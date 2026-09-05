@@ -44,6 +44,14 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 - Run `bun run check:install` plus the affected stack's sandbox scenario before declaring done. Hand-tests do not count as e2e.
 
+## Assets and captures
+
+- Read `.claude/context/development/regeneration.md`'s Hero section before touching `assets/captures/` or `assets/*.png`. Those renders gate on drift, so a hand edit to a generated frame is overwritten by the next `scripts/core/regen-hero.sh` run.
+
+## Hooks and husky
+
+- Read `.claude/context/development/hooks.md` before touching `.claude/hooks/` or `.husky/`. It covers the Claude Code hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` capability-seeding marker rule from `.claude/ARCHITECTURE.md`.
+
 ## Reference
 
 - `.claude/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities

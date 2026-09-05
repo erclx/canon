@@ -64,14 +64,14 @@ The test between a canonical row and the per-domain one is how many domains read
 
 The toolkit has the following domains. Each maps to a skill. Load the skill before editing anything in that domain.
 
-| Task type                                                              | Skill to load         |
-| ---------------------------------------------------------------------- | --------------------- |
-| Modifying `src/`, `scripts/`, sandbox scenarios, `manage-*.sh`, `lib/` | `internal-scripts`    |
-| Modifying `tooling/`, manifests, golden configs, seeds                 | `internal-tooling`    |
-| Modifying `standards/`, `docs/`, `.claude/context/`                    | `internal-standards`  |
-| Modifying `governance/rules/`, `governance/stacks/`                    | `internal-governance` |
-| Modifying `snippets/`                                                  | `internal-snippets`   |
-| Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`      | `internal-claude`     |
+| Task type                                                                         | Skill to load         |
+| --------------------------------------------------------------------------------- | --------------------- |
+| Modifying `src/`, `scripts/`, sandbox scenarios, `manage-*.sh`, `lib/`, `assets/` | `internal-scripts`    |
+| Modifying `tooling/`, manifests, golden configs, seeds                            | `internal-tooling`    |
+| Modifying `standards/`, `docs/`, `.claude/context/`                               | `internal-standards`  |
+| Modifying `governance/rules/`, `governance/stacks/`                               | `internal-governance` |
+| Modifying `snippets/`                                                             | `internal-snippets`   |
+| Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
 
 The per-domain context catalog is always loaded so the entries are discoverable without a lookup. Load each entry on demand.
 
