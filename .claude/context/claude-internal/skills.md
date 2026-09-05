@@ -7,20 +7,21 @@ description: The internal canon skills loaded before editing a toolkit domain, t
 
 Internal skills live in `.claude/skills/` and are toolkit-only. They are not installed into target projects.
 
-| Skill                    | Description                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `internal-ask`           | Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask` |
-| `internal-claude`        | Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries                              |
-| `internal-governance`    | Load before editing Cursor rules or stack definitions                                                             |
-| `internal-scripts`       | Load before editing scripts or sandbox scenarios                                                                  |
-| `internal-snippets`      | Load before editing snippets                                                                                      |
-| `internal-standards`     | Load before editing standards or docs                                                                             |
-| `internal-tooling`       | Load before editing tooling stacks or golden configs                                                              |
-| `internal-sandbox-check` | Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`   |
+| Skill                        | Description                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `internal-ask`               | Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`   |
+| `internal-claude`            | Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries                                |
+| `internal-governance`        | Load before editing Cursor rules or stack definitions                                                               |
+| `internal-scripts`           | Load before editing scripts or sandbox scenarios                                                                    |
+| `internal-snippets`          | Load before editing snippets                                                                                        |
+| `internal-standards`         | Load before editing standards or docs                                                                               |
+| `internal-tooling`           | Load before editing tooling stacks or golden configs                                                                |
+| `internal-sandbox-check`     | Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`     |
+| `internal-shipped-reference` | Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `598-authoring-layout.md` |
 
 ## Requirement coverage
 
-All eight internal skills carry a `REQUIREMENT.md`. Coverage is universal rather than selective, because the operator reads the corpus to decide whether a skill should exist at all, and a file present for some skills and absent for others cannot be scanned for that. An absence reads as a gap in the authoring rather than as a verdict that the body is already its own specification.
+All nine internal skills carry a `REQUIREMENT.md`. Coverage is universal rather than selective, because the operator reads the corpus to decide whether a skill should exist at all, and a file present for some skills and absent for others cannot be scanned for that. An absence reads as a gap in the authoring rather than as a verdict that the body is already its own specification.
 
 The earlier test earned a skill one only when a reader could not recover from the body alone both the failures it prevents and the nearest thing it deliberately does not do. That still describes what a working requirement answers, and it no longer decides which skills get one. Length never discriminated either way, since the 31-line skill earned one under it and the 191-line skill did not.
 

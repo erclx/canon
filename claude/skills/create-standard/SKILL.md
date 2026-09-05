@@ -23,7 +23,7 @@ Creates one standard file. Read these files in parallel:
 
 Emit the full path on its own line.
 
-- In the toolkit: this is the authoring source. Remind the user to run `bun run check` to regenerate the consumed copy under `.claude/`. That pass also regenerates the `standards/index.md` entry, and the user adds a row to the standards table in `.claude/context/standards/overview.md`.
+- In the toolkit: this is the authoring source. Remind the user to run `bun run check` to regenerate the consumed copy under `.claude/`. That pass also regenerates the `standards/index.md` entry, and the user adds a row to the standards table in the toolkit's own context entry for standards.
 - In a project: the file is project-local and no toolkit command touches it. Remind the user to copy it to the toolkit repo, under `standards/<slug>.md`, if it should ship to every project.
 
 Separate the two by whether the folder already held toolkit-authored standards before this write, since a project authoring its own uses the same path.

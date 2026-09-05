@@ -5,7 +5,7 @@ description: Fetches a YouTube video transcript with metadata frontmatter into t
 
 # YouTube transcripts
 
-Turn a pasted YouTube URL into a markdown file with YAML frontmatter and a cleaned prose body. The `canon transcripts` command owns the fetch, VTT cleanup, and frontmatter. Do not reimplement that logic. The output format and field list live in the toolkit's `.claude/context/transcripts.md`, which a target does not receive.
+Turn a pasted YouTube URL into a markdown file with YAML frontmatter and a cleaned prose body. The `canon transcripts` command owns the fetch, the VTT cleanup, and the frontmatter shape. Do not reimplement or restate any of it here.
 
 ## Guards
 

@@ -157,9 +157,10 @@ controller that hands an operator two chained blocks to paste as separate
 messages risks both landing as one, where everything after the first
 command's name is read as that command's own argument and the second command
 never fires, measured four times out of four on 2026-09-02.
-`.claude/context/claude-plugin/skill-lifecycle.md` carries the mechanism. The
-fix is what the template above already takes: one message, one command, at
-position zero.
+A slash command expands as a user invocation only at position zero of a
+prompt, and a later one in the same text reaches the session as prose instead.
+The fix is what the template above already takes: one message, one command,
+at position zero.
 
 ### What the brief may carry
 

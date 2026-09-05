@@ -5,7 +5,7 @@ paths:
   - 'standards/**'
   - 'snippets/**'
   - 'claude/**'
-  - 'governance/rules/**'
+  - 'governance/**'
   - 'docs/**'
   - 'scripts/**'
   - 'tooling/**'
@@ -34,6 +34,8 @@ paths:
 - Cite a docs page through `canon docs <name>`, resolved per `docs/agents/docs.md`'s three-spelling rule. Never write a raw `docs/<name>.md` or `.claude/context/<name>.md` path that names this repository's own reference corpus. The second has no resolving form at all for a registry install, since `.claude/` is never published. This rule governs a reference to a real page, never a token shown to illustrate the path shape a target's own tree would take, which is what lets a body teaching the convention still show what one looks like.
 - Never cite a phase label. A target holds no board to resolve it against, so state the fact the label points at instead of the label itself. This rule governs a reference to a real row, never a token shown to illustrate the label's own format.
 - Write a layout, stack, or config-path claim only where it names a portable convention true of any project carrying the same toolkit surface, such as a fixed install path like `.claude/canon/pr-labels.toml`. Never state a count, a stack choice, or a folder shape true of this checkout specifically.
+- Load the `internal-shipped-reference` skill before shipping a change under any of this rule's paths. It reviews the one form the bullets above cannot classify by pattern alone: a `.claude/context/<name>.md` reference that resolves here and reads as portable, and a layout or count claim stated as portable when it holds only for this checkout.
+- Report it rather than proceeding silently when the skill does not resolve.
 
 ## Before shipping
 

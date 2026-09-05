@@ -102,4 +102,4 @@ Run `canon tooling sync <stack> <target> --check` for the list resolved against 
 
 ## Source of truth
 
-- Full semantics live in the toolkit's `.claude/context/tooling.md`, `.claude/context/standards/`, and `.claude/context/claude-plugin/`. This skill is the target-session summary. When they disagree, the context docs win.
+- Full semantics live in the toolkit's own context entries. This skill is the target-session summary. When they disagree, the context docs win.
