@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.54.0](https://github.com/erclx/canon/compare/v4.53.0...v4.54.0) (2026-09-05)
+
+
+### Features
+
+* **indexes:** add a list verb for the folder catalog ([#1513](https://github.com/erclx/canon/issues/1513)) ([30f8a17](https://github.com/erclx/canon/commit/30f8a1724933749fdaba9bcd81486ffe704f92d9))
+* **web:** add the live agent view and deploy the landing page ([#1510](https://github.com/erclx/canon/issues/1510)) ([caea4b1](https://github.com/erclx/canon/commit/caea4b1b0f2ccee57243f05ab355af04842f70eb))
+
+
+### Bug Fixes
+
+* **worktrees:** document the planner's heredoc route past isolation ([#1514](https://github.com/erclx/canon/issues/1514)) ([79042c0](https://github.com/erclx/canon/commit/79042c024dc5e3933240ce7fec0b9877d653c164))
+
 ## [4.53.0](https://github.com/erclx/canon/compare/v4.52.0...v4.53.0) (2026-09-05)
 
 
