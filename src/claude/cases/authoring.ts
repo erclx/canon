@@ -43,6 +43,16 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
     expect: 'docs-draft',
   },
   {
+    prompt:
+      'Write a context entry for the payments domain, there is no .claude/context page for it yet.',
+    expect: 'context-draft',
+  },
+  {
+    prompt:
+      'Draft a wireframe for the settings panel, nothing under .claude/wireframes covers that surface yet.',
+    expect: 'wireframe-draft',
+  },
+  {
     prompt: 'Say what that dense answer actually means in plain terms.',
     expect: 'restate-plainly',
   },

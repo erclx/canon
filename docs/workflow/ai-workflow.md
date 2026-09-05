@@ -284,18 +284,20 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Generate an artifact on demand
 
-| Skill                      | When to use                                                           |
-| -------------------------- | --------------------------------------------------------------------- |
-| `canon:create-rule`        | For a project-specific governance rule the toolkit does not ship      |
-| `canon:create-skill`       | For a new `SKILL.md`                                                  |
-| `canon:create-snippet`     | For a reusable prompt                                                 |
-| `canon:create-standard`    | For a new authoring convention                                        |
-| `canon:docs-draft`         | For a brand-new `docs/*.md` page, drafted against `standards/docs.md` |
-| `canon:bash-script`        | For an interactive, human-facing shell tool                           |
-| `canon:bash-cli-script`    | For a non-interactive automation, CI, or pipeline script              |
-| `canon:ci-workflow`        | For a GitHub Actions workflow file                                    |
-| `canon:canon-slides-draft` | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint |
-| `canon:canon-screencast`   | For a recording script with beats and defaults already seeded         |
+| Skill                      | When to use                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| `canon:create-rule`        | For a project-specific governance rule the toolkit does not ship                                  |
+| `canon:create-skill`       | For a new `SKILL.md`                                                                              |
+| `canon:create-snippet`     | For a reusable prompt                                                                             |
+| `canon:create-standard`    | For a new authoring convention                                                                    |
+| `canon:docs-draft`         | For a brand-new `docs/*.md` page, drafted against `standards/docs.md`                             |
+| `canon:context-draft`      | For a brand-new `.claude/context/<domain>.md` entry, drafted against `standards/context.md`       |
+| `canon:wireframe-draft`    | For a brand-new `.claude/wireframes/<surface>.md` file, drafted against `standards/wireframes.md` |
+| `canon:bash-script`        | For an interactive, human-facing shell tool                                                       |
+| `canon:bash-cli-script`    | For a non-interactive automation, CI, or pipeline script                                          |
+| `canon:ci-workflow`        | For a GitHub Actions workflow file                                                                |
+| `canon:canon-slides-draft` | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                             |
+| `canon:canon-screencast`   | For a recording script with beats and defaults already seeded                                     |
 
 ### Answer a question at any point
 

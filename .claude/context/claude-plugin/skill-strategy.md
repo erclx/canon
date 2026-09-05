@@ -241,6 +241,16 @@ What it borrows from `create-standard` rather than from its nearer neighbor is t
 
 Placement reads the catalog rather than assuming a folder. A `category` value already carried by a sibling page is reused verbatim, since a near-miss spelling opens a second shelf holding one page, and a topic matching no shelf lands at the `docs/` root, since a subfolder earns itself only once a shelf of pages already sits there. The guard against redrafting a covered topic runs the derived slug through `canon docs <slug>` and points at `docs-sync` on a hit, which is a heuristic gate rather than an exhaustive one, since the slug is guessed from the topic phrase rather than confirmed against every page's frontmatter.
 
+## The context and wireframe draft surfaces are the seventieth and seventy-first skills, mirroring docs-draft's shape against two different standards
+
+`context-draft` and `wireframe-draft` close the same gap `docs-draft` closed, read against the two surfaces `claude-docs` already refreshes but never originates. That skill's own Step 7 declines outright to create a new `.claude/context/` entry, and its wireframe-sweep step only ever writes a bare `TODO` stub for a surface a diff touched. Neither is a draft, so a domain or a surface with no file yet was reached by nothing that read the owning standard, checked the catalog for a name collision, or confirmed a placement judgment before writing.
+
+Both skills take `docs-draft`'s five-step shape whole rather than inventing a second one: read the owning standard, check for a name-or-topic collision, decide placement, draft against the template, confirm, write. `context-draft` defaults every new domain to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder. `wireframe-draft` walks the whole `.claude/wireframes/` tree rather than its top level alone, since a collision can sit nested inside a grouped surface's own subfolder.
+
+One correction rides along with `wireframe-draft` rather than with either skill's design. The task that shipped it cited `standards/wireframes.md` as the source of a three-tier framework deciding ASCII-only, ASCII-plus-render, or visual-as-source-of-truth. That framework is not there, since `standards/wireframes.md` documents only the per-surface ASCII shape, and the tier framework lives in the project-wide visual design workflow guide instead, a once-per-project four-question call rather than a per-draft decision.
+
+`wireframe-draft` reads `.claude/DESIGN.md` and the wireframes tree for an existing tier signal and reports what it finds, since no shipped mechanism turns a detected tier 1 or tier 2 into a companion render. Building that mechanism was out of reach for a skill mirroring `docs-draft`, so detecting and reporting is the ceiling rather than a scoped-down version of something more ambitious.
+
 ## Whether a skill earns its place
 
 The redundancy audit below runs outward, against community counterparts. Nothing ran inward, against the catalog's own two zero-cost tells, until this section: a folder wrapping something already reachable, and a folder nobody calls. `create-skill` now asks the first two before a folder exists, and `570-skill.md` carries the same check for whatever creates a `SKILL.md` some other way.
