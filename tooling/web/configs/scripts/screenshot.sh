@@ -11,7 +11,7 @@ fi
 bun run build
 bun run preview >/dev/null 2>&1 &
 PREVIEW_PID=$!
-trap 'kill "$PREVIEW_PID" 2>/dev/null; wait "$PREVIEW_PID" 2>/dev/null || true' EXIT
+trap 'kill "$PREVIEW_PID" 2>/dev/null || true; wait "$PREVIEW_PID" 2>/dev/null || true' EXIT
 
 for _ in $(seq 1 40); do
   if curl -sSf "http://localhost:$PREVIEW_PORT/" >/dev/null 2>&1; then
