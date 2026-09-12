@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.72.1](https://github.com/erclx/canon/compare/v4.72.0...v4.72.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* **docs:** attribute the .canon/ carve-out block to its spelling ([#1623](https://github.com/erclx/canon/issues/1623)) ([e70c9e5](https://github.com/erclx/canon/commit/e70c9e58cfb10ae17e4c83bc0ef3abc6f9a264e2))
+
 ## [4.72.0](https://github.com/erclx/canon/compare/v4.71.0...v4.72.0) (2026-09-08)
 
 
