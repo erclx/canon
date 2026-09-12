@@ -26,7 +26,7 @@ Read `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md` before writing any file
 - A `draft-and-pick` run invoked from inside a live track follows its own branch for this, writing to `evidence/` here rather than `.canon/tmp/<slug>/`.
 - Reading is not restricted. External research is in scope, so read documentation, comparable projects, and papers whenever a live question needs them.
 - Every claim about a source outside the project carries a link to it. A source found and not read is listed as a lead and is never cited.
-- Treat the folder as gitignored and unbacked. It dies with the machine, so `07-next-session.md` repeats what it needs instead of pointing at its siblings.
+- Treat the folder as gitignored and backed by `canon records push` and `canon records pull`, which protects it against the machine being lost but not against a compaction dropping this session's own reasoning before anyone has pushed, so `07-next-session.md` repeats what it needs instead of pointing at its siblings.
 
 ## Running a spike
 

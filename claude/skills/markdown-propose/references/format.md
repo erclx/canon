@@ -88,7 +88,7 @@ A proposal outlives its own diff. The source moves under it, so an approved chan
 
 What remains is the record of what changed and why, which is the half no commit message holds. The folder stays where it is, beside every earlier pass, so a later one reads what an earlier one settled instead of asking it again.
 
-The folder is gitignored and unbacked. It carries decision state rather than generated data, which is why `src/records/backup.ts` names it in `BACKED_FOLDERS`, but nothing else about its contents is enforced.
+The folder is gitignored and backed. It carries decision state rather than generated data, which is why `src/records/backup.ts` names it in `BACKED_FOLDERS` so `canon records push` and `canon records pull` carry it, but nothing else about its contents is enforced.
 
 ## Retrieval
 
