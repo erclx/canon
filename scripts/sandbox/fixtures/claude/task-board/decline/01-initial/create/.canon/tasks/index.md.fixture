@@ -1,0 +1,11 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Export the task list as CSV](v01.0-csv-export.md): Download the current task list as a CSV file
+- [v02.0: Paginate the task list](v02.0-pagination.md): Return a bounded page of tasks instead of the whole collection

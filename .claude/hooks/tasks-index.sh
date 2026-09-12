@@ -34,11 +34,12 @@ case "$file_path" in
 esac
 
 # The board index covers the live folder alone. A shell pattern's wildcard
-# crosses a separator, so the guard above matches an archived task as well and
-# a regen fired on one would rebuild the index the archive was taken out of.
+# crosses a separator, so the guard above matches an archived or declined task
+# as well, and a regen fired on one would rebuild the index that task was
+# taken out of.
 case "$file_path" in
-*/.claude/tasks/index.md | */.claude/tasks/archive/*) exit 0 ;;
-*/.canon/tasks/index.md | */.canon/tasks/archive/*) exit 0 ;;
+*/.claude/tasks/index.md | */.claude/tasks/archive/* | */.claude/tasks/declined/*) exit 0 ;;
+*/.canon/tasks/index.md | */.canon/tasks/archive/* | */.canon/tasks/declined/*) exit 0 ;;
 esac
 
 # The walk-up boundary has to come from the path, not from the session. Shared

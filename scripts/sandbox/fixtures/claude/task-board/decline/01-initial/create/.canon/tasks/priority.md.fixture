@@ -1,0 +1,13 @@
+---
+title: Priority
+description: What is ready to hand a worker, what is planned behind it, and what still needs planning
+---
+
+# Priority
+
+## Needs a plan
+
+| Task                                     | Waiting on                        |
+| ----------------------------------------- | ---------------------------------- |
+| [v01.0 csv export](v01.0-csv-export.md)   | no plan yet, leads the group       |
+| [v02.0 pagination](v02.0-pagination.md)   | no plan yet, trails v01.0          |

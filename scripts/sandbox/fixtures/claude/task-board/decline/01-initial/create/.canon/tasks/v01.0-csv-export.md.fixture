@@ -1,0 +1,27 @@
+---
+title: 'v01.0: Export the task list as CSV'
+description: Download the current task list as a CSV file
+---
+
+# v01.0: Export the task list as CSV
+
+Issue: #58
+
+A support request asked for a downloadable copy of the task list, filed before
+the list endpoint carried pagination.
+
+## Outcomes
+
+- [ ] Outcome: a CSV download carries every task's title and status
+- [ ] Outcome: the file name carries today's date
+
+## Findings
+
+- Filed against the list endpoint's original, unbounded response, before
+  pagination existed.
+- v02.0 already scopes a bounded JSON response the same client renders as a
+  table, so a standalone CSV download duplicates work already planned there.
+  Declining this task as redundant rather than building a second path to the
+  same data.
+
+> Test strategy: manual, download the file and open it in a spreadsheet.

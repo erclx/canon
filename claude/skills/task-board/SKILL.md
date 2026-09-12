@@ -14,7 +14,7 @@ Read `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` before writing any file. It 
 - Resolve the board at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo. Every read and write below resolves against that root. The board is gitignored scratch shared across worktrees, so a linked worktree writing to its own `pwd` creates a second board nothing else reads.
 - From a linked worktree the file-editing tools refuse that root, so a new task file goes out through `Bash` as a plain single command carrying a heredoc. Archiving already runs through `canon tasks archive`, which resolves the root in-process. Marking an outcome shipped is `docs-fold` and runs through `canon tasks outcome`. Resolve that root the way `session-worktree` does.
 - If `.canon/tasks/` does not exist at that root, stop: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
-- Route on the request rather than on a flag. Creating names work that does not exist yet, archiving names a task file already on the board. If the request fits neither, stop: `❌ Ambiguous. Say whether to create a task or archive one.`
+- Route on the request rather than on a flag. Creating names work that does not exist yet, archiving names a task file already shipped, and declining names one decided against. If the request fits none of the three, stop: `❌ Ambiguous. Say whether to create a task, archive one, or decline one.`
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter after a write. Do not run the regen command directly, except after a shell write from a linked worktree: the hook matches `Write|Edit|MultiEdit` and nothing fires on `Bash`, so that one case regenerates explicitly with `canon indexes regen --no-stage --root <main-root> <main-root>/.canon/tasks/index.md`.
 
 ## Create
@@ -63,13 +63,13 @@ Scan for work that has been decided and would otherwise be forgotten. Three orig
 
 List `.canon/groundwork/` and run `gh issue list --state open` when a remote is configured, then grep the board for each track name and issue number. Report any with no task, one line each.
 
-Read the dumps through `canon intake list --json`, which reports items, open, unread, and malformed per folder and owns the parse of the answer contract `${CLAUDE_SKILL_DIR}/../../standards/intake.md` fixes. Then grep both `.canon/tasks/` and `.canon/tasks/archive/` for each folder slug. A dump with no live task is the ordinary shape of one already promoted and shipped, so a check reading the board by itself reports every finished folder as abandoned.
+Read the dumps through `canon intake list --json`, which reports items, open, unread, and malformed per folder and owns the parse of the answer contract `${CLAUDE_SKILL_DIR}/../../standards/intake.md` fixes. Then grep `.canon/tasks/`, `.canon/tasks/archive/`, and `.canon/tasks/declined/` for each folder slug. A dump with no live task is the ordinary shape of one already promoted and either shipped or declined, so a check reading the board by itself reports every settled folder as abandoned.
 
 A dump is the stronger case for this scan rather than the weaker one. A track holds one question and stays visible, while a dump holds dozens of items whose verdicts were reached and then left with nothing carrying them forward.
 
 Those two reads give four states, and the first three earn a line each:
 
-- Every item answered, `malformed` at zero, and neither the board nor the archive cites the folder. Decided work nobody promoted, which is what this step exists to find.
+- Every item answered, `malformed` at zero, and none of the board, the archive, or the declined folder cites it. Decided work nobody promoted, which is what this step exists to find.
 - Unread items. The folder is waiting on the operator rather than forgotten, so it takes its own wording and never lands in the block above.
 - `malformed` above zero. An item carrying no answer slot can be reached by no verb, so name the folder as a file to repair rather than as work in either state above.
 - The archive cites it. Promoted and shipped, so say nothing.
@@ -128,6 +128,40 @@ Leave `TASK-ARCHIVE.md` alone when it is present in the archive folder. It recor
 ### Step 4: clear prose naming the task
 
 The command drops the task's row from `.canon/tasks/priority.md` and leaves prose alone. Remove any sentence that still names the archived task or counts the rows that changed, since a stale count reads as board state.
+
+## Decline
+
+A task decided against carries no `post-merge` hook of its own, so every decline request arrives here directly rather than through work the hook already did.
+
+Do not move the file, edit `priority.md` or `backlog.md`, or regenerate the index by hand. `canon tasks decline` owns all three as one unit.
+
+### Step 1: gather the reason
+
+Ask for the reason when the request does not carry one, and stop rather than guessing: `❌ No reason. Say why the task is being declined.` The command takes it as `--reason <text>` and refuses without it, so gathering it here saves a round trip through that refusal.
+
+### Step 2: run the decline
+
+Pass the task's filename stem:
+
+```bash
+canon tasks decline <stem> --reason "<text>" [--by <name>] --json
+```
+
+The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit, the same wrapper hazard `canon tasks archive` carries. Branch on `ok`, then on `reason`.
+
+On success the record carries `from`, `to`, `priorityRowRemoved`, `backlogRowRemoved`, and `indexRegenerated`, where `backlogRowRemoved` is decline's own field since a task can be declined straight off `backlog.md` and archive never checks that file. It also carries `plan` when the task was the last live citation of a live plan, holding the `from` and `to` of the plan moved alongside it, the same shape `canon tasks archive` uses for its own `plan` field.
+
+### Step 3: route on a refusal
+
+- `no-match`: the stem does not name exactly one task. Either none matches, or exactly one starts with it and the full name is needed. Check the name against the listed stems.
+- `ambiguous`: the stem is a prefix more than one task starts with, unlike archive's own `ambiguous`, which fires on a shared pull request. Decline takes no pull-request selector, so this is the only route to it. Pass the full stem.
+- `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
+
+Do not move a plan by hand from this skill. The command carries the plan with the task when no other live task cites it, and retargets the declined task's `Plan:` line at the new path. A second mover drifts into relocating the same file differently.
+
+### Step 4: clear prose naming the task
+
+The command drops the task's row from `.canon/tasks/priority.md` or `.canon/tasks/backlog.md` and leaves prose alone. Remove any sentence that still names the declined task or counts the rows that changed, since a stale count reads as board state.
 
 ## Output
 
