@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.72.0](https://github.com/erclx/canon/compare/v4.71.0...v4.72.0) (2026-09-08)
+
+
+### Features
+
+* **governance:** admit an established capture convention ([#1615](https://github.com/erclx/canon/issues/1615)) ([b2bb98e](https://github.com/erclx/canon/commit/b2bb98e76564adde4f318b4e23fd10baef8e7942))
+* **skills:** add session-relay for the no-tool channel gap ([#1619](https://github.com/erclx/canon/issues/1619)) ([cc0bb2c](https://github.com/erclx/canon/commit/cc0bb2c3d6a54d4b538b7b040831bee46b45a2c3))
+* **skills:** keep draft-and-pick's arms as images, not delete them ([#1618](https://github.com/erclx/canon/issues/1618)) ([5de2d75](https://github.com/erclx/canon/commit/5de2d75c4a60d7fa63417893032ca94dda636c21))
+* **tasks:** read a branch back against its declared file set ([#1616](https://github.com/erclx/canon/issues/1616)) ([1ef5e43](https://github.com/erclx/canon/commit/1ef5e43807cb1dca76a296659bac8273524d6910))
+
+
+### Bug Fixes
+
+* **pr:** credit key-changes claims against renames and gitignore ([#1620](https://github.com/erclx/canon/issues/1620)) ([82e66c2](https://github.com/erclx/canon/commit/82e66c2ff128eb20f4a04c162e7f04bf383c2ef9))
+
 ## [4.71.0](https://github.com/erclx/canon/compare/v4.70.0...v4.71.0) (2026-09-08)
 
 
