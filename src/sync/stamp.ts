@@ -85,16 +85,29 @@ export function retiredNameStampPath(target: string): string {
 }
 
 /**
+ * The stamp path under the new surface root, `canon/config/config.json`.
+ *
+ * Read ahead of `stampPath`, extending the same mechanism rather than adding a
+ * new one: a target that has moved reads its config from the root it moved
+ * to, and one that has not falls through to the spellings below unchanged.
+ * The write destination does not move to it in this batch.
+ */
+function surfaceStampPath(target: string): string {
+  return join(target, 'canon', 'config', 'config.json')
+}
+
+/**
  * Every spelling a stamp has been written under, current first. The order is
  * the read order, so a target carrying more than one resolves to the newest.
  *
- * The fallback carries no end date. It costs two path reads on a command that
- * already touches the filesystem, and dropping it later is a second breaking
- * change aimed at exactly the targets that were slowest to migrate the first
- * time.
+ * The fallback carries no end date. It costs three path reads on a command
+ * that already touches the filesystem, and dropping any of them later is a
+ * second breaking change aimed at exactly the targets that were slowest to
+ * migrate the first time.
  */
 export function stampPaths(target: string): readonly string[] {
   return [
+    surfaceStampPath(target),
     stampPath(target),
     retiredNameStampPath(target),
     legacyStampPath(target),
@@ -107,7 +120,9 @@ export function stampPaths(target: string): readonly string[] {
  * there is nothing to migrate off of.
  */
 export function isLegacyStamped(target: string): boolean {
-  if (existsSync(stampPath(target))) return false
+  if (existsSync(surfaceStampPath(target)) || existsSync(stampPath(target))) {
+    return false
+  }
   return (
     existsSync(retiredNameStampPath(target)) ||
     existsSync(legacyStampPath(target))

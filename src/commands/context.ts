@@ -17,11 +17,11 @@ import {
   type SectionFinding,
 } from '@/context/audit'
 import {
+  architectureRel,
   type ArchitectureReport,
   coveredCount,
   isOverLength,
   measureArchitecture,
-  RECORD_REL,
   testableCount,
 } from '@/context/architecture'
 import { auditCitations, type CitationReport } from '@/context/citations'
@@ -251,7 +251,7 @@ async function runAudit(
     reportProvenance(entries, folders)
     reportNarration(entries, folders, narration)
     reportDrift(drift)
-    reportRecord(record)
+    reportRecord(record, root)
     outro()
   }
 
@@ -761,12 +761,15 @@ const CLAIM_LABEL: Record<string, string> = {
  * anchors it sits beside already do. Nothing is stored: every run reclassifies,
  * so an entry rewritten tomorrow is read as it stands then.
  */
-function reportRecord(report: ArchitectureReport | undefined): void {
+function reportRecord(
+  report: ArchitectureReport | undefined,
+  root: string,
+): void {
   logStep('Architecture record')
 
   if (report === undefined) {
     logInfo(
-      `Out of scope. The project carries no ${RECORD_REL}, so there was no record to measure.`,
+      `Out of scope. The project carries no ${architectureRel(root)}, so there was no record to measure.`,
     )
     return
   }

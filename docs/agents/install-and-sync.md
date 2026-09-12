@@ -158,8 +158,9 @@ Use `--json` for the machine-readable report and `--exit-code` to fail a CI job.
 and missing files are both excluded from that exit code: a project-authored
 rule never converges, and a sync that added a missing one silently changes
 what the project is governed by, which stays a separate command an operator
-chooses to run. Attribution reads `.claude/canon/config.json`, which every
-install and sync writes.
+chooses to run. Attribution reads `canon/config/config.json` first and falls
+back to `.claude/canon/config.json`, which every install and sync still writes
+in this release.
 
 A target installed before stamping shipped has no such file, and neither does
 that fallback do anything to migrate it. A target stamped before the file

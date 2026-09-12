@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { listRepositoryFiles } from '@/git-files'
 import { RECORD_ROOTS } from '@/record-root'
+import { SURFACE_ROOTS } from '@/surface-root'
 
 /**
  * Suppresses citation checking for the source line carrying it.
@@ -78,17 +79,41 @@ export function isFixture(rel: string): boolean {
 }
 
 /**
- * Both record roots are spelled, so a citation into a folder that has moved is
- * still resolved. A pattern fixed at one root matches nothing after the move and
- * reports nothing, which is a stale reference passing the check that exists to
- * find it rather than a check that fails.
+ * The boundary a root's own leading character rules out.
+ *
+ * A dotted root cannot be a suffix of a path segment, since a segment boundary
+ * is a slash and a slash can never sit inside the dot itself, so a preceding
+ * slash is not a false match to guard against and the boundary admits it. That
+ * is what a relative link needs, since `../.claude/context/<entry>.md` carries
+ * a slash immediately before `.claude`. A bare root has no such protection: it
+ * is a suffix of a dotted root's own name and of any `/<root>/` path segment,
+ * so its boundary rejects a slash along with a name character or a dot.
+ */
+function rootBoundary(root: string): string {
+  return root.startsWith('.') ? '(?<![\\w.])' : '(?<![\\w./])'
+}
+
+/**
+ * Every record and surface root is spelled, so a citation into a folder that
+ * has moved is still resolved. A pattern fixed at one root matches nothing
+ * after the move and reports nothing, which is a stale reference passing the
+ * check that exists to find it rather than a check that fails.
+ *
+ * Each root carries its own boundary rather than one shared ahead of the whole
+ * alternation, per `rootBoundary`. A shared boundary rejecting a slash blocked
+ * every dotted root from a relative link, which is the same failure this
+ * function's own boundary exists to prevent, aimed at the roots that never
+ * needed it.
  */
 export function citationPattern(folders: readonly string[]): RegExp {
   const names = folders.map((name) => escape(name))
-  const roots = RECORD_ROOTS.map((name) => escape(name))
+  const roots = [...new Set([...RECORD_ROOTS, ...SURFACE_ROOTS])]
+  const alternatives = roots
+    .map((root) => `${rootBoundary(root)}${escape(root)}`)
+    .join('|')
 
   return new RegExp(
-    `(?:${roots.join('|')})/(?:${names.join('|')})/[A-Za-z0-9._/-]+\\.md`,
+    `(?:${alternatives})/(?:${names.join('|')})/[A-Za-z0-9._/-]+\\.md`,
     'g',
   )
 }

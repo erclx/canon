@@ -44,6 +44,46 @@ describe('citationPattern', () => {
   it('should not match a folder outside the audited set at the new root', () => {
     expect(paths('Read `.canon/standards/prose.md` first.')).toEqual([])
   })
+
+  it('should read a path at the record root rather than as a canon/ citation', () => {
+    expect(paths('See `.canon/diagrams/a.md` for the flow.')).toEqual([
+      '.canon/diagrams/a.md',
+    ])
+  })
+
+  it('should match a path at the new surface root', () => {
+    expect(paths('See `canon/context/cli.md` for the layout.')).toEqual([
+      'canon/context/cli.md',
+    ])
+  })
+
+  it('should not match a path under a vendored canon/ dependency', () => {
+    expect(
+      paths('See `node_modules/canon/context/cli.md` for the vendored copy.'),
+    ).toEqual([])
+  })
+
+  it('should match a relative link whose root sits right after the slash', () => {
+    expect(paths('See `../.claude/context/x.md` for the entry.')).toEqual([
+      '.claude/context/x.md',
+    ])
+  })
+
+  it('should match a relative link into the record root', () => {
+    expect(paths('See `../.canon/diagrams/x.md` for the entry.')).toEqual([
+      '.canon/diagrams/x.md',
+    ])
+  })
+
+  it('should not match a bare-root path prefixed by a name character', () => {
+    expect(paths('See `9canon/context/x.md` for the entry.')).toEqual([])
+  })
+
+  it('should match a backticked bare-root citation with no preceding path segment', () => {
+    expect(paths('See `canon/context/x.md` for the entry.')).toEqual([
+      'canon/context/x.md',
+    ])
+  })
 })
 
 describe('collectCitations', () => {

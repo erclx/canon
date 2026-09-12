@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSkillsCorpus } from '@/claude/skills-list'
+import { SURFACE_ROOTS } from '@/surface-root'
 
 /**
  * The authoring roots this repository owns and no install channel delivers.
@@ -15,9 +16,14 @@ import { resolveSkillsCorpus } from '@/claude/skills-list'
  * report a correct citation on every run and bury the defect this measures.
  * `docs/agents/` is the exception, being the CLI contract pages that exist
  * here alone.
+ *
+ * `.claude/context/` carries both surface-root spellings, since this list
+ * decides whether a shipped body names this repository's own tree and a body
+ * naming either root is doing that regardless of which root a given checkout
+ * carries.
  */
 const AUTHORING_ROOTS = [
-  '.claude/context/',
+  ...SURFACE_ROOTS.map((root) => `${root}/context/`),
   'claude/',
   'docs/agents/',
   'governance/',
@@ -92,9 +98,13 @@ export function isQualified(line: string): boolean {
  * by corpus instead.
  */
 export function authoringRootsFor(corpus: string): readonly string[] {
-  if (!corpus.startsWith('.claude/')) return AUTHORING_ROOTS
+  if (!SURFACE_ROOTS.some((root) => corpus.startsWith(`${root}/`))) {
+    return AUTHORING_ROOTS
+  }
 
-  return AUTHORING_ROOTS.filter((root) => !root.startsWith('.claude/'))
+  return AUTHORING_ROOTS.filter(
+    (root) => !SURFACE_ROOTS.some((surface) => root.startsWith(`${surface}/`)),
+  )
 }
 
 /**

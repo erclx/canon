@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  architectureRel,
   type ArchitectureReport,
   ceilingFor,
   classifyDecision,
@@ -9,6 +13,29 @@ import {
   splitDecisions,
   testableCount,
 } from '@/context/architecture'
+
+describe('architectureRel', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should resolve at canon/ when the project has moved', () => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), '# Architecture\n')
+
+    expect(architectureRel(root)).toBe(join('canon', 'ARCHITECTURE.md'))
+  })
+
+  it('should resolve at .claude/ when neither root carries the record', () => {
+    expect(architectureRel(root)).toBe(join('.claude', 'ARCHITECTURE.md'))
+  })
+})
 
 function makeReport(
   overrides: Partial<ArchitectureReport> = {},

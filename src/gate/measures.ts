@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import {
   CLIENT_COMMAND_MARKER,
   CLIENT_COMMANDS,
@@ -15,6 +15,7 @@ import {
   SHIPPED_CORPORA,
   type ShippedReference,
 } from '@/shipped/references'
+import { surfaceDir } from '@/surface-root'
 import {
   README_PARAPHRASE_MARKER,
   readmeCitationsIn,
@@ -122,11 +123,18 @@ export const SANDBOX_UNDECLARED_CEILING = 47
 export const SANDBOX_ASSERTED_FLOOR = 26
 
 /**
- * The retained counts the audit stage compares each run against. Spelled here
- * rather than derived, because this stage only ever names the file in a remedy
- * a reader has to be able to open, and `canon audits run` owns writing it.
+ * Where the retained counts the audit stage compares each run against are
+ * read, relative to `root`.
+ *
+ * A function rather than a spelled constant, since the read now resolves at
+ * either surface root and a constant naming one of them would be believed of
+ * a project that has moved. `canon audits run` owns writing it, and the write
+ * stays at the creation default for this batch, so the two can disagree for
+ * exactly the release window `src/surface-root.ts` documents.
  */
-export const AUDITS_BASELINE = '.claude/canon/baseline.json'
+export function auditsBaselineRel(root: string): string {
+  return relative(root, surfaceDir(root, 'canon', 'baseline.json'))
+}
 
 export const CAPTURE_STAMP_FAILURE =
   'A capture set disagrees with the stamp written when its image was captured. Run canon capture assets/captures --selector .window --out assets and commit each frame with its image and its stamp.'
@@ -958,16 +966,17 @@ export const auditSet: Measure = async (ctx) => {
       ),
     )
   }
+  const baselineRel = auditsBaselineRel(ctx.root)
   emissions.push(
     summary.grown > 0
       ? warn(
-          `${summary.grown} measure(s) grew against ${AUDITS_BASELINE}. Run bun src/cli.ts audits run to see which, then fix them or re-record and say why.`,
+          `${summary.grown} measure(s) grew against ${baselineRel}. Run bun src/cli.ts audits run to see which, then fix them or re-record and say why.`,
         )
-      : info(`No measure grew against ${AUDITS_BASELINE}`),
+      : info(`No measure grew against ${baselineRel}`),
   )
   if (typeof summary.shrunk === 'number' && summary.shrunk > 0) {
     emissions.push(
-      info(`${summary.shrunk} measure(s) fell against ${AUDITS_BASELINE}`),
+      info(`${summary.shrunk} measure(s) fell against ${baselineRel}`),
     )
   }
 
