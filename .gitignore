@@ -40,10 +40,14 @@ demos/*.png
 # what is ignored lives here, so a record folder added later needs no entry.
 #
 # That holds only while nothing tracked ever lands under .canon/. The bare
-# .canon/ spelling is what blocks a carve-out, not git itself: written instead
-# as .canon/*, a negation like !.canon/context/ stages that folder, at one
-# negation line per tracked folder, while a new record folder stays
-# auto-ignored under the wildcard either way. Nothing enforces the spelling
+# .canon/ spelling is what blocks a carve-out at this file alone, not git
+# itself: written instead as .canon/*, a negation like !.canon/context/ stages
+# that folder, at one negation line per tracked folder, while a new record
+# folder stays auto-ignored under the wildcard either way. A second route
+# reaches the same result without touching this line: a nested .gitignore
+# inside the tracked folder itself, negating .canon/ at that deeper level,
+# carves out just that folder. scripts/sandbox/fixtures/claude/task-board/
+# decline/.gitignore is the first to take it. Nothing enforces either spelling
 # staying bare.
 #
 # Both entries are checked against the "# Claude" array in
