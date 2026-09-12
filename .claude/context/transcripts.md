@@ -25,12 +25,14 @@ The command shells out to the `yt-dlp` binary, the same way the git skills shell
 
 ## Fetch command
 
-`canon transcripts <url>` writes one file per video to the output directory. The filename is `<title-slug>--<video-id>.md`, so re-fetching the same video overwrites in place and two videos never collide.
+`canon transcripts <url>` writes one file per video to the output directory. The filename is `<fetch-date>--<title-slug>--<video-id>.md`, date-prefixed so re-fetching the same video on a later date writes a new file rather than overwriting the earlier one. The default output directory is a backed record folder, so `canon records push` and `canon records pull` carry it along with the rest. The command also writes a minimal `index.md` stub into the output directory the first time it runs there, left alone on every later run.
 
-| Option              | Default       | Behavior                                         |
-| ------------------- | ------------- | ------------------------------------------------ |
-| `--out <path>`      | `transcripts` | Output directory, resolved against the CWD       |
-| `--keep-timestamps` | off           | Prefix each line with `[mm:ss]` instead of prose |
+| Option              | Default                         | Behavior                                             |
+| ------------------- | ------------------------------- | ---------------------------------------------------- |
+| `--out <path>`      | the backed `transcripts` folder | Output directory, resolved against the main worktree |
+| `--keep-timestamps` | off                             | Prefix each line with `[mm:ss]` instead of prose     |
+
+A caller-supplied `--out` still resolves against the CWD rather than the main worktree, since naming a path explicitly is opting out of the backed default.
 
 The written file path prints to stdout so it pipes clean into a wrapper. The framed run UI goes to stderr.
 

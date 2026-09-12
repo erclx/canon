@@ -42,7 +42,7 @@ afterEach(() => {
 })
 
 describe('writeTranscript', () => {
-  it('names the file by title slug and video id', () => {
+  it('names the file by fetch date, title slug, and video id', () => {
     const subPath = join(workDir, 'captions.vtt')
     writeFileSync(subPath, ROLLING_VTT)
     writeTranscript(METADATA, subPath, {
@@ -51,8 +51,44 @@ describe('writeTranscript', () => {
       fetchedAt: '2026-06-18',
     })
     expect(readdirSync(workDir)).toContain(
-      'how-attention-works--sandboxVid01.md',
+      '2026-06-18--how-attention-works--sandboxVid01.md',
     )
+  })
+
+  it('writes a new dated file rather than overwriting an earlier fetch', () => {
+    const subPath = join(workDir, 'captions.vtt')
+    writeFileSync(subPath, ROLLING_VTT)
+    writeTranscript(METADATA, subPath, {
+      outDir: workDir,
+      keepTimestamps: false,
+      fetchedAt: '2026-06-18',
+    })
+    writeTranscript(METADATA, subPath, {
+      outDir: workDir,
+      keepTimestamps: false,
+      fetchedAt: '2026-06-19',
+    })
+    const files = readdirSync(workDir).filter((name) => name.endsWith('.md'))
+    expect(files).toContain('2026-06-18--how-attention-works--sandboxVid01.md')
+    expect(files).toContain('2026-06-19--how-attention-works--sandboxVid01.md')
+  })
+
+  it('writes a minimal index.md stub on first run and leaves it alone after', () => {
+    writeTranscript(METADATA, null, {
+      outDir: workDir,
+      keepTimestamps: false,
+      fetchedAt: '2026-06-18',
+    })
+    const indexPath = join(workDir, 'index.md')
+    expect(readFileSync(indexPath, 'utf8')).toContain('title: Transcripts')
+
+    writeFileSync(indexPath, 'hand-edited\n')
+    writeTranscript(METADATA, null, {
+      outDir: workDir,
+      keepTimestamps: false,
+      fetchedAt: '2026-06-19',
+    })
+    expect(readFileSync(indexPath, 'utf8')).toBe('hand-edited\n')
   })
 
   it('writes frontmatter, a heading, and deduped prose from the captions', () => {

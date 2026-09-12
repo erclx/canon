@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -81,13 +82,42 @@ interface WriteOptions {
   readonly fetchedAt: string
 }
 
+const INDEX_FILE = 'index.md'
+
+/**
+ * Writes a minimal index.md stub if the output directory carries none yet,
+ * so `canon indexes regen` has frontmatter to render entries against. Left
+ * alone once present, since a project may have customized it.
+ */
+function ensureIndex(outDir: string): void {
+  const indexPath = join(outDir, INDEX_FILE)
+  if (existsSync(indexPath)) return
+
+  const content = [
+    '---',
+    'title: Transcripts',
+    'subtitle: YouTube transcripts fetched by canon transcripts, one file per video.',
+    '---',
+    '',
+    '# Transcripts',
+    '',
+    'YouTube transcripts fetched by canon transcripts, one file per video.',
+    '',
+    'This folder is machine-written. Run canon indexes regen here to refresh its entries.',
+    '',
+  ].join('\n')
+
+  writeFileSync(indexPath, content)
+}
+
 export function writeTranscript(
   metadata: VideoMetadata,
   subPath: string | null,
   { outDir, keepTimestamps, fetchedAt }: WriteOptions,
 ): string {
   mkdirSync(outDir, { recursive: true })
-  const slug = `${slugify(metadata.title)}--${metadata.videoId}`
+  ensureIndex(outDir)
+  const slug = `${fetchedAt}--${slugify(metadata.title)}--${metadata.videoId}`
   const target = join(outDir, `${slug}.md`)
 
   const hasTranscript = subPath !== null

@@ -7,11 +7,16 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git-env'
-import { BACKED_FOLDERS, pullRecords, pushRecords } from '@/records/backup'
+import {
+  BACKED_FOLDERS,
+  projectBranch,
+  pullRecords,
+  pushRecords,
+} from '@/records/backup'
 
 let ROOT: string
 let ORIGIN: string
@@ -51,9 +56,10 @@ async function makeProject(): Promise<string> {
   return root
 }
 
-/** Every path the records origin holds on its branch, newline-joined. */
-function trackedOnOrigin(): Promise<string> {
-  return git(['-C', ORIGIN, 'ls-tree', '-r', '--name-only', 'main'])
+/** Every path the records origin holds on a project's branch, newline-joined. */
+async function trackedOnOrigin(root: string): Promise<string> {
+  const branch = await projectBranch(root)
+  return git(['-C', ORIGIN, 'ls-tree', '-r', '--name-only', branch])
 }
 
 async function makeRecordsRepo(root: string, origin: string): Promise<void> {
@@ -130,7 +136,61 @@ describe('BACKED_FOLDERS', () => {
       'review',
       'tasks',
       'teach',
+      'transcripts',
     ])
+  })
+})
+
+describe('projectBranch', () => {
+  it('should reduce the project origin the way remoteIdentity reduces one', async () => {
+    await git([
+      '-C',
+      ROOT,
+      'remote',
+      'add',
+      'origin',
+      'git@github.com:Owner/Repo.git',
+    ])
+
+    expect(await projectBranch(ROOT)).toBe('github.com/owner/repo')
+  })
+
+  it('should fall back to the project directory basename with no origin', async () => {
+    expect(await projectBranch(ROOT)).toBe(
+      basename(resolve(ROOT)).toLowerCase(),
+    )
+  })
+
+  it('should keep an underscore in the origin identity rather than dashing it out', async () => {
+    await git([
+      '-C',
+      ROOT,
+      'remote',
+      'add',
+      'origin',
+      'git@github.com:owner/my_repo.git',
+    ])
+
+    expect(await projectBranch(ROOT)).toBe('github.com/owner/my_repo')
+  })
+
+  it('should build the push and pull ref path from it rather than a literal main', async () => {
+    await git([
+      '-C',
+      ROOT,
+      'remote',
+      'add',
+      'origin',
+      'https://example.test/owner/other.git',
+    ])
+    await makeRecordsRepo(ROOT, ORIGIN)
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(true)
+    const branches = await git(['-C', ORIGIN, 'branch', '--list'])
+    expect(branches).toContain('example.test/owner/other')
+    expect(branches.split('\n')).not.toContain('main')
   })
 })
 
@@ -217,14 +277,7 @@ describe('pushRecords', () => {
     if (!outcome.ok) return
     expect(outcome.changed).toBe(1)
 
-    const tracked = await git([
-      '-C',
-      ORIGIN,
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'main',
-    ])
+    const tracked = await trackedOnOrigin(ROOT)
     expect(tracked).not.toContain('intake/')
   })
 
@@ -242,7 +295,7 @@ describe('pushRecords', () => {
     // Asserted before the removal, because a name the pathspec never carries
     // reaches the remote on no push and passes the absence test below having
     // proved nothing.
-    expect(await trackedOnOrigin()).toContain('plans-archive/entry.md')
+    expect(await trackedOnOrigin(ROOT)).toContain('plans-archive/entry.md')
 
     rmSync(retired, { recursive: true, force: true })
     const outcome = await pushRecords(ROOT)
@@ -250,7 +303,7 @@ describe('pushRecords', () => {
     expect(outcome.ok).toBe(true)
     if (!outcome.ok) return
     expect(outcome.changed).toBe(1)
-    expect(await trackedOnOrigin()).not.toContain('plans-archive/')
+    expect(await trackedOnOrigin(ROOT)).not.toContain('plans-archive/')
   })
 
   it('should commit every backed folder and push it to the records origin', async () => {
@@ -263,14 +316,7 @@ describe('pushRecords', () => {
     expect(outcome.changed).toBe(BACKED_FOLDERS.length)
     expect(outcome.pushed).toBe(true)
 
-    const tracked = await git([
-      '-C',
-      ORIGIN,
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'main',
-    ])
+    const tracked = await trackedOnOrigin(ROOT)
     expect(tracked.split('\n').sort()).toEqual(
       BACKED_FOLDERS.map((folder) => `${folder}/entry.md`).sort(),
     )
@@ -286,14 +332,7 @@ describe('pushRecords', () => {
 
     await pushRecords(ROOT)
 
-    const tracked = await git([
-      '-C',
-      ORIGIN,
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'main',
-    ])
+    const tracked = await trackedOnOrigin(ROOT)
     expect(tracked).not.toContain('skills/')
     expect(tracked).not.toContain('ARCHITECTURE.md')
     expect(tracked).not.toContain('.tmp/')
@@ -325,14 +364,7 @@ describe('pushRecords', () => {
     if (!outcome.ok) return
     expect(outcome.changed).toBe(1)
 
-    const tracked = await git([
-      '-C',
-      ORIGIN,
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'main',
-    ])
+    const tracked = await trackedOnOrigin(ROOT)
     expect(tracked).not.toContain('memory/entry.md')
   })
 
@@ -348,7 +380,7 @@ describe('pushRecords', () => {
     if (!outcome.ok) return
     expect(outcome.changed).toBe(BACKED_FOLDERS.length)
     expect(outcome.pushed).toBe(true)
-    expect((await trackedOnOrigin()).split('\n').sort()).toEqual(
+    expect((await trackedOnOrigin(ROOT)).split('\n').sort()).toEqual(
       BACKED_FOLDERS.map((folder) => `${folder}/entry.md`).sort(),
     )
   })
@@ -470,12 +502,32 @@ describe('pullRecords', () => {
   })
 
   it('should write the records the remote carries onto a machine holding none', async () => {
+    // A second machine holding the same project resolves the same branch only
+    // because both clones name the same project origin. Two clones with no
+    // origin at all would each fall back to their own directory basename and
+    // never agree, which this shared remote is what rules out here.
+    await git([
+      '-C',
+      ROOT,
+      'remote',
+      'add',
+      'origin',
+      'https://example.test/owner/repo.git',
+    ])
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
 
     const fresh = mkdtempSync(join(tmpdir(), 'canon-backup-fresh-'))
     mkdirSync(join(fresh, '.claude'), { recursive: true })
     await git(['init', '--quiet', fresh])
+    await git([
+      '-C',
+      fresh,
+      'remote',
+      'add',
+      'origin',
+      'https://example.test/owner/repo.git',
+    ])
     await makeRecordsRepo(fresh, ORIGIN)
 
     const outcome = await pullRecords(fresh)
