@@ -4,6 +4,13 @@ import type { Command } from 'commander'
 import { BACKED_FOLDERS, pullRecords, pushRecords } from '@/records/backup'
 import { migrateRecord } from '@/records/migrate'
 import {
+  type ClaimOutcome,
+  claimOrdinal,
+  highestOrdinal,
+  isOrdinalKind,
+  ORDINAL_KINDS,
+} from '@/records/ordinal'
+import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
@@ -40,6 +47,9 @@ const EXIT_FINDINGS = 2
 /** Returned when a record carries a known transform and `--write` was not passed. */
 const EXIT_MIGRATABLE = 2
 
+/** Returned when `--claim` loses every retry to a collision. */
+const EXIT_CONTENDED = 2
+
 interface ValidateCommandOptions {
   readonly json?: boolean
   readonly root?: string
@@ -49,6 +59,10 @@ type BackupCommandOptions = ValidateCommandOptions
 
 interface MigrateCommandOptions extends ValidateCommandOptions {
   readonly write?: boolean
+}
+
+interface OrdinalCommandOptions extends ValidateCommandOptions {
+  readonly claim?: boolean
 }
 
 export function register(program: Command): void {
@@ -138,6 +152,49 @@ export function register(program: Command): void {
     )
     .action(async (kind: string, opts: MigrateCommandOptions) => {
       process.exitCode = await runMigrate(kind, opts)
+    })
+
+  records
+    .command('ordinal')
+    .description(
+      'Report or claim the next ordinal shared by intake and groundwork folders',
+    )
+    .argument('<kind>', `Ordinal-bearing folder: ${ORDINAL_KINDS.join(', ')}`)
+    .argument('<slug>', 'The kebab-case slug the new folder will carry')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--claim',
+      'Create the folder atomically instead of only reporting the ordinal',
+    )
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'intake and groundwork folders share one ordinal sequence, so this reads',
+        'both .canon/intake/ and .canon/groundwork/ regardless of which kind was',
+        'asked for.',
+        '',
+        'Exit codes:',
+        '  0  reported the next ordinal, or --claim created the folder',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  --claim lost every retry to a collision',
+        '',
+        'Without --claim this only reports, so two sessions reading at once can',
+        'still report the same number. --claim resolves that by creating the',
+        'folder as part of the same act, retrying past a losing race rather than',
+        'reporting one.',
+        '',
+        'Examples:',
+        '  canon records ordinal intake my-topic',
+        '  canon records ordinal groundwork my-topic --claim',
+        '  canon records ordinal groundwork my-topic --claim --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (kind: string, slug: string, opts: OrdinalCommandOptions) => {
+      process.exitCode = await runOrdinal(kind, slug, opts)
     })
 
   records
@@ -725,4 +782,85 @@ export function migrateExitCode(
   if (repaired.length === 0) return 1
   if (!write) return EXIT_MIGRATABLE
   return refused.length > 0 ? 1 : 0
+}
+
+async function runOrdinal(
+  kind: string,
+  slug: string,
+  opts: OrdinalCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+
+  if (!isOrdinalKind(kind)) {
+    return reportRefusal(
+      'canon records ordinal',
+      {
+        reason: 'unknown-kind',
+        message: `Not an ordinal-bearing kind: ${kind}. Expected one of: ${ORDINAL_KINDS.join(', ')}.`,
+      },
+      emitJson,
+    )
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const claim = opts.claim ?? false
+
+  if (!claim) {
+    const next = String((await highestOrdinal(root)) + 1).padStart(2, '0')
+
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({ ok: true, root, kind, slug, ordinal: next, claimed: false })}\n`,
+      )
+    } else {
+      intro('canon records ordinal')
+      logStep('Next')
+      logInfo(`${next}-${slug} (report only, pass --claim to create it)`)
+      outro()
+    }
+
+    return 0
+  }
+
+  return reportOrdinal(root, await claimOrdinal(root, kind, slug), emitJson)
+}
+
+function reportOrdinal(
+  root: string,
+  outcome: ClaimOutcome,
+  emitJson: boolean,
+): number {
+  if (!outcome.ok) {
+    if (emitJson) {
+      process.stderr.write(`${outcome.message}\n`)
+      process.stdout.write(
+        `${JSON.stringify({
+          ok: false,
+          reason: outcome.reason,
+          message: outcome.message,
+          lastOrdinal: outcome.lastOrdinal,
+        })}\n`,
+      )
+      return EXIT_CONTENDED
+    }
+
+    intro('canon records ordinal')
+    logStep('Refused')
+    logError(outcome.message)
+    outro()
+    return EXIT_CONTENDED
+  }
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ root, ...outcome, claimed: true })}\n`,
+    )
+  } else {
+    intro('canon records ordinal')
+    logStep('Claimed')
+    logInfo(outcome.path)
+    outro()
+  }
+
+  return 0
 }

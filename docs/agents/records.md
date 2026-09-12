@@ -1,6 +1,6 @@
 ---
 title: Records
-description: The two roots a record folder resolves at, validating the session records and the standards corpus, the per-kind checks, the refusal reasons, migrating a record a frontmatter change orphaned, reading each folder's size and growth, backing the folders to a private remote, and which root each kind defaults to
+description: The two roots a record folder resolves at, validating the session records and the standards corpus, the per-kind checks, the refusal reasons, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, backing the folders to a private remote, and which root each kind defaults to
 ---
 
 # Records
@@ -103,6 +103,26 @@ It writes nothing until `--write` is passed, matching the write-flag contract `c
 A transform runs only where the missing value is recoverable from the file itself. The one shipped today repairs a memory record missing `category` alone, deriving it from the same filename prefix `checkMemory` already reads it from. `title` and `description` are prose nobody wrote down, so a finding naming either carries no transform and stays for a session to fix by hand, and `validate` keeps reporting it. The transform re-reads the file rather than trusting a value captured at validate time, so a check and its repair cannot disagree about the same record.
 
 Exit codes: `0` nothing carried a known transform, or `--write` repaired everything it found. `1` refused for a reason `validate` shares, every candidate it found failed to repair, or `--write` repaired only some of them. `2` a record carries a known transform and `--write` was not passed.
+
+## Ordinal
+
+`canon records ordinal <kind> <slug>` reports the next ordinal `intake` and `groundwork` share, or claims it with `--claim`. The two kinds share one sequence, per `standards/intake.md` and `standards/groundwork.md`, so this reads both `.canon/intake/` and `.canon/groundwork/` regardless of which kind was asked for.
+
+```bash
+canon records ordinal intake my-topic
+canon records ordinal groundwork my-topic --claim
+canon records ordinal groundwork my-topic --claim --json
+```
+
+| Option          | Behavior                                               |
+| --------------- | ------------------------------------------------------ |
+| `--json`        | Add a machine-readable record on stdout                |
+| `--claim`       | Create the folder atomically instead of only reporting |
+| `--root <path>` | Project root, defaulting to the main worktree          |
+
+Without `--claim` this only reports, so two sessions reading at once can still report the same number, which is what let two sessions open two different record folders under one ordinal on the same day. `--claim` closes that: it reserves the number at a path both an `intake` claim and a `groundwork` claim resolve to identically, whichever kind is asking, and only creates the kind's own `<nn>-<slug>/` folder once that reservation is won. A losing reservation is retried against a freshly read ordinal rather than reported as a collision, bounded to five attempts before refusing as `ordinal-contended`.
+
+Exit codes: `0` reported the next ordinal, or `--claim` created the folder. `1` refused, `unknown-kind` when the argument names neither `intake` nor `groundwork`. `2` `--claim` lost every retry to a collision.
 
 ## Size
 
