@@ -62,6 +62,28 @@ describe('citationPattern', () => {
       paths('See `node_modules/canon/context/cli.md` for the vendored copy.'),
     ).toEqual([])
   })
+
+  it('should match a relative link whose root sits right after the slash', () => {
+    expect(paths('See `../.claude/context/x.md` for the entry.')).toEqual([
+      '.claude/context/x.md',
+    ])
+  })
+
+  it('should match a relative link into the record root', () => {
+    expect(paths('See `../.canon/diagrams/x.md` for the entry.')).toEqual([
+      '.canon/diagrams/x.md',
+    ])
+  })
+
+  it('should not match a bare-root path prefixed by a name character', () => {
+    expect(paths('See `9canon/context/x.md` for the entry.')).toEqual([])
+  })
+
+  it('should match a backticked bare-root citation with no preceding path segment', () => {
+    expect(paths('See `canon/context/x.md` for the entry.')).toEqual([
+      'canon/context/x.md',
+    ])
+  })
 })
 
 describe('collectCitations', () => {
