@@ -18,6 +18,7 @@ Neither attempt named who the relay is from. A message an operator relays by han
 ## Must
 
 - Fire from inside `role-worker` or `role-planner`'s own `## The channel` section, at the point that section finds no message-sending tool
+- Refuse a caller holding neither role, checked ahead of the tool-availability guard
 - Read the sender's own name off `canon sessions list --self --json` before composing anything, and degrade to naming itself from the environment when the installed CLI answers `--self` with an unknown option rather than a refusal carrying a reason
 - Resolve the addressee by running the calling role's own ladder rather than a second one
 - Carry the message body the calling role's bullet already names, verbatim
@@ -32,6 +33,7 @@ Neither attempt named who the relay is from. A message an operator relays by han
 
 ## Guards
 
+- The calling session holds neither role: refuse, and state the addressing and timing it owes instead, since the plugin skill it would otherwise defer to reaches a target the moment it merges while a governance rule reaches one only through a separate install. Checked first, since the tool guard read alone let the incident behind this row stop at "you have a tool" without ever learning steps 2 and 3 were unreachable regardless.
 - A message-sending tool is available: refuse, name it, and send through it instead
 
 ## Out of scope

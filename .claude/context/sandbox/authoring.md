@@ -103,7 +103,7 @@ use_config() {
 
 There is no standards injection. Nothing installs the corpus into a project, so a sandbox holding no standards folder is the shape a scaffolded target has, and a scenario driving a skill that reads a standard exercises the resolve a real project takes rather than a staged copy.
 
-A stack install narrows what arrives. The copy it replaced took all 71 rules under `governance/rules`, while `base` resolves to 47, which is what a real target holds since no project carries both the React and FastAPI rules. A scenario needing a framework's rules sets `SANDBOX_GOV_STACK` rather than assuming every rule is present.
+A stack install narrows what arrives. The copy it replaced took all 72 rules under `governance/rules`, while `base` resolves to 48, which is what a real target holds since no project carries both the React and FastAPI rules. A scenario needing a framework's rules sets `SANDBOX_GOV_STACK` rather than assuming every rule is present.
 
 A failed install aborts provisioning with the installer's own stderr, since a sandbox missing the rules a scenario depends on would otherwise fail later somewhere unrelated.
 

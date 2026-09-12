@@ -136,6 +136,7 @@ retarget
 retargeted
 retargets
 ripgreprc
+roleless
 sandboxed
 sandboxing
 scannability
