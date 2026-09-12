@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git-env'
 import { RECORD_ROOTS, recordRoot } from '@/record-root'
 
 /**
  * The folders a backup carries, relative to the record root `workTree` resolves
- * rather than to either root specifically, since the same nine names sit under
+ * rather than to either root specifically, since the same ten names sit under
  * whichever one a tree holds.
  *
  * Nothing bounds this list any more, and the move is what took the bound away.
@@ -18,12 +18,12 @@ import { RECORD_ROOTS, recordRoot } from '@/record-root'
  * a name is written here.
  *
  * Three counts describe this surface and each is right about a different
- * question, so they are stated apart rather than reconciled. Nine is what a
- * disk loss would take, which is this list. Eleven is what sat under `.claude/`
+ * question, so they are stated apart rather than reconciled. Ten is what a
+ * disk loss would take, which is this list. Twelve is what sat under `.claude/`
  * as an ignored folder before the move, which adds the scratch folder that is
  * deletable without loss and `worktrees/`, whose contents belong to the
- * enclosing repository already. Twelve is what the move relocated, which counts
- * ignore entries rather than folders: the eleven less `worktrees/`, which stayed,
+ * enclosing repository already. Thirteen is what the move relocated, which counts
+ * ignore entries rather than folders: the twelve less `worktrees/`, which stayed,
  * plus `.records.git/` and the `README.md` a records pull writes back.
  *
  * Each entry is a top-level record folder and every archive sits inside the one
@@ -46,6 +46,7 @@ export const BACKED_FOLDERS = [
   'review',
   'tasks',
   'teach',
+  'transcripts',
 ] as const
 
 /**
@@ -88,8 +89,46 @@ function recordsGitDir(root: string): string {
   return join(workTree(root), RECORDS_GIT_NAME)
 }
 
-/** Both directions name the branch, so a machine whose `init.defaultBranch` differs still lands on it. */
-const RECORDS_BRANCH = 'main'
+/**
+ * A run of characters outside what git accepts in a ref segment, replaced
+ * with a single dash, with a leading or trailing `/` or `.` trimmed after.
+ */
+function sanitizeRefSegment(segment: string): string {
+  return segment
+    .replace(/[^a-z0-9_./-]+/g, '-')
+    .replace(/^[/.]+/, '')
+    .replace(/[/.]+$/, '')
+}
+
+/**
+ * The branch a records push or pull targets for the project at `root`,
+ * one branch per project on the shared records repository.
+ *
+ * Reduces the project's own `origin` through the same `remoteIdentity`
+ * reduction the shared-origin gate already applies, so two clones of the
+ * same project land on the same branch regardless of transport. Falls back
+ * to the project directory's own basename for a project with no `origin`,
+ * such as a fresh scaffold, which is no worse than the single shared branch
+ * this replaces: nothing else here distinguishes two such clones either.
+ *
+ * `enclosing` is `pushRecords`/`pullRecords`'s own already-fetched remote
+ * read, reused here rather than shelled out for a second time. A caller with
+ * none, such as a test reading this in isolation, gets one read of its own.
+ *
+ * A project's `origin` can change (rename, fork, transfer) between one push
+ * and the next, which silently starts writing to a new branch and orphans
+ * whatever was left on the old one. No migration handles that today.
+ */
+export async function projectBranch(
+  root: string,
+  enclosing?: EnclosingRemotes,
+): Promise<string> {
+  const remotes = enclosing ?? (await enclosingRemotes(root))
+  const raw = remotes?.originUrl
+    ? remoteIdentity(remotes.originUrl)
+    : basename(resolve(root)).toLowerCase()
+  return sanitizeRefSegment(raw)
+}
 
 /**
  * The records history is machine-written and nobody reads its authorship, so a
@@ -145,6 +184,7 @@ export type PullOutcome = PullReport | BackupRefused
 
 interface GitResult {
   readonly ok: boolean
+  readonly code: number
   readonly text: string
   readonly stderr: string
 }
@@ -180,6 +220,7 @@ async function records(root: string, args: string[]): Promise<GitResult> {
 
   return {
     ok: result.exitCode === 0,
+    code: result.exitCode,
     text: result.stdout.toString().trim(),
     stderr: result.stderr.toString().trim(),
   }
@@ -217,9 +258,18 @@ function remoteIdentity(url: string): string {
     .replace(/\/+$/, '')
 }
 
+interface EnclosingRemotes {
+  readonly identities: readonly string[]
+  readonly originUrl: string | undefined
+}
+
 /**
- * Lists every remote of the enclosing project, or undefined when git cannot
- * answer.
+ * Reads every remote of the enclosing project in one call, or undefined when
+ * git cannot answer.
+ *
+ * `resolveRemote`'s shared-origin gate needs every remote's identity and
+ * `projectBranch` needs specifically `origin`'s raw URL, so both read from
+ * this one call rather than each shelling out to git on its own.
  *
  * The caller refuses on undefined rather than smoothing it into an empty list.
  * An empty list clears the gate below for every URL, so a git that failed for
@@ -227,22 +277,27 @@ function remoteIdentity(url: string): string {
  * happens to name. A project with no remotes answers `0` with an exit of zero,
  * so the two states stay distinguishable.
  */
-async function enclosingRemoteUrls(
+async function enclosingRemotes(
   root: string,
-): Promise<string[] | undefined> {
+): Promise<EnclosingRemotes | undefined> {
   const result = await $`git -C ${root} remote -v`
     .env(gitEnv())
     .quiet()
     .nothrow()
   if (result.exitCode !== 0) return undefined
 
-  return result.stdout
-    .toString()
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => line.split(/\s+/)[1] ?? '')
-    .filter(Boolean)
-    .map(remoteIdentity)
+  const identities: string[] = []
+  let originUrl: string | undefined
+
+  for (const line of result.stdout.toString().split('\n')) {
+    if (!line) continue
+    const [name, url] = line.split(/\s+/)
+    if (!url) continue
+    identities.push(remoteIdentity(url))
+    if (name === 'origin' && originUrl === undefined) originUrl = url
+  }
+
+  return { identities, originUrl }
 }
 
 /**
@@ -255,16 +310,20 @@ async function enclosingRemoteUrls(
  * misconfigured `origin` from publishing them, and refusing when that list
  * cannot be read is what keeps a failed comparison from reading as a pass.
  */
-async function resolveRemote(root: string): Promise<string | BackupRefused> {
+async function resolveRemote(
+  root: string,
+  enclosing: EnclosingRemotes | undefined,
+): Promise<string | BackupRefused> {
   const gitDir = recordsGitDir(root)
 
   if (!existsSync(gitDir)) {
     return refuse(
       'no-repository',
       [
-        `No records history at ${relative(root, gitDir)}. Create it once, against a private repository:`,
+        `No records history at ${relative(root, gitDir)}. One private repository backs every project on this machine, each on its own branch, so create it once, against whichever project sets it up first:`,
         `  git --git-dir=${gitDir} init`,
         `  git --git-dir=${gitDir} remote add origin <private-repo-url>`,
+        `A person commits a README to that repository's main branch once. It is never machine-written.`,
       ].join('\n'),
     )
   }
@@ -280,7 +339,6 @@ async function resolveRemote(root: string): Promise<string | BackupRefused> {
     )
   }
 
-  const enclosing = await enclosingRemoteUrls(root)
   if (!enclosing) {
     return refuse(
       'remote-unreadable',
@@ -289,7 +347,7 @@ async function resolveRemote(root: string): Promise<string | BackupRefused> {
   }
 
   const url = remoteIdentity(remote.text)
-  if (enclosing.includes(url)) {
+  if (enclosing.identities.includes(url)) {
     return refuse(
       'remote-shared',
       `The records origin ${remote.text} is a remote of this project. Records carry the memory pen and the groundwork trails, so they need a repository of their own.`,
@@ -396,7 +454,8 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   const split = refuseSplitRoots(root)
   if (split) return split
 
-  const remote = await resolveRemote(root)
+  const enclosing = await enclosingRemotes(root)
+  const remote = await resolveRemote(root, enclosing)
   if (typeof remote !== 'string') return remote
 
   const scope = await scopedFolders(root)
@@ -438,10 +497,11 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
     return { ok: true, root, folders, changed, pushed: false }
   }
 
+  const branch = await projectBranch(root, enclosing)
   const pushed = await records(root, [
     'push',
     'origin',
-    `HEAD:refs/heads/${RECORDS_BRANCH}`,
+    `HEAD:refs/heads/${branch}`,
   ])
   if (!pushed.ok) return failed('push', pushed)
 
@@ -460,26 +520,38 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
   const split = refuseSplitRoots(root)
   if (split) return split
 
-  const remote = await resolveRemote(root)
+  const enclosing = await enclosingRemotes(root)
+  const remote = await resolveRemote(root, enclosing)
   if (typeof remote !== 'string') return remote
+
+  const branch = await projectBranch(root, enclosing)
+
+  // Checked ahead of the fetch rather than parsed out of a failed fetch's
+  // stderr, which is git's own message and translates on a localized
+  // machine. `--exit-code` answers through a code no locale changes: 2 for
+  // no matching ref, 0 for found, anything else for a remote git could not
+  // reach at all.
+  const remoteBranch = await records(root, [
+    'ls-remote',
+    '--exit-code',
+    'origin',
+    `refs/heads/${branch}`,
+  ])
+  if (remoteBranch.code === 2) {
+    return refuse(
+      'no-remote-records',
+      `The records origin carries no ${branch} branch yet. Run canon records push from the machine holding the records.`,
+    )
+  }
+  if (!remoteBranch.ok) return failed('ls-remote', remoteBranch)
 
   const fetched = await records(root, [
     'fetch',
     '--quiet',
     'origin',
-    `refs/heads/${RECORDS_BRANCH}`,
+    `refs/heads/${branch}`,
   ])
-  if (!fetched.ok) {
-    // A missing branch and an unreachable remote both fail the fetch, and only
-    // the first is an ordinary state a person resolves by pushing once.
-    if (fetched.stderr.includes("couldn't find remote ref")) {
-      return refuse(
-        'no-remote-records',
-        `The records origin carries no ${RECORDS_BRANCH} branch yet. Run canon records push from the machine holding the records.`,
-      )
-    }
-    return failed('fetch', fetched)
-  }
+  if (!fetched.ok) return failed('fetch', fetched)
 
   const target = await records(root, ['rev-parse', 'FETCH_HEAD'])
   if (!target.ok) return failed('rev-parse', target)
