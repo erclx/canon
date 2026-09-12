@@ -85,20 +85,28 @@ describe('claimOrdinal', () => {
     }
   })
 
-  it('should refuse as ordinal-contended after the retry bound', async () => {
-    // A held reservation at the number every attempt keeps recomputing, since
-    // nothing here ever creates the intake or groundwork folder that would
-    // move the highest ordinal forward.
+  it('should recover a stale reservation left by a process that died before its leaf create', async () => {
+    // A lock with no folder behind it in either kind: a process reserved 01
+    // and never got to creating its own leaf folder.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
 
-    const outcome = await claimOrdinal(ROOT, 'intake', 'contended-topic')
+    const outcome = await claimOrdinal(ROOT, 'intake', 'recovered-topic')
 
-    expect(outcome).toMatchObject({
-      ok: false,
-      reason: 'ordinal-contended',
-      lastOrdinal: '01',
+    expect(outcome).toMatchObject({ ok: true, ordinal: '01' })
+  })
+
+  it('should not read a lock backed by the other kind as stale', async () => {
+    // 01 is genuinely live: groundwork already claimed it, so highestOrdinal
+    // has already moved past it before this call even reads the lock.
+    seed('groundwork', '01-already-claimed')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
+      recursive: true,
     })
+
+    const outcome = await claimOrdinal(ROOT, 'intake', 'next-topic')
+
+    expect(outcome).toMatchObject({ ok: true, ordinal: '02' })
   })
 })
