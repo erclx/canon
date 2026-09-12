@@ -184,6 +184,7 @@ export type PullOutcome = PullReport | BackupRefused
 
 interface GitResult {
   readonly ok: boolean
+  readonly code: number
   readonly text: string
   readonly stderr: string
 }
@@ -219,6 +220,7 @@ async function records(root: string, args: string[]): Promise<GitResult> {
 
   return {
     ok: result.exitCode === 0,
+    code: result.exitCode,
     text: result.stdout.toString().trim(),
     stderr: result.stderr.toString().trim(),
   }
@@ -523,23 +525,33 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
   if (typeof remote !== 'string') return remote
 
   const branch = await projectBranch(root, enclosing)
+
+  // Checked ahead of the fetch rather than parsed out of a failed fetch's
+  // stderr, which is git's own message and translates on a localized
+  // machine. `--exit-code` answers through a code no locale changes: 2 for
+  // no matching ref, 0 for found, anything else for a remote git could not
+  // reach at all.
+  const remoteBranch = await records(root, [
+    'ls-remote',
+    '--exit-code',
+    'origin',
+    `refs/heads/${branch}`,
+  ])
+  if (remoteBranch.code === 2) {
+    return refuse(
+      'no-remote-records',
+      `The records origin carries no ${branch} branch yet. Run canon records push from the machine holding the records.`,
+    )
+  }
+  if (!remoteBranch.ok) return failed('ls-remote', remoteBranch)
+
   const fetched = await records(root, [
     'fetch',
     '--quiet',
     'origin',
     `refs/heads/${branch}`,
   ])
-  if (!fetched.ok) {
-    // A missing branch and an unreachable remote both fail the fetch, and only
-    // the first is an ordinary state a person resolves by pushing once.
-    if (fetched.stderr.includes("couldn't find remote ref")) {
-      return refuse(
-        'no-remote-records',
-        `The records origin carries no ${branch} branch yet. Run canon records push from the machine holding the records.`,
-      )
-    }
-    return failed('fetch', fetched)
-  }
+  if (!fetched.ok) return failed('fetch', fetched)
 
   const target = await records(root, ['rev-parse', 'FETCH_HEAD'])
   if (!target.ok) return failed('rev-parse', target)
