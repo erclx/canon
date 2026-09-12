@@ -141,7 +141,7 @@ A relative path resolves against the project root first and against `.canon/task
 
 `canon tasks plan-citations` reads a task's `Plan:` line against those same two bases in the opposite order, and tests that the target lands under the live plans folder, which this verb does not. Both answer the same file for every spelling a board writes. Liveness is a separate refusal here: a plan resolving inside `.canon/plans/archive/` returns `archived` rather than a launchable reading, since it answers every question and describes work that already shipped.
 
-A plan still staging its batches with a `**Batch N**` sub-heading inside one file's `**Files to touch:**` reads `launchable: false` the same way, alongside the operator-call case. It reports as an entry in `open` naming `Files to touch` and stating that the plan must split into one file per batch before it can dispatch, since the row waits on a split rather than on the operator.
+A plan still staging its batches with a `**Batch N**` sub-heading inside one file's `**Files to touch:**` reads `launchable: false` the same way, alongside the operator-call case. It reports as an entry in `open` labeled `Batch staging`, stating that the plan must split into one file per batch before it can dispatch, since the row waits on a split rather than on the operator.
 
 | Option          | Effect                                      |
 | --------------- | ------------------------------------------- |

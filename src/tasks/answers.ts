@@ -226,7 +226,7 @@ export async function planAnswers(
 
   if (hasStagedBatches(text)) {
     open.push({
-      label: 'Files to touch',
+      label: 'Batch staging',
       why: 'stages a batch inside one file and must split into one plan file per batch before it can dispatch.',
     })
   }

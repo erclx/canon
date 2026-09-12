@@ -232,7 +232,7 @@ describe('planAnswers', () => {
 
     assertOk(outcome)
     expect(outcome.launchable).toBe(false)
-    expect(outcome.open.map(({ label }) => label)).toContain('Files to touch')
+    expect(outcome.open.map(({ label }) => label)).toContain('Batch staging')
   })
 
   it('should launch an ordinary plan carrying no staged batch', async () => {
