@@ -11,7 +11,7 @@ Read the calling body's `## The channel` section for the message owed and the la
 
 ## Guards
 
-- Refuse to fire when the calling session holds neither `role-worker` nor `role-planner`. Say so, and point at `.claude/rules/canon/core/091-channel.md` for what a roleless session owes instead. Checked first, since a caller that never held either role never had a ladder here to run, and the tool guard below reads as the whole reason only once this one has cleared.
+- Refuse to fire when the calling session holds neither `role-worker` nor `role-planner`. Say so, and state what it owes instead: resolve the addressee at send time through `canon sessions list --json`, never by name prefix, and send a block out as a message before it becomes an interactive prompt, leaving the message content to whatever dispatched it. Checked first, since a caller that never held either role never had a ladder here to run, and the tool guard below reads as the whole reason only once this one has cleared.
 - Refuse to fire when a message-sending tool is available. Say so, name the tool, and send through it. This skill exists for the gap, never as an alternative to the ordinary channel.
 
 ## Steps

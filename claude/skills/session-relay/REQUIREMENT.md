@@ -33,7 +33,7 @@ Neither attempt named who the relay is from. A message an operator relays by han
 
 ## Guards
 
-- The calling session holds neither role: refuse, and point at `.claude/rules/canon/core/091-channel.md`. Checked first, since the tool guard read alone let the incident behind this row stop at "you have a tool" without ever learning steps 2 and 3 were unreachable regardless.
+- The calling session holds neither role: refuse, and state the addressing and timing it owes instead, since the plugin skill it would otherwise defer to reaches a target the moment it merges while a governance rule reaches one only through a separate install. Checked first, since the tool guard read alone let the incident behind this row stop at "you have a tool" without ever learning steps 2 and 3 were unreachable regardless.
 - A message-sending tool is available: refuse, name it, and send through it instead
 
 ## Out of scope
