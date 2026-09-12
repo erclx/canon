@@ -151,6 +151,7 @@ describe('buildSteps', () => {
       'Claude workflow',
       'Governance',
       'Wiki',
+      'Records backup',
     ])
   })
 
@@ -159,7 +160,29 @@ describe('buildSteps', () => {
       'Base tooling',
       'Claude workflow',
       'Governance',
+      'Records backup',
     ])
+  })
+
+  it('should announce records backup as a skip by default', () => {
+    const records = steps().find((step) => step.label === 'Records backup')
+
+    expect(records?.kind).toBe('skip')
+  })
+
+  it('should name the one-time setup command in the records notice', () => {
+    const records = steps().find((step) => step.label === 'Records backup')
+
+    expect(records).toMatchObject({
+      kind: 'skip',
+      notice: expect.stringContaining("Run 'canon records push'"),
+    })
+  })
+
+  it('should drop the records step entirely when skipped', () => {
+    expect(labels(steps({ skip: parseSkip('records') }))).not.toContain(
+      'Records backup',
+    )
   })
 
   it('should spawn no standards install, since the corpus reaches no target', () => {

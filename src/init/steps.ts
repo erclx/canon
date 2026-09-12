@@ -5,6 +5,13 @@ import type { DomainStep } from '@/init/run'
 export type RunFactory = (args: readonly string[]) => () => Promise<boolean>
 
 /**
+ * States the same fact as `docs/target-projects.md`'s backup section in its
+ * own words. Keep the two in step by hand; nothing compares them.
+ */
+const RECORDS_SETUP_NOTICE =
+  "No private repository to push to yet. Run 'canon records push' once one exists to print the one-time setup command, or --skip records to silence this."
+
+/**
  * Orders the domains an init installs. Base tooling seeds the files the later
  * domains install alongside, so the sequence is part of the contract rather
  * than an arbitrary listing.
@@ -53,6 +60,16 @@ export function buildSteps(
       kind: 'run',
       label: 'Wiki',
       run: child(['wiki', 'init', resolved]),
+    })
+  }
+
+  if (!flags.skip.skipped.has('records')) {
+    // `skip` here means there is nothing to run non-interactively, not that
+    // the caller opted out, unlike every other push of this kind above.
+    steps.push({
+      kind: 'skip',
+      label: 'Records backup',
+      notice: RECORDS_SETUP_NOTICE,
     })
   }
 

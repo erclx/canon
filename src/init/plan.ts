@@ -1,4 +1,4 @@
-export const SKIPPABLE_DOMAINS = ['wiki', 'governance'] as const
+export const SKIPPABLE_DOMAINS = ['wiki', 'governance', 'records'] as const
 
 export type SkippableDomain = (typeof SKIPPABLE_DOMAINS)[number]
 
@@ -101,6 +101,13 @@ export function planInit(flags: InitFlags): InitPlan {
     preview.push({
       level: 'info',
       text: 'wiki (.claude/wiki/ with a stub index)',
+    })
+  }
+
+  if (!flags.skip.skipped.has('records')) {
+    preview.push({
+      level: 'info',
+      text: 'records (one-time backup setup notice)',
     })
   }
 
