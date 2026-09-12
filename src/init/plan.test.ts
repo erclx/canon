@@ -46,6 +46,13 @@ describe('parseSkip', () => {
     ])
   })
 
+  it('should accept records as a skippable domain', () => {
+    const plan = parseSkip('records')
+
+    expect([...plan.skipped]).toEqual(['records'])
+    expect(plan.unknown).toEqual([])
+  })
+
   it('should report standards as unrecognized, since it no longer installs', () => {
     const plan = parseSkip('standards')
 
@@ -83,8 +90,8 @@ describe('parseSkip', () => {
 })
 
 describe('planInit', () => {
-  it('should count four domains when no flags are given', () => {
-    expect(planInit(flags()).total).toBe(4)
+  it('should count five domains when no flags are given', () => {
+    expect(planInit(flags()).total).toBe(5)
   })
 
   it('should install the default stack when none is named', () => {
@@ -100,7 +107,7 @@ describe('planInit', () => {
   it('should warn about governance rather than counting it when skipped', () => {
     const plan = planInit(flags({ skip: parseSkip('governance') }))
 
-    expect(plan.total).toBe(3)
+    expect(plan.total).toBe(4)
     expect(plan.preview).toContainEqual({
       level: 'warn',
       text: 'governance (skipped)',
@@ -129,14 +136,21 @@ describe('planInit', () => {
   it('should drop a skipped domain from the preview and the count', () => {
     const plan = planInit(flags({ stack: 'base', skip: parseSkip('wiki') }))
 
-    expect(plan.total).toBe(3)
+    expect(plan.total).toBe(4)
     expect(texts(plan)).not.toContain('wiki (.claude/wiki/ with a stub index)')
   })
 
   it('should subtract every skip from the count', () => {
     const plan = planInit(flags({ skip: parseSkip('wiki,governance') }))
 
-    expect(plan.total).toBe(2)
+    expect(plan.total).toBe(3)
+  })
+
+  it('should drop the records notice from the preview and the count when skipped', () => {
+    const plan = planInit(flags({ skip: parseSkip('records') }))
+
+    expect(plan.total).toBe(4)
+    expect(texts(plan)).not.toContain('records (one-time backup setup notice)')
   })
 
   it('should keep the count equal to the domains that will run', () => {

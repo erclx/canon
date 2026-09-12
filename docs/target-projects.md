@@ -143,6 +143,10 @@ The first line takes the `.canon/` ignore entry, and the verb refuses until the 
 
 Order matters between the first line and the two under it. The sync prunes the twelve old `.claude/` ignore entries down to the one `.canon/` line, which leaves every record still at the old root visible to git and therefore to the verb. The sweep passes over them on purpose, reporting a count of what it left alone rather than reading the memory pen and the groundwork trails as source.
 
+### Back records up off this machine, once
+
+Moving records under `.canon/` relocates them, and relocating them is not the same as backing them up. Run `canon records push` once a private repository exists for them, and it prints the one-time setup command when it finds none, since the task board, the memory pen, and the groundwork trails otherwise live on one disk with nothing pushing them off it. `canon init` prints the same reminder as a notice-only step rather than trying to run this non-interactively, since the private repository does not exist yet at scaffold time.
+
 Read the `ok` field out of the `--json` record rather than the exit code. A shell profile that wraps `canon` in a function takes its status from whatever the function runs last, so an absent subcommand and a clean run can both exit 0, and a reader watching the exit alone concludes the move happened.
 
 A tracked file that names an old record path on purpose, such as prose dating a decision, keeps it by carrying `canon-keep-record-root` on that line or the nearest non-blank line above. The report pass prints every file it would rewrite, which is where to catch one before `--write` runs.

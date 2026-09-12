@@ -402,16 +402,19 @@ so this section reports and gates nothing.
 
 ## Bootstrap
 
-`canon init` installs up to four core domains and reports each one independently. A
+`canon init` installs up to five core domains and reports each one independently. A
 domain that fails does not abort the run, so the command finishes the rest and
 exits 1 naming the failures. Passing any flag skips the confirmation prompt,
 which is what makes it scriptable.
 
 `--stack` defaults to `base`, and the default
 does not read as a passed flag, so a bare `canon init` installs governance and
-still prompts. `--skip` takes `wiki` and `governance`, and warns
-without aborting on any other value. There is no `--standards` and no
-`--snippets`, since no run writes either corpus into the target.
+still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns
+without aborting on any other value. Records has nothing to run non-interactively,
+since the private backup repository does not exist yet at scaffold time, so its
+step only prints the one-time setup reminder and `--skip records` silences it.
+There is no `--standards` and no `--snippets`, since no run writes either corpus
+into the target.
 
 ## Unguarded tooling primitives
 

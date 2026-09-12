@@ -59,3 +59,30 @@ done
 printf '\n📋 %s archive candidate(s) on the board:\n%s\n' "$count" "$closed"
 printf 'Outcomes are marked on the branch, so each still needs its work confirmed\n'
 printf 'on main. Run /task-board, which checks that and sweeps the plan first.\n\n'
+
+# The gitignored record folders live on one disk and nowhere else, and a merge
+# is the event that changes them most. This runs on every merge rather than
+# only on one that closes a task, since a review report and a memory entry
+# both land on runs that archive nothing.
+#
+# Sits last so a slow or unreachable remote delays no candidate announcement,
+# and inside an `if` so a push failing offline, or a machine that never ran
+# the one-time setup, still leaves this hook exiting zero. Guarded by its own
+# `command -v canon` check, since this file carries none above it.
+if command -v canon >/dev/null 2>&1; then
+  if backup=$(canon records push --root "$root" --json 2>/dev/null); then
+    changed=$(printf '%s' "$backup" | sed -n 's/.*"changed":\([0-9][0-9]*\).*/\1/p')
+    if [ -n "$changed" ] && [ "$changed" != "0" ]; then
+      printf '\n🗄️  Backed up %s record path(s).\n\n' "$changed"
+    fi
+  else
+    reason=$(printf '%s' "$backup" | sed -n 's/.*"reason":"\([^"]*\)".*/\1/p')
+
+    # No records history on this machine, which is every checkout that never
+    # ran the one-time setup. Nothing to report.
+    if [ "$reason" != "no-repository" ]; then
+      printf '\n🗄️  Records not backed up: %s\n' "${reason:-unknown}"
+      printf 'Run canon records push when the remote is reachable.\n\n'
+    fi
+  fi
+fi
