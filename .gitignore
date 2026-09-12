@@ -39,9 +39,12 @@ demos/*.png
 # tree, which is what the move bought: what is committed stays in .claude/ and
 # what is ignored lives here, so a record folder added later needs no entry.
 #
-# That holds only while nothing tracked ever lands under .canon/. Git does not
-# descend into an excluded directory, so a re-inclusion like !.canon/x/ matches
-# nothing and there is no way to carve one out. Nothing enforces the rule.
+# That holds only while nothing tracked ever lands under .canon/. The bare
+# .canon/ spelling is what blocks a carve-out, not git itself: written instead
+# as .canon/*, a negation like !.canon/context/ stages that folder, at one
+# negation line per tracked folder, while a new record folder stays
+# auto-ignored under the wildcard either way. Nothing enforces the spelling
+# staying bare.
 #
 # Both entries are checked against the "# Claude" array in
 # tooling/claude/manifest.toml by scripts/core/check-ignore-parity.sh.
