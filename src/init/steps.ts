@@ -5,8 +5,8 @@ import type { DomainStep } from '@/init/run'
 export type RunFactory = (args: readonly string[]) => () => Promise<boolean>
 
 /**
- * Cited verbatim from `docs/target-projects.md`'s backup section, so the two
- * surfaces cannot drift apart on what the one-time setup command is.
+ * States the same fact as `docs/target-projects.md`'s backup section in its
+ * own words. Keep the two in step by hand; nothing compares them.
  */
 const RECORDS_SETUP_NOTICE =
   "No private repository to push to yet. Run 'canon records push' once one exists to print the one-time setup command, or --skip records to silence this."
@@ -64,6 +64,8 @@ export function buildSteps(
   }
 
   if (!flags.skip.skipped.has('records')) {
+    // `skip` here means there is nothing to run non-interactively, not that
+    // the caller opted out, unlike every other push of this kind above.
     steps.push({
       kind: 'skip',
       label: 'Records backup',
