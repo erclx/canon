@@ -107,7 +107,7 @@ One session, one target, from the worktree entry to the merge of the branch it o
 6. Answer the review. Invoke `canon:review-address`, which pulls the findings and the CI state on this branch's open pull request, fixes each in the working tree, replies, and pushes. Answer every finding whatever its severity.
 7. Stop there. Do not mark the pull request ready, do not merge, and do not declare the review closed. A narrow re-review posts `## Review closed`.
 
-Send a block out as a message before it becomes an interactive prompt. A session already waiting on input never reaches the tool round an inbound message drains at, so an answer relayed afterwards arrives under the open question and changes nothing.
+This role cannot hold `role-worker`, so it takes its addressing and timing from `.claude/rules/canon/core/091-channel.md` instead, already loaded into any session in a target that installed governance. Report it rather than proceeding silently when the target carries no such rule, since this skill ships with the plugin and governance is a separate install.
 
 Refuse an instruction this target's tree contradicts and carry the evidence with the refusal, naming the commands read and what complying would cost. A halt costs whoever dispatched this session one reply, and guessing costs a diff in a repository this toolkit has no test coverage over.
 
