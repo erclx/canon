@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm } from 'node:fs/promises'
+import { mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { extractOrdinal } from '@/intake/folder'
 import { recordDir } from '@/record-root'
 
@@ -20,6 +20,19 @@ const ORDINAL_WIDTH = 2
 
 /** Bounds the retry loop below. A fifth collision in a row is not a race. */
 const MAX_ATTEMPTS = 5
+
+/**
+ * How long a reservation with no leaf folder behind it stays live before
+ * `reserve` will clear it.
+ *
+ * An ordinary claim reserves the number and creates its leaf folder with
+ * nothing awaited in between, so it finishes in milliseconds. The threshold
+ * only has to clear that by a wide margin, not bound it tightly: reading a
+ * genuinely abandoned lock as live costs one retry, while reading one still
+ * in flight as abandoned reopens the exact duplicate this recovery exists to
+ * close, so the cost of guessing too short is the one that matters here.
+ */
+const STALE_LOCK_MS = 5 * 60 * 1000
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error
@@ -73,22 +86,49 @@ function lockPath(root: string, ordinal: string): string {
   return recordDir(root, 'ordinal-locks', ordinal)
 }
 
-/**
- * `true` when no kind's folder carries this ordinal, which means the number
- * was reserved and never claimed: a process died between `reserve` and the
- * leaf `mkdir`, or an earlier attempt in this same call lost the leaf create
- * to something other than a collision. A live reservation always has a leaf
- * folder behind it by the time another caller can observe the lock, since the
- * two happen inside one call with nothing awaited between them.
- */
-async function isStale(root: string, ordinal: string): Promise<boolean> {
+async function isBacked(root: string, ordinal: string): Promise<boolean> {
   const names = (
     await Promise.all(
       ORDINAL_KINDS.map((kind) => listNames(recordDir(root, kind))),
     )
   ).flat()
 
-  return !names.some((name) => extractOrdinal(name) === ordinal)
+  return names.some((name) => extractOrdinal(name) === ordinal)
+}
+
+/**
+ * `undefined` when the lock is already gone, otherwise how long ago it was
+ * created. The lock directory is never written to after its `mkdir`, so its
+ * `mtime` is its creation time.
+ */
+async function lockAgeMs(dir: string): Promise<number | undefined> {
+  try {
+    const info = await stat(dir)
+    return Date.now() - info.mtimeMs
+  } catch (error) {
+    if (isErrnoException(error) && error.code === 'ENOENT') return undefined
+    throw error
+  }
+}
+
+/**
+ * `true` when a lock carries no leaf folder in either kind and is old enough
+ * that an ordinary claim could not still be in flight.
+ *
+ * No backing folder alone is not enough: `claimOrdinal` awaits the leaf
+ * `mkdir` after `reserve` returns, so a second process can observe another's
+ * lock in that exact gap, with no folder behind it yet even though the first
+ * process is seconds from creating one. Reading that gap as abandoned lets
+ * both processes land a leaf folder at the same ordinal under their own
+ * kind, which never collide with each other, reopening the race this verb
+ * exists to close. Requiring the lock to also be older than `STALE_LOCK_MS`
+ * is what keeps that window from being read as abandoned.
+ */
+async function isStale(root: string, ordinal: string): Promise<boolean> {
+  if (await isBacked(root, ordinal)) return false
+
+  const age = await lockAgeMs(lockPath(root, ordinal))
+  return age !== undefined && age >= STALE_LOCK_MS
 }
 
 /**

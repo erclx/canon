@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -16,6 +16,13 @@ afterEach(() => {
 
 function seed(kind: 'intake' | 'groundwork', name: string): void {
   mkdirSync(join(ROOT, '.canon', kind, name), { recursive: true })
+}
+
+/** Backdates a lock directory's mtime so it reads as older than the staleness threshold. */
+function ageLock(ordinal: string, minutesAgo: number): void {
+  const dir = join(ROOT, '.canon', 'ordinal-locks', ordinal)
+  const past = new Date(Date.now() - minutesAgo * 60 * 1000)
+  utimesSync(dir, past, past)
 }
 
 describe('highestOrdinal', () => {
@@ -86,15 +93,37 @@ describe('claimOrdinal', () => {
   })
 
   it('should recover a stale reservation left by a process that died before its leaf create', async () => {
-    // A lock with no folder behind it in either kind: a process reserved 01
-    // and never got to creating its own leaf folder.
+    // A lock with no folder behind it in either kind, old enough that no
+    // ordinary claim could still be creating its leaf folder: a process
+    // reserved 01 and never got to creating its own.
     mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
+    ageLock('01', 10)
 
     const outcome = await claimOrdinal(ROOT, 'intake', 'recovered-topic')
 
     expect(outcome).toMatchObject({ ok: true, ordinal: '01' })
+  })
+
+  it('should not reclaim a lock too young to be abandoned', async () => {
+    // No folder behind it yet, but freshly created: indistinguishable from a
+    // claim mid-flight between its reservation and its own leaf create.
+    // Every retry keeps recomputing the same next ordinal, since nothing
+    // here ever backs the lock with a real folder, so the bounded spin ends
+    // in a refusal rather than skipping ahead of a claim that might still
+    // complete.
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', '01'), {
+      recursive: true,
+    })
+
+    const outcome = await claimOrdinal(ROOT, 'intake', 'my-topic')
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'ordinal-contended',
+      lastOrdinal: '01',
+    })
   })
 
   it('should not read a lock backed by the other kind as stale', async () => {
