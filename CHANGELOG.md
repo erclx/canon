@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.73.0](https://github.com/erclx/canon/compare/v4.72.1...v4.73.0) (2026-09-12)
+
+
+### Features
+
+* **cli:** resolve tracked surfaces at either root ahead of a move ([#1625](https://github.com/erclx/canon/issues/1625)) ([6aff988](https://github.com/erclx/canon/commit/6aff98899503f40d135947f03c5849632925be50))
+* **governance:** add channel contract for a roleless session ([#1624](https://github.com/erclx/canon/issues/1624)) ([95fd21d](https://github.com/erclx/canon/commit/95fd21d3d7c36200cb66c1e28ca6f1f38b5b2b82))
+
 ## [4.72.1](https://github.com/erclx/canon/compare/v4.72.0...v4.72.1) (2026-09-12)
 
 
