@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.74.0](https://github.com/erclx/canon/compare/v4.73.0...v4.74.0) (2026-09-12)
+
+
+### Features
+
+* **plans:** split staged batches into one plan file per batch ([#1629](https://github.com/erclx/canon/issues/1629)) ([d680ccc](https://github.com/erclx/canon/commit/d680ccc356125bad80215494039c6374e288873f))
+* **records:** branch push/pull per project, back up transcripts ([#1632](https://github.com/erclx/canon/issues/1632)) ([ea2828c](https://github.com/erclx/canon/commit/ea2828c4de58619b95555ae5f0ccf3ad8f67b031))
+* **records:** serialize ordinal allocation with records ordinal --claim ([#1630](https://github.com/erclx/canon/issues/1630)) ([58807b8](https://github.com/erclx/canon/commit/58807b874fd117fead0d90f0f12a7af96d199b86))
+* **tooling:** seed the records push into scaffolded targets ([#1631](https://github.com/erclx/canon/issues/1631)) ([34e8a88](https://github.com/erclx/canon/commit/34e8a88fbf68fc33ca4e93612f4e641747bb2b7d))
+
 ## [4.73.0](https://github.com/erclx/canon/compare/v4.72.1...v4.73.0) (2026-09-12)
 
 
