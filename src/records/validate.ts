@@ -73,6 +73,7 @@ export const FINDING_KINDS = [
   'item-incomplete',
   'category-mismatch',
   'operator-call-phrasing',
+  'batch-unsplit',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -235,6 +236,18 @@ async function listFolders(dir: string): Promise<string[]> {
 
 const PLAN_NAME = /^feature-[a-z0-9]+(-[a-z0-9]+)*\.md$/
 const PLAN_TITLE = /^#[ \t]+Feature:[ \t]+\S/
+const BATCH_LABEL = /^\*\*Batch\s+\d+\b.*\*\*/i
+
+/**
+ * Reads the raw text rather than `splitPlanSections`'s output, since a
+ * colon-bearing `**Batch 1: ...**` line is itself a `MARKER_LINE` and is
+ * already dropped from the split `Files to touch` section before any check
+ * sees it.
+ */
+export function hasStagedBatches(text: string): boolean {
+  return linesOutsideFences(text).some((line) => BATCH_LABEL.test(line.trim()))
+}
+
 /**
  * An entry names a file and says something about it. Both halves are tested as
  * facts rather than as a syntax: a backticked span anywhere, and prose left over
@@ -462,6 +475,21 @@ export function checkPlan(name: string, text: string): Finding[] {
   }
 
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
+
+  if (hasStagedBatches(text)) {
+    const staged = linesOutsideFences(text).find((line) =>
+      BATCH_LABEL.test(line.trim()),
+    )
+
+    findings.push(
+      finding(
+        'batch-unsplit',
+        name,
+        shorten((staged ?? '').trim()),
+        "stages a batch inside one file, so the batch sharing this plan's branch has nothing left to open a pull request against once an earlier one merges. Split it into one plan file per batch.",
+      ),
+    )
+  }
 
   return findings
 }

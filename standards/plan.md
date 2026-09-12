@@ -38,6 +38,7 @@ A plan failing these is non-conforming even when it satisfies every shape rule b
 
 - Name the file `feature-<slug>.md`, with `<slug>` two to four kebab-case words naming the concern.
 - Write one concern per file. A request spanning two independent concerns takes two plans rather than one bundling both, since a bundled plan cannot be executed by two sessions or abandoned by half.
+- A staged batch is a concern of its own and takes its own file rather than a `**Batch N**` sub-heading inside one plan's `**Files to touch:**`. `canon tasks plan-branch` derives one branch from one plan filename, so every batch sharing a file has nothing left to open a pull request against once an earlier batch merges under that name. State a batch's dependency on the ones before it in its own `**Constraints:**`.
 - Derive the slug from the concern rather than from a branch, because the plan is written before the branch exists.
 - Give the branch that executes the plan the same slug. A later surface finds the plan from the branch name and finds nothing when the two spellings differ.
 
