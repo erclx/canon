@@ -11,6 +11,7 @@ import {
   checkStandard,
   type Finding,
   type FindingKind,
+  hasStagedBatches,
   isRecordKind,
   isSharedScratch,
   pathWords,
@@ -438,6 +439,20 @@ describe('readQuestions', () => {
   })
 })
 
+describe('hasStagedBatches', () => {
+  it('should read a plain **Batch N** label as staged', () => {
+    expect(hasStagedBatches('**Batch 1**\n\n**Files to touch:**\n')).toBe(true)
+  })
+
+  it('should read a colon-bearing **Batch N:** label as staged', () => {
+    expect(hasStagedBatches('**Batch 1: The verb change**\n')).toBe(true)
+  })
+
+  it('should read a plan carrying no batch label as not staged', () => {
+    expect(hasStagedBatches(conformingPlan())).toBe(false)
+  })
+})
+
 describe('checkPlan', () => {
   it('should report nothing on a conforming plan', () => {
     expect(checkPlan('feature-plan-standards.md', conformingPlan())).toEqual([])
@@ -499,6 +514,24 @@ describe('checkPlan', () => {
     )
 
     expect(checkPlan('feature-a-b.md', body)).toEqual([])
+  })
+
+  it('should report a plan staging a batch as a plain **Batch N** label', () => {
+    const body = conformingPlan().replace(
+      '**Files to touch:**',
+      '**Batch 1**\n\n**Files to touch:**',
+    )
+
+    expect(kinds(checkPlan('feature-a-b.md', body))).toEqual(['batch-unsplit'])
+  })
+
+  it('should report a plan staging a batch as a colon-bearing **Batch N:** label', () => {
+    const body = conformingPlan().replace(
+      '**Files to touch:**',
+      '**Batch 1: The verb change**\n\n**Files to touch:**',
+    )
+
+    expect(kinds(checkPlan('feature-a-b.md', body))).toEqual(['batch-unsplit'])
   })
 
   it('should accept an entry naming two files before one shared reason', () => {

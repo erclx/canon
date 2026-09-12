@@ -4,6 +4,7 @@ import { isAbsolute, relative, resolve } from 'node:path'
 import { isUnder } from '@/paths'
 import { recordDir, recordDirs } from '@/record-root'
 import {
+  hasStagedBatches,
   normalizeOperatorCall,
   OPERATOR_CALL,
   readQuestions,
@@ -219,8 +220,16 @@ export async function planAnswers(
   const resolved = resolvePlanReference(root, reference)
   if (!resolved.ok) return resolved
 
-  const sections = splitPlanSections(await readFile(resolved.path, 'utf8'))
+  const text = await readFile(resolved.path, 'utf8')
+  const sections = splitPlanSections(text)
   const open = openQuestions(sections.get('Questions') ?? [])
+
+  if (hasStagedBatches(text)) {
+    open.push({
+      label: 'Batch staging',
+      why: 'stages a batch inside one file and must split into one plan file per batch before it can dispatch.',
+    })
+  }
 
   return {
     ok: true,

@@ -208,6 +208,44 @@ describe('planAnswers', () => {
     expect(outcome.open[0]?.why).toBe('the longer variant this task measured.')
   })
 
+  it('should hold a plan staging a batch inside one file', async () => {
+    await writeFile(
+      join(ROOT, '.canon', 'plans', 'feature-staged.md'),
+      [
+        '# Feature: A staged plan',
+        '',
+        '## Summary',
+        '',
+        '- It ships something.',
+        '',
+        '**Batch 1: The first slice**',
+        '',
+        '**Files to touch:**',
+        '',
+        '- `src/a.ts`: the thing.',
+        '',
+      ].join('\n'),
+      'utf8',
+    )
+
+    const outcome = await planAnswers(ROOT, 'staged')
+
+    assertOk(outcome)
+    expect(outcome.launchable).toBe(false)
+    expect(outcome.open.map(({ label }) => label)).toContain('Batch staging')
+  })
+
+  it('should launch an ordinary plan carrying no staged batch', async () => {
+    await writePlan('gate', [
+      { suggested: 'the first, since the group already carries a verb.' },
+    ])
+
+    const outcome = await planAnswers(ROOT, 'gate')
+
+    assertOk(outcome)
+    expect(outcome.launchable).toBe(true)
+  })
+
   it('should launch a plan carrying no questions section at all', async () => {
     await writeFile(
       join(ROOT, '.canon', 'plans', 'feature-bare.md'),
