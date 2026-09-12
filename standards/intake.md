@@ -7,7 +7,7 @@ description: Folder layout, ordinal naming, reserved index number, frontmatter a
 
 Applies to an intake folder at `.canon/intake/<nn>-<slug>/`. One folder holds one dump, filed by domain, and every finding in it is an item carrying a measured problem, one proposed fix, and a verdict.
 
-The folder is gitignored and backed by `canon records push` and `canon records pull`, which protects it against the machine being lost but not against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so the shape below survives only by being read.
+The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so the shape below survives only by being read.
 
 ## Scope
 

@@ -32,7 +32,7 @@ Using the wrong one fails in two shapes. Intake on a question that needs measuri
 - Write only inside `.canon/intake/<nn>-<slug>/`. A plan file, a task file, a source change, a standard, and a rule all live outside that folder, so this one rule forbids every one of them.
 - There is no exception. Promoting an item onto the board runs through `task-board` after the operator has answered, which is a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
-- Treat the folder as gitignored and backed by `canon records push` and `canon records pull`, which protects it against the machine being lost but not against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule stated here holds only while a session reads it.
+- Treat the folder as gitignored, and backed only where a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there and refuse with `no-remote` otherwise, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule stated here holds only while a session reads it.
 
 Nothing outside this body carries the write-scope floor, and no path-scoped rule can. A misrouted write lands on a path the folder's glob never matches, so the rule that ships beside the intake standard carries the item format and the answer contract instead, for a session editing the folder with this skill unloaded.
 

@@ -7,7 +7,7 @@ description: Filename and type prefix, frontmatter, the body shape per type, lin
 
 Applies to a memory entry at `.canon/memory/<type>-<slug>.md`. One file holds one rule or one fact, written at the end of the session that produced it and read by a session that holds none of it. Which surface owns a given fact is settled before an entry is written at all, and that routing is project policy rather than a shape rule.
 
-The folder is gitignored and backed by `canon records push` and `canon records pull`, which protects it against the machine being lost but not against an entry deleted before anyone has pushed. That is why the retire step below is a move rather than a cleanup: a retired entry stays readable regardless of push timing, where a deleted one is gone the moment nothing has captured it yet.
+The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and protect nothing against an entry deleted before anyone has pushed. That is why the retire step below is a move rather than a cleanup: a retired entry stays readable regardless of push timing, where a deleted one is gone the moment nothing has captured it yet.
 
 ## Scope
 
