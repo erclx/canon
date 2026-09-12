@@ -7,7 +7,7 @@ description: Filename and type prefix, frontmatter, the body shape per type, lin
 
 Applies to a memory entry at `.canon/memory/<type>-<slug>.md`. One file holds one rule or one fact, written at the end of the session that produced it and read by a session that holds none of it. Which surface owns a given fact is settled before an entry is written at all, and that routing is project policy rather than a shape rule.
 
-The folder is gitignored and unbacked. Nothing recovers a deleted entry, which is why the retire step below is a move rather than a cleanup.
+The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and protect nothing against an entry deleted before anyone has pushed. That is why the retire step below is a move rather than a cleanup: a retired entry stays readable regardless of push timing, where a deleted one is gone the moment nothing has captured it yet.
 
 ## Scope
 
@@ -98,7 +98,7 @@ Link a related entry as `[[name]]`, where `name` is the target's filename stem w
 
 - Check the folder for an entry on the same topic before writing a new one, and update that entry in place when one exists. Two entries on one rule disagree the moment either is edited.
 - Rewrite an entry the tree has moved under rather than appending a second passage narrating the change. A reader cannot tell which of two claims is current.
-- Never delete an entry. Retire one by moving it to an archive under its own name, because the folder is unbacked and a bulk judgment has no undo behind it.
+- Never delete an entry. Retire one by moving it to an archive under its own name, because a bulk judgment made before the next push has no undo behind it, and moving keeps the record where deleting would not.
 - Treat the folder as a holding pen rather than a destination. An entry whose rule belongs on a durable surface is promoted there and retired here, and the rest is what the pen is for.
 
 The catalog is generated from sibling frontmatter rather than authored. Never hand-edit it, since the next regeneration discards whatever was added by hand.

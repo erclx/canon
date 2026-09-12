@@ -25,7 +25,7 @@ A track that closes with several separable findings writes only one task, and th
 - Place the closing task's row through `task-board` Step 4 rather than writing `priority.md` or `backlog.md` directly
 - Link every claim about a source outside the project, and list an unread source as a lead rather than citing it
 - Put a fixture a headless run is pointed at outside the repository
-- Write the next-session file self-contained, since the folder is unbacked and dies with the machine
+- Write the next-session file self-contained, since backing the folder through `canon records push` and `canon records pull` holds only where a records remote is configured, protects only against the machine being lost even there, and never against a compaction dropping this session's reasoning before it has pushed
 
 ## Must not
 

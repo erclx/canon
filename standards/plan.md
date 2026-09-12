@@ -7,7 +7,7 @@ description: Filename and slug, required sections, the suggested-and-answer cont
 
 Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds one concern, written before implementation starts and read by whatever executes it, so it has to carry the scope without the conversation that produced it.
 
-The folder is gitignored and unbacked. Nothing recovers a deleted plan, which is why the archive step below is a move rather than a cleanup.
+The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and protect nothing against a plan deleted before anyone has pushed. That is why the archive step below is a move rather than a cleanup.
 
 ## Scope
 

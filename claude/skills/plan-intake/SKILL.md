@@ -32,7 +32,7 @@ Using the wrong one fails in two shapes. Intake on a question that needs measuri
 - Write only inside `.canon/intake/<nn>-<slug>/`. A plan file, a task file, a source change, a standard, and a rule all live outside that folder, so this one rule forbids every one of them.
 - There is no exception. Promoting an item onto the board runs through `task-board` after the operator has answered, which is a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
-- Treat the folder as gitignored and unbacked. No check reaches its contents, so every rule stated here holds only while a session reads it.
+- Treat the folder as gitignored, and backed only where a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there and refuse with `no-remote` otherwise, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule stated here holds only while a session reads it.
 
 Nothing outside this body carries the write-scope floor, and no path-scoped rule can. A misrouted write lands on a path the folder's glob never matches, so the rule that ships beside the intake standard carries the item format and the answer contract instead, for a session editing the folder with this skill unloaded.
 
@@ -81,7 +81,7 @@ Write `00-overview.md` last, once the clusters are filed and the counts are real
 
 Each open question in the index is a labeled markdown link to its owning item's heading anchor. The index points and the item owns, so no answer slot appears in the index. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
 
-Add `99-next-session.md` only where the pass ends holding context no cluster file carries, such as a dump half filed or a measurement that has to be redone. Write it self-contained, since the folder is unbacked and the conversation behind it compacts away.
+Add `99-next-session.md` only where the pass ends holding context no cluster file carries, such as a dump half filed or a measurement that has to be redone. Write it self-contained, since a compaction drops the conversation behind it regardless of whether the folder is backed.
 
 ## Output
 

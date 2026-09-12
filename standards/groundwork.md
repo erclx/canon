@@ -7,7 +7,7 @@ description: Folder layout, ordinal naming, reserved numbering, frontmatter and 
 
 Applies to a groundwork track at `.canon/groundwork/<nn>-<slug>/`. A track measures one question that has to be settled before anyone can plan against it. The numbering inside the folder is the table of contents, so a reader opens the folder and knows where to start and what follows without an index maintained inside each file.
 
-The folder is gitignored and unbacked. No check reaches its contents and no history recovers a deleted one, so every rule here holds only while a session reads it, and the handoff file has to be self-contained.
+The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refusing with `no-remote` where no remote is set, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule here holds only while a session reads it, and the handoff file has to be self-contained.
 
 ## Scope
 
