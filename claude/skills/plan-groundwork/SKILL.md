@@ -46,11 +46,12 @@ List `.canon/groundwork/` from the project root and match the topic against the 
 
 Never match against `.claude/` itself. That directory holds every other workflow surface, so a topic matched there lands on a folder that was never a track.
 
-With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `ts-migration` over `migration-research`. Also list `.canon/intake/` and take `<nn>` as the highest ordinal present across both listings, incremented, per `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md`. Then route on `.canon/groundwork/<nn>-<slug>/`:
+With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `ts-migration` over `migration-research`. That is open mode outright: no folder can carry a slug nothing matched yet, so there is nothing to route on. `<nn>` for it is claimed in Open mode Step 1 rather than here, since the qualifying test below has to run before the folder exists.
 
-- Folder absent: open
-- Folder present without `06-decision.md`: resume
-- Present folder the user judges ready: close
+A matched folder instead routes on its own `<nn>-<slug>/`:
+
+- Present without `06-decision.md`: resume
+- Present and the user judges it ready: close
 
 Detect the mode from the folder. Do not ask which one to run.
 
@@ -73,7 +74,7 @@ The standard sets the open question format and requires it inside a topic file a
 
 ## Open mode
 
-1. Create `.canon/groundwork/<nn>-<slug>/`, with `<nn>` and `<slug>` as derived in Step 1.
+1. Claim the ordinal and create the folder in one act with `canon records ordinal groundwork <slug> --claim`, per `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/groundwork/` and `.canon/intake/` and creating `.canon/groundwork/<nn>-<slug>/` at the highest ordinal present across the two, incremented.
 2. Write `README.md` first. Writing it first forces the question of what the track is for.
 3. Write `01-current-state.md` by measuring now. Never carry a figure from a previous session or from recall without re-measuring it. Measure only what an open question in the folder needs. A number with no question attached is how groundwork turns into the work.
 4. Write `00-scope.md` when the track is large enough to run away. Skip it on a small track.

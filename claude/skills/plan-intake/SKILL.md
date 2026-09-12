@@ -42,7 +42,7 @@ List `.canon/intake/` from the project root and match the topic against the slug
 
 Never match against `.claude/` itself. That directory holds every other workflow surface, so a topic matched there lands on a folder that was never an intake.
 
-With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `toolkit-overview` over `august-triage`. Also list `.canon/groundwork/` and take `<nn>` as the highest ordinal present across both listings, incremented, per `${CLAUDE_SKILL_DIR}/../../standards/intake.md`. An absent folder opens, and a present one resumes by appending items and revising verdicts the tree has moved under.
+With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `toolkit-overview` over `august-triage`. Claim the ordinal and create the folder in one act with `canon records ordinal intake <slug> --claim`, per `${CLAUDE_SKILL_DIR}/../../standards/intake.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/intake/` and `.canon/groundwork/` and taking the highest ordinal present across the two, incremented. An absent folder opens, and a present one resumes by appending items and revising verdicts the tree has moved under.
 
 ## Step 2: orient
 

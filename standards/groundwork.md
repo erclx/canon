@@ -25,7 +25,7 @@ Does not govern:
 ## Folder name
 
 - Name the folder `<nn>-<slug>`, a two-digit zero-padded ordinal followed by a kebab-case slug.
-- Take the ordinal from the highest one already present across both `.canon/groundwork/` and `.canon/intake/`, incremented. A listing then sorts by when each folder opened rather than alphabetically, and the count includes both kinds because the two share one creation-order line.
+- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one already present across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in the same atomic act, closing the race a read-then-create sequence leaves open between two sessions opening at once. A listing then sorts by when each folder opened rather than alphabetically, and the count includes both kinds because the two share one creation-order line.
 - With neither folder holding an entry, the first one opened takes `01`. Do not read this off the numbering inside a track, which starts at `00` on a large one and disagrees with intake's own first file.
 - Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
 

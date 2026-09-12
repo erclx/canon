@@ -138,7 +138,7 @@ function matchSlug(names: readonly string[], slug: string): SlugMatch {
   return { kind: 'none' }
 }
 
-function extractOrdinal(name: string): string {
+export function extractOrdinal(name: string): string {
   return /^\d{2,}-/.exec(name)?.[0].slice(0, -1) ?? ''
 }
 
