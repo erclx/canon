@@ -12,8 +12,9 @@ use_config() {
 stage_setup() {
   log_info "create  : board with three tasks and an unlinked plan, no task for it yet"
   log_info "archive : board with one shipped task and one still open"
+  log_info "decline : board with one task decided against and one still open"
 
-  select_or_route_scenario "Which scenario?" "create" "archive"
+  select_or_route_scenario "Which scenario?" "create" "archive" "decline"
 
   case "$SELECTED_OPTION" in
   "create")
@@ -61,6 +62,32 @@ stage_setup() {
     log_info "         retargeted a folder deeper, its ordering row cleared, and"
     log_info "         the control and its plan left where they were."
     log_info "         Two expectations need a reader and report as unchecked."
+    ;;
+  "decline")
+    stage_fixtures claude task-board decline 01-initial
+    git add . && git commit -m "feat(api): serve the task list" --no-verify -q
+
+    stage_fixtures claude task-board decline 02-csv-spike
+    git add . && git commit -m "feat(api): sketch a CSV export endpoint (#58)" --no-verify -q
+
+    log_step "Scenario ready: one task decided against on a two-task board"
+    log_info "Context: v01.0-csv-export is open, names #58, and its own"
+    log_info "  Findings already record the decision: v02.0's planned response"
+    log_info "  covers the same request, so the export duplicates it. The spike"
+    log_info "  at src/routes/export.ts wires into no route table."
+    log_info "  v02.0-pagination is the control. Its outcomes stay open, and it"
+    log_info "  must end the run exactly where it started."
+    log_info ""
+    log_info "Action:  /canon:task-board decline v01.0-csv-export, since"
+    log_info "         v02.0 already plans the response it duplicates"
+    log_info "Expect:  declared in fixtures/claude/task-board/decline/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:task-board decline"
+    log_info "         The task moved under .canon/tasks/declined/, carrying a"
+    log_info "         Declined: line naming the reason and who decided, its"
+    log_info "         ordering row cleared, and the control left where it was."
+    log_info "         Unlike archive, decline carries no outcome-state gate, so"
+    log_info "         the task moves with both outcomes still open."
+    log_info "         One expectation needs a reader and reports as unchecked."
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

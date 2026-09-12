@@ -1,0 +1,67 @@
+# What a correct `/task-board` run leaves behind on the decline arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# The arm asserts the successful move and the Declined: line, not the refusal
+# set. `src/tasks/archive.test.ts` covers those at the unit level, and a model
+# session at a dollar a run is the wrong instrument for a typed guard. What no
+# unit test reaches is whether the skill gets to the command at all with the
+# board in the state the command needs.
+
+max_turns = 30
+
+# The destination, not the source. A run that declined the wrong task, or
+# neither, leaves the source file exactly where a `paths` entry over it would
+# find it, so asserting the destination is what separates the two.
+paths = [
+  ".canon/tasks/declined/v01.0-csv-export.md",
+  ".canon/tasks/v02.0-pagination.md",
+  ".canon/tasks/priority.md",
+]
+
+# The source is gone and the control never moved. The second entry catches a
+# run that declined the control instead of the task it was given.
+absent = [
+  ".canon/tasks/v01.0-csv-export.md",
+  ".canon/tasks/declined/v02.0-pagination.md",
+]
+
+write_scope = [".canon/tasks/**"]
+
+# The skill reports the paths the command returned, in full from the project
+# root. The declined destination is the token worth pinning, since a reply
+# naming only the stem reads the same whether the file moved or not.
+reply = [".canon/tasks/declined/v01.0-csv-export.md"]
+
+manual = [
+  "The run reached the declined folder through `canon tasks decline` rather than moving the file by hand. Semantic: both leave the same tree, so no assertion over the tree separates them.",
+]
+
+# The cleared ordering row, asserted by what survives it. An `absent` entry
+# cannot express a removed table row, and a negative pattern would pass on
+# every rewording, so the pin runs from the separator line into the row that
+# follows it. The fixture puts the declined task's row first, so a run that
+# left it in place pushes the control's row down and the match fails.
+[[content]]
+path = ".canon/tasks/priority.md"
+pattern = '^\| [\-]+ \| [\-]+ \|\n\| \[v02\.0 pagination\]\(v02\.0-pagination\.md\)'
+
+# The move carried the file rather than creating an empty one at the
+# destination, and the `Declined:` line names both the reason and the decider.
+# `paths` alone passes on a touched file with no reason recorded.
+[[content]]
+path = ".canon/tasks/declined/v01.0-csv-export.md"
+pattern = '^Declined: .+, .+ on \d{4}-\d{2}-\d{2}$'
+
+# Decline carries no outcome-state gate, so the task moves with both outcomes
+# exactly as open as they were staged. A run that closed them to get past a
+# gate that does not exist would still pass every assertion above this one.
+[[content]]
+path = ".canon/tasks/declined/v01.0-csv-export.md"
+pattern = '^- \[ \] Outcome: a CSV download carries every task'
+
+# The control's outcomes stay open too. Asserting only the declined task's
+# state would pass a run that closed outcomes on both files by habit.
+[[content]]
+path = ".canon/tasks/v02.0-pagination.md"
+pattern = '^- \[ \] Outcome: a list request accepts a page size and an offset'

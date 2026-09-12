@@ -1,0 +1,23 @@
+---
+title: 'v02.0: Paginate the task list'
+description: Return a bounded page of tasks instead of the whole collection
+---
+
+# v02.0: Paginate the task list
+
+Issue: #61
+
+The list endpoint returns every task it holds, so response size grows with the
+collection and nothing bounds it.
+
+## Outcomes
+
+- [ ] Outcome: a list request accepts a page size and an offset
+- [ ] Outcome: a response carries the total count beside the page
+
+## Findings
+
+- The page cursor answers a different request than a downloadable export, so
+  this task and v01.0 are independent rather than sequenced.
+
+> Test strategy: unit, request a page past the end and one at the boundary.
