@@ -320,6 +320,10 @@ describe('isExcludedPath', () => {
     expect(isExcludedPath('src/record-root.ts')).toBe(true)
   })
 
+  it('should exclude the module stating the surface roots', () => {
+    expect(isExcludedPath('src/surface-root.ts')).toBe(true)
+  })
+
   it('should exclude its own source', () => {
     expect(isExcludedPath('src/migrate/records.ts')).toBe(true)
   })

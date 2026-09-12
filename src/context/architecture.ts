@@ -1,16 +1,22 @@
 import { access, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
 import { bodyLines } from '@/markdown/scan'
+import { surfaceDir } from '@/surface-root'
 
 /**
- * The record this measures, relative to the project root.
+ * The record this measures, relative to `root`.
  *
- * One fixed path rather than a folder walk, because the standard governing it
- * names one document, and the length rule this measures is stated by whichever
- * record sits there rather than by the standard or by this file.
+ * A function rather than a fixed constant, because the path now resolves at
+ * either surface root and a constant naming one of them would be believed to
+ * be true of a project that has moved. One fixed name rather than a folder
+ * walk otherwise, because the standard governing it names one document, and
+ * the length rule this measures is stated by whichever record sits there
+ * rather than by the standard or by this file.
  */
-export const RECORD_REL = '.claude/ARCHITECTURE.md'
+export function architectureRel(root: string): string {
+  return relative(root, surfaceDir(root, 'ARCHITECTURE.md'))
+}
 
 /**
  * The line allowances a record states for itself, absent when it states none.
@@ -299,7 +305,8 @@ export function ceilingFor(allowances: Allowances, decisions: number): number {
 export async function measureArchitecture(
   root: string,
 ): Promise<ArchitectureReport | undefined> {
-  const path = join(root, RECORD_REL)
+  const rel = architectureRel(root)
+  const path = join(root, rel)
 
   let source: string
   try {
@@ -330,7 +337,7 @@ export async function measureArchitecture(
   )
 
   return {
-    rel: RECORD_REL,
+    rel,
     lines: source.replace(/\n$/, '').split('\n').length,
     ...(allowances !== undefined && {
       allowances,

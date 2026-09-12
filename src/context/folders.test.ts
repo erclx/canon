@@ -154,6 +154,32 @@ describe('resolveFolders', () => {
       'gone',
     ])
   })
+
+  it('should resolve context under canon/ ahead of .claude/', async () => {
+    seed('canon/context', ['ci.md'])
+    seed('.claude/context', ['ci.md'])
+
+    const { folders } = await resolveFolders(ROOT, ['context'])
+
+    expect(folders.map((folder) => folder.rel)).toEqual(['canon/context'])
+  })
+
+  it('should resolve diagrams under .canon/ ahead of .claude/', async () => {
+    seed('.canon/diagrams', ['components.md'])
+    seed('.claude/diagrams', ['components.md'])
+
+    const { folders } = await resolveFolders(ROOT, ['diagrams'])
+
+    expect(folders.map((folder) => folder.rel)).toEqual(['.canon/diagrams'])
+  })
+
+  it('should fall back to .claude/ for context when canon/ carries nothing', async () => {
+    seed('.claude/context', ['ci.md'])
+
+    const { folders } = await resolveFolders(ROOT, ['context'])
+
+    expect(folders.map((folder) => folder.rel)).toEqual(['.claude/context'])
+  })
 })
 
 describe('presentNames', () => {

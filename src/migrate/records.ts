@@ -76,10 +76,14 @@ function escape(value: string): string {
  * paths a session actually opened. Rewriting either makes it testify to
  * something that never happened.
  *
- * This module and `src/record-root.ts` are the two sources that state the old
+ * This module and `src/record-root.ts` are two of the sources that state the old
  * root on purpose. Sweeping them turns every citation this expression is built
  * from into its own replacement, leaving a rewriter that maps `.canon/` to
- * `.canon/` and matches nothing.
+ * `.canon/` and matches nothing. `src/surface-root.ts` joins the list a release
+ * early, for the same reason: it spells `.claude` as data the moment it
+ * exists, and excluding it later would leave one release where a records
+ * migration in a target could rewrite the resolver that migration itself
+ * depends on.
  *
  * A test file is excluded because the fixtures that prove the old root still
  * resolves have to keep building it. Rewriting one is worse than a failing
@@ -106,7 +110,11 @@ const EXCLUDED_PREFIXES: readonly string[] = [
   'tooling/claude/seeds/.claude/hooks/',
 ]
 
-const EXCLUDED_PATHS: readonly string[] = ['CHANGELOG.md', 'src/record-root.ts']
+const EXCLUDED_PATHS: readonly string[] = [
+  'CHANGELOG.md',
+  'src/record-root.ts',
+  'src/surface-root.ts',
+]
 
 const EXCLUDED_SUFFIXES: readonly string[] = ['.test.ts']
 

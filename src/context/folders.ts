@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
 import { INDEX_FILE, listIndexes } from '@/indexes/walk'
 import { RECORD_ROOTS } from '@/record-root'
+import { SURFACE_ROOTS } from '@/surface-root'
 
 /**
  * Folder names under a record root audited by default.
@@ -23,16 +24,34 @@ export const DEFAULT_FOLDERS: readonly string[] = [
 ]
 
 /**
- * The bases every folder in the default list is looked for under, in the record
- * roots' own precedence order.
+ * The bases every folder in the default list is looked for under.
  *
- * `diagrams` is the one name here that is a session record and moves with them,
- * so the list has to carry the root it moves to. `context` and `wireframes` are
- * tracked and stay, which leaves them resolvable at a root nothing will ever put
- * them under. That costs one `existsSync` apiece and is cheaper than a per-name
- * base map that would state the same split twice.
+ * `diagrams` is a session record and resolves under `RECORD_ROOTS`, while
+ * `context` and `wireframes` are tracked and resolve under `SURFACE_ROOTS`, so
+ * the split this comment used to describe as hypothetical is real: two
+ * folders on this list read from two different root lists. The base array is
+ * their union rather than a per-name map, since a name resolving at the wrong
+ * root costs one extra `existsSync` and nothing else, where a map states the
+ * split a second time next to the one each resolver module already carries.
+ *
+ * `.claude` is pushed last because both lists name it, and each list's own
+ * precedence otherwise survives: `canon` still precedes `.claude` for a
+ * `SURFACE_ROOTS` name, and `.canon` still precedes `.claude` for a
+ * `RECORD_ROOTS` one. Order between `canon` and `.canon` is unobserved, since
+ * no name on this list resolves under both.
+ *
+ * Adding `canon` here means a target holding a root-level `canon/` folder of
+ * its own now resolves it as the toolkit's, since a project writing about a
+ * product called canon is a plausible name collision `canResolveAtRoot`'s own
+ * project-root gate does not cover. The audit only reports, so the cost is a
+ * wrong scope line rather than a wrong edit.
  */
-const CLAUDE_BASES: readonly string[] = RECORD_ROOTS
+const CLAUDE_BASES: readonly string[] = [
+  ...new Set(
+    [...SURFACE_ROOTS, ...RECORD_ROOTS].filter((root) => root !== '.claude'),
+  ),
+  '.claude',
+]
 
 /** The project root, reached only by a name the caller asked for. */
 const ROOT_BASE = '.'

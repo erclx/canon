@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { listRepositoryFiles } from '@/git-files'
 import { RECORD_ROOTS } from '@/record-root'
+import { SURFACE_ROOTS } from '@/surface-root'
 
 /**
  * Suppresses citation checking for the source line carrying it.
@@ -78,17 +79,26 @@ export function isFixture(rel: string): boolean {
 }
 
 /**
- * Both record roots are spelled, so a citation into a folder that has moved is
- * still resolved. A pattern fixed at one root matches nothing after the move and
- * reports nothing, which is a stale reference passing the check that exists to
- * find it rather than a check that fails.
+ * Every record and surface root is spelled, so a citation into a folder that
+ * has moved is still resolved. A pattern fixed at one root matches nothing
+ * after the move and reports nothing, which is a stale reference passing the
+ * check that exists to find it rather than a check that fails.
+ *
+ * The leading boundary rejects a name character, a dot, or a slash sitting
+ * immediately before the root, since a bare `canon` is a suffix of `.canon`
+ * and of any `/canon/` path segment. Without it, `.canon/diagrams/x.md` reads
+ * as a `canon/` citation starting one character in, and a path under a
+ * vendored `node_modules/canon/context/` reads as a citation of this
+ * repository's own tree.
  */
 export function citationPattern(folders: readonly string[]): RegExp {
   const names = folders.map((name) => escape(name))
-  const roots = RECORD_ROOTS.map((name) => escape(name))
+  const roots = [...new Set([...RECORD_ROOTS, ...SURFACE_ROOTS])].map((name) =>
+    escape(name),
+  )
 
   return new RegExp(
-    `(?:${roots.join('|')})/(?:${names.join('|')})/[A-Za-z0-9._/-]+\\.md`,
+    `(?<![\\w./])(?:${roots.join('|')})/(?:${names.join('|')})/[A-Za-z0-9._/-]+\\.md`,
     'g',
   )
 }

@@ -269,6 +269,49 @@ describe('readStamp', () => {
 
     expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('new')
   })
+
+  it('should resolve at canon/config/config.json when the project has moved', () => {
+    writeFixture(
+      join(TARGET, 'canon', 'config', 'config.json'),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { syncedAt: 'moved', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('moved')
+  })
+
+  it('should still resolve the .claude/ spelling when the project has not moved', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { syncedAt: 'unmoved', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('unmoved')
+  })
+
+  it('should prefer canon/config/config.json over every .claude/ spelling', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { syncedAt: 'old-root', files: {} } },
+      }),
+    )
+    writeFixture(
+      join(TARGET, 'canon', 'config', 'config.json'),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { syncedAt: 'new-root', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('new-root')
+  })
 })
 
 describe('isLegacyStamped', () => {
@@ -293,6 +336,28 @@ describe('isLegacyStamped', () => {
 
   it('should return false when both paths exist', async () => {
     await writeStamp(TARGET, GOVERNANCE, {}, NOW)
+    writeFixture(
+      legacyStampPath(TARGET),
+      JSON.stringify({ covers: [], domains: {} }),
+    )
+
+    expect(isLegacyStamped(TARGET)).toBe(false)
+  })
+
+  it('should return false when only the surface-root path exists', () => {
+    writeFixture(
+      join(TARGET, 'canon', 'config', 'config.json'),
+      JSON.stringify({ covers: [], domains: {} }),
+    )
+
+    expect(isLegacyStamped(TARGET)).toBe(false)
+  })
+
+  it('should return false when the surface-root path exists alongside a retired one', () => {
+    writeFixture(
+      join(TARGET, 'canon', 'config', 'config.json'),
+      JSON.stringify({ covers: [], domains: {} }),
+    )
     writeFixture(
       legacyStampPath(TARGET),
       JSON.stringify({ covers: [], domains: {} }),

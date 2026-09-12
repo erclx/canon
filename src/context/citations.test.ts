@@ -44,6 +44,24 @@ describe('citationPattern', () => {
   it('should not match a folder outside the audited set at the new root', () => {
     expect(paths('Read `.canon/standards/prose.md` first.')).toEqual([])
   })
+
+  it('should read a path at the record root rather than as a canon/ citation', () => {
+    expect(paths('See `.canon/diagrams/a.md` for the flow.')).toEqual([
+      '.canon/diagrams/a.md',
+    ])
+  })
+
+  it('should match a path at the new surface root', () => {
+    expect(paths('See `canon/context/cli.md` for the layout.')).toEqual([
+      'canon/context/cli.md',
+    ])
+  })
+
+  it('should not match a path under a vendored canon/ dependency', () => {
+    expect(
+      paths('See `node_modules/canon/context/cli.md` for the vendored copy.'),
+    ).toEqual([])
+  })
 })
 
 describe('collectCitations', () => {

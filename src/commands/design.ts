@@ -11,6 +11,7 @@ import { renderDesignDoc } from '@/design/render'
 import { DESIGN_BASE_CSS, DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel } from '@/record-root'
+import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { resolveTarget } from '@/target'
 import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
@@ -88,7 +89,11 @@ export function register(program: Command): void {
   design
     .command('render')
     .description('Render DESIGN.md tokens to HTML and CSS preview')
-    .option('-s, --source <path>', 'Source DESIGN.md path', '.claude/DESIGN.md')
+    .option(
+      '-s, --source <path>',
+      'Source DESIGN.md path',
+      relative(process.cwd(), surfaceDir(process.cwd(), 'DESIGN.md')),
+    )
     .option(
       '-o, --out <path>',
       'Output directory',

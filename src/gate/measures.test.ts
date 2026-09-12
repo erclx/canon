@@ -9,7 +9,7 @@ import { gitEnv } from '@/git-env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
 import {
   auditSet,
-  AUDITS_BASELINE,
+  auditsBaselineRel,
   captureStamps,
   clientCommandCitations,
   readmeCitations,
@@ -23,9 +23,14 @@ import {
 import { REFERENCE_MARKER } from '@/shipped/references'
 import { README_PARAPHRASE_MARKER } from '@/web/readme-citations'
 
-describe('AUDITS_BASELINE', () => {
-  it('should agree with the path audits/baseline.ts writes', () => {
-    expect(AUDITS_BASELINE).toBe(BASELINE_REL)
+describe('auditsBaselineRel', () => {
+  it('should agree with the path audits/baseline.ts writes when the project has not moved', () => {
+    const root = mkdtempSync(join(tmpdir(), 'canon-measures-'))
+    try {
+      expect(auditsBaselineRel(root)).toBe(BASELINE_REL)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
 

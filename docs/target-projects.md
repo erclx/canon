@@ -204,7 +204,7 @@ The report opens by naming the binary running it. The installed version reads ag
 
 A `stale` file still matches what the toolkit installed, so the update is mechanical. A `customized` file carries local edits, so taking the upstream version is a decision and `canon:seed-sync` is the tool for it. A `stranded` file sits where an older toolkit installed it and the toolkit has since moved, which is a relocation the report names but no command runs.
 
-That attribution comes from `.claude/canon/config.json`, a stamp every install and sync writes. A target stamped before that path shipped is read from the retired `.claude/canon.json` instead, reported rather than migrated. Governance records a hash per installed file, plus the stack `canon gov install` was given, and tooling records the stack chain it resolved instead of any file hash, since its install runs no per-file walk to attribute.
+That attribution comes from `canon/config/config.json` when a project carries it, falling back to `.claude/canon/config.json`, a stamp every install and sync still writes in this release. A target stamped before that path shipped is read from the retired `.claude/canon.json` instead, reported rather than migrated. Governance records a hash per installed file, plus the stack `canon gov install` was given, and tooling records the stack chain it resolved instead of any file hash, since its install runs no per-file walk to attribute.
 
 Each domain holds its own toolkit commit, so syncing governance today does not move the revision tooling measures against, and each domain reports the upstream commits touching its own source path. Running any sync stamps that domain, and the report names the ones still unstamped.
 

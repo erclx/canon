@@ -88,12 +88,20 @@ describe('isToolkitOwned', () => {
 describe('authoringRootsFor', () => {
   it('should keep every root when reading the shipped corpus', () => {
     expect(authoringRootsFor('claude/skills')).toContain('.claude/context/')
+    expect(authoringRootsFor('claude/skills')).toContain('canon/context/')
   })
 
-  it("should drop the reader's own dotted roots for a project corpus", () => {
+  it("should drop the reader's own dotted root for a project corpus", () => {
     const roots = authoringRootsFor('.claude/skills')
 
     expect(roots).not.toContain('.claude/context/')
+    expect(roots).toContain('standards/')
+  })
+
+  it("should drop the reader's own surface root for a moved project corpus", () => {
+    const roots = authoringRootsFor('canon/skills')
+
+    expect(roots).not.toContain('canon/context/')
     expect(roots).toContain('standards/')
   })
 })
