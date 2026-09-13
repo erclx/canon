@@ -42,7 +42,7 @@ A phase label is one way text names the board, and a path under a record root is
 
 Two shapes get past a reader scanning for a bare label. A code span quoting a label is still the label, so read a span whose whole content is one as a hit and leave a longer token inside a span alone, which is a fixture name rather than a reference. The second shape is a path under a record root, gitignored and therefore absent from every clone, so `.canon/review/feedback/` names a folder the remote's reader cannot open.
 
-Under `.claude/`'s own tracked folders there is no hit, since `canon/context/governance/rules.md` resolves everywhere. `.canon/` carries no such carve-out: one ignore line covers the root whole, so every path beneath it is a hit regardless of which folder names it.
+Under the tracked `canon/` and `.claude/` folders there is no hit, since `canon/context/governance/rules.md` resolves everywhere. `.canon/` carries no such carve-out: one ignore line covers the root whole, so every path beneath it is a hit regardless of which folder names it.
 
 Rewrite a hit to name what the reader can reach rather than deleting it. A row's subject stated plainly replaces its label, and what a record folder holds, said in a sentence, replaces its path.
 
