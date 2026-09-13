@@ -276,25 +276,19 @@ function isDocsPathReportable(
 }
 
 /**
- * Whether `file` sits in the one corpus `STANDARDS_PATH` gates.
+ * Whether `file` sits in the one corpus `STANDARDS_PATH` and `RULE_PATH`
+ * both gate: a shipped skill body, minus its own `REQUIREMENT.md`.
  *
- * `REQUIREMENT.md` is excluded for the reason `598-authoring-layout.md`
- * leaves it alone: a maintainer or an audit command reads that file rather
- * than a session loading it, so the resolver rule this pattern enforces
- * never applies there.
+ * Both patterns share this scope because both bans live in
+ * `598-authoring-layout.md`, stated for the same reader: a session loading
+ * the `SKILL.md` body a target actually receives. `REQUIREMENT.md` is
+ * excluded for the reason that file states there, since a maintainer or an
+ * audit command reads it rather than a session loading it, so neither
+ * resolver rule this pair enforces ever applies to it. One predicate serves
+ * both call sites rather than two copies drifting apart with nothing
+ * comparing them.
  */
-function isStandardsPathScope(file: string): boolean {
-  return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
-}
-
-/**
- * Whether `file` sits in the one corpus `RULE_PATH` gates, matching
- * `isStandardsPathScope` exactly: `598-authoring-layout.md` states the ban
- * for a shipped skill body, and `REQUIREMENT.md` is excluded for the same
- * reason that file is excluded there, since a maintainer or an audit command
- * reads it rather than a session loading it.
- */
-function isRulePathScope(file: string): boolean {
+function isSkillBodyScope(file: string): boolean {
   return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
 }
 
@@ -385,7 +379,7 @@ export function referencesIn(
       })
     }
 
-    if (isStandardsPathScope(file)) {
+    if (isSkillBodyScope(file)) {
       for (const match of line.matchAll(STANDARDS_PATH)) {
         if (!isStandardsPathReportable(match[0])) continue
         references.push({
@@ -406,7 +400,7 @@ export function referencesIn(
       })
     }
 
-    if (isRulePathScope(file)) {
+    if (isSkillBodyScope(file)) {
       for (const match of line.matchAll(RULE_PATH)) {
         if (isPlaceholderPath(match[0])) continue
         references.push({
