@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.79.0](https://github.com/erclx/canon/compare/v4.78.0...v4.79.0) (2026-09-13)
+
+
+### Features
+
+* **surfaces:** move tracked surfaces to canon/ ([#1654](https://github.com/erclx/canon/issues/1654)) ([65c0c64](https://github.com/erclx/canon/commit/65c0c6422d1431a813cccc8c93ac0e36422ca102))
+
 ## [4.78.0](https://github.com/erclx/canon/compare/v4.77.0...v4.78.0) (2026-09-13)
 
 
