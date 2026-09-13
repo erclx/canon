@@ -157,6 +157,7 @@ Without this skill, a session <observed failure>, <observed failure>.
 - `name` (required): kebab-case, matches folder name, no spaces or capitals
 - `description` (required): what it does + when to use it, under 1024 chars, no XML tags
 - `disable-model-invocation: true`: user-invoked only, Claude will not auto-trigger
+- Set `disable-model-invocation` on a skill that starts a process the operator owns, never on one reachable by a matched trigger. The field marks the boundary between the two, not a style preference.
 - `allowed-tools`: restrict tool access when the skill is active
 - `metadata`: optional key-value pairs (`author`, `version`, `mcp-server`)
 
