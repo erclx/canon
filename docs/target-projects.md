@@ -196,6 +196,21 @@ Run the second line once per stack the project holds, since the two hooks above 
 
 The order carries the reason. A sync replaces each toolkit-owned copy with one already carrying the new names, and the sweep afterwards reaches the prose the project wrote itself. Sweeping first rewrites those installed files in place, which moves them off the hash the install recorded, so the next sync reads them as edited by the project and leaves them alone.
 
+### Move the surfaces off `.claude/`, once
+
+Tracked surfaces moved out of `.claude/` and into a root of their own. `context/`, `wireframes/`, the three loose documents (`ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`), and the install stamp folder, respelled `canon/config/`, now live under `canon/`, and `rules/`, `skills/`, `hooks/`, and `settings.json` stay put since Claude Code reads those by path.
+
+Run `canon upgrade` first if you have not, then run this from inside the project:
+
+```bash
+canon migrate surface-roots --json
+canon migrate surface-roots --write --json
+```
+
+The first line reports the plan and the second applies it, moving each surface with `git mv` so its history follows and repointing every tracked citation of one in the same run. See `canon docs commands` for the full file list rather than reading it here.
+
+Neither `canon sync --check` nor any other command notices a surface still sitting at `.claude/`, so running this is on you rather than on a prompt from the toolkit.
+
 ### Check first
 
 `canon sync --check <path>` reports what has drifted without writing anything. It splits each difference by cause, which is the question that decides what to do next.
