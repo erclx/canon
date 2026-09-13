@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.75.1](https://github.com/erclx/canon/compare/v4.75.0...v4.75.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* **ci:** give each Playwright cache job its own browser-set key ([#1641](https://github.com/erclx/canon/issues/1641)) ([9c099fe](https://github.com/erclx/canon/commit/9c099fe3876c7dd32034aa46a45a24b2405f0175))
+
 ## [4.75.0](https://github.com/erclx/canon/compare/v4.74.0...v4.75.0) (2026-09-13)
 
 
