@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.75.0](https://github.com/erclx/canon/compare/v4.74.0...v4.75.0) (2026-09-13)
+
+
+### Features
+
+* **design:** promote the hand-drawn figure component ([#1639](https://github.com/erclx/canon/issues/1639)) ([6b890c5](https://github.com/erclx/canon/commit/6b890c5a912ac8b46ed500d61ad24f32522d1dcb))
+* **pr:** compare changed evidence images on pull requests ([#1637](https://github.com/erclx/canon/issues/1637)) ([067e550](https://github.com/erclx/canon/commit/067e55070f0f24d135af31bececb4b95cdb19d90))
+* **skills:** state five criteria the tree already follows ([#1636](https://github.com/erclx/canon/issues/1636)) ([5da6c75](https://github.com/erclx/canon/commit/5da6c75ed0d58ab0b3afe367a23b69d92ab8b84e))
+* **standards:** extract figure authoring standard ([#1638](https://github.com/erclx/canon/issues/1638)) ([03a10b2](https://github.com/erclx/canon/commit/03a10b2455954813a39fb9b55677c079852c49b2))
+
 ## [4.74.0](https://github.com/erclx/canon/compare/v4.73.0...v4.74.0) (2026-09-12)
 
 
