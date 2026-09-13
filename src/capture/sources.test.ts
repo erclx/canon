@@ -18,6 +18,7 @@ describe('resolveCaptureSources', () => {
 
     expect(sources).toEqual([
       {
+        kind: 'file',
         htmlPath: join(dir, 'install.html'),
         pngPath: join(dir, 'install.png'),
       },
@@ -29,10 +30,11 @@ describe('resolveCaptureSources', () => {
 
     const sources = resolveCaptureSources(dir)
 
-    expect(sources.map((source) => source.htmlPath)).toEqual([
-      join(dir, 'install.html'),
-      join(dir, 'sync.html'),
-    ])
+    expect(
+      sources.map((source) =>
+        source.kind === 'file' ? source.htmlPath : source.url,
+      ),
+    ).toEqual([join(dir, 'install.html'), join(dir, 'sync.html')])
   })
 
   it('should return no source for a directory holding no html', () => {
@@ -48,7 +50,32 @@ describe('resolveCaptureSources', () => {
 
     const sources = resolveCaptureSources(dir, '/out')
 
-    expect(sources[0].pngPath).toBe(join('/out', 'install.png'))
+    expect(sources[0]?.pngPath).toBe(join('/out', 'install.png'))
+  })
+
+  it('should pair a URL source with its explicit destination file', () => {
+    const sources = resolveCaptureSources(
+      'https://example.com',
+      '/out/shot.png',
+    )
+
+    expect(sources).toEqual([
+      {
+        kind: 'url',
+        url: 'https://example.com',
+        pngPath: '/out/shot.png',
+      },
+    ])
+  })
+
+  it('should accept a plain http URL, not only https', () => {
+    const sources = resolveCaptureSources('http://example.com', '/out/shot.png')
+
+    expect(sources[0]?.kind).toBe('url')
+  })
+
+  it('should refuse a URL source with no destination given', () => {
+    expect(() => resolveCaptureSources('https://example.com')).toThrow(/--out/)
   })
 })
 

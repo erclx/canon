@@ -37,12 +37,12 @@ export interface CaptureOptions {
 export type CaptureResult =
   | {
       status: 'rendered'
-      htmlPath: string
+      source: string
       pngPath: string
       width: number
       height: number
     }
-  | { status: 'failed'; htmlPath: string; reason: string }
+  | { status: 'failed'; source: string; reason: string }
 
 export async function captureSources(
   sourcePath: string,
@@ -74,7 +74,9 @@ async function captureOne(
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
   })
   try {
-    await page.goto(pathToFileURL(source.htmlPath).href)
+    await page.goto(
+      source.kind === 'url' ? source.url : pathToFileURL(source.htmlPath).href,
+    )
     const element = page.locator(selector).first()
     if ((await element.count()) === 0) {
       return failed(source, `no element matched ${selector}`)
@@ -97,7 +99,7 @@ async function captureOne(
     writeStamp(source, png)
     return {
       status: 'rendered',
-      htmlPath: source.htmlPath,
+      source: sourceIdentifier(source),
       pngPath: source.pngPath,
       width: png.readUInt32BE(16),
       height: png.readUInt32BE(20),
@@ -118,8 +120,11 @@ async function captureOne(
  * caller's catch and reports the source as failed, which is correct: a PNG
  * whose stamp never landed is the state the verify stage exists to reject.
  *
- * The source is stored as a bare filename. An absolute path would record the
- * machine that ran the capture into a tracked file and differ per checkout.
+ * A file source is stored as a bare filename. An absolute path would record
+ * the machine that ran the capture into a tracked file and differ per
+ * checkout. A URL source is stored as the URL itself, and its digest hashes
+ * the URL string's UTF-8 bytes rather than any local file, since there is
+ * none to hash.
  *
  * The image digest is taken over the buffer the screenshot returned rather than
  * by reading the file back, so the stamp describes the bytes this run wrote.
@@ -128,15 +133,27 @@ function writeStamp(source: CaptureSource, png: Uint8Array): void {
   writeFileSync(
     stampPath(source.pngPath),
     formatStamp({
-      source: basename(source.htmlPath),
-      sourceSha256: hashSource(readFileSync(source.htmlPath)),
+      source: source.kind === 'url' ? source.url : basename(source.htmlPath),
+      sourceSha256:
+        source.kind === 'url'
+          ? hashSource(Buffer.from(source.url, 'utf8'))
+          : hashSource(readFileSync(source.htmlPath)),
       imageSha256: hashSource(png),
     }),
   )
 }
 
+/**
+ * The identifier a `CaptureResult` reports, kept as the full path for a file
+ * source so `displayPath` in `src/commands/capture.ts` can still show it
+ * relative to the working directory.
+ */
+function sourceIdentifier(source: CaptureSource): string {
+  return source.kind === 'url' ? source.url : source.htmlPath
+}
+
 function failed(source: CaptureSource, reason: string): CaptureResult {
-  return { status: 'failed', htmlPath: source.htmlPath, reason }
+  return { status: 'failed', source: sourceIdentifier(source), reason }
 }
 
 /**

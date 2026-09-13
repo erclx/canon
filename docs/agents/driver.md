@@ -49,7 +49,7 @@ Every step names what it did, and that name is carried onto each finding it prod
 
 Probes run after a step and never on arrival, so a run reaches the load state by opening with a `wait` step of its own, as the example above does. Nothing probes before the first step runs, which makes that leading step the only way to measure the page as it first painted, and naming it is what puts the load state on its own findings rather than under whatever ran next.
 
-Write one wherever no capture runs against the page. `canon capture` renders a single state from a source on disk, so where it runs it already answers about arrival and a leading `wait` duplicates it. Where it does not, this command is the only thing measuring the page at all, and a run without that step reports every driven state and nothing about the one a visitor sees first.
+Write one wherever no capture runs against the page. `canon capture` renders a single state from a source on disk or a URL, so where it runs it already answers about arrival and a leading `wait` duplicates it. Where it does not, this command is the only thing measuring the page at all, and a run without that step reports every driven state and nothing about the one a visitor sees first.
 
 Each height is driven in a context of its own from a fresh navigation, rather than by resizing the page the previous height already drove, since a sweep asks the same question of each height rather than a later question of an already-driven page.
 

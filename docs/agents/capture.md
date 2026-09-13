@@ -11,6 +11,7 @@ description: Rendering HTML sources to PNG, what the command asserts about fonts
 canon capture --selector .window
 canon capture assets/captures/install.html --selector .window --out assets
 canon capture assets/captures --selector .window --out .canon/review/captures
+canon capture https://example.com --selector .window --out preview.png
 ```
 
 `--selector` is required and every example above passes it. The element a capture crops to belongs to the page, not to the command, so there is no value that could be right for an arbitrary project's markup. `.window` is what this repository's own five sources declare, and a project renders its own pages by naming whatever theirs declare.
@@ -29,10 +30,10 @@ Every render writes a stamp beside its PNG, `hero.png` next to `hero.stamp`, hol
 
 Neither digest is ever written by hand. A digest is what the gate compares, so a hand-set one asserts agreement the tool never checked, and the way to move it is a capture. The `source:` line above them is the one field a rename may correct in place, since nothing reads it and the alternative is a stamp naming a file that no longer exists. Renaming a frame is the case that comes up, and the correction is the same basename the next capture would have written anyway.
 
-| Option             | Behavior                                          |
-| ------------------ | ------------------------------------------------- |
-| `--out <dir>`      | Write every PNG here instead of beside its source |
-| `--selector <sel>` | Element to capture, required and never defaulted  |
+| Option             | Behavior                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| `--out <dir>`      | Write every PNG here instead of beside its source. For a URL source, names the destination PNG itself. |
+| `--selector <sel>` | Element to capture, required and never defaulted                                                       |
 
 ## What the command asserts
 
@@ -48,4 +49,4 @@ The command ships to targets, alongside `demo`, `inventory`, and `drive`. It was
 
 Shipping it also fixed what the exclusion was hiding. The render module imported the `@playwright/test` development dependency, which no published tarball carries. Every browser reference still sits behind a dynamic import, so a browser loads for this command rather than in front of every other one.
 
-`demo.md` and `driver.md` cover two of the other three browser commands. What separates this one is that a capture renders a single state from a file on disk, where the rest drive a running application.
+`demo.md` and `driver.md` cover two of the other three browser commands. What separates this one is that a capture renders a single state, from a file on disk or a named `http(s)://` URL, where the rest drive a running application.
