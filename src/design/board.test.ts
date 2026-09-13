@@ -22,8 +22,8 @@ function seed(relativePath: string, body: string): void {
 }
 
 /** The ordinary call: the caller stands in the same tree the board describes. */
-function generate(dir: string) {
-  return generateBoard(root, dir, root)
+function generate(dir: string, isToolkitCheckout = true) {
+  return generateBoard(root, dir, root, isToolkitCheckout)
 }
 
 const MINIMAL_DESIGN_DOC = [
@@ -92,7 +92,7 @@ describe('generateBoard', () => {
   it('refuses an --out that would delete the caller cwd, even in a second checkout', () => {
     const otherCheckout = mkdtempSync(join(tmpdir(), 'canon-board-cwd-'))
     try {
-      const result = generateBoard(root, otherCheckout, otherCheckout)
+      const result = generateBoard(root, otherCheckout, otherCheckout, true)
 
       expect(result).toEqual({
         ok: false,
@@ -129,6 +129,15 @@ describe('generateBoard', () => {
     expect(html).toContain('No canon/DESIGN.md')
   })
 
+  it('renders the tokens panel from .claude/DESIGN.md on a target that has not migrated', () => {
+    seed(join('.claude', 'DESIGN.md'), MINIMAL_DESIGN_DOC)
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'tokens', 'index.html'), 'utf8')
+    expect(html).toContain('background')
+  })
+
   it('renders a wireframe file as-is inside a pre block', () => {
     seed(join(WIREFRAME_DIR, 'landing-page.md'), '# Landing\n\nOne column.')
 
@@ -139,12 +148,61 @@ describe('generateBoard', () => {
     expect(html).toContain('One column.')
   })
 
-  it('names a missing wireframe file rather than omitting it', () => {
+  it('reports the wireframes panel empty when the directory is absent', () => {
     generate(outDir)
 
     const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
-    expect(html).toContain('slides.md')
-    expect(html).toContain('Missing from')
+    expect(html).toContain('No wireframe files under')
+  })
+
+  it('reports the wireframes panel empty when the directory holds only index.md', () => {
+    seed(join(WIREFRAME_DIR, 'index.md'), '# Wireframes')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
+    expect(html).toContain('No wireframe files under')
+  })
+
+  it('excludes index.md at every depth while rendering a nested file', () => {
+    seed(join(WIREFRAME_DIR, 'index.md'), '# Wireframes')
+    seed(join(WIREFRAME_DIR, 'teach', 'index.md'), '# Teach')
+    seed(join(WIREFRAME_DIR, 'teach', 'root.md'), '# Teach root')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
+    expect(html).toContain('<h2>teach/root.md</h2>')
+    expect(html).not.toContain('index.md')
+  })
+
+  it('reads .claude/wireframes/ on a target that has not migrated to canon/', () => {
+    seed(join('.claude', 'wireframes', 'answer.md'), '# Answer\n\nOne route.')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
+    expect(html).toContain('<h2>answer.md</h2>')
+    expect(html).toContain('One route.')
+  })
+
+  it('labels a wireframe from its own frontmatter description', () => {
+    seed(
+      join(WIREFRAME_DIR, 'slides.md'),
+      [
+        '---',
+        'title: Slides',
+        'description: The slide layout catalog',
+        '---',
+        '',
+        '# Slides',
+      ].join('\n'),
+    )
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
+    expect(html).toContain('The slide layout catalog')
   })
 
   it('iframes the built landing page when web/dist exists', () => {
@@ -177,6 +235,25 @@ describe('generateBoard', () => {
     seed(join('.canon', 'teach', 'index.html'), '<h1>Workspaces</h1>')
 
     generate(outDir)
+
+    const html = readFileSync(join(outDir, 'surfaces', 'index.html'), 'utf8')
+    expect(html).toContain('teach/index.html')
+  })
+
+  it('reports the landing page half as toolkit-only when isToolkitCheckout is false', () => {
+    seed(join('web', 'dist', 'index.html'), '<h1>Landing</h1>')
+
+    generate(outDir, false)
+
+    const html = readFileSync(join(outDir, 'surfaces', 'index.html'), 'utf8')
+    expect(html).toContain("this toolkit's own checkout")
+    expect(html).not.toContain('landing/index.html')
+  })
+
+  it('keeps the teach half of the surfaces panel when isToolkitCheckout is false', () => {
+    seed(join('.canon', 'teach', 'index.html'), '<h1>Workspaces</h1>')
+
+    generate(outDir, false)
 
     const html = readFileSync(join(outDir, 'surfaces', 'index.html'), 'utf8')
     expect(html).toContain('teach/index.html')
@@ -220,5 +297,15 @@ describe('generateBoard', () => {
     expect(
       existsSync(join(outDir, 'components', 'gallery', 'index.html')),
     ).toBe(true)
+  })
+
+  it('reports the components panel as toolkit-only when isToolkitCheckout is false', () => {
+    seed(join('web', 'gallery-dist', 'index.html'), '<h2>agent-view</h2>')
+
+    generate(outDir, false)
+
+    const html = readFileSync(join(outDir, 'components', 'index.html'), 'utf8')
+    expect(html).toContain("this toolkit's own checkout")
+    expect(html).not.toContain('gallery/index.html')
   })
 })

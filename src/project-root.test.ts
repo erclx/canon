@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   checkoutMismatchWarning,
   findCheckoutMismatch,
+  isOwnCheckout,
   PROJECT_ROOT,
 } from '@/project-root'
 
@@ -61,5 +62,27 @@ describe('checkoutMismatchWarning', () => {
     writePackage(startDir, 'some-other-package')
 
     expect(checkoutMismatchWarning(startDir)).toBeUndefined()
+  })
+})
+
+describe('isOwnCheckout', () => {
+  it('should read true for PROJECT_ROOT itself', () => {
+    expect(isOwnCheckout(PROJECT_ROOT)).toBe(true)
+  })
+
+  it('should read true for a different directory carrying the same package name', () => {
+    writePackage(fixture, '@erclx/canon')
+
+    expect(isOwnCheckout(fixture)).toBe(true)
+  })
+
+  it('should read false for a directory carrying a different package name', () => {
+    writePackage(fixture, 'some-other-package')
+
+    expect(isOwnCheckout(fixture)).toBe(false)
+  })
+
+  it('should read false for a directory carrying no package.json', () => {
+    expect(isOwnCheckout(fixture)).toBe(false)
   })
 })
