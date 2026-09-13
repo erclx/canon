@@ -156,9 +156,12 @@ EOF
 
 # The promote arm alone. A project with no wiki folder gets a refusal from the
 # skill rather than a scaffold, so the arm that drives a proposal has to seed
-# one, and it seeds the `.claude/` spelling a scaffolded target carries.
+# one, and it seeds the `.claude/` spelling a scaffolded target carries. The
+# wiki holds only Anthropic-owned subjects, so seeding it here is what gives
+# the routing test something to correctly pass over: the regex page belongs to
+# nobody, which routes it to docs instead.
 seed_wiki() {
-  mkdir -p .claude/wiki/tools .claude/wiki/concepts
+  mkdir -p .claude/wiki
 
   cat <<'EOF' >.claude/wiki/index.md
 ---
@@ -169,9 +172,6 @@ subtitle: Reference pages for tools, workflows, and concepts
 # Wiki
 
 Reference pages for tools, workflows, and concepts.
-
-- [Tools](tools/): pages whose subject a vendor other than this project owns
-- [Concepts](concepts/): pages whose subject no single vendor owns
 EOF
 }
 
@@ -257,9 +257,10 @@ stage_setup() {
 
     log_step "Scenario ready: teach proposes where a durable page belongs"
     log_info "Context: .canon/teach/01-regex/ holds one reference page, one lesson,"
-    log_info "  and a glossary. The project carries .claude/wiki/ with a tools and a"
-    log_info "  concepts folder, so the routing test has somewhere to land a page"
-    log_info "  whose subject belongs to someone outside the project"
+    log_info "  and a glossary. The project carries .claude/wiki/ with a stub index,"
+    log_info "  but the wiki holds only Anthropic-owned subjects, so the routing test"
+    log_info "  has to notice a regex reference page belongs to nobody and route it"
+    log_info "  to the project's docs instead of the wiki sitting right there"
     log_info "  The invocation confirms the proposal in advance, because the step"
     log_info "  proposes and waits and a headless run has nobody to confirm"
     log_info ""
@@ -269,9 +270,9 @@ stage_setup() {
     log_info "         Check it with: canon sandbox check claude:teach-workspace promote"
     log_info "         A handoff at .canon/tmp/teach-promotion/promote-regex.md"
     log_info "         carrying one heading"
-    log_info "         naming a path under .claude/wiki/ and the source page under it."
-    log_info "         Nothing written into .claude/wiki/ itself, and the lesson"
-    log_info "         neither proposed nor carried across."
+    log_info "         naming a path under docs/ and the source page under it."
+    log_info "         Nothing written into .claude/wiki/ or docs/ themselves, and the"
+    log_info "         lesson neither proposed nor carried across."
     ;;
   "lesson")
     seed_project

@@ -128,7 +128,7 @@ Pick Claude Design when:
 Skip Claude Design when:
 
 - A dedicated designer owns the source of truth in Figma, Figma's MCP and Code to Canvas round-trip better
-- The workflow needs an agent to draw on a canvas and read back what it drew, use Excalidraw with `mcp_excalidraw` instead, see [visual wireframes](../tools/visual-wireframes.md)
+- The workflow needs an agent to draw on a canvas and read back what it drew, use Excalidraw with `mcp_excalidraw` instead
 - The project is CLI-only or backend-only, prose in `DESIGN.md` is enough
 - Output needs to live outside Anthropic's ecosystem for licensing or vendor reasons
 
@@ -145,7 +145,7 @@ Skip Claude Design when:
 
 Claude Design's per-action cost makes it a ceiling tool. On a Max 5x plan, one full design system plus one artifact through to handoff and exports lands near 55 percent of the weekly Claude Design quota. That caps usable cycles at roughly two per week. Daily iteration needs a cheaper companion to handle the bulk of prompt-to-prototype work.
 
-Direct comparison against [Stitch](../tools/stitch.md) on the same landing-page prompt with no uploads:
+Direct comparison against Stitch, Google's Gemini-powered design product, on the same landing-page prompt with no uploads:
 
 |                           | Claude Design                                       | Stitch                                        |
 | ------------------------- | --------------------------------------------------- | --------------------------------------------- |
@@ -163,4 +163,3 @@ Reach for Claude Design when codebase extraction or the richly annotated handoff
 - [TechCrunch launch coverage](https://techcrunch.com/2026/04/17/anthropic-launches-claude-design-a-new-product-for-creating-quick-visuals/)
 - [VentureBeat on the Figma comparison](https://venturebeat.com/technology/anthropic-just-launched-claude-design-an-ai-tool-that-turns-prompts-into-prototypes-and-challenges-figma)
 - [Visual design workflow](../../docs/workflow/visual-design-workflow.md): tier framework that places Claude Design against Figma, Stitch, and Excalidraw
-- [Community skills and plugins](../tools/community-skills.md): third-party design skills and adjacent integrations

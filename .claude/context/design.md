@@ -129,10 +129,9 @@ Typical sequence in a new project:
 4. Open `.canon/review/design/index.html` in a browser
 5. Iterate on DESIGN.md until the preview matches intent
 
-The Stitch integration (`canon design sync`, `generate`, `edit`, `variants`, `list`) sits on top of the same DESIGN.md file, consuming its tables via MCP. See `wiki/tools/stitch.md` for that surface.
+The Stitch integration (`canon design sync`, `generate`, `edit`, `variants`, `list`) sits on top of the same DESIGN.md file, consuming its tables via MCP. Stitch is Google's Gemini-powered design product, addressed through a remote MCP server at `stitch.googleapis.com/mcp` that exposes project, screen, generation, and design-system tools, and `DesignTheme`, the theme schema those tools read and write, sits beside the same object's free-text `designMd` field.
 
 ## Related
 
 - `docs/agents/commands.md`: CLI flags and invocation contract for `canon design`
 - `docs/workflow/visual-design-workflow.md`: tier framework for prose-only, visual companion, and graphical source of truth
-- `wiki/tools/stitch.md`: Stitch MCP details for the downstream generation surface

@@ -8,9 +8,9 @@ category: Workflow
 
 Three tiers cover the range from prose-only design docs to a fully graphical design source of truth. Pick one per project based on how UI-heavy the work is, whether stakeholders review visuals, and whether a designer is involved. Tiers stack, so moving up does not invalidate work done at a lower tier.
 
-The tier framework sits alongside [Claude Design](../../wiki/claude/claude-design.md), [visual wireframes](../../wiki/tools/visual-wireframes.md), [community skills and plugins](../../wiki/tools/community-skills.md), and [community MCP servers](../../wiki/tools/community-mcp-servers.md). Those pages catalog the tooling. This page decides when to reach for what.
+The tier framework sits alongside [Claude Design](../../wiki/claude/claude-design.md), the one catalog page in this range. Stitch, Excalidraw, and the surrounding MCP and skill ecosystem are named inline below rather than catalogued separately. This page decides when to reach for what.
 
-Two tools anchor tier 1 and tier 2. [Stitch](../../wiki/tools/stitch.md) is the agent-addressable default through its MCP server at `stitch.googleapis.com/mcp`, with a free tier of 400 daily credits that covers daily iteration. [Claude Design](../../wiki/claude/claude-design.md), released 2026-04-17 and priced inside Claude subscriptions, is the ceiling tool reserved for codebase extraction and the richly annotated handoff bundle. Each covers a different job, they are not swappable.
+Two tools anchor tier 1 and tier 2. Stitch is the agent-addressable default through its MCP server at `stitch.googleapis.com/mcp`, with a free tier of 400 daily credits that covers daily iteration. [Claude Design](../../wiki/claude/claude-design.md), released 2026-04-17 and priced inside Claude subscriptions, is the ceiling tool reserved for codebase extraction and the richly annotated handoff bundle. Each covers a different job, they are not swappable.
 
 ## Tier 0: prose only
 
@@ -68,16 +68,16 @@ Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in the
 
 ### Tools
 
-- Stitch via MCP at `stitch.googleapis.com/mcp`. Default pick for agent-driven visual generation. Free tier of 400 daily credits. See [Stitch](../../wiki/tools/stitch.md).
-- Excalidraw canvas server on localhost plus the `yctimlin/mcp_excalidraw` MCP shim, for projects that need an agent to draw, read back, and revise a canvas. See [visual wireframes](../../wiki/tools/visual-wireframes.md) for setup and footguns.
-- Playwright MCP for browser-side verification. See [Playwright](../../wiki/tools/community-mcp-servers.md#playwright-microsoft).
-- Chrome DevTools MCP for live frontend debugging. See [Chrome DevTools](../../wiki/tools/community-mcp-servers.md#chrome-devtools-google).
+- Stitch via MCP at `stitch.googleapis.com/mcp`, Google's Gemini-powered design product. Agent-addressable through `generate_screen_from_text`, `edit_screens`, and `generate_variants`. Default pick for agent-driven visual generation. Free tier of 400 daily credits.
+- Excalidraw canvas server on localhost plus the community [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw) MCP shim, for projects that need an agent to draw, read back, and revise a canvas. MIT-licensed, plaintext JSON scene format. `describe_scene` and `get_canvas_screenshot` let the agent verify its own layout before claiming it is correct.
+- Playwright MCP ([`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp)) for browser-side verification, driven off the accessibility tree rather than screenshots.
+- Chrome DevTools MCP ([`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp)) for live frontend debugging: performance traces, network inspection, and DOM and CSS inspection.
 - Claude Design as the ceiling option for codebase extraction or polished handoff bundles. See [Claude Design](../../wiki/claude/claude-design.md).
 
 ### Skills
 
 - Everything from tier 0
-- A frontend design skill to steer visual quality. Pick one of [Impeccable](../../wiki/tools/community-skills.md#pbakausimpeccable), [UI/UX Pro Max](../../wiki/tools/community-skills.md#nextlevelbuilderui-ux-pro-max-skill), or Anthropic's `frontend-design` plugin. Impeccable is the strongest default because of its curated anti-patterns.
+- A frontend design skill to steer visual quality. Pick one of [pbakaus/impeccable](https://github.com/pbakaus/impeccable), which bundles curated anti-pattern references and is the strongest default, [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), which maps product type to UI rules through a reasoning engine, or Anthropic's `frontend-design` plugin.
 
 ### When to pick
 
@@ -108,9 +108,9 @@ Design happens in a graphical tool. `.claude/DESIGN.md` either regenerates from 
 
 ### Tools
 
-- Figma desktop app with the [Figma Dev Mode MCP](../../wiki/tools/community-skills.md#figma-mcp-and-code-to-canvas) for teams with a dedicated designer already on Figma. Bidirectional sync and Code to Canvas capture.
+- Figma desktop app with the official [Figma Dev Mode MCP](https://www.figma.com/blog/introducing-claude-code-to-figma/) for teams with a dedicated designer already on Figma. Bidirectional sync and Code to Canvas capture of a running Claude Code UI into editable Figma frames.
 - Claude Design with its Claude Code handoff bundle for teams without an existing Figma investment and for solo founders or PMs driving design themselves. One-way handoff, no bidirectional sync. See [Claude Design](../../wiki/claude/claude-design.md).
-- Stitch via MCP as a low-cost complement to either, used for bulk screen generation driven by Claude Code. See [Stitch](../../wiki/tools/stitch.md).
+- Stitch via MCP as a low-cost complement to either, used for bulk screen generation driven by Claude Code.
 - Playwright and Chrome DevTools MCPs as in tier 1
 
 ### Skills
@@ -147,9 +147,8 @@ Resist over-tiering early. Moving up is cheap because tiers stack. Moving down m
 
 ## References
 
-- [Stitch](../../wiki/tools/stitch.md): Gemini-powered design product with the MCP server that anchors tier 1
 - [Claude Design](../../wiki/claude/claude-design.md): first-party hosted design product and handoff bundle
 - `.claude/context/claude-plugin/skill-strategy.md`: how to decide between workflow and domain-knowledge skills
-- [Visual wireframes](../../wiki/tools/visual-wireframes.md): Excalidraw research and setup for the tier 1 wireframe companion
-- [Community skills and plugins](../../wiki/tools/community-skills.md): catalog of frontend design skills and integrations
-- [Community MCP servers](../../wiki/tools/community-mcp-servers.md): catalog of MCPs referenced across all tiers
+- [`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp): browser automation MCP used in tier 1 and tier 2
+- [`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp): live frontend debugging MCP used in tier 1 and tier 2
+- [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 wireframe companion
