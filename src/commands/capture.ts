@@ -6,6 +6,7 @@ import {
   isBrowserMissing,
   isEngineMissing,
 } from '@/browser/engine'
+import { isUrlSource } from '@/capture/sources'
 import {
   frameError,
   intro,
@@ -42,8 +43,15 @@ export function register(program: Command): void {
   program
     .command('capture')
     .description('Render HTML capture sources to PNG')
-    .argument('[source]', 'HTML file or a directory of them', DEFAULT_SOURCE)
-    .option('-o, --out <dir>', 'Output directory, defaults beside the source')
+    .argument(
+      '[source]',
+      'HTML file, a directory of them, or an http(s):// URL',
+      DEFAULT_SOURCE,
+    )
+    .option(
+      '-o, --out <path>',
+      'Output directory for a file source, or the destination PNG for a URL source; defaults beside the source',
+    )
     .option('-s, --selector <selector>', 'Element to capture')
     .action(
       async (
@@ -66,8 +74,9 @@ export function register(program: Command): void {
         }
         const selector = opts.selector
 
-        const sourcePath = resolve(process.cwd(), source)
-        if (!existsSync(sourcePath)) {
+        const isUrl = isUrlSource(source)
+        const sourcePath = isUrl ? source : resolve(process.cwd(), source)
+        if (!isUrl && !existsSync(sourcePath)) {
           frameError(`${source} not found`)
           process.exitCode = 1
           return
@@ -141,9 +150,11 @@ function reportInFrame(error: unknown): void {
 /**
  * Keeps a path clickable in the operator's terminal. A source outside the
  * project reports absolute, since a relative path to it is a run of `..`
- * segments no editor resolves.
+ * segments no editor resolves. A URL is not a filesystem path at all, so it
+ * reports as given.
  */
 function displayPath(path: string): string {
+  if (isUrlSource(path)) return path
   const fromCwd = relative(process.cwd(), path)
   return fromCwd.startsWith('..') ? path : fromCwd
 }
