@@ -17,7 +17,7 @@ Step 1 carries two more stops that apply to one path only. Do not evaluate them 
 Check the project root for UI surfaces: `src/ui.ts`, `src/ui.tsx`, `src/components/**`, `scripts/lib/ui.sh`, and any `*.css`, `tailwind.config.*`, or `theme.*`.
 
 - Any match takes the source path. Existing code defines the system, so every filled cell traces to a value already in the tree.
-- No match takes the greenfield path. Nothing anchors a value, so every filled cell is a proposal and carries the tag that says so.
+- No match takes the greenfield path. Nothing anchors a value there unless a picked reference does, so name `sketch-design` as the first move: a picked reference anchors a cell where a paragraph alone cannot. A direct run of this skill still falls through to the proposal-from-personality rules in Step 4, tag included, so this skill stays runnable on its own with nothing rendered yet.
 
 The project decides this, never a user flag or an argument. Announce which path ran in one line before Step 2, since the two produce different-looking output from the same skill.
 
@@ -38,6 +38,8 @@ Read these on both paths, skipping any that do not exist:
 On the source path, also read the UI surfaces matched in Step 1 plus `canon docs output-shape` and `canon docs index`, for output shape or framing rules already documented in the toolkit's own reference. Skip either that fails to resolve, since a project keeping its framing rules elsewhere is read there instead.
 
 On the greenfield path, also read `canon/ARCHITECTURE.md` for platform, tech stack, and surface type. Do not scan `src/`, stylesheets, or UI modules. Step 1 already established they hold nothing.
+
+On the greenfield path, also check `.canon/review/evidence/*/design-handoff.md` for a file the `sketch-design` skill wrote, taking the most recently modified match when more than one exists. Read it when found. Its presence is what Step 4 traces cells from instead of proposing them.
 
 Run these reads in parallel. Do not speculatively recurse into every directory.
 
@@ -72,6 +74,8 @@ On the source path, the tag marks the exception. On the greenfield path it marks
 
 Anchor every proposal to a signal, never to a default. "Calm and dense" pins muted grays and tight spacing. A requirements non-goal of "no motion" makes Motion read `No animation.` with no tag. A CLI-only surface leans Typography monospaced and keeps Borders minimal.
 
+- **Traced cells**: when Step 2 matched a `design-handoff.md` file, fill only the fields it actually states, no tag, the same traced-versus-proposed distinction the source path draws for a stylesheet value.
+- The handoff carries hex and family and size, never Weight, Line height, or a color's Intent. Those cells, every field of a role the handoff never names, and Motion and Iconography regardless, still follow the proposal rules below, tag included.
 - **Personality**: transcribe the `## Personality` paragraph from `canon/REQUIREMENTS.md` verbatim. This is the one section that is not a proposal. No tag.
 - **Color**: one row per role. Rewrite the Intent cell in personality language, for example `warm off-white page canvas` instead of the seed default `page canvas`. Propose hex values matching the personality. Dense and calm gives low saturation and high text contrast. Playful gives saturated accents. Every Intent and Value cell gets `? verify`.
 - **Typography**: one row per role. Propose families fitting the platform, system UI for web, monospaced for CLI tools, serif for editorial, and a harmonious scale. Every cell gets `? verify`.
