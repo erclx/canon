@@ -37,12 +37,12 @@ export interface CaptureOptions {
 export type CaptureResult =
   | {
       status: 'rendered'
-      htmlPath: string
+      source: string
       pngPath: string
       width: number
       height: number
     }
-  | { status: 'failed'; htmlPath: string; reason: string }
+  | { status: 'failed'; source: string; reason: string }
 
 export async function captureSources(
   sourcePath: string,
@@ -99,7 +99,7 @@ async function captureOne(
     writeStamp(source, png)
     return {
       status: 'rendered',
-      htmlPath: sourceIdentifier(source),
+      source: sourceIdentifier(source),
       pngPath: source.pngPath,
       width: png.readUInt32BE(16),
       height: png.readUInt32BE(20),
@@ -153,7 +153,7 @@ function sourceIdentifier(source: CaptureSource): string {
 }
 
 function failed(source: CaptureSource, reason: string): CaptureResult {
-  return { status: 'failed', htmlPath: sourceIdentifier(source), reason }
+  return { status: 'failed', source: sourceIdentifier(source), reason }
 }
 
 /**

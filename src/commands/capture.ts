@@ -109,7 +109,7 @@ export function register(program: Command): void {
               `${displayPath(result.pngPath)} ${result.width}x${result.height}`,
             )
           } else {
-            logError(`${displayPath(result.htmlPath)}: ${result.reason}`)
+            logError(`${displayPath(result.source)}: ${result.reason}`)
           }
         }
         outro()
