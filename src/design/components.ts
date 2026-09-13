@@ -153,11 +153,17 @@ figure {
   transform: translateX(-50%);
 }
 
-figure svg { width: 100%; height: auto; display: block; }
+figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
 /* CSS beats an SVG presentation attribute, so the diagrams pick up the
    hand face without editing a single lesson. */
-figure svg text { font-family: var(--figure-hand); }
+figure svg text {
+  font-family: var(--figure-hand);
+}
 
 figcaption {
   font-family: var(--figure-hand);
@@ -173,11 +179,18 @@ figcaption {
    the centre keeps overlapping as the window widens, so the ceiling is fixed
    instead. */
 @media (min-width: 1421px) {
-  figure { max-width: 54rem; }
+  figure {
+    max-width: 54rem;
+  }
 }
 
 @media (max-width: 640px) {
-  figure { width: 100%; max-width: 100%; margin-left: 0; transform: none; }
+  figure {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    transform: none;
+  }
 }`,
 }
 
