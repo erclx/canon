@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.81.0](https://github.com/erclx/canon/compare/v4.80.0...v4.81.0) (2026-09-13)
+
+
+### Features
+
+* **design:** add sketch-design skill and wire it into design-extract ([#1663](https://github.com/erclx/canon/issues/1663)) ([691bb2d](https://github.com/erclx/canon/commit/691bb2d03c5c9513778dadbbfdf300b5452705ca))
+* **design:** add the board's references panel and hand-off line ([#1662](https://github.com/erclx/canon/issues/1662)) ([2fea056](https://github.com/erclx/canon/commit/2fea05647f0496dcbdd28cc7d6d5fdb7192d0698))
+* **design:** retarget the board onto a caller-resolved root ([#1659](https://github.com/erclx/canon/issues/1659)) ([15549a8](https://github.com/erclx/canon/commit/15549a825bbddcb2476ddf55d0895b93bebe0216))
+* **teach:** render lesson bodies through shared components ([#1660](https://github.com/erclx/canon/issues/1660)) ([c377c73](https://github.com/erclx/canon/commit/c377c73ddb8f199400eb96a78f08c81ff6b38b3f))
+
 ## [4.80.0](https://github.com/erclx/canon/compare/v4.79.0...v4.80.0) (2026-09-13)
 
 
