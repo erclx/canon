@@ -7,6 +7,7 @@ import {
   DESIGN_PROJECT_SUBDIR,
 } from '@/design/adapter'
 import { buildDesignCss } from '@/design/css'
+import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { renderDesignDoc } from '@/design/render'
 import { DESIGN_BASE_CSS, DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
@@ -79,9 +80,16 @@ export function register(program: Command): void {
       '--no-components',
       'Custom properties only, without the component rules',
     )
-    .action((opts: { components: boolean }) => {
+    .option(
+      '--figures',
+      'Embed the hand-drawn figure fonts (Virgil, Excalifont), which the unconditional component styling never carries on its own',
+    )
+    .action((opts: { components: boolean; figures?: boolean }) => {
       process.stdout.write(
-        buildDesignCss(undefined, { components: opts.components }),
+        buildDesignCss(undefined, {
+          components: opts.components,
+          embedFonts: opts.figures ? HAND_DRAWN_FONT_FACES : undefined,
+        }),
       )
     })
 

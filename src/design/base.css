@@ -136,3 +136,49 @@
 *::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* hand-drawn-figure
+   The hand-drawn SVG diagram figure and its caption, sized wider than the
+   reading measure and cleared past an outline rail on a wide viewport. */
+
+/* ---- Figures: hand-drawn, and wider than the measure ---- */
+
+:root {
+  --figure-hand: 'Virgil', 'Excalifont', cursive;
+  --figure-wide: 64rem;
+}
+
+figure {
+  margin: 2.75rem 0;
+  width: var(--figure-wide);
+  max-width: 92vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+figure svg { width: 100%; height: auto; display: block; }
+
+/* CSS beats an SVG presentation attribute, so the diagrams pick up the
+   hand face without editing a single lesson. */
+figure svg text { font-family: var(--figure-hand); }
+
+figcaption {
+  font-family: var(--figure-hand);
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 1rem auto 0;
+  line-height: 1.5;
+  max-width: 52rem;
+}
+
+/* A figure breaks the measure and must still clear an outline rail. Deriving
+   the ceiling from the viewport does not hold, since a rail positioned from
+   the centre keeps overlapping as the window widens, so the ceiling is fixed
+   instead. */
+@media (min-width: 1421px) {
+  figure { max-width: 54rem; }
+}
+
+@media (max-width: 640px) {
+  figure { width: 100%; max-width: 100%; margin-left: 0; transform: none; }
+}

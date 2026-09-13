@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { COMPONENTS, TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
 import { buildDesignCss, slug, unmappedOnLight } from '@/design/css'
+import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import type { DesignTokens } from '@/design/tokens'
 import { TOKENS } from '@/design/tokens'
 
@@ -214,5 +215,13 @@ describe('buildDesignCss', () => {
 
   it('emits no @font-face block by default', () => {
     expect(buildDesignCss()).not.toContain('@font-face')
+  })
+
+  it('emits two @font-face blocks when asked to embed the hand-drawn faces', () => {
+    const css = buildDesignCss(undefined, { embedFonts: HAND_DRAWN_FONT_FACES })
+
+    expect(css.match(/@font-face/g)).toHaveLength(2)
+    expect(css).toContain("font-family: 'Virgil';")
+    expect(css).toContain("font-family: 'Excalifont';")
   })
 })
