@@ -101,7 +101,7 @@ function renderCheck(report: CheckReport): void {
 
   if (report.stampAtLegacyPath) {
     logWarn(
-      'Stamp found at a retired path. Move it to .claude/canon/config.json.',
+      'Stamp found at a retired path. Move it to canon/config/config.json.',
     )
   }
 

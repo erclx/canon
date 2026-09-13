@@ -241,4 +241,37 @@ describe('reading and writing the baseline file', () => {
 
     await expect(readBaseline(ROOT)).rejects.toThrow(BASELINE_REL)
   })
+
+  it('should fall back to .claude/canon/baseline.json for a target that has not moved', async () => {
+    const baseline = baselineFrom([result('markdown', { bans: 0 })], {
+      recordedAt: '2026-08-20',
+      commit: 'abc1234',
+    })
+    const legacyPath = join(ROOT, '.claude', 'canon', 'baseline.json')
+    await mkdir(dirname(legacyPath), { recursive: true })
+    await writeFile(
+      legacyPath,
+      `${JSON.stringify(baseline, null, 2)}\n`,
+      'utf8',
+    )
+
+    expect(await readBaseline(ROOT)).toEqual(baseline)
+  })
+
+  it('should prefer canon/config/baseline.json over the legacy path when both exist', async () => {
+    const legacy = baselineFrom([result('markdown', { bans: 0 })], {
+      recordedAt: '2026-08-19',
+      commit: 'old0000',
+    })
+    const current = baselineFrom([result('markdown', { bans: 0 })], {
+      recordedAt: '2026-08-20',
+      commit: 'new1111',
+    })
+    const legacyPath = join(ROOT, '.claude', 'canon', 'baseline.json')
+    await mkdir(dirname(legacyPath), { recursive: true })
+    await writeFile(legacyPath, `${JSON.stringify(legacy, null, 2)}\n`, 'utf8')
+    await writeBaseline(ROOT, current)
+
+    expect(await readBaseline(ROOT)).toEqual(current)
+  })
 })

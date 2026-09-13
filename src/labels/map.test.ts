@@ -92,4 +92,27 @@ describe('readLabelMap', () => {
   it('should answer a project with no map as an absence rather than a fault', () => {
     expect(readLabelMap(root)).toEqual({ kind: 'refused', reason: 'no-map' })
   })
+
+  it('should fall back to .claude/canon/pr-labels.toml for a project that has not moved', () => {
+    const path = join(root, '.claude', 'canon', 'pr-labels.toml')
+    mkdirSync(dirname(path), { recursive: true })
+    writeFileSync(path, '[domains]\ncli = ["src/"]\n')
+
+    expect(readLabelMap(root).kind).toBe('map')
+  })
+
+  it('should prefer canon/config/pr-labels.toml over the legacy path when both exist', () => {
+    const legacyPath = join(root, '.claude', 'canon', 'pr-labels.toml')
+    mkdirSync(dirname(legacyPath), { recursive: true })
+    writeFileSync(legacyPath, '[domains]\nold = ["legacy/"]\n')
+
+    const path = join(root, MAP_REL)
+    mkdirSync(dirname(path), { recursive: true })
+    writeFileSync(path, '[domains]\ncli = ["src/"]\n')
+
+    const result = readLabelMap(root)
+    expect(result.kind === 'map' ? result.domains[0]?.label : undefined).toBe(
+      'cli',
+    )
+  })
 })

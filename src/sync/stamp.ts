@@ -56,7 +56,21 @@ export interface Stamp {
   readonly domains: Readonly<Partial<Record<StampDomain, DomainStamp>>>
 }
 
+/**
+ * Where a stamp is written today, `canon/config/config.json`. Named
+ * `stampPath` rather than `surfaceStampPath` because the write side has only
+ * one current path, unlike the read side's fallback chain below.
+ */
 export function stampPath(target: string): string {
+  return join(target, 'canon', 'config', 'config.json')
+}
+
+/**
+ * Where the stamp wrote before this move, `.claude/canon/config.json`. Kept
+ * for the same reason as the two spellings below: a target stamped under it
+ * still carries its config here, and `readStamp` falls back to it.
+ */
+export function claudeCanonStampPath(target: string): string {
   return join(target, '.claude', 'canon', 'config.json')
 }
 
@@ -85,18 +99,6 @@ export function retiredNameStampPath(target: string): string {
 }
 
 /**
- * The stamp path under the new surface root, `canon/config/config.json`.
- *
- * Read ahead of `stampPath`, extending the same mechanism rather than adding a
- * new one: a target that has moved reads its config from the root it moved
- * to, and one that has not falls through to the spellings below unchanged.
- * The write destination does not move to it in this batch.
- */
-function surfaceStampPath(target: string): string {
-  return join(target, 'canon', 'config', 'config.json')
-}
-
-/**
  * Every spelling a stamp has been written under, current first. The order is
  * the read order, so a target carrying more than one resolves to the newest.
  *
@@ -107,8 +109,8 @@ function surfaceStampPath(target: string): string {
  */
 export function stampPaths(target: string): readonly string[] {
   return [
-    surfaceStampPath(target),
     stampPath(target),
+    claudeCanonStampPath(target),
     retiredNameStampPath(target),
     legacyStampPath(target),
   ]
@@ -120,7 +122,10 @@ export function stampPaths(target: string): readonly string[] {
  * there is nothing to migrate off of.
  */
 export function isLegacyStamped(target: string): boolean {
-  if (existsSync(surfaceStampPath(target)) || existsSync(stampPath(target))) {
+  if (
+    existsSync(stampPath(target)) ||
+    existsSync(claudeCanonStampPath(target))
+  ) {
     return false
   }
   return (

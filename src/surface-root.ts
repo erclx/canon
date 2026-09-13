@@ -56,26 +56,19 @@ export function spell(root: SurfaceRoot, entry: string): string {
 }
 
 /**
- * The creation default for one entry.
+ * The root a surface resolves at: the first that carries it, and
+ * `CREATION_ROOT` when neither does.
  *
- * The stamp folder keeps creating under `.claude/` until its own move lands,
- * since the install stamp and the audits baseline still write there by a
- * fixed path. A read resolving to `canon/config/` in a fresh project would
- * answer from a folder nothing writes.
- */
-function creationRootFor(entry: string): SurfaceRoot {
-  return entry === 'canon' ? '.claude' : CREATION_ROOT
-}
-
-/**
- * The root a surface resolves at: the first that carries it, and the creation
- * default when neither does.
+ * The stamp folder used to take a carve-out here, staying at `.claude/` while
+ * the install stamp and the audits baseline still wrote there by a fixed path
+ * of their own. Both moved to `canon/config/` by a fixed path of their own, so
+ * every entry now shares the one default.
  */
 function rootOf(root: string, entry: string): SurfaceRoot {
   return (
     SURFACE_ROOTS.find((candidate) =>
       existsSync(join(root, candidate, spell(candidate, entry))),
-    ) ?? creationRootFor(entry)
+    ) ?? CREATION_ROOT
   )
 }
 

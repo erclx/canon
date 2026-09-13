@@ -110,8 +110,8 @@ describe('surface-root', () => {
     expect(surfaceDir(root, 'canon')).toBe(join(root, '.claude', 'canon'))
   })
 
-  it('keeps creating the stamp folder under .claude/ until its own move lands', () => {
-    expect(surfaceDir(root, 'canon')).toBe(join(root, '.claude', 'canon'))
+  it('creates the stamp folder under canon/ when neither root has it', () => {
+    expect(surfaceDir(root, 'canon')).toBe(join(root, 'canon', 'config'))
   })
 
   it('reports both roots from surfaceDirs whether or not either exists', () => {
