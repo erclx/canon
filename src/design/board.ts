@@ -32,6 +32,7 @@ const WEB_DIST_ENTRY = 'index.html'
  * `web/dist`.
  */
 const WEB_GALLERY_DIST = join('web', 'gallery-dist')
+const WEB_GALLERY_DIST_ENTRY = 'index.html'
 
 interface WireframeEntry {
   readonly path: string
@@ -351,7 +352,7 @@ function writeComponentsPanel(root: string, outDir: string): void {
   mkdirSync(dir, { recursive: true })
 
   const gallerySource = join(root, WEB_GALLERY_DIST)
-  const body = existsSync(join(gallerySource, WEB_DIST_ENTRY))
+  const body = existsSync(join(gallerySource, WEB_GALLERY_DIST_ENTRY))
     ? (copyBuilt(gallerySource, join(dir, 'gallery')),
       '<iframe src="gallery/index.html" loading="lazy"></iframe>')
     : `<p class="empty">No ${WEB_GALLERY_DIST}/ build. Run bun run web:gallery, then regenerate the board.</p>`
