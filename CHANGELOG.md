@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.80.0](https://github.com/erclx/canon/compare/v4.79.0...v4.80.0) (2026-09-13)
+
+
+### Features
+
+* **sync:** move the install stamp and its neighbors to canon/config/ ([#1656](https://github.com/erclx/canon/issues/1656)) ([f3c0eb3](https://github.com/erclx/canon/commit/f3c0eb3e86e7234a33fecd087989b3222fd380cf))
+
 ## [4.79.0](https://github.com/erclx/canon/compare/v4.78.0...v4.79.0) (2026-09-13)
 
 
