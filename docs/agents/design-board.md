@@ -21,9 +21,9 @@ canon serve .canon/review/board
 
 ## Panels
 
-- **Tokens** renders `<root>/canon/DESIGN.md` through the same renderer `canon design render` uses, rather than a second one.
+- **Tokens** renders `DESIGN.md` through the same renderer `canon design render` uses, rather than a second one, reading `<root>/canon/DESIGN.md` or `<root>/.claude/DESIGN.md` for a target that has not run `canon migrate surface-roots`.
 - **Surfaces** iframes the built landing page from `<root>/web/dist/` and a teach workspace from `<root>/.canon/teach/`, copying each whole into the board's own tree. The landing-page half reports a toolkit-only notice outside this toolkit's own checkout, and either half reports its own missing build or absent workspace rather than rendering a broken frame.
-- **Wireframes** reads every `canon/wireframes/**/*.md` under `<root>`, excluding `index.md` at any depth, and renders each file as-is inside a `<pre>`, labeled from its own `description` frontmatter field. Reports the whole panel empty rather than per file when the directory is absent or holds nothing to render.
+- **Wireframes** reads every `**/*.md` under `<root>/canon/wireframes/` or `<root>/.claude/wireframes/`, excluding `index.md` at any depth, and renders each file as-is inside a `<pre>`, labeled from its own `description` frontmatter field. Reports the whole panel empty rather than per file when the directory is absent or holds nothing to render.
 - **Past candidates** lists an arm capture image per folder under `<root>/.canon/review/evidence/`, and states the corpus carries none rather than rendering an empty grid.
 - **Components** iframes the gallery built by `bun run web:gallery`, a second Astro config at `web/gallery.config.mjs` reading `web/gallery-src/` and writing `web/gallery-dist/`. That config's `srcDir` is never read by `web:build`'s own config, so the gallery never reaches the published `web/dist/`. The gallery page renders every component under `web/src/components/` except two whose props carry no defaults, which it names rather than filling with invented data. Reports a toolkit-only notice outside this toolkit's own checkout, and a missing gallery build otherwise.
 

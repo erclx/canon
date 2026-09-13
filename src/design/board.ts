@@ -13,11 +13,15 @@ import { renderDesignDoc } from '@/design/render'
 import { colorValue } from '@/design/tokens'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { recordDir } from '@/record-root'
+import { surfaceDir } from '@/surface-root'
 
 /**
- * Where the wireframes panel reads its corpus, relative to whichever `root`
- * the caller resolved. Named once so a caller and this module's own tests
- * spell the same path rather than repeating the literal.
+ * The wireframes panel's creation-root spelling, used in its own empty-state
+ * message and by this module's tests to seed a fixture. The panel itself
+ * resolves its actual read path through `surfaceDir`, which also reads
+ * `.claude/wireframes/` for a target that has not run the surface-roots
+ * migration, so this constant names where a fresh file lands rather than
+ * where every root's corpus necessarily sits.
  */
 export const WIREFRAME_DIR = join('canon', 'wireframes')
 
@@ -262,7 +266,7 @@ ${body}
 }
 
 function writeTokensPanel(root: string, outDir: string): void {
-  const sourcePath = join(root, DESIGN_DOCUMENT)
+  const sourcePath = surfaceDir(root, 'DESIGN.md')
   const dir = join(outDir, 'tokens')
 
   if (!existsSync(sourcePath)) {
@@ -287,14 +291,17 @@ interface WireframeFile {
 }
 
 /**
- * Every wireframe under `<root>/canon/wireframes/`, sorted for a stable
- * render order across runs. `index.md` at any depth is a catalog rather than
- * a wireframe and is excluded. A glob emits OS-native separators, and the
- * corpus nests one level deep, so the label always reads with forward
- * slashes regardless of platform.
+ * Every wireframe under whichever root the corpus resolves at, sorted for a
+ * stable render order across runs. `surfaceDir` reads `.claude/wireframes/`
+ * for a target that has not run the surface-roots migration, the same
+ * fallback `recordDir` already gives the surfaces panel's teach half.
+ * `index.md` at any depth is a catalog rather than a wireframe and is
+ * excluded. A glob emits OS-native separators, and the corpus nests one
+ * level deep, so the label always reads with forward slashes regardless of
+ * platform.
  */
 function listWireframes(root: string): readonly WireframeFile[] {
-  const dir = join(root, WIREFRAME_DIR)
+  const dir = surfaceDir(root, 'wireframes')
   if (!existsSync(dir)) return []
 
   const glob = new Bun.Glob('**/*.md')

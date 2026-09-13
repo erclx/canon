@@ -11,7 +11,11 @@ import { buildDesignCss } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { renderDesignDoc } from '@/design/render'
 import { DESIGN_BASE_CSS, DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import {
+  checkoutMismatchWarning,
+  isOwnCheckout,
+  PROJECT_ROOT,
+} from '@/project-root'
 import { creationRel } from '@/record-root'
 import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
@@ -156,8 +160,10 @@ export function register(program: Command): void {
     )
     .action(async (opts: { out: string; root?: string }) => {
       const outDir = resolve(process.cwd(), opts.out)
-      const root = opts.root ?? (await mainWorktreeRoot())
-      const isToolkitCheckout = root === PROJECT_ROOT
+      const root = opts.root
+        ? resolve(process.cwd(), opts.root)
+        : await mainWorktreeRoot()
+      const isToolkitCheckout = isOwnCheckout(root)
       const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
       const mismatch = checkoutMismatchWarning(process.cwd())
       process.stderr.write(

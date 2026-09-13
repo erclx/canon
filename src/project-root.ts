@@ -29,6 +29,22 @@ const readPackageName = (root: string): string | undefined => {
 }
 
 /**
+ * Whether `root` is a checkout of this same package, judged by package name
+ * rather than by path equality against `PROJECT_ROOT`.
+ *
+ * A linked worktree tracks the identical `package.json` the main worktree
+ * does, so this reads true for either. Comparing `root` against `PROJECT_ROOT`
+ * directly reads true only for the one directory this process happened to
+ * load its own source from, which is wrong for a caller whose CLI runs out of
+ * a linked worktree while `root` correctly points at the main one, or at
+ * another worktree of the same repository.
+ */
+export function isOwnCheckout(root: string): boolean {
+  const ownName = readPackageName(PROJECT_ROOT)
+  return ownName !== undefined && readPackageName(root) === ownName
+}
+
+/**
  * Walks upward from `startDir` for the nearest ancestor `package.json`
  * sharing this package's own `name`, and reports its path when that ancestor
  * is not `PROJECT_ROOT`. A bare `canon` on PATH resolves `PROJECT_ROOT` to the

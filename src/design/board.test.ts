@@ -129,6 +129,15 @@ describe('generateBoard', () => {
     expect(html).toContain('No canon/DESIGN.md')
   })
 
+  it('renders the tokens panel from .claude/DESIGN.md on a target that has not migrated', () => {
+    seed(join('.claude', 'DESIGN.md'), MINIMAL_DESIGN_DOC)
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'tokens', 'index.html'), 'utf8')
+    expect(html).toContain('background')
+  })
+
   it('renders a wireframe file as-is inside a pre block', () => {
     seed(join(WIREFRAME_DIR, 'landing-page.md'), '# Landing\n\nOne column.')
 
@@ -165,6 +174,16 @@ describe('generateBoard', () => {
     const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
     expect(html).toContain('<h2>teach/root.md</h2>')
     expect(html).not.toContain('index.md')
+  })
+
+  it('reads .claude/wireframes/ on a target that has not migrated to canon/', () => {
+    seed(join('.claude', 'wireframes', 'answer.md'), '# Answer\n\nOne route.')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'wireframes', 'index.html'), 'utf8')
+    expect(html).toContain('<h2>answer.md</h2>')
+    expect(html).toContain('One route.')
   })
 
   it('labels a wireframe from its own frontmatter description', () => {
