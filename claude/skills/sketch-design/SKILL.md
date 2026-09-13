@@ -34,7 +34,7 @@ Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Step 2, with one substit
 
 ## Step 3: render, hand off, and take the pick
 
-Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Steps 3 and 4 unchanged: render the combined page, hand over the address, and put the choice to the operator through the structured question surface.
+Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Steps 3 and 4 unchanged: render the combined page, hand over the address, and put the choice to the operator through the structured question surface. Take whatever reason the operator's answer already states, whether through the surface's own free-text escape or in the surrounding turn, as the reason Step 5 records. The surface takes the pick and the reason in one turn when the operator gives both together, rather than needing a second one.
 
 ## Step 4: loop, when the operator asks for a change
 
@@ -42,7 +42,7 @@ The arms here are fixed references rather than drafted markup, so nothing about 
 
 ## Step 5: trace and write the handoff
 
-1. Ask the operator to state, in their own words, why the picked reference won. Carry that sentence forward as written rather than paraphrasing it.
+1. Carry forward the reason Step 3's pick already stated, as written rather than paraphrased. Ask the operator to state, in their own words, why the picked reference won only when the pick arrived with no reason attached.
 2. Read the picked arm's render at `<dest>/refs/arm-<id>.png` and trace its color, type, and spacing by looking, the same reading a person does against a screenshot. Name a role only where the reference actually shows it. Leave one out rather than guessing.
 3. Write `.canon/review/evidence/<slug>/design-handoff.md`, resolved against the main worktree root rather than the linked worktree this run may be building in, since shared session scratch always resolves there. One field per line, grouped under the section names `${CLAUDE_SKILL_DIR}/../../standards/design.md` fixes, so `design-extract` reads it mechanically:
 
