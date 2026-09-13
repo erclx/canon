@@ -204,6 +204,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:setup-plugins`  | On a new machine, to install the community and official plugins user-scoped                                     |
 | `canon:setup-verify`   | After the agent generates configs, to run the installed scripts and report pass or fail                         |
 | `canon:setup-smoke`    | After `setup-verify` passes, to check the dev and preview servers, end-to-end tests, and the screenshot harness |
+| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs            |
 | `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                         |
 | `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                            |
 | `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README          |
