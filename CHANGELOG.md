@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.77.0](https://github.com/erclx/canon/compare/v4.76.0...v4.77.0) (2026-09-13)
+
+
+### Features
+
+* **design:** add the components panel to the design board ([#1648](https://github.com/erclx/canon/issues/1648)) ([a4fea54](https://github.com/erclx/canon/commit/a4fea54c88bd32c92fa7fda8363861f59b4f14de))
+* **gate:** ban a shipped skill from citing a rule as authority ([#1647](https://github.com/erclx/canon/issues/1647)) ([dbfc94c](https://github.com/erclx/canon/commit/dbfc94c36eb0c86464ce248783a4cebdeafda7de))
+* **teach:** add a lesson-body component layer ([#1650](https://github.com/erclx/canon/issues/1650)) ([ba11910](https://github.com/erclx/canon/commit/ba11910855cdef9c6c9b9ddc58921da6e005359b))
+
 ## [4.76.0](https://github.com/erclx/canon/compare/v4.75.1...v4.76.0) (2026-09-13)
 
 
