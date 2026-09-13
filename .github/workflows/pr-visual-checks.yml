@@ -54,7 +54,7 @@ jobs:
       - name: Verify Playwright Browsers Restored
         run: |
           for browser in chromium firefox webkit; do
-            ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^${browser}" || {
+            ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^${browser}-" || {
               echo "Missing Playwright browser: ${browser}" >&2
               exit 1
             }
@@ -106,7 +106,7 @@ jobs:
 
       - name: Verify Playwright Browsers Restored
         run: |
-          ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^chromium" || {
+          ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^chromium-" || {
             echo "Missing Playwright browser: chromium" >&2
             exit 1
           }
