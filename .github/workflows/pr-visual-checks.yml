@@ -114,6 +114,9 @@ jobs:
       - name: Build
         run: bun run web:build
 
+      - name: Build gallery
+        run: bun run web:gallery
+
       - name: Verify gallery excluded from build
         run: ./scripts/core/check-gallery-exclusion.sh
 
