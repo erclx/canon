@@ -66,7 +66,7 @@ A grep for the installed prefix comes back at 25 lines across 18 files outside t
 - A dated record of a past mechanism or measurement, covering `canon/ARCHITECTURE.md`, `destinations.md`, and `distribution.md`.
 - Fixture or test data, covering `scripts/sandbox/`, `scripts/eval/`, and every `*.test.ts`.
 - A marker-syntax illustration, covering `src/context/citations.ts`.
-- The label-map prefix kept so a diff deleting the folder stays covered, covering `.claude/canon/pr-labels.toml`.
+- The label-map prefix kept so a diff deleting the folder stays covered, covering `canon/config/pr-labels.toml`.
 
 Run that classification rather than a bare grep. The first sweep moved 64 citations and left three lines stating the mirror as live, in `orchestration.md`, `sandbox/overview.md`, and `scripts/eval.md`, each of which reads as prose about a folder until the rule is applied to it. Nothing here is checkable, so the classification is the whole of the discipline.
 

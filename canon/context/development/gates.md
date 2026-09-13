@@ -95,7 +95,7 @@ The Seed independence stage runs `scripts/core/check-seed-independence.sh`, whic
 
 Banning a token is blunt, and the alternative is a judgment no stage can make. The only false-positive class is a fenced example naming the toolkit on purpose, which no seed carries, and a rule admitting fenced mentions would parse markdown to answer a question the corpus has never asked.
 
-The match is a bare substring rather than a word boundary, and `grep -w` does not narrow it. A slash is a non-word character, so `grep -w canon` still matches `.claude/canon/config.json` with a boundary sitting either side. The bare substring is deliberate rather than unrefined, and the stage prefers a false positive to a missed citation because it gates.
+The match is a bare substring rather than a word boundary, and `grep -w` does not narrow it. A slash is a non-word character, so `grep -w canon` still matches `canon/config/config.json` with a boundary sitting either side. The bare substring is deliberate rather than unrefined, and the stage prefers a false positive to a missed citation because it gates.
 
 ### What the walk covers
 
@@ -147,7 +147,7 @@ The twenty-first was never authored as an exemption at all. `standards/publish.m
 
 ## Audit set
 
-The Audit set stage runs `canon audits run --corpus tracked --corpus per-machine --json` and reports. It is the one stage here that reads a measure and fails nothing, which is deliberate: the three findings the audits treat as facts already fail the push at their own stages above, and those name a specific remedy an aggregate line cannot. What this stage adds is the judgment half of every tracked and per-machine audit and the growth against `.claude/canon/baseline.json`.
+The Audit set stage runs `canon audits run --corpus tracked --corpus per-machine --json` and reports. It is the one stage here that reads a measure and fails nothing, which is deliberate: the three findings the audits treat as facts already fail the push at their own stages above, and those name a specific remedy an aggregate line cannot. What this stage adds is the judgment half of every tracked and per-machine audit and the growth against `canon/config/baseline.json`.
 
 ### The upstream corpus runs on its own schedule
 

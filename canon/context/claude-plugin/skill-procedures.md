@@ -33,7 +33,7 @@ A proposal drawn from the plugin copy would hand back a shape the project never 
 
 ### Configuration a project declares rather than a skill ships
 
-`git-pr` labels a pull request from a `[domains]` table at `.claude/canon/pr-labels.toml`, keying a label name to the path prefixes that earn it. No domain name of this repository reaches the skill or its references, because a shipped label set is a guess about someone else's surfaces and a wrong default costs more than no label at all. A project declaring no map is labelled silently and never warned, which reads the absent-key discipline above the other way: an absent file here is an answer rather than a state to repair.
+`git-pr` labels a pull request from a `[domains]` table at `canon/config/pr-labels.toml`, keying a label name to the path prefixes that earn it. No domain name of this repository reaches the skill or its references, because a shipped label set is a guess about someone else's surfaces and a wrong default costs more than no label at all. A project declaring no map is labelled silently and never warned, which reads the absent-key discipline above the other way: an absent file here is an answer rather than a state to repair.
 
 The scope derivation the intake proposed was measured and dropped. Across the 80 merged pull requests at `02da9e21` the conventional commit scope reaches 23 distinct values against seven labels, four of them shared, so keying on it needs a hand-maintained scope-to-domain table that is a second vocabulary to hold in step with the first. The changed paths need none, since the top level of the tree already is the domain set. The distinct count rose from 19 at 60 pull requests while the four-way overlap held, which is the shape that settles it.
 

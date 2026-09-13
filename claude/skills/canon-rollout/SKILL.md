@@ -36,7 +36,7 @@ Every target in every wave takes the same branch and the same title, written fro
 - Title: `chore(agents): <what changed in that target>`.
 - Body: the sections `${CLAUDE_SKILL_DIR}/../../standards/pr.md` fixes, describing what that target received.
 - Body, one line: name this toolkit as the source of the changed files and where to change the content upstream. A reader in that repository months later has no other route to the fact that these files are toolkit-managed and that a local edit is lost at the next wave.
-- Body, no version number anywhere in it. `${CLAUDE_SKILL_DIR}/../../standards/versioning.md` permits a semver tag only where the pull request cuts a release, and `.claude/canon/config.json` in the target already records `syncedAt` and a sha256 per synced file. A version in the body is a second copy of a fact the target holds canonically, and it is the copy that goes stale while the pull request sits open.
+- Body, no version number anywhere in it. `${CLAUDE_SKILL_DIR}/../../standards/versioning.md` permits a semver tag only where the pull request cuts a release, and `canon/config/config.json` in the target already records `syncedAt` and a sha256 per synced file. A version in the body is a second copy of a fact the target holds canonically, and it is the copy that goes stale while the pull request sits open.
 
 The title withholds the source and the body supplies it, because the two have different audiences. `agents` says what changed without saying where it came from, which is what a target's own history wants, and the source line is for a reader inside that repository rather than for whoever merges.
 
