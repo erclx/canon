@@ -32,6 +32,7 @@ elif
 enotdir
 errexit
 excalidraw
+excalifont
 execa
 execve
 fastapi

@@ -119,7 +119,86 @@ const SCROLLBAR: Component = {
 }`,
 }
 
-export const COMPONENTS: readonly Component[] = [STATUS, SCROLLBAR]
+/**
+ * The hand-drawn SVG diagram figure and its caption, sized wider than the
+ * reading measure and cleared past an outline rail on a wide viewport.
+ * Promoted out of `TEACH_COMPONENTS` per
+ * `.canon/groundwork/86-portable-hand-drawn-figures/06-decision.md` item 4:
+ * any project can draw one hand-drawn-styled figure without teach's own quiz
+ * and schedule machinery. It could not move as `TEACH_FIGURES` as-is, since
+ * that component's `reads` list named `--teach-hand` and `--teach-wide`
+ * while only `TEACH_CHROME` declared them, so this component declares its
+ * own `--figure-hand` and `--figure-wide` defaults rather than borrowing
+ * undeclared custom properties from a teach-only sibling.
+ */
+const HAND_DRAWN_FIGURE: Component = {
+  name: 'hand-drawn-figure',
+  note: [
+    'The hand-drawn SVG diagram figure and its caption, sized wider than the',
+    'reading measure and cleared past an outline rail on a wide viewport.',
+  ].join('\n   '),
+  reads: ['--color-muted', '--figure-hand', '--figure-wide'],
+  rules: `/* ---- Figures: hand-drawn, and wider than the measure ---- */
+
+:root {
+  --figure-hand: 'Virgil', 'Excalifont', cursive;
+  --figure-wide: 64rem;
+}
+
+figure {
+  margin: 2.75rem 0;
+  width: var(--figure-wide);
+  max-width: 92vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* CSS beats an SVG presentation attribute, so the diagrams pick up the
+   hand face without editing a single lesson. */
+figure svg text {
+  font-family: var(--figure-hand);
+}
+
+figcaption {
+  font-family: var(--figure-hand);
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 1rem auto 0;
+  line-height: 1.5;
+  max-width: 52rem;
+}
+
+/* A figure breaks the measure and must still clear an outline rail. Deriving
+   the ceiling from the viewport does not hold, since a rail positioned from
+   the centre keeps overlapping as the window widens, so the ceiling is fixed
+   instead. */
+@media (min-width: 1421px) {
+  figure {
+    max-width: 54rem;
+  }
+}
+
+@media (max-width: 640px) {
+  figure {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    transform: none;
+  }
+}`,
+}
+
+export const COMPONENTS: readonly Component[] = [
+  STATUS,
+  SCROLLBAR,
+  HAND_DRAWN_FIGURE,
+]
 
 const TEACH_CHROME: Component = {
   name: 'teach-chrome',
@@ -153,7 +232,6 @@ const TEACH_CHROME: Component = {
   --teach-mono: 'Cascadia Code', ui-monospace, monospace;
   --teach-measure: 52rem;
   --teach-chrome: 52rem;
-  --teach-wide: 64rem;
   --teach-mast-h: 4.4rem;
   --teach-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
   --color-teach-accent-bg: color-mix(in srgb, var(--color-accent) 14%, var(--color-background));
@@ -1126,53 +1204,6 @@ const TEACH_OUTLINE: Component = {
 @media (max-width: 1420px) { .outline { display: none; } }`,
 }
 
-const TEACH_FIGURES: Component = {
-  name: 'teach-figures',
-  note: [
-    'The hand-drawn SVG diagram figure and its caption, sized wider than the',
-    'reading measure and cleared past the outline rail on a wide viewport.',
-  ].join('\n   '),
-  reads: ['--color-muted', '--teach-hand', '--teach-measure', '--teach-wide'],
-  rules: `/* ---- Figures: hand-drawn, and wider than the measure ---- */
-
-figure {
-  margin: 2.75rem 0;
-  width: var(--teach-wide);
-  max-width: 92vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-}
-
-figure svg { width: 100%; height: auto; display: block; }
-
-/* CSS beats an SVG presentation attribute, so the diagrams pick up the
-   hand face without editing a single lesson. */
-figure svg text { font-family: var(--teach-hand); }
-
-figcaption {
-  font-family: var(--teach-hand);
-  font-size: 1rem;
-  color: var(--color-muted);
-  margin: 1rem auto 0;
-  line-height: 1.5;
-  max-width: var(--teach-measure);
-}
-
-/* A figure breaks the measure and must still clear the outline rail. The rail
-   starts at \`50% + 26rem + 2.5rem\`, so a figure centred on the same axis may
-   reach 27rem from centre and no further, which is 54rem wide with a 1.5rem
-   gap left over. Deriving it from the viewport was the earlier attempt and it
-   does not hold: the rail is positioned from the centre, not from the edge, so
-   a wider window moved both and kept the overlap. */
-@media (min-width: 1421px) {
-  figure { max-width: 54rem; }
-}
-
-@media (max-width: 640px) {
-  figure { width: 100%; max-width: 100%; margin-left: 0; transform: none; }
-}`,
-}
-
 const TEACH_REFERENCES: Component = {
   name: 'teach-references',
   note: [
@@ -1269,7 +1300,6 @@ export const TEACH_COMPONENTS: readonly Component[] = [
   TEACH_QUIZ,
   TEACH_GLOSSARY,
   TEACH_OUTLINE,
-  TEACH_FIGURES,
   TEACH_REFERENCES,
 ]
 
