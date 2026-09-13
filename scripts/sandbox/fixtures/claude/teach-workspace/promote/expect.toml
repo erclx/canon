@@ -11,12 +11,13 @@
 # one belongs to that table in TOML, so a `manual` array written at the bottom
 # parses clean and asserts nothing.
 
-# Measured at 21 turns and 0.70 dollars on 2026-08-19, passing every mechanical
-# assertion. The ceiling stays at the default on one sample, because this is a
-# proposal-only arm resolving several files against several standards and its
-# count moves with how a run orders those reads. The routing destination below
-# moved from a wiki subfolder to docs once the wiki narrowed to Anthropic-owned
-# subjects, which has not been re-measured against a live run since.
+# The routing destination below moved from a wiki subfolder to docs once the
+# wiki narrowed to Anthropic-owned subjects, superseding the 21-turn, 0.70-dollar
+# reading from 2026-08-19 this file used to carry. Measured again at 8 turns and
+# 0.2177 dollars on 2026-09-13, passing every mechanical assertion. The ceiling
+# stays at the default on one sample either way, because this is a proposal-only
+# arm resolving several files against several standards and its count moves with
+# how a run orders those reads.
 max_turns = 30
 
 # The handoff name comes off the branch slug, which the arm pins to
