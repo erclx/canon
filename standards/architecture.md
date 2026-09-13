@@ -27,6 +27,7 @@ Does not govern:
 
 - How individual functions work line by line. The code carries its own behavior.
 - Full type definitions. They live in code. Reference the shape conceptually if needed.
+- A measurement paragraph specific to one domain's own mechanism. Route it to that domain's `.claude/context/<domain>.md` entry instead. The choice and its rejected alternative stay here whatever their reach, since reach is what makes a decision cross-domain, not how many domains its supporting measurement happens to touch.
 
 ## Sections
 
