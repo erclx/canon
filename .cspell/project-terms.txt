@@ -63,6 +63,7 @@ executeautomation
 extensionless
 failable
 feedwatch
+figcaption
 footgun
 footguns
 footnav
