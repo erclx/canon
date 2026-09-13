@@ -451,7 +451,7 @@ function writeCandidatesPanel(root: string, outDir: string): void {
   const sections = found
     .map(
       ({ folder, images }) =>
-        `<h2>${escapeHtml(folder)}</h2>\n${images.map((image) => `<img src="${folder}/${image}" alt="${escapeHtml(image)}">`).join('\n')}`,
+        `<h2>${escapeHtml(folder)}</h2>\n${images.map((image) => `<img src="${escapeHtml(`${folder}/${image}`)}" alt="${escapeHtml(image)}">`).join('\n')}`,
     )
     .join('\n')
 
@@ -491,7 +491,9 @@ function writeReferencesPanel(root: string, outDir: string): void {
   }
 
   const sections = images
-    .map((image) => `<img src="${image}" alt="${escapeHtml(image)}">`)
+    .map(
+      (image) => `<img src="${escapeHtml(image)}" alt="${escapeHtml(image)}">`,
+    )
     .join('\n')
 
   writeFileSync(join(dir, 'index.html'), panelPage('References', sections))

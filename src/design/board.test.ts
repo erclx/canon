@@ -269,6 +269,25 @@ describe('generateBoard', () => {
     expect(html).toContain('none carries a draft-and-pick arm capture')
   })
 
+  it('escapes a candidate filename carrying a double quote', () => {
+    seed(
+      join(
+        '.canon',
+        'review',
+        'evidence',
+        'hero-probe',
+        'a" onerror=alert(1) x.png',
+      ),
+      'x',
+    )
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'candidates', 'index.html'), 'utf8')
+    expect(html).not.toContain('src="hero-probe/a" onerror=alert(1) x.png"')
+    expect(html).toContain('src="hero-probe/a&quot; onerror=alert(1) x.png"')
+  })
+
   it('renders an arm capture image when the evidence corpus carries one', () => {
     seed(join('.canon', 'review', 'evidence', 'hero-probe', 'arm-a.png'), 'x')
 
@@ -325,6 +344,19 @@ describe('generateBoard', () => {
 
     const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
     expect(html).toContain('carries no image yet')
+  })
+
+  it('escapes a reference filename carrying a double quote', () => {
+    seed(
+      join('.canon', 'review', 'references', 'a" onerror=alert(1) x.png'),
+      'x',
+    )
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).not.toContain('src="a" onerror=alert(1) x.png"')
+    expect(html).toContain('src="a&quot; onerror=alert(1) x.png"')
   })
 
   it('renders a reference image when the folder carries one', () => {
