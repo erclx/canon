@@ -18,6 +18,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'draft-identity',
   },
   {
+    prompt:
+      "I found two sites whose look I want us to draw from. Put them side by side and let's settle which one the design should follow before anyone writes a token.",
+    expect: 'sketch-design',
+  },
+  {
     prompt: 'Fire up the dev server the way this project documents it.',
     expect: 'project-commands',
   },

@@ -35,6 +35,7 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 
 ### Skills
 
+- `canon:sketch-design` to trace a design direction from reference images or URLs, before `design-extract`'s greenfield path proposes from a personality paragraph alone
 - `canon:design-extract` to draft `canon/DESIGN.md`, from existing project signals or from requirements alone on day one
 - `canon:ui-test` for e2e test generation after UI changes
 - `canon:ux-audit` for UX gap detection on existing surfaces
