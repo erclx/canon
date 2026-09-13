@@ -28,6 +28,26 @@ async function runCapture(args: string[]): Promise<{
   return { exitCode: result.exitCode ?? 1, stderr: result.stderr }
 }
 
+/**
+ * The URL-source test below drives a real headless chromium through the
+ * spawned CLI. `verify.yml` installs no browser, so this mirrors the
+ * `hasBrowser` guard `src/driver/probes/focus.test.ts` and its siblings carry:
+ * skip there rather than fail, since a green run on that job is not evidence
+ * this passed.
+ */
+async function browserAvailable(): Promise<boolean> {
+  const { chromium } = await import('playwright-core')
+  try {
+    const browser = await chromium.launch()
+    await browser.close()
+    return true
+  } catch {
+    return false
+  }
+}
+
+const hasBrowser = await browserAvailable()
+
 describe('canon capture', () => {
   it('should refuse a run that names no selector', async () => {
     const result = await runCapture([])
@@ -61,7 +81,7 @@ describe('canon capture', () => {
     server = undefined
   })
 
-  it(
+  it.skipIf(!hasBrowser)(
     'should treat --out as the destination file for a URL source',
     { timeout: RUN_TIMEOUT_MS },
     async () => {
@@ -88,7 +108,7 @@ describe('canon capture', () => {
         outFile,
       ])
 
-      expect(result.exitCode).toBe(0)
+      expect(result.exitCode, result.stderr).toBe(0)
       expect(existsSync(outFile)).toBe(true)
     },
   )
