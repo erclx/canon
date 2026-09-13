@@ -131,7 +131,11 @@ echo '[
 ]' | canon teach render --json
 ```
 
-A `heading`, a `paragraph` (`lede: true` for the dek), and a `list` cover the structural body. Reach for `raw` only where none of the three can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's trailing `raw` entry every time, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file. Then run:
+A `heading`, a `paragraph` (`lede: true` for the dek), and a `list` cover the structural body. Reach for `raw` only where none of the three can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's trailing `raw` entry every time, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file.
+
+Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it, and never compose the lesson body by hand as a fallback. That is the state this section exists to end, and a target holds this skill body before it holds the verb, since a plugin skill reaches a target the moment it merges while the CLI reaches one only when a release publishes.
+
+Then run:
 
 ```bash
 canon teach nav <topic> --json
