@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.78.0](https://github.com/erclx/canon/compare/v4.77.0...v4.78.0) (2026-09-13)
+
+
+### Features
+
+* **capture:** render a URL source ([#1652](https://github.com/erclx/canon/issues/1652)) ([2d3dee1](https://github.com/erclx/canon/commit/2d3dee1b9e75459eb6c989ef9a1dfa4ad7819236))
+
 ## [4.77.0](https://github.com/erclx/canon/compare/v4.76.0...v4.77.0) (2026-09-13)
 
 
