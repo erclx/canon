@@ -203,6 +203,22 @@ const STANDARDS_PATH = /(?<![\w./-])standards\/[^\s`)\]]*\.md\b/g
  */
 const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
+/**
+ * A `.claude/rules/<segments>/<nnn>-<slug>.md` citation from a body under
+ * `claude/skills/`, the installed-path spelling `598-authoring-layout.md`
+ * bans a shipped skill body from citing as authority for its own behavior.
+ *
+ * Anchored on the trailing `\d{3}-[\w-]+\.md` rather than on the bare
+ * `.claude/rules/` prefix, which is what keeps a folder mention carrying no
+ * number, such as `create-rule`, `memory-review`, and `setup-gov` already
+ * write correctly, from matching. The segment group between `rules/` and the
+ * numbered file admits both a governance-namespace path
+ * (`canon/core/055-scratch.md`) and a project-namespace one
+ * (`project/<subdir>/<n>-<slug>.md`) without distinguishing them, since
+ * either shape is the same broken citation.
+ */
+const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*\/\d{3}-[\w-]+\.md\b/g
+
 export interface ShippedReference {
   readonly file: string
   /** One-based, matching the `file:line` form a reader clicks. */
@@ -213,6 +229,7 @@ export interface ShippedReference {
     | 'docs-path'
     | 'standards-path'
     | 'phase-label'
+    | 'rule-path'
   /** The reference as written, so a report names the token to qualify. */
   readonly text: string
   /**
@@ -267,6 +284,17 @@ function isDocsPathReportable(
  * never applies there.
  */
 function isStandardsPathScope(file: string): boolean {
+  return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
+}
+
+/**
+ * Whether `file` sits in the one corpus `RULE_PATH` gates, matching
+ * `isStandardsPathScope` exactly: `598-authoring-layout.md` states the ban
+ * for a shipped skill body, and `REQUIREMENT.md` is excluded for the same
+ * reason that file is excluded there, since a maintainer or an audit command
+ * reads it rather than a session loading it.
+ */
+function isRulePathScope(file: string): boolean {
   return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
 }
 
@@ -376,6 +404,18 @@ export function referencesIn(
         kind: 'phase-label',
         text: match[0],
       })
+    }
+
+    if (isRulePathScope(file)) {
+      for (const match of line.matchAll(RULE_PATH)) {
+        if (isPlaceholderPath(match[0])) continue
+        references.push({
+          file,
+          line: index + 1,
+          kind: 'rule-path',
+          text: match[0],
+        })
+      }
     }
   }
 

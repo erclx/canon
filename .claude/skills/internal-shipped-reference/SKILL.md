@@ -1,11 +1,11 @@
 ---
 name: internal-shipped-reference
-description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern. Use before shipping a change under claude/, docs/, governance/, scripts/, snippets/, standards/, or tooling/, routed here by `598-authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, or a phase label, which `canon gate run`'s shipped-references stage already classifies by pattern.
+description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern. Use before shipping a change under claude/, docs/, governance/, scripts/, snippets/, standards/, or tooling/, routed here by `598-authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, a phase label, or a numbered rule path, which `canon gate run`'s shipped-references stage already classifies by pattern.
 ---
 
 # Internal shipped reference
 
-`src/shipped/references.ts` classifies four same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names the fifth: telling a `.claude/context/<name>.md` citation of this repository's own domain entry apart from an illustration of a target's own generic tree, such as `.claude/context/index.md`, is a semantic read no pattern makes. This skill is that read, plus the parallel judgment over a layout or count claim.
+`src/shipped/references.ts` classifies five same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names the sixth: telling a `.claude/context/<name>.md` citation of this repository's own domain entry apart from an illustration of a target's own generic tree, such as `.claude/context/index.md`, is a semantic read no pattern makes. This skill is that read, plus the parallel judgment over a layout or count claim.
 
 ## Discriminator
 

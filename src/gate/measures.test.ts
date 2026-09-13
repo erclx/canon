@@ -474,6 +474,25 @@ describe('shippedReferences', () => {
     expect(report.emissions[0]?.text).toContain('v28.1')
     expect(report.emissions[0]?.text).toContain('no target holds')
   })
+
+  it('fails on a bare rule path cited from a skill body', async () => {
+    write(
+      'claude/skills/alpha/SKILL.md',
+      "Write scratch to `.claude/rules/canon/core/055-scratch.md`'s location.\n",
+    )
+
+    const report = await shippedReferences(context())
+
+    expect(report.failure).toContain('One reference')
+    expect(report.emissions).toHaveLength(1)
+    expect(report.emissions[0]?.text).toContain(
+      'claude/skills/alpha/SKILL.md:1',
+    )
+    expect(report.emissions[0]?.text).toContain(
+      '.claude/rules/canon/core/055-scratch.md',
+    )
+    expect(report.emissions[0]?.text).toContain('canon gov sync')
+  })
 })
 
 describe('clientCommandCitations', () => {

@@ -429,6 +429,65 @@ describe('referencesIn', () => {
     })
   })
 
+  describe('RULE_PATH', () => {
+    let root: string
+
+    beforeAll(() => {
+      root = mkdtempSync(join(tmpdir(), 'canon-references-rule-'))
+    })
+
+    afterAll(() => {
+      rmSync(root, { recursive: true, force: true })
+    })
+
+    it('should report a rule path that resolves against the checkout', () => {
+      expect(
+        referencesIn(
+          'claude/skills/draft-and-pick/SKILL.md',
+          "Write scratch to `.claude/rules/canon/core/055-scratch.md`'s location.",
+          root,
+        ),
+      ).toEqual([
+        {
+          file: 'claude/skills/draft-and-pick/SKILL.md',
+          line: 1,
+          kind: 'rule-path',
+          text: '.claude/rules/canon/core/055-scratch.md',
+        },
+      ])
+    })
+
+    it('should pass a rule path illustrating a placeholder shape', () => {
+      expect(
+        referencesIn(
+          'claude/skills/migration-standards-drop/SKILL.md',
+          'Repoint the citation at `.claude/rules/canon/core/<n>-<slug>.md`.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it("should pass a rule path cited from a skill's own REQUIREMENT.md, which a maintainer reads rather than a session", () => {
+      expect(
+        referencesIn(
+          'claude/skills/task-board/REQUIREMENT.md',
+          'See `.claude/rules/canon/core/035-tasks.md` for the file shape.',
+          root,
+        ),
+      ).toEqual([])
+    })
+
+    it('should mute a rule path marked as deliberate', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          `See \`.claude/rules/canon/core/055-scratch.md\` for the shape. <!-- ${REFERENCE_MARKER}: illustrates the bare form the rule bans -->`,
+          root,
+        ),
+      ).toEqual([])
+    })
+  })
+
   describe('PHASE_LABEL', () => {
     let root: string
 
