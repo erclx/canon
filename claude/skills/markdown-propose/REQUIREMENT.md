@@ -21,7 +21,7 @@ A second failure compounds the first. A claim copied across several files is cor
 - Grep the named surface for the concern before proposing, so a defect's site count is measured rather than assumed
 - Draft the replacement text, not only the finding
 - Carry three labelled variants on a change whose replacement was invented, and one on a change that corrects text to a recorded fact
-- Write one proposal file per source file under `.canon/proposals/<slug>/` and stop, leaving `You:` empty on every change
+- Write one proposal file per source file under `.canon/proposals/<nn>-<slug>/` and stop, leaving `You:` empty on every change
 - Apply only a change carrying an answer, one file at a time, and re-grep its anchor before applying it
 - Report what each file leaves alone, so a proposal cannot be read as finding everything wanting
 
