@@ -61,6 +61,7 @@ describe('generateBoard', () => {
       'wireframes',
       'candidates',
       'components',
+      'references',
     ])
     for (const panel of result.panels) {
       expect(existsSync(join(outDir, panel.path))).toBe(true)
@@ -307,5 +308,43 @@ describe('generateBoard', () => {
     const html = readFileSync(join(outDir, 'components', 'index.html'), 'utf8')
     expect(html).toContain("this toolkit's own checkout")
     expect(html).not.toContain('gallery/index.html')
+  })
+
+  it('reports the references panel empty when no folder exists', () => {
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('No')
+    expect(html).toContain('folder yet')
+  })
+
+  it('reports the references panel empty when the folder carries no image', () => {
+    seed(join('.canon', 'review', 'references', 'notes.md'), 'x')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('carries no image yet')
+  })
+
+  it('renders a reference image when the folder carries one', () => {
+    seed(join('.canon', 'review', 'references', 'competitor-nav.png'), 'x')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('competitor-nav.png')
+    expect(existsSync(join(outDir, 'references', 'competitor-nav.png'))).toBe(
+      true,
+    )
+  })
+
+  it('names both hand-off skills in the header', () => {
+    const result = generate(outDir)
+
+    if (!result.ok) throw new Error('expected generateBoard to succeed')
+    const html = readFileSync(result.indexPath, 'utf8')
+    expect(html).toContain('canon:draft-and-pick')
+    expect(html).toContain('canon:ux-audit')
   })
 })
