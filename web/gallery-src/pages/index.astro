@@ -1,0 +1,108 @@
+---
+import '../../src/styles/global.css'
+import AgentView from '../../src/components/agent-view.astro'
+import BoardLifecycle from '../../src/components/board-lifecycle.astro'
+import CallToAction from '../../src/components/call-to-action.astro'
+import Catalog from '../../src/components/catalog.astro'
+import DesignPreview from '../../src/components/design-preview.astro'
+import Hero from '../../src/components/hero.astro'
+import Install from '../../src/components/install.astro'
+import Panel from '../../src/components/panel.astro'
+import RuleArrival from '../../src/components/rule-arrival.astro'
+import SiteNav from '../../src/components/site-nav.astro'
+import TargetReceives from '../../src/components/target-receives.astro'
+import TeachPreview from '../../src/components/teach-preview.astro'
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Component gallery</title>
+  </head>
+  <body>
+    <main>
+      <section id="agent-view">
+        <h2>agent-view</h2>
+        <AgentView />
+      </section>
+      <section id="board-lifecycle">
+        <h2>board-lifecycle</h2>
+        <BoardLifecycle />
+      </section>
+      <section id="call-to-action">
+        <h2>call-to-action</h2>
+        <CallToAction />
+      </section>
+      <section id="catalog">
+        <h2>catalog</h2>
+        <Catalog />
+      </section>
+      <section id="design-preview">
+        <h2>design-preview</h2>
+        <DesignPreview />
+      </section>
+      <section id="hero">
+        <h2>hero</h2>
+        <Hero />
+      </section>
+      <section id="install">
+        <h2>install</h2>
+        <Install />
+      </section>
+      <section id="panel">
+        <h2>panel</h2>
+        <Panel />
+      </section>
+      <section id="rule-arrival">
+        <h2>rule-arrival</h2>
+        <RuleArrival />
+      </section>
+      <section id="site-nav">
+        <h2>site-nav</h2>
+        <SiteNav />
+      </section>
+      <section id="target-receives">
+        <h2>target-receives</h2>
+        <TargetReceives />
+      </section>
+      <section id="teach-preview">
+        <h2>teach-preview</h2>
+        <TeachPreview />
+      </section>
+      <section id="panel-group">
+        <h2>panel-group</h2>
+        <p class="unrendered">Unrendered. Needs label (string, required).</p>
+      </section>
+      <section id="panel-row">
+        <h2>panel-row</h2>
+        <p class="unrendered">
+          Unrendered. Needs name, value (string, required).
+        </p>
+      </section>
+    </main>
+    <style>
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      section {
+        border-top: 1px solid var(--color-border);
+        padding-top: 1.25rem;
+      }
+      section > h2 {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: var(--type-label-size);
+        color: var(--color-muted);
+        margin: 0 0 0.75rem;
+      }
+      .unrendered {
+        color: var(--color-muted);
+        font-style: italic;
+      }
+    </style>
+  </body>
+</html>

@@ -21,6 +21,7 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/e2e/` owns the Playwright suite
 - `web/public/assets/` owns `hero.png`, symlinked from the repository's own `assets/`
 - `web/public/previews/` owns build-time renders embedded live as `<iframe>` sources: `design-tokens/` and `teach-workspace/`
+- `web/gallery.config.mjs` and `web/gallery-src/` are a second Astro config over this domain's own components, owned by the design board rather than the landing page. See `.claude/context/design.md`'s Board section for the mechanism and the exclusion proof.
 
 ## Decisions
 
