@@ -25,6 +25,16 @@ actually shows, and a reviewer who opens it midway through a review round
 never reads a stale before image describing an intermediate commit nobody is
 looking at anymore.
 
+## What counts as evidence
+
+A changed path qualifies when one of its segments is literally `evidence` and
+its filename carries an image extension (`png`, `jpg`, `jpeg`, `gif`, `webp`,
+`avif`, `svg`). The second half of that test exists because an `evidence/`
+folder holds whatever else a project keeps beside its captures. This
+repository's own tree carries eight `.md` files, two `.sh` scripts, a `.tsv`,
+a `.json`, and an `.html` file against a single `.png`, and every one of them
+would render as a broken `![]()` embed without the extension filter.
+
 ## What the record carries
 
 The record groups every evidence path by state, the remainder of its

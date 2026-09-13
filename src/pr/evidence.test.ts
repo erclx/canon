@@ -12,6 +12,32 @@ describe('groupEvidence', () => {
     expect(reading).toEqual({ kind: 'refused', reason: 'no-evidence' })
   })
 
+  it('should keep only paths under evidence/ that carry an image extension', async () => {
+    const reading = await groupEvidence(
+      [
+        'web/evidence/dark/hero.png',
+        'web/evidence/README.md',
+        'web/evidence/capture.sh',
+        'web/evidence/counts.tsv',
+        'web/evidence/meta.json',
+        'web/evidence/report.html',
+      ],
+      async () => true,
+    )
+
+    expect(reading).toEqual({
+      kind: 'read',
+      states: [
+        {
+          state: 'dark',
+          items: [
+            { path: 'web/evidence/dark/hero.png', stem: 'hero', added: false },
+          ],
+        },
+      ],
+    })
+  })
+
   it('should group by the remainder of the path under the evidence segment', async () => {
     const reading = await groupEvidence(
       [

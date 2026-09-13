@@ -7,6 +7,14 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 /** A `#issuecomment-<id>` suffix, which is the REST comment id `gh pr view` never returns directly. */
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
 
+/**
+ * The image extensions this module embeds. An `evidence/` folder holds
+ * whatever else a project keeps beside its captures, such as a README, a
+ * capture script, or a raw data file, and none of those render as
+ * `![](url)` without producing a broken embed.
+ */
+const IMAGE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg)$/i
+
 export interface EvidenceItem {
   readonly path: string
   readonly stem: string
@@ -34,7 +42,7 @@ function evidencePosition(path: string): number {
 }
 
 export function isEvidencePath(path: string): boolean {
-  return evidencePosition(path) !== -1
+  return evidencePosition(path) !== -1 && IMAGE_EXTENSION.test(path)
 }
 
 function splitEvidencePath(path: string): {
