@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
 import { listRepositoryFiles } from '@/git-files'
@@ -26,6 +26,10 @@ import {
   walkFlatRules,
 } from '@/migrate/rule-layout'
 import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
+import {
+  planSurfaceRootsMove,
+  type SurfaceRootsPlan,
+} from '@/migrate/surface-roots'
 import {
   applyScratchEvidence,
   planScratchEvidence,
@@ -396,6 +400,143 @@ function toRecordsRecord(
   }
 }
 
+/**
+ * Moves the tracked toolkit surfaces to `canon/` and repoints what cites them.
+ *
+ * Every path here is tracked, so the write goes through `applyRename`'s
+ * `git mv` rather than the records move's plain rename, and the history
+ * follows each file. A destination already on disk refuses the whole plan,
+ * since `git mv` onto an existing path fails per file and leaves a tree split
+ * across both roots.
+ */
+async function runSurfaceRoots(opts: SweepOptions): Promise<number> {
+  const root = opts.root ?? process.cwd()
+
+  const files = await listRepositoryFiles(root)
+  if (files === undefined) {
+    logError(`Could not list files under ${root}. Is it a git repository?`)
+    return 1
+  }
+
+  const toSweep = files.filter((path) => !isRecordArtifact(path))
+  const plan = planSurfaceRootsMove(await readSources(root, toSweep))
+  const taken = plan.entries
+    .map((entry) => entry.movesTo)
+    .filter((to): to is string => to !== undefined)
+    .filter((to) => existsSync(join(root, to)))
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify(toSurfaceRootsRecord(plan, taken, opts.write))}\n`,
+    )
+  }
+
+  reportSurfaceRoots(plan)
+
+  if (taken.length > 0) {
+    logError(
+      `${plural(taken.length, 'destination')} already exist under canon/. Merging two copies of a surface is not a call this verb takes.`,
+    )
+    for (const path of taken) logError(`  ${path}`)
+    return 1
+  }
+
+  if (plan.entries.length === 0) return 0
+
+  if (!opts.write) {
+    logWarn('Nothing was written. Pass --write to apply this plan.')
+    return 2
+  }
+
+  const applied = await applyRename(root, {
+    entries: plan.entries.map((entry) => ({
+      path: entry.path,
+      ...(entry.movesTo === undefined ? {} : { movesTo: entry.movesTo }),
+      ...(entry.text === undefined ? {} : { text: entry.text }),
+      renamed: entry.rewritten,
+      protectedCount: entry.kept,
+    })),
+    excluded: plan.excluded,
+    renamed: plan.rewritten,
+    protectedCount: plan.kept,
+    moves: plan.moves,
+  })
+  logStep(
+    `Rewrote ${plural(applied.written, 'file')} and moved ${plural(applied.moved, 'file')}.`,
+  )
+
+  if (applied.failed.length > 0) {
+    logError(`Could not move ${plural(applied.failed.length, 'path')}.`)
+    for (const path of applied.failed) logError(`  ${path}`)
+    return 1
+  }
+
+  return 0
+}
+
+function reportSurfaceRoots(plan: SurfaceRootsPlan): void {
+  logInfo(`${plural(plan.moves, 'file')} to move.`)
+  logInfo(
+    `${plural(plan.entries.filter((entry) => entry.text !== undefined).length, 'file')} to change, ${plural(plan.rewritten, 'citation')} to rewrite.`,
+  )
+  logInfo(`${plural(plan.kept, 'citation')} marked to keep the old root.`)
+
+  if (plan.excluded.length > 0) {
+    logInfo(`${plural(plan.excluded.length, 'file')} excluded from the sweep:`)
+    for (const path of plan.excluded) logInfo(`  ${path}`)
+  }
+
+  if (plan.coupled.length > 0) {
+    logInfo(
+      `${plural(plan.coupled.length, 'file')} couple to an excluded path:`,
+    )
+    for (const path of plan.coupled) logInfo(`  ${path}`)
+  }
+
+  for (const [label, held] of [
+    ['a frontmatter paths: glob', plan.frontmatterGlobs],
+    ['a citation into another repository', plan.crossRepoCitations],
+    ['a dated citation', plan.datedCitations],
+  ] as const) {
+    if (held.length === 0) continue
+    logInfo(`${plural(held.length, 'file')} carry ${label}, left alone:`)
+    for (const entry of held) {
+      for (const line of entry.lines) {
+        logInfo(`  ${entry.path}:${line.line}  ${excerpt(line.text)}`)
+      }
+    }
+  }
+}
+
+function toSurfaceRootsRecord(
+  plan: SurfaceRootsPlan,
+  collisions: readonly string[],
+  wrote: boolean | undefined,
+): unknown {
+  return {
+    ok: collisions.length === 0,
+    wrote: wrote === true,
+    moves: plan.moves,
+    collisions,
+    files: plan.entries.length,
+    rewritten: plan.rewritten,
+    kept: plan.kept,
+    excluded: plan.excluded,
+    coupled: plan.coupled,
+    frontmatterGlobs: plan.frontmatterGlobs,
+    crossRepoCitations: plan.crossRepoCitations,
+    datedCitations: plan.datedCitations,
+    globs: plan.globs,
+    crossRepo: plan.crossRepo,
+    dated: plan.dated,
+    paths: plan.entries.map((entry) => ({
+      path: entry.path,
+      ...(entry.movesTo === undefined ? {} : { movesTo: entry.movesTo }),
+      rewritten: entry.rewritten,
+    })),
+  }
+}
+
 interface RecordTreeOptions {
   readonly json?: boolean
   readonly write?: boolean
@@ -761,6 +902,46 @@ export function register(program: Command): void {
     )
     .action(async (opts: RecordsOptions) => {
       process.exitCode = await runRecords(opts)
+    })
+
+  migrate
+    .command('surface-roots')
+    .description('Move the tracked toolkit surfaces to canon/')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--write', 'Apply the plan rather than reporting it')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the working directory',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  nothing to move, or --write applied the whole plan',
+        '  1  refused, or a move failed',
+        '  2  a plan exists and --write was not passed',
+        '',
+        'Moves canon/context/, canon/wireframes/, and the ARCHITECTURE.md,',
+        'REQUIREMENTS.md, and DESIGN.md documents to canon/ with git mv, and',
+        'rewrites every tracked citation of them. .claude/canon/, rules/,',
+        'skills/, hooks/, and settings.json stay where the vendor reads them.',
+        '',
+        'A line carrying canon-keep-surface-root, or the nearest non-blank line',
+        'above it, keeps the old root. A frontmatter paths: glob, a citation',
+        'into another repository, and one inside a dated paragraph are reported',
+        'and left alone rather than rewritten.',
+        '',
+        'Examples:',
+        '  canon migrate surface-roots',
+        '  canon migrate surface-roots --write',
+        '  canon migrate surface-roots --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: SweepOptions) => {
+      process.exitCode = await runSurfaceRoots(opts)
     })
 
   migrate
