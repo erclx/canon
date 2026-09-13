@@ -55,9 +55,8 @@ Use `bunx` when bun is available, falling back to `npx -y @mermaid-js/mermaid-cl
 
 ## Step 5: the freehand path
 
-- Author the SVG by hand: plain shapes and lines, nothing exported from a diagramming tool.
-- Color every fill and stroke through a custom property the host stylesheet defines, never a literal hex value.
-- Give the drawing an accessible name: `role="img"` with `aria-label` for one short line, or `aria-labelledby` pointing at a `<title>` element inside it for a longer one.
+- Author the SVG by hand: plain shapes and lines authored directly in the markup.
+- Follow the standard's `## Color and accessibility` section for every fill, stroke, and accessible name.
 
 There is no external render to verify a freehand drawing against. The check here is the stroke-and-fill audit above and a read of the markup against what the subject means to show, done once rather than looped.
 
