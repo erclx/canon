@@ -15,7 +15,7 @@
  * `buildDesignCss`'s `components` option, which is what widening that option
  * from a boolean to `boolean | readonly Component[]` bought.
  *
- * It does not live in `.claude/DESIGN.md`. `standards/design.md` keeps CSS class
+ * It does not live in `canon/DESIGN.md`. `standards/design.md` keeps CSS class
  * names out of that record and says they live in code, which is here.
  */
 
@@ -207,7 +207,7 @@ const TEACH_CHROME: Component = {
     'navigation shared by every teach page. Recovered from two gitignored',
     'course.css files that predate a regression that dropped this layer from the',
     "generator, and rewritten onto this module's tokens rather than the",
-    'incompatible palette they carried. See .claude/wireframes/teach/chrome.md for',
+    'incompatible palette they carried. See canon/wireframes/teach/chrome.md for',
     'the shape.',
   ].join('\n   '),
   reads: [

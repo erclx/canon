@@ -125,7 +125,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a whole-catalog quantifier', async () => {
-    // `.claude/context/sandbox/authoring.md` states `took all 69 rules`,
+    // `canon/context/sandbox/authoring.md` states `took all 69 rules`,
     // where the trigger the verb gate wants sits five words ahead of the
     // number and `all` is what sits against it.
     seedSkills(63)
@@ -144,7 +144,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a production verb outside the original list', async () => {
-    // `.claude/context/development/regeneration.md` states `the toolkit
+    // `canon/context/development/regeneration.md` states `the toolkit
     // authors 69 rules`, the assertion shape this gate was built for with a
     // verb the first list did not carry.
     seedSkills(63)
@@ -166,7 +166,7 @@ describe('scanCounts', () => {
   })
 
   it('should read past a total reached through an indirect noun, which is the false positive the gap axis would have admitted', async () => {
-    // Measured live at `.claude/context/claude-plugin/overview.md`: widening
+    // Measured live at `canon/context/claude-plugin/overview.md`: widening
     // the trigger-to-number gap to two words reaches this sentence and reads
     // a domain's own membership as the catalog's total. The trigger
     // vocabulary carried both live misses without it, so the gap stayed shut
@@ -310,7 +310,7 @@ describe('scanCounts', () => {
     // a restated whole. No syntactic rule tells the two apart, so the real
     // fix for a case like this is dating the clause as a past state, not
     // narrowing the matcher, which is what the equivalent instance in
-    // `.claude/context/standards/destinations.md` was repaired with.
+    // `canon/context/standards/destinations.md` was repaired with.
     seedSkills(27)
     write(
       'docs/history.md',

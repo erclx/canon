@@ -34,7 +34,7 @@ Small Vite + React notes app. Voice is calm and direct. Dense screens, sparing a
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >>.claude/REQUIREMENTS.md
+    cat <<'EOF' >>canon/REQUIREMENTS.md
 
 # Requirements
 
@@ -165,7 +165,7 @@ EOF
     log_info "  src/components/Button.tsx: token usage in a real component"
     log_info "  REQUIREMENTS.md non-goal: no motion or transitions"
     log_info "Action 1: /canon:design-extract"
-    log_info "Expect:   source path announced, .claude/DESIGN.md token tables filled from tokens.css"
+    log_info "Expect:   source path announced, canon/DESIGN.md token tables filled from tokens.css"
     log_info "Action 2: canon design render"
     log_info "Expect:   .canon/review/design/index.html with swatches, samples, and bars"
     ;;
@@ -180,7 +180,7 @@ EOF
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >>.claude/REQUIREMENTS.md
+    cat <<'EOF' >>canon/REQUIREMENTS.md
 
 # Requirements
 
@@ -197,7 +197,7 @@ Quiet and disciplined. The app should feel like a clean desk at dawn: uncluttere
 - No motion or transitions
 EOF
 
-    cat <<'EOF' >>.claude/ARCHITECTURE.md
+    cat <<'EOF' >>canon/ARCHITECTURE.md
 
 # Architecture
 
@@ -215,7 +215,7 @@ EOF
     log_info "  Non-goals: no motion or transitions"
     log_info "  Architecture: Vite plus React web app (informs typography choices)"
     log_info "Action 1: /canon:design-extract"
-    log_info "Expect:   greenfield path announced, .claude/DESIGN.md proposed, most cells marked ? verify"
+    log_info "Expect:   greenfield path announced, canon/DESIGN.md proposed, most cells marked ? verify"
     log_info "Action 2: canon design render"
     log_info "Expect:   .canon/review/design/index.html renders cleanly with swatches and samples"
     log_info "Expect:   every tagged cell shows a ? verify marker beside its value, never inside it"

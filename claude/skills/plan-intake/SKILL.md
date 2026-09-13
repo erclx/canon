@@ -49,8 +49,8 @@ With no match, derive a kebab-case slug named for the subject rather than the ac
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: behavior rules, conventions, commands
-- `.claude/REQUIREMENTS.md`: scope and non-goals
-- `.claude/ARCHITECTURE.md`: decisions already made
+- `canon/REQUIREMENTS.md`: scope and non-goals
+- `canon/ARCHITECTURE.md`: decisions already made
 - `.canon/tasks/index.md`: what is already tracked. Open a task file whose entry looks related to an item.
 
 Then read only what a live item needs. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.

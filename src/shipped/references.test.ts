@@ -570,7 +570,7 @@ describe('isShippedCorpus', () => {
   })
 
   it('should exclude a corpus whose reader already holds this repository', () => {
-    expect(isShippedCorpus('.claude/context/development/gates.md')).toBe(false)
+    expect(isShippedCorpus('canon/context/development/gates.md')).toBe(false)
     expect(
       isShippedCorpus('internal/rules/claude/598-authoring-layout.md'),
     ).toBe(false)

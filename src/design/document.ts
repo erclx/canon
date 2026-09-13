@@ -8,7 +8,7 @@ import type {
 import { TOKENS } from '@/design/tokens'
 
 /**
- * Renders `.claude/DESIGN.md` from the token source.
+ * Renders `canon/DESIGN.md` from the token source.
  *
  * The document is the view and `@/design/tokens` is the fact, which is the one
  * thing that changed when this record stopped being a transcript of two other

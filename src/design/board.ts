@@ -14,12 +14,12 @@ import { colorValue } from '@/design/tokens'
 import { recordDir } from '@/record-root'
 
 /**
- * The one named site for this repository's wireframe corpus. `standards/`
- * moves it to `canon/wireframes/` under the answered
- * `.canon/intake/88-surface-roots-and-corpus-debt/` item 1, and that move
- * retargets this constant alone rather than a literal repeated per panel.
+ * The one named site for this repository's wireframe corpus, so the surface
+ * move retargets a single constant rather than a literal repeated per panel.
+ * The board reads this checkout alone, which has moved, so the new root is
+ * spelled directly rather than resolved.
  */
-export const WIREFRAME_DIR = join('.claude', 'wireframes')
+export const WIREFRAME_DIR = join('canon', 'wireframes')
 
 /** Landing page for the built site the surfaces panel iframes when present. */
 const WEB_DIST = join('web', 'dist')

@@ -5,16 +5,16 @@ description: Reviews a shipped-corpus edit for a reference that resolves only in
 
 # Internal shipped reference
 
-`src/shipped/references.ts` classifies five same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names the sixth: telling a `.claude/context/<name>.md` citation of this repository's own domain entry apart from an illustration of a target's own generic tree, such as `.claude/context/index.md`, is a semantic read no pattern makes. This skill is that read, plus the parallel judgment over a layout or count claim.
+`src/shipped/references.ts` classifies five same-repository reference forms by pattern and stops there on purpose. Its own `DOCS_PATH` comment names the sixth: telling a `canon/context/<name>.md` citation of this repository's own domain entry apart from an illustration of a target's own generic tree, such as `canon/context/index.md`, is a semantic read no pattern makes. This skill is that read, plus the parallel judgment over a layout or count claim.
 
 ## Discriminator
 
 Read every added or changed line in the diff under this rule's eight corpora: `internal/`, `standards/`, `snippets/`, `claude/`, `governance/`, `docs/`, `scripts/`, `tooling/`.
 
-For each `.claude/context/<name>.md` token:
+For each `canon/context/<name>.md` token:
 
-- **Fine.** The sentence reads as an instruction for a target session to consult its own project's copy if one exists, or illustrates the path shape a target's own tree would take, never naming a fact only this checkout holds. `ux-measure/SKILL.md`'s `.claude/context/development/: the documented run commands and the port each serves` is this case, read as "check your own project's entry."
-- **Fails.** The sentence names a fact true of this repository specifically, one only this checkout's own `.claude/context/` resolves, such as a documented decision or a domain narrative a target reader cannot open. `canon-cli/SKILL.md`'s prior citation of `.claude/context/tooling.md` as "the toolkit's" was this case.
+- **Fine.** The sentence reads as an instruction for a target session to consult its own project's copy if one exists, or illustrates the path shape a target's own tree would take, never naming a fact only this checkout holds. `ux-measure/SKILL.md`'s `canon/context/development/: the documented run commands and the port each serves` is this case, read as "check your own project's entry."
+- **Fails.** The sentence names a fact true of this repository specifically, one only this checkout's own `canon/context/` resolves, such as a documented decision or a domain narrative a target reader cannot open. `canon-cli/SKILL.md`'s prior citation of `canon/context/tooling.md` as "the toolkit's" was this case.
 
 Do not test a token against what a scaffolded project's seed happens to ship. That discriminator was measured and rejected: the seed's own contents drift, and a token reading as an instruction is fine regardless of what any seed carries.
 
@@ -30,7 +30,7 @@ For each layout, stack, or config-path claim:
 - State the fact the reference carries instead of the path. `claude/skills/canon-cli/SKILL.md`'s repaired form, naming the toolkit's own context entries as authoritative over a target-session summary without the three paths, is the shape.
 - Where the sentence labels the path toolkit-only inside text every reader sees, the label is not the fix. Drop the path and fold what it pointed at into the sentence, or drop the trailing clause when the path carried nothing past the label. `youtube-transcripts/SKILL.md`'s repaired form is this case.
 - Where the path sits inside a branch only a toolkit-repo reader ever follows, keep it and mark `<!-- canon-allow-reference: <why> -->`, naming the branch. That reader can open the path, so dropping it costs the only audience the sentence has. `create-standard/SKILL.md`'s `In the toolkit:` branch is this case, not the bullet above.
-- Where the token is a genuine illustration rather than a citation, mark it the same way, the marker `src/shipped/references.ts` already reads for its own four forms. Nothing in the gate scans a `.claude/context/` token today, so the marker documents the read for the next reader rather than suppressing a check.
+- Where the token is a genuine illustration rather than a citation, mark it the same way, the marker `src/shipped/references.ts` already reads for its own four forms. Nothing in the gate scans a `canon/context/` token today, so the marker documents the read for the next reader rather than suppressing a check.
 - Scope a checkout-specific claim to "in the toolkit" or "in this repository" rather than deleting it, when the fact is worth keeping for a toolkit-only reader.
 
 ## Report

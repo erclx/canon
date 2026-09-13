@@ -1,7 +1,7 @@
 /**
  * The design system's one source of values.
  *
- * `.claude/DESIGN.md` is rendered from this module rather than read by it, so
+ * `canon/DESIGN.md` is rendered from this module rather than read by it, so
  * the document a person opens is a view and this file is the fact. Every
  * rendering surface reads from here in the form it can take: a CSS surface
  * takes custom properties through `@/design/css`, and the slide renderer takes
@@ -94,7 +94,7 @@ export const TOKENS: DesignTokens = {
     '',
     'The two rendered captures read it as well. `scripts/core/regen-hero.sh` fills `assets/captures/hero.html.tmpl` and `assets/captures/install.html.tmpl` with what `canon design css --no-components` emits, so both frames now carry the custom properties rather than their own copies of the hex, and a value moved here moves what the next capture renders.',
     '',
-    'The terminal framing is the one surface left holding its own values, and that is a decision rather than a gap. `scripts/lib/ui.sh` and `src/ui.ts` each spell six escape constants, and `.claude/ARCHITECTURE.md` records one color source per language with a check behind each, so generating a third spelling from here would break the rule those two checks enforce. What the record is still incomplete about is the other half of those six: `WHITE` and `GREY` name no role below, so the terminal palette is described here in part rather than in whole.',
+    'The terminal framing is the one surface left holding its own values, and that is a decision rather than a gap. `scripts/lib/ui.sh` and `src/ui.ts` each spell six escape constants, and `canon/ARCHITECTURE.md` records one color source per language with a check behind each, so generating a third spelling from here would break the rule those two checks enforce. What the record is still incomplete about is the other half of those six: `WHITE` and `GREY` name no role below, so the terminal palette is described here in part rather than in whole.',
   ].join('\n'),
 
   personality: [

@@ -46,8 +46,8 @@ describe('namedPaths', () => {
   })
 
   it('should read a shape as the folder above its placeholder', () => {
-    expect(namedPaths('- Read `.claude/context/<domain>.md` first.')).toEqual([
-      '.claude/context/',
+    expect(namedPaths('- Read `canon/context/<domain>.md` first.')).toEqual([
+      'canon/context/',
     ])
   })
 
@@ -125,14 +125,14 @@ describe('readRuleGlobs', () => {
         '---',
         'description: x',
         'paths:',
-        "  - '.claude/context/**'",
+        "  - 'canon/context/**'",
         '---',
         '',
       ].join('\n'),
     )
 
     expect(readRuleGlobs(root)).toEqual([
-      { rule: 'claude/510-context.md', globs: ['.claude/context/**'] },
+      { rule: 'claude/510-context.md', globs: ['canon/context/**'] },
     ])
   })
 
@@ -143,7 +143,7 @@ describe('readRuleGlobs', () => {
         '---',
         'description: x',
         'paths:',
-        "  - '.claude/context/**'",
+        "  - 'canon/context/**'",
         '---',
         '',
         '# Context entry standards',
@@ -154,7 +154,7 @@ describe('readRuleGlobs', () => {
     )
 
     expect(readRuleGlobs(root)).toEqual([
-      { rule: 'claude/510-context.md', globs: ['.claude/context/**'] },
+      { rule: 'claude/510-context.md', globs: ['canon/context/**'] },
     ])
   })
 
@@ -170,16 +170,14 @@ describe('readRuleGlobs', () => {
 
 describe('coveringRule', () => {
   const globs = [
-    { rule: 'claude/510-context.md', globs: ['.claude/context/**'] },
+    { rule: 'claude/510-context.md', globs: ['canon/context/**'] },
     { rule: 'claude/501-markdown.md', globs: ['**/*.md'] },
     { rule: 'claude/592-claude-md.md', globs: ['CLAUDE.md'] },
     { rule: 'core/097-non-interactive.md', globs: ['src/**/*.ts'] },
   ]
 
   it('should name the rule whose glob reaches under a named folder', () => {
-    expect(coveringRule('.claude/context/', globs)).toBe(
-      'claude/510-context.md',
-    )
+    expect(coveringRule('canon/context/', globs)).toBe('claude/510-context.md')
   })
 
   it('should reach a folder whose files are not markdown', () => {
@@ -222,7 +220,7 @@ describe('scanRouting', () => {
         '---',
         'description: x',
         'paths:',
-        "  - '.claude/context/**'",
+        "  - 'canon/context/**'",
         '---',
         '',
       ].join('\n'),
@@ -235,7 +233,7 @@ describe('scanRouting', () => {
         '## Behavior',
         '',
         '- Confirm before editing.',
-        '- Read `.claude/context/index.md` first.',
+        '- Read `canon/context/index.md` first.',
         '- Never write to `wiki/` unasked.',
         '',
       ].join('\n'),

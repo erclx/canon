@@ -129,7 +129,7 @@ describe('classifySpan', () => {
 
   it('should decline a path written with a placeholder segment', () => {
     for (const span of [
-      '.claude/context/<domain>.md',
+      'canon/context/<domain>.md',
       '.claude/diagrams/<kind>.md',
       'standards/<name>.md',
       '${CLAUDE_SKILL_DIR}/../../standards/<name>.md',

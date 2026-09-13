@@ -12,15 +12,17 @@ A concise reference for when to reach for which tool, organized by what you're t
 
 ## Documents
 
-Project docs split across two roots at the project root, on one mechanical line: what is committed lives in `.claude/`, and every gitignored session record lives in `.canon/`, which a single ignore entry covers.
+Project docs split across three roots at the project root. What the project authors and commits lives in `canon/`, what Claude Code reads lives in `.claude/`, and every gitignored session record lives in `.canon/`, which a single ignore entry covers.
 
 ```plaintext
-.claude/
+canon/
 ├── REQUIREMENTS.md  ← goals, non-goals, MVP scope
 ├── ARCHITECTURE.md  ← technical design decisions
 ├── DESIGN.md        ← visual intent and token decisions (UI projects)
-├── WIREFRAMES.md    ← ASCII wireframes: layout, UI copy, and interaction rules (UI projects)
-├── context/         ← per-domain narrative loaded on demand via index.md
+├── wireframes/      ← ASCII wireframes: layout, UI copy, and interaction rules (UI projects)
+└── context/         ← per-domain narrative loaded on demand via index.md
+
+.claude/
 └── rules/           ← path-scoped governance rules, written by canon gov install
 
 .canon/
@@ -31,9 +33,9 @@ Project docs split across two roots at the project root, on one mechanical line:
 └── tmp/             ← deletable scratch, safe to remove without loss
 ```
 
-A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git.
+A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context, wireframes, and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
 
-Three tiers of context load with different cost: always-loaded (root `CLAUDE.md`, `.claude/REQUIREMENTS.md`, `.claude/ARCHITECTURE.md`), path-scoped lazy (`.claude/rules/<scope>.md` with `paths:` glob), and on-demand lookup (`.claude/context/<domain>.md`, or `.claude/context/<domain>/` once a domain outgrows one file, discovered via `.claude/context/index.md`). See [the context model](../../.claude/context/context-model.md) for the full picture.
+Three tiers of context load with different cost: always-loaded (root `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`), path-scoped lazy (`.claude/rules/<scope>.md` with `paths:` glob), and on-demand lookup (`canon/context/<domain>.md`, or `canon/context/<domain>/` once a domain outgrows one file, discovered via `canon/context/index.md`). See [the context model](../../canon/context/context-model.md) for the full picture.
 
 Run `canon init` to seed the `.claude/` directory, a root `CLAUDE.md` file, and `.claude/rules/` in one pass. `canon init` chains claude init and governance install. Claude Code auto-loads every file in `.claude/rules/` at session start, applying always-on rules unconditionally and path-scoped rules to files matching their `paths:` glob.
 
@@ -84,7 +86,7 @@ When features are independent, run them in parallel instead of sequentially. Use
 
 To run several worktrees as a coordinated flow rather than ad hoc, assert the orchestrator role in one warm session with `canon:role-orchestrator`. It holds the cross-feature call, plans each feature itself or dispatches a cold planner under `canon:role-planner` to write the plan, refills the ready queue so a free worker never waits, and reviews each worker's PR with `canon:review-pr`, then tells the session holding that branch to run `canon:review-address` whenever the pass posted a finding at any severity, which is the same threshold `canon:review-pr` states and posts its open heading under. The human launches workers and merges. See [operating model](operating-model.md) for the full loop.
 
-Execution order comes off `.canon/tasks/priority.md` and nothing sequences work into versions. Scope stays in `.claude/REQUIREMENTS.md` as a statement of what is wanted, and it reaches the board as discrete tasks the orchestrator orders by readiness.
+Execution order comes off `.canon/tasks/priority.md` and nothing sequences work into versions. Scope stays in `canon/REQUIREMENTS.md` as a statement of what is wanted, and it reaches the board as discrete tasks the orchestrator orders by readiness.
 
 Run one orchestrator at a time. The board is gitignored, so a second session reads none of the first one's writes and the two collide on labels and archives.
 
@@ -157,7 +159,7 @@ The list stays written in the skill body as the fallback for a target whose inst
 
 #### Memory in the chain
 
-`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 8 rather than restating the order. A fact about a domain carrying an entry in `.claude/context/index.md` is routed to that entry, and `docs-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
+`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 8 rather than restating the order. A fact about a domain carrying an entry in `canon/context/index.md` is routed to that entry, and `docs-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
 
 Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
 
@@ -202,7 +204,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:setup-plugins`  | On a new machine, to install the community and official plugins user-scoped                                     |
 | `canon:setup-verify`   | After the agent generates configs, to run the installed scripts and report pass or fail                         |
 | `canon:setup-smoke`    | After `setup-verify` passes, to check the dev and preview servers, end-to-end tests, and the screenshot harness |
-| `canon:design-extract` | Before the first UI feature, to draft `.claude/DESIGN.md`                                                       |
+| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                         |
 | `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                            |
 | `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README          |
 
@@ -281,7 +283,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | -------------------------------- | ---------------------------------------------------------------------------------- |
 | `canon:seed-sync`                | After a toolkit update, to reconcile installed seeds without losing customizations |
 | `canon:migration-claude-md`      | When `CLAUDE.md` grew past what always-load context should carry                   |
-| `canon:migration-context`        | When `docs/` holds agent-flavored files belonging in `.claude/context/`            |
+| `canon:migration-context`        | When `docs/` holds agent-flavored files belonging in `canon/context/`              |
 | `canon:migration-superseded`     | When a drift report names a `.claude/` file a folder has replaced                  |
 | `canon:migration-standards-drop` | When the project still holds an installed `.claude/standards/` tree                |
 | `canon:canon-feedback-file`      | When something in the toolkit is broken, missing, or off                           |
@@ -297,8 +299,8 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:create-snippet`    | For a reusable prompt                                                                                                               |
 | `canon:create-standard`   | For a new authoring convention                                                                                                      |
 | `canon:draft-docs`        | For a brand-new `docs/*.md` page, drafted against `standards/docs.md`                                                               |
-| `canon:draft-context`     | For a brand-new `.claude/context/<domain>.md` entry, drafted against `standards/context.md`                                         |
-| `canon:draft-wireframes`  | For a brand-new `.claude/wireframes/<surface>.md` file, drafted against `standards/wireframes.md`                                   |
+| `canon:draft-context`     | For a brand-new `canon/context/<domain>.md` entry, drafted against `standards/context.md`                                           |
+| `canon:draft-wireframes`  | For a brand-new `canon/wireframes/<surface>.md` file, drafted against `standards/wireframes.md`                                     |
 | `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` and rendered through Mermaid or freehand SVG |
 | `canon:draft-readme`      | For a project's `README.md`, drafted against `standards/readme.md`                                                                  |
 | `canon:bash-script`       | For an interactive, human-facing shell tool                                                                                         |
@@ -335,4 +337,4 @@ review finds  → Session 2 (fix alongside review, before ship)
 
 ## Snippets
 
-For the full list of snippets that complement this workflow, see `.claude/context/snippets.md`.
+For the full list of snippets that complement this workflow, see `canon/context/snippets.md`.

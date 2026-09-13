@@ -5,16 +5,16 @@ description: Governance rules and stack definitions. Source `.md` files install 
 
 # Governance
 
-Read `.claude/context/governance/overview.md` for the system overview and `.claude/context/governance/stacks.md` for stack structure before editing.
+Read `canon/context/governance/overview.md` for the system overview and `canon/context/governance/stacks.md` for stack structure before editing.
 
 ## Rules
 
-- Read `.claude/context/governance/rules.md` for the numbering ranges before picking a number for a new rule.
+- Read `canon/context/governance/rules.md` for the numbering ranges before picking a number for a new rule.
 - Follow `standards/rule.md` for frontmatter, heading style, and bullet conventions when writing a new rule file.
 - `rule_subdir` is all that is left in `scripts/lib/gov.sh`. Frontmatter stripping is `src/frontmatter.ts`. Do not duplicate either.
 - Every verb is TypeScript and `scripts/gov/` is gone. The sync engine is `src/sync/engine.ts`, the gov adapter is `src/gov/adapter.ts`, the payload builder is `src/gov/payload.ts`, the stack resolver is `src/gov/stacks.ts`, and the catalog behind `list` is `src/gov/list.ts`.
 - Changing what counts as a change, or where a rule's source lives, belongs in the adapter. Changing the scan report, the prompt, or the apply loop belongs in the engine, where snippets and standards will inherit it.
-- `internal/rules/` follows the same numbering and frontmatter convention as `governance/rules/`, per `.claude/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.
+- `internal/rules/` follows the same numbering and frontmatter convention as `governance/rules/`, per `canon/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.
 
 ## Install path
 
@@ -44,5 +44,5 @@ After writing or revising a rule, audit each bullet against the checklist. Trigg
 
 ## Reference
 
-- `.claude/context/governance/index.md`: the domain catalog, with the overview, rules and their numbering, stacks, and install and sync as sub-areas
+- `canon/context/governance/index.md`: the domain catalog, with the overview, rules and their numbering, stacks, and install and sync as sub-areas
 - `standards/rule.md`: conventions for writing rule files

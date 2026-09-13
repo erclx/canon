@@ -51,7 +51,7 @@ EOF
 EOF
 
   mkdir -p .claude
-  cat <<'EOF' >.claude/DESIGN.md
+  cat <<'EOF' >canon/DESIGN.md
 ---
 title: Design
 description: Tokens, typography, and the treatments still unresolved

@@ -80,7 +80,7 @@ Sticky negative knowledge. Do not relearn.
 
 ## CI docs (extend)
 
-Extend `.claude/context/ci.md` so the `## Checks` table reflects the web jobs.
+Extend `canon/context/ci.md` so the `## Checks` table reflects the web jobs.
 
 Append rows:
 
@@ -94,7 +94,7 @@ Under `## Running CI locally`, document that `bun run check:full` runs verify pl
 
 ## Development docs (extend)
 
-Extend the `development` context entry under `.claude/context/` so the `## Scripts` table lists every web script. Stack adapters add their `dev`, `build`, `preview`, `typecheck` rows.
+Extend the `development` context entry under `canon/context/` so the `## Scripts` table lists every web script. Stack adapters add their `dev`, `build`, `preview`, `typecheck` rows.
 
 Append rows:
 

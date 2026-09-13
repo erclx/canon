@@ -26,7 +26,7 @@ Read in parallel, skipping any that do not exist:
 - `${CLAUDE_SKILL_DIR}/../../standards/memory.md`: the filename, frontmatter, body shape, and lifecycle every entry follows
 - `CLAUDE.md`: the project's write location and any rule it states over the folder
 - `.canon/memory/index.md`: existing index, to avoid duplicates
-- `.claude/context/index.md`: the domain catalog Step 3 routes against
+- `canon/context/index.md`: the domain catalog Step 3 routes against, read under `.claude/` instead in a project the surface move has not reached
 - `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting applied to memory file bodies
 - The `write-human` skill: voice, rhythm, and sentence construction applied to memory file bodies
 
@@ -40,16 +40,16 @@ Scan the whole session rather than its last exchange. A rule the user stated ear
 
 Only a **project** candidate is routable. Feedback, user, and reference describe how to work or who to ask rather than how a domain behaves, and no context entry owns them.
 
-For each project candidate, match its subject against `.claude/context/index.md`. The test is a named entry, not a judgment about fit: the fact names a surface that already has an entry in the catalog. Route it to that entry.
+For each project candidate, match its subject against `canon/context/index.md`. The test is a named entry, not a judgment about fit: the fact names a surface that already has an entry in the catalog. Route it to that entry.
 
 Fail closed. A project candidate matching no entry stays a memory file, and so does one matching two entries where neither is clearly the owner. The residue is what the folder is for, and a fact filed under the wrong entry is worse than one in memory because a context entry is a surface sessions trust.
 
-Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `.claude/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation the shell does directly, so send it as a plain single `Bash` command carrying a heredoc:
+Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation the shell does directly, so send it as a plain single `Bash` command carrying a heredoc:
 
 A flat domain takes:
 
 ```markdown
-## .claude/context/<domain>.md
+## canon/context/<domain>.md
 
 <the fact in one or two sentences, stated as a fact about the domain rather than as a session narrative>
 ```
@@ -57,7 +57,7 @@ A flat domain takes:
 A domain split into a folder takes its own generated index instead:
 
 ```markdown
-## .claude/context/<domain>/index.md
+## canon/context/<domain>/index.md
 
 <the fact in one or two sentences, stated as a fact about the domain rather than as a session narrative>
 ```
@@ -90,7 +90,7 @@ Run `canon records validate memory` when the writes are done and fix what it nam
 
 Respond with one line per fact routed, written, or updated:
 
-- `➡️ Routed: <fact subject> → .claude/context/<domain>.md` for a flat entry, or `→ .claude/context/<domain>/index.md` for a nested one, matching the heading the routing file carries
+- `➡️ Routed: <fact subject> → canon/context/<domain>.md` for a flat entry, or `→ canon/context/<domain>/index.md` for a nested one, matching the heading the routing file carries
 - `✅ Wrote: .canon/memory/<file> (<type>)`
 - `✏️ Updated: .canon/memory/<file> (<type>)`
 

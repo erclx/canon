@@ -126,7 +126,7 @@ describe('generateBoard', () => {
     generate(outDir)
 
     const html = readFileSync(join(outDir, 'tokens', 'index.html'), 'utf8')
-    expect(html).toContain('No .claude/DESIGN.md')
+    expect(html).toContain('No canon/DESIGN.md')
   })
 
   it('renders a wireframe file as-is inside a pre block', () => {

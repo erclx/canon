@@ -82,7 +82,7 @@ export function namedPaths(line: string): string[] {
  * The openable part of a token, which for a shape is the folder above the
  * placeholder.
  *
- * `.claude/context/<domain>.md` names `.claude/context/` and nothing narrower,
+ * `canon/context/<domain>.md` names `canon/context/` and nothing narrower,
  * so dropping the whole token would report the section that carries it as
  * naming no path at all. A token whose placeholder sits in the first segment
  * has no openable prefix and is dropped.

@@ -17,7 +17,7 @@ The threshold is what the remaining folder lives or dies on. A first-occurrence 
 
 - Resolve every read and write at the main worktree root, so parallel worktrees write one folder
 - Classify each candidate as feedback, project, user, or reference before routing or writing
-- Route a project candidate whose subject names an entry in `.claude/context/index.md` to that entry, and hand it off as a file rather than an edit
+- Route a project candidate whose subject names an entry in `canon/context/index.md` to that entry, and hand it off as a file rather than an edit
 - Keep a candidate that matches no entry, or two entries with no clear owner, as a memory file
 - Apply the save threshold, firing feedback only on an explicit correction or a pattern that repeated twice
 - Grep the folder for an existing file on the topic and update it in place rather than adding a second

@@ -1,6 +1,7 @@
 ---
-description: Route .claude/ARCHITECTURE.md edits to the architecture standard for system decisions and risks
+description: Route canon/ARCHITECTURE.md edits to the architecture standard for system decisions and risks
 paths:
+  - 'canon/ARCHITECTURE.md'
   - '.claude/ARCHITECTURE.md'
 ---
 

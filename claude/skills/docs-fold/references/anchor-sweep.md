@@ -9,7 +9,7 @@ Mechanics for Step 5 of `docs-fold`. The body owns the skip conditions, the repo
 
 ## Anchored entries
 
-Read `.claude/ARCHITECTURE.md` and take the H3 entries under `## Key technical decisions`. An entry is anchored when its reasoning closes on the marker the standard fixes:
+Read `canon/ARCHITECTURE.md` and take the H3 entries under `## Key technical decisions`. An entry is anchored when its reasoning closes on the marker the standard fixes:
 
 ```plaintext
 Measured at <short-sha> on <YYYY-MM-DD>.

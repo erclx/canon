@@ -19,7 +19,7 @@ Markdown note-taking app. v2 launch adds inline edit on click.
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >.claude/REQUIREMENTS.md
+    cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
 ## Audience

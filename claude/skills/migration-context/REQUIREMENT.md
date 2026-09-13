@@ -11,7 +11,7 @@ Without this skill, a session judges a `docs/` file agent-facing, moves it, and 
 
 Three more failures share a cause. The skill reads a folder two other surfaces also write, and a proposal blind to them destroys work.
 
-A seed-derived `development.md` moved out of `docs/` comes back on the next seed sync. A move onto an existing `.claude/context/` filename overwrites the entry sitting there. A proposal drafted while `migration-claude-md` is proposing entries into the same folder cannot see those targets, and running the two in the wrong order turns a legitimate move into a skipped conflict.
+A seed-derived `development.md` moved out of `docs/` comes back on the next seed sync. A move onto an existing `canon/context/` filename overwrites the entry sitting there. A proposal drafted while `migration-claude-md` is proposing entries into the same folder cannot see those targets, and running the two in the wrong order turns a legitimate move into a skipped conflict.
 
 ## Must
 
@@ -32,5 +32,5 @@ A seed-derived `development.md` moved out of `docs/` comes back on the next seed
 
 ## Out of scope
 
-- Classifying `CLAUDE.md` sections, which `migration-claude-md` proposes into this same `.claude/context/` folder. Run this skill first when both apply, so that skill's append-or-create check reads a folder the moves have already populated.
-- Regenerating `.claude/context/index.md`, which `canon indexes regen` does once the user has applied the moves
+- Classifying `CLAUDE.md` sections, which `migration-claude-md` proposes into this same `canon/context/` folder. Run this skill first when both apply, so that skill's append-or-create check reads a folder the moves have already populated.
+- Regenerating `canon/context/index.md`, which `canon indexes regen` does once the user has applied the moves

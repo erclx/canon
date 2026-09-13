@@ -11,7 +11,7 @@ The nextjs stack covers Next.js + TypeScript projects using the App Router. It s
 1. Scaffold with `bunx create-next-app@latest <name> --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-bun --skip-install --disable-git --no-agents-md --yes`. `--no-agents-md` skips the scaffold-time `AGENTS.md`/`CLAUDE.md` write, which otherwise duplicates the root `CLAUDE.md`.
 2. Install web tooling: `canon tooling sync web . --write`
 3. Install nextjs configs: `canon tooling sync nextjs . --write`
-4. Extend the `ci` and `development` context entries under `.claude/context/` per the web reference's extend sections plus the nextjs rows below.
+4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the nextjs rows below.
 5. Run `bun run lint:fix` then `bun run check`.
 
 ## What ships as golden configs
@@ -50,4 +50,4 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `.claude/context/ci.md`, the Typecheck row's assertion reads: `` `next typegen && tsc --noEmit` passes ``.
+In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `next typegen && tsc --noEmit` passes ``.

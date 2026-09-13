@@ -29,13 +29,13 @@ Run each prompt in a fresh session. Invoke with `/internal-ask <question>`. Judg
 ## 5. two-file ambiguity
 
 - **Prompt:** `/internal-ask how do skills get installed from the toolkit into a project?`
-- **Expected source:** `.claude/context/claude-plugin/distribution.md` and `wiki/claude/claude-skills.md` both plausible. Either one alone is acceptable. Two-file `Source:` line is also acceptable.
+- **Expected source:** `canon/context/claude-plugin/distribution.md` and `wiki/claude/claude-skills.md` both plausible. Either one alone is acceptable. Two-file `Source:` line is also acceptable.
 - **Shape:** tests the "read at most two" rule.
 
 ## 6. escalation to CLAUDE.md / REQUIREMENTS.md
 
 - **Prompt:** `/internal-ask what are the non-goals of this toolkit?`
-- **Expected source:** `.claude/REQUIREMENTS.md`
+- **Expected source:** `canon/REQUIREMENTS.md`
 - **Shape:** neither index lists this directly. Should fall through to the requirements doc, not guess from docs/.
 
 ## 7. not covered

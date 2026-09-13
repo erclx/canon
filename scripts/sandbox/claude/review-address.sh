@@ -36,11 +36,11 @@ Task API. Route handlers live in `src/`.
 
 ## Commands
 
-- `bun run check`: regenerate `.claude/context/index.md`, then lint and typecheck
+- `bun run check`: regenerate `canon/context/index.md`, then lint and typecheck
 
 ## Indexes
 
-- Never hand-edit `.claude/context/index.md`. `bun run check` regenerates it from sibling frontmatter.
+- Never hand-edit `canon/context/index.md`. `bun run check` regenerates it from sibling frontmatter.
 EOF
 
   mkdir -p scripts
@@ -48,11 +48,11 @@ EOF
 #!/usr/bin/env bash
 set -e
 
-out=".claude/context/index.md"
+out="canon/context/index.md"
 
 {
   printf -- '---\ntitle: Context\ndescription: Per-domain narrative loaded on demand\n---\n\n# Context\n\n'
-  for entry in .claude/context/*.md; do
+  for entry in canon/context/*.md; do
     if [ "$entry" = "$out" ]; then
       continue
     fi
@@ -70,8 +70,8 @@ export function createTask(title: string) {
 }
 EOF
 
-  mkdir -p .claude/context
-  cat <<'EOF' >.claude/context/api.md
+  mkdir -p canon/context
+  cat <<'EOF' >canon/context/api.md
 ---
 title: API
 description: Task creation endpoint and handlers in src/tasks.ts
@@ -145,7 +145,7 @@ stage_setup() {
     log_info "Context: open PR on feat/create-endpoint with one should-fix review finding posted"
     log_info "Action:  /review-address"
     log_info "Expect:  reads the finding, adds the empty-title guard, verify passes"
-    log_info "         refreshes the now-stale .claude/context/api.md validation line"
+    log_info "         refreshes the now-stale canon/context/api.md validation line"
     log_info "         pushes a follow-up commit, then posts a summary reply comment, does NOT merge"
     log_info "         once CI goes green, edits that reply in place for the closing confirmation"
     log_info "         rather than posting it as a second comment"
@@ -153,7 +153,7 @@ stage_setup() {
   "stale")
     start_feature_branch
 
-    cat <<'EOF' >.claude/context/handlers.md
+    cat <<'EOF' >canon/context/handlers.md
 ---
 title: Handlers
 description: Request shape each route handler in src/tasks.ts accepts
@@ -166,7 +166,7 @@ EOF
 
     bash scripts/regen-index.sh
 
-    cat <<'EOF' >.claude/context/api.md
+    cat <<'EOF' >canon/context/api.md
 ---
 title: API
 description: Task creation endpoint and handlers in src/tasks.ts
@@ -184,7 +184,7 @@ EOF
     # The sibling lands on main after the PR opens, which is what makes the branch stale.
     git checkout -q -B sibling "$base_commit"
 
-    cat <<'EOF' >.claude/context/limits.md
+    cat <<'EOF' >canon/context/limits.md
 ---
 title: Limits
 description: Per-client request ceiling the task endpoints enforce
@@ -197,7 +197,7 @@ EOF
 
     bash scripts/regen-index.sh
 
-    cat <<'EOF' >.claude/context/api.md
+    cat <<'EOF' >canon/context/api.md
 ---
 title: API
 description: Task creation endpoint and handlers in src/tasks.ts
@@ -215,8 +215,8 @@ EOF
     log_step "Scenario ready: worker rebases a branch that went stale during review"
     log_info "Context: open PR on feat/create-endpoint with one should-fix review finding posted"
     log_info "  A sibling landed on main after the PR opened, touching the same two files"
-    log_info "  .claude/context/api.md conflicts and both sides are content worth keeping"
-    log_info "  .claude/context/index.md conflicts and bun run check rebuilds it"
+    log_info "  canon/context/api.md conflicts and both sides are content worth keeping"
+    log_info "  canon/context/index.md conflicts and bun run check rebuilds it"
     log_info ""
     log_info "Action:  /review-address"
     log_info "Expect:  addresses the finding first, then detects the branch no longer merges"

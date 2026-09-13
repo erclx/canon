@@ -23,13 +23,13 @@ export type SurfaceRoot = (typeof SURFACE_ROOTS)[number]
 /**
  * The root a surface is created at when neither root carries it yet.
  *
- * Disagreeing with the head of the read order for exactly one release: read
- * precedence is new-first so a tree that has moved is never answered from the
- * copy left behind, while creation stays at the old root so nothing writes a
- * fresh tracked file under a root a target's installed binary may not resolve
- * yet. A later batch flips this once a release carries the read side.
+ * It agrees with the head of the read precedence. While the two disagreed,
+ * creation stayed at `.claude/` so nothing wrote a fresh tracked file under a
+ * root a target's installed binary could not resolve. A release carries the
+ * read side now, so a fresh project scaffolds one root and an unmoved one keeps
+ * resolving its own surfaces through the fallback above.
  */
-export const CREATION_ROOT: SurfaceRoot = '.claude'
+export const CREATION_ROOT: SurfaceRoot = 'canon'
 
 /**
  * Every tracked surface this module resolves, at the name `.claude/` gives it.
@@ -56,6 +56,18 @@ export function spell(root: SurfaceRoot, entry: string): string {
 }
 
 /**
+ * The creation default for one entry.
+ *
+ * The stamp folder keeps creating under `.claude/` until its own move lands,
+ * since the install stamp and the audits baseline still write there by a
+ * fixed path. A read resolving to `canon/config/` in a fresh project would
+ * answer from a folder nothing writes.
+ */
+function creationRootFor(entry: string): SurfaceRoot {
+  return entry === 'canon' ? '.claude' : CREATION_ROOT
+}
+
+/**
  * The root a surface resolves at: the first that carries it, and the creation
  * default when neither does.
  */
@@ -63,7 +75,7 @@ function rootOf(root: string, entry: string): SurfaceRoot {
   return (
     SURFACE_ROOTS.find((candidate) =>
       existsSync(join(root, candidate, spell(candidate, entry))),
-    ) ?? CREATION_ROOT
+    ) ?? creationRootFor(entry)
   )
 }
 
@@ -80,6 +92,26 @@ export function surfaceDir(
 ): string {
   const at = rootOf(root, entry)
   return join(root, at, spell(at, entry), ...rest)
+}
+
+/**
+ * Where a path authored at the `canon/` spelling lands under `root`.
+ *
+ * A seed tree authors every surface once, at the new root, while a target may
+ * still hold that surface under `.claude/`. Writing the literal path there
+ * would open a `canon/` copy that wins read precedence and hides every entry
+ * the target already wrote, so the entry resolves the way a read does. A path
+ * naming no surface entry is joined as written.
+ */
+export function resolveSurfacePath(root: string, rel: string): string {
+  const [head, entry, ...rest] = rel.split(/[\\/]/)
+
+  if (head !== 'canon' || entry === undefined || entry === 'canon') {
+    return join(root, rel)
+  }
+  if (!SURFACE_ENTRIES.includes(entry)) return join(root, rel)
+
+  return surfaceDir(root, entry, ...rest)
 }
 
 /**

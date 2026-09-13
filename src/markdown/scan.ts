@@ -206,7 +206,7 @@ export function maskDisplayed(text: string): string {
  * A code span is walked around rather than through, since keeping it counted
  * and then dropping spans from inside it takes back the decision. The
  * placeholders this repository writes are the case: a reader is shown all of
- * `.claude/context/<domain>.md` and the autolink pattern reaches the angle
+ * `canon/context/<domain>.md` and the autolink pattern reaches the angle
  * brackets in the middle of it.
  */
 export function visibleText(text: string): string {

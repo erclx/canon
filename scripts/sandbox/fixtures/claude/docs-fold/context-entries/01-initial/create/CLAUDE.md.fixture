@@ -4,8 +4,8 @@ Mixed web and api project.
 
 ## Context
 
-- Always loaded: this file, `.claude/REQUIREMENTS.md`, `.claude/ARCHITECTURE.md`
-- On-demand lookup: `.claude/context/<domain>.md`. Check `.claude/context/index.md` first.
+- Always loaded: this file, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`
+- On-demand lookup: `canon/context/<domain>.md`. Check `canon/context/index.md` first.
 
 ## Commands
 

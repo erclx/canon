@@ -60,8 +60,8 @@ Detect the mode from the folder. Do not ask which one to run.
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: behavior rules, conventions, commands
-- `.claude/REQUIREMENTS.md`: scope and non-goals
-- `.claude/ARCHITECTURE.md`: decisions already made
+- `canon/REQUIREMENTS.md`: scope and non-goals
+- `canon/ARCHITECTURE.md`: decisions already made
 - `.canon/tasks/index.md`: what is already tracked, and what a prior track concluded. Open a task file only when its entry looks related.
 
 Then read only what a live question needs. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.

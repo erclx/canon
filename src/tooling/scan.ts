@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections } from '@/tooling/gitignore'
 import { ancestorsFirst, listFiles, type Manifest } from '@/tooling/manifest'
 import {
@@ -79,7 +80,9 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
       seeds.push({
         rel,
-        state: existsSync(join(target, rel)) ? 'present' : 'missing',
+        state: existsSync(resolveSurfacePath(target, rel))
+          ? 'present'
+          : 'missing',
       })
     }
   }

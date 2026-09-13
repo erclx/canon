@@ -7,7 +7,7 @@
  * application three times, so the set moved here and the body now calls a verb
  * that reads it. Being machine-parsed makes it permanently exempt from any
  * later design that folds a standard back into the surface citing it, per the
- * machine-parsed clause in `.claude/ARCHITECTURE.md`.
+ * machine-parsed clause in `canon/ARCHITECTURE.md`.
  */
 
 /**

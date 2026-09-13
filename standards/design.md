@@ -1,15 +1,15 @@
 ---
 title: Design reference
-description: Shape and content rules for .claude/DESIGN.md
+description: Shape and content rules for canon/DESIGN.md
 ---
 
 # Design reference
 
-Applies to `.claude/DESIGN.md`. Captures visual intent and the decisions behind how things look, not a style guide, component spec, or framework reference. Update when a visual decision is made or a rule changes.
+Applies to `canon/DESIGN.md`. Captures visual intent and the decisions behind how things look, not a style guide, component spec, or framework reference. Update when a visual decision is made or a rule changes.
 
 ## Scope
 
-Governs the visual-intent document at `.claude/DESIGN.md`: tokens described as intent, layout constraints, and the omissions that keep visual scope closed.
+Governs the visual-intent document at `canon/DESIGN.md`: tokens described as intent, layout constraints, and the omissions that keep visual scope closed.
 
 Does not govern:
 

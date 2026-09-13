@@ -244,7 +244,7 @@ The line is what lets a merge close its own task. Every merge on `main` is a squ
 
 - Class names, file paths, function names, or prop names in any entry or title
 - Code-level steps or implementation detail. Behavioral specifics are fine.
-- Architectural reasoning that outlives the task. A finding explains why this task is shaped as it is. A decision the system keeps after the task closes belongs in `.claude/ARCHITECTURE.md`.
+- Architectural reasoning that outlives the task. A finding explains why this task is shaped as it is. A decision the system keeps after the task closes belongs in `canon/ARCHITECTURE.md`.
 - Narrative of the session that produced the task. A finding states what constrains the task, so what was probed, what it cost, and who decided belongs in the groundwork folder the `Groundwork:` line names. A task with no groundwork folder cuts the narrative rather than relocating it, since the board is not the fallback destination for it.
 - "In progress" or "Blocked" headings. Note status inline on the outcome instead.
 - Sequencing rationale or which version is active. Why this task is planned before its neighbors goes on its row in `priority.md`, in the cell that already carries what it is waiting on. Rationale wider than one row has no home at all, so cut it rather than filing it here.

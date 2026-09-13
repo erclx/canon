@@ -47,7 +47,7 @@ pattern = 'installer at `src/gov/install\.ts` carries 4 rules today, which is sm
 # too, so a sweep keying on the path rather than on the anchor annotates it, and
 # a writer ignoring the forward scope dates a decision written before the rule.
 [[content]]
-path = ".claude/ARCHITECTURE.md"
+path = "canon/ARCHITECTURE.md"
 pattern = 'Overwriting keeps the target uniform and discards the local edits a project made deliberately, and those edits are the reason install copies in the first place\.\n\n### The planner runs ahead of the installer$'
 
 # The control entry is anchored and its cited path never enters the diff, so it

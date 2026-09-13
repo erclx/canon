@@ -1,7 +1,8 @@
 import { existsSync, statSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import { SUBDIRS } from '@/claude/seeds'
 import { creationRel, isRecordEntry } from '@/record-root'
+import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
 import type { StampDomain } from '@/sync/stamp'
 
 const CLAUDE_DIR = '.claude'
@@ -70,13 +71,16 @@ export function collectSuperseded(target: string): SupersededEntry[] {
     const rel = join(CLAUDE_DIR, `${subdir.toUpperCase()}.md`)
     if (!isFile(join(target, rel))) continue
 
-    // A record subdir now lives under the record root, so the replacement this
-    // names is resolved against the target rather than fixed at `.claude/`.
-    // Naming a folder the target does not have sends a person to migrate their
-    // legacy file into a path nothing reads.
+    // A record subdir lives under the record root and a tracked surface under
+    // the surface root, so the replacement this names is resolved against the
+    // target rather than fixed at `.claude/`. Naming a folder the target does
+    // not have sends a person to migrate their legacy file into a path nothing
+    // reads.
     const replacedBy = isRecordEntry(subdir)
       ? creationRel(target, subdir)
-      : join(CLAUDE_DIR, subdir)
+      : SURFACE_ENTRIES.includes(subdir)
+        ? relative(target, surfaceDir(target, subdir))
+        : join(CLAUDE_DIR, subdir)
 
     entries.push({ rel, replacedBy })
   }

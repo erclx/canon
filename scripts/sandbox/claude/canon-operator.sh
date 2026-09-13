@@ -30,8 +30,8 @@ EOF
     log_info "Assert:  declared in fixtures/claude/canon-operator/fresh/expect.toml"
     ;;
   "audits")
-    mkdir -p .claude/context .canon/plans
-    cat <<'EOF' >.claude/context/billing.md
+    mkdir -p canon/context .canon/plans
+    cat <<'EOF' >canon/context/billing.md
 ---
 title: Billing
 description: Subscription state, the invoice job, and the two retry paths
@@ -43,7 +43,7 @@ description: Subscription state, the invoice job, and the two retry paths
 
 Subscriptions renew nightly and the invoice job writes one row per renewal.
 EOF
-    cat <<'EOF' >.claude/context/index.md
+    cat <<'EOF' >canon/context/index.md
 ---
 title: Context
 description: Per-domain narrative loaded on demand
@@ -87,7 +87,7 @@ EOF
     git add . && git commit -m "chore(sandbox): context and plans without source for canon-operator" --no-verify -q
 
     log_step "Scenario ready: canon-operator skill on a target carrying two of four audit surfaces"
-    log_info "Context: .claude/context/ and .canon/plans/ present, no TypeScript or shell source"
+    log_info "Context: canon/context/ and .canon/plans/ present, no TypeScript or shell source"
     log_info "Action:  /canon:canon-operator then 'what can you measure about this project'"
     log_info "Expect:  names the setup-init handoff, then offers the context and records audits, withholds the comment scan"
     log_info "Assert:  declared in fixtures/claude/canon-operator/audits/expect.toml"

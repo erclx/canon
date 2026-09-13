@@ -23,7 +23,7 @@ fi
 # stages disagree about what the same condition means.
 seed_roots=$(collect_seed_roots)
 if [ -z "$seed_roots" ]; then
-  echo "No seed root carries .claude/, nothing to check." >&2
+  echo "No seed root carries .claude/ or canon/, nothing to check." >&2
   exit 0
 fi
 
@@ -36,9 +36,12 @@ measured=0
 while IFS= read -r seed_root; do
   while IFS= read -r file; do
     measured=$((measured + 1))
+    # A token followed by `/` is the tracked surface root, a folder the seed
+    # itself installs, rather than the binary. Every other spelling still
+    # reports, which keeps a verb, a plugin skill prefix, and a bare mention in.
     while IFS= read -r hit; do
       cited="$cited  ${file#"$PROJECT_ROOT/"}:$hit"$'\n'
-    done < <(grep -n "$TOOLKIT_TOKEN" "$file" || true)
+    done < <(grep -nE "${TOOLKIT_TOKEN}([^/]|$)" "$file" || true)
   done < <(find "$PROJECT_ROOT/$seed_root" -type f -name '*.md')
 done <<<"$seed_roots"
 

@@ -11,7 +11,7 @@ Without this skill, a session asked to slim `CLAUDE.md` deletes sections it judg
 
 Three more failures share a cause. The session has no baseline for what belongs in `CLAUDE.md`, so it reads toolkit-seeded always-load behavior as bloat and proposes moving it, and the next seed sync puts it back. A section carrying a rule and a narrative together gets sorted whole into one bucket, which loses half of it either way. And a target that already exists gets written over, since a proposal blind to the folder cannot tell a create from a collision.
 
-The skill also writes into `.claude/context/`, a folder `migration-context` moves files into. A proposal drafted before those moves land cannot see the entries they create, so a move that should have resolved to an append reads as a create.
+The skill also writes into `canon/context/`, a folder `migration-context` moves files into. A proposal drafted before those moves land cannot see the entries they create, so a move that should have resolved to an append reads as a create.
 
 ## Must
 
@@ -35,6 +35,6 @@ The skill also writes into `.claude/context/`, a folder `migration-context` move
 
 ## Out of scope
 
-- Relocating `docs/` files, which `migration-context` proposes into this same `.claude/context/` folder. Run that skill first when both apply, so Step 3 reads a folder its moves have already populated.
+- Relocating `docs/` files, which `migration-context` proposes into this same `canon/context/` folder. Run that skill first when both apply, so Step 3 reads a folder its moves have already populated.
 - Scaffolding the rule files it proposes, which `create-rule` does with the numbering and frontmatter
-- Regenerating `.claude/context/index.md`, which `canon indexes regen` does once the user has applied the moves
+- Regenerating `canon/context/index.md`, which `canon indexes regen` does once the user has applied the moves

@@ -72,7 +72,7 @@ export const SETUP_CASES: readonly SkillCase[] = [
   },
   // The performing skill wins a phrase naming its operation over the front
   // door's own routing framing, even though canon-operator's description
-  // quotes a phrase near this one. See .claude/context/cli/audits.md.
+  // quotes a phrase near this one. See canon/context/cli/audits.md.
   {
     prompt:
       "Whatever the right toolkit command is, get this project's rules installed.",

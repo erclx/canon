@@ -35,9 +35,9 @@ ENTRY
 }
 
 seed_folder() {
-  mkdir -p .claude/context
+  mkdir -p canon/context
 
-  cat <<'INDEX' >.claude/context/index.md
+  cat <<'INDEX' >canon/context/index.md
 ---
 title: Context
 subtitle: Per-domain narrative loaded on demand
@@ -51,26 +51,26 @@ Per-domain narrative loaded on demand
 - [Web](web.md): Client rendering and routing
 INDEX
 
-  write_entry .claude/context/api.md API
-  write_entry .claude/context/web.md Web
+  write_entry canon/context/api.md API
+  write_entry canon/context/web.md Web
 }
 
 list_entry() {
   local name=$1 title=$2
   printf -- '- [%s](%s): Narrative for the %s domain\n' \
-    "$title" "$name" "$title" >>.claude/context/index.md
+    "$title" "$name" "$title" >>canon/context/index.md
 }
 
 seed_citation() {
   mkdir -p docs
   printf 'Read `%s` before touching the routes.\n' \
-    '.claude/context/api.md' >docs/onboarding.md
+    'canon/context/api.md' >docs/onboarding.md
 }
 
 seed_stale_citation() {
   mkdir -p docs
   printf 'Read `%s` for the retrieval flow.\n' \
-    '.claude/context/retrieval.md' >docs/onboarding.md
+    'canon/context/retrieval.md' >docs/onboarding.md
 }
 
 # Three shapes that display a path rather than pointing at one. Each is
@@ -85,19 +85,19 @@ seed_illustrations() {
 A reference is written as inline code.
 
 ```markdown
-Bad: See [.claude/context/retrieval.md](.claude/context/retrieval.md) for the flow.
-Good: See `.claude/context/retrieval.md` for the flow.
+Bad: See [canon/context/retrieval.md](canon/context/retrieval.md) for the flow.
+Good: See `canon/context/retrieval.md` for the flow.
 ```
 STANDARD
 
   printf 'One `%s` per domain. <!-- audit-ignore-citations -->\n' \
-    '.claude/context/<domain>.md' >docs/layout.md
+    'canon/context/<domain>.md' >docs/layout.md
   printf 'Names `%s` inside its own fixture tree.\n' \
-    '.claude/context/pollers.md' >scripts/sandbox/infra/fake.sh
+    'canon/context/pollers.md' >scripts/sandbox/infra/fake.sh
 }
 
 seed_deep_entry() {
-  mkdir -p .claude/context
+  mkdir -p canon/context
 
   {
     printf -- '---\ntitle: Deep\ndescription: An entry with one long unbroken run\n---\n\n'
@@ -105,13 +105,13 @@ seed_deep_entry() {
     for i in $(seq 1 60); do printf 'Sentence %s of the run.\n' "$i"; done
     printf '\n## Peers\n\n'
     for i in $(seq 1 60); do printf -- '- Peer item %s\n' "$i"; done
-  } >.claude/context/deep.md
+  } >canon/context/deep.md
 
   list_entry deep.md Deep
 }
 
 seed_tables() {
-  mkdir -p .claude/context
+  mkdir -p canon/context
 
   {
     printf -- '---\ntitle: Tables\ndescription: A growing catalog beside a fixed table\n---\n\n'
@@ -121,15 +121,15 @@ seed_tables() {
     printf '\n## Comparison\n\n'
     printf '| Concern | Tradeoff |\n| --- | --- |\n'
     for i in $(seq 1 8); do printf '| Concern %s | Some prose about it |\n' "$i"; done
-  } >.claude/context/tables.md
+  } >canon/context/tables.md
 
   list_entry tables.md Tables
 }
 
 seed_drift() {
   seed_folder
-  write_entry .claude/context/sandbox.md Sandbox
-  rm .claude/context/web.md
+  write_entry canon/context/sandbox.md Sandbox
+  rm canon/context/web.md
 }
 
 # Three shapes the required-section rule reads differently. A short entry in the
@@ -138,9 +138,9 @@ seed_drift() {
 # arm seeding only the first would pass while both halves of the unit rule went
 # unmeasured.
 seed_short_sections() {
-  mkdir -p .claude/context/scripts
+  mkdir -p canon/context/scripts
 
-  cat <<'INDEX' >.claude/context/index.md
+  cat <<'INDEX' >canon/context/index.md
 ---
 title: Context
 subtitle: Per-domain narrative loaded on demand
@@ -154,7 +154,7 @@ Per-domain narrative loaded on demand
 - [Short](short.md): An entry declaring neither required section
 INDEX
 
-  cat <<'ENTRY' >.claude/context/ci.md
+  cat <<'ENTRY' >canon/context/ci.md
 ---
 title: CI
 description: An entry declaring both required sections
@@ -171,7 +171,7 @@ Owns the workflow that gates a merge.
 - `.github/workflows/` owns the workflow definitions
 ENTRY
 
-  cat <<'ENTRY' >.claude/context/short.md
+  cat <<'ENTRY' >canon/context/short.md
 ---
 title: Short
 description: An entry declaring neither required section
@@ -184,7 +184,7 @@ description: An entry declaring neither required section
 On every push to a pull request.
 ENTRY
 
-  cat <<'INDEX' >.claude/context/scripts/index.md
+  cat <<'INDEX' >canon/context/scripts/index.md
 ---
 title: Scripts
 subtitle: Bash entry points and the shared lib surface
@@ -198,7 +198,7 @@ Bash entry points and the shared lib surface
 - [Lib](lib.md): Shared functions sourced by domain scripts
 INDEX
 
-  cat <<'ENTRY' >.claude/context/scripts/overview.md
+  cat <<'ENTRY' >canon/context/scripts/overview.md
 ---
 title: Overview
 description: Structure of the scripts domain
@@ -211,7 +211,7 @@ description: Structure of the scripts domain
 - `scripts/lib/` owns shared bash functions sourced by domain scripts
 ENTRY
 
-  cat <<'ENTRY' >.claude/context/scripts/lib.md
+  cat <<'ENTRY' >canon/context/scripts/lib.md
 ---
 title: Lib
 description: Shared functions sourced by domain scripts
@@ -280,7 +280,7 @@ stage_setup() {
     run_audit
     log_info "Expect: short.md alone reported, missing Overview and Layout"
     log_info "Expect: ci.md beside it answers for itself and does not cover short.md"
-    log_info "Expect: .claude/context/scripts silent, its overview.md carries both"
+    log_info "Expect: canon/context/scripts silent, its overview.md carries both"
     log_info "Expect: exit 0, since a missing section reports rather than gates"
     ;;
   "depth")

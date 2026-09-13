@@ -7,7 +7,7 @@ description: Why a design system is drafted from what the tree already holds, an
 
 ## Gap
 
-Without this skill, a session asked for a design system either invents token values with nothing behind them or refuses because the project ships no stylesheet. It writes over a `.claude/DESIGN.md` someone already filled. It fills every cell so the file looks complete, which leaves a reader unable to tell a hex sampled from the CLI apart from one the session made up, and a proposal nobody flagged gets built on. A trailing tag column added to mark that uncertainty breaks the render parser instead.
+Without this skill, a session asked for a design system either invents token values with nothing behind them or refuses because the project ships no stylesheet. It writes over a `canon/DESIGN.md` someone already filled. It fills every cell so the file looks complete, which leaves a reader unable to tell a hex sampled from the CLI apart from one the session made up, and a proposal nobody flagged gets built on. A trailing tag column added to mark that uncertainty breaks the render parser instead.
 
 The greenfield case is the one that fails quietly. A project with no UI code still has a personality paragraph and a stated platform, so values can be proposed against a signal rather than pulled from a default palette. A session that does not know this reports there is nothing to extract.
 
@@ -22,7 +22,7 @@ The greenfield case is the one that fails quietly. A project with no UI code sti
 
 ## Must not
 
-- Overwrite a `.claude/DESIGN.md` that already carries content beyond the seed
+- Overwrite a `canon/DESIGN.md` that already carries content beyond the seed
 - Guess a value on the source path when no signal exists. Leave the cell blank instead.
 - Invent a non-goal. A proposed motion line is correct when nothing rules motion out.
 - Put the verify tag in a trailing column, which breaks the row
@@ -30,9 +30,9 @@ The greenfield case is the one that fails quietly. A project with no UI code sti
 
 ## Guards
 
-- `.claude/DESIGN.md` already populated: stop rather than mutating it
+- `canon/DESIGN.md` already populated: stop rather than mutating it
 - `canon` not on PATH: stop, since the seed template and the render both need it
-- Greenfield path with no `.claude/REQUIREMENTS.md` or no `## Personality` section: stop, because there is nothing to propose against. Evaluate this only after Step 1 picks the path.
+- Greenfield path with no `canon/REQUIREMENTS.md` or no `## Personality` section: stop, because there is nothing to propose against. Evaluate this only after Step 1 picks the path.
 
 ## Out of scope
 

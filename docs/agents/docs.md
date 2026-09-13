@@ -5,10 +5,10 @@ description: How canon docs resolves the toolkit's own reference surface from an
 
 # Docs
 
-`canon docs` emits the toolkit's own reference docs so an agent in a target project can orient without the toolkit source checked out. The CLI resolves `docs/` and `.claude/context/` from its install root, and which of the two it finds depends on how the CLI was installed. A registry install carries `docs/` alone, since `.claude/` is not published. A clone or a linked worktree carries both.
+`canon docs` emits the toolkit's own reference docs so an agent in a target project can orient without the toolkit source checked out. The CLI resolves `docs/` and `canon/context/` from its install root, and which of the two it finds depends on how the CLI was installed. A registry install carries `docs/` alone, since `.claude/` is not published. A clone or a linked worktree carries both.
 
-- `canon docs list [--json]` lists the downstream catalog: the consumer-facing `docs/` surface plus per-domain narrative from `.claude/context/` when that root is present. Toolkit-internal context entries (`ci`, `development`, `sandbox`) are dropped. From a registry install the context section is absent rather than empty.
-- `canon docs <topic>` prints one doc to stdout, resolved by exact name from `docs/` first, then `.claude/context/`. Any doc the install carries is reachable by name, including the toolkit-internal topics the list omits.
+- `canon docs list [--json]` lists the downstream catalog: the consumer-facing `docs/` surface plus per-domain narrative from `canon/context/` when that root is present. Toolkit-internal context entries (`ci`, `development`, `sandbox`) are dropped. From a registry install the context section is absent rather than empty.
+- `canon docs <topic>` prints one doc to stdout, resolved by exact name from `docs/` first, then `canon/context/`. Any doc the install carries is reachable by name, including the toolkit-internal topics the list omits.
 
 ## How a name resolves
 

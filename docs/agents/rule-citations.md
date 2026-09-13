@@ -48,7 +48,7 @@ A `path` is anchored on the whole backticked span rather than on a trailing patt
 
 A rule body is full of backticked spans carrying a slash, and almost none of them names a file in this tree. The stage declines four shapes outright.
 
-- A placeholder or glob segment describes a shape rather than naming a file: `.claude/context/<domain>.md`, `standards/<name>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`.
+- A placeholder or glob segment describes a shape rather than naming a file: `canon/context/<domain>.md`, `standards/<name>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`.
 - A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`. A bare name is read as a citation only when it matches a rule filename, which is how `562-session.md` points at `555-tasks.md`.
 - A span carrying no file extension is a folder or a module specifier: `src/pages/`, `next/font`, `try/except`, `react-hooks/set-state-in-effect`, `oven-sh/setup-bun@v2`, `@/lib/utils`.
 - A fenced block displays a path rather than pointing at one.

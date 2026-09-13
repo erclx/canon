@@ -36,7 +36,7 @@ Toggle auto-memory with `/memory` or set `autoMemoryEnabled: false` in settings.
 
 ## Toolkit memory workflow
 
-Project-scoped memory complements Claude Code's auto-memory. Files live at `.canon/memory/` in the project tree, gitignored, written by capture and curated through a review loop. A fact about a domain does not land there at all: capture routes it to that domain's `.claude/context/` entry, which the three-tier context model already loads on demand. What stays is the residue no entry owns, in whatever mix of types that leaves.
+Project-scoped memory complements Claude Code's auto-memory. Files live at `.canon/memory/` in the project tree, gitignored, written by capture and curated through a review loop. A fact about a domain does not land there at all: capture routes it to that domain's `canon/context/` entry, which the three-tier context model already loads on demand. What stays is the residue no entry owns, in whatever mix of types that leaves.
 
 The toolkit treats that residue as a holding pen, not long-term storage. Every review should promote each entry to a durable surface (`CLAUDE.md`, skill body, standards, governance) or retire it to `.canon/tmp/memory-archive/`. User-type memories are the exception when no in-repo target exists.
 
@@ -72,7 +72,7 @@ paths:
 
 User-level rules at `~/.claude/rules/` apply to all projects.
 
-The toolkit installs governance into `.claude/rules/` by default. See `.claude/context/governance/install.md` for the install and sync path.
+The toolkit installs governance into `.claude/rules/` by default. See `canon/context/governance/install.md` for the install and sync path.
 
 ## Imports
 

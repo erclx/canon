@@ -27,7 +27,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 
 ## Placement
 
-- Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `.claude/context/`, or a skill body instead.
+- Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `canon/context/`, or a skill body instead.
 - File the page under `wiki/claude/`. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
 
 ## Frontmatter

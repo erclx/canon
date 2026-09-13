@@ -23,13 +23,13 @@ canon claude skills reach ~/repos/my-project
 
 ## The defect it reads for
 
-A plugin skill installs into a project and the toolkit's own tree is not there. A body naming `.claude/context/transcripts.md` resolves for a session running in this repository and sends every other reader to nothing, and no stage asked the question until this one. The shape is wider than one folder: a seed naming a standard with no route and a machine-readable field naming a toolkit-only path are the same claim, true here and false in a target.
+A plugin skill installs into a project and the toolkit's own tree is not there. A body naming `canon/context/transcripts.md` resolves for a session running in this repository and sends every other reader to nothing, and no stage asked the question until this one. The shape is wider than one folder: a seed naming a standard with no route and a machine-readable field naming a toolkit-only path are the same claim, true here and false in a target.
 
 ## What counts as a citation
 
 A backticked token carrying a separator and an extension, which is how every body spells a path it means a reader to open. Three forms are skipped by construction.
 
-- A placeholder such as `.claude/context/<domain>.md`, which names a shape rather than a file
+- A placeholder such as `canon/context/<domain>.md`, which names a shape rather than a file
 - A path resolved through `${CLAUDE_SKILL_DIR}`, which is self-contained wherever the plugin loads
 - A sibling named relatively, such as `references/labels.md`, which matches no authoring root and travels with the body
 
@@ -43,7 +43,7 @@ A cited path counts when it sits under an authoring root no install channel deli
 
 `src/`, `scripts/`, and bare `docs/` are deliberately outside the list. A body naming one of those is describing the reader's own tree, so listing them reports a correct citation on every run and buries the finding under the pass.
 
-`.claude/context/` joins them when the corpus read is a project's own. A seed put those entries there and the project owns them afterward, so a body under `.claude/skills/` naming one points at a file its reader holds. The seed disowning below cannot answer that in a project, since it reads a `tooling/` tree only the toolkit carries.
+`canon/context/` joins them when the corpus read is a project's own. A seed put those entries there and the project owns them afterward, so a body under `.claude/skills/` naming one points at a file its reader holds. The seed disowning below cannot answer that in a project, since it reads a `tooling/` tree only the toolkit carries.
 
 A path a seed installs is disowned twice, under its own name and under the folder spelling it takes once a project splits the entry. A domain that outgrows one file becomes `<domain>/`, which is still the entry the seed delivered, so reporting the split form would fail a project for growing.
 
@@ -52,7 +52,7 @@ A path a seed installs is disowned twice, under its own name and under the folde
 A correct citation and a defective one are the same string, and the sentence around it is the difference. A citation counts as decided when its line names the toolkit as the owner, matching the bodies that already spell it that way. The repair for a finding is to say whose copy the path is, never to delete the citation, since the paths name real documents a reader wants.
 
 ```markdown
-Read `.claude/context/indexes.md` from the toolkit if context on the system is needed.
+Read `canon/context/indexes.md` from the toolkit if context on the system is needed.
 ```
 
 A line mentioning the toolkit for an unrelated reason exempts a citation on it. That is the accepted cost of a word over a notation every future body would have to learn.

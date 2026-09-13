@@ -22,7 +22,7 @@
 # "Nobody has written one yet" is not a reason. That is `should-be-asserted`,
 # which is a default rather than a queue. Which of those skills earns an arm is
 # decided by the blast-radius rule under `## What earns a declaration` in
-# `.claude/context/sandbox/coverage.md`, and this file is the other half of that split:
+# `canon/context/sandbox/coverage.md`, and this file is the other half of that split:
 # the rule says what to write, an entry here says what never will be.
 
 [setup-plugins]

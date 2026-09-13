@@ -115,7 +115,7 @@ stage_setup() {
     seed_duplicated_workspace
 
     mkdir -p .claude
-    cat <<'EOF' >>.claude/ARCHITECTURE.md
+    cat <<'EOF' >>canon/ARCHITECTURE.md
 
 # Architecture
 

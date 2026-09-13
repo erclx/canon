@@ -39,7 +39,7 @@ Read these from the project root in parallel, skipping any that do not exist:
 
 - `package.json`: `dependencies` and `devDependencies`
 - Root configs: `astro.config.*`, `next.config.*`, `vite.config.*`, `tailwind.config.*`, `tsconfig.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`
-- `.claude/REQUIREMENTS.md` and `.claude/ARCHITECTURE.md` if present
+- `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md` if present
 - Directory structure via `ls -1` of the project root and `src/` if present
 
 ## Resolve arguments

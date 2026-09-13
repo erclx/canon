@@ -42,7 +42,7 @@ A phase label is one way text names the board, and a path under a record root is
 
 Two shapes get past a reader scanning for a bare label. A code span quoting a label is still the label, so read a span whose whole content is one as a hit and leave a longer token inside a span alone, which is a fixture name rather than a reference. The second shape is a path under a record root, gitignored and therefore absent from every clone, so `.canon/review/feedback/` names a folder the remote's reader cannot open.
 
-Under `.claude/`'s own tracked folders there is no hit, since `.claude/context/governance/rules.md` resolves everywhere. `.canon/` carries no such carve-out: one ignore line covers the root whole, so every path beneath it is a hit regardless of which folder names it.
+Under the tracked `canon/` and `.claude/` folders there is no hit, since `canon/context/governance/rules.md` resolves everywhere. `.canon/` carries no such carve-out: one ignore line covers the root whole, so every path beneath it is a hit regardless of which folder names it.
 
 Rewrite a hit to name what the reader can reach rather than deleting it. A row's subject stated plainly replaces its label, and what a record folder holds, said in a sentence, replaces its path.
 
@@ -66,11 +66,11 @@ Text published to a remote is the auto-linking half: a pull request body, an iss
 
 Content that installs into another repository is the third destination, and it splits on which repository the number names. A skill body loads from a plugin cache, a docs page is read through `canon docs`, and a standard through `canon standards`, so the reader holds their own repository rather than the one a bare number belongs to. Qualifying a number against a different, resolvable repository fixes that, since the reader can open that repository even without this one.
 
-Qualifying it against `erclx/canon` fixes nothing, because a reader holding only the plugin cache or the published package still cannot open this repository's own history. A same-repository citation takes no number here at all, bare or qualified. State the fact the citation was standing in for instead, and where the identifier is the only trace of a one-off incident rather than a reproducible count, carry it into the `.claude/context/` entry that owns the surface.
+Qualifying it against `erclx/canon` fixes nothing, because a reader holding only the plugin cache or the published package still cannot open this repository's own history. A same-repository citation takes no number here at all, bare or qualified. State the fact the citation was standing in for instead, and where the identifier is the only trace of a one-off incident rather than a reproducible count, carry it into the `canon/context/` entry that owns the surface.
 
 Write `owner/repo#123` and `owner/repo@abc1234` for a citation of a different, resolvable repository, across every such surface. `canon gate run` fails a push on a bare reference there, and a line whose bare form is the point carries `canon-allow-reference: <reason>` on itself or on the line above.
 
-Choose the number over the sha where the citation names a decided change, since a pull request number resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape `.claude/ARCHITECTURE.md` already uses. The choice holds for both spellings this section fixes, the bare form a remote auto-links and the qualified form a cross-repository citation carries.
+Choose the number over the sha where the citation names a decided change, since a pull request number resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape `canon/ARCHITECTURE.md` already uses. The choice holds for both spellings this section fixes, the bare form a remote auto-links and the qualified form a cross-repository citation carries.
 
 A commit message takes the bare form even though it is also read through the log, where nothing links. The remote is what the form is chosen for, since a reader in the log loses only a link that plain text never carried.
 

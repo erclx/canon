@@ -3,7 +3,7 @@
 # source, writing the .html beside each one.
 #
 # The name says hero because the hero was the only template when it was written
-# and every citation of it across docs/, .claude/context/, and src/ spells that
+# and every citation of it across docs/, canon/context/, and src/ spells that
 # name. Renaming the file is a sweep across roughly twenty surfaces for a
 # cosmetic gain, so the file keeps its name and the loop below covers whatever
 # templates the folder holds.

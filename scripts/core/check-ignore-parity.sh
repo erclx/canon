@@ -19,7 +19,7 @@ SECTION="# Claude"
 # The diagrams divergence is the one that cost something. A target used to track
 # its diagrams and keep the context audit's default coverage of them, and it now
 # ignores them with the rest of its records, so that coverage is gone unless the
-# project names the folder itself. `.claude/context/tooling.md` carries the
+# project names the folder itself. `canon/context/tooling.md` carries the
 # narrative.
 #
 # An exception mechanism is not kept against a future divergence, because an

@@ -13,7 +13,7 @@ The routing failure is the one with no local symptom. A misplaced document reads
 
 ## Must
 
-- Route a document by its reader before writing it, keeping `docs/` for consumer-facing reference and sending internal narrative to `.claude/context/`
+- Route a document by its reader before writing it, keeping `docs/` for consumer-facing reference and sending internal narrative to `canon/context/`
 - Give a standard a scope statement naming what it does not govern, so jurisdiction is readable without opening every sibling
 - Add the catalog row in the same change that creates the standard
 

@@ -16,8 +16,8 @@ One identity rendered twice: the same mark sized down to an icon sequence and co
 
 Read these in parallel, skipping any that do not exist:
 
-- `.claude/DESIGN.md`: the `## Personality`, `## Color`, and `## Typography` sections, the same three cells `design-extract` Step 2 sources from
-- `.claude/REQUIREMENTS.md`: the `## Personality` paragraph, when `.claude/DESIGN.md` carries none
+- `canon/DESIGN.md`: the `## Personality`, `## Color`, and `## Typography` sections, the same three cells `design-extract` Step 2 sources from
+- `canon/REQUIREMENTS.md`: the `## Personality` paragraph, when `canon/DESIGN.md` carries none
 - `CLAUDE.md`: the project's stated voice, when neither file above carries a personality signal
 
 No signal from any of the three is not a stop. Draft against a neutral default and tag the color and type choices `? verify` per `${CLAUDE_SKILL_DIR}/../../standards/design.md`'s uncertainty tag.
@@ -82,5 +82,5 @@ Write folder: <detected <path>|defaulted to project root>. Move the files if thi
 Cite these rather than restating them.
 
 - `draft-and-pick` owns Steps 1 through 5 of the render-and-pick loop, cited above
-- `design-extract` owns building `.claude/DESIGN.md`. This skill only reads it.
+- `design-extract` owns building `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, and its reported dimensions

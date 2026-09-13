@@ -549,9 +549,9 @@ describe('measureFolders', () => {
   }
 
   it('should report a marker in an entry the rule governs', async () => {
-    seed('.claude/context', 'ci.md', NARRATED)
+    seed('canon/context', 'ci.md', NARRATED)
 
-    expect(await provenanceOf('.claude/context/ci.md')).toBe(1)
+    expect(await provenanceOf('canon/context/ci.md')).toBe(1)
   })
 
   it('should leave a marker in a diagram entry unreported', async () => {
@@ -561,12 +561,10 @@ describe('measureFolders', () => {
   })
 
   it('should govern a split domain by the folder it sits beneath', async () => {
-    seed('.claude/context', 'ci.md', '# X\n')
-    seed('.claude/context/claude-plugin', 'skills.md', NARRATED)
+    seed('canon/context', 'ci.md', '# X\n')
+    seed('canon/context/claude-plugin', 'skills.md', NARRATED)
 
-    expect(await provenanceOf('.claude/context/claude-plugin/skills.md')).toBe(
-      1,
-    )
+    expect(await provenanceOf('canon/context/claude-plugin/skills.md')).toBe(1)
   })
 
   it('should leave a marker in a root folder unreported', async () => {
@@ -625,8 +623,8 @@ describe('bareReferences', () => {
   /** The walk starts at the named folder, so a split needs its parent seeded. */
   function seedSplit(base: string, entries: Record<string, string>): void {
     const [named] = base.split('/')
-    seedFolder(`.claude/${named}`, {})
-    seedFolder(`.claude/${base}`, entries)
+    seedFolder(`canon/${named}`, {})
+    seedFolder(`canon/${base}`, entries)
   }
 
   async function namesIn(rel: string): Promise<readonly string[]> {
@@ -646,7 +644,7 @@ describe('bareReferences', () => {
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([
       'routing.md',
     ])
   })
@@ -654,11 +652,11 @@ describe('bareReferences', () => {
   it('should leave a sibling named by its path unreported', async () => {
     seedSplit('context/governance', {
       'rules.md':
-        '# Rules\n\nWhat earns a rule is `.claude/context/governance/routing.md`.\n',
+        '# Rules\n\nWhat earns a rule is `canon/context/governance/routing.md`.\n',
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([])
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([])
   })
 
   it('should leave a name matching no sibling unreported', async () => {
@@ -667,18 +665,18 @@ describe('bareReferences', () => {
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([])
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([])
   })
 
   it('should leave a name colliding with a seed at the flat root unreported', async () => {
-    // `.claude/context/ci.md` is a domain entry and a seed of the same name is
+    // `canon/context/ci.md` is a domain entry and a seed of the same name is
     // a file a scaffolded project owns. No signal in the name separates them.
-    seedFolder('.claude/context', {
+    seedFolder('canon/context', {
       'tooling.md': '# Tooling\n\nA scaffold receives `ci.md` of its own.\n',
       'ci.md': '# CI\n\nOwns the workflow.\n',
     })
 
-    expect(await namesIn('.claude/context/tooling.md')).toEqual([])
+    expect(await namesIn('canon/context/tooling.md')).toEqual([])
   })
 
   it('should leave a name inside a fenced block unreported', async () => {
@@ -688,7 +686,7 @@ describe('bareReferences', () => {
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([])
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([])
   })
 
   it('should leave a name on a line carrying the ignore marker unreported', async () => {
@@ -697,7 +695,7 @@ describe('bareReferences', () => {
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([])
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([])
   })
 
   it('should leave an entry naming itself unreported', async () => {
@@ -706,7 +704,7 @@ describe('bareReferences', () => {
       'routing.md': '# Routing\n\nOne rule a standard.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([])
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([])
   })
 
   it('should leave a diagram folder unreported', async () => {
@@ -725,7 +723,7 @@ describe('bareReferences', () => {
       'stacks.md': '# Stacks\n\nOne roster a toolchain.\n',
     })
 
-    expect(await namesIn('.claude/context/governance/rules.md')).toEqual([
+    expect(await namesIn('canon/context/governance/rules.md')).toEqual([
       'routing.md',
       'stacks.md',
     ])
@@ -773,70 +771,70 @@ describe('missingSections', () => {
   }
 
   it('should report both sections against the entry declaring neither', async () => {
-    seedFolder('.claude/context', {
+    seedFolder('canon/context', {
       'ci.md': '# CI\n\n## Triggers\n\nOn every push.\n',
     })
 
-    expect(await missingIn('.claude/context/ci.md')).toEqual([
+    expect(await missingIn('canon/context/ci.md')).toEqual([
       'Overview',
       'Layout',
     ])
   })
 
   it('should report the one section the entry is short of', async () => {
-    seedFolder('.claude/context', {
+    seedFolder('canon/context', {
       'ci.md': '# CI\n\n## Overview\n\nOwns the workflow.\n',
     })
 
-    expect(await missingIn('.claude/context/ci.md')).toEqual(['Layout'])
+    expect(await missingIn('canon/context/ci.md')).toEqual(['Layout'])
   })
 
   it('should leave an entry declaring every required section unreported', async () => {
-    seedFolder('.claude/context', { 'ci.md': CONFORMING })
+    seedFolder('canon/context', { 'ci.md': CONFORMING })
 
-    expect(await missingIn('.claude/context/ci.md')).toEqual([])
+    expect(await missingIn('canon/context/ci.md')).toEqual([])
   })
 
   it('should hold each entry of the named folder to the sections itself', async () => {
     // The named folder's entries are one domain each, so a conforming sibling
     // answers for nothing. Rolling this folder up let one entry stand in for
     // every other domain beside it.
-    seedFolder('.claude/context', {
+    seedFolder('canon/context', {
       'ci.md': CONFORMING,
       'web.md': '# Web\n\n## Overview\n\nOwns the client.\n',
     })
 
-    expect(await missingIn('.claude/context/web.md')).toEqual(['Layout'])
+    expect(await missingIn('canon/context/web.md')).toEqual(['Layout'])
   })
 
   it('should accept a split folder where one sibling carries the sections', async () => {
-    seedFolder('.claude/context', { 'ci.md': CONFORMING })
-    seedFolder('.claude/context/scripts', {
+    seedFolder('canon/context', { 'ci.md': CONFORMING })
+    seedFolder('canon/context/scripts', {
       'overview.md': '# Overview\n\n## Layout\n\n- `scripts/` owns them\n',
       'lib.md': '# Lib\n\n## Decisions\n\nOne concern a file.\n',
     })
 
-    expect(await missingIn('.claude/context/scripts')).toEqual([])
+    expect(await missingIn('canon/context/scripts')).toEqual([])
   })
 
   it('should report a split folder against the folder rather than its entries', async () => {
-    seedFolder('.claude/context', { 'ci.md': CONFORMING })
-    seedFolder('.claude/context/scripts', {
+    seedFolder('canon/context', { 'ci.md': CONFORMING })
+    seedFolder('canon/context/scripts', {
       'lib.md': '# Lib\n\n## Decisions\n\nOne concern a file.\n',
     })
 
-    expect(await missingIn('.claude/context/scripts')).toEqual([
+    expect(await missingIn('canon/context/scripts')).toEqual([
       'Overview',
       'Layout',
     ])
-    expect(await missingIn('.claude/context/scripts/lib.md')).toEqual([])
+    expect(await missingIn('canon/context/scripts/lib.md')).toEqual([])
   })
 
   it('should leave a split parent carrying no entries of its own unreported', async () => {
-    seedFolder('.claude/context', {})
-    seedFolder('.claude/context/scripts', { 'overview.md': CONFORMING })
+    seedFolder('canon/context', {})
+    seedFolder('canon/context/scripts', { 'overview.md': CONFORMING })
 
-    expect(await missingIn('.claude/context')).toEqual([])
+    expect(await missingIn('canon/context')).toEqual([])
   })
 
   it('should leave a diagram folder unreported', async () => {

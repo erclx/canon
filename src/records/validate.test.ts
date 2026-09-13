@@ -546,7 +546,7 @@ describe('checkPlan', () => {
   it('should accept a reason carrying the path rather than leading with it', () => {
     const body = conformingPlan().replace(
       '- `standards/plan.md`: the sections and the answer contract',
-      '- Context assembly: the tier table in `.claude/context/model.md`',
+      '- Context assembly: the tier table in `canon/context/model.md`',
     )
 
     expect(checkPlan('feature-a-b.md', body)).toEqual([])

@@ -16,14 +16,14 @@ description: Plans a feature by reading the project's Claude setup and scanning 
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: behavior rules, conventions, commands
-- `.claude/REQUIREMENTS.md`: feature scope and non-goals
-- `.claude/ARCHITECTURE.md`: decisions already made
+- `canon/REQUIREMENTS.md`: feature scope and non-goals
+- `canon/ARCHITECTURE.md`: decisions already made
 - `.canon/tasks/index.md`: current scope and status, then any task file the feature relates to
 
 Also read these when the feature touches code or UI. Skip them for prose, docs, catalog, or config-only changes:
 
-- `.claude/DESIGN.md`: tokens, typography, spacing, and component rules
-- `.claude/wireframes/index.md` + the surface files relevant to the feature: intended UI layout and behavior. Read `index.md` first, then follow only the links the feature actually touches, each a flat `.claude/wireframes/<surface>.md` or a grouped surface's own `.claude/wireframes/<surface>/index.md` and the siblings it lists. Do not read the whole folder speculatively.
+- `canon/DESIGN.md`: tokens, typography, spacing, and component rules
+- `canon/wireframes/index.md` + the surface files relevant to the feature: intended UI layout and behavior. Read `index.md` first, then follow only the links the feature actually touches, each a flat `canon/wireframes/<surface>.md` or a grouped surface's own `canon/wireframes/<surface>/index.md` and the siblings it lists. Do not read the whole folder speculatively.
 
 When the plan adds or revises a surface, the wireframe file follows `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md`.
 

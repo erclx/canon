@@ -95,7 +95,7 @@ log_step "Assert scaffold"
 # `@`-reference convention rule is the one snippets-domain file that still
 # installs, since `base` carries `governance/rules/snippets/` as a
 # folder-whole entry the same way it does `core` and `claude`.
-for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" ".claude/context/index.md" ".claude/wireframes/index.md" ".canon/diagrams/index.md" \
+for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" "canon/wireframes/index.md" ".canon/diagrams/index.md" \
   ".prettierrc" ".editorconfig" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.sh" \
   ".claude/rules/canon/core/000-constitution.md" ".claude/rules/canon/snippets/600-at-references.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then

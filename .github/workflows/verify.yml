@@ -38,7 +38,7 @@ jobs:
         run: sudo apt-get install -y shfmt shellcheck
 
       - name: Install Plugin CLI
-        # Pinned deliberately. Reason and revisit test in .claude/context/ci.md
+        # Pinned deliberately. Reason and revisit test in canon/context/ci.md
         run: bun install -g @anthropic-ai/claude-code@2.1.236
 
       - name: Verify

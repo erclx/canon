@@ -18,7 +18,7 @@ Local-first habit tracking web app.
 EOF
 
   mkdir -p .canon/plans .claude
-  cat <<'EOF' >.claude/REQUIREMENTS.md
+  cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
 ## MVP features

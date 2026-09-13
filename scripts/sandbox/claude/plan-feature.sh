@@ -40,7 +40,7 @@ Task management API with SQLite storage.
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >>.claude/ARCHITECTURE.md
+    cat <<'EOF' >>canon/ARCHITECTURE.md
 
 # Architecture
 
@@ -149,15 +149,15 @@ This here project is a place where i keep notes and stuff for my work and other 
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >.claude/DESIGN.md
+    cat <<'EOF' >canon/DESIGN.md
 # Design
 
 SENTINEL: this file should NOT be read for prose-only changes. If the skill surfaces this content, the small-mode branch is broken.
 EOF
 
-    mkdir -p .claude/wireframes
-    rm -f .claude/wireframes/feature-name.md
-    cat <<'EOF' >.claude/wireframes/index.md
+    mkdir -p canon/wireframes
+    rm -f canon/wireframes/feature-name.md
+    cat <<'EOF' >canon/wireframes/index.md
 ---
 title: Wireframes
 subtitle: Per-surface ASCII layouts loaded on demand
@@ -167,7 +167,7 @@ subtitle: Per-surface ASCII layouts loaded on demand
 
 SENTINEL: this folder should NOT be read for prose-only changes. If the skill surfaces this content, the small-mode branch is broken.
 EOF
-    cat <<'EOF' >.claude/wireframes/decoy.md
+    cat <<'EOF' >canon/wireframes/decoy.md
 ---
 title: Decoy surface
 description: Sentinel surface that should not be read for prose-only changes.
@@ -285,7 +285,7 @@ EOF
 Data pipeline with a reference doc that has outgrown one file.
 EOF
 
-    mkdir -p docs .claude/context
+    mkdir -p docs canon/context
     cat <<'EOF' >docs/reference.md
 # Reference
 
@@ -308,7 +308,7 @@ EOF
 Read `docs/reference.md` for the pipeline stages before your first change.
 EOF
 
-    cat <<'EOF' >.claude/context/pipeline.md
+    cat <<'EOF' >canon/context/pipeline.md
 ---
 title: Pipeline
 description: Stage boundaries and where each transform runs
@@ -350,8 +350,8 @@ EOF
     git add . && git commit -m "docs(reference): initial reference doc" --no-verify -q
 
     log_step "Scenario ready: feature planning (constraint)"
-    log_info "Context: docs/reference.md split into a folder, cited by docs/onboarding.md and .claude/context/pipeline.md"
-    log_info "Action:  /plan-feature 'split docs/reference.md per the task. Constraint: leave .claude/context/pipeline.md alone.'"
+    log_info "Context: docs/reference.md split into a folder, cited by docs/onboarding.md and canon/context/pipeline.md"
+    log_info "Action:  /plan-feature 'split docs/reference.md per the task. Constraint: leave canon/context/pipeline.md alone.'"
     log_info "Expect:  the plan's Constraints entry resolves both acts for pipeline.md, forbidding conforming it to the new shape and requiring its citations of the deleted path be retargeted, and v01.0-reference-split.md's Plan: line points at the plan"
     ;;
   *)

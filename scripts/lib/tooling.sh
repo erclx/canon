@@ -23,13 +23,15 @@ list_tooling_stacks() {
   done < <(find "$tooling_dir" -mindepth 1 -maxdepth 1 -type d | sort)
 }
 
-# Seed roots that carry a `.claude/`, emitted relative to `PROJECT_ROOT`. Every
-# stage measuring seed content discovers through this rather than naming a stack,
-# so a stack seeding `.claude/` later arrives covered with no edit to any caller.
+# Seed roots that carry a `.claude/` or a `canon/`, emitted relative to
+# `PROJECT_ROOT`. Every stage measuring seed content discovers through this
+# rather than naming a stack, so a stack seeding either root later arrives
+# covered with no edit to any caller. A stack seeding only tracked surfaces
+# carries `canon/` alone, which a `.claude/` test would drop from both stages.
 collect_seed_roots() {
   local dir
   for dir in "$PROJECT_ROOT"/tooling/*/seeds; do
-    [ -d "$dir/.claude" ] || continue
+    [ -d "$dir/.claude" ] || [ -d "$dir/canon" ] || continue
     printf '%s\n' "${dir#"$PROJECT_ROOT"/}"
   done
 }

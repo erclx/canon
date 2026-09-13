@@ -63,13 +63,13 @@ web = ["web/"]
 ci = [".github/", "scripts/core/", ".husky/", ".claude/hooks/", ".claude/settings.json"]
 # Internal narrative and the always-loaded record, which `docs` does not reach.
 # `assets/brand/` rides here rather than under `generated` or `rides-with-generated`,
-# since a mark under it is hand-authored source `.claude/DESIGN.md`'s own
+# since a mark under it is hand-authored source `canon/DESIGN.md`'s own
 # iconography field names, not a mechanical derivative of anything.
 context = [
-  ".claude/context/",
-  ".claude/ARCHITECTURE.md",
-  ".claude/REQUIREMENTS.md",
-  ".claude/DESIGN.md",
+  "canon/context/",
+  "canon/ARCHITECTURE.md",
+  "canon/REQUIREMENTS.md",
+  "canon/DESIGN.md",
   ".canon/diagrams/",
   "CLAUDE.md",
   "assets/brand/",

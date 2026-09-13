@@ -33,7 +33,7 @@ It reports and never gates, which is the split the citation check already draws.
 
 ## Length
 
-Length quotes its checkpoint from `standards/context.md`: roughly 150 rendered lines for an entry, applied to each of the 60 entries the audit measures, 51 of them under `.claude/context/` and 9 diagram files beside them. It counts rendered lines rather than source lines, wrapping each line at 80 columns and summing the heights.
+Length quotes its checkpoint from `standards/context.md`: roughly 150 rendered lines for an entry, applied to each of the 60 entries the audit measures, 51 of them under `canon/context/` and 9 diagram files beside them. It counts rendered lines rather than source lines, wrapping each line at 80 columns and summing the heights.
 
 A line is wrapped at the width it renders at, so a link counts as its anchor text and a backticked path counts whole, which parts the rendered count from a source count wherever an entry cites a path in backticks rather than as a link. Entries here are authored one line per bullet, so a block of fifteen paragraph-bullets occupies fifteen source lines and renders past sixty, which source counting cannot see.
 
@@ -89,7 +89,7 @@ The JSON record carries the findings per entry as `entries[].narration` and the 
 
 ## The architecture record
 
-Two findings read `.claude/ARCHITECTURE.md` rather than a folder, and only the first is a fact.
+Two findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first is a fact.
 
 The length check compares the record against the ceiling it derives for itself, and only a record that states its own allowances has one. No standard sets a length rule for this document, so the numbers belong to whichever record declares them. The check reads a frame allowance and an allowance per decision out of the record's own prose and puts the ceiling at the frame plus the allowance times the decision count. The JSON record carries what it read as `architecture.allowances` and the reading as `architecture.lines` against `architecture.ceiling`.
 
@@ -105,7 +105,7 @@ The report gates nothing. Deciding whether a sentence states a claim is a judgme
 
 ## Which folders each check reaches
 
-The provenance, required-section, and narration checks cover `.claude/context/` alone, the reference-form check covers the split folders inside it, and length and the table finding reach every audited folder.
+The provenance, required-section, and narration checks cover `canon/context/` alone, the reference-form check covers the split folders inside it, and length and the table finding reach every audited folder.
 
 What narrows the three is stated in `standards/context.md`, which opens its scope by handing diagrams and wireframes to `diagrams.md` and `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere, and a diagram entry carries a heading per kind rather than a run of bullets deciding anything. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
 

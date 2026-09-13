@@ -30,7 +30,7 @@ Vite + React task list. Uses CSS modules and a small token system.
 EOF
 
   mkdir -p .claude
-  cat <<'EOF' >>.claude/DESIGN.md
+  cat <<'EOF' >>canon/DESIGN.md
 
 # Design
 
@@ -61,9 +61,9 @@ Two variants only: `primary` (accent background, white text) and `secondary` (tr
 Use Lucide icons exclusively. Icon size matches text size of the surrounding label.
 EOF
 
-  mkdir -p .claude/wireframes
-  rm -f .claude/wireframes/feature-name.md
-  cat <<'EOF' >.claude/wireframes/index.md
+  mkdir -p canon/wireframes
+  rm -f canon/wireframes/feature-name.md
+  cat <<'EOF' >canon/wireframes/index.md
 ---
 title: Wireframes
 subtitle: Per-surface ASCII layouts loaded on demand
@@ -72,7 +72,7 @@ subtitle: Per-surface ASCII layouts loaded on demand
 # Wireframes
 EOF
 
-  cat <<'EOF' >.claude/wireframes/task-list.md
+  cat <<'EOF' >canon/wireframes/task-list.md
 ---
 title: Task list surface
 description: Vertical list of task rows on the home view.
@@ -90,7 +90,7 @@ States:
 - **Error**: inline error banner above the list with a retry button
 EOF
 
-  cat <<'EOF' >.claude/wireframes/add-task.md
+  cat <<'EOF' >canon/wireframes/add-task.md
 ---
 title: Add task surface
 description: Modal dialog for creating a new task.
@@ -101,7 +101,7 @@ description: Modal dialog for creating a new task.
 Modal dialog with a single text input and a primary "Add" button plus a secondary "Cancel" button.
 EOF
 
-  cat <<'EOF' >>.claude/REQUIREMENTS.md
+  cat <<'EOF' >>canon/REQUIREMENTS.md
 
 # Requirements
 

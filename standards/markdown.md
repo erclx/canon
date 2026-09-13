@@ -108,8 +108,8 @@ When frontmatter carries a short `title` or `description` used for catalog displ
 Each pair shows a banned pattern and its fix.
 
 ```markdown
-Bad: See [.claude/context/retrieval.md](.claude/context/retrieval.md) for the retrieval flow.
-Good: See `.claude/context/retrieval.md` for the retrieval flow.
+Bad: See [canon/context/retrieval.md](canon/context/retrieval.md) for the retrieval flow.
+Good: See `canon/context/retrieval.md` for the retrieval flow.
 ```
 
 ```markdown

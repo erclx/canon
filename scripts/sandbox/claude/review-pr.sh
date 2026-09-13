@@ -44,7 +44,7 @@ Task API. Route handlers live in `src/`.
 EOF
 
   mkdir -p .claude
-  cat <<'EOF' >.claude/REQUIREMENTS.md
+  cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
 ## MVP features
@@ -117,7 +117,7 @@ Task API. Route handlers live in `src/`.
 EOF
 
   mkdir -p .claude
-  cat <<'EOF' >.claude/REQUIREMENTS.md
+  cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
 ## MVP features

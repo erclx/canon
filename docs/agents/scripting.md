@@ -38,7 +38,7 @@ array rather than skipping the standard behind it.
 
 `canon claude seeds list` reads the same plan `canon claude init` applies, so the
 listing and the install cannot disagree. It now reports
-`.claude/context/index.md`, which `init` has always installed and the listing
+`canon/context/index.md`, which `init` has always installed and the listing
 never named, and it emits the project-level `CLAUDE.md` last rather than first.
 
 `canon gov list` reports each stack's rules already expanded. A stack entry names

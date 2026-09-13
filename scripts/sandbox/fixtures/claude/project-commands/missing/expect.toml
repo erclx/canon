@@ -15,7 +15,7 @@ absent = ["fell-back.txt"]
 # The path is the load-bearing token. A guard that fires without naming the file
 # it wants leaves the reader nothing to act on, and the name is the one part of
 # the reply that cannot be reworded.
-reply = [".claude/context/development.md"]
+reply = ["canon/context/development.md"]
 
 # Prose the checker cannot assert, each with the reason it stays here.
 manual = [

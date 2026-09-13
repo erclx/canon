@@ -73,7 +73,7 @@ describe('compareKeyChanges', () => {
         '- Add `docs/agents/rule-citations.md` and its rows in `docs/agents/index.md`.',
       ),
       [
-        '.claude/context/governance/index.md',
+        'canon/context/governance/index.md',
         'docs/agents/index.md',
         'docs/agents/rule-citations.md',
         'src/gov/citations.test.ts',
@@ -83,7 +83,7 @@ describe('compareKeyChanges', () => {
 
     expect(result.kind === 'measured' && result.unmet).toEqual([])
     expect(result.kind === 'measured' && result.unnamed).toEqual([
-      '.claude/context/governance/index.md',
+      'canon/context/governance/index.md',
     ])
     expect(result.kind === 'measured' && result.incidental).toEqual([
       'src/gov/citations.test.ts',
@@ -93,12 +93,12 @@ describe('compareKeyChanges', () => {
   it('should credit every changed file a single bullet names (#1329)', () => {
     const result = read(
       keyChanges(
-        '- Update `.claude/context/cli/packaging.md` with what the check proves, `.claude/context/development/gates.md` with the working-tree read, and `.claude/context/ci.md` to reverse its stated decision.',
+        '- Update `canon/context/cli/packaging.md` with what the check proves, `canon/context/development/gates.md` with the working-tree read, and `canon/context/ci.md` to reverse its stated decision.',
       ),
       [
-        '.claude/context/ci.md',
-        '.claude/context/cli/packaging.md',
-        '.claude/context/development/gates.md',
+        'canon/context/ci.md',
+        'canon/context/cli/packaging.md',
+        'canon/context/development/gates.md',
       ],
     )
 

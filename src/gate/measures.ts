@@ -369,7 +369,8 @@ export const seedStandards: Measure = async (ctx) => {
   if (seedRoots.length === 0) {
     return {
       emissions: [],
-      unmeasured: 'No seed root carries .claude/, so nothing was measured.',
+      unmeasured:
+        'No seed root carries .claude/ or canon/, so nothing was measured.',
     }
   }
 
@@ -387,11 +388,13 @@ export const seedStandards: Measure = async (ctx) => {
 
     // The audit separates 1 from 2 and they mean opposite things. 2 is a seed
     // breaking the standard it seeds. 1 is the audit refusing, which a seed
-    // root carrying a `.claude/` but no audited folder produces, and reporting
-    // that as a violation sends a reader hunting one that does not exist.
+    // root carrying a root but no audited folder produces, and reporting that
+    // as a violation sends a reader hunting one that does not exist.
     if (run.exitCode === 1) {
       emissions.push(
-        warn(`${seedRoot}: no audited folder under .claude/, nothing measured`),
+        warn(
+          `${seedRoot}: no audited folder under either root, nothing measured`,
+        ),
       )
       continue
     }
@@ -581,8 +584,8 @@ export const shippedReferences: Measure = async (ctx) => {
     ),
     failure:
       found.length === 1
-        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning .claude/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
-        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning .claude/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
+        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
+        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
   }
 }
 
@@ -1011,7 +1014,7 @@ export const pluginManifests: Measure = async (ctx) => {
     return {
       emissions: [],
       unmeasured:
-        'claude is on PATH and claude --version fails, so the install brought down no platform-native binary and no manifest was read. Raise or lower the pinned version at the Install Plugin CLI step in .github/workflows/verify.yml, and record the move in .claude/context/ci.md.',
+        'claude is on PATH and claude --version fails, so the install brought down no platform-native binary and no manifest was read. Raise or lower the pinned version at the Install Plugin CLI step in .github/workflows/verify.yml, and record the move in canon/context/ci.md.',
     }
   }
 

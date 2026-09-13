@@ -7,7 +7,9 @@ description: Classifies each section of a target project's bloated `CLAUDE.md` i
 
 Rebalance a large `CLAUDE.md` so only always-load behavior stays in it, path-scoped behavior becomes a rule, and domain narrative becomes a context entry. Every move is a proposal the user applies by hand.
 
-Run `migration-context` first when both apply. Its moves populate `.claude/context/`, and Step 3 has to read the folder those moves left so an existing entry resolves to an append rather than blocking the move that should have created it.
+Run `migration-context` first when both apply. Its moves populate `canon/context/`, and Step 3 has to read the folder those moves left so an existing entry resolves to an append rather than blocking the move that should have created it.
+
+A project the surface move has not reached keeps its context folder under `.claude/` rather than `canon/`. Read and propose entries into whichever root already carries the folder, and propose `canon/` only when neither does, since a new `canon/` folder would hide every entry the old one holds.
 
 ## Guards
 
@@ -20,7 +22,7 @@ Run these in parallel from `pwd`:
 
 - Read `CLAUDE.md`
 - `ls .claude/rules/ 2>/dev/null`: existing rule subdirs and numbers for placement
-- `ls .claude/context/ 2>/dev/null`: existing context entries for conflict checks
+- `ls canon/context/ 2>/dev/null`: existing context entries for conflict checks
 - `canon claude seeds list --json 2>/dev/null`: the base seed set. Read the `CLAUDE.md` entry's `content` as the always-load baseline. Skip this input when `canon` is not installed.
 
 ## Step 2: classify each section
@@ -37,7 +39,7 @@ Split `CLAUDE.md` by `##` heading. Score each section against this order:
 For each section proposed for a move:
 
 - Path-scoped: propose `.claude/rules/<subdir>/<n>-<slug>.md` with a `paths:` glob. Pick the subdir and a free number the way `create-rule` does. If `.claude/rules/<subdir>/` already holds a rule on the topic, mark as "conflict" and skip.
-- Domain narrative: propose `.claude/context/<domain>.md`. If the entry already exists, flat or as a same-named `.claude/context/<domain>/` folder, propose appending to the file that owns it rather than creating a duplicate flat entry beside a domain already split.
+- Domain narrative: propose `canon/context/<domain>.md`. If the entry already exists, flat or as a same-named `canon/context/<domain>/` folder, propose appending to the file that owns it rather than creating a duplicate flat entry beside a domain already split.
 
 ## Step 4: output
 
@@ -54,8 +56,8 @@ Print one grouped proposal block. Omit empty groups.
 
 ## Extract to a context entry
 
-- `## <heading>` → `.claude/context/<domain>.md` (<reason>)
-- `## <heading>` → `.claude/context/<domain>/<sub-area>.md`, appending to the domain's existing sibling file (<reason>)
+- `## <heading>` → `canon/context/<domain>.md` (<reason>)
+- `## <heading>` → `canon/context/<domain>/<sub-area>.md`, appending to the domain's existing sibling file (<reason>)
 
 ## Needs manual split
 

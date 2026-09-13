@@ -92,7 +92,7 @@ function replyExpectation(): Expectation {
     absent: [PLANS_LIVE],
     content: [],
     writeScope: [],
-    reply: ['.claude/context/development.md'],
+    reply: ['canon/context/development.md'],
     manual: [],
     maxTurns: undefined,
   }
@@ -693,13 +693,13 @@ describe('checkExpectation on the reply text', () => {
   it('should pass when the reply carries the declared fragment', () => {
     const verdict = runReply({
       ...CLEAN_ENVELOPE,
-      reply: 'Stopped. No .claude/context/development.md in this project.',
+      reply: 'Stopped. No canon/context/development.md in this project.',
     })
 
     expect(verdict.state).toBe('pass')
     expect(verdict.results).toContainEqual({
       ok: true,
-      message: 'reply says: .claude/context/development.md',
+      message: 'reply says: canon/context/development.md',
     })
   })
 
@@ -712,7 +712,7 @@ describe('checkExpectation on the reply text', () => {
     expect(verdict.state).toBe('fail')
     expect(verdict.results).toContainEqual({
       ok: false,
-      message: 'reply never says: .claude/context/development.md',
+      message: 'reply never says: canon/context/development.md',
     })
   })
 

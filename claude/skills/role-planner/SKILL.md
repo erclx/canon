@@ -32,7 +32,7 @@ Each item below is something a plan needed and a launch string did not carry.
 
 - The task file, and its `## Findings` before deciding anything. A row can carry its own disproof under a title that still states the original claim, which is how one trial nearly planned against a premise the file had already recorded as dead.
 - The source files themselves, opened rather than summarized. Never a count quoted from the task file, which was wrong or stale in ten places across four plans.
-- `CLAUDE.md` and `.claude/ARCHITECTURE.md`, for the decision and the alternative it was taken against rather than for the decision alone.
+- `CLAUDE.md` and `canon/ARCHITECTURE.md`, for the decision and the alternative it was taken against rather than for the decision alone.
 - The plan of any row this one is sequenced behind, including one already moved to `.canon/plans/archive/`. Reading a shipped plan produced the strongest constraint in the first trial and no brief asked for it.
 - `.canon/tasks/priority.md` for the row's Touches column and its stated blocker. That column is the file set the dispatch disjointness gate already reads.
 - `${CLAUDE_SKILL_DIR}/../../standards/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` on the file once it is written. Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists.

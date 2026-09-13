@@ -84,13 +84,15 @@ export function isFixture(rel: string): boolean {
  * A dotted root cannot be a suffix of a path segment, since a segment boundary
  * is a slash and a slash can never sit inside the dot itself, so a preceding
  * slash is not a false match to guard against and the boundary admits it. That
- * is what a relative link needs, since `../.claude/context/<entry>.md` carries
- * a slash immediately before `.claude`. A bare root has no such protection: it
- * is a suffix of a dotted root's own name and of any `/<root>/` path segment,
- * so its boundary rejects a slash along with a name character or a dot.
+ * is what a relative link into a dotted root needs. A bare root has no such
+ * protection: it is a suffix of a dotted root's own name and of any
+ * `/<root>/` path segment, such as a seed tree's own `canon/` folder, so its
+ * boundary rejects a name character, a dot, and a slash, except a slash that
+ * closes a `..` segment. That one exception is a relative link climbing out of
+ * a folder into the bare root, which is the form a moved docs page writes.
  */
 function rootBoundary(root: string): string {
-  return root.startsWith('.') ? '(?<![\\w.])' : '(?<![\\w./])'
+  return root.startsWith('.') ? '(?<![\\w.])' : '(?<![\\w.])(?<!(?<!\\.\\.)/)'
 }
 
 /**

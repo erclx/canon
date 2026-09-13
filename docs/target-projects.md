@@ -8,7 +8,7 @@ category: Agent surface
 
 How a project outside this repo consumes the toolkit across its lifecycle. Three phases: scaffold once, add a domain later when a new need appears, and sync when the upstream toolkit moves.
 
-This doc stays at the narrative layer. For command flags and JSON shapes, see [agents](agents/index.md). For per-domain mechanics, see each `.claude/context/<domain>.md`.
+This doc stays at the narrative layer. For command flags and JSON shapes, see [agents](agents/index.md). For per-domain mechanics, see each `canon/context/<domain>.md`.
 
 ## Getting the skills
 
@@ -57,7 +57,7 @@ The chain is:
 
 - `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/` in the same pass
 - `canon tooling sync <stack> --write` adds stack-specific deps, scripts, and gitignore entries
-- The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate eslint, vitest, playwright configs and the stack's setup script, and extends `.claude/context/ci.md` and `.claude/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: .claude/context/development.md -->
+- The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate eslint, vitest, playwright configs and the stack's setup script, and extends `canon/context/ci.md` and `canon/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: canon/context/development.md -->
 - `setup-verify` runs the installed `package.json` scripts (lint, typecheck, check, test, build) and reports pass or fail
 - `setup-indexes` bootstraps the `index.md` system over the project's own documentation folders, confirming candidate folders with the operator rather than running unattended
 
@@ -65,14 +65,14 @@ The chain stops at the project edge. `repo-metadata` and `git-commit` also ship,
 
 Run `canon:setup-smoke` by hand once `setup-verify` passes, for the heavier server smoke, end-to-end, and screenshot pass, since the same flakiness reasons that excluded those stages from `setup-verify` keep it out of this unattended chain too.
 
-Keep the `## Scripts` table in `.claude/context/development.md` current as scripts are added. Base tooling seeds that entry with the commands it installs, and each stack reference extends the table. `project-commands` reads it to start the app or run a check on request, so a command missing from the table cannot be run that way. A project whose entry outgrew one file and split into `.claude/context/development/` keeps the table in `overview.md`, which is where the skill looks next. <!-- audit-ignore-citations: .claude/context/development.md -->
+Keep the `## Scripts` table in `canon/context/development.md` current as scripts are added. Base tooling seeds that entry with the commands it installs, and each stack reference extends the table. `project-commands` reads it to start the app or run a check on request, so a command missing from the table cannot be run that way. A project whose entry outgrew one file and split into `canon/context/development/` keeps the table in `overview.md`, which is where the skill looks next. <!-- audit-ignore-citations: canon/context/development.md -->
 
 ### From scaffold to first feature
 
 Scaffold installs tooling and seeds. It does not fill the planning docs or the design system. Complete those before the first feature session:
 
-1. Fill `.claude/REQUIREMENTS.md` and `.claude/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write.
-2. For a UI project, invoke `canon:design-extract` to draft `.claude/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
+1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write.
+2. For a UI project, invoke `canon:design-extract` to draft `canon/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
 3. Optionally invoke `canon:draft-diagram` to draft entries under `.canon/diagrams/` from the architecture and the requirements. One file per diagram kind, so a later refresh of one kind leaves the others untouched. It renders each diagram it writes to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
 4. Start the feature loop. See [AI workflow](workflow/ai-workflow.md) for the per-feature sequence.
 
@@ -80,7 +80,7 @@ A machine without a renderer still gets the diagrams and is told which check was
 
 Each diagram entry records the commit and date it was last verified against, and nothing maintains that record for you. The folder is redrawn on demand rather than swept on every ship, so `verified` carries the whole signal: an entry whose date sits far behind your branch is due a read, and no pass will name which one. Run `canon:draft-diagram` again when the code a kind is drawn from moves.
 
-`.claude/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:docs-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
+`canon/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:docs-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
 
 ### Stack decision
 
@@ -262,7 +262,7 @@ Standards take no part in that run. Nothing installed them, so there is no copy 
 
 ### Targeted
 
-- Claude seed docs such as `CLAUDE.md` and `.claude/REQUIREMENTS.md`: invoke `canon:seed-sync`. The skill splits each file into a preamble (between the H1 and the first H2) plus one part per `##` section, then diffs part by part and proposes per-part edits. User customizations are preserved.
+- Claude seed docs such as `CLAUDE.md` and `canon/REQUIREMENTS.md`: invoke `canon:seed-sync`. The skill splits each file into a preamble (between the H1 and the first H2) plus one part per `##` section, then diffs part by part and proposes per-part edits. User customizations are preserved.
 - Governance rules already installed: `canon gov sync <path>` diffs and applies, and never adds new rules. A rule your recorded stack lists reports as `missing` instead.
 - Tooling configs and seeds: `canon tooling <stack> <path>` overwrites golden configs and merges seeds
 - Reference docs for a stack: `canon tooling reference <stack>` reads and never writes, so there is nothing to sync
@@ -272,7 +272,7 @@ Use a targeted entry point when only one surface moved upstream. Use the catch-a
 
 ## Verify a sync
 
-Before running a sync against a real project, run the relevant sandbox scenario. The sandbox provisions a representative project state and routes `SANDBOX_SCENARIO=sync` through the domain flow. See [sandbox](../.claude/context/sandbox/index.md) for the scenario catalog and routing patterns.
+Before running a sync against a real project, run the relevant sandbox scenario. The sandbox provisions a representative project state and routes `SANDBOX_SCENARIO=sync` through the domain flow. See [sandbox](../canon/context/sandbox/index.md) for the scenario catalog and routing patterns.
 
 ## Scenarios
 
@@ -326,5 +326,5 @@ Sync also refuses a target whose working tree is dirty, so commit or stash befor
 
 - [agents](agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [AI workflow](workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
-- [tooling](../.claude/context/tooling.md), [governance](../.claude/context/governance/index.md), [claude plugin](../.claude/context/claude-plugin/index.md), [indexes](../.claude/context/indexes.md), [snippets](../.claude/context/snippets.md), [standards](../.claude/context/standards/index.md): per-domain mechanics
-- [sandbox](../.claude/context/sandbox/index.md): scenario catalog for verifying domain flows
+- [tooling](../canon/context/tooling.md), [governance](../canon/context/governance/index.md), [claude plugin](../canon/context/claude-plugin/index.md), [indexes](../canon/context/indexes.md), [snippets](../canon/context/snippets.md), [standards](../canon/context/standards/index.md): per-domain mechanics
+- [sandbox](../canon/context/sandbox/index.md): scenario catalog for verifying domain flows

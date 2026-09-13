@@ -160,7 +160,7 @@ describe('visibleText', () => {
   it('should keep a placeholder inside a code span, brackets and all', () => {
     // The autolink pattern reaches into a backticked path and takes the angle
     // brackets out of the middle of it, which counts less than the page shows.
-    const text = 'See `.claude/context/<domain>.md` for it.'
+    const text = 'See `canon/context/<domain>.md` for it.'
 
     expect(visibleText(text)).toBe(text)
   })

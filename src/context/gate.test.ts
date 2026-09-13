@@ -4,12 +4,12 @@ import { type GateInput, hasDrift, isGating } from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
 function makeDrift(overrides: Partial<FolderDrift> = {}): FolderDrift {
-  return { rel: '.claude/context', unlisted: [], missing: [], ...overrides }
+  return { rel: 'canon/context', unlisted: [], missing: [], ...overrides }
 }
 
 function makeSection(overrides: Partial<SectionFinding> = {}): SectionFinding {
   return {
-    rel: '.claude/context/ci.md',
+    rel: 'canon/context/ci.md',
     missing: ['Overview'],
     ...overrides,
   }

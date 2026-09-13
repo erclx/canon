@@ -222,7 +222,7 @@ Two tiers hold work at different altitudes.
 - Edits: a few lines, done immediately with no ceremony.
 
 Nothing above these sequences work into versions. Scope is stated in
-`.claude/REQUIREMENTS.md` and reaches the board as discrete tasks, so why one
+`canon/REQUIREMENTS.md` and reaches the board as discrete tasks, so why one
 task runs before its neighbors is on its row and why one group of work runs
 before another is carried nowhere at all.
 
@@ -263,4 +263,4 @@ port-collision detail.
 
 - [Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md) for the isolation and fan-out mechanics
 - [Claude Code subagents](../../wiki/claude/claude-subagents.md) for in-session parallelism without worktrees
-- `.claude/context/claude-plugin/skill-strategy.md` for how the skills in the loop are categorized
+- `canon/context/claude-plugin/skill-strategy.md` for how the skills in the loop are categorized

@@ -46,7 +46,7 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 - Do not include license text. Reference the `LICENSE` file.
 - Do not include detailed contribution guidelines. Reference `CONTRIBUTING.md`.
 - Do not include extensive troubleshooting guides. Use a wiki or separate documentation.
-- A README that points to the project's own context entries instead of restating them satisfies the required list by routing rather than carrying. A repository documented in `docs/` or `.claude/context/` names the entry point and the listing command, then stops. The reader is one hop away, the same way `## Badges` treats zero as complete.
+- A README that points to the project's own context entries instead of restating them satisfies the required list by routing rather than carrying. A repository documented in `docs/` or `canon/context/` names the entry point and the listing command, then stops. The reader is one hop away, the same way `## Badges` treats zero as complete.
 - A README missing an H1, or whose headings restate the tool that scaffolded it rather than the project, is unedited generator output rather than a page anyone wrote. Draft over it. Nothing here asks a session to preserve a section a scaffold wrote and nobody replaced.
 
 ### Badges

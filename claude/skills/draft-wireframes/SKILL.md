@@ -1,11 +1,13 @@
 ---
 name: draft-wireframes
-description: Drafts a brand-new `.claude/wireframes/<surface>.md` file against the wireframes standard, walks the tree for a name collision, detects an existing higher visual-design tier without building one, confirms with the user, then writes. Use when asked to "draft a wireframe for X", "write the wireframe for this surface", "add a .claude/wireframes entry for X", or "wireframe this screen" where no surface file covers it yet. Do NOT use to fix a stale TODO stub or report wireframe drift against a diff, which is `docs-fold`'s wireframe-sweep step.
+description: Drafts a brand-new `canon/wireframes/<surface>.md` file against the wireframes standard, walks the tree for a name collision, detects an existing higher visual-design tier without building one, confirms with the user, then writes. Use when asked to "draft a wireframe for X", "write the wireframe for this surface", "add a canon/wireframes entry for X", or "wireframe this screen" where no surface file covers it yet. Do NOT use to fix a stale TODO stub or report wireframe drift against a diff, which is `docs-fold`'s wireframe-sweep step.
 ---
 
 # Wireframe draft
 
-Drafts one brand-new `.claude/wireframes/<surface>.md` file end to end: read the standard, decide whether the surface is already covered, detect but never build a higher visual-design tier, confirm the draft with the user, then write.
+Drafts one brand-new `canon/wireframes/<surface>.md` file end to end: read the standard, decide whether the surface is already covered, detect but never build a higher visual-design tier, confirm the draft with the user, then write.
+
+A project the surface move has not reached keeps its wireframes folder under `.claude/` rather than `canon/`. Walk and write at whichever root already carries the folder, and create it under `canon/` only when neither does, since a new `canon/` folder would hide every surface the old one holds.
 
 Read these files in parallel:
 
@@ -18,11 +20,11 @@ This skill stays fully independent of `docs-fold`'s wireframe coverage sweep, wh
 ## Guards
 
 - If no surface is given, stop: `❌ No surface given. Name the surface this wireframe should cover.`
-- Derive a kebab-case slug from the surface. Walk the whole `.claude/wireframes/` tree, including a surface nested inside a grouped subfolder, rather than checking the top level alone. A match at any depth means the surface already has a file. Stop: `❌ <path> already covers this surface. Edit it directly; this skill only drafts a surface with no file yet.`
+- Derive a kebab-case slug from the surface. Walk the whole `canon/wireframes/` tree, including a surface nested inside a grouped subfolder, rather than checking the top level alone. A match at any depth means the surface already has a file. Stop: `❌ <path> already covers this surface. Edit it directly; this skill only drafts a surface with no file yet.`
 
 ## Tier detection
 
-- Read `.claude/DESIGN.md` and every existing `.claude/wireframes/` file for a tier signal: a Stitch, Excalidraw, or Figma reference, or a marker naming one of them.
+- Read `canon/DESIGN.md` and every existing `canon/wireframes/` file for a tier signal: a Stitch, Excalidraw, or Figma reference, or a marker naming one of them.
 - State the detected tier at the confirm step. Always draft the tier-0 ASCII file regardless of what is detected, since that is the only shape this skill or any other shipped mechanism produces. Report a higher tier rather than attempting a companion render for it.
 - Default silently to tier 0 when nothing is detected.
 
@@ -43,7 +45,7 @@ This skill stays fully independent of `docs-fold`'s wireframe coverage sweep, wh
 
 - Write the file at the confirmed path, creating a grouped subfolder only when the surface belongs beside siblings that already share one.
 - Run `canon markdown audit <path>` against the prose outside the fenced block.
-- Run `canon indexes regen .claude/wireframes`, so the surface appears in `.claude/wireframes/index.md` immediately rather than drifting until the next unrelated regen.
+- Run `canon indexes regen canon/wireframes`, so the surface appears in `canon/wireframes/index.md` immediately rather than drifting until the next unrelated regen.
 
 ## Response format
 
