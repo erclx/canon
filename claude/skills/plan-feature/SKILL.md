@@ -31,7 +31,7 @@ Coding standards live in `.claude/rules/`. Claude Code loads them automatically.
 
 ## Step 2: scan relevant source files
 
-Based on the feature description, identify and read source files that are directly relevant. Do not read entire directories speculatively.
+Based on the feature description, identify and read source files that are directly relevant. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
 Measure against the tree rather than recall. Grep for each construct the plan will name and count the sites, so the plan carries the count the tree holds today. Confirm any work the plan sequences behind is still open, so it does not lead with an item that already shipped.
 

@@ -4,10 +4,12 @@ Governs the proposal `markdown-propose` writes before it edits anything. The con
 
 ## Folder
 
-- One folder per screening pass at `.canon/proposals/<slug>/`, where the slug names the subject rather than the activity
+- One folder per screening pass at `.canon/proposals/<nn>-<slug>/`, where the slug names the subject rather than the activity
 - One proposal file per source file, named `<nn>-<source filename, its own extension dropped>.md`, so a source already named `CLAUDE.md` becomes `01-CLAUDE.md` rather than `01-CLAUDE.md.md`
 - `00-overview.md` when the pass spans more than two source files, holding the cross-file pattern, the change counts, and the settle order
 - `applied.md` once the first change lands, holding every applied change with its reason and the answer it carried
+
+The folder's own `<nn>` and a proposal file's own `<nn>` are two independent counters. The folder's ordinal records when the pass was opened, counted within `.canon/proposals/` alone rather than shared with `plan-groundwork` or `plan-intake`'s sequence, and a proposal file's ordinal inside it records settle order, the dependency order changes apply in. Reading one as the other gets a pass dated wrong or an apply ordered wrong.
 
 The name carries both structures the folder has. The basename pairs a proposal to its source so a reader opens the two side by side, and the number is the settle order, which is a dependency rather than a preference: a file other files quote is settled first. Do not group proposals by theme.
 
@@ -95,13 +97,13 @@ The folder is gitignored, and backed wherever a records remote is configured. It
 Count the unread changes per file:
 
 ```bash
-grep -c '^- \*\*You:\*\*$' .canon/proposals/<slug>/*.md
+grep -c '^- \*\*You:\*\*$' .canon/proposals/<nn>-<slug>/*.md
 ```
 
 Report every answer given, against the change it sits under:
 
 ```bash
-awk '/^### /{h=FILENAME": "$0} /^- \*\*You:\*\*./{print h; print "   "$0}' .canon/proposals/<slug>/*.md
+awk '/^### /{h=FILENAME": "$0} /^- \*\*You:\*\*./{print h; print "   "$0}' .canon/proposals/<nn>-<slug>/*.md
 ```
 
 Both walk `###` headings, which is the mechanical reason an answer typed anywhere else is lost.
