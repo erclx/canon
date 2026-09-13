@@ -70,16 +70,19 @@ export interface BoardRefused {
 export type BoardOutcome = BoardResult | BoardRefused
 
 /**
- * Whether clearing `outDir` would take `root` down with it: the directory
- * equals the project root, or contains it.
+ * Whether clearing `outDir` would take a protected directory down with it:
+ * the directory equals one of them, or contains one.
  *
  * `generateBoard` clears its output directory on every run, and `--out` is
- * caller-supplied. A mistaken `--out .` with no check here deletes the
- * repository the board is meant to describe rather than refusing loud, the
- * way the render command's own missing-source guard does.
+ * resolved against the caller's cwd while the panels read from `PROJECT_ROOT`.
+ * Those agree in the ordinary case and diverge in exactly one: a second
+ * checkout, where a global `canon` resolves `PROJECT_ROOT` to a different
+ * tree than the one the caller stands in. Guarding `PROJECT_ROOT` alone misses
+ * that case, since `--out .` then resolves under the caller's own cwd, which
+ * shares no containment with the unrelated root the guard compared it to.
  */
-function wouldDeleteRoot(root: string, outDir: string): boolean {
-  return root === outDir || root.startsWith(outDir + sep)
+function wouldDeleteRoot(protect: readonly string[], outDir: string): boolean {
+  return protect.some((dir) => dir === outDir || dir.startsWith(outDir + sep))
 }
 
 function escapeHtml(value: string): string {
@@ -317,13 +320,21 @@ function writeCandidatesPanel(root: string, outDir: string): void {
  * This function is the directory's only writer, per the constraint every
  * caller shares it under: `canon serve` and a future `canon capture` pass
  * both read the result and neither may assume it exists ahead of a run.
+ *
+ * `cwd` is the caller's own working directory, resolved and passed in
+ * explicitly rather than read here, so a test can exercise the checkout-
+ * mismatch case without touching the process's real cwd.
  */
-export function generateBoard(root: string, outDir: string): BoardOutcome {
-  if (wouldDeleteRoot(root, outDir)) {
+export function generateBoard(
+  root: string,
+  outDir: string,
+  cwd: string,
+): BoardOutcome {
+  if (wouldDeleteRoot([root, cwd], outDir)) {
     return {
       ok: false,
       reason: 'unsafe-out',
-      detail: `${outDir} is or contains ${root}. Refusing to clear it.`,
+      detail: `${outDir} is or contains ${root} or ${cwd}. Refusing to clear it.`,
     }
   }
 

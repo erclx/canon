@@ -159,7 +159,7 @@ export function register(program: Command): void {
         `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}Generate design board${NC}\n`,
       )
       if (mismatch !== undefined) logWarn(mismatch)
-      const result = generateBoard(PROJECT_ROOT, outDir)
+      const result = generateBoard(PROJECT_ROOT, outDir, process.cwd())
       if (!result.ok) {
         process.stderr.write(
           `${GREY}│${NC} ${RED}✗${NC} ${result.detail}\n${GREY}└${NC}\n`,
