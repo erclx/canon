@@ -1,7 +1,7 @@
-import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import type { AuditResult } from '@/audits/catalog'
+import { resolveExisting } from '@/legacy-path'
 
 /**
  * Where the retained counts live, relative to the project root.
@@ -173,10 +173,11 @@ function isBaseline(value: unknown): value is Baseline {
 export async function readBaseline(
   root: string,
 ): Promise<Baseline | undefined> {
-  const rel = existsSync(join(root, BASELINE_REL))
-    ? BASELINE_REL
-    : LEGACY_BASELINE_REL
-  const path = join(root, rel)
+  const path = resolveExisting([
+    join(root, BASELINE_REL),
+    join(root, LEGACY_BASELINE_REL),
+  ])
+  const rel = relative(root, path)
 
   let raw: string
   try {

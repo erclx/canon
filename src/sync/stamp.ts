@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join, sep } from 'node:path'
 import { execa } from 'execa'
+import { resolveExisting } from '@/legacy-path'
 import { recordTarget } from '@/targets/registry'
 
 /**
@@ -107,7 +108,7 @@ export function retiredNameStampPath(target: string): string {
  * second breaking change aimed at exactly the targets that were slowest to
  * migrate the first time.
  */
-export function stampPaths(target: string): readonly string[] {
+export function stampPaths(target: string): readonly [string, ...string[]] {
   return [
     stampPath(target),
     claudeCanonStampPath(target),
@@ -163,8 +164,7 @@ export function toStampKey(rel: string): string {
  * was read from.
  */
 export function readStamp(target: string): Stamp | undefined {
-  const found = stampPaths(target).find((path) => existsSync(path))
-  return found === undefined ? undefined : readStampFile(found)
+  return readStampFile(resolveExisting(stampPaths(target)))
 }
 
 function readStampFile(path: string): Stamp | undefined {

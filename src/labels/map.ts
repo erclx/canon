@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { resolveExisting } from '@/legacy-path'
 
 /**
  * Where a project declares its pull request label map.
@@ -98,11 +99,14 @@ export function parseLabelMap(source: string): LabelMap {
 
 /** Reads the map a project declares at `root`, or says why it could not. */
 export function readLabelMap(root: string): LabelMap {
-  const rel = existsSync(join(root, MAP_REL)) ? MAP_REL : LEGACY_MAP_REL
+  const path = resolveExisting([
+    join(root, MAP_REL),
+    join(root, LEGACY_MAP_REL),
+  ])
 
   let source: string
   try {
-    source = readFileSync(join(root, rel), 'utf8')
+    source = readFileSync(path, 'utf8')
   } catch {
     return { kind: 'refused', reason: 'no-map' }
   }
