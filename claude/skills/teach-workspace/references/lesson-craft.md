@@ -35,12 +35,7 @@ Every element competes with the material for attention.
 
 ## Diagrams
 
-A diagram earns its place when a relationship, a boundary, a path, a before-and-after, is the point of the passage rather than decoration for it. Most passages do not clear that bar, and a lesson reaching for a diagram on every section is the failure the neighboring `## Restraint` section already guards against. When prose or a list already carries that point, leave it there.
-
-- Wrap it in a `<figure>` holding an inline `<svg>` and a `<figcaption>` that names what to take from the diagram rather than what it shows. Let the figure run wider than the prose column, since a diagram cramped to the reading measure loses the labels it needs.
-- Draw it by hand, as plain shapes and lines authored directly in the markup, not exported from a diagramming tool.
-- Color every fill and stroke through a custom property the workspace's own stylesheet defines, never a literal hex value, which is the same rule that stylesheet's opening comment already states for every rule added under it. The diagram then re-colors itself on the same switch that re-colors the page.
-- Give the `<svg>` an accessible name: `role="img"` with `aria-label` for one short line, or `aria-labelledby` pointing at a `<title>` element inside it for a longer one.
+Follow `${CLAUDE_SKILL_DIR}/../../standards/figures.md` for when a diagram earns its place, the render-first policy between Mermaid and freehand SVG, and the wrapping, color, and accessibility rules every figure carries. A lesson reaching for a diagram on every section is the failure the neighboring `## Restraint` section already guards against.
 
 ## Quiz construction
 

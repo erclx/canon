@@ -14,6 +14,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Design reference](design.md): Shape and content rules for .claude/DESIGN.md
 - [Diagram reference](diagrams.md): Shape and content rules for .canon/diagrams/<kind>.md files
 - [Docs reference](docs.md): Reader and jurisdiction, frontmatter, page structure, what a page links out to, the diagram permission, and when a category earns a subfolder
+- [Figure reference](figures.md): When a figure earns its place, the render-first policy for a graph-shaped subject, freehand SVG as the escape hatch, and its wrapping, color, and accessibility rules
 - [Glossary reference](glossary.md): Frontmatter, entry shape, ordering, and the rules deciding which terms a glossary carries
 - [Groundwork reference](groundwork.md): Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
 - [Intake reference](intake.md): Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
