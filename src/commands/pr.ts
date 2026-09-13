@@ -20,6 +20,11 @@ import {
   treeRoots,
 } from '@/pr/bijection'
 import { type CheckRunListing, collapseChecks } from '@/pr/checks'
+import {
+  findEvidenceCommentId,
+  groupEvidence,
+  renderEvidenceBody,
+} from '@/pr/evidence'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import { KEY_CHANGES } from '@/pr/paths'
 import { type ReviewListing, resolveReviewScope } from '@/pr/review-scope'
@@ -79,6 +84,27 @@ const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
     'The check runs for this commit could not be read. An empty answer here would report a commit as having no check rather than as unread, so nothing is reported.',
   'reviews-unreadable':
     'The reviews on this pull request could not be read. An empty answer here would report a reviewed pull request as never reviewed, which routes the next pass to the whole change, so nothing is reported.',
+}
+
+/**
+ * Why `canon pr evidence` produced no comment body, past the ones
+ * `readIdentity` already owns (`gh-missing`, `gh-failed`, `no-branch`) and the
+ * one `identity.head` owns (`no-object-head`).
+ */
+type EvidenceRefusal =
+  | 'gh-failed'
+  | 'no-base'
+  | 'unreadable-tree'
+  | 'unreadable-changes'
+
+const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
+  'gh-failed':
+    'gh could not answer for this repository. Name the pull request number.',
+  'no-base': 'No base resolves against the trunk. Fetch origin and re-run.',
+  'unreadable-tree':
+    'git could not read the tree at the base commit, so no path could be judged added or changed.',
+  'unreadable-changes':
+    'git could not list what this branch changed, so the set is unknown.',
 }
 
 /** Why the read produced no comparison, ahead of the ones the compare owns. */
@@ -288,6 +314,46 @@ export function register(program: Command): void {
     )
     .action(async (number: string | undefined, opts: ReadOptions) => {
       process.exitCode = await runReviewState(number, opts)
+    })
+
+  pr.command('evidence')
+    .description(
+      "Render a before/after comparison for the pull request's changed evidence images",
+    )
+    .argument('[number]', 'Pull request to read, defaulting to this branch')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Compares the merge base with the trunk against the current head, never',
+        'the previous push against the new one, so the comment never claims more',
+        'than the branch currently shows. A path counts as evidence when one of',
+        'its segments is literally `evidence` and the filename carries an image',
+        'extension (png, jpg, jpeg, gif, webp, avif, svg). A README, a capture',
+        'script, or a raw data file kept beside the images is left out rather',
+        'than rendered as a broken embed.',
+        '',
+        'Read `reason` on the JSON record before posting anything:',
+        '  ok           a body was rendered, with `commentId` set when a marked',
+        '               comment already exists and should be edited in place',
+        '  no-evidence  nothing in the diff carries an evidence/ segment, which',
+        '               is an ordinary, silent no-op rather than a refusal',
+        '',
+        'Exit codes:',
+        '  0  read, whether it produced a body or reported no-evidence',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr evidence --json',
+        '  canon pr evidence 1341 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: ReadOptions) => {
+      process.exitCode = await runEvidence(number, opts)
     })
 }
 
@@ -1012,6 +1078,160 @@ async function runReviewState(
         root,
         ...(listing.number !== undefined && { number: listing.number }),
         ...scope,
+      })}\n`,
+    )
+  }
+
+  return 0
+}
+
+/**
+ * Every path `git ls-tree` reports for `ref`, or undefined when the read
+ * failed. One call for the whole tree rather than one `cat-file -e` per
+ * evidence path, since existence at base is checked once per changed path and
+ * a batch read is one round trip instead of many.
+ */
+async function listTreePaths(
+  root: string,
+  ref: string,
+): Promise<Set<string> | undefined> {
+  const result = await $`git -C ${root} ls-tree -r --name-only ${ref}`
+    .env(gitEnv())
+    .quiet()
+    .nothrow()
+  if (result.exitCode !== 0) return undefined
+  return new Set(result.text().split('\n').filter(Boolean))
+}
+
+async function runEvidence(
+  number: string | undefined,
+  opts: ReadOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  intro('canon pr evidence')
+
+  const read = await readIdentity(root, number)
+  if (read.kind === 'refused') {
+    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+  }
+
+  const { identity } = read
+  if (identity.head === undefined) {
+    return refuseWith(
+      'no-object-head',
+      PULL_REFUSALS['no-object-head'],
+      emitJson,
+      root,
+    )
+  }
+
+  const base = await resolveBaseRef(root)
+  if (base === undefined) {
+    return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
+  }
+
+  const [changed, baseTree] = await Promise.all([
+    listChangedFiles(root, base),
+    listTreePaths(root, base),
+  ])
+  if (changed === undefined) {
+    return refuseWith(
+      'unreadable-changes',
+      EVIDENCE_REFUSALS['unreadable-changes'],
+      emitJson,
+      root,
+    )
+  }
+  if (baseTree === undefined) {
+    return refuseWith(
+      'unreadable-tree',
+      EVIDENCE_REFUSALS['unreadable-tree'],
+      emitJson,
+      root,
+    )
+  }
+
+  const grouped = await groupEvidence(changed, async (path) =>
+    baseTree.has(path),
+  )
+
+  if (grouped.kind === 'refused') {
+    logStep('Skipped')
+    logInfo(
+      'No changed path carries an evidence/ segment, so there is nothing to post.',
+    )
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          ...(identity.number !== undefined && { number: identity.number }),
+          reason: 'no-evidence',
+        })}\n`,
+      )
+    }
+    return 0
+  }
+
+  const repoRow = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
+  const repo =
+    repoRow === null
+      ? undefined
+      : (JSON.parse(repoRow) as { nameWithOwner?: string }).nameWithOwner
+
+  if (repo === undefined) {
+    return refuseWith(
+      'gh-failed',
+      EVIDENCE_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+    )
+  }
+
+  const body = renderEvidenceBody(grouped.states, repo, base, identity.head)
+
+  let commentId: number | undefined
+  if (identity.number !== undefined) {
+    const commentsRow = await gh(root, [
+      'pr',
+      'view',
+      String(identity.number),
+      '--json',
+      'comments',
+    ])
+    if (commentsRow !== null) {
+      try {
+        const parsed = JSON.parse(commentsRow) as {
+          comments?: readonly { url?: string; body: string }[]
+        }
+        commentId = findEvidenceCommentId(parsed.comments ?? [])
+      } catch {
+        commentId = undefined
+      }
+    }
+  }
+
+  const caseCount = grouped.states.reduce((n, s) => n + s.items.length, 0)
+
+  logStep('Scope')
+  logInfo(
+    `${plural(caseCount, 'case')} across ${plural(grouped.states.length, 'state')}`,
+  )
+
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        root,
+        ...(identity.number !== undefined && { number: identity.number }),
+        reason: 'ok',
+        base,
+        head: identity.head,
+        body,
+        ...(commentId !== undefined && { commentId }),
       })}\n`,
     )
   }

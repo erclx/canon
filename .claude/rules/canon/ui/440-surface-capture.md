@@ -37,3 +37,4 @@ paths:
 - A project whose own established convention already commits that same comparison may route a flagged case's evidence there instead of a separate evidence folder. Only an established convention already committing the same comparison qualifies, not a preference for skipping a second folder.
 - Commit an evidence case for the first time only after running the capture twice with no code change between the runs and confirming the two outputs are byte-identical.
 - Recommitting an unbounded sweep on every run reaches a gigabyte of repository history inside a hundred merges. A small, committed evidence set is what a reviewer needs and what lets GitHub draw its own before-and-after comparison on the pull request.
+- `git-pr` and `git-followup` maintain a comparison comment on the pull request automatically once a case is committed, so a reviewer never has to open Files Changed to see it.

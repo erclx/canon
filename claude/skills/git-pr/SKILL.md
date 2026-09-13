@@ -176,6 +176,27 @@ rmdir <main-root>/.canon/tmp/ui-checklist 2>/dev/null || true
 
 The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
 
+### Post the evidence comparison
+
+Run `canon pr evidence <number> --json` against the number the pull request step above resolved. Read `reason` on the record rather than the exit code.
+
+- `no-evidence`: nothing changed under an `evidence/` segment. Say nothing and move on.
+- `ok`: write `body` to `.canon/tmp/pr-evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
+
+```bash
+gh pr comment <number> --body-file <main-root>/.canon/tmp/pr-evidence/body-<number>.md
+```
+
+When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`:
+
+```bash
+gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr-evidence/body-<number>.md
+```
+
+Clean up the tmp file the way the UI-checklist step does, only after the call reports success.
+
+Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read.
+
 ### Record the number on the task
 
 Write the `number` the final command printed onto the task the branch is closing. Do not resolve it again. `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.

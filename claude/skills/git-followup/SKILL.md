@@ -29,15 +29,19 @@ A missing tracking ref is no longer a guard. An open pull request proves the bra
 
    The lease is what stops the force from overwriting a commit this session never read. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
 
-5. Check for existing review comments: `gh api 'repos/{owner}/{repo}/pulls/<number>/comments' --jq 'length'`, resolving `<number>` from `gh pr view --json number`.
-6. Sync the body and title on every invocation, before the routing below decides on the reply.
+5. Post the evidence comparison, on every invocation including `reply-owned`, since this comment is not the reply step 8 owns. Run `canon pr evidence <number> --json`, resolving `<number>` from `gh pr view --json number`, and read `reason` on the record rather than the exit code.
+   - `no-evidence`: nothing changed under an `evidence/` segment this push. Say nothing and move on.
+   - `ok`: write `body` to `.canon/tmp/pr-evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post the comment with `gh pr comment <number> --body-file <main-root>/.canon/tmp/pr-evidence/body-<number>.md` when the record carries no `commentId`, or edit the existing one in place with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr-evidence/body-<number>.md` when it does. Clean up the tmp file only after the call reports success.
+   - Any other reason is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and continue without stopping the chain.
+6. Check for existing review comments: `gh api 'repos/{owner}/{repo}/pulls/<number>/comments' --jq 'length'`, resolving `<number>` from `gh pr view --json number`.
+7. Sync the body and title on every invocation, before the routing below decides on the reply.
    - Run `gh pr view --json url,title,body` and update the body with `gh pr edit --body` when the new commit changes scope, and the title with `gh pr edit --title` when the scope shifted enough to make it inaccurate.
    - A fix commit answering a review changes what shipped exactly as much as an ordinary followup does, so the sync cannot wait on the invocation or the comment count below.
    - A body a person edited by hand between rounds gets no special handling: judge it against the tree the same way regardless of who wrote it last, since a hand-edit the fix commit has made stale is the exact drift this sync exists to close.
-7. Route on the invocation and the comment count for the reply alone.
+8. Route on the invocation and the comment count for the reply alone.
    - When invoked with `reply-owned`, skip this step: the caller posts its own reply.
-   - Otherwise, if the count is above zero, the followup addresses review feedback: post a one-line summary of the fix with `gh pr comment --body`, first running the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against it, since the hook does not see an inline comment body. The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the title and body step 6 synced reaches it.
-   - If it is zero, nothing further runs. The sync in step 6 already did this branch's job.
+   - Otherwise, if the count is above zero, the followup addresses review feedback: post a one-line summary of the fix with `gh pr comment --body`, first running the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against it, since the hook does not see an inline comment body. The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the title and body step 7 synced reaches it.
+   - If it is zero, nothing further runs. The sync in step 7 already did this branch's job.
 
 ## After completion
 

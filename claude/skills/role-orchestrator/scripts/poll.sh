@@ -32,19 +32,25 @@ if [ -z "$BASE_REF" ]; then
 fi
 BASE_BRANCH="${BASE_REF#origin/}"
 
-# These five strings are owned elsewhere and pinned here. `review-pr`
-# writes `## Review` and `## Review closed`, and states the full five-heading
+# These six strings are owned elsewhere and pinned here. `review-pr`
+# writes `## Review` and `## Review closed`, and states the full six-heading
 # set once, beside the threshold it already states once. `review-address`
 # writes `## Review response`, `## Rebase`, and `## Post-review findings`, the
 # last for a finding a worker produces after a close-out rather than in answer
-# to one already on the thread. All three surfaces ship separately, so a
-# heading added in either skill breaks a test here that no check reaches across.
+# to one already on the thread. `canon pr evidence`, run through `git-pr` and
+# `git-followup`, writes `## Evidence`. All these surfaces ship separately, so
+# a heading added in any of them breaks a test here that no check reaches
+# across.
 #
-# Both families match on the first line alone so the tests stay symmetric. The
-# reply family carries `## Rebase` and `## Post-review findings` beside
-# `## Review response` because neither answers a comment already on the thread,
-# which is why both were kept outside the `## Review` family rather than folded
-# into it.
+# All three families match on the first line alone so the tests stay
+# symmetric. The reply family carries `## Rebase` and `## Post-review
+# findings` beside `## Review response` because neither answers a comment
+# already on the thread, which is why both were kept outside the `## Review`
+# family rather than folded into it. `## Evidence` answers no comment either,
+# and it stays out of the reply family rather than joining it: an evidence
+# comment is not a response to a review, so counting it as one would send the
+# poll back for a re-review nothing asked for. It is excluded from the
+# unmatched filter below instead, on its own.
 #
 # The review family reaches this file through `canon pr review-state` rather
 # than through a filter of its own, so the two headings are pinned here only in
@@ -81,7 +87,7 @@ JQ_UNMATCHED_STATE='
     | select(startswith("## "))
     | select(. != "## Review" and . != "## Review closed"
               and . != "## Review response" and . != "## Rebase"
-              and . != "## Post-review findings")
+              and . != "## Post-review findings" and . != "## Evidence")
   ] as $unclassified
   | ($unclassified | length | tostring)
     + " "
