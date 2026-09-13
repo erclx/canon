@@ -67,7 +67,7 @@ function renderAttribute(key: string, value: unknown): string {
   }
   if (value === undefined || value === null || value === false) return ''
   if (value === true) return ` ${key}`
-  if (isRaw(value)) return ` ${key}="${value.html}"`
+  if (isRaw(value)) return ` ${key}="${escape(value.html)}"`
   return ` ${key}="${escape(String(value))}"`
 }
 

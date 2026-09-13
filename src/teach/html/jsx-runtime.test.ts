@@ -45,6 +45,19 @@ describe('jsx runtime', () => {
     )
   })
 
+  it('should escape a raw value used in attribute position', () => {
+    expect(
+      render(jsx('div', { title: raw('a" onload="alert(1)'), children: 'x' })),
+    ).toBe('<div title="a&quot; onload=&quot;alert(1)">x</div>')
+  })
+
+  it('should escape a rendered component used in attribute position', () => {
+    const Badge = (props: Props) => jsx('span', { children: props.children })
+    expect(
+      render(jsx('div', { title: Badge({ children: 'hi' }), children: 'x' })),
+    ).toBe('<div title="&lt;span&gt;hi&lt;/span&gt;">x</div>')
+  })
+
   it('should compose nested components', () => {
     const List = (props: Props) => jsx('ul', { children: props.children })
     const Item = (props: Props) => jsx('li', { children: props.children })
