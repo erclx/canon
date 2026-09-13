@@ -30,6 +30,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'This onboarding doc needs a hand-drawn picture of the signup-to-active path, sketch it in and make sure it actually renders correctly.',
+    expect: 'draft-figure',
+  },
+  {
+    prompt:
       'Bring the internal planning docs under .claude up to date with what we decided this session.',
     expect: 'docs-fold',
   },
