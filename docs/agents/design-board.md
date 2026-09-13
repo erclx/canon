@@ -5,7 +5,7 @@ description: Generating a static index over a project's design surfaces, what ea
 
 # Design board
 
-`canon design board [--out <path>] [--root <path>]` generates a static page set indexing five design surfaces and reports the path a reader opens with `canon serve`. `--root` defaults to the main worktree the same way `canon teach`'s verbs resolve their own root. The surfaces panel's landing-page half and the whole components panel render only when that root is this toolkit's own checkout, since both read this repository's own build output rather than anything a target project produces. Running the installed CLI from inside a checkout of this project prints a mismatch warning when the caller's working directory disagrees with the root it resolved.
+`canon design board [--out <path>] [--root <path>]` generates a static page set indexing six design surfaces and reports the path a reader opens with `canon serve`. `--root` defaults to the main worktree the same way `canon teach`'s verbs resolve their own root. The surfaces panel's landing-page half and the whole components panel render only when that root is this toolkit's own checkout, since both read this repository's own build output rather than anything a target project produces. Running the installed CLI from inside a checkout of this project prints a mismatch warning when the caller's working directory disagrees with the root it resolved.
 
 Each panel reads what is already on disk and reports its own missing source rather than failing the run, so an absent build, an empty corpus, or a toolkit-only gate renders an empty-state message instead of a broken frame.
 
@@ -26,6 +26,7 @@ canon serve .canon/review/board
 - **Wireframes** reads every `**/*.md` under `<root>/canon/wireframes/` or `<root>/.claude/wireframes/`, excluding `index.md` at any depth, and renders each file as-is inside a `<pre>`, labeled from its own `description` frontmatter field. Reports the whole panel empty rather than per file when the directory is absent or holds nothing to render.
 - **Past candidates** lists an arm capture image per folder under `<root>/.canon/review/evidence/`, and states the corpus carries none rather than rendering an empty grid.
 - **Components** iframes the gallery built by `bun run web:gallery`, a second Astro config at `web/gallery.config.mjs` reading `web/gallery-src/` and writing `web/gallery-dist/`. That config's `srcDir` is never read by `web:build`'s own config, so the gallery never reaches the published `web/dist/`. The gallery page renders every component under `web/src/components/` except two whose props carry no defaults, which it names rather than filling with invented data. Reports a toolkit-only notice outside this toolkit's own checkout, and a missing gallery build otherwise.
+- **References** lists whatever image an operator has dropped flat under `<root>/.canon/review/references/`, with no fetching and no second token source: a reference is an image, nothing more. Reports the folder as absent or as present but carrying no image rather than rendering an empty grid.
 
 ## What it does not do
 

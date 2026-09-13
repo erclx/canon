@@ -61,6 +61,7 @@ describe('generateBoard', () => {
       'wireframes',
       'candidates',
       'components',
+      'references',
     ])
     for (const panel of result.panels) {
       expect(existsSync(join(outDir, panel.path))).toBe(true)
@@ -268,6 +269,25 @@ describe('generateBoard', () => {
     expect(html).toContain('none carries a draft-and-pick arm capture')
   })
 
+  it('escapes a candidate filename carrying a double quote', () => {
+    seed(
+      join(
+        '.canon',
+        'review',
+        'evidence',
+        'hero-probe',
+        'a" onerror=alert(1) x.png',
+      ),
+      'x',
+    )
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'candidates', 'index.html'), 'utf8')
+    expect(html).not.toContain('src="hero-probe/a" onerror=alert(1) x.png"')
+    expect(html).toContain('src="hero-probe/a&quot; onerror=alert(1) x.png"')
+  })
+
   it('renders an arm capture image when the evidence corpus carries one', () => {
     seed(join('.canon', 'review', 'evidence', 'hero-probe', 'arm-a.png'), 'x')
 
@@ -307,5 +327,56 @@ describe('generateBoard', () => {
     const html = readFileSync(join(outDir, 'components', 'index.html'), 'utf8')
     expect(html).toContain("this toolkit's own checkout")
     expect(html).not.toContain('gallery/index.html')
+  })
+
+  it('reports the references panel empty when no folder exists', () => {
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('No')
+    expect(html).toContain('folder yet')
+  })
+
+  it('reports the references panel empty when the folder carries no image', () => {
+    seed(join('.canon', 'review', 'references', 'notes.md'), 'x')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('carries no image yet')
+  })
+
+  it('escapes a reference filename carrying a double quote', () => {
+    seed(
+      join('.canon', 'review', 'references', 'a" onerror=alert(1) x.png'),
+      'x',
+    )
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).not.toContain('src="a" onerror=alert(1) x.png"')
+    expect(html).toContain('src="a&quot; onerror=alert(1) x.png"')
+  })
+
+  it('renders a reference image when the folder carries one', () => {
+    seed(join('.canon', 'review', 'references', 'competitor-nav.png'), 'x')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'references', 'index.html'), 'utf8')
+    expect(html).toContain('competitor-nav.png')
+    expect(existsSync(join(outDir, 'references', 'competitor-nav.png'))).toBe(
+      true,
+    )
+  })
+
+  it('names both hand-off skills in the header', () => {
+    const result = generate(outDir)
+
+    if (!result.ok) throw new Error('expected generateBoard to succeed')
+    const html = readFileSync(result.indexPath, 'utf8')
+    expect(html).toContain('canon:draft-and-pick')
+    expect(html).toContain('canon:ux-audit')
   })
 })
