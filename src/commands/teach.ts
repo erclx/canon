@@ -2,6 +2,7 @@ import { relative } from 'node:path'
 import type { Command } from 'commander'
 import { type LessonOutcome, planLesson } from '@/teach/lesson'
 import { type NavOutcome, generateNav } from '@/teach/nav'
+import { type RenderOutcome, renderLessonBody } from '@/teach/render'
 import {
   defineTerms,
   type ListOutcome,
@@ -79,6 +80,10 @@ interface GlossaryCommandOptions {
 interface NavCommandOptions {
   readonly json?: boolean
   readonly root?: string
+}
+
+interface RenderCommandOptions {
+  readonly json?: boolean
 }
 
 export function register(program: Command): void {
@@ -357,6 +362,36 @@ export function register(program: Command): void {
     .action(async (topic: string | undefined, opts: NavCommandOptions) => {
       process.exitCode = await runNav(topic, opts)
     })
+
+  teach
+    .command('render')
+    .description('Render a lesson body block list to HTML')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the block list rendered',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Reads a JSON array of blocks from stdin, each a heading, paragraph,',
+        'list, or raw block, and renders it through the same components the',
+        'fixture lesson is generated from. Content the three cannot express',
+        'takes type raw, carrying its own html verbatim, unescaped.',
+        '',
+        'Takes no topic and no --root: the verb is a stateless transform,',
+        'reading nothing off a workspace on disk.',
+        '',
+        'Examples:',
+        '  echo \'[{"type":"heading","level":1,"text":"Compass bearings"}]\' | canon teach render --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RenderCommandOptions) => {
+      process.exitCode = await runRender(opts)
+    })
 }
 
 interface StylesheetCommandOptions {
@@ -401,6 +436,17 @@ async function runStylesheet(
 
 function collect(value: string, previous: string[]): string[] {
   return [...previous, value]
+}
+
+function readStdin(): Promise<string> {
+  return new Promise((resolveStream, rejectStream) => {
+    const chunks: Buffer[] = []
+    process.stdin.on('data', (chunk: Buffer) => chunks.push(chunk))
+    process.stdin.on('end', () =>
+      resolveStream(Buffer.concat(chunks).toString('utf8')),
+    )
+    process.stdin.on('error', rejectStream)
+  })
 }
 
 /**
@@ -646,6 +692,78 @@ async function runNav(
   const root = await rootFor(opts.root)
 
   return reportNav(await generateNav(root, topic), emitJson, root)
+}
+
+async function runRender(opts: RenderCommandOptions): Promise<number> {
+  const emitJson = opts.json ?? false
+
+  if (process.stdin.isTTY) {
+    return reportRenderRefusal(
+      badInput(
+        "No blocks on stdin. Pipe a JSON array: echo '[...]' | canon teach render",
+      ),
+      emitJson,
+    )
+  }
+
+  const body = (await readStdin()).trim()
+
+  if (!body) {
+    return reportRenderRefusal(
+      badInput('Empty stdin. Pipe a JSON array of blocks.'),
+      emitJson,
+    )
+  }
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(body)
+  } catch {
+    return reportRenderRefusal(badInput('Malformed JSON on stdin.'), emitJson)
+  }
+
+  if (!Array.isArray(parsed)) {
+    return reportRenderRefusal(
+      badInput('Stdin must be a JSON array of blocks.'),
+      emitJson,
+    )
+  }
+
+  return reportRender(renderLessonBody(parsed), emitJson)
+}
+
+function reportRenderRefusal(refused: TeachRefused, emitJson: boolean): number {
+  if (emitJson) {
+    process.stderr.write(`${refused.message}\n`)
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: false,
+        reason: refused.reason,
+        message: refused.message,
+      })}\n`,
+    )
+    return 1
+  }
+
+  intro('canon teach render')
+  logStep('Refused')
+  logError(refused.message)
+  outro()
+  return 1
+}
+
+function reportRender(outcome: RenderOutcome, emitJson: boolean): number {
+  if (!outcome.ok) return reportRenderRefusal(outcome, emitJson)
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, html: outcome.html })}\n`,
+    )
+    return 0
+  }
+
+  process.stdout.write(`${outcome.html}\n`)
+  return 0
 }
 
 function reportNav(

@@ -113,7 +113,29 @@ Write each option as a `<label class="opt" data-k="<letter>">` holding a radio `
 
 Then carry a teach-back block beside the quiz. A quiz is recognition and the pedagogy prefers production, so a lesson offering only a quiz tests the weak form. Ask for an explanation to a named audience, and carry a `<details>` listing what a complete explanation covers, closed by default, so a learner reading with no session in the room can grade themselves. The reference states both shapes in full.
 
-Write the chrome as four empty marker pairs rather than composing it by hand: `<!-- canon:teach:style -->`/`<!-- /canon:teach:style -->` inside `<head>`, and `<!-- canon:teach:header -->`, `<!-- canon:teach:footnav -->`, and `<!-- canon:teach:scripts -->` each with its own close marker, in that order in `<body>`. Write the authored `<h1>`, lede, body, and quiz between the header's close marker and the footnav's open marker, and nothing else anywhere in the file. Then run:
+Compose the quiz and the teach-back block as one string. Below, that string is the block list's trailing `raw` entry, rather than markup written into the file by hand.
+
+### Building the lesson body
+
+Write the chrome as four empty marker pairs rather than composing it by hand: `<!-- canon:teach:style -->`/`<!-- /canon:teach:style -->` inside `<head>`, and `<!-- canon:teach:header -->`, `<!-- canon:teach:footnav -->`, and `<!-- canon:teach:scripts -->` each with its own close marker, in that order in `<body>`.
+
+Build the authored `<h1>`, lede, body, and quiz as a JSON array of blocks rather than composing markup by hand, and render it through the verb rather than through a component import:
+
+```bash
+echo '[
+  {"type":"heading","level":1,"text":"<title>"},
+  {"type":"paragraph","lede":true,"text":"<the dek>"},
+  {"type":"paragraph","text":"<a body paragraph>"},
+  {"type":"list","ordered":true,"items":["<step one>","<step two>"]},
+  {"type":"raw","html":"<the quiz and teach-back block composed above>"}
+]' | canon teach render --json
+```
+
+A `heading`, a `paragraph` (`lede: true` for the dek), and a `list` cover the structural body. Reach for `raw` only where none of the three can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's trailing `raw` entry every time, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file.
+
+Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it, and never compose the lesson body by hand as a fallback. That is the state this section exists to end, and a target holds this skill body before it holds the verb, since a plugin skill reaches a target the moment it merges while the CLI reaches one only when a release publishes.
+
+Then run:
 
 ```bash
 canon teach nav <topic> --json
