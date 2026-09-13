@@ -67,7 +67,7 @@ The rest are the toolkit's own and stay because they are committed:
 | `canon/`          | `canon audits` for `baseline.json`, and the pull request label map for `pr-labels.toml`       |
 | `ARCHITECTURE.md` | Every session, eagerly, through the root `CLAUDE.md`                                          |
 | `REQUIREMENTS.md` | Every session, eagerly, and the design and diagram skills by name                             |
-| `DESIGN.md`       | `canon design render`, and the design skills by name                                          |
+| `DESIGN.md`       | `canon design render`, `canon design board`, and the design skills by name                    |
 | `wireframes/`     | `canon context` as an audited folder, in a project that carries one. This repository does not |
 
 Everything else that used to sit here is a session record and lives under `.canon/` now, which one ignore line covers. That is what makes the census worth writing once rather than maintaining: a record folder added later needs no row here, no ignore entry, and no manifest edit, and anything added to `.claude/` is either a row in one of the tables above or, like `.tmp/`, a carve-out this entry names by hand.
