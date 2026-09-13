@@ -137,6 +137,22 @@ Each `quiz` entry carries `order`, the authored option indices in presentation o
 
 The order is drawn here rather than instructed, and that is the point of the verb. An author told to vary the position still varies it by judgment, and the judgment settles on the first slot, which is the defect this design departs from. The draw is uniform over the options, so the position carries no information about which answer is correct.
 
+## Render
+
+`canon teach render` renders a lesson body's structural blocks to HTML, through the same components the fixture lesson under `examples/teach/00-fixture/` is generated from. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
+
+```bash
+echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach render --json
+```
+
+| Option   | Behavior                                 |
+| -------- | ---------------------------------------- |
+| `--json` | Emit a machine-readable record on stdout |
+
+It reads a JSON array of blocks from stdin, each a `heading`, `paragraph`, `list`, or `raw` block, and reports `{ ok: true, html }` on `--json` or the bare rendered HTML on stdout otherwise. Content none of the three components can express takes a `raw` block, carrying its own HTML verbatim and unescaped, which is the shape the quiz and the teach-back block travel in.
+
+It refuses `bad-input` on empty stdin, on malformed JSON, on stdin that does not parse to an array, and on a block carrying an unrecognized `type` or a field of the wrong shape for its type, naming the block's index in the message.
+
 ## Nav
 
 `canon teach nav` rewrites the teach-root listing, a workspace's contents page, and each of its lessons' chrome, from what the workspace holds on disk.
