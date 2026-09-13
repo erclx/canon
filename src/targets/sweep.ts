@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git-env'
 import {
+  claudeCanonStampPath,
   isLegacyStamped,
   legacyStampPath,
   retiredNameStampPath,
@@ -91,15 +92,18 @@ export interface SweepOptions {
 }
 
 /**
- * Whether a folder carries an install stamp at the current path or either
+ * Whether a folder carries an install stamp at the current path or any
  * retired one. `aitk@3.57.0` still writes the folder form,
  * `retiredNameStampPath`, as its current path, so a target a pre-rename
  * binary syncs after this check drops the folder form would otherwise vanish
- * from the walk with nothing saying so.
+ * from the walk with nothing saying so. `claudeCanonStampPath` is the spelling
+ * every target carried before the stamp moved to `canon/config/`, which a
+ * target this batch has not reached still writes to.
  */
 function isStamped(path: string): boolean {
   return (
     Bun.file(stampPath(path)).size > 0 ||
+    Bun.file(claudeCanonStampPath(path)).size > 0 ||
     Bun.file(retiredNameStampPath(path)).size > 0 ||
     Bun.file(legacyStampPath(path)).size > 0
   )

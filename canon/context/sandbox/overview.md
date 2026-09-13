@@ -98,7 +98,7 @@ The checker is TypeScript while provisioning stays bash. The harness was closed 
 
 ### What a sandbox is provisioned with
 
-- Standards and gov rules provision through the real installer rather than a copy. Both copies reimplemented an installer's selection rules, and the standards one omitted the `index.md` a real install rebuilds while neither wrote the `.claude/canon/config.json` stamp. A sandbox now carries what a target carries, which is what makes a rule change observable to a run.
+- Standards and gov rules provision through the real installer rather than a copy. Both copies reimplemented an installer's selection rules, and the standards one omitted the `index.md` a real install rebuilds while neither wrote the `canon/config/config.json` stamp. A sandbox now carries what a target carries, which is what makes a rule change observable to a run.
 - Seeds stay a raw copy. `canon claude init` does more than drop files, and the scenarios depending on the current shape outnumber the drift the copy risks. Hooks ship inside the seed tree, so a hook change is already reachable by any scenario declaring `SANDBOX_INJECT_SEEDS`.
 
 ### Why the sandbox sits outside the repository

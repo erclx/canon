@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  claudeCanonStampPath,
   hashContent,
   hashFile,
   isLegacyStamped,
@@ -270,9 +271,9 @@ describe('readStamp', () => {
     expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('new')
   })
 
-  it('should resolve at canon/config/config.json when the project has moved', () => {
+  it('should resolve at canon/config/config.json for a fresh stamp', () => {
     writeFixture(
-      join(TARGET, 'canon', 'config', 'config.json'),
+      stampPath(TARGET),
       JSON.stringify({
         covers: ['governance'],
         domains: { governance: { syncedAt: 'moved', files: {} } },
@@ -282,9 +283,9 @@ describe('readStamp', () => {
     expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('moved')
   })
 
-  it('should still resolve the .claude/ spelling when the project has not moved', () => {
+  it('should still resolve the .claude/canon/config.json spelling when the project has not moved', () => {
     writeFixture(
-      stampPath(TARGET),
+      claudeCanonStampPath(TARGET),
       JSON.stringify({
         covers: ['governance'],
         domains: { governance: { syncedAt: 'unmoved', files: {} } },
@@ -294,16 +295,16 @@ describe('readStamp', () => {
     expect(readStamp(TARGET)?.domains.governance?.syncedAt).toBe('unmoved')
   })
 
-  it('should prefer canon/config/config.json over every .claude/ spelling', () => {
+  it('should prefer canon/config/config.json over the .claude/canon/ spelling', () => {
     writeFixture(
-      stampPath(TARGET),
+      claudeCanonStampPath(TARGET),
       JSON.stringify({
         covers: ['governance'],
         domains: { governance: { syncedAt: 'old-root', files: {} } },
       }),
     )
     writeFixture(
-      join(TARGET, 'canon', 'config', 'config.json'),
+      stampPath(TARGET),
       JSON.stringify({
         covers: ['governance'],
         domains: { governance: { syncedAt: 'new-root', files: {} } },

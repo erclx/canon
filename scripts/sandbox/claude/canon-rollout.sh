@@ -36,8 +36,8 @@ EOF
   git -C targets/seed config user.email "sandbox@example.com"
   git -C targets/seed config user.name "Sandbox"
 
-  mkdir -p targets/seed/.claude/canon targets/seed/.claude/rules/canon/core
-  cat <<'EOF' >targets/seed/.claude/canon/config.json
+  mkdir -p targets/seed/canon/config targets/seed/.claude/rules/canon/core
+  cat <<'EOF' >targets/seed/canon/config/config.json
 {
   "syncedAt": "2026-08-01T00:00:00.000Z",
   "domains": {

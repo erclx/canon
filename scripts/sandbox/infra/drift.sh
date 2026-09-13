@@ -14,7 +14,7 @@ use_config() {
   export SANDBOX_INJECT_GOV="true"
 }
 
-# Every arm runs unstamped. No target on disk carries `.claude/canon/config.json`, so the
+# Every arm runs unstamped. No target on disk carries `canon/config/config.json`, so the
 # git-history fallback is the path a real project takes and the stamped path is
 # the rare one. An arm that stamped first would exercise the wrong branch.
 write_report() {
@@ -78,7 +78,7 @@ stage_setup() {
 
     log_step "Scenario ready: rules installed, tooling never recorded"
     log_info "Context: every target installed before the tooling record shipped"
-    log_info "  .claude/canon/config.json carries no tooling chain"
+    log_info "  canon/config/config.json carries no tooling chain"
     log_info ""
     log_info "The report names tooling unmeasured rather than counting zero"
     log_info "changes against it. A target that never installed tooling and one"

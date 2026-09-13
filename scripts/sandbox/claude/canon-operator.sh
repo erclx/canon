@@ -107,7 +107,7 @@ EOF
     # The row this arm scores reads the leaf off the recorded chain. Without the
     # stamp the operator correctly reports the chain as unrecorded, and the
     # failure would read as a defect in the skill rather than in the fixture.
-    if ! grep -q '"chain"' .claude/canon/config.json 2>/dev/null; then
+    if ! grep -q '"chain"' canon/config/config.json 2>/dev/null; then
       log_error "Fixture recorded no stack chain. The arm would score a row with nothing to read."
       return 1
     fi

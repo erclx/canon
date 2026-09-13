@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import type { AuditResult } from '@/audits/catalog'
+import { resolveExisting } from '@/legacy-path'
 
 /**
  * Where the retained counts live, relative to the project root.
@@ -15,7 +16,14 @@ import type { AuditResult } from '@/audits/catalog'
  * that installs the CLI. A baseline in the package would hand a target this
  * repository's counts to measure its own tree against.
  */
-export const BASELINE_REL = join('.claude', 'canon', 'baseline.json')
+export const BASELINE_REL = join('canon', 'config', 'baseline.json')
+
+/**
+ * Where the baseline wrote before this move, `.claude/canon/baseline.json`.
+ * `readBaseline` falls back to it so a target that has not moved still reads
+ * its recorded floor, and the write no longer lands there.
+ */
+const LEGACY_BASELINE_REL = join('.claude', 'canon', 'baseline.json')
 
 export interface Baseline {
   /** The day the record was taken, as `YYYY-MM-DD`. */
@@ -165,7 +173,11 @@ function isBaseline(value: unknown): value is Baseline {
 export async function readBaseline(
   root: string,
 ): Promise<Baseline | undefined> {
-  const path = join(root, BASELINE_REL)
+  const path = resolveExisting([
+    join(root, BASELINE_REL),
+    join(root, LEGACY_BASELINE_REL),
+  ])
+  const rel = relative(root, path)
 
   let raw: string
   try {
@@ -178,12 +190,12 @@ export async function readBaseline(
   try {
     parsed = JSON.parse(raw)
   } catch {
-    throw new Error(`${BASELINE_REL} does not parse as JSON. Fix or delete it.`)
+    throw new Error(`${rel} does not parse as JSON. Fix or delete it.`)
   }
 
   if (!isBaseline(parsed)) {
     throw new Error(
-      `${BASELINE_REL} carries no recordedAt, commit, and checks. Fix or delete it.`,
+      `${rel} carries no recordedAt, commit, and checks. Fix or delete it.`,
     )
   }
 

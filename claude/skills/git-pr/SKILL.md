@@ -11,7 +11,7 @@ Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/branch.md`: branch format, valid types, and constraints
 - `${CLAUDE_SKILL_DIR}/../../standards/pr.md`: structure, rules, and banned phrases
-- `${CLAUDE_SKILL_DIR}/references/labels.md`: label map format, matching, and the missing-label warning. Skip when the project has no `.claude/canon/pr-labels.toml`.
+- `${CLAUDE_SKILL_DIR}/references/labels.md`: label map format, matching, and the missing-label warning. Skip when the project has no `canon/config/pr-labels.toml` and no `.claude/canon/pr-labels.toml`.
 - `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 - `${CLAUDE_SKILL_DIR}/../../standards/versioning.md`: phase label vs semver discipline
@@ -119,7 +119,7 @@ A `reason` of `no-map` is the answer that the project declared no map, which ear
 
 Every other `reason` is a map or a range the verb could not read, which is `unreadable-map`, `no-domains`, `no-base`, and `unreadable-changes`, plus `bad-base` for a ref this skill resolved wrongly. Take the fallback below and warn beside the result line, naming the reason. A map with a typo in it still has rows a prefix match can reach, and reading the refusal as an absence would open the pull request with no labels and nothing said, which is the surface merging bare that the verb exists to name.
 
-The fallback is reading `.claude/canon/pr-labels.toml` and matching it against the name-only diff per `${CLAUDE_SKILL_DIR}/references/labels.md`. It also covers no record coming back at all, which is an installed `canon` predating the verb, since a skill reaches a target the moment it merges while the CLI reaches one only when a release publishes. The fallback labels correctly and reports no uncovered path, which is the half only the verb carries.
+The fallback is reading `canon/config/pr-labels.toml`, or `.claude/canon/pr-labels.toml` when the project has not moved, and matching it against the name-only diff per `${CLAUDE_SKILL_DIR}/references/labels.md`. It also covers no record coming back at all, which is an installed `canon` predating the verb, since a skill reaches a target the moment it merges while the CLI reaches one only when a release publishes. Naming both spellings matters exactly here: the binary old enough to need this fallback is the same binary that may predate the move, so the project's map can still sit at the older path. The fallback labels correctly and reports no uncovered path, which is the half only the verb carries.
 
 Leave `pr_labels` empty when no map resolves or no prefix matches, which skips the labelling command rather than running it against nothing.
 
@@ -223,7 +223,7 @@ Respond with one line, using the `url` the final command printed:
 
 Add a line for each `uncovered` path the labels step reported, naming the path and the map it belongs in:
 
-`⚠️ No label covers <path>. Add a row to .claude/canon/pr-labels.toml or a [declined] entry.`
+`⚠️ No label covers <path>. Add a row to canon/config/pr-labels.toml or a [declined] entry.`
 
 Add a further line only when the labelling command printed its warning, quoting the label `gh` refused:
 

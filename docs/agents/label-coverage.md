@@ -28,7 +28,7 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 ## The map it reads
 
-The map sits at `.claude/canon/pr-labels.toml` and carries two tables. `[domains]` keys a label name to the path prefixes that earn it, and `[declined]` keys a reason to the prefixes that earn no label on purpose.
+The map sits at `canon/config/pr-labels.toml`, falling back to `.claude/canon/pr-labels.toml` for a project that has not moved, and carries two tables. `[domains]` keys a label name to the path prefixes that earn it, and `[declined]` keys a reason to the prefixes that earn no label on purpose.
 
 ```toml
 [domains]

@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { stampPath } from '@/sync/stamp'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 const GOLDEN = '.editorconfig'
@@ -94,20 +95,16 @@ describe('tooling sync write authorization', () => {
   it('should write no install stamp under --check', () => {
     sync(['--check'])
 
-    expect(() =>
-      readFileSync(join(target, '.claude', 'canon', 'config.json')),
-    ).toThrow()
+    expect(() => readFileSync(stampPath(target))).toThrow()
   })
 
   it('should write no install stamp when an up-to-date target is synced without --write', () => {
     sync(['--write'])
-    rmSync(join(target, '.claude', 'canon', 'config.json'))
+    rmSync(stampPath(target))
 
     sync([])
 
-    expect(() =>
-      readFileSync(join(target, '.claude', 'canon', 'config.json')),
-    ).toThrow()
+    expect(() => readFileSync(stampPath(target))).toThrow()
   })
 })
 

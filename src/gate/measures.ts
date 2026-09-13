@@ -126,11 +126,11 @@ export const SANDBOX_ASSERTED_FLOOR = 26
  * Where the retained counts the audit stage compares each run against are
  * read, relative to `root`.
  *
- * A function rather than a spelled constant, since the read now resolves at
+ * A function rather than a spelled constant, since the read resolves at
  * either surface root and a constant naming one of them would be believed of
- * a project that has moved. `canon audits run` owns writing it, and the write
- * stays at the creation default for this batch, so the two can disagree for
- * exactly the release window `src/surface-root.ts` documents.
+ * a project that has moved. `canon audits run` owns writing it, at
+ * `canon/config/baseline.json` now that the write has flipped, falling back to
+ * `.claude/canon/baseline.json` for a target that has not moved.
  */
 export function auditsBaselineRel(root: string): string {
   return relative(root, surfaceDir(root, 'canon', 'baseline.json'))

@@ -1,14 +1,23 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { resolveExisting } from '@/legacy-path'
 
 /**
- * Where a project declares its pull request label map, spelled once.
+ * Where a project declares its pull request label map.
  *
  * The file has already moved once, and that relocation rewrote every mention
- * across four surfaces. Nothing in code spells it anywhere else, so the next
- * move is one edit here rather than a sweep.
+ * across four surfaces. `LEGACY_MAP_REL` below is the one other place code
+ * spells it, kept only as a read fallback, so the next move is still one edit
+ * to the write path rather than a sweep.
  */
-export const MAP_REL = join('.claude', 'canon', 'pr-labels.toml')
+export const MAP_REL = join('canon', 'config', 'pr-labels.toml')
+
+/**
+ * Where the map lived before this move, `.claude/canon/pr-labels.toml`.
+ * `readLabelMap` falls back to it so a project that has not moved still reads
+ * its declared map.
+ */
+const LEGACY_MAP_REL = join('.claude', 'canon', 'pr-labels.toml')
 
 /** A label name and the path prefixes that earn it, in the map's own order. */
 export interface DomainRow {
@@ -90,9 +99,14 @@ export function parseLabelMap(source: string): LabelMap {
 
 /** Reads the map a project declares at `root`, or says why it could not. */
 export function readLabelMap(root: string): LabelMap {
+  const path = resolveExisting([
+    join(root, MAP_REL),
+    join(root, LEGACY_MAP_REL),
+  ])
+
   let source: string
   try {
-    source = readFileSync(join(root, MAP_REL), 'utf8')
+    source = readFileSync(path, 'utf8')
   } catch {
     return { kind: 'refused', reason: 'no-map' }
   }

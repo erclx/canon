@@ -32,8 +32,8 @@ max_turns = 15
 # correctly guessed between two checkouts that looked identical. This entry was
 # a `manual` line until the first driven run showed the file in its write list.
 paths = [
-  "targets/kestrel-a/.claude/canon/config.json",
-  "targets/kestrel-b/.claude/canon/config.json",
+  "targets/kestrel-a/canon/config/config.json",
+  "targets/kestrel-b/canon/config/config.json",
   "targets/kestrel-a/.git/FETCH_HEAD",
 ]
 

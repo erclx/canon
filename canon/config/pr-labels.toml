@@ -85,7 +85,7 @@ repo = [
   ".vscode/",
   "cspell.json",
   ".cspell/",
-  ".claude/canon/",
+  "canon/config/",
   "vitest.config.ts",
   "vitest.setup.ts",
   "commitlint.config.js",
@@ -136,7 +136,7 @@ generated = [
   "assets/install-surface.stamp",
   "assets/task-board.png",
   "assets/task-board.stamp",
-  ".claude/canon/baseline.json",
+  "canon/config/baseline.json",
 ]
 # Each is a reason of its own rather than another generated file, since a reader
 # reviews the markup where the image and the stamp are mechanical. Giving either

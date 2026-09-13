@@ -22,7 +22,7 @@ A token inside a branch only a toolkit-repo reader ever follows, such as an `In 
 
 For each layout, stack, or config-path claim:
 
-- **Fine.** The claim names a portable convention true of any project carrying the same toolkit surface, such as a fixed install path (`.claude/canon/pr-labels.toml`).
+- **Fine.** The claim names a portable convention true of any project carrying the same toolkit surface, such as a fixed install path (`canon/config/pr-labels.toml`).
 - **Fails.** The claim states a count, a stack choice, or a folder shape true of this checkout specifically, phrased as if every target shared it.
 
 ## Repair menu

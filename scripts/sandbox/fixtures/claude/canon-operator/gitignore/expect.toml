@@ -33,5 +33,5 @@ pattern = 'node_modules/'
 # The stamp survives the write. `inject --gitignore` merges entries and records
 # nothing, so a rewritten chain means a full inject ran under the narrow name.
 [[content]]
-path = ".claude/canon/config.json"
+path = "canon/config/config.json"
 pattern = '"base"'

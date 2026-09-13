@@ -20,13 +20,12 @@ const TO_ROOT: SurfaceRoot = 'canon'
 /**
  * Every entry this move relocates, at the name `.claude/` gives it.
  *
- * Read from `SURFACE_ENTRIES` rather than restated, less the one entry that
- * stays: `canon` names the install stamp folder, which batch 3 owns and which
- * `.claude/canon/` continues to hold until that batch lands.
+ * Read from `SURFACE_ENTRIES` rather than restated. `canon` names the install
+ * stamp folder and is the one entry whose name differs by root, which
+ * `sourcePrefix` and `destinationPrefix` already resolve through `spell`
+ * rather than restating the variant here.
  */
-export const MOVED_ENTRIES: readonly string[] = SURFACE_ENTRIES.filter(
-  (entry) => entry !== 'canon',
-)
+export const MOVED_ENTRIES: readonly string[] = SURFACE_ENTRIES
 
 function sourcePrefix(entry: string): string {
   return join(FROM_ROOT, spell(FROM_ROOT, entry))

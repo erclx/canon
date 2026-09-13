@@ -61,5 +61,5 @@ manual = [
 # above still passes. Standards is not among them and `.claude/standards` is
 # asserted absent above, since the corpus installs into no target.
 [[content]]
-path = ".claude/canon/config.json"
+path = "canon/config/config.json"
 pattern = '"covers": \["snippets", "governance"\]'
