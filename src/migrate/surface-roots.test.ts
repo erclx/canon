@@ -14,18 +14,15 @@ function source(path: string, text = '') {
 }
 
 describe('MOVED_ENTRIES', () => {
-  it('should carry the five tracked surfaces the move relocates', () => {
+  it('should carry the six tracked surfaces the move relocates', () => {
     expect([...MOVED_ENTRIES].sort()).toEqual([
       'ARCHITECTURE.md',
       'DESIGN.md',
       'REQUIREMENTS.md',
+      'canon',
       'context',
       'wireframes',
     ])
-  })
-
-  it('should leave the install stamp folder to its own batch', () => {
-    expect(MOVED_ENTRIES).not.toContain('canon')
   })
 })
 
@@ -44,8 +41,10 @@ describe('movedPath', () => {
     expect(movedPath('.claude/rules/core/005-behavior.md')).toBeUndefined()
   })
 
-  it('should leave the install stamp folder where it is', () => {
-    expect(movedPath('.claude/canon/pr-labels.toml')).toBeUndefined()
+  it('should move the install stamp folder, respelled as canon/config/', () => {
+    expect(movedPath('.claude/canon/pr-labels.toml')).toBe(
+      'canon/config/pr-labels.toml',
+    )
   })
 
   it('should not treat a longer sibling name as the moved folder', () => {
@@ -81,9 +80,9 @@ describe('rewriteText', () => {
     expect(rewriteText(text)).toBe(text)
   })
 
-  it('should leave the install stamp folder alone', () => {
+  it('should rewrite the install stamp folder, respelled as canon/config/', () => {
     expect(rewriteText('.claude/canon/pr-labels.toml')).toBe(
-      '.claude/canon/pr-labels.toml',
+      'canon/config/pr-labels.toml',
     )
   })
 
@@ -200,6 +199,22 @@ describe('planSurfaceRootsMove', () => {
 
     expect(plan.entries).toEqual([])
     expect(plan.excluded).toEqual(['CHANGELOG.md'])
+  })
+
+  it('should move the install stamp folder and respell its citations', () => {
+    const plan = planSurfaceRootsMove([
+      source('.claude/canon/pr-labels.toml', 'see .claude/canon/config.json'),
+    ])
+
+    expect(plan.entries).toEqual([
+      {
+        path: '.claude/canon/pr-labels.toml',
+        movesTo: 'canon/config/pr-labels.toml',
+        text: 'see canon/config/config.json',
+        rewritten: 1,
+        kept: 0,
+      },
+    ])
   })
 
   it('should report nothing on an already-moved tree', () => {

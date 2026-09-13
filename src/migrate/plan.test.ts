@@ -135,6 +135,10 @@ describe('isToolkitOwned', () => {
     expect(isToolkitOwned('.claude/aitk/config.json')).toBe(true)
   })
 
+  it('should own the stamp folder at its moved root', () => {
+    expect(isToolkitOwned('canon/config/config.json')).toBe(true)
+  })
+
   it('should own an installed rule', () => {
     expect(isToolkitOwned('.claude/rules/core/005-behavior.md')).toBe(true)
   })
