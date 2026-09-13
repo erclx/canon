@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.76.0](https://github.com/erclx/canon/compare/v4.75.1...v4.76.0) (2026-09-13)
+
+
+### Features
+
+* **design:** add the design board over four existing surfaces ([#1644](https://github.com/erclx/canon/issues/1644)) ([4c13474](https://github.com/erclx/canon/commit/4c134741330b21685fcbadf941e31ff1c0130f87))
+* **skills:** add draft-figure skill ([#1643](https://github.com/erclx/canon/issues/1643)) ([11efb69](https://github.com/erclx/canon/commit/11efb6976419b229ef7eb97920f31975c6ce90a9))
+
 ## [4.75.1](https://github.com/erclx/canon/compare/v4.75.0...v4.75.1) (2026-09-13)
 
 
