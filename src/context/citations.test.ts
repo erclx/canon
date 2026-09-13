@@ -20,14 +20,14 @@ function paths(text: string, rel = 'docs/agents.md'): string[] {
 
 describe('citationPattern', () => {
   it('should match a path in an audited folder', () => {
-    expect(paths('See `.claude/context/cli.md` for the layout.')).toEqual([
-      '.claude/context/cli.md',
+    expect(paths('See `canon/context/cli.md` for the layout.')).toEqual([
+      'canon/context/cli.md',
     ])
   })
 
   it('should match a path nested under a split domain', () => {
-    expect(paths('Read `.claude/context/claude-plugin/skills.md`.')).toEqual([
-      '.claude/context/claude-plugin/skills.md',
+    expect(paths('Read `canon/context/claude-plugin/skills.md`.')).toEqual([
+      'canon/context/claude-plugin/skills.md',
     ])
   })
 
@@ -64,8 +64,8 @@ describe('citationPattern', () => {
   })
 
   it('should match a relative link whose root sits right after the slash', () => {
-    expect(paths('See `../.claude/context/x.md` for the entry.')).toEqual([
-      '.claude/context/x.md',
+    expect(paths('See `../canon/context/x.md` for the entry.')).toEqual([
+      'canon/context/x.md',
     ])
   })
 
@@ -84,66 +84,80 @@ describe('citationPattern', () => {
       'canon/context/x.md',
     ])
   })
+
+  it('should match a relative link into the dotted surface root', () => {
+    // canon-keep-surface-root
+    expect(paths('See `../.claude/context/x.md` for the entry.')).toEqual([
+      // canon-keep-surface-root
+      '.claude/context/x.md',
+    ])
+  })
+
+  it('should not match a bare root nested under another folder', () => {
+    expect(
+      paths('See `tooling/base/seeds/canon/context/x.md` for the seed.'),
+    ).toEqual([])
+  })
 })
 
 describe('collectCitations', () => {
   it('should report the line the citation sits on', () => {
     const found = collectCitations(
       'docs/agents.md',
-      'First.\nSecond.\nSee `.claude/context/cli.md`.\n',
+      'First.\nSecond.\nSee `canon/context/cli.md`.\n',
       PATTERN,
     )
 
     expect(found).toEqual([
-      { file: 'docs/agents.md', line: 3, path: '.claude/context/cli.md' },
+      { file: 'docs/agents.md', line: 3, path: 'canon/context/cli.md' },
     ])
   })
 
   it('should collect every citation on one line', () => {
     expect(
-      paths('Both `.claude/context/cli.md` and `.claude/diagrams/index.md`.'),
-    ).toEqual(['.claude/context/cli.md', '.claude/diagrams/index.md'])
+      paths('Both `canon/context/cli.md` and `.claude/diagrams/index.md`.'),
+    ).toEqual(['canon/context/cli.md', '.claude/diagrams/index.md'])
   })
 
   it('should skip a fenced block in markdown', () => {
     const text = [
-      'Good: See `.claude/context/cli.md`.',
+      'Good: See `canon/context/cli.md`.',
       '',
       '```markdown',
-      'Bad: See `.claude/context/retrieval.md` for the flow.',
+      'Bad: See `canon/context/retrieval.md` for the flow.',
       '```',
       '',
       'Also `.claude/diagrams/index.md`.',
     ].join('\n')
 
     expect(paths(text)).toEqual([
-      '.claude/context/cli.md',
+      'canon/context/cli.md',
       '.claude/diagrams/index.md',
     ])
   })
 
   it('should keep scanning a shell file whose text contains a fence', () => {
-    const text = ['echo "```"', 'echo "see .claude/context/cli.md"'].join('\n')
+    const text = ['echo "```"', 'echo "see canon/context/cli.md"'].join('\n')
 
     expect(paths(text, 'scripts/core/thing.sh')).toEqual([
-      '.claude/context/cli.md',
+      'canon/context/cli.md',
     ])
   })
 
   it('should skip a line carrying the bare ignore marker', () => {
-    const text = `One \`.claude/context/web.md\` per domain. <!-- ${IGNORE_MARKER} -->`
+    const text = `One \`canon/context/web.md\` per domain. <!-- ${IGNORE_MARKER} -->`
 
     expect(paths(text)).toEqual([])
   })
 
   it('should skip only the path a named ignore marker lists', () => {
-    const text = `Placeholder \`.claude/context/X.md\` beside real \`.claude/context/cli.md\`. <!-- ${IGNORE_MARKER}: .claude/context/X.md -->`
+    const text = `Placeholder \`canon/context/X.md\` beside real \`canon/context/cli.md\`. <!-- ${IGNORE_MARKER}: canon/context/X.md -->`
 
-    expect(paths(text)).toEqual(['.claude/context/cli.md'])
+    expect(paths(text)).toEqual(['canon/context/cli.md'])
   })
 
   it('should skip every path a named ignore marker lists', () => {
-    const text = `Both \`.claude/context/web.md\` and \`.claude/context/api.md\` are placeholders. <!-- ${IGNORE_MARKER}: .claude/context/web.md, .claude/context/api.md -->`
+    const text = `Both \`canon/context/web.md\` and \`canon/context/api.md\` are placeholders. <!-- ${IGNORE_MARKER}: canon/context/web.md, canon/context/api.md -->`
 
     expect(paths(text)).toEqual([])
   })
@@ -172,8 +186,8 @@ describe('auditCitations against a real tree', () => {
     // precedence over `cwd`, so an inherited environment initializes the
     // repository somewhere other than the fixture and every case reads empty.
     execSync('git init --quiet', { cwd: root, env: gitEnv() })
-    mkdirSync(join(root, '.claude', 'context'), { recursive: true })
-    writeFileSync(join(root, '.claude', 'context', 'cli.md'), '# CLI\n')
+    mkdirSync(join(root, 'canon', 'context'), { recursive: true })
+    writeFileSync(join(root, 'canon', 'context', 'cli.md'), '# CLI\n')
   })
 
   afterEach(() => {
@@ -183,7 +197,7 @@ describe('auditCitations against a real tree', () => {
   it('should report a citation naming a path that does not exist', async () => {
     writeFileSync(
       join(root, 'README.md'),
-      'See `.claude/context/missing.md` for the layout.\n',
+      'See `canon/context/missing.md` for the layout.\n',
     )
 
     const report = await auditCitations(root, ['context'])
@@ -193,7 +207,7 @@ describe('auditCitations against a real tree', () => {
       unresolved: [
         {
           file: 'README.md',
-          path: '.claude/context/missing.md',
+          path: 'canon/context/missing.md',
         },
       ],
     })
@@ -202,7 +216,7 @@ describe('auditCitations against a real tree', () => {
   it('should leave a citation naming a path that exists unresolved-free', async () => {
     writeFileSync(
       join(root, 'README.md'),
-      'See `.claude/context/cli.md` for the layout.\n',
+      'See `canon/context/cli.md` for the layout.\n',
     )
 
     const report = await auditCitations(root, ['context'])
@@ -213,7 +227,7 @@ describe('auditCitations against a real tree', () => {
   it('should skip a broken path carrying the ignore marker', async () => {
     writeFileSync(
       join(root, 'README.md'),
-      `Cite it as \`.claude/context/X.md\`. <!-- ${IGNORE_MARKER} -->\n`,
+      `Cite it as \`canon/context/X.md\`. <!-- ${IGNORE_MARKER} -->\n`,
     )
 
     const report = await auditCitations(root, ['context'])
@@ -224,14 +238,14 @@ describe('auditCitations against a real tree', () => {
   it('should still report a real broken path beside a named placeholder', async () => {
     writeFileSync(
       join(root, 'README.md'),
-      `Placeholder \`.claude/context/X.md\` beside broken \`.claude/context/missing.md\`. <!-- ${IGNORE_MARKER}: .claude/context/X.md -->\n`,
+      `Placeholder \`canon/context/X.md\` beside broken \`canon/context/missing.md\`. <!-- ${IGNORE_MARKER}: canon/context/X.md -->\n`,
     )
 
     const report = await auditCitations(root, ['context'])
 
     expect(report).toMatchObject({
       kind: 'scanned',
-      unresolved: [{ file: 'README.md', path: '.claude/context/missing.md' }],
+      unresolved: [{ file: 'README.md', path: 'canon/context/missing.md' }],
     })
   })
 })
@@ -247,7 +261,7 @@ describe('isFixture', () => {
     expect(isFixture(rel)).toBe(true)
   })
 
-  it.each(['docs/agents.md', '.claude/context/cli.md', 'src/context/audit.ts'])(
+  it.each(['docs/agents.md', 'canon/context/cli.md', 'src/context/audit.ts'])(
     'should treat %s as a real reference',
     (rel) => {
       expect(isFixture(rel)).toBe(false)

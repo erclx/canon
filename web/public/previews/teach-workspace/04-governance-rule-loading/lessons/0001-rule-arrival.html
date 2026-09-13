@@ -178,7 +178,7 @@
    navigation shared by every teach page. Recovered from two gitignored
    course.css files that predate a regression that dropped this layer from the
    generator, and rewritten onto this module's tokens rather than the
-   incompatible palette they carried. See .claude/wireframes/teach/chrome.md for
+   incompatible palette they carried. See canon/wireframes/teach/chrome.md for
    the shape. */
 
       :root {
@@ -1712,7 +1712,7 @@
       <div class="hard">
         <span class="hard-label">Tier 1, eager</span>
         <p>
-          CLAUDE.md and .claude/ARCHITECTURE.md load into every session, every
+          CLAUDE.md and canon/ARCHITECTURE.md load into every session, every
           time, with no condition attached. This is where a cross-domain rule
           belongs, the kind that has to be true regardless of what is being
           edited.
@@ -1733,8 +1733,8 @@
       <div class="hard">
         <span class="hard-label">Tier 3, on demand</span>
         <p>
-          A file under .claude/context/&lt;domain&gt;.md carries narrative a
-          session opens by choice, not automatically. .claude/context/index.md
+          A file under canon/context/&lt;domain&gt;.md carries narrative a
+          session opens by choice, not automatically. canon/context/index.md
           lists every entry so a session can find the one it needs before
           touching that domain, rather than never learning the entry exists.
         </p>
@@ -1830,7 +1830,7 @@
             font-size="12"
             fill="var(--ink)"
           >
-            .claude/context/*.md
+            canon/context/*.md
           </text>
           <text
             x="530"
@@ -2045,7 +2045,7 @@
             Nothing; every rule requires a glob match
           </button>
           <button class="opt" data-a="0">
-            Every file under .claude/context/
+            Every file under canon/context/
           </button>
           <button class="opt" data-a="0">
             Only a rule whose glob matches the current diff
@@ -2115,7 +2115,7 @@
 
         <div class="q">
           <p class="q-stem">
-            4. Why does a .claude/context/&lt;domain&gt;.md entry not load
+            4. Why does a canon/context/&lt;domain&gt;.md entry not load
             automatically the way CLAUDE.md does?
           </p>
           <button class="opt" data-a="0">
@@ -2134,7 +2134,7 @@
           <div class="fb">
             <b>Correct: it is opt-in by design.</b> Loading every context entry
             eagerly rebuilds the one large file the tiers were split to avoid.
-            The index at .claude/context/index.md is what keeps an entry
+            The index at canon/context/index.md is what keeps an entry
             discoverable without loading it, so a session picks what it needs
             before touching that domain.
           </div>
@@ -2157,7 +2157,7 @@
         <li id="r2">
           This repository.
           <cite
-            >.claude/ARCHITECTURE.md, Three tiers of context rather than one
+            >canon/ARCHITECTURE.md, Three tiers of context rather than one
             file</cite
           >. The decision record: why one large file was replaced, what each
           tier costs, and the three-axis test for which tier a fact belongs in.

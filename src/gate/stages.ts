@@ -79,7 +79,7 @@ export interface Stage {
 
 /**
  * Corpora a `src/` test asserts over from outside `src/`, censused in
- * `.claude/context/development/verification.md`. This list and that census are
+ * `canon/context/development/verification.md`. This list and that census are
  * two copies of one set with nothing comparing them, so a corpus joining the
  * census joins this list in the same change. The first four are directory
  * prefixes because their tests walk the tree whole, which is what reaches a
@@ -221,7 +221,7 @@ export const STAGES: readonly Stage[] = [
     success: 'Tooling paths clean',
   },
   {
-    // `.claude/DESIGN.md`, the base stylesheet, the web stylesheet, and the
+    // `canon/DESIGN.md`, the base stylesheet, the web stylesheet, and the
     // tab icon are all written from `src/design/tokens.ts` and none is edited
     // by hand. Four artifacts from one source is the cost of the token move,
     // and a render step that has to run is only safe while something fails
@@ -236,9 +236,9 @@ export const STAGES: readonly Stage[] = [
       },
       {
         kind: 'drift',
-        pathspec: '.claude/DESIGN.md',
+        pathspec: 'canon/DESIGN.md',
         failure:
-          'The design record drifted from the token source. Run bun run check and commit .claude/DESIGN.md.',
+          'The design record drifted from the token source. Run bun run check and commit canon/DESIGN.md.',
       },
       {
         kind: 'drift',

@@ -1,11 +1,13 @@
 ---
 name: draft-context
-description: Drafts a brand-new `.claude/context/<domain>.md` entry against the context standard, checks the catalog for a name-or-topic collision, decides flat-file placement, confirms with the user, then writes. Use when asked to "write a context entry for X", "document the X domain", "add a context entry for X", or "create a .claude/context page for X" where no existing entry covers the domain. Do NOT use to refresh an existing entry against a diff, which is `docs-fold`.
+description: Drafts a brand-new `canon/context/<domain>.md` entry against the context standard, checks the catalog for a name-or-topic collision, decides flat-file placement, confirms with the user, then writes. Use when asked to "write a context entry for X", "document the X domain", "add a context entry for X", or "create a canon/context page for X" where no existing entry covers the domain. Do NOT use to refresh an existing entry against a diff, which is `docs-fold`.
 ---
 
 # Context draft
 
-Drafts one brand-new `.claude/context/<domain>.md` entry end to end: read the standard, decide whether the domain is already covered under a different name, confirm the draft with the user, then write.
+Drafts one brand-new `canon/context/<domain>.md` entry end to end: read the standard, decide whether the domain is already covered under a different name, confirm the draft with the user, then write.
+
+A project the surface move has not reached keeps its context folder under `.claude/` rather than `canon/`. Check and write at whichever root already carries the folder, and create it under `canon/` only when neither does, since a new `canon/` folder would hide every entry the old one holds.
 
 Read these files in parallel:
 
@@ -16,13 +18,13 @@ Read these files in parallel:
 ## Guards
 
 - If no domain is given, stop: `❌ No domain given. Name the domain this entry should cover.`
-- Derive a kebab-case slug from the domain and check whether `.claude/context/<slug>.md` or `.claude/context/<slug>/index.md` already exists. Either resolving means the domain is already covered under that exact name. Stop: `❌ <slug> already has a context entry. Use docs-fold to refresh it instead.`
+- Derive a kebab-case slug from the domain and check whether `canon/context/<slug>.md` or `canon/context/<slug>/index.md` already exists. Either resolving means the domain is already covered under that exact name. Stop: `❌ <slug> already has a context entry. Use docs-fold to refresh it instead.`
 
 ## Placement
 
-- Read `.claude/context/index.md` and check every title and description it lists against the domain. The Guards check above only catches an exact-slug collision, and a domain already covered under a different name still resolves here at no extra cost, since this read already runs.
+- Read `canon/context/index.md` and check every title and description it lists against the domain. The Guards check above only catches an exact-slug collision, and a domain already covered under a different name still resolves here at no extra cost, since this read already runs.
 - Stop the same way on a match: `❌ <path> already covers this domain under a different name. Use docs-fold to refresh it instead.`
-- Default a brand-new entry to a flat file, `.claude/context/<slug>.md`. A domain starts as one page's worth of narrative, and the standard only splits it into a folder once it holds three or more sub-areas, which a fresh domain never does on day one.
+- Default a brand-new entry to a flat file, `canon/context/<slug>.md`. A domain starts as one page's worth of narrative, and the standard only splits it into a folder once it holds three or more sub-areas, which a fresh domain never does on day one.
 
 ## Draft
 
@@ -39,7 +41,7 @@ Read these files in parallel:
 
 - Write the file at the confirmed path, creating the folder when it is absent.
 - Run `canon markdown audit <path>`.
-- Run `canon indexes regen .claude/context`, so the domain appears in `.claude/context/index.md` immediately rather than drifting until the next unrelated regen.
+- Run `canon indexes regen canon/context`, so the domain appears in `canon/context/index.md` immediately rather than drifting until the next unrelated regen.
 
 ## Response format
 

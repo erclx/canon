@@ -37,7 +37,7 @@ describe('findBrokenLinks', () => {
   it('should never pass a template placeholder destination to exists', () => {
     const { exists, calls } = fake([])
     const found = findBrokenLinks(
-      bodyLines('See [an entry](.claude/context/<domain>.md).\n'),
+      bodyLines('See [an entry](canon/context/<domain>.md).\n'),
       exists,
     )
 

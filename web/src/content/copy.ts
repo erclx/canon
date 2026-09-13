@@ -208,7 +208,7 @@ export const designPreview = {
   // was produced, which no README sentence states since the README names the
   // format and the command rather than a page wiring them into an iframe.
   citation:
-    'Rendered from .claude/DESIGN.md by canon design render, embedded live rather than captured.',
+    'Rendered from canon/DESIGN.md by canon design render, embedded live rather than captured.',
 }
 
 export const teachPreview = {

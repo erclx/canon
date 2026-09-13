@@ -14,15 +14,15 @@ Two tools anchor tier 1 and tier 2. Stitch is the agent-addressable default thro
 
 ## Tier 0: prose only
 
-The default. `.claude/DESIGN.md` holds visual intent as prose plus token tables for color, typography, spacing, borders, motion, and iconography. `.claude/WIREFRAMES.md` holds ASCII layouts.
+The default. `canon/DESIGN.md` holds visual intent as prose plus token tables for color, typography, spacing, borders, motion, and iconography. `.claude/WIREFRAMES.md` holds ASCII layouts.
 
 Claude Code reads both and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
 
 ### Seed shape
 
-The toolkit seed in `tooling/claude/seeds/.claude/DESIGN.md` ships a token-table template with a starting set of roles, and `standards/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
+The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships a token-table template with a starting set of roles, and `standards/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
 
-The `canon:design-extract` skill drafts the file, sourcing tokens from a project's existing prose and CLI UI surfaces, or proposing them from `.claude/REQUIREMENTS.md` and a `## Personality` paragraph when no UI code exists yet. `canon design render` writes an HTML plus CSS preview to `.canon/review/design/` for eyeballing the current system without leaving Claude Code. See `.claude/context/design.md`.
+The `canon:design-extract` skill drafts the file, sourcing tokens from a project's existing prose and CLI UI surfaces, or proposing them from `canon/REQUIREMENTS.md` and a `## Personality` paragraph when no UI code exists yet. `canon design render` writes an HTML plus CSS preview to `.canon/review/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design.md`.
 
 A project wanting the toolkit's own values rather than its own runs `canon design install`, which copies one stylesheet to `.claude/design/base.css` carrying the token set as custom properties and two components built on them. That file is toolkit-owned and `canon design sync` refreshes it, so a project overrides a value in `.claude/design/project/` instead, which sync never touches. Nothing arrives without that install, and the two channels are independent: a record drafted by the extract skill is the project's own, and the installed stylesheet is the toolkit's.
 
@@ -35,7 +35,7 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 
 ### Skills
 
-- `canon:design-extract` to draft `.claude/DESIGN.md`, from existing project signals or from requirements alone on day one
+- `canon:design-extract` to draft `canon/DESIGN.md`, from existing project signals or from requirements alone on day one
 - `canon:ui-test` for e2e test generation after UI changes
 - `canon:ux-audit` for UX gap detection on existing surfaces
 - `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
@@ -64,7 +64,7 @@ All three produce derived artifacts, so human edits are review annotations rathe
 
 Same as tier 0 with two additions. `WIREFRAMES.md` opts into Excalidraw rendering via a top-of-file marker like `<!-- excalidraw: WIREFRAMES.excalidraw -->`. `DESIGN.md` stays human-maintained, and its content is what the toolkit provisions into Stitch via `create_design_system` when visual generation is needed.
 
-Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in the Stitch DESIGN.md spec format. These are separate files from the toolkit's `.claude/DESIGN.md` and are not synced with it. Treat impeccable's pair as its own source of truth for its commands, and the toolkit's `.claude/DESIGN.md` as the source other toolkit skills read.
+Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in the Stitch DESIGN.md spec format. These are separate files from the toolkit's `canon/DESIGN.md` and are not synced with it. Treat impeccable's pair as its own source of truth for its commands, and the toolkit's `canon/DESIGN.md` as the source other toolkit skills read.
 
 ### Tools
 
@@ -100,11 +100,11 @@ Most tier 1 projects pick one. Projects with a messy codebase and no curated `DE
 
 ## Tier 2: visual as source of truth
 
-Design happens in a graphical tool. `.claude/DESIGN.md` either regenerates from the graphical source or takes a secondary role as agent-facing summary. Implementation follows the graphical source, either through an MCP round-trip or a one-way handoff bundle. Fits teams with a dedicated designer or projects where design iteration outpaces code changes.
+Design happens in a graphical tool. `canon/DESIGN.md` either regenerates from the graphical source or takes a secondary role as agent-facing summary. Implementation follows the graphical source, either through an MCP round-trip or a one-way handoff bundle. Fits teams with a dedicated designer or projects where design iteration outpaces code changes.
 
 ### Seed shape
 
-`.claude/DESIGN.md` becomes a generated artifact. A top-of-file note identifies the upstream source, either a Claude Design project ID or a Figma file URL. Manual edits in the seed carry a warning tag because they will not survive regeneration.
+`canon/DESIGN.md` becomes a generated artifact. A top-of-file note identifies the upstream source, either a Claude Design project ID or a Figma file URL. Manual edits in the seed carry a warning tag because they will not survive regeneration.
 
 ### Tools
 
@@ -148,7 +148,7 @@ Resist over-tiering early. Moving up is cheap because tiers stack. Moving down m
 ## References
 
 - [Claude Design](../../wiki/claude/claude-design.md): first-party hosted design product and handoff bundle
-- `.claude/context/claude-plugin/skill-strategy.md`: how to decide between workflow and domain-knowledge skills
+- `canon/context/claude-plugin/skill-strategy.md`: how to decide between workflow and domain-knowledge skills
 - [`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp): browser automation MCP used in tier 1 and tier 2
 - [`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp): live frontend debugging MCP used in tier 1 and tier 2
 - [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 wireframe companion

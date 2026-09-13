@@ -4,11 +4,56 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   CREATION_ROOT,
+  resolveSurfacePath,
   spell,
   SURFACE_ROOTS,
   surfaceDir,
   surfaceDirs,
 } from '@/surface-root'
+
+describe('resolveSurfacePath', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-surface-path-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should land a surface seed at canon/ in a fresh project', () => {
+    expect(resolveSurfacePath(root, 'canon/context/ci.md')).toBe(
+      join(root, 'canon', 'context', 'ci.md'),
+    )
+  })
+
+  it('should land a surface seed beside the copy an unmoved project holds', () => {
+    mkdirSync(join(root, '.claude', 'context'), { recursive: true })
+
+    expect(resolveSurfacePath(root, 'canon/context/ci.md')).toBe(
+      join(root, '.claude', 'context', 'ci.md'),
+    )
+  })
+
+  it('should resolve a loose surface document by its own presence', () => {
+    mkdirSync(join(root, '.claude'), { recursive: true })
+    writeFileSync(join(root, '.claude', 'DESIGN.md'), 'x')
+
+    expect(resolveSurfacePath(root, 'canon/DESIGN.md')).toBe(
+      join(root, '.claude', 'DESIGN.md'),
+    )
+  })
+
+  it('should join a path naming no surface entry as written', () => {
+    expect(resolveSurfacePath(root, '.cspell/tech-stack.txt')).toBe(
+      join(root, '.cspell', 'tech-stack.txt'),
+    )
+    expect(resolveSurfacePath(root, 'canon/config/x.toml')).toBe(
+      join(root, 'canon', 'config', 'x.toml'),
+    )
+  })
+})
 
 describe('surface-root', () => {
   let root: string
@@ -34,13 +79,13 @@ describe('surface-root', () => {
     expect(surfaceDir(root, 'context')).toBe(join(root, '.claude', 'context'))
   })
 
-  it('disagrees with the head of the read order for creation', () => {
-    expect(CREATION_ROOT).toBe('.claude')
-    expect(SURFACE_ROOTS[0]).not.toBe(CREATION_ROOT)
+  it('agrees with the head of the read order for creation', () => {
+    expect(CREATION_ROOT).toBe('canon')
+    expect(SURFACE_ROOTS[0]).toBe(CREATION_ROOT)
   })
 
-  it('creates at .claude/ when neither root carries the surface', () => {
-    expect(surfaceDir(root, 'context')).toBe(join(root, '.claude', 'context'))
+  it('creates at canon/ when neither root carries the surface', () => {
+    expect(surfaceDir(root, 'context')).toBe(join(root, 'canon', 'context'))
   })
 
   it('spells the stamp folder as config under canon/ and canon under .claude/', () => {
@@ -62,6 +107,10 @@ describe('surface-root', () => {
   it('resolves the stamp folder at .claude/canon when only .claude/ has it', () => {
     mkdirSync(join(root, '.claude', 'canon'), { recursive: true })
 
+    expect(surfaceDir(root, 'canon')).toBe(join(root, '.claude', 'canon'))
+  })
+
+  it('keeps creating the stamp folder under .claude/ until its own move lands', () => {
     expect(surfaceDir(root, 'canon')).toBe(join(root, '.claude', 'canon'))
   })
 

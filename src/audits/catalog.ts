@@ -490,8 +490,8 @@ export const AUDITS: readonly AuditSpec[] = [
     corpus: 'tracked',
     // The one reason this verb refuses for that is an absence rather than a
     // break, on the same test the reach check and the skill audit take: no
-    // target adopts `.claude/context/`, `.canon/diagrams/`, and
-    // `.claude/wireframes/` all at once, so without the allowance every such
+    // target adopts `canon/context/`, `.canon/diagrams/`, and
+    // `canon/wireframes/` all at once, so without the allowance every such
     // project reports the verb unmeasured on every run and never changes.
     absentReasons: ['no-folders'] satisfies ContextAuditRefusal[],
     counts: contextCounts,

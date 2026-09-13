@@ -30,7 +30,7 @@ afterEach(() => {
 describe('isQualified', () => {
   it('should accept a line naming the toolkit as the owner', () => {
     expect(
-      isQualified('Read `.claude/context/indexes.md` from the toolkit.'),
+      isQualified('Read `canon/context/indexes.md` from the toolkit.'),
     ).toBe(true)
   })
 
@@ -42,7 +42,7 @@ describe('isQualified', () => {
 
   it('should reject a bare citation with no owner named', () => {
     expect(
-      isQualified('See `.claude/context/transcripts.md` for the fields.'),
+      isQualified('See `canon/context/transcripts.md` for the fields.'),
     ).toBe(false)
   })
 })
@@ -54,18 +54,15 @@ describe('isToolkitOwned', () => {
 
   it('should disown a path a seed installs into the target', () => {
     expect(
-      isToolkitOwned(
-        '.claude/context/ci.md',
-        new Set(['.claude/context/ci.md']),
-      ),
+      isToolkitOwned('canon/context/ci.md', new Set(['canon/context/ci.md'])),
     ).toBe(false)
   })
 
   it('should disown the split-folder spelling of a seeded entry', () => {
     expect(
       isToolkitOwned(
-        '.claude/context/development/overview.md',
-        new Set(['.claude/context/development.md']),
+        'canon/context/development/overview.md',
+        new Set(['canon/context/development.md']),
       ),
     ).toBe(false)
   })
@@ -77,7 +74,7 @@ describe('isToolkitOwned', () => {
   it('should disown a context entry when the roots exclude it', () => {
     expect(
       isToolkitOwned(
-        '.claude/context/ci.md',
+        'canon/context/ci.md',
         new Set(),
         authoringRootsFor('.claude/skills'),
       ),
@@ -87,13 +84,15 @@ describe('isToolkitOwned', () => {
 
 describe('authoringRootsFor', () => {
   it('should keep every root when reading the shipped corpus', () => {
-    expect(authoringRootsFor('claude/skills')).toContain('.claude/context/')
     expect(authoringRootsFor('claude/skills')).toContain('canon/context/')
+    // canon-keep-surface-root
+    expect(authoringRootsFor('claude/skills')).toContain('.claude/context/')
   })
 
   it("should drop the reader's own dotted root for a project corpus", () => {
     const roots = authoringRootsFor('.claude/skills')
 
+    // canon-keep-surface-root
     expect(roots).not.toContain('.claude/context/')
     expect(roots).toContain('standards/')
   })
@@ -108,11 +107,11 @@ describe('authoringRootsFor', () => {
 
 describe('readReceivedPaths', () => {
   it('should read every seed payload as the path it lands on in a target', () => {
-    write('tooling/base/seeds/.claude/context/ci.md', '# CI\n')
+    write('tooling/base/seeds/canon/context/ci.md', '# CI\n')
     write('tooling/claude/seeds/CLAUDE.md', '# Root\n')
 
     expect(readReceivedPaths(root)).toEqual(
-      new Set(['.claude/context/ci.md', 'CLAUDE.md']),
+      new Set(['canon/context/ci.md', 'CLAUDE.md']),
     )
   })
 
@@ -153,7 +152,7 @@ describe('citationsIn', () => {
   })
 
   it('should skip a placeholder path no reader can open', () => {
-    const text = 'Propose `.claude/context/<domain>.md` for the entry.'
+    const text = 'Propose `canon/context/<domain>.md` for the entry.'
 
     expect(citationsIn('claude/skills/x/SKILL.md', text, new Set())).toEqual([])
   })
@@ -174,7 +173,7 @@ describe('citationsIn', () => {
 describe('scanReach', () => {
   it('should split the shipped corpus into qualified and unqualified citations', () => {
     write('standards/intake.md', '# Intake\n')
-    write('tooling/base/seeds/.claude/context/ci.md', '# CI\n')
+    write('tooling/base/seeds/canon/context/ci.md', '# CI\n')
     write(
       'claude/skills/alpha/SKILL.md',
       'See `standards/intake.md` for the shape.\n',
@@ -233,10 +232,10 @@ describe('scanReach', () => {
   })
 
   it('should not fault a target for citing its own context entry', () => {
-    write('.claude/context/ci.md', '# CI\n')
+    write('canon/context/ci.md', '# CI\n')
     write(
       '.claude/skills/alpha/SKILL.md',
-      'See `.claude/context/ci.md` for the workflow.\n',
+      'See `canon/context/ci.md` for the workflow.\n',
     )
 
     const report = scanReach(root)

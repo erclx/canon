@@ -17,7 +17,7 @@ import { SURFACE_ROOTS } from '@/surface-root'
  * `docs/agents/` is the exception, being the CLI contract pages that exist
  * here alone.
  *
- * `.claude/context/` carries both surface-root spellings, since this list
+ * The context folder carries both surface-root spellings, since this list
  * decides whether a shipped body names this repository's own tree and a body
  * naming either root is doing that regardless of which root a given checkout
  * carries.
@@ -51,7 +51,7 @@ const TOKEN = /`([^`\s]+)`/g
  * A path a reader could open, which is the only kind worth measuring.
  *
  * Requires an extension and a separator, and admits no `<`, `$`, or `*`. A
- * body writes `.claude/context/<domain>.md` to name a shape rather than a
+ * body writes `canon/context/<domain>.md` to name a shape rather than a
  * file, and `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` to resolve
  * against the plugin root, which is self-contained by construction.
  */
@@ -88,7 +88,7 @@ export function isQualified(line: string): boolean {
  * The roots that belong to the toolkit rather than to the reader, read
  * against the corpus being measured.
  *
- * A target's `.claude/context/` is the reader's own tree. A seed put the
+ * A target's `canon/context/` is the reader's own tree. A seed put the
  * entries there and the project owns them afterward, so a body under
  * `.claude/skills/` citing one names a file its reader holds. Measuring it
  * would report a correct citation on every run, which is exactly why `src/`

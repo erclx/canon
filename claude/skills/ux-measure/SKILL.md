@@ -17,7 +17,7 @@ Report numbers. A sentence about what the source looks like is what this exists 
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `package.json`: the `scripts` block naming a dev, preview, or start command
-- `.claude/context/development/`: the documented run commands and the port each serves
+- `canon/context/development/`: the documented run commands and the port each serves
 - `CLAUDE.md`: project type and conventions
 
 Prefer a production-shaped build (`preview`, `start`) over the dev server. A dev server ships unminified modules and reports a cost no user pays.

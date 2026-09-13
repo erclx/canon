@@ -65,7 +65,7 @@ For each in-scope entry (see Scope), pick one action:
 - **Promote to `CLAUDE.md`**: the rule is cross-domain behavior or a design principle applied across the whole project.
 - **Promote to a skill body**: the rule fires only when editing a specific path-scoped domain. Name the target skill.
 - **Promote to a standards file**: the rule is an authoring reference that belongs in the project's own standards folder as `<domain>.md`.
-- **Promote to a context entry**: the entry states a fact about a domain carrying an entry in `.claude/context/index.md`. Append it to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root, in the format `memory-capture` writes, and tell the user to run `/docs-fold` from a branch. Do not edit the context entry here.
+- **Promote to a context entry**: the entry states a fact about a domain carrying an entry in `canon/context/index.md`. Append it to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root, in the format `memory-capture` writes, and tell the user to run `/docs-fold` from a branch. Do not edit the context entry here.
 - **Hand off to governance**: the rule is coding-standards class (typescript, testing, naming, error-handling, performance, logging, concurrency, planning). Do not author the rule file inline. Never edit the synced `.claude/rules/` copies of toolkit rules, because `canon gov sync` overwrites them. Stop at handoff.
   - In the toolkit repo, point the user at `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own the source-of-truth rules under `governance/rules/`.
   - In a target project, point the user at the `create-rule` skill, which scaffolds a project-local rule under `.claude/rules/`.

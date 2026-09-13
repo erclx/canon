@@ -73,7 +73,7 @@ Five audits measure a surface without changing it. Offer the ones whose surface 
 
 A lifecycle row and these offers fire together on a project carrying a context folder and no installed domain, which is the ranking the preamble states. Scaffold work on a target with nothing installed is real work, so an audit offered instead of it answers a question nobody asked, while an audit dropped in favor of it loses the one the user did.
 
-- `.claude/context/` present: offer `canon context audit`
+- `canon/context/` present: offer `canon context audit`
 - A record folder present under `.claude/`, one of `plans`, `groundwork`, `intake`, or `memory`: offer `canon records validate <kind>` for each one found
 - Markdown that git lists: offer `canon markdown audit`
 - TypeScript or shell source present: offer `canon comments scan`

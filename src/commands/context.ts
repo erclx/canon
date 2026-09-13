@@ -455,13 +455,13 @@ function reportReferenceForm(
   const scoped = folders.filter(matchesSiblings)
   if (scoped.length === 0) {
     logInfo(
-      `Out of scope. A bare name is matched against the siblings of a domain split into a folder, and no audited folder under .claude/${PROVENANCE_FOLDER}/ is one.`,
+      `Out of scope. A bare name is matched against the siblings of a domain split into a folder, and no audited folder under canon/${PROVENANCE_FOLDER}/ is one.`,
     )
     return
   }
 
   logInfo(
-    `Covers ${plural(scoped.length, 'split folder')} under .claude/${PROVENANCE_FOLDER}/, whose standard asks a reference to spell its path.`,
+    `Covers ${plural(scoped.length, 'split folder')} under canon/${PROVENANCE_FOLDER}/, whose standard asks a reference to spell its path.`,
   )
   logInfo(
     'The flat folder is out of reach, since a domain filename there is shared by seeds and other trees.',
@@ -513,13 +513,13 @@ function reportSections(
   const governed = folders.filter(governsContent)
   if (governed.length === 0) {
     logInfo(
-      `Out of scope. The list is stated in the standard governing .claude/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
+      `Out of scope. The list is stated in the standard governing canon/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
     )
     return
   }
 
   logInfo(
-    `Covers .claude/${PROVENANCE_FOLDER}/ alone, whose standard requires ${REQUIRED_SECTIONS.join(' and ')}.`,
+    `Covers canon/${PROVENANCE_FOLDER}/ alone, whose standard requires ${REQUIRED_SECTIONS.join(' and ')}.`,
   )
   logInfo(
     'A heading at any level counts. Each entry answers for itself, except in a domain split across a folder, where a sibling answers for the rest.',
@@ -635,13 +635,13 @@ function reportProvenance(
   const governed = folders.filter(governsContent)
   if (governed.length === 0) {
     logInfo(
-      `Out of scope. The rule is stated in the standard governing .claude/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
+      `Out of scope. The rule is stated in the standard governing canon/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
     )
     return
   }
 
   logInfo(
-    `Covers .claude/${PROVENANCE_FOLDER}/ alone, whose standard carries the rule. The sibling standards do not restate it.`,
+    `Covers canon/${PROVENANCE_FOLDER}/ alone, whose standard carries the rule. The sibling standards do not restate it.`,
   )
   logInfo(
     'Fenced blocks are excluded, and so is a date whose clause stamps a measurement. A marker is a judgment, never a defect.',
@@ -697,7 +697,7 @@ function reportNarration(
   const governed = folders.filter(governsContent)
   if (governed.length === 0) {
     logInfo(
-      `Out of scope. The rule is stated in the standard governing .claude/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
+      `Out of scope. The rule is stated in the standard governing canon/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
     )
     return
   }
@@ -710,7 +710,7 @@ function reportNarration(
   }
 
   logInfo(
-    `Covers .claude/${PROVENANCE_FOLDER}/ alone, reading ${plural(narration.pronouns.length, 'pronoun')} and ${plural(narration.verbs.length, 'verb')} from ${narration.source}.`,
+    `Covers canon/${PROVENANCE_FOLDER}/ alone, reading ${plural(narration.pronouns.length, 'pronoun')} and ${plural(narration.verbs.length, 'verb')} from ${narration.source}.`,
   )
   logInfo(
     'A rejected alternative is a legitimate hit, since the standard keeps what was tried and why it lost.',

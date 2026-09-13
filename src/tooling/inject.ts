@@ -1,9 +1,10 @@
 import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { $ } from 'bun'
 import { copyPreservingMode } from '@/copy'
 import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
+import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
 import { ancestorsFirst, listFiles, type Manifest } from '@/tooling/manifest'
 import {
@@ -92,8 +93,9 @@ export async function injectSeeds(
 
     logStep(`Applying ${manifest.name} seeds`)
     for (const rel of files) {
-      await mergeSeedFile(join(manifest.seedsDir, rel), join(target, rel))
-      logAdd(rel)
+      const dest = resolveSurfacePath(target, rel)
+      await mergeSeedFile(join(manifest.seedsDir, rel), dest)
+      logAdd(relative(target, dest))
       applied.push(rel)
     }
   }

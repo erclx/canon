@@ -35,7 +35,7 @@
 # the scratch folder still standing, on the reading that a pick is not permission
 # to close, which is true of the body and untestable without an operator.
 
-paths = ["index.html", ".claude/DESIGN.md"]
+paths = ["index.html", "canon/DESIGN.md"]
 
 # The two surfaces a close reaches, and the scratch it works in. `index.html`
 # carries the applied arm and the design note carries the decision, and step 6
@@ -46,7 +46,7 @@ paths = ["index.html", ".claude/DESIGN.md"]
 # Unresolved section before step 2 existed, and the step was added rather than
 # the path dropped, since a pick that records nothing about why is the loss the
 # note exists to prevent.
-write_scope = [".canon/tmp/**", "index.html", ".claude/DESIGN.md"]
+write_scope = [".canon/tmp/**", "index.html", "canon/DESIGN.md"]
 
 # Declared at the runner default rather than at the observation. One run bounds
 # nothing here, since the cost follows how many arms the run drafts and how much

@@ -61,7 +61,7 @@ export interface AuditedFolder {
    * The requested folder name this was resolved under, which is what says
    * which standard governs the entries. A nested split folder carries the name
    * of the folder it sits beneath rather than its own, so
-   * `.claude/context/claude-plugin` is governed as `context`.
+   * `canon/context/claude-plugin` is governed as `context`.
    */
   readonly name: string
   /**
@@ -90,7 +90,7 @@ export interface AuditedFolder {
  * Names the requested record-root folders that actually exist, which is the
  * citation check's scope.
  *
- * A skill or seed pointing into `.claude/wireframes/` is a live instruction for
+ * A skill or seed pointing into `canon/wireframes/` is a live instruction for
  * a project that carries the folder and says nothing about one that does not.
  * Checking a path into an absent folder would fail eight shipped references
  * here for the sole reason that this repository has no wireframes.

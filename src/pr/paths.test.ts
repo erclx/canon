@@ -82,9 +82,9 @@ describe('extractKeyChangePaths', () => {
   it('should drop a bare name a compound bullet leaves as a fragment (#1267)', () => {
     expect(
       pathsOf(
-        '- Update `.claude/context/sandbox/overview.md`, `running.md`, and `coverage.md` to describe the per-run id.',
+        '- Update `canon/context/sandbox/overview.md`, `running.md`, and `coverage.md` to describe the per-run id.',
       ),
-    ).toEqual(['.claude/context/sandbox/overview.md'])
+    ).toEqual(['canon/context/sandbox/overview.md'])
   })
 
   it('should drop an angle-bracket placeholder naming no real file (#1248)', () => {
@@ -232,9 +232,9 @@ describe('extractKeyChangePaths', () => {
   it('should drop a line citation that follows the bullet own claim (#1236)', () => {
     expect(
       pathsOf(
-        '- Add a `## Gotchas` entry to `.claude/context/development/verification.md` stating that the Types and Tests stages at `scripts/core/verify.sh:634` and `:642` skip a branch editing a corpus outside `src/`.',
+        '- Add a `## Gotchas` entry to `canon/context/development/verification.md` stating that the Types and Tests stages at `scripts/core/verify.sh:634` and `:642` skip a branch editing a corpus outside `src/`.',
       ),
-    ).toEqual(['.claude/context/development/verification.md'])
+    ).toEqual(['canon/context/development/verification.md'])
   })
 })
 
@@ -242,26 +242,26 @@ describe('extractKeyChangePaths', () => {
   it('should take every path a bullet names across its commas (#1329)', () => {
     expect(
       pathsOf(
-        '- Update `.claude/context/cli/packaging.md` with what the check now proves and what it still cannot see, `.claude/context/development/gates.md` with the working-tree read the pack replaces the last-commit read with, and `.claude/context/ci.md` to reverse its stated decision.',
+        '- Update `canon/context/cli/packaging.md` with what the check now proves and what it still cannot see, `canon/context/development/gates.md` with the working-tree read the pack replaces the last-commit read with, and `canon/context/ci.md` to reverse its stated decision.',
       ),
     ).toEqual([
-      '.claude/context/cli/packaging.md',
-      '.claude/context/development/gates.md',
-      '.claude/context/ci.md',
+      'canon/context/cli/packaging.md',
+      'canon/context/development/gates.md',
+      'canon/context/ci.md',
     ])
   })
 
   it('should mark only the path ahead of the first comma as leading (#1329)', () => {
     const read = extractKeyChangePaths(
       body(
-        '- Update `.claude/context/cli/packaging.md` with what the check proves, `.claude/context/ci.md` to reverse its stated decision.',
+        '- Update `canon/context/cli/packaging.md` with what the check proves, `canon/context/ci.md` to reverse its stated decision.',
       ),
       ROOTS,
     )
 
     expect(read.kind === 'read' && read.claims).toMatchObject([
-      { path: '.claude/context/cli/packaging.md', leading: true },
-      { path: '.claude/context/ci.md', leading: false },
+      { path: 'canon/context/cli/packaging.md', leading: true },
+      { path: 'canon/context/ci.md', leading: false },
     ])
   })
 

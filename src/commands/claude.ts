@@ -435,7 +435,7 @@ export function register(program: Command): void {
         '  carrying that corpus alone. A cited path counts when it sits under',
         '  an authoring root no install channel delivers and the project',
         '  holds it. A path under src/, scripts/, or bare docs/ names the',
-        "  reader's own tree and is not measured, and .claude/context/ joins",
+        "  reader's own tree and is not measured, and canon/context/ joins",
         "  them when the corpus read is a project's own.",
         '',
         'Exit codes:',

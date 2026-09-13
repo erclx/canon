@@ -30,7 +30,7 @@ const INDEX = [
 ].join('\n')
 
 function seedFolder(names: string[], index = INDEX): void {
-  const dir = join(ROOT, '.claude', 'context')
+  const dir = join(ROOT, 'canon', 'context')
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, 'index.md'), index)
 
@@ -43,11 +43,11 @@ function seedFolder(names: string[], index = INDEX): void {
 }
 
 function folderAt(names: string[]): AuditedFolder {
-  const dir = join(ROOT, '.claude', 'context')
+  const dir = join(ROOT, 'canon', 'context')
   return {
     name: 'context',
-    base: '.claude',
-    rel: '.claude/context',
+    base: 'canon',
+    rel: 'canon/context',
     indexPath: join(dir, 'index.md'),
     entries: names.map((name) => join(dir, name)),
     nested: false,
@@ -73,13 +73,13 @@ describe('listedTargets', () => {
 describe('auditFolder', () => {
   it('should report nothing when the index agrees with its siblings', async () => {
     seedFolder(['ci.md', 'cli.md'])
-    mkdirSync(join(ROOT, '.claude/context/claude-plugin'), { recursive: true })
-    writeFileSync(join(ROOT, '.claude/context/claude-plugin/index.md'), INDEX)
+    mkdirSync(join(ROOT, 'canon/context/claude-plugin'), { recursive: true })
+    writeFileSync(join(ROOT, 'canon/context/claude-plugin/index.md'), INDEX)
 
     const drift = await auditFolder(folderAt(['ci.md', 'cli.md']))
 
     expect(drift).toEqual({
-      rel: '.claude/context',
+      rel: 'canon/context',
       unlisted: [],
       missing: [],
     })
@@ -87,8 +87,8 @@ describe('auditFolder', () => {
 
   it('should report an entry the index does not link', async () => {
     seedFolder(['ci.md', 'cli.md', 'sandbox.md'])
-    mkdirSync(join(ROOT, '.claude/context/claude-plugin'), { recursive: true })
-    writeFileSync(join(ROOT, '.claude/context/claude-plugin/index.md'), INDEX)
+    mkdirSync(join(ROOT, 'canon/context/claude-plugin'), { recursive: true })
+    writeFileSync(join(ROOT, 'canon/context/claude-plugin/index.md'), INDEX)
 
     const drift = await auditFolder(folderAt(['ci.md', 'cli.md', 'sandbox.md']))
 

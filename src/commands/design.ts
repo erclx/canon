@@ -28,7 +28,7 @@ export function register(program: Command): void {
   design
     .command('regen')
     .description(
-      'Rewrite .claude/DESIGN.md and the base stylesheet from src/design/tokens.ts',
+      'Rewrite canon/DESIGN.md and the base stylesheet from src/design/tokens.ts',
     )
     .addHelpText(
       'after',

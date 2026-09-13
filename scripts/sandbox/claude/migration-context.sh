@@ -176,7 +176,7 @@ EOF
   log_info ""
   log_info "Action:  /migration-context"
   log_info "Expect:  proposal block with grouped sections:"
-  log_info "         Move to .claude/context/: web.md, python.md"
+  log_info "         Move to canon/context/: web.md, python.md"
   log_info "         Keep in docs/: contributing.md"
   log_info "         Defer to seed-sync: development.md"
   log_info "         Suggested git mv commands listed for the user to run"

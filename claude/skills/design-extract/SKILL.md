@@ -1,13 +1,13 @@
 ---
 name: design-extract
-description: Drafts `.claude/DESIGN.md` from a project's existing prose and shell UI surfaces, or proposes token values from `REQUIREMENTS.md` and a `## Personality` section when no UI code exists yet. Use when asked to "extract the design system", "draft DESIGN.md", "bootstrap design tokens", "capture the visual system", "propose a design system", "bootstrap DESIGN.md from scratch", "draft tokens for a greenfield project", or "replace Claude Design onboarding". Do NOT use to mutate an existing `.claude/DESIGN.md`.
+description: Drafts `canon/DESIGN.md` from a project's existing prose and shell UI surfaces, or proposes token values from `REQUIREMENTS.md` and a `## Personality` section when no UI code exists yet. Use when asked to "extract the design system", "draft DESIGN.md", "bootstrap design tokens", "capture the visual system", "propose a design system", "bootstrap DESIGN.md from scratch", "draft tokens for a greenfield project", or "replace Claude Design onboarding". Do NOT use to mutate an existing `canon/DESIGN.md`.
 ---
 
 # Design extract
 
 ## Guards
 
-- If `.claude/DESIGN.md` already exists and has content beyond the seed template, stop: `❌ .claude/DESIGN.md already populated. Edit directly or archive the existing file first.`
+- If `canon/DESIGN.md` already exists and has content beyond the seed template, stop: `❌ canon/DESIGN.md already populated. Edit directly or archive the existing file first.`
 - If `canon` is not on PATH, stop: `❌ canon CLI not found.`
 
 Step 1 carries two more stops that apply to one path only. Do not evaluate them before the path is picked.
@@ -23,21 +23,21 @@ The project decides this, never a user flag or an argument. Announce which path 
 
 The greenfield path needs a personality paragraph to propose against, and stops without one. The source path needs neither file and skips both stops.
 
-- If `.claude/REQUIREMENTS.md` is missing, stop: `❌ .claude/REQUIREMENTS.md not found. Write requirements before proposing a design system.`
-- If `.claude/REQUIREMENTS.md` has no `## Personality` section, stop: `❌ .claude/REQUIREMENTS.md missing ## Personality section. Add a paragraph describing voice and tone before running this skill.`
+- If `canon/REQUIREMENTS.md` is missing, stop: `❌ canon/REQUIREMENTS.md not found. Write requirements before proposing a design system.`
+- If `canon/REQUIREMENTS.md` has no `## Personality` section, stop: `❌ canon/REQUIREMENTS.md missing ## Personality section. Add a paragraph describing voice and tone before running this skill.`
 
 ## Step 2: read source signals in parallel
 
 Read these on both paths, skipping any that do not exist:
 
 - `CLAUDE.md`: voice and personality
-- `.claude/REQUIREMENTS.md`: the `## Personality` paragraph, worldview, non-goals
+- `canon/REQUIREMENTS.md`: the `## Personality` paragraph, worldview, non-goals
 - `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: word, punctuation, and formatting constraints
 - The `write-human` skill: tone and sentence construction constraints
 
 On the source path, also read the UI surfaces matched in Step 1 plus `canon docs output-shape` and `canon docs index`, for output shape or framing rules already documented in the toolkit's own reference. Skip either that fails to resolve, since a project keeping its framing rules elsewhere is read there instead.
 
-On the greenfield path, also read `.claude/ARCHITECTURE.md` for platform, tech stack, and surface type. Do not scan `src/`, stylesheets, or UI modules. Step 1 already established they hold nothing.
+On the greenfield path, also read `canon/ARCHITECTURE.md` for platform, tech stack, and surface type. Do not scan `src/`, stylesheets, or UI modules. Step 1 already established they hold nothing.
 
 Run these reads in parallel. Do not speculatively recurse into every directory.
 
@@ -46,7 +46,7 @@ Run these reads in parallel. Do not speculatively recurse into every directory.
 Run this from the project root:
 
 ```bash
-canon claude seeds list --json | jq -r '.[] | select(.path == ".claude/DESIGN.md") | .content'
+canon claude seeds list --json | jq -r '.[] | select(.path == "canon/DESIGN.md") | .content'
 ```
 
 Use the returned content as the target shape. Keep every section heading and every table header intact. The `canon design render` parser depends on them.
@@ -61,7 +61,7 @@ On the source path, the tag marks the exception. On the greenfield path it marks
 
 ### Source path
 
-- **Personality**: one paragraph. Transcribe what `CLAUDE.md` and `.claude/REQUIREMENTS.md` say about voice, tone, and visual feeling. Do not invent rules the source does not state. If nothing matches, write a one-sentence placeholder ending in `? verify`.
+- **Personality**: one paragraph. Transcribe what `CLAUDE.md` and `canon/REQUIREMENTS.md` say about voice, tone, and visual feeling. Do not invent rules the source does not state. If nothing matches, write a one-sentence placeholder ending in `? verify`.
 - **Color**: one row per role. Source hex values from the CLI UI files or stylesheets. If a role has no source signal, leave `Value` blank rather than guessing.
 - **Typography**: one row per role. Source families and sizes from stylesheet or theme config. Leave cells blank when no signal exists.
 - **Spacing**: fill the base unit and multipliers from stylesheet tokens or obvious repeated values in the UI code.
@@ -72,7 +72,7 @@ On the source path, the tag marks the exception. On the greenfield path it marks
 
 Anchor every proposal to a signal, never to a default. "Calm and dense" pins muted grays and tight spacing. A requirements non-goal of "no motion" makes Motion read `No animation.` with no tag. A CLI-only surface leans Typography monospaced and keeps Borders minimal.
 
-- **Personality**: transcribe the `## Personality` paragraph from `.claude/REQUIREMENTS.md` verbatim. This is the one section that is not a proposal. No tag.
+- **Personality**: transcribe the `## Personality` paragraph from `canon/REQUIREMENTS.md` verbatim. This is the one section that is not a proposal. No tag.
 - **Color**: one row per role. Rewrite the Intent cell in personality language, for example `warm off-white page canvas` instead of the seed default `page canvas`. Propose hex values matching the personality. Dense and calm gives low saturation and high text contrast. Playful gives saturated accents. Every Intent and Value cell gets `? verify`.
 - **Typography**: one row per role. Propose families fitting the platform, system UI for web, monospaced for CLI tools, serif for editorial, and a harmonious scale. Every cell gets `? verify`.
 - **Spacing**: propose a base unit matching density intent. Dense gives a 4px base, roomy gives 8px. Keep the Multiplier column as the seed ships it, no tag. Only the Value column gets `? verify`.
@@ -84,7 +84,7 @@ Do not invent non-goals. A proposed motion line is fine when neither the persona
 
 ## Step 5: write and render
 
-Write the filled template to `.claude/DESIGN.md` from the project root. Then run:
+Write the filled template to `canon/DESIGN.md` from the project root. Then run:
 
 ```bash
 canon design render
@@ -95,7 +95,7 @@ The command writes an HTML plus CSS preview to `.canon/review/design/`. Output t
 ## Response format
 
 ```plaintext
-📝 Wrote .claude/DESIGN.md
+📝 Wrote canon/DESIGN.md
 📝 Wrote .canon/review/design/index.html
 
 Ran the <source|greenfield> path. N cells marked `? verify`. Open the preview and confirm before committing.

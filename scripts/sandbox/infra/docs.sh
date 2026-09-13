@@ -9,8 +9,8 @@ use_config() {
 stage_setup() {
   log_step "Docs sandbox"
   log_info "list : downstream catalog, toolkit-internal context entries filtered out"
-  log_info "get  : print one doc to stdout by exact name, from docs/ or .claude/context/"
-  log_info "canon docs reads the toolkit's own docs/ and .claude/context/, no target needed"
+  log_info "get  : print one doc to stdout by exact name, from docs/ or canon/context/"
+  log_info "canon docs reads the toolkit's own docs/ and canon/context/, no target needed"
 
   select_or_route_scenario "Which scenario?" "list" "get"
 
@@ -36,7 +36,7 @@ stage_setup() {
     log_step "Running: canon docs tooling"
     tooling_doc=$(bun "$PROJECT_ROOT/src/cli.ts" docs tooling)
     head -5 <<<"$tooling_doc"
-    log_info "Expect the tooling doc resolved from .claude/context/, not docs/"
+    log_info "Expect the tooling doc resolved from canon/context/, not docs/"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

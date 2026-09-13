@@ -377,7 +377,7 @@ toolkit shipped and the target renamed goes unmatched, the same limit the
 
 `migrations` names a proposal-only skill with a live case in this target. It
 fires on a `CLAUDE.md` past 250 lines for `migration-claude-md`, and on a `docs/` folder
-holding markdown with no populated `.claude/context/` for `migration-context`.
+holding markdown with no populated `canon/context/` for `migration-context`.
 Each entry carries the skill name and the measurement behind it, so a consumer
 can check the proposal before running it. Without the field both skills are
 documented and unreachable from any report.

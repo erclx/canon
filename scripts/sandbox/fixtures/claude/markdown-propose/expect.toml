@@ -7,7 +7,7 @@
 # a since-corrected fixture. The spread is real rather than noise, since one run
 # spent extra turns cleaning banned punctuation out of its own draft. 45 sits
 # above the widest observed rather than at the default, per
-# .claude/context/sandbox/running.md.
+# canon/context/sandbox/running.md.
 max_turns = 45
 
 # The slug is pinned by the invocation rather than left to the run, per the same

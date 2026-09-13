@@ -49,13 +49,13 @@ a variant records its kind as \`ablation\` and ignores the second argument"
 case "$arm" in
 context)
   standard="context.md"
-  dest=".claude/context/feedwatch.md"
+  dest="canon/context/feedwatch.md"
   surface="one entry for this codebase"
   arm_dir="ctx-arm"
   ;;
 wireframes)
   standard="wireframes.md"
-  dest=".claude/wireframes/feed-list.md"
+  dest="canon/wireframes/feed-list.md"
   surface="one entry for the feed list surface"
   arm_dir="wf-arm"
   ;;
@@ -446,7 +446,7 @@ if [ "$arm" = seed ]; then
   echo
   echo '```plaintext'
   # Match anywhere in the call, not just at a path boundary. A session that
-  # consults an index by `cat .claude/context/index.md` reaches the seed exactly
+  # consults an index by `cat canon/context/index.md` reaches the seed exactly
   # as much as one that Reads it, and an anchored pattern reported the first
   # kind as "(none)". Session-owned scratch and worktree paths match too, so
   # read the list rather than counting it.

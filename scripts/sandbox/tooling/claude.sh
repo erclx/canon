@@ -32,7 +32,7 @@ EOF
   log_info ""
   log_info "Verify after init:"
   log_info "  .canon/tasks/index.md, REQUIREMENTS.md, ARCHITECTURE.md exist"
-  log_info "  .claude/wireframes/index.md exists"
-  log_info "  .claude/DESIGN.md exists only if UI was selected"
+  log_info "  canon/wireframes/index.md exists"
+  log_info "  canon/DESIGN.md exists only if UI was selected"
   log_info "  .gitignore contains .canon/tmp/"
 }

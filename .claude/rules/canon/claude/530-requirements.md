@@ -1,6 +1,7 @@
 ---
-description: Route .claude/REQUIREMENTS.md edits to the requirements standard for product scope and goals
+description: Route canon/REQUIREMENTS.md edits to the requirements standard for product scope and goals
 paths:
+  - 'canon/REQUIREMENTS.md'
   - '.claude/REQUIREMENTS.md'
 ---
 

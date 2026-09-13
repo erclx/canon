@@ -194,7 +194,7 @@ The capture row states a standing debt rather than a per-run result. Running cap
 
 That block is the detail. Lead the reply with the three slots under Every later turn above, so the human reads what they own before the evidence for it.
 
-Treat a task that edits `.claude/context/` entries wholesale as conflicting with every other task, because the root instruction file requires each task to update its own domain entry as it lands.
+Treat a task that edits `canon/context/` entries wholesale as conflicting with every other task, because the root instruction file requires each task to update its own domain entry as it lands.
 
 Do not promote a task to fill the queue when nothing qualifies. A thin queue is a real answer and it beats a plan nobody needed.
 

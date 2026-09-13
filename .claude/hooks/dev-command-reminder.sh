@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: points a session at .claude/context/development/index.md, a toolkit-authored entry describing this checkout's own scripts, which does not and should not exist in a target.
+# canon-no-seed: points a session at this checkout's development context entry, a toolkit-authored entry describing this checkout's own scripts, which does not and should not exist in a target.
 
 # Claude Code sends a payload and closes stdin. A bare read with nothing feeding
 # it blocks forever and holds the session open, so the read is bounded. `read`
@@ -21,13 +21,24 @@ session=$(printf '%s' "$input" | jq -r '
 [ "$session" = "SKIP" ] && exit 0
 [ -n "$session" ] || exit 0
 
-entry=".claude/context/development/index.md"
-[ -f "${CLAUDE_PROJECT_DIR:-.}/$entry" ] || exit 0
+project="${CLAUDE_PROJECT_DIR:-.}"
+
+# The entry sits under whichever surface root the checkout carries, the moved
+# root first, so a checkout the surface move has not reached still gets the
+# reminder rather than silence.
+entry=""
+for root in canon .claude; do
+  candidate="$root/context/development/index.md"
+  if [ -f "$project/$candidate" ]; then
+    entry="$candidate"
+    break
+  fi
+done
+[ -n "$entry" ] || exit 0
 
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 # The marker is scratch, so it follows the scratch folder to whichever record
 # root the project carries rather than creating a second one beside it.
-project="${CLAUDE_PROJECT_DIR:-.}"
 if [ -d "$project/.canon" ]; then
   marker_dir="$project/.canon/tmp/dev-command-reminder"
 else

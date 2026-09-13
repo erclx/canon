@@ -1,15 +1,21 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { stripFrontmatter } from '@/frontmatter'
+import { SURFACE_ROOTS } from '@/surface-root'
 
 const INDEX_TOPIC = 'index'
 
 /**
- * The two roots a topic resolves against, in precedence order. `docs/` holds
- * consumer-facing reference and `.claude/context/` holds per-domain internal
+ * The roots a topic resolves against, in precedence order. `docs/` holds
+ * consumer-facing reference and the context folder holds per-domain internal
  * narrative, so a name present in both resolves to the consumer-facing copy.
+ * The context folder is read at every surface root, so a checkout the surface
+ * move has not reached still resolves its own entries.
  */
-const ROOTS: readonly string[] = ['docs', join('.claude', 'context')]
+const ROOTS: readonly string[] = [
+  'docs',
+  ...SURFACE_ROOTS.map((root) => join(root, 'context')),
+]
 
 export interface ResolvedTopic {
   readonly path: string

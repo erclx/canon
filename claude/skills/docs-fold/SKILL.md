@@ -42,12 +42,12 @@ Widening what a step reads is safe. Widening what a step writes is not, and wide
 
 ## Step 1: read current docs
 
-Read these in parallel from the current worktree root (`pwd`), not the main worktree root. These are tracked files and edits must commit with the branch. Skip any that do not exist:
+Read these in parallel from the current worktree root (`pwd`), not the main worktree root. These are tracked files and edits must commit with the branch. A project the surface move has not reached holds each of them under `.claude/` rather than `canon/`, so read and write each at whichever root already carries it. Skip any that exist at neither:
 
-- `.claude/REQUIREMENTS.md`
-- `.claude/ARCHITECTURE.md`
-- `.claude/DESIGN.md`
-- `.claude/wireframes/index.md` and every surface file it links to, following a grouped surface's own `index.md` and the siblings it lists rather than stopping at the top-level folder
+- `canon/REQUIREMENTS.md`
+- `canon/ARCHITECTURE.md`
+- `canon/DESIGN.md`
+- `canon/wireframes/index.md` and every surface file it links to, following a grouped surface's own `index.md` and the siblings it lists rather than stopping at the top-level folder
 
 Read the task board from the main worktree root instead, resolving that root the way `session-worktree` does. It is gitignored scratch and never commits with the branch:
 
@@ -109,14 +109,14 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
 - Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
-- Close a decision entry in `.claude/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
+- Close a decision entry in `canon/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
 - Leave every decision entry this run did not write alone, anchored or not. The rule is scoped forward, so an entry written before it is dated by blame rather than by a read. Step 5 reports a stale anchor and no step writes one on an entry it did not amend.
 
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
 ## Step 4: wireframe coverage sweep
 
-Skip this step silently when `.claude/wireframes/` does not exist or has no surface files. When the baseline is unusable, scope it to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the wireframe sweep.`
+Skip this step silently when `canon/wireframes/` does not exist or has no surface files. When the baseline is unusable, scope it to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the wireframe sweep.`
 
 Reuse the diff from the baseline above and filter for UI-affecting paths. UI-affecting paths are framework-dependent. Default heuristic: any file under a `components/`, `features/`, `pages/`, `app/`, `routes/`, or `screens/` folder, plus any `*.tsx`, `*.jsx`, `*.vue`, or `*.svelte` file anywhere in the diff.
 
@@ -124,7 +124,7 @@ Skip silently when the filter leaves nothing, which is every branch touching no 
 
 ## Step 5: architecture anchor sweep
 
-Skip this step silently when `.claude/ARCHITECTURE.md` does not exist at `pwd` or carries no decision entry with a verification anchor. A record written before the rule holds none, and a project is not told on every ship that nothing has been checked when the standard calls that state correct. When the baseline is unusable, scope the sweep to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the anchor sweep.`
+Skip this step silently when `canon/ARCHITECTURE.md` does not exist at `pwd` or carries no decision entry with a verification anchor. A record written before the rule holds none, and a project is not told on every ship that nothing has been checked when the standard calls that state correct. When the baseline is unusable, scope the sweep to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the anchor sweep.`
 
 This step reports and never writes. The record carries no frontmatter, so an anchor is a sentence sharing a paragraph with the claim it marks, and a pass editing prose to mark prose has no structural guard against editing the claim beside it. A surface whose marker sits in YAML gets that separation for free and this one cannot.
 
@@ -144,11 +144,11 @@ Do not edit `CLAUDE.md` inline. Every `CLAUDE.md` change goes through the show-d
 
 ## Step 7: refresh context entries
 
-Read `.claude/context/index.md` at `pwd` to see which domain entries exist. Skip this step silently if the directory does not exist or has no entries.
+Read `canon/context/index.md` at `pwd` to see which domain entries exist. Skip this step silently if the directory does not exist or has no entries.
 
 Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
 
-**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `.claude/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
+**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `canon/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
 
 This half is not diff-scoped and must not be. A gotcha a session hit while working is exactly the fact the diff never shows, and scoping it to changed files would drop the entries worth keeping. The handoff is a named input rather than a scan, so the reach stays bounded to what capture decided.
 
@@ -156,7 +156,7 @@ Skip this half silently when the file is absent, which is every run where nothin
 
 **The diff.** When the baseline is unusable, scope this half to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the context refresh.` The routed half still runs, since it reads a file rather than a diff.
 
-Reuse the diff from the baseline above, names and content both. For each domain listed in `.claude/context/index.md`, read its own entry: a flat `.claude/context/<domain>.md`, or, for a domain split into a folder, its `.claude/context/<domain>/index.md` and every sibling file that index links. Follow the index rather than globbing the folder, since a folder can hold a file the index does not list yet.
+Reuse the diff from the baseline above, names and content both. For each domain listed in `canon/context/index.md`, read its own entry: a flat `canon/context/<domain>.md`, or, for a domain split into a folder, its `canon/context/<domain>/index.md` and every sibling file that index links. Follow the index rather than globbing the folder, since a folder can hold a file the index does not list yet.
 
 - Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
 - For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
@@ -173,17 +173,17 @@ Grep the tree for the name that went, rather than for the paths the diff carries
 
 Report each hit as an ordinary rewrite.
 
-Create a new entry only for a domain `.claude/context/index.md` already lists but carries no file for, following `${CLAUDE_SKILL_DIR}/../../standards/context.md` for its shape. Before treating a domain as carrying no file, confirm it holds no entry under either spelling, `.claude/context/<domain>.md` or `.claude/context/<domain>/index.md`, since a domain already split into a folder still passes a check that only looked for the flat file. A row in the catalog is the deliberate decision, taken by whoever added it. This step only fills in what that decision left open, and only until the next `canon indexes regen` pass, which rebuilds the catalog from each entry's own frontmatter plus every sibling's and drops a row whose file still does not exist. Create the file before that regen runs, or the row this bar exists to fill in is gone. A domain the catalog does not list at all is a different case: report it and stop, rather than creating an entry or a catalog row for it.
+Create a new entry only for a domain `canon/context/index.md` already lists but carries no file for, following `${CLAUDE_SKILL_DIR}/../../standards/context.md` for its shape. Before treating a domain as carrying no file, confirm it holds no entry under either spelling, `canon/context/<domain>.md` or `canon/context/<domain>/index.md`, since a domain already split into a folder still passes a check that only looked for the flat file. A row in the catalog is the deliberate decision, taken by whoever added it. This step only fills in what that decision left open, and only until the next `canon indexes regen` pass, which rebuilds the catalog from each entry's own frontmatter plus every sibling's and drops a row whose file still does not exist. Create the file before that regen runs, or the row this bar exists to fill in is gone. A domain the catalog does not list at all is a different case: report it and stop, rather than creating an entry or a catalog row for it.
 
 Write each updated entry immediately. Output one line per file, naming the path this run actually wrote rather than always the flat template:
 
-`✅ Context: .claude/context/<domain>.md` for a flat entry, or `✅ Context: .claude/context/<domain>/<sub-area>.md` for the sibling file a nested edit landed in
+`✅ Context: canon/context/<domain>.md` for a flat entry, or `✅ Context: canon/context/<domain>/<sub-area>.md` for the sibling file a nested edit landed in
 
 Add a line naming the handoff when one was consumed:
 
 `🧹 Folded: .canon/tmp/memory-routing/<slug>.md`
 
-The base lint-staged config runs `canon indexes regen` on every committed `*.md`, so `.claude/context/index.md` refreshes automatically on commit. No manual step needed.
+The base lint-staged config runs `canon indexes regen` on every committed `*.md`, so `canon/context/index.md` refreshes automatically on commit. No manual step needed.
 
 ## Step 8: fold promoted pages
 

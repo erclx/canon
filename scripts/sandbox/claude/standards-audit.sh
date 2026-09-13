@@ -27,8 +27,8 @@ A tiny reference project used to exercise the standards audit skill.
 - `bun run check`: lint and typecheck
 EOF
 
-  mkdir -p docs .claude/skills/example .claude/context
-  cat <<'EOF' >.claude/context/api.md
+  mkdir -p docs .claude/skills/example canon/context
+  cat <<'EOF' >canon/context/api.md
 ---
 title: API
 description: Request handling, routing, and the serialization boundary
@@ -114,7 +114,7 @@ The skill provides a comprehensive way to handle example workflows — it offers
 You should probably try to run the example command if you think it might help.
 EOF
 
-  cat <<'EOF' >.claude/context/api.md
+  cat <<'EOF' >canon/context/api.md
 ---
 title: API
 description: Request handling, routing, and the serialization boundary
@@ -142,9 +142,9 @@ EOF
   log_info "  3. docs/overview.md: semicolon joining clauses in a bullet"
   log_info "  4. .claude/skills/example/SKILL.md: em dash and inflated prose ('comprehensive', 'offers')"
   log_info "  5. .claude/skills/example/SKILL.md: non-imperative hedging voice ('You should probably try')"
-  log_info "  6. .claude/context/api.md: em dash, and a Layout section listing files instead of folders"
+  log_info "  6. canon/context/api.md: em dash, and a Layout section listing files instead of folders"
   log_info "Action:  /standards-audit"
   log_info "Expect:  violations grouped by file with line references, each naming its standard."
-  log_info "         .claude/context/api.md is the reach test: it must be audited against context.md,"
+  log_info "         canon/context/api.md is the reach test: it must be audited against context.md,"
   log_info "         which the mapping resolves from that standard's own scope statement."
 }

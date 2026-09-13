@@ -1,18 +1,21 @@
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/copy'
 import { creationRel, isRecordEntry } from '@/record-root'
 import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
+import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
 
 const SEEDS_DIR = join('tooling', 'claude', 'seeds')
 const CLAUDE_DIR = '.claude'
+const SURFACE_DIR = 'canon'
 const CLAUDE_MD = 'CLAUDE.md'
 const HOOKS = 'hooks'
 /**
- * Seed subdirectories under `.claude/`. Exported because each one replaced a
- * single file of the same stem in an older layout, which is what
- * `@/sync/layout` pairs a target against to find a superseded artifact.
+ * Seed subdirectories, authored under `.claude/` or, for a tracked surface,
+ * under `canon/`. Exported because each one replaced a single file of the same
+ * stem in an older layout, which is what `@/sync/layout` pairs a target against
+ * to find a superseded artifact.
  */
 export const SUBDIRS: readonly string[] = [
   HOOKS,
@@ -48,10 +51,26 @@ function seedsRoot(root: string): string {
   return join(root, SEEDS_DIR)
 }
 
+function isSurfaceEntry(name: string): boolean {
+  return SURFACE_ENTRIES.includes(name)
+}
+
+/**
+ * Where a surface seed installs, relative to the target.
+ *
+ * Resolved the way a read resolves rather than fixed at `canon/`. A target that
+ * still holds the surface under `.claude/` receives the seed beside the copy it
+ * has, since a fresh `canon/` folder there would win read precedence and hide
+ * every entry that target already wrote.
+ */
+function surfaceRel(target: string, entry: string): string {
+  return relative(target, surfaceDir(target, entry))
+}
+
 /**
  * Lists a single directory level, sorted the way `find -maxdepth 1 -type f |
- * sort` was. Bun.Glob skips dotfiles without `dot`, and every path here sits
- * under `.claude`, so omitting it would match nothing.
+ * sort` was. Bun.Glob skips dotfiles without `dot`, and the `.claude` source
+ * sits under a dotted name, so omitting it would match nothing there.
  */
 function listLevel(dir: string): string[] {
   if (!existsSync(dir)) return []
@@ -61,19 +80,19 @@ function listLevel(dir: string): string[] {
 }
 
 /**
- * Builds the seed list in the order the bash scanned it: the `.claude` root
- * level, then each subdirectory, then the project-level `CLAUDE.md`. Order is
- * load-bearing because it is also the order the timeline prints.
+ * Builds the seed list in the order the timeline prints it: the `.claude` root
+ * level, the `canon` root level, then each subdirectory from whichever source
+ * authors it, then the project-level `CLAUDE.md`.
  */
 export function planSeeds(root: string, target: string): SeedEntry[] {
-  const source = join(seedsRoot(root), CLAUDE_DIR)
-  const destDir = join(target, CLAUDE_DIR)
+  const claudeSource = join(seedsRoot(root), CLAUDE_DIR)
+  const surfaceSource = join(seedsRoot(root), SURFACE_DIR)
   const seeds: Seed[] = []
 
-  for (const name of listLevel(source)) {
+  for (const name of listLevel(claudeSource)) {
     seeds.push({
-      src: join(source, name),
-      dest: join(destDir, name),
+      src: join(claudeSource, name),
+      dest: join(target, CLAUDE_DIR, name),
       scanLabel: name,
       applyLabel: join(CLAUDE_DIR, name),
       scope: 'claude',
@@ -81,23 +100,38 @@ export function planSeeds(root: string, target: string): SeedEntry[] {
     })
   }
 
-  for (const subdir of SUBDIRS) {
-    // The seed tree authors every subdirectory under `.claude/`, and three of
-    // them are record folders that install under the record root instead. A
-    // target that has not migrated resolves back to `.claude/`, so the same seed
-    // lands beside the records already there rather than opening a second root.
-    // Scaffolding one under `.claude/` now would also land it outside the single
-    // `.canon/` ignore entry a target receives, which tracks the memory pen.
-    const installRel = isRecordEntry(subdir)
-      ? creationRel(target, subdir)
-      : join(CLAUDE_DIR, subdir)
+  for (const name of listLevel(surfaceSource)) {
+    const rel = surfaceRel(target, name)
+    seeds.push({
+      src: join(surfaceSource, name),
+      dest: join(target, rel),
+      scanLabel: name,
+      applyLabel: rel,
+      scope: 'claude',
+      executable: false,
+    })
+  }
 
-    for (const name of listLevel(join(source, subdir))) {
-      const rel = `${subdir}/${name}`
+  for (const subdir of SUBDIRS) {
+    const surface = isSurfaceEntry(subdir)
+    const source = join(surface ? surfaceSource : claudeSource, subdir)
+
+    // Three of the `.claude/` subdirectories are record folders that install
+    // under the record root instead. A target that has not migrated resolves
+    // back to `.claude/`, so the same seed lands beside the records already
+    // there rather than opening a second root, and never outside the single
+    // `.canon/` ignore entry a target receives.
+    const installRel = surface
+      ? surfaceRel(target, subdir)
+      : isRecordEntry(subdir)
+        ? creationRel(target, subdir)
+        : join(CLAUDE_DIR, subdir)
+
+    for (const name of listLevel(source)) {
       seeds.push({
-        src: join(source, subdir, name),
+        src: join(source, name),
         dest: join(target, installRel, name),
-        scanLabel: rel,
+        scanLabel: `${subdir}/${name}`,
         applyLabel: join(installRel, name),
         scope: 'claude',
         executable: subdir === HOOKS,

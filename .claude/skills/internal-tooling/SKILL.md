@@ -5,11 +5,11 @@ description: Tooling stacks, golden configs, seeds, references, and manifests. U
 
 # Tooling
 
-Read `.claude/context/tooling.md` for system overview, configs vs seeds vs references, extends chain, and manifest authoring before editing.
+Read `canon/context/tooling.md` for system overview, configs vs seeds vs references, extends chain, and manifest authoring before editing.
 
 ## Layer model
 
-Stack-specific configs override extends-chain configs at the same relative path. `scan` in `src/tooling/scan.ts` walks current-first. Refer to `.claude/context/tooling.md` for the layer inventory and what each one owns.
+Stack-specific configs override extends-chain configs at the same relative path. `scan` in `src/tooling/scan.ts` walks current-first. Refer to `canon/context/tooling.md` for the layer inventory and what each one owns.
 
 ## Manifest rules
 
@@ -55,7 +55,7 @@ When adding deps or scripts to `manifest.toml`:
 ## Seed naming
 
 - Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames (`development.md`, `ci.md`). Reserve CAPS (`CLAUDE.md`, `REQUIREMENTS.md`, `ARCHITECTURE.md`) for state and planning files that agents read as known paths.
-- Base agent-context seeds land at `tooling/base/seeds/.claude/context/` and install to target projects' `.claude/context/`. This matches the three-tier context model documented in the `internal-claude` seed. Do not seed agent-facing content under `tooling/*/seeds/docs/`. The `docs/` location is reserved for human-facing prose.
+- Base agent-context seeds land at `tooling/base/seeds/canon/context/` and install to target projects' `canon/context/`, or beside the entries an unmoved project still holds under `.claude/context/`. <!-- canon-keep-surface-root --> This matches the three-tier context model documented in the `internal-claude` seed. Do not seed agent-facing content under `tooling/*/seeds/docs/`. The `docs/` location is reserved for human-facing prose.
 
 ## Cspell seeds
 
@@ -63,5 +63,5 @@ Seed files merge across layers. Each stack contributes words to the target's `.c
 
 ## Reference
 
-- `.claude/context/tooling.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
+- `canon/context/tooling.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
 - `internal/standards/tooling-reference.md`: conventions for writing reference.md docs

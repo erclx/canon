@@ -32,8 +32,15 @@ describe('architectureRel', () => {
     expect(architectureRel(root)).toBe(join('canon', 'ARCHITECTURE.md'))
   })
 
-  it('should resolve at .claude/ when neither root carries the record', () => {
+  it('should resolve at .claude/ when only the old root carries the record', () => {
+    mkdirSync(join(root, '.claude'), { recursive: true })
+    writeFileSync(join(root, '.claude', 'ARCHITECTURE.md'), '# Architecture\n')
+
     expect(architectureRel(root)).toBe(join('.claude', 'ARCHITECTURE.md'))
+  })
+
+  it('should resolve at canon/ when neither root carries the record', () => {
+    expect(architectureRel(root)).toBe(join('canon', 'ARCHITECTURE.md'))
   })
 })
 
@@ -41,7 +48,7 @@ function makeReport(
   overrides: Partial<ArchitectureReport> = {},
 ): ArchitectureReport {
   return {
-    rel: '.claude/ARCHITECTURE.md',
+    rel: 'canon/ARCHITECTURE.md',
     lines: 100,
     allowances: { frame: 34, perDecision: 6 },
     ceiling: 100,

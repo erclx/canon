@@ -45,7 +45,7 @@ describe('the shipped-references stage scope', () => {
     const scope = scopeOf('shipped-references')
 
     expect(scope.test('src/gate/measures.ts')).toBe(false)
-    expect(scope.test('.claude/context/development/gates.md')).toBe(false)
+    expect(scope.test('canon/context/development/gates.md')).toBe(false)
     expect(scope.test('internal/rules/claude/598-authoring-layout.md')).toBe(
       false,
     )

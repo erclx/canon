@@ -54,16 +54,16 @@ stage_setup() {
 
     log_step "Scenario ready: docs refreshes context entry from diff"
     log_info "Context: feat/provider-switch branch with diff in src/features/chat/"
-    log_info "         .claude/context/web.md already exists. Its Layer responsibilities section names src/features/chat/."
+    log_info "         canon/context/web.md already exists. Its Layer responsibilities section names src/features/chat/."
     log_info "Action:  /docs-fold"
     log_info "Expect:  Step 3 updates planning docs (none diverged here)"
     log_info "         Step 4 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
-    log_info "         Rewrites the relevant section of .claude/context/web.md from the diff content"
+    log_info "         Rewrites the relevant section of canon/context/web.md from the diff content"
     log_info "         Does NOT create new entries (no auto-creation per design)"
     log_info "         Outputs a reminder line to run canon indexes regen"
     ;;
   "wireframe-coverage")
-    rm -f .claude/wireframes/feature-name.md
+    rm -f canon/wireframes/feature-name.md
     stage_fixtures claude docs-fold wireframe-coverage 01-initial
     git add . && git commit -m "feat(web): initial BYOK gate" --no-verify -q
 
@@ -73,16 +73,16 @@ stage_setup() {
 
     log_step "Scenario ready: docs wireframe coverage sweep"
     log_info "Context: branch widens BYOK gate to three providers and adds a new mock demo surface"
-    log_info "  .claude/wireframes/byok-gate.md still says Anthropic-only"
+    log_info "  canon/wireframes/byok-gate.md still says Anthropic-only"
     log_info "  src/features/mock/MockDemoStrip.tsx has no matching wireframe surface"
     log_info ""
     log_info "Action:  /docs-fold"
-    log_info "Expect:  Step 4 reports drift in .claude/wireframes/byok-gate.md (Anthropic-only contradicted)"
-    log_info "         Step 4 stubs .claude/wireframes/mock-demo-strip.md with a TODO"
+    log_info "Expect:  Step 4 reports drift in canon/wireframes/byok-gate.md (Anthropic-only contradicted)"
+    log_info "         Step 4 stubs canon/wireframes/mock-demo-strip.md with a TODO"
     log_info "         Operator resolves drift manually; auto-rewrite of prose is out of scope"
     ;;
   "anchor-sweep")
-    # The fixture record overwrites the seeded .claude/ARCHITECTURE.md in place.
+    # The fixture record overwrites the seeded canon/ARCHITECTURE.md in place.
     # No delete first, unlike an arm keying on a path entering the tree: nothing here keys on the file
     # being added, so the branch diff is the same either way.
     stage_fixtures claude docs-fold anchor-sweep 01-initial
@@ -111,7 +111,7 @@ stage_setup() {
     log_info "Action:  /docs-fold"
     log_info "Expect:  declared in fixtures/claude/docs-fold/anchor-sweep/expect.toml"
     log_info "         Check it with: canon sandbox check claude:docs-fold anchor-sweep"
-    log_info "         Two reported entries, and .claude/ARCHITECTURE.md unwritten:"
+    log_info "         Two reported entries, and canon/ARCHITECTURE.md unwritten:"
     log_info "         no anchor refreshed, none added, no claim edited beside one"
     log_info "         Two expectations need a reader and report as unchecked."
     ;;

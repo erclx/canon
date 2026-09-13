@@ -11,7 +11,7 @@ Without this skill, `role-worker` and `role-planner` state three and two message
 
 A standalone skill was proposed for the gap and declined the same day. It fired on no condition of its own, since nothing routes a session to a skill matching no request and reaching for no artifact, so a skill built to close the gap never closed it.
 
-The first draft of this plan closed the gap with a paragraph drafted inline, once inside `role-worker` and once inside `role-planner`. The operator overrode that call: two bodies carrying identical protocol text is the shared-surface case `.claude/ARCHITECTURE.md` already decided against duplicating, since a later fix reaching one copy and not the other diverges silently.
+The first draft of this plan closed the gap with a paragraph drafted inline, once inside `role-worker` and once inside `role-planner`. The operator overrode that call: two bodies carrying identical protocol text is the shared-surface case `canon/ARCHITECTURE.md` already decided against duplicating, since a later fix reaching one copy and not the other diverges silently.
 
 Neither attempt named who the relay is from. A message an operator relays by hand needs a sender as much as an addressee, and the standalone draft and the inline draft both composed a body and an addressee with no line stating whose turn produced it.
 

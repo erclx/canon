@@ -52,10 +52,12 @@ const CANON_SCRATCH = 'tmp'
  * writes back. `worktrees` is absent because the harness creates a worktree
  * under `.claude/` and requires its target to sit there.
  *
- * Everything absent from this list is committed and stays where it is, which is
- * the rule the move ran on. `context`, `rules`, `skills`, `hooks`, `wireframes`,
- * and the loose documents at the root are all in that set, which is why a seed
- * and a superseded-layout report each ask this rather than assuming a root.
+ * Everything absent from this list is committed and never lands under the
+ * record root, which is the rule the move ran on. `rules`, `skills`, and
+ * `hooks` stay under `.claude/` because the vendor reads them there, while
+ * `context`, `wireframes`, and the loose documents are tracked surfaces that
+ * `surface-root.ts` resolves under `canon/` instead. A seed and a
+ * superseded-layout report each ask this rather than assuming a root.
  */
 export const RECORD_ENTRIES: readonly string[] = [
   '.records.git',

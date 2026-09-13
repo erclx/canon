@@ -28,8 +28,8 @@ The base equalling HEAD is a usable baseline rather than the second case it used
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: project type, conventions, and commands
-- `.claude/REQUIREMENTS.md`: feature scope and non-goals
-- `.claude/ARCHITECTURE.md`: technical design decisions
+- `canon/REQUIREMENTS.md`: feature scope and non-goals
+- `canon/ARCHITECTURE.md`: technical design decisions
 
 Coding standards from `.claude/rules/` are auto-loaded by Claude Code. Always-on rules apply every session. Path-scoped rules apply to files matching their `paths:` glob.
 
@@ -68,7 +68,7 @@ Review the full diff and changed file contents for:
 5. Violations of rules from `.claude/rules/` that apply to the changed files
 6. When the diff touches a file this project ships to a target holding none of its own history: a repository-relative path, a phase label naming a gitignored board, a same-repository pull request or commit reference, or a layout, stack, or config-path claim true of this checkout but stated as if it were general
 
-Use `CLAUDE.md`, `.claude/REQUIREMENTS.md`, `.claude/ARCHITECTURE.md`, and the auto-loaded `.claude/rules/` as project context to inform what is intentional vs problematic. Do not fix, rewrite, or suggest refactors outside the scope of a finding.
+Use `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`, and the auto-loaded `.claude/rules/` as project context to inform what is intentional vs problematic. Do not fix, rewrite, or suggest refactors outside the scope of a finding.
 
 ### High-signal filter
 

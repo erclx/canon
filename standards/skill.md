@@ -210,7 +210,7 @@ Without this skill, a session <observed failure>, <observed failure>.
 ### Output and tuning
 
 - Skill success lines emit the full relative path from the project root (`<dir>/<file>`) for any file written, updated, or deleted. A bare filename names a file the reader cannot open. The `## Output` section of the project's instruction file sets the form that path takes, so a skill body states which path is emitted and leaves the form to that section.
-- Before a skill writes anything, decide whether the output is a deliverable the project keeps or a toolkit session record. A deliverable lands among the project's own tracked files. A session record lands under `.canon/`, in the named subfolder for its kind (`tasks/`, `plans/`, `review/`, `memory/`, `groundwork/`, `intake/`, `proposals/`, `diagrams/`, or `teach/`, with `tmp/` for scratch nothing else claims), never in a folder the body invents. `.claude/ARCHITECTURE.md`'s per-folder decisions are the precedent for which kind takes which folder.
+- Before a skill writes anything, decide whether the output is a deliverable the project keeps or a toolkit session record. A deliverable lands among the project's own tracked files. A session record lands under `.canon/`, in the named subfolder for its kind (`tasks/`, `plans/`, `review/`, `memory/`, `groundwork/`, `intake/`, `proposals/`, `diagrams/`, or `teach/`, with `tmp/` for scratch nothing else claims), never in a folder the body invents. `canon/ARCHITECTURE.md`'s per-folder decisions are the precedent for which kind takes which folder.
 - Codify a skill's posted or generated output as a fenced template, and keep the body consistent with every capability the frontmatter description names.
 - When a skill gathers user input or pre-seeds a template, attach a concrete proposed default to every question, derived from project context. Accept "use defaults" as a bulk-confirm.
 - Separate correctness axes (routing, sourcing, escalation, decline) from shape axes (line count, formatting, variant sprawl) when tuning a skill. Tighten only on correctness regressions. Do not convert soft caps to hard caps for aesthetic drift when correctness passes.
@@ -228,7 +228,7 @@ Without this skill, a session <observed failure>, <observed failure>.
 A skill reads from two roots. Know which one a file lives under before referencing it.
 
 - Bundled skill assets (`references/`, `scripts/`, `assets/`) resolve against the skill's own directory in the source clone. Reference them with `${CLAUDE_SKILL_DIR}/<path>`, never a bare relative path, so a plugin skill running from another project still finds them.
-- Installed shared docs (`.claude/rules/`, `.claude/context/`) resolve against the target project cwd, where install placed them. Reference them by that path.
+- Installed shared docs (`.claude/rules/`, `canon/context/`) resolve against the target project cwd, where install placed them. Reference them by that path.
 - Do not hand-copy a standard into a skill. A hand-copied file drifts from its source and belongs to no owner. If a skill must carry its own copy, generate it from the single source and reference it through `${CLAUDE_SKILL_DIR}`, so one owner keeps every copy in sync.
 
 ### Citing a standard

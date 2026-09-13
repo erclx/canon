@@ -44,8 +44,8 @@
         "src/markdown/gate.test.ts",
         "src/markdown/scan.test.ts",
         "src/markdown/scan.ts",
-        ".claude/context/cli/audits.md",
-        ".claude/context/development/verification.md",
+        "canon/context/cli/audits.md",
+        "canon/context/development/verification.md",
         "docs/agents/markdown-audit.md"
       ],
       "dictionaries": ["banned-spellings"]

@@ -37,7 +37,7 @@ manual = [
 # The staged surfaces survive. An audit reads and never writes, so a run that
 # changed either file ran something other than the audit it offered.
 [[content]]
-path = ".claude/context/billing.md"
+path = "canon/context/billing.md"
 pattern = 'Subscriptions renew nightly'
 
 [[content]]

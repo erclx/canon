@@ -35,7 +35,7 @@ export type CountsReport =
 
 /**
  * A calendar date, which reads a sentence as a historical record rather than
- * a live claim about the tree. `.claude/ARCHITECTURE.md` and the context
+ * a live claim about the tree. `canon/ARCHITECTURE.md` and the context
  * entries carry a figure this way deliberately, and every one of them stays
  * correct forever, so a sentence carrying one is read past rather than
  * matched.
@@ -80,7 +80,7 @@ function sentencesOf(line: string): string[] {
  * the 290 showed removing all of them while keeping that one.
  *
  * `authors` joined the list on a corpus measurement rather than on the shape
- * argument above. `.claude/context/development/regeneration.md` states `the
+ * argument above. `canon/context/development/regeneration.md` states `the
  * toolkit authors 69 rules under governance/rules/`, which is the assertion
  * shape this list was built for with a verb the list did not carry, and the
  * word costs one further sentence across the whole corpus and no finding.
@@ -129,7 +129,7 @@ const QUANTIFIERS = ['all']
  * of the number.
  *
  * Found on this module's own first review, against a live instance the verb
- * gate alone reported clean: `.claude/context/development/gates.md` stated
+ * gate alone reported clean: `canon/context/development/gates.md` stated
  * `the twelve audits` while the tree held 20, sitting inside the plausibility
  * bound this design already carries, so nothing but the missing shape kept it
  * from reporting.
@@ -142,7 +142,7 @@ const QUANTIFIERS = ['all']
  * match at all. No syntactic rule tells a qualifier that narrows a catalog
  * from one that only restates it, and the sentence was true when written, so
  * the fix was not a narrower matcher: the clause was dated as a past state,
- * the way `.claude/ARCHITECTURE.md` dates its own figures, which is the class
+ * the way `canon/ARCHITECTURE.md` dates its own figures, which is the class
  * the date exclusion below already reads past.
  */
 const ARTICLES = ['the', 'a', 'an']

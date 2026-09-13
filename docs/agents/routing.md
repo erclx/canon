@@ -5,7 +5,7 @@ description: Reading per CLAUDE.md section how many bullets name a path, what co
 
 # Routing report
 
-`canon claude routing` reports, per `CLAUDE.md` section, how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers the firing axis of the tier test in `.claude/rules/canon/claude/592-claude-md.md`, whether a fact applies every session or fires on one path, and which until this verb existed was a judgment nothing counted. `.claude/ARCHITECTURE.md` names two further axes, conditional presence and updatability, that this verb does not check.
+`canon claude routing` reports, per `CLAUDE.md` section, how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers the firing axis of the tier test in `.claude/rules/canon/claude/592-claude-md.md`, whether a fact applies every session or fires on one path, and which until this verb existed was a judgment nothing counted. `canon/ARCHITECTURE.md` names two further axes, conditional presence and updatability, that this verb does not check.
 
 ```bash
 canon claude routing
@@ -34,7 +34,7 @@ A bullet is path-scoped here when it names a path. That is evidence for the tier
 
 A backticked token counts when it carries a separator or an alphabetic extension, which admits `src/cli.ts` and `cspell.json` while leaving a flag, a bare word, and a version string out.
 
-A shape counts as the folder above its placeholder. `.claude/context/<domain>.md` names `.claude/context/` and nothing narrower, so dropping the token whole would report the section carrying it as naming no path at all. A placeholder opening the first segment has no openable prefix and is dropped.
+A shape counts as the folder above its placeholder. `canon/context/<domain>.md` names `canon/context/` and nothing narrower, so dropping the token whole would report the section carrying it as naming no path at all. A placeholder opening the first segment has no openable prefix and is dropped.
 
 ## When a rule counts as covering it
 

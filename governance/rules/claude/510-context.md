@@ -1,6 +1,7 @@
 ---
-description: Route .claude/context edits to the context-entry standard and the consult-first workflow
+description: Route canon/context edits to the context-entry standard and the consult-first workflow
 paths:
+  - 'canon/context/**'
   - '.claude/context/**'
 ---
 
@@ -8,7 +9,7 @@ paths:
 
 ## Before editing
 
-- Before non-trivial work in a domain, read its `.claude/context/<domain>.md` entry. Use `.claude/context/index.md` to find it.
+- Before non-trivial work in a domain, read its `canon/context/<domain>.md` entry. Use `canon/context/index.md` to find it.
 - Leave the entry conforming when work in its domain changes what it describes.
 
 ## Narration pronouns

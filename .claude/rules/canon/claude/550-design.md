@@ -1,6 +1,7 @@
 ---
-description: Route .claude/DESIGN.md edits to the design standard for visual intent and token tables
+description: Route canon/DESIGN.md edits to the design standard for visual intent and token tables
 paths:
+  - 'canon/DESIGN.md'
   - '.claude/DESIGN.md'
 ---
 

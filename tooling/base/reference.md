@@ -28,7 +28,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.cspell/project-terms.txt` and `.cspell/tech-stack.txt`: one word per line, sorted alphabetically.
 - `.lintstagedrc`: the glob map below.
 - `.prettierignore`: created empty. Projects add their own entries.
-- `.claude/context/`: extend the `ci` and `development` entries with project-specific commands, workflows, or deploy steps. Canonical rationale stays in this reference.
+- `canon/context/`: extend the `ci` and `development` entries with project-specific commands, workflows, or deploy steps. Canonical rationale stays in this reference.
 
 ## Tool pairing
 
@@ -42,8 +42,8 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 ## File layout
 
 - All shell scripts live in `scripts/`. Do not place a `.sh` file outside it.
-- Dictionaries live in `.cspell/`, hooks in `.husky/`, seeded context docs in `.claude/context/`.
-- The `.claude/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md`, `.claude/REQUIREMENTS.md`, and `.claude/ARCHITECTURE.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `.claude/context/`. Indexes stay opt-in.
+- Dictionaries live in `.cspell/`, hooks in `.husky/`, seeded context docs in `canon/context/`.
+- The `canon/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `canon/ARCHITECTURE.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `canon/context/`. Indexes stay opt-in.
 
 ## Hooks
 

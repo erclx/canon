@@ -48,12 +48,12 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Write a context entry for the payments domain, there is no .claude/context page for it yet.',
+      'Write a context entry for the payments domain, there is no canon/context page for it yet.',
     expect: 'draft-context',
   },
   {
     prompt:
-      'Draft a wireframe for the settings panel, nothing under .claude/wireframes covers that surface yet.',
+      'Draft a wireframe for the settings panel, nothing under canon/wireframes covers that surface yet.',
     expect: 'draft-wireframes',
   },
   {

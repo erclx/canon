@@ -19,7 +19,7 @@ import { isStubSeed } from '@/seed-marker'
  * Every reason `canon context audit` refuses for.
  *
  * `no-folders` is the one ordinary absence: a project that never adopted
- * `.claude/context/`, `.canon/diagrams/`, or `.claude/wireframes/` names no
+ * `canon/context/`, `.canon/diagrams/`, or `canon/wireframes/` names no
  * corpus this audit can measure, the same state `no-skills` reads for the
  * skill corpora. The other four are a malformed invocation or a checkout git
  * cannot read, which stay a break rather than an absence.

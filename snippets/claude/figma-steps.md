@@ -1,4 +1,4 @@
-Read the relevant spec from `.claude/DESIGN.md` and any other design files needed. Write step-by-step Figma instructions to produce the component exactly.
+Read the relevant spec from `canon/DESIGN.md` and any other design files needed. Write step-by-step Figma instructions to produce the component exactly.
 
 For each step, specify:
 

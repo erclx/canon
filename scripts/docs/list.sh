@@ -9,7 +9,7 @@ source "$PROJECT_ROOT/scripts/lib/ui.sh"
 source "$PROJECT_ROOT/scripts/lib/frontmatter.sh"
 
 DOCS_DIR="$PROJECT_ROOT/docs"
-CONTEXT_DIR="$PROJECT_ROOT/.claude/context"
+CONTEXT_DIR="$PROJECT_ROOT/canon/context"
 
 INTERNAL_TOPICS=" ci development sandbox "
 
@@ -97,7 +97,7 @@ collect_context() {
       [ "$name" = "index" ] && continue
       is_internal_topic "$name" && continue
       description=$(read_frontmatter_field "$file" "description")
-      printf '%s\t%s\t%s\n' "$name" "$description" ".claude/context/$name.md"
+      printf '%s\t%s\t%s\n' "$name" "$description" "canon/context/$name.md"
     done < <(find "$CONTEXT_DIR" -maxdepth 1 -type f -name "*.md")
 
     # A split domain is named by its folder and described by its generated
@@ -106,7 +106,7 @@ collect_context() {
       name=$(basename "$(dirname "$file")")
       is_internal_topic "$name" && continue
       description=$(read_frontmatter_field "$file" "subtitle")
-      printf '%s\t%s\t%s\n' "$name" "$description" ".claude/context/$name/index.md"
+      printf '%s\t%s\t%s\n' "$name" "$description" "canon/context/$name/index.md"
     done < <(find "$CONTEXT_DIR" -mindepth 2 -maxdepth 2 -type f -name "index.md")
   } | sort
 }

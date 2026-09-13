@@ -19,7 +19,7 @@ Personal finance CLI. v1 ships budgets, recurring rules, and a monthly report.
 EOF
 
     mkdir -p .claude
-    cat <<'EOF' >.claude/REQUIREMENTS.md
+    cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
 ## Audience

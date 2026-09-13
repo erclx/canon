@@ -63,4 +63,4 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `.claude/context/ci.md`, the Typecheck row's assertion reads: `` `mypy .` passes ``. Add a Lint row whose assertion reads: `` `ruff check` and `ruff format --check` pass ``. Add a Tests row whose assertion reads: `` `pytest` exits 0 ``.
+In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `mypy .` passes ``. Add a Lint row whose assertion reads: `` `ruff check` and `ruff format --check` pass ``. Add a Tests row whose assertion reads: `` `pytest` exits 0 ``.

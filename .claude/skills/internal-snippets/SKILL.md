@@ -5,7 +5,7 @@ description: Reusable prompt snippets for Claude and Gemini. Use for adding snip
 
 # Snippets
 
-Read `.claude/context/snippets.md` for system overview, categories, and structure before editing.
+Read `canon/context/snippets.md` for system overview, categories, and structure before editing.
 
 ## Authoring rules
 
@@ -28,7 +28,7 @@ Read `.claude/context/snippets.md` for system overview, categories, and structur
 When adding a snippet:
 
 - Place the file in `snippets/{category}/{name}.md` (or `snippets/{name}.md` for base)
-- Leave `.claude/context/snippets.md` alone unless the layout or a decision changed. `canon snippets list` is the catalog, so the entry keeps no per-snippet or per-category record to update.
+- Leave `canon/context/snippets.md` alone unless the layout or a decision changed. `canon snippets list` is the catalog, so the entry keeps no per-snippet or per-category record to update.
 - If the snippet belongs in `essentials`, add it to `snippets/snippets.toml`
 
 When renaming a snippet:
@@ -38,5 +38,5 @@ When renaming a snippet:
 
 ## Reference
 
-- `.claude/context/snippets.md`: system overview, categories, CLI
+- `canon/context/snippets.md`: system overview, categories, CLI
 - `standards/snippets.md`: what a snippet is, invocation channels, use patterns, authoring conventions

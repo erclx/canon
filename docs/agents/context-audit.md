@@ -5,7 +5,7 @@ description: Running the audit, its flags and folder scope, the exit codes, the 
 
 # Context audit
 
-`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `.claude/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`.
+`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`.
 
 Findings stated over every markdown file rather than over a context entry are measured by `canon markdown audit`, described in `markdown-audit.md`. That command resolves no folder, so it reaches trees this one refuses.
 
@@ -72,7 +72,7 @@ The exemption exists because the section check has a false-positive class. A sta
 
 The citation check resolves every path into an audited folder that appears anywhere in the repository, and it is the half wired into `bun run check`. A stale reference has a silent failure mode: the session opens nothing and carries on.
 
-Three exclusions keep it from firing on prose about paths. Fenced blocks are skipped in markdown, which covers a standard displaying a path as an example. Fixture and harness trees are skipped by location, covering sandbox scenarios that describe their own scratch tree, the eval harness naming its target project, and `*.test.ts`. A path into a folder the project does not carry is skipped, so a skill directing a reader to `.claude/wireframes/index.md` stays valid in a project that has wireframes and silent in one that does not.
+Three exclusions keep it from firing on prose about paths. Fenced blocks are skipped in markdown, which covers a standard displaying a path as an example. Fixture and harness trees are skipped by location, covering sandbox scenarios that describe their own scratch tree, the eval harness naming its target project, and `*.test.ts`. A path into a folder the project does not carry is skipped, so a skill directing a reader to `canon/wireframes/index.md` stays valid in a project that has wireframes and silent in one that does not.
 
 Two cases remain, and no syntax separates either from a real reference. One is a sentence naming a hypothetical entry to show the shape of a name. The other is a line instructing a target project about its own tree, which resolves against the target rather than against this repository and passes here only while the two layouts agree. Splitting a seeded domain into a folder ends that agreement and turns every such line red at once.
 

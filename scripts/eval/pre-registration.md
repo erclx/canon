@@ -101,7 +101,7 @@ One hook bears on the Indexes pair. `index-reminder.sh` fires on `Grep` and `Glo
 Fixed here so a miss cannot be reinterpreted afterward.
 
 1. **Memory discriminates.** The kept half writes to `.canon/memory/` in the 3-line shape. The cut half writes the correction somewhere else or not at all. This is the cleanest candidate and the cheapest place to learn the method does not work.
-2. **Indexes discriminates weakly.** Both halves should leave `.claude/context/index.md` alone, since `standards/context.md` carries that much. A difference should appear on the `auto: false` escape alone, which nothing else covers, and the prompt may not reach it.
+2. **Indexes discriminates weakly.** Both halves should leave `canon/context/index.md` alone, since `standards/context.md` carries that much. A difference should appear on the `auto: false` escape alone, which nothing else covers, and the prompt may not reach it.
 3. **Output discriminates on one bullet of three.** The grouping bullet is reachable through a prompt that creates, modifies, and deletes at once. The two worktree bullets are not reachable by a headless run in a single worktree, so a null on those two is evidence about the prompt.
 4. **Tasks does not discriminate.** Governance covers both candidate bullets in full. A null here means the seed is duplicating an installed standard, which is the `v24.0` cut criterion rather than this task's.
 

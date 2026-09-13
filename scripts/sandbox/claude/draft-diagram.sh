@@ -23,7 +23,7 @@ EOF
 Two-folder app. `web/` runs a Next.js chat surface. `api/` runs FastAPI tools backed by SQLite for keyword and vector search.
 EOF
 
-  cat <<'EOF' >>.claude/REQUIREMENTS.md
+  cat <<'EOF' >>canon/REQUIREMENTS.md
 
 ## Problem
 
@@ -34,7 +34,7 @@ Ad reviewers open one ticket at a time and search a policy corpus by hand.
 Next.js browser client, FastAPI service, SQLite corpus. Reviewers reach it from a browser. It calls an LLM provider with a key the reviewer supplies, and pulls policy documents from an internal compliance export.
 EOF
 
-  cat <<'EOF' >>.claude/ARCHITECTURE.md
+  cat <<'EOF' >>canon/ARCHITECTURE.md
 
 # Architecture
 
@@ -208,7 +208,7 @@ EOF
   log_info "Context: web/ + api/ + SQLite, two entries already drawn under .canon/diagrams/"
   log_info "Signals the skill should pick up:"
   log_info "  docker-compose.yml gained a worker service → deployment is the stale kind"
-  log_info "  .claude/REQUIREMENTS.md names reviewers, an LLM provider, a compliance export → system context has no entry yet"
+  log_info "  canon/REQUIREMENTS.md names reviewers, an LLM provider, a compliance export → system context has no entry yet"
   log_info "  components.md and data-pipeline.md still match ARCHITECTURE.md → neither has a reason to change"
   log_info "Action: /canon:draft-diagram refresh the deployment diagram"
   log_info "Expect: .canon/diagrams/deployment.md written, with title, description, and category frontmatter"

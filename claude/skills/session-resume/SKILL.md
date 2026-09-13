@@ -42,7 +42,7 @@ When the board is empty and a handoff was found, name what the handoff leaves op
 
 Do not offer to remove entries. A completed task is archived out of `.canon/tasks/` when work ships. The git log is the authoritative record of shipped work. Plan files are archived per the lifecycle rule in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
 
-Memory is updated only when a recorded fact becomes wrong, never on resume. A domain fact reaches a session through `.claude/context/`, which `memory-capture` routes to and the three-tier model loads on demand, so the memory folder read here is the residue no context entry owns.
+Memory is updated only when a recorded fact becomes wrong, never on resume. A domain fact reaches a session through `canon/context/`, which `memory-capture` routes to and the three-tier model loads on demand, so the memory folder read here is the residue no context entry owns.
 
 ## Writing the next one
 

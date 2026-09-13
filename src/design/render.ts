@@ -219,7 +219,7 @@ ${previewChrome()}
 </head>
 <body>
 <h1>Design tokens</h1>
-<p class="note">Generated from <code>.claude/DESIGN.md</code> by <code>canon design render</code>. Token preview only, not a screen mock.</p>${summary}
+<p class="note">Generated from <code>canon/DESIGN.md</code> by <code>canon design render</code>. Token preview only, not a screen mock.</p>${summary}
 ${sections.join('\n')}
 </body>
 </html>

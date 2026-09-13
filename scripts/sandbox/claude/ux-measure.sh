@@ -69,8 +69,8 @@ test("renders the task list", async ({ page }) => {
 });
 EOF
 
-  mkdir -p .claude/context/development
-  cat <<'EOF' >.claude/context/development/index.md
+  mkdir -p canon/context/development
+  cat <<'EOF' >canon/context/development/index.md
 ---
 title: Development
 subtitle: Local run commands and the ports they serve

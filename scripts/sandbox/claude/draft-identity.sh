@@ -25,7 +25,7 @@ A single-screen focus timer for writers. Voice is calm and disciplined.
 EOF
 
   mkdir -p .claude
-  cat <<'EOF' >.claude/DESIGN.md
+  cat <<'EOF' >canon/DESIGN.md
 ---
 title: Design
 description: Tokens for the focus timer
@@ -75,7 +75,7 @@ EOF
   git add . && git commit -m "feat(project): seed a focus timer with DESIGN.md tokens" --no-verify -q
 
   log_step "Scenario ready: a project with DESIGN.md tokens and no logo, favicon, or manifest yet"
-  log_info "Context: CLAUDE.md names a focus timer, .claude/DESIGN.md carries Personality, Color, and Typography"
+  log_info "Context: CLAUDE.md names a focus timer, canon/DESIGN.md carries Personality, Color, and Typography"
   log_info "Signals the skill should pick up:"
   log_info "  Personality: quiet, disciplined, warm paper tones, single accent, no motion"
   log_info "  Color: warm paper ground, dark ink, a rust accent for the active state"

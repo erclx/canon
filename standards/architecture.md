@@ -1,15 +1,15 @@
 ---
 title: Architecture reference
-description: Shape and content rules for .claude/ARCHITECTURE.md
+description: Shape and content rules for canon/ARCHITECTURE.md
 ---
 
 # Architecture reference
 
-Applies to `.claude/ARCHITECTURE.md`. Describes the system shape and the decisions behind it, not a tutorial, setup guide, or implementation walkthrough. Pair it with `CLAUDE.md`: principles live there, patterns and decisions live here. Update when a decision is made or a risk is resolved.
+Applies to `canon/ARCHITECTURE.md`. Describes the system shape and the decisions behind it, not a tutorial, setup guide, or implementation walkthrough. Pair it with `CLAUDE.md`: principles live there, patterns and decisions live here. Update when a decision is made or a risk is resolved.
 
 ## Scope
 
-Governs the system-shape document at `.claude/ARCHITECTURE.md`: the overview, the decision entries, and the open risks.
+Governs the system-shape document at `canon/ARCHITECTURE.md`: the overview, the decision entries, and the open risks.
 
 Does not govern:
 
@@ -27,7 +27,7 @@ Does not govern:
 
 - How individual functions work line by line. The code carries its own behavior.
 - Full type definitions. They live in code. Reference the shape conceptually if needed.
-- A measurement paragraph specific to one domain's own mechanism. Route it to that domain's `.claude/context/<domain>.md` entry instead. The choice and its rejected alternative stay here whatever their reach, since reach is what makes a decision cross-domain, not how many domains its supporting measurement happens to touch.
+- A measurement paragraph specific to one domain's own mechanism. Route it to that domain's `canon/context/<domain>.md` entry instead. The choice and its rejected alternative stay here whatever their reach, since reach is what makes a decision cross-domain, not how many domains its supporting measurement happens to touch.
 
 ## Sections
 

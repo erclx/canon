@@ -1,6 +1,6 @@
 ---
 name: draft-diagram
-description: Writes per-kind Mermaid diagram entries into `.canon/diagrams/`, covering system context, components, request flow, data pipeline, and deployment. Reads `.claude/ARCHITECTURE.md` and `REQUIREMENTS.md` when present, falls back to a code-structure scan. Use when asked to "draw the architecture", "diagram the system", "show the components", "give me a flow chart", "refresh the deploy diagram", or "visualize the project". Do NOT use for design tokens (use `design-extract`) or UI audits (use `ux-audit`).
+description: Writes per-kind Mermaid diagram entries into `.canon/diagrams/`, covering system context, components, request flow, data pipeline, and deployment. Reads `canon/ARCHITECTURE.md` and `REQUIREMENTS.md` when present, falls back to a code-structure scan. Use when asked to "draw the architecture", "diagram the system", "show the components", "give me a flow chart", "refresh the deploy diagram", or "visualize the project". Do NOT use for design tokens (use `design-extract`) or UI audits (use `ux-audit`).
 ---
 
 # Draft diagram
@@ -9,15 +9,15 @@ Write one entry per diagram kind. Never rewrite the folder wholesale. A pass tha
 
 ## Guards
 
-- If no `.claude/ARCHITECTURE.md`, no `.claude/REQUIREMENTS.md`, and no top-level folder structure to scan, stop: `❌ No source signal. Add .claude/ARCHITECTURE.md or run inside a project folder.`
+- If no `canon/ARCHITECTURE.md`, no `canon/REQUIREMENTS.md`, and no top-level folder structure to scan, stop: `❌ No source signal. Add canon/ARCHITECTURE.md or run inside a project folder.`
 
 ## Step 1: read sources and locate the surface
 
 Read these from the project root in parallel, skipping any that do not exist:
 
 - `.canon/diagrams/index.md` and every `.canon/diagrams/*.md`: which entries exist and what they already say
-- `.claude/REQUIREMENTS.md`: users, external dependencies, tech stack, MVP feature list
-- `.claude/ARCHITECTURE.md`: layered components, key technical decisions
+- `canon/REQUIREMENTS.md`: users, external dependencies, tech stack, MVP feature list
+- `canon/ARCHITECTURE.md`: layered components, key technical decisions
 - `CLAUDE.md`: project type, conventions
 - `package.json`, `pyproject.toml`, `Cargo.toml`: language and framework markers
 - Top-level folder layout and root config files via `ls`: deploy targets, infrastructure config, component boundaries
@@ -44,7 +44,7 @@ Count entries the way Step 1 does, excluding `index.md`. Counting the catalog as
 - The user asked broadly and the folder holds no entry: write every kind whose signal exists.
 - The user asked broadly and at least one entry exists: compare each entry against its source signal and write only the ones whose signal moved. Report the untouched ones as current.
 
-The standard fixes one filename and one `category` value per kind. Use them verbatim rather than inventing a name, since a refresh finds its target by filename and a new name writes a duplicate entry beside the old one. Emit `system-context.md` whenever `.claude/REQUIREMENTS.md` exists, since it is the entry a reader outside the team opens first and the set is incomplete without it.
+The standard fixes one filename and one `category` value per kind. Use them verbatim rather than inventing a name, since a refresh finds its target by filename and a new name writes a duplicate entry beside the old one. Emit `system-context.md` whenever `canon/REQUIREMENTS.md` exists, since it is the entry a reader outside the team opens first and the set is incomplete without it.
 
 Stay inside `flowchart` and `sequenceDiagram`. C4, state, ER, and class diagrams render inconsistently across viewers.
 

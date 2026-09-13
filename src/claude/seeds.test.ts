@@ -26,19 +26,20 @@ async function makeRoot(): Promise<string> {
   const root = await makeDir()
   const seeds = join(root, 'tooling', 'claude', 'seeds')
   const claude = join(seeds, '.claude')
+  const surface = join(seeds, 'canon')
 
   await mkdir(join(claude, 'hooks'), { recursive: true })
-  await mkdir(join(claude, 'context'), { recursive: true })
   await mkdir(join(claude, 'tasks'), { recursive: true })
-  await mkdir(join(claude, 'wireframes'), { recursive: true })
+  await mkdir(join(surface, 'context'), { recursive: true })
+  await mkdir(join(surface, 'wireframes'), { recursive: true })
 
   await writeFile(join(seeds, 'CLAUDE.md'), '# Project\n')
-  await writeFile(join(claude, 'ARCHITECTURE.md'), '# Architecture\n')
   await writeFile(join(claude, 'settings.json'), '{}\n')
   await writeFile(join(claude, 'hooks', 'guard.sh'), '#!/bin/sh\n')
-  await writeFile(join(claude, 'context', 'index.md'), '# Context\n')
   await writeFile(join(claude, 'tasks', 'index.md'), '# Tasks\n')
-  await writeFile(join(claude, 'wireframes', 'index.md'), '# Wireframes\n')
+  await writeFile(join(surface, 'ARCHITECTURE.md'), '# Architecture\n')
+  await writeFile(join(surface, 'context', 'index.md'), '# Context\n')
+  await writeFile(join(surface, 'wireframes', 'index.md'), '# Wireframes\n')
 
   return root
 }
@@ -57,8 +58,8 @@ describe('planSeeds', () => {
     const labels = planSeeds(root, target).map((entry) => entry.seed.scanLabel)
 
     expect(labels).toEqual([
-      'ARCHITECTURE.md',
       'settings.json',
+      'ARCHITECTURE.md',
       'hooks/guard.sh',
       'context/index.md',
       'tasks/index.md',
@@ -140,14 +141,26 @@ describe('applySeeds', () => {
     const applied = await applySeeds(pendingSeeds(planSeeds(root, target)))
 
     expect(applied).toEqual([
-      '.claude/ARCHITECTURE.md',
       '.claude/settings.json',
+      'canon/ARCHITECTURE.md',
       '.claude/hooks/guard.sh',
-      '.claude/context/index.md',
+      'canon/context/index.md',
       '.canon/tasks/index.md',
-      '.claude/wireframes/index.md',
+      'canon/wireframes/index.md',
       'CLAUDE.md',
     ])
+  })
+
+  it('should seed a surface beside the copy an unmoved target already holds', async () => {
+    const root = await makeRoot()
+    const target = await makeDir()
+    await mkdir(join(target, '.claude', 'context'), { recursive: true })
+
+    const applied = await applySeeds(pendingSeeds(planSeeds(root, target)))
+
+    // canon-keep-surface-root
+    expect(applied).toContain('.claude/context/index.md')
+    expect(existsSync(join(target, 'canon', 'context'))).toBe(false)
   })
 
   it('should create the nested directories a seed needs', async () => {
@@ -177,6 +190,6 @@ describe('applySeeds', () => {
 
     const applied = await applySeeds(pendingSeeds(planSeeds(root, target)))
 
-    expect(applied).not.toContain('.claude/ARCHITECTURE.md')
+    expect(applied).not.toContain('canon/ARCHITECTURE.md')
   })
 })

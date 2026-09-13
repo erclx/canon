@@ -12,7 +12,7 @@ import { TOKENS } from '@/design/tokens'
  *
  * The property names match the ones `@/design/render` already emits from a
  * parsed document, so the toolkit's own source and a target's hand-authored
- * `.claude/DESIGN.md` produce one vocabulary rather than two.
+ * `canon/DESIGN.md` produce one vocabulary rather than two.
  */
 
 /** A role name as it appears in a custom property. */

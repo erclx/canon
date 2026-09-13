@@ -16,7 +16,7 @@ description: Drafts a screencast script with pre-seeded beats, defaults, and dec
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: behavior rules and project pitch
-- `.claude/REQUIREMENTS.md`: feature scope, non-goals, audience hints
+- `canon/REQUIREMENTS.md`: feature scope, non-goals, audience hints
 - `.canon/tasks/index.md`: current scope
 - Recent commits via `git log --oneline -20 2>/dev/null || echo "FALLBACK"`: what shipped recently is usually the recording subject.
 

@@ -32,37 +32,37 @@ function seed(relativeDir: string, names: string[]): void {
 
 describe('resolveFolders', () => {
   it('should resolve the default folders that are present', async () => {
-    seed('.claude/context', ['ci.md'])
+    seed('canon/context', ['ci.md'])
     seed('.claude/diagrams', ['components.md'])
 
     const folders = (await resolveFolders(ROOT)).folders
 
     expect(folders.map((folder) => folder.rel)).toEqual([
-      '.claude/context',
+      'canon/context',
       '.claude/diagrams',
     ])
   })
 
   it('should skip a default folder the project does not carry', async () => {
-    seed('.claude/context', ['ci.md'])
+    seed('canon/context', ['ci.md'])
 
     expect((await resolveFolders(ROOT)).folders).toHaveLength(1)
   })
 
   it('should audit a split domain as its own folder', async () => {
-    seed('.claude/context', ['ci.md'])
-    seed('.claude/context/claude-plugin', ['skills.md', 'overview.md'])
+    seed('canon/context', ['ci.md'])
+    seed('canon/context/claude-plugin', ['skills.md', 'overview.md'])
 
     const folders = (await resolveFolders(ROOT)).folders
 
     expect(folders.map((folder) => folder.rel)).toEqual([
-      '.claude/context',
-      '.claude/context/claude-plugin',
+      'canon/context',
+      'canon/context/claude-plugin',
     ])
   })
 
   it('should exclude the index from a folder entry list', async () => {
-    seed('.claude/context', ['ci.md', 'cli.md'])
+    seed('canon/context', ['ci.md', 'cli.md'])
 
     const [folder] = (await resolveFolders(ROOT)).folders
 
@@ -73,14 +73,14 @@ describe('resolveFolders', () => {
   })
 
   it('should ignore a folder with entries but no index', async () => {
-    mkdirSync(join(ROOT, '.claude/context'), { recursive: true })
-    writeFileSync(join(ROOT, '.claude/context/ci.md'), '# CI\n')
+    mkdirSync(join(ROOT, 'canon/context'), { recursive: true })
+    writeFileSync(join(ROOT, 'canon/context/ci.md'), '# CI\n')
 
     expect((await resolveFolders(ROOT)).folders).toEqual([])
   })
 
   it('should honor an explicit folder list', async () => {
-    seed('.claude/context', ['ci.md'])
+    seed('canon/context', ['ci.md'])
     seed('.claude/diagrams', ['components.md'])
 
     const { folders } = await resolveFolders(ROOT, ['diagrams'])
@@ -140,11 +140,11 @@ describe('resolveFolders', () => {
   })
 
   it('should report a name that resolves under neither base', async () => {
-    seed('.claude/context', ['ci.md'])
+    seed('canon/context', ['ci.md'])
 
     const { folders, missing } = await resolveFolders(ROOT, ['context', 'nope'])
 
-    expect(folders.map((folder) => folder.rel)).toEqual(['.claude/context'])
+    expect(folders.map((folder) => folder.rel)).toEqual(['canon/context'])
     expect(missing).toEqual(['nope'])
   })
 
@@ -157,6 +157,7 @@ describe('resolveFolders', () => {
 
   it('should resolve context under canon/ ahead of .claude/', async () => {
     seed('canon/context', ['ci.md'])
+    // canon-keep-surface-root
     seed('.claude/context', ['ci.md'])
 
     const { folders } = await resolveFolders(ROOT, ['context'])
@@ -174,18 +175,20 @@ describe('resolveFolders', () => {
   })
 
   it('should fall back to .claude/ for context when canon/ carries nothing', async () => {
+    // canon-keep-surface-root
     seed('.claude/context', ['ci.md'])
 
     const { folders } = await resolveFolders(ROOT, ['context'])
 
+    // canon-keep-surface-root
     expect(folders.map((folder) => folder.rel)).toEqual(['.claude/context'])
   })
 })
 
 describe('presentNames', () => {
   it('should name each present folder once regardless of its split entries', async () => {
-    seed('.claude/context', ['ci.md'])
-    seed('.claude/context/claude-plugin', ['skills.md'])
+    seed('canon/context', ['ci.md'])
+    seed('canon/context/claude-plugin', ['skills.md'])
     seed('.claude/diagrams', ['components.md'])
 
     expect(presentNames((await resolveFolders(ROOT)).folders)).toEqual([
@@ -195,7 +198,7 @@ describe('presentNames', () => {
   })
 
   it('should omit a folder the project does not carry', async () => {
-    seed('.claude/context', ['ci.md'])
+    seed('canon/context', ['ci.md'])
 
     expect(presentNames((await resolveFolders(ROOT)).folders)).not.toContain(
       'wireframes',

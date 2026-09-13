@@ -419,7 +419,7 @@ export function register(program: Command): void {
         '',
         'Not read, each a shape the corpus writes and none of them a citation:',
         '  a placeholder or glob segment, which describes a shape rather than',
-        '  naming a file, such as .claude/context/<domain>.md or app/**/route.ts',
+        '  naming a file, such as canon/context/<domain>.md or app/**/route.ts',
         '  a bare filename naming a convention, such as route.ts or manifest.toml',
         '  a span carrying no file extension, which is a folder or a module',
         '  specifier, such as src/pages/ , next/font , or claude/standards',

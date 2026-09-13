@@ -9,7 +9,7 @@ description: Why a README needs a project-type read and a confirm step, not the 
 
 Without this skill, a session drafting a README either copies the generic template from memory or reaches for `docs-sync`, which has nothing to diff a nonexistent page against and reports the topic as unrelated to any change. A scaffold-written stub meets the same dead end, since no diff touches it either. Either way the page ships with no read of `standards/readme.md`, no read of what the project actually is, and no badge chosen against its rendered value rather than its service name.
 
-A README whose real documentation lives in `.claude/context/` or `docs/` was a second gap the standard itself carried until this build: nothing named a pointer page as complete, so a session drafting one either padded the page or read the required list as unsatisfied.
+A README whose real documentation lives in `canon/context/` or `docs/` was a second gap the standard itself carried until this build: nothing named a pointer page as complete, so a session drafting one either padded the page or read the required list as unsatisfied.
 
 ## Must
 

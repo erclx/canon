@@ -6,7 +6,7 @@ CLI toolkit for managing AI workflows, developer standards, and project tooling 
 
 The toolkit is agent-first. Every surface is designed so a Claude Code skill or other agent can orchestrate it as well as a human. When adding or changing a CLI command, verify each of these holds.
 
-Worldview and goals live in `.claude/REQUIREMENTS.md`. The rules below derive from it.
+Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from it.
 
 - Every command has a non-interactive path via args or `CANON_NON_INTERACTIVE=1`. Never require a TTY.
 - Data goes to stdout. UI and logs go to stderr. JSON output must pipe clean through any wrapper.
@@ -49,10 +49,10 @@ Worldview and goals live in `.claude/REQUIREMENTS.md`. The rules below derive fr
 Each rule or knowledge item lives in exactly one surface. Other surfaces point, never duplicate.
 
 - Cross-domain behavior or design principle: `CLAUDE.md`
-- Cross-domain decision with its rejected alternative: `.claude/ARCHITECTURE.md`
+- Cross-domain decision with its rejected alternative: `canon/ARCHITECTURE.md`
 - Behavior that fires on a path being edited rather than every session: `governance/rules/`
 - Behavior triggered only when editing domain X: `.claude/skills/internal-<X>/SKILL.md`
-- Per-domain internal narrative about domain X (structure, decisions, gotchas): `.claude/context/<X>.md`
+- Per-domain internal narrative about domain X (structure, decisions, gotchas): `canon/context/<X>.md`
 - Consumer-facing reference (AI workflow, target-project integration): `docs/`
 - CLI command surface or invocation contract: `docs/agents/`
 
@@ -68,15 +68,15 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 | --------------------------------------------------------------------------------- | --------------------- |
 | Modifying `src/`, `scripts/`, sandbox scenarios, `manage-*.sh`, `lib/`, `assets/` | `internal-scripts`    |
 | Modifying `tooling/`, manifests, golden configs, seeds                            | `internal-tooling`    |
-| Modifying `standards/`, `docs/`, `.claude/context/`                               | `internal-standards`  |
+| Modifying `standards/`, `docs/`, `canon/context/`                                 | `internal-standards`  |
 | Modifying `governance/rules/`, `governance/stacks/`                               | `internal-governance` |
 | Modifying `snippets/`                                                             | `internal-snippets`   |
 | Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
 
 The per-domain context catalog is always loaded so the entries are discoverable without a lookup. Load each entry on demand.
 
-@.claude/ARCHITECTURE.md
-@.claude/context/index.md
+@canon/ARCHITECTURE.md
+@canon/context/index.md
 
 ## Key paths
 
@@ -86,7 +86,7 @@ The per-domain context catalog is always loaded so the entries are discoverable 
 - `tooling/`: golden configs (base), references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
 - `.claude/skills/`: internal skills, toolkit repo only
-- `.claude/context/`: per-domain internal narrative (how each domain is built, decisions, gotchas), indexed via `.claude/context/index.md`
+- `canon/context/`: per-domain internal narrative (how each domain is built, decisions, gotchas), indexed via `canon/context/index.md`
 - `snippets/`: reusable prompt snippets, invoked by `@` reference in a Claude Code session
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
 - `docs/`: consumer-facing reference (CLI surface, AI workflow, target-project integration, and the workflow method this repo runs on)
@@ -95,7 +95,7 @@ The per-domain context catalog is always loaded so the entries are discoverable 
 
 ## Commands
 
-- Run `bun run check` to verify and `bun run format` to auto-fix before committing. The pre-push hook runs `check` and may reformat files, so after `git push` run `git status` and commit any diff as `style(<scope>):`. Full script and hook reference in `.claude/context/development/index.md`.
+- Run `bun run check` to verify and `bun run format` to auto-fix before committing. The pre-push hook runs `check` and may reformat files, so after `git push` run `git status` and commit any diff as `style(<scope>):`. Full script and hook reference in `canon/context/development/index.md`.
 
 ## Tasks
 

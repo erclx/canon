@@ -23,7 +23,7 @@ EOF
 Two-folder app. `web/` runs a Next.js chat surface. `api/` runs FastAPI tools backed by SQLite.
 EOF
 
-  cat <<'EOF' >>.claude/ARCHITECTURE.md
+  cat <<'EOF' >>canon/ARCHITECTURE.md
 
 # Architecture
 

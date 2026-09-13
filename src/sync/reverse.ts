@@ -234,7 +234,7 @@ export function detectMigrations(target: string): MigrationCandidate[] {
   if (docs > 0 && context === 0) {
     found.push({
       skill: 'migration-context',
-      reason: `${docs} markdown files under docs/ with no .claude/context/ tier`,
+      reason: `${docs} markdown files under docs/ with no canon/context/ tier`,
     })
   }
 

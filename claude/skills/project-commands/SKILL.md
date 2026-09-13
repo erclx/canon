@@ -11,7 +11,7 @@ The value is the stop. A launch that continues into log inspection, browser chec
 
 ## Guards
 
-- Resolve the entry before anything else. Take the flat `development.md` under `.claude/context/` when it exists, and `.claude/context/development/overview.md` when the domain outgrew one file and split into a folder, which is where the `## Scripts` table lands in a split. Test both paths, then read one. If neither resolves, stop with the line below and let the user decide.
+- Resolve the entry before anything else. Take the flat `development.md` under `canon/context/` when it exists, and `canon/context/development/overview.md` when the domain outgrew one file and split into a folder, which is where the `## Scripts` table lands in a split. Test both paths, then read one. If neither resolves, stop with the line below and let the user decide.
 - If the entry documents no command matching the request, stop and list what it does document. Do not infer a command from a filename or a framework.
 - If the resolved command has an effect that outlives the process and stopping it does not undo, print it for the user to run and stop. Deploying, publishing, releasing, migrating, and resetting are the common shapes, and the test is the effect rather than the name. A script called `infra:apply` or `promote` qualifies.
 
@@ -20,7 +20,7 @@ Do not read another file to reconstruct an entry that did not resolve, because a
 The stop names the flat path in both cases, since a project carrying neither has no entry to point at and the flat one is where a project without a split keeps it:
 
 ```plaintext
-❌ No .claude/context/development.md. This project has no documented dev loop.
+❌ No canon/context/development.md. This project has no documented dev loop.
 ```
 
 ## Step 1: read the entry

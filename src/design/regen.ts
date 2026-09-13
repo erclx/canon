@@ -15,7 +15,7 @@ import { renderDesignDocument } from '@/design/document'
  */
 
 /** The rendered record, at the path `standards/design.md` fixes for it. */
-export const DESIGN_DOCUMENT = join('.claude', 'DESIGN.md')
+export const DESIGN_DOCUMENT = join('canon', 'DESIGN.md')
 
 /**
  * The base stylesheet a target installs. It sits inside `src/` because that is

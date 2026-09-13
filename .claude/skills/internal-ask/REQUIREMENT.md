@@ -15,7 +15,7 @@ Reconstruction from source is the failure that reads best and is worth least. It
 
 - Read the four indexes together and route on their one-line summaries before opening any file, since the index states which file owns a subject and a grep only states which files mention it
 - Follow a wiki match into the role catalog holding its page summaries, since `wiki/index.md` routes to a catalog rather than to a page
-- Route by reader, keeping `docs/` for consumer-facing reference, `.claude/context/` for how a domain is built here, `standards/` for the shape an authored artifact must take, and `wiki/` for a subject owned outside this repository
+- Route by reader, keeping `docs/` for consumer-facing reference, `canon/context/` for how a domain is built here, `standards/` for the shape an authored artifact must take, and `wiki/` for a subject owned outside this repository
 - Cite the file paths the answer came from, so the reader can check it and correct it at its source
 - Bound the read. One file, two when the indexes tie, and one hop per escalation level. An index read spent reaching a page is routing rather than a hop.
 - Report that nothing covers the question rather than assembling an answer from what is nearby

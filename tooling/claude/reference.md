@@ -7,12 +7,16 @@ The claude stack installs the `.claude/` workflow directory into a project. Stat
 ## Structure
 
 ```plaintext
-.claude/
-├── CLAUDE.md          ← seeded. Project context and rules, auto-loaded by Claude Code each session
+CLAUDE.md              ← seeded. Project context and rules, auto-loaded by Claude Code each session
+
+canon/
 ├── REQUIREMENTS.md    ← seeded. Project goals, non-goals, MVP scope
 ├── ARCHITECTURE.md    ← seeded. Technical design decisions and open questions
 ├── DESIGN.md          ← seeded. Visual intent and the decisions behind it
-├── wireframes/        ← seeded. Per-surface ASCII layouts. `index.md` is the discovery anchor; `<surface>.md` files hold the sketches and behavior bullets.
+├── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
+└── wireframes/        ← seeded. Per-surface ASCII layouts. `index.md` is the discovery anchor; `<surface>.md` files hold the sketches and behavior bullets.
+
+.claude/
 ├── GOV.md             ← retired. Removed by `canon gov sync` if present from a prior install
 ├── settings.json      ← seeded. Project-level Claude Code config (PreToolUse and PostToolUse hooks). User-level config installed separately via `canon claude setup`.
 └── worktrees/         ← gitignored. Where EnterWorktree creates a linked worktree, which is why it did not move.

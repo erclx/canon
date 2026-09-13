@@ -99,7 +99,7 @@ describe('reading counts out of each record shape', () => {
     indexDrift: [{ rel: 'c.md' }],
     entries: [{ bareReferences: [{ line: 4 }] }, { bareReferences: [] }],
     architecture: {
-      rel: '.claude/ARCHITECTURE.md',
+      rel: 'canon/ARCHITECTURE.md',
       lines: 162,
       ceiling: 178,
       decisions: [
@@ -253,7 +253,7 @@ describe('reading counts out of each record shape', () => {
     const record = {
       bodies: 152,
       qualified: [{ path: 'standards/intake.md' }, { path: 'wiki/index.md' }],
-      unqualified: [{ path: '.claude/context/transcripts.md' }],
+      unqualified: [{ path: 'canon/context/transcripts.md' }],
     }
 
     expect(countsFor(specFor('skills-reach'), record)).toEqual({
@@ -566,8 +566,8 @@ describe('classifying an audit run by its exit code', () => {
   })
 
   /**
-   * A project adopting none of `.claude/context/`, `.claude/diagrams/`, or
-   * `.claude/wireframes/` is the ordinary state of a target, the same test the
+   * A project adopting none of `canon/context/`, `.claude/diagrams/`, or
+   * `canon/wireframes/` is the ordinary state of a target, the same test the
    * skill corpora take below.
    */
   it('should read a project with no audited context folder as absent', () => {

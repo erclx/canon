@@ -9,11 +9,11 @@ use_config() {
 stage_setup() {
   select_or_route_scenario "Which scenario?" "documented" "split" "missing" "refused"
 
-  mkdir -p .claude/context
+  mkdir -p canon/context
 
   case "$SELECTED_OPTION" in
   "documented")
-    cat <<'EOF' >.claude/context/development.md
+    cat <<'EOF' >canon/context/development.md
 ---
 title: Development
 description: Local dev workflow and run commands
@@ -60,9 +60,9 @@ EOF
     log_info "Watch:   any log reading, browser use, or second check after the first is a failure"
     ;;
   "split")
-    mkdir -p .claude/context/development
+    mkdir -p canon/context/development
 
-    cat <<'EOF' >.claude/context/development/overview.md
+    cat <<'EOF' >canon/context/development/overview.md
 ---
 title: Overview
 description: What the domain owns and the run commands
@@ -80,7 +80,7 @@ Owns the local development loop for the sandbox project.
 | `bun run check` | Format, lint, and test in one pass. Exits when done. |
 EOF
 
-    cat <<'EOF' >.claude/context/development/verification.md
+    cat <<'EOF' >canon/context/development/verification.md
 ---
 title: Verification
 description: What each stage of the check gates on
@@ -137,13 +137,13 @@ EOF
     git add . && git commit -m "chore(sandbox): project with scripts but no context entry" --no-verify -q
 
     log_step "Scenario ready: project-commands guard"
-    log_info "Context: package.json has a dev script, .claude/context/development.md does not exist"
+    log_info "Context: package.json has a dev script, canon/context/development.md does not exist"
     log_info "Action:  /canon:project-commands start the dev server"
-    log_info "Expect:  stops with 'No .claude/context/development.md'"
+    log_info "Expect:  stops with 'No canon/context/development.md'"
     log_info "Assert:  fell-back.txt absent. Its presence means the skill ran the package.json script."
     ;;
   "refused")
-    cat <<'EOF' >.claude/context/development.md
+    cat <<'EOF' >canon/context/development.md
 ---
 title: Development
 description: Local dev workflow and run commands

@@ -22,25 +22,19 @@ afterEach(() => {
 
 describe('listSeeds', () => {
   it('should map each seed to its name, source, and install target', () => {
-    seedFile(join('.claude', 'ARCHITECTURE.md'), 'Architecture')
+    seedFile(join('canon', 'ARCHITECTURE.md'), 'Architecture')
 
     expect(listSeeds(root)).toEqual([
       {
         name: 'ARCHITECTURE.md',
-        source: join(
-          'tooling',
-          'claude',
-          'seeds',
-          '.claude',
-          'ARCHITECTURE.md',
-        ),
-        target: join('.claude', 'ARCHITECTURE.md'),
+        source: join('tooling', 'claude', 'seeds', 'canon', 'ARCHITECTURE.md'),
+        target: join('canon', 'ARCHITECTURE.md'),
         src: join(
           root,
           'tooling',
           'claude',
           'seeds',
-          '.claude',
+          'canon',
           'ARCHITECTURE.md',
         ),
       },
@@ -48,10 +42,10 @@ describe('listSeeds', () => {
   })
 
   it('should list the context seed the bash listing never reported', () => {
-    seedFile(join('.claude', 'context', 'index.md'), 'Context')
+    seedFile(join('canon', 'context', 'index.md'), 'Context')
 
     expect(listSeeds(root).map((entry) => entry.target)).toEqual([
-      join('.claude', 'context', 'index.md'),
+      join('canon', 'context', 'index.md'),
     ])
   })
 
@@ -60,7 +54,7 @@ describe('listSeeds', () => {
     seedFile(join('.claude', 'hooks', 'scratch-guard.sh'), 'Hook')
     seedFile(join('.claude', 'diagrams', 'index.md'), 'Diagrams')
     seedFile(join('.claude', 'tasks', 'index.md'), 'Tasks')
-    seedFile(join('.claude', 'wireframes', 'index.md'), 'Wireframes')
+    seedFile(join('canon', 'wireframes', 'index.md'), 'Wireframes')
 
     expect(listSeeds(root).map((entry) => entry.name)).toEqual([
       'settings.json',
@@ -72,11 +66,11 @@ describe('listSeeds', () => {
   })
 
   it('should place the project-level CLAUDE.md last', () => {
-    seedFile(join('.claude', 'ARCHITECTURE.md'), 'Architecture')
+    seedFile(join('canon', 'ARCHITECTURE.md'), 'Architecture')
     seedFile('CLAUDE.md', 'Project')
 
     expect(listSeeds(root).map((entry) => entry.target)).toEqual([
-      join('.claude', 'ARCHITECTURE.md'),
+      join('canon', 'ARCHITECTURE.md'),
       'CLAUDE.md',
     ])
   })

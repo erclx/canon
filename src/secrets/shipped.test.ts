@@ -91,7 +91,7 @@ describe('selectShipped', () => {
     'scripts/sandbox/run.sh',
     'docs/index.md',
     'tsconfig.json',
-    '.claude/context/cli/audits.md',
+    'canon/context/cli/audits.md',
   ]
 
   it('should keep a file under a shipped directory', () => {
@@ -100,7 +100,7 @@ describe('selectShipped', () => {
 
   it('should drop a file under no shipped entry', () => {
     expect(selectShipped(FILES, ['docs'])).not.toContain(
-      '.claude/context/cli/audits.md',
+      'canon/context/cli/audits.md',
     )
   })
 

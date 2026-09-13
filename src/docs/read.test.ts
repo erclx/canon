@@ -15,7 +15,7 @@ function writeDoc(relToRoot: string, content: string): void {
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-docs-read-'))
   mkdirSync(join(ROOT, 'docs'), { recursive: true })
-  mkdirSync(join(ROOT, '.claude', 'context'), { recursive: true })
+  mkdirSync(join(ROOT, 'canon', 'context'), { recursive: true })
 })
 
 afterEach(() => {
@@ -33,41 +33,41 @@ describe('resolveTopic', () => {
   })
 
   it('should resolve a topic from the context root', () => {
-    writeDoc('.claude/context/tooling.md', '# Tooling\n')
+    writeDoc('canon/context/tooling.md', '# Tooling\n')
 
     expect(resolveTopic(ROOT, 'tooling')).toEqual({
-      path: join(ROOT, '.claude', 'context', 'tooling.md'),
-      rel: join('.claude', 'context', 'tooling.md'),
+      path: join(ROOT, 'canon', 'context', 'tooling.md'),
+      rel: join('canon', 'context', 'tooling.md'),
     })
   })
 
   it('should prefer the docs root when a name exists in both', () => {
     writeDoc('docs/shared.md', '# From docs\n')
-    writeDoc('.claude/context/shared.md', '# From context\n')
+    writeDoc('canon/context/shared.md', '# From context\n')
 
     expect(resolveTopic(ROOT, 'shared')?.rel).toBe(join('docs', 'shared.md'))
   })
 
   it('should resolve a topic split into a folder to its index', () => {
-    writeDoc('.claude/context/claude-plugin/index.md', '# Claude plugin\n')
+    writeDoc('canon/context/claude-plugin/index.md', '# Claude plugin\n')
 
     expect(resolveTopic(ROOT, 'claude-plugin')).toEqual({
-      path: join(ROOT, '.claude', 'context', 'claude-plugin', 'index.md'),
-      rel: join('.claude', 'context', 'claude-plugin', 'index.md'),
+      path: join(ROOT, 'canon', 'context', 'claude-plugin', 'index.md'),
+      rel: join('canon', 'context', 'claude-plugin', 'index.md'),
     })
   })
 
   it('should prefer a sibling file over a folder of the same name', () => {
-    writeDoc('.claude/context/both.md', '# From the file\n')
-    writeDoc('.claude/context/both/index.md', '# From the folder\n')
+    writeDoc('canon/context/both.md', '# From the file\n')
+    writeDoc('canon/context/both/index.md', '# From the folder\n')
 
     expect(resolveTopic(ROOT, 'both')?.rel).toBe(
-      join('.claude', 'context', 'both.md'),
+      join('canon', 'context', 'both.md'),
     )
   })
 
   it('should return undefined for a folder carrying no index', () => {
-    writeDoc('.claude/context/headless/skills.md', '# Skills\n')
+    writeDoc('canon/context/headless/skills.md', '# Skills\n')
 
     expect(resolveTopic(ROOT, 'headless')).toBeUndefined()
   })
@@ -91,30 +91,30 @@ describe('resolveTopic', () => {
   })
 
   it('should prefer a root file in the second root over a leaf in the first', () => {
-    writeDoc('.claude/context/indexes.md', '# From the context root\n')
+    writeDoc('canon/context/indexes.md', '# From the context root\n')
     writeDoc('docs/agents/index.md', '# Agents\n')
     writeDoc('docs/agents/indexes.md', '# From the docs leaf\n')
 
     expect(resolveTopic(ROOT, 'indexes')?.rel).toBe(
-      join('.claude', 'context', 'indexes.md'),
+      join('canon', 'context', 'indexes.md'),
     )
   })
 
   it('should prefer a split folder over a leaf of the same name', () => {
-    writeDoc('.claude/context/sandbox/index.md', '# From the folder\n')
+    writeDoc('canon/context/sandbox/index.md', '# From the folder\n')
     writeDoc('docs/agents/index.md', '# Agents\n')
     writeDoc('docs/agents/sandbox.md', '# From the leaf\n')
 
     expect(resolveTopic(ROOT, 'sandbox')?.rel).toBe(
-      join('.claude', 'context', 'sandbox', 'index.md'),
+      join('canon', 'context', 'sandbox', 'index.md'),
     )
   })
 
   it('should return undefined for a leaf name carried by two folders', () => {
-    writeDoc('.claude/context/cli/index.md', '# CLI\n')
-    writeDoc('.claude/context/cli/overview.md', '# CLI overview\n')
-    writeDoc('.claude/context/sandbox/index.md', '# Sandbox\n')
-    writeDoc('.claude/context/sandbox/overview.md', '# Sandbox overview\n')
+    writeDoc('canon/context/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/cli/overview.md', '# CLI overview\n')
+    writeDoc('canon/context/sandbox/index.md', '# Sandbox\n')
+    writeDoc('canon/context/sandbox/overview.md', '# Sandbox overview\n')
 
     expect(resolveTopic(ROOT, 'overview')).toBeUndefined()
   })
@@ -122,16 +122,25 @@ describe('resolveTopic', () => {
   it('should return undefined for a leaf name carried across both roots', () => {
     writeDoc('docs/agents/index.md', '# Agents\n')
     writeDoc('docs/agents/overview.md', '# Agents overview\n')
-    writeDoc('.claude/context/cli/index.md', '# CLI\n')
-    writeDoc('.claude/context/cli/overview.md', '# CLI overview\n')
+    writeDoc('canon/context/cli/index.md', '# CLI\n')
+    writeDoc('canon/context/cli/overview.md', '# CLI overview\n')
 
     expect(resolveTopic(ROOT, 'overview')).toBeUndefined()
   })
 
   it('should not resolve a leaf inside a folder carrying no index', () => {
-    writeDoc('.claude/context/headless/skills.md', '# Skills\n')
+    writeDoc('canon/context/headless/skills.md', '# Skills\n')
 
     expect(resolveTopic(ROOT, 'skills')).toBeUndefined()
+  })
+
+  it('should resolve a context topic at the old root in a checkout that has not moved', () => {
+    // canon-keep-surface-root
+    writeDoc('.claude/context/legacy.md', '# Legacy\n')
+
+    expect(resolveTopic(ROOT, 'legacy')?.rel).toBe(
+      join('.claude', 'context', 'legacy.md'),
+    )
   })
 
   it('should return undefined for a topic in neither root', () => {
@@ -143,8 +152,8 @@ describe('listTopics', () => {
   it('should list each root in turn, sorted within the root', () => {
     writeDoc('docs/target-projects.md', 'a')
     writeDoc('docs/agents.md', 'b')
-    writeDoc('.claude/context/tooling.md', 'c')
-    writeDoc('.claude/context/cli.md', 'd')
+    writeDoc('canon/context/tooling.md', 'c')
+    writeDoc('canon/context/cli.md', 'd')
 
     expect(listTopics(ROOT)).toEqual([
       'agents',
@@ -157,16 +166,16 @@ describe('listTopics', () => {
   it('should omit the index of each root', () => {
     writeDoc('docs/index.md', 'a')
     writeDoc('docs/agents.md', 'b')
-    writeDoc('.claude/context/index.md', 'c')
+    writeDoc('canon/context/index.md', 'c')
 
     expect(listTopics(ROOT)).toEqual(['agents'])
   })
 
   it('should list a folder topic beside the sibling files, sorted together', () => {
-    writeDoc('.claude/context/tooling.md', 'a')
-    writeDoc('.claude/context/cli.md', 'b')
-    writeDoc('.claude/context/claude-plugin/index.md', 'c')
-    writeDoc('.claude/context/claude-plugin/skills.md', 'd')
+    writeDoc('canon/context/tooling.md', 'a')
+    writeDoc('canon/context/cli.md', 'b')
+    writeDoc('canon/context/claude-plugin/index.md', 'c')
+    writeDoc('canon/context/claude-plugin/skills.md', 'd')
 
     expect(listTopics(ROOT)).toEqual([
       'claude-plugin',
@@ -177,8 +186,8 @@ describe('listTopics', () => {
   })
 
   it('should omit a nested folder that carries no index', () => {
-    writeDoc('.claude/context/cli.md', 'a')
-    writeDoc('.claude/context/headless/skills.md', 'b')
+    writeDoc('canon/context/cli.md', 'a')
+    writeDoc('canon/context/headless/skills.md', 'b')
 
     expect(listTopics(ROOT)).toEqual(['cli'])
   })
@@ -203,7 +212,7 @@ describe('listTopics', () => {
   })
 
   it('should omit a leaf a root file already names', () => {
-    writeDoc('.claude/context/indexes.md', 'a')
+    writeDoc('canon/context/indexes.md', 'a')
     writeDoc('docs/agents/index.md', 'b')
     writeDoc('docs/agents/indexes.md', 'c')
 
@@ -211,10 +220,10 @@ describe('listTopics', () => {
   })
 
   it('should omit a leaf name carried by two folders', () => {
-    writeDoc('.claude/context/cli/index.md', 'a')
-    writeDoc('.claude/context/cli/overview.md', 'b')
-    writeDoc('.claude/context/sandbox/index.md', 'c')
-    writeDoc('.claude/context/sandbox/overview.md', 'd')
+    writeDoc('canon/context/cli/index.md', 'a')
+    writeDoc('canon/context/cli/overview.md', 'b')
+    writeDoc('canon/context/sandbox/index.md', 'c')
+    writeDoc('canon/context/sandbox/overview.md', 'd')
 
     expect(listTopics(ROOT)).toEqual(['cli', 'sandbox'])
   })

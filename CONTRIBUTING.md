@@ -18,7 +18,7 @@ The markers are how a re-run recognizes its own block and skips, so the script n
 
 The `pre-push` hook runs `bun run check`, and that run can rewrite files. Check `git status` after a push and commit any diff as `style(<scope>):`.
 
-The [development notes](.claude/context/development/index.md) carry the full script table, what each stage gates on, and the rest of the hooks.
+The [development notes](canon/context/development/index.md) carry the full script table, what each stage gates on, and the rest of the hooks.
 
 ## Where to author
 
