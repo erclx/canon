@@ -114,6 +114,12 @@ jobs:
       - name: Build
         run: bun run web:build
 
+      - name: Build gallery
+        run: bun run web:gallery
+
+      - name: Verify gallery excluded from build
+        run: ./scripts/core/check-gallery-exclusion.sh
+
       # `tooling/web/configs/e2e/screenshot.ts` is reused as is (Constraints,
       # .canon/plans/archive/feature-render-visibility.md). This checkout has no
       # web/package.json, so the preview server and the two cases run against

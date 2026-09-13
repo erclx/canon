@@ -46,6 +46,7 @@
     "web:favicon": "bun scripts/core/regen-web-favicon.ts",
     "web:previews": "bun scripts/core/regen-web-previews.ts",
     "web:build": "bun run web:tokens && bun run web:favicon && bun run web:previews && cd web && astro check && astro build",
+    "web:gallery": "cd web && astro build --config gallery.config.mjs",
     "web:preview": "cd web && astro preview",
     "web:e2e": "cd web && playwright test"
   },

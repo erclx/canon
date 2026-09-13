@@ -17,6 +17,9 @@ web/dist/
 web/.astro/
 web/playwright-report/
 web/test-results/
+# The board's own gallery panel. The published build never reads
+# web/gallery-src/, so nothing here reaches web/dist.
+web/gallery-dist/
 # screenshot.ts's own sweep. web/evidence/ is unused on purpose, not by
 # oversight: `440-surface-capture.md`'s "Sharing a capture" section lets a
 # project route a flagged case's evidence through its own established

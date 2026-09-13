@@ -60,6 +60,7 @@ describe('generateBoard', () => {
       'surfaces',
       'wireframes',
       'candidates',
+      'components',
     ])
     for (const panel of result.panels) {
       expect(existsSync(join(outDir, panel.path))).toBe(true)
@@ -199,6 +200,25 @@ describe('generateBoard', () => {
     expect(html).toContain('hero-probe/arm-a.png')
     expect(
       existsSync(join(outDir, 'candidates', 'hero-probe', 'arm-a.png')),
+    ).toBe(true)
+  })
+
+  it('reports a missing gallery build rather than an empty frame', () => {
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'components', 'index.html'), 'utf8')
+    expect(html).toContain('bun run web:gallery')
+  })
+
+  it('iframes the built gallery when web/gallery-dist exists', () => {
+    seed(join('web', 'gallery-dist', 'index.html'), '<h2>agent-view</h2>')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'components', 'index.html'), 'utf8')
+    expect(html).toContain('gallery/index.html')
+    expect(
+      existsSync(join(outDir, 'components', 'gallery', 'index.html')),
     ).toBe(true)
   })
 })
