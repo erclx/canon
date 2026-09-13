@@ -207,7 +207,7 @@ canon migrate surface-roots --json
 canon migrate surface-roots --write --json
 ```
 
-The first line reports the plan and the second applies it, moving each surface with `git mv` so its history follows and repointing every tracked citation of one in the same run. See `canon docs commands` for the full file list rather than reading it here.
+The first line reports the plan and the second applies it, moving each surface with `git mv` so its history follows and repointing every tracked citation of one in the same run. See `canon docs agents` for the full file list rather than reading it here.
 
 Neither `canon sync --check` nor any other command notices a surface still sitting at `.claude/`, so running this is on you rather than on a prompt from the toolkit.
 
