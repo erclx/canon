@@ -16,7 +16,7 @@ Some decisions are settled by looking rather than by reasoning, and no draft is 
 ## Step 1: name the decision and the arms
 
 1. State the decision in one sentence, naming what changes between arms and what stays fixed.
-2. Derive a kebab slug from that sentence. Call the folder every file this run writes to `<dest>` below. `<dest>` is `.canon/tmp/<slug>/`, per `.claude/rules/canon/core/055-scratch.md`. Running inside a live `plan-groundwork` track is the one exception: `<dest>` is the track's own `evidence/<slug>/` instead, since a candidate render is evidence the track's decision file cites rather than spike input.
+2. Derive a kebab slug from that sentence. Call the folder every file this run writes to `<dest>` below. `<dest>` is `.canon/tmp/<slug>/`, a nested `<slug>/` folder rather than a flat `<slug>-<file>.md`, which is the shape every temporary write in this project takes. Running inside a live `plan-groundwork` track is the one exception: `<dest>` is the track's own `evidence/<slug>/` instead, since a candidate render is evidence the track's decision file cites rather than spike input.
 3. Write one arm per candidate, each carrying an id, a label, and what the arm costs. An arm with no stated cost is not an option.
 4. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
 5. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
@@ -48,7 +48,7 @@ canon capture <dest>/candidates.html --selector <element>
 
 ## Step 4: take the pick
 
-Put the choice to the operator through the structured question surface, per `.claude/rules/canon/core/005-behavior.md`.
+Put the choice to the operator through the structured question surface, since a call the operator's preference decides always routes through it rather than through prose.
 
 - One option per arm, labeled with the arm's id and carrying its cost as the description.
 - Rank the recommendation first and mark it `(Recommended)`.
@@ -68,7 +68,7 @@ Put the choice to the operator through the structured question surface, per `.cl
 1. Apply the winning arm to the real surface, in one change.
 2. Close out whatever document stated the decision as open, in the same change, naming the arm that won and the ones that stayed defensible. A pick that changes a surface and records nothing about why leaves the next reader to re-derive it from a diff. Skip this where nothing stated the decision.
 3. Batch-capture the final round's arm files, when `<dest>` is the scratch path: `canon capture <dest>/arms --selector <wrapper-class> --out <archive-dir>`, naming Step 2's chosen class. This is the directory-batch convention `draft-identity` Step 6 already uses.
-4. Resolve `<archive-dir>` as `.canon/review/evidence/<slug>/` against the main worktree root, per `.claude/rules/canon/core/085-worktrees.md`, never against a linked worktree this run happens to be building in. The capture is what keeps every arm past the pick, the losing ones included, as a durable revert record distinct from the live comparison page.
+4. Resolve `<archive-dir>` as `.canon/review/evidence/<slug>/` against the main worktree root, since shared session scratch resolves there rather than against a linked worktree this run happens to be building in. The capture is what keeps every arm past the pick, the losing ones included, as a durable revert record distinct from the live comparison page.
 5. Delete `<dest>` and every file inside it, when `<dest>` is the scratch path, now that every arm sits at the durable path above. A variant left behind there is a second design nobody maintains.
 6. Leave `<dest>` in place when it is a live track's `evidence/<slug>/`: `plan-groundwork`'s write scope treats evidence as durable rather than as scratch a session may delete, and the arms already sit at a durable path there.
 7. Report `<dest>` as still standing when the scratch-path delete is refused, naming the path for the operator to remove, rather than closing on a report the tree contradicts. The pick is applied either way, so the run has done its work and the folder is what outlives it.

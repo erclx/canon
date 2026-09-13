@@ -203,6 +203,22 @@ const STANDARDS_PATH = /(?<![\w./-])standards\/[^\s`)\]]*\.md\b/g
  */
 const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
+/**
+ * A `.claude/rules/<segments>/<nnn>-<slug>.md` citation from a body under
+ * `claude/skills/`, the installed-path spelling `598-authoring-layout.md`
+ * bans a shipped skill body from citing as authority for its own behavior.
+ *
+ * Anchored on the trailing `\d{3}-[\w-]+\.md` rather than on the bare
+ * `.claude/rules/` prefix, which is what keeps a folder mention carrying no
+ * number, such as `create-rule`, `memory-review`, and `setup-gov` already
+ * write correctly, from matching. The segment group between `rules/` and the
+ * numbered file admits both a governance-namespace path
+ * (`canon/core/055-scratch.md`) and a project-namespace one
+ * (`project/<subdir>/<n>-<slug>.md`) without distinguishing them, since
+ * either shape is the same broken citation.
+ */
+const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*\/\d{3}-[\w-]+\.md\b/g
+
 export interface ShippedReference {
   readonly file: string
   /** One-based, matching the `file:line` form a reader clicks. */
@@ -213,6 +229,7 @@ export interface ShippedReference {
     | 'docs-path'
     | 'standards-path'
     | 'phase-label'
+    | 'rule-path'
   /** The reference as written, so a report names the token to qualify. */
   readonly text: string
   /**
@@ -259,14 +276,19 @@ function isDocsPathReportable(
 }
 
 /**
- * Whether `file` sits in the one corpus `STANDARDS_PATH` gates.
+ * Whether `file` sits in the one corpus `STANDARDS_PATH` and `RULE_PATH`
+ * both gate: a shipped skill body, minus its own `REQUIREMENT.md`.
  *
- * `REQUIREMENT.md` is excluded for the reason `598-authoring-layout.md`
- * leaves it alone: a maintainer or an audit command reads that file rather
- * than a session loading it, so the resolver rule this pattern enforces
- * never applies there.
+ * Both patterns share this scope because both bans live in
+ * `598-authoring-layout.md`, stated for the same reader: a session loading
+ * the `SKILL.md` body a target actually receives. `REQUIREMENT.md` is
+ * excluded for the reason that file states there, since a maintainer or an
+ * audit command reads it rather than a session loading it, so neither
+ * resolver rule this pair enforces ever applies to it. One predicate serves
+ * both call sites rather than two copies drifting apart with nothing
+ * comparing them.
  */
-function isStandardsPathScope(file: string): boolean {
+function isSkillBodyScope(file: string): boolean {
   return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
 }
 
@@ -357,7 +379,7 @@ export function referencesIn(
       })
     }
 
-    if (isStandardsPathScope(file)) {
+    if (isSkillBodyScope(file)) {
       for (const match of line.matchAll(STANDARDS_PATH)) {
         if (!isStandardsPathReportable(match[0])) continue
         references.push({
@@ -376,6 +398,18 @@ export function referencesIn(
         kind: 'phase-label',
         text: match[0],
       })
+    }
+
+    if (isSkillBodyScope(file)) {
+      for (const match of line.matchAll(RULE_PATH)) {
+        if (isPlaceholderPath(match[0])) continue
+        references.push({
+          file,
+          line: index + 1,
+          kind: 'rule-path',
+          text: match[0],
+        })
+      }
     }
   }
 
