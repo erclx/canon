@@ -11,13 +11,13 @@ import { join, relative, sep } from 'node:path'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { renderDesignDoc } from '@/design/render'
 import { colorValue } from '@/design/tokens'
+import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { recordDir } from '@/record-root'
 
 /**
- * The one named site for this repository's wireframe corpus, so the surface
- * move retargets a single constant rather than a literal repeated per panel.
- * The board reads this checkout alone, which has moved, so the new root is
- * spelled directly rather than resolved.
+ * Where the wireframes panel reads its corpus, relative to whichever `root`
+ * the caller resolved. Named once so a caller and this module's own tests
+ * spell the same path rather than repeating the literal.
  */
 export const WIREFRAME_DIR = join('canon', 'wireframes')
 
@@ -33,26 +33,6 @@ const WEB_DIST_ENTRY = 'index.html'
  */
 const WEB_GALLERY_DIST = join('web', 'gallery-dist')
 const WEB_GALLERY_DIST_ENTRY = 'index.html'
-
-interface WireframeEntry {
-  readonly path: string
-  readonly describes: string
-}
-
-/**
- * The six files the wireframes panel renders, each beside the surface it
- * describes. `index.md` at either level is a catalog rather than a wireframe
- * and is excluded, which is why this list holds six rather than the eight
- * files the corpus carries today.
- */
-const WIREFRAMES: readonly WireframeEntry[] = [
-  { path: 'landing-page.md', describes: 'The canon.erclx.dev landing page' },
-  { path: 'slides.md', describes: 'The SLIDES.md render' },
-  { path: 'teach/root.md', describes: 'A teach workspace root listing' },
-  { path: 'teach/contents.md', describes: 'A workspace contents page' },
-  { path: 'teach/lesson.md', describes: 'A lesson page and quiz stepper' },
-  { path: 'teach/chrome.md', describes: 'The shared teach chrome' },
-]
 
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg', '.webp']
 
@@ -300,18 +280,53 @@ function writeTokensPanel(root: string, outDir: string): void {
   renderDesignDoc(sourcePath, dir)
 }
 
+interface WireframeFile {
+  readonly relPath: string
+  readonly text: string
+  readonly description: string | undefined
+}
+
+/**
+ * Every wireframe under `<root>/canon/wireframes/`, sorted for a stable
+ * render order across runs. `index.md` at any depth is a catalog rather than
+ * a wireframe and is excluded. A glob emits OS-native separators, and the
+ * corpus nests one level deep, so the label always reads with forward
+ * slashes regardless of platform.
+ */
+function listWireframes(root: string): readonly WireframeFile[] {
+  const dir = join(root, WIREFRAME_DIR)
+  if (!existsSync(dir)) return []
+
+  const glob = new Bun.Glob('**/*.md')
+  const relPaths = [...glob.scanSync({ cwd: dir })]
+    .filter((relPath) => relPath.split(sep).pop() !== 'index.md')
+    .map((relPath) => relPath.split(sep).join('/'))
+    .sort()
+
+  return relPaths.map((relPath) => {
+    const text = readFileSync(join(dir, relPath), 'utf8')
+    return {
+      relPath,
+      text,
+      description: readField(parseFrontmatter(text), 'description'),
+    }
+  })
+}
+
 function writeWireframesPanel(root: string, outDir: string): void {
   const dir = join(outDir, 'wireframes')
   mkdirSync(dir, { recursive: true })
 
-  const sections = WIREFRAMES.map((entry) => {
-    const sourcePath = join(root, WIREFRAME_DIR, entry.path)
-    if (!existsSync(sourcePath)) {
-      return `<h2>${escapeHtml(entry.path)}</h2>\n<p class="empty">Missing from ${WIREFRAME_DIR}/.</p>`
-    }
-    const text = readFileSync(sourcePath, 'utf8')
-    return `<h2>${escapeHtml(entry.path)}</h2>\n<p>${escapeHtml(entry.describes)}</p>\n<pre>${escapeHtml(text)}</pre>`
-  }).join('\n')
+  const files = listWireframes(root)
+  const sections =
+    files.length === 0
+      ? `<p class="empty">No wireframe files under ${WIREFRAME_DIR}/.</p>`
+      : files
+          .map((file) => {
+            const description = file.description ?? file.relPath
+            return `<h2>${escapeHtml(file.relPath)}</h2>\n<p>${escapeHtml(description)}</p>\n<pre>${escapeHtml(file.text)}</pre>`
+          })
+          .join('\n')
 
   writeFileSync(join(dir, 'index.html'), panelPage('Wireframes', sections))
 }
@@ -322,15 +337,21 @@ function copyBuilt(source: string, dest: string): void {
   cpSync(source, dest, { recursive: true })
 }
 
-function writeSurfacesPanel(root: string, outDir: string): void {
+function writeSurfacesPanel(
+  root: string,
+  outDir: string,
+  isToolkitCheckout: boolean,
+): void {
   const dir = join(outDir, 'surfaces')
   mkdirSync(dir, { recursive: true })
 
   const distSource = join(root, WEB_DIST)
-  const landingBody = existsSync(join(distSource, WEB_DIST_ENTRY))
-    ? (copyBuilt(distSource, join(dir, 'landing')),
-      '<iframe src="landing/index.html" loading="lazy"></iframe>')
-    : `<p class="empty">No ${WEB_DIST}/ build. Run bun run web:build, then regenerate the board.</p>`
+  const landingBody = !isToolkitCheckout
+    ? `<p class="empty">The landing page panel only renders in this toolkit's own checkout.</p>`
+    : existsSync(join(distSource, WEB_DIST_ENTRY))
+      ? (copyBuilt(distSource, join(dir, 'landing')),
+        '<iframe src="landing/index.html" loading="lazy"></iframe>')
+      : `<p class="empty">No ${WEB_DIST}/ build. Run bun run web:build, then regenerate the board.</p>`
 
   const teachSource = recordDir(root, 'teach')
   const teachBody = existsSync(join(teachSource, 'index.html'))
@@ -347,15 +368,21 @@ function writeSurfacesPanel(root: string, outDir: string): void {
   )
 }
 
-function writeComponentsPanel(root: string, outDir: string): void {
+function writeComponentsPanel(
+  root: string,
+  outDir: string,
+  isToolkitCheckout: boolean,
+): void {
   const dir = join(outDir, 'components')
   mkdirSync(dir, { recursive: true })
 
   const gallerySource = join(root, WEB_GALLERY_DIST)
-  const body = existsSync(join(gallerySource, WEB_GALLERY_DIST_ENTRY))
-    ? (copyBuilt(gallerySource, join(dir, 'gallery')),
-      '<iframe src="gallery/index.html" loading="lazy"></iframe>')
-    : `<p class="empty">No ${WEB_GALLERY_DIST}/ build. Run bun run web:gallery, then regenerate the board.</p>`
+  const body = !isToolkitCheckout
+    ? `<p class="empty">The components panel only renders in this toolkit's own checkout.</p>`
+    : existsSync(join(gallerySource, WEB_GALLERY_DIST_ENTRY))
+      ? (copyBuilt(gallerySource, join(dir, 'gallery')),
+        '<iframe src="gallery/index.html" loading="lazy"></iframe>')
+      : `<p class="empty">No ${WEB_GALLERY_DIST}/ build. Run bun run web:gallery, then regenerate the board.</p>`
 
   writeFileSync(join(dir, 'index.html'), panelPage('Components', body))
 }
@@ -433,11 +460,16 @@ function writeCandidatesPanel(root: string, outDir: string): void {
  * `cwd` is the caller's own working directory, resolved and passed in
  * explicitly rather than read here, so a test can exercise the checkout-
  * mismatch case without touching the process's real cwd.
+ *
+ * `isToolkitCheckout` gates the surfaces panel's landing-page half and the
+ * whole components panel, both of which read this repository's own build
+ * output rather than anything a target project produces.
  */
 export function generateBoard(
   root: string,
   outDir: string,
   cwd: string,
+  isToolkitCheckout: boolean,
 ): BoardOutcome {
   if (wouldDeleteRoot([root, cwd], outDir)) {
     return {
@@ -463,10 +495,10 @@ export function generateBoard(
   ]
 
   writeTokensPanel(root, outDir)
-  writeSurfacesPanel(root, outDir)
+  writeSurfacesPanel(root, outDir, isToolkitCheckout)
   writeWireframesPanel(root, outDir)
   writeCandidatesPanel(root, outDir)
-  writeComponentsPanel(root, outDir)
+  writeComponentsPanel(root, outDir, isToolkitCheckout)
 
   const indexPath = join(outDir, 'index.html')
   writeFileSync(indexPath, shellHtml(panels))

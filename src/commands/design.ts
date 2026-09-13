@@ -17,6 +17,7 @@ import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { resolveTarget } from '@/target'
 import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
+import { mainWorktreeRoot } from '@/worktree'
 
 export function register(program: Command): void {
   const design = program
@@ -133,33 +134,42 @@ export function register(program: Command): void {
   design
     .command('board')
     .description(
-      'Generate the design board, an index over this repository’s own design surfaces',
+      'Generate the design board, an index over a project’s design surfaces',
     )
     .option(
       '-o, --out <path>',
       'Output directory',
       creationRel(process.cwd(), 'review', 'board'),
     )
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
     .addHelpText(
       'after',
       [
         '',
-        'Like regen, this runs against the toolkit checkout rather than a',
-        'target: it reads five sources already on disk relative to the',
-        'project root and writes a static page set, never installed or',
-        'synced. Open it with canon serve <out>.',
+        'Reads its sources from --root, defaulting to the main worktree of',
+        'whatever project the caller stands in, and writes a static page',
+        'set, never installed or synced. The surfaces panel’s landing-page',
+        'half and the whole components panel render only when that root is',
+        'this toolkit’s own checkout. Open the result with canon serve <out>.',
         '',
       ].join('\n'),
     )
-    .action((opts: { out: string }) => {
+    .action(async (opts: { out: string; root?: string }) => {
       const outDir = resolve(process.cwd(), opts.out)
+      const root = opts.root ?? (await mainWorktreeRoot())
+      const isToolkitCheckout = root === PROJECT_ROOT
       const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
       const mismatch = checkoutMismatchWarning(process.cwd())
       process.stderr.write(
         `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}Generate design board${NC}\n`,
       )
       if (mismatch !== undefined) logWarn(mismatch)
-      const result = generateBoard(PROJECT_ROOT, outDir, process.cwd())
+      const result = generateBoard(
+        root,
+        outDir,
+        process.cwd(),
+        isToolkitCheckout,
+      )
       if (!result.ok) {
         process.stderr.write(
           `${GREY}│${NC} ${RED}✗${NC} ${result.detail}\n${GREY}└${NC}\n`,
