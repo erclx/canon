@@ -14,6 +14,7 @@ This repository's own record is the one that is generated rather than authored. 
 ## Layout
 
 - `src/design/tokens.ts` owns the values, and `components.ts` beside it owns the component layer built on them
+- `src/design/board.ts` owns the board generator, and `WIREFRAME_DIR` there is the one named site the wireframe corpus's root move retargets
 - `src/design/document.ts` renders the record, `css.ts` renders the stylesheet, and `regen.ts` writes both through `canon design regen`
 - `src/design/parse.ts` and `render.ts` own the markdown parser and the preview renderer, which serve a target's hand-authored record
 - `src/design/adapter.ts` owns the sync adapter, and `src/design/base.css` is the generated file it installs
@@ -105,6 +106,16 @@ Flags:
 | `--out <path>`    | `.canon/review/design` | Output directory         |
 
 The output directory sits under `.canon/review/` which is gitignored by the seed CLAUDE.md. Do not stage the preview.
+
+## Board
+
+`canon design board` generates a static page set into a gitignored record folder, defaulting to `.canon/review/board/` through `creationRel`, and reports the path a reader opens with `canon serve`. `src/design/board.ts` writes it, following `src/teach/workspace.ts`'s shape of TypeScript emitting self-contained HTML with no framework and no build step.
+
+Like `regen`, it reads from `PROJECT_ROOT` rather than the caller's cwd, and it carries the same `checkoutMismatchWarning` a stale global install needs: `.claude/`, `.canon/`, and `web/` are all absent from the published package's `files` list, so an installed target resolves none of the four sources below and every panel renders its own empty state rather than the run failing.
+
+Four panels read sources that already exist on disk. Tokens calls `renderDesignDoc` against this repository's own `.claude/DESIGN.md` rather than building a second renderer. Surfaces copies `web/dist` and `.canon/teach/` whole into the board's own tree and iframes each, reporting a missing build or an absent workspace rather than rendering a broken frame. Wireframes renders each of the six files under `WIREFRAME_DIR` as-is inside a `<pre>`, since `standards/wireframes.md` makes the ASCII proportions load-bearing and any parse would reinterpret them. Past candidates lists an arm capture image under `.canon/review/evidence/` per folder, and states the corpus is empty rather than rendering an empty grid when none carries one. A fifth panel, components, ships behind this one once an Astro component's isolated rendering approach is settled.
+
+The board is never installed or synced. It is repository-local, measured against the one project rich enough to fill it, and a target that installs every domain receives no board at all. The generator is the directory's only writer, so `canon serve` and a later `canon capture` pass both read the result without assuming it exists ahead of a run.
 
 ## Workflow
 

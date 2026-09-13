@@ -1,0 +1,451 @@
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { join, relative, sep } from 'node:path'
+import { DESIGN_DOCUMENT } from '@/design/regen'
+import { renderDesignDoc } from '@/design/render'
+import { colorValue } from '@/design/tokens'
+import { recordDir } from '@/record-root'
+
+/**
+ * The one named site for this repository's wireframe corpus. `standards/`
+ * moves it to `canon/wireframes/` under the answered
+ * `.canon/intake/88-surface-roots-and-corpus-debt/` item 1, and that move
+ * retargets this constant alone rather than a literal repeated per panel.
+ */
+export const WIREFRAME_DIR = join('.claude', 'wireframes')
+
+/** Landing page for the built site the surfaces panel iframes when present. */
+const WEB_DIST = join('web', 'dist')
+const WEB_DIST_ENTRY = 'index.html'
+
+interface WireframeEntry {
+  readonly path: string
+  readonly describes: string
+}
+
+/**
+ * The six files the wireframes panel renders, each beside the surface it
+ * describes. `index.md` at either level is a catalog rather than a wireframe
+ * and is excluded, which is why this list holds six rather than the eight
+ * files the corpus carries today.
+ */
+const WIREFRAMES: readonly WireframeEntry[] = [
+  { path: 'landing-page.md', describes: 'The canon.erclx.dev landing page' },
+  { path: 'slides.md', describes: 'The SLIDES.md render' },
+  { path: 'teach/root.md', describes: 'A teach workspace root listing' },
+  { path: 'teach/contents.md', describes: 'A workspace contents page' },
+  { path: 'teach/lesson.md', describes: 'A lesson page and quiz stepper' },
+  { path: 'teach/chrome.md', describes: 'The shared teach chrome' },
+]
+
+const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg', '.webp']
+
+export interface BoardPanel {
+  readonly id: string
+  readonly title: string
+  /** Relative to the board's own output directory. */
+  readonly path: string
+}
+
+export interface BoardResult {
+  readonly ok: true
+  readonly outDir: string
+  readonly indexPath: string
+  readonly panels: readonly BoardPanel[]
+}
+
+export interface BoardRefused {
+  readonly ok: false
+  readonly reason: 'unsafe-out'
+  readonly detail: string
+}
+
+export type BoardOutcome = BoardResult | BoardRefused
+
+/**
+ * Whether clearing `outDir` would take a protected directory down with it:
+ * the directory equals one of them, or contains one.
+ *
+ * `generateBoard` clears its output directory on every run, and `--out` is
+ * resolved against the caller's cwd while the panels read from `PROJECT_ROOT`.
+ * Those agree in the ordinary case and diverge in exactly one: a second
+ * checkout, where a global `canon` resolves `PROJECT_ROOT` to a different
+ * tree than the one the caller stands in. Guarding `PROJECT_ROOT` alone misses
+ * that case, since `--out .` then resolves under the caller's own cwd, which
+ * shares no containment with the unrelated root the guard compared it to.
+ */
+function wouldDeleteRoot(protect: readonly string[], outDir: string): boolean {
+  return protect.some((dir) => dir === outDir || dir.startsWith(outDir + sep))
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+const THEME_TOGGLE_BUTTON = `<button class="theme-toggle" type="button" aria-label="Switch between light and dark"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>`
+
+const THEME_TOGGLE_SCRIPT = [
+  '<script>(function(){',
+  'var r=document.documentElement;',
+  'try{var s=localStorage.getItem("board-theme");if(s)r.dataset.theme=s;}catch(e){}',
+  'document.addEventListener("click",function(e){',
+  'var b=e.target.closest(".theme-toggle");if(!b)return;',
+  'var dark=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme: dark)").matches);',
+  'r.dataset.theme=dark?"light":"dark";',
+  'try{localStorage.setItem("board-theme",r.dataset.theme);}catch(e){}',
+  '});',
+  '})();</script>',
+].join('')
+
+/**
+ * Highlights the nav link for whichever section fills the most of the
+ * viewport, following the same largest-intersection-ratio rule the landing
+ * page's own floating pill uses, so a reader scrolling through the four
+ * panels sees the pill track their position rather than sitting static.
+ */
+const SCROLLSPY_SCRIPT = [
+  '<script>(function(){',
+  'var links={};',
+  'document.querySelectorAll("nav a[href^=\\"#\\"]").forEach(function(a){links[a.getAttribute("href").slice(1)]=a;});',
+  'var ratios={};',
+  'var current="";',
+  'var observer=new IntersectionObserver(function(entries){',
+  'entries.forEach(function(entry){ratios[entry.target.id]=entry.isIntersecting?entry.intersectionRatio:0;});',
+  'var bestId="";',
+  'var bestRatio=0;',
+  'Object.keys(ratios).forEach(function(id){if(ratios[id]>bestRatio){bestRatio=ratios[id];bestId=id;}});',
+  'if(bestId&&bestId!==current){',
+  'if(links[current])links[current].classList.remove("active");',
+  'current=bestId;',
+  'if(links[current])links[current].classList.add("active");',
+  '}',
+  '},{threshold:[0,0.25,0.5,0.75,1]});',
+  'Object.keys(links).forEach(function(id){',
+  'var section=document.getElementById(id);',
+  'if(section)observer.observe(section);',
+  '});',
+  '})();</script>',
+].join('')
+
+/**
+ * The same brand mark `src/design/render.ts` embeds in its own preview,
+ * colored with the dark accent since the board's default chrome is dark
+ * where that preview's is light. Duplicated here rather than imported,
+ * following that module's own precedent of three independently-colored
+ * copies rather than a shared icon helper for the first second caller.
+ */
+function faviconLink(): string {
+  const color = colorValue('accent') ?? '#e0724b'
+  const href = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80"><path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" fill="${color}" /><rect x="44" y="15" width="12" height="70" rx="2" fill="${color}" /></svg>`,
+  )}`
+  return `<link rel="icon" href="${href}">`
+}
+
+/** The board shell's own chrome, read off the toolkit's design source. */
+function shellChrome(): string {
+  const roles: ReadonlyArray<readonly [string, string]> = [
+    ['background', 'background'],
+    ['surface', 'surface'],
+    ['text', 'text'],
+    ['muted', 'muted'],
+    ['border', 'border'],
+    ['accent', 'accent'],
+  ]
+  const dark = roles
+    .map(([name, role]) => {
+      const value = colorValue(role)
+      return value === undefined ? '' : `  --board-${name}: ${value};`
+    })
+    .filter((line) => line !== '')
+  const light = roles
+    .map(([name, role]) => {
+      const value = colorValue(`light-${role}`)
+      return value === undefined ? '' : `  --board-${name}: ${value};`
+    })
+    .filter((line) => line !== '')
+
+  return `:root {\n${dark.join('\n')}\n}\n[data-theme='light'] {\n${light.join('\n')}\n}`
+}
+
+function shellHtml(panels: readonly BoardPanel[]): string {
+  const navLinks = panels
+    .map((panel) => `<a href="#${panel.id}">${escapeHtml(panel.title)}</a>`)
+    .join('')
+
+  const sections = panels
+    .map(
+      (panel, index) =>
+        `<section id="${panel.id}">\n<div class="eyebrow">Panel 0${index + 1}</div>\n<h2>${escapeHtml(panel.title)}</h2>\n<iframe src="${panel.path}" loading="lazy"></iframe>\n</section>`,
+    )
+    .join('\n')
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+${faviconLink()}
+<title>Design board</title>
+<style>
+${shellChrome()}
+* { box-sizing: border-box; }
+body { font-family: 'Noto Sans Mono', 'DejaVu Sans Mono', monospace; margin: 0; color: var(--board-text); background: var(--board-background); }
+header { padding: 2.5rem 3rem 1.5rem; }
+h1 { margin: 0 0 0.4rem; font-size: 1.6rem; font-weight: 600; letter-spacing: -0.01em; }
+.meta { color: var(--board-muted); font-size: 0.85rem; margin: 0; }
+nav { position: fixed; top: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 1; display: flex; align-items: center; gap: 1.25rem; padding: 0.5rem 0.6rem 0.5rem 1.1rem; background: var(--board-surface); border: 1px solid var(--board-border); border-radius: 999px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); white-space: nowrap; }
+nav a { color: var(--board-muted); text-decoration: none; font-size: 0.8rem; }
+nav a:hover { color: var(--board-accent); }
+nav a.active { color: var(--board-accent); }
+.theme-toggle { display: flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; background: var(--board-background); color: var(--board-text); border: 1px solid var(--board-border); border-radius: 50%; padding: 0; cursor: pointer; }
+.theme-toggle .sun { display: none; }
+.theme-toggle .moon { display: block; }
+[data-theme='light'] .theme-toggle .sun { display: block; }
+[data-theme='light'] .theme-toggle .moon { display: none; }
+.theme-toggle svg { width: 0.95rem; height: 0.95rem; }
+main { padding: 0 3rem 4.5rem; }
+section { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--board-border); scroll-margin-top: 4.5rem; }
+.eyebrow { color: var(--board-accent); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.35rem; }
+section h2 { margin: 0 0 0.75rem; font-size: 1.1rem; font-weight: 600; }
+iframe { width: 100%; height: 480px; border: 1px solid var(--board-border); border-radius: 4px; background: var(--board-surface); }
+</style>
+</head>
+<body>
+<header>
+<h1>Design board</h1>
+<p class="meta">Generated by <code>canon design board</code>. Repository-local, never installed into a target.</p>
+</header>
+<nav>${navLinks}${THEME_TOGGLE_BUTTON}</nav>
+<main>
+${sections}
+</main>
+${THEME_TOGGLE_SCRIPT}
+${SCROLLSPY_SCRIPT}
+</body>
+</html>
+`
+}
+
+function panelPage(title: string, body: string): string {
+  const accent = colorValue('light-accent') ?? '#a4471c'
+  const surface = colorValue('light-surface') ?? '#f4efe6'
+  const border = colorValue('light-border') ?? '#e4dcd0'
+  const muted = colorValue('light-muted') ?? '#726b62'
+  const text = colorValue('light-text') ?? '#1a1815'
+  const background = colorValue('light-background') ?? '#faf7f2'
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+${faviconLink()}
+<title>${escapeHtml(title)}</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'Noto Sans Mono', 'DejaVu Sans Mono', monospace; margin: 0; padding: 1.75rem 2.25rem; color: ${text}; background: ${background}; }
+h2 { margin: 2rem 0 0.6rem; padding-top: 1.1rem; border-top: 1px solid ${border}; font-size: 1rem; font-weight: 600; }
+h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+p { color: ${muted}; font-size: 0.85rem; }
+table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; font-size: 0.85rem; }
+td, th { padding: 0.4rem 0.6rem; border-bottom: 1px solid ${border}; text-align: left; }
+pre { white-space: pre-wrap; background: ${surface}; border-radius: 4px; padding: 1rem; font-size: 0.8rem; }
+img { border-radius: 4px; border: 1px solid ${border}; margin-top: 0.5rem; }
+a { color: ${accent}; }
+.empty { color: ${muted}; font-style: italic; background: ${surface}; border-radius: 4px; padding: 0.9rem 1rem; }
+</style>
+</head>
+<body>
+${body}
+</body>
+</html>
+`
+}
+
+function writeTokensPanel(root: string, outDir: string): void {
+  const sourcePath = join(root, DESIGN_DOCUMENT)
+  const dir = join(outDir, 'tokens')
+
+  if (!existsSync(sourcePath)) {
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, 'index.html'),
+      panelPage(
+        'Tokens',
+        `<p class="empty">No ${DESIGN_DOCUMENT} at the repository root.</p>`,
+      ),
+    )
+    return
+  }
+
+  renderDesignDoc(sourcePath, dir)
+}
+
+function writeWireframesPanel(root: string, outDir: string): void {
+  const dir = join(outDir, 'wireframes')
+  mkdirSync(dir, { recursive: true })
+
+  const sections = WIREFRAMES.map((entry) => {
+    const sourcePath = join(root, WIREFRAME_DIR, entry.path)
+    if (!existsSync(sourcePath)) {
+      return `<h2>${escapeHtml(entry.path)}</h2>\n<p class="empty">Missing from ${WIREFRAME_DIR}/.</p>`
+    }
+    const text = readFileSync(sourcePath, 'utf8')
+    return `<h2>${escapeHtml(entry.path)}</h2>\n<p>${escapeHtml(entry.describes)}</p>\n<pre>${escapeHtml(text)}</pre>`
+  }).join('\n')
+
+  writeFileSync(join(dir, 'index.html'), panelPage('Wireframes', sections))
+}
+
+/** Copies a built directory whole, filtering nothing, into the board's own tree. */
+function copyBuilt(source: string, dest: string): void {
+  rmSync(dest, { recursive: true, force: true })
+  cpSync(source, dest, { recursive: true })
+}
+
+function writeSurfacesPanel(root: string, outDir: string): void {
+  const dir = join(outDir, 'surfaces')
+  mkdirSync(dir, { recursive: true })
+
+  const distSource = join(root, WEB_DIST)
+  const landingBody = existsSync(join(distSource, WEB_DIST_ENTRY))
+    ? (copyBuilt(distSource, join(dir, 'landing')),
+      '<iframe src="landing/index.html" loading="lazy"></iframe>')
+    : `<p class="empty">No ${WEB_DIST}/ build. Run bun run web:build, then regenerate the board.</p>`
+
+  const teachSource = recordDir(root, 'teach')
+  const teachBody = existsSync(join(teachSource, 'index.html'))
+    ? (copyBuilt(teachSource, join(dir, 'teach')),
+      '<iframe src="teach/index.html" loading="lazy"></iframe>')
+    : `<p class="empty">${relative(root, teachSource)} is gitignored and machine-local, so this panel renders empty in a fresh clone and on CI.</p>`
+
+  writeFileSync(
+    join(dir, 'index.html'),
+    panelPage(
+      'Surfaces',
+      `<h2>Landing page</h2>\n${landingBody}\n<h2>Teach workspaces</h2>\n${teachBody}`,
+    ),
+  )
+}
+
+function isImage(name: string): boolean {
+  return IMAGE_EXTENSIONS.some((ext) => name.toLowerCase().endsWith(ext))
+}
+
+/** Every image file directly inside an evidence arm folder, one level deep. */
+function imagesIn(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && isImage(entry.name))
+    .map((entry) => entry.name)
+    .sort()
+}
+
+function writeCandidatesPanel(root: string, outDir: string): void {
+  const dir = join(outDir, 'candidates')
+  mkdirSync(dir, { recursive: true })
+
+  const evidenceDir = recordDir(root, 'review', 'evidence')
+  if (!existsSync(evidenceDir)) {
+    writeFileSync(
+      join(dir, 'index.html'),
+      panelPage(
+        'Past candidates',
+        `<p class="empty">No ${relative(root, evidenceDir)} folder yet.</p>`,
+      ),
+    )
+    return
+  }
+
+  const folders = readdirSync(evidenceDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+
+  const found: Array<{ folder: string; images: string[] }> = []
+  for (const folder of folders) {
+    const images = imagesIn(join(evidenceDir, folder))
+    if (images.length > 0) {
+      cpSync(join(evidenceDir, folder), join(dir, folder), { recursive: true })
+      found.push({ folder, images })
+    }
+  }
+
+  if (found.length === 0) {
+    writeFileSync(
+      join(dir, 'index.html'),
+      panelPage(
+        'Past candidates',
+        `<p class="empty">${folders.length} folders under ${relative(root, evidenceDir)}/ and none carries a draft-and-pick arm capture. The archival capture step has not run since it shipped.</p>`,
+      ),
+    )
+    return
+  }
+
+  const sections = found
+    .map(
+      ({ folder, images }) =>
+        `<h2>${escapeHtml(folder)}</h2>\n${images.map((image) => `<img src="${folder}/${image}" alt="${escapeHtml(image)}">`).join('\n')}`,
+    )
+    .join('\n')
+
+  writeFileSync(join(dir, 'index.html'), panelPage('Past candidates', sections))
+}
+
+/**
+ * Generates the board's page set into `outDir`, clearing whatever was there.
+ *
+ * This function is the directory's only writer, per the constraint every
+ * caller shares it under: `canon serve` and a future `canon capture` pass
+ * both read the result and neither may assume it exists ahead of a run.
+ *
+ * `cwd` is the caller's own working directory, resolved and passed in
+ * explicitly rather than read here, so a test can exercise the checkout-
+ * mismatch case without touching the process's real cwd.
+ */
+export function generateBoard(
+  root: string,
+  outDir: string,
+  cwd: string,
+): BoardOutcome {
+  if (wouldDeleteRoot([root, cwd], outDir)) {
+    return {
+      ok: false,
+      reason: 'unsafe-out',
+      detail: `${outDir} is or contains ${root} or ${cwd}. Refusing to clear it.`,
+    }
+  }
+
+  rmSync(outDir, { recursive: true, force: true })
+  mkdirSync(outDir, { recursive: true })
+
+  const panels: readonly BoardPanel[] = [
+    { id: 'tokens', title: 'Tokens', path: 'tokens/index.html' },
+    { id: 'surfaces', title: 'Surfaces', path: 'surfaces/index.html' },
+    { id: 'wireframes', title: 'Wireframes', path: 'wireframes/index.html' },
+    {
+      id: 'candidates',
+      title: 'Past candidates',
+      path: 'candidates/index.html',
+    },
+  ]
+
+  writeTokensPanel(root, outDir)
+  writeSurfacesPanel(root, outDir)
+  writeWireframesPanel(root, outDir)
+  writeCandidatesPanel(root, outDir)
+
+  const indexPath = join(outDir, 'index.html')
+  writeFileSync(indexPath, shellHtml(panels))
+
+  return { ok: true, outDir, indexPath, panels }
+}

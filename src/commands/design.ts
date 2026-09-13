@@ -6,6 +6,7 @@ import {
   DESIGN_INSTALL_DIR,
   DESIGN_PROJECT_SUBDIR,
 } from '@/design/adapter'
+import { generateBoard } from '@/design/board'
 import { buildDesignCss } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { renderDesignDoc } from '@/design/render'
@@ -20,7 +21,9 @@ import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
 export function register(program: Command): void {
   const design = program
     .command('design')
-    .description('Design system commands (regen, css, render, install, sync)')
+    .description(
+      'Design system commands (regen, css, render, board, install, sync)',
+    )
 
   design
     .command('regen')
@@ -124,6 +127,48 @@ export function register(program: Command): void {
       const result = renderDesignDoc(sourcePath, outDir)
       process.stderr.write(
         `${GREY}│${NC} ${GREEN}✓${NC} ${result.htmlPath}\n${GREY}│${NC} ${GREEN}✓${NC} ${result.cssPath}\n${GREY}└${NC}\n`,
+      )
+    })
+
+  design
+    .command('board')
+    .description(
+      'Generate the design board, an index over this repository’s own design surfaces',
+    )
+    .option(
+      '-o, --out <path>',
+      'Output directory',
+      creationRel(process.cwd(), 'review', 'board'),
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Like regen, this runs against the toolkit checkout rather than a',
+        'target: it reads five sources already on disk relative to the',
+        'project root and writes a static page set, never installed or',
+        'synced. Open it with canon serve <out>.',
+        '',
+      ].join('\n'),
+    )
+    .action((opts: { out: string }) => {
+      const outDir = resolve(process.cwd(), opts.out)
+      const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
+      const mismatch = checkoutMismatchWarning(process.cwd())
+      process.stderr.write(
+        `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}Generate design board${NC}\n`,
+      )
+      if (mismatch !== undefined) logWarn(mismatch)
+      const result = generateBoard(PROJECT_ROOT, outDir, process.cwd())
+      if (!result.ok) {
+        process.stderr.write(
+          `${GREY}│${NC} ${RED}✗${NC} ${result.detail}\n${GREY}└${NC}\n`,
+        )
+        process.exitCode = 1
+        return
+      }
+      process.stderr.write(
+        `${GREY}│${NC} ${GREEN}✓${NC} ${relative(process.cwd(), result.indexPath)}\n${GREY}│${NC}   Open with: canon serve ${relative(process.cwd(), result.outDir)}\n${GREY}└${NC}\n`,
       )
     })
 
