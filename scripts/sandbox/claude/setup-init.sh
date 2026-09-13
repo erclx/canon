@@ -25,7 +25,7 @@ EOF
     log_step "Scenario ready: setup-init skill on an empty repo"
     log_info "Context: package.json only, no framework evidence"
     log_info "Action:  /canon:setup-init"
-    log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps .claude/canon/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), setup-verify finds no stack scripts and reports base scripts only, setup-indexes then runs as step 5 and finds no candidate folder on the empty tree, and the report names repo-metadata and git-commit as outside the chain"
+    log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), setup-verify finds no stack scripts and reports base scripts only, setup-indexes then runs as step 5 and finds no candidate folder on the empty tree, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "no-stack")
     cat <<'EOF' >go.mod
