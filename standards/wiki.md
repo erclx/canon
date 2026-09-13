@@ -28,8 +28,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Placement
 
 - Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `.claude/context/`, or a skill body instead.
-- File the page by owner: `wiki/claude/` for Anthropic, `wiki/tools/` for another vendor, `wiki/concepts/` where no single vendor owns the subject.
-- Treat `wiki/concepts/rule-writing-vocabulary.md` as the one recorded exception to the owner test, stated in the page itself.
+- File the page under `wiki/claude/`. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
 
 ## Frontmatter
 
@@ -38,8 +37,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 
 ## Naming
 
-- Name a `wiki/claude/` page with a `claude-` prefix before the kebab subject.
-- Name a `wiki/tools/` or `wiki/concepts/` page as a bare kebab subject, with no prefix.
+- Name a page with a `claude-` prefix before the kebab subject.
 
 ## Sourcing
 

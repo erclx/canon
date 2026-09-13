@@ -68,4 +68,3 @@ Fan out only when the work earns it. Each spawned subagent pays its own startup 
 
 - [Claude Code skills](claude-skills.md) for the `context: fork` frontmatter fields
 - [Claude Code hooks](claude-hooks.md) for `SubagentStart` and `SubagentStop` events
-- [Community skills and plugins](../tools/community-skills.md) for third-party patterns like `subagent-driven-development`

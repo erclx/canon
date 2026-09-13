@@ -1,9 +1,9 @@
-Review this session for new terms worth adding to `wiki/concepts/rule-writing-vocabulary.md`. Append qualifying entries directly to the page.
+Review this session for new terms worth adding to `internal/vocabulary.md`. Append qualifying entries directly to the page.
 
 A term qualifies when it names a rhetorical or structural pattern used with clear utility in the session and no matching entry already exists.
 
 1. Resolve the main worktree root via `git worktree list --porcelain | awk '/^worktree /{print $2; exit}'` (fall back to `pwd`).
-2. Read `wiki/concepts/rule-writing-vocabulary.md` at that root.
+2. Read `internal/vocabulary.md` at that root.
 3. For each new term, build a bullet with three parts on one line:
    - `**Term**` in bold, sentence case.
    - One-line gloss of what the term means.

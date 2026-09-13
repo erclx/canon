@@ -161,9 +161,9 @@ The caller-supplied tier is what a dispatched worker reaches, and it was added b
 
 ### Bundled references
 
-`setup-plugins` bundles `references/plugin-catalog.md`, which holds install data alone. `wiki/tools/community-skills.md` is its narrative companion and `.claude/context/claude-plugin/skill-strategy.md` argues the install-versus-author decision, and neither is reachable from the shipped file by design. A `references/` file is read by a session running in a target project, where no `wiki/` path resolves, so the two pointers the catalog used to carry were already dead for the only consumer that reads it.
+`setup-plugins` bundles `references/plugin-catalog.md`, which holds install data alone. `.claude/context/claude-plugin/skill-strategy.md` argues the install-versus-author decision and is not reachable from the shipped file by design. A `references/` file is read by a session running in a target project, where no `.claude/context/` path resolves, so the pointer the catalog used to carry was already dead for the only consumer that reads it.
 
-They are recorded here instead, on a surface that never ships, for the maintainer editing the catalog. `community-skills.md` stays in `wiki/` rather than moving to `docs/` because its subject is the community plugin authors, which is the test that decides what `wiki/` holds.
+It is recorded here instead, on a surface that never ships, for the maintainer editing the catalog.
 
 ## Procedures defined once and cited
 

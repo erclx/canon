@@ -91,7 +91,7 @@ The per-domain context catalog is always loaded so the entries are discoverable 
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
 - `docs/`: consumer-facing reference (CLI surface, AI workflow, target-project integration, and the workflow method this repo runs on)
 - `scripts/`: bash domain scripts, core maintenance, sandbox, and prompt generation
-- `wiki/`: reference pages for tools and concepts owned outside this repo, split into `claude/`, `tools/`, and `concepts/` by who owns the subject
+- `wiki/`: reference pages for Anthropic-owned subjects, under `wiki/claude/`
 
 ## Commands
 

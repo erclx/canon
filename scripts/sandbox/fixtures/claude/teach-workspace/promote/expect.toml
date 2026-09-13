@@ -11,10 +11,13 @@
 # one belongs to that table in TOML, so a `manual` array written at the bottom
 # parses clean and asserts nothing.
 
-# Measured at 21 turns and 0.70 dollars on 2026-08-19, passing every mechanical
-# assertion. The ceiling stays at the default on one sample, because this is a
-# proposal-only arm resolving several files against several standards and its
-# count moves with how a run orders those reads.
+# The routing destination below moved from a wiki subfolder to docs once the
+# wiki narrowed to Anthropic-owned subjects, superseding the 21-turn, 0.70-dollar
+# reading from 2026-08-19 this file used to carry. Measured again at 8 turns and
+# 0.2177 dollars on 2026-09-13, passing every mechanical assertion. The ceiling
+# stays at the default on one sample either way, because this is a proposal-only
+# arm resolving several files against several standards and its count moves with
+# how a run orders those reads.
 max_turns = 30
 
 # The handoff name comes off the branch slug, which the arm pins to
@@ -25,14 +28,13 @@ paths = [
   ".canon/teach/01-regex/reference/reading-patterns.md",
 ]
 
-# The two ways this step fails silently, both of them a run that wrote the
-# destination itself rather than handing it off, in either wiki folder. The
-# lesson rule has no entry here on purpose: a promoted lesson arrives as a
-# second block inside the handoff file rather than as a file of its own, so an
-# extension glob would pass on the run it names.
+# A run that wrote the destination itself rather than handing it off, in either
+# place the page could land. The lesson rule has no entry here on purpose: a
+# promoted lesson arrives as a second block inside the handoff file rather than
+# as a file of its own, so an extension glob would pass on the run it names.
 absent = [
-  ".claude/wiki/tools/*.md",
-  ".claude/wiki/concepts/*.md",
+  ".claude/wiki/*/*.md",
+  "docs/**/*.md",
 ]
 
 # One skill owns the durable writes, so this pass reaches the handoff and
@@ -50,26 +52,26 @@ write_scope = [
   ".canon/tmp/index-reminder/**",
 ]
 
-# The reply names the destination it proposed. The wiki prefix is the
+# The reply names the destination it proposed. The docs prefix is the
 # load-bearing token: a reply naming the page without a destination reads the
 # same whether the routing test ran or not.
-reply = [".claude/wiki/"]
+reply = ["docs/"]
 
 manual = [
-  "The destination sits in the wiki folder that matches who owns the subject, rather than in whichever one came first. Semantic: both folders exist and both are under the prefix the reply assertion checks, so the sub-folder choice is a judgment no pattern separates. The measured run landed on the concepts folder, which is correct for a subject no single vendor owns.",
-  "The proposal names what the destination expects that the page does not carry, which is the sentence naming who owns the subject. Semantic: the page body in the handoff is prose either way, and a pattern over it cannot tell a supplied source line from a copied paragraph. The measured run supplied one.",
-  "The page body arrives inside a fence, so a heading in the page is not read as a second destination. Semantic: a pattern over the fence line passes on a body that carries no heading to protect, which is the case it exists for. The measured run fenced it.",
-  "A run against a project with no wiki folder refuses and names the command that creates one. Unwired: this arm seeds a wiki, because the refusal path writes nothing and would assert none of the routing. Splitting it into a second arm is the way to cover it.",
+  "The destination sits under docs/ rather than under the wiki that is already present in the project. Semantic: a pattern over the heading only confirms a docs/ prefix, not that the run weighed the wiki and rejected it rather than never considering it. The correct run recognizes regex reading patterns as owned by nobody, which the standard now routes to docs instead of a wiki subfolder.",
+  "The proposal names what the destination expects that the page does not carry, which is whatever standards/docs.md requires a docs page to state that a workspace reference page does not. Semantic: the page body in the handoff is prose either way, and a pattern over it cannot tell a supplied line from a copied paragraph.",
+  "The page body arrives inside a fence, so a heading in the page is not read as a second destination. Semantic: a pattern over the fence line passes on a body that carries no heading to protect, which is the case it exists for.",
+  "A run against a project with no wiki folder still resolves this page to docs without a wiki refusal, since the subject was never wiki-bound. Unwired: this arm seeds a wiki anyway, to prove the routing test passes over it rather than defaulting to whatever destination exists.",
   "The lesson was neither proposed nor carried into the handoff. Semantic: a promoted lesson lands as a second block inside the same file, and no path assertion separates one block from two.",
   "The glossary was considered alongside the reference page rather than passed over. Semantic: a run that proposes one page and a run that proposes both satisfy every assertion above, and nothing here decides which is correct.",
   "Promotion was proposed rather than assumed. Unwired: the invocation confirms in advance, so a run that skipped the proposal and wrote the handoff directly passes every assertion above. The waiting half is what a headless arm cannot reach.",
 ]
 
-# One heading per destination, naming the path. The wiki prefix is what says the
+# One heading per destination, naming the path. The docs prefix is what says the
 # routing test ran rather than that a file appeared.
 [[content]]
 path = ".canon/tmp/teach-promotion/promote-regex.md"
-pattern = '^## \.claude/wiki/'
+pattern = '^## docs/'
 
 # The source line under the heading. Without it the fold lands a page with no
 # record of which workspace produced it, and the workspace holds the only copy
