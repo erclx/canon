@@ -31,6 +31,15 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/bare-flag-repair.sh"
           }
         ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/unattended-agent-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

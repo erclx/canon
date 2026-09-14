@@ -46,6 +46,13 @@ const INERT_PAYLOAD = JSON.stringify({
 interface ActingCase {
   /** Exit code the acting branch leaves, where a blocking hook leaves 2. */
   readonly code?: number
+  /**
+   * Overrides applied on top of the spawned process's own environment, for a
+   * hook whose acting branch reads a variable rather than the payload. A key
+   * mapped to `undefined` is deleted rather than left at whatever the runner
+   * happens to carry.
+   */
+  readonly env?: Record<string, string | undefined>
   readonly expect: string
   readonly payload: (nonce: string) => string
   /** Prepended to the stripped PATH, for a hook whose acting branch shells out. */
@@ -96,15 +103,21 @@ const run = (
   payload?: string,
   path?: string,
   root?: string,
+  env?: Record<string, string | undefined>,
 ): Promise<Run> =>
   new Promise((resolve) => {
     const started = performance.now()
+    const childEnv: NodeJS.ProcessEnv = {
+      ...process.env,
+      CLAUDE_PROJECT_DIR: root ?? join(fixture, 'project'),
+      PATH: path ?? hookPath,
+    }
+    for (const [key, value] of Object.entries(env ?? {})) {
+      if (value === undefined) delete childEnv[key]
+      else childEnv[key] = value
+    }
     const child = spawn('bash', [hook], {
-      env: {
-        ...process.env,
-        CLAUDE_PROJECT_DIR: root ?? join(fixture, 'project'),
-        PATH: path ?? hookPath,
-      },
+      env: childEnv,
       stdio: ['pipe', 'pipe', 'pipe'],
     })
     let stdout = ''
@@ -351,6 +364,18 @@ beforeAll(() => {
           tool_name: 'Write',
         }),
     },
+    'unattended-agent-guard.sh': {
+      code: 2,
+      env: { CLAUDE_CODE_SESSION_ATTENDED: '0' },
+      expect: 'may not call the Agent tool',
+      payload: (nonce) =>
+        payloadFor({
+          session_id: nonce,
+          tool_input: { subagent_type: 'general-purpose' },
+          tool_name: 'Agent',
+        }),
+      stream: 'stderr',
+    },
   }
 
   // Last, so nothing else in this setup is writing into it any more. A root the
@@ -410,6 +435,8 @@ for (const tree of TREES) {
             hook,
             expected.payload(`${tree.label}-${name}`),
             expected.path,
+            undefined,
+            expected.env,
           )
 
           expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
@@ -734,6 +761,64 @@ describe('seeds standards-audit.sh runner', () => {
       expect(result.stdout).toContain('nothing checked')
       expect(result.stdout).toContain('no record')
       expect(result.code).toBe(0)
+    },
+  )
+})
+
+// Held local rather than seeded, per the canon-no-seed marker on the file
+// itself, so it exists in .claude/hooks/ alone and the directory walk above
+// never reaches a seed copy to test.
+//
+// The acting case proves the denial fires on the one value the hook can back.
+// Everything else, unset included, is a session this reading cannot classify,
+// and classifying it wrong in either direction is worse than saying nothing:
+// blocking it traps a session the reading never measured, and reporting a
+// pass claims a verdict the hook has no basis for.
+describe('unattended-agent-guard.sh classification boundary', () => {
+  const hook = join(ROOT, '.claude/hooks/unattended-agent-guard.sh')
+
+  const payload = (): string =>
+    payloadFor({ tool_input: {}, tool_name: 'Agent' })
+
+  it.concurrent(
+    'should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED is unset',
+    async ({ expect }) => {
+      const result = await run(hook, payload(), undefined, undefined, {
+        CLAUDE_CODE_SESSION_ATTENDED: undefined,
+      })
+
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED holds a value other than 0',
+    async ({ expect }) => {
+      const result = await run(hook, payload(), undefined, undefined, {
+        CLAUDE_CODE_SESSION_ATTENDED: '1',
+      })
+
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should deny a Task call the same as an Agent call when unattended',
+    async ({ expect }) => {
+      const result = await run(
+        hook,
+        payloadFor({ tool_input: {}, tool_name: 'Task' }),
+        undefined,
+        undefined,
+        { CLAUDE_CODE_SESSION_ATTENDED: '0' },
+      )
+
+      expect(result.stderr).toContain('may not call the Agent tool')
+      expect(result.code).toBe(2)
     },
   )
 })
