@@ -1,0 +1,8 @@
+---
+title: Context
+subtitle: Per-domain narrative loaded on demand
+---
+
+# Context
+
+- [Retrieval](retrieval.md): chunk store size and how it is queried

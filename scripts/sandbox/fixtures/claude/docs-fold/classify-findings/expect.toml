@@ -1,0 +1,41 @@
+# What a correct `/docs-fold` run leaves behind on the classify-findings arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# canon/context/retrieval.md carries an uncommitted edit that appended a
+# branch-narrated re-measurement below the count it restates, instead of
+# rewriting the count in place. That is the exact pattern Step 10's classify
+# call exists to catch after Step 3 and Step 7 have already run, whatever
+# either step's own session judgment did or did not catch on its own.
+
+# No backend is configured in the sandbox, so the regex layer is the only
+# deterministic one. `diffPatternVerdict` never returns REPLACE, only KEEP,
+# HISTORY, or MOVE, so the finding this arm measures reads HISTORY: the added
+# paragraph carries "moved again" and "at this branch", both narration
+# patterns `src/context/classify/patterns.ts` matches.
+reply = ["Classify", "regex ran"]
+
+write_scope = ["canon/**"]
+
+# Unmeasured against a live run. Set to the harness default rather than a
+# number nobody has read a clean run against yet.
+max_turns = 30
+
+manual = [
+  "The old count, 42,000, no longer appears anywhere in canon/context/retrieval.md. Unwired: `absent` asserts over paths rather than content, and there is no path to assert absent here.",
+  "No narration phrase (`moved again`, `at this branch`, or similar) survives in canon/context/retrieval.md. Unwired: same reason.",
+]
+
+# The new count is stated once, in the decision's own sentence, once the
+# narrated paragraph below it has been folded back in rather than left beside
+# the count it restates.
+[[content]]
+path = "canon/context/retrieval.md"
+pattern = "58,500 chunks"
+
+# The decision's own reasoning survives the rewrite. A run that dropped the
+# paragraph instead of rewriting it in place loses the reasoning along with
+# the narration.
+[[content]]
+path = "canon/context/retrieval.md"
+pattern = "blurs the boundary a citation should point at"

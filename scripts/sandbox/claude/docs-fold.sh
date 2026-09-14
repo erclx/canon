@@ -10,7 +10,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "receipt-sweep"
+  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "receipt-sweep" "classify-findings"
 
   case "$SELECTED_OPTION" in
   "drift")
@@ -164,6 +164,26 @@ stage_setup() {
     log_info "         Check it with: canon sandbox check claude:docs-fold receipt-sweep"
     log_info "         One receipt deleted, one decline folded into a **Why:** line, the control untouched"
     log_info "         One expectation needs a reader and reports as unchecked."
+    ;;
+  "classify-findings")
+    stage_fixtures claude docs-fold classify-findings 01-initial
+    git add . && git commit -m "feat(retrieval): document the chunk size decision" --no-verify -q
+
+    stage_fixtures claude docs-fold classify-findings 02-remeasure
+
+    log_step "Scenario ready: docs-fold classifies what it writes"
+    log_info "Context: canon/context/retrieval.md is committed with one chunk count"
+    log_info "  An uncommitted edit appended a branch-narrated re-measurement below it"
+    log_info "  instead of rewriting the count in place, the exact pattern this closes"
+    log_info ""
+    log_info "Narrate nothing about the re-ingest or the new count. The arm fails if the"
+    log_info "classify step only reaches an entry the prompt named."
+    log_info ""
+    log_info "Action:  /docs-fold"
+    log_info "Expect:  declared in fixtures/claude/docs-fold/classify-findings/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:docs-fold classify-findings"
+    log_info "         The entry holds 58,500 once, the narration is gone, 42,000 is gone"
+    log_info "         Two expectations need a reader and report as unchecked."
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

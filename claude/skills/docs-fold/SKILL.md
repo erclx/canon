@@ -108,6 +108,7 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md` and `${CLAUDE_SKILL_DIR}/../../standards/architecture.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
 - Close a decision entry in `canon/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
 - Leave every decision entry this run did not write alone, anchored or not. The rule is scoped forward, so an entry written before it is dated by blame rather than by a read. Step 5 reports a stale anchor and no step writes one on an entry it did not amend.
@@ -160,6 +161,7 @@ Reuse the diff from the baseline above, names and content both. For each domain 
 
 - Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
 - For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
+- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule Step 3 applies to the other four canonical doc types.
 - Write a reference to another entry as the path that entry sits at, rather than as its bare filename. `${CLAUDE_SKILL_DIR}/../../standards/context.md` states the form, and a bare name strands the reference once a domain splits into subfolders.
 
 ### When the diff removes a capability
@@ -245,11 +247,24 @@ Output one line per file swept:
 
 If nothing qualifies, skip this step silently.
 
+## Step 10: classify what this run wrote
+
+Skip this step silently when Steps 3 and 7 wrote no canonical doc file this run. There is nothing of this run's own to check.
+
+Resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
+
+Findings never stop the fold. A refusal or a missing subcommand on an older installed binary reports one line, per that reference, and the fold continues either way.
+
 ## After completion
 
 Output one line per file updated:
 
 `✅ Updated: .claude/<filename>`
+
+Step 10 adds its own lines when it applied a finding:
+
+`✏ Rewrote: <file>`
+`✂ Cut: <file>`
 
 If no files were updated and nothing was swept, output:
 

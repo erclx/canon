@@ -1,0 +1,16 @@
+---
+title: Retrieval
+description: Chunk store size and how it is queried
+---
+
+# Retrieval
+
+## Overview
+
+The retrieval index holds chunk embeddings for every ingested document. A query re-ranks the top candidates against the question before returning them.
+
+## Key technical decisions
+
+### Chunk size is fixed at ingestion
+
+The index holds 42,000 chunks today, each capped at 512 tokens. A larger chunk raises recall and blurs the boundary a citation should point at, so ingestion splits every document at a fixed size rather than one derived from its own structure.
