@@ -26,7 +26,20 @@
 # HISTORY, or MOVE. The wireframe edit names a `.tsx` file in backticks, which
 # `src/context/classify/patterns.ts`'s `MECHANISM_IN_WIREFRAME` pattern
 # matches, firing a regex-decided MOVE that `classify.md` says to cut outright.
-reply = ["SearchPanel.tsx"]
+
+# Pinned on the report line itself, not on the source-file name alone. A run
+# that mentions "SearchPanel.tsx" while narrating an incorrect move into
+# another file, or while describing a rewrite that never actually cut the
+# sentence, still passed a looser check on that name. The exact `✂ Cut:` line
+# only prints when Step 10 itself applied a regex-decided MOVE per
+# `classify.md`'s Report section, so it is the one string that distinguishes
+# "Step 10 ran and cut it" from every other way the file could end up clean.
+# `canon sandbox check`'s content matcher runs every pattern with the `m`
+# flag (`src/sandbox/expect.ts`), which makes `$` match before any newline
+# rather than only at the true end of file, so an end-of-paragraph anchor on
+# the surviving text cannot rule out a trailing addition either; a literal
+# string unique to the correct code path is what this arm has instead.
+reply = ["✂ Cut: canon/wireframes/search-panel.md"]
 
 write_scope = ["canon/**"]
 
@@ -37,7 +50,7 @@ max_turns = 30
 manual = [
   "The old count, 42,000, no longer appears anywhere in canon/context/retrieval.md. Unwired: `absent` asserts over paths rather than content, and there is no path to assert absent here.",
   "No narration phrase (`moved again`, `at this branch`, or similar) survives in canon/context/retrieval.md. Unwired: same reason.",
-  "`src/features/search/SearchPanel.tsx` no longer appears anywhere in canon/wireframes/search-panel.md. Unwired: same reason.",
+  "`src/features/search/SearchPanel.tsx` no longer appears anywhere in canon/wireframes/search-panel.md, and no new section such as `## Hidden contracts` was added to canon/context/retrieval.md to hold it. Unwired: same reason, and the `m`-flag content matcher above cannot express an end-of-file anchor either.",
 ]
 
 # The new count is stated once, in the decision's own sentence, once the
@@ -64,3 +77,4 @@ pattern = "streaming in below it as the query lengthens"
 [[content]]
 path = "canon/wireframes/search-panel.md"
 pattern = "the document title, a one-line snippet, and a relevance score"
+
