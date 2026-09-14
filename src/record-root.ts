@@ -46,8 +46,9 @@ const CANON_SCRATCH = 'tmp'
 /**
  * Every entry that lives under the record root, at the name `.claude/` gave it.
  *
- * These are the twelve ignore patterns the move to `.canon/` collapsed into one,
- * so the list counts entries rather than record folders: `.records.git` is the
+ * These are the twelve ignore patterns the move to `.canon/` collapsed into
+ * one, plus every record folder added since, so the list counts entries
+ * rather than record folders: `.records.git` is the
  * backup history rather than a record, and `README.md` is a file a records pull
  * writes back. `worktrees` is absent because the harness creates a worktree
  * under `.claude/` and requires its target to sit there.
@@ -72,6 +73,7 @@ export const RECORD_ENTRIES: readonly string[] = [
   'review',
   'tasks',
   'teach',
+  'walkthroughs',
 ]
 
 /** Whether a name under `.claude/` is one the record root owns. */

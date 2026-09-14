@@ -242,6 +242,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:markdown-propose` | When a markdown claim needs rewriting and the change should wait for an answer per file |
 | `canon:ux-audit`         | To read UI source for missing states, edge cases, and inconsistencies                   |
 | `canon:ux-measure`       | To start the interface and measure paint, processor, and layout cost                    |
+| `canon:ux-walkthrough`   | To run a multi-finding inspection pass over a running app with the operator             |
 
 ### Ship it
 
