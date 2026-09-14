@@ -1,0 +1,33 @@
+# What a correct `/canon:ux-walkthrough` run leaves behind on the guard-only arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# The seeded tree carries a package.json with no build, dev, or preview script
+# and a CLAUDE.md holding no Commands section, so the skill's own first guard
+# fires before anything is read: there is no running build and no build command
+# to measure against. This is the one path a headless run can reach, since every
+# other step needs a live operator looking at a served page.
+
+# The whole assertion. A correct run touches nothing under the record folder
+# this skill owns, because the guard refuses before Step 1 ever writes a
+# walkthrough file.
+absent = [".canon/walkthroughs/**"]
+
+# A correct run writes nothing at all, so an empty scope is the claim: any path
+# a run touched fails it. Declared rather than left absent, since `write_scope`
+# undeclared skips the check entirely and `[]` asserts the bound.
+write_scope = []
+
+# Observed at 1 turn and $0.09 on 2026-09-14, from one run. The guard fires
+# ahead of any read, so the cost is the cheapest shape this skill can take.
+# Set above the measured run rather than at it, so the ceiling catches a
+# blowup instead of firing on ordinary variance.
+max_turns = 5
+
+# The fixed guard string is the load-bearing token. It is not reworded by
+# anything a run decides, unlike a derived filename or a count.
+reply = ["Nothing to inspect"]
+
+manual = [
+  "The link-before-question order, the batch relay, and measurement read-back never fire on this arm. Unwired: all three need a live operator, a browser, and a served build, none of which a headless run can supply, so this arm proves only the refusal above and claims no coverage of the other nine steps.",
+]
