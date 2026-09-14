@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.85.0](https://github.com/erclx/canon/compare/v4.84.0...v4.85.0) (2026-09-14)
+
+
+### Features
+
+* **claude:** retire memory-review's promote to CLAUDE.md ([#1684](https://github.com/erclx/canon/issues/1684)) ([bb66154](https://github.com/erclx/canon/commit/bb66154ff4b56fe2a4424cf844fe1a062958325f))
+* **records:** push every .canon folder except a named exclusion set ([#1685](https://github.com/erclx/canon/issues/1685)) ([da41f6a](https://github.com/erclx/canon/commit/da41f6a87195fbba723f4da52b55f0a0ed178774))
+
 ## [4.84.0](https://github.com/erclx/canon/compare/v4.83.0...v4.84.0) (2026-09-14)
 
 
