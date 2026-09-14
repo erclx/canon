@@ -49,19 +49,19 @@ The entry is a folder on the sub-area condition rather than on length. `standard
 
 ### Why most citations kept the flat path
 
-The citation surface is what made this split harder than the one `standards/` took. Fifteen files named the flat path and ten of them instruct a target project about its own entry rather than pointing into this repository. A target seeded from `tooling/base/seeds/` carries a flat `development.md`, so retargeting those sites would ship a path that resolves nowhere into every scaffolded project, and no stage here would report it.
+Fifteen files name the flat path and ten of them instruct a target project about its own entry rather than pointing into this repository. A target seeded from `tooling/base/seeds/` carries a flat `development.md`, so retargeting those sites would ship a path that resolves nowhere into every scaffolded project, and no stage here would report it.
 
-Those sites keep the flat spelling, and the citation gate is what that costs. It resolves every `canon/context/*.md` string in the repository against this root, and it passed on all fifteen only because the toolkit's layout matched the layout it seeds. The split ends that coincidence.
+Those sites keep the flat spelling, and the citation gate is what that costs. It resolves every `canon/context/*.md` string in the repository against this root, so a citation naming the pre-split flat path passes only because it describes a target's own layout rather than this repository's.
 
 Two repairs follow, and which one applies turns on whether the surface installs. A line in a file that reaches a target drops the path, since a marker there is toolkit bookkeeping landing in someone else's tree. That covers the seeded `CLAUDE.md` and the `project-commands` guard and the row describing it. A line that stays in this repository carries `<!-- audit-ignore-citations -->` instead, which is `docs/target-projects.md` alone.
 
-Widening the gate by location was the alternative, and it silences a real stale reference in the same trees. Where a stop message has to spell the flat path, a fenced block carries it rather than a marker, since the gate skips fences in markdown.
+Widening the gate by location was the alternative, and it would silence a real stale reference in the same trees. Where a stop message has to spell the flat path, a fenced block carries it rather than a marker, since the gate skips fences in markdown.
 
 ### A prose edit can break a test no stage in that push runs
 
 The Types and Tests stages are scoped to changed files and skip when no TypeScript changed, so a markdown-only push runs neither, and eleven `src/` test files assert over a corpus outside `src/`. `canon/context/development/verification.md` holds the census, the bound it was taken under, and the command to run beside each corpus.
 
-The markdown checkpoints are no longer one of them. `CHECKPOINTS` and the three ban sets ship as literals in `src/markdown/`, and `src/markdown/structure.test.ts` asserts those numbers against itself rather than reading them back off `standards/markdown.md`, which is what the parser it replaced did. Editing a standard that states one of those numbers therefore fails nothing, and the drift between the prose and the shipped value is caught by whoever edits or not at all. `.cspell/banned-spellings.txt` is the file on this surface that a `src/` test does still assert over, through `src/markdown/bans.test.ts`.
+The markdown checkpoints are not one of them. `CHECKPOINTS` and the three ban sets ship as literals in `src/markdown/`, and `src/markdown/structure.test.ts` asserts those numbers against itself rather than reading them back off `standards/markdown.md`. Editing a standard that states one of those numbers therefore fails nothing, and the drift between the prose and the shipped value is caught by whoever edits or not at all. `.cspell/banned-spellings.txt` is the file on this surface that a `src/` test does still assert over, through `src/markdown/bans.test.ts`.
 
 ### The consumed-copies stage fails on its own regeneration
 

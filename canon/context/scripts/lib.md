@@ -21,15 +21,15 @@ Source this in any script that needs terminal output. When `CANON_NON_INTERACTIV
 
 ## `gov.sh`
 
-Narrowed to one function. The payload builder that used to live here is `src/gov/payload.ts`, and `strip_frontmatter` is `src/frontmatter.ts`.
+Narrowed to one function. The payload builder lives in `src/gov/payload.ts`, and `strip_frontmatter` lives in `src/frontmatter.ts`.
 
 - `rule_subdir`: emit a source rule's subdirectory relative to the rules root, or empty when the rule sits at the root. Stays bash permanently
 
-`rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. `manage-sandbox.sh` dropped its own caller when gov injection moved to the real installer, so the dispatcher no longer sources `gov.sh` at all. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
+`rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. `manage-sandbox.sh` does not source `gov.sh`, since gov injection runs through the real installer. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
 
-The bash `strip_frontmatter` treated the first `---` on any line as the start of a frontmatter block, so a document whose body carried two horizontal rules lost everything between them. `stripFrontmatter` in `src/frontmatter.ts` anchors to the first line instead and leaves such a body intact. The docs migration took the TypeScript reading, which means `canon docs <topic>` now emits sections the bash silently swallowed.
+The bash reading of frontmatter treats the first `---` on any line as the start of a frontmatter block, so a document whose body carries two horizontal rules loses everything between them. `stripFrontmatter` in `src/frontmatter.ts` anchors to the first line instead and leaves such a body intact, which is the reading `canon docs <topic>` emits.
 
-The divergence is latent on the current corpus. All 22 documents under `docs/` and `canon/context/` strip byte-identically under both, so the fix guards documents not yet written rather than repairing today's output. Three other inputs diverge and each favors the TypeScript: a file with no trailing newline, a block opening on line 2, and an unterminated block. The last two are the ones worth knowing, since the bash emitted nothing at all for an unterminated block and swallowed a mid-document block that was never frontmatter.
+The divergence is latent on the current corpus. All 22 documents under `docs/` and `canon/context/` strip byte-identically under both, so the difference guards documents not yet written rather than repairing today's output. Three other inputs diverge and each favors the TypeScript reading: a file with no trailing newline, a block opening on line 2, and an unterminated block. The last two are the ones worth knowing, since the bash reading emits nothing at all for an unterminated block and swallows a mid-document block that was never frontmatter.
 
 ## `tooling.sh`
 
@@ -43,7 +43,7 @@ Consumed by `scripts/tooling/{ref,verify,create}.sh` for discovery and name vali
 
 ## `frontmatter.sh`
 
-Sourced by `scripts/docs/list.sh` and `scripts/standards/list.sh`. The index engine that used to sit alongside this function is TypeScript now, in `src/indexes/`.
+Sourced by `scripts/docs/list.sh` and `scripts/standards/list.sh`. The index engine lives in `src/indexes/`, TypeScript rather than bash.
 
 - `read_frontmatter_field`: read a YAML field from a markdown file's frontmatter. Strips wrapping quotes
 
@@ -51,7 +51,7 @@ Sourced by `scripts/docs/list.sh` and `scripts/standards/list.sh`. The index eng
 
 ### Sweep callers by path, not by function name
 
-Before deleting a bash script or lib, grep for the file path in `source`, `exec`, and `bash <path>` form rather than for the names of the functions it defines. Deleting `lib/inject.sh` and `tooling/sync.sh` in migration step 2, a function-name audit found 2 callers where 17 existed: twelve sandbox scripts carried a dead `source` line and five call sites shelled the script, including `manage-init.sh`, which silently stopped installing base tooling. `bun run check:install` still passed, because `run_domain` swallows a failed domain and the gate asserts only on files the tooling stack does not provide. Step 3 repeated it, finding five callers of `manage-gov.sh` where the plan named two. Confirm the gate you cite actually asserts on the deleted code's output rather than trusting its exit code.
+Before deleting a bash script or lib, grep for the file path in `source`, `exec`, and `bash <path>` form rather than for the names of the functions it defines. A function-name audit undercounts real callers: deleting `lib/inject.sh` and `tooling/sync.sh`, such an audit found 2 callers where 17 existed, twelve sandbox scripts carrying a dead `source` line and five call sites shelling the script, including `manage-init.sh`, which silently stopped installing base tooling while `bun run check:install` still passed, because `run_domain` swallows a failed domain and the gate asserts only on files the tooling stack does not provide. Confirm the gate you cite actually asserts on the deleted code's output rather than trusting its exit code.
 
 ### A guard inside a substitution cannot stop the run
 

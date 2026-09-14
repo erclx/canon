@@ -9,17 +9,17 @@ Three stages regenerate a tracked artifact and then assert it did not move. Rege
 
 ## Consumed copies
 
-The Consumed copies stage runs `scripts/core/regen-claude-copies.sh` and then asserts no drift across `.claude/rules`. `standards/` and `snippets/` mirrored here too until each copy stopped answering anywhere but this checkout, which is what closing their install channels left them doing. `internal/` mirrored on a different argument and retired on its own: nothing ever installed it, and both readers of the one standard under it sit at the root beside the source.
+The Consumed copies stage runs `scripts/core/regen-claude-copies.sh` and then asserts no drift across `.claude/rules`. It is the only mirror this stage regenerates: standards and snippets ship with no mirror, since nothing installs their corpus into a project, and `internal/` carries no mirror either, since nothing installs it and both readers of the one standard under it sit at the root beside the source.
 
 The assert reads the unstaged diff, so the first `bun run check` after an edit under `governance/rules/` reports its own regeneration as drift and exits red. Stage the rewritten copy and run again. The failure message asks for a commit while staging is what clears the stage, which is the distinction a ship chain needs, since it regenerates before the step that groups its commits. `canon/context/development/verification.md` records the same shape for the Indexes and Skill references stages.
 
 Staging to clear the stage changes what the next skill in that chain measures. `review-branch` scopes to the staged set whenever one is non-empty, so a run that staged three regenerated rules reviews those three files and reports a clean branch for the source sitting untracked beside them. Reset the index before the review step and let the chain restage at its own commit step. Nothing reports the narrowed scope, since a review of three files is indistinguishable from a branch that changed three files.
 
-`.claude/rules/` is not a whole-directory mirror, because the toolkit authors 72 rules under `governance/rules/` and consumes 67 into `.claude/rules/`, and installing the framework rules here would fire a React rule on a fixture this repository writes. The ui rules are consumed and the framework rules are not, which separates two families this sentence read as one until this repository started rendering surfaces of its own. `internal/governance.toml` carries that reason beside the list. It resolves through `canon gov regen` instead, which reads the stack named in `internal/governance.toml` and installs it with the same machinery `canon gov install` uses for a target.
+`.claude/rules/` is not a whole-directory mirror, because the toolkit authors 72 rules under `governance/rules/` and consumes 67 into `.claude/rules/`, and installing the framework rules here would fire a React rule on a fixture this repository writes. The ui rules are consumed and the framework rules are not, which separates two families a governed-target install treats the same. `internal/governance.toml` carries that reason beside the list. It resolves through `canon gov regen` instead, which reads the stack named in `internal/governance.toml` and installs it with the same machinery `canon gov install` uses for a target.
 
 `canon gov regen`'s `--root` flag defaults to wherever the invoking binary is installed, never to the working directory. Run it bare from a worktree or any checkout other than that install and it looks for `internal/governance.toml` on the wrong tree, refusing there if none exists or regenerating the wrong repository's rules if one does. Pass `--root <literal-path>` naming the checkout being regenerated.
 
-The producer clears `.claude/rules/` before installing, so a rule dropped from the record disappears rather than lingering as an unsourced file. That is also why `internal/rules/` exists: a rule governing toolkit authoring alone needs a source somewhere outside `governance/rules/`, which ships to every target. `internal/rules/` named the internal mirror's one exclusion before this branch retired that mirror entirely, so those rules land at one path now for a simpler reason: nothing under `internal/` mirrors anywhere.
+The producer clears `.claude/rules/` before installing, so a rule dropped from the record disappears rather than lingering as an unsourced file. That is also why `internal/rules/` exists: a rule governing toolkit authoring alone needs a source somewhere outside `governance/rules/`, which ships to every target. Those rules land at the one path they are authored at, since nothing under `internal/` mirrors anywhere.
 
 ## Tooling paths
 
@@ -31,7 +31,7 @@ The whole file is asserted rather than the block alone, since a drift check over
 
 ## Sample content on disk
 
-Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. Moving the docs scenario's heredocs to disk put an `index.md` and a `package.json` on disk, and `canon indexes regen` rebuilds any `index.md` from sibling frontmatter, so `bun run check` rewrote a fixture whose body deliberately disagreed with its sibling and then failed its own drift gate, while prettier reformatted the JSON and the leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers. cspell still reads suffixed files, so spell coverage survives the move.
+Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers. cspell still reads suffixed files, so spell coverage survives the move.
 
 ## Hero
 
@@ -49,7 +49,7 @@ What the script can read bounds what a frame can show. It reads committed catalo
 
 So a template placed a further folder down is skipped by regeneration, by capture, and by the drift gate at once, and nothing reports it, because each is a filter over a listing and a filter matching nothing returns an empty set. The nesting therefore stops at that one level, and `assets/brand/` is safe only because no stage ever looks for the SVG it holds.
 
-Only the markup half reads that way. `captureBases` lists `assets/captures/`, then `readCaptureSet` builds the `.png` and the `.stamp` against `assets/`, which is where `--out assets` puts them, so a set is one base name resolved in two folders rather than three files in one. Splitting them is what let the frames drop the `showcase-` prefix: the prefix existed to separate markup from image inside a single flat listing, and there is no longer a single flat listing to separate.
+Only the markup half reads that way. `captureBases` lists `assets/captures/`, then `readCaptureSet` builds the `.png` and the `.stamp` against `assets/`, which is where `--out assets` puts them, so a set is one base name resolved in two folders rather than three files in one. The frames carry no `showcase-` prefix, since separating markup from image needs no prefix once the two live in separate folders rather than a single flat listing.
 
 ### What the assert covers
 
@@ -69,6 +69,4 @@ That entry is a folder glob rather than a list of frames. The script writes what
 
 ### An exit 2 with no message
 
-`scripts/core/regen-hero.sh` exits 2 with nothing on stderr on roughly one run in five, reported as `✗ Hero regen failed` inside `bun run check`. The rate, the failing command, and what to do about it sit under `## Hero provenance` in `canon/context/development/gates.md`, beside the stage that reports it.
-
-Two accounts of this landed within a day of each other, one here and one there, because the flake fires on any branch that moves a catalog count and nothing pairs the two entries. One is kept and this is the pointer.
+`scripts/core/regen-hero.sh` exits 2 with nothing on stderr on roughly one run in five, reported as `✗ Hero regen failed` inside `bun run check`. The rate, the failing command, and what to do about it sit under `## Hero provenance` in `canon/context/development/gates.md`, beside the stage that reports it, which is the canonical record for this flake rather than a duplicate kept here.
