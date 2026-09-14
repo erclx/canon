@@ -1,27 +1,25 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git-env'
 import { RECORD_ROOTS, recordRoot } from '@/record-root'
 
 /**
- * The folders a backup carries, relative to the record root `workTree` resolves
- * rather than to either root specifically, since the same eleven names sit
- * under whichever one a tree holds.
+ * The legacy `.claude`-root allowlist, read only when a project has not moved
+ * to `.canon/` yet.
  *
- * Nothing bounds this list any more, and the move is what took the bound away.
- * The claude manifest used to ship a folder apiece, so the `# Claude` group
- * named a superset this could be read against; it ships one `.canon/` root
- * entry now and names no folder at all. Spelling the list out is therefore the
- * whole of the protection rather than half of it, since a record folder added
- * under `.canon/` is ignored the moment it exists and enters no payload until
- * a name is written here.
+ * That root still tracks `skills/`, `rules/`, and `hooks/` a backup must never
+ * carry, so it cannot take the exclusion-based reading `foldersAt` applies at
+ * `.canon/`: every top-level entry there is fair game and an allowlist is the
+ * only thing separating a record folder from the vendor's own. A `.canon/` root
+ * carries no such mix, since nothing else lives there, which is what let the
+ * bound move from this list to `EXCLUDED_ENTRIES`.
  *
- * Three counts describe this surface and each is right about a different
- * question, so they are stated apart rather than reconciled. Eleven is what a
- * disk loss would take, which is this list. Twelve is what sat under `.claude/`
- * as an ignored folder before the move, which adds the scratch folder that is
- * deletable without loss and `worktrees/`, whose contents belong to the
+ * Three counts describe what this list once bounded and each is right about a
+ * different question, so they are stated apart rather than reconciled. Eleven
+ * is what a disk loss would take, which is this list. Twelve is what sat under
+ * `.claude/` as an ignored folder before the move, which adds the scratch folder
+ * that is deletable without loss and `worktrees/`, whose contents belong to the
  * enclosing repository already. Thirteen is what the move relocated, which counts
  * ignore entries rather than folders: the twelve less `worktrees/`, which stayed,
  * plus `.records.git/` and the `README.md` a records pull writes back.
@@ -72,6 +70,53 @@ const RETIRED_FOLDERS = [
 
 /** The history directory's own name, which keeps its dot at either record root. */
 const RECORDS_GIT_NAME = '.records.git'
+
+/**
+ * Top-level `.canon/` entries a backup never carries, named rather than
+ * matched by pattern so a reader can see the whole exemption in one place.
+ *
+ * `tmp` is deletable without loss, per the scratch standard. `ordinal-locks`
+ * is transient per claim, and pushing one races the claim it guards.
+ * `.records.git` is the history itself, and reading directories rather than
+ * every entry already keeps a pull's `README.md` out, so this is the one name
+ * that still has to be said: without it a listing would stage the history
+ * into itself.
+ */
+export const EXCLUDED_ENTRIES = [
+  'tmp',
+  'ordinal-locks',
+  RECORDS_GIT_NAME,
+] as const
+
+/**
+ * The record folders sitting at `dir` right now, at either root spelling.
+ *
+ * A `.claude`-spelled directory reads the fixed allowlist, filtered to what
+ * exists, since that root also holds `skills/`, `rules/`, and `hooks/` no
+ * exclusion set names. A `.canon`-spelled directory reads its own top-level
+ * directories less `EXCLUDED_ENTRIES` instead, since nothing else shares that
+ * root and a folder added there is a record folder by construction.
+ *
+ * Takes a directory rather than a project root so `strandedFolders` can ask it
+ * about a candidate root other than the one `workTree` resolved.
+ */
+function foldersAt(dir: string): string[] {
+  if (basename(dir) === '.claude') {
+    return BACKED_FOLDERS.filter((folder) => existsSync(join(dir, folder)))
+  }
+
+  const entries = existsSync(dir)
+    ? readdirSync(dir, { withFileTypes: true })
+    : []
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter(
+      (name) =>
+        !EXCLUDED_ENTRIES.includes(name as (typeof EXCLUDED_ENTRIES)[number]),
+    )
+}
 
 /**
  * The tree a backup stages, which is the record root itself.
@@ -167,6 +212,8 @@ export interface PushReport {
   readonly ok: true
   readonly root: string
   readonly folders: readonly string[]
+  /** A folder in scope this push found on disk but the records index had never tracked. */
+  readonly firstSeen: readonly string[]
   readonly changed: number
   readonly commit?: string
   readonly pushed: boolean
@@ -372,9 +419,10 @@ async function resolveRemote(
  * work tree hard and leaves the stranded copy beside it, which is not a loss but
  * is a tree where two roots disagree and neither is wrong.
  *
- * Only `BACKED_FOLDERS` is read. The scratch folder is deletable by definition
- * and `worktrees/` belongs to the enclosing repository, so neither stranded
- * anywhere costs a record.
+ * Reads `foldersAt` on each candidate, so a `.canon` candidate is checked
+ * against its own exclusion set rather than the `.claude` allowlist. The
+ * scratch folder is deletable by definition and `worktrees/` belongs to the
+ * enclosing repository, so neither stranded anywhere costs a record.
  */
 function strandedFolders(root: string): string[] {
   const resolved = resolve(workTree(root))
@@ -383,9 +431,7 @@ function strandedFolders(root: string): string[] {
     const dir = join(root, candidate)
     if (resolve(dir) === resolved) return []
 
-    return BACKED_FOLDERS.filter((folder) => existsSync(join(dir, folder))).map(
-      (folder) => join(candidate, folder),
-    )
+    return foldersAt(dir).map((folder) => join(candidate, folder))
   })
 }
 
@@ -404,9 +450,15 @@ function refuseSplitRoots(root: string): BackupRefused | undefined {
   )
 }
 
+/** A pathspec-safe subset, plus which of it never entered the records index before. */
+interface FolderScope {
+  readonly scope: readonly string[]
+  readonly firstSeen: readonly string[]
+}
+
 /**
- * The subset of the backed and retired names a pathspec can name: on disk, or
- * already in the records index.
+ * The subset of the present, retired, and previously-tracked names a pathspec
+ * can name.
  *
  * A pathspec matching neither fails the whole `add`, which is why the subset
  * exists. The index half is what covers a folder deleted in full. Reading disk
@@ -415,29 +467,64 @@ function refuseSplitRoots(root: string): BackupRefused | undefined {
  * every other unpushed deletion.
  *
  * The retired names are the same case one level up, where the folder left the
- * backed list rather than the disk, and the index is the only side that still
- * knows it existed.
+ * disk before the index caught up, and the index is the only side that still
+ * knows it existed. At a `.canon` root a folder can leave the same way under a
+ * name `RETIRED_FOLDERS` never anticipated, which is what folding the index
+ * into the candidate set (rather than only using it as a filter) covers.
+ *
+ * `firstSeen` is a folder in scope that disk carries but the index has never
+ * tracked, which is the read a caller reports rather than acts on: a folder
+ * `.canon` picked up that should have been excluded is visible in the push
+ * report instead of entering the payload silently.
  */
-async function scopedFolders(root: string): Promise<string[]> {
+async function scopedFolders(root: string): Promise<FolderScope> {
   const tracked = await records(root, ['ls-files'])
   const indexed = new Set(
     tracked.ok ? tracked.text.split('\n').filter(Boolean).map(topSegment) : [],
   )
 
-  return [...BACKED_FOLDERS, ...RETIRED_FOLDERS].filter(
+  const present = new Set(foldersAt(workTree(root)))
+  const retired = RETIRED_FOLDERS.filter(
     (folder) => existsSync(join(workTree(root), folder)) || indexed.has(folder),
   )
+  const scope = [...new Set([...present, ...retired, ...indexed])].sort()
+  const firstSeen = scope.filter(
+    (folder) => present.has(folder) && !indexed.has(folder),
+  )
+
+  return { scope, firstSeen }
 }
 
 function topSegment(path: string): string {
   return path.split('/')[0]
 }
 
-/** What a report names, which is the folders a reader can go and open. */
-function presentFolders(root: string): string[] {
-  return BACKED_FOLDERS.filter((folder) =>
-    existsSync(join(workTree(root), folder)),
-  )
+/**
+ * What a report names, which is the folders a reader can go and open.
+ *
+ * Exported so the scratch-evidence walk and the push and pull help text read
+ * the same resolved set rather than each re-deriving it against
+ * `BACKED_FOLDERS`, which is silently wrong at a `.canon` root.
+ */
+export function presentFolders(root: string): string[] {
+  return foldersAt(workTree(root))
+}
+
+/**
+ * The record folder names a project could ever carry, without regard to
+ * whether each currently exists: `BACKED_FOLDERS` at the legacy `.claude`
+ * root, since nothing else names a folder there, and the live directory
+ * listing at `.canon`, since nothing bounds that root's names from outside
+ * any more and a name nobody has created yet cannot be listed.
+ *
+ * Exported for `canon records size`, whose own contract reports every folder
+ * whether or not it exists so a caller reading the record gets a stable set
+ * of keys. `presentFolders` filters by existence instead, which is right for
+ * a push report naming what a reader can go and open and wrong here.
+ */
+export function candidateFolders(root: string): string[] {
+  const tree = workTree(root)
+  return basename(tree) === '.claude' ? [...BACKED_FOLDERS] : foldersAt(tree)
 }
 
 function countLines(text: string): number {
@@ -459,7 +546,7 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   const remote = await resolveRemote(root, enclosing)
   if (typeof remote !== 'string') return remote
 
-  const scope = await scopedFolders(root)
+  const { scope, firstSeen } = await scopedFolders(root)
 
   if (scope.length > 0) {
     // `-f` is what carries the payload: every backed folder is ignored by the
@@ -495,7 +582,7 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   const folders = presentFolders(root)
   const head = await records(root, ['rev-parse', '--short', 'HEAD'])
   if (!head.ok) {
-    return { ok: true, root, folders, changed, pushed: false }
+    return { ok: true, root, folders, firstSeen, changed, pushed: false }
   }
 
   const branch = await projectBranch(root, enclosing)
@@ -506,7 +593,15 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   ])
   if (!pushed.ok) return failed('push', pushed)
 
-  return { ok: true, root, folders, changed, commit: head.text, pushed: true }
+  return {
+    ok: true,
+    root,
+    folders,
+    firstSeen,
+    changed,
+    commit: head.text,
+    pushed: true,
+  }
 }
 
 /**
@@ -557,7 +652,7 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
   const target = await records(root, ['rev-parse', 'FETCH_HEAD'])
   if (!target.ok) return failed('rev-parse', target)
 
-  const scope = await scopedFolders(root)
+  const { scope } = await scopedFolders(root)
 
   if (scope.length > 0) {
     const dirty = await records(root, ['status', '--porcelain', '--', ...scope])

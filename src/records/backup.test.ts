@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git-env'
 import {
   BACKED_FOLDERS,
+  EXCLUDED_ENTRIES,
   projectBranch,
   pullRecords,
   pushRecords,
@@ -119,13 +120,10 @@ describe('BACKED_FOLDERS', () => {
     ).toEqual([])
   })
 
-  // Every other assertion in this file reads the list rather than pinning it,
-  // so a name arriving or leaving passes them all. The payload is what a disk
-  // loss would take on one side and what a backup ships to a private remote on
-  // the other, so both directions are worth failing on: a name added by
-  // accident enlarges what leaves the machine, and a name dropped by accident
-  // strands a folder nothing else copies.
-  it('should name exactly the record folders a backup carries', () => {
+  // This is the legacy `.claude`-root allowlist now, read only for a project
+  // that has not moved to `.canon/` yet. A `.canon` root reads its own
+  // directory listing less EXCLUDED_ENTRIES instead, asserted below.
+  it('should name exactly the record folders a legacy .claude root carries', () => {
     expect([...BACKED_FOLDERS]).toEqual([
       'diagrams',
       'groundwork',
@@ -138,6 +136,16 @@ describe('BACKED_FOLDERS', () => {
       'teach',
       'transcripts',
       'walkthroughs',
+    ])
+  })
+})
+
+describe('EXCLUDED_ENTRIES', () => {
+  it('should name exactly the top-level .canon entries a push never carries', () => {
+    expect([...EXCLUDED_ENTRIES]).toEqual([
+      'tmp',
+      'ordinal-locks',
+      '.records.git',
     ])
   })
 })
@@ -337,6 +345,38 @@ describe('pushRecords', () => {
     expect(tracked).not.toContain('skills/')
     expect(tracked).not.toContain('ARCHITECTURE.md')
     expect(tracked).not.toContain('.tmp/')
+  })
+
+  // The `.canon` counterpart of the allowlist test above: nothing bounds the
+  // folder set from outside any more, so a new top-level directory is carried
+  // and named as first seen, while the two excluded folder names are not.
+  it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
+    const canonRoot = mkdtempSync(join(tmpdir(), 'canon-backup-canon-'))
+    mkdirSync(join(canonRoot, '.canon', 'memory'), { recursive: true })
+    writeFileSync(join(canonRoot, '.canon', 'memory', 'entry.md'), '# memory\n')
+    mkdirSync(join(canonRoot, '.canon', 'tmp'), { recursive: true })
+    writeFileSync(join(canonRoot, '.canon', 'tmp', 'scratch.md'), 'scratch\n')
+    mkdirSync(join(canonRoot, '.canon', 'ordinal-locks', '01'), {
+      recursive: true,
+    })
+    await git(['init', '--quiet', canonRoot])
+
+    const canonGitDir = join(canonRoot, '.canon', '.records.git')
+    await git(['--git-dir', canonGitDir, 'init'])
+    await git(['--git-dir', canonGitDir, 'remote', 'add', 'origin', ORIGIN])
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.firstSeen).toEqual(['memory'])
+
+    const tracked = await trackedOnOrigin(canonRoot)
+    expect(tracked).toContain('memory/entry.md')
+    expect(tracked).not.toContain('tmp/')
+    expect(tracked).not.toContain('ordinal-locks/')
+
+    rmSync(canonRoot, { recursive: true, force: true })
   })
 
   it('should commit nothing on a second push that changed no record', async () => {

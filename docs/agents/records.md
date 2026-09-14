@@ -126,7 +126,7 @@ Exit codes: `0` reported the next ordinal, or `--claim` created the folder. `1` 
 
 ## Size
 
-`canon records size` reports what each record folder holds and how much of it is recent. It reads the ten backed folders named under Push and pull, plus the scratch folder, and it gates nothing.
+`canon records size` reports what each record folder holds and how much of it is recent. It reads the same backed folders push carries, resolved the same way, plus the scratch folder, and it gates nothing.
 
 ```bash
 canon records size
@@ -138,7 +138,7 @@ canon records size --json
 | `--json`        | Add a machine-readable record on stdout       |
 | `--root <path>` | Project root, defaulting to the main worktree |
 
-The table carries one row per folder that exists, heaviest first, with the file count, the bytes, a count for each growth window, and the dates of the least and most recently written file. Those dates render in the machine's local time, which is the calendar day whoever wrote the file was living in, and the reading is per-machine already. Folders that do not exist are named on one line below it rather than printed as rows of zeros. The record a `--json` call emits carries every folder either way, each with a `present` flag, so a caller reading the record gets a stable set of keys and can tell an absent folder from one the reading skipped.
+The table carries one row per folder that exists, heaviest first, with the file count, the bytes, a count for each growth window, and the dates of the least and most recently written file. Those dates render in the machine's local time, which is the calendar day whoever wrote the file was living in, and the reading is per-machine already. Folders that do not exist are named on one line below it rather than printed as rows of zeros. At the legacy `.claude` root, the record a `--json` call emits carries every folder in the fixed list either way, each with a `present` flag, so a caller reading the record gets a stable set of keys and can tell an absent folder from one the reading skipped. At a `.canon` root, the folder set is read off the directory itself rather than off a fixed list, so an absent folder is not listed at all: nothing enumerates a name nobody has created yet.
 
 Ordering by weight is what makes the reading worth taking. A folder listed alphabetically hides behind its neighbors, and the row a reader came for is the one that grew.
 
@@ -150,7 +150,7 @@ The scratch folder is read here and skipped by a backup, because deletable witho
 
 The window counts read `mtime`, so what they report is a file written inside the window rather than one created there. An entry edited long after it landed reads as recent, which overstates growth and never understates it, and these folders are append-mostly so the two readings agree on nearly every file. The one reading that is wrong rather than early is a machine restored by `canon records pull`, which resets the work tree hard and re-dates every file it writes, so a window taken there counts the restore. Nothing on the filesystem separates the two, since a restored file is new by every stamp it carries.
 
-Exit codes: `0` the reading completed, `1` refused. The one refusal is `no-folder`, raised when the project holds neither record root. A project holding a root and no records is empty rather than absent, and each folder's own `present` flag already says which of the ten it carries.
+Exit codes: `0` the reading completed, `1` refused. The one refusal is `no-folder`, raised when the project holds neither record root. A project holding a root and no records is empty rather than absent: at the legacy `.claude` root each folder's own `present` flag says which ones it carries, and at a `.canon` root the folder list itself is already the answer, since nothing absent is named.
 
 ## Push and pull
 
@@ -162,9 +162,9 @@ canon records push --json
 canon records pull
 ```
 
-The backed folders are `diagrams`, `groundwork`, `intake`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`, all under whichever record root the project carries. They are the record root's own entries less three: `tmp`, which is deletable without loss, `.claude/worktrees/`, whose contents belong to the project repository already, and `.records.git/`, which is the history the rest are pushed into. Nothing bounds the list from outside any more, since the claude manifest ships one `.canon/` root entry and names no folder, so spelling the nine out is what keeps a record folder added later from silently entering the payload. Each name is a top-level record folder and every archive sits inside the one it archives, so the list stays at one entry per surface however many archives appear. It is a constant rather than configuration, and it deliberately does not match the six record kinds `validate` hardcodes.
+At the `.canon` root, the backed folders are every top-level directory less three: `tmp`, which is deletable without loss, `ordinal-locks`, whose entries are transient per claim and would race the claim they guard, and `.records.git`, which is the history the rest are pushed into. Nothing bounds the set from outside, since the claude manifest ships one `.canon/` root entry and names no folder, so a record folder added later enters the payload on its own rather than waiting on a name written here. A push names each folder in scope that the records index has never tracked before, so a folder that picked up a name by mistake, such as a misrouted scratch write, is visible in the report rather than entering the payload silently. The legacy `.claude` root keeps a fixed allowlist instead, since that root also holds tracked `skills/`, `rules/`, and `hooks/` a push must never carry, and an exclusion set there would stage all three. Each name is a top-level record folder and every archive sits inside the one it archives, so the set stays at one entry per surface however many archives appear, and it deliberately does not match the six record kinds `validate` hardcodes.
 
-Records are gitignored by design, so the history lives in a second git directory at `.records.git` inside the record root, with that root as its work tree. Both resolve off the root together rather than folder by folder, since a history opened at one root beside a work tree at the other would stage the deletion of every folder a move relocated. Every path stays where it is, which is what a separate checkout could not do. The verbs stage the nine folders by explicit pathspec with `--force`, so nothing outside them can enter the index however the ignore rules read, and the project working tree and its index are never touched. Each pathspec is a bare folder name and git reads it against the current directory rather than against the work tree the same call names, so the invocation carries `-C` at the work tree beside the other two flags. That is what lets either verb run from a linked worktree under `.claude/worktrees/`, which sits inside the records work tree and would otherwise prefix every name with its own path.
+Records are gitignored by design, so the history lives in a second git directory at `.records.git` inside the record root, with that root as its work tree. Both resolve off the root together rather than folder by folder, since a history opened at one root beside a work tree at the other would stage the deletion of every folder a move relocated. Every path stays where it is, which is what a separate checkout could not do. The verbs stage the backed folders by explicit pathspec with `--force`, so nothing outside them can enter the index however the ignore rules read, and the project working tree and its index are never touched. Each pathspec is a bare folder name and git reads it against the current directory rather than against the work tree the same call names, so the invocation carries `-C` at the work tree beside the other two flags. That is what lets either verb run from a linked worktree under `.claude/worktrees/`, which sits inside the records work tree and would otherwise prefix every name with its own path.
 
 ### Setup
 
@@ -196,7 +196,7 @@ Point it at a private repository, and at one that is not a remote of the project
 
 `split-roots` runs ahead of every gate below it and fires on a half-migrated tree, which is what a `canon migrate records` run that failed partway leaves. `recordRoot` answers for the whole tree on the first root that exists, so a folder left at the old root is absent from the work tree while the records index still names it, and an unguarded `add -A` would stage its deletion and drop it from the remote on the next push. Finish the move, or put the stranded folders back beside the others.
 
-The two `pull` refusals exist because the directions are not symmetric. A push only adds, while a pull onto a machine holding work that never left it would discard that work. Resolve either by running `push` first, or by moving the local folders aside. A machine holding none of the ten has nothing to lose, so a restore onto a fresh checkout runs straight through.
+The two `pull` refusals exist because the directions are not symmetric. A push only adds, while a pull onto a machine holding work that never left it would discard that work. Resolve either by running `push` first, or by moving the local folders aside. A machine holding no backed folders has nothing to lose, so a restore onto a fresh checkout runs straight through.
 
 ### When it runs
 
