@@ -65,9 +65,9 @@ It tells a release-please pull request apart from an ordinary one by two fixed s
 
 The scan reads a title and a body with every fenced block dropped and every inline code span blanked first, the same two exclusions `canon markdown audit` takes from its own ban scan over the same kind of text. A link destination stays unmasked, unlike the ban scan's reading, because a release-please body's real semver reference sits inside its generated compare link and masking it would empty the record on the one pull request the check exists to pass.
 
-The code-span exclusion exists because a test fixture can carry its own version-shaped name inside a backticked span, which a naive scan of every fenced span would flag as a leaked label.
+The code-span exclusion exists because a test fixture can carry its own version-shaped name inside a backticked span, which a naive scan of every code span would flag as a leaked label.
 
-A span whose whole content is a version token reads as a hit. A token folded into longer content clears the check, which is the fixture-name shape the exclusion above protects. A phase label quoted alone in its own span still needs the board-identifier check to catch it, since the phase-label check alone would clear it.
+The board-identifier check (`VERSION_SPAN` in `src/labels/phase.ts`) reads a span whose whole content is a version token as a hit. A token folded into longer content clears it, which is the fixture-name shape the exclusion above protects. A phase label quoted alone in its own span still needs that check to catch it, since the phase-label check alone would clear it.
 
 The carve-out stays, leaving authors responsible for a label quoted alone in its own span, rather than narrowing it to fenced blocks alone or dropping it and giving up every leak written with no backticks, the common case the check was built for. `standards/versioning.md` states the same three-way split.
 
