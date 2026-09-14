@@ -26,6 +26,26 @@ import {
 } from '@/context/architecture'
 import { auditCitations, type CitationReport } from '@/context/citations'
 import {
+  CANONICAL_DOC_TYPES,
+  type CanonicalDocType,
+} from '@/context/classify/extract'
+import {
+  classifyDiff,
+  classifySweep,
+  type ClassifyOutcome,
+  type ClassifyRefusal,
+  type DiffFinding,
+  type DiffRecord,
+  type SweepFinding,
+  type SweepRecord,
+} from '@/context/classify/run'
+import {
+  CLASSIFIER_CONFIG_REL,
+  type ClassifierBackend,
+  resolveClassifier,
+  writeClassifierConfig,
+} from '@/context/classify/settings'
+import {
   type AuditedFolder,
   DEFAULT_FOLDERS,
   presentNames,
@@ -122,6 +142,411 @@ export function register(program: Command): void {
     .action(async (path: string | undefined, opts: AuditCommandOptions) => {
       process.exitCode = await runAudit(path, opts)
     })
+
+  const classify = context
+    .command('classify')
+    .description(
+      'Classify canonical-doc content as keep, replace/rewrite, history, or move',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+
+  classify
+    .command('diff')
+    .description(
+      'Classify the chunks a git range changed, each with the section it landed in',
+    )
+    .argument('[path]', 'Project root, defaulting to the current directory')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--base <ref>', 'Far side of the range, defaulting to the trunk')
+    .option(
+      '--doc-types <list>',
+      `Comma-separated canonical doc types (default: all five: ${CANONICAL_DOC_TYPES.join(', ')})`,
+    )
+    .option(
+      '--backend <name>',
+      'Override the resolved model backend for this run',
+    )
+    .option('--model <name>', 'Override the resolved model name for this run')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'The regex layer always runs. The model layer runs only when a',
+        'backend resolves through `canon context classifier show`, and a',
+        'configured-but-unreachable backend warns and falls back to regex',
+        'rather than failing the run.',
+        '',
+        'Exit codes:',
+        '  0  the run completed, whatever the findings say',
+        '  1  refused: a bad range or a file this could not read',
+        '',
+        'Examples:',
+        '  canon context classify diff',
+        '  canon context classify diff --base origin/main --json',
+        '  canon context classify diff --doc-types context,wireframes',
+        '',
+      ].join('\n'),
+    )
+    .action(async (path: string | undefined, opts: ClassifyDiffOptions) => {
+      process.exitCode = await runClassifyDiff(path, opts)
+    })
+
+  classify
+    .command('sweep')
+    .description(
+      'Classify every section of the five canonical doc types, split at H3',
+    )
+    .argument('[path]', 'Project root, defaulting to the current directory')
+    .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--doc-types <list>',
+      `Comma-separated canonical doc types (default: all five: ${CANONICAL_DOC_TYPES.join(', ')})`,
+    )
+    .option(
+      '--backend <name>',
+      'Override the resolved model backend for this run',
+    )
+    .option('--model <name>', 'Override the resolved model name for this run')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the run completed, whatever the findings say',
+        '  1  refused: a file this could not read',
+        '',
+        'Examples:',
+        '  canon context classify sweep',
+        '  canon context classify sweep --doc-types design,requirements --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (path: string | undefined, opts: ClassifySweepOptions) => {
+      process.exitCode = await runClassifySweep(path, opts)
+    })
+
+  const classifier = context
+    .command('classifier')
+    .description('Read or write the project classifier setting')
+    .helpOption('-h, --help', 'Show this help message')
+
+  classifier
+    .command('show')
+    .description(
+      'Report the backend and model that would run, and which source decided it',
+    )
+    .argument('[path]', 'Project root, defaulting to the current directory')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .action((path: string | undefined, opts: { json?: boolean }) => {
+      runClassifierShow(path, opts)
+    })
+
+  classifier
+    .command('set')
+    .description('Write the project classifier setting')
+    .argument('[path]', 'Project root, defaulting to the current directory')
+    .helpOption('-h, --help', 'Show this help message')
+    .requiredOption('--backend <name>', 'ollama or off')
+    .option('--model <name>', 'Model name, required when --backend is ollama')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .action((path: string | undefined, opts: ClassifierSetOptions) => {
+      process.exitCode = runClassifierSet(path, opts)
+    })
+}
+
+interface ClassifyDiffOptions {
+  readonly json?: boolean
+  readonly base?: string
+  readonly docTypes?: string
+  readonly backend?: string
+  readonly model?: string
+}
+
+interface ClassifySweepOptions {
+  readonly json?: boolean
+  readonly docTypes?: string
+  readonly backend?: string
+  readonly model?: string
+}
+
+interface ClassifierSetOptions {
+  readonly json?: boolean
+  readonly backend: string
+  readonly model?: string
+}
+
+function parseDocTypes(
+  list: string | undefined,
+): readonly CanonicalDocType[] | string {
+  if (!list) return CANONICAL_DOC_TYPES
+
+  const names = list
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+
+  const invalid = names.filter(
+    (name) => !CANONICAL_DOC_TYPES.includes(name as CanonicalDocType),
+  )
+  if (invalid.length > 0) {
+    return `--doc-types takes ${CANONICAL_DOC_TYPES.join(', ')}: ${invalid.join(', ')}`
+  }
+
+  return names as CanonicalDocType[]
+}
+
+/**
+ * Validates `--backend` up front, so a typo'd value refuses rather than
+ * falling through `resolveBackend`'s tier chain to the environment, the
+ * file, or the default, which reads as the flag having been ignored.
+ */
+function parseBackendFlag(value: string | undefined): string | undefined {
+  if (value === undefined || value === 'ollama' || value === 'off') {
+    return undefined
+  }
+  return `--backend takes ollama or off: ${value}`
+}
+
+/** Widens the extraction refusals with the CLI's own argument-parsing failure. */
+type CliRefusal = ClassifyRefusal | 'bad-flags'
+
+function refuseClassify(
+  reason: CliRefusal,
+  message: string,
+  emitJson: boolean,
+): number {
+  intro('canon context classify')
+  logStep('Refused')
+  logWarn(message)
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ decision: 'refused', reason, message })}\n`,
+    )
+  }
+  return 1
+}
+
+/** How each not-off model-layer state reads in the report. */
+const MODEL_LAYER_LABEL: Record<string, string> = {
+  ran: 'ran',
+  'skipped-no-model': 'skipped, no model resolved for the configured backend',
+  'skipped-unreachable': 'skipped, the configured backend did not answer',
+}
+
+function reportLayers(record: DiffRecord | SweepRecord): void {
+  logStep('Layers')
+  logInfo('regex: ran')
+
+  if (record.modelLayer === 'off') {
+    logInfo('model: off, no backend configured')
+    return
+  }
+
+  logInfo(
+    `model: ${MODEL_LAYER_LABEL[record.modelLayer]} (${record.backend ?? 'none'}${record.model ? `, ${record.model}` : ''})`,
+  )
+  if (record.modelLayer !== 'ran') {
+    logWarn('Falling back to the regex layer alone for this run.')
+  }
+}
+
+function reportFindings(
+  findings: readonly (DiffFinding | SweepFinding)[],
+  label: (finding: DiffFinding | SweepFinding) => string,
+): void {
+  logStep('Findings')
+
+  if (findings.length === 0) {
+    logInfo('Nothing met the extraction floor under the requested doc types.')
+    return
+  }
+
+  const flagged = findings.filter((finding) => finding.verdict !== 'KEEP')
+  logInfo(
+    `${plural(findings.length, 'item')} read, ${plural(flagged.length, 'flagged')}`,
+  )
+
+  if (flagged.length === 0) return
+
+  pipeOutput(
+    flagged
+      .map((finding) => {
+        const chosen =
+          finding.decidedBy === 'model' ? finding.model : finding.regex
+        return `${label(finding)}  ${finding.verdict} (${finding.decidedBy})\n  ${chosen?.quote ? `"${chosen.quote}"  ` : ''}${chosen?.reason ?? ''}`
+      })
+      .join('\n'),
+  )
+}
+
+async function runClassifyDiff(
+  path: string | undefined,
+  opts: ClassifyDiffOptions,
+): Promise<number> {
+  const root = resolve(path ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  const docTypes = parseDocTypes(opts.docTypes)
+  if (typeof docTypes === 'string') {
+    return refuseClassify('bad-flags', docTypes, emitJson)
+  }
+
+  const backendError = parseBackendFlag(opts.backend)
+  if (backendError !== undefined) {
+    return refuseClassify('bad-flags', backendError, emitJson)
+  }
+
+  const result: ClassifyOutcome<DiffRecord> = await classifyDiff(
+    root,
+    opts.base,
+    {
+      docTypes,
+      flags: { backend: opts.backend, model: opts.model },
+    },
+  )
+
+  if (result.kind === 'refused') {
+    return refuseClassify(result.reason, result.message, emitJson)
+  }
+
+  intro('canon context classify diff')
+  reportLayers(result.record)
+  reportFindings(result.record.findings, (finding) => finding.file)
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ decision: 'ok', ...result.record })}\n`,
+    )
+  }
+
+  return 0
+}
+
+async function runClassifySweep(
+  path: string | undefined,
+  opts: ClassifySweepOptions,
+): Promise<number> {
+  const root = resolve(path ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  const docTypes = parseDocTypes(opts.docTypes)
+  if (typeof docTypes === 'string') {
+    return refuseClassify('bad-flags', docTypes, emitJson)
+  }
+
+  const backendError = parseBackendFlag(opts.backend)
+  if (backendError !== undefined) {
+    return refuseClassify('bad-flags', backendError, emitJson)
+  }
+
+  const result: ClassifyOutcome<SweepRecord> = await classifySweep(root, {
+    docTypes,
+    flags: { backend: opts.backend, model: opts.model },
+  })
+
+  if (result.kind === 'refused') {
+    return refuseClassify(result.reason, result.message, emitJson)
+  }
+
+  intro('canon context classify sweep')
+  reportLayers(result.record)
+  reportFindings(
+    result.record.findings,
+    (finding) => `${finding.file}:${(finding as SweepFinding).heading}`,
+  )
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ decision: 'ok', ...result.record })}\n`,
+    )
+  }
+
+  return 0
+}
+
+function runClassifierShow(
+  path: string | undefined,
+  opts: { json?: boolean },
+): void {
+  const root = resolve(path ?? process.cwd())
+  const resolution = resolveClassifier(root, {})
+
+  intro('canon context classifier show')
+
+  if (resolution.kind === 'off') {
+    logInfo(
+      `Model layer off (source: ${resolution.source}). Regex layer always runs.`,
+    )
+  } else if (resolution.kind === 'no-model') {
+    logWarn(
+      `Backend ${resolution.backend} configured (source: ${resolution.source}) with no model name. \`classify\` runs regex only.`,
+    )
+  } else {
+    logInfo(
+      `Backend ${resolution.backend}, model ${resolution.model} (source: ${resolution.source}).`,
+    )
+  }
+
+  logInfo(
+    `Reads ${CLASSIFIER_CONFIG_REL} when neither a flag nor an environment variable decides.`,
+  )
+  outro()
+
+  if (opts.json) {
+    process.stdout.write(`${JSON.stringify(resolution)}\n`)
+  }
+}
+
+function runClassifierSet(
+  path: string | undefined,
+  opts: ClassifierSetOptions,
+): number {
+  const root = resolve(path ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  if (opts.backend !== 'ollama' && opts.backend !== 'off') {
+    return refuseClassify(
+      'bad-flags',
+      '--backend takes ollama or off.',
+      emitJson,
+    )
+  }
+
+  if (opts.backend === 'ollama' && !opts.model) {
+    return refuseClassify(
+      'bad-flags',
+      '--model is required when --backend is ollama.',
+      emitJson,
+    )
+  }
+
+  const backend: ClassifierBackend | 'off' = opts.backend
+  writeClassifierConfig(
+    root,
+    backend,
+    backend === 'off' ? undefined : opts.model,
+  )
+
+  intro('canon context classifier set')
+  logInfo(
+    `Wrote ${CLASSIFIER_CONFIG_REL}: backend ${opts.backend}${opts.model ? `, model ${opts.model}` : ''}.`,
+  )
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ decision: 'ok', backend: opts.backend, model: opts.model })}\n`,
+    )
+  }
+
+  return 0
 }
 
 function parseFolders(list: string | undefined): string[] | string {
