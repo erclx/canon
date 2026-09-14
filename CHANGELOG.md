@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.82.0](https://github.com/erclx/canon/compare/v4.81.0...v4.82.0) (2026-09-14)
+
+
+### Features
+
+* **context:** add canon context classify and classifier ([#1669](https://github.com/erclx/canon/issues/1669)) ([a0aa6ec](https://github.com/erclx/canon/commit/a0aa6ec0c9e3659f9b57f1a3206ba469bbb2c366))
+* **decisions:** add tracked canon/decisions log and surface wiring ([#1668](https://github.com/erclx/canon/issues/1668)) ([254f0c0](https://github.com/erclx/canon/commit/254f0c06965c5dc6e92170a6557b48282b765a6d))
+* **governance:** consume the python rule internally ([#1666](https://github.com/erclx/canon/issues/1666)) ([c0b1316](https://github.com/erclx/canon/commit/c0b1316a72e42b60f14c72d3542b88dd443cdc93))
+
 ## [4.81.0](https://github.com/erclx/canon/compare/v4.80.0...v4.81.0) (2026-09-13)
 
 
