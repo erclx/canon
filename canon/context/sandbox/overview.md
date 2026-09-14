@@ -43,7 +43,7 @@ What `write_scope` cannot do is prevent the write, and it cannot see a write out
 
 ### A per-arm escape scope for the one arm meant to reach past the tree
 
-`claude:canon-rollout` is the only catalog entry whose skill's own job is dispatching a nested `claude --bg` session, and the one bound on it before this row was a line of narration asking the driven model to dispatch nothing. `run.sh`'s escape watch never enforced that, since it only ever reported a write under the four scratch directories as an unattributed warning, so a dispatch that reached the toolkit's own `.canon/plans/` or `.canon/tasks/` would have passed the arm cleanly.
+`claude:canon-rollout` is the only catalog entry whose skill's own job is dispatching a nested `claude --bg` session. `run.sh`'s escape watch alone does not enforce the fixture's instruction to dispatch nothing, since it only reports a write under the four scratch directories as an unattributed warning, so a dispatch that reached the toolkit's own `.canon/plans/` or `.canon/tasks/` would pass the arm cleanly.
 
 `escape_scope` in an arm's `expect.toml` closes that with the mechanism `write_scope` already models: a set of globs matched against what `escape_roots` and `ESCAPE_SCRATCH_DIRS` found, checked by the same harness that finds them rather than left to the skill's own restraint. Declaring the key, even at `escape_scope = []`, turns the warning into a mechanical result. A write matching a declared glob passes as expected, and everything else fails the arm outright, which is what "the harness asserts them" means in practice.
 
@@ -59,13 +59,13 @@ A witnessed concurrent session softens no verdict here. `sessions_concurrent` na
 
 ### A nested background dispatch is bounded rather than watched
 
-An arm invoked without the narration its fixture states dispatched a real `claude --bg` session against the machine's own process table. Every watch above reported clean and every one was right to, since a dispatched session writes into neither the sandbox tree `snapshot_tree` reads nor the four scratch directories `snapshot_root` reads. The run spent real cost until a person found it, and `SIGTERM` alone did not end it.
+An arm invoked without the narration its fixture states can dispatch a real `claude --bg` session against the machine's own process table, and every watch above reports clean and is right to, since a dispatched session writes into neither the sandbox tree `snapshot_tree` reads nor the four scratch directories `snapshot_root` reads. An unbound dispatch keeps running and spending real cost until a person finds and kills it, and `SIGTERM` alone does not end it.
 
 The bound is a `claude` shim placed first on the PATH of the session `run.sh` spawns, which refuses `--bg` and `--background` by name and delegates everything else. Its own caller goes around it: the harness calls the real binary by resolved path, since the arm's prompt is an argument to that call and a prompt naming the flag would otherwise refuse the run. That path is written into the shim rather than passed through the environment, because a variable carrying it sits in the spawned session's own environment and hands any arm the string that walks around the bound.
 
 The recording is a snapshot of `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions` either side of the run, comparing record names rather than content, since a live session rewrites its own record on every status change and a content manifest would name every session running beside this one. It reports on `sessions` in the merged JSON rather than through `escape_scope`. Folding a process fact into a key defined against a file-write watch would make the key mean two things and would silently widen the empty declaration `claude:canon-rollout` carries into covering something it was not written for.
 
-What lets a new record read as a dispatch is that the harness's own session leaves none. A headless `claude -p` writes no registry entry, measured 2026-08-31 over 603 files in `~/.claude/sessions`, where two named a sandbox path: one the `git-worktree` scenario stages by hand, and one the `claude --bg` dispatch this bound was filed against. A client that started registering a print-mode run would have every sandbox run report itself.
+What lets a new record read as a dispatch is that the harness's own session leaves none. A headless `claude -p` writes no registry entry, so a sandbox path appearing in the registry names either a scenario staging one by hand, such as `git-worktree`, or an actual nested dispatch. A client that started registering a print-mode run would have every sandbox run report itself.
 
 The backstop is a reap. `run.sh` starts its session under `set -m` so the session leads a process group of its own, and signals that group after the verdict is taken, escalating to `SIGKILL` rather than sending one signal and reporting success. The group has to be one the run created: signalling the group the harness inherited would reap the operator's terminal, so the run compares the session's real group against its own and `reap_process_group` refuses a group matching the calling shell whatever it is handed.
 
@@ -89,7 +89,7 @@ A per-arm permission set would not have reached this failure at all. The arm tha
 
 An assertion kind whose input the caller did not supply reports as unchecked rather than dropping out of the count. Omitting `--writes` would otherwise let write scope vanish silently from the cheap standalone path, which is the path most likely to be trusted. A verdict never reports `pass` having asserted nothing, since the declaration counts globs while the verdict counts writes and the two diverge at zero.
 
-The checker is TypeScript while provisioning stays bash. The harness was closed as bash on the grounds that what remains is `git` and `gh` orchestration plus copying trees, which is true of provisioning and does not describe a component that parses a declaration, aggregates partial failures, and emits counts. Its stated failure mode is asserting nothing while reporting green, which is invisible at runtime, so it has to be the unit-testable part.
+The checker is TypeScript while provisioning stays bash. Provisioning is `git` and `gh` orchestration plus copying trees, which bash suits, and that does not describe a component that parses a declaration, aggregates partial failures, and emits counts. Its stated failure mode is asserting nothing while reporting green, which is invisible at runtime, so it has to be the unit-testable part.
 
 - A run reports pass, fail, or unchecked. Absence of a declaration is `unchecked` rather than a pass, since a scenario that asserts nothing cannot pass, and rather than a failure, since failing every undeclared arm would make the harness unusable while expectations roll out. Only a failure exits non-zero.
 - `unchecked` keeps its name rather than becoming `unproven`. The state already existed when the reporting gap was scoped, and a second word for one state costs more than the clearer label gains.
@@ -98,14 +98,14 @@ The checker is TypeScript while provisioning stays bash. The harness was closed 
 
 ### What a sandbox is provisioned with
 
-- Standards and gov rules provision through the real installer rather than a copy. Both copies reimplemented an installer's selection rules, and the standards one omitted the `index.md` a real install rebuilds while neither wrote the `canon/config/config.json` stamp. A sandbox now carries what a target carries, which is what makes a rule change observable to a run.
+- Standards and gov rules provision through the real installer rather than a hand-built copy, since a copy reimplementing an installer's selection rules drifts from what the installer actually does and from the stamp it writes. A sandbox carries what a target carries, which is what makes a rule change observable to a run.
 - Seeds stay a raw copy. `canon claude init` does more than drop files, and the scenarios depending on the current shape outnumber the drift the copy risks. Hooks ship inside the seed tree, so a hook change is already reachable by any scenario declaring `SANDBOX_INJECT_SEEDS`.
 
 ### Why the sandbox sits outside the repository
 
 The two headless harnesses stay separate. `scripts/eval/run.sh` extracts its fixture to a `mktemp -d` carrying no seed, which is the opposite of the sandbox's need to look like a real installed project. Merging them would cost one of the two its defining property.
 
-Location and inheritance are separable, which is what lets both harnesses sit outside the repository. The eval fixture is outside it and carries no seed. The sandbox is outside it and still carries its seed, its installed standards, and its gov rules, which is the whole of what makes it look like a real installed project. Reading the separation above as ruling out a directory rather than a merge is what left the sandbox inside the worktree while the escape it caused was recorded as unfixable.
+Location and inheritance are separable, which is what lets both harnesses sit outside the repository. The eval fixture is outside it and carries no seed. The sandbox is outside it and still carries its seed, its installed standards, and its gov rules, which is the whole of what makes it look like a real installed project.
 
 ### The sandbox path and its guard
 
@@ -119,9 +119,9 @@ The sandbox tree lives at `$XDG_STATE_HOME/canon/sandbox-<run-id>`, defaulting t
 
 ### The guard
 
-Inside the worktree, the toolkit's own `CLAUDE.md` loaded through the ancestor chain of the session `run.sh` spawns, beside the seeded copy the scenario installed. Both carry the rule sending shared session scratch to the main worktree root and nothing decided which root won, so a skill's output landed in the toolkit on roughly one run in two.
+A sandbox tree inside the worktree would put the toolkit's own `CLAUDE.md` on the ancestor chain of the session `run.sh` spawns, beside the seeded copy the scenario installed. Both carry the rule sending shared session scratch to the main worktree root, with nothing to decide which root wins, which is the collision `### Why the sandbox sits outside the repository` above exists to avoid.
 
-`.gitignore` keeps its `.sandbox/` entry after the move. Nothing provisions there now, so the entry costs a line and covers a stray tree from an older checkout or a hand-set override.
+`.gitignore` keeps a `.sandbox/` entry regardless. Nothing provisions there now, so the entry costs a line and covers a stray tree from an older checkout or a hand-set override.
 
 `assert_sandbox_dir_safe` is the live guard. Provisioning runs `rm -rf` on the resolved path at three sites, so it tests an allowlist rather than a list of paths to refuse: the path normalizes first, collapsing repeated separators, folding `.` and `..` segments, and stripping trailing ones, then has to be a strict descendant of the home directory or the temp root.
 
@@ -160,7 +160,7 @@ A scenario file is named for the skill it drives, not for the domain the skill s
 
 ### The anchor remote and its credentials
 
-The anchor URL is built once by `sandbox_anchor_url` in `lib/sandbox-git.sh` and reaches GitHub over HTTPS. Eleven call sites hardcoded an SSH URL before, so no anchor scenario could run on a machine carrying only `gh` credentials. `setup_ssh` went with them, since an agent cannot answer a passphrase prompt and nothing authenticates over SSH now.
+The anchor URL is built once by `sandbox_anchor_url` in `lib/sandbox-git.sh` and reaches GitHub over HTTPS rather than SSH, since an agent cannot answer a passphrase prompt and a machine carrying only `gh` credentials has none to offer SSH.
 
 The harness sets `credential.helper` to `!gh auth git-credential` on the sandbox repo rather than expecting the operator to run `gh auth setup-git`. `gh auth login` authenticates the CLI and leaves git without a credential, so an authenticated machine still failed at clone. Scoping the helper to the throwaway repo keeps the operator's global config unwritten and covers the pushes the agent makes itself once it is running inside the sandbox.
 
@@ -212,7 +212,7 @@ Six things a run cannot reach. Each is a property of the harness rather than a g
 - A write landing outside both the sandbox tree and the four watched scratch directories. `snapshot_tree` reads the sandbox, and `run.sh` watches `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/` under the toolkit roots for escapes.
 - Git state. `snapshot_tree` excludes `.git`, and the seven declaration keys read paths, file content, the write list, the reply, and the turn count, so no key reaches a commit, a branch, or a rewritten history.
 
-A nested background dispatch used to belong on that list and no longer does. It is bounded by a shim and recorded on `sessions`, and the three things that bound still cannot reach are stated where the bound is, under the decision above.
+A nested background dispatch is not on this list. It is bounded by a shim and recorded on `sessions`, and the three things that bound still cannot reach are stated where the bound is, under the decision above.
 
 ### Reading the last three
 

@@ -36,13 +36,11 @@ Run `canon standards list` for the catalog of installable standards and their de
 
 Run `canon standards --help` for the verbs and what each one does. Flags and arguments live in `docs/agents/scripting.md`.
 
-`--json` emits `{standards: [{name, description, appliesTo, content}]}`. It carried a `target` naming where each standard installed, dropped when nothing installed any more: every value left was either a path only this repository has or a second spelling of what `canon standards <name>` already reports, and `content` carries the document a consumer wanted the path for.
+`--json` emits `{standards: [{name, description, appliesTo, content}]}`. `content` carries the document itself, and `appliesTo` is the paths a standard's `## Scope` statement declares, parsed by `read_applies_to` in `scripts/standards/list.sh`. It reads the backticked paths in the first sentence of the statement, resolves an attribute standard to `*`, and emits an empty array for a statement it cannot read.
 
-`appliesTo` is the paths a standard's `## Scope` statement declares, parsed by `read_applies_to` in `scripts/standards/list.sh`. It reads the backticked paths in the first sentence of the statement, resolves an attribute standard to `*`, and emits an empty array for a statement it cannot read.
+The first sentence is the bound rather than the whole statement, since a later sentence names sibling standards and excluded paths that would otherwise land in the same list. Every standard is walked from the flat root. Five return an empty `appliesTo`, not from any exclusion but because their `## Scope` sentence names no backticked path and never says it governs an attribute: they fix a commit message, a branch name, a pull request body, and an issue, none of which is a file in a diff. `glossary.md` is the exception, whose scope sentence names `.canon/teach/<nn>-<topic>/GLOSSARY.md`.
 
-The first sentence is the bound rather than the whole statement, since a later sentence names sibling standards and excluded paths that would otherwise land in the same list. The six standards that used to sit in `standards/bundled/` are walked like every other one now that the folder and its `-maxdepth 1` exclusion are both gone. Five return an empty `appliesTo`, not from any exclusion but because their `## Scope` sentence names no backticked path and never says it governs an attribute: they fix a commit message, a branch name, a pull request body, and an issue, none of which is a file in a diff. `glossary.md` is the exception, whose scope sentence already names `.canon/teach/<nn>-<topic>/GLOSSARY.md`.
-
-The domain has no write verb. `<name>` prints one standard from `src/commands/standards.ts` and `list` forwards to `scripts/standards/list.sh`, and both read rather than copy. `canon/context/standards/resolution.md` carries the roots each reads and what the closed install channel took with it.
+The domain has no write verb. `<name>` prints one standard from `src/commands/standards.ts` and `list` forwards to `scripts/standards/list.sh`, and both read rather than copy. `canon/context/standards/resolution.md` carries the roots each reads.
 
 ## Workflow
 
