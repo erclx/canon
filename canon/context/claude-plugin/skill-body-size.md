@@ -7,9 +7,9 @@ description: The line checkpoint that replaced a word cap nothing reached, the m
 
 `standards/skill.md` checks a skill body against 150 lines and names what moves to `references/` past it. The number is a prompt to look rather than a gate, matching the context-entry checkpoint the repository already runs, so nothing enforces it and a body carrying nothing but procedure stays whole at any length.
 
-## Why the cap was replaced rather than lowered
+## Why the cap counts lines rather than words
 
-The rule before it capped a body at 5,000 words. No skill in the corpus has ever approached that, so the rule that would force a reference has never once applied, and the corpus grew to roughly five thousand body lines across fifty-five skills with two thirds of them putting everything in the body. A cap that never fires is indistinguishable from no rule, and lowering the word number would have kept the wrong unit: a body is read as lines on a screen and edited as lines in a diff, and every neighboring checkpoint in this repository counts lines.
+A word cap of 5,000 never forces a single reference, since no skill body approaches it. A cap that never fires is indistinguishable from no rule, and lowering the word number would keep the wrong unit: a body is read as lines on a screen and edited as lines in a diff, and every neighboring checkpoint in this repository counts lines.
 
 Words and lines also disagree about what a body is heavy with. A signal table or a stub template is few words and many lines, and those are exactly the blocks worth moving, so the word unit was blind to the content the rule exists to catch.
 
@@ -19,7 +19,7 @@ A catalog, a table of cases, or a format spec running past roughly fifteen lines
 
 Each move owes a named branch that skips it. Body lines are paid on every invocation and a reference only when the body sends the session to it, so a block every run dereferences costs a read and saves nothing, and the asymmetry is the entire argument for moving anything. The body keeps the trigger, the skip condition, and the guard, because a run that never reaches the block has to decide that without opening the reference.
 
-That test is what bounds the rule. Every sweep in `docs-fold` moved on it: a project with no wireframe folder skips the first outright, and an architecture record carrying no anchored entry skips the second. A third moved the same way and later retired with the diagram surface, which cost the rule nothing, since a reference deleted with its step is the move working rather than failing. The rebase machinery in `review-address` moved because a branch that still merges never reaches it. A reply format the same skill writes on every run stayed, having failed the test.
+That test is what bounds the rule. In `docs-fold`, a project with no wireframe folder skips the wireframe-sweep reference outright, and an architecture record carrying no anchored entry skips the architecture-sweep reference the same way. The rebase machinery in `review-address` sits in a reference because a branch that still merges never reaches it, while the reply format that same skill writes on every run stays in the body, having failed the test.
 
 ## Applying it is maintenance, not a sweep
 
@@ -27,4 +27,4 @@ Ten bodies clear the checkpoint. Moving all of them in one pass turns a standard
 
 Pointing one skill at a sibling's folder is banned outright, since a bare relative path across folders resolves against the session cwd and breaks the moment either skill runs from a plugin cache. A reference two skills read is authored as a standard at the flat root instead, cited from each skill through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, which resolves off the `claude/standards` symlink in a plugin cache holding no project files. `git-pr` and `git-split` both citing `standards/branch.md` and `standards/pr.md` this way is the shape to expect.
 
-Where that single source lives is a fact about this repository rather than a rule the standard can carry, so the standard states the requirement and stops. A per-skill copy was the earlier shape, `standards/bundled/` fanning eleven of them out through `scripts/core/regen-skill-references.sh`, retired once the fallback citation form was measured to reach the same skills at zero copies. `canon/ARCHITECTURE.md` carries that decision.
+Where that single source lives is a fact about this repository rather than a rule the standard can carry, so the standard states the requirement and stops. `canon/ARCHITECTURE.md` carries the decision behind the fallback citation form.
