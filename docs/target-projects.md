@@ -198,7 +198,7 @@ The order carries the reason. A sync replaces each toolkit-owned copy with one a
 
 ### Move the surfaces off `.claude/`, once
 
-Tracked surfaces moved out of `.claude/` and into a root of their own. `context/`, `wireframes/`, the three loose documents (`ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`), and the install stamp folder, respelled `canon/config/`, now live under `canon/`, and `rules/`, `skills/`, `hooks/`, and `settings.json` stay put since Claude Code reads those by path.
+Tracked surfaces moved out of `.claude/` and into a root of their own. `context/`, `decisions/`, `wireframes/`, the three loose documents (`ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`), and the install stamp folder, respelled `canon/config/`, now live under `canon/`, and `rules/`, `skills/`, `hooks/`, and `settings.json` stay put since Claude Code reads those by path.
 
 Run `canon upgrade` first if you have not, then run this from inside the project:
 
