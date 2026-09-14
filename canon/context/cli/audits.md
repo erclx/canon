@@ -111,7 +111,9 @@ One check out of `canon context audit` gates `bun run check` and the rest report
 
 The architecture record's length is the second measure to pass that test, and it gates the verb rather than the push, and only where the record states the rule it is held to. `--citations-only` is what the push stage runs and it never measures the record, and the audit-set stage only warns on a finding that is a fact, so the exit reaches a direct run, the seed stage passing `--gate`, and the `canon audits run` verdict. Widening either stage is a policy change about what fails a push, which `src/audits/catalog.ts` cautions against making as a side effect of adding a measure.
 
-`--gate` widens the failing set to required sections and index drift, and the seed stage is its only caller. What moves a finding across the line is the corpus rather than the measure. A context entry in a live project is edited under time pressure by the people who own it, so a threshold there reports. A seed is authored once and read by every scaffolded project, so the same finding ships outward and gates.
+`--gate` widens the failing set to required sections, index drift, and a wireframe's States table disagreeing with its evidence folders, and the seed stage is its only caller. What moves a finding across the line is the corpus rather than the measure. A context entry in a live project is edited under time pressure by the people who own it, so a threshold there reports. A seed is authored once and read by every scaffolded project, so the same finding ships outward and gates.
+
+A wireframe carrying a sketch beside evidence that already exists stays advisory under both modes rather than joining that set. It reads a whole entry against whether any state has evidence, not one sketched layout against its own, so a conforming file, a captured default layout beside a sketch of a breakpoint layout nobody has built, can still trip it.
 
 The thresholds that measure distance stay advisory under both corpora, since no corpus makes a judgment into a fact.
 

@@ -9,7 +9,9 @@ import {
   classifyDecision,
   coveredCount,
   isOverLength,
+  measureArchitecture,
   readAllowances,
+  risksSection,
   splitDecisions,
   testableCount,
 } from '@/context/architecture'
@@ -50,6 +52,7 @@ function makeReport(
   return {
     rel: 'canon/ARCHITECTURE.md',
     lines: 100,
+    words: 620,
     allowances: { frame: 34, perDecision: 6 },
     ceiling: 100,
     decisions: [],
@@ -66,6 +69,7 @@ function makeDecision(
     claim: 'neither',
     figures: [],
     checks: [],
+    words: 12,
     ...overrides,
   }
 }
@@ -268,6 +272,108 @@ describe('the ceiling the record derives for itself', () => {
     })
 
     expect(isOverLength(report)).toBe(false)
+  })
+})
+
+describe('extracting the Risks / open questions section', () => {
+  it('should capture the section body up to the end of the file', () => {
+    const source = [
+      '### Only',
+      '',
+      'Reasoning.',
+      '',
+      '## Risks / open questions',
+      '',
+      '- A risk carrying no figure at all.',
+      '',
+    ].join('\n')
+
+    expect(risksSection(source)).toContain('A risk carrying no figure')
+  })
+
+  it('should stop the section at the next H2', () => {
+    const source = [
+      '## Risks / open questions',
+      '',
+      '- Open.',
+      '',
+      '## Somewhere else',
+      '',
+      'Not a risk.',
+    ].join('\n')
+
+    expect(risksSection(source)).not.toContain('Not a risk')
+  })
+
+  it('should read nothing from a record carrying no Risks heading', () => {
+    const source = ['# Architecture', '', '## Overview', '', 'Body.'].join('\n')
+
+    expect(risksSection(source)).toBeUndefined()
+  })
+})
+
+describe('measuring word weight', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should weigh a record whose paragraphs sit one to a source line', async () => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    const source = [
+      '# Architecture',
+      '',
+      '## Key technical decisions',
+      '',
+      '### A decision',
+      '',
+      'One paragraph occupies one long source line here so a line count would read it as a single unit while a word count reads its real weight.',
+      '',
+      '## Risks / open questions',
+      '',
+      '- Still open.',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.words).toBeGreaterThan(report?.lines ?? 0)
+    expect(report?.decisions[0]?.words).toBeGreaterThan(0)
+  })
+
+  it('should weigh the Risks section in words', async () => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    const source = [
+      '# Architecture',
+      '',
+      '## Risks / open questions',
+      '',
+      '- The deploy target for the new stack is still undecided.',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.risksWords).toBe(11)
+  })
+
+  it('should leave risksWords absent for a record with no Risks heading', async () => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    writeFileSync(
+      join(root, 'canon', 'ARCHITECTURE.md'),
+      '# Architecture\n\n## Overview\n\nBody.\n',
+    )
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.risksWords).toBeUndefined()
   })
 })
 

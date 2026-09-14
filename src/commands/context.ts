@@ -59,6 +59,10 @@ import {
   PRONOUN_HEADING,
   VERB_HEADING,
 } from '@/context/narration'
+import {
+  measureWireframeFolder,
+  type WireframeStatesReport,
+} from '@/context/wireframe-states'
 import { RENDER_WIDTH } from '@/markdown/structure'
 import {
   frameError,
@@ -94,7 +98,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, superseded-decision narration, index drift, and the architecture record against its own ceiling',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, superseded-decision narration, index drift, the architecture record against its own ceiling and its word weight, and wireframe states against their evidence folders',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -662,6 +666,15 @@ async function runAudit(
   // are different answers, and one value for both reports the second as the
   // first.
   const record = gateOnly ? undefined : await measureArchitecture(root)
+  const wireframes = gateOnly
+    ? []
+    : (
+        await Promise.all(
+          folders
+            .filter((folder) => folder.name === 'wireframes')
+            .map((folder) => measureWireframeFolder(root, folder)),
+        )
+      ).flat()
 
   if (gateOnly) {
     reportGate(citations)
@@ -677,6 +690,7 @@ async function runAudit(
     reportNarration(entries, folders, narration)
     reportDrift(drift)
     reportRecord(record, root)
+    reportWireframeStates(wireframes)
     outro()
   }
 
@@ -713,6 +727,11 @@ async function runAudit(
         // target that never wrote one is entitled to. Absent says the run
         // never looked, which is `--citations-only`.
         architecture: gateOnly ? undefined : (record ?? null),
+        // Absent under `--citations-only`, for the same reason as above. An
+        // empty array under the ordinary run says the project carries no
+        // wireframes folder or no entry carrying a States table, which is a
+        // fact rather than an unmeasured run.
+        wireframes: gateOnly ? undefined : wireframes,
         checkpoints: {
           lines: LENGTH_CHECKPOINT,
           renderWidth: RENDER_WIDTH,
@@ -742,6 +761,7 @@ async function runAudit(
     recordOverLength: record !== undefined && isOverLength(record),
     sections,
     drift,
+    wireframes,
     widened,
   })
 
@@ -1202,6 +1222,15 @@ function reportRecord(
   const decisions = report.decisions.length
   const { allowances } = report
 
+  logInfo(
+    `${plural(report.words, 'word')} across ${plural(report.lines, 'line')}, read alongside the weight judgment a session makes by reading the file. This never gates.`,
+  )
+  if (report.risksWords !== undefined) {
+    logInfo(
+      `\`## Risks / open questions\` holds ${plural(report.risksWords, 'word')}, weighed the same way and read alongside the same judgment.`,
+    )
+  }
+
   if (allowances === undefined) {
     logInfo(
       `Covers ${report.rel} alone. No standard sets a length rule for it and this record states none, so its ${plural(report.lines, 'line')} across ${plural(decisions, 'decision')} are reported and nothing is gated.`,
@@ -1261,7 +1290,7 @@ function reportRecord(
           entry.checks.length > 0
             ? `\n  checked by ${entry.checks.join(', ')}`
             : ''
-        return `${report.rel}:${entry.line}  ${kind}${evidence}\n  ${entry.heading}${checks}`
+        return `${report.rel}:${entry.line}  ${kind}${evidence}  ${plural(entry.words, 'word')}\n  ${entry.heading}${checks}`
       })
       .join('\n'),
   )
@@ -1281,5 +1310,45 @@ function reportDrift(drift: readonly FolderDrift[]): void {
   }
 
   logWarn(plural(lines.length, 'disagreement'))
+  pipeOutput(lines.join('\n'))
+}
+
+function reportWireframeStates(
+  wireframes: readonly WireframeStatesReport[],
+): void {
+  logStep('Wireframe states')
+
+  const withRows = wireframes.filter((entry) => entry.rows.length > 0)
+  if (withRows.length === 0) {
+    logInfo(
+      'No wireframe carries a States table, so nothing was checked against its evidence folders.',
+    )
+    return
+  }
+
+  const lines = withRows.flatMap((entry) => [
+    ...entry.missingFolders.map(
+      (finding) =>
+        `${entry.rel}:${finding.line}  ${finding.state}  no folder at ${finding.path}`,
+    ),
+    ...entry.unlistedFolders.map(
+      (finding) =>
+        `${entry.rel}  ${finding.root}/${finding.folder}  named in no row`,
+    ),
+    ...(entry.sketchWithEvidence
+      ? [
+          `${entry.rel}:${entry.sketchLine}  a plaintext sketch sits beside evidence that already exists`,
+        ]
+      : []),
+  ])
+
+  if (lines.length === 0) {
+    logInfo(
+      `${plural(withRows.length, 'wireframe')} checked, every state matched one-to-one with its evidence folder.`,
+    )
+    return
+  }
+
+  logWarn(plural(lines.length, 'finding'))
   pipeOutput(lines.join('\n'))
 }

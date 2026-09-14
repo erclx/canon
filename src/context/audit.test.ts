@@ -124,6 +124,26 @@ describe('measureEntry', () => {
     ])
   })
 
+  it('should report a change number under three digits', () => {
+    const source = `${FRONTMATTER}# CI\n\nThe fix landed in PR #49, a follow-up to #7.\n`
+
+    expect(
+      measureEntry('ci.md', source).provenance.map((found) => found.text),
+    ).toEqual(['#49', '#7'])
+  })
+
+  it('should leave a heading anchor link destination unreported', () => {
+    const source = `${FRONTMATTER}# CI\n\nSee [Open questions](#7-open-questions) for the rest.\n`
+
+    expect(measureEntry('ci.md', source).provenance).toEqual([])
+  })
+
+  it('should leave a hex color inside a code span unreported', () => {
+    const source = `${FRONTMATTER}# CI\n\nThe placeholder swatch is \`#000\` until a token replaces it.\n`
+
+    expect(measureEntry('ci.md', source).provenance).toEqual([])
+  })
+
   it('should report a release label attached to a change', () => {
     const source = `${FRONTMATTER}# CI\n\nEighteen skills have one as of v16.2.\n`
 
