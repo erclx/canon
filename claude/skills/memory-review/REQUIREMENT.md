@@ -29,7 +29,7 @@ A pen the caller cannot face is the same gap wearing a different shape. Routing 
 ## Must not
 
 - Apply anything the user has not approved by item
-- Author a governance rule inline. Coding-standards rules have an owner and a scaffolding path, and a rule written here bypasses both.
+- Author a toolkit rule inline. A toolkit rule under `internal/rules/` or `governance/rules/` has an owner and a scaffolding path, `internal-governance`, and a rule written here bypasses it. A project rule under `.claude/rules/project/` is project-owned and takes an `Edit` appending to an existing file, or a handoff to `create-rule` when none fits.
 - Mutate tracked files from the main worktree
 - Answer a question raised in a decision slot while applying. Discussion and application are separate passes so an approval is never inferred from a reply.
 - Delete a memory entry at all. Every exit from the pen is a move into the archive.
