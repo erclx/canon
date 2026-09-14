@@ -61,6 +61,7 @@ import { copyPreservingMode } from '@/copy'
 import { execScript } from '@/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { recordDir } from '@/record-root'
+import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
 import { isDirectory, resolveTarget } from '@/target'
 import { injectGitignore, pruneGitignore } from '@/tooling/inject'
 import {
@@ -154,6 +155,21 @@ const SEEDED_DIRS: readonly string[] = [
   'tasks',
   'wireframes',
 ]
+
+/**
+ * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
+ *
+ * `wireframes` and `decisions` are tracked surface entries, resolved under
+ * `canon/` ahead of `.claude/`, while `memory` and `tasks` are session records
+ * resolved under `.canon/` ahead of `.claude/`. Routing every name through
+ * `recordDir` reported a migrated target's `canon/wireframes/` or
+ * `canon/decisions/` as missing, since that resolver never checks `canon/`.
+ */
+export function seededDirPath(resolved: string, name: string): string {
+  return SURFACE_ENTRIES.includes(name)
+    ? surfaceDir(resolved, name)
+    : recordDir(resolved, name)
+}
 const USER_DIR = join('tooling', 'claude', 'user')
 const STATUSLINE = 'statusline-command.sh'
 const PLUGIN_MANIFEST = join('claude', '.claude-plugin', 'plugin.json')
@@ -585,16 +601,16 @@ async function runSync(target: string): Promise<number> {
 
   // A record folder resolves at either root, so a migrated target is reported as
   // seeded rather than sent to `canon claude init` to re-create records it
-  // already holds. The three seeded files and `wireframes` are tracked and stay
-  // at `.claude/`, which the resolver answers for them anyway, since nothing
-  // ever creates a second root copy for a name that does not move.
+  // already holds. `wireframes` and `decisions` are tracked surface entries
+  // instead, resolved through `surfaceDir`, since a migrated target holds them
+  // at `canon/` rather than under either record root.
   logStep('Seeded')
   for (const name of SEEDED_FILES) {
     if (existsSync(join(resolved, '.claude', name))) logInfo(name)
     else logWarn(`${name} missing. Run \`canon claude init\``)
   }
   for (const name of SEEDED_DIRS) {
-    if (isDirectory(recordDir(resolved, name))) logInfo(`${name}/`)
+    if (isDirectory(seededDirPath(resolved, name))) logInfo(`${name}/`)
     else logWarn(`${name}/ missing. Run \`canon claude init\``)
   }
 
