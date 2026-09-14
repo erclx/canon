@@ -137,6 +137,7 @@ describe('BACKED_FOLDERS', () => {
       'tasks',
       'teach',
       'transcripts',
+      'walkthroughs',
     ])
   })
 })

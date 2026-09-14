@@ -6,8 +6,8 @@ import { RECORD_ROOTS, recordRoot } from '@/record-root'
 
 /**
  * The folders a backup carries, relative to the record root `workTree` resolves
- * rather than to either root specifically, since the same ten names sit under
- * whichever one a tree holds.
+ * rather than to either root specifically, since the same eleven names sit
+ * under whichever one a tree holds.
  *
  * Nothing bounds this list any more, and the move is what took the bound away.
  * The claude manifest used to ship a folder apiece, so the `# Claude` group
@@ -18,7 +18,7 @@ import { RECORD_ROOTS, recordRoot } from '@/record-root'
  * a name is written here.
  *
  * Three counts describe this surface and each is right about a different
- * question, so they are stated apart rather than reconciled. Ten is what a
+ * question, so they are stated apart rather than reconciled. Eleven is what a
  * disk loss would take, which is this list. Twelve is what sat under `.claude/`
  * as an ignored folder before the move, which adds the scratch folder that is
  * deletable without loss and `worktrees/`, whose contents belong to the
@@ -47,6 +47,7 @@ export const BACKED_FOLDERS = [
   'tasks',
   'teach',
   'transcripts',
+  'walkthroughs',
 ] as const
 
 /**
