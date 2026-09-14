@@ -155,14 +155,14 @@ describe('isGating', () => {
     expect(isGating(makeInput({ wireframes: [wireframe] }))).toBe(false)
   })
 
-  it('should fail a sketch beside existing evidence under the widened gate', () => {
+  it('should leave a sketch beside existing evidence advisory under the widened gate too', () => {
     const wireframe = makeWireframe({
       sketchWithEvidence: true,
       sketchLine: 12,
     })
     const input = makeInput({ wireframes: [wireframe], widened: true })
 
-    expect(isGating(input)).toBe(true)
+    expect(isGating(input)).toBe(false)
   })
 
   it('should pass a widened gate reading a clean wireframe report', () => {

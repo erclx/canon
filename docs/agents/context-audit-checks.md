@@ -117,9 +117,11 @@ An evidence cell's path is read as written and resolved against the project root
 
 Both are counted rather than only listed, since a count is what a reader compares run to run. A `not captured` cell is the one value the standard exempts from having a folder, and it drops out of both counts.
 
-The fourth finding reads the whole entry rather than one row: whether it carries a `plaintext`-fenced sketch while a state's evidence already exists on disk. The standard asks the fence to come out the moment a layout has a capture to show instead, so a sketch surviving past that point is a boolean per entry rather than a count.
+The third finding reads the whole entry rather than one row: whether it carries a `plaintext`-fenced sketch while a state's evidence already exists on disk. The standard asks the fence to come out the moment a layout has a capture to show instead, so a sketch surviving past that point is a boolean per entry rather than a count.
 
-All four wireframe findings are printed and advisory under a bare run, and the states and sketch findings gate at `2` under `--gate`, alongside a missing required section and index drift. The JSON record carries them per entry under `wireframes[]`, as `rows`, `missingFolders`, `unlistedFolders`, and `sketchWithEvidence` alongside `sketchLine`.
+The unit here is the entry rather than the layout the standard's own rule is stated against. A table names states, not the layouts a wireframe's `## Regions` section can split into at a breakpoint, so this finding has no narrower unit to match a sketch against the evidence for its own layout alone. An entry with a captured default layout and a sketch for a breakpoint layout that is not built yet is conforming, and this finding still reports it, which is why it stays advisory under every mode rather than joining the states-mismatch gate below.
+
+All three wireframe findings are printed under a bare run. The states-mismatch finding, missing and unlisted folders together, gates at `2` under `--gate`, alongside a missing required section and index drift. The sketch finding stays advisory under both modes, for the reason above. The JSON record carries them per entry under `wireframes[]`, as `rows`, `missingFolders`, `unlistedFolders`, and `sketchWithEvidence` alongside `sketchLine`.
 
 ## Which folders each check reaches
 
