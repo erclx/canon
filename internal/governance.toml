@@ -13,8 +13,12 @@
 # none of which is a framework route. `305-e2e-reliability` governs the driven
 # capture those surfaces are verified with.
 
+# `110-python` is added because sessions here write Python for groundwork
+# spikes and occasional skill scripts, and the `node` stack alone never loads it.
+
 stack = "node"
 add = [
+  "110-python",
   "300-testing-ts",
   "305-e2e-reliability",
   "400-ui",
