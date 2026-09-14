@@ -185,7 +185,7 @@ The read sites were left alone. `Read` resolves against the main root normally, 
 
 Two documented behaviors meet on any branch editing an authoring surface, and the result is a review of the wrong file set. The Consumed copies stage clears only on a staged regeneration, so a branch that edits `governance/rules/core/X.md` has to stage `.claude/rules/canon/core/X.md` before `bun run check` passes. <!-- audit-ignore-citations: .claude/rules/canon/core/X.md --> `review-branch` Step 2 then takes a non-empty `git diff --staged` as its diff scope, which is the generated mirror alone and none of the files carrying the change.
 
-Nothing reports it, since the review runs, writes a receipt, and reads clean. On a branch before its first commit the staged set is empty too, so `git diff HEAD` is the only read at correct scope and the staged-set rule has to be overridden by hand.
+Nothing reports it, since the review runs, writes a receipt, and reads clean. On a branch before its first commit the branch pair is empty too, so `git diff HEAD` is the only read at correct scope and the staged-set rule has to be overridden by hand.
 
 ### The body that writes a receipt owns its lifetime
 

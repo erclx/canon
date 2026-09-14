@@ -63,7 +63,7 @@ Suppressing the pass was one alternative and it fails twice: a reader scanning t
 
 A further heading was the other alternative, and the closed set `poll.sh` matches against closes it outright: the script matches a fixed set in jq and reports anything else as `UNMATCHED`, so a new heading invented here without a matching change to that set would break the classification it was meant to clarify. `## Evidence` joined the set on that same condition, shipping together with `canon pr evidence` and the `poll.sh` exclusion rather than one heading arriving ahead of the other.
 
-`poll.sh`'s `SEEN` branch fires when `prior` equals the head. Since `FINAL` writes the head the run observed back to the baseline every tick and the report gates on `old_head`, `head != old_head` fires once per move regardless of what `prior` says, so a pass over a pull request whose head has not moved is reported once rather than repeatedly.
+`poll.sh`'s `SEEN` branch fires when `prior` equals the head. Since `FINAL` writes the head the run observed back to the baseline every tick and the report gates on `old_head`, `head != old_head` fires once per head move regardless of what `prior` says, rather than repeatedly on every later tick that finds the same unmoved head.
 
 The read-time marker covered next closes the rest: `PUT` replaces the body and the marker rides in it, but `PUT` cannot move `submittedAt`, so a rewritten close-out still ages from when it first landed, which is the reading the poll's age test wants.
 

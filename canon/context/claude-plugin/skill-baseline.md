@@ -45,7 +45,7 @@ The correction is prose in a skill body rather than a verb, so nothing stops a l
 
 `auto-ship`'s classifier decides whether a review runs at all, so widening what it sees would turn a branch that reads as prose-only into a mixed one and change behavior rather than only correctness.
 
-Its unusable test is narrower than three of the four ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` also drops the arm, on the same reasoning, once its Step 2 moves to one range, leaving `docs-sync`, `standards-audit`, and `git-pr` as the three still carrying it.
+Its unusable test is narrower than three of the four ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` also drops the arm, on the same reasoning, since its Step 2 already reads one range, leaving `docs-sync`, `standards-audit`, and `git-pr` as the three still carrying it.
 
 `auto-ship` reaches Step 5 before `git-stage` has committed anything, so the base equals HEAD on every ordinary run, and the arm ported verbatim would stop the chain every time. The skill body states the omission at that point, because the next reader porting the block would otherwise add it back.
 

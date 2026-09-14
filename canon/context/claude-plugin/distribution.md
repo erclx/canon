@@ -43,7 +43,7 @@ The verb also needs a fallback rather than only a guard, since these scripts shi
 
 ### What a symlink costs
 
-A symlink is an entry point that cannot filter. `standards/canon/` and `snippets/canon/` are excluded at every CLI verb, yet an installer dereferences the two symlinks and copies whatever sits behind them into every plugin cache with no code in the path to stop it.
+A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and `claude/snippets` and copies whatever sits behind them into every plugin cache with no code in the path to stop it, which is why internal content was moved out of `standards/canon/` and `snippets/canon/`, filterable locations that still leaked through the symlinks ahead of them.
 
 Internal content lives at `internal/` instead, which nothing under `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
 

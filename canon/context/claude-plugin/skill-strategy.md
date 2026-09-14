@@ -221,13 +221,13 @@ What travels and what does not is stated in the skill's own `REQUIREMENT.md` rat
 
 The pull request boundary rule went to `plan-feature` and not to `standards/plan.md`. It is the whole of the source skill's phase 1, and a session decides scope while writing the plan, so it lands in the skill that writes one rather than in the document standard that plan follows. A rule stated in both is two sources for one rule.
 
-The sandbox arm resolves `canon capture` through `playwright-core` and the installed `canon` binary rather than `@playwright/test`, since the latter resolves out of a `node_modules` no target installs. A headless run has no operator to confirm a pick is right, so it carries a pre-supplied pick through the run, waits to its turn cap, and closes as its only terminal behavior.
+The sandbox arm resolves `canon capture` through `playwright-core` and the installed `canon` binary rather than `@playwright/test`, since the latter resolves out of a `node_modules` no target installs. A headless run has no operator to confirm a pick is right, so waiting would spend turns up to the cap with nobody to answer. Closing on a pre-supplied pick is the only terminal behavior available to it.
 
 What the arm cannot reach is the loop, the pick, and the hand-off, and that is a property of the harness rather than a gap a later fixture closes. The stop condition is a person and no fixture supplies one, so a green verdict is not coverage of the half the skill exists for. What is left to assert is the blast radius and the scope of the edit: a `write_scope` admitting the two surfaces a close legitimately reaches, and content pins holding the lines of the seeded page a treatment change must leave alone.
 
 `canon capture` refuses a page that would rewrap against a substituted font, so a candidate page naming no font is refused on whatever the default font resolves to. Step 2 tells a run to declare a stack the machine resolves, since a page that carries everything it needs and a page that renders are not the same requirement.
 
-A close records the decision wherever it was stated as open, in the same step that writes it, rather than in a separate path the write scope does not admit. The losing arms are deleted by the next step, so a pick that records nothing about why leaves the next reader re-deriving it from a diff.
+A close records the decision wherever it was stated as open, in the same step that writes the design note, a path the write scope admits. The losing arms are deleted by the next step, so a pick that records nothing about why leaves the next reader re-deriving it from a diff.
 
 ## The draft surface, recombining docs-sync's domain with create-standard's confirm-before-write shape
 
@@ -276,7 +276,7 @@ A zero or near-zero reading is not the same as nobody reaching the skill. A skil
 
 ### Every skill currently ships
 
-Every folder under `claude/skills/` has been read against `create-skill`'s three questions, and none has failed them: each either has no simpler surface already reaching its moment, or carries a nontrivial procedure worth a body of its own, or both. A skill landing after a given census pass carries no verdict yet by construction, since the pass has nothing to count for a folder that had not shipped, and a later pass closes that gap.
+Every folder under `claude/skills/` currently ships. Each read against `create-skill`'s three questions either has no simpler surface already reaching its moment, or carries a nontrivial procedure worth a body of its own, or both, with one open exception: `youtube-transcripts` answers question 1 with a plain yes, since `canon transcripts <url>` already owns the fetch, the cleanup, and the frontmatter its body wraps. It is the strongest removal candidate the audit has found, and it stays a skill until the operator answers whether to drop it. A skill landing after a given census pass carries no verdict yet by construction, since the pass has nothing to count for a folder that had not shipped, and a later pass closes that gap.
 
 A few load-bearing patterns came out of running the three questions across the whole catalog:
 
@@ -356,6 +356,8 @@ A catalog-size trim is answered by the marketplace subset lever instead of a cut
 The one job-duplication candidate an overlap read across the catalog has found is `git-commit` inside `git-stage`. That pair fails the merge on a behavioral difference neither description states on its own: `git-stage` clears the stage and restages whole files, destroying the hunk-level selection `git-commit` preserves.
 
 Every other pair that reads as overlap is a declared boundary or a wording collision rather than genuine duplication.
+
+One repair from that same read stays open. `seed-sync` cites `canon-cli`, and `setup-init`, `setup-gov`, and `setup-indexes` still cite it under neither that name nor its retired spelling, so the fix reached one of the five bodies it named.
 
 The four `migration-*` skills are not dead weight behind an unfinished migration. Each proposes a per-project structural move and applies none of it, so the job closes for a target that has taken it and stays open for every target that has not. No global finished state exists for a completed migration to reach, since a project scaffolded later arrives holding whatever layout it was scaffolded with. What retires one is its destination ceasing to be legitimate, which is what happened to `migration-standards` when the snippets install channel closed, a different event from a migration finishing.
 
