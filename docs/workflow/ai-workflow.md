@@ -20,7 +20,8 @@ canon/
 ├── ARCHITECTURE.md  ← technical design decisions
 ├── DESIGN.md        ← visual intent and token decisions (UI projects)
 ├── wireframes/      ← ASCII wireframes: layout, UI copy, and interaction rules (UI projects)
-└── context/         ← per-domain narrative loaded on demand via index.md
+├── context/         ← per-domain narrative loaded on demand via index.md
+└── decisions/       ← decision history a canonical doc points at, never loaded eagerly
 
 .claude/
 └── rules/           ← path-scoped governance rules, written by canon gov install
@@ -33,7 +34,7 @@ canon/
 └── tmp/             ← deletable scratch, safe to remove without loss
 ```
 
-A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context, wireframes, and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
+A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context, decisions, wireframes, and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
 
 Three tiers of context load with different cost: always-loaded (root `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`), path-scoped lazy (`.claude/rules/<scope>.md` with `paths:` glob), and on-demand lookup (`canon/context/<domain>.md`, or `canon/context/<domain>/` once a domain outgrows one file, discovered via `canon/context/index.md`). See [the context model](../../canon/context/context-model.md) for the full picture.
 

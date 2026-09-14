@@ -31,6 +31,7 @@ async function makeRoot(): Promise<string> {
   await mkdir(join(claude, 'hooks'), { recursive: true })
   await mkdir(join(claude, 'tasks'), { recursive: true })
   await mkdir(join(surface, 'context'), { recursive: true })
+  await mkdir(join(surface, 'decisions'), { recursive: true })
   await mkdir(join(surface, 'wireframes'), { recursive: true })
 
   await writeFile(join(seeds, 'CLAUDE.md'), '# Project\n')
@@ -39,6 +40,7 @@ async function makeRoot(): Promise<string> {
   await writeFile(join(claude, 'tasks', 'index.md'), '# Tasks\n')
   await writeFile(join(surface, 'ARCHITECTURE.md'), '# Architecture\n')
   await writeFile(join(surface, 'context', 'index.md'), '# Context\n')
+  await writeFile(join(surface, 'decisions', 'index.md'), '# Decisions\n')
   await writeFile(join(surface, 'wireframes', 'index.md'), '# Wireframes\n')
 
   return root
@@ -62,6 +64,7 @@ describe('planSeeds', () => {
       'ARCHITECTURE.md',
       'hooks/guard.sh',
       'context/index.md',
+      'decisions/index.md',
       'tasks/index.md',
       'wireframes/index.md',
       'CLAUDE.md',
@@ -129,7 +132,7 @@ describe('countByScope', () => {
 
     const counts = countByScope(pendingSeeds(planSeeds(root, target)))
 
-    expect(counts).toEqual({ claude: 6, root: 1 })
+    expect(counts).toEqual({ claude: 7, root: 1 })
   })
 })
 
@@ -145,6 +148,7 @@ describe('applySeeds', () => {
       'canon/ARCHITECTURE.md',
       '.claude/hooks/guard.sh',
       'canon/context/index.md',
+      'canon/decisions/index.md',
       '.canon/tasks/index.md',
       'canon/wireframes/index.md',
       'CLAUDE.md',

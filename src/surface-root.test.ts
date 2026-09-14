@@ -151,4 +151,12 @@ describe('surface-root', () => {
       join(root, 'canon', 'context', 'ci.md'),
     )
   })
+
+  it('resolves the decisions entry the same way as context', () => {
+    mkdirSync(join(root, '.claude', 'decisions'), { recursive: true })
+
+    expect(surfaceDir(root, 'decisions')).toBe(
+      join(root, '.claude', 'decisions'),
+    )
+  })
 })

@@ -29,7 +29,7 @@ canon context audit tooling/base/seeds --gate
 
 ## Folder scope
 
-Scope defaults to `context`, `diagrams`, and `wireframes`, and a folder the project does not carry is skipped rather than reported. A domain that outgrew one file and split into `<domain>/` is audited as its own folder, so a split entry measures at the same grain as a flat one.
+Scope defaults to `context`, `decisions`, `diagrams`, and `wireframes`, and a folder the project does not carry is skipped rather than reported. A domain that outgrew one file and split into `<domain>/` is audited as its own folder, so a split entry measures at the same grain as a flat one.
 
 A name passed to `--folder` resolves under the record roots first, `.canon/` ahead of `.claude/`, and at the project root last, which is what puts `docs/` and any later corpus in reach of the same engine. The root base is reached only by a name the caller passes, so the default list still resolves under a record root alone and a project holding a root `wireframes/` is not audited against a standard it never adopted. `diagrams` is the one default name that is a session record and moves with them, which is why both record roots are in the list rather than one, and `docs/agents/records.md` states the read order every verb shares. The scope line prints the resolved path, so a project carrying both spellings reads which one was taken. The JSON record carries the base per folder as `folders[].base`.
 
