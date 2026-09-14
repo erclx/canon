@@ -106,6 +106,7 @@ pytestmark
 qwen
 readlink
 realpath
+rects
 repr
 rerank
 reranker

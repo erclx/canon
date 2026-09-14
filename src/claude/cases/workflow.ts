@@ -140,6 +140,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Sit with me while I go through my whole list of app findings one at a time, and write down each pick with what it beat.',
+    expect: 'ux-walkthrough',
+  },
+  {
+    prompt:
       'I am building this branch for another session. What am I on the hook for, and what is off limits?',
     expect: 'role-worker',
   },
