@@ -108,6 +108,7 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md` and `${CLAUDE_SKILL_DIR}/../../standards/architecture.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
 - Close a decision entry in `canon/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
 - Leave every decision entry this run did not write alone, anchored or not. The rule is scoped forward, so an entry written before it is dated by blame rather than by a read. Step 5 reports a stale anchor and no step writes one on an entry it did not amend.
@@ -160,6 +161,7 @@ Reuse the diff from the baseline above, names and content both. For each domain 
 
 - Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
 - For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
+- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule Step 3 applies to the other four canonical doc types.
 - Write a reference to another entry as the path that entry sits at, rather than as its bare filename. `${CLAUDE_SKILL_DIR}/../../standards/context.md` states the form, and a bare name strands the reference once a domain splits into subfolders.
 
 ### When the diff removes a capability
@@ -245,11 +247,29 @@ Output one line per file swept:
 
 If nothing qualifies, skip this step silently.
 
+## Step 10: classify the fold's diff baseline
+
+Skip this step silently only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
+
+Otherwise resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Run the check over the fold's whole baseline rather than scoping it to what Steps 3 and 7 wrote this run: earlier commits on the branch carry doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none.
+
+The invocation is:
+
+```bash
+canon context classify diff --base <base> --json
+```
+
+Never substitute a different verb for it, such as `canon autoship classify` (a different check, over a different scope) or `canon docs <name>` (a documentation lookup, not a classification). Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape. `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, several steps before this one. If Step 10's memory of that path is uncertain, read the reference by that resolved path rather than guessing a `.claude/skills/docs-fold/references/classify.md` path from the toolkit's install-time layout, which is a different root than the one this skill's own files live under. The invocation above runs either way, whether or not that reference resolves.
+
+Findings never stop the fold. A refusal or a missing subcommand on an older installed binary reports one line, per that reference, and the fold continues either way.
+
 ## After completion
 
 Output one line per file updated:
 
 `✅ Updated: .claude/<filename>`
+
+Step 10 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 
 If no files were updated and nothing was swept, output:
 

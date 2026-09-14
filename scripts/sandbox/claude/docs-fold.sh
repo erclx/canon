@@ -10,7 +10,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "receipt-sweep"
+  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "receipt-sweep" "classify-findings"
 
   case "$SELECTED_OPTION" in
   "drift")
@@ -164,6 +164,30 @@ stage_setup() {
     log_info "         Check it with: canon sandbox check claude:docs-fold receipt-sweep"
     log_info "         One receipt deleted, one decline folded into a **Why:** line, the control untouched"
     log_info "         One expectation needs a reader and reports as unchecked."
+    ;;
+  "classify-findings")
+    stage_fixtures claude docs-fold classify-findings 01-initial
+    git add . && git commit -m "feat(retrieval): document the chunk size decision" --no-verify -q
+
+    stage_fixtures claude docs-fold classify-findings 02-remeasure
+
+    log_step "Scenario ready: docs-fold classifies what it writes"
+    log_info "Context: two uncommitted edits stage two shapes Step 10 exists to catch"
+    log_info "  canon/context/retrieval.md appended a branch-narrated re-measurement"
+    log_info "  below the count it restates, instead of rewriting it in place"
+    log_info "  canon/wireframes/search-panel.md appended a bullet naming the source"
+    log_info "  file that implements it, which is a MOVE finding rather than a REPLACE"
+    log_info "  or a HISTORY one, and nothing but Step 10 touches a wireframe this way"
+    log_info ""
+    log_info "Narrate nothing about either edit. The arm fails if the classify step only"
+    log_info "reaches a file the prompt named."
+    log_info ""
+    log_info "Action:  /docs-fold"
+    log_info "Expect:  declared in fixtures/claude/docs-fold/classify-findings/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:docs-fold classify-findings"
+    log_info "         retrieval.md holds 58,500 once, the narration and 42,000 are gone"
+    log_info "         search-panel.md keeps its behavior bullets, the source-file mention gone"
+    log_info "         Three expectations need a reader and report as unchecked."
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

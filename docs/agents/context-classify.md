@@ -5,7 +5,7 @@ description: Classifying canonical-doc content as keep, replace/rewrite, history
 
 # Doc classifier
 
-`canon context classify` reads content from the five canonical doc types (`context/<domain>.md`, `ARCHITECTURE.md`, `wireframes/<surface>.md`, `DESIGN.md`, `REQUIREMENTS.md`) and reports whether each piece states the project as it stands or should be rewritten, narrated elsewhere, or moved to another surface. It reports and never gates: a finding is a judgment for a writer to act on, not a fact a push fails over. Wiring it into `docs-fold`, the merge gate, or `canon context audit` is separate work this verb does not do.
+`canon context classify` reads content from the five canonical doc types (`context/<domain>.md`, `ARCHITECTURE.md`, `wireframes/<surface>.md`, `DESIGN.md`, `REQUIREMENTS.md`) and reports whether each piece states the project as it stands or should be rewritten, narrated elsewhere, or moved to another surface. It reports and never gates: a finding is a judgment for a writer to act on, not a fact a push fails over. The `docs-fold` skill calls this verb in diff mode over its own diff baseline. Wiring it into the merge gate or `canon context audit` is separate work this verb does not do.
 
 Two modes read different units. Diff mode reads the chunks a git range changed, each with the section it landed in, which is what a session checks right after an edit. Sweep mode reads every section of the five doc types, split at H3, which is what a cleanup pass or a periodic re-scan runs over a whole corpus.
 

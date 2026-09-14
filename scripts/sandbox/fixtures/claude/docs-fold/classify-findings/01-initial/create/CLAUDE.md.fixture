@@ -1,0 +1,12 @@
+# Retrieval Service
+
+Chunk-indexed document retrieval.
+
+## Context
+
+- Always loaded: this file, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`
+- On-demand lookup: `canon/context/<domain>.md`. Check `canon/context/index.md` first.
+
+## Commands
+
+- `bun run check`: lint and typecheck

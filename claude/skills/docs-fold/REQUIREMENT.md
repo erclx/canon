@@ -17,6 +17,8 @@ The receipt half of that sweep was missing entirely. A review receipt was delete
 
 The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the planning surface the request was about goes untouched.
 
+This skill writes canonical docs at the end of a long build and never reviews what it wrote. An appended figure or a branch-narrated re-measurement lands unchecked the same way a session's own edits do, so what the fold produces carries the exact defect the standards it cites already ban.
+
 ## Must
 
 - Name the `.claude/` corpus in a trigger phrase rather than in the opening clause alone, so a bare request to sync the docs separates this skill from `docs-sync` on something both descriptions state
@@ -34,6 +36,10 @@ The trigger side carries a gap of its own. "Sync the docs" names either corpus t
 - Leave the current branch's review receipt alone, since the chain that wrote it cites it in its own closing line and this skill cannot read whether that citation is still live
 - Land each block of a promotion handoff at the destination its heading names, then delete the file so a later run does not fold it twice
 - Take a promotion destination as already decided, since the operator confirmed it where the page was produced
+- Classify the fold's whole diff baseline through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body, since an earlier commit on the branch carries a doc edit the fold is equally responsible for
+- Apply a `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, against the quote it names, report a model-decided `MOVE` finding naming the surface it belongs on rather than cutting it, or keep a finding with a one-line reason, rather than leaving a finding unanswered
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it, on every canonical doc type this skill writes
+- Report a refusal or a missing `context classify` subcommand as one line and continue the fold either way, since a check that cannot run is not a reason to leave the fold's own output unshipped
 
 ## Must not
 
@@ -45,6 +51,13 @@ The trigger side carries a gap of its own. "Sync the docs" names either corpus t
 - Overwrite a file a promotion block routes to. A destination that already holds a page is a merge for a person, and folding over it discards work this skill never read.
 - Write an anchor onto a decision the run did not amend, or refresh one without re-reading the number. A date from a pass that measured nothing is the false confidence the marker exists to prevent.
 - Anchor an entry written before the rule, which dates it by blame rather than by a read
+- Pick or configure a classifier backend. The project setting decides it, and this skill reports the resolved `modelLayer` as returned.
+- Stop the fold on a classify finding, a refusal, or a missing subcommand. All three report and continue.
+- Apply a finding against a quote found more than once or not found at all. Report that it could not be located instead of guessing.
+- Re-run the classifier after applying a finding, which loops it over its own edit
+- Cut a model-decided `MOVE` finding. The model's own prompt defines `MOVE` more broadly than the regex layer does, for correct content sitting on the wrong surface rather than a deletion candidate, so cutting one can discard content that belongs elsewhere rather than removing detail that never belonged at all.
+- Paste a regex-decided `MOVE` finding's content into another canonical doc after cutting it. It never belonged on the wireframe surface at all, so cutting is the whole fix, not a relocation.
+- Scope Step 10 to the files Steps 3 and 7 wrote this run. An earlier commit on the branch carries a doc edit the fold is equally responsible for, and the verb's own extraction already answers whether anything in range qualifies.
 
 ## Guards
 
