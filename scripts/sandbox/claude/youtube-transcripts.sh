@@ -50,5 +50,5 @@ EOF
   log_info "Context: deterministic yt-dlp shim at bin/yt-dlp, no network needed"
   log_info "Action:  /youtube-transcripts https://youtu.be/sandboxVid01"
   log_info "Note:    launch claude with the shim on PATH: PATH=\"\$PWD/bin:\$PATH\" claude ..."
-  log_info "Expect:  transcripts/how-attention-works--sandboxVid01.md with frontmatter and deduped prose"
+  log_info "Expect:  .canon/transcripts/<fetch-date>--how-attention-works--sandboxVid01.md with frontmatter and deduped prose"
 }
