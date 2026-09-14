@@ -171,7 +171,7 @@ EOF
 
   log_step "Scenario ready: memory review with mixed classification"
   log_info "Fixtures seeded in .canon/memory/:"
-  log_info "  confirm-destructive-commands  : promote to CLAUDE.md Behavior (cross-domain)"
+  log_info "  confirm-destructive-commands  : promote to an always-loaded rule (cross-domain)"
   log_info "  zod-in-src-routes             : promote to .claude/skills/canon-sample/SKILL.md (path-scoped)"
   log_info "  no-obvious-comments + comments-explain-why : consolidate into one promote"
   log_info "  memory-location               : already absorbed in CLAUDE.md Memory, should retire"

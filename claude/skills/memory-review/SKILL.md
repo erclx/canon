@@ -1,6 +1,6 @@
 ---
 name: memory-review
-description: Reviews `.canon/memory/` and proposes per-entry actions (promote to `CLAUDE.md`, move into a skill body, route to a context entry, hand off to governance, or retire as stale). Also runs the discuss, challenge, apply, and cleanup phases on an existing review file. Use when asked to "review memory", "discuss memory questions", "challenge the promotes", "apply memory decisions", "cleanup memory review", "promote memory", or "consolidate memories". Do NOT auto-apply. Output a grouped proposal and wait for block-by-block approval.
+description: Reviews `.canon/memory/` and proposes per-entry actions (promote to an always-loaded rule, move into a skill body, route to a context entry, hand off to governance, or retire as stale). Also runs the discuss, challenge, apply, and cleanup phases on an existing review file. Use when asked to "review memory", "discuss memory questions", "challenge the promotes", "apply memory decisions", "cleanup memory review", "promote memory", or "consolidate memories". Do NOT auto-apply. Output a grouped proposal and wait for block-by-block approval.
 ---
 
 # Memory review
@@ -48,11 +48,12 @@ Read in parallel from the project root:
 
 Read in parallel from the project root. Skip any file or folder that does not exist.
 
-- `CLAUDE.md`: project behavior rules and Content ownership section
+- `CLAUDE.md`: project behavior rules and Content ownership section, still a read target for the absorbed-already check even though it takes no new promotion
 - every `SKILL.md` under `.claude/skills/`: domain-scoped internal skill bodies
 - every `SKILL.md` under `claude/skills/`: plugin skill bodies
 - every `*.md` under `${CLAUDE_SKILL_DIR}/../../standards/`: authoring references
 - every `*.md` under `governance/rules/` in the toolkit repo, or `.claude/rules/` in a target project: coding-standards rules
+- every `*.md` under `internal/rules/` in the toolkit repo, or `.claude/rules/project/` in a target project: always-loaded rules a promote lands in
 
 ### Step 3: classify each entry
 
@@ -62,11 +63,13 @@ Read in parallel from the project root. Skip any file or folder that does not ex
 
 For each in-scope entry (see Scope), pick one action:
 
-- **Promote to `CLAUDE.md`**: the rule is cross-domain behavior or a design principle applied across the whole project.
+- **Promote to an always-loaded rule**: the rule is cross-domain behavior or a design principle applied across the whole project, passing `592-claude-md.md`'s test (applies every session regardless of what is being edited). Do not author a toolkit rule file inline.
+  - In the toolkit repo, hand off to `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own `internal/rules/core/` (this repo only, never ships) and `governance/rules/core/` (ships to every target).
+  - In a target project, append the rule to an existing file under `.claude/rules/project/` with `Edit`, since a project rule is project-owned and sync never overwrites it, or hand off to the `create-rule` skill when no existing file fits.
 - **Promote to a skill body**: the rule fires only when editing a specific path-scoped domain. Name the target skill.
 - **Promote to a standards file**: the rule is an authoring reference that belongs in the project's own standards folder as `<domain>.md`.
-- **Promote to a context entry**: the entry states a fact about a domain carrying an entry in `canon/context/index.md`. Append it to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root, in the format `memory-capture` writes, and tell the user to run `/docs-fold` from a branch. Do not edit the context entry here.
-- **Hand off to governance**: the rule is coding-standards class (typescript, testing, naming, error-handling, performance, logging, concurrency, planning). Do not author the rule file inline. Never edit the synced `.claude/rules/` copies of toolkit rules, because `canon gov sync` overwrites them. Stop at handoff.
+- **Promote to a context entry**: the entry states a fact about a domain carrying an entry in `canon/context/index.md`. Append it to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root, in the format `memory-capture` writes, and tell the user to run `/docs-fold` from a branch. Do not edit the context entry here. A project-identity or command fact takes this action when a context entry owns the subject, such as a development entry for commands, and **Retire** otherwise, naming a hand edit to `CLAUDE.md` as the reason. Memory review does not write the root file itself.
+- **Hand off to governance**: the rule is coding-standards class (typescript, testing, naming, error-handling, performance, logging, concurrency, planning), never a cross-domain behavior rule. Do not author the rule file inline. Never edit the synced `.claude/rules/` copies of toolkit rules, because `canon gov sync` overwrites them. Stop at handoff. This and **Promote to an always-loaded rule** never both claim one entry: class names the topic (coding-standards routes here), firing axis names the rest (applies-every-session routes to the rule promote).
   - In the toolkit repo, point the user at `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own the source-of-truth rules under `governance/rules/`.
   - In a target project, point the user at the `create-rule` skill, which scaffolds a project-local rule under `.claude/rules/`.
 - **Retire**: the rule is stale, already absorbed into a durable surface, too vague to phrase as a rule, or a one-time incident narrative. Apply moves the file to `.canon/tmp/memory-archive/` rather than deleting it.
@@ -83,7 +86,7 @@ The check covers implication, not only keyword match. If an adjacent bullet in t
 
 #### Crispness check
 
-Rules that resist crisp one-line phrasing default to **Retire** over promote. Never promote a memory unchanged. Rewrite to match the destination surface's tone. Use terser phrasing for `CLAUDE.md` and imperative phrasing for skill bodies.
+Rules that resist crisp one-line phrasing default to **Retire** over promote. Never promote a memory unchanged. Rewrite to match the destination surface's tone. Use single-directive rule-bullet phrasing for an always-loaded rule and imperative phrasing for skill bodies.
 
 ### Step 4: write the proposal to the review file
 
@@ -134,9 +137,9 @@ Before applying any item, check the worktree state:
 
 If the result is `MAIN`, stop and tell the user: `❌ Apply phase mutates tracked files. Run /session-worktree first.` Discuss and Challenge phases only touch `.canon/review/` scratch and run from anywhere.
 
-Before applying a promote to root `CLAUDE.md`, load `internal-claude` so its seed-mirror rule fires on the edit.
+Before applying a promote to an always-loaded rule in the toolkit repo, load `internal-governance`, which owns `internal/rules/core/` and `governance/rules/core/` and is the only route that may author into either. In a target project, hand off to `create-rule` with no load, since `internal-governance` is a toolkit-internal skill under `.claude/skills/` that a target project never has. An `Edit` appending to an existing file under `.claude/rules/project/` needs no load either.
 
-Promotions are a separate concern from any feature in flight. Keep the promoted edits on their own commit. Do not fold a `CLAUDE.md` or skill-body change into a feature's commits, because a feature reviewer should not have to vet a change to how the agent operates.
+Promotions are a separate concern from any feature in flight. Keep the promoted edits on their own commit. Do not fold an always-loaded-rule or skill-body change into a feature's commits, because a feature reviewer should not have to vet a change to how the agent operates.
 
 For each item, parse the `Decision:` line:
 
@@ -149,7 +152,7 @@ Free-form text after the verb is a reason. Capture it in the receipt but do not 
 
 Action by action type:
 
-- **Promote**: use `Edit` to insert the rewritten rule into the target surface, then archive the memory file.
+- **Promote**: use `Edit` to insert the rewritten rule into the target surface, then archive the memory file. A promote to an always-loaded rule in the toolkit repo never reaches this line: it stops as a handoff to `internal-governance`, the same as **Hand off** below, and archives only on the user's explicit confirmation.
 - **Promote to a context entry**: append the fact to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root, then archive the memory file. `docs-fold` folds it in on its next run from a branch, which is what keeps one skill writing context entries.
 - **Hand off**: do not edit governance. Archive the memory file only if the user confirmed the handoff explicitly. Otherwise leave it in place.
 - **Retire**: archive the memory file.

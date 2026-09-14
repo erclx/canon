@@ -21,9 +21,9 @@ absent = [".claude/standards/skill.md", "standards/skill.md"]
 paths = [".canon/review/memory/memory-review-memory-sweep.md"]
 
 # Propose writes the proposal and nothing else. The apply pass, which edits
-# `CLAUDE.md` and the skill body and moves entries into the archive, needs a
-# second turn the headless run never takes, so a run that reached those files
-# applied without approval.
+# the always-loaded rule target and the skill body and moves entries into the
+# archive, needs a second turn the headless run never takes, so a run that
+# reached those files applied without approval.
 # Those targets are ordinary project files and land inside the snapshot, and the
 # proposal itself now does too, so the scope has a write to check on a correct
 # run rather than only on a wrong one.
@@ -35,7 +35,7 @@ write_scope = [".canon/review/**"]
 
 manual = [
   "`no-obvious-comments` and `comments-explain-why` are fused into one promote rather than proposed separately. Semantic: consolidation is the skill's judgment and both filenames appear in the proposal either way",
-  "`zod-in-src-routes` targets the path-scoped skill body and `confirm-destructive-commands` targets CLAUDE.md. Semantic: the routing rule is the point of the arm, and a pattern matching a target name cannot tell a correct route from a coincidence",
+  "`zod-in-src-routes` targets the path-scoped skill body and `confirm-destructive-commands` targets an always-loaded rule, either an existing file under `.claude/rules/project/` or a handoff to `create-rule` since the fixture seeds no project rule folder. Semantic: the routing rule is the point of the arm, and a pattern matching a target name cannot tell a correct route from a coincidence",
 ]
 
 # Every key above this line is top level. A bare key written below a
