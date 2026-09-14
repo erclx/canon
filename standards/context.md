@@ -70,6 +70,7 @@ Pick by what the domain is. Add domain-specific headings as needed.
 ## Ordering
 
 - Order sections `Overview`, `Layout`, `Decisions`, `Gotchas`, then everything else.
+- Name a heading for its subject as it stands (`## Cache`), never for the event that shaped it (`## The cache was the untested part, and the test moved it`). A heading is what a scan reads, so a narrating heading turns the table of contents into a changelog.
 - Entries get read top-down and often partially, so irreducible content sits above recoverable content.
 
 ## The development entry
@@ -84,6 +85,7 @@ Only the `development` entry carries this section. It is not a general-purpose h
 - Decisions specific to the domain. Broader cross-domain decisions belong in `canon/ARCHITECTURE.md`.
 - Constraints, gotchas, things tried and rejected
 - Domain-specific conventions that do not fit a `paths:`-scoped rule
+- A measured figure, anchored the way `architecture.md` states under `## Verification anchors`, so an entry and the architecture record date a number the same way.
 - A reference to another entry, spelled as the path that entry sits at rather than as its bare filename. A bare name resolves against whichever folder the reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A reference to a seed, a standard, or a file the project owns elsewhere keeps the form its own surface uses.
 
 ## What does not go in
@@ -98,12 +100,13 @@ Only the `development` entry carries this section. It is not a general-purpose h
 - Anything already in `canon/REQUIREMENTS.md` or `canon/ARCHITECTURE.md`.
 - The history of how the domain reached its current shape. An entry describes the repository as it stands, so a change number, release label, or date attached to a change goes wherever the project tracks work.
 - A rejected alternative's provenance, which is the same rule at the one place the section above admits history. Keep what was tried and why it lost. Cut who tried it and when.
+- The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. The route goes to the decision log or the change that introduced it.
+- Measured results a generated file already carries. Point at the file instead of copying the figure, so a re-run cannot leave the entry behind.
 
 ## Length
 
 - Aim for one entry per domain. There is no hard cap. Length is a symptom, not the defect.
 - Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. Rendered lines count as `markdown.md` defines them.
-- Where a bullet sits past the weight checkpoint `markdown.md` states, the overflow to move is the incident that motivated the decision, which specializes that rule's instruction to send the overflow to prose. Keep the current design and the alternative that lost, and send the incident to the change that introduced it, the issue that tracked it, or the research record behind it.
 - Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` or `## CLI` section instead.
 - Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than leaving the narration of what it replaced beside it. A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age. The rule above protects content whose subject is live, and this one releases content whose subject is not.
 - Rewrite a decision a later one replaced rather than appending the replacement beside it. The subject is still live, so the rule above does not reach it, and two bullets on one subject leave a reader to work out which of them is current. State the design that stands and keep the superseded reasoning only where it is the alternative that lost.

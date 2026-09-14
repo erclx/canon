@@ -30,10 +30,11 @@ Does not govern:
 
 - Implementation details, API names, or internal component references
 - Anything that describes how a feature is built rather than what it does
+- Measured results, such as scores, benchmark figures, or token counts. They move on every run and this file changes least. Name where the results live instead.
 
 ## Sections
 
-Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, `## Tech stack`, and `## Constraints`. Add `## Distribution` when the rule below applies. Drop a section rather than pad it with filler.
+Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, `## Tech stack`, and `## Constraints`. Add `## Distribution` when the rule below applies. Add `## Premise` when the project exists to answer a question, stated as the question and what would count as an answer, never as the answer measured so far. Drop a section rather than pad it with filler.
 
 ## Lifecycle
 

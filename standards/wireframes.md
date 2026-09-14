@@ -24,11 +24,12 @@ Does not govern:
 
 A wireframe works when someone can rebuild the surface from it without opening the components:
 
-- What is on screen, and where does it sit relative to everything else?
-- Which states can a visitor reach, and what does each one look like?
+- What regions are on screen, by name, and where does each sit relative to the others?
+- Which states can a visitor reach, what triggers each, and where is its captured evidence?
 - What does its structural copy say, word for word, and where does its long-form content come from?
+- What was deliberately left off the surface?
 
-A wireframe that fails these is non-conforming regardless of whether it satisfies every section rule below. The fences are the means. These three questions are the test.
+A wireframe that fails these is non-conforming regardless of whether it satisfies every section rule below. The sections are the means. These four questions are the test.
 
 ## Transcription wireframes
 
@@ -45,18 +46,20 @@ Route detail the source citation does not already carry to `canon/context/` as u
 
 Both fields feed `canon/wireframes/index.md` when regenerated.
 
-## Layout
+## Regions
 
-- Draw each surface as an ASCII block inside a `plaintext` fence. One fence per distinct layout.
-- Label regions with `←` annotations. Never use `#` for annotations.
-- Show a region's role, not its styling. `← status pill` reads better than a class name or hex value. A transcription wireframe is the exception: see `## Transcription wireframes`.
-- Keep the grid honest. The ASCII proportions should match the intended widths, since conveying proportion is the wireframe's job.
+- Name every region the surface holds, in a bullet list ordered as a reader scans the page, each with where it sits relative to the others: `- Act pane: right of the answer from 1024 up, an overlay below 1024`. These names are the vocabulary plans, picks, and tests use, and the placement is what a list without a sketch would otherwise lose. Pixel sizes stay in `canon/DESIGN.md`.
+- Draw an ASCII block inside a `plaintext` fence only for a layout that is not built yet. Label regions with `←` annotations, show a region's role rather than its styling, and keep the proportions honest.
+- Remove the fence in the change that first captures evidence for the layout. The capture is the exact picture, and a sketch kept beside it drifts from it. A wireframe carrying both a sketch and an evidence folder for the same layout is non-conforming.
+- Give a layout that changes across a breakpoint its own entry under the list, named by what triggers it (`At 1024 and wider`), not by an arbitrary label. A wider gutter alone is not a new layout.
+- Keep one surface per file, indexed by `index.md`.
 
-## Variants
+## States
 
-- Add a second fence only when the layout itself changes across a breakpoint or state. A wider gutter alone is not a new layout.
-- Name each variant by what triggers it (`## Desktop (≥768px)`, `## Empty state`), not by an arbitrary label.
-- One H2 per variant. Do not stack unrelated surfaces in one file. Keep one surface per file, indexed by `index.md`.
+- List every state a visitor can reach in one table: the state name, what reaches it, what it shows in words, and its evidence folder.
+- Name a state in plain kebab case (`answered`, `refused`) and name its evidence folder the same way, with no ordinal prefix. The table carries the reading order, so a state added in the middle renames nothing.
+- Keep the table and the evidence folders one-to-one. A state with no capture yet reads `not captured` in its evidence cell, which is the one exception, and it stays visible until the capture lands.
+- Add an H3 below the table only for a state that needs more than its row: what differs from the regions in words, and its own copy or behavior.
 
 ## Copy
 
@@ -66,9 +69,19 @@ Both fields feed `canon/wireframes/index.md` when regenerated.
 
 ## Behavior
 
-- Describe interaction intent: what the visitor does, what changes on screen, what each state looks like.
+- Describe interaction intent: what the visitor does and what changes on screen.
 - State the rule, not the mechanism. `The rail tracks the active section as the visitor scrolls` is intent. The scroll handler, throttle, and observer margins are not.
-- Keep it to a short list. A Behavior section longer than the layout is a sign implementation detail has leaked in.
+- Keep it to a short list. A Behavior section longer than the regions and states is a sign implementation detail has leaked in.
+
+## Not on this surface
+
+- State what was deliberately left off, one bullet per exclusion, as a present-tense rule: `- No navigation rail`. This is the section that stops a draft from proposing what was already ruled out.
+- Keep the reason to a clause where one is needed. The rounds that ruled it out go to the decision log.
+
+## What moves out
+
+- Which candidate beat which, and when: the decision log
+- Measurements such as contrast ratios and timings: `canon/DESIGN.md` for tokens and floors, the surface's context entry for the rest
 
 ## What moves to canon/context/
 
@@ -84,13 +97,12 @@ Reference the context entry from the wireframe by path when a reader needs the m
 ## Maintenance
 
 - When a surface's layout or interaction changes, update its wireframe file in the same PR. A wireframe showing a defunct layout is worse than none.
+- When a state is added, removed, or renamed, update its row and its evidence folder in the same PR.
 - The Behavior and Copy prose around an ASCII block is prose and follows `markdown.md` and the `write-human` skill. The fenced block itself is not, so a check scoped to prose is the wrong thing to rely on for what sits inside it.
 
 ## Template
 
-One H2 per layout variant, each holding its own fence. A surface with a single layout carries one.
-
-````markdown
+```markdown
 ---
 title: <Surface name>
 description: <when and where the surface appears>
@@ -98,17 +110,18 @@ description: <when and where the surface appears>
 
 # <Surface name>
 
-## <what triggers this variant>
+<One paragraph: what the surface is for and what it covers.>
 
-```plaintext
-+------------------------------------------+
-| <region>                    ← <its role> |
-+------------------------------------------+
-|                                          |
-| <region>                    ← <its role> |
-|                                          |
-+------------------------------------------+
-```
+## Regions
+
+- <Region>: <what it holds>, <where it sits relative to the others>
+- <Region>: <what it holds>, <where it sits relative to the others>
+
+## States
+
+| State   | Reached when | Shows      | Evidence                   |
+| ------- | ------------ | ---------- | -------------------------- |
+| <state> | <trigger>    | <in words> | `<evidence-root>/<state>/` |
 
 ## Copy
 
@@ -119,5 +132,8 @@ description: <when and where the surface appears>
 ## Behavior
 
 - <what the visitor does, and what changes on screen>
-- <what each reachable state looks like>
-````
+
+## Not on this surface
+
+- <what was deliberately left out, as a present-tense rule>
+```

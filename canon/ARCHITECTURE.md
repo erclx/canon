@@ -260,13 +260,13 @@ Sequencing it behind a release was the constraint that shaped the rest. `#1309` 
 
 The second test landed once a release carried the surface resolver, so a target on an older binary kept reading either root before anything moved. `canon migrate surface-roots` relocated 80 files with `git mv` and rewrote 1,040 citations across 268 files. What the second test costs is a tracked `canon/` one character from the ignored `.canon/`, and a reader skimming a path cannot tell which of the two was meant. Measured at `c947c27f` on 2026-09-13.
 
-### The line budget is retired rather than re-derived
+### A reported word figure never gates the file's weight
 
-`standards/architecture.md` no longer prices this file at six lines a decision plus a frame, and asks a session to judge weight by reading rather than by counting, merging or retiring a decision when the file reads heavy. The retired budget never gated anything: six readings tracked it past its own ceiling on every merge measured, from 228 lines across 30 decisions to 276 across 34, and the three most recent widened it by growing a decision or adding one rather than by padding prose. Nothing compared the number to the ceiling, so the bullet's only effect was a recount somebody owed the next branch.
+`standards/architecture.md` prices no decision by line or word count. A session judges this file's weight by reading it, merging or retiring a decision when the file reads heavy, and a word count reported for the file and for each decision would give that reading a figure to start from rather than memory alone. The figure would never gate: nothing would compare it to a ceiling and nothing would block a merge on it, which is the position a numeric budget already tried and failed at, tracked past its own ceiling on every merge measured until the ceiling was dropped rather than widened.
 
-Re-deriving a wider ceiling from that same history was the alternative, and it fails on the history itself: the marginal cost of a decision added across the six readings, 48 lines over the last four decisions, 12 apiece from 228 across 30 to 276 across 34, already runs double the retired six-line price, so a wider number meets the identical defect, nothing enforces it, and drifts past its own ceiling on the same cadence. This repository's own position is that a rule the model can talk itself out of moves into a verb, and no verb prices a decision's weight here, so the honest move is to stop pricing the file rather than price it again at a number the next branch clears as cleanly.
+Re-deriving a wider ceiling from that same history was the alternative, and it fails the way the first ceiling failed: a number nothing enforces drifts past itself on the same cadence regardless of where it starts. This repository's own position is that a rule the model can talk itself out of moves into a verb, and no verb prices a decision's weight here, so the honest move is to report the figure and stop pricing the file against it.
 
-The paragraph weight checkpoint in `markdown.md`, gated by `canon markdown audit`, is the one part of this mechanism that was ever enforced, and it still governs every entry here, this one included. Measured at `50c523f5` on 2026-09-02.
+The paragraph weight checkpoint in `markdown.md`, gated by `canon markdown audit`, is the one part of this mechanism ever enforced, and it still governs every entry here, this one included.
 
 ### A capability's presence in a seed or config decides whether it installs, and a gate is exempt by kind
 

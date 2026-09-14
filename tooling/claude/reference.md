@@ -15,7 +15,7 @@ canon/
 ├── DESIGN.md          ← seeded. Visual intent and the decisions behind it
 ├── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
 ├── decisions/         ← seeded. Decision history a canonical doc points at, never loaded eagerly. `<nn>-<slug>.md` records.
-└── wireframes/        ← seeded. Per-surface ASCII layouts. `index.md` is the discovery anchor; `<surface>.md` files hold the sketches and behavior bullets.
+└── wireframes/        ← seeded. Per-surface regions and states. `index.md` is the discovery anchor; `<surface>.md` files hold the regions list, the states table, and the behavior bullets.
 
 .claude/
 ├── GOV.md             ← retired. Removed by `canon gov sync` if present from a prior install
