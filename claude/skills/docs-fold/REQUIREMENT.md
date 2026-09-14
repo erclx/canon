@@ -56,6 +56,7 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Apply a finding against a quote found more than once or not found at all. Report that it could not be located instead of guessing.
 - Re-run the classifier after applying a finding, which loops it over its own edit
 - Cut a model-decided `MOVE` finding. The model's own prompt defines `MOVE` more broadly than the regex layer does, for correct content sitting on the wrong surface rather than a deletion candidate, so cutting one can discard content that belongs elsewhere rather than removing detail that never belonged at all.
+- Paste a regex-decided `MOVE` finding's content into another canonical doc after cutting it. It never belonged on the wireframe surface at all, so cutting is the whole fix, not a relocation.
 - Scope Step 10 to the files Steps 3 and 7 wrote this run. An earlier commit on the branch carries a doc edit the fold is equally responsible for, and the verb's own extraction already answers whether anything in range qualifies.
 
 ## Guards

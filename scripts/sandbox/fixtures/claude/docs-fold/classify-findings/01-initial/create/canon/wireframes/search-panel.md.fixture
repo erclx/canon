@@ -1,0 +1,11 @@
+---
+title: Search panel
+description: The retrieval search UI
+---
+
+# Search panel
+
+## Behavior
+
+- A search box sits at the top of the panel, with results streaming in below it as the query lengthens.
+- Each result row shows the document title, a one-line snippet, and a relevance score.

@@ -2,18 +2,31 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# canon/context/retrieval.md carries an uncommitted edit that appended a
-# branch-narrated re-measurement below the count it restates, instead of
-# rewriting the count in place. That is the exact pattern Step 10's classify
-# call exists to catch after Step 3 and Step 7 have already run, whatever
-# either step's own session judgment did or did not catch on its own.
+# Two uncommitted edits stage two shapes Step 10's classify call exists to
+# catch, after Step 3 and Step 7 have already run:
+#
+# `canon/context/retrieval.md` appends a branch-narrated re-measurement below
+# the count it restates, instead of rewriting the count in place. Step 7's own
+# session judgment reliably folds this on its own, measured across two clean
+# runs, since the diff sits inside the entry Step 7 already maps to and reads.
+# It is kept here as an end-to-end content check on the final doc, not as
+# evidence Step 10 ran, since Step 7 alone is sufficient to produce it.
+#
+# `canon/wireframes/search-panel.md` appends a bullet naming the source file
+# implementing the panel, which is a `MOVE` verdict rather than a `REPLACE` or
+# `HISTORY` one. Nothing else in the fold touches a wireframe's prose this way:
+# Step 7 never reads `canon/wireframes/`, and Step 4's own sweep only checks
+# for a contradicted literal string or an uncovered surface, neither of which
+# this edit is. Only Step 10's classify call can remove it, which is what
+# makes this half of the arm evidence that the step actually ran, rather than
+# the retrieval.md half above.
 
 # No backend is configured in the sandbox, so the regex layer is the only
 # deterministic one. `diffPatternVerdict` never returns REPLACE, only KEEP,
-# HISTORY, or MOVE, so the finding this arm measures reads HISTORY: the added
-# paragraph carries "moved again" and "at this branch", both narration
-# patterns `src/context/classify/patterns.ts` matches.
-reply = ["Classify", "regex ran"]
+# HISTORY, or MOVE. The wireframe edit names a `.tsx` file in backticks, which
+# `src/context/classify/patterns.ts`'s `MECHANISM_IN_WIREFRAME` pattern
+# matches, firing a regex-decided MOVE that `classify.md` says to cut outright.
+reply = ["SearchPanel.tsx"]
 
 write_scope = ["canon/**"]
 
@@ -24,6 +37,7 @@ max_turns = 30
 manual = [
   "The old count, 42,000, no longer appears anywhere in canon/context/retrieval.md. Unwired: `absent` asserts over paths rather than content, and there is no path to assert absent here.",
   "No narration phrase (`moved again`, `at this branch`, or similar) survives in canon/context/retrieval.md. Unwired: same reason.",
+  "`src/features/search/SearchPanel.tsx` no longer appears anywhere in canon/wireframes/search-panel.md. Unwired: same reason.",
 ]
 
 # The new count is stated once, in the decision's own sentence, once the
@@ -39,3 +53,14 @@ pattern = "58,500 chunks"
 [[content]]
 path = "canon/context/retrieval.md"
 pattern = "blurs the boundary a citation should point at"
+
+# The wireframe's original behavior bullets survive the cut. A run that
+# dropped the whole file, or the whole section, rather than cutting the one
+# misplaced bullet, fails here even though the mechanism mention is also gone.
+[[content]]
+path = "canon/wireframes/search-panel.md"
+pattern = "streaming in below it as the query lengthens"
+
+[[content]]
+path = "canon/wireframes/search-panel.md"
+pattern = "the document title, a one-line snippet, and a relevance score"

@@ -251,7 +251,15 @@ If nothing qualifies, skip this step silently.
 
 Skip this step silently only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
 
-Otherwise resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Run the check over the fold's whole baseline rather than scoping it to what Steps 3 and 7 wrote this run: earlier commits on the branch carry doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none. Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
+Otherwise resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Run the check over the fold's whole baseline rather than scoping it to what Steps 3 and 7 wrote this run: earlier commits on the branch carry doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none.
+
+The invocation is:
+
+```bash
+canon context classify diff --base <base> --json
+```
+
+Never substitute a different verb for it, such as `canon autoship classify` (a different check, over a different scope) or `canon docs <name>` (a documentation lookup, not a classification). Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape. `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, several steps before this one. If Step 10's memory of that path is uncertain, read the reference by that resolved path rather than guessing a `.claude/skills/docs-fold/references/classify.md` path from the toolkit's install-time layout, which is a different root than the one this skill's own files live under. The invocation above runs either way, whether or not that reference resolves.
 
 Findings never stop the fold. A refusal or a missing subcommand on an older installed binary reports one line, per that reference, and the fold continues either way.
 
@@ -261,11 +269,7 @@ Output one line per file updated:
 
 `✅ Updated: .claude/<filename>`
 
-Step 10 adds its own lines when it applied or reported a finding:
-
-`✏ Rewrote: <file>`
-`✂ Cut: <file>`
-`➡ Move needed: <file>`
+Step 10 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 
 If no files were updated and nothing was swept, output:
 

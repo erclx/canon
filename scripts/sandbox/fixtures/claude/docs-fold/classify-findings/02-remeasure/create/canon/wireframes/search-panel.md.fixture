@@ -1,0 +1,12 @@
+---
+title: Search panel
+description: The retrieval search UI
+---
+
+# Search panel
+
+## Behavior
+
+- A search box sits at the top of the panel, with results streaming in below it as the query lengthens.
+- Each result row shows the document title, a one-line snippet, and a relevance score.
+- The debounce timing and the re-rank call both live in `src/features/search/SearchPanel.tsx`, which schedules the query after the user stops typing for 200 milliseconds and then re-ranks the streamed candidates against the full question before painting them.
