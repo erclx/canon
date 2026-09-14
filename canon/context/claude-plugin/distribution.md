@@ -21,15 +21,11 @@ Validation proves the manifest parses and nothing about whether it works. `claud
 
 ### Reaching a standard
 
-Delivering a standard and reaching it are separate problems. The shipped skills once cited `.claude/standards/X.md`, which resolves against the target project, so in a project with no standards installed a skill resolved the citation to the project root, found nothing, and never looked in its own plugin root. <!-- audit-ignore-citations: .claude/standards/X.md --> The cache copies were inert until a skill was told to look at them.
+Delivering a standard and reaching it are separate problems. Each citing body names `${CLAUDE_SKILL_DIR}/../../standards/X.md`, which lands on the dereferenced symlink beside `skills/`. One path is enough, because no corpus installs into a project, so there is no project copy for a citation to fall back to. `git-commit` citing `versioning.md` is the concrete shape of the form.
 
-Each citing body now names `${CLAUDE_SKILL_DIR}/../../standards/X.md` alone, which lands on the dereferenced symlink beside `skills/`. One path rather than two, because no corpus installs into a project and there is no project copy for a first branch to try.
+Only `${CLAUDE_SKILL_DIR}` survives to the model as an already-expanded path. Measured across three probe skills in a project with no `.claude/`, the body arrived with that variable already expanded to an absolute path, while `${CLAUDE_PLUGIN_ROOT}` reached the model as a literal string and a bare `../../` arrived unresolved, working only because the model inferred a base, which is the inference `standards/skill.md` bans a bare relative path to avoid.
 
-The two-branch citation that preceded it needed a rule about what the fallback tested, since a project could hold the directory and not the file. That whole class is gone with the channel: a target has no directory to test and a body naming the installed path resolves nothing rather than resolving to a stale copy. `git-commit` citing `versioning.md` is the concrete shape of the single-path form.
-
-Only `${CLAUDE_SKILL_DIR}` survives to the model. Measured across three probe skills in a project with no `.claude/`, the body arrived with that variable already expanded to an absolute path, while `${CLAUDE_PLUGIN_ROOT}` reached the model as a literal string and a bare `../../` arrived unresolved. The latter two happened to work because the model inferred a base, which is the inference `standards/skill.md` bans a bare relative path to avoid.
-
-A guard on a standard's presence names the file under the plugin root rather than a directory in the target. `create-skill` and `standards-audit` each carried a directory guard that refused to run in a project holding the file by the other route.
+A guard on a standard's presence names the file under the plugin root rather than a directory in the target. `create-skill` and `standards-audit` each carry that guard.
 
 ### The first executable in a skill
 
@@ -47,9 +43,9 @@ The verb also needs a fallback rather than only a guard, since these scripts shi
 
 ### What a symlink costs
 
-A symlink is an entry point that cannot filter. `standards/canon/` and `snippets/canon/` were excluded at every CLI verb and still reached every plugin cache, because an installer dereferences the two symlinks and copies whatever is behind them with no code in the path. The count reached five before the fix and grew on its own, since `snippets/canon/` was where internal snippets were authored.
+A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and `claude/snippets` and copies whatever sits behind them into every plugin cache with no code in the path to stop it, which is why internal content was moved out of `standards/canon/` and `snippets/canon/`, filterable locations that still leaked through the symlinks ahead of them.
 
-Internal content now lives at `internal/`, which nothing under `claude/` reaches, and the filters that guarded the old category are deleted. `scripts/core/check-plugin-boundary.sh` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, so what the filters asserted is now measured against what an install actually copies.
+Internal content lives at `internal/` instead, which nothing under `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
 
 A native Windows checkout without symlink support materializes both links as plain text files holding the paths `../standards` and `../snippets`. The plugin then ships two junk files and no standards, and no stage notices, because every catalog command reads the real directories at the repository root. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 
@@ -71,9 +67,9 @@ What that shape drops is the standards fallback. Install copies the named skill 
 
 ### What a shape change does to an installed cache
 
-An installed plugin follows its marketplace where auto-update is on, which it is for the `canon` marketplace on the authoring machine, so a version lag is no longer the usual failure. Earlier measurements caught the older one, where the cache sat 38 releases behind and served a skill the repository had replaced. What remains is a shape change.
+An installed plugin follows its marketplace where auto-update is on, which it is for the `canon` marketplace on the authoring machine, so a version lag is not the usual failure. What remains is a shape change.
 
-A change to an entry's `skills` array reaches the reported inventory as soon as the marketplace refreshes and never reaches the cache. Adding a fifth skill made `claude plugin details` report five while the cache directory still held four, so the command answers from the entry rather than from what an install materialized. `claude plugin update` declined the work and reported the plugin already current, because the version key had not moved. Uninstall followed by install reconciled both.
+A change to an entry's `skills` array reaches the reported inventory as soon as the marketplace refreshes and never reaches the cache: `claude plugin details` answers from the entry rather than from what an install materialized, so its reported count can outrun the cache directory's own contents. `claude plugin update` declines the work and reports the plugin already current whenever the version key has not moved. Uninstall followed by install reconciles both.
 
 Publishing a shape change therefore strands anyone who has already installed, unless the release moves the version the cache is keyed on. An entry resolving a `plugin.json` takes its key from that file's version, which `release-please` bumps, so a shape change riding a release materializes and one shipped without a bump does not. An entry resolving no manifest is keyed on the source commit instead.
 

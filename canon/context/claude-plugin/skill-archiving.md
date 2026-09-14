@@ -21,8 +21,6 @@ Naming it is what nothing recorded. A branch name cannot carry the link, because
 
 That number has to name an open pull request. `gh pr view` resolves by head branch and ignores state, so a branch name reused after an earlier pull request merged returned the closed one, and the run rewrote a merged pull request's title and body while reporting its URL as the one it opened. The detection reads `gh pr list --head` scoped to `--state open` and to the repository's default base now, since one head can carry open pull requests against two bases and reading the first result would pick between them by list order. The run resolves once and reuses what that command printed rather than looking the number up again for the task write.
 
-The sandbox arm measured the second lookup rather than assuming it: `gh pr view` prefers the open pull request when a head carries both, so the number it wrote was right, and the claim that it recorded the merged one was wrong. It was removed anyway, because that precedence is an undocumented detail of the tool and the record `canon tasks archive` closes against should not rest on one.
-
 `git-followup` needed nothing, since its guard already stops unless the state is `OPEN`. The cause sits in `git-branch`, which has no collision check against a name that already carried a pull request, and that stays on the board because scoping the lookup makes a reused name survivable.
 
 ## Where the gates live

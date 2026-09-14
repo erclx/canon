@@ -18,9 +18,7 @@ description: The canon claude command surface and what each verb writes into a t
 
 Seeds `.claude/` with project docs (`REQUIREMENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `context/`, `tasks/`, `wireframes/`, `settings.json`) and hook scripts under `.claude/hooks/`. Also seeds `CLAUDE.md` at the project root and merges `.gitignore` entries. Skips files already present. Run once per project.
 
-Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` now runs on every scaffold because `--stack` defaults to `base`. The seed `CLAUDE.md` carried a `## Markdown` section duplicating that routing for as long as a bare init could skip governance. A seed audit proposed cutting it, the cut was reverted because governance was opt-in while standards were opt-out, and the default closed that gap.
-
-The section is gone: `500-prose.md`, `501-markdown.md`, `510-context.md`, and `520-wireframes.md` deliver the same routing path-scoped. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
+Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `500-prose.md`, `501-markdown.md`, `510-context.md`, and `520-wireframes.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
 
 ### Seeded folders
 
@@ -36,13 +34,11 @@ A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `c
 
 The seed copy calls the same verb and diverges in what it can resolve. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names the install command when the machine carries none rather than exiting clean. `scripts/core/check-seed-independence.sh` exists to catch seed content depending on the toolkit checkout, which a resolved-binary call does not.
 
-The awk both copies replaced parsed its wordlist out of a standard at runtime, taking the single-word backticked terms from every bullet opening `- Do not use`. It admitted the buzzword and vague-qualifier sets, skipped the multi-word and punctuation bans phrased the same way, and reached none of the spellings. The sets now ship as package data, so the two headings a wording edit moves are a reader's concern rather than a parser's.
-
 The same PostToolUse block also carries `.claude/hooks/tasks-index.sh`, which regenerates `.canon/tasks/index.md` after a task file changes. It is the only trigger that reaches that folder, because the board is gitignored and the whole-repo index walk filters candidates through `git check-ignore`.
 
 The hook derives the walk-up boundary from the file path rather than the session, since the board resolves at the main worktree root and a linked worktree would otherwise reject the path, passes `--no-stage` so a hook never touches the git index, and reports both a frontmatter failure and a missing `canon` as `additionalContext`, because no gate stage can fail on a stale index in an ignored folder. Reporting is the point of the hook, so neither failure exits quietly, and the path guard keeps both messages scoped to a task-file edit.
 
-`.claude/hooks/memory-index.sh` sits beside it and does the same job for `.canon/memory/index.md`, which is gitignored for the same reason and reached the same way. The memory folder's index was hand-appended by `memory-capture` until this hook took it, and it had drifted to more rows than files, which is what a hand-maintained catalog does at that size. The two hooks differ only in the path they guard on, so a change to one is owed to the other.
+`.claude/hooks/memory-index.sh` sits beside it and does the same job for `.canon/memory/index.md`, which is gitignored for the same reason and reached the same way. The two hooks differ only in the path they guard on, so a change to one is owed to the other.
 
 `.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in full in `canon/context/development/hooks.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the two index hooks above it.
 
@@ -62,7 +58,7 @@ User-level pieces (attribution, permission `allow` entries, and `.env` denies) l
 
 `canon claude seeds list [--json|--names]` enumerates the seed docs that `canon claude init` would copy into a project. Skills consume `--json` to compare a target project's installed copies against the toolkit's current seed source and propose targeted edits. The CLI only emits content. Reconciliation is the skill's job (see `seed-sync`).
 
-The listing reads `planSeeds`, the same function `init` applies, so the two cannot disagree about what a seed install contains. The bash it replaced re-globbed the seeds directory against its own hard-coded subdirectory list, which had drifted: `canon/context/index.md` was installed by `init` and absent from every listing.
+The listing reads `planSeeds`, the same function `init` applies, so the two cannot disagree about what a seed install contains.
 
 ## sync
 

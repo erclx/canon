@@ -18,8 +18,8 @@ Owns everything the toolkit ships outward under the Claude domain: the plugin sk
 
 ## Why this domain is a folder
 
-The entry was one file until it became the seam every parallel branch met in. It held the skill catalog, the shell-out pattern, and the per-skill reasoning for a domain of 55 skills, so almost any skill change wrote it. Two collisions landed on one day: three branches rebased through it in sequence, and two more produced a content conflict in this file alone, because one widened a catalog column while the other edited a row of the same table.
+A domain this size stays contended as one file: the skill catalog, the shell-out pattern, and the per-skill reasoning for a corpus this large all sit behind one file that almost any skill change writes. Splitting by sub-area gives each one a file that no unrelated change is also writing, and it is what keeps a reader from meeting a claim the entry already states elsewhere against the same subject.
 
-The catalog was the sharpest edge. A markdown table pads its columns to a shared width, so a description outgrowing its column reflows every row and turns a one-row edit into a whole-file rewrite. The catalog is a bullet list for that reason, and `standards/context.md` records the rule. Splitting the file addresses the rest: a change to one sub-area now writes a file no unrelated change is also writing.
+The catalog is a bullet list rather than a table, per `standards/context.md`. A table pads its columns to a shared width, so a description outgrowing its column reflows every row and turns a one-row edit into a whole-file rewrite. A bullet list carries no shared column to reflow.
 
-Contention was not the only cost. Two sessions in one day wrote claims the entry already contradicted rather than claims it did not cover, both against the same paragraph, which is what a file this size does to a reader. The sub-areas below are the units a session actually arrives looking for.
+The sub-areas below are the units a session actually arrives looking for.
