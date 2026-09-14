@@ -11,7 +11,7 @@ Without this skill, a session drafting a wireframe for a surface with no file ye
 
 ## Must
 
-- Read `standards/wireframes.md` before drafting, since the frontmatter contract, the layout and variant rules, and the Transcription-wireframes branch are what make the file arguable against a sibling
+- Read `standards/wireframes.md` before drafting, since the frontmatter contract, the regions list, the states table, the exclusions section, and the Transcription-wireframes branch are what make the file arguable against a sibling
 - Walk the whole `canon/wireframes/` tree, including a grouped surface's own subfolder, before drafting, since a top-level-only check misses a nested match
 - Detect an existing higher tier from `canon/DESIGN.md` and the wireframes tree and report it, never build a companion render for it, since no shipped mechanism produces one
 - Draft in transcription mode, citing the real source, when the surface names an already-built component. Draft in role-intent mode otherwise.

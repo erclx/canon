@@ -1,8 +1,8 @@
 ---
 title: Wireframes
-subtitle: Per-surface ASCII layouts loaded on demand
+subtitle: Per-surface regions and states loaded on demand
 ---
 
 # Wireframes
 
-Per-surface ASCII layouts loaded on demand
+Per-surface regions and states loaded on demand

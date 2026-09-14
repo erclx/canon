@@ -27,6 +27,7 @@ Does not govern:
 
 - CSS classes and prop names. Those live in code.
 - Anything that needs updating every time the code is refactored
+- The history of how a value or a mark was chosen: the candidates, the rounds, the date of a pick. State the rule and the current value. The trail goes to the decision log.
 
 ## Format
 
@@ -47,6 +48,11 @@ A prose section takes its uncertainty inline instead, in a sentence saying what 
 ## Sections
 
 Use `## Personality`, `## Color`, `## Typography`, `## Spacing`, `## Borders`, `## Motion`, and `## Iconography`. The token tables carry fixed headers the renderer reads.
+
+Add either optional section when the project has content for it:
+
+- `## Layout`: page width, breakpoints, and grid rules, as current constraints
+- `## Mark`: the logo's construction rules and the files that carry it
 
 ## Template
 

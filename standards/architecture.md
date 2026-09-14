@@ -28,16 +28,26 @@ Does not govern:
 - How individual functions work line by line. The code carries its own behavior.
 - Full type definitions. They live in code. Reference the shape conceptually if needed.
 - A measurement paragraph specific to one domain's own mechanism. Route it to that domain's `canon/context/<domain>.md` entry instead. The choice and its rejected alternative stay here whatever their reach, since reach is what makes a decision cross-domain, not how many domains its supporting measurement happens to touch.
+- A decision that constrains one domain alone. It lives in that domain's context entry, and this file carries at most one line pointing at it.
+- The history of how a decision was reached or revised: rounds of candidates, a figure followed by its correction, a branch or change that moved a number. That trail goes to the decision log or the change that introduced it.
 
 ## Sections
 
 Use `## Overview`, `## Key technical decisions` with one named H3 per decision, and `## Risks / open questions`. Name each decision and give the reasoning, especially for non-obvious choices. Skip entries where the rationale is self-evident.
+
+## Keeping it current
+
+- Rewrite a decision a later one changed rather than appending the change beside it. A reader should find the design that stands in one place, with the alternative that lost stated once.
+- Hold only what is open under `## Risks / open questions`. An entry leaves the section in the change that settles it, becoming a decision here when it constrains more than one domain and moving to that domain's context entry when it does not.
 
 ## Verification anchors
 
 A decision's reasoning stays correct while the numbers it cites move. The anchor records what a measured claim was read against, so a reader can tell a number that was checked and held from one nobody has looked at since.
 
 - Close a decision entry whose reasoning cites a measured number with a trailing sentence naming the short commit SHA and the ISO date that number was read: `Measured at <short-sha> on <YYYY-MM-DD>.`
+- Name a commit, never a pull request number or a branch. A branch is gone after merge, and a pull request number resolves only on the forge.
+- Carry one anchor per figure. When a number is re-measured, rewrite the number and its anchor in place, and leave the old value to the change that moved it.
+- Point at a generated file that already records a figure and its commit, rather than copying the figure and anchoring the copy.
 - Anchor on the number alone. A decision citing none takes no anchor whatever its reasoning rests on, because a marker over a claim nobody can re-measure is one no reader can falsify.
 - Anchor a decision when writing it or when amending its reasoning. Leave an entry written before the rule unanchored rather than dating it by blame, which is archaeology for a marker nothing reads back.
 - Read an absent anchor as unchecked rather than as current. On an entry citing no number there is nothing to check. On one citing a number the number is due a read.
@@ -46,7 +56,7 @@ A decision's reasoning stays correct while the numbers it cites move. The anchor
 
 ## Length
 
-Every session pays for this file before any work starts, so a heavy read is a real cost. Judge weight by reading the file rather than by counting it: a file that reads heavy is carrying too many decisions, not decisions written too long.
+Every session pays for this file before any work starts, so a heavy read is a real cost. Judge weight by reading the file rather than by counting it: a file that reads heavy is carrying too many decisions, not decisions written too long. A word count, for the file and for each decision, is read alongside that judgment when one is available, and it never gates.
 
 - Bring a heavy file back by merging two decisions or retiring one, never by compressing a decision's prose.
 - Yield to the paragraph weight checkpoint in `markdown.md`. A paragraph past the checkpoint is a defect no length guideline licenses.

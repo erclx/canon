@@ -19,7 +19,7 @@ canon/
 ├── REQUIREMENTS.md  ← goals, non-goals, MVP scope
 ├── ARCHITECTURE.md  ← technical design decisions
 ├── DESIGN.md        ← visual intent and token decisions (UI projects)
-├── wireframes/      ← ASCII wireframes: layout, UI copy, and interaction rules (UI projects)
+├── wireframes/      ← regions, states, UI copy, and interaction rules (UI projects)
 ├── context/         ← per-domain narrative loaded on demand via index.md
 └── decisions/       ← decision history a canonical doc points at, never loaded eagerly
 
