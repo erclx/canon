@@ -137,7 +137,7 @@ Before applying any item, check the worktree state:
 
 If the result is `MAIN`, stop and tell the user: `❌ Apply phase mutates tracked files. Run /session-worktree first.` Discuss and Challenge phases only touch `.canon/review/` scratch and run from anywhere.
 
-Before applying a promote to an always-loaded rule, load `internal-governance` in the toolkit repo, which owns `internal/rules/core/` and `governance/rules/core/` and is the only route that may author into either. In a target project, load it only when handing off to `create-rule`. An `Edit` appending to an existing file under `.claude/rules/project/` needs no load.
+Before applying a promote to an always-loaded rule in the toolkit repo, load `internal-governance`, which owns `internal/rules/core/` and `governance/rules/core/` and is the only route that may author into either. In a target project, hand off to `create-rule` with no load, since `internal-governance` is a toolkit-internal skill under `.claude/skills/` that a target project never has. An `Edit` appending to an existing file under `.claude/rules/project/` needs no load either.
 
 Promotions are a separate concern from any feature in flight. Keep the promoted edits on their own commit. Do not fold an always-loaded-rule or skill-body change into a feature's commits, because a feature reviewer should not have to vet a change to how the agent operates.
 

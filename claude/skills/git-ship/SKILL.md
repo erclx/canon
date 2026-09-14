@@ -48,7 +48,7 @@ An installed binary carrying no `plan-reach` subcommand reports the reach unread
 
 Capture leads the sequence because a routed fact lands in a context entry, which is a tracked file. Running it after the pull request opens leaves that edit off the branch entirely, so the fact reaches nothing. Memory files are gitignored either way, which is what hid the ordering while capture wrote only those.
 
-Stop at the Propose phase. Do not run Apply. Promoting an entry to `CLAUDE.md` or a skill body ships as its own change, separate from this feature.
+Stop at the Propose phase. Do not run Apply. Promoting an entry to an always-loaded rule or a skill body ships as its own change, separate from this feature.
 
 ## After completion
 
