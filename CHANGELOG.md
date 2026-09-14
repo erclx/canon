@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.83.0](https://github.com/erclx/canon/compare/v4.82.0...v4.83.0) (2026-09-14)
+
+
+### Features
+
+* **claude:** deny unattended Agent calls via PreToolUse hook ([#1675](https://github.com/erclx/canon/issues/1675)) ([33da532](https://github.com/erclx/canon/commit/33da5328d0e525bde603693f58017cc06304e232))
+* **claude:** inspect rendered slides in-session instead of via subagent ([#1672](https://github.com/erclx/canon/issues/1672)) ([136126d](https://github.com/erclx/canon/commit/136126df54c32620dae83fa662340458ed9b8278))
+* **context:** close the audit's canonical doc blind spots ([#1674](https://github.com/erclx/canon/issues/1674)) ([4a1b0de](https://github.com/erclx/canon/commit/4a1b0de64086846fdcb00fe9588821876251a906))
+* **docs-fold:** classify canonical docs each fold writes ([#1673](https://github.com/erclx/canon/issues/1673)) ([9c65a8d](https://github.com/erclx/canon/commit/9c65a8df8a09f94b382bb5943233c60cbad17c4a))
+* **standards:** retire history from the five canonical doc standards ([#1670](https://github.com/erclx/canon/issues/1670)) ([c8173d6](https://github.com/erclx/canon/commit/c8173d6f9eee5852da9d00f2583edcbc2acd2210))
+
 ## [4.82.0](https://github.com/erclx/canon/compare/v4.81.0...v4.82.0) (2026-09-14)
 
 
