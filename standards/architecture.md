@@ -56,7 +56,7 @@ A decision's reasoning stays correct while the numbers it cites move. The anchor
 
 ## Length
 
-Every session pays for this file before any work starts, so a heavy read is a real cost. Judge weight by reading the file rather than by counting it: a file that reads heavy is carrying too many decisions, not decisions written too long. A reported word count, for the file and for each decision, would let that reading start from a figure rather than from memory.
+Every session pays for this file before any work starts, so a heavy read is a real cost. Judge weight by reading the file rather than by counting it: a file that reads heavy is carrying too many decisions, not decisions written too long. A word count, for the file and for each decision, is read alongside that judgment when one is available, and it never gates.
 
 - Bring a heavy file back by merging two decisions or retiring one, never by compressing a decision's prose.
 - Yield to the paragraph weight checkpoint in `markdown.md`. A paragraph past the checkpoint is a defect no length guideline licenses.

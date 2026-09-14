@@ -262,7 +262,7 @@ The second test landed once a release carried the surface resolver, so a target 
 
 ### A reported word figure never gates the file's weight
 
-`standards/architecture.md` prices no decision by line or word count. A session judges this file's weight by reading it, merging or retiring a decision when the file reads heavy, and a word count reported for the file and for each decision would give that reading a figure to start from rather than memory alone. The figure would never gate: nothing would compare it to a ceiling and nothing would block a merge on it, which is the position a numeric budget already tried and failed at, tracked past its own ceiling on every merge measured until the ceiling was dropped rather than widened.
+`standards/architecture.md` prices no decision by line or word count. A session judges this file's weight by reading it, merging or retiring a decision when the file reads heavy, and a word count for the file and for each decision is read alongside that judgment when one is available. The figure never gates: nothing compares it to a ceiling and nothing blocks a merge on it, which is the position a numeric budget already tried and failed at, tracked past its own ceiling on every merge measured until the ceiling was dropped rather than widened.
 
 Re-deriving a wider ceiling from that same history was the alternative, and it fails the way the first ceiling failed: a number nothing enforces drifts past itself on the same cadence regardless of where it starts. This repository's own position is that a rule the model can talk itself out of moves into a verb, and no verb prices a decision's weight here, so the honest move is to report the figure and stop pricing the file against it.
 
