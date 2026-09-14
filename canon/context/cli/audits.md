@@ -430,7 +430,7 @@ The spec names `no-skills` as an absence, which is the second tracked corpus to 
 
 The check reads whichever corpus `resolveSkillsCorpus` finds, so a project holding `.claude/skills/` alone is measured rather than refused, and the refusal narrows to a tree carrying neither. What the two corpora do not share is which prefixes belong to the toolkit. A seeded path is disowned by reading `tooling/*/seeds/`, and a target carries no tooling tree at all, so nothing disowns anything there and every citation of the project's own `canon/context/` entry read as a path its reader cannot open.
 
-`authoringRootsFor` drops the dotted roots when the corpus being read is a project's own, on the same reasoning that keeps `src/` and `scripts/` off the list: a body naming one of those describes the reader's own tree, and reporting it is a correct citation on every run. Measured on 2026-08-28 against the two live targets, this cleared enough citations to change both from exiting 2 to a clean run.
+`authoringRootsFor` drops the dotted roots when the corpus being read is a project's own, on the same reasoning that keeps `src/` and `scripts/` off the list: a body naming one of those describes the reader's own tree, and reporting it is a correct citation on every run. Measured on 2026-08-28 against the two live targets at 16 such citations in `career` and 5 in `life`, enough to exit 2 on both before the split.
 
 ## The routing report
 
@@ -614,8 +614,8 @@ A hand-recorded figure can be unreproducible against the same replay, which is a
 
 ## The label coverage report
 
-- `canon labels audit` resolves a changed set against `canon/config/pr-labels.toml` and names the paths no row reaches, which the map's own comment already flags as a risk.
-- Matching lives in `src/labels/` rather than in a skill body, which is what makes it testable. A rule stated only in prose, as `claude/skills/git-pr/references/labels.md` once carried it, has nothing to exercise it, so the census behind the map's 41 prefixes is the only evidence it is right.
+- `canon labels audit` resolves a changed set against `canon/config/pr-labels.toml` and names the paths no row reaches, which is the check the map's own comment already describes.
+- Matching moved from a skill body into `src/labels/`, which is what makes it testable. The rule stated in `claude/skills/git-pr/references/labels.md` had nothing to exercise it, so the census behind the map's 41 prefixes was the only evidence it was right.
 - Prefix-anchored matching is fixed rather than chosen. Rewriting it to a glob reaches every existing prefix and invalidates the measurement behind all of them.
 - The verb answers two readers from one pass. `git-pr` wants the labels it is about to apply and the aggregate wants the uncovered count, and a shape serving only the first returns nothing the second can retain.
 - A gap and a decision are separate outputs. `[declined]` moved out of the map's trailing comment into a table keyed by reason, because a report that could not tell an uncovered surface from a path somebody decided against is useful about neither.
