@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.84.0](https://github.com/erclx/canon/compare/v4.83.0...v4.84.0) (2026-09-14)
+
+
+### Features
+
+* **claude:** add ux-walkthrough skill ([#1677](https://github.com/erclx/canon/issues/1677)) ([a96985b](https://github.com/erclx/canon/commit/a96985b400676e26701c2d6ed64a9df6671f7f2c))
+
+
+### Bug Fixes
+
+* **claude:** correct youtube-transcripts default output path ([#1676](https://github.com/erclx/canon/issues/1676)) ([417cc79](https://github.com/erclx/canon/commit/417cc7926608fddfa0795a4715509f5bed7f9e79))
+
 ## [4.83.0](https://github.com/erclx/canon/compare/v4.82.0...v4.83.0) (2026-09-14)
 
 
