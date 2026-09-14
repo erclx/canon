@@ -103,6 +103,7 @@ pydantic
 pyproject
 pytest
 pytestmark
+qwen
 readlink
 realpath
 repr
