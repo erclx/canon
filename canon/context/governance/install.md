@@ -36,8 +36,8 @@ A rule whose source no stack names never installs, and the drift assertion still
 - `canon gov install` and `canon gov sync` refuse to run against the toolkit root, because a target's rules are the operator's to edit. `canon gov regen` runs against it on purpose, since the destination there is produced output.
 - `scripts/lib/gov.sh` is narrowed to `rule_subdir` alone. It is called once per rule file inside a loop, so routing it through the CLI would cost a process per file, and it stays permanently because four of its five callers are sandbox scripts.
 - The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
-- Projects that previously installed `.cursor/rules/` from this toolkit retain those files. Sync no longer touches them. Run `rm -rf .cursor/rules/` to clean up if Cursor is no longer in use.
-- A target still on the flat `.claude/rules/<subdir>/` layout from before the `canon/` wrapper landed is invisible to both bootstrap verbs. `canon gov sync` narrows its walk to `.claude/rules/canon/`, so it reports the missing-surfaces message and exits 0 rather than reading the flat tree at all. `canon gov install` writes only into that same narrowed destination and never reads or clears the flat one, so the target ends up holding both, and Claude Code loads both copies of an edited rule at session start, one of them frozen. `canon migrate rule-layout` moves a target off the flat layout first. Run it before either bootstrap verb sees anything.
+- A project holding `.cursor/rules/` from an earlier toolkit version retains those files, since sync does not touch them. Run `rm -rf .cursor/rules/` to clean up if Cursor is no longer in use.
+- A target still on the flat `.claude/rules/<subdir>/` layout, predating the current `canon/`-wrapped one, is invisible to both bootstrap verbs. `canon gov sync` narrows its walk to `.claude/rules/canon/`, so it reports the missing-surfaces message and exits 0 rather than reading the flat tree at all. `canon gov install` writes only into that same narrowed destination and never reads or clears the flat one, so the target ends up holding both, and Claude Code loads both copies of an edited rule at session start, one of them frozen. `canon migrate rule-layout` moves a target off the flat layout first. Run it before either bootstrap verb sees anything.
 
 ## CLI
 
@@ -55,7 +55,7 @@ Commands that write files require confirmation before running, and `CANON_NON_IN
 
 ### Why `list` is TypeScript
 
-`list` migrated when folder entries landed. Its bash matched a rules array against `"[0-9]{3}-[a-z0-9-]+"`, so a folder entry matched nothing and `base` would have reported zero rules to `setup-gov`, which dedupes `--add` extras against that list. Expanding in bash beside the resolver would have put the same rule in two languages.
+Bash cannot express the folder-entry match. A regex bash could apply against a rules array, `"[0-9]{3}-[a-z0-9-]+"`, matches nothing for a folder entry, and `base` reporting zero rules to `setup-gov`, which dedupes `--add` extras against that list, is the failure that shape would produce. Expanding the match in bash beside the resolver would also put the same rule-matching logic in two languages.
 
 `gov list --json` carries `unreferenced` alongside `stacks` and `rules`, on every invocation rather than behind a flag. The verify stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
 

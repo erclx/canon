@@ -21,7 +21,7 @@ An ablation half records its `Kind` as `ablation`, written by the runner rather 
 
 ## The ablation strip
 
-The strip anchors on each bullet's own text and kills the run when an anchor stops matching exactly one line. An ordinal is not a stable address here, and one ablation was ordered against Indexes bullets that no longer existed by the time it ran.
+The strip anchors on each bullet's own text and kills the run when an anchor stops matching exactly one line, since an ordinal is not a stable address here: a bullet list reordered or edited between when an ablation is planned and when it runs leaves an ordinal pointing at the wrong line.
 
 The miss is fatal rather than a warning because a cut half that silently kept its section is identical to its partner in every artifact a run leaves behind. A wrong strip would read as a null result about the section rather than as a broken run.
 
@@ -33,7 +33,7 @@ A run that costs money leaves two records, split by what each costs to keep.
 
 Retention is additive. A failure to write either record warns and the verdict still prints, and a row whose retention failed records its output cell as `none` rather than naming a directory nothing wrote.
 
-`pre-registration.md` and each `result-*.md` are frozen evidence rather than maintained prose. Each opens with a banner refusing edits, the result document over its machine-derived blocks and its first-person text, and the pre-registration over what it fixed as a hit before either run. The pre-registration gained its banner only when the durable-record move retargeted the paths around it and reached a file with nothing saying to leave it alone.
+`pre-registration.md` and each `result-*.md` are frozen evidence rather than maintained prose. Each opens with a banner refusing edits, the result document over its machine-derived blocks and its first-person text, and the pre-registration over what it fixed as a hit before either run.
 
 Both therefore quote paths, seed bullets, and rules as they stood on the run date. A repository-wide sweep excludes them, and a path inside one that no longer resolves is the record doing its job rather than drift to repair.
 
@@ -43,7 +43,7 @@ A prose sweep and a path sweep reach those judgment sections differently, and th
 
 ### The `Subject` column
 
-A `Subject` commit an ablation pair regenerates from gets a pushed tag under `eval/`, and an ordinary run does not. Rows pointing at a commit that lives on one local branch and nothing else are one branch cleanup or one lost disk away from losing the entry point while the content stays committed. A tag survives that deletion, and the `eval/` prefix keeps it clear of the `v*` release tags. `run.sh` does not create the ref, so the next ablation can recreate the same state, which is accepted on the same grounds the citation check was cut.
+A `Subject` commit an ablation pair regenerates from gets a pushed tag under `eval/`, and an ordinary run does not. Rows pointing at a commit that lives on one local branch and nothing else are one branch cleanup or one lost disk away from losing the entry point while the content stays committed. A tag survives that deletion, and the `eval/` prefix keeps it clear of the `v*` release tags. `run.sh` does not create the ref itself, so the next ablation can recreate the same state on demand.
 
 The ledger's own path is excluded from the dirty check that builds a row's `Subject`. It is a tracked file the append writes to, so counting it marks every run after the first `-dirty` with nothing under test changed, which corrupts the one column saying which tree a run exercised. An edit that drops the pathspec exclusion breaks the column silently, since the value stays plausible.
 
@@ -53,22 +53,22 @@ The row is appended with `>>` and anchors on no existing line, so its table has 
 
 ## Limits
 
-- Nothing prunes `.canon/tmp/eval-runs/`. It is the second uncapped scratch folder after `sandbox-runs/`, and neither is queued for a cap, since the pruning outcome that would have set one was cut. Clearing it by hand loses every `Output` path the ledger points at, which is the intended trade rather than a bug.
+- Nothing prunes `.canon/tmp/eval-runs/`. It is the second uncapped scratch folder after `sandbox-runs/`, and neither is queued for a cap, since automatic pruning was evaluated and rejected. Clearing it by hand loses every `Output` path the ledger points at, which is the intended trade rather than a bug.
 - `run.sh` is safe serially and not concurrently. Two arms starting in the same second race on the `while [ -e "$run_dir" ]` existence check, and parallel `>>` appends to the ledger can interleave. Parallelism is the obvious fix for wall clock, which is the harness's real cost. Fix both hazards before taking it, since a corrupted ledger is the one record a re-run cannot rebuild.
 
 ### The snapshot blind spot
 
-A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. `scripts/eval/` compares a before-and-after hash of the fixture, and a cut half of the memory ablation wrote into `~/.claude/projects/<fixture>/memory/` while the run reported no files changed, which is true of the fixture and false of the machine. The sandbox harness reports `write_scope` from a manifest diff over its sandbox tree and carries the same blind spot rather than a different one, recorded in `canon/context/sandbox/overview.md`. Read the transcript alongside the file list in either, and clear the stray path afterward.
+A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. `scripts/eval/` compares a before-and-after hash of the fixture, and a cut half of the memory ablation can write into `~/.claude/projects/<fixture>/memory/` while the run reports no files changed, which is true of the fixture and false of the machine. The sandbox harness reports `write_scope` from a manifest diff over its sandbox tree and carries the same blind spot rather than a different one, recorded in `canon/context/sandbox/overview.md`. Read the transcript alongside the file list in either, and clear the stray path afterward.
 
 The sandbox picked a boundary, watching the four shared-scratch directories under each toolkit root and naming what it leaves out, so the deciding is done rather than deferred and the eval fixture can copy the shape or state its own.
 
 ### A fixture under the project root inherits its instructions
 
-A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. One spike permission named `.canon/tmp/groundwork-fixtures/<slug>/` for every fixture, and review caught that a headless arm run there would measure this repository rather than the arm, while `scripts/standards/authoring-test/run.sh` already extracts to `mktemp -d` and states the reason in a comment. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
+A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. A fixture path under `.canon/tmp/groundwork-fixtures/<slug>/` would put a headless arm run there measuring this repository rather than the arm, which is why `scripts/standards/authoring-test/run.sh` extracts to `mktemp -d` instead and states the reason in a comment. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
 
 ### A format spec is not an instruction
 
-A coverage audit reading a standard can mistake documenting the shape of X for instructing X, and the two are indistinguishable in a grep. The Tasks ablation was pre-registered as a predicted null because `standards/tasks.md` covers the `Plan:` link, the `../plans/` path, and the archive destination in full, and both pairs falsified it, since the cut halves created no plan at all and the standard only specifies a pointer's format while the seed bullets carry the instruction to create one.
+A coverage audit reading a standard can mistake documenting the shape of X for instructing X, and the two are indistinguishable in a grep. `standards/tasks.md` covers the `Plan:` link, the `../plans/` path, and the archive destination in full, which predicted the Tasks ablation as a null, and both pairs falsify that: the cut halves create no plan at all, since the standard only specifies a pointer's format while the seed bullets carry the instruction to create one.
 
 ### An unrelated arm is a control
 

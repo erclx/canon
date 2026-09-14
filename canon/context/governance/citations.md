@@ -17,39 +17,39 @@ Owns whether a citation inside `governance/rules/` or `standards/` resolves for 
 
 ## Verdicts
 
-### Restated its target, now cut to a pointer
+### Rules that point rather than restate
 
-Each rule below duplicated bullets the cited standard already states. The rule-authoring standard's own scope line settles the call: a rule points at the standard that owns a convention and never restates it. Every rule listed cut its restated bullets, keeping only its `Authority` pointer plus any content the standard does not cover.
+Each rule below cites its standard through `canon standards <name>` alone, keeping only its `Authority` pointer plus any content the standard does not cover. The rule-authoring standard's own scope line settles the shape: a rule points at the standard that owns a convention and never restates it.
 
-- `governance/rules/claude/520-wireframes.md` → `canon standards wireframes`: cut the ASCII-fence, region-label, copy-verbatim, interaction-intent, and same-PR-update bullets.
-- `governance/rules/claude/530-requirements.md` → `canon standards requirements`: cut the goal-as-outcome, non-goal, MVP-lifecycle, later-scope, and `## Distribution` bullets.
-- `governance/rules/claude/540-architecture.md` → `canon standards architecture`: cut the decision-H3 and verification-anchor bullets.
-- `governance/rules/claude/550-design.md` → `canon standards design`: cut the token-as-intent, no-CSS, table-format, and omission bullets.
-- `governance/rules/claude/555-tasks.md` → `canon standards tasks`: cut the origin-line, outcome-sizing, heading, no-implementation-detail, and archiving bullets, each restated close to verbatim.
-- `governance/rules/claude/559-memory.md` → `canon standards memory`: cut the routing and pen bullets.
-- `governance/rules/claude/560-diagrams.md` → `canon standards diagrams`: cut the refresh-only-changed-entries bullet and kept the `DIAGRAMS.md` migration bullets, which the standard does not state. It also routes at `502-mermaid` rather than citing `mermaid.md` itself, since that rule's own glob already reaches an entry under `.canon/diagrams/`.
-- `governance/rules/claude/502-mermaid.md` → `canon standards mermaid`: carries no cut bullet, opening instead on the condition its glob cannot express, since a path match cannot read whether the file holds a fence.
-- `governance/rules/claude/562-session.md` → `canon standards session`: cut the own-file, worktree-root, compaction-only, and citation bullets, and kept the routing bullet pointing at `555-tasks.md`, which the standard does not carry.
-- `governance/rules/claude/570-skill.md` → `canon standards skill`: cut the `REQUIREMENT.md` gap-line bullet and kept the `create-skill` question bullet and the after-editing bullets, none of which the standard states.
-- `governance/rules/claude/580-readme.md` → `canon standards readme`: cut the audience-and-voice bullets, each restated close to verbatim.
-- `governance/rules/claude/590-rule-authoring.md` → `canon standards rule`: cut the numbering and body bullets, each restated close to verbatim.
-- `governance/rules/claude/591-standard-authoring.md` → `canon standards standard`: cut the scope-statement bullets, each restated close to verbatim.
-- `governance/rules/claude/510-context.md` → `canon standards context`: cut the supersede-in-place bullet. Moot for a target holding governance alone, per the row below, and cut anyway rather than left for whoever opens the file next.
-- `governance/rules/claude/556-groundwork.md` → `canon standards groundwork`: cut the folder-name and measuring-and-closing bullets. Moot for the same reason.
-- `governance/rules/claude/557-intake.md` → `canon standards intake`: cut the folder-name and answer-contract bullets. Moot for the same reason.
-- `governance/rules/claude/561-teach.md` → `canon standards teach`: cut the workspace-conventions bullets. Moot for the same reason.
+- `governance/rules/claude/520-wireframes.md` → `canon standards wireframes`, without restating the ASCII-fence, region-label, copy-verbatim, interaction-intent, or same-PR-update rules.
+- `governance/rules/claude/530-requirements.md` → `canon standards requirements`, without restating the goal-as-outcome, non-goal, MVP-lifecycle, later-scope, or `## Distribution` rules.
+- `governance/rules/claude/540-architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
+- `governance/rules/claude/550-design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
+- `governance/rules/claude/555-tasks.md` → `canon standards tasks`, without restating the origin-line, outcome-sizing, heading, no-implementation-detail, or archiving rules.
+- `governance/rules/claude/559-memory.md` → `canon standards memory`, without restating the routing or pen rules.
+- `governance/rules/claude/560-diagrams.md` → `canon standards diagrams`, without restating the refresh-only-changed-entries rule, and keeps the `DIAGRAMS.md` migration bullets, which the standard does not state. It also routes at `502-mermaid` rather than citing `mermaid.md` itself, since that rule's own glob already reaches an entry under `.canon/diagrams/`.
+- `governance/rules/claude/502-mermaid.md` → `canon standards mermaid`, opening instead on the condition its glob cannot express, since a path match cannot read whether the file holds a fence.
+- `governance/rules/claude/562-session.md` → `canon standards session`, without restating the own-file, worktree-root, compaction-only, or citation rules, and keeps the routing bullet pointing at `555-tasks.md`, which the standard does not carry.
+- `governance/rules/claude/570-skill.md` → `canon standards skill`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets, none of which the standard states.
+- `governance/rules/claude/580-readme.md` → `canon standards readme`, without restating the audience-and-voice rules.
+- `governance/rules/claude/590-rule-authoring.md` → `canon standards rule`, without restating the numbering or body rules.
+- `governance/rules/claude/591-standard-authoring.md` → `canon standards standard`, without restating the scope-statement rules.
+- `governance/rules/claude/510-context.md` → `canon standards context`, without restating the supersede-in-place rule. Moot for a target holding governance alone, per the row below.
+- `governance/rules/claude/556-groundwork.md` → `canon standards groundwork`, without restating the folder-name or measuring-and-closing rules. Moot for the same reason.
+- `governance/rules/claude/557-intake.md` → `canon standards intake`, without restating the folder-name or answer-contract rules. Moot for the same reason.
+- `governance/rules/claude/561-teach.md` → `canon standards teach`, without restating the workspace-conventions rules. Moot for the same reason.
 
-### Resolved only for a plugin-holding target, now repaired
+### Skill citations carrying the prefix and fallback
 
-- `governance/rules/core/045-memory.md` names `memory-capture` and `docs-fold` bare, with no fallback. Repaired to the `canon:` prefix plus a report-if-missing line, and tightened its vague "which your toolkit resolves by name" standard pointer to `canon standards memory`.
-- `governance/rules/lang/120-bash.md` names `bash-script` and `bash-cli-script` bare, with no fallback. Repaired the same way.
-- `governance/rules/claude/561-teach.md` and `standards/teach.md` both name `teach-workspace` bare. Each already carried the report-if-missing line (the rule's own, the standard's "say so and stop"), so the only gap was the missing prefix. Repaired to `canon:teach-workspace` in both.
-- `governance/rules/claude/570-skill.md` names `create-skill` bare, twice, with the report-if-missing line already present. Repaired to `canon:create-skill` in both places.
-- `standards/markdown.md` names `write-human` bare in the sentence explaining why cadence and rhythm are excluded from this file's scope. Unlike the "Does not govern:" bullets the Gotchas section exempts, this sentence sits in ordinary prose describing where a markdown edit routes, so it reads as a citation rather than a boundary statement. Repaired to `canon:write-human`.
+Every rule and standard below cites its skill with the `canon:` prefix plus a line reporting rather than proceeding silently when the skill does not resolve, which is what keeps the citation resolving honestly for a target holding governance alone.
 
-Three prior instances of this defect, named in this task's own findings, are already fixed on `main` and needed no further repair here: `claude/592-claude-md.md` no longer cites `canon/ARCHITECTURE.md`, and `claude/575-hooks.md` no longer cites a context entry. The third, `standards/teach.md` plus `claude/561-teach.md` already carrying the fallback line for the `teach-workspace` glossary reference, turned out to be half-fixed rather than fixed: the fallback line was there, the `canon:` prefix was not, which is the repair two rows above closes.
+- `governance/rules/core/045-memory.md` cites `canon:memory-capture` and `canon:docs-fold`, each with a report-if-missing line, and points at its standard through `canon standards memory` rather than a vague sibling-file description.
+- `governance/rules/lang/120-bash.md` cites `canon:bash-script` and `canon:bash-cli-script`, each with a report-if-missing line.
+- `governance/rules/claude/561-teach.md` and `standards/teach.md` both cite `canon:teach-workspace`, each with its own report-if-missing line, the rule's own and the standard's "say so and stop".
+- `governance/rules/claude/570-skill.md` cites `canon:create-skill`, twice, each with a report-if-missing line.
+- `standards/markdown.md` cites `canon:write-human` in the sentence explaining why cadence and rhythm are excluded from this file's scope. Unlike the "Does not govern:" bullets the Gotchas section exempts, this sentence sits in ordinary prose describing where a markdown edit routes, so it reads as a citation rather than a boundary statement.
 
-The context-entry half of that defect recurs on rules written after the repairs rather than being closed by them. `claude/576-settings.md` was drafted on 2026-08-28 closing on `.claude/context/development/hooks.md` as the record holding this repository's own answer for the settings it governs, which is the citation `claude/575-hooks.md` had already been repaired for and which sits in the same folder one number away. What pulls an author there is real: a rule stating a general fact wants to point at where the local decision lives, and for a rule that ships through `canon gov sync` no such path exists on the reader's machine. A rule stating its facts and naming no path is what ships instead, and the local answer is reached from the entry rather than from the rule. <!-- audit-ignore-citations: .claude/context/development/hooks.md -->
+A rule stating a general fact and wanting to point at where the local decision lives has nowhere to point, since a rule ships through `canon gov sync` with no path on the reader's machine resolving to this repository's own context entries. A rule states its facts and names no path instead, leaving the local answer to be reached from the entry rather than from the rule. <!-- audit-ignore-citations: .claude/context/development/hooks.md -->
 
 ### Moot: the target cannot reach the governed surface
 
@@ -60,9 +60,9 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 - `governance/rules/claude/557-intake.md`, scoped to `.canon/intake/**`. Nothing but `plan-intake` creates a dump folder.
 - `governance/rules/claude/561-teach.md`, scoped to `.canon/teach/**`. Nothing but `teach-workspace` creates a workspace.
 - `governance/rules/core/025-indexes.md` names both `canon/context/` and `canon/wireframes/` as places to check an index before searching. Only the second is moot. A governance-only target can hand-author a wireframe entry against `standards/wireframes.md` with no plugin skill involved, so that half of the rule is a clean pointer.
-- `governance/rules/snippets/600-at-references.md`, an always-on rule with no `paths:` glob, carries no skill or standard citation and states what to do when a snippet is referenced with `@`. It landed on `base.toml`'s stack after `#1168`, and the same install channel that dropped means a governance-only target holding no `.claude/snippets/` folder has no `@`-reference the rule ever fires on. The inertness reasons the same way as the other four rows even though the mechanism differs: theirs is a glob that never matches, this one is a rule that always loads but governs a reference that never appears.
+- `governance/rules/snippets/600-at-references.md`, an always-on rule with no `paths:` glob, carries no skill or standard citation and states what to do when a snippet is referenced with `@`. Nothing installs `.claude/snippets/` for a governance-only target, so it has no `@`-reference the rule ever fires on. The inertness reasons the same way as the other four rows even though the mechanism differs: theirs is a glob that never matches, this one is a rule that always loads but governs a reference that never appears.
 
-Each of the four entries that restated their standard also carries a moot verdict here, which only matters for the plugin-holding target that can actually reach the folder. Cutting the restatement cost nothing beyond the mechanical pass the repaired list above already ran, so it went out with the rest rather than waiting for whoever next opens one of those four files. The verdict table above reflects that: each of the four is listed both as restated-and-cut and as moot, since the two verdicts answer different questions about the same file. The fifth row, `600-at-references.md`, carries no citation to restate and is listed here for the moot verdict alone.
+Each of the four entries that point at their standard rather than restating it also carries a moot verdict here, which only matters for the plugin-holding target that can actually reach the folder. The verdict table above reflects that: each of the four is listed both as pointing rather than restating and as moot, since the two verdicts answer different questions about the same file. The fifth row, `600-at-references.md`, carries no standard citation and is listed here for the moot verdict alone.
 
 ### Clean pointer, no other note
 
@@ -73,7 +73,7 @@ Each of the four entries that restated their standard also carries a moot verdic
 
 ### Standards corpus, examined and excluded
 
-`grep -rl "write-human\|teach-workspace\|plan-groundwork\|plan-intake\|docs-fold\|memory-capture\|standards/[a-z-]*\.md\|canon standards\|canon:" standards --include="*.md"` names 18 files carrying a candidate citation. Two, `skill.md` and `tasks.md`, carry a genuine citation and sit in the clean-pointer list above. `markdown.md` and `teach.md` sit in the repaired list above. The other 14, `diagrams.md`, `glossary.md`, `groundwork.md`, `intake.md`, `issue.md`, `memory.md`, `plan.md`, `pr.md`, `publish.md`, `readme.md`, `snippets.md`, `standard.md`, `versioning.md`, and `wireframes.md`, name `write-human` or `markdown.md` only inside a `## Scope` "Does not govern:" bullet, which the Gotchas exclusion below covers, and carry no citation this entry verdicts.
+Across the standards corpus, `skill.md` and `tasks.md` carry a genuine sibling-standard citation and sit in the clean-pointer list above. `markdown.md` and `teach.md` sit in the skill-citation list above. The rest, `diagrams.md`, `glossary.md`, `groundwork.md`, `intake.md`, `issue.md`, `memory.md`, `plan.md`, `pr.md`, `publish.md`, `readme.md`, `snippets.md`, `standard.md`, `versioning.md`, and `wireframes.md`, name `write-human` or `markdown.md` only inside a `## Scope` "Does not govern:" bullet, which the Gotchas exclusion below covers, and carry no citation this entry verdicts.
 
 `diagrams.md` and `wireframes.md` each carry one further mention outside that bullet, in a sentence naming a "voice yield" a sibling standard grants the surface. `diagrams.md` says a section "claims the yield the `write-human` skill grants." `wireframes.md` says its Behavior and Copy prose "follows `markdown.md` and the `write-human` skill." Read as describing a cross-standard relationship rather than instructing the reader to load anything, the same reasoning the Gotchas exclusion applies to a "Does not govern:" bullet. `markdown.md`'s repaired sentence reads differently: it states where a markdown edit routes, which is closer to a directive than a boundary description, and that difference is why one got a verdict and the other two did not.
 
@@ -83,7 +83,7 @@ Each of the four entries that restated their standard also carries a moot verdic
 
 At `2e912110` the corpus holds 36 body citations across 77 rules. Twenty are `canon standards <name>`, fifteen are backticked paths, one names a sibling rule by filename. All 36 resolve or are excused, and all 14 internal globs across 7 rules match, so the gate ships as a floor rather than as a repair.
 
-The glob half reads one corpus and the operator settled which on 2026-08-31. A rule under `governance/rules/` installs into a target and its globs name that project's shape, so 32 of the 72 there match nothing in this tree and every one is correct, `src/pages/**` in the Astro rule being indistinguishable by pattern from a path here. Gating them would ship an exemption list the length of the corpus. `internal/rules/` ships nowhere, which makes the tree it governs the tree present.
+The glob half reads one corpus. A rule under `governance/rules/` installs into a target and its globs name that project's shape, so 32 of the 72 there match nothing in this tree and every one is correct, `src/pages/**` in the Astro rule being indistinguishable by pattern from a path here. Gating them would ship an exemption list the length of the corpus. `internal/rules/` ships nowhere, which makes the tree it governs the tree present.
 
 What it reads is bounded three ways, and each bound is a shape the corpus already writes.
 

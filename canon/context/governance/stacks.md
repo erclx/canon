@@ -31,15 +31,15 @@ The consequence is that both folders are now opt-out. A rule authored into `gove
 
 ### A Node backend takes a sibling stack where Python takes none
 
-`python` names both server rules directly and can, because `python-fastapi` is the only stack extending it and a FastAPI target wants them. `node` cannot do the same. `react` and `astro` both extend it, so a persistence rule placed there arrives at every pure frontend target and matches none of its files, which is the reads-as-covered defect the corpus work opened against.
+`python` names both server rules directly and can, because `python-fastapi` is the only stack extending it and a FastAPI target wants them. `node` cannot do the same. `react` and `astro` both extend it, so a persistence rule placed there arrives at every pure frontend target and matches none of its files, which is a reads-as-covered defect.
 
-`node-server` extends `node` instead, beside those two rather than above them. `resolveRules` walks `extends` ancestors first and then the stack's own rules, so a child inherits from its parent and pushes nothing back up. `react` and `astro` resolve exactly what they resolved before this stack existed, and a Node backend picks the two server rules up by naming one stack.
+`node-server` extends `node` instead, beside those two rather than above them. `resolveRules` walks `extends` ancestors first and then the stack's own rules, so a child inherits from its parent and pushes nothing back up. `react` and `astro` resolve exactly what they would without this stack, and a Node backend picks the two server rules up by naming one stack.
 
-Reaching for symmetry between the two ecosystems is what reintroduces the defect, since the shape that works for Python turns on nothing extending it. Renaming `node` was the other candidate and it breaks both frontend stack files plus every target that installed under the old name, for a result the sibling already gives.
+Reaching for symmetry between the two ecosystems would reintroduce the defect, since the shape that works for Python turns on nothing extending it. Renaming `node` is the other candidate and it would break both frontend stack files plus every target installed under the old name, for a result the sibling already gives.
 
 The stack carries those two rules and nothing else. `300-testing-ts` and `310-zod` read as reasonable on a backend and are currently named by `react`, so pulling either in is a separate decision about the default a Node backend gets, and it costs one line once a target asks.
 
-`--add 360-security-server,370-database` was the interim route onto a `node` target and this stack supersedes it. The flag is unchanged and still layers on any stack, so it stays the way to reach a rule no stack names rather than the way to reach these two.
+`--add 360-security-server,370-database` still works as a route onto a `node` target. The flag layers on any stack, so it stays the way to reach a rule no stack names rather than the way to reach these two specifically, which `node-server` now names directly.
 
 Nothing detects the stack. `setup-init` and `setup-gov` both pick by matching a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `node-server` is therefore named deliberately until one of those skills carries a rule for the backend case, which needs a decision about what evidence marks a project as one.
 
@@ -57,7 +57,7 @@ A rule authored under `governance/rules/` in a folder no stack names reaches no 
 
 ### Why the unreferenced stage stays advisory
 
-The `Unreferenced rules` stage in `src/gate/stages.ts` reports rules no stack reaches and never fails, comparing the catalog against the list `src/gate/measures.ts` records. `260-shadcn` and `320-tanstack-query` are opt-in libraries this repository ships on purpose. `600-at-references` used to reach no stack by design: a rule under `governance/rules/claude/` would ship to every `base` consumer through that folder's whole-folder entry, so the `@`-reference convention sat in its own `governance/rules/snippets/` instead, reachable only through `canon snippets install`. That install channel retired, leaving the rule no delivery path at all, so `base` now carries `snippets` as a folder-whole entry too and the rule ships the same way `core` and `claude` do. A gate here would fail every push over the two deliberate cases that remain.
+The `Unreferenced rules` stage in `src/gate/stages.ts` reports rules no stack reaches and never fails, comparing the catalog against the list `src/gate/measures.ts` records. `260-shadcn` and `320-tanstack-query` are opt-in libraries this repository ships on purpose. `600-at-references` sits in its own `governance/rules/snippets/` folder rather than under `governance/rules/claude/`, since shipping the `@`-reference convention through the claude folder's whole-folder entry would ship it to every `base` consumer regardless of whether a project carries `.claude/snippets/`. `base` carries `snippets` as a folder-whole entry too, the same way it does `core` and `claude`, so the rule ships that way rather than through the retired `canon snippets install` channel. A gate here would fail every push over these two deliberate cases.
 
 `GOV_EXPECTED_UNREFERENCED` in that script holds both, and a third rule arriving reads as new against it. Reconsider failing if the set keeps growing and the pattern turns out to be an accident rather than a design.
 
