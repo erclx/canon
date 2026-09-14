@@ -31,7 +31,7 @@ Machine provisioning is a separate concern reachable by the same word. `canon cl
 
 ### Worktree entry branches from whatever the local ref holds
 
-Worktree entry bases the new branch on the local `origin/main` tracking ref rather than fetching, so a stale ref starts the work behind the remote with nothing reporting it. One worktree opened two commits and one release behind the remote, with `package.json` and `.cspell/tech-stack.txt` touched on either side. Neither entry, `bun run check`, nor the commit path reports the gap, so fetch and compare `git rev-parse HEAD` against `git ls-remote --heads origin main` at the start of a run.
+Worktree entry bases the new branch on the local `origin/main` tracking ref rather than fetching, so a stale ref starts the work behind the remote with nothing reporting it. Neither entry, `bun run check`, nor the commit path reports the gap, so fetch and compare `git rev-parse HEAD` against `git ls-remote --heads origin main` at the start of a run.
 
 ### A skill edited on the branch serves its pre-edit body
 
@@ -39,13 +39,13 @@ A session that edits a plugin skill and then invokes it receives the pre-edit bo
 
 ### The isolation guard reads a command as text
 
-The isolation guard scans a `Bash` line as text rather than parsing it, so two shapes are refused before they run. A second `git` token anywhere in the line, file paths included, reads as unverifiable: `git diff --staged -- standards/slug.md claude/skills/session-worktree claude/skills/git-followup` was refused while the same command with no pathspec ran, and a bare `ls` naming those same paths was refused though it invokes no git at all. A command substitution wrapping a redirect or a chain is refused for complexity, as a `git merge-base` capture feeding a braced pipe was, though every path it touched sat inside the worktree. A read-only `for` loop over worktree-local files is refused on the same trigger. Drop the pathspec and filter the full output, or run the producing command alone and paste its literal into the next call.
+The isolation guard scans a `Bash` line as text rather than parsing it, so a path or argument merely containing the substring `git` (such as `claude/skills/git-followup`) triggers the same refusal a real second git invocation would, even in a command that invokes no git at all, such as `ls`. A pathspec on an otherwise plain `git` command reads as unverifiable the same way: a second `git` token anywhere in the line refuses the command regardless of whether every path it touches sits inside the worktree. A command substitution wrapping a redirect or a chain is refused for complexity, which catches a `git merge-base` capture feeding a braced pipe and a read-only `for` loop over worktree-local files alike. Drop the pathspec and filter the full output, or run the producing command alone and paste its literal into the next call.
 
 A bulk move of many files at the main worktree root goes out as `xargs -a <list> mv -t <destination>`, with the argument list built into a scratchpad file by an earlier command. Neither the obvious loop nor a `mkdir -p ... && mv ...` runs past the guard, and issuing one plain `mv` per file does not scale past a handful, so building the list first is what keeps every call plain and single.
 
 ### A branch listing carries decoration
 
-`git branch --merged` prefixes the current branch with `*` and every branch checked out in a linked worktree with `+`, so a grep matching a literal two-space indent misses exactly the branches a worktree-aware command enumerates. `git-worktree`'s local-ancestry fallback ran `grep -qx "  <branch>"` and reported `unmerged` for every merged worktree branch with no pull request, so cleanup skipped the rows it exists to remove. `--format='%(refname:short)'` drops decoration entirely. The paired sandbox scenario already asserted the correct state and had never been run, so a correct scenario is not coverage until something executes it.
+`git branch --merged` prefixes the current branch with `*` and every branch checked out in a linked worktree with `+`, so a grep matching a literal two-space indent misses exactly the branches a worktree-aware command enumerates. Read `--format='%(refname:short)'` instead, which drops the decoration entirely.
 
 ### A linked worktree's `.git` is a file
 

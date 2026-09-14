@@ -21,7 +21,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 - `src/docs/` and `src/wiki/` own the two read-only domains, which reach for no shared engine because neither syncs into a target
 - `src/claude/` owns seed planning, the gitignore preview, and the user settings merge
 - `src/tasks/` owns the task-board archive, the one domain whose primary caller is a git hook rather than a person, and the two record verbs a skill reaches for when worktree isolation refuses its own write
-- `src/worktree.ts` owns `mainWorktreeRoot()`, which every shared-scratch verb resolves its root through. It sat duplicated in the tasks and records command files until a third caller was due
+- `src/worktree.ts` owns `mainWorktreeRoot()`, which every shared-scratch verb resolves its root through
 - `src/worktree.ts` also owns `currentWorktreeRoot()`, the same read against `git rev-parse --show-toplevel`, for a verb over a tracked tree. The two answer different questions: shared scratch lives at one root every session reads, and a tracked tree is per worktree, so a verb reading one from the main root reports on files the session never edited
 - `src/worktree.ts` also owns `listWorktrees()`, the branch each worktree in the repository holds, parsed off `git worktree list --porcelain`
 - `src/sessions/` owns the live-session roster, splitting the registry read, the liveness decision, and the git join across three modules so the platform-specific half is the only one a stub has to replace, plus `claim.ts`, which composes that roster with `listWorktrees()` so a caller can ask whether a branch is already claimed by either surface without re-deriving the join itself
@@ -34,7 +34,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 - `src/git-files.ts` owns `listRepositoryFiles()`, the tracked-plus-untracked listing the citation check, the markdown corpus, and the secret scan all take their file set from
 - `src/git-files.ts` also owns `resolveBaseRef()` and `listChangedFiles()`, the branch-range pair the label audit reads. The changed set diffs the base against the working tree rather than against `HEAD`, so a surface added before the branch commits is still in scope. A ref the caller names resolves through its merge base with `HEAD` rather than being taken literally, and `src/git-base.ts`'s `baseCandidates()` holds that candidate order once for this resolver and the private one in `src/gov/test-order.ts` alike, each still running its own git call over the list
 - `src/git-files.ts` also owns `listRenames()` and `listIgnoreAdditions()`, the evidence `canon pr key-changes` credits a claim against past its own changed-file list: a git-detected rename's old path, and a pattern newly added to `.gitignore`. `parseIgnoreAdditions()` is the shared parse behind the second, since the same shape reaches it from a local `git diff` and from a patch string GitHub returns inline. Reasoned about in `canon/context/cli/audits.md`
-- `src/capture/` owns the capture render, one of the four browser modules under `src/` and the last of them to start shipping
+- `src/capture/` owns the capture render, one of the four browser modules under `src/`
 
 ## Gotchas
 
@@ -69,7 +69,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 
 - `src/wiki/` scaffolds `.claude/wiki/` in a target and reports a root `wiki/` left by an older scaffold rather than migrating it. A move is a decision the operator owns, since the two roots can both hold pages.
 - Porting a guard means porting its side effects. The bash `guard_root` ran `cd "$target"`, which validated the target existed as a by-product of resolving it. A port that reproduces only the stated purpose drops that check, and `mkdir -p` downstream then scaffolds a typo'd path into a new tree.
-- Preserving a destination's mode and indent width moved to `internal/rules/core/096-operator-files.md`, which globs `src/**/*.ts`. `writeSettings` is the live implementation of the mode half, after `merge_user_setting` silently tightened `~/.claude/settings.json` from 644 to 600 on every run, and `detectIndent` plus `serializeSettings` are the indent half.
+- Preserving a destination's mode and indent width lives in `internal/rules/core/096-operator-files.md`, which globs `src/**/*.ts`. `writeSettings` is the live implementation of the mode half, and `detectIndent` plus `serializeSettings` are the indent half.
 
 ### A catalog command reads the installation, not the branch
 
@@ -85,7 +85,7 @@ Logic under `src/commands/` that needs a unit test moves to a pure module under 
 
 ### Map a ported conditional to the matching predicate
 
-Porting a bash conditional means mapping the operator to the matching predicate rather than to a bare existence check. `-d` is `isDirectory`, `-f` is `isFile`, and `-e` alone is what `existsSync` provides. `collect_files_for_category` tested `[ ! -d "$dir" ]` and reported a clean `Category not found`, while the port using `existsSync` let `canon snippets install snippets.toml` resolve to the real file sitting beside the category folders and crash with an unhandled `ENOTDIR`. The trap fires wherever a directory of folders also holds files.
+Porting a bash conditional means mapping the operator to the matching predicate rather than to a bare existence check. `-d` is `isDirectory`, `-f` is `isFile`, and `-e` alone is what `existsSync` provides. A conditional ported as `existsSync` in place of a directory test resolves true against a same-named file, so `canon snippets install snippets.toml` crashes with an unhandled `ENOTDIR` wherever a directory of folders also holds a file of that name.
 
 ### Promoting a repo utility
 
