@@ -38,73 +38,77 @@ The conceptual placement decision is:
 
 ## What each root holds, and what reads it
 
-The move to `.canon/` split the project root on one mechanical line: what is committed stays in `.claude/`, what is gitignored lives in `.canon/`. The census below is the whole of `.claude/` as it stands, since the branch performing the move is the one whose author has to enumerate the root anyway and any census written before it would be stale on merge. Read at `346556b1` on 2026-09-01.
+The project root splits three ways: `.claude/` holds what Claude Code reads by path, `canon/` holds what the toolkit authors and commits, and `.canon/` holds every gitignored session record. One ignore line covers `.canon/`, so a record folder added later needs no row here, no ignore entry, and no manifest edit.
 
-Five surfaces are Claude Code's own and the toolkit invented none of them:
+Five surfaces sit under `.claude/` and are Claude Code's own, and the toolkit invented none of them:
 
-| Surface               | What reads it                                                       |
-| --------------------- | ------------------------------------------------------------------- |
-| `settings.json`       | Claude Code, which registers the hooks below from it                |
-| `settings.local.json` | Claude Code, per-machine and untracked                              |
-| `hooks/`              | Claude Code, on the events `settings.json` names                    |
-| `skills/`             | Claude Code, as the internal skills a session in this repo can load |
-| `rules/`              | Claude Code, glob-matched against the path being edited             |
+| Surface                       | What reads it                                                       |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `.claude/settings.json`       | Claude Code, which registers the hooks below from it                |
+| `.claude/settings.local.json` | Claude Code, per-machine and untracked                              |
+| `.claude/hooks/`              | Claude Code, on the events `settings.json` names                    |
+| `.claude/skills/`             | Claude Code, as the internal skills a session in this repo can load |
+| `.claude/rules/`              | Claude Code, glob-matched against the path being edited             |
 
-Two more are the harness's rather than the toolkit's, and the first is a carve-out the move left behind:
+Two more sit under `.claude/` as the harness's rather than the toolkit's:
 
-| Surface                | What reads it                                                                      |
-| ---------------------- | ---------------------------------------------------------------------------------- |
-| `worktrees/`           | `EnterWorktree`, which creates a worktree here and requires its target to sit here |
-| `scheduled_tasks.lock` | Claude Code, and nothing in this repository names it                               |
+| Surface                        | What reads it                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------------- |
+| `.claude/worktrees/`           | `EnterWorktree`, which creates a worktree here and requires its target to sit here |
+| `.claude/scheduled_tasks.lock` | Claude Code, and nothing in this repository names it                               |
 
-A third is the toolkit's own and gitignored rather than committed, which keeps it out of the "committed" rule below: `.tmp/` is the scratch rule's fallback spelling, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
+`.tmp/`, when it exists, is the toolkit's own and gitignored rather than committed: the scratch rule's fallback spelling, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
 
-The rest are the toolkit's own and stay because they are committed:
+The rest are the toolkit's own and sit under `canon/`, since they are committed:
 
-| Surface           | What reads it                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| `context/`        | A session, on demand, through the `index.md` catalog this entry describes                     |
-| `canon/`          | `canon audits` for `baseline.json`, and the pull request label map for `pr-labels.toml`       |
-| `ARCHITECTURE.md` | Every session, eagerly, through the root `CLAUDE.md`                                          |
-| `REQUIREMENTS.md` | Every session, eagerly, and the design and diagram skills by name                             |
-| `DESIGN.md`       | `canon design render`, `canon design board`, and the design skills by name                    |
-| `wireframes/`     | `canon context` as an audited folder, in a project that carries one. This repository does not |
+| Surface                 | What reads it                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `canon/context/`        | A session, on demand, through the `index.md` catalog this entry describes                     |
+| `canon/config/`         | `canon audits` for `baseline.json`, and the pull request label map for `pr-labels.toml`       |
+| `canon/ARCHITECTURE.md` | Every session, eagerly, through the root `CLAUDE.md`                                          |
+| `canon/REQUIREMENTS.md` | Every session, eagerly, and the design and diagram skills by name                             |
+| `canon/DESIGN.md`       | `canon design render`, `canon design board`, and the design skills by name                    |
+| `canon/wireframes/`     | `canon context` as an audited folder, in a project that carries one. This repository does not |
 
-The surface move later relocated five of those six rows to `canon/`, which is tracked as well, leaving only the stamp folder under `.claude/`. The test that decided the split still holds: `canon/` takes what the toolkit authors and commits, `.claude/` keeps what Claude Code reads, and `.canon/` keeps what is ignored.
-
-Everything else that used to sit here is a session record and lives under `.canon/` now, which one ignore line covers. That is what makes the census worth writing once rather than maintaining: a record folder added later needs no row here, no ignore entry, and no manifest edit, and anything added to `.claude/` is either a row in one of the tables above or, like `.tmp/`, a carve-out this entry names by hand.
+The test that decides the split: `canon/` takes what the toolkit authors and commits, `.claude/` keeps what Claude Code reads, and `.canon/` keeps what is ignored.
 
 ## Gotchas
 
 ### A folder split is a ceiling rather than a fix
 
-A folder split gets re-breached rather than durably fixing entry length. Measured 2026-08-05 with `canon context audit`, 22 of the 48 audited entries sat past the 150-line checkpoint and 14 of those were already sub-files of folders that had split: `sandbox/` was over in all four of its files, `claude-plugin/` in 6 of 12, `cli/` in 3 of 5, and `scripts/` in 1 of 5. `standards/context.md` names no split at all. It asks for three checks past 150 lines, being whether the entry still covers a single domain, whether it has filled with content a command reproduces, and whether it carries the history of its own changes, then says to fix whichever is true. Split only when the single-domain check is the one that fails. A task filed as a split on line count alone has skipped the diagnosis.
+A folder split gets re-breached rather than durably fixing entry length, since a split child re-accumulates content past the checkpoint the same way the flat entry did. `standards/context.md` names no split as a length remedy on its own.
+
+It asks for three checks past 150 lines, being whether the entry still covers a single domain, whether it has filled with content a command reproduces, and whether it carries the history of its own changes, then says to fix whichever is true. Split only when the single-domain check is the one that fails. A task filed as a split on line count alone has skipped the diagnosis.
+
+Measured 2026-08-05 with `canon context audit`: 22 of 48 audited entries sat past the 150-line checkpoint, and 14 of those were already sub-files of folders that had split, including `sandbox/` in all four of its files, `claude-plugin/` in 6 of 12, `cli/` in 3 of 5, and `scripts/` in 1 of 5.
 
 ### A weight remedy grows the file
 
-Both remedies for a weight finding make the file longer. Collapsing heavy bullets into prose costs a break wherever the prose then crosses the paragraph checkpoint, and a subheading breaking a long run costs about three lines, so neither sheds rendered lines. The standards entry went from 461 rendered lines to 549 on the change that took its 20 heavy bullets to zero, while its longest run fell from 41 to 33, so the depth measure improved as the length measure moved the other way. Budget a weight remedy as a rewrite that grows the file and report the post-remedy length as the number a folder decision is made against.
+Both remedies for a weight finding make the file longer. Collapsing heavy bullets into prose costs a break wherever the prose then crosses the paragraph checkpoint, and a subheading breaking a long run costs about three lines, so neither sheds rendered lines: the depth measure can improve while the length measure moves the other way. Budget a weight remedy as a rewrite that grows the file, and report the post-remedy length as the number a folder decision is made against.
 
-Deriving the subheading count from a plan's guess undercounts it. The CLI entry went from 137 to 172 lines while its 58-bullet decision block cleared, needing twelve headings rather than the four or five the plan guessed, because a group of paragraph-bullets averaging 360 characters clears the 40-rendered-line checkpoint only at roughly eight bullets. The standard reads the resulting length breach as the folder-split signal rather than as a regression. Projecting a split child's size from the source entry's named section weights undercounts it for the same reason: the flat `## Decisions` and `## Gotchas` blocks distribute into children by topic and that arithmetic never counted them. The scripts-entry-split plan projected 128 rendered lines for `core.md` and measured 151 after distribution, and being one line past the checkpoint forced a fifth child the plan had considered and rejected on that same projection. Distribute first, measure with `canon context audit`, and fix the file shape after.
+Deriving the subheading count from a plan's guess undercounts it, since a group of paragraph-bullets averaging 360 characters clears the 40-rendered-line checkpoint only at roughly eight bullets, well below what a quick guess assumes. The standard reads the resulting length breach as the folder-split signal rather than as a regression.
+
+Projecting a split child's size from the source entry's named section weights undercounts it for the same reason: the flat `## Decisions` and `## Gotchas` blocks distribute into children by topic, and that arithmetic never counts them, so a projection can land narrowly past the checkpoint and force an extra child a plan had already rejected. Distribute first, measure with `canon context audit`, and fix the file shape after.
 
 ### What a split strands
 
-A reader enumerating a flat surface pins depth somewhere, so converting an entry to a folder removes it from that reader's output rather than erroring. Moving the plugin entry to a folder dropped the domain from `canon docs list` and made `canon docs claude-plugin` exit 1, through two readers that pinned depth independently: `listTopics` via `new Bun.Glob('*.md')` in `src/docs/read.ts` and `list_text` via `find -maxdepth 1` in `scripts/docs/list.sh`. `bun run check` passed throughout, since every stage tests the files that exist rather than the names a command can still reach. It recurred splitting `docs/agents.md`, inside the file the first repair had already touched, because that repair added folder-aware collection for the context root and left the `docs/` root flat. `CLAUDE.md` carries the depth-constraint rule for `snippets/`, `claude/skills/`, `tooling/`, and `governance/rules/`, and both `canon/context/` and `docs/` sit outside that list. Count the roots inside each reader rather than counting readers.
+A reader enumerating a flat surface pins depth somewhere, so converting an entry to a folder can drop it from that reader's output rather than erroring. Two readers pin depth independently: `listTopics` via `new Bun.Glob('*.md')` in `src/docs/read.ts` and `list_text` via `find -maxdepth 1` in `scripts/docs/list.sh`. `bun run check` passes regardless, since every stage tests the files that exist rather than the names a command can still reach.
 
-The third reading came from the `docs/` files rather than from another folder split. Moving four pages into `docs/workflow/` left `resolveTopic` and `collect_docs` pinned one level above them, so `canon docs operating-model` would have exited 1 inside every target with `bun run check` still green. A shipped skill body calls that name, which is what put the widening in the same pull request as the move rather than behind it.
+`CLAUDE.md` carries the depth-constraint rule for `snippets/`, `claude/skills/`, `tooling/`, and `governance/rules/`, and both `canon/context/` and `docs/` sit outside that list, so count the roots inside each reader rather than counting readers before splitting either.
 
-What closed it is a third candidate under the two each reader already tried, rather than a fourth repair to one reader. A sub-area file resolves by its bare name once every root has been tried for a sibling file and for a folder, and only where a single folder across both roots carries that name. Reading depth last is what keeps the widening additive, so no name that resolved before this resolves anywhere else now.
+A sub-area file resolves by its bare name once every root has been tried for a sibling file and for a folder, and only where a single folder across both roots carries that name. Reading depth last is what keeps a widened reader additive, so a name that resolves before a widening fix resolves nowhere else afterward.
 
-A split also strands two classes of reference no gate reads. An entry's own direction words dangle the moment it splits, since a citation gate resolves backticked paths and a bare `above` names none: splitting the sandbox entry left `coverage.md` closing a section with "which is the sixth standing limit above" while the standing limits moved to `overview.md`, and `canon context audit` reported every cited path resolving throughout. A finding pinning a defect to `<entry>:<line>` stops resolving too, and the task carrying it still ships, so the work reaches the next sweep claimed by nothing. One finding recorded against `canon/context/cli/audits.md` named a line in the pre-split `cli.md`, and confirming it meant checking a task file that no longer existed on the board. Grep for `above`, `below`, and the entry's own heading names before splitting, and re-resolve every open line-pinned finding after.
+A split also strands two classes of reference no gate reads. An entry's own direction words dangle the moment it splits, since a citation gate resolves backticked paths and a bare `above` names none. A finding pinning a defect to `<entry>:<line>` stops resolving too, and the task carrying it still ships, so the work reaches the next sweep claimed by nothing. Grep for `above`, `below`, and the entry's own heading names before splitting, and re-resolve every open line-pinned finding after.
 
-A third class points out of the moved file rather than into it. Every root-relative link inside a page deepens by one segment when the page moves a folder down, and moving four pages into `docs/workflow/` broke 22 of them in their own bodies while the plan had counted only the 20 inbound citations. `canon context audit` resolves a cited path and reports nothing about the depth it was written at, so both directions are unread. Count the links leaving the moved file alongside the ones naming it.
+A third class points out of the moved file rather than into it. Every root-relative link inside a page deepens by one segment when the page moves a folder down. `canon context audit` resolves a cited path and reports nothing about the depth it was written at, so both directions are unread. Count the links leaving the moved file alongside the ones naming it.
 
 ### What makes a document always-loaded
 
-A document is always-loaded only when an `@` line in `CLAUDE.md` names it. `canon/ARCHITECTURE.md` was written against a plan whose files-to-touch named only a content-ownership row, and this repository's `CLAUDE.md` anchored `canon/context/index.md` alone while `tooling/claude/seeds/CLAUDE.md` anchors four paths. Nothing gates the toolkit's own `CLAUDE.md` against the seed it distributes, so the gap was invisible until someone read both. Before closing an outcome that calls a document always-loaded, grep `^@` in `CLAUDE.md` and diff the anchor block against the seed.
+A document is always-loaded only when an `@` line in `CLAUDE.md` names it. Nothing gates the toolkit's own `CLAUDE.md` against the seed it distributes, `tooling/claude/seeds/CLAUDE.md`, so the two can anchor a different set of paths with nothing to catch the drift. Before closing an outcome that calls a document always-loaded, grep `^@` in `CLAUDE.md` and diff the anchor block against the seed.
 
 ### The root map stays in the always-loaded file
 
-The context standard caps re-derivable folder structure inside an entry, and the same sentence reads as a reason to move the root file's own map out to an entry, which it is not. The map orients a reader who has opened no entry yet, so replacing it with a pointer into the catalog costs a discovery hop the tier split exists to remove. Measured on the `v59.2` pass, where the relocation was proposed, approved, and reversed before it landed.
+The context standard caps re-derivable folder structure inside an entry, and the same sentence reads as a reason to move the root file's own map out to an entry, which it is not. The map orients a reader who has opened no entry yet, so replacing it with a pointer into the catalog costs a discovery hop the tier split exists to remove.
 
 What the cap governs is a second copy of the structure inside a per-domain entry, where the reader has already arrived and the folder is one `ls` away.
 
@@ -120,10 +124,10 @@ This is ship-time and not plan-time because the plan describes intent, while con
 
 ## Two stale claims a diff-scoped refresh cannot reach
 
-Mapping changed files to the entries that reference them is what makes the refresh affordable, and it misses two shapes. Both are produced by a change that removes a capability, and the `docs-fold` body holds the sweep that catches them, since a session running the refresh holds that skill and reaches no context entry. What sits here is the pair itself and the case that produced them.
+Mapping changed files to the entries that reference them is what makes the refresh affordable, and it misses two shapes. Both are produced by a change that removes a capability, and the `docs-fold` body holds the sweep that catches them, since a session running the refresh holds that skill and reaches no context entry.
 
-The first is the half-rewritten entry. An entry refreshed at the top and left alone below argues both sides of itself, and it reads worse than one nobody touched, because the current opening lends authority to the stale remainder. The entry is in the diff and the refresh passed over it, so nothing reports it. `canon/context/standards/resolution.md` recorded the closed standards install channel in its opening and described the open one two paragraphs down.
+The first is the half-rewritten entry. An entry refreshed at the top and left alone below argues both sides of itself, and it reads worse than one nobody touched, because the current opening lends authority to the stale remainder. The entry is in the diff and the refresh passed over it, so nothing reports it.
 
-The second is the sentence a change inverted from a distance. A claim comparing two surfaces stays true only while both hold, so moving one flips it with nobody editing the file it sits in. That file is often outside the diff entirely, which puts it past every scope the refresh reads. `canon/context/cli/audits.md` recorded that the records check reads its roots in the reverse order of `src/standards/read.ts`, and collapsing the resolver left both reading the authoring root first, so a correct sentence became backwards on a branch that never opened the file.
+The second is the sentence a change inverted from a distance. A claim comparing two surfaces stays true only while both hold, so moving one flips it with nobody editing the file it sits in. That file is often outside the diff entirely, which puts it past every scope the refresh reads.
 
 The two rules pull against each other and the narrow one is the default. Rewriting only what the diff touched is what keeps a refresh from churning prose nothing put in doubt, and it is overridden only inside an entry the run already edited, which is the first shape above.

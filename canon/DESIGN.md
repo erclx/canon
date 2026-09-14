@@ -18,7 +18,7 @@ One surface is carved out of the sentence above, and it is the landing page hero
 
 ## Color
 
-Every role clears WCAG AA at 4.5:1 against each ground it declares, asserted in `src/design/contrast.test.ts`. Two corrections landed with this record becoming the source. The light `muted` step moved from `#7A736A`, which read 4.38 and 4.09 against the two light grounds, and the dark `accent` moved off the `#C8602E` the slide theme carried, which read 4.36 and 3.99 against the two dark ones. Both now sit on the values below.
+Every role clears WCAG AA at 4.5:1 against each ground it declares, asserted in `src/design/contrast.test.ts`.
 
 Warning and error hold ANSI codes because that is what `scripts/lib/ui.sh` writes and no rendered surface implements an equivalent. Giving either a hex value would invent a mapping no file has, so they carry no contrast reading either.
 
@@ -53,7 +53,7 @@ Success is the one of the three that does have a rendered equivalent, which is w
 
 One family covers every role but `page-display`, which is the landing page hero and takes the proportional sibling of the same superfamily. The size scale runs from 11.5 to 52 pixels, and six values map onto a role. Five further values are adjustments inside a single component and get no role here, since a scale with five invented steps reads as a system the surfaces do not implement. They are 11.5, 12.5, 13, 14, and 15 pixels.
 
-The 52 pixel step sits above the 34 the rest of the scale tops out at, and it is the one size no other surface reaches. A hero headline set at the display cap reads as a section heading rather than an opening, which four rendered arms measured on 2026-09-04 before the step was added.
+The 52 pixel step sits above the 34 the rest of the scale tops out at, and it is the one size no other surface reaches, since a hero headline set at the display cap reads as an opening rather than as a section heading.
 
 A tagged cell is one no rendering surface exercises yet, which is a declaration the system has not tested rather than one it has.
 
@@ -104,4 +104,6 @@ Motion is not used. No transition, animation, or keyframe declaration appears on
 
 ## Iconography
 
-No icon library is installed. `assets/brand/mark.svg` is the one authored icon, embedded inline in the hero topbar, and the surfaces otherwise draw literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing. The same mark also ships as a favicon on every rendered surface, as three independently-maintained copies that track different accents by design rather than by drift: `regen-hero.sh` derives one from the live SVG colored with whatever `--color-accent` (`#e0724b`) the fetched token CSS carries, `src/design/render.ts` carries the path data as a hardcoded literal colored via `colorValue('light-accent')` (`#a4471c`), since a data URI has no CSS context and that page renders on light chrome, and `teach-workspace`'s `SKILL.md` names one in prose colored `rgb(224,114,75)`, the same value as the dark accent written as decimal rather than hex to clear the shipped-references gate's commit-sha check. Unifying the three or repairing the one that looks drifted would break the fit each was chosen for.
+No icon library is installed. `assets/brand/mark.svg` is the one authored icon, embedded inline in the hero topbar, and the surfaces otherwise draw literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing.
+
+The same mark ships as a favicon on every rendered surface, as three independently-maintained copies that track different accents by design rather than by drift, colored to fit the chrome each renders on: the dark accent (`#e0724b`) for a dark-chrome surface and the light accent (`#a4471c`) for a light-chrome one. Unifying the three or repairing the one that looks drifted would break the fit each was chosen for. `canon/context/design.md` carries which file holds each copy.

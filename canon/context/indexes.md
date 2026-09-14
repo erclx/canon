@@ -23,10 +23,10 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 - The bootstrap skill is the only supported migration path. The CLI does not own it because authoring readable `description` text is judgment work, not a deterministic transformation.
 - Regen auto-stages rewritten `index.md` files when positional paths are passed inside a git repository. Without it, a commit that stages a sibling frontmatter change would land with a drifted `index.md`, because `lint-staged` re-stages only files that were in the original staged set.
 - Both integration points are opt-in per project and the toolkit ships no default. Git-driven projects want `lint-staged`, agent-driven ones want the hook, and picking one for them would be wrong half the time.
-- This was the first domain migrated off bash, chosen because nothing else depended on its walker. The engine reads frontmatter with `Bun.YAML` and emits JSON with `JSON.stringify`, so neither the parser nor the escaping is hand-rolled.
+- The engine reads frontmatter with `Bun.YAML` and emits JSON with `JSON.stringify`, so neither the parser nor the escaping is hand-rolled.
 - Frontmatter is re-emitted verbatim rather than re-serialized from the parsed object. Key order, comments, and the `auto: false` marker all survive a regeneration that way.
 - Flat mode sorts sub-catalogs among the sibling files instead of appending them. A folder and a file are both one domain to a reader scanning the catalog, and the rendered lines are indistinguishable, so a trailing entry reads as absent from the alphabetical run it belongs in.
-- `canon/context/claude-plugin/` was the repository's first sub-catalog, so nothing read the append path until it landed at the bottom of a catalog `CLAUDE.md` loads every session. Grouped mode keeps the append, because its heading is what makes the child catalogs visible there.
+- Grouped mode keeps the append, since its heading is what makes the child catalogs visible in a catalog `CLAUDE.md` loads every session.
 - `list` ships with a dedicated lookup skill, `index-lookup`, which matches a topic against every entry's `title`, `description`, and `path` rather than searching file contents. The skill names, rather than searches, a folder sitting outside `list`'s walk, checking which ones a project carries before naming any, since widening `list` to reach them stays declined per the gotchas below.
 
 ## Gotchas
