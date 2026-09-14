@@ -110,7 +110,7 @@ The `## Needs a plan` cell has a second half and it takes the same treatment one
 
 The shape rules are measured against the pen rather than drafted from the three sources, which is the lesson `plan.md` paid for. Every body opens with a prose rule line, no marker is ever indented, and `**Why:**` and `**How to apply:**` co-occur in every rule-bearing entry, and the entries carrying neither are exactly the `reference` and `user` types.
 
-Blank lines between the three parts split across the pen with no majority form, so the standard states the three parts as the contract and stays silent on the separator. Requiring one spelling would report a large share of the corpus on the rule readers are least served by.
+Blank lines between the three parts vary across the pen, so the standard states the three parts as the contract and stays silent on the separator. Requiring one spelling would report a large share of the corpus on the rule readers are least served by.
 
 `category` is compared against the sentence-case form of the filename prefix rather than checked field by field. One comparison catches a prefix outside the four types, a field disagreeing with the prefix, and a casing drift that would open a second group in the generated catalog, and it reports one finding where three separate rules would report the same defect three times.
 

@@ -62,9 +62,6 @@ The resolve has exactly one caller, `src/commands/standards.ts`, and no shipped 
 - A grep for `standards install` or `standards sync` in a skill body or a doc is a stale citation, not a verb. Neither exists.
 - A standard citing a `docs/agents/` page resolves as a path here and nowhere else, since neither root carries a `docs/` tree. `standards/tasks.md` carries the first such pointer.
 - `canon docs <name>` resolves a sub-area file by its bare name, so `canon docs tasks` is the spelling the pointer above can run. A name two folders share still resolves to neither.
-
-### The two read routes return different bytes
-
-`canon standards <name>` runs its file through `stripFrontmatter` at `src/standards/read.ts:99`, so stdout opens at the H1, while the `content` field of `canon standards list --json` carries the source whole. Anything comparing a target's leftover copy against the corpus reads the catalog, since an install once copied the source file whole and the verb's output differs from it by the frontmatter block. Measured 2026-08-28: the catalog's `content` for `slug` is byte-identical to `standards/slug.md`.
+- The two read routes return different bytes. `canon standards <name>` runs its file through `stripFrontmatter` at `src/standards/read.ts:99`, so stdout opens at the H1, while the `content` field of `canon standards list --json` carries the source whole. Anything comparing a target's leftover copy against the corpus reads the catalog, since an install once copied the source file whole and the verb's output differs from it by the frontmatter block. Measured 2026-08-28: the catalog's `content` for `slug` is byte-identical to `standards/slug.md`.
 
 A plan's measured claim that nothing covers an artifact can be false when the covering file sits in a subfolder a catalog read excludes, since the listing the plan trusted then reports it missing while the conclusion drawn from it is wrong. Glob a domain root recursively rather than reading its `index.md` alone, and where a match turns up in an excluded subfolder, the fix is usually a promotion to the flat root plus the one missing rule.

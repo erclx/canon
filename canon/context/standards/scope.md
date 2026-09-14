@@ -65,7 +65,7 @@ The `description` is the surface with the most reach. It becomes the index link 
 
 ## How the scope statement is parsed
 
-The scope statement is read by machine as well as by a person, which is what the two shape rules `standards/standard.md` carries about it enforce. The path goes in backticks in the first sentence, anchored deep enough to resolve from a project root.
+The scope statement is read by machine as well as by a person, which is what the two shape rules `standards/standard.md` carries about it enforce. The path goes in backticks in the first sentence, anchored deep enough to resolve from a project root, and an attribute standard says in that same sentence that it governs an attribute.
 
 Every backticked token in that first sentence is read as a path, and the `*` resolution for an attribute standard fires only when the sentence carries none, so an attribute standard keeps its first sentence free of backticks and names the identifiers it governs in a later one. A field name or a file extension backticked there would publish as the standard's jurisdiction, and a consumer mapping a changed file through `appliesTo` would match nothing and report the file clean.
 
