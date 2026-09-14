@@ -50,7 +50,7 @@ Pass `--variant light` or `--variant dark` to override the source variant for a 
 Run this once after the first render, then stop.
 
 1. Convert the deck to images: `soffice --headless --convert-to pdf <deck>.pptx` then `pdftoppm -r 90 -png <deck>.pdf slide`. If `soffice` or `pdftoppm` is missing, skip the image pass and say so. Do not fail the render.
-2. Inspect the images with fresh eyes. Spawn a subagent to check every slide for overlap, overflow, low contrast, and empty regions.
+2. Open and inspect every rendered image in this session, checking each slide for overlap, overflow, low contrast, and empty regions.
 3. Fix the reported issues in `SLIDES.md` once, re-render, and stop. Do not loop indefinitely on aesthetics.
 
 ## Response
