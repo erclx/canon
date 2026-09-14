@@ -37,9 +37,11 @@ A run where no requested name resolves refuses, whichever list it read. Naming t
 
 ## Exit codes
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. An architecture record that states its own line allowances gates when it is past the ceiling those derive, on any run that measures it, which is every mode except `--citations-only`, and a record stating none is reported and never gated. Entry length, reference form, table, provenance, narration, and the record's claim classification print and return `0` under every mode, because each is a judgment and failing a push on one would make the check something to route around. Narration is the weakest of the five, since whether two bullets share a subject is a call the measure approximates from structure alone, and one of the shapes it matches is the rejected alternative the standard asks an entry to keep.
+Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. An architecture record that states its own line allowances gates when it is past the ceiling those derive, on any run that measures it, which is every mode except `--citations-only`, and a record stating none is reported and never gated.
 
-Required-section and index findings sit between the two. Both are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
+Entry length, reference form, table, provenance, narration, the record's claim classification, and every word figure print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around. Narration is the weakest of the printed measures, since whether two bullets share a subject is a call the measure approximates from structure alone, and one of the shapes it matches is the rejected alternative the standard asks an entry to keep.
+
+Required-section, index, wireframe-states, and sketch-with-evidence findings sit between the two. All four are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
 
 ## The seed gate
 
@@ -81,3 +83,11 @@ Append `<!-- audit-ignore-citations: <path> -->` to the source line in either ca
 The marker itself stays out of anything that installs. A seed, a plugin skill body, and a stack reference all reach a target, so a marker there lands as toolkit bookkeeping in someone else's tree. Reword those lines to drop the path instead, and where a stop message has to spell it, move that message into a fenced block, which this check already skips.
 
 The pattern spells both record-root prefixes, so a citation into a folder that has moved still resolves and a folder resolved at the project root is measured by every other check while contributing nothing here. A pattern fixed at one root matches nothing after a move and reports nothing, which is a stale reference passing the check written to find it. Widening it to a bare `docs/x.md` would match prose that references nothing, which is a separate decision from where entries come from. A run whose folders all resolved at the root says the check is out of scope rather than reporting that zero paths resolved, and the same run under `--citations-only` refuses, because a gate exiting clean on a scope it could not build is the failure the gate exists to catch.
+
+## The wireframe states gate
+
+Every entry under `canon/wireframes/` carrying a `## States` table is checked one-to-one against its evidence folders, matching the table's `State` and `Evidence` columns by header text rather than position, so a project reordering the template's own columns still resolves. An entry with no such table reports nothing, which is what leaves a project on an older wireframe shape silent until it adopts one.
+
+An evidence cell resolves as the literal path it names, taken from the project root. A state whose cited folder does not exist is a states mismatch, and so is a folder sitting under a cited evidence root that no row names. A `not captured` cell is the one exception the standard admits, and it excuses that row from both readings. A layout still carrying a `plaintext` sketch once a state's evidence exists on disk is the second finding this check adds, since the standard asks the fence to come out the moment the layout has a capture to show instead.
+
+Both findings are printed and advisory under a bare run, and both gate at `2` under `--gate`, alongside a missing required section and index drift.

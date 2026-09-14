@@ -57,11 +57,25 @@ export interface DecisionReport {
    * claim some check happens to cover without the entry saying so.
    */
   readonly checks: readonly string[]
+  /**
+   * The entry's own word count, read alongside the weight judgment the
+   * standard asks a session to make by reading the file rather than counting
+   * it. Never gates, per `standards/architecture.md`'s `## Length` section.
+   */
+  readonly words: number
 }
 
 export interface ArchitectureReport {
   readonly rel: string
   readonly lines: number
+  /** The whole record's word count, reported for the same reason. */
+  readonly words: number
+  /**
+   * Word count of the `## Risks / open questions` section, absent when the
+   * record carries no such heading. The standard asks that section to hold
+   * only what is still open, so its weight is read the same way the file's is.
+   */
+  readonly risksWords?: number
   /** What the record declared, absent when it states no length rule. */
   readonly allowances?: Allowances
   /** The frame plus the per-decision allowance, absent alongside it. */
@@ -71,6 +85,8 @@ export interface ArchitectureReport {
 
 const DECISION_HEADING = /^###\s+(.+?)\s*$/
 const SECTION_HEADING = /^##\s+\S/
+/** The one H2 the standard's `## Length` section asks to be weighed by words. */
+const RISKS_HEADING = /^##\s+Risks\s*\/\s*open questions\s*$/i
 const CODE_SPAN = /`[^`]*`/g
 /** Dropped ahead of the figure scan, since an anchor date is not a claim. */
 const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
@@ -238,6 +254,54 @@ export function splitDecisions(source: string): RawDecision[] {
   return decisions
 }
 
+/**
+ * Counts whitespace-delimited tokens, which is the unit the standard's
+ * `## Length` section reads alongside the weight judgment a session makes by
+ * reading the file. It is a report figure rather than a gate, so a fenced
+ * example or a code span inflating the count costs nothing a reader corrects
+ * for by reading, the same trade the line count above it already takes.
+ */
+function wordCount(text: string): number {
+  return text.match(/\S+/g)?.length ?? 0
+}
+
+/**
+ * Extracts the `## Risks / open questions` section, or nothing when the
+ * record carries no such heading.
+ *
+ * The section is read the same way `splitDecisions` reads a decision: capture
+ * starts at the heading and stops at the next H2, or at the end of the file
+ * when the section is last, which is where the standard's template puts it.
+ */
+export function risksSection(source: string): string | undefined {
+  const lines = bodyLines(source)
+  const body: string[] = []
+  let capturing = false
+  let found = false
+
+  for (const line of lines) {
+    if (line.fenced) {
+      if (capturing) body.push(line.text)
+      continue
+    }
+
+    if (RISKS_HEADING.test(line.text)) {
+      capturing = true
+      found = true
+      continue
+    }
+
+    if (capturing && SECTION_HEADING.test(line.text)) {
+      capturing = false
+      continue
+    }
+
+    if (capturing) body.push(line.text)
+  }
+
+  return found ? body.join('\n') : undefined
+}
+
 /** Cardinals a record spells rather than writes, which the corpus does for both. */
 const SPELLED: Record<string, number> = {
   one: 1,
@@ -332,13 +396,22 @@ export async function measureArchitecture(
         figures,
         ...(quantified !== undefined && { quantified }),
         checks: await namedChecks(root, entry.body),
+        words: wordCount(entry.body),
       }
     }),
   )
 
+  const risks = risksSection(source)
+
   return {
     rel,
     lines: source.replace(/\n$/, '').split('\n').length,
+    words: wordCount(
+      bodyLines(source)
+        .map((line) => line.text)
+        .join('\n'),
+    ),
+    ...(risks !== undefined && { risksWords: wordCount(risks) }),
     ...(allowances !== undefined && {
       allowances,
       ceiling: ceilingFor(allowances, raw.length),

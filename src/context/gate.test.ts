@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { SectionFinding } from '@/context/audit'
-import { type GateInput, hasDrift, isGating } from '@/context/gate'
+import {
+  type GateInput,
+  hasDrift,
+  hasSketchWithEvidence,
+  hasStatesMismatch,
+  isGating,
+} from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
+import type { WireframeStatesReport } from '@/context/wireframe-states'
 
 function makeDrift(overrides: Partial<FolderDrift> = {}): FolderDrift {
   return { rel: 'canon/context', unlisted: [], missing: [], ...overrides }
@@ -15,12 +22,26 @@ function makeSection(overrides: Partial<SectionFinding> = {}): SectionFinding {
   }
 }
 
+function makeWireframe(
+  overrides: Partial<WireframeStatesReport> = {},
+): WireframeStatesReport {
+  return {
+    rel: 'canon/wireframes/header.md',
+    rows: [],
+    missingFolders: [],
+    unlistedFolders: [],
+    sketchWithEvidence: false,
+    ...overrides,
+  }
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
     recordOverLength: false,
     sections: [],
     drift: [],
+    wireframes: [],
     widened: false,
     ...overrides,
   }
@@ -104,5 +125,88 @@ describe('isGating', () => {
     const input = makeInput({ drift: [makeDrift()], widened: true })
 
     expect(isGating(input)).toBe(false)
+  })
+
+  it('should leave a states mismatch advisory under the narrow gate', () => {
+    const wireframe = makeWireframe({
+      missingFolders: [
+        { line: 20, state: 'empty', path: 'web/evidence/empty' },
+      ],
+    })
+
+    expect(isGating(makeInput({ wireframes: [wireframe] }))).toBe(false)
+  })
+
+  it('should fail a states mismatch under the widened gate', () => {
+    const wireframe = makeWireframe({
+      unlistedFolders: [{ root: 'web/evidence', folder: 'answered' }],
+    })
+    const input = makeInput({ wireframes: [wireframe], widened: true })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should leave a sketch beside existing evidence advisory under the narrow gate', () => {
+    const wireframe = makeWireframe({
+      sketchWithEvidence: true,
+      sketchLine: 12,
+    })
+
+    expect(isGating(makeInput({ wireframes: [wireframe] }))).toBe(false)
+  })
+
+  it('should fail a sketch beside existing evidence under the widened gate', () => {
+    const wireframe = makeWireframe({
+      sketchWithEvidence: true,
+      sketchLine: 12,
+    })
+    const input = makeInput({ wireframes: [wireframe], widened: true })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should pass a widened gate reading a clean wireframe report', () => {
+    const input = makeInput({ wireframes: [makeWireframe()], widened: true })
+
+    expect(isGating(input)).toBe(false)
+  })
+})
+
+describe('hasStatesMismatch', () => {
+  it('should report no mismatch when every wireframe is clean', () => {
+    expect(hasStatesMismatch([makeWireframe()])).toBe(false)
+  })
+
+  it('should report a mismatch from a missing folder', () => {
+    const wireframe = makeWireframe({
+      missingFolders: [
+        { line: 20, state: 'empty', path: 'web/evidence/empty' },
+      ],
+    })
+
+    expect(hasStatesMismatch([wireframe])).toBe(true)
+  })
+
+  it('should report a mismatch from an unlisted folder', () => {
+    const wireframe = makeWireframe({
+      unlistedFolders: [{ root: 'web/evidence', folder: 'answered' }],
+    })
+
+    expect(hasStatesMismatch([wireframe])).toBe(true)
+  })
+})
+
+describe('hasSketchWithEvidence', () => {
+  it('should report false when no wireframe carries the finding', () => {
+    expect(hasSketchWithEvidence([makeWireframe()])).toBe(false)
+  })
+
+  it('should report true when a wireframe carries the finding', () => {
+    const wireframe = makeWireframe({
+      sketchWithEvidence: true,
+      sketchLine: 12,
+    })
+
+    expect(hasSketchWithEvidence([wireframe])).toBe(true)
   })
 })

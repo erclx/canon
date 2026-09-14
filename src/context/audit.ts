@@ -77,6 +77,14 @@ const INSIDE_LIST = /^\s+\S/
  * and which release labelled it. A marker is a judgment rather than a defect,
  * so this is measured and reported and never gates.
  *
+ * The change pattern matches any digit count rather than the three-plus this
+ * used to require, since a project young enough to sit in single or double
+ * digits, `PR #7`, went entirely unread under the old floor. Widening it reads
+ * a change reference wherever a document is scanned as prose, so `provenance`
+ * masks a line's displayed spans first, which is what keeps a heading's own
+ * auto-derived link destination, `(#7-open-questions)`, from reading as a
+ * change number: `#7` there names the heading, not a pull request.
+ *
  * The release pattern accepts three segments without a leading `v`, since the
  * standard cuts a release label rather than a spelling of one and `a CLI at
  * 0.83.0` names a release exactly as `v0.83.0` does. Two segments still require
@@ -88,7 +96,7 @@ const INSIDE_LIST = /^\s+\S/
  */
 const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
   { kind: 'date', pattern: /\b\d{4}-\d{2}-\d{2}\b/g },
-  { kind: 'change', pattern: /#\d{3,}\b/g },
+  { kind: 'change', pattern: /#\d+\b/g },
   { kind: 'release', pattern: /\b(?:v\d+\.\d+(?:\.\d+)?|\d+\.\d+\.\d+)\b/g },
 ]
 
@@ -349,6 +357,12 @@ function catalogTables(entry: readonly BodyLine[]): TableFinding[] {
  * rather than a claim it makes, and a version pinned in an install line is the
  * ordinary shape of one.
  *
+ * Displayed spans are masked for the same reason. A code span quoting a hex
+ * color, `#000`, and a link destination naming a heading's own anchor,
+ * `(#7-open-questions)`, both read as text the entry shows rather than a claim
+ * it makes, which is the same distinction the fence skip draws at the block
+ * level.
+ *
  * A date stamping a measurement is dropped rather than reported under a kind of
  * its own. One list with one meaning is what lets every consumer read it
  * without filtering: the report names what the standard cuts, and the length
@@ -365,8 +379,10 @@ function provenance(lines: readonly BodyLine[]): ProvenanceFinding[] {
   for (const line of lines) {
     if (line.fenced) continue
 
+    const text = maskDisplayed(line.text)
+
     for (const { kind, pattern } of PROVENANCE) {
-      for (const match of line.text.matchAll(pattern)) {
+      for (const match of text.matchAll(pattern)) {
         if (kind === 'date' && stampsMeasurement(line.text, match.index)) {
           continue
         }

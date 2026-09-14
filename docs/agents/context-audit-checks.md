@@ -55,6 +55,8 @@ The table check reports a catalog that grows a row per shipped thing, not a tabl
 
 The provenance check reports the markers narrating how a domain reached its shape rather than describing what it is: a date, a change number, or a release label. The standard admits a rejected alternative and the reasoning that killed it while refusing the provenance attached to it, so a marker names a line to read rather than a line to delete. Findings group by entry and sort left to right within a line, since what a reader acts on is which file to open.
 
+A change number matches at any digit count, so `PR #7` and `#49` report alongside a four-digit number. Displayed spans are masked before the match runs, which is what keeps a heading's own auto-derived link destination, `(#7-open-questions)`, and a hex color in a code span, `` `#000` ``, from reading as a change reference: both are text an entry shows rather than a claim it makes. <!-- canon-allow-reference: illustrates the input shape the rule reads -->
+
 A date stamping a measurement is excluded, because the standard cuts a date attached to a change and permits one dating a figure. The check reads the clause in front of the date, back to the nearest sentence boundary, for one of five verbs: measured, verified, driven, passed, and fired. The noun `run` counts only where it sits against the date, so `A run on 2026-08-14` is excluded and `Runs on erclx/canon#632 and erclx/canon#634 landed 2026-08-02` reports. The set is closed, and a date it cannot place reports as a change marker rather than as a state of its own, which names one date too many rather than clearing one the rule cuts. <!-- canon-allow-reference: illustrates the input shape the rule reads -->
 
 A release label reports with or without its leading `v` at three segments, since the rule cuts the label rather than a spelling of it. Two segments still need the `v`, which keeps a dollar cost and a duration out. Another tool's version reports too, and the check cannot tell one from a release, so treat a version beside a tool name as a line to read rather than one to cut.
@@ -89,7 +91,7 @@ The JSON record carries the findings per entry as `entries[].narration` and the 
 
 ## The architecture record
 
-Two findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first is a fact.
+Three findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first is a fact.
 
 The length check compares the record against the ceiling it derives for itself, and only a record that states its own allowances has one. No standard sets a length rule for this document, so the numbers belong to whichever record declares them. The check reads a frame allowance and an allowance per decision out of the record's own prose and puts the ceiling at the frame plus the allowance times the decision count. The JSON record carries what it read as `architecture.allowances` and the reading as `architecture.lines` against `architecture.ceiling`.
 
@@ -103,9 +105,25 @@ Three limits are stated on every run rather than hidden. The countable signal re
 
 The report gates nothing. Deciding whether a sentence states a claim is a judgment no parser settles, so the output names candidates for a reader. This answers a different question from the verification anchors `standards/architecture.md` describes, which record that one cited number was re-read. That mechanism says whether a marked figure held, and this one says how much of the record could be checked at all.
 
+The third finding is a word count, measured in words rather than lines: one figure for the whole record and one per decision. `standards/architecture.md` asks a session to judge the file's weight by reading it rather than by counting it, and reads the word figure alongside that judgment when one is available. A paragraph written one source line to a paragraph passes the rendered-line measure other checks use while still reading heavy, which is the gap a word count closes without turning into a second cap.
+
+The `## Risks / open questions` section is weighed the same way, reported apart from the whole-record figure since the standard singles it out for holding only what is still open. This finding gates nothing under any mode. The JSON record carries the whole-record figure as `architecture.words`, the section figure as `architecture.risksWords` where the record carries the heading, and the per-decision figure as `architecture.decisions[].words`.
+
+## Wireframe states
+
+Every entry under `canon/wireframes/` carrying a `## States` table is checked against its evidence folders on disk. `State` and `Evidence` are matched by header text rather than column position, since the standard's own template could still move a column during its own review. An entry with no such table is out of scope and reports nothing.
+
+An evidence cell's path is read as written and resolved against the project root, since the standard puts the path in the cell rather than a state name a convention would have to guess at. A state whose cited path resolves to no directory is a missing folder, measured in states: one finding per row. A directory sitting under a root at least one row already cites, but named in no row itself, is an unlisted folder, measured in folders: one finding per directory.
+
+Both are counted rather than only listed, since a count is what a reader compares run to run. A `not captured` cell is the one value the standard exempts from having a folder, and it drops out of both counts.
+
+The fourth finding reads the whole entry rather than one row: whether it carries a `plaintext`-fenced sketch while a state's evidence already exists on disk. The standard asks the fence to come out the moment a layout has a capture to show instead, so a sketch surviving past that point is a boolean per entry rather than a count.
+
+All four wireframe findings are printed and advisory under a bare run, and the states and sketch findings gate at `2` under `--gate`, alongside a missing required section and index drift. The JSON record carries them per entry under `wireframes[]`, as `rows`, `missingFolders`, `unlistedFolders`, and `sketchWithEvidence` alongside `sketchLine`.
+
 ## Which folders each check reaches
 
-The provenance, required-section, and narration checks cover `canon/context/` alone, the reference-form check covers the split folders inside it, and length and the table finding reach every audited folder.
+The provenance, required-section, and narration checks cover `canon/context/` alone, the reference-form check covers the split folders inside it, length and the table finding reach every audited folder, and the wireframe states check covers `canon/wireframes/` alone.
 
 What narrows the three is stated in `standards/context.md`, which opens its scope by handing diagrams and wireframes to `diagrams.md` and `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere, and a diagram entry carries a heading per kind rather than a run of bullets deciding anything. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
 
