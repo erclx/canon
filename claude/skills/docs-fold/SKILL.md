@@ -247,11 +247,11 @@ Output one line per file swept:
 
 If nothing qualifies, skip this step silently.
 
-## Step 10: classify what this run wrote
+## Step 10: classify the fold's diff baseline
 
-Skip this step silently when Steps 3 and 7 wrote no canonical doc file this run. There is nothing of this run's own to check.
+Skip this step silently only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
 
-Resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
+Otherwise resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Run the check over the fold's whole baseline rather than scoping it to what Steps 3 and 7 wrote this run: earlier commits on the branch carry doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none. Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
 
 Findings never stop the fold. A refusal or a missing subcommand on an older installed binary reports one line, per that reference, and the fold continues either way.
 
@@ -261,10 +261,11 @@ Output one line per file updated:
 
 `✅ Updated: .claude/<filename>`
 
-Step 10 adds its own lines when it applied a finding:
+Step 10 adds its own lines when it applied or reported a finding:
 
 `✏ Rewrote: <file>`
 `✂ Cut: <file>`
+`➡ Move needed: <file>`
 
 If no files were updated and nothing was swept, output:
 

@@ -36,8 +36,8 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Leave the current branch's review receipt alone, since the chain that wrote it cites it in its own closing line and this skill cannot read whether that citation is still live
 - Land each block of a promotion handoff at the destination its heading names, then delete the file so a later run does not fold it twice
 - Take a promotion destination as already decided, since the operator confirmed it where the page was produced
-- Classify a canonical doc file this run itself wrote through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body
-- Apply a `REPLACE`, `HISTORY`, or `MOVE` finding against the quote it names, or keep it with a one-line reason, rather than leaving a finding unanswered
+- Classify the fold's whole diff baseline through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body, since an earlier commit on the branch carries a doc edit the fold is equally responsible for
+- Apply a `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, against the quote it names, report a model-decided `MOVE` finding naming the surface it belongs on rather than cutting it, or keep a finding with a one-line reason, rather than leaving a finding unanswered
 - Rewrite a restated or superseded statement in place rather than appending the replacement beside it, on every canonical doc type this skill writes
 - Report a refusal or a missing `context classify` subcommand as one line and continue the fold either way, since a check that cannot run is not a reason to leave the fold's own output unshipped
 
@@ -55,6 +55,8 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Stop the fold on a classify finding, a refusal, or a missing subcommand. All three report and continue.
 - Apply a finding against a quote found more than once or not found at all. Report that it could not be located instead of guessing.
 - Re-run the classifier after applying a finding, which loops it over its own edit
+- Cut a model-decided `MOVE` finding. The model's own prompt defines `MOVE` more broadly than the regex layer does, for correct content sitting on the wrong surface rather than a deletion candidate, so cutting one can discard content that belongs elsewhere rather than removing detail that never belonged at all.
+- Scope Step 10 to the files Steps 3 and 7 wrote this run. An earlier commit on the branch carries a doc edit the fold is equally responsible for, and the verb's own extraction already answers whether anything in range qualifies.
 
 ## Guards
 

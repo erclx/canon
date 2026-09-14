@@ -1,9 +1,9 @@
 ---
-title: Classify what this run wrote
+title: Classify the fold's diff baseline
 description: The classify diff invocation, the record fields to read, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape
 ---
 
-# Classify what this run wrote
+# Classify the fold's diff baseline
 
 Mechanics for Step 10 of `docs-fold`. The body owns the skip condition and the shared baseline, and this file owns the invocation, what the record carries, and what applying a finding does.
 
@@ -28,7 +28,7 @@ Each finding carries `file`, a `verdict` of `KEEP`, `REPLACE`, `HISTORY`, or `MO
 
 ## Scope
 
-Read only the findings whose `file` this run itself wrote in Step 3 or Step 7. The verb classifies the whole diff baseline, which on a branch carrying earlier commits from a prior session is wider than what this run produced, and this step answers for its own output alone.
+Answer every non-`KEEP` finding the verb returns, not only the files Step 3 or Step 7 wrote this run. A branch carrying earlier commits from a prior session has doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none, so there is no narrower check to add here.
 
 ## Applying a finding
 
@@ -37,7 +37,8 @@ Locate the finding by its `quote` in the file's current content. The quote is of
 - **Found exactly once.** Apply the verdict:
   - `REPLACE`: rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3 and Step 7's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
   - `HISTORY`: rewrite the sentence or bullet carrying the quote to drop the narration and keep any current fact the same clause states. The quote narrates how the fact arrived rather than stating the fact, which a canonical doc excludes regardless of what wrote it, and a literal cut of the fragment alone would leave the rest of the clause grammatically stranded.
-  - `MOVE`: cut the sentence or bullet carrying the quote from its current file. A `MOVE` verdict fires only inside `canon/wireframes/`, on prose naming a source-file path, which is implementation detail a wireframe surface does not carry. There is no second file this step lands it in, so cutting removes the misplaced detail from the surface that should not hold it.
+  - `MOVE`, regex-decided (`decidedBy: 'regex'`): cut the sentence or bullet carrying the quote. The regex layer only ever returns `MOVE` inside `canon/wireframes/`, on prose naming a source-file path, which is implementation detail a wireframe surface does not carry, so a regex-decided `MOVE` is always safe to remove outright.
+  - `MOVE`, model-decided (`decidedBy: 'model'`): do not cut. The model's own prompt defines `MOVE` more broadly, for correct content sitting on the wrong surface, such as domain mechanism written into `canon/ARCHITECTURE.md` that belongs in a context entry. Cutting would delete content a fold with no model configured would never have flagged at all. Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited.
 - **Found more than once, or not found at all.** Report that the finding could not be located rather than guessing which occurrence or rewriting nothing silently. A model verdict paraphrasing the quote it read is the ordinary way this happens.
 
 Run the classifier once per fold. Do not re-run it after applying a finding to check the edit, since a second pass over what this step wrote is the loop the verb's own reference already warns against.
@@ -70,6 +71,7 @@ Then one line per non-`KEEP` finding:
 
 - `✏ Rewrote: <file>, "<quote>" (<reason>)`
 - `✂ Cut: <file>, "<quote>" (<reason>)`
+- `➡ Move needed: <file>, "<quote>" (<reason>)`, for a model-decided `MOVE` this step reported rather than cut
 - `⏭ Kept: <file>, "<quote>", <reason for keeping>`
 - `⚠ Not located: <file>, "<quote>" not found or found more than once`
 
