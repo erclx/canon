@@ -49,6 +49,14 @@ describe('resolveFolders', () => {
     expect((await resolveFolders(ROOT)).folders).toHaveLength(1)
   })
 
+  it('should resolve decisions as a default folder', async () => {
+    seed('canon/decisions', ['01-example.md'])
+
+    const { folders } = await resolveFolders(ROOT)
+
+    expect(folders.map((folder) => folder.rel)).toEqual(['canon/decisions'])
+  })
+
   it('should audit a split domain as its own folder', async () => {
     seed('canon/context', ['ci.md'])
     seed('canon/context/claude-plugin', ['skills.md', 'overview.md'])

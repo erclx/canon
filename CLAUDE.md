@@ -53,6 +53,7 @@ Each rule or knowledge item lives in exactly one surface. Other surfaces point, 
 - Behavior that fires on a path being edited rather than every session: `governance/rules/`
 - Behavior triggered only when editing domain X: `.claude/skills/internal-<X>/SKILL.md`
 - Per-domain internal narrative about domain X (structure, decisions, gotchas): `canon/context/<X>.md`
+- Decision history behind a canonical doc, never loaded eagerly: `canon/decisions/`
 - Consumer-facing reference (AI workflow, target-project integration): `docs/`
 - CLI command surface or invocation contract: `docs/agents/`
 
@@ -87,6 +88,7 @@ The per-domain context catalog is always loaded so the entries are discoverable 
 - `claude/skills/`: plugin skills installable in target projects
 - `.claude/skills/`: internal skills, toolkit repo only
 - `canon/context/`: per-domain internal narrative (how each domain is built, decisions, gotchas), indexed via `canon/context/index.md`
+- `canon/decisions/`: decision history a canonical doc points at, never loaded eagerly, indexed via `canon/decisions/index.md`
 - `snippets/`: reusable prompt snippets, invoked by `@` reference in a Claude Code session
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
 - `docs/`: consumer-facing reference (CLI surface, AI workflow, target-project integration, and the workflow method this repo runs on)

@@ -43,6 +43,7 @@ export const SURFACE_ENTRIES: readonly string[] = [
   'DESIGN.md',
   'context',
   'wireframes',
+  'decisions',
   'canon',
 ]
 

@@ -148,7 +148,12 @@ const SEEDED_FILES: readonly string[] = [
   'REQUIREMENTS.md',
   'DESIGN.md',
 ]
-const SEEDED_DIRS: readonly string[] = ['memory', 'tasks', 'wireframes']
+const SEEDED_DIRS: readonly string[] = [
+  'decisions',
+  'memory',
+  'tasks',
+  'wireframes',
+]
 const USER_DIR = join('tooling', 'claude', 'user')
 const STATUSLINE = 'statusline-command.sh'
 const PLUGIN_MANIFEST = join('claude', '.claude-plugin', 'plugin.json')

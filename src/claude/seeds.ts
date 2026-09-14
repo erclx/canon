@@ -20,6 +20,7 @@ const HOOKS = 'hooks'
 export const SUBDIRS: readonly string[] = [
   HOOKS,
   'context',
+  'decisions',
   'diagrams',
   'memory',
   'tasks',

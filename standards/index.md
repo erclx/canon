@@ -11,6 +11,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Branch reference](branch.md): Branch naming format and type conventions
 - [Commit reference](commit.md): Commit message format and type conventions
 - [Context entry reference](context.md): Shape and content rules for canon/context/<domain>.md entries
+- [Decisions reference](decisions.md): Folder layout, ordinal filename, frontmatter, record sections, and the append-only lifecycle for canon/decisions/
 - [Design reference](design.md): Shape and content rules for canon/DESIGN.md
 - [Diagram reference](diagrams.md): Shape and content rules for .canon/diagrams/<kind>.md files
 - [Docs reference](docs.md): Reader and jurisdiction, frontmatter, page structure, what a page links out to, the diagram permission, and when a category earns a subfolder

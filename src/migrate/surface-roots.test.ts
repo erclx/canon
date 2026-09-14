@@ -14,13 +14,14 @@ function source(path: string, text = '') {
 }
 
 describe('MOVED_ENTRIES', () => {
-  it('should carry the six tracked surfaces the move relocates', () => {
+  it('should carry the seven tracked surfaces the move relocates', () => {
     expect([...MOVED_ENTRIES].sort()).toEqual([
       'ARCHITECTURE.md',
       'DESIGN.md',
       'REQUIREMENTS.md',
       'canon',
       'context',
+      'decisions',
       'wireframes',
     ])
   })

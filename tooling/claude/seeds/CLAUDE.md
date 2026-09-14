@@ -22,3 +22,4 @@
 - `canon/DESIGN.md`: design tokens and the visual system
 - `canon/context/`: per-domain narrative (how a domain is structured, decisions, gotchas), indexed via `canon/context/index.md`
 - `canon/wireframes/`: per-surface ASCII layouts loaded on demand, indexed via `canon/wireframes/index.md`
+- `canon/decisions/`: decision history a project doc points at, never loaded eagerly
