@@ -45,7 +45,7 @@ Types and tests run on any `src/` change alone, so a shell script under `claude/
 
 The direction above is half of one gap and this is the other half. The Types and Tests stages are the last two entries in `STAGES` in `src/gate/stages.ts`, and both are guarded on `^src/` plus a config file or two, so a branch editing a corpus outside `src/` runs neither stage even where a `src/` test asserts over that corpus. Tests closes that half in the decision below and Types does not.
 
-The gap reproduces on demand: dropping `'**/*.astro'` from the `paths:` list in `governance/rules/ui/450-link-behavior.md` fails `src/gov/list.test.ts` while `bun run check` prints `✓ Verification passed` on that tree, reporting `Skipped, no TypeScript changes` for both stages.
+Types alone still shows the gap: dropping `'**/*.astro'` from the `paths:` list in `governance/rules/ui/450-link-behavior.md` fails `src/gov/list.test.ts`, and Types skips with `Skipped, no TypeScript changes` on that tree since its scope covers `src/` alone, even though Tests now runs and catches it through the census below.
 
 **The count**
 

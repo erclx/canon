@@ -137,7 +137,7 @@ The Audit set stage runs `canon audits run --corpus tracked --corpus per-machine
 
 ### The upstream corpus runs on its own schedule
 
-`deps`, the one audit reading `bun audit --json` against the upstream advisory index, carries `corpus: 'upstream'` in `src/audits/catalog.ts` and runs apart from the other corpora here. Its own wall time would otherwise dominate the gate's cost: clean runs measure between roughly 45 and 80 seconds, against roughly 50 seconds for every other stage in the table combined, and a stalled lookup runs unbounded to bun's own 299-second ceiling. Gating a push on a network read that answers nothing about this tree's own health is the defect a separate schedule avoids.
+`deps`, the one audit reading `bun audit --json` against the upstream advisory index, carries `corpus: 'upstream'` in `src/audits/catalog.ts` and runs apart from the other corpora here. Its own wall time would otherwise dominate the gate's cost: three consecutive clean runs measured 44.7, 77.6, and 62.9 seconds each, against roughly 50 seconds for every other stage in the table combined, and a stalled lookup runs unbounded to bun's own 299-second ceiling. Gating a push on a network read that answers nothing about this tree's own health is the defect a separate schedule avoids.
 
 `canon audits run` takes a repeatable `--corpus <tracked|per-machine|upstream>`, defaulting to every corpus when none is named, and `auditsFor` in `src/audits/run.ts` reads it. `auditSet` in `src/gate/measures.ts` passes `tracked` and `per-machine` alone, so the gate reads only the corpora describing this tree. `canon audits run` with no filter still reads every corpus, including `deps`, for a caller who wants the whole set.
 
