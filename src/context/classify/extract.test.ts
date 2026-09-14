@@ -88,6 +88,28 @@ describe('sweepSections', () => {
       { heading: 'A', body: '### A\na' },
     ])
   })
+
+  it('should sweep every H3 as its own section in a document with no H2 at all', () => {
+    const lines = ['# Title', '', '### First', 'a', '### Second', 'b']
+
+    const sections = sweepSections(lines)
+
+    expect(sections).toEqual([
+      { heading: 'First', body: '### First\na' },
+      { heading: 'Second', body: '### Second\nb' },
+    ])
+  })
+
+  it('should sweep an H3 that sits before the first H2 in the document', () => {
+    const lines = ['### Early', 'a', '## Two', 'b']
+
+    const sections = sweepSections(lines)
+
+    expect(sections).toEqual([
+      { heading: 'Early', body: '### Early\na' },
+      { heading: 'Two', body: '## Two\nb' },
+    ])
+  })
 })
 
 let ROOT: string
