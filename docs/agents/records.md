@@ -138,7 +138,7 @@ canon records size --json
 | `--json`        | Add a machine-readable record on stdout       |
 | `--root <path>` | Project root, defaulting to the main worktree |
 
-The table carries one row per folder that exists, heaviest first, with the file count, the bytes, a count for each growth window, and the dates of the least and most recently written file. Those dates render in the machine's local time, which is the calendar day whoever wrote the file was living in, and the reading is per-machine already. Folders that do not exist are named on one line below it rather than printed as rows of zeros. The record a `--json` call emits carries every folder either way, each with a `present` flag, so a caller reading the record gets a stable set of keys and can tell an absent folder from one the reading skipped.
+The table carries one row per folder that exists, heaviest first, with the file count, the bytes, a count for each growth window, and the dates of the least and most recently written file. Those dates render in the machine's local time, which is the calendar day whoever wrote the file was living in, and the reading is per-machine already. Folders that do not exist are named on one line below it rather than printed as rows of zeros. At the legacy `.claude` root, the record a `--json` call emits carries every folder in the fixed list either way, each with a `present` flag, so a caller reading the record gets a stable set of keys and can tell an absent folder from one the reading skipped. At a `.canon` root, the folder set is read off the directory itself rather than off a fixed list, so an absent folder is not listed at all: nothing enumerates a name nobody has created yet.
 
 Ordering by weight is what makes the reading worth taking. A folder listed alphabetically hides behind its neighbors, and the row a reader came for is the one that grew.
 
@@ -150,7 +150,7 @@ The scratch folder is read here and skipped by a backup, because deletable witho
 
 The window counts read `mtime`, so what they report is a file written inside the window rather than one created there. An entry edited long after it landed reads as recent, which overstates growth and never understates it, and these folders are append-mostly so the two readings agree on nearly every file. The one reading that is wrong rather than early is a machine restored by `canon records pull`, which resets the work tree hard and re-dates every file it writes, so a window taken there counts the restore. Nothing on the filesystem separates the two, since a restored file is new by every stamp it carries.
 
-Exit codes: `0` the reading completed, `1` refused. The one refusal is `no-folder`, raised when the project holds neither record root. A project holding a root and no records is empty rather than absent, and each folder's own `present` flag already says which ones it carries.
+Exit codes: `0` the reading completed, `1` refused. The one refusal is `no-folder`, raised when the project holds neither record root. A project holding a root and no records is empty rather than absent: at the legacy `.claude` root each folder's own `present` flag says which ones it carries, and at a `.canon` root the folder list itself is already the answer, since nothing absent is named.
 
 ## Push and pull
 

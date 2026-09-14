@@ -8,11 +8,12 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { SCRATCH } from '@/record-root'
+import { BACKED_FOLDERS } from '@/records/backup'
 import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
-  sizedFolders,
   type SizeReport,
   sizeRecords,
 } from '@/records/size'
@@ -138,12 +139,13 @@ describe('sizeRecords', () => {
     expect(entry.bytes).toBe(5)
   })
 
-  it('should report every sized folder whether or not it exists', async () => {
+  it('should report every sized folder whether or not it exists, at a legacy .claude root', async () => {
     const report = await read()
 
-    expect(report.folders.map((entry) => entry.folder)).toEqual(
-      sizedFolders(ROOT),
-    )
+    expect(report.folders.map((entry) => entry.folder)).toEqual([
+      ...BACKED_FOLDERS,
+      SCRATCH,
+    ])
   })
 
   it('should report an absent folder as absent rather than as empty', async () => {
@@ -151,6 +153,25 @@ describe('sizeRecords', () => {
 
     expect(folder(report, 'memory').present).toBe(false)
     expect(folder(report, 'memory').files).toBe(0)
+  })
+
+  it('should not list an absent folder at all at a .canon root', async () => {
+    const canonRoot = join(ROOT, 'canon-root')
+    const path = join(canonRoot, '.canon', 'memory', 'project-one.md')
+    mkdirSync(join(path, '..'), { recursive: true })
+    writeFileSync(path, '12345')
+
+    const outcome = await sizeRecords(canonRoot, NOW)
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.folders.map((entry) => entry.folder)).toEqual([
+      'memory',
+      SCRATCH,
+    ])
+    expect(outcome.folders.some((entry) => entry.folder === 'groundwork')).toBe(
+      false,
+    )
   })
 
   it('should count the files a folder holds and the bytes they occupy', async () => {
