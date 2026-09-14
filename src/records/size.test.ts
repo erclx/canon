@@ -12,8 +12,8 @@ import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
+  sizedFolders,
   type SizeReport,
-  SIZED_FOLDERS,
   sizeRecords,
 } from '@/records/size'
 
@@ -141,9 +141,9 @@ describe('sizeRecords', () => {
   it('should report every sized folder whether or not it exists', async () => {
     const report = await read()
 
-    expect(report.folders.map((entry) => entry.folder)).toEqual([
-      ...SIZED_FOLDERS,
-    ])
+    expect(report.folders.map((entry) => entry.folder)).toEqual(
+      sizedFolders(ROOT),
+    )
   })
 
   it('should report an absent folder as absent rather than as empty', async () => {

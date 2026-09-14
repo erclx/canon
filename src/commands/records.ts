@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Command } from 'commander'
-import { BACKED_FOLDERS, pullRecords, pushRecords } from '@/records/backup'
+import { pullRecords, pushRecords } from '@/records/backup'
 import { migrateRecord } from '@/records/migrate'
 import {
   type ClaimOutcome,
@@ -14,7 +14,7 @@ import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
-  SIZED_FOLDERS,
+  sizedFolders,
   type SizeOutcome,
   sizeRecords,
 } from '@/records/size'
@@ -207,8 +207,9 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Folders read under .claude/:',
-        `  ${SIZED_FOLDERS.join(', ')}`,
+        'Folders read, at whichever record root the project carries:',
+        '  every folder canon records push carries, plus the scratch folder',
+        '  (deletable without loss, so a backup skips it, but a reading does not)',
         '',
         'Exit codes:',
         '  0  the reading completed',
@@ -274,8 +275,10 @@ function backupHelp(verb: 'push' | 'pull'): string {
 
   return [
     '',
-    'Backed folders under .claude/:',
-    `  ${BACKED_FOLDERS.join(', ')}`,
+    'Backed folders, at whichever record root the project carries:',
+    '  every top-level entry, less tmp, ordinal-locks, and .records.git',
+    '  (a legacy .claude root instead uses a fixed list; run this with --json',
+    '  to see what actually resolved, including any folder seen for the first time)',
     '',
     'Exit codes:',
     '  0  the records remote and this machine agree',
@@ -404,6 +407,9 @@ async function runPush(opts: BackupCommandOptions): Promise<number> {
   logInfo(
     `${outcome.folders.length} folder(s), ${outcome.changed} path(s) changed`,
   )
+  if (outcome.firstSeen.length > 0) {
+    logWarn(`first seen: ${outcome.firstSeen.join(', ')}`)
+  }
   logStep(outcome.pushed ? 'Pushed' : 'Nothing to push')
   logInfo(
     outcome.commit

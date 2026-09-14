@@ -26,7 +26,7 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { BACKED_FOLDERS } from '@/records/backup'
+import { presentFolders } from '@/records/backup'
 import { recordDir, SCRATCH } from '@/record-root'
 
 /**
@@ -168,13 +168,13 @@ function applyRewrites(
   return { text: rewritten.join('\n'), count }
 }
 
-/** The files under every `BACKED_FOLDERS` entry, archives included. */
+/** The files under every present backed folder at `root`, archives included. */
 export async function walkScratchEvidenceCorpus(
   root: string,
 ): Promise<string[]> {
   const files: string[] = []
 
-  for (const folder of BACKED_FOLDERS) {
+  for (const folder of presentFolders(root)) {
     const dir = recordDir(root, folder)
     if (!existsSync(dir)) continue
 

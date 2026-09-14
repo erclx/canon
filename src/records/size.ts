@@ -2,20 +2,24 @@ import { existsSync, type Stats } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { RECORD_ROOTS, recordDir, SCRATCH } from '@/record-root'
-import { BACKED_FOLDERS } from '@/records/backup'
+import { candidateFolders } from '@/records/backup'
 
 /**
- * The folders a size reading covers, named at the record root they sit under.
+ * The folders a size reading covers at `root`, resolved the same way a push
+ * resolves its scope rather than pinned to `BACKED_FOLDERS`, which is silently
+ * wrong at a `.canon` root.
  *
- * It is the backed set plus the scratch folder, which a backup skips because it is
- * deletable without loss and a reading covers because deletable is not the same
- * as empty: the routing handoffs and the memory archive both sit there and both
- * accumulate. `.records.git` stays out because it is the backup history rather
- * than a record, and `worktrees/` stays out because each entry there is a
- * checkout of the enclosing repository with its own removal verb, and one of
- * them outweighs every record folder combined.
+ * It is the present backed set plus the scratch folder, which a backup skips
+ * because it is deletable without loss and a reading covers because deletable
+ * is not the same as empty: the routing handoffs and the memory archive both
+ * sit there and both accumulate. `.records.git` stays out because it is the
+ * backup history rather than a record, and `worktrees/` stays out because each
+ * entry there is a checkout of the enclosing repository with its own removal
+ * verb, and one of them outweighs every record folder combined.
  */
-export const SIZED_FOLDERS = [...BACKED_FOLDERS, SCRATCH] as const
+export function sizedFolders(root: string): string[] {
+  return [...candidateFolders(root), SCRATCH]
+}
 
 /**
  * The windows a reading reports, in days.
@@ -227,9 +231,9 @@ export async function sizeRecords(
 
   // Each folder is walked independently, and the report is ordered by the
   // caller rather than by arrival, so `Promise.all` keeps the input order while
-  // the ten walks overlap.
+  // the walks overlap.
   const folders = await Promise.all(
-    SIZED_FOLDERS.map((folder) => measure(root, folder, now)),
+    sizedFolders(root).map((folder) => measure(root, folder, now)),
   )
 
   return {

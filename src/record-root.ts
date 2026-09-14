@@ -73,6 +73,7 @@ export const RECORD_ENTRIES: readonly string[] = [
   'review',
   'tasks',
   'teach',
+  'transcripts',
   'walkthroughs',
 ]
 
