@@ -1,6 +1,6 @@
 /**
  * The promotion of nine cited measurement folders out of `.canon/tmp/` into
- * `.canon/review/evidence/`, which `canon records push` already backs.
+ * `.canon/evidence/<nn>-<folder>/`, which `canon records push` already backs.
  *
  * The scratch root is the one record root a disk loss takes with it, and a
  * durable record naming a folder under it as its evidence is a citation into
@@ -26,6 +26,13 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import {
+  byFirstAppearance,
+  folderNames,
+  nextOrdinal,
+  numberedName,
+  slugOf,
+} from '@/migrate/evidence-ordinal'
 import { presentFolders } from '@/records/backup'
 import { recordDir, SCRATCH } from '@/record-root'
 
@@ -59,16 +66,14 @@ export const PROMOTED_FOLDERS: readonly string[] = [
   'target-survey',
 ]
 
-const EVIDENCE_ROOT = ['review', 'evidence'] as const
-
 /** Where a promoted folder sits before the move. */
 export function sourcePath(root: string, folder: string): string {
   return recordDir(root, SCRATCH, folder)
 }
 
-/** Where it lands after, always under whichever root `review/` resolves at. */
-export function destinationPath(root: string, folder: string): string {
-  return recordDir(root, ...EVIDENCE_ROOT, folder)
+/** The folder a promoted one lands inside, under whichever root carries it. */
+function evidenceDir(root: string): string {
+  return recordDir(root, 'evidence')
 }
 
 function escape(value: string): string {
@@ -100,14 +105,14 @@ function citationPattern(folder: string): RegExp {
 
 interface Rewrite {
   readonly pattern: RegExp
-  readonly folder: string
+  readonly name: string
 }
 
-/** One rewrite per folder, paired with its citation pattern. */
-function buildRewrites(folders: readonly string[]): readonly Rewrite[] {
-  return folders.map((folder) => ({
+/** One rewrite per folder, from its scratch name to its numbered one. */
+function buildRewrites(names: ReadonlyMap<string, string>): readonly Rewrite[] {
+  return [...names].map(([folder, name]) => ({
     pattern: citationPattern(folder),
-    folder,
+    name,
   }))
 }
 
@@ -131,8 +136,8 @@ function isKept(lines: readonly string[], index: number): boolean {
 
 function rewriteLine(line: string, rewrites: readonly Rewrite[]): string {
   return rewrites.reduce(
-    (current, { pattern, folder }) =>
-      current.replace(pattern, `.canon/review/evidence/${folder}`),
+    (current, { pattern, name }) =>
+      current.replace(pattern, `.canon/evidence/${name}`),
     line,
   )
 }
@@ -144,7 +149,7 @@ interface RewriteOutcome {
 
 /**
  * Rewrites every unmarked citation of a folder `rewrites` covers into its
- * destination under `.canon/review/evidence/`, absolute regardless of how the
+ * destination under `.canon/evidence/`, absolute regardless of how the
  * source citation was spelled, counting each as it goes. A file naming no
  * such folder returns byte-identical with a count of zero, and a marked line
  * is returned unchanged and uncounted.
@@ -232,30 +237,55 @@ export interface ScratchEvidencePlan {
 }
 
 /**
- * Every promoted folder found on disk, with its destination, refusing a
- * folder whose destination is already occupied rather than merging into it.
+ * Every promoted folder found on disk, with its numbered destination, and the
+ * name each promoted folder's citations rewrite to.
+ *
+ * Folders on disk take ordinals in order of first appearance, continuing past
+ * the highest ordinal `evidence/` already holds. One whose slug `evidence/`
+ * already carries refuses rather than taking a second number, and its
+ * citations stay as they are. One already moved is not on disk under scratch,
+ * so its citations rewrite to the numbered name it landed at.
  */
 export function planFolderMoves(root: string): {
   moves: FolderMove[]
   collisions: string[]
+  names: Map<string, string>
 } {
+  const dir = evidenceDir(root)
+  const existing = folderNames(dir)
   const moves: FolderMove[] = []
   const collisions: string[] = []
+  const names = new Map<string, string>()
+  let next = nextOrdinal(existing)
 
-  for (const folder of PROMOTED_FOLDERS) {
-    const from = sourcePath(root, folder)
-    if (!existsSync(from)) continue
+  const present = byFirstAppearance(
+    PROMOTED_FOLDERS.map((folder) => ({
+      name: folder,
+      dir: sourcePath(root, folder),
+    })).filter((folder) => existsSync(folder.dir)),
+  )
 
-    const to = destinationPath(root, folder)
-    if (existsSync(to)) {
-      collisions.push(to)
+  for (const { name: folder, dir: from } of present) {
+    const landed = existing.find((entry) => slugOf(entry) === folder)
+    if (landed !== undefined) {
+      collisions.push(join(dir, landed))
       continue
     }
 
-    moves.push({ folder, from, to })
+    const name = numberedName(next, folder)
+    next += 1
+    names.set(folder, name)
+    moves.push({ folder, from, to: join(dir, name) })
   }
 
-  return { moves, collisions }
+  for (const folder of PROMOTED_FOLDERS) {
+    if (existsSync(sourcePath(root, folder))) continue
+
+    const landed = existing.find((entry) => slugOf(entry) === folder)
+    if (landed !== undefined) names.set(folder, landed)
+  }
+
+  return { moves, collisions, names }
 }
 
 /**
@@ -267,11 +297,8 @@ export function planScratchEvidence(
   root: string,
   sources: readonly ScratchEvidenceSource[],
 ): ScratchEvidencePlan {
-  const { moves, collisions } = planFolderMoves(root)
-  const folders = PROMOTED_FOLDERS.filter(
-    (folder) => !collisions.includes(destinationPath(root, folder)),
-  )
-  const rewrites = buildRewrites(folders)
+  const { moves, collisions, names } = planFolderMoves(root)
+  const rewrites = buildRewrites(names)
   const entries: CitationEntry[] = []
 
   for (const source of sources) {
