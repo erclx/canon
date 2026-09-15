@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.87.0](https://github.com/erclx/canon/compare/v4.86.0...v4.87.0) (2026-09-15)
+
+
+### Features
+
+* **records:** move non-review records out of the review folder ([#1693](https://github.com/erclx/canon/issues/1693)) ([6f53e6a](https://github.com/erclx/canon/commit/6f53e6ac80675430ba57b91491a289275de46e16))
+
 ## [4.86.0](https://github.com/erclx/canon/compare/v4.85.0...v4.86.0) (2026-09-15)
 
 
