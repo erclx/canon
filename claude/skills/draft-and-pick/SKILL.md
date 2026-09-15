@@ -28,8 +28,9 @@ Write every arm side by side on one self-contained HTML page at `<dest>/candidat
 - One page for the pick, never a set of separate images handed to the operator to compare from memory. The comparison they judge is `candidates.html`, which Step 3 renders and Step 4 asks about. The per-arm files exist only for Step 6's archival capture, once the pick is made, and only the last pass through this step is what Step 6 finds there.
 - Wrap each arm's markup in the same class on both files, chosen once per run and reused everywhere, so one selector addresses an arm on the combined page and on its own standalone file alike.
 - Label each arm on the page with its id and its cost, so the render carries what the question will ask about.
-- Inline every style, script, and asset the page needs. The render reads the file off disk, so a page reaching for a build step or a network font renders without it and the arms differ by something nobody chose.
-- Declare a font stack the machine resolves, such as `system-ui` behind a generic fallback. The render refuses a page that would rewrap against a substitute rather than shipping a false comparison, so a page naming no font at all is refused on whatever the default resolves to.
+- Take the live-app branch instead when the surface under decision is a running app: lift the rendered markup and link a copy of the built stylesheet rather than inlining, per `${CLAUDE_SKILL_DIR}/references/live-arms.md`.
+- On the default path, inline every style, script, and asset the page needs. The render reads the file off disk, so a page reaching for a build step or a network font renders without it and the arms differ by something nobody chose.
+- On the default path, declare a font stack the machine resolves, such as `system-ui` behind a generic fallback. The render refuses a page that would rewrap against a substitute rather than shipping a false comparison, so a page naming no font at all is refused on whatever the default resolves to.
 - Vary one property across the arms. A page whose arms differ in three ways answers no question, since the pick cannot say which difference decided it.
 
 ## Step 3: render and hand off

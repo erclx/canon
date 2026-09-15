@@ -27,7 +27,7 @@ A walkthrough turns what the operator sees in a running app into findings and pi
 2. **Take the operator's list in their order.** Name each item as a finding with the walkthrough letter and a number, such as T1, and confirm the order once rather than per item.
 3. **Measure before drafting.** Read the component behind the finding and pull the numbers off the built page, per `${CLAUDE_SKILL_DIR}/references/measuring.md`. Write the finding into the walkthrough file with those numbers before any arm exists.
 4. **Route a finding with no visible choice.** A parse defect, a stale figure or a broken invariant gets recorded as a finding with no draft and goes into the batch as a proposed row, not as a pick.
-5. **Draft three or four arms.** Follow `draft-and-pick` Steps 1 and 2 for the arms, with arm 0 the shipped state, one property varied and a cost on each. Build the page from the app's own rendered markup, per `${CLAUDE_SKILL_DIR}/references/candidate-pages.md`.
+5. **Draft three or four arms.** Follow `draft-and-pick` Steps 1 and 2 for the arms, with arm 0 the shipped state, one property varied and a cost on each. Take `draft-and-pick`'s live-app branch of Step 2 to build the page from the app's own rendered markup, per `${CLAUDE_SKILL_DIR}/references/candidate-pages.md`.
 6. **Look before handing anything over.** Capture every arm in every theme the app ships into `.canon/walkthroughs/<nn>-<slug>/evidence/<nn>-<slug>/`, with the finding's number as the prefix, open the captures, and fix what rendered wrong before the operator sees the page.
 7. **Hand the link, then ask.** Emit `http://localhost:<port>/<nn>-<slug>/candidates.html` in a message that ends the turn, confirmed with a `200`, carrying no question. Take any reply after that message as the operator having looked, an explicit "go" included, rather than holding for a stated confirmation, and only then put the choice through the structured question surface with the recommendation first.
 8. **Record the pick.** Write what won, what it beat and by which numbers, where the evidence is, and the build criteria, per `${CLAUDE_SKILL_DIR}/references/record.md`. Read every figure you quote back from the page or the data file first, and correct the record where the question quoted one wrong.
@@ -44,7 +44,7 @@ A walkthrough turns what the operator sees in a running app into findings and pi
 
 ## What this delegates
 
-- `draft-and-pick` owns the arm discipline and the structured question. This walkthrough departs from its Step 2 inlining and its Step 6 apply and delete, for the reasons `${CLAUDE_SKILL_DIR}/references/candidate-pages.md` states.
+- `draft-and-pick` owns the arm discipline and the structured question. This walkthrough takes its live-app branch of Step 2 and departs from its Step 6 apply and delete, for the reasons `${CLAUDE_SKILL_DIR}/references/candidate-pages.md` states.
 - `write-human` carries the voice of every recorded passage and any copy an arm puts in front of a reader.
 - `plan-feature` and whoever dispatches builds turn a batch into plans and code.
 - `canon capture`, `canon serve` and `canon sessions list` own the render, the address and the roster.
