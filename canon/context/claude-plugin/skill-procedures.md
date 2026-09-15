@@ -151,6 +151,10 @@ The caller-supplied tier is what a dispatched worker reaches, and it exists beca
 
 It is recorded here instead, on a surface that never ships, for the maintainer editing the catalog.
 
+### A references/ folder cited across skills has no generation mechanism to back it
+
+`standards/skill.md`'s Path resolution section bans one skill pointing at a sibling's `references/` folder for a reference both read, naming a generated per-skill copy as the alternative, but no script or hook in this repository produces one. `claude/skills/ux-walkthrough/references/candidate-pages.md` cites `claude/skills/draft-and-pick/references/live-arms.md` directly regardless, via `${CLAUDE_SKILL_DIR}/../draft-and-pick/references/live-arms.md`, since the corpus's only precedent for the citation form, `sketch-design` and `draft-identity` pointing at `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md`, targets a sibling's top-level body rather than its `references/` folder, which is the shape the standard's bullet singles out.
+
 ## Procedures defined once and cited
 
 Two procedures run inside more than one skill and are defined once in `standards/`, cited from each body rather than restated in it. Each has a standard of its own, `publish.md` for the scan and `slug.md` for the transform. Neither sits inside a document-type standard, since `markdown.md` does not govern a scan and `skill.md` does not govern a slug transform.

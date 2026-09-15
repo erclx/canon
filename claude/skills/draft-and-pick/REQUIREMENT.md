@@ -19,11 +19,12 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Reads a driver record as a verdict and drops an arm on it. `canon drive` reports findings and never gates, so a run filtering the arms on a probe reading has made a claim the probe catalog has not earned.
 - Reads a color without compositing its alpha, samples a round control at the corner of its bounding box, or confirms a panel's dimensions while it sits above the viewport. Each reads as a passing measurement about something no reader sees.
 - Meets a machine with no browser binary and reports on the arms anyway, since nothing in the default flow separates a render that failed from one that was never attempted.
+- Hand-writes a mockup of a surface a running app already serves, which drifts from what ships by a few pixels and a few words the moment the app's own markup or stylesheet moves on.
 
 ## Must
 
 - Produce three to five arms with the shipping state among them, each carrying an id, a label, and what the arm costs.
-- Author the whole candidate set as one self-contained page and render it once, so the comparison arrives as one image.
+- Author the whole candidate set as one self-contained page and render it once, so the comparison arrives as one image, except where the surface under decision is a running app: there the page links a copy of the built stylesheet rather than inlining it, per `references/live-arms.md`.
 - Vary one property across the arms, so the answer names a difference.
 - Render before reporting on any arm, and report a missing browser binary as a refusal naming the repair rather than describing an arm nobody has seen.
 - Take the pick through the structured question surface, with the recommendation ranked first and marked, and every option carrying its cost.

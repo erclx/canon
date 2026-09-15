@@ -383,7 +383,7 @@ One skill covers both outputs rather than two. The mark and the card are one ide
 
 `ux-walkthrough` turns what an operator sees in a running app into findings and picks a builder can act on without the conversation.
 
-The boundary against `draft-and-pick` sits inside the render step rather than around the whole flow. `ux-walkthrough` departs from `draft-and-pick` Step 2's inlining and Step 6's apply-and-delete, per its own `## What this delegates`, capturing arms into the walkthrough's own numbered evidence folder and leaving `candidates.html` in place rather than applying the winning arm.
+The boundary against `draft-and-pick` sits inside the render step rather than around the whole flow. `ux-walkthrough` takes `draft-and-pick`'s own live-app branch of Step 2, which lifts the rendered markup and links a copy of the built stylesheet rather than inlining, and departs only from Step 6's apply-and-delete, per its own `## What this delegates`, capturing arms into the walkthrough's own numbered evidence folder and leaving `candidates.html` in place rather than applying the winning arm.
 
 The boundary against `ux-audit` runs on where the judgment happens. `ux-audit` reads source for roughness the code alone reveals. `ux-walkthrough` measures a finding off the built page and hands the operator the link before every pick question, so a record carries what a person saw rather than what a reading of the source predicted.
 
