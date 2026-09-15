@@ -510,14 +510,11 @@ describe('pr-create-log.sh root resolution', () => {
       )
 
       expect(result.code).toBe(0)
+      expect(existsSync(join(worktreeRoot, '.claude/.tmp/pr/log/log.md'))).toBe(
+        false,
+      )
       expect(
-        existsSync(join(worktreeRoot, '.claude/.tmp/pr-create-log/log.md')),
-      ).toBe(false)
-      expect(
-        readFileSync(
-          join(project, '.claude/.tmp/pr-create-log/log.md'),
-          'utf8',
-        ),
+        readFileSync(join(project, '.claude/.tmp/pr/log/log.md'), 'utf8'),
       ).toContain('pr=https://github.com/example/repo/pull/99')
     },
   )

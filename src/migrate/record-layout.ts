@@ -6,7 +6,7 @@
  * feedback moves to `.canon/feedback/`, option captures to `.canon/picks/`,
  * claim-backing folders to a numbered `.canon/evidence/`, renders rebuilt from
  * committed sources to `.canon/tmp/render/`, a branch report flattens to
- * `review/branch-<slug>.md`, and a flat checklist joins the `tmp/ui-checklist/`
+ * `review/branch-<slug>.md`, and a flat checklist joins the `tmp/handoff/ui-checklist/`
  * handoff folder. `canon records push` carries every top-level `.canon/`
  * entry except `EXCLUDED_ENTRIES`, so the new root folders are backed with no
  * list edit, and `tmp/render/` is deliberately not.
@@ -120,7 +120,7 @@ export const RECORD_LAYOUT_MOVES: readonly RecordLayoutMove[] = [
     kind: 'files',
     from: ['review'],
     prefix: 'ui-checklist-',
-    to: [SCRATCH, 'ui-checklist'],
+    to: [SCRATCH, 'handoff', 'ui-checklist'],
     renamed: '',
     prune: false,
   },

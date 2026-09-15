@@ -16,7 +16,7 @@ show_help() {
   echo -e "${GREY}│${NC}    --keep       ${GREY}# Keep tmp dir after run for inspection${NC}"
   echo -e "${GREY}│${NC}    -h, --help   ${GREY}# Show this help message${NC}"
   echo -e "${GREY}│${NC}"
-  echo -e "${GREY}│${NC}  Scaffolds <stack> into .canon/tmp/verify-<stack>/, syncs the full"
+  echo -e "${GREY}│${NC}  Scaffolds <stack> into .canon/tmp/runs/verify-<stack>/, syncs the full"
   echo -e "${GREY}│${NC}  layer chain, and runs check + test:e2e + screenshot."
   echo -e "${GREY}└${NC}"
   exit 0
@@ -102,7 +102,7 @@ main() {
   open_timeline "canon tooling verify $stack"
   trap close_timeline EXIT
 
-  local tmp_root="$PROJECT_ROOT/.canon/tmp"
+  local tmp_root="$PROJECT_ROOT/.canon/tmp/runs"
   local tmp_dir="$tmp_root/verify-$stack"
 
   mkdir -p "$tmp_root"

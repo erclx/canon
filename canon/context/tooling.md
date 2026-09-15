@@ -189,7 +189,7 @@ canon tooling sync python ./backend --skip base --write
 
 ## Testing
 
-`canon tooling verify <stack>` is the end-to-end validator. It scaffolds fresh into `.canon/tmp/verify-<stack>/`, runs the optional `[verify] prepare` hook, invokes `canon tooling sync <stack> . --write`, then executes `bun run lint:fix`, `bun run check`, `bun run test:e2e`, and `bun run screenshot`, asserts screenshot artifacts, and reports a pass/fail matrix. The tmp dir auto-removes on success. Use `--keep` to inspect a green run, or rely on the auto-preserve on failure.
+`canon tooling verify <stack>` is the end-to-end validator. It scaffolds fresh into `.canon/tmp/runs/verify-<stack>/`, runs the optional `[verify] prepare` hook, invokes `canon tooling sync <stack> . --write`, then executes `bun run lint:fix`, `bun run check`, `bun run test:e2e`, and `bun run screenshot`, asserts screenshot artifacts, and reports a pass/fail matrix. The tmp dir auto-removes on success. Use `--keep` to inspect a green run, or rely on the auto-preserve on failure.
 
 Run it after any change to `tooling/<stack>/configs/`, a manifest, or the sync logic in `src/tooling/`.
 
@@ -221,7 +221,7 @@ Unit tests cover the manifest walk, the gitignore transforms, the package.json c
 
 Measured 2026-09-05: two `bun e2e/screenshot.ts` captures against the same built `astro` preview, with no code change between them, produced byte-identical PNGs for both cases in `screenshots/localhost/home/`, confirmed by SHA-256.
 
-`canon tooling verify <stack>` scaffolds fresh, so a stack whose manifest leaves a dependency unpinned resolves whatever is current at scaffold time. `web`'s `@playwright/test` carries no version, so a scaffold can resolve a newer release than this checkout's own pinned devDependency, and the two need different cached browser binaries. Install browsers from inside the scaffold, `.canon/tmp/verify-<stack>/node_modules/.bin/playwright install <browsers>`, rather than from this checkout's root, which targets the wrong version and fails E2E with `browserType.launch: Executable doesn't exist`. Measured 2026-09-05 against `astro`.
+`canon tooling verify <stack>` scaffolds fresh, so a stack whose manifest leaves a dependency unpinned resolves whatever is current at scaffold time. `web`'s `@playwright/test` carries no version, so a scaffold can resolve a newer release than this checkout's own pinned devDependency, and the two need different cached browser binaries. Install browsers from inside the scaffold, `.canon/tmp/runs/verify-<stack>/node_modules/.bin/playwright install <browsers>`, rather than from this checkout's root, which targets the wrong version and fails E2E with `browserType.launch: Executable doesn't exist`. Measured 2026-09-05 against `astro`.
 
 Building `nextjs`, its current non-interactive scaffold flags are `--skip-install` and `--disable-git`, not the older `--no-install`/`--no-git`, and there is no `--turbopack` flag since Turbopack is the default bundler. `--no-agents-md` suppresses the scaffold-time `AGENTS.md`/`CLAUDE.md` write, avoiding the root-`CLAUDE.md` collision. The stack's `typecheck` script runs `next typegen && tsc --noEmit` rather than bare `tsc --noEmit`, since the App Router's route-level types (`LayoutProps`, `PageProps`) generate into a gitignored `.next/types/` absent from a fresh checkout.
 

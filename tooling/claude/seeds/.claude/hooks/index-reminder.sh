@@ -44,9 +44,9 @@ key=$(printf '%s__%s' "$session" "$index" | tr -c 'A-Za-z0-9' '_')
 # root the project carries rather than creating a second one beside it.
 project="${CLAUDE_PROJECT_DIR:-.}"
 if [ -d "$project/.canon" ]; then
-  marker_dir="$project/.canon/tmp/index-reminder"
+  marker_dir="$project/.canon/tmp/hooks/index-reminder"
 else
-  marker_dir="$project/.claude/.tmp/index-reminder"
+  marker_dir="$project/.claude/.tmp/hooks/index-reminder"
 fi
 marker="$marker_dir/$key"
 [ -f "$marker" ] && exit 0

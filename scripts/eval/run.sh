@@ -175,7 +175,7 @@ fi
 # row that costs bytes. Nothing prunes the scratch. Promote a transcript into
 # the arm's result document by hand on the day it becomes evidence for a claim.
 run_stamp="$(date +%Y%m%dT%H%M%S)"
-run_dir="$REPO_ROOT/.canon/tmp/eval-runs/$arm_label-$run_stamp"
+run_dir="$REPO_ROOT/.canon/tmp/runs/eval/$arm_label-$run_stamp"
 ledger="$SCRIPT_DIR/ledger.md"
 
 # The stamp resolves to the second, so two runs of one arm inside the same
@@ -185,7 +185,7 @@ ledger="$SCRIPT_DIR/ledger.md"
 # name instead. `%N` would be shorter and BSD `date` does not have it.
 run_suffix=2
 while [ -e "$run_dir" ]; do
-  run_dir="$REPO_ROOT/.canon/tmp/eval-runs/$arm_label-$run_stamp-$run_suffix"
+  run_dir="$REPO_ROOT/.canon/tmp/runs/eval/$arm_label-$run_stamp-$run_suffix"
   run_suffix=$((run_suffix + 1))
 done
 

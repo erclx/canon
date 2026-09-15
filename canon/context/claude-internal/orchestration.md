@@ -151,7 +151,7 @@ Shipping the script put the first executable in the plugin, so the three shell s
 
 `watch.sh` was the second executable and cost nothing further, since all three stages glob the folder rather than naming a file.
 
-The script is tracked and its baseline is not. State lives at `.canon/tmp/pr-poll/baseline.txt` under the main worktree root, resolved through `git worktree list` rather than through the script's own folder, so a poll started from a linked worktree reads what one started from main wrote. Delete a copy left at `.canon/tmp/pr-poll/poll.sh` on any machine that ran the poll before it was tracked, since that path is gitignored and no change here removes it.
+The script is tracked and its baseline is not. State lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, resolved through `git worktree list` rather than through the script's own folder, so a poll started from a linked worktree reads what one started from main wrote. Delete a copy left at `.canon/tmp/pr-poll/poll.sh` on any machine that ran the poll before it was tracked, since that path is gitignored and no change here removes it.
 
 `RESPONSE` is two tests rather than one count. The count asks whether a reply is new to the script, the stamp asks whether it is newer than the last pass, and a reply failing the second is one that pass already answered. A worker answers a finding and the reviewing session closes out seconds later, which is the ordinary handback rather than a race, so the count alone reported the answered thread on the next run and the re-review it routed to stopped at the guard `review-pr` states.
 

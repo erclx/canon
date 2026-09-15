@@ -38,7 +38,7 @@ When modifying files in `tooling/base/configs/`:
 When modifying `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`:
 
 - Update `tooling/<stack>/reference.md` if the intent or rationale changed. Typo fixes and dictionary term additions do not count.
-- Validate headless via `canon tooling verify <stack>`. Scaffolds into `.canon/tmp/verify-<stack>/`, runs the full chain through `check`, `test:e2e`, and `screenshot`, and reports pass/fail per phase.
+- Validate headless via `canon tooling verify <stack>`. Scaffolds into `.canon/tmp/runs/verify-<stack>/`, runs the full chain through `check`, `test:e2e`, and `screenshot`, and reports pass/fail per phase.
 
 When adding deps or scripts to `manifest.toml`:
 

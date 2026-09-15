@@ -17,7 +17,7 @@ max_turns = 12
 # write a body file, so the folder staying empty is what proves no post
 # happened, matching the shape `project-commands/refused` already uses for a
 # refusal.
-absent = [".canon/tmp/pr-review/*.md"]
+absent = [".canon/tmp/pr/review/*.md"]
 
 # Fixed by the refusal Step 2 states, not chosen by the run.
 reply = ["head is unchanged"]

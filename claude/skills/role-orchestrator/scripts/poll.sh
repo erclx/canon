@@ -18,7 +18,7 @@ if [ -z "$MAIN_ROOT" ]; then
   echo "poll: not a git repository, so nothing is classified" >&2
   exit 1
 fi
-STATE_DIR="$MAIN_ROOT/.canon/tmp/pr-poll"
+STATE_DIR="$MAIN_ROOT/.canon/tmp/pr/poll"
 mkdir -p "$STATE_DIR"
 STATE="$STATE_DIR/baseline.txt"
 touch "$STATE"

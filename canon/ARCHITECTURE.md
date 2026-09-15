@@ -150,7 +150,7 @@ The workspace is the first record folder named `<nn>-<topic>` rather than by a b
 
 ### A producer hands off through a file of its own rather than a shared one
 
-`teach-workspace` proposes where a durable page belongs and writes each confirmed one to `.canon/tmp/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing `.canon/tmp/memory-routing/<slug>.md` was the obvious reuse and it is what the pattern cannot take, since that file already has two writers and a reader that deletes it, so a fold triggered by one producer discards whatever the other wrote and never read. A sibling path costs the folding skill one more read and removes the interaction entirely.
+`teach-workspace` proposes where a durable page belongs and writes each confirmed one to `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing `.canon/tmp/handoff/memory-routing/<slug>.md` was the obvious reuse and it is what the pattern cannot take, since that file already has two writers and a reader that deletes it, so a fold triggered by one producer discards whatever the other wrote and never read. A sibling path costs the folding skill one more read and removes the interaction entirely.
 
 The fold reaching the public docs corpus is the cost, since `docs-sync` owns that tree, and the carve-out is landing a page whose destination an operator already confirmed. Splitting the fold across two skills by destination was the alternative and it puts one handoff file under two readers, which is the failure this decision declines in the other direction. Measured at `f0f8bd62` on 2026-08-19.
 

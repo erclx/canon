@@ -162,7 +162,7 @@ record_run() {
   local writes="$4"
 
   local runs_dir record stamp
-  runs_dir="$PROJECT_ROOT/.canon/tmp/sandbox-runs"
+  runs_dir="$PROJECT_ROOT/.canon/tmp/runs/sandbox"
   stamp="$(date +%Y%m%dT%H%M%S)"
   record="$runs_dir/$(printf '%s' "${target}${scenario:+-$scenario}" | tr ':' '-')-$stamp.json"
 
@@ -195,7 +195,7 @@ record_dead_run() {
   local raw_output="$4"
 
   local runs_dir record stamp
-  runs_dir="$PROJECT_ROOT/.canon/tmp/sandbox-runs"
+  runs_dir="$PROJECT_ROOT/.canon/tmp/runs/sandbox"
   stamp="$(date +%Y%m%dT%H%M%S)"
   record="$runs_dir/$(printf '%s' "${target}${scenario:+-$scenario}" | tr ':' '-')-$stamp.json"
 

@@ -24,7 +24,7 @@ max_turns = 30
 # `promote-regex` for exactly this assertion. The source page and the workspace
 # it came from both survive the pass, since promotion copies rather than moves.
 paths = [
-  ".canon/tmp/teach-promotion/promote-regex.md",
+  ".canon/tmp/handoff/teach-promotion/promote-regex.md",
   ".canon/teach/01-regex/reference/reading-patterns.md",
 ]
 
@@ -48,8 +48,8 @@ absent = [
 # is the first arm narrow enough to report it, so the entry is named here rather
 # than exempted in the checker for every arm at once.
 write_scope = [
-  ".canon/tmp/teach-promotion/**",
-  ".canon/tmp/index-reminder/**",
+  ".canon/tmp/handoff/teach-promotion/**",
+  ".canon/tmp/hooks/index-reminder/**",
 ]
 
 # The reply names the destination it proposed. The docs prefix is the
@@ -70,19 +70,19 @@ manual = [
 # One heading per destination, naming the path. The docs prefix is what says the
 # routing test ran rather than that a file appeared.
 [[content]]
-path = ".canon/tmp/teach-promotion/promote-regex.md"
+path = ".canon/tmp/handoff/teach-promotion/promote-regex.md"
 pattern = '^## docs/'
 
 # The source line under the heading. Without it the fold lands a page with no
 # record of which workspace produced it, and the workspace holds the only copy
 # of the reasoning behind it.
 [[content]]
-path = ".canon/tmp/teach-promotion/promote-regex.md"
+path = ".canon/tmp/handoff/teach-promotion/promote-regex.md"
 pattern = '^Source: \.canon/teach/01-regex/reference/reading-patterns\.md$'
 
 # The page body travels with the block rather than being fetched at fold time.
 # The heading below is the one the reference page carries, so a block holding
 # only a pointer fails here.
 [[content]]
-path = ".canon/tmp/teach-promotion/promote-regex.md"
+path = ".canon/tmp/handoff/teach-promotion/promote-regex.md"
 pattern = '^## Anchors$'

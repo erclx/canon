@@ -16,10 +16,10 @@ absent = [".claude/standards/pr.md", "standards/pr.md"]
 # The short-sha segment is derived from the PR's head commit, so only the
 # prefix is fixed. The head moved on this arm, so the name carries the two
 # segments rather than the repeated-head third one.
-paths = [".canon/tmp/pr-review/body-*.md"]
+paths = [".canon/tmp/pr/review/body-*.md"]
 
 # The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr-review/**"]
+write_scope = [".canon/tmp/pr/review/**"]
 
 # The thread half of this arm is a GitHub state rather than a local file, so
 # it is asserted by hand. A substring cannot count comments on a remote, and
@@ -45,16 +45,16 @@ manual = [
 # `## Review` on a delta raising nothing has failed the threshold rather than
 # the guard, and this pins the half a local file can carry.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review closed'
 
 # The scope line names what this pass covered rather than what the standing
 # comment covered, which is the body half of the rewrite.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Re-reviewed'
 
 # The footer every pass owes, kept through a rewrite the same as through a post.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Reviewed by Claude Code'

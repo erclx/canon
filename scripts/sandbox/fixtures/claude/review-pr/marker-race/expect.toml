@@ -33,10 +33,10 @@ absent = [".claude/standards/pr.md", "standards/pr.md"]
 # The head moved, so the name carries the two segments rather than the
 # repeated-head third one. A pass that took the unchanged-head stop reaches
 # Step 4 at all, so this path is what separates the two outcomes.
-paths = [".canon/tmp/pr-review/body-*.md"]
+paths = [".canon/tmp/pr/review/body-*.md"]
 
 # The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr-review/**"]
+write_scope = [".canon/tmp/pr/review/**"]
 
 # The thread half is a GitHub state rather than a local file, so it is asserted
 # by hand. No assertion kind reads a remote thread, and the poll's own half runs
@@ -54,7 +54,7 @@ manual = [
 # The pass reviewed something rather than stopping, under either heading. Which
 # one it picked is the threshold's business and not this arm's.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review'
 
 # The marker this pass writes for whoever reads the thread next. Its shape is
@@ -62,10 +62,10 @@ pattern = '^## Review'
 # missing it reads as a pre-marker pass and drops the next reader back onto the
 # stamps this arm exists to stop trusting.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = '<!-- review-pr: commit=[0-9a-f]{7,40} read-at=[0-9]{4}-[0-9]{2}-[0-9]{2}T'
 
 # The footer every pass owes, which the marker sits below rather than replaces.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Reviewed by Claude Code'

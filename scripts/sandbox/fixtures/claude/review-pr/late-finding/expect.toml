@@ -18,10 +18,10 @@ max_turns = 32
 # The short-sha segment is derived from the PR's head commit, and the third
 # segment is the id of the reply Step 2 resolved, which is a real GitHub
 # comment id rather than a value this fixture can predict.
-paths = [".canon/tmp/pr-review/body-*-r*.md"]
+paths = [".canon/tmp/pr/review/body-*-r*.md"]
 
 # The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr-review/**"]
+write_scope = [".canon/tmp/pr/review/**"]
 
 # Fixed by Step 5's own output template, not chosen by the run.
 reply = ["Posted to PR #"]

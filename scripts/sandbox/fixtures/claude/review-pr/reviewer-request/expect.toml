@@ -16,10 +16,10 @@ absent = [".claude/standards/pr.md", "standards/pr.md"]
 
 # The short-sha segment is derived from the PR's head commit, so only the
 # prefix is fixed.
-paths = [".canon/tmp/pr-review/body-*.md"]
+paths = [".canon/tmp/pr/review/body-*.md"]
 
 # The only file this arm's diff has any business touching.
-write_scope = [".canon/tmp/pr-review/**"]
+write_scope = [".canon/tmp/pr/review/**"]
 
 # Fixed by Step 5's own output template, not chosen by the run, the same test
 # `claude:restate-plainly`'s `Cut:` pin already applies.
@@ -40,15 +40,15 @@ manual = [
 # The heading this arm exists to prove: an all-answered `## For the reviewer`
 # block takes the closed heading rather than forcing the review open.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review closed'
 
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = '\*\*For the reviewer\*\*'
 
 # The bullet as the author wrote it, proving the pass read the section itself
 # rather than paraphrasing it into a new question.
 [[content]]
-path = ".canon/tmp/pr-review/body-*.md"
+path = ".canon/tmp/pr/review/body-*.md"
 pattern = 'Confirm handleCreate rejects a missing or empty title'

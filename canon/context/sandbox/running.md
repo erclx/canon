@@ -64,13 +64,13 @@ An escape list covering the whole tree, or a failure count far past what the arm
 
 ### The run record
 
-Every run also lands at `.canon/tmp/sandbox-runs/<target>-<arm>-<timestamp>.json`, and `run.sh` logs the path on stderr. The file holds what stdout emitted plus a `writes` array. Both are needed to score a run again later: `canon sandbox check` recovers the tree-based assertions from surviving sandbox state, but `max_turns` reads the envelope and `write_scope` reads the writes list, and the temp files carrying those are deleted at the end of the run.
+Every run also lands at `.canon/tmp/runs/sandbox/<target>-<arm>-<timestamp>.json`, and `run.sh` logs the path on stderr. The file holds what stdout emitted plus a `writes` array. Both are needed to score a run again later: `canon sandbox check` recovers the tree-based assertions from surviving sandbox state, but `max_turns` reads the envelope and `write_scope` reads the writes list, and the temp files carrying those are deleted at the end of the run.
 
 The record is gitignored scratch with no rotation, one file per run. Writing it is additive and stdout stays the data contract, so a failure to record warns and prints the verdict anyway. What that costs is the turn count, which is recoverable from nowhere else once the run's temp files are deleted, so an arm whose record failed to write cannot have its ceiling calibrated without paying for the run twice. `claude:canon-operator/fresh` is declared at the cap for that reason rather than from an observation.
 
 The warning sits on stderr among the framing, where a caller reading the tail of a passing run does not see it. Nothing prunes the folder, which makes it a scratch-lifecycle question rather than an oversight.
 
-When the skill session itself exits non-zero, `record_dead_run` stamps `{is_error, exit_code, raw_output}` to `.canon/tmp/sandbox-runs/<target>-<scenario>-<stamp>.json` ahead of that exit, mirroring the record `record_run` writes on the success path, and `run.sh` logs the path the same way, so the run that most needs a record still gets one.
+When the skill session itself exits non-zero, `record_dead_run` stamps `{is_error, exit_code, raw_output}` to `.canon/tmp/runs/sandbox/<target>-<scenario>-<stamp>.json` ahead of that exit, mirroring the record `record_run` writes on the success path, and `run.sh` logs the path the same way, so the run that most needs a record still gets one.
 
 An earlier silent failure carries its own message rather than the session-exit one. A non-zero exit from `manage-sandbox.sh` during provisioning logs `Provisioning exited <n> before the session could start.`, distinguishing that failure from the session-exit case above, since both otherwise leave the same absent verdict and no run record.
 

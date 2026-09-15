@@ -148,18 +148,18 @@ if [ -n "$pr_labels" ]; then
   gh pr edit "$pr_number" --add-label "$pr_labels" >/dev/null ||
     printf 'Label apply failed. Create a missing label with: gh label create <name>\n' >&2
 fi
-rm -rf .canon/tmp/pr
+rm -rf .canon/tmp/pr/body
 printf 'number=%s\nurl=%s\n' "$pr_number" "$pr_url"
 ```
 
 ### Post the UI checklist
 
-`ui-test` writes a manual checklist to `.canon/tmp/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This step is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and there is nothing to post.
+`ui-test` writes a manual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This step is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and there is nothing to post.
 
 When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md` before posting, the same as the pull request body above. Post it as its own comment on `<number>`, the number the final command above resolved, rather than folding it into the body, since a later push editing the body would overwrite checkboxes a reviewer already ticked:
 
 ```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/ui-checklist/<slug>.md
+gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
 ```
 
 Run the cleanup below only once that call reports success. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
@@ -167,11 +167,11 @@ Run the cleanup below only once that call reports success. On a failure, stop an
 From a linked worktree the file-editing tools refuse a main-root path, so the cleanup goes out through `Bash` as two plain commands, the file and then the folder, rather than joined by `&&`, which is refused as compound:
 
 ```bash
-rm <main-root>/.canon/tmp/ui-checklist/<slug>.md
+rm <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
 ```
 
 ```bash
-rmdir <main-root>/.canon/tmp/ui-checklist 2>/dev/null || true
+rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
 ```
 
 The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
@@ -181,16 +181,16 @@ The `rmdir` is a no-op when another branch's pending checklist still sits in the
 Run `canon pr evidence <number> --json` against the number the pull request step above resolved. Read `reason` on the record rather than the exit code.
 
 - `no-evidence`: nothing changed under an `evidence/` segment. Say nothing and move on.
-- `ok`: write `body` to `.canon/tmp/pr-evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
+- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
 
 ```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/pr-evidence/body-<number>.md
+gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
 ```
 
 When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`:
 
 ```bash
-gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr-evidence/body-<number>.md
+gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
 ```
 
 Clean up the tmp file the way the UI-checklist step does, only after the call reports success.

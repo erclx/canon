@@ -48,11 +48,9 @@ import { recordDir, SCRATCH } from '@/record-root'
  * `verify-astro` and `verify-vite-react` pass the same test and are excluded
  * by name: both are scaffolds a command generates rather than records a
  * session wrote, and each is 100+ MB, which the review remote is not sized
- * for. `ablation`, `eval-runs`, `sandbox-runs`, `memory-archive`,
- * `groundwork-fixtures`, `precompact-handoff`, `pr-poll`, `pr`,
- * `address-review`, and `memory-routing` fail the second clause: a script or
- * a skill body names each of those paths, so moving one needs a code change
- * first rather than a promotion.
+ * for. `ablation`, `runs`, `memory-archive`, `hooks`, `pr`, and `handoff`
+ * fail the second clause: a script or a skill body names each of those
+ * paths, so moving one needs a code change first rather than a promotion.
  */
 export const PROMOTED_FOLDERS: readonly string[] = [
   'hero-probe',

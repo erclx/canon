@@ -19,7 +19,7 @@ Writing the checklist correctly to disk does not close the gap either. The file 
 - Read the project's existing test config and patterns before writing a test against them
 - Assert a user action and its outcome per test, covering the happy path and the key edge cases
 - Run the tests after writing them and fix what fails
-- Write a produced checklist to the `.canon/tmp/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting
+- Write a produced checklist to the `.canon/tmp/handoff/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting
 - Report that everything is covered rather than manufacturing a checklist to show work
 
 ## Must not

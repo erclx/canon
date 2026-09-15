@@ -59,7 +59,7 @@ If all changes are automatable, skip the manual checklist:
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
 
-When a manual checklist is produced, write it directly to `.canon/tmp/ui-checklist/<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite. This is a handoff file rather than a deliverable: `git-pr` posts it as a pull request comment once one opens, then removes it, and nothing here talks to `gh` directly.
+When a manual checklist is produced, write it directly to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite. This is a handoff file rather than a deliverable: `git-pr` posts it as a pull request comment once one opens, then removes it, and nothing here talks to `gh` directly.
 
 From a linked worktree the file-editing tools refuse that path, so the checklist goes out through `Bash`. Send the `mkdir -p` and the heredoc as two plain commands rather than joining them with `&&`, which is refused as compound.
 
@@ -71,7 +71,7 @@ The `.canon/tmp/` directory is gitignored. Do not stage or commit the file.
 
 1. Write and run e2e tests (report pass/fail)
 2. If a manual checklist was produced, write it to file, then output only the file path in chat:
-   `📝 Wrote .canon/tmp/ui-checklist/<slug>.md`
+   `📝 Wrote .canon/tmp/handoff/ui-checklist/<slug>.md`
 3. If no checklist was needed: `✅ All changes covered by e2e tests. No manual verification needed.`
 
 Do not repeat the full checklist in chat.
