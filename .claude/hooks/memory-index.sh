@@ -33,6 +33,16 @@ case "$file_path" in
 *) exit 0 ;;
 esac
 
+# A shell `case` `*` crosses `/`, so the match above also catches a receipt
+# under memory/review/ or a retired entry under memory/archive/. Neither is
+# a pen entry the index renders, so both exit here before the regen call.
+case "$file_path" in
+*/.claude/memory/review/* | */.canon/memory/review/* | \
+  */.claude/memory/archive/* | */.canon/memory/archive/*)
+  exit 0
+  ;;
+esac
+
 case "$file_path" in
 */.claude/memory/index.md | */.canon/memory/index.md) exit 0 ;;
 esac
