@@ -88,7 +88,7 @@ Capture the pattern rather than the recovery. What was tried, what failed, and w
 
 ## Links
 
-Link a related entry as `[[name]]`, where `name` is the target's filename stem without the extension. Link freely: the folder is flat and the links are the only structure it has.
+Link a related entry as `[[name]]`, where `name` is the target's filename stem without the extension. Link freely: an entry sits flat at the top level and the links are the only structure among them. `review/` and `archive/` hold receipts and retirements rather than entries, so neither takes a link.
 
 - Place links inside the body part they support, not in a list of their own at the end.
 - A link naming an entry nobody has written yet is legal, and it marks a rule worth writing rather than a defect.

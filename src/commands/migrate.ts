@@ -31,6 +31,13 @@ import {
   type SurfaceRootsPlan,
 } from '@/migrate/surface-roots'
 import {
+  applyRecordLayout,
+  planRecordLayout,
+  readRecordLayoutCorpus,
+  type RecordLayoutPlan,
+  walkRecordLayoutCorpus,
+} from '@/migrate/record-layout'
+import {
   applyScratchEvidence,
   planScratchEvidence,
   readScratchEvidenceCorpus,
@@ -746,6 +753,102 @@ function toScratchEvidenceRecord(
   }
 }
 
+interface RecordLayoutOptions {
+  readonly json?: boolean
+  readonly write?: boolean
+  readonly root?: string
+}
+
+/**
+ * Moves review receipts from `.canon/review/memory/` to `.canon/memory/review/`
+ * and retired entries from `.canon/tmp/memory-archive/` to
+ * `.canon/memory/archive/`, and repoints the citations that name either.
+ */
+async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
+  const root = opts.root ?? process.cwd()
+
+  const files = await walkRecordLayoutCorpus(root)
+  const sources = await readRecordLayoutCorpus(files)
+  const plan = planRecordLayout(root, sources)
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify(toRecordLayoutRecord(plan, opts.write))}\n`,
+    )
+  }
+
+  reportRecordLayout(plan)
+
+  if (plan.collisions.length > 0) {
+    logError(
+      `${plural(plan.collisions.length, 'destination')} already occupied. Neither side moved.`,
+    )
+    for (const collision of plan.collisions) logError(`  ${collision}`)
+  }
+
+  if (plan.moves.length === 0 && plan.entries.length === 0) {
+    return plan.collisions.length > 0 ? 1 : 0
+  }
+
+  if (!opts.write) {
+    logWarn('Nothing was written. Pass --write to apply this plan.')
+    return 2
+  }
+
+  const applied = await applyRecordLayout(plan)
+  logStep(
+    `Moved ${plural(applied.moved, 'folder')} and rewrote ${plural(applied.written, 'file')}.`,
+  )
+
+  if (applied.failed.length > 0) {
+    logError(`Could not write ${plural(applied.failed.length, 'file')}.`)
+    for (const path of applied.failed) logError(`  ${path}`)
+    return 1
+  }
+
+  return plan.collisions.length > 0 ? 1 : 0
+}
+
+function reportRecordLayout(plan: RecordLayoutPlan): void {
+  logInfo(`${plural(plan.moves.length, 'folder')} to move.`)
+  for (const move of plan.moves) {
+    logInfo(`  ${move.from} -> ${move.to}`)
+  }
+
+  logInfo(
+    `${plural(plan.entries.length, 'file')} to change, ${plural(plan.rewritten, 'citation')} to rewrite.`,
+  )
+  for (const entry of plan.entries) {
+    logInfo(`  ${entry.path}: ${plural(entry.rewritten, 'citation')}`)
+  }
+
+  if (plan.strays.length > 0) {
+    logWarn(
+      `${plural(plan.strays.length, 'stray receipt')} at the flat review/ root. Not moved, move by hand into memory/review/.`,
+    )
+    for (const stray of plan.strays) logWarn(`  ${stray}`)
+  }
+}
+
+function toRecordLayoutRecord(
+  plan: RecordLayoutPlan,
+  wrote: boolean | undefined,
+): unknown {
+  return {
+    ok: true,
+    wrote: wrote === true,
+    moves: plan.moves.map((move) => ({ from: move.from, to: move.to })),
+    collisions: plan.collisions,
+    files: plan.entries.length,
+    rewritten: plan.rewritten,
+    strays: plan.strays,
+    paths: plan.entries.map((entry) => ({
+      path: entry.path,
+      rewritten: entry.rewritten,
+    })),
+  }
+}
+
 interface RuleLayoutOptions {
   readonly json?: boolean
   readonly write?: boolean
@@ -1029,6 +1132,45 @@ export function register(program: Command): void {
     )
     .action(async (opts: ScratchEvidenceOptions) => {
       process.exitCode = await runScratchEvidence(opts)
+    })
+
+  migrate
+    .command('record-layout')
+    .description('Fold memory review receipts and archive under memory/')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--write', 'Apply the plan rather than reporting it')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the working directory',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Moves review receipts from .canon/review/memory/ to',
+        '.canon/memory/review/, and retired entries from',
+        '.canon/tmp/memory-archive/ to .canon/memory/archive/, backed for',
+        'the first time, and repoints every citation that names either,',
+        'live or archived.',
+        '',
+        'A receipt sitting at the flat review/ root, the shape memory-review',
+        'wrote before review/memory/ existed, is reported rather than moved.',
+        '',
+        'Exit codes:',
+        '  0  nothing to move, or --write applied the whole plan',
+        '  1  a write failed, or an unresolved collision remains',
+        '  2  a plan exists and --write was not passed',
+        '',
+        'Examples:',
+        '  canon migrate record-layout',
+        '  canon migrate record-layout --write',
+        '  canon migrate record-layout --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RecordLayoutOptions) => {
+      process.exitCode = await runRecordLayout(opts)
     })
 
   migrate

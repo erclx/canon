@@ -197,7 +197,7 @@ Pinning the slug once at chain entry was the alternative, and it makes the delet
 
 A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. `git-ship` runs `docs-fold` second and `memory-review` ninth, so a memory receipt lands seven steps behind a sweep keyed on the current slug, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
 
-Scanning the folder rather than keying on the slug is what survives this. The memory receipt sweep reads every `.canon/review/memory/memory-review-*.md` and tests each for pending items rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
+Scanning the folder rather than keying on the slug is what survives this. The memory receipt sweep reads every `.canon/memory/review/memory-review-*.md` and tests each for pending items rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
 
 ### A citation count that reads one surface misses the other
 

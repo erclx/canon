@@ -51,7 +51,7 @@ A `.canon/tmp/<topic>/<slug>.md` handoff shared across worktrees, the pattern `m
 
 Sixteen skills write `.canon/tmp/`. Eight write throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite: `git-pr`'s pull request body, `review-address`'s reply body, `draft-diagram`'s verification renders, `plan-groundwork`'s spike fixtures, `git-issue`'s issue body, `git-split`'s per-branch bodies, `internal-tooling`'s headless verify scaffold, and `internal-governance`'s paste-payload build. None of the eight needs a root, since nothing outside the run that wrote it ever opens the file.
 
-Six write material a later run or a different worktree reads back. `memory-capture` states the main worktree root for `.canon/tmp/memory-routing/<slug>.md`, and `memory-review` states it again for its own `.canon/tmp/memory-archive/` move, but its append to the routing file relies on the location capture already put it at rather than restating the root. `ui-test`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline (`role-orchestrator/scripts/poll.sh`, `STATE_DIR="$MAIN_ROOT/.canon/tmp/pr-poll"`) each state their own root directly.
+Six write material a later run or a different worktree reads back. `memory-capture` states the main worktree root for `.canon/tmp/memory-routing/<slug>.md`, and `memory-review`'s append to that file relies on the location capture already put it at rather than restating the root. `ui-test`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline (`role-orchestrator/scripts/poll.sh`, `STATE_DIR="$MAIN_ROOT/.canon/tmp/pr-poll"`) each state their own root directly.
 
 `085-worktrees.md` states the mixed default alone and names none of the six, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead.
 
@@ -61,15 +61,15 @@ Six write material a later run or a different worktree reads back. `memory-captu
 
 ### Where each folder archives to
 
-An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history. The exception is stated below and it is deliberate.
+An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history.
 
-A memory entry that leaves the folder moves to `.canon/tmp/memory-archive/`, the one archive that stays under the scratch tree rather than beside the record it archives. Nothing cites a retired memory the way a task file cites a plan or a groundwork track, and a phase label derives from the task archive while no surface reads this one, so it is an undo buffer for a bulk pass rather than a record a later session opens. Deletion is not safe here: the folder is gitignored, so a wrong call over a folder this size has nothing to recover from.
+A memory entry that leaves the pen moves to `.canon/memory/archive/`, the same rule every other record folder follows. Nothing cites a retired memory the way a task file cites a plan or a groundwork track, and a phase label derives from the task archive while no surface reads this one, but citation is not what decides whether a folder is backed: `memory/` is not one of the three names `EXCLUDED_ENTRIES` withholds from `canon records push`, so a wrong call over the folder recovers through `canon records pull` the same as any other retired record.
 
 A plan that ships moves to `.canon/plans/archive/` under its original name, swept there by `docs-fold`. A re-shipped slug overwrites the earlier file, which keeps the folder holding intact plans under the names they were written with.
 
-Two surfaces both named for memory therefore archive to two places. The entry goes to the deletable tree and the receipt to a record folder, and the test separating them is whether the judgment behind the file has been taken.
+Two surfaces both named for memory archive inside the same pen: a retired entry at `.canon/memory/archive/` and a review receipt at `.canon/memory/review/archive/`, so a listing of `.canon/memory/` shows one record rather than a record split across scratch and review.
 
-A memory-review receipt a triage takes out of `.canon/review/memory/` moves to `archive/` beside it. A receipt whose items have all resolved needs no archive at all, since the collection rule folds its declines into the entries and deletes the file.
+A memory-review receipt a triage takes out of `.canon/memory/review/` moves to `archive/` beside it. A receipt whose items have all resolved needs no archive at all, since the collection rule folds its declines into the entries and deletes the file.
 
 A task that ships moves to `.canon/tasks/archive/` the same way, through `canon tasks archive`. The `Pull request:` line `git-pr` writes onto the task is what lets the merge close it, since every merge on `main` is a squash carrying that number in its subject while the branch name never lands. The command owns the move, the `priority.md` row removal, and the index regen as one unit, so the hook and `task-board` cannot archive differently.
 

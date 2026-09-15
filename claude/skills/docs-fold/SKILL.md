@@ -228,7 +228,7 @@ Sweep the branch reports this session never opened. List `.canon/review/branch/r
 
 What that removes is a local-only review on a branch deleted before it opened a pull request. `review-branch` says so where a reader meets the report, and the sweep runs anyway rather than keeping every report against the one case, since nothing else ever clears them.
 
-Memory receipts sweep board-wide rather than by slug. Scan every `.canon/review/memory/memory-review-*.md`, not only the one matching this slug. `memory-review` writes its receipt after this skill has run in every ship chain, so a sweep keyed on the current slug looks for a file that does not exist yet, and no later branch looks for it either because a slug is unique per feature. Scanning the folder is what makes the sweep fire at all.
+Memory receipts sweep board-wide rather than by slug. Scan every `.canon/memory/review/memory-review-*.md`, not only the one matching this slug. `memory-review` writes its receipt after this skill has run in every ship chain, so a sweep keyed on the current slug looks for a file that does not exist yet, and no later branch looks for it either because a slug is unique per feature. Scanning the folder is what makes the sweep fire at all.
 
 For each receipt, count the H2 items still marked 📝 pending:
 

@@ -38,14 +38,14 @@ Toggle auto-memory with `/memory` or set `autoMemoryEnabled: false` in settings.
 
 Project-scoped memory complements Claude Code's auto-memory. Files live at `.canon/memory/` in the project tree, gitignored, written by capture and curated through a review loop. A fact about a domain does not land there at all: capture routes it to that domain's `canon/context/` entry, which the three-tier context model already loads on demand. What stays is the residue no entry owns, in whatever mix of types that leaves.
 
-The toolkit treats that residue as a holding pen, not long-term storage. Every review should promote each entry to a durable surface (`CLAUDE.md`, skill body, standards, governance) or retire it to `.canon/tmp/memory-archive/`. User-type memories are the exception when no in-repo target exists.
+The toolkit treats that residue as a holding pen, not long-term storage. Every review should promote each entry to a durable surface (`CLAUDE.md`, skill body, standards, governance) or retire it to `.canon/memory/archive/`. User-type memories are the exception when no in-repo target exists.
 
 Capture opens the ship chain and propose closes it. The cost of review is re-deriving why an entry was captured, and that context is gone once the session ends. Writing the proposed fix while the session is fresh turns the later decision into a one-glance confirm and stops the pen from stacking to ten or more cold entries. Propose reads `CLAUDE.md`, the skill bodies, standards, and governance each ship, so it pays a read cost, but that work moves earlier where the batch is small.
 
 ### The loop
 
 1. **Capture** with `/memory-capture`. Classifies session patterns as `feedback`, `project`, `user`, or `reference`, routes a project fact naming a context entry to that entry, and writes the rest as files. The ship skills run it first, because a routed fact edits a tracked file and has to reach the branch before the commit steps.
-2. **Propose** with `/memory-review`, run last by `auto-ship` and `git-ship` and skipped when capture wrote no file. A ship caller scopes it to that session's captures. Run standalone it sweeps the whole pen, which is what lets cross-session duplicates merge into one rule. Writes `.canon/review/memory-review-<branch>.md` with a `Decision:` slot and a proposed fix per item.
+2. **Propose** with `/memory-review`, run last by `auto-ship` and `git-ship` and skipped when capture wrote no file. A ship caller scopes it to that session's captures. Run standalone it sweeps the whole pen, which is what lets cross-session duplicates merge into one rule. Writes `.canon/memory/review/memory-review-<slug>.md` with a `Decision:` slot and a proposed fix per item.
 3. **Apply** with `/memory-review` after reviewing the receipt. Apply mutates tracked files, so it runs in a worktree and ships as its own commit, separate from the feature. A feature reviewer should not have to vet a change to how the agent operates.
 4. **Challenge, Discuss, Cleanup** by re-pinging `/memory-review` with the matching phase phrase. Challenge applies absorbed, delta, and generality tests to promote items. Discuss writes `Take:` lines for question decisions. Cleanup deletes one receipt and touches no entry, since Apply is the only phase that moves one.
 

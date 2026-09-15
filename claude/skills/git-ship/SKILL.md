@@ -58,7 +58,7 @@ Output up to four lines:
 ✅ Shipped
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
-<Memory proposal at .canon/review/memory/memory-review-<slug>.md>
+<Memory proposal at .canon/memory/review/memory-review-<slug>.md>
 ```
 
 Omit the second line if nothing routed. Omit the third and fourth if `memory-capture` wrote no memory file this session, since an empty pen means no scoped review and no proposal.

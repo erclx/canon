@@ -188,7 +188,7 @@ EOF
   log_info "Expect:  declared in fixtures/claude/memory-review/expect.toml"
   log_info "         Check it with: canon sandbox check claude:memory-review"
   log_info "         Interactively, respond 'all' to exercise the apply path, after"
-  log_info "         which each handled entry sits in .canon/tmp/memory-archive/"
+  log_info "         which each handled entry sits in .canon/memory/archive/"
   log_info "         rather than deleted, and index.md has lost its rows. The"
   log_info "         declaration covers the propose pass alone, which is where a"
   log_info "         headless run stops."

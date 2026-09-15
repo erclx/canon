@@ -38,7 +38,7 @@ function seed(): void {
   write('.canon/tasks/v1.1-row.md', LIVE_CITATION)
   write('.canon/memory/entry.md', LIVE_CITATION)
   write('.canon/plans/archive/feature-shipped.md', LIVE_CITATION)
-  write('.canon/review/memory/archive/receipt.md', LIVE_CITATION)
+  write('.canon/memory/review/archive/receipt.md', LIVE_CITATION)
   write('.canon/groundwork/01-trail/notes.md', LIVE_CITATION)
   write('.canon/intake/01-dump/item.md', LIVE_CITATION)
   write('.canon/tmp/scratch/note.md', LIVE_CITATION)
@@ -88,9 +88,9 @@ describe('walkRecordTree', () => {
 
   it('should prune an archive nested below the top of a live folder', async () => {
     const walk = await walkRecordTree(root)
-    expect(walk.files).not.toContain('.canon/review/memory/archive/receipt.md')
+    expect(walk.files).not.toContain('.canon/memory/review/archive/receipt.md')
     expect(walk.excluded).toContainEqual({
-      path: '.canon/review/memory/archive',
+      path: '.canon/memory/review/archive',
       files: 1,
     })
   })
