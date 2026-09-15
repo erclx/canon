@@ -16,7 +16,7 @@ import {
   isOwnCheckout,
   PROJECT_ROOT,
 } from '@/project-root'
-import { creationRel } from '@/record-root'
+import { creationRel, SCRATCH } from '@/record-root'
 import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { resolveTarget } from '@/target'
@@ -113,7 +113,7 @@ export function register(program: Command): void {
     .option(
       '-o, --out <path>',
       'Output directory',
-      creationRel(process.cwd(), 'review', 'design'),
+      creationRel(process.cwd(), SCRATCH, 'render', 'design'),
     )
     .action((opts: { source: string; out: string }) => {
       const sourcePath = resolve(process.cwd(), opts.source)
@@ -143,7 +143,7 @@ export function register(program: Command): void {
     .option(
       '-o, --out <path>',
       'Output directory',
-      creationRel(process.cwd(), 'review', 'board'),
+      creationRel(process.cwd(), SCRATCH, 'render', 'board'),
     )
     .option('--root <path>', 'Project root, defaulting to the main worktree')
     .addHelpText(

@@ -399,7 +399,7 @@ function isImage(name: string): boolean {
   return IMAGE_EXTENSIONS.some((ext) => name.toLowerCase().endsWith(ext))
 }
 
-/** Every image file directly inside an evidence arm folder, one level deep. */
+/** Every image file directly inside a pick folder, one level deep. */
 function imagesIn(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && isImage(entry.name))
@@ -407,32 +407,39 @@ function imagesIn(dir: string): string[] {
     .sort()
 }
 
+/**
+ * The folder under `picks/` holding operator-supplied reference images, which
+ * the References panel reads. It sits beside the captures of the choices it
+ * fed, so the candidates panel steps over it rather than listing it as a pick.
+ */
+const REFERENCES_FOLDER = 'references'
+
 function writeCandidatesPanel(root: string, outDir: string): void {
   const dir = join(outDir, 'candidates')
   mkdirSync(dir, { recursive: true })
 
-  const evidenceDir = recordDir(root, 'review', 'evidence')
-  if (!existsSync(evidenceDir)) {
+  const picksDir = recordDir(root, 'picks')
+  if (!existsSync(picksDir)) {
     writeFileSync(
       join(dir, 'index.html'),
       panelPage(
         'Past candidates',
-        `<p class="empty">No ${relative(root, evidenceDir)} folder yet.</p>`,
+        `<p class="empty">No ${relative(root, picksDir)} folder yet.</p>`,
       ),
     )
     return
   }
 
-  const folders = readdirSync(evidenceDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+  const folders = readdirSync(picksDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== REFERENCES_FOLDER)
     .map((entry) => entry.name)
     .sort()
 
   const found: Array<{ folder: string; images: string[] }> = []
   for (const folder of folders) {
-    const images = imagesIn(join(evidenceDir, folder))
+    const images = imagesIn(join(picksDir, folder))
     if (images.length > 0) {
-      cpSync(join(evidenceDir, folder), join(dir, folder), { recursive: true })
+      cpSync(join(picksDir, folder), join(dir, folder), { recursive: true })
       found.push({ folder, images })
     }
   }
@@ -442,7 +449,7 @@ function writeCandidatesPanel(root: string, outDir: string): void {
       join(dir, 'index.html'),
       panelPage(
         'Past candidates',
-        `<p class="empty">${folders.length} folders under ${relative(root, evidenceDir)}/ and none carries a draft-and-pick arm capture. The archival capture step has not run since it shipped.</p>`,
+        `<p class="empty">${folders.length} folders under ${relative(root, picksDir)}/ and none carries a draft-and-pick arm capture. The archival capture step has not run since it shipped.</p>`,
       ),
     )
     return
@@ -462,7 +469,7 @@ function writeReferencesPanel(root: string, outDir: string): void {
   const dir = join(outDir, 'references')
   mkdirSync(dir, { recursive: true })
 
-  const referencesDir = recordDir(root, 'review', 'references')
+  const referencesDir = recordDir(root, 'picks', REFERENCES_FOLDER)
   if (!existsSync(referencesDir)) {
     writeFileSync(
       join(dir, 'index.html'),

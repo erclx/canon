@@ -72,7 +72,7 @@ function showHelp(): void {
     `${GREY}│${NC}    demo [cmd]         ${GREY}# Record a running app (compile, run)${NC}`,
     `${GREY}│${NC}    inventory [subj]   ${GREY}# Report one computed property across every route${NC}`,
     `${GREY}│${NC}    drive <url> <run>  ${GREY}# Walk a page through named interactions and measure each state${NC}`,
-    `${GREY}│${NC}    feedback           ${GREY}# Write toolkit feedback from stdin to .canon/review/feedback/${NC}`,
+    `${GREY}│${NC}    feedback           ${GREY}# Write toolkit feedback from stdin to .canon/feedback/${NC}`,
     `${GREY}│${NC}    transcripts <url>  ${GREY}# Fetch a YouTube transcript with metadata frontmatter${NC}`,
     `${GREY}│${NC}    tasks [cmd]        ${GREY}# Task board commands (archive)${NC}`,
     `${GREY}│${NC}    intake [cmd]       ${GREY}# Intake folders under .canon/intake/ (list, answer)${NC}`,

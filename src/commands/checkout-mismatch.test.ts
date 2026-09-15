@@ -155,7 +155,7 @@ describe('checkout-mismatch warning at each directly wired verb', () => {
  * to the checkout this test spawns `bun` out of rather than to `cwd`, so the
  * decoy cannot make this verb refuse the way the other cases' `plain` root
  * does elsewhere in this file. The write lands in this checkout's own
- * `.canon/review/feedback/`, which the test deletes.
+ * `.canon/feedback/`, which the test deletes.
  */
 describe('checkout-mismatch warning on canon feedback', () => {
   it('should warn on the local-scratch write path', () => {
