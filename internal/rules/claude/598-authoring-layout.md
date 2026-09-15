@@ -18,6 +18,7 @@ paths:
 - Author toolkit-internal content under `internal/`, never inside an installable surface.
 - Author standards at `standards/` and snippets at `snippets/`, both at the project root.
 - Author a toolkit-only rule at `internal/rules/` and a rule that ships to targets at `governance/rules/`.
+- Before restructuring installable content under `snippets/`, `claude/skills/`, `tooling/`, or `governance/rules/`, grep the matching install and list scripts for depth constraints such as `-maxdepth` and fixed globs. Bundle the script update with the restructure, or pick a depth the scripts already handle.
 
 ## Which copy to edit and cite
 
