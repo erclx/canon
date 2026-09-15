@@ -378,3 +378,15 @@ Two further candidates surfaced through queued additions carrying an overlap the
 The name passed over two candidates. `logo` names one of the two outputs and leaves the card unaccounted for, and `assets` collides twice, with `canon capture`'s own `DEFAULT_SOURCE = 'assets'` and with this repository's top-level `assets/` folder of README captures. It takes the `draft-` prefix, joining `draft-screencast` and `draft-slides`, since the bare-word rule the rest of `SKILL_NAME_MAP` follows applies here too: it writes candidates to scratch and a final deliverable outside `.claude/`, so it is neither a Claude workflow surface nor a toolkit-subject skill, and a prefix-free name would misstate that.
 
 One skill covers both outputs rather than two. The mark and the card are one identity rendered twice, and two skills each reading the other's pick can settle on shapes that do not compose. Drafting every arm already inside the card frame is what makes that real rather than aspirational, since the pick settling the mark's shape settles its composition in the same choice.
+
+## ux-walkthrough closes the operator-observed corner no other catalog entry answers
+
+`ux-walkthrough` turns what an operator sees in a running app into findings and picks a builder can act on without the conversation.
+
+The boundary against `draft-and-pick` sits inside the render step rather than around the whole flow. `ux-walkthrough` departs from `draft-and-pick` Step 2's inlining and Step 6's apply-and-delete, per its own `## What this delegates`, capturing arms into the walkthrough's own numbered evidence folder and leaving `candidates.html` in place rather than applying the winning arm.
+
+The boundary against `ux-audit` runs on where the judgment happens. `ux-audit` reads source for roughness the code alone reveals. `ux-walkthrough` measures a finding off the built page and hands the operator the link before every pick question, so a record carries what a person saw rather than what a reading of the source predicted.
+
+The boundary against `plan-feature` and a worker runs on who builds. `ux-walkthrough` records a pick with the arms it beat and the numbers behind it. Turning that record into a plan and code belongs to `plan-feature` and a worker, never to this skill.
+
+No `## Redundancy audit` entry names it, because it carries no plausible community counterpart. Pairing an operator's live look at a running build against a recorded batch of picks is a shape `### Redundancy comparisons` skips outright rather than one that was compared and cleared.
