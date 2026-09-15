@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -12,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   applyRecordLayout,
   destinationPath,
+  type FolderLayoutMove,
   planRecordLayout,
   RECORD_LAYOUT_MOVES,
   readRecordLayoutCorpus,
@@ -22,8 +24,8 @@ import {
 
 let root: string
 
-const REVIEW_MOVE = RECORD_LAYOUT_MOVES[0]!
-const ARCHIVE_MOVE = RECORD_LAYOUT_MOVES[1]!
+const REVIEW_MOVE = RECORD_LAYOUT_MOVES[0] as FolderLayoutMove
+const ARCHIVE_MOVE = RECORD_LAYOUT_MOVES[1] as FolderLayoutMove
 
 function write(relative: string, text: string): void {
   const path = join(root, relative)
@@ -31,10 +33,30 @@ function write(relative: string, text: string): void {
   writeFileSync(path, text)
 }
 
+function writeAt(relative: string, text: string, at: Date): void {
+  write(relative, text)
+  utimesSync(join(root, relative), at, at)
+}
+
 async function planFrom(at: string) {
   const files = await walkRecordLayoutCorpus(at)
   const sources = await readRecordLayoutCorpus(files)
   return planRecordLayout(at, sources)
+}
+
+function movesTo(plan: Awaited<ReturnType<typeof planFrom>>) {
+  return plan.moves.map((move) => ({
+    from: move.from.slice(root.length + 1),
+    to: move.to.slice(root.length + 1),
+    classified: move.classified,
+  }))
+}
+
+function entryFor(
+  plan: Awaited<ReturnType<typeof planFrom>>,
+  suffix: string,
+): string | undefined {
+  return plan.entries.find((candidate) => candidate.path.endsWith(suffix))?.text
 }
 
 beforeEach(() => {
@@ -154,6 +176,208 @@ describe('planRecordLayout', () => {
     expect(collidedEntry).toBeUndefined()
     expect(movedEntry?.text).toContain('.canon/memory/archive/')
   })
+
+  it('should move feedback to its own root folder and rewrite its citation', async () => {
+    write('.canon/review/feedback/feedback-a-1.md', 'a report\n')
+    write(
+      '.canon/tasks/v1.0-open.md',
+      'Filed at `.canon/review/feedback/feedback-a-1.md`.\n',
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/feedback',
+      to: '.canon/feedback',
+      classified: undefined,
+    })
+    expect(entryFor(plan, 'v1.0-open.md')).toContain(
+      '`.canon/feedback/feedback-a-1.md`',
+    )
+  })
+
+  it('should move a render folder under tmp/render and rewrite its citation', async () => {
+    write('.canon/review/board/index.html', '<h1>board</h1>\n')
+    write(
+      '.canon/plans/feature-look.md',
+      'Open `.canon/review/board/index.html`.\n',
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/board',
+      to: '.canon/tmp/render/board',
+      classified: undefined,
+    })
+    expect(entryFor(plan, 'feature-look.md')).toContain(
+      '`.canon/tmp/render/board/index.html`',
+    )
+  })
+
+  it('should skip a render move whose source is absent', async () => {
+    write('.canon/review/board/index.html', '<h1>board</h1>\n')
+
+    const plan = await planFrom(root)
+
+    expect(
+      movesTo(plan).some((move) => move.from === '.canon/review/design'),
+    ).toBe(false)
+  })
+
+  it('should move reference images beside the picks they fed', async () => {
+    write('.canon/review/references/nav.png', 'x')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/references',
+      to: '.canon/picks/references',
+      classified: undefined,
+    })
+  })
+
+  it('should flatten a branch report beside the audits and rewrite its citation', async () => {
+    write('.canon/review/branch/review-user-batch.md', 'a report\n')
+    write(
+      '.canon/tasks/v1.0-open.md',
+      'Findings in `.canon/review/branch/review-user-batch.md`.\n',
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/branch/review-user-batch.md',
+      to: '.canon/review/branch-user-batch.md',
+      classified: undefined,
+    })
+    expect(entryFor(plan, 'v1.0-open.md')).toContain(
+      '`.canon/review/branch-user-batch.md`',
+    )
+  })
+
+  it('should move a flat checklist into the tmp handoff folder and rewrite its citation', async () => {
+    write('.canon/review/ui-checklist-task-filter.md', '- [ ] look\n')
+    write(
+      '.canon/tasks/v1.0-open.md',
+      'Checklist at `.canon/review/ui-checklist-task-filter.md`.\n',
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/ui-checklist-task-filter.md',
+      to: '.canon/tmp/ui-checklist/task-filter.md',
+      classified: undefined,
+    })
+    expect(entryFor(plan, 'v1.0-open.md')).toContain(
+      '`.canon/tmp/ui-checklist/task-filter.md`',
+    )
+  })
+
+  it('should classify a folder holding an arm capture as a pick', async () => {
+    write('.canon/review/evidence/header-look/arm-0.png', 'x')
+    write('.canon/review/evidence/header-look/arm-0.stamp', 'x')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/evidence/header-look',
+      to: '.canon/picks/header-look',
+      classified: 'pick',
+    })
+  })
+
+  it('should classify a folder holding a design handoff as a pick', async () => {
+    write('.canon/review/evidence/brand-refs/design-handoff.md', 'handoff\n')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/evidence/brand-refs',
+      to: '.canon/picks/brand-refs',
+      classified: 'pick',
+    })
+  })
+
+  it('should number evidence folders by their oldest file, breaking a same-day tie on the full timestamp', async () => {
+    writeAt(
+      '.canon/review/evidence/later-notes/notes.md',
+      'x',
+      new Date('2026-08-03T15:00:00Z'),
+    )
+    writeAt(
+      '.canon/review/evidence/earlier-notes/notes.md',
+      'x',
+      new Date('2026-08-03T09:00:00Z'),
+    )
+    writeAt(
+      '.canon/review/evidence/earlier-notes/newer.md',
+      'x',
+      new Date('2026-09-01T09:00:00Z'),
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toEqual(
+      expect.arrayContaining([
+        {
+          from: '.canon/review/evidence/earlier-notes',
+          to: '.canon/evidence/01-earlier-notes',
+          classified: 'evidence',
+        },
+        {
+          from: '.canon/review/evidence/later-notes',
+          to: '.canon/evidence/02-later-notes',
+          classified: 'evidence',
+        },
+      ]),
+    )
+  })
+
+  it('should continue numbering past an evidence folder already numbered', async () => {
+    write('.canon/evidence/03-old-survey/survey.md', 'x')
+    write('.canon/review/evidence/new-survey/survey.md', 'x')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/review/evidence/new-survey',
+      to: '.canon/evidence/04-new-survey',
+      classified: 'evidence',
+    })
+  })
+
+  it('should refuse an evidence folder whose slug is already numbered', async () => {
+    write('.canon/evidence/01-survey/survey.md', 'x')
+    write('.canon/review/evidence/survey/survey.md', 'x')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toHaveLength(0)
+    expect(plan.collisions).toEqual([join(root, '.canon/evidence/01-survey')])
+  })
+
+  it('should rewrite a pick and an evidence citation to their derived destinations', async () => {
+    write('.canon/review/evidence/header-look/arm-0.png', 'x')
+    write('.canon/review/evidence/survey/survey.md', 'x')
+    write(
+      '.canon/tasks/archive/v1.0-shipped.md',
+      [
+        'Arms at `.canon/review/evidence/header-look/arm-0.png`.',
+        'Counts in `.canon/review/evidence/survey/survey.md`.',
+        'A sibling `.canon/review/evidence/survey-two/` is not this one.',
+        '',
+      ].join('\n'),
+    )
+
+    const plan = await planFrom(root)
+    const text = entryFor(plan, 'v1.0-shipped.md')
+
+    expect(text).toContain('`.canon/picks/header-look/arm-0.png`')
+    expect(text).toContain('`.canon/evidence/01-survey/survey.md`')
+    expect(text).toContain('`.canon/review/evidence/survey-two/`')
+  })
 })
 
 describe('applyRecordLayout', () => {
@@ -210,6 +434,37 @@ describe('applyRecordLayout', () => {
       ),
     ).toContain('.canon/memory/archive/')
   })
+
+  it('should remove the branch folder once its last report moves out', async () => {
+    write('.canon/review/branch/review-user-batch.md', 'a report\n')
+
+    const plan = await planFrom(root)
+    const result = await applyRecordLayout(plan)
+
+    expect(result.failed).toEqual([])
+    expect(existsSync(join(root, '.canon/review/branch-user-batch.md'))).toBe(
+      true,
+    )
+    expect(existsSync(join(root, '.canon/review/branch'))).toBe(false)
+  })
+
+  it('should rewrite a citation inside an evidence folder before numbering moves it', async () => {
+    write('.canon/review/evidence/survey/survey.md', 'x')
+    write(
+      '.canon/review/evidence/survey/notes.md',
+      'See `.canon/review/feedback/feedback-a-1.md`.\n',
+    )
+    write('.canon/review/feedback/feedback-a-1.md', 'a report\n')
+
+    const plan = await planFrom(root)
+    const result = await applyRecordLayout(plan)
+
+    expect(result.failed).toEqual([])
+    expect(
+      readFileSync(join(root, '.canon/evidence/01-survey/notes.md'), 'utf8'),
+    ).toContain('`.canon/feedback/feedback-a-1.md`')
+    expect(existsSync(join(root, '.canon/review/evidence/survey'))).toBe(false)
+  })
 })
 
 describe('strayReceipts', () => {
@@ -229,10 +484,14 @@ describe('strayReceipts', () => {
 })
 
 describe('RECORD_LAYOUT_MOVES', () => {
-  it('should carry one entry per move, data-shaped for a later batch to append', () => {
-    expect(RECORD_LAYOUT_MOVES).toEqual([
-      { from: ['review', 'memory'], to: ['memory', 'review'] },
-      { from: ['.tmp', 'memory-archive'], to: ['memory', 'archive'] },
+  it('should keep batch 2 as its first two rows, data-shaped for a later batch to append', () => {
+    expect(RECORD_LAYOUT_MOVES.slice(0, 2)).toEqual([
+      { kind: 'folder', from: ['review', 'memory'], to: ['memory', 'review'] },
+      {
+        kind: 'folder',
+        from: ['.tmp', 'memory-archive'],
+        to: ['memory', 'archive'],
+      },
     ])
   })
 })
