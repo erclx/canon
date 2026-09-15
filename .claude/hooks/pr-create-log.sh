@@ -43,9 +43,9 @@ esac
 # The log is scratch, so it follows the scratch folder to whichever record root
 # the project carries rather than creating a second one beside it.
 if [ -d "$root/.canon" ]; then
-  log_dir="$root/.canon/tmp/pr-create-log"
+  log_dir="$root/.canon/tmp/pr/log"
 else
-  log_dir="$root/.claude/.tmp/pr-create-log"
+  log_dir="$root/.claude/.tmp/pr/log"
 fi
 mkdir -p "$log_dir"
 session=$(printf '%s' "$input" | jq -r '.session_id // "unknown"')

@@ -267,11 +267,11 @@ describe('planRecordLayout', () => {
 
     expect(movesTo(plan)).toContainEqual({
       from: '.canon/review/ui-checklist-task-filter.md',
-      to: '.canon/tmp/ui-checklist/task-filter.md',
+      to: '.canon/tmp/handoff/ui-checklist/task-filter.md',
       classified: undefined,
     })
     expect(entryFor(plan, 'v1.0-open.md')).toContain(
-      '`.canon/tmp/ui-checklist/task-filter.md`',
+      '`.canon/tmp/handoff/ui-checklist/task-filter.md`',
     )
   })
 

@@ -81,7 +81,7 @@ A missing file at the requested path is a harness result, never a standard failu
 
 ## What a run leaves behind
 
-Every run appends a row to `ledger.md` and copies its raw output to `.canon/tmp/eval-runs/<arm>-<timestamp>/`. The row is committed and the output is gitignored, which splits the durable record from the bulky one: a transcript carries the full text of every file the session read, so a hundred retained runs is a repository hundreds of megabytes larger for every clone.
+Every run appends a row to `ledger.md` and copies its raw output to `.canon/tmp/runs/eval/<arm>-<timestamp>/`. The row is committed and the output is gitignored, which splits the durable record from the bulky one: a transcript carries the full text of every file the session read, so a hundred retained runs is a repository hundreds of megabytes larger for every clone.
 
 Both writes are additive. A failure to record warns on stderr and the judged result still prints, since stdout is the data contract.
 

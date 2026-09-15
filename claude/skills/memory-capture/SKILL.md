@@ -44,7 +44,7 @@ For each project candidate, match its subject against `canon/context/index.md`. 
 
 Fail closed. A project candidate matching no entry stays a memory file, and so does one matching two entries where neither is clearly the owner. The residue is what the folder is for, and a fact filed under the wrong entry is worse than one in memory because a context entry is a surface sessions trust.
 
-Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation the shell does directly, so send it as a plain single `Bash` command carrying a heredoc:
+Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation the shell does directly, so send it as a plain single `Bash` command carrying a heredoc:
 
 A flat domain takes:
 
@@ -96,7 +96,7 @@ Respond with one line per fact routed, written, or updated:
 
 When anything routed, add a line naming the handoff so the caller knows a `docs-fold` pass is owed:
 
-`→ Routed facts wait at .canon/tmp/memory-routing/<slug>.md. Run /docs-fold to fold them in.`
+`→ Routed facts wait at .canon/tmp/handoff/memory-routing/<slug>.md. Run /docs-fold to fold them in.`
 
 Omit that line when the caller runs `docs-fold` itself later in its own chain.
 

@@ -1164,7 +1164,7 @@ export function register(program: Command): void {
         '  review/{design,board,slides,diagrams}/ -> tmp/render/<kind>/',
         '  review/references/              -> picks/references/',
         '  review/branch/review-<slug>.md  -> review/branch-<slug>.md',
-        '  review/ui-checklist-<slug>.md   -> tmp/ui-checklist/<slug>.md',
+        '  review/ui-checklist-<slug>.md   -> tmp/handoff/ui-checklist/<slug>.md',
         '  review/evidence/<slug>/         -> picks/<slug>/ or evidence/<nn>-<slug>/',
         '',
         'An evidence folder is a pick when it directly holds an arm-<id>',

@@ -13,7 +13,7 @@ A row records that a run happened. `result-<arm>.md` records what a run found. T
 - `Cost`: `total_cost_usd` as reported by the run
 - `Turns`: `num_turns` as reported by the run
 - `Verdict`: `pending` on append. Whoever judges the report edits the cell to `pass`, `fail`, or `inconclusive`. What those mean depends on `Kind`, so read the two columns together
-- `Output`: the retained raw output under `.canon/tmp/eval-runs/`, gitignored and never pruned. Reads `none` when retention failed, so the cell never names a directory that was never written
+- `Output`: the retained raw output under `.canon/tmp/runs/eval/`, gitignored and never pruned. Reads `none` when retention failed, so the cell never names a directory that was never written
 
 ## Reading a row
 

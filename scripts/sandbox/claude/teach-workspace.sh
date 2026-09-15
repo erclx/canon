@@ -268,7 +268,7 @@ stage_setup() {
     log_info "         for the reference page, I approve it in advance."
     log_info "Expect:  declared in fixtures/claude/teach-workspace/promote/expect.toml"
     log_info "         Check it with: canon sandbox check claude:teach-workspace promote"
-    log_info "         A handoff at .canon/tmp/teach-promotion/promote-regex.md"
+    log_info "         A handoff at .canon/tmp/handoff/teach-promotion/promote-regex.md"
     log_info "         carrying one heading"
     log_info "         naming a path under docs/ and the source page under it."
     log_info "         Nothing written into .claude/wiki/ or docs/ themselves, and the"

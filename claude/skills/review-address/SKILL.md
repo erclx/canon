@@ -99,7 +99,7 @@ moved, which the earlier test could not see. Rebase again under
 continue. The second push costs one extra force-push in a
 case that needs the fix and the sibling to touch the same lines.
 
-Then write a summary reply to `.canon/tmp/address-review/reply-<number>.md`
+Then write a summary reply to `.canon/tmp/pr/reply/reply-<number>.md`
 mapping each finding to what changed, or to a one-line reason when it is a
 conscious-accept rather than a defect. Key the filename on the PR number so two
 sessions addressing different pull requests never overwrite each other between
@@ -154,7 +154,7 @@ Before posting, follow `${CLAUDE_SKILL_DIR}/../../standards/publish.md`
 and run its scan against the reply:
 
 ```bash
-canon labels scan --body-file .canon/tmp/address-review/reply-<number>.md
+canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md
 ```
 
 The hook skips `.canon/tmp/`, so this scan is the only gate on the published
@@ -163,8 +163,8 @@ capture the posted comment's id, since Step 7 edits this exact comment rather
 than trusting whichever one `gh` considers last:
 
 ```bash
-comment_url=$(gh pr comment <number> --body-file .canon/tmp/address-review/reply-<number>.md)
-echo "${comment_url##*issuecomment-}" > .canon/tmp/address-review/reply-<number>.id
+comment_url=$(gh pr comment <number> --body-file .canon/tmp/pr/reply/reply-<number>.md)
+echo "${comment_url##*issuecomment-}" > .canon/tmp/pr/reply/reply-<number>.id
 ```
 
 ## Step 7: confirm resolution
@@ -176,7 +176,7 @@ the closing confirmation to the reply file Step 6 already posted, so the thread
 carries one terminal state rather than a second comment under no heading:
 
 ```bash
-printf '\n✅ All review findings addressed, CI green.\n' >> .canon/tmp/address-review/reply-<number>.md
+printf '\n✅ All review findings addressed, CI green.\n' >> .canon/tmp/pr/reply/reply-<number>.md
 ```
 
 A rebase-only run addressed no finding, so it appends its own confirmation
@@ -184,14 +184,14 @@ instead of that one. Claiming findings were addressed on a pull request that
 carries none is false on a surface nothing else checks:
 
 ```bash
-printf '\n✅ Rebased onto origin/main, CI green. No review findings were open.\n' >> .canon/tmp/address-review/reply-<number>.md
+printf '\n✅ Rebased onto origin/main, CI green. No review findings were open.\n' >> .canon/tmp/pr/reply/reply-<number>.md
 ```
 
 Re-run the scan against the updated file, since the appended line is new
 content the Step 6 scan never saw:
 
 ```bash
-canon labels scan --body-file .canon/tmp/address-review/reply-<number>.md
+canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md
 ```
 
 Then edit the exact comment Step 6 posted, read back from the id it saved,
@@ -201,12 +201,12 @@ so read the id as its own plain command and write the printed value as a
 literal in the `gh api` call rather than a substitution or a variable:
 
 ```bash
-cat .canon/tmp/address-review/reply-<number>.id
+cat .canon/tmp/pr/reply/reply-<number>.id
 ```
 
 ```bash
 gh api -X PATCH "repos/{owner}/{repo}/issues/comments/<id printed above>" \
-  -F body=@.canon/tmp/address-review/reply-<number>.md
+  -F body=@.canon/tmp/pr/reply/reply-<number>.md
 ```
 
 `--edit-last` was the first shape and it targets the wrong object here.
@@ -243,10 +243,10 @@ Do not merge. Hand back to the orchestrator for re-review.
 
 ## Post-review findings
 
-Not everything worth reaching the reviewing session surfaces inside the numbered flow above. A worker that settled a risk, filed a follow-up, or found something else worth reporting after Step 7 already closed the review posts it directly rather than waiting on a review pass that has nothing left to trigger it. Write the body the way Step 6 writes a reply: load `write-human` for voice, follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for the banned words, and run the `${CLAUDE_SKILL_DIR}/../../standards/publish.md` scan before posting with `canon labels scan --body-file .canon/tmp/address-review/reply-<number>.md`.
+Not everything worth reaching the reviewing session surfaces inside the numbered flow above. A worker that settled a risk, filed a follow-up, or found something else worth reporting after Step 7 already closed the review posts it directly rather than waiting on a review pass that has nothing left to trigger it. Write the body the way Step 6 writes a reply: load `write-human` for voice, follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for the banned words, and run the `${CLAUDE_SKILL_DIR}/../../standards/publish.md` scan before posting with `canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md`.
 
 Open with `## Post-review findings` rather than `## Review response`, since nothing on the thread is being answered. `review-pr` states the full heading set this belongs to and routes it the same as a response: `role-orchestrator`'s poll picks it up and sends the reviewing session back for a pass. Close the body with `🤖 Addressed by Claude Code` on its own line, matching the reply's footer.
 
 ```bash
-gh pr comment <number> --body-file .canon/tmp/address-review/reply-<number>.md
+gh pr comment <number> --body-file .canon/tmp/pr/reply/reply-<number>.md
 ```

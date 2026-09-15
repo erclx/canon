@@ -54,7 +54,7 @@ Every classification line names a pull request and a state. A line starting `pol
 
 The script exits non-zero and classifies nothing when the open pull request list itself fails to load. That case would otherwise report every tracked pull request as merged, so the baseline is left untouched and the run says so.
 
-The baseline lives at `.canon/tmp/pr-poll/baseline.txt` under the main worktree root and is per-machine. A first run against a board already in flight reports each open pull request once before it settles.
+The baseline lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root and is per-machine. A first run against a board already in flight reports each open pull request once before it settles.
 
 The five review headings the script matches are written by `review-pr` and `review-address`, and the whole set is stated once in the first. The reply family is matched by jq filters in the script, so a project posting its replies under different headings edits those to match. The review family is matched inside `canon pr review-state` instead, which the script and `review-pr` both read through, so a project renaming either review heading changes the verb rather than the script. Either way, a heading nothing matches reads as a pull request nobody has reviewed.
 

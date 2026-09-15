@@ -217,7 +217,7 @@ Still owed:    <what the destination expects that the page does not carry yet>
 
 Then stop and let the operator strike, redirect, or confirm each block.
 
-Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against. Record each confirmed block in `.canon/tmp/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists, with one H2 per destination naming its path, the source page beneath it, and the page body fenced:
+Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against. Record each confirmed block in `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists, with one H2 per destination naming its path, the source page beneath it, and the page body fenced:
 
 ````markdown
 ## <destination path>
@@ -258,7 +258,7 @@ A promotion pass reports its own shape instead, one line per page the operator c
 
 ```plaintext
 ➡️ Promoting: .canon/teach/<nn>-<topic>/reference/<slug>.md → <destination path>
-→ Confirmed pages wait at .canon/tmp/teach-promotion/<slug>.md. Run /docs-fold from a branch to fold them in.
+→ Confirmed pages wait at .canon/tmp/handoff/teach-promotion/<slug>.md. Run /docs-fold from a branch to fold them in.
 ```
 
 A pass where the operator confirmed nothing writes no handoff file and reports that alone.

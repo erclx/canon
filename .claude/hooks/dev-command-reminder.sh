@@ -40,9 +40,9 @@ key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 # The marker is scratch, so it follows the scratch folder to whichever record
 # root the project carries rather than creating a second one beside it.
 if [ -d "$project/.canon" ]; then
-  marker_dir="$project/.canon/tmp/dev-command-reminder"
+  marker_dir="$project/.canon/tmp/hooks/dev-command-reminder"
 else
-  marker_dir="$project/.claude/.tmp/dev-command-reminder"
+  marker_dir="$project/.claude/.tmp/hooks/dev-command-reminder"
 fi
 marker="$marker_dir/$key"
 [ -f "$marker" ] && exit 0

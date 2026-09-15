@@ -35,7 +35,7 @@ The two halves close in one act, so neither can run before the other and no call
 
 A fact a session learns is routed by owner rather than filed in one place. `memory-capture` classifies each candidate, and a project fact whose subject names an entry in `canon/context/index.md` goes to that entry, which the three-tier model already loads on demand. Everything else stays a memory file. The test is a named catalog entry rather than a judgment about fit, so it fails closed to memory when no entry matches or when two do.
 
-Capture never edits a context entry. It appends the fact to `.canon/tmp/memory-routing/<slug>.md` and `docs-fold` folds it in, which keeps one skill writing those files. The handoff is a file rather than a spoken result so it survives a compaction between the two steps, and so a standalone capture leaves something a later `/docs-fold` consumes.
+Capture never edits a context entry. It appends the fact to `.canon/tmp/handoff/memory-routing/<slug>.md` and `docs-fold` folds it in, which keeps one skill writing those files. The handoff is a file rather than a spoken result so it survives a compaction between the two steps, and so a standalone capture leaves something a later `/docs-fold` consumes.
 
 A routing file written under the `latest` slug can collect facts for several domains and several sessions, so the branch consuming it owns only part of what it holds. A fold therefore takes one section at a time and deletes the file once no section is left, since folding it whole pulls an unrelated domain into the diff and deleting it whole discards a fact nobody read.
 

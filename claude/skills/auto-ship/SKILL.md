@@ -121,7 +121,7 @@ The verb ships with the CLI and this body ships with the plugin, matching Step 6
 
 If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-test`.
 
-If `ui-test` produces a manual checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
+If `ui-test` produces a manual checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
 
 If all UI changes are covered by e2e tests, continue.
 

@@ -179,7 +179,7 @@ stage_setup() {
     log_info "Action:  /review-pr"
     log_info "Expect:  reviews the PR diff against docs, posts findings to the PR via gh pr review --comment"
     log_info "         opens the comment with the ## Review heading"
-    log_info "         writes the body to .canon/tmp/pr-review/body-<number>-<short-sha>.md"
+    log_info "         writes the body to .canon/tmp/pr/review/body-<number>-<short-sha>.md"
     log_info "         flags the missing title validation, does NOT merge"
     ;;
 
@@ -315,7 +315,7 @@ Accepted as recorded. No status field is added, since nothing consumes one and t
     log_info "Expect:  reads ## For the reviewer bounded to its own bullets, answers it from the diff"
     log_info "         posts a **For the reviewer** block carrying the answer"
     log_info "         posts under ## Review closed, since the bullet is answered and nothing else is owed"
-    log_info "         writes the body to .canon/tmp/pr-review/body-<number>-<short-sha>.md, does NOT merge"
+    log_info "         writes the body to .canon/tmp/pr/review/body-<number>-<short-sha>.md, does NOT merge"
     ;;
 
   "late-finding")

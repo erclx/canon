@@ -48,9 +48,9 @@ session=$(printf '%s' "$input" | jq -r '.session_id // "none"')
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 project="${CLAUDE_PROJECT_DIR:-.}"
 if [ -d "$project/.canon" ]; then
-  marker_dir="$project/.canon/tmp/scratch-guard"
+  marker_dir="$project/.canon/tmp/hooks/scratch-guard"
 else
-  marker_dir="$project/.claude/.tmp/scratch-guard"
+  marker_dir="$project/.claude/.tmp/hooks/scratch-guard"
 fi
 marker="$marker_dir/$key"
 [ -f "$marker" ] && exit 0

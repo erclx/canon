@@ -29,7 +29,7 @@ The miss is fatal rather than a warning because a cut half that silently kept it
 
 A run that costs money leaves two records, split by what each costs to keep.
 
-`scripts/eval/ledger.md` takes one appended row per run carrying date, arm, kind, subject commit, cost, turns, verdict, and output path, and is committed. The raw transcript lands in `.canon/tmp/eval-runs/<arm>-<timestamp>/` and is not, because a transcript holds the full text of every file the session read and a hundred retained runs is a repository hundreds of megabytes larger for every clone. The row is the durable record, and a transcript is promoted into the arm's result document by hand on the day it becomes evidence for a claim.
+`scripts/eval/ledger.md` takes one appended row per run carrying date, arm, kind, subject commit, cost, turns, verdict, and output path, and is committed. The raw transcript lands in `.canon/tmp/runs/eval/<arm>-<timestamp>/` and is not, because a transcript holds the full text of every file the session read and a hundred retained runs is a repository hundreds of megabytes larger for every clone. The row is the durable record, and a transcript is promoted into the arm's result document by hand on the day it becomes evidence for a claim.
 
 Retention is additive. A failure to write either record warns and the verdict still prints, and a row whose retention failed records its output cell as `none` rather than naming a directory nothing wrote.
 
@@ -53,7 +53,7 @@ The row is appended with `>>` and anchors on no existing line, so its table has 
 
 ## Limits
 
-- Nothing prunes `.canon/tmp/eval-runs/`. It is the second uncapped scratch folder after `sandbox-runs/`, and neither is queued for a cap, since automatic pruning was evaluated and rejected. Clearing it by hand loses every `Output` path the ledger points at, which is the intended trade rather than a bug.
+- Nothing prunes `.canon/tmp/runs/eval/`. It is the second uncapped scratch folder after `runs/sandbox/`, and neither is queued for a cap, since automatic pruning was evaluated and rejected. Clearing it by hand loses every `Output` path the ledger points at, which is the intended trade rather than a bug.
 - `run.sh` is safe serially and not concurrently. Two arms starting in the same second race on the `while [ -e "$run_dir" ]` existence check, and parallel `>>` appends to the ledger can interleave. Parallelism is the obvious fix for wall clock, which is the harness's real cost. Fix both hazards before taking it, since a corrupted ledger is the one record a re-run cannot rebuild.
 
 ### The snapshot blind spot
@@ -64,7 +64,7 @@ The sandbox picked a boundary, watching the four shared-scratch directories unde
 
 ### A fixture under the project root inherits its instructions
 
-A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. A fixture path under `.canon/tmp/groundwork-fixtures/<slug>/` would put a headless arm run there measuring this repository rather than the arm, which is why `scripts/standards/authoring-test/run.sh` extracts to `mktemp -d` instead and states the reason in a comment. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
+A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. A fixture path under `.canon/tmp/runs/groundwork-fixtures/<slug>/` would put a headless arm run there measuring this repository rather than the arm, which is why `scripts/standards/authoring-test/run.sh` extracts to `mktemp -d` instead and states the reason in a comment. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
 
 ### A format spec is not an instruction
 

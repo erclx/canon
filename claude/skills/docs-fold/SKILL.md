@@ -149,7 +149,7 @@ Read `canon/context/index.md` at `pwd` to see which domain entries exist. Skip t
 
 Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
 
-**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `canon/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
+**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `canon/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
 
 This half is not diff-scoped and must not be. A gotcha a session hit while working is exactly the fact the diff never shows, and scoping it to changed files would drop the entries worth keeping. The handoff is a named input rather than a scan, so the reach stays bounded to what capture decided.
 
@@ -183,13 +183,13 @@ Write each updated entry immediately. Output one line per file, naming the path 
 
 Add a line naming the handoff when one was consumed:
 
-`🧹 Folded: .canon/tmp/memory-routing/<slug>.md`
+`🧹 Folded: .canon/tmp/handoff/memory-routing/<slug>.md`
 
 The base lint-staged config runs `canon indexes regen` on every committed `*.md`, so `canon/context/index.md` refreshes automatically on commit. No manual step needed.
 
 ## Step 8: fold promoted pages
 
-Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/teach-promotion/<slug>.md` at the main worktree root. `teach-workspace` writes it, one H2 per destination naming the path, with a source line under the heading and the page body in a fenced block below that. Read the body out of the fence rather than off the heading level, since a reference page carries headings of its own and only the fence separates them from the next destination. Skip this step silently when the file is absent, which is every run where nothing was promoted.
+Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root. `teach-workspace` writes it, one H2 per destination naming the path, with a source line under the heading and the page body in a fenced block below that. Read the body out of the fence rather than off the heading level, since a reference page carries headings of its own and only the fence separates them from the next destination. Skip this step silently when the file is absent, which is every run where nothing was promoted.
 
 Each block is a page an operator already confirmed a destination for, so this step lands it rather than judging it again. Write to the destination the heading names, at `pwd` rather than at the main root, since every destination here is a tracked file that commits with the branch:
 
@@ -204,7 +204,7 @@ Output one line per page landed:
 
 Add a line naming the handoff when one was consumed:
 
-`🧹 Folded: .canon/tmp/teach-promotion/<slug>.md`
+`🧹 Folded: .canon/tmp/handoff/teach-promotion/<slug>.md`
 
 Report a block left unfolded rather than dropping it:
 
