@@ -6,8 +6,13 @@ CLI toolkit for managing AI workflows, developer standards, and project tooling 
 
 The toolkit is agent-first. Every surface is designed so a Claude Code skill or other agent can orchestrate it as well as a human. When adding or changing a CLI command, verify each of these holds.
 
+Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from it.
+
+- Every command has a non-interactive path via args or `CANON_NON_INTERACTIVE=1`. Never require a TTY.
+- Data goes to stdout. UI and logs go to stderr. JSON output must pipe clean through any wrapper.
 - Extend existing commands with flags over creating bespoke variants. Prefer `--add` and similar composition over stack explosion.
 - A session reading toolkit state prefers a CLI verb over its own inspection wherever one exists, since the verb is the surface under test and a hand-rolled read of the same files is not.
+- This repo is behavior-heavy. Planning and review are the work here, so a higher supervision ratio than a typical app repo is expected.
 - Toolkit surfaces stay general-purpose. Map to external-tool schemas in a thin sync adapter rather than adopting them as the canonical shape.
 
 ## Behavior
@@ -64,7 +69,6 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 | Modifying `snippets/`                                                             | `internal-snippets`   |
 | Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
 
-@canon/REQUIREMENTS.md
 @canon/ARCHITECTURE.md
 @canon/context/index.md
 

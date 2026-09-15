@@ -110,7 +110,7 @@ An `@` line earns its place by carrying a catalog or a short document every sess
 
 ### What a CLAUDE.md line has to carry
 
-A line stays in either `CLAUDE.md` only when no always-loaded core rule, no path-scoped rule firing at the moment it matters, no eager import, and no catalog already carries it. A path-scoped rule fires on edit rather than during planning, so a principle a command is planned against needs an eager copy even where a rule on `src/` restates it. The root gets that copy by importing `canon/REQUIREMENTS.md`, whose constraints state the non-interactive and stream-split principles, rather than by restating them as bullets.
+A line stays in either `CLAUDE.md` only when no always-loaded core rule, no path-scoped rule firing at the moment it matters, no eager import, and no catalog already carries it. A path-scoped rule fires on edit rather than during planning, so a design principle a command is planned against stays in the root even where a rule on `src/` restates it.
 
 The seed takes one exception on top. A target can install the seed without governance, so a seed line a core rule duplicates stays when that target would otherwise lose the instruction, which is why the seed keeps its Context bullet while the root carries no Tasks or Parallel sessions section.
 
