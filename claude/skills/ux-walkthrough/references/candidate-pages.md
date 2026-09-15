@@ -2,7 +2,7 @@
 
 Read when drafting arms for a finding. Skip it for a finding with no visible choice.
 
-Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/references/live-arms.md` for lifting the markup, copying the stylesheet, and building the page. What follows is only where this walkthrough departs from that shared path.
+Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Step 2's live-app branch for lifting the markup, copying the stylesheet, and building the page, which routes to its own `references/live-arms.md`. What follows is only where this walkthrough departs from that shared path.
 
 ## Where this departs from draft-and-pick
 
