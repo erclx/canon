@@ -11,6 +11,12 @@ import {
   ORDINAL_KINDS,
 } from '@/records/ordinal'
 import {
+  DEFAULT_OLDER_THAN_DAYS,
+  type PruneReport,
+  type PruneUnit,
+  pruneScratch,
+} from '@/records/prune'
+import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
@@ -50,6 +56,9 @@ const EXIT_MIGRATABLE = 2
 /** Returned when `--claim` loses every retry to a collision. */
 const EXIT_CONTENDED = 2
 
+/** Returned when candidates exist and `--write` was not passed. */
+const EXIT_PRUNABLE = 2
+
 interface ValidateCommandOptions {
   readonly json?: boolean
   readonly root?: string
@@ -59,6 +68,11 @@ type BackupCommandOptions = ValidateCommandOptions
 
 interface MigrateCommandOptions extends ValidateCommandOptions {
   readonly write?: boolean
+}
+
+interface PruneCommandOptions extends ValidateCommandOptions {
+  readonly write?: boolean
+  readonly olderThan?: string
 }
 
 interface OrdinalCommandOptions extends ValidateCommandOptions {
@@ -234,6 +248,55 @@ export function register(program: Command): void {
     })
 
   records
+    .command('prune-tmp')
+    .description('Report scratch nobody has touched in a while, and delete it')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--write', 'Delete every candidate the report lists')
+    .option(
+      '--older-than <days>',
+      `Age in days a unit's newest file must clear to be offered (default ${DEFAULT_OLDER_THAN_DAYS})`,
+    )
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'A candidate is a unit whose newest file is older than --older-than:',
+        '  a tmp/<slug>/ folder, a folder one level inside runs/, render/, or',
+        '  pr/, or a single marker file inside hooks/<hook>/. A unit with no',
+        '  files is offered whatever its age.',
+        '',
+        'tmp/handoff/ and tmp/pr/poll/ are never offered, since a reader deletes',
+        'a handoff itself and a poll baseline is live state. The pre-split names',
+        'the same two folders replaced (memory-routing/, teach-promotion/,',
+        'ui-checklist/, pr-poll/) are skipped the same way rather than offered',
+        'as ordinary slugs.',
+        '',
+        'Exit codes:',
+        '  0  nothing to prune, or --write deleted every candidate',
+        '  1  refused, with the reason on stderr or in the JSON record, or a',
+        '     delete failed',
+        '  2  candidates exist and --write was not passed',
+        '',
+        'It writes nothing until --write is passed, matching canon records',
+        'migrate: a session record has no history to undo a wrong delete from.',
+        'It reads mtime like canon records size, so a machine restored by canon',
+        'records pull reads everything as new, which fails safe by offering',
+        'nothing.',
+        '',
+        'Examples:',
+        '  canon records prune-tmp',
+        '  canon records prune-tmp --write',
+        '  canon records prune-tmp --older-than 30 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: PruneCommandOptions) => {
+      process.exitCode = await runPruneTmp(opts)
+    })
+
+  records
     .command('push')
     .description(
       'Commit the backed record folders and push them to the records remote',
@@ -388,6 +451,102 @@ function reportSize(outcome: Extract<SizeOutcome, { ok: true }>): void {
     `${plural(outcome.files, 'file')}, ${formatBytes(outcome.bytes)} across ${plural(present.length, 'folder')}`,
   )
   outro()
+}
+
+async function runPruneTmp(opts: PruneCommandOptions): Promise<number> {
+  const emitJson = opts.json ?? false
+  const olderThan = Number(opts.olderThan ?? DEFAULT_OLDER_THAN_DAYS)
+
+  if (!Number.isFinite(olderThan) || olderThan <= 0) {
+    return reportRefusal(
+      'canon records prune-tmp',
+      {
+        reason: 'bad-older-than',
+        message: `--older-than must be a positive number of days, got ${opts.olderThan}.`,
+      },
+      emitJson,
+    )
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const write = opts.write ?? false
+  const outcome = await pruneScratch(root, olderThan, write)
+
+  if (!outcome.ok)
+    return reportRefusal('canon records prune-tmp', outcome, emitJson)
+
+  return reportPrune(outcome, emitJson)
+}
+
+function pruneRow(entry: PruneUnit): string[] {
+  return [
+    entry.path,
+    String(entry.files),
+    formatBytes(entry.bytes),
+    entry.newest ?? '',
+  ]
+}
+
+function pruneExitCode(outcome: PruneReport): number {
+  if (outcome.failed.length > 0) return 1
+  if (outcome.candidates.length > 0 && outcome.deleted.length === 0)
+    return EXIT_PRUNABLE
+  return 0
+}
+
+function reportPrune(outcome: PruneReport, emitJson: boolean): number {
+  const exit = pruneExitCode(outcome)
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify(outcome)}\n`)
+    return exit
+  }
+
+  intro('canon records prune-tmp')
+
+  if (outcome.candidates.length === 0) {
+    logStep('Prunable')
+    logInfo(`none, older than ${plural(outcome.olderThan, 'day')}`)
+  } else {
+    logStep(outcome.deleted.length > 0 ? 'Deleted' : 'Prunable')
+
+    const headers = ['path', 'files', 'size', 'newest']
+    const rows = outcome.candidates.map(pruneRow)
+    const widths = headers.map((header, column) =>
+      columnWidth(
+        header,
+        rows.map((row) => row[column]),
+      ),
+    )
+    const render = (cells: readonly string[]): string =>
+      cells
+        .map((cell, column) =>
+          column === 0
+            ? cell.padEnd(widths[column])
+            : cell.padStart(widths[column]),
+        )
+        .join('  ')
+        .trimEnd()
+
+    pipeOutput([render(headers), ...rows.map(render)].join('\n'))
+
+    if (outcome.deleted.length === 0) logInfo('Re-run with --write to delete.')
+  }
+
+  if (outcome.skipped.length > 0) {
+    logStep('Skipped')
+    for (const entry of outcome.skipped)
+      logInfo(`${entry.path}: ${entry.reason}`)
+  }
+
+  if (outcome.failed.length > 0) {
+    logStep('Failed')
+    for (const entry of outcome.failed)
+      logWarn(`${entry.path}: ${entry.message}`)
+  }
+
+  outro()
+  return exit
 }
 
 async function runPush(opts: BackupCommandOptions): Promise<number> {

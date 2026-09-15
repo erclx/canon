@@ -53,7 +53,7 @@ The row is appended with `>>` and anchors on no existing line, so its table has 
 
 ## Limits
 
-- Nothing prunes `.canon/tmp/runs/eval/`. It is the second uncapped scratch folder after `runs/sandbox/`, and neither is queued for a cap, since automatic pruning was evaluated and rejected. Clearing it by hand loses every `Output` path the ledger points at, which is the intended trade rather than a bug.
+- Nothing prunes `.canon/tmp/runs/eval/` automatically, which was evaluated and rejected. It is the second uncapped scratch folder after `runs/sandbox/`, and `canon records prune-tmp` is the manual route, reading each as one unit. Clearing either loses every `Output` path the ledger points at, the intended trade rather than a bug.
 - `run.sh` is safe serially and not concurrently. Two arms starting in the same second race on the `while [ -e "$run_dir" ]` existence check, and parallel `>>` appends to the ledger can interleave. Parallelism is the obvious fix for wall clock, which is the harness's real cost. Fix both hazards before taking it, since a corrupted ledger is the one record a re-run cannot rebuild.
 
 ### The snapshot blind spot
