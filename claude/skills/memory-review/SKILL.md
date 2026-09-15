@@ -5,7 +5,7 @@ description: Reviews `.canon/memory/` and proposes per-entry actions (promote to
 
 # Memory review
 
-This skill drives the full memory review lifecycle in five phases. Pick the phase from what the user said and whether a review receipt already exists at `<main-root>/.canon/review/memory/memory-review-*.md`.
+This skill drives the full memory review lifecycle in five phases. Pick the phase from what the user said and whether a review receipt already exists at `<main-root>/.canon/memory/review/memory-review-*.md`.
 
 What an entry looks like and why a retired one is moved rather than deleted are fixed by `${CLAUDE_SKILL_DIR}/../../standards/memory.md`. Read it before rewriting an entry, since a promotion rewrites the rule and a rewrite has to leave the entry conforming.
 
@@ -72,7 +72,7 @@ For each in-scope entry (see Scope), pick one action:
 - **Hand off to governance**: the rule is coding-standards class (typescript, testing, naming, error-handling, performance, logging, concurrency, planning), never a cross-domain behavior rule. Do not author the rule file inline. Never edit the synced `.claude/rules/` copies of toolkit rules, because `canon gov sync` overwrites them. Stop at handoff. This and **Promote to an always-loaded rule** never both claim one entry: class names the topic (coding-standards routes here), firing axis names the rest (applies-every-session routes to the rule promote).
   - In the toolkit repo, point the user at `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own the source-of-truth rules under `governance/rules/`.
   - In a target project, point the user at the `create-rule` skill, which scaffolds a project-local rule under `.claude/rules/`.
-- **Retire**: the rule is stale, already absorbed into a durable surface, too vague to phrase as a rule, or a one-time incident narrative. Apply moves the file to `.canon/tmp/memory-archive/` rather than deleting it.
+- **Retire**: the rule is stale, already absorbed into a durable surface, too vague to phrase as a rule, or a one-time incident narrative. Apply moves the file to `.canon/memory/archive/` rather than deleting it.
 
 Retire is an archive, not a deletion, which `${CLAUDE_SKILL_DIR}/../../standards/memory.md` states as the rule and this skill executes. The archive is worth less than a plan's, since a promoted entry survives in its destination and a stale one is discarded on purpose, which is why the move is cheap rather than free.
 
@@ -92,11 +92,11 @@ Rules that resist crisp one-line phrasing default to **Retire** over promote. Ne
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
 
-Write the full proposal to `.canon/review/memory/memory-review-<slug>.md` at the main worktree root. Do not print it inline. Read `${CLAUDE_SKILL_DIR}/references/receipt-format.md` for the file structure, the item template, and how each action type varies the body. The four phases below rewrite items inside an existing receipt rather than authoring one, so none of them opens it.
+Write the full proposal to `.canon/memory/review/memory-review-<slug>.md` at the main worktree root. Do not print it inline. Read `${CLAUDE_SKILL_DIR}/references/receipt-format.md` for the file structure, the item template, and how each action type varies the body. The four phases below rewrite items inside an existing receipt rather than authoring one, so none of them opens it.
 
 A phase changing items reads the receipt, applies every change for that phase, and writes the whole file back in one command. Batching is what keeps a per-item rewrite from costing a full read each time, and it is the only route from a linked worktree, where the guard above rules out editing a line in place.
 
-Tell the user `✅ Wrote proposal to .canon/review/memory/memory-review-<slug>.md`. Ask them to fill in `Decision:` per item, then re-ping with "discuss" for question rounds or "apply" to commit.
+Tell the user `✅ Wrote proposal to .canon/memory/review/memory-review-<slug>.md`. Ask them to fill in `Decision:` per item, then re-ping with "discuss" for question rounds or "apply" to commit.
 
 Rewrite the review file in place whenever the proposal changes mid-review. The file stays the source of truth for the current decisions.
 
@@ -104,7 +104,7 @@ Rewrite the review file in place whenever the proposal changes mid-review. The f
 
 Trigger: user says "challenge the promotes", "challenge before apply", or asks for a high-bar pass. Run before Apply. No mutations to memory files or promotion targets. Review file only.
 
-1. Read the latest `.canon/review/memory/memory-review-*.md` at the main root.
+1. Read the latest `.canon/memory/review/memory-review-*.md` at the main root.
 2. For each promote item, apply three tests:
    - **Absorbed**: grep the target surface for the rule's keywords. If already stated or implied, flip to retire.
    - **Delta**: if the rule is a nice-to-have next to existing bullets, flip to retire.
@@ -115,7 +115,7 @@ Trigger: user says "challenge the promotes", "challenge before apply", or asks f
 
 Trigger: user says "discuss", "respond to questions", or any `Decision:` value contains `?` or an unrecognized verb. No mutations to memory files or targets. Review file only. Multi-round.
 
-1. Read the latest `.canon/review/memory/memory-review-*.md` at the main root.
+1. Read the latest `.canon/memory/review/memory-review-*.md` at the main root.
 2. For each item whose `Decision:` contains `?` or any unrecognized verb (anything other than `apply`, `skip`, `defer`):
    - Write a `Take:` line under `Decision:`, separated by exactly one blank line. If a `Take:` line already exists, overwrite it.
    - Format: pick + one-line reason. Max 2 sentences. Decision-help style. State the recommendation (`apply` / `skip` / `retire` / specific alternative) first, then the reason. Do not enumerate tradeoffs unless one changes the call.
@@ -157,7 +157,7 @@ Action by action type:
 - **Hand off**: do not edit governance. Archive the memory file only if the user confirmed the handoff explicitly. Otherwise leave it in place.
 - **Retire**: archive the memory file.
 
-Archiving means creating `.canon/tmp/memory-archive/` at the main worktree root and moving the file there under its original name, overwriting any file already at that name. Send the `mkdir -p` and the `mv` as two plain commands rather than joining them with `&&`, which is refused as compound from a linked worktree. Never delete a memory entry. Nothing recovers one from a gitignored folder.
+Archiving means creating `.canon/memory/archive/` at the main worktree root and moving the file there under its original name, overwriting any file already at that name. Send the `mkdir -p` and the `mv` as two plain commands rather than joining them with `&&`, which is refused as compound from a linked worktree. Never delete a memory entry. Nothing recovers one from a gitignored folder.
 
 Do not hand-edit `.canon/memory/index.md`. Once every archive move is done, regenerate it instead:
 
@@ -189,11 +189,11 @@ End with: `✅ Applied: <nums> | ⏭ Skipped: <nums> | 📝 Pending: <nums>`. Om
 
 Trigger: user says "cleanup" or "delete the receipt" after Apply has run.
 
-Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `docs-fold` Step 10 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/tmp/memory-archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
+Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `docs-fold` Step 10 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/memory/archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
 
-If no `.canon/review/memory/memory-review-*.md` exists at the main root, stop: `✅ No review receipt to clean up.` Every other refusal in this skill carries a message, and the phase reads a receipt before it does anything else.
+If no `.canon/memory/review/memory-review-*.md` exists at the main root, stop: `✅ No review receipt to clean up.` Every other refusal in this skill carries a message, and the phase reads a receipt before it does anything else.
 
-1. Read the latest `.canon/review/memory/memory-review-*.md` at the main root and confirm Apply has run against it. If any item is still 📝 pending, stop and name the pending numbers.
+1. Read the latest `.canon/memory/review/memory-review-*.md` at the main root and confirm Apply has run against it. If any item is still 📝 pending, stop and name the pending numbers.
 2. Collect it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, folding each ⏭ skipped item before the file goes. The fold happens wherever a receipt is collected, so this phase runs the same rule the Apply sweep does.
 3. Delete that one file. Leave every other receipt beside it in place, because the pending test above covers the file it read and nothing has tested the rest.
 4. Leave every memory entry in the pen. A skip records the decline on the entry and keeps the file, and applied promotions, governance handoffs, and user-type memories each stay as the review left them.
@@ -206,7 +206,7 @@ Output one line per action taken in the most recent phase:
 
 - `✅ Promoted: .canon/memory/<memory-file> → <target>`
 - `✅ Handed off: .canon/memory/<memory-file> → governance`
-- `📦 Retired: .canon/memory/<memory-file> → .canon/tmp/memory-archive/`
+- `📦 Retired: .canon/memory/<memory-file> → .canon/memory/archive/`
 - `🗑  Swept: .canon/review/<review-file>, folded <n> skips`
 - `⏭ Kept: .canon/review/<review-file>, <n> items pending`
 

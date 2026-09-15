@@ -212,7 +212,7 @@ Respond with up to five lines:
 <N minor findings kept in .canon/review/branch/review-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
-<Memory proposal at .canon/review/memory/memory-review-<slug>.md>
+<Memory proposal at .canon/memory/review/memory-review-<slug>.md>
 ```
 
 `<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the undo asked for. Writing the word `draft` there unconditionally is what this line used to do, and it named a state no step had read.

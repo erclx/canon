@@ -5,7 +5,7 @@ description: The proposal file structure, its item template, and how each action
 
 # Memory review receipt format
 
-The shape Step 4 of the Propose phase writes to `.canon/review/memory/memory-review-<slug>.md`. Only Propose writes this file. Challenge, Discuss, and Apply rewrite items inside a receipt that already exists, and Cleanup deletes one, so none of the four needs this file.
+The shape Step 4 of the Propose phase writes to `.canon/memory/review/memory-review-<slug>.md`. Only Propose writes this file. Challenge, Discuss, and Apply rewrite items inside a receipt that already exists, and Cleanup deletes one, so none of the four needs this file.
 
 ## Structure
 
