@@ -100,6 +100,18 @@ describe('pruneScratch at a .canon root', () => {
     expect(skippedPaths).toContain('.canon/tmp/pr/poll')
   })
 
+  it('should skip a scratch-root name a different migration moves out, such as memory-archive', async () => {
+    writeAt('.canon/tmp', 'memory-archive/2026-08-01-retired.md', 90)
+
+    const report = await read()
+
+    expect(paths(report)).not.toContain('.canon/tmp/memory-archive')
+    const skipped = report.skipped.find(
+      (entry) => entry.path === '.canon/tmp/memory-archive',
+    )
+    expect(skipped?.reason).toContain('canon migrate record-layout')
+  })
+
   it('should skip the pre-split handoff and poll names at the scratch root instead of offering them as slugs', async () => {
     writeAt('.canon/tmp', 'memory-routing/note.md', 90)
     writeAt('.canon/tmp', 'teach-promotion/note.md', 90)

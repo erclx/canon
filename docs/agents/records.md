@@ -173,6 +173,8 @@ A candidate is a unit whose newest file is older than the threshold: a `tmp/<slu
 
 `tmp/handoff/` and `tmp/pr/poll/` are never offered. A reader deletes a handoff themselves once it has been read, and a poll baseline is live state rather than scratch. The pre-split names the reserved split replaced, `memory-routing/`, `teach-promotion/`, `ui-checklist/`, and `pr-poll/` at the scratch root, are skipped the same way on a project the rename never reached, naming the folder they moved to, rather than being offered as ordinary slugs. An unread handoff is the one thing a wrong delete here loses for good.
 
+A scratch-root name `canon migrate record-layout` or `canon migrate scratch-evidence` moves out of scratch for good, such as `memory-archive`, is skipped the same way on a project that has not yet run that migration, naming the verb to run. The retired-entry archive `memory-archive` holds is never deleted, per the memory standard, so it stays skipped rather than aging into an offer.
+
 It writes nothing until `--write` is passed, matching `canon records migrate`: a session record has no history to undo a wrong delete from. It reads `mtime` the way `canon records size` does, so a machine restored by `canon records pull` reads its whole tree as new and fails safe by offering nothing.
 
 Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refused, sharing `no-folder` with `size`, or a delete failed. `2` candidates exist and `--write` was not passed.

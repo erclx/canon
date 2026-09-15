@@ -1,6 +1,8 @@
 import { existsSync, type Dirent } from 'node:fs'
 import { readdir, rm, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import { RECORD_LAYOUT_MOVES } from '@/migrate/record-layout'
+import { PROMOTED_FOLDERS } from '@/migrate/scratch-evidence'
 import { RECORD_ROOTS, recordDir, SCRATCH } from '@/record-root'
 import { day, newestMtime } from '@/records/size'
 
@@ -28,6 +30,33 @@ const LEGACY_MOVES: ReadonlyMap<string, string> = new Map([
   ['ui-checklist', 'handoff/ui-checklist'],
   ['pr-poll', 'pr/poll'],
 ])
+
+/**
+ * Scratch-root names a different migration moves out of scratch for good,
+ * derived from that migration's own table rather than duplicated in a second
+ * hand-kept list. `RECORD_LAYOUT_MOVES` names `memory-archive`, the
+ * retired-entry archive `045-memory` says never to delete, and `PROMOTED_FOLDERS`
+ * names an evidence folder a durable record cites by name. A project that has
+ * not run either migration still carries these at the scratch root, where an
+ * ordinary slug's own age test would eventually offer them.
+ */
+function migratedScratchNames(): ReadonlyMap<string, string> {
+  const names = new Map<string, string>()
+
+  for (const move of RECORD_LAYOUT_MOVES) {
+    if (move.from[0] === SCRATCH && move.from.length >= 2) {
+      names.set(move.from[1], 'canon migrate record-layout')
+    }
+  }
+
+  for (const folder of PROMOTED_FOLDERS) {
+    names.set(folder, 'canon migrate scratch-evidence')
+  }
+
+  return names
+}
+
+const MIGRATED_SCRATCH_NAMES = migratedScratchNames()
 
 export interface PruneUnit {
   /** Relative to the project root, at the scratch spelling the project carries. */
@@ -334,6 +363,19 @@ async function processEntry(
         {
           path: displayPath,
           reason: `moved to ${scratchDisplay}/${legacyTarget}, move or clear it by hand`,
+        },
+      ],
+    }
+  }
+
+  const migrationVerb = MIGRATED_SCRATCH_NAMES.get(name)
+  if (migrationVerb !== undefined) {
+    return {
+      units: [],
+      skipped: [
+        {
+          path: displayPath,
+          reason: `moves out under a different migration, run ${migrationVerb} to clear it`,
         },
       ],
     }
