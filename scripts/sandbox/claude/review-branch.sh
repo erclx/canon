@@ -137,7 +137,7 @@ EOF
   log_info "This arm also checks the standards citation, not the skill alone."
   log_info "  .claude/standards/ is absent, so the skill must reach the plugin copy"
   log_info "  the slug transform lives only in standards/skill.md, never in the skill body"
-  log_info "  so review-user-batch.md is evidence the fallback resolved"
+  log_info "  so branch-user-batch.md is evidence the fallback resolved"
   log_info "  read that filename yourself, the checker cannot assert it yet"
   log_info ""
   log_info "Action:  /canon:review-branch"

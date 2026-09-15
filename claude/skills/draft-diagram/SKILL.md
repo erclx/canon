@@ -167,11 +167,11 @@ After a migration pass, add: `Converted .claude/DIAGRAMS.md into N entries. The 
 If the user asks to export the diagrams (`export to svg`, `give me images`, `render to png`), run:
 
 ```bash
-mkdir -p .canon/review/diagrams && bunx -y @mermaid-js/mermaid-cli -i .canon/diagrams/<kind>.md -o .canon/review/diagrams/<kind>.png
+mkdir -p .canon/tmp/render/diagrams && bunx -y @mermaid-js/mermaid-cli -i .canon/diagrams/<kind>.md -o .canon/tmp/render/diagrams/<kind>.png
 ```
 
 Export PNG by default. Swap the extension for `.svg` only when the user asks for vector, and never for the Step 5 verification path. The CLI writes one file per `mermaid` block, suffixing when an entry holds more than one. Export every entry when the user names no kind. Output line:
 
 ```plaintext
-📝 Wrote N files to .canon/review/diagrams/
+📝 Wrote N files to .canon/tmp/render/diagrams/
 ```

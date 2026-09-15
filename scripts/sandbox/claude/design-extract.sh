@@ -167,7 +167,7 @@ EOF
     log_info "Action 1: /canon:design-extract"
     log_info "Expect:   source path announced, canon/DESIGN.md token tables filled from tokens.css"
     log_info "Action 2: canon design render"
-    log_info "Expect:   .canon/review/design/index.html with swatches, samples, and bars"
+    log_info "Expect:   .canon/tmp/render/design/index.html with swatches, samples, and bars"
     ;;
   "greenfield")
     cat <<'EOF' >package.json
@@ -217,7 +217,7 @@ EOF
     log_info "Action 1: /canon:design-extract"
     log_info "Expect:   greenfield path announced, canon/DESIGN.md proposed, most cells marked ? verify"
     log_info "Action 2: canon design render"
-    log_info "Expect:   .canon/review/design/index.html renders cleanly with swatches and samples"
+    log_info "Expect:   .canon/tmp/render/design/index.html renders cleanly with swatches and samples"
     log_info "Expect:   every tagged cell shows a ? verify marker beside its value, never inside it"
     log_info "Expect:   the confidence line reports nearly every counted cell tagged on this path"
     ;;

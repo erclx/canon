@@ -40,7 +40,7 @@ The palette and type scale live in the CLI. Own the choices the source controls.
 Shell out to the CLI. It writes the deck and reports the path.
 
 ```bash
-canon slides render --source .claude/SLIDES.md --out .canon/review/slides
+canon slides render --source .claude/SLIDES.md --out .canon/tmp/render/slides
 ```
 
 Pass `--variant light` or `--variant dark` to override the source variant for a one-off render. Pass `--open` to open the deck, and `--mirror <dir>` (or set `CANON_SLIDES_MIRROR`) to copy it into a synced folder.

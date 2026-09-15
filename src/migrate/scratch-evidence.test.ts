@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -11,7 +12,6 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   applyScratchEvidence,
-  destinationPath,
   planScratchEvidence,
   PROMOTED_FOLDERS,
   readScratchEvidenceCorpus,
@@ -25,6 +25,11 @@ function write(relative: string, text: string): void {
   const path = join(root, relative)
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, text)
+}
+
+function writeAt(relative: string, text: string, at: Date): void {
+  write(relative, text)
+  utimesSync(join(root, relative), at, at)
 }
 
 async function planFrom(at: string) {
@@ -44,7 +49,7 @@ afterEach(() => {
 })
 
 describe('planScratchEvidence', () => {
-  it('should plan a folder move for a promoted folder found on disk', async () => {
+  it('should plan a numbered folder move for a promoted folder found on disk', async () => {
     write('.canon/tmp/system-map/how-it-works.md', 'the map\n')
 
     const plan = await planFrom(root)
@@ -53,8 +58,29 @@ describe('planScratchEvidence', () => {
       {
         folder: 'system-map',
         from: sourcePath(root, 'system-map'),
-        to: destinationPath(root, 'system-map'),
+        to: join(root, '.canon/evidence/01-system-map'),
       },
+    ])
+  })
+
+  it('should number promoted folders by first appearance, continuing past an existing ordinal', async () => {
+    write('.canon/evidence/02-older-trail/notes.md', 'x')
+    writeAt(
+      '.canon/tmp/system-map/how-it-works.md',
+      'the map\n',
+      new Date('2026-08-03T15:00:00Z'),
+    )
+    writeAt(
+      '.canon/tmp/target-survey/survey.md',
+      'the survey\n',
+      new Date('2026-08-03T09:00:00Z'),
+    )
+
+    const plan = await planFrom(root)
+
+    expect(plan.moves.map((move) => move.to)).toEqual([
+      join(root, '.canon/evidence/03-target-survey'),
+      join(root, '.canon/evidence/04-system-map'),
     ])
   })
 
@@ -71,7 +97,7 @@ describe('planScratchEvidence', () => {
     )
 
     expect(entry?.rewritten).toBe(1)
-    expect(entry?.text).toContain('.canon/review/evidence/system-map')
+    expect(entry?.text).toContain('.canon/evidence/01-system-map')
     expect(entry?.text).not.toContain('.claude/.tmp/system-map')
   })
 
@@ -87,7 +113,7 @@ describe('planScratchEvidence', () => {
       candidate.path.includes('groundwork'),
     )
 
-    expect(entry?.text).toContain('.canon/review/evidence/target-survey')
+    expect(entry?.text).toContain('.canon/evidence/01-target-survey')
   })
 
   it('should leave a citation carrying the keep marker on its own line unchanged', async () => {
@@ -128,17 +154,16 @@ describe('planScratchEvidence', () => {
     ).toBe(text)
   })
 
-  it('should refuse a folder move whose destination already exists', async () => {
+  it('should refuse a folder move whose slug evidence already holds', async () => {
     write('.canon/tmp/system-map/how-it-works.md', 'the map\n')
-    write(
-      '.canon/review/evidence/system-map/how-it-works.md',
-      'already there\n',
-    )
+    write('.canon/evidence/01-system-map/how-it-works.md', 'already there\n')
 
     const plan = await planFrom(root)
 
     expect(plan.moves).toHaveLength(0)
-    expect(plan.collisions).toEqual([destinationPath(root, 'system-map')])
+    expect(plan.collisions).toEqual([
+      join(root, '.canon/evidence/01-system-map'),
+    ])
   })
 
   it('should leave a refused folder citation untouched while a moving folder citation rewrites', async () => {
@@ -147,10 +172,7 @@ describe('planScratchEvidence', () => {
     const movedText = 'Counts are in `.claude/.tmp/target-survey/survey.md`.\n'
 
     write('.canon/tmp/system-map/how-it-works.md', 'the map\n')
-    write(
-      '.canon/review/evidence/system-map/how-it-works.md',
-      'already there\n',
-    )
+    write('.canon/evidence/01-system-map/how-it-works.md', 'already there\n')
     write('.canon/tmp/target-survey/survey.md', 'the survey\n')
     write('.canon/tasks/archive/collided.md', collidedText)
     write('.canon/tasks/archive/moved.md', movedText)
@@ -165,14 +187,11 @@ describe('planScratchEvidence', () => {
     )
 
     expect(collidedEntry).toBeUndefined()
-    expect(movedEntry?.text).toContain('.canon/review/evidence/target-survey')
+    expect(movedEntry?.text).toContain('.canon/evidence/02-target-survey')
   })
 
   it('should still rewrite a late citation of a folder that already completed its move', async () => {
-    write(
-      '.canon/review/evidence/system-map/how-it-works.md',
-      'already moved\n',
-    )
+    write('.canon/evidence/03-system-map/how-it-works.md', 'already moved\n')
     write(
       '.canon/tasks/archive/late.md',
       'See `.claude/.tmp/system-map/how-it-works.md`.\n',
@@ -186,7 +205,7 @@ describe('planScratchEvidence', () => {
     const entry = plan.entries.find((candidate) =>
       candidate.path.endsWith('late.md'),
     )
-    expect(entry?.text).toContain('.canon/review/evidence/system-map')
+    expect(entry?.text).toContain('.canon/evidence/03-system-map')
   })
 })
 
@@ -206,9 +225,7 @@ describe('applyScratchEvidence', () => {
     expect(result.failed).toEqual([])
     expect(existsSync(join(root, '.canon/tmp/system-map'))).toBe(false)
     expect(
-      existsSync(
-        join(root, '.canon/review/evidence/system-map/how-it-works.md'),
-      ),
+      existsSync(join(root, '.canon/evidence/01-system-map/how-it-works.md')),
     ).toBe(true)
 
     const second = await planFrom(root)

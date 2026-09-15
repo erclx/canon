@@ -40,20 +40,20 @@ function isToolkitSource(): boolean {
 }
 
 /**
- * One producer, one subfolder. The review folder carries the output of four
- * unrelated producers, and the filename prefix was doing the folder's job by
- * hand, so each writes under its own name and the enclosing folder keeps the
- * single ignore entry and the single backed-folder entry it already had.
+ * One producer, one record folder. Feedback is not a review, so it writes
+ * under a root folder of its own rather than inside `review/`, and `canon
+ * records push` backs it with no list edit, since it carries every `.canon/`
+ * entry it does not exclude.
  */
 function writeLocal(body: string, mismatch: string | undefined): string {
-  // Resolved against the same root the write joins onto, so a checkout that has
-  // not migrated its records writes this beside the ones already there rather
-  // than opening a second root nothing reads.
-  const relativeDir = creationRel(PROJECT_ROOT, 'review', 'feedback')
-  const reviewDir = join(PROJECT_ROOT, relativeDir)
-  mkdirSync(reviewDir, { recursive: true })
+  // Resolved against the same root the write joins onto. `creationRel` reads
+  // whichever root already carries a `feedback/` folder and falls back to the
+  // creation root when neither does.
+  const relativeDir = creationRel(PROJECT_ROOT, 'feedback')
+  const feedbackDir = join(PROJECT_ROOT, relativeDir)
+  mkdirSync(feedbackDir, { recursive: true })
   const filename = `feedback-${deriveSlug(body)}-${timestamp()}.md`
-  const filePath = join(reviewDir, filename)
+  const filePath = join(feedbackDir, filename)
   writeFileSync(filePath, `${body}\n`, 'utf8')
 
   // Manual frame rather than `frameSuccess`, since the mismatch warning is a
@@ -72,7 +72,7 @@ export function register(program: Command): void {
   program
     .command('feedback')
     .description(
-      'Write toolkit feedback from stdin to .canon/review/feedback/, or open a GitHub issue with --github',
+      'Write toolkit feedback from stdin to .canon/feedback/, or open a GitHub issue with --github',
     )
     .option(
       '--github',

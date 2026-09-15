@@ -13,12 +13,12 @@ description: SLIDES.md source shape, layout catalog, render command, draft skill
 
 - `src/slides/` owns the parser, the layout functions, the design tokens, and the render
 - `examples/slides/` owns the reference deck that exercises every layout
-- `.canon/review/slides/` owns rendered decks, gitignored
+- `.canon/tmp/render/slides/` owns rendered decks, gitignored
 
 ## Decisions
 
 - The engine is a fresh general-purpose layer, not a port of any single project's deck modes. It ships one source format with a per-slide layout, so any repo writes its own `SLIDES.md` and renders with the same command.
-- The source is committed. The rendered `.pptx` lands in the gitignored `.canon/review/slides/` and can be regenerated at any time.
+- The source is committed. The rendered `.pptx` lands in the gitignored `.canon/tmp/render/slides/` and can be regenerated at any time.
 - The palette is a paper background with a rust accent, deliberately not blue. Both variants share the same accent so a deck reads consistently either way.
 
 ## Source shape
@@ -48,7 +48,7 @@ A `toc` slide renders a clickable contents list. The render builds the navigatio
 
 ## Render command
 
-`canon slides render --source .claude/SLIDES.md --out .canon/review/slides` parses the source, builds the deck with pptxgenjs, and writes one `.pptx` named after the source. A `--variant light` or `--variant dark` flag overrides the frontmatter variant for a one-off render. Data and logs follow the standard stream contract: the success frame goes to stderr, leaving stdout clean.
+`canon slides render --source .claude/SLIDES.md --out .canon/tmp/render/slides` parses the source, builds the deck with pptxgenjs, and writes one `.pptx` named after the source. A `--variant light` or `--variant dark` flag overrides the frontmatter variant for a one-off render. Data and logs follow the standard stream contract: the success frame goes to stderr, leaving stdout clean.
 
 `--mirror <dir>` copies the rendered deck into another directory after writing, and the `CANON_SLIDES_MIRROR` environment variable sets a default mirror so the path stays out of the repo. `--open` opens the deck after writing, targeting the mirror copy when present. On WSL it opens through the Windows shell, elsewhere through the platform opener.
 

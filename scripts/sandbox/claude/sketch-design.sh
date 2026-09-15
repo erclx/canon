@@ -61,10 +61,10 @@ EOF
   log_info "         to answer either question and would stall on it otherwise."
   log_info "Expect:  the closed state. A headless run has no operator to ask for a narrower set, so it carries"
   log_info "         the pre-supplied pick straight to the trace rather than looping."
-  log_info "Expect:  .canon/review/evidence/<slug>/design-handoff.md naming arm-2 as picked, the operator's"
+  log_info "Expect:  .canon/picks/<slug>/design-handoff.md naming arm-2 as picked, the operator's"
   log_info "         stated reason, and Color and Typography values traced from cool.svg: the slate ground,"
   log_info "         the blue accent, and the system-ui family, with no ? verify tag on any of them."
-  log_info "Expect:  .canon/review/evidence/<slug>/ also holds both arms' rendered PNGs, not only the winner."
+  log_info "Expect:  .canon/picks/<slug>/ also holds both arms' rendered PNGs, not only the winner."
   log_info "Not reached: canon/DESIGN.md itself. That is a separate run of /canon:design-extract reading"
   log_info "         the handoff this run writes, which is out of scope for this scenario."
 }

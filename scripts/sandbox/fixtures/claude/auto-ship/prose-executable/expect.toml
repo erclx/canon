@@ -16,7 +16,7 @@
 # `review-branch` writes this file when it runs. A classifier that reads the
 # markdown extension alone and skips despite the behavior path never creates
 # it.
-paths = [".canon/review/branch/review-tighten-deploy-check.md"]
+paths = [".canon/review/branch-tighten-deploy-check.md"]
 
 # The same Step-7 completion signal the other two autoship arms pin.
 reply = ["Autoshipped (draft)"]

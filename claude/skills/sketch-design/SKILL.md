@@ -44,7 +44,7 @@ The arms here are fixed references rather than drafted markup, so nothing about 
 
 1. Carry forward the reason Step 3's pick already stated, as written rather than paraphrased. Ask the operator to state, in their own words, why the picked reference won only when the pick arrived with no reason attached.
 2. Read the picked arm's render at `<dest>/refs/arm-<id>.png` and trace its color, type, and spacing by looking, the same reading a person does against a screenshot. Name a role only where the reference actually shows it. Leave one out rather than guessing.
-3. Write `.canon/review/evidence/<slug>/design-handoff.md`, resolved against the main worktree root rather than the linked worktree this run may be building in, since shared session scratch always resolves there. One field per line, grouped under the section names `${CLAUDE_SKILL_DIR}/../../standards/design.md` fixes, so `design-extract` reads it mechanically:
+3. Write `.canon/picks/<slug>/design-handoff.md`, resolved against the main worktree root rather than the linked worktree this run may be building in, since shared session scratch always resolves there. One field per line, grouped under the section names `${CLAUDE_SKILL_DIR}/../../standards/design.md` fixes, so `design-extract` reads it mechanically:
 
    ```markdown
    # Design handoff
@@ -71,14 +71,14 @@ The arms here are fixed references rather than drafted markup, so nothing about 
 
    Write only the sections and roles the trace actually names. A role or a whole section with nothing traced is left out rather than written empty, since `design-extract` Step 2 treats an absent line as untraced and an empty one as a claim about the source.
 
-4. Batch-capture the final round's arm files, the same directory-batch convention `draft-and-pick` Step 6 uses: `canon capture <dest>/arms --selector <wrapper-class> --out .canon/review/evidence/<slug>/`, naming Step 2's chosen class, so every arm considered, not only the winner, survives past the pick as a revert record.
+4. Batch-capture the final round's arm files, the same directory-batch convention `draft-and-pick` Step 6 uses: `canon capture <dest>/arms --selector <wrapper-class> --out .canon/picks/<slug>/`, naming Step 2's chosen class, so every arm considered, not only the winner, survives past the pick as a revert record.
 5. Delete `<dest>` and everything in it, now that the handoff and the arms both sit at the durable path above. Report the path as still standing when the delete is refused, rather than closing on a report the tree contradicts.
 
 ## Response format
 
 ```plaintext
-📝 Wrote .canon/review/evidence/<slug>/design-handoff.md
-📝 Wrote .canon/review/evidence/<slug>/arm-<id>.png (and every other arm considered)
+📝 Wrote .canon/picks/<slug>/design-handoff.md
+📝 Wrote .canon/picks/<slug>/arm-<id>.png (and every other arm considered)
 
 Picked arm-<id>: <label>. Run /canon:design-extract to fill canon/DESIGN.md from the trace.
 ```

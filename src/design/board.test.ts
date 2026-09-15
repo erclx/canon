@@ -261,7 +261,7 @@ describe('generateBoard', () => {
   })
 
   it('reports the candidates panel empty when no arm capture exists', () => {
-    seed(join('.canon', 'review', 'evidence', 'hero-probe', 'notes.md'), 'x')
+    seed(join('.canon', 'picks', 'hero-probe', 'notes.md'), 'x')
 
     generate(outDir)
 
@@ -271,13 +271,7 @@ describe('generateBoard', () => {
 
   it('escapes a candidate filename carrying a double quote', () => {
     seed(
-      join(
-        '.canon',
-        'review',
-        'evidence',
-        'hero-probe',
-        'a" onerror=alert(1) x.png',
-      ),
+      join('.canon', 'picks', 'hero-probe', 'a" onerror=alert(1) x.png'),
       'x',
     )
 
@@ -288,8 +282,8 @@ describe('generateBoard', () => {
     expect(html).toContain('src="hero-probe/a&quot; onerror=alert(1) x.png"')
   })
 
-  it('renders an arm capture image when the evidence corpus carries one', () => {
-    seed(join('.canon', 'review', 'evidence', 'hero-probe', 'arm-a.png'), 'x')
+  it('renders an arm capture image when the picks corpus carries one', () => {
+    seed(join('.canon', 'picks', 'hero-probe', 'arm-a.png'), 'x')
 
     generate(outDir)
 
@@ -298,6 +292,15 @@ describe('generateBoard', () => {
     expect(
       existsSync(join(outDir, 'candidates', 'hero-probe', 'arm-a.png')),
     ).toBe(true)
+  })
+
+  it('leaves reference images out of the candidates panel', () => {
+    seed(join('.canon', 'picks', 'references', 'competitor-nav.png'), 'x')
+
+    generate(outDir)
+
+    const html = readFileSync(join(outDir, 'candidates', 'index.html'), 'utf8')
+    expect(html).not.toContain('references/competitor-nav.png')
   })
 
   it('reports a missing gallery build rather than an empty frame', () => {
@@ -338,7 +341,7 @@ describe('generateBoard', () => {
   })
 
   it('reports the references panel empty when the folder carries no image', () => {
-    seed(join('.canon', 'review', 'references', 'notes.md'), 'x')
+    seed(join('.canon', 'picks', 'references', 'notes.md'), 'x')
 
     generate(outDir)
 
@@ -348,7 +351,7 @@ describe('generateBoard', () => {
 
   it('escapes a reference filename carrying a double quote', () => {
     seed(
-      join('.canon', 'review', 'references', 'a" onerror=alert(1) x.png'),
+      join('.canon', 'picks', 'references', 'a" onerror=alert(1) x.png'),
       'x',
     )
 
@@ -360,7 +363,7 @@ describe('generateBoard', () => {
   })
 
   it('renders a reference image when the folder carries one', () => {
-    seed(join('.canon', 'review', 'references', 'competitor-nav.png'), 'x')
+    seed(join('.canon', 'picks', 'references', 'competitor-nav.png'), 'x')
 
     generate(outDir)
 

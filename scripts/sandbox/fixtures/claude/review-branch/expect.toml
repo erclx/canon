@@ -13,11 +13,11 @@
 # own would resolve the project path instead and void the whole premise here.
 absent = [".claude/standards/skill.md", "standards/skill.md"]
 
-# The filename is the evidence, not the file. `review-user-batch.md` is the
+# The filename is the evidence, not the file. `branch-user-batch.md` is the
 # slug transform in `standards/skill.md` applied to branch `feat/user-batch`, and
 # that transform appears in no skill body, so a report at this exact path is what
 # proves the plugin fallback resolved.
-paths = [".canon/review/branch/review-user-batch.md"]
+paths = [".canon/review/branch-user-batch.md"]
 
 # Bounds where the run may write. Live rather than declared intent now: the
 # report lands inside the tree, so the write list carries it and each entry is
@@ -45,7 +45,7 @@ manual = [
 # severity is the skill's judgment, asserted here only for appearing in the
 # format the skill's own body fixes.
 [[content]]
-path = ".canon/review/branch/review-user-batch.md"
+path = ".canon/review/branch-user-batch.md"
 pattern = '[0-9]+ critical, [0-9]+ should-fix, [0-9]+ minor'
 
 # One entry per half the branch carries, which is what separates a report that
@@ -53,17 +53,17 @@ pattern = '[0-9]+ critical, [0-9]+ should-fix, [0-9]+ minor'
 # arm stages a bug in each, so a run naming only `src/api/users.ts` fails here
 # rather than passing on a summary line that looks complete.
 [[content]]
-path = ".canon/review/branch/review-user-batch.md"
+path = ".canon/review/branch-user-batch.md"
 pattern = 'src/api/users.ts'
 
 [[content]]
-path = ".canon/review/branch/review-user-batch.md"
+path = ".canon/review/branch-user-batch.md"
 pattern = 'src/api/orders.ts'
 
 [[content]]
-path = ".canon/review/branch/review-user-batch.md"
+path = ".canon/review/branch-user-batch.md"
 pattern = 'src/api/session.ts'
 
 [[content]]
-path = ".canon/review/branch/review-user-batch.md"
+path = ".canon/review/branch-user-batch.md"
 pattern = 'src/api/cache.ts'

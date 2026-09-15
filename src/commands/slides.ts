@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { creationRel } from '@/record-root'
+import { creationRel, SCRATCH } from '@/record-root'
 import { LAYOUTS } from '@/slides/layouts'
 import { openDeck } from '@/slides/open'
 import { renderSlidesDoc } from '@/slides/render'
@@ -20,7 +20,7 @@ export function register(program: Command): void {
     .option(
       '-o, --out <path>',
       'Output directory',
-      creationRel(process.cwd(), 'review', 'slides'),
+      creationRel(process.cwd(), SCRATCH, 'render', 'slides'),
     )
     .option('-v, --variant <variant>', 'Override variant (light or dark)')
     .option(

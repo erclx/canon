@@ -16,10 +16,10 @@
 # produced a number rather than setting a ceiling from zero samples that could
 # red a correct run for running long.
 
-# `review-branch` writes this file at `.canon/review/branch/review-<slug>.md`
+# `review-branch` writes this file at `.canon/review/branch-<slug>.md`
 # when it runs at all. A run that invoked it despite the skip test leaves the
 # file behind; a correct run never creates it.
-absent = [".canon/review/branch/review-expand-intro.md"]
+absent = [".canon/review/branch-expand-intro.md"]
 
 # The same Step-7 completion signal `happy-path` pins, carried here so a
 # classifier that runs review by mistake and still ships is not read as

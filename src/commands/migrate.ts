@@ -671,7 +671,7 @@ interface ScratchEvidenceOptions {
 
 /**
  * Moves the nine cited-and-unwritten folders under `.canon/tmp/` to
- * `.canon/review/evidence/`, and repoints the citations that name them,
+ * `.canon/evidence/`, and repoints the citations that name them,
  * archives included.
  */
 async function runScratchEvidence(
@@ -760,9 +760,10 @@ interface RecordLayoutOptions {
 }
 
 /**
- * Moves review receipts from `.canon/review/memory/` to `.canon/memory/review/`
- * and retired entries from `.canon/tmp/memory-archive/` to
- * `.canon/memory/archive/`, and repoints the citations that name either.
+ * Moves every row of `RECORD_LAYOUT_MOVES`: the memory pen's receipts and
+ * retired entries under `.canon/memory/`, and everything under
+ * `.canon/review/` that is not a review out to its own folder, then repoints
+ * the citations that name any of them.
  */
 async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
   const root = opts.root ?? process.cwd()
@@ -797,7 +798,7 @@ async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
 
   const applied = await applyRecordLayout(plan)
   logStep(
-    `Moved ${plural(applied.moved, 'folder')} and rewrote ${plural(applied.written, 'file')}.`,
+    `Moved ${plural(applied.moved, 'path')} and rewrote ${plural(applied.written, 'file')}.`,
   )
 
   if (applied.failed.length > 0) {
@@ -810,9 +811,10 @@ async function runRecordLayout(opts: RecordLayoutOptions): Promise<number> {
 }
 
 function reportRecordLayout(plan: RecordLayoutPlan): void {
-  logInfo(`${plural(plan.moves.length, 'folder')} to move.`)
+  logInfo(`${plural(plan.moves.length, 'path')} to move.`)
   for (const move of plan.moves) {
-    logInfo(`  ${move.from} -> ${move.to}`)
+    const label = move.classified === undefined ? '' : ` (${move.classified})`
+    logInfo(`  ${move.from} -> ${move.to}${label}`)
   }
 
   logInfo(
@@ -837,7 +839,11 @@ function toRecordLayoutRecord(
   return {
     ok: true,
     wrote: wrote === true,
-    moves: plan.moves.map((move) => ({ from: move.from, to: move.to })),
+    moves: plan.moves.map((move) => ({
+      from: move.from,
+      to: move.to,
+      ...(move.classified === undefined ? {} : { classified: move.classified }),
+    })),
     collisions: plan.collisions,
     files: plan.entries.length,
     rewritten: plan.rewritten,
@@ -1097,7 +1103,7 @@ export function register(program: Command): void {
 
   migrate
     .command('scratch-evidence')
-    .description('Promote cited measurement folders out of tmp into review')
+    .description('Promote cited measurement folders out of tmp into evidence')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--write', 'Apply the plan rather than reporting it')
@@ -1110,7 +1116,7 @@ export function register(program: Command): void {
       [
         '',
         'Moves nine folders cited as measurement evidence from .canon/tmp/ to',
-        '.canon/review/evidence/, which canon records push already backs, and',
+        '.canon/evidence/<nn>-<folder>/, numbered by first appearance, and',
         'repoints every citation that names one, live or archived.',
         '',
         'A promoted folder is one a durable record cites and no source file',
@@ -1136,7 +1142,7 @@ export function register(program: Command): void {
 
   migrate
     .command('record-layout')
-    .description('Fold memory review receipts and archive under memory/')
+    .description('Move record folders to their batch layout')
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--write', 'Apply the plan rather than reporting it')
@@ -1151,8 +1157,25 @@ export function register(program: Command): void {
         'Moves review receipts from .canon/review/memory/ to',
         '.canon/memory/review/, and retired entries from',
         '.canon/tmp/memory-archive/ to .canon/memory/archive/, backed for',
-        'the first time, and repoints every citation that names either,',
-        'live or archived.',
+        'the first time.',
+        '',
+        'Leaves .canon/review/ holding only reviews:',
+        '  review/feedback/                -> feedback/',
+        '  review/{design,board,slides,diagrams}/ -> tmp/render/<kind>/',
+        '  review/references/              -> picks/references/',
+        '  review/branch/review-<slug>.md  -> review/branch-<slug>.md',
+        '  review/ui-checklist-<slug>.md   -> tmp/ui-checklist/<slug>.md',
+        '  review/evidence/<slug>/         -> picks/<slug>/ or evidence/<nn>-<slug>/',
+        '',
+        'An evidence folder is a pick when it directly holds an arm-<id>',
+        'capture or a design-handoff.md, and evidence otherwise. Evidence',
+        'folders are numbered by the oldest file each holds, continuing past',
+        'any ordinal evidence/ already carries. The dry run labels every',
+        'derived destination, so check the split before passing --write.',
+        '',
+        'A citation reaching into a moved folder or naming a moved file is',
+        'repointed, live or archived. A bare mention of an emptied folder, such',
+        'as review/evidence/ with no slug, matches no row and stays as written.',
         '',
         'A receipt sitting at the flat review/ root, the shape memory-review',
         'wrote before review/memory/ existed, is reported rather than moved.',
