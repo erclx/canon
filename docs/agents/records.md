@@ -152,6 +152,31 @@ The window counts read `mtime`, so what they report is a file written inside the
 
 Exit codes: `0` the reading completed, `1` refused. The one refusal is `no-folder`, raised when the project holds neither record root. A project holding a root and no records is empty rather than absent: at the legacy `.claude` root each folder's own `present` flag says which ones it carries, and at a `.canon` root the folder list itself is already the answer, since nothing absent is named.
 
+## Prune
+
+`canon records prune-tmp` reports scratch nobody has touched inside an age window, and deletes it only with `--write`. Nothing removed an abandoned scratch folder before this, so a spike folder from months ago sat beside the ones a session still needs.
+
+```bash
+canon records prune-tmp
+canon records prune-tmp --write
+canon records prune-tmp --older-than 30 --json
+```
+
+| Option                | Behavior                                                       |
+| --------------------- | -------------------------------------------------------------- |
+| `--json`              | Add a machine-readable record on stdout                        |
+| `--write`             | Delete every candidate the report lists                        |
+| `--older-than <days>` | Age a unit's newest file must clear to be offered (default 14) |
+| `--root <path>`       | Project root, defaulting to the main worktree                  |
+
+A candidate is a unit whose newest file is older than the threshold: a `tmp/<slug>/` folder, a folder one level inside `runs/`, `render/`, or `pr/`, or a single marker file inside `hooks/<hook>/`. `pr/review/` groups its body files by pull request number rather than reporting as one folder, since a review pass leaves one file per pass and a folder holding thousands of them would otherwise report as a single row nobody can prune apart. A unit holding no files, empty subfolders included, is offered whatever its age.
+
+`tmp/handoff/` and `tmp/pr/poll/` are never offered. A reader deletes a handoff themselves once it has been read, and a poll baseline is live state rather than scratch. The pre-split names the reserved split replaced, `memory-routing/`, `teach-promotion/`, `ui-checklist/`, and `pr-poll/` at the scratch root, are skipped the same way on a project the rename never reached, naming the folder they moved to, rather than being offered as ordinary slugs. An unread handoff is the one thing a wrong delete here loses for good.
+
+It writes nothing until `--write` is passed, matching `canon records migrate`: a session record has no history to undo a wrong delete from. It reads `mtime` the way `canon records size` does, so a machine restored by `canon records pull` reads its whole tree as new and fails safe by offering nothing.
+
+Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refused, sharing `no-folder` with `size`, or a delete failed. `2` candidates exist and `--write` was not passed.
+
 ## Push and pull
 
 `canon records push` commits the backed record folders to a private remote and pushes them. `canon records pull` fetches the other direction and writes them back. Both take `--json` and `--root` the way `validate` does, and both exit `0` on agreement and `1` on a refusal.

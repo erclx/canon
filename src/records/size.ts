@@ -87,7 +87,7 @@ interface Walked {
  * already, since these folders are gitignored and hold whatever that disk holds,
  * so a local date is the answer consistent with the rest of the report.
  */
-function day(ms: number): string {
+export function day(ms: number): string {
   const at = new Date(ms)
   const month = String(at.getMonth() + 1).padStart(2, '0')
   const date = String(at.getDate()).padStart(2, '0')
@@ -243,6 +243,29 @@ export async function sizeRecords(
     files: folders.reduce((total, entry) => total + entry.files, 0),
     bytes: folders.reduce((total, entry) => total + entry.bytes, 0),
   }
+}
+
+/**
+ * The file count, byte total, and newest `mtime` under one path, for a caller
+ * that wants a unit's freshness rather than the full per-window reading.
+ *
+ * It walks with the same `walk`/`absorb` pair `sizeRecords` uses, so the two
+ * verbs agree on what counts as a file and which mtime a rewritten entry
+ * carries, rather than each answering from a second walk of its own.
+ */
+export async function newestMtime(
+  path: string,
+): Promise<{ files: number; bytes: number; newest?: number } | undefined> {
+  if (!existsSync(path)) return undefined
+
+  const walked: Walked = {
+    files: 0,
+    bytes: 0,
+    touched: GROWTH_WINDOWS.map(() => 0),
+  }
+  await walk(path, walked, Date.now())
+
+  return { files: walked.files, bytes: walked.bytes, newest: walked.newest }
 }
 
 const UNITS = ['B', 'K', 'M', 'G'] as const
