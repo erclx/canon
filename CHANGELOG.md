@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.86.0](https://github.com/erclx/canon/compare/v4.85.0...v4.86.0) (2026-09-15)
+
+
+### Features
+
+* **claude:** build draft-and-pick arms from a running app's own markup ([#1692](https://github.com/erclx/canon/issues/1692)) ([d5f8392](https://github.com/erclx/canon/commit/d5f83923ae08d9da25909844b6f2f786a49db527))
+* **context:** add ux-walkthrough catalog and coverage entries ([#1688](https://github.com/erclx/canon/issues/1688)) ([99ffa72](https://github.com/erclx/canon/commit/99ffa72f15f92d0a043fbb4b77095296fd63f134))
+* **migrate:** fold memory receipts and archive under memory/ ([#1691](https://github.com/erclx/canon/issues/1691)) ([d23bb0c](https://github.com/erclx/canon/commit/d23bb0c164c0214ce7449d3dcb89747680b13c7a))
+* **records:** add a ready folder for verbatim file handoffs ([#1689](https://github.com/erclx/canon/issues/1689)) ([adc2871](https://github.com/erclx/canon/commit/adc2871fe766d573e1126c2ba4e6d9578b38b4c1))
+
 ## [4.85.0](https://github.com/erclx/canon/compare/v4.84.0...v4.85.0) (2026-09-14)
 
 
