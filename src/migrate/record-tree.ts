@@ -60,7 +60,7 @@ export const OBJECT_STORE = '.records.git'
  * `archive` is the substantive one: an archived plan or a retired memory entry
  * describes work that closed, and a path inside that sentence is history rather
  * than a pointer. It is pruned at any depth because the archives do not all sit
- * at the same one, `review/memory/archive/` being two levels down.
+ * at the same one, `memory/review/archive/` being two levels down.
  */
 export const PRUNED_SEGMENTS: readonly string[] = [
   'archive',
