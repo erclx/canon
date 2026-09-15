@@ -213,6 +213,12 @@ What the split does cost is a coupling nothing checks. `Expectation` in `src/san
 
 A scenario staging a subdirectory read inside its own script is the other mechanism and stays distinct. `infra:standards read` runs `canon standards skill` from `install/` because the scenario body invokes the command there. The prompt route reaches the skill session's own directory, which no scenario body can set.
 
+### The ux-walkthrough arm proves the refusal path and nothing past it
+
+`claude/ux-walkthrough.sh` stages a package.json declaring no build, dev, or preview script and a `CLAUDE.md` with no Commands section, so the skill's own first guard fires ahead of any read: there is no running build and no build command to measure against. The arm asserts that refusal, `absent = [".canon/walkthroughs/**"]` and `write_scope = []`, against the fixed reply pin `"Nothing to inspect"`.
+
+Every step past that guard needs a live operator, a browser, and a served build, none of which a headless run supplies. The manual entry names the three the arm cannot reach: the link-before-question order, the batch relay, and measurement read-back, so the declaration proves the refusal path alone and claims nothing about the other nine steps in the skill's own sequence.
+
 ### The gap the rule names
 
 The rule selects `git-stage` and `git-split` ahead of everything else and the harness cannot assert either, which is the sixth standing limit in `canon/context/sandbox/overview.md`. A rule that selects what nothing can check is working correctly. It names the gap instead of hiding it behind a skill nobody nominated.
