@@ -72,6 +72,7 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 - `memory.md` fixes the pen entry and its lifecycle from write to retire. `559-memory.md`.
 - `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `558-plan.md`.
 - `readme.md` fixes the voice and structure of the page a project leads with. `580-readme.md`.
+- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it. `563-ready.md`.
 - `requirements.md` fixes the problem, goals, and non-goals record. `530-requirements.md`.
 - `rule.md` fixes a path-scoped governance rule. `590-rule-authoring.md`.
 - `session.md` fixes the pre-compaction handoff. `562-session.md`, which globs the `session-` file alone because `555-tasks.md` globs the board around it and one rule over both shapes would carry two.
