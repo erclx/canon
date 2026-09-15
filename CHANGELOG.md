@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.88.0](https://github.com/erclx/canon/compare/v4.87.0...v4.88.0) (2026-09-15)
+
+
+### Features
+
+* **records:** add prune-tmp verb for abandoned scratch ([#1697](https://github.com/erclx/canon/issues/1697)) ([6c25f9e](https://github.com/erclx/canon/commit/6c25f9eded526ba027d05c5c8d64a7c41261ac7a))
+
 ## [4.87.0](https://github.com/erclx/canon/compare/v4.86.0...v4.87.0) (2026-09-15)
 
 
