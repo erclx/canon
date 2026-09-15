@@ -70,6 +70,7 @@ export const RECORD_ENTRIES: readonly string[] = [
   'memory',
   'plans',
   'proposals',
+  'ready',
   'review',
   'tasks',
   'teach',
