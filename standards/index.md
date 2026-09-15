@@ -27,6 +27,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Pull request reference](pr.md): Pull request title and body conventions
 - [Publish reference](publish.md): Scan an author runs against finished text, the cross-reference form each destination takes, and the response to an unreadable source
 - [Readme reference](readme.md): Readme voice, structure, and content conventions
+- [Ready reference](ready.md): Folder layout, ordinal naming, the overview frontmatter, the thin-plan contract, and the archive lifecycle for a finished-file handoff
 - [Requirements reference](requirements.md): Shape and content rules for canon/REQUIREMENTS.md
 - [Governance rule reference](rule.md): Rule frontmatter, body shape, and voice for .claude/rules files
 - [Session map reference](session.md): Filename and location, the sections a handoff carries, the write and read procedures, and how a role extends it

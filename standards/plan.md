@@ -85,6 +85,8 @@ A constraint measured against work in flight expires when that work merges, and 
 
 A dead constraint fails silently in the expensive direction. A session honoring one ships the dangling citation the change created and reports success, where a session crossing a live constraint collides visibly and is caught.
 
+A constraint naming a `.canon/ready/` folder is a third shape beside the two above. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
+
 ### Risks
 
 - Name the collision rather than the category. A risk a reader cannot act on is padding.
