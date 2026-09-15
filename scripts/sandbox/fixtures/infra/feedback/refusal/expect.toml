@@ -14,7 +14,7 @@ paths = [
 ]
 
 # No record root opened under the working directory. A report that passes
-# validation writes into the toolkit's own `.canon/review/feedback/`, which sits
+# validation writes into the toolkit's own `.canon/feedback/`, which sits
 # outside the tree, so this is what the sandbox can see of the refusal stopping
 # ahead of the write: a resolve that read `pwd` rather than `PROJECT_ROOT` would
 # have created this folder here.

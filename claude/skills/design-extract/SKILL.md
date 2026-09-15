@@ -39,7 +39,7 @@ On the source path, also read the UI surfaces matched in Step 1 plus `canon docs
 
 On the greenfield path, also read `canon/ARCHITECTURE.md` for platform, tech stack, and surface type. Do not scan `src/`, stylesheets, or UI modules. Step 1 already established they hold nothing.
 
-On the greenfield path, also check `.canon/review/evidence/*/design-handoff.md` for a file the `sketch-design` skill wrote, taking the most recently modified match when more than one exists. Read it when found. Its presence is what Step 4 traces cells from instead of proposing them.
+On the greenfield path, also check `.canon/picks/*/design-handoff.md` for a file the `sketch-design` skill wrote, taking the most recently modified match when more than one exists. Read it when found. Its presence is what Step 4 traces cells from instead of proposing them.
 
 Run these reads in parallel. Do not speculatively recurse into every directory.
 
@@ -94,13 +94,13 @@ Write the filled template to `canon/DESIGN.md` from the project root. Then run:
 canon design render
 ```
 
-The command writes an HTML plus CSS preview to `.canon/review/design/`. Output the path in chat so the user can open it.
+The command writes an HTML plus CSS preview to `.canon/tmp/render/design/`. Output the path in chat so the user can open it.
 
 ## Response format
 
 ```plaintext
 📝 Wrote canon/DESIGN.md
-📝 Wrote .canon/review/design/index.html
+📝 Wrote .canon/tmp/render/design/index.html
 
 Ran the <source|greenfield> path. N cells marked `? verify`. Open the preview and confirm before committing.
 ```

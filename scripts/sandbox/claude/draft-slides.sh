@@ -38,7 +38,7 @@ EOF
     log_step "Scenario ready: slides draft (with project context)"
     log_info "Context: ledger CLI v1 with REQUIREMENTS and CLAUDE.md present"
     log_info "Action:  /canon:draft-slides 'ledger v1 overview deck'"
-    log_info "Expect:  .claude/SLIDES.md drafted with a bold non-blue palette and varied layouts, then rendered to .canon/review/slides/, with a one-pass QA check"
+    log_info "Expect:  .claude/SLIDES.md drafted with a bold non-blue palette and varied layouts, then rendered to .canon/tmp/render/slides/, with a one-pass QA check"
     ;;
   "bare")
     cat <<'EOF' >README.md

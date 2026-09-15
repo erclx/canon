@@ -172,17 +172,17 @@ The verb reads the same set from `src/autoship/paths.ts`, so a path added here b
 
 ## Step 7: evaluate findings
 
-Skip this step when Step 6 skipped review. Otherwise read `.canon/review/branch/review-<slug>.md` at the main worktree root. Split every finding by origin before parsing the summary line (`X critical, Y should-fix, Z minor`), since the stop exists for a defect the branch inherited rather than for one this run introduced.
+Skip this step when Step 6 skipped review. Otherwise read `.canon/review/branch-<slug>.md` at the main worktree root. Split every finding by origin before parsing the summary line (`X critical, Y should-fix, Z minor`), since the stop exists for a defect the branch inherited rather than for one this run introduced.
 
 - **This run caused it, at any severity.** Fix it, re-run the Step 3 verify commands, re-read the fixed file against what the finding claimed, and continue. Do not report it as a stop and do not offer the fix as a choice, which is the same stop wearing a proposal.
-- **It predates this run, critical or should-fix.** Stop: `❌ Review found non-minor issues that predate this run. See .canon/review/branch/review-<slug>.md. Fix and run /git-ship.`
+- **It predates this run, critical or should-fix.** Stop: `❌ Review found non-minor issues that predate this run. See .canon/review/branch-<slug>.md. Fix and run /git-ship.`
 - **It predates this run, minor only.** Continue. The minor findings stay in the on-disk review receipt. Fold any a reviewer needs into the PR's `## Technical Context`. Do not add a separate review-notes section to the PR body.
 
 Read origin as causation rather than authorship. Staleness this run induced in a file it never opened is a finding it caused, and the plan's "Files to touch" list scopes what the run builds rather than what it may repair.
 
-Bound the repair at one pass, the way Step 3 bounds verify. When that re-read shows the finding still standing, stop: `❌ A self-introduced finding survived one fix pass. See .canon/review/branch/review-<slug>.md. Fix and run /git-ship.`
+Bound the repair at one pass, the way Step 3 bounds verify. When that re-read shows the finding still standing, stop: `❌ A self-introduced finding survived one fix pass. See .canon/review/branch-<slug>.md. Fix and run /git-ship.`
 
-This chain owns the receipt's lifetime, which is what makes the Output block's citation resolve on a run that reaches it. `docs-fold` used to delete the current slug's receipt while running under Step 8 below, so the closing line named a file the same run had already removed. That sweep now reaches only reports whose branch is gone, which collects this one a branch later rather than during the run that wrote it. The cost is one receipt per live branch left in `.canon/review/branch/`, bounded by the branch count rather than by the lifetime of the checkout.
+This chain owns the receipt's lifetime, which is what makes the Output block's citation resolve on a run that reaches it. `docs-fold` used to delete the current slug's receipt while running under Step 8 below, so the closing line named a file the same run had already removed. That sweep now reaches only reports whose branch is gone, which collects this one a branch later rather than during the run that wrote it. The cost is one `branch-<slug>.md` receipt per live branch left in `.canon/review/`, bounded by the branch count rather than by the lifetime of the checkout.
 
 ## Step 8: ship
 
@@ -209,7 +209,7 @@ Respond with up to five lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
-<N minor findings kept in .canon/review/branch/review-<slug>.md>
+<N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
 <Memory proposal at .canon/memory/review/memory-review-<slug>.md>

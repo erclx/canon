@@ -1,6 +1,6 @@
 ---
 name: canon-feedback-file
-description: Format a paste-back report about something broken, missing, or off in canon and write it directly to the toolkit's `.canon/review/feedback/` folder via `canon feedback`. Use when asked to "send this to the toolkit", "report this to canon", "file toolkit feedback", or "give the toolkit feedback about X". Do NOT use for general complaints about other tooling, IDE issues, or in-project bugs that do not implicate canon surfaces.
+description: Format a paste-back report about something broken, missing, or off in canon and write it directly to the toolkit's `.canon/feedback/` folder via `canon feedback`. Use when asked to "send this to the toolkit", "report this to canon", "file toolkit feedback", or "give the toolkit feedback about X". Do NOT use for general complaints about other tooling, IDE issues, or in-project bugs that do not implicate canon surfaces.
 ---
 
 # Canon feedback file
@@ -93,7 +93,7 @@ cat <<'EOF' | canon feedback
 EOF
 ```
 
-It writes to `.canon/review/feedback/feedback-<slug>-<ts>.md` and prints the absolute path on stdout. Report the printed path back to the user on its own line, in the form the project's instruction file sets under `## Output`.
+It writes to `.canon/feedback/feedback-<slug>-<ts>.md` and prints the absolute path on stdout. Report the printed path back to the user on its own line, in the form the project's instruction file sets under `## Output`.
 
 If `canon` is not on PATH, fall back: print the block in chat and tell the user `📋 Copy the block above into a toolkit-repo session.`
 

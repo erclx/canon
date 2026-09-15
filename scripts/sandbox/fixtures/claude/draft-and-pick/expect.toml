@@ -46,7 +46,11 @@ paths = ["index.html", "canon/DESIGN.md"]
 # Unresolved section before step 2 existed, and the step was added rather than
 # the path dropped, since a pick that records nothing about why is the loss the
 # note exists to prevent.
-write_scope = [".canon/tmp/**", "index.html", "canon/DESIGN.md"]
+#
+# `.canon/picks/**` is the third write step 6 directs: the batch capture of the
+# final round's arms lands there as the durable revert record, before the
+# scratch folder is removed.
+write_scope = [".canon/tmp/**", ".canon/picks/**", "index.html", "canon/DESIGN.md"]
 
 # Declared at the runner default rather than at the observation. One run bounds
 # nothing here, since the cost follows how many arms the run drafts and how much
