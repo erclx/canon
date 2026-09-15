@@ -20,14 +20,14 @@
 max_turns = 30
 
 paths = [
-  ".canon/review/memory-review-stale-pen.md",
+  ".canon/memory/review/memory-review-stale-pen.md",
   ".canon/memory/feedback-confirm-before-editing.md",
   ".canon/memory/reference-transport-dashboard.md",
 ]
 
 # The resolved receipt goes. Both its items are decided, so the collection rule
 # in `standards/memory.md` folds the declines and deletes the file.
-absent = [".canon/review/memory-review-legacy-inbox.md"]
+absent = [".canon/memory/review/memory-review-legacy-inbox.md"]
 
 write_scope = [".claude/**"]
 
@@ -43,7 +43,7 @@ manual = [
 # the arm cannot tell a sweep that reads item status from one that deletes every
 # receipt it finds.
 [[content]]
-path = ".canon/review/memory-review-stale-pen.md"
+path = ".canon/memory/review/memory-review-stale-pen.md"
 pattern = '^## 2\. 📝 Retire'
 
 # The fold lands in the `**Why:**` line, which is where a decline belongs on a

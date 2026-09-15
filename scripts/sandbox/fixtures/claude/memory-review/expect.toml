@@ -18,7 +18,7 @@ absent = [".claude/standards/skill.md", "standards/skill.md"]
 # transform in `standards/skill.md` applied to branch `chore/memory-sweep`, and
 # that transform appears in no skill body, so a proposal at this exact path is
 # what proves the plugin fallback resolved.
-paths = [".canon/review/memory/memory-review-memory-sweep.md"]
+paths = [".canon/memory/review/memory-review-memory-sweep.md"]
 
 # Propose writes the proposal and nothing else. The apply pass, which edits
 # the always-loaded rule target and the skill body and moves entries into the
@@ -46,22 +46,22 @@ manual = [
 # name, so a proposal written to the right path from the wrong branch still goes
 # red.
 [[content]]
-path = ".canon/review/memory/memory-review-memory-sweep.md"
+path = ".canon/memory/review/memory-review-memory-sweep.md"
 pattern = '^# Memory review: memory-sweep'
 
 # The slot each item needs for the pass the proposal exists to open. An item
 # written without one strands the decision round.
 [[content]]
-path = ".canon/review/memory/memory-review-memory-sweep.md"
+path = ".canon/memory/review/memory-review-memory-sweep.md"
 pattern = '^Decision:'
 
 # Both reach the proposal as items, the first stating nothing actionable and the
 # second already absorbed into the seeded `CLAUDE.md`. A pass that dropped either
 # reviewed a subset while reporting the whole.
 [[content]]
-path = ".canon/review/memory/memory-review-memory-sweep.md"
+path = ".canon/memory/review/memory-review-memory-sweep.md"
 pattern = 'feedback-be-careful\.md'
 
 [[content]]
-path = ".canon/review/memory/memory-review-memory-sweep.md"
+path = ".canon/memory/review/memory-review-memory-sweep.md"
 pattern = 'feedback-memory-location\.md'
