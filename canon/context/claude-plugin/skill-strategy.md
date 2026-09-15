@@ -389,4 +389,4 @@ The boundary against `ux-audit` runs on where the judgment happens. `ux-audit` r
 
 The boundary against `plan-feature` and a worker runs on who builds. `ux-walkthrough` records a pick with the arms it beat and the numbers behind it. Turning that record into a plan and code belongs to `plan-feature` and a worker, never to this skill.
 
-No `## Redundancy audit` entry names it, because it carries no plausible community counterpart. Pairing an operator's live look at a running build against a recorded batch of picks is a shape none of that section's other comparisons found matched anywhere else.
+No `## Redundancy audit` entry names it, because it carries no plausible community counterpart. Pairing an operator's live look at a running build against a recorded batch of picks is a shape `### Redundancy comparisons` skips outright rather than one that was compared and cleared.

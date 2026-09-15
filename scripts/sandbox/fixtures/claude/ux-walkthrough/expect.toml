@@ -2,11 +2,13 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 #
-# The seeded tree carries a package.json with no build, dev, or preview script
-# and a CLAUDE.md holding no Commands section, so the skill's own first guard
-# fires before anything is read: there is no running build and no build command
-# to measure against. This is the one path a headless run can reach, since every
-# other step needs a live operator looking at a served page.
+# The seeded tree carries a package.json with no build, dev, or preview script.
+# SANDBOX_INJECT_SEEDS copies the seed CLAUDE.md in first, whose Commands
+# section holds only the placeholder and names no build command, so the
+# skill's own first guard fires before anything is read: there is no running
+# build and no build command to measure against. This is the one path a
+# headless run can reach, since every other step needs a live operator
+# looking at a served page.
 
 # The whole assertion. A correct run touches nothing under the record folder
 # this skill owns, because the guard refuses before Step 1 ever writes a
@@ -29,5 +31,5 @@ max_turns = 5
 reply = ["Nothing to inspect"]
 
 manual = [
-  "The link-before-question order, the batch relay, and measurement read-back never fire on this arm. Unwired: all three need a live operator, a browser, and a served build, none of which a headless run can supply, so this arm proves only the refusal above and claims no coverage of the other nine steps.",
+  "The link-before-question order, the batch relay, and measurement read-back never fire on this arm. Unwired: all three need a live operator, a browser, and a served build, none of which a headless run can supply, so this arm proves only the refusal above and claims no coverage of the ten steps.",
 ]
