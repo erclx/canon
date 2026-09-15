@@ -94,7 +94,7 @@ Projecting a split child's size from the source entry's named section weights un
 
 A reader enumerating a flat surface pins depth somewhere, so converting an entry to a folder can drop it from that reader's output rather than erroring. Two readers pin depth independently: `listTopics` via `new Bun.Glob('*.md')` in `src/docs/read.ts` and `list_text` via `find -maxdepth 1` in `scripts/docs/list.sh`. `bun run check` passes regardless, since every stage tests the files that exist rather than the names a command can still reach.
 
-`CLAUDE.md` carries the depth-constraint rule for `snippets/`, `claude/skills/`, `tooling/`, and `governance/rules/`, and both `canon/context/` and `docs/` sit outside that list, so count the roots inside each reader rather than counting readers before splitting either.
+`internal/rules/claude/598-authoring-layout.md` carries the depth-constraint rule for `snippets/`, `claude/skills/`, `tooling/`, and `governance/rules/`, and both `canon/context/` and `docs/` sit outside that list, so count the roots inside each reader rather than counting readers before splitting either.
 
 A sub-area file resolves by its bare name once every root has been tried for a sibling file and for a folder, and only where a single folder across both roots carries that name. Reading depth last is what keeps a widened reader additive, so a name that resolves before a widening fix resolves nowhere else afterward.
 
@@ -105,6 +105,14 @@ A third class points out of the moved file rather than into it. Every root-relat
 ### What makes a document always-loaded
 
 A document is always-loaded only when an `@` line in `CLAUDE.md` names it. Nothing gates the toolkit's own `CLAUDE.md` against the seed it distributes, `tooling/claude/seeds/CLAUDE.md`, so the two can anchor a different set of paths with nothing to catch the drift. Before closing an outcome that calls a document always-loaded, grep `^@` in `CLAUDE.md` and diff the anchor block against the seed.
+
+An `@` line earns its place by carrying a catalog or a short document every session needs, such as a folder `index.md`. A lookup file such as `canon/DESIGN.md` stays a one-line key path instead, since an import loads its whole content into every session whatever the task.
+
+### What a CLAUDE.md line has to carry
+
+A line stays in either `CLAUDE.md` only when no always-loaded core rule, no path-scoped rule firing at the moment it matters, no eager import, and no catalog already carries it. A path-scoped rule fires on edit rather than during planning, so a design principle a command is planned against stays in the root even where a rule on `src/` restates it.
+
+The seed takes one exception on top. A target can install the seed without governance, so a seed line a core rule duplicates stays when that target would otherwise lose the instruction, which is why the seed keeps its Context bullet while the root carries no Tasks or Parallel sessions section.
 
 ### The root map stays in the always-loaded file
 

@@ -10,10 +10,8 @@ Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from
 
 - Every command has a non-interactive path via args or `CANON_NON_INTERACTIVE=1`. Never require a TTY.
 - Data goes to stdout. UI and logs go to stderr. JSON output must pipe clean through any wrapper.
-- Every domain has a `list` command with `--json` so skills read catalogs at runtime. Never hardcode names in skills.
 - Extend existing commands with flags over creating bespoke variants. Prefer `--add` and similar composition over stack explosion.
-- The toolkit is the source of truth. Authoring happens here, target projects consume via install and sync.
-- Skills detect and call the CLI. They do not reimplement CLI logic. A session reading toolkit state prefers a CLI verb over its own inspection wherever one exists, since the verb is the surface under test and a hand-rolled read of the same files is not.
+- A session reading toolkit state prefers a CLI verb over its own inspection wherever one exists, since the verb is the surface under test and a hand-rolled read of the same files is not.
 - This repo is behavior-heavy. Planning and review are the work here, so a higher supervision ratio than a typical app repo is expected.
 - Toolkit surfaces stay general-purpose. Map to external-tool schemas in a thin sync adapter rather than adopting them as the canonical shape.
 
@@ -21,14 +19,11 @@ Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from
 
 ### Before editing
 
-- Plan before editing: propose what files will change and why before touching anything
-- Confirm with the user before making any edits
 - When directing the user to invoke a skill, give the exact command with args, or state explicitly that it runs bare
 
 ### Scope discipline
 
-- Do not add CLI flags or aliases the user did not ask for. When a fix has a natural mirror in a template or seed, flag it as a follow-up rather than silently extending the PR.
-- Before restructuring installable content (`snippets/`, `claude/skills/`, `tooling/`, `governance/rules/`), grep the corresponding install and list scripts for depth constraints (`-maxdepth`, fixed globs). Bundle script updates with the restructure or pick a depth the scripts already handle.
+- When a fix has a natural mirror in a template or seed, flag it as a follow-up rather than silently extending the PR.
 - Before queuing or starting a new feature, confirm a concrete project or use case drives it. If precedent exists, lift patterns from that project rather than writing from scratch.
 
 ### Choices and mechanics
@@ -74,8 +69,6 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 | Modifying `snippets/`                                                             | `internal-snippets`   |
 | Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
 
-The per-domain context catalog is always loaded so the entries are discoverable without a lookup. Load each entry on demand.
-
 @canon/ARCHITECTURE.md
 @canon/context/index.md
 
@@ -86,26 +79,14 @@ The per-domain context catalog is always loaded so the entries are discoverable 
 - `standards/`: authoring conventions, read through `canon standards <name>` rather than installed
 - `tooling/`: golden configs (base), references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
-- `.claude/skills/`: internal skills, toolkit repo only
-- `canon/context/`: per-domain internal narrative (how each domain is built, decisions, gotchas), indexed via `canon/context/index.md`
-- `canon/decisions/`: decision history a canonical doc points at, never loaded eagerly, indexed via `canon/decisions/index.md`
 - `snippets/`: reusable prompt snippets, invoked by `@` reference in a Claude Code session
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
-- `docs/`: consumer-facing reference (CLI surface, AI workflow, target-project integration, and the workflow method this repo runs on)
 - `scripts/`: bash domain scripts, core maintenance, sandbox, and prompt generation
 - `wiki/`: reference pages for Anthropic-owned subjects, under `wiki/claude/`
 
 ## Commands
 
 - Run `bun run check` to verify and `bun run format` to auto-fix before committing. The pre-push hook runs `check` and may reformat files, so after `git push` run `git status` and commit any diff as `style(<scope>):`. Full script and hook reference in `canon/context/development/index.md`.
-
-## Tasks
-
-- Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter.
-
-## Parallel sessions
-
-- Independent feature tracks can run concurrently in git worktrees. See `wiki/claude/claude-worktrees.md` for the fan-out rules and which domains are safe to parallelize vs which must serialize.
 
 ## Wiki
 
