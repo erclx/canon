@@ -21,7 +21,7 @@
  * `markdown.md` has a body backtick a named thing, so the natural spelling of
  * the citation is `` See the `Parallel sessions` heading in `CLAUDE.md` `` and
  * a class stopping at the first backtick never reaches the file. That heading
- * is real in this repository's own root file. Both classes returned the same
+ * was real in this repository's own root file when the check was written. Both classes returned the same
  * twenty lines over `claude/skills/` at the stamp, so the backtick exclusion
  * was carrying nothing and hiding the spelling an author would reach for.
  *
