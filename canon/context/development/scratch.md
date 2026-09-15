@@ -63,7 +63,7 @@ Six write material a later run or a different worktree reads back. `memory-captu
 
 An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history.
 
-A memory entry that leaves the pen moves to `.canon/memory/archive/`, the same rule every other record folder follows. Nothing cites a retired memory the way a task file cites a plan or a groundwork track, and a phase label derives from the task archive while no surface reads this one, but citation is not what decides whether a folder is backed: `memory/` is one of `BACKED_FOLDERS`, so a wrong call over the folder recovers through `canon records pull` the same as any other retired record.
+A memory entry that leaves the pen moves to `.canon/memory/archive/`, the same rule every other record folder follows. Nothing cites a retired memory the way a task file cites a plan or a groundwork track, and a phase label derives from the task archive while no surface reads this one, but citation is not what decides whether a folder is backed: `memory/` is not one of the three names `EXCLUDED_ENTRIES` withholds from `canon records push`, so a wrong call over the folder recovers through `canon records pull` the same as any other retired record.
 
 A plan that ships moves to `.canon/plans/archive/` under its original name, swept there by `docs-fold`. A re-shipped slug overwrites the earlier file, which keeps the folder holding intact plans under the names they were written with.
 

@@ -188,6 +188,28 @@ describe('applyRecordLayout', () => {
     expect(second.moves).toHaveLength(0)
     expect(second.rewritten).toBe(0)
   })
+
+  it('should rewrite a citation carried inside a folder the same run moves', async () => {
+    write('.canon/review/memory/review-example.md', 'a receipt\n')
+    write('.canon/tmp/memory-archive/retired-example.md', 'a retirement\n')
+    write(
+      '.canon/review/memory/archive/old-receipt.md',
+      'Retired at `.canon/tmp/memory-archive/retired-example.md`.\n',
+    )
+
+    const plan = await planFrom(root)
+    const result = await applyRecordLayout(plan)
+
+    expect(result.failed).toEqual([])
+    expect(result.moved).toBe(2)
+    expect(result.written).toBe(1)
+    expect(
+      readFileSync(
+        join(root, '.canon/memory/review/archive/old-receipt.md'),
+        'utf8',
+      ),
+    ).toContain('.canon/memory/archive/')
+  })
 })
 
 describe('strayReceipts', () => {

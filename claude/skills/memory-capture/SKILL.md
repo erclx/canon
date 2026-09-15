@@ -68,7 +68,7 @@ The handoff is a file rather than a spoken result so the routed fact survives a 
 
 ## Step 4: dedupe
 
-For each remaining candidate, grep `.canon/memory/` for an existing file on the same topic. If one exists, update it in place rather than create a new file. Read it first and write the whole file back, since the guard above rules out editing a line inside it.
+For each remaining candidate, grep the top-level `*.md` files in `.canon/memory/` for an existing file on the same topic, never its `review/` or `archive/` subfolders, since a hit there is a receipt or a retired entry rather than a live one to update. If one exists, update it in place rather than create a new file. Read it first and write the whole file back, since the guard above rules out editing a line inside it.
 
 ## Step 5: write the residue
 

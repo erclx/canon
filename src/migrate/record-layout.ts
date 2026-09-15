@@ -4,9 +4,10 @@
  *
  * `.canon/review/memory/` and `.canon/tmp/memory-archive/` move to
  * `.canon/memory/review/` and `.canon/memory/archive/`, the second one backed
- * for the first time since `memory/` is one of `BACKED_FOLDERS` and `tmp/` is
- * not. `canon/ARCHITECTURE.md`'s "A durable record is named for what it is,
- * not for how long it lives" already names the cost this closes: two
+ * for the first time: `canon records push` carries every top-level `.canon/`
+ * entry except `EXCLUDED_ENTRIES`, and `tmp/` is one of the three names that
+ * set excludes. `canon/ARCHITECTURE.md`'s "A durable record is named for what
+ * it is, not for how long it lives" already names the cost this closes: two
  * surfaces both named for memory archived to two different places.
  *
  * The move and the citation repoint follow `scratch-evidence.ts`'s shape: a
@@ -306,13 +307,30 @@ export interface RecordLayoutResult {
   readonly failed: readonly string[]
 }
 
-/** Writes the plan: every folder move, then every citation rewrite. */
+/**
+ * Writes the plan: every citation rewrite first, then every folder move.
+ *
+ * A citation can sit inside a file the plan is about to move, since the walk
+ * carries archives on purpose and a receipt can cite the row it retired.
+ * Rewriting first is what keeps that write landing on a path that still
+ * exists: renaming the folder first would send `writeFile` at the pre-move
+ * path into a directory `rename` already cleared.
+ */
 export async function applyRecordLayout(
   plan: RecordLayoutPlan,
 ): Promise<RecordLayoutResult> {
   let moved = 0
   let written = 0
   const failed: string[] = []
+
+  for (const entry of plan.entries) {
+    const done = await writeFile(entry.path, entry.text)
+      .then(() => true)
+      .catch(() => false)
+
+    if (done) written += 1
+    else failed.push(entry.path)
+  }
 
   for (const move of plan.moves) {
     await mkdir(dirname(move.to), { recursive: true })
@@ -322,15 +340,6 @@ export async function applyRecordLayout(
 
     if (done) moved += 1
     else failed.push(move.from)
-  }
-
-  for (const entry of plan.entries) {
-    const done = await writeFile(entry.path, entry.text)
-      .then(() => true)
-      .catch(() => false)
-
-    if (done) written += 1
-    else failed.push(entry.path)
   }
 
   return { moved, written, failed }

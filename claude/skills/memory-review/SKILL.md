@@ -23,7 +23,7 @@ If the user re-pings the skill with no new phrase and a receipt exists, default 
 
 - All `.canon/memory/` reads, edits, and archive moves resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
 - If no `.canon/memory/` directory exists at the main worktree root, stop: `❌ No .canon/memory/ directory found.`
-- If `.canon/memory/` contains no `*.md` entries other than `index.md`, stop: `✅ No memory entries to review.`
+- If `.canon/memory/` contains no top-level `*.md` entries other than `index.md`, stop: `✅ No memory entries to review.` The pen holds two subfolders now, `review/` and `archive/`, and neither is a memory entry, so this count and every entry read below stay at the top level and never recurse into either.
 - Cleanup is exempt from the two stops above. It works on receipts in `.canon/review/`, and a drained pen is the normal state once Apply has run, so a pen-shaped stop would strand the receipt it exists to delete.
 - Resolve the main root via `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`. All review and memory reads anchor here.
 - From a linked worktree the file-editing tools refuse every main-root path, so each write below goes out through `Bash` as a plain single command. The receipt and a memory entry are both short and this session has read them whole, so a rewrite replaces the file with a heredoc rather than editing a line inside it. Promotion targets are tracked files at `pwd` and keep taking `Edit`.
@@ -42,7 +42,7 @@ Propose is the ship-time entry point. The ship skills run it right after capture
 Read in parallel from the project root:
 
 - `.canon/memory/index.md`: the generated index
-- every other `*.md` file under `.canon/memory/`: individual entries with frontmatter (`title`, `description`, `category`)
+- every other top-level `*.md` file in `.canon/memory/`, never its `review/` or `archive/` subfolders: individual entries with frontmatter (`title`, `description`, `category`)
 
 ### Step 2: read promotion targets
 
