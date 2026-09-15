@@ -20,7 +20,7 @@ This repository's own record is the one that is generated rather than authored. 
 - `src/design/adapter.ts` owns the sync adapter, and `src/design/base.css` is the generated file it installs
 - `src/design/contrast.ts` owns the WCAG reading, asserted over the record in `contrast.test.ts`
 - `claude/skills/design-extract/` owns the skill that drafts the file, from an existing codebase or from a greenfield project
-- `.canon/review/design/` owns the rendered preview, gitignored
+- `.canon/tmp/render/design/` owns the rendered preview, gitignored
 - `.claude/design/base.css` is where an install lands in a target, and `.claude/design/project/` is where that target's own values go
 
 ## Decisions
@@ -90,26 +90,26 @@ Install in a target project via `canon claude install` and invoke with `/canon:d
 
 ## Render command
 
-`canon design render` reads `canon/DESIGN.md` and writes an HTML plus CSS preview to `.canon/review/design/`. The HTML shows color swatches, typography samples, spacing bars, and border exemplars. The CSS holds tokens as custom properties for copy-paste into a project stylesheet.
+`canon design render` reads `canon/DESIGN.md` and writes an HTML plus CSS preview to `.canon/tmp/render/design/`. The HTML shows color swatches, typography samples, spacing bars, and border exemplars. The CSS holds tokens as custom properties for copy-paste into a project stylesheet.
 
 A cell no source anchors shows a `? verify` marker beside its value, and a confidence line above the sections names how many cells are anchored against how many are tagged. `src/design/parse.test.ts` and `src/design/render.test.ts` cover both tag spellings, the count and the columns it reads, and the untagged render.
 
 Flags:
 
-| Option            | Default                | Behavior                 |
-| ----------------- | ---------------------- | ------------------------ |
-| `--source <path>` | `canon/DESIGN.md`      | Source markdown to parse |
-| `--out <path>`    | `.canon/review/design` | Output directory         |
+| Option            | Default                    | Behavior                 |
+| ----------------- | -------------------------- | ------------------------ |
+| `--source <path>` | `canon/DESIGN.md`          | Source markdown to parse |
+| `--out <path>`    | `.canon/tmp/render/design` | Output directory         |
 
-The output directory sits under `.canon/review/` which is gitignored by the seed CLAUDE.md. Do not stage the preview.
+The output directory sits under `.canon/tmp/render/`, gitignored scratch the command regenerates and `canon records push` never carries. Do not stage the preview.
 
 ## Board
 
-`canon design board` generates a static page set into a gitignored record folder, defaulting to `.canon/review/board/` through `creationRel`, and reports the path a reader opens with `canon serve`. `src/design/board.ts` writes it, following `src/teach/workspace.ts`'s shape of TypeScript emitting self-contained HTML with no framework and no build step.
+`canon design board` generates a static page set into a gitignored record folder, defaulting to `.canon/tmp/render/board/` through `creationRel`, and reports the path a reader opens with `canon serve`. `src/design/board.ts` writes it, following `src/teach/workspace.ts`'s shape of TypeScript emitting self-contained HTML with no framework and no build step.
 
 It reads from a caller-resolved `--root`, defaulting through `mainWorktreeRoot()` to the main worktree the way `canon teach`'s verbs resolve their own root, rather than from `PROJECT_ROOT`. `generateBoard` takes an `isToolkitCheckout` boolean the CLI layer computes by calling `isOwnCheckout(root)` (`@/project-root`), since a panel function comparing the constant internally would make every existing unit test, which passes a throwaway tmp directory as `root`, silently start exercising the "not toolkit" branch. `isOwnCheckout` reads `root`'s own `package.json` name rather than comparing the path against `PROJECT_ROOT`, since the CLI's own `PROJECT_ROOT` is wherever its running source sits, which is a linked worktree's own path when a worker runs the board from inside one, and literal equality there reported the main toolkit checkout `--root` correctly resolved to as not-toolkit. It gates the surfaces panel's landing-page half and the whole components panel, both of which read this repository's own build output. The command still carries the same `checkoutMismatchWarning` a stale global install needs, since `.claude/`, `.canon/`, and `web/` are absent from the published package's `files` list.
 
-Six panels read sources that already exist on disk. Tokens calls `renderDesignDoc` against `surfaceDir(root, 'DESIGN.md')` rather than building a second renderer. Surfaces copies `web/dist` and `.canon/teach/` whole into the board's own tree and iframes each, reporting a missing build, an absent workspace, or (for the landing-page half alone, outside this toolkit's own checkout) a toolkit-only notice rather than rendering a broken frame. Wireframes reads every `**/*.md` under `surfaceDir(root, 'wireframes')`, excluding `index.md` at any depth, and renders each file as-is inside a `<pre>`, since `standards/wireframes.md` makes the ASCII proportions load-bearing and any parse would reinterpret them. `surfaceDir` (`@/surface-root`) is what lets tokens and wireframes reach a target that has not run `canon migrate surface-roots`, the same `.claude/`-or-`canon/` fallback `recordDir` already gives the surfaces panel's teach half. Each wireframe's label comes from the file's own `description` frontmatter field via `@/indexes/frontmatter`, and an empty or absent directory reports the whole panel empty rather than per file. Past candidates lists an arm capture image under `.canon/review/evidence/` per folder, and states the corpus is empty rather than rendering an empty grid when none carries one. Components copies `web/gallery-dist` the same way surfaces copies `web/dist`, reporting a missing build outside a build and a toolkit-only notice outside this toolkit's own checkout. References lists whatever image an operator has dropped flat under `.canon/review/references/` via the same `imagesIn` helper Past candidates uses, with no fetching and no second token source, reporting the folder as absent or as present but empty rather than rendering nothing.
+Six panels read sources that already exist on disk. Tokens calls `renderDesignDoc` against `surfaceDir(root, 'DESIGN.md')` rather than building a second renderer. Surfaces copies `web/dist` and `.canon/teach/` whole into the board's own tree and iframes each, reporting a missing build, an absent workspace, or (for the landing-page half alone, outside this toolkit's own checkout) a toolkit-only notice rather than rendering a broken frame. Wireframes reads every `**/*.md` under `surfaceDir(root, 'wireframes')`, excluding `index.md` at any depth, and renders each file as-is inside a `<pre>`, since `standards/wireframes.md` makes the ASCII proportions load-bearing and any parse would reinterpret them. `surfaceDir` (`@/surface-root`) is what lets tokens and wireframes reach a target that has not run `canon migrate surface-roots`, the same `.claude/`-or-`canon/` fallback `recordDir` already gives the surfaces panel's teach half. Each wireframe's label comes from the file's own `description` frontmatter field via `@/indexes/frontmatter`, and an empty or absent directory reports the whole panel empty rather than per file. Past candidates lists an arm capture image under `.canon/picks/` per folder, stepping over `references/`, and states the corpus is empty rather than rendering an empty grid when none carries one. Components copies `web/gallery-dist` the same way surfaces copies `web/dist`, reporting a missing build outside a build and a toolkit-only notice outside this toolkit's own checkout. References lists whatever image an operator has dropped flat under `.canon/picks/references/` via the same `imagesIn` helper Past candidates uses, with no fetching and no second token source, reporting the folder as absent or as present but empty rather than rendering nothing.
 
 The header states the hand-off groundwork 89 named rather than building a control for it: one static line naming `canon:draft-and-pick` as the drafting owner and `canon:ux-audit` as the auditing owner, since a static page cannot invoke a skill and anything calling this a button would be describing a label.
 
@@ -124,7 +124,7 @@ Typical sequence in a new project:
 1. Run the extract skill to draft `canon/DESIGN.md`. It sources tokens from an existing codebase, or proposes them against a greenfield project with a personality paragraph.
 2. Review `? verify` cells and edit the file directly. The preview marks each one and counts them, so step 4 below is where they are found rather than the source file.
 3. Run `canon design render` to regenerate the preview
-4. Open `.canon/review/design/index.html` in a browser
+4. Open `.canon/tmp/render/design/index.html` in a browser
 5. Iterate on DESIGN.md until the preview matches intent
 
 The Stitch integration (`canon design sync`, `generate`, `edit`, `variants`, `list`) sits on top of the same DESIGN.md file, consuming its tables via MCP. Stitch is Google's Gemini-powered design product, addressed through a remote MCP server at `stitch.googleapis.com/mcp` that exposes project, screen, generation, and design-system tools, and `DesignTheme`, the theme schema those tools read and write, sits beside the same object's free-text `designMd` field.
