@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.88.1](https://github.com/erclx/canon/compare/v4.88.0...v4.88.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **draft-and-pick:** close five demonstrated failures in the pick loop ([#1700](https://github.com/erclx/canon/issues/1700)) ([439bd75](https://github.com/erclx/canon/commit/439bd757c7c050bf2537a649e3a8f41a41a6d480))
+
 ## [4.88.0](https://github.com/erclx/canon/compare/v4.87.0...v4.88.0) (2026-09-15)
 
 
