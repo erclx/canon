@@ -20,12 +20,21 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Reads a color without compositing its alpha, samples a round control at the corner of its bounding box, or confirms a panel's dimensions while it sits above the viewport. Each reads as a passing measurement about something no reader sees.
 - Meets a machine with no browser binary and reports on the arms anyway, since nothing in the default flow separates a render that failed from one that was never attempted.
 - Hand-writes a mockup of a surface a running app already serves, which drifts from what ships by a few pixels and a few words the moment the app's own markup or stylesheet moves on.
+- Varies a property the decision is not about, which satisfies the one-property rule and produces a set differing in the layer a reader notices least. Five palettes over one identical page read as five skins of one design, and the operator rejected the whole set on sight.
+- Renders each arm in whatever theme it happens to carry, so a set spanning both themes cannot be compared without the operator toggling every arm and holding the earlier ones in memory.
+- Looks at a render to confirm it came out rather than to judge whether it is worth showing, which satisfies the rule against reporting an unseen result and still hands over weak work.
+- Writes the run's renders to a scratch path outside the record that cites them, leaving the folder holding source markup and none of the images, so the judgment is unreachable to everyone except the session that made it.
+- Narrows the page onto the picked arm in place on each iteration, so every earlier round is overwritten and a later pass cannot see what was already rejected.
 
 ## Must
 
 - Produce three to five arms with the shipping state among them, each carrying an id, a label, and what the arm costs.
 - Author the whole candidate set as one self-contained page and render it once, so the comparison arrives as one image, except where the surface under decision is a running app: there the page links a copy of the built stylesheet rather than inlining it, per `references/live-arms.md`.
-- Vary one property across the arms, so the answer names a difference.
+- Name the layer the decision lives at before drafting, and vary the arms at that layer alone, so the answer names the difference that decided it rather than the cheapest one to change.
+- Render every arm in one theme at a time, with a control that sets the whole set, so the comparison holds still while the operator reads it.
+- Judge each render against a stated bar before handing it over, name the weakest thing on the page, and fix it where that sentence would embarrass the work.
+- Write each iteration to its own folder rather than narrowing the previous one in place, so every earlier round stays openable.
+- Write the run's renders inside the record that cites them wherever one exists, and reserve the scratch path for inputs that are re-runnable and cited by nothing.
 - Render before reporting on any arm, and report a missing browser binary as a refusal naming the repair rather than describing an arm nobody has seen.
 - Take the pick through the structured question surface, with the recommendation ranked first and marked, and every option carrying its cost.
 - Keep every write inside the run's scratch folder until the pick is final.

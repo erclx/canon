@@ -15,7 +15,7 @@ Some decisions are settled by looking rather than by reasoning, and no draft is 
 
 ## Step 1: name the decision and the arms
 
-1. State the decision in one sentence, naming what changes between arms and what stays fixed.
+1. State the decision in one sentence, naming what changes between arms and what stays fixed. Name the layer that sentence puts the decision at, and check that the arms will differ there rather than somewhere cheaper to change.
 2. Derive a kebab slug from that sentence. Call the folder every file this run writes to `<dest>` below. `<dest>` is `.canon/tmp/<slug>/`, a nested `<slug>/` folder rather than a flat `<slug>-<file>.md`, which is the shape every temporary write in this project takes. Running inside a live `plan-groundwork` track is the one exception: `<dest>` is the track's own `evidence/<slug>/` instead, since a candidate render is evidence the track's decision file cites rather than spike input.
 3. Write one arm per candidate, each carrying an id, a label, and what the arm costs. An arm with no stated cost is not an option.
 4. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
@@ -28,10 +28,12 @@ Write every arm side by side on one self-contained HTML page at `<dest>/candidat
 - One page for the pick, never a set of separate images handed to the operator to compare from memory. The comparison they judge is `candidates.html`, which Step 3 renders and Step 4 asks about. The per-arm files exist only for Step 6's archival capture, once the pick is made, and only the last pass through this step is what Step 6 finds there.
 - Wrap each arm's markup in the same class on both files, chosen once per run and reused everywhere, so one selector addresses an arm on the combined page and on its own standalone file alike.
 - Label each arm on the page with its id and its cost, so the render carries what the question will ask about.
+- Give the combined page one control that sets every arm's theme at once, beside whatever per-arm control the arms carry. A set spanning both themes cannot be compared, since the operator has to toggle each arm and hold the earlier ones in memory, which is the failure the single-page rule exists to prevent.
 - Take the live-app branch instead when the surface under decision is a running app: lift the rendered markup and link a copy of the built stylesheet rather than inlining, per `${CLAUDE_SKILL_DIR}/references/live-arms.md`.
 - On the default path, inline every style, script, and asset the page needs. The render reads the file off disk, so a page reaching for a build step or a network font renders without it and the arms differ by something nobody chose.
 - On the default path, declare a font stack the machine resolves, such as `system-ui` behind a generic fallback. The render refuses a page that would rewrap against a substitute rather than shipping a false comparison, so a page naming no font at all is refused on whatever the default resolves to.
 - Vary one property across the arms. A page whose arms differ in three ways answers no question, since the pick cannot say which difference decided it.
+- Vary the property the decision is about, which the rule above is satisfiable without. Holding composition fixed and varying color obeys it exactly and produces five skins of one design, because a set differing in the layer a reader notices least answers nothing. A palette is chosen to serve a composition, so it cannot be picked ahead of one.
 
 ## Step 3: render and hand off
 
@@ -44,8 +46,10 @@ canon capture <dest>/candidates.html --selector <element>
 - `--selector` has no default and the command refuses without it. Name the element wrapping the arms rather than `body`, which crops to whatever the page's own margins leave.
 - `canon capture` and `canon drive` both need a browser binary the toolkit does not install. When either refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, then stop rather than describing an arm nobody has seen.
 - Serve the page instead of capturing it when the operator has to drive the decision, such as a hover response, a scroll-linked position, or a pace. Start `canon serve <dest> --entry candidates.html` in the background and read the link off its record, since the printed link opens `index.html` without that flag and `<dest>` holds no such file. A still answers how a thing looks and answers none of those.
+- Write the render inside the record that cites it wherever one exists, by pointing `--out` at `<dest>/renders/` rather than at a session scratch path. A pick taken from an image the record does not hold is a judgment nobody but this session can check, and the archival capture in Step 6 covers the final round alone.
 - Hand over the address rather than a description. Emit the PNG path on its own line, and the link beside it where the page is served.
 - Never report a visual result you have not looked at. A claim about appearance with no render behind it is a guess.
+- Look to judge rather than to confirm. Reading the image back to check it rendered satisfies the rule above and still hands over weak work, so name the weakest thing on the page in a sentence. Where that sentence would embarrass the work, fix it and hand over the second version. Say the remaining weakness out loud either way, so the operator is not hunting for what you already know.
 
 ## Step 4: take the pick
 
@@ -58,11 +62,11 @@ Put the choice to the operator through the structured question surface, since a 
 
 ## Step 5: loop on the pick
 
-1. Narrow the page to the picked arm, plus whatever the operator asked to change about it.
+1. Write each iteration to its own `<dest>` rather than narrowing the previous one in place, suffixing the slug so the folders sort. An iteration overwritten is one a later pass cannot open, and the losing round is what stops a correction re-proposing something already rejected.
 2. Write fresh arms off the pick and return to Step 2 where the correction opens a new question. Revise the one arm where it does not.
 3. Re-render, hand off again, and take the next answer.
 4. Repeat until the operator says it is right. The loop stops on their word and on nothing else, so a run stopping because the arms stopped differing has stopped early.
-5. Hold the real surface untouched across every iteration. Nothing outside `<dest>` changes until the pick is final.
+5. Hold the real surface untouched across every iteration. Nothing outside the run's own folders changes until the pick is final.
 
 ## Step 6: close
 
