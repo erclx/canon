@@ -48,6 +48,18 @@ afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
 })
 
+describe('teachDir', () => {
+  it('wraps an ordinary root in the record-root resolver', () => {
+    expect(teachDir(ROOT)).toBe(join(ROOT, '.canon', 'teach'))
+  })
+
+  it('takes a root already named teach as the teach folder itself', () => {
+    const direct = join(ROOT, 'examples', 'teach')
+
+    expect(teachDir(direct)).toBe(direct)
+  })
+})
+
 describe('listWorkspaces', () => {
   it('refuses a root carrying no teach folder', async () => {
     const outcome = await listWorkspaces(ROOT)
