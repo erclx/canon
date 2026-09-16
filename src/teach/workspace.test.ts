@@ -58,6 +58,18 @@ describe('teachDir', () => {
 
     expect(teachDir(direct)).toBe(direct)
   })
+
+  it('lets a verb reach a workspace under a directly named teach folder', async () => {
+    const direct = join(ROOT, 'teach')
+    mkdirSync(join(direct, '00-fixture'), { recursive: true })
+
+    const outcome = await listWorkspaces(direct)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      workspaces: [{ slug: '00-fixture' }],
+    })
+  })
 })
 
 describe('listWorkspaces', () => {
