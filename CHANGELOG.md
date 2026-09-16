@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.89.0](https://github.com/erclx/canon/compare/v4.88.1...v4.89.0) (2026-09-16)
+
+
+### Features
+
+* **design:** land derived palette anchors ([#1699](https://github.com/erclx/canon/issues/1699)) ([78822c3](https://github.com/erclx/canon/commit/78822c31000a89dd80368cea0aa035642ce0f3ae))
+
 ## [4.88.1](https://github.com/erclx/canon/compare/v4.88.0...v4.88.1) (2026-09-16)
 
 
