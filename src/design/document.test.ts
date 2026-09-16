@@ -61,7 +61,7 @@ describe('renderDesignDocument', () => {
   it('tags a cell the record marks and leaves the rest bare', () => {
     const document = renderDesignDocument()
 
-    expect(document).toContain('#e4dcd0 ? verify')
+    expect(document).toContain('#d5d4d1 ? verify')
     // The role column pads to the widest role in the table, so this width
     // moves whenever a longer role name is declared.
     expect(document).toContain('| background           | page canvas')
@@ -85,7 +85,7 @@ describe('renderDesignDocument', () => {
     const border = parsed.color.find(
       (row) => row['Role'].value === 'light-border',
     )
-    expect(border?.['Value']).toEqual({ value: '#e4dcd0', tagged: true })
+    expect(border?.['Value']).toEqual({ value: '#d5d4d1', tagged: true })
   })
 
   it('ends on a single trailing newline', () => {

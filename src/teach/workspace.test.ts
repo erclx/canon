@@ -634,7 +634,7 @@ describe('writeStylesheet', () => {
     const body = await readFile(join(ROOT, outcome.basePath), 'utf8')
 
     expect(outcome.written).toBe(true)
-    expect(body).toContain('--color-accent: #e0724b;')
+    expect(body).toContain('--color-accent: #c76b5f;')
     expect(body).toContain('.status::before')
     expect(body).toContain('@font-face')
     expect(body).toContain('base64,')

@@ -32,8 +32,8 @@ describe('buildDesignCss', () => {
   it('emits one custom property per color role a browser can render', () => {
     const css = buildDesignCss()
 
-    expect(css).toContain('--color-background: #191512;')
-    expect(css).toContain('--color-light-muted: #726b62;')
+    expect(css).toContain('--color-background: #0f0e0c;')
+    expect(css).toContain('--color-light-muted: #6e6d6c;')
   })
 
   it('leaves an ANSI role out, since no browser renders one', () => {

@@ -22,32 +22,38 @@ Every role clears WCAG AA at 4.5:1 against each ground it declares, asserted in 
 
 Warning and error hold ANSI codes because that is what `scripts/lib/ui.sh` writes and no rendered surface implements an equivalent. Giving either a hex value would invent a mapping no file has, so they carry no contrast reading either.
 
-Success is the one of the three that does have a rendered equivalent, which is why it carries a hex. `assets/captures/install.html` marks every confirmed step with it, and the shell writes `ANSI 32` for the same role, so the two are one role in two registers rather than one value in two spellings. The hex is what the rendered surface picked and no reading claims the terminal renders that value. It declares `background` alone as its ground, since that is the only role it is drawn on, where every other dark text role is drawn on both.
+Success is the one of the three that does have a rendered equivalent, which is why it carries a hex. `assets/captures/install.html` marks every confirmed step with it, and the shell writes `ANSI 32` for the same role, so the two are one role in two registers rather than one value in two spellings. The hex is what the rendered surface picked and no reading claims the terminal renders that value. It declares `background` alone as its ground, since that is the only role it is drawn on, where every other dark text role is drawn on both. It is the one role below that is not derived.
+
+Every other role is derived rather than picked, solved in OKLCH by binary search for the lightness that hits a target contrast against its ground, using this module's own anchors. Six anchors are the whole system: ground lightness 0.985 light and 0.165 dark, neutral chroma 0.003 light and 0.004 dark, neutral hue 90 both, accent hue 22 light and 28 dark, accent chroma 0.13 light and 0.12 dark for a mark and 0.095 light and 0.09 dark for a fill. Only the mark step is rendered below, in `accent`. That token already stands in for a fill in practice: `assets/captures/hero.html`'s `.cmd` rule paints its whole background with `var(--color-accent)` and sets text on top, which is a fill use rather than a mark one. The fill chroma step has no token of its own yet, so a lower-saturation `accent-fill` would recolor that button rather than introduce a new consumer. Targets, which are inputs rather than results: text 13.5, body 8.6, secondary 5.6, muted 4.6, accent 5.2. Dark is its own anchor set rather than an inversion of light, and every arm measured in the groundwork behind this landed on identical neutral ratios, which is what made the accent choice a question about hue alone.
+
+`muted` and `light-muted` solve against `surface` rather than `background`. Both declare two grounds and the groundwork solved its target against one, so the recorded hex cleared 4.6 against `background` and read 4.40 dark, 4.24 light against `surface`, the tighter of the two since surface sits a step closer to its text color. The values here are re-solved for the same 4.6 target read against `surface` instead, which clears both: 4.58 dark, 4.56 light against `surface`, and 4.80 dark, 4.95 light against `background`.
+
+The accent is a quiet red at hue 22 light, 28 dark, chosen over a vivid red that read as an error state against a page reporting success, over indigo which carries less distinctiveness at hue 280 in tooling already dominated by that hue, and over rust at hue 42, a larger temperature shift than the problem required. The debt this accepts: `error` and `warning` now share a register with the most repeated element on every rendered surface, so both need differentiating by lightness or by an icon rather than by hue, and that work is unscheduled.
 
 | Role                 | Intent                                                | Value            |
 | -------------------- | ----------------------------------------------------- | ---------------- |
-| background           | page canvas                                           | #191512          |
-| surface              | cards, panels, raised blocks                          | #211c19          |
-| chrome               | the window titlebar, one step above the canvas        | #241e1a          |
-| border               | every rule and panel edge                             | #2f2823          |
-| text                 | headings, counts, emphasized runs                     | #f4efe9          |
-| text-body            | default body copy                                     | #c9c0b7          |
-| text-secondary       | labels, captions, supporting copy                     | #a79d94          |
-| muted                | the faintest step, trailing notes                     | #948a81          |
-| accent               | install command, mark, primary action                 | #e0724b          |
+| background           | page canvas                                           | #0f0e0c          |
+| surface              | cards, panels, raised blocks                          | #151412          |
+| chrome               | the window titlebar, one step above the canvas        | #1b1a18          |
+| border               | every rule and panel edge                             | #2a2926          |
+| text                 | headings, counts, emphasized runs                     | #d9d7d4          |
+| text-body            | default body copy                                     | #aeada9          |
+| text-secondary       | labels, captions, supporting copy                     | #8c8b86          |
+| muted                | the faintest step, trailing notes                     | #7f7f7c          |
+| accent               | install command, mark, primary action                 | #c76b5f          |
 | success              | confirmations, rendered and in the terminal           | #61c454          |
 | warning              | terminal cautions                                     | ANSI 33          |
 | error                | terminal failures                                     | ANSI 31          |
-| light-background     | page canvas on a light ground                         | #faf7f2          |
-| light-surface        | cards and panels on a light ground                    | #f4efe6          |
-| light-chrome         | the window titlebar, one step above the canvas        | #ede4d6          |
-| light-text           | primary text on a light ground                        | #1a1815          |
-| light-text-body      | default body copy on a light ground                   | #3d3630          |
-| light-text-secondary | labels, captions, supporting copy on a light ground   | #5c544b          |
-| light-muted          | secondary text on a light ground                      | #726b62          |
-| light-accent         | links and primary action on light                     | #a4471c          |
+| light-background     | page canvas on a light ground                         | #fbfaf8          |
+| light-surface        | cards and panels on a light ground                    | #f1f1ee          |
+| light-chrome         | the window titlebar, one step above the canvas        | #e9e8e5          |
+| light-text           | primary text on a light ground                        | #2c2c29          |
+| light-text-body      | default body copy on a light ground                   | #4b4947          |
+| light-text-secondary | labels, captions, supporting copy on a light ground   | #666561          |
+| light-muted          | secondary text on a light ground                      | #6e6d6c          |
+| light-accent         | links and primary action on light                     | #ad4a4b          |
 | light-success        | confirmations, rendered and in the terminal, on light | #2d6b22          |
-| light-border         | rules and panel edges on light                        | #e4dcd0 ? verify |
+| light-border         | rules and panel edges on light                        | #d5d4d1 ? verify |
 
 ## Typography
 
