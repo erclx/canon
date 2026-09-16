@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import { TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
@@ -230,9 +230,14 @@ export function refuse(
  * Every workspace sits under the main worktree root rather than under the
  * checkout the caller stands in. Resolving that root belongs to the caller, so
  * this takes one and never reads the working directory.
+ *
+ * A root already named `teach` is taken as the teach folder itself rather than
+ * a project root to wrap, which is what lets a caller point straight at a
+ * folder such as `examples/teach` that holds workspaces outside any `.canon/`
+ * or `.claude/` record root.
  */
 export function teachDir(root: string): string {
-  return recordDir(root, 'teach')
+  return basename(root) === 'teach' ? root : recordDir(root, 'teach')
 }
 
 async function listSlugs(dir: string): Promise<string[]> {

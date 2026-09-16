@@ -48,6 +48,30 @@ afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
 })
 
+describe('teachDir', () => {
+  it('wraps an ordinary root in the record-root resolver', () => {
+    expect(teachDir(ROOT)).toBe(join(ROOT, '.canon', 'teach'))
+  })
+
+  it('takes a root already named teach as the teach folder itself', () => {
+    const direct = join(ROOT, 'examples', 'teach')
+
+    expect(teachDir(direct)).toBe(direct)
+  })
+
+  it('lets a verb reach a workspace under a directly named teach folder', async () => {
+    const direct = join(ROOT, 'teach')
+    mkdirSync(join(direct, '00-fixture'), { recursive: true })
+
+    const outcome = await listWorkspaces(direct)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      workspaces: [{ slug: '00-fixture' }],
+    })
+  })
+})
+
 describe('listWorkspaces', () => {
   it('refuses a root carrying no teach folder', async () => {
     const outcome = await listWorkspaces(ROOT)
