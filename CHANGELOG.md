@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.96.0](https://github.com/erclx/canon/compare/v4.95.0...v4.96.0) (2026-09-19)
+
+
+### Features
+
+* **web:** rebuild the landing page as one session read top to bottom ([#1730](https://github.com/erclx/canon/issues/1730)) ([fbba953](https://github.com/erclx/canon/commit/fbba953cb65639087041016e6bf8166d677e9538))
+
 ## [4.95.0](https://github.com/erclx/canon/compare/v4.94.0...v4.95.0) (2026-09-19)
 
 
