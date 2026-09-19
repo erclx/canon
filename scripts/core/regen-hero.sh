@@ -77,8 +77,11 @@ GOV_JSON="$(catalog gov list)"
 STANDARDS_JSON="$(catalog standards list)"
 SNIPPETS_JSON="$(catalog snippets list)"
 TOOLING_JSON="$(catalog tooling list)"
+# The catalog ledger names three commands, and the registered set is only
+# readable from the root help, which lists one per line under `Commands:`.
+COMMANDS_HELP="$(cd "$PROJECT_ROOT" && CANON_NON_INTERACTIVE=1 bun src/cli.ts --help 2>/dev/null)"
 
-for payload in "$COUNTS_JSON" "$SKILLS_JSON" "$GOV_JSON" "$STANDARDS_JSON" "$SNIPPETS_JSON" "$TOOLING_JSON"; do
+for payload in "$COUNTS_JSON" "$SKILLS_JSON" "$GOV_JSON" "$STANDARDS_JSON" "$SNIPPETS_JSON" "$TOOLING_JSON" "$COMMANDS_HELP"; do
   if [ -z "$payload" ]; then
     echo "regen-hero: a catalog returned nothing, refusing to write a zeroed hero" >&2
     exit 1
@@ -98,6 +101,7 @@ printf '%s' "$GOV_JSON" >"$PAYLOAD_DIR/gov.json"
 printf '%s' "$STANDARDS_JSON" >"$PAYLOAD_DIR/standards.json"
 printf '%s' "$SNIPPETS_JSON" >"$PAYLOAD_DIR/snippets.json"
 printf '%s' "$TOOLING_JSON" >"$PAYLOAD_DIR/tooling.json"
+printf '%s' "$COMMANDS_HELP" >"$PAYLOAD_DIR/commands-help.txt"
 printf '%s' "$TOKEN_CSS" >"$PAYLOAD_DIR/tokens.css"
 
 export PAYLOAD_DIR
@@ -326,8 +330,36 @@ for (const [label, rows] of [
   }
 }
 
+// The ledger names a few real entries per domain. Chosen by hand for the same
+// reason FEATURED_SKILLS is, and asserted against the catalog so a rename fails
+// the run rather than leaving a name the repository no longer ships.
+const commandNames = readFileSync(PAYLOAD_DIR + "/commands-help.txt", "utf8")
+  .split("\n")
+  .map((line) => line.match(/^[│\s]{2,}(?<name>[a-z][a-z-]*)\s/)?.groups?.name)
+  .filter(Boolean)
+const LEDGER = [
+  ["skills", skills.length, ["plan-feature", "role-orchestrator", "review-pr"], skills],
+  ["rules", rules.length, ["behavior", "memory", "testing"], rules],
+  ["standards", standards.length, ["markdown", "plan", "teach"], standards],
+  ["commands", commandCount, ["gov", "tasks", "design"], commandNames],
+  ["stacks", toolingStacks.length, ["astro", "python", "web"], toolingStacks.map((stack) => stack.name)],
+]
+for (const [domain, , chosen, names] of LEDGER) {
+  const known = new Set(names)
+  const missing = chosen.filter((name) => !known.has(name))
+  if (missing.length > 0) {
+    console.error(`regen-hero: ledger ${domain} names missing from the catalog: ${missing.join(", ")}`)
+    process.exit(1)
+  }
+}
+const ledgerRows = LEDGER.map(
+  ([domain, count, chosen]) =>
+    `      <div class="row"><span class="count">${count}</span><span class="domain">${domain}</span><span class="names">${escape(chosen.join(", "))}</span></div>`,
+).join("\n")
+
 const values = {
   TOKENS: tokenCss,
+  LEDGER_ROWS: ledgerRows,
   GOV_STACK_ROWS: govStackRows,
   GOV_RULE_ROWS: govRuleRows,
   STANDARD_ROWS: standardRows,

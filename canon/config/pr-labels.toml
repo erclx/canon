@@ -131,12 +131,10 @@ generated = [
   "assets/evidence/hero.stamp",
   "assets/evidence/install.png",
   "assets/evidence/install.stamp",
-  "assets/evidence/governance.png",
-  "assets/evidence/governance.stamp",
-  "assets/evidence/install-surface.png",
-  "assets/evidence/install-surface.stamp",
-  "assets/evidence/task-board.png",
-  "assets/evidence/task-board.stamp",
+  "assets/evidence/catalog.png",
+  "assets/evidence/catalog.stamp",
+  "assets/evidence/arrival.png",
+  "assets/evidence/arrival.stamp",
   "canon/config/baseline.json",
 ]
 # Each is a reason of its own rather than another generated file, since a reader
@@ -147,9 +145,7 @@ generated = [
 rides-with-generated = [
   "assets/captures/hero.html",
   "assets/captures/install.html",
-  "assets/captures/governance.html",
-  "assets/captures/install-surface.html",
-  "assets/captures/task-board.html",
+  "assets/captures/catalog.html",
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.
