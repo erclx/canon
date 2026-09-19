@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.98.0](https://github.com/erclx/canon/compare/v4.97.0...v4.98.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** add a navigation frame to draft-and-pick ([#1738](https://github.com/erclx/canon/issues/1738)) ([71a5e18](https://github.com/erclx/canon/commit/71a5e1834b5437cadffbb93f7d3974b1af8ca150))
+* **slides:** read the deck face from the design module ([#1740](https://github.com/erclx/canon/issues/1740)) ([c5079ce](https://github.com/erclx/canon/commit/c5079ceaeb2c79c48ef1267961437136d3ff953e))
+
 ## [4.97.0](https://github.com/erclx/canon/compare/v4.96.0...v4.97.0) (2026-09-19)
 
 
