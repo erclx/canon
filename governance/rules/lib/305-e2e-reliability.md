@@ -1,8 +1,7 @@
 ---
 description: Enforce settled waits and falsifiable guards in end-to-end tests
 paths:
-  - 'e2e/*.ts'
-  - 'e2e/**/*.ts'
+  - '**/e2e/**/*.ts'
 ---
 
 # End-to-end reliability standards
@@ -14,6 +13,8 @@ paths:
 - Bound every settle with an explicit timeout.
 - Do not raise a timeout to clear a failure that reproduces under load. Replace the wait with a settle.
 - Do not read a value once after a pause. Poll it.
+- Settle a smooth scroll on the `scrollend` event. Fall back to a stillness window only when the target was already in view.
+- Run with motion reduced unless the test asserts motion, and opt back in per test.
 
 ## Falsifiable guards
 
