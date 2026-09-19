@@ -6,7 +6,7 @@
 
 canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories. It keeps one authoritative copy and installs it into each project on demand.
 
-![The canon catalog, listing skills, governance rules, and standards with the count each ships, the workflow skills named, and a sample of the rule and standard names](assets/hero.png)
+![The canon catalog, listing skills, governance rules, and standards with the count each ships, the workflow skills named, and a sample of the rule and standard names](assets/evidence/hero.png)
 
 The counts above are read from the catalogs when the image is built, so they're what the repo actually ships today. See it live at [canon.erclx.dev](https://canon.erclx.dev).
 
@@ -39,7 +39,7 @@ claude plugin marketplace add https://github.com/erclx/canon
 claude plugin install canon@canon
 ```
 
-![Adding the canon marketplace and installing the plugin in Claude Code](assets/install.png)
+![Adding the canon marketplace and installing the plugin in Claude Code](assets/evidence/install.png)
 
 The skills land as `/canon:<name>`. If your session was already open, run `/reload-plugins` to pick them up.
 
@@ -67,19 +67,19 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 
 Those domains split on one line: some are copied into your project and become yours to edit, and some are never copied at all.
 
-![canon tooling list and canon standards list side by side, the first showing five stacks with their dependency and script counts, the second showing standards against the artifact each governs](assets/install-surface.png)
+![canon tooling list and canon standards list side by side, the first showing five stacks with their dependency and script counts, the second showing standards against the artifact each governs](assets/evidence/install-surface.png)
 
 A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one.
 
 Governance is the third shape, and it is worth seeing rather than reading about, because the glob beside each rule is what decides whether it reaches a session at all.
 
-![canon gov list, showing seven stacks with the rules each carries and a sample of rules beside the path glob that loads each one](assets/governance.png)
+![canon gov list, showing seven stacks with the rules each carries and a sample of rules beside the path glob that loads each one](assets/evidence/governance.png)
 
 Stacks compose, so a react project inherits node and node inherits base. A rule with a glob loads only when a matching path is edited, and a rule with none loads every session. Both counts and every row above are read from the catalogs when the image is built.
 
 The toolkit tracks its own work the same way, in a task board no catalog can read back.
 
-![the task board's Run now table, one row per task in flight, each naming the files it touches and the plan it runs under](assets/task-board.png)
+![the task board's Run now table, one row per task in flight, each naming the files it touches and the plan it runs under](assets/evidence/task-board.png)
 
 `.canon/tasks/` is gitignored session scratch, so unlike the two frames above, this one is a hand-taken snapshot rather than something the build reads live, and it goes stale the moment the board moves.
 

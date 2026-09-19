@@ -65,7 +65,7 @@ The `Unreferenced rules` stage in `src/gate/stages.ts` reports rules no stack re
 
 Create a new `.toml` file in `governance/stacks/`. Set `extends` to the parent stack name or leave it empty. List rule names without `.md` in the `rules` array, or a folder name under `governance/rules/` to take that folder whole. Nothing compiles the stack, so the file is live to `canon gov install` as soon as it is written.
 
-`bun run check` still has something to say about it. Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html` and the Hero stage fails until `canon capture assets/captures/hero.html --selector .window --out assets` re-renders the image. The capture writes `assets/hero.stamp` alongside, and the `captureStamps` measure in `src/gate/measures.ts` compares the two digests it holds against the markup and the image on disk.
+`bun run check` still has something to say about it. Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html` and the Hero stage fails until `canon capture assets/captures/hero.html --selector .window --out assets/evidence` re-renders the image. The capture writes `assets/evidence/hero.stamp` alongside, and the `captureStamps` measure in `src/gate/measures.ts` compares the two digests it holds against the markup and the image on disk.
 
 ```toml
 extends = "node"

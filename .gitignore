@@ -23,7 +23,7 @@ web/gallery-dist/
 # screenshot.ts's own sweep. web/evidence/ is unused on purpose, not by
 # oversight: `440-surface-capture.md`'s "Sharing a capture" section lets a
 # project route a flagged case's evidence through its own established
-# convention instead, which this repository does at assets/captures/home/.
+# convention instead, which this repository does at assets/evidence/home/.
 web/screenshots/
 web/evidence/
 

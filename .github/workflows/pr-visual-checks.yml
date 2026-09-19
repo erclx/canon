@@ -141,9 +141,9 @@ jobs:
 
       - name: Update the committed baseline
         run: |
-          mkdir -p assets/captures/home
-          cp web/screenshots/localhost/home/default.png assets/captures/home/light.png
-          cp web/screenshots/localhost/home/dark.png assets/captures/home/dark.png
+          mkdir -p assets/evidence/home
+          cp web/screenshots/localhost/home/default.png assets/evidence/home/light.png
+          cp web/screenshots/localhost/home/dark.png assets/evidence/home/dark.png
 
       # HEAD_REF carries github.head_ref through env: rather than into the
       # script body directly, since that value is attacker-controlled on a
@@ -173,7 +173,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/captures/home
+          git add assets/evidence/home
           if git diff --cached --quiet; then
             echo "No change in the captured baseline."
             exit 0
