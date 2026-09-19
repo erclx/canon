@@ -42,6 +42,7 @@ type CaptureResult = Awaited<ReturnType<Renderer['captureSources']>>[number]
 export function register(program: Command): void {
   program
     .command('capture')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Render HTML capture sources to PNG')
     .argument(
       '[source]',
