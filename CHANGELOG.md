@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.94.0](https://github.com/erclx/canon/compare/v4.93.0...v4.94.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** add the test-craft skill for test layer and quality ([#1726](https://github.com/erclx/canon/issues/1726)) ([cf38730](https://github.com/erclx/canon/commit/cf38730d98d590aa60fea5e38d083e5b2721b580))
+* **teach:** read the design module's faces and type steps ([#1724](https://github.com/erclx/canon/issues/1724)) ([a65010f](https://github.com/erclx/canon/commit/a65010f0b422fea6a9289927bd98603dece2c8c1))
+
 ## [4.93.0](https://github.com/erclx/canon/compare/v4.92.0...v4.93.0) (2026-09-19)
 
 
