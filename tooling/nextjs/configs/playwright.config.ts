@@ -12,7 +12,9 @@ export default defineConfig({
     trace: 'on-first-retry',
     baseURL,
     // Nothing to wait out unless a test asserts motion. Opt back in per test with page.emulateMedia({ reducedMotion: 'no-preference' }).
-    reducedMotion: 'reduce',
+    // It is a context option rather than a top-level one, so written beside
+    // `baseURL` it type-checks nowhere and reaches no page.
+    contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
