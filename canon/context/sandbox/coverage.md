@@ -219,6 +219,12 @@ A scenario staging a subdirectory read inside its own script is the other mechan
 
 Every step past that guard needs a live operator, a browser, and a served build, none of which a headless run supplies. The manual entry names the three the arm cannot reach: the link-before-question order, the batch relay, and measurement read-back, so the declaration proves the refusal path alone and claims nothing about the ten steps in the skill's own sequence.
 
+### The test-craft arms score placement, and only one of them can discriminate
+
+`claude/test-craft.sh` carries `layers` and `pull`, both asserting where a written test lands rather than whether it passes, since nothing installs. `layers` stages three untested behaviors and a baseline session already places each at its right layer, so a with-and-without run over it cannot move. `pull` stages a page that already has an end to end spec and asks for a loading state, which is the prompt that pulls a session toward extending the spec. Its `expect.toml` asserts the with arm only: a component test carrying the loading state, and `Loading` absent from every `e2e/*.spec.ts`.
+
+The without arm cannot run through `scripts/sandbox/run.sh`, which hardcodes `--plugin-dir claude`. It is a hand run of `claude -p` against the provisioned tree with a scratch copy of `claude/` lacking `skills/test-craft`, scored by reading the files it wrote, since it fails the arm's check by design. Name the arm in every check call, because `canon sandbox check claude:test-craft` with no arm asserts nothing and reports clean.
+
 ### The gap the rule names
 
 The rule selects `git-stage` and `git-split` ahead of everything else and the harness cannot assert either, which is the sixth standing limit in `canon/context/sandbox/overview.md`. A rule that selects what nothing can check is working correctly. It names the gap instead of hiding it behind a skill nobody nominated.
