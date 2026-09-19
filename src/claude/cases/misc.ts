@@ -14,6 +14,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Which layer of this landing page should I settle first, and what has to stay constant across it?',
+    expect: 'design-taste',
+  },
+  {
+    prompt:
       'This project has no logo yet. Draft one and give me a social card to go with it.',
     expect: 'draft-identity',
   },

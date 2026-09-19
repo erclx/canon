@@ -1,2 +1,2 @@
 extends = "node"
-rules = ["210-astro", "350-security-web", "400-ui", "410-a11y", "430-ux-completeness", "440-surface-capture", "450-link-behavior"]
+rules = ["210-astro", "350-security-web", "400-ui", "410-a11y", "430-ux-completeness", "440-surface-capture", "450-link-behavior", "460-design-taste"]
