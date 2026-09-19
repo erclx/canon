@@ -43,6 +43,7 @@ const APP = `<!doctype html>
     <button id="add">Add card</button>
     <div id="output"></div>
     <script>
+      fetch('/scheme-seen?dark=' + matchMedia('(prefers-color-scheme: dark)').matches)
       document.getElementById('add').addEventListener('click', () => {
         const value = document.getElementById('title').value
         document.getElementById('output').textContent = value ? 'Added ' + value : ''
@@ -116,13 +117,20 @@ const hasBrowser = await browserAvailable()
 describe.skipIf(!hasBrowser)('drive against a served application', () => {
   let server: { port: number; stop: () => void }
   let root: string
+  const schemesSeen: string[] = []
 
   beforeAll(() => {
     root = mkdtempSync(join(tmpdir(), 'canon-demo-e2e-'))
     const served = Bun.serve({
       port: 0,
-      fetch: () =>
-        new Response(APP, { headers: { 'content-type': 'text/html' } }),
+      fetch: (request) => {
+        const url = new URL(request.url)
+        if (url.pathname === '/scheme-seen') {
+          schemesSeen.push(url.searchParams.get('dark') ?? '')
+          return new Response('ok')
+        }
+        return new Response(APP, { headers: { 'content-type': 'text/html' } })
+      },
     })
     server = { port: Number(served.port), stop: () => served.stop(true) }
   })
@@ -184,6 +192,30 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     expect(readFileSync(result.stillPath ?? '').byteLength).toBeGreaterThan(
       1000,
     )
+  }, 180_000)
+
+  it('should start the page in the color scheme the plan sets, with no click beat', async () => {
+    const parsed = parseDraft(DRAFT)
+    if (parsed.status !== 'parsed') return
+
+    const plan = {
+      ...quicken(
+        compilePlan(parsed.draft, { slug: 'scheme', outDir: 'frames' }),
+        `http://127.0.0.1:${server.port}/`,
+        ['', '#title', '#add'],
+      ),
+      colorScheme: 'dark' as const,
+    }
+    schemesSeen.length = 0
+
+    const result = await drive({
+      plan,
+      cursors: DEFAULT_CURSORS,
+      stillPath: join(root, 'frames', 'scheme.png'),
+    })
+
+    expect(result).toMatchObject({ status: 'recorded' })
+    expect(schemesSeen[0]).toBe('true')
   }, 180_000)
 
   it('should draw a caption once the overlay script sets one', async () => {

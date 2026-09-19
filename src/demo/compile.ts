@@ -107,11 +107,14 @@ export interface DemoStep {
   readonly note?: string
 }
 
+export type ColorScheme = 'light' | 'dark'
+
 export interface DemoPlan {
   readonly slug: string
   readonly title: string
   readonly url: string
   readonly viewport: { readonly width: number; readonly height: number }
+  readonly colorScheme?: ColorScheme
   readonly output: { readonly video: string; readonly still: string }
   readonly pointer: { readonly travelMs: number; readonly typeDelayMs: number }
   readonly annotations: typeof ANNOTATIONS
@@ -229,6 +232,9 @@ export function parsePlan(text: string): PlanParse {
     steps.push(step.step)
   }
 
+  const colorScheme = parseColorScheme(raw.colorScheme)
+  if (colorScheme.status === 'failed') return colorScheme
+
   const slug = asText(raw.slug)
   const output = isRecord(raw.output) ? raw.output : {}
   const pointer = isRecord(raw.pointer) ? raw.pointer : {}
@@ -244,6 +250,7 @@ export function parsePlan(text: string): PlanParse {
         width: asNumber(viewport.width, VIEWPORT.width),
         height: asNumber(viewport.height, VIEWPORT.height),
       },
+      ...(colorScheme.value && { colorScheme: colorScheme.value }),
       output: {
         video: asText(output.video) || `demos/${slug || 'demo'}.webm`,
         still: asText(output.still) || `demos/${slug || 'demo'}.png`,
@@ -255,6 +262,19 @@ export function parsePlan(text: string): PlanParse {
       annotations: ANNOTATIONS,
       steps,
     },
+  }
+}
+
+function parseColorScheme(
+  value: unknown,
+):
+  | { status: 'ok'; value?: ColorScheme }
+  | { status: 'failed'; reason: string } {
+  if (value === undefined) return { status: 'ok' }
+  if (value === 'light' || value === 'dark') return { status: 'ok', value }
+  return {
+    status: 'failed',
+    reason: `colorScheme is ${JSON.stringify(value)}, which is not light or dark`,
   }
 }
 
