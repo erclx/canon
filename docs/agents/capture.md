@@ -5,11 +5,11 @@ description: Rendering HTML sources to PNG, what the command asserts about fonts
 
 # Capture
 
-`canon capture [source] --selector <sel>` renders HTML sources to PNG, which is how a generated documentation image is rebuilt from the markup it was generated out of. The source defaults to `assets/`, where a directory expands to every `.html` directly inside it, so adding a capture means dropping a file beside the first one and running the same command. That default is a generic starting point rather than a convention every target shares, and it stays because a missing folder still refuses loud, naming the argument, rather than failing silently. This repository no longer takes it: its own sources moved to `assets/captures/` and its images stayed in `assets/`, so a run here names the source explicitly and sends the output where that run wants it, `--out assets` to rebuild the committed images and somewhere disposable to preview them.
+`canon capture [source] --selector <sel>` renders HTML sources to PNG, which is how a generated documentation image is rebuilt from the markup it was generated out of. The source defaults to `assets/`, where a directory expands to every `.html` directly inside it, so adding a capture means dropping a file beside the first one and running the same command. That default is a generic starting point rather than a convention every target shares, and it stays because a missing folder still refuses loud, naming the argument, rather than failing silently. This repository no longer takes it: its own sources moved to `assets/captures/` and its images moved to `assets/evidence/`, so a run here names the source explicitly and sends the output where that run wants it, `--out assets/evidence` to rebuild the committed images and somewhere disposable to preview them.
 
 ```bash
 canon capture --selector .window
-canon capture assets/captures/install.html --selector .window --out assets
+canon capture assets/captures/install.html --selector .window --out assets/evidence
 canon capture assets/captures --selector .window --out .canon/review/captures
 canon capture https://example.com --selector .window --out preview.png
 ```
@@ -18,13 +18,13 @@ canon capture https://example.com --selector .window --out preview.png
 
 ## What this repository captures
 
-A capture set here spans two folders. `assets/captures/` holds five sources and the template each is written from, and `assets/` holds the five images a document points at with the stamp answering for each. One run over the source folder rebuilds every image, and it takes `--out assets` to put each PNG where its document points rather than beside the markup it rendered. None of the five is edited by hand. `scripts/core/regen-hero.sh` writes each `.html` from the template beside it, filling one shared value map into all of them, and `bun run check` regenerates them and fails on the difference.
+A capture set here spans two folders. `assets/captures/` holds five sources and the template each is written from, and `assets/evidence/` holds the five images a document points at with the stamp answering for each, under the segment `canon pr evidence` compares. One run over the source folder rebuilds every image, and it takes `--out assets/evidence` to put each PNG where its document points rather than beside the markup it rendered. None of the five is edited by hand. `scripts/core/regen-hero.sh` writes each `.html` from the template beside it, filling one shared value map into all of them, and `bun run check` regenerates them and fails on the difference.
 
 Three of the five take catalog data, so a stack gaining a rule moves the frame on the next run. `install.html` and `task-board.html` are the two exceptions: the first holds terminal text from a real run and the second holds a hand-frozen snapshot of a gitignored board, each in its template rather than derived from a live catalog at build time.
 
-`assets/captures/` is read flat and never descends, by the regeneration script, by this command, and by the drift stage alike. A source nested a further folder down is skipped by all three with nothing reported, so a new frame is a template dropped directly in rather than a folder of its own. The split is what retired the name prefix the flat layout used to need: a frame is named for itself now, since `assets/` no longer mixes markup in with the images.
+`assets/captures/` is read flat and never descends, by the regeneration script, by this command, and by the drift stage alike. A source nested a further folder down is skipped by all three with nothing reported, so a new frame is a template dropped directly in rather than a folder of its own. The split is what retired the name prefix the flat layout used to need: a frame is named for itself now, since `assets/captures/` no longer mixes markup in with the images.
 
-Only the HTML is asserted for drift. The PNG is a chromium render whose bytes move with the browser version, so rebuild it with `canon capture assets/captures --selector .window --out assets` when the check reports the HTML changed.
+Only the HTML is asserted for drift. The PNG is a chromium render whose bytes move with the browser version, so rebuild it with `canon capture assets/captures --selector .window --out assets/evidence` when the check reports the HTML changed.
 
 Every render writes a stamp beside its PNG, `hero.png` next to `hero.stamp`, holding the source filename, a `source-sha256` over the markup bytes it read, and an `image-sha256` over the image bytes it wrote. Both digests are what `bun run check` compares, so a markup edit committed without a capture and a PNG swapped under unchanged markup each fail. The stamp is tracked and commits alongside the pair. A capture that cannot write it reports that source as failed and exits 1, so an image whose stamp never landed is reported rather than passed over.
 

@@ -116,6 +116,7 @@ rlength
 rstart
 rtrimstr
 segoe
+scrollend
 semgrep
 setattr
 setsid

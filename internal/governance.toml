@@ -16,6 +16,9 @@
 # `110-python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
+# `306-test-scope` is left out because it names `bun run test:e2e:changed`,
+# which no script in this repository's `package.json` carries.
+
 stack = "node"
 add = [
   "110-python",

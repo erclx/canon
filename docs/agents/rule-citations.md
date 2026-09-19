@@ -73,7 +73,7 @@ A rule under `governance/rules/` installs into a target, and its `paths:` entrie
 
 `internal/rules/` ships nowhere. The tree it governs is the tree present, which makes the question answerable, and all 14 of its globs across 7 rules match at the commit this shipped on.
 
-What that leaves unreached is a glob that matches real files and still reaches none of the work it was scoped at. `governance/rules/lib/305-e2e-reliability.md` scopes itself at `e2e/*.ts` and `e2e/**/*.ts`, and no probe in this repository is written under `e2e/`, so the rule asking a session to watch a new guard fail never fired for the session writing guards. Resolution is mechanical and reach is a judgment about where the work happens, so only the first is here.
+What that leaves unreached is a glob that matches real files and still reaches none of the work it was scoped at. `governance/rules/lib/305-e2e-reliability.md` scoped itself at `e2e/*.ts` and `e2e/**/*.ts` and now reads `**/e2e/**/*.ts`. No probe in this repository is written under `e2e/`, so the rule asking a session to watch a new guard fail never fired for the session writing guards. Resolution is mechanical and reach is a judgment about where the work happens, so only the first is here.
 
 ## The exemption marker
 

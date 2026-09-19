@@ -18,10 +18,11 @@
 # Only the HTML regenerates here. The PNG beside it is a chromium render whose
 # bytes move with the browser version, so asserting it in verify.sh would fail
 # on a machine whose chromium differs rather than on a stale count. Rebuild the
-# images with `canon capture assets/captures --selector .window --out assets`
+# images with `canon capture assets/captures --selector .window --out assets/evidence`
 # after this script reports a change. The markup and the image sit in two
-# folders, so that run reads the sources here and sends every PNG and stamp back
-# up to assets/, where the documents point. The selector has no default, since
+# folders, so that run reads the sources here and sends every PNG and stamp to
+# assets/evidence/, where the documents point and where `canon pr evidence`
+# compares a changed image. The selector has no default, since
 # the element a capture crops to belongs to the page rather than to the command,
 # and `.window` is the class this repository's own sources declare.
 # That capture also writes a .stamp beside each PNG, which records the digest of

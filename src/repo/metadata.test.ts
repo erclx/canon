@@ -37,7 +37,7 @@ describe('extractOpeningLine', () => {
       '',
       'One source for your repos conventions.',
       '',
-      '![hero](assets/hero.png)',
+      '![hero](assets/evidence/hero.png)',
     ].join('\n')
 
     expect(extractOpeningLine(readme)).toBe(

@@ -65,7 +65,7 @@ Six write material a later run or a different worktree reads back. `memory-captu
 
 A folder can be a durable record without being cited, since the disk-loss risk separating `.tmp/` from a backed folder has nothing to do with citation. That is why a retired memory sits under the pen rather than under scratch: an undo buffer left in `.tmp/` on the test that nothing cites it was the declined alternative. The memory-review archive fails the deletable test on content rather than on citation, holding 154 receipts and 261 undecided items the memory standard calls decision state the next round reads back. Measured at `961aa69c` on 2026-08-20.
 
-Nine further folders moved to `.canon/evidence/`, since a durable record names each as its evidence and no source file writes into any on a schedule of its own. Measured at `3208052c` on 2026-09-06, at nine folders, thirteen files, and twenty-nine citations across twenty-two files.
+A folder a durable record cites as its evidence belongs outside `.tmp/` too, and `canon migrate scratch-evidence` moves one to `.canon/evidence/<nn>-<folder>/` when a project has one. This repository has no such folder, since the nine measured at `3208052c` on 2026-09-06 were never moved. Committed images that `canon pr evidence` compares sit under an `evidence/` segment beside the area they belong to, such as `assets/evidence/`, which is a different folder from the record root.
 
 Prefixing the remaining record surfaces with a dot to collapse the ignore file into one pattern was declined at 486 occurrences across roughly 150 committed files against 80 for the move that shipped. It would have been a breaking rename for every installed target and would hide the board a person opens daily.
 

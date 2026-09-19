@@ -9,7 +9,7 @@ docs = ["docs/", "README.md"]
 
 [declined]
 release-managed = ["CHANGELOG.md", "package.json"]
-generated = ["assets/hero.png"]
+generated = ["assets/evidence/hero.png"]
 `
 
 function fixtureMap() {
@@ -44,13 +44,13 @@ describe('resolveCoverage', () => {
   it('should report a declined path as a decision rather than a gap', () => {
     const coverage = resolveCoverage(fixtureMap(), [
       'CHANGELOG.md',
-      'assets/hero.png',
+      'assets/evidence/hero.png',
     ])
 
     expect(coverage.uncovered).toEqual([])
     expect(coverage.declined).toEqual([
       { path: 'CHANGELOG.md', reason: 'release-managed' },
-      { path: 'assets/hero.png', reason: 'generated' },
+      { path: 'assets/evidence/hero.png', reason: 'generated' },
     ])
   })
 
