@@ -123,6 +123,7 @@ performatively
 phrasability
 pipeable
 pipefail
+Pocock
 powerup
 pressable
 promptname
@@ -197,6 +198,7 @@ unwired
 updatability
 upstreaming
 vitejs
+Wieruch
 wireframes
 wordlist
 wordlists
