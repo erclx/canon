@@ -46,17 +46,18 @@ image or marks the case new.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
-| Reason               | What it means                                                                 |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `ok`                 | A body was rendered. `commentId` is set when a marked comment already exists. |
-| `no-evidence`        | Nothing in the diff carries an `evidence/` segment. An ordinary silent no-op. |
-| `gh-missing`         | `gh` is not on the path, so no pull request could be resolved.                |
-| `gh-failed`          | `gh` could not answer for this repository or branch, or read its comments.    |
-| `no-branch`          | The pull request carries no head branch name.                                 |
-| `no-object-head`     | The pull request object reported no head commit.                              |
-| `no-base`            | No base resolves against the trunk.                                           |
-| `unreadable-tree`    | git could not read the tree at the base commit.                               |
-| `unreadable-changes` | git could not list what this branch changed.                                  |
+| Reason                 | What it means                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| `ok`                   | A body was rendered. `commentId` is set when a marked comment already exists. |
+| `no-evidence`          | Nothing in the diff carries an `evidence/` segment. An ordinary silent no-op. |
+| `unreadable-checklist` | `--checklist` named a path that could not be read, or one holding nothing.    |
+| `gh-missing`           | `gh` is not on the path, so no pull request could be resolved.                |
+| `gh-failed`            | `gh` could not answer for this repository or branch, or read its comments.    |
+| `no-branch`            | The pull request carries no head branch name.                                 |
+| `no-object-head`       | The pull request object reported no head commit.                              |
+| `no-base`              | No base resolves against the trunk.                                           |
+| `unreadable-tree`      | git could not read the tree at the base commit.                               |
+| `unreadable-changes`   | git could not list what this branch changed.                                  |
 
 `no-evidence` is not a refusal a caller reports. A project on a stack that
 carries no evidence path, such as `base` or `python`, hits this reason on
@@ -106,6 +107,28 @@ without it carries forward the address the marked comment already holds. With
 no evidence in the diff and an address in hand, the body is the address and the
 marker alone, reported as `ok`. `canon docs pr-preview` covers where the
 address comes from.
+
+## The checklist line
+
+`--checklist <path>` closes the body with a visual checklist, below the
+comparison it annotates, so one comment carries the preview address, the
+screenshots, and what a reviewer has to look at. The file is what
+`canon:ui-checklist` writes to `.canon/tmp/handoff/ui-checklist/<slug>.md`, and
+`git-pr` passes it here rather than posting it as a second comment.
+
+A run without the option carries forward whatever checklist the marked comment
+already holds, the same way the preview address is carried. That is what keeps
+`git-followup`'s re-render after a push from wiping boxes a reviewer has
+already ticked, since `git-pr` deletes the handoff once the first post reports
+success and no later call has a file to pass.
+
+The option does not decide `no-evidence`. A branch with a checklist and no
+changed evidence image still reports `no-evidence`, and the caller posts the
+checklist on its own, which is what it did before this option existed. A path
+that cannot be read, or one holding nothing, refuses as
+`unreadable-checklist` rather than rendering without it: the caller deletes the
+handoff once a post succeeds, so a silently dropped checklist is the only copy
+gone.
 
 ## What a collapsed comment still leaves to GitHub
 

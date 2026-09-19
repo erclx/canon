@@ -21,7 +21,7 @@ max_turns = 30
 # when a further segment follows it, which leaves `seed-drift`. The declaration
 # expected `chore-seed-drift` until a run measured the skill writing the stripped
 # form, so the type-carrying spelling here predated the rule rather than testing
-# it. The `claude/review`, `claude/memory-review`, and `claude/ui-test`
+# it. The `claude/review`, `claude/memory-review`, and `claude/ui-checklist`
 # declarations carried the same spelling and were corrected from this rule rather
 # than from a run of their own.
 paths = [".canon/review/seed-audit-seed-drift.md"]

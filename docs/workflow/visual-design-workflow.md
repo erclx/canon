@@ -31,13 +31,13 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 ### Tools
 
 - None beyond Claude Code itself
-- Playwright CLI optional for verifying journeys across routes and browser-only behavior. See [`ui-test`](../../claude/skills/ui-test/SKILL.md).
+- Playwright CLI optional for verifying journeys across routes and browser-only behavior. See [`test-craft`](../../claude/skills/test-craft/SKILL.md) for which layer a journey belongs at.
 
 ### Skills
 
 - `canon:sketch-design` to trace a design direction from reference images or URLs, before `design-extract`'s greenfield path proposes from a personality paragraph alone
 - `canon:design-extract` to draft `canon/DESIGN.md`, from existing project signals or from requirements alone on day one
-- `canon:ui-test` for layered test generation after UI changes
+- `canon:ui-checklist` for what a reviewer has to look at after UI changes, and what ships without a test
 - `canon:ux-audit` for UX gap detection on existing surfaces
 - `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
 - `canon:draft-and-pick` for a call settled by looking, drafting several candidates onto one page and taking your pick

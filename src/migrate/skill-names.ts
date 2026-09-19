@@ -21,6 +21,13 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * reading in sequence with `draft-screencast` as one three-step pipeline with
  * no prefix forcing that reading.
  *
+ * One row renames a skill rather than retiring a prefix. `ui-test` became
+ * `ui-checklist` when the skill stopped writing tests and shrank to the
+ * checklist a reviewer reads, so the old name described a job it no longer
+ * does. `claude-ui-test` is retargeted onto the same destination rather than
+ * left pointing at the retired name, which lands a target on the oldest
+ * spelling in one pass instead of two.
+ *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
  * substring of ordinary prose with no token left for a later sweep to find.
@@ -56,7 +63,8 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-standards-audit': 'standards-audit',
   'claude-tasks': 'task-board',
   'claude-teach': 'teach-workspace',
-  'claude-ui-test': 'ui-test',
+  'claude-ui-test': 'ui-checklist',
+  'ui-test': 'ui-checklist',
   'claude-ux-audit': 'ux-audit',
   'claude-ux-measure': 'ux-measure',
   'claude-worker': 'role-worker',
@@ -72,11 +80,11 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  *
  * It protects nothing. The `aitk` sweep had to guard a sibling repository
  * whose name contained the token, and no string here contains a skill name
- * while meaning something else: the one overlap in the map is
- * `claude-intake` inside `claude-intake-answer`, which the longest-first
- * ordering settles rather than a protected form. Reading that off the output
- * would report a pass either way, since both rows land on a name opening with
- * `plan-intake`, so the ordering is asserted directly.
+ * while meaning something else. Two rows overlap another row: `claude-intake`
+ * inside `claude-intake-answer`, and `ui-test` inside `claude-ui-test`. The
+ * longest-first ordering settles both rather than a protected form. Reading
+ * either off the output would report a pass anyway, since each pair lands on
+ * one destination, so the ordering is asserted directly.
  *
  * It matches whole tokens. A skill name is a complete name rather than a word
  * stem, and the corpus holds one word that opens with a name and means

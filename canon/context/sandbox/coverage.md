@@ -281,7 +281,7 @@ A bounding key whose only passing value admits the whole tree asserts nothing. T
 
 ### A declaration can bind to the wrong scope and still count as armed
 
-TOML binds a bare key under a `[[table]]` header to that table, so a misplaced key asserts nothing while existence-only coverage counts the file as armed. `claude/ui-test`'s `expect.toml` carried `max_turns` and all five `manual` entries below its last `[[content]]` block, so the turn ceiling never asserted, the entries never reached the unchecked count, and `canon sandbox coverage` read the arm as armed throughout, because it tests only for the file's existence. Place every top-level key above the first `[[table]]` header and reject unknown keys inside the table so a misplacement fails loudly. A coverage number built on file existence measures declarations present, never declarations that work.
+TOML binds a bare key under a `[[table]]` header to that table, so a misplaced key asserts nothing while existence-only coverage counts the file as armed. The arm then named `claude/ui-test`, now `claude/ui-checklist`, carried `max_turns` and all five `manual` entries below its last `[[content]]` block in its `expect.toml`, so the turn ceiling never asserted, the entries never reached the unchecked count, and `canon sandbox coverage` read the arm as armed throughout, because it tests only for the file's existence. Place every top-level key above the first `[[table]]` header and reject unknown keys inside the table so a misplacement fails loudly. A coverage number built on file existence measures declarations present, never declarations that work.
 
 ### Two families report `no scenario` for opposite reasons
 

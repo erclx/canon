@@ -152,17 +152,54 @@ rm -rf .canon/tmp/pr/body
 printf 'number=%s\nurl=%s\n' "$pr_number" "$pr_url"
 ```
 
-### Post the UI checklist
+### Find the UI checklist
 
-`ui-test` writes a manual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This step is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and there is nothing to post.
+`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
 
-When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md` before posting, the same as the pull request body above. Post it as its own comment on `<number>`, the number the final command above resolved, rather than folding it into the body, since a later push editing the body would overwrite checkboxes a reviewer already ticked:
+When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md` before either step posts it, the same as the pull request body above.
+
+Where it lands is decided by the evidence step below rather than here, since a checklist reads next to the screenshots it annotates and posting it on its own is the fallback for a branch that changed no screenshot.
+
+### Post the evidence comparison
+
+Run the verb once against the number the pull request step above resolved, passing `--checklist` when the step above found a file and leaving it off when it did not:
+
+```bash
+canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --json
+```
+
+One call answers both questions because a checklist does not decide `no-evidence`. The verb reports `no-evidence` on a diff carrying no evidence image whether or not a checklist came with it, so the branch below reads the same `reason` it would have read without the flag, and the checklist is folded in only on the path that has a comparison to fold it into.
+
+Pass `--checklist` only for a file that exists. The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
+
+Read `reason` on the record rather than the exit code.
+
+- `no-evidence`: nothing changed under an `evidence/` segment, so there is no comparison to post and no body was rendered. Say nothing about the evidence and fall through to the checklist step below.
+- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
+
+```bash
+gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
+```
+
+When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`:
+
+```bash
+gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
+```
+
+Delete the handoff file once that call reports success, per the cleanup below, since the checklist now lives on the pull request. Clean up the tmp body file the same way.
+
+Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read. Fall through to the checklist step, which posts the checklist alone rather than losing it to a transient read.
+
+### Post the UI checklist alone
+
+Run this step only when the evidence step above did not carry the checklist, meaning it reported `no-evidence` or one of the git refusals, and a checklist file exists. Post it as its own comment on `<number>`:
 
 ```bash
 gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
 ```
 
-Run the cleanup below only once that call reports success. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
+Run the cleanup below only once the call that carried the checklist reports success, whichever of the two steps that was. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
 
 From a linked worktree the file-editing tools refuse a main-root path, so the cleanup goes out through `Bash` as two plain commands, the file and then the folder, rather than joined by `&&`, which is refused as compound:
 
@@ -176,30 +213,11 @@ rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
 
 The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
 
-### Post the evidence comparison
-
-Run `canon pr evidence <number> --json` against the number the pull request step above resolved. Read `reason` on the record rather than the exit code.
-
-- `no-evidence`: nothing changed under an `evidence/` segment. Say nothing and move on.
-- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
-
-```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
-```
-
-When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`:
-
-```bash
-gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
-```
-
-Clean up the tmp file the way the UI-checklist step does, only after the call reports success.
-
-Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read.
+Deleting the file is what makes the later re-render safe. `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it is editing, so the boxes a reviewer already ticked survive the push.
 
 ### Post the preview address
 
-Run this step only when the evidence step above returned `ok` or the UI checklist step posted a comment. Either one means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. Otherwise skip it silently.
+Run this step only when the evidence step above returned `ok` or a checklist was posted, by either step. Either one means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. Otherwise skip it silently.
 
 The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs. Mint the preview against the same `<number>`:
 
@@ -250,9 +268,11 @@ Add a further line only when the labelling command printed its warning, quoting 
 
 `⚠️ Labels not applied: <what gh reported>`
 
-Add a line when the UI checklist step posted a comment, naming the pull request it landed on:
+Add a line when a checklist was posted, naming the pull request it landed on and which comment carries it:
 
-`📋 Posted the UI checklist to <number>.`
+`📋 Posted the UI checklist to <number>, in the evidence comment.`
+
+`📋 Posted the UI checklist to <number>, on its own.`
 
 Add a line when the preview step returned an address:
 

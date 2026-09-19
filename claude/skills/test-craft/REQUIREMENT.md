@@ -49,7 +49,7 @@ Moving the guidance into a path-scoped rule does not reach the session that need
 - Structure floors for every test: the core testing rule
 - Runner choice, file suffix, placement, and query conventions: the TypeScript and Python testing rules
 - Settle, guard, and run-scope rules inside an end to end file: the end to end reliability and test scope rules
-- Writing a UI change's tests and its visual checklist after implementation: `ui-test`
+- Writing a UI change's visual checklist, and naming the behaviors it ships untested for this skill to place: `ui-checklist`
 - Grading the tests a pull request adds: `review-pr`
 - Whether the guidance moves where a session puts a test, which needs a measured with-and-without run rather than a rule here
 

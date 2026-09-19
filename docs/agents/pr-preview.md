@@ -81,13 +81,14 @@ going, so the preview may still land after the verb has given up on it.
 
 `canon pr evidence --preview <url>` puts `**Preview:** <url>` on the first line
 of the evidence body. With no evidence image in the diff, the body is that line
-and the trailing marker alone, so a pull request with a checklist and no
-screenshots still gets one comment a later call can find and edit.
+and the trailing marker alone, so a pull request whose screenshots did not
+change still gets one comment a later call can find and edit.
 
 A later `canon pr evidence` run without `--preview` reads the address off the
 marked comment and carries it into the new body. `git-followup` re-renders the
 comment after every push, and without that carry the first push would delete
-the link.
+the link. A visual checklist folded in through `--checklist` carries the same
+way, which is what keeps that push from wiping boxes a reviewer already ticked.
 
 ## Removing a preview
 

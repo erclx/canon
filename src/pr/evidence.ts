@@ -7,6 +7,13 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 /** How the first line of a body names the branch's preview deployment. */
 const PREVIEW_PREFIX = '**Preview:**'
 
+/** The heading the checklist sits under, printed outside the delimiters so a carried checklist never doubles it. */
+const CHECKLIST_HEADING = '## What to look at'
+
+/** Delimiters around the checklist, so a re-render can read back what a reviewer has already ticked. */
+const CHECKLIST_START = '<!-- pr-checklist:start -->'
+const CHECKLIST_END = '<!-- pr-checklist:end -->'
+
 /** A `#issuecomment-<id>` suffix, which is the REST comment id `gh pr view` never returns directly. */
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
 
@@ -116,6 +123,9 @@ export function evidenceMarker(head: string): string {
  * A preview address opens the body, and with no states it is the whole body
  * apart from the marker, so a pull request whose screenshots did not change
  * still gets one comment a later call can find and edit in place.
+ *
+ * A checklist closes the body, below the comparison it annotates, so one
+ * comment carries the preview address, the screenshots, and what to look at.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -123,11 +133,16 @@ export function renderEvidenceBody(
   base: string,
   head: string,
   preview?: string,
+  checklist?: string,
 ): string {
   const opening =
     preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`, '']
+  const closing =
+    checklist === undefined
+      ? []
+      : [CHECKLIST_HEADING, '', CHECKLIST_START, checklist, CHECKLIST_END, '']
   if (states.length === 0) {
-    return [...opening, evidenceMarker(head)].join('\n')
+    return [...opening, ...closing, evidenceMarker(head)].join('\n')
   }
 
   const sections = states.map((entry) => {
@@ -157,6 +172,7 @@ export function renderEvidenceBody(
     '',
     ...sections,
     '',
+    ...closing,
     evidenceMarker(head),
   ].join('\n')
 }
@@ -203,4 +219,23 @@ export function findEvidencePreview(
   const first = marked?.body.split('\n')[0]?.trim() ?? ''
   if (!first.startsWith(PREVIEW_PREFIX)) return undefined
   return first.slice(PREVIEW_PREFIX.length).trim() || undefined
+}
+
+/**
+ * The checklist the marked comment already carries, read back out of its
+ * delimiters. The handoff file is deleted once posted, so every later render
+ * passes no checklist of its own, and carrying this one forward is what keeps
+ * a re-render after a push from wiping the boxes a reviewer has ticked.
+ */
+export function findEvidenceChecklist(
+  comments: readonly EvidenceComment[],
+): string | undefined {
+  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
+  if (marked === undefined) return undefined
+  const start = marked.body.indexOf(CHECKLIST_START)
+  const end = marked.body.indexOf(CHECKLIST_END, start)
+  if (start === -1 || end === -1) return undefined
+  return (
+    marked.body.slice(start + CHECKLIST_START.length, end).trim() || undefined
+  )
 }

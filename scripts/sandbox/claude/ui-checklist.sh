@@ -5,11 +5,12 @@ set -o pipefail
 # cspell:ignore esbuild
 
 # No project copy of the corpus, for the same reason `claude/review-branch.sh` carries
-# none. The absent project copy forces `ui-test` onto the
+# none. The absent project copy forces `ui-checklist` onto the
 # `${CLAUDE_SKILL_DIR}/../../standards/skill.md` fallback, and the branch name
-# below turns that citation into a checklist filename a reader can check by eye.
-# `expect.toml` carries that claim as a manual entry rather than an assertion,
-# because the checklist lands at a root no run determines.
+# below turns that citation into a checklist filename `expect.toml` asserts by
+# exact path. It sat in `manual` while the skill could correctly write no
+# checklist at all, which is the escape the shrink closed: the checklist is the
+# skill's whole output now, so a run producing none has produced nothing.
 use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"
   export SANDBOX_INJECT_SEEDS="true"
@@ -18,7 +19,7 @@ use_config() {
 stage_setup() {
   cat <<'EOF' >package.json
 {
-  "name": "sandbox-ui-test",
+  "name": "sandbox-ui-checklist",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -185,16 +186,16 @@ EOF
   log_info "This arm also checks the standards citation, not the skill alone."
   log_info "  .claude/standards/ is absent, so the skill must reach the plugin copy"
   log_info "  the slug transform lives only in standards/skill.md, never in the skill body"
-  log_info "  so ui-checklist-task-filter.md is evidence the fallback resolved"
-  log_info "  read that filename yourself, the checker cannot assert it yet"
+  log_info "  so .canon/tmp/handoff/ui-checklist/task-filter.md is evidence it resolved"
+  log_info "  expect.toml asserts that exact path, so the checker reads it for you"
   log_info ""
-  log_info "Playwright installs, and the tests cannot pass. There is no app entry"
-  log_info "point and nothing serves the baseURL, so every test fails on a refused"
-  log_info "connection. The arm asserts what the skill authored, not what a test"
-  log_info "run reported, and a correct run says the scaffold is missing rather"
-  log_info "than building a Vite app to get green."
+  log_info "The Playwright and vitest scaffold stays in the fixture on purpose."
+  log_info "The skill writes no test now, so a run that installs a runner or adds"
+  log_info "a spec has gone past its job. The write scope is what catches that:"
+  log_info "e2e/ and the component test glob are outside it, so either write"
+  log_info "reports as a violation rather than as coverage."
   log_info ""
-  log_info "Action:  /canon:ui-test I added a filter input, a loading state, an empty state, and a link to the archive route to TaskList, and restyled its spacing"
-  log_info "Expect:  declared in fixtures/claude/ui-test/expect.toml"
-  log_info "         Check it with: canon sandbox check claude:ui-test"
+  log_info "Action:  /canon:ui-checklist I added a filter input, a loading state, an empty state, and a link to the archive route to TaskList, and restyled its spacing"
+  log_info "Expect:  declared in fixtures/claude/ui-checklist/expect.toml"
+  log_info "         Check it with: canon sandbox check claude:ui-checklist"
 }
