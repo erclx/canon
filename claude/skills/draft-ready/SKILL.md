@@ -73,7 +73,7 @@ Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label St
 canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
 ```
 
-Branch on the record rather than on the exit. `Ready:` is defined nowhere yet, so the line orients a worker reading the task and no check reads it.
+Branch on the record rather than on the exit. The `Ready:` line orients a worker reading the task, and `canon tasks archive` reads it to move the folder on ship.
 
 A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now` when `canon tasks plan-reach` reports nothing claimed and `## Up next` otherwise, with the held path in its `Waiting on` cell, per the tests in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions list --self --json` for this session and `canon sessions list --json` for a row from the same repository, under another `sessionId`, whose `name` starts with `orchestrator-`. Treat a refused read as a roster read that failed.
 
@@ -106,10 +106,10 @@ Fix what the records name in the files this run wrote and re-run once. Report a 
    Plan: .canon/plans/feature-<slug>.md
    Task: .canon/tasks/<label>-<slug>.md
    Row: <label> <title>, <written under ## Run now | reported to <orchestrator name> | left for the operator to place>, <reason>
-   Archive on ship: move the folder to .canon/ready/archive/<nn>-<slug>/ by hand, then retarget the task's Ready: line
+   Archive on ship: canon tasks archive moves the folder to .canon/ready/archive/<nn>-<slug>/
 ```
 
-Name the archive move every time. `canon tasks archive` moves the task and its plan and leaves the folder live, so the move is the one step this run leaves for whoever ships.
+Name the archive move every time, so whoever ships knows the verb carries the folder and needs no step of their own.
 
 ## Rules
 

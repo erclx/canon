@@ -78,7 +78,7 @@ Below the frontmatter, state in prose what the worker still owns beyond copying 
 ## Lifecycle
 
 - Write the ready folder in the same session that writes the files it carries. A folder assembled later from memory is a plan with extra steps, not a handoff.
-- Move the folder to `.canon/ready/archive/<nn>-<slug>/` by hand when the task that shipped it archives. No board verb currently automates this move. `canon tasks archive` moves the task and its plan and leaves the ready folder where it is.
+- Leave the move to `canon tasks archive`, which carries the folder to `.canon/ready/archive/<nn>-<slug>/` with its plan when the task that shipped it archives, and retargets the task's `Ready:` line. A plan another live task still cites keeps its folder.
 - Never delete a ready folder. The archived copy sits beside the merged pull request as the exact text that shipped, the way an archived plan sits beside the reasoning that produced it.
 
 ## Anti-patterns
@@ -86,7 +86,7 @@ Below the frontmatter, state in prose what the worker still owns beyond copying 
 - **The folder with an undeclared destination.** A file the plan's `**Files to touch:**` does not list passes the collision check unseen, and a second track can write the same path without either side finding out.
 - **The rewritten copy.** A worker that reads the folder's files as inspiration and writes its own version loses the exact text the handoff exists to carry.
 - **The folder as scratch.** Notes, alternates, or draft passages left in the folder beside the real files leave the worker guessing which is the source.
-- **The folder left live after shipping.** A ready folder nobody moves to the archive reads as unshipped work to the next session that lists the live folder.
+- **The folder left live after shipping.** A ready folder the archive verb did not move reads as unshipped work to the next session that lists the live folder. The verb skips one whose task carries no `Ready:` line and cites no folder path in its plan.
 
 ## Template
 
