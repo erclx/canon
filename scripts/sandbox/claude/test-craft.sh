@@ -7,7 +7,7 @@ use_config() {
   export SANDBOX_INJECT_SEEDS="true"
 }
 
-stage_setup() {
+stage_shop_config() {
   cat <<'EOF' >package.json
 {
   "name": "sandbox-test-craft",
@@ -61,7 +61,9 @@ Vite and React storefront. Routes live in `src/App.tsx`, components in `src/comp
 - `bun run test`: Vitest unit and component tests, beside their subject
 - `bun run test:e2e`: Playwright end to end tests under `e2e/`
 EOF
+}
 
+stage_layers() {
   mkdir -p src/lib src/components src/pages e2e
 
   # One behavior per layer, so a correct run has exactly one right home for
@@ -174,22 +176,121 @@ export function App() {
   )
 }
 EOF
+}
 
-  git add .
-  git commit -m "feat(shop): add prices, the order list, and checkout" --no-verify -q
+stage_pull() {
+  mkdir -p src/pages e2e
 
-  log_step "Scenario ready: three untested behaviors, one per layer"
-  log_info "Context: src/lib/price.ts is pure, src/components/OrderList.tsx has a"
-  log_info "         loading, empty, and error state, and src/App.tsx routes a checkout"
-  log_info "         from /cart through /checkout to /confirmation. Nothing is tested."
-  log_info "Action:  /canon:test-craft Write the tests formatPrice, the OrderList"
-  log_info "         states, and the checkout flow need."
-  log_info "Expect:  a unit test beside price.ts, a component test beside OrderList"
-  log_info "         covering its three states, and one Playwright spec under e2e/"
-  log_info "         walking the checkout. No browser test asserts the loading state."
-  log_info "         Declared in fixtures/claude/test-craft/expect.toml."
-  log_info "         Check it with: canon sandbox check claude:test-craft"
-  log_info ""
-  log_info "Nothing installs, so no test can run. The arm asserts where each test"
-  log_info "landed, not whether it passed."
+  # The page already carries an end to end spec, which is the pull. A session
+  # adding to a page with a spec beside it is tempted to extend that spec. The
+  # loading state renders without leaving the component, so the right home is
+  # a component test, and the spec must stay free of it.
+  cat <<'EOF' >src/pages/Orders.tsx
+import { useEffect, useState } from 'react'
+
+interface Order {
+  id: string
+  label: string
+}
+
+export function Orders({ load }: { load: () => Promise<Order[]> }) {
+  const [orders, setOrders] = useState<Order[]>([])
+
+  useEffect(() => {
+    load().then(setOrders)
+  }, [load])
+
+  return (
+    <main>
+      <h1>Orders</h1>
+      <ul aria-label="Orders">
+        {orders.map((order) => (
+          <li key={order.id}>{order.label}</li>
+        ))}
+      </ul>
+    </main>
+  )
+}
+EOF
+
+  cat <<'EOF' >src/App.tsx
+import { Route, Routes } from 'react-router-dom'
+
+import { Orders } from './pages/Orders'
+
+const loadOrders = () => fetch('/api/orders').then((response) => response.json())
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/orders" element={<Orders load={loadOrders} />} />
+    </Routes>
+  )
+}
+EOF
+
+  cat <<'EOF' >e2e/orders.spec.ts
+import { expect, test } from '@playwright/test'
+
+test('the orders page lists each order the API returns', async ({ page }) => {
+  await page.route('**/api/orders', (route) =>
+    route.fulfill({ json: [{ id: 'A-1', label: 'Order A-1' }] }),
+  )
+  await page.goto('/orders')
+  await expect(page.getByRole('list', { name: 'Orders' })).toContainText('Order A-1')
+})
+EOF
+}
+
+stage_setup() {
+  select_or_route_scenario "Which scenario?" "layers" "pull"
+
+  stage_shop_config
+
+  case "$SELECTED_OPTION" in
+  "layers")
+    stage_layers
+    git add .
+    git commit -m "feat(shop): add prices, the order list, and checkout" --no-verify -q
+
+    log_step "Scenario ready: three untested behaviors, one per layer"
+    log_info "Context: src/lib/price.ts is pure, src/components/OrderList.tsx has a"
+    log_info "         loading, empty, and error state, and src/App.tsx routes a checkout"
+    log_info "         from /cart through /checkout to /confirmation. Nothing is tested."
+    log_info "Action:  /canon:test-craft Write the tests formatPrice, the OrderList"
+    log_info "         states, and the checkout flow need."
+    log_info "Expect:  a unit test beside price.ts, a component test beside OrderList"
+    log_info "         covering its three states, and one Playwright spec under e2e/"
+    log_info "         walking the checkout. No browser test asserts the loading state."
+    log_info "         Declared in fixtures/claude/test-craft/layers/expect.toml."
+    log_info "         Check it with: canon sandbox check claude:test-craft layers"
+    log_info ""
+    log_info "Nothing installs, so no test can run. The arm asserts where each test"
+    log_info "landed, not whether it passed."
+    ;;
+  "pull")
+    stage_pull
+    git add .
+    git commit -m "feat(shop): add the orders page and its spec" --no-verify -q
+
+    log_step "Scenario ready: a page under end to end coverage, a state to add"
+    log_info "Context: src/pages/Orders.tsx has no loading state, and"
+    log_info "         e2e/orders.spec.ts already covers the list in a browser."
+    log_info "Action:  /canon:test-craft Add a loading state to the Orders page and"
+    log_info "         write the tests it needs."
+    log_info "Expect:  a component test beside Orders asserting the loading state,"
+    log_info "         and no mention of it in e2e/orders.spec.ts."
+    log_info "         Declared in fixtures/claude/test-craft/pull/expect.toml."
+    log_info "         Check it with: canon sandbox check claude:test-craft pull"
+    log_info ""
+    log_info "Naming an arm is what makes the check assert anything. Without one,"
+    log_info "canon sandbox check claude:test-craft reports clean with nothing read."
+    log_info "The without arm is a hand run against a scratch plugin dir lacking"
+    log_info "skills/test-craft, since run.sh hardcodes --plugin-dir claude, and it"
+    log_info "is scored by reading the files it wrote, not by this check."
+    ;;
+  *)
+    log_error "Unknown scenario: $SELECTED_OPTION"
+    ;;
+  esac
 }

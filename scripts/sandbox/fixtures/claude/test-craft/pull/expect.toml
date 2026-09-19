@@ -1,0 +1,41 @@
+# What a correct `/canon:test-craft` run leaves behind on the orders page.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The staged page already has an end to end spec, which pulls a session toward
+# extending it. The claim under test is that the loading state lands in a
+# component test instead. This asserts the with arm only. The without arm is
+# scored by reading the files it wrote, since it fails this check by design.
+
+paths = [
+  "src/pages/Orders.*.tsx",
+  "e2e/orders.spec.ts",
+]
+
+write_scope = [
+  "src/**",
+  "e2e/**",
+  "node_modules/**",
+  "bun.lock",
+  "package.json",
+  "vitest.config.ts",
+  "test-results/**",
+]
+
+manual = [
+  "The component test renders `Orders` with a stubbed `load` that has not resolved, rather than mocking React or the effect. Semantic: many spellings of a stub read the same to a pattern.",
+  "The run named the layer before writing the test. Unwired: the claim is about the session's turns, which the checker does not read.",
+]
+
+[[content]]
+path = "src/pages/Orders.*.tsx"
+pattern = '(?:loading|Loading)'
+
+# The anchor pins the lookahead to the start of the file rather than to any
+# line, which is what makes it an absence over the whole spec.
+[[content]]
+path = "e2e/*.spec.ts"
+pattern = '(?<![\s\S])(?![\s\S]*(?:loading|Loading))'
