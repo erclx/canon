@@ -15,6 +15,7 @@ Without this skill, a session implementing a planned change writes the test afte
 - Run the test before implementing and confirm it fails for the missing behavior, not for an unrelated mistake in the test itself
 - Implement the minimum the current test demands, and start a new test before extending past it
 - Re-run the test after implementing and confirm the pass is the one the test was written to prove
+- Refactor the implementation and the test once the suite is green, re-running it after each change, since the smallest change that passes leaves duplication and shortcuts the loop exists to remove before they reach history
 
 ## Must not
 
@@ -29,6 +30,7 @@ Without this skill, a session implementing a planned change writes the test afte
 
 ## Out of scope
 
+- Choosing the layer a test belongs at and judging whether it is a good test: `canon:test-craft`, loaded at step 1 rather than restated here
 - Finding the cause of an unexplained failure: `canon:systematic-debugging`
 - Confirming visual output after a change lands: `070-planning.md` states the order and `ui-test` covers it
 - The mechanical audit of whether an implementation reached history ahead of its test: `canon gov test-order`, invoked from `auto-ship`
