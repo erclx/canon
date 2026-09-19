@@ -1,6 +1,6 @@
 ---
 name: session-map
-description: Writes the session map, the pre-compaction handoff at `.canon/tasks/session-<slug>.md`, from any session whatever role it holds, running the skill-drift step the write procedure opens with. Use when asked to "write the handoff", "write the session map", "save the session before it compacts", "we are about to compact", "hand off to the next session", or "leave a note for whoever picks this up". Do NOT use to route session facts to a context entry or the memory folder, which is `memory-capture` and writes a different artifact, and do NOT use to read a handoff back, which is `session-resume`.
+description: Writes the session map, the board-side handoff at `.canon/tasks/session-<slug>.md`, for an orchestrating session or on a request naming the session map or the task board, running the skill-drift step the write procedure opens with. Use when asked to "write the session map", "write the board handoff", or when a session holding `canon:role-orchestrator` hands off before a compaction. Do NOT use for a plain session about to compact, which is `session-compact` and writes a note outside the board. Do NOT use to route session facts to a context entry or the memory folder, which is `memory-capture` and writes a different artifact, and do NOT use to read a handoff back, which is `session-resume`.
 ---
 
 # Session map
@@ -13,7 +13,7 @@ Run every step rather than judging in advance that one has nothing to act on. Th
 
 ## What fires this
 
-Being asked is one route. The other is a `PreCompact` hook registered against the `manual` matcher, which a project may install and which blocks the first `/compact` of a session with a message naming this skill. The block fires once, so the next `/compact` proceeds whether or not a map was written, and an automatic compaction is never blocked. A project that registered no such hook reaches this skill by being asked alone.
+Being asked is the route for a plain session that wants a board-side map, and the orchestrator's handoff runbook is the route for that role. A plain session about to compact belongs to `session-compact`, which is what the `PreCompact` hook on the `manual` matcher names. That hook's message carries one sentence sending a session holding `canon:role-orchestrator` here.
 
 Decline where the session holds no reasoning a reader could not get faster from git. Say so in one line and write nothing. The standard already names a `## State` filled from the tree as non-conforming, and the file that carries three such sections is worse than an absent one, because a reader who finds a map trusts it. Declining is a result the caller can act on, where a padded map is a result that misleads.
 

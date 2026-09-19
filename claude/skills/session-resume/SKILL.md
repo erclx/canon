@@ -7,11 +7,11 @@ description: Resumes a previous session by reading the handoff it left behind, t
 
 ## Step 1: read tracked work
 
-Resolve `.canon/plans/`, `.canon/memory/`, and `.canon/tasks/` at the main worktree root the way `session-worktree` does.
+Resolve `.canon/plans/`, `.canon/memory/`, `.canon/compact/`, and `.canon/tasks/` at the main worktree root the way `session-worktree` does.
 
 Read these in parallel, skipping any that do not exist:
 
-- the newest `.canon/tasks/session-*.md`: the handoff a previous session wrote before a compaction, per `${CLAUDE_SKILL_DIR}/../../standards/session.md`. It leads the report rather than the reads.
+- the newest `.canon/compact/*.md`, then the newest `.canon/tasks/session-*.md`: the handoff a previous session wrote before a compaction. The first is the note `session-compact` writes, and the second is the board-side map per `${CLAUDE_SKILL_DIR}/../../standards/session.md`, which stays readable. Whichever exists leads the report rather than the reads, and both lead it when both exist.
 - `.canon/tasks/index.md`: the folder catalog. Read this before any individual task file, and take the task list from it by dropping the `index`, `priority`, `backlog`, and `session-` rows, which are siblings rather than tasks.
 - `.canon/plans/*.md`: execution detail for in-progress tasks
 - `.canon/memory/index.md` and any memory files relevant to the top backlog item
@@ -48,4 +48,4 @@ Memory is updated only when a recorded fact becomes wrong, never on resume. A do
 
 This skill reads a handoff and never writes one. Reading and writing are two jobs, and the write happens at the close of a session rather than at its start.
 
-Name the standard when the session asks how to leave a handoff behind, and let the session follow it directly. Any session may write one, whatever role it holds, so nothing here routes the request to another skill. A role carrying sections of its own adds them over the core per that role's own runbook.
+Route a session asking how to leave a handoff behind to `session-compact`, which writes a note under `.canon/compact/`. A session holding the orchestrator role takes `session-map` instead, which writes the board-side map the standard governs, and a role carrying sections of its own adds them over the core per that role's own runbook.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: a scaffolded target without the plugin would meet a blocked /compact naming canon:session-map, a skill it does not carry. See "The compaction handoff" in canon/context/development/hooks.md.
+# canon-no-seed: a scaffolded target without the plugin would meet a blocked /compact naming canon:session-compact, a skill it does not carry. See "The compaction handoff" in canon/context/development/hooks.md.
 
 # Claude Code sends a payload and closes stdin. A bare read with nothing feeding
 # it blocks forever and holds the session open, so the read is bounded. `read`
@@ -58,8 +58,8 @@ mkdir -p "$marker_dir" 2>/dev/null || exit 0
 cat >&2 <<'MSG'
 Compaction blocked once so the handoff is written first. A compaction keeps conclusions and drops the reasoning that produced them, and this session is the only one still holding that reasoning.
 
-Run the canon:session-map skill, then run /compact again. This block fires once per session, so the next /compact proceeds whether or not a map was written.
+Run the canon:session-compact skill, then run /compact again. A session holding canon:role-orchestrator runs its own handoff runbook instead. This block fires once per session, so the next /compact proceeds whether or not a note was written.
 
-Where this session holds no reasoning a reader could not get faster from git, say so and write nothing. A map padded from the tree is worse than no map, because the next session trusts it.
+Where this session holds no reasoning a reader could not get faster from git, say so and write nothing. A note padded from the tree is worse than no note, because the next session trusts it.
 MSG
 exit 2

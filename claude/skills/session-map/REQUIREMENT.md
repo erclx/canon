@@ -50,6 +50,7 @@ A body that restates the sections, the frontmatter, or the numbered steps become
 
 ## Out of scope
 
+- The handoff a plain session writes before a compaction, which is a note outside the board with no drift step and no `## State`: `session-compact`. Both skills once claimed the phrases "write the handoff" and "about to compact", so this description narrows to the orchestrator and to a request naming the map or the board, and a plain session belongs to `session-compact`.
 - Reading a handoff back at the start of the next session: `session-resume`
 - Routing a session fact to the context entry that owns it, and writing what no entry owns to the memory folder: `memory-capture`
 - The sections a role adds over the core three, which belong to that role's own surface. `role-orchestrator` owns the orchestrator's and cites this route for the generic half.

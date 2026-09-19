@@ -34,6 +34,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       "We're about to hit the context limit, write the handoff before we lose state.",
+    expect: 'session-compact',
+  },
+  {
+    prompt:
+      'I am the orchestrating session and about to compact, so write the board handoff as a session map on the task board.',
     expect: 'session-map',
   },
   {
