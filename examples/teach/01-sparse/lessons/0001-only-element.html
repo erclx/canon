@@ -3,19 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fixture, contents</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E"
-    />
-    <link rel="stylesheet" href="assets/course.css" />
+    <title>Only element</title>
+    <link rel="stylesheet" href="../assets/course.css" />
+    <!-- canon:teach:style -->
+    <style>
+      @import url('./base.css');
+
+      @supports selector(:has(*)) {
+        .quiz .q:not(:has(input[type='radio']:checked)) ~ .q {
+          display: none;
+        }
+        .quiz .q:not(:has(input[type='radio']:checked)) .fb {
+          display: none;
+        }
+        .quiz .q:has(input[type='radio']:checked) > .fb {
+          display: block;
+        }
+      }
+    </style>
+    <!-- /canon:teach:style -->
   </head>
   <body>
+    <!-- canon:teach:header -->
     <header class="bar">
       <div class="mast">
         <span class="mast-left"
           ><span class="crumb-item"
-            ><a class="crumb" href="../index.html">Workspaces</a>
+            ><a class="crumb" href="../../index.html">Workspaces</a>
             <details class="jump" name="mast">
               <summary aria-label="Switch workspace">
                 <svg
@@ -32,14 +46,14 @@
                 </svg>
               </summary>
               <ul class="jump-list">
-                <li class="at">
-                  <a href="../00-fixture/index.html"
+                <li>
+                  <a href="../../00-fixture/index.html"
                     ><span class="n">00</span><span>Fixture</span
                     ><span class="dot done"></span
                   ></a>
                 </li>
-                <li>
-                  <a href="../01-sparse/index.html"
+                <li class="at">
+                  <a href="../../01-sparse/index.html"
                     ><span class="n">01</span><span>Sparse</span
                     ><span class="dot done"></span
                   ></a>
@@ -53,7 +67,7 @@
               </ul></details></span
           ><span class="crumb-sep" aria-hidden="true">/</span
           ><span class="crumb-item"
-            ><span class="crumb crumb-here">Fixture</span>
+            ><a class="crumb" href="../index.html">Sparse</a>
             <details class="jump" name="mast">
               <summary aria-label="Jump to a lesson">
                 <svg
@@ -70,26 +84,18 @@
                 </svg>
               </summary>
               <ul class="jump-list">
-                <li>
-                  <a href="lessons/0001-alpha-element.html"
-                    ><span class="n">01</span><span>Alpha element</span
-                    ><span class="dot done"></span
-                  ></a>
-                </li>
-                <li>
-                  <a href="lessons/0002-beta-element.html"
-                    ><span class="n">02</span><span>Beta element</span
-                    ><span class="dot done"></span
-                  ></a>
-                </li>
-                <li>
-                  <a href="lessons/0003-gamma-element.html"
-                    ><span class="n">03</span><span>Gamma element</span
+                <li class="at">
+                  <a href="../lessons/0001-only-element.html"
+                    ><span class="n">01</span><span>Only element</span
                     ><span class="dot done"></span
                   ></a>
                 </li>
               </ul></details></span
-        ></span>
+          ><span class="crumb-sep" aria-hidden="true">/</span
+          ><span class="crumb-item"
+            ><span class="crumb crumb-here">Lesson 1 of 1</span></span
+          ></span
+        >
         <span class="mast-right"
           ><button
             class="theme"
@@ -123,134 +129,83 @@
             </svg></button
         ></span>
       </div>
-      <div class="track" role="presentation">
-        <i class="done"></i><i class="done"></i><i class="done"></i>
-      </div>
+      <div class="track" role="presentation"><i class="here"></i></div>
     </header>
-    <main class="wide-body">
-      <h1>Fixture</h1>
+    <!-- /canon:teach:header -->
+    <main>
+      <h1>Only element</h1>
       <p class="lede">
-        A placeholder workspace exercising the lesson-body render layer with no
-        real subject behind it
+        Lesson 1 of 1. The one lesson of a workspace that holds no other, so
+        nothing here has a neighbor.
       </p>
 
-      <h2>Finished when you can do all of these unaided</h2>
-      <ol class="succ">
-        <li>
-          Render one lesson through the components in `src/teach/components/`
-          and commit its output
-        </li>
-      </ol>
+      <p class="assumes">
+        Assumes: nothing.<br />
+        Covers: a lone lesson.<br />
+        Sources: none.
+      </p>
 
-      <h2>Lessons</h2>
-      <ul class="toc">
-        <li>
-          <a href="lessons/0001-alpha-element.html"
-            ><span class="num">01</span><b>Alpha element</b
-            ><span class="state done">Written</span
-            ><span class="blurb"
-              >Lesson 1. A deliberately meaningless lesson that carries one of
-              every prose element the shell can draw.</span
-            ></a
-          >
-        </li>
-        <li>
-          <a href="lessons/0002-beta-element.html"
-            ><span class="num">02</span><b>Beta element</b
-            ><span class="state done">Written</span
-            ><span class="blurb"
-              >Lesson 2. A second meaningless lesson carrying the figure and the
-              road.</span
-            ></a
-          >
-        </li>
-        <li>
-          <a href="lessons/0003-gamma-element.html"
-            ><span class="num">03</span><b>Gamma element</b
-            ><span class="state done">Written</span
-            ><span class="blurb"
-              >Lesson 3. A last meaningless lesson, present so the jump list and
-              the footer navigation have a third row.</span
-            ></a
-          >
-        </li>
-      </ul>
+      <h2>A lone body</h2>
 
-      <h2>Glossary <span class="count">8</span></h2>
-      <input
-        class="filter"
-        type="search"
-        id="gfilter"
-        aria-label="Filter glossary terms"
-        aria-controls="gloss"
-        placeholder="term"
-      />
-      <div class="gloss" id="gloss">
-        <p class="empty">
-          No term matches that.
-          <button type="button" class="clear">Clear the filter</button>
-        </p>
-        <h3 class="gloss-group">Alpha element</h3>
-        <div class="gterm">
-          <b>Callout</b
-          ><span
-            >A block set apart from the prose to hold one sentence. First seen
-            in 0001-alpha-element.html.</span
+      <p>
+        Neither a previous link nor a next link draws below this, and the jump
+        list holds a single row with nothing to contrast against.
+      </p>
+
+      <div class="quiz">
+        <h2>Retrieval check</h2>
+
+        <div class="q">
+          <p class="q-stem">
+            1. How many rows does this lesson's jump list hold?
+          </p>
+          <label class="opt" data-k="A"
+            ><input type="radio" name="q1" /><span>None</span></label
           >
+          <label class="opt" data-k="B"
+            ><input type="radio" name="q1" /><span>Two</span></label
+          >
+          <label class="opt" data-k="C"
+            ><input type="radio" name="q1" /><span>Three</span></label
+          >
+          <label class="opt" data-k="D"
+            ><input type="radio" name="q1" data-a="1" /><span>One</span></label
+          >
+          <div class="fb">
+            <b>Correct: one.</b> The workspace carries a single lesson, so the
+            list has the one row and no others.
+          </div>
         </div>
-        <div class="gterm">
-          <b>Chrome</b
-          ><span
-            >The header, footer navigation, stylesheet and scripts a lesson
-            carries around its body. First seen in
-            0001-alpha-element.html.</span
+
+        <div class="q">
+          <p class="q-stem">2. What does the footer navigation show here?</p>
+          <label class="opt" data-k="A"
+            ><input type="radio" name="q2" /><span>A previous link</span></label
           >
-        </div>
-        <div class="gterm">
-          <b>Lede</b
-          ><span
-            >The opening line under a lesson title. First seen in
-            0001-alpha-element.html.</span
+          <label class="opt" data-k="B"
+            ><input type="radio" name="q2" /><span>Both links</span></label
           >
-        </div>
-        <div class="gterm">
-          <b>Marker pair</b
-          ><span
-            >A pair of comments that bound a chrome region for the generator to
-            rewrite. First seen in 0001-alpha-element.html.</span
+          <label class="opt" data-k="C"
+            ><input type="radio" name="q2" data-a="1" /><span
+              >Neither link</span
+            ></label
           >
-        </div>
-        <div class="gterm">
-          <b>Stepper</b
-          ><span
-            >The rule set that shows one quiz question at a time. First seen in
-            0001-alpha-element.html.</span
+          <label class="opt" data-k="D"
+            ><input type="radio" name="q2" /><span>A next link</span></label
           >
-        </div>
-        <h3 class="gloss-group">Beta element</h3>
-        <div class="gterm">
-          <b>Caption</b
-          ><span
-            >The line below a figure saying what it shows. First seen in
-            0002-beta-element.html.</span
-          >
-        </div>
-        <div class="gterm">
-          <b>Figure</b
-          ><span
-            >A drawing with a caption, wrapped so it scales. First seen in
-            0002-beta-element.html.</span
-          >
-        </div>
-        <div class="gterm">
-          <b>Road</b
-          ><span
-            >A list of rows, each carrying a number, a body and a size. First
-            seen in 0002-beta-element.html.</span
-          >
+          <div class="fb">
+            <b>Correct: neither link.</b> With no lesson before or after, both
+            slots are empty.
+          </div>
         </div>
       </div>
     </main>
+    <!-- canon:teach:footnav -->
+    <nav class="nav">
+      <span class="end">End of the lessons written so far</span>
+    </nav>
+    <!-- /canon:teach:footnav -->
+    <!-- canon:teach:scripts -->
     <script>
       ;(function () {
         var r = document.documentElement
@@ -349,42 +304,6 @@
         sync()
       })()
     </script>
-    <script>
-      ;(function () {
-        var input = document.getElementById('gfilter')
-        var list = document.getElementById('gloss')
-        if (!input || !list) return
-        function updateGroups() {
-          list.querySelectorAll('.gloss-group').forEach(function (heading) {
-            var el = heading.nextElementSibling
-            var any = false
-            while (el && !el.classList.contains('gloss-group')) {
-              if (el.style.display !== 'none') any = true
-              el = el.nextElementSibling
-            }
-            heading.style.display = any ? '' : 'none'
-          })
-        }
-        input.addEventListener('input', function () {
-          var q = input.value.toLowerCase()
-          var n = 0
-          list.querySelectorAll('.gterm').forEach(function (entry) {
-            var match = entry.textContent.toLowerCase().includes(q)
-            entry.style.display = match ? '' : 'none'
-            if (match) n++
-          })
-          list.classList.toggle('none', n === 0)
-          updateGroups()
-        })
-        var clear = list.querySelector('.clear')
-        if (clear) {
-          clear.addEventListener('click', function () {
-            input.value = ''
-            input.dispatchEvent(new Event('input'))
-            input.focus()
-          })
-        }
-      })()
-    </script>
+    <!-- /canon:teach:scripts -->
   </body>
 </html>
