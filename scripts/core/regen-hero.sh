@@ -15,6 +15,10 @@
 # component half is left out on purpose: it is a scrollbar and a status marker,
 # and a static capture frame renders neither.
 #
+# A frame a README shows in both themes fills once more against the light roles
+# and writes `<name>-light.html` beside the dark one, so each theme is its own
+# capture set with its own stamp.
+#
 # Only the HTML regenerates here. The PNG beside it is a chromium render whose
 # bytes move with the browser version, so asserting it in verify.sh would fail
 # on a machine whose chromium differs rather than on a stale count. Rebuild the
@@ -393,9 +397,38 @@ if (templates.length === 0) {
   process.exit(1)
 }
 
-for (const template of templates) {
+// The frames a README serves in both themes. The emitter already carries a
+// `--color-light-*` role beside each `--color-*` one, so the light frame is the
+// same template with the plain roles pointed at the light ones rather than a
+// second copy of any hex value. The hero is a landing-page frame no README
+// shows, so it stays dark.
+const LIGHT_TEMPLATES = new Set(["catalog.html.tmpl", "install.html.tmpl"])
+
+const lightRoles = [...tokenCss.matchAll(/--color-light-([a-z-]+):/g)].map((match) => match[1])
+if (lightRoles.length === 0) {
+  console.error("regen-hero: token css carries no --color-light-* roles, refusing to write a light frame")
+  process.exit(1)
+}
+const lightTokenCss = [
+  tokenCss,
+  "",
+  "      :root {",
+  ...lightRoles.map((role) => `        --color-${role}: var(--color-light-${role});`),
+  "        --frame-shadow: rgb(0 0 0 / 16%);",
+  "      }",
+].join("\n")
+
+const frames = templates.flatMap((template) => {
+  const base = template.replace(/\.html\.tmpl$/, "")
+  const dark = { template, out: `${base}.html`, tokens: tokenCss }
+  return LIGHT_TEMPLATES.has(template)
+    ? [dark, { template, out: `${base}-light.html`, tokens: lightTokenCss }]
+    : [dark]
+})
+
+for (const { template, out, tokens } of frames) {
   let html = await Bun.file(ASSET_DIR + "/" + template).text()
-  for (const [key, value] of Object.entries(values)) {
+  for (const [key, value] of Object.entries({ ...values, TOKENS: tokens })) {
     html = html.replaceAll(`{{${key}}}`, value)
   }
 
@@ -405,6 +438,6 @@ for (const template of templates) {
     process.exit(1)
   }
 
-  await Bun.write(ASSET_DIR + "/" + template.replace(/\.tmpl$/, ""), html)
+  await Bun.write(ASSET_DIR + "/" + out, html)
 }
 '
