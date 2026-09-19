@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/brand/mark-accent.svg" alt="canon" width="56" height="56">
+
 # canon
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
