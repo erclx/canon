@@ -9,12 +9,13 @@
  *
  * The chip is deliberately not the accent. An earlier cut drew it in
  * `--color-accent` and the page ended up carrying 21 of them, against a rule
- * in `internal/rules/claude/593-landing-page.md` that caps structural accent
- * at exactly one use. Measured at 5.36:1 against a 3:1 floor, no single chip
- * was too bright; there were simply twenty-one, so the accent stopped being a
- * signal and became the texture of the page. The chip now reads on surface and
- * border tokens, which is what that rule points a section at when it separates
- * a state that is not the live one.
+ * in `internal/rules/claude/593-landing-page.md` that closes the accent to
+ * structure, action, and status. A scope chip is none of the three. Measured
+ * at 5.36:1 against a 3:1 floor, no single chip was too bright; there were
+ * simply twenty-one, so the accent stopped being a signal and became the
+ * texture of the page. The chip now reads on surface and border tokens, which
+ * is what that rule points a section at when it separates a state that is not
+ * the live one.
  */
 interface Props {
   name: string
