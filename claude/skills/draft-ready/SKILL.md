@@ -1,6 +1,6 @@
 ---
 name: draft-ready
-description: Writes a ready folder for finished files, its `00-overview.md`, the thin plan that points at it, and the task row in one invocation. Use when asked to "write a ready folder", "hand these files to a worker", "package these finished files for a worker", "make a ready handoff", or when a session already holds the exact text of a skill, rule, or doc and a worker should copy it rather than author it. Do NOT use to plan a change nobody has written yet, which is `plan-feature`, to copy a folder into a worktree and ship it, which is `role-worker`, or to file a task with no finished files behind it, which is `task-board`.
+description: Writes a ready folder for finished files, its `00-overview.md`, the thin plan that points at it, and the task with a board row placed, reported to an orchestrator, or left to the operator, in one invocation. Use when asked to "write a ready folder", "hand these files to a worker", "package these finished files for a worker", "make a ready handoff", or when a session already holds the exact text of a skill, rule, or doc and a worker should copy it rather than author it. Do NOT use to plan a change nobody has written yet, which is `plan-feature`, to copy a folder into a worktree and ship it, which is `role-worker`, or to file a task with no finished files behind it, which is `task-board`.
 ---
 
 # Draft ready
@@ -75,7 +75,13 @@ canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
 
 Branch on the record rather than on the exit. `Ready:` is defined nowhere yet, so the line orients a worker reading the task and no check reads it.
 
-Never write `priority.md` or `backlog.md`. Where the row sits is the controlling session's call, so the report carries the row's title and the plan link for it to place.
+A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now` when `canon tasks plan-reach` reports nothing claimed and `## Up next` otherwise, with the held path in its `Waiting on` cell, per the tests in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions list --self --json` for this session and `canon sessions list --json` for a row from the same repository, under another `sessionId`, whose `name` starts with `orchestrator-`. Treat a refused read as a roster read that failed.
+
+- **Orchestrator found.** Write neither file. Message that session with the row's title, the plan link, and the group with its reason, so it places the row itself rather than two sessions writing the board at once.
+- **Not found, and this session's name starts with `worker-` or `planner-`.** Write neither file, since both role bodies ban a board write with no exception. Report the row and its group in Step 8.
+- **Not found otherwise, or the roster read fails.** Write the row into `priority.md` through the same `Bash` route the task file took. A failed read looks like a solo project, and stopping would strand the task on the one path with nobody to place it.
+
+Say which branch fired in Step 8.
 
 Regenerate the task index after writing, since a hook on `Write|Edit` never fires on `Bash`:
 
@@ -99,7 +105,7 @@ Fix what the records name in the files this run wrote and re-run once. Report a 
 ✅ Ready folder written: .canon/ready/<nn>-<slug>/
    Plan: .canon/plans/feature-<slug>.md
    Task: .canon/tasks/<label>-<slug>.md
-   Row for the board: <label> <title>, plan feature-<slug>
+   Row: <label> <title>, <written under ## Run now | reported to <orchestrator name> | left for the operator to place>, <reason>
    Archive on ship: move the folder to .canon/ready/archive/<nn>-<slug>/ by hand, then retarget the task's Ready: line
 ```
 

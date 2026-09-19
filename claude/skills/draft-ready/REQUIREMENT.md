@@ -27,6 +27,7 @@ Without this skill, a session holding finished files that hands them to a worker
 - Write the plan's `**Constraints:**` line naming the folder as the verbatim source.
 - Copy each finished file whole to its destination path inside the folder, and carry nothing else into it.
 - Write the plan and the task through `canon tasks plan-link`, `canon records validate plans`, and `canon markdown audit` rather than by restating what those verbs check.
+- Place the task's row by the three branches `task-board` Step 4 states, so a solo project never ends with a task file on no surface.
 - Route a write at the main root from a linked worktree through `Bash`, per `085-worktrees.md`.
 - Name the archive move in the closing report, since the skill writes a folder that stays live until someone moves it.
 
@@ -34,7 +35,7 @@ Without this skill, a session holding finished files that hands them to a worker
 
 - Edit a finished file. The worker copies verbatim, so a change made here is a change the warm session should have made before invoking the skill.
 - Hardcode a branch type, which `branch.md` owns, or restate the folder shape, which `ready.md` owns.
-- Write `priority.md` or `backlog.md`. Where a row sits is a judgment the controlling session takes, so the report carries the row and the skill adds none.
+- Write `priority.md` or `backlog.md` where an orchestrator is on the roster or the session is a worker or planner, since one board writer at a time is what keeps a gitignored board safe. Those two cases report the row instead.
 - Automate the archive move. No verb owns the relocation, and a skill doing it by hand would be the second copy of a step the standard already states.
 - Dispatch or start the worker, which belongs to whoever runs the board.
 
