@@ -6,6 +6,7 @@
     "width": 1280,
     "height": 940
   },
+  "colorScheme": "dark",
   "output": {
     "video": "demos/agent-view.webm",
     "still": "demos/agent-view.png"
@@ -33,17 +34,6 @@
     },
     {
       "beat": 2,
-      "name": "Switch to the dark ground",
-      "kind": "click",
-      "target": ".theme-toggle",
-      "text": "",
-      "waitFor": "",
-      "holdMs": 500,
-      "caption": "",
-      "still": false
-    },
-    {
-      "beat": 3,
       "name": "One session dispatches the rest",
       "kind": "scroll",
       "target": "#dispatch",
@@ -54,7 +44,7 @@
       "still": false
     },
     {
-      "beat": 4,
+      "beat": 3,
       "name": "Four branches on disjoint files",
       "kind": "scroll",
       "target": "#workers",
