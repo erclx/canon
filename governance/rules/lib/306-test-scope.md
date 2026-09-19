@@ -1,8 +1,7 @@
 ---
 description: Enforce which specs and which engines an end-to-end run covers at each point in the loop
 paths:
-  - 'e2e/*.ts'
-  - 'e2e/**/*.ts'
+  - '**/e2e/**/*.ts'
 ---
 
 # Test scope standards

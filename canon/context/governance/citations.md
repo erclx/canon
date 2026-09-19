@@ -91,7 +91,7 @@ What it reads is bounded three ways, and each bound is a shape the corpus alread
 - A placeholder or glob segment is declined, since it describes a shape rather than naming a file. `standards/<name>.md` and `app/**/route.ts` are the two forms.
 - A span carrying no file extension is declined as a folder or a module specifier. This costs one real path, `claude/standards`, which the stage cannot tell from `next/font` by looking at it.
 - A path written without backticks is not read at all, since matching one would report every sentence that happens to name a file.
-- A glob that matches real files and still reaches none of the work it was scoped at is not read. `lib/305-e2e-reliability.md` scopes itself at `e2e/*.ts` and `e2e/**/*.ts`, and no probe here is written under `e2e/`, so the rule asking a session to watch a new guard fail never fired for the session writing guards. Resolution is mechanical and reach is a judgment about where the work happens.
+- A glob that matches real files and still reaches none of the work it was scoped at is not read. `lib/305-e2e-reliability.md` scoped itself at `e2e/*.ts` and `e2e/**/*.ts` and now reads `**/e2e/**/*.ts`, which also reaches a suite kept under an app folder such as `web/e2e/`. No probe here is written under `e2e/`, so the rule asking a session to watch a new guard fail never fired for the session writing guards. Resolution is mechanical and reach is a judgment about where the work happens.
 
 Two classes resolve to nothing and are correct to, and both are reported by name rather than dropped.
 
