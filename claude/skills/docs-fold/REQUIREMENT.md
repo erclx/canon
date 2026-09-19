@@ -28,6 +28,8 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Write tracked docs at the current worktree root and the task board at the main root, since only the first commits with the branch
 - Count every other citation before archiving a plan, comparing resolved targets rather than raw strings or bare filenames
 - Retarget a closed task at the archived plan, so the reasoning behind finished work stays reachable
+- Write a decision to the domain context entry it constrains unless it fills an architecture slot, since reach admits nearly every decision to an always-loaded file
+- Merge or retire an architecture entry before adding one at the record's stated cap, and name which in the report, so the cap never turns into compressed prose or two decisions packed under one heading
 - Anchor a decision entry this run writes or amends whose reasoning cites a measured number, re-reading the number against the tree before writing the marker
 - Report an anchored decision whose cited path the diff touched, since the number was read before the branch moved what it counted
 - Scan every memory-review receipt rather than the one matching this slug, since the skill that writes them runs after this one in the ship chain and a slug is unique per feature

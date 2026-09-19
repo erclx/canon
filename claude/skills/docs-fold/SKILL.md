@@ -110,6 +110,8 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 - Do not rewrite sections unrelated to what changed.
 - Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md` and `${CLAUDE_SKILL_DIR}/../../standards/architecture.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
+- Write a session decision into the `canon/context/` entry for the domain it constrains, under that entry's `## Decisions`, by default. Touch `canon/ARCHITECTURE.md` only for a decision that fills one of the slots `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` names, however many domains its reasoning reaches.
+- Read the entry cap the record states before adding a decision to it. At the cap, merge two decisions or retire one to the domain entry it constrains, and name which in the report. Never compress a decision's prose to fit, and never pack two decisions under one heading.
 - Close a decision entry in `canon/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
 - Leave every decision entry this run did not write alone, anchored or not. The rule is scoped forward, so an entry written before it is dated by blame rather than by a read. Step 5 reports a stale anchor and no step writes one on an entry it did not amend.
 
@@ -268,6 +270,10 @@ Findings never stop the fold. A refusal or a missing subcommand on an older inst
 Output one line per file updated:
 
 `✅ Updated: .claude/<filename>`
+
+When Step 3 met the architecture record's cap, add one line naming what it did there:
+
+`↪ Architecture at cap: merged <heading> into <heading>` or `↪ Architecture at cap: retired <heading> to <context entry>`
 
 Step 10 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 

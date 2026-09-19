@@ -44,7 +44,7 @@ Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from
 Each rule or knowledge item lives in exactly one surface. Other surfaces point, never duplicate.
 
 - Cross-domain behavior or design principle: `CLAUDE.md`
-- Cross-domain decision with its rejected alternative: `canon/ARCHITECTURE.md`
+- Decision filling an architecture slot (stack and runtime, delivery, enforced boundaries, layout, build principles), with its rejected alternative: `canon/ARCHITECTURE.md`
 - Behavior that fires on a path being edited rather than every session: `governance/rules/`
 - Behavior triggered only when editing domain X: `.claude/skills/internal-<X>/SKILL.md`
 - Per-domain internal narrative about domain X (structure, decisions, gotchas): `canon/context/<X>.md`
@@ -54,7 +54,7 @@ Each rule or knowledge item lives in exactly one surface. Other surfaces point, 
 
 When adding new content, place it in the canonical owner. If another surface needs awareness, add a one-line pointer.
 
-The test between a canonical row and the per-domain one is how many domains read the fact. More than one makes it canonical. Exactly one makes it per-domain, even when the fact is important, because importance is not reach.
+The test between a canonical row and the per-domain one is how many domains read the fact. More than one makes it canonical. Exactly one makes it per-domain, even when the fact is important, because importance is not reach. A decision is the exception: it goes to the domain entry it constrains unless it fills an architecture slot, since nearly every decision reaches a second domain.
 
 ## System overview
 
