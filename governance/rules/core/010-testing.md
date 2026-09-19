@@ -4,6 +4,10 @@ description: Enforce universal testing standards and best practices
 
 # Testing standards
 
+## Before writing a test
+
+- Load the `canon:test-craft` skill before choosing the layer for a new test, and report it rather than proceeding silently when the skill does not resolve.
+
 ## Test structure
 
 - Structure tests using the Arrange, Act, Assert (AAA) pattern.
@@ -12,9 +16,7 @@ description: Enforce universal testing standards and best practices
 
 ## Test focus
 
-- Test user-visible behavior rather than implementation details.
 - Do not test private functions or internal state directly.
-- Cover critical paths and edge cases.
 - Do not target arbitrary coverage percentages.
 
 ## Organization and isolation
