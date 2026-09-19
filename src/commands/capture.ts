@@ -54,10 +54,14 @@ export function register(program: Command): void {
       'Output directory for a file source, or the destination PNG for a URL source; defaults beside the source',
     )
     .option('-s, --selector <selector>', 'Element to capture')
+    .option(
+      '--width <px>',
+      'Viewport width in pixels, so a media query resolves at that width',
+    )
     .action(
       async (
         source: string,
-        opts: { out?: string; selector?: string },
+        opts: { out?: string; selector?: string; width?: string },
       ): Promise<void> => {
         /**
          * Refused rather than defaulted, and refused ahead of every other
@@ -75,6 +79,15 @@ export function register(program: Command): void {
         }
         const selector = opts.selector
 
+        const width = parseWidth(opts.width)
+        if (Number.isNaN(width)) {
+          frameError(
+            `--width takes a whole number of pixels of 1 or more, got ${opts.width}.`,
+          )
+          process.exitCode = 1
+          return
+        }
+
         const isUrl = isUrlSource(source)
         const sourcePath = isUrl ? source : resolve(process.cwd(), source)
         if (!isUrl && !existsSync(sourcePath)) {
@@ -89,6 +102,7 @@ export function register(program: Command): void {
           const renderer = await import('@/capture/render')
           results = await renderer.captureSources(sourcePath, {
             selector,
+            width,
             outDir: opts.out ? resolve(process.cwd(), opts.out) : undefined,
           })
         } catch (error) {
@@ -120,6 +134,16 @@ export function register(program: Command): void {
         }
       },
     )
+}
+
+/**
+ * Undefined for an absent flag and `NaN` for a value that is not a positive
+ * integer, so the caller can tell no width from a bad one.
+ */
+function parseWidth(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined
+  const value = Number(raw)
+  return Number.isInteger(value) && value >= 1 ? value : Number.NaN
 }
 
 /**

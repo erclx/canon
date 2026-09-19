@@ -25,6 +25,7 @@ import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
  */
 
 const DEVICE_SCALE_FACTOR = 2
+const DEFAULT_VIEWPORT_HEIGHT = 720
 const FONT_PROBE_SIZE = 72
 const FONT_PROBE_TEXT = 'canon capture 0123456789'
 const ABSENT_FAMILY = '__canon_absent_family__'
@@ -32,6 +33,7 @@ const ABSENT_FAMILY = '__canon_absent_family__'
 export interface CaptureOptions {
   selector: string
   outDir?: string
+  width?: number
 }
 
 export type CaptureResult =
@@ -54,7 +56,9 @@ export async function captureSources(
   const browser = await chromium.launch()
   try {
     return await Promise.all(
-      sources.map((source) => captureOne(browser, source, options.selector)),
+      sources.map((source) =>
+        captureOne(browser, source, options.selector, options.width),
+      ),
     )
   } finally {
     await browser.close()
@@ -69,9 +73,19 @@ async function captureOne(
   browser: Browser,
   source: CaptureSource,
   selector: string,
+  width: number | undefined,
 ): Promise<CaptureResult> {
+  /**
+   * A viewport rather than a wrapper, since a media query answers to the
+   * viewport. Absent leaves the option out so the browser default stands and
+   * every committed capture renders as before. The height is Playwright's own
+   * default, which keeps `vh` units where they were.
+   */
   const page = await browser.newPage({
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
+    ...(width === undefined
+      ? {}
+      : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
   })
   try {
     await page.goto(

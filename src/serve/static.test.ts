@@ -59,7 +59,7 @@ function rawRequest(port: number, path: string): Promise<number> {
 /** Starts a server and registers it for teardown, so no test leaks a port. */
 function start(
   dir: string,
-  options?: { port?: number; entry?: string },
+  options?: { port?: number; entry?: string; index?: boolean },
 ): ServeStarted {
   const outcome = startServer(dir, options)
   if (!outcome.ok)
@@ -401,5 +401,142 @@ describe('startServer', () => {
     // ports of their own. Pinning the offset asserts that nothing else was
     // listening, which is a fact about the machine rather than about the walk.
     expect(second.port).toBeGreaterThan(first.port)
+  })
+})
+
+describe('startServer with index', () => {
+  it('should list a directory that holds no index page', async () => {
+    seed('a.html', '<h1>a</h1>')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const response = await fetch(`http://${SERVE_HOST}:${server.port}/`)
+    const body = await response.text()
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toContain('text/html')
+    expect(body).toContain('href="a.html"')
+  })
+
+  it('should answer 404 for the same directory without the option', async () => {
+    seed('a.html', '<h1>a</h1>')
+    const server = start(ROOT, { port: 0 })
+
+    const response = await fetch(`http://${SERVE_HOST}:${server.port}/`)
+
+    expect(response.status).toBe(404)
+  })
+
+  it('should serve an existing index page ahead of the listing', async () => {
+    seed('index.html', '<h1>root</h1>')
+    seed('a.html', '<h1>a</h1>')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const body = await fetch(`http://${SERVE_HOST}:${server.port}/`).then((r) =>
+      r.text(),
+    )
+
+    expect(body).toBe('<h1>root</h1>')
+  })
+
+  it('should list directories before files, each alphabetical', async () => {
+    seed('b.html', 'b')
+    seed('a.html', 'a')
+    seed('zed/x.html', 'x')
+    seed('alpha/x.html', 'x')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const body = await fetch(`http://${SERVE_HOST}:${server.port}/`).then((r) =>
+      r.text(),
+    )
+    const order = ['alpha/', 'zed/', 'a.html', 'b.html'].map((name) =>
+      body.indexOf(`href="${name}"`),
+    )
+
+    expect(order).toEqual([...order].sort((x, y) => x - y))
+    expect(order.every((position) => position >= 0)).toBe(true)
+  })
+
+  it('should link the parent below the root and not at it', async () => {
+    seed('sub/x.html', 'x')
+    const server = start(ROOT, { port: 0, index: true })
+    const base = `http://${SERVE_HOST}:${server.port}`
+
+    const atRoot = await fetch(`${base}/`).then((r) => r.text())
+    const inSub = await fetch(`${base}/sub/`).then((r) => r.text())
+
+    expect(atRoot).not.toContain('href="../"')
+    expect(inSub).toContain('href="../"')
+  })
+
+  it('should hide dotfiles from the listing', async () => {
+    seed('.hidden.html', 'h')
+    seed('shown.html', 's')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const body = await fetch(`http://${SERVE_HOST}:${server.port}/`).then((r) =>
+      r.text(),
+    )
+
+    expect(body).not.toContain('.hidden.html')
+    expect(body).toContain('shown.html')
+  })
+
+  it('should omit an entry that escapes the root through a symlink', async () => {
+    const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))
+    writeFileSync(join(outside, 'secret.txt'), 'secret')
+    symlinkSync(join(outside, 'secret.txt'), join(ROOT, 'leak.txt'))
+    seed('kept.html', 'k')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const body = await fetch(`http://${SERVE_HOST}:${server.port}/`).then((r) =>
+      r.text(),
+    )
+    rmSync(outside, { recursive: true, force: true })
+
+    expect(body).not.toContain('leak.txt')
+    expect(body).toContain('kept.html')
+  })
+
+  it('should refuse a directory that is a symlink out of the root', async () => {
+    const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))
+    writeFileSync(join(outside, 'secret.txt'), 'secret')
+    symlinkSync(outside, join(ROOT, 'out'))
+    const server = start(ROOT, { port: 0, index: true })
+
+    const response = await fetch(`http://${SERVE_HOST}:${server.port}/out/`)
+    rmSync(outside, { recursive: true, force: true })
+
+    expect(response.status).toBe(403)
+  })
+
+  it('should escape a name carrying markup and encode its href', async () => {
+    seed('<img src=x onerror=alert(1)>.html', 'x')
+    seed('a"b.html', 'x')
+    const server = start(ROOT, { port: 0, index: true })
+
+    const body = await fetch(`http://${SERVE_HOST}:${server.port}/`).then((r) =>
+      r.text(),
+    )
+
+    expect(body).not.toContain('<img')
+    expect(body).toContain('&lt;img')
+    expect(body).toContain('href="a%22b.html"')
+  })
+
+  it('should report the root as the link when no index page exists', () => {
+    seed('a.html', 'a')
+
+    const server = start(ROOT, { port: 0, index: true })
+
+    expect(server.url).toBe(`http://${SERVE_HOST}:${server.port}/`)
+    expect(server.entryExists).toBe(true)
+  })
+
+  it('should still warn for an explicit entry that is absent', () => {
+    seed('a.html', 'a')
+
+    const server = start(ROOT, { port: 0, index: true, entry: 'gone.html' })
+
+    expect(server.entryExists).toBe(false)
   })
 })

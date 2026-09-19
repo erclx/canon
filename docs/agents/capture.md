@@ -34,6 +34,7 @@ Neither digest is ever written by hand. A digest is what the gate compares, so a
 | ------------------ | ------------------------------------------------------------------------------------------------------ |
 | `--out <dir>`      | Write every PNG here instead of beside its source. For a URL source, names the destination PNG itself. |
 | `--selector <sel>` | Element to capture, required and never defaulted                                                       |
+| `--width <px>`     | Render at this viewport width so a media query resolves there. One whole number of 1 or more.          |
 
 ## What the command asserts
 
@@ -50,3 +51,9 @@ The command ships to targets, alongside `demo`, `inventory`, and `drive`. It was
 Shipping it also fixed what the exclusion was hiding. The render module imported the `@playwright/test` development dependency, which no published tarball carries. Every browser reference still sits behind a dynamic import, so a browser loads for this command rather than in front of every other one.
 
 `demo.md` and `driver.md` cover two of the other three browser commands. What separates this one is that a capture renders a single state, from a file on disk or a named `http(s)://` URL, where the rest drive a running application.
+
+## Capturing at a width
+
+`--width` sets the browser viewport and leaves the page alone. A media query answers to the viewport, so a wrapper narrowed to 390px renders a thin column of the desktop layout and proves nothing about the mobile one. The height stays at Playwright's default of 720, which keeps `vh` units where they are without the flag. A run that passes no `--width` passes no viewport option at all, so every committed image renders as before and no stamp digest moves.
+
+The flag takes one integer and no list. A sweep across breakpoints is one run per width, and the caller picks `--out` for each, since two widths written into one directory overwrite each other under the source's name. A value that is not a whole number of 1 or more refuses ahead of the browser import, naming the flag.

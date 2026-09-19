@@ -1,4 +1,4 @@
-import { existsSync, realpathSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
 
 /**
@@ -81,6 +81,66 @@ export type ServeOutcome = ServeStarted | ServeRefused
 export interface ServeOptions {
   readonly port?: number
   readonly entry?: string
+  /** Answers a directory request with no index page by listing it. Off by default. */
+  readonly index?: boolean
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+interface ListingEntry {
+  readonly name: string
+  readonly isDirectory: boolean
+}
+
+/**
+ * Reads the entries a listing may name. Each one takes the same containment
+ * test a request for it would, since a listed name is itself a fact about a
+ * place outside the root. Dotfiles are hidden because a listing is for
+ * navigating pages, and a hidden file is still reachable by its URL.
+ */
+function listEntries(root: string, directory: string): ListingEntry[] {
+  return readdirSync(directory)
+    .filter((name) => !name.startsWith('.'))
+    .filter((name) => !escapesThroughLink(root, join(directory, name)))
+    .map((name) => ({
+      name,
+      isDirectory:
+        statSync(join(directory, name), {
+          throwIfNoEntry: false,
+        })?.isDirectory() ?? false,
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.isDirectory) - Number(a.isDirectory) ||
+        a.name.localeCompare(b.name),
+    )
+}
+
+function renderListing(
+  pathname: string,
+  entries: readonly ListingEntry[],
+  hasParent: boolean,
+): string {
+  const rows = entries.map(({ name, isDirectory }) => {
+    const label = isDirectory ? `${name}/` : name
+    return `<li><a href="${escapeHtml(encodeURIComponent(name))}${isDirectory ? '/' : ''}">${escapeHtml(label)}</a></li>`
+  })
+  if (hasParent) rows.unshift('<li><a href="../">../</a></li>')
+  return `<!doctype html>
+<meta charset="utf-8">
+<title>Index of ${escapeHtml(pathname)}</title>
+<h1>Index of ${escapeHtml(pathname)}</h1>
+<ul>
+${rows.join('\n')}
+</ul>
+`
 }
 
 function refuse(reason: ServeRefusal, detail: string): ServeRefused {
@@ -165,13 +225,14 @@ export function shouldWalkPast(error: unknown): boolean {
 function listen(
   root: string,
   first: number,
+  index: boolean,
 ): { server: ReturnType<typeof Bun.serve>; port: number } | undefined {
   for (let port = first; port < first + PORT_ATTEMPTS; port++) {
     try {
       const server = Bun.serve({
         hostname: SERVE_HOST,
         port,
-        fetch: (request) => respond(root, request),
+        fetch: (request) => respond(root, request, index),
       })
       /**
        * The bound port rather than the requested one. Port 0 asks the OS to
@@ -196,6 +257,7 @@ function listen(
 export async function respond(
   root: string,
   request: Request,
+  index = false,
 ): Promise<Response> {
   const { pathname, search } = new URL(request.url)
   const forbidden = () =>
@@ -229,7 +291,19 @@ export async function respond(
         headers: { location: `${pathname}/${search}` },
       })
     }
-    path = join(path, DEFAULT_ENTRY)
+    const indexPage = join(path, DEFAULT_ENTRY)
+    if (index && !existsSync(indexPage)) {
+      return new Response(
+        renderListing(pathname, listEntries(root, path), path !== root),
+        {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-store',
+          },
+        },
+      )
+    }
+    path = indexPage
   }
 
   /**
@@ -291,7 +365,7 @@ export function startServer(
    */
   let bound: ReturnType<typeof listen>
   try {
-    bound = listen(root, first)
+    bound = listen(root, first, options.index ?? false)
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code ?? 'unknown'
     return refuse(
@@ -307,14 +381,24 @@ export function startServer(
     )
   }
 
+  /**
+   * A listing answers `/` where no index page exists, so under the flag the
+   * default entry is the root itself. An explicit `--entry` keeps its own link
+   * and its own warning.
+   */
+  const listsRoot =
+    (options.index ?? false) &&
+    options.entry === undefined &&
+    !existsSync(entryPath)
+
   return {
     ok: true,
     root,
     host: SERVE_HOST,
     port: bound.port,
     entry,
-    url: `http://${SERVE_HOST}:${bound.port}/${entry}`,
-    entryExists: existsSync(entryPath),
+    url: `http://${SERVE_HOST}:${bound.port}/${listsRoot ? '' : entry}`,
+    entryExists: listsRoot || existsSync(entryPath),
     stop: async () => {
       await bound.server.stop(true)
     },
