@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint"
+  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint" "layout"
 
   case "$SELECTED_OPTION" in
   "full")
@@ -353,6 +353,123 @@ EOF
     log_info "Context: docs/reference.md split into a folder, cited by docs/onboarding.md and canon/context/pipeline.md"
     log_info "Action:  /plan-feature 'split docs/reference.md per the task. Constraint: leave canon/context/pipeline.md alone.'"
     log_info "Expect:  the plan's Constraints entry resolves both acts for pipeline.md, forbidding conforming it to the new shape and requiring its citations of the deleted path be retargeted, and v01.0-reference-split.md's Plan: line points at the plan"
+    ;;
+  "layout")
+    cat <<'EOF' >package.json
+{
+  "name": "sandbox-shop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}
+EOF
+
+    cat <<'EOF' >>CLAUDE.md
+
+# Shop
+
+React storefront with a Playwright end to end suite.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+- `bun run test`: unit and component tests
+- `bun run e2e`: Playwright suite
+EOF
+
+    # Two roles share one flat folder: generic primitives any screen renders
+    # and pieces only the cart screen renders. The arm scores whether the plan
+    # adds three more components beside them or places them by role.
+    mkdir -p src/components e2e
+    local component
+    for component in Button Card Dialog Input Select Spinner Tooltip; do
+      cat <<EOF >"src/components/$component.tsx"
+export function $component(props: { children?: React.ReactNode }) {
+  return <div className="$component">{props.children}</div>
+}
+EOF
+    done
+    for component in CartLine CartSummary CartEmpty CouponField ShippingPicker; do
+      cat <<EOF >"src/components/$component.tsx"
+import { Card } from './Card'
+
+export function $component() {
+  return <Card>$component</Card>
+}
+EOF
+    done
+
+    cat <<'EOF' >e2e/cart.spec.ts
+import { test, expect } from '@playwright/test'
+import { seedCart } from './seed-cart'
+
+test('shows the cart total', async ({ page }) => {
+  await seedCart(page)
+  await expect(page.getByText('Total')).toBeVisible()
+})
+EOF
+
+    cat <<'EOF' >e2e/home.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('renders the storefront', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+})
+EOF
+
+    cat <<'EOF' >e2e/seed-cart.ts
+import type { Page } from '@playwright/test'
+
+export async function seedCart(page: Page) {
+  await page.goto('/cart?seed=two-items')
+}
+EOF
+
+    cat <<'EOF' >e2e/login.ts
+import type { Page } from '@playwright/test'
+
+export async function login(page: Page) {
+  await page.goto('/login?as=shopper')
+}
+EOF
+
+    mkdir -p .canon/tasks
+    cat <<'EOF' >.canon/tasks/index.md
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Add a wishlist](v01.0-wishlist.md): Let a shopper save products to a wishlist and move them into the cart
+EOF
+
+    cat <<'EOF' >.canon/tasks/v01.0-wishlist.md
+---
+title: 'v01.0: Add a wishlist'
+description: Let a shopper save products to a wishlist and move them into the cart
+---
+
+# v01.0: Add a wishlist
+
+A shopper saves a product to a wishlist from its page, sees the saved list on a wishlist screen, and moves an item into the cart. The screen needs a wishlist line, a wishlist summary, and an empty state. The end to end suite needs a helper that seeds a wishlist and a spec for the save-then-move journey.
+
+- [ ] Outcome: a shopper can save a product and see it on the wishlist screen
+- [ ] Outcome: a wishlist item moves into the cart
+- [ ] Outcome: the save-then-move journey has an end to end spec
+EOF
+
+    git add . && git commit -m "feat(shop): initial storefront and cart" --no-verify -q
+
+    log_step "Scenario ready: feature planning (layout)"
+    log_info "Context: flat src/components/ mixing 7 primitives with 5 cart pieces, flat e2e/ mixing 2 specs with 2 helpers, one wishlist task"
+    log_info "Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-feature, since the injected copies carry no references/ or standards/ and shadow the plugin"
+    log_info "Action:  /canon:plan-feature plan the wishlist task in .canon/tasks/v01.0-wishlist.md"
+    log_info "Expect:  plan names its new components under a subfolder rather than flat in src/components/, its new e2e helper outside the specs' folder, and a placement reason on each new path"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"
