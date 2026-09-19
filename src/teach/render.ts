@@ -109,8 +109,8 @@ function renderBlock(
 
 /**
  * Renders a lesson body's structural blocks through the same components
- * `render-fixture.tsx` composes by hand, so a real lesson and the committed
- * fixture share one rendering mechanism. Every block past the first refusal
+ * `lesson.test.tsx` composes as JSX, so a real lesson and the component test
+ * share one rendering mechanism. Every block past the first refusal
  * goes unread, matching how a malformed JSON parse refuses the whole call.
  */
 export function renderLessonBody(blocks: readonly unknown[]): RenderOutcome {
