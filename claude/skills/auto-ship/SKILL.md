@@ -117,13 +117,15 @@ The verb reads git history rather than the working tree, so a branch with nothin
 
 The verb ships with the CLI and this body ships with the plugin, matching Step 6's own fallback for the classify verb. Report that the check did not run rather than reading a missing subcommand as clean, and continue to Step 5.
 
-## Step 5: UI test (conditional)
+## Step 5: UI checklist (conditional)
 
-If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-test`.
+If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`.
 
-If `ui-test` produces a manual checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
+If `ui-checklist` produces a checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
 
-If all UI changes are covered by tests, continue.
+The stop is unchanged by that skill's shrink. The checklist is now the step's whole output rather than the visual remainder beside the tests it wrote, so the stop is the only thing that makes the operator look before `git-ship`.
+
+If there is nothing to verify visually and nothing shipping untested, continue.
 
 ## Step 6: review
 
