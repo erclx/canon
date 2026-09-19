@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
@@ -47,6 +47,10 @@ async function browserAvailable(): Promise<boolean> {
 }
 
 const hasBrowser = await browserAvailable()
+
+function pngWidth(path: string): number {
+  return readFileSync(path).readUInt32BE(16)
+}
 
 describe('canon capture', () => {
   it('should refuse a run that names no selector', async () => {
@@ -121,6 +125,55 @@ describe('canon capture', () => {
 
       expect(result.exitCode, result.stderr).toBe(0)
       expect(existsSync(outFile)).toBe(true)
+    },
+  )
+
+  it.each(['abc', '0', '-5', '12.5'])(
+    'should refuse --width %s ahead of any browser launch',
+    async (width) => {
+      const result = await runCapture(['--selector', '.t', '--width', width])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('--width')
+    },
+  )
+
+  it.skipIf(!hasBrowser)(
+    'should resolve a media query at the width being captured',
+    { timeout: RUN_TIMEOUT_MS },
+    async () => {
+      const dir = mkdtempSync(join(tmpdir(), 'canon-capture-width-'))
+      const page = join(dir, 'page.html')
+      writeFileSync(
+        page,
+        '<style>.t{width:1000px;height:20px;font-family:"DejaVu Sans Mono"}@media (max-width:600px){.t{width:300px}}</style><div class="t">hi</div>',
+      )
+      const narrowDir = join(dir, 'narrow')
+      const wideDir = join(dir, 'wide')
+
+      const narrow = await runCapture([
+        page,
+        '--selector',
+        '.t',
+        '--width',
+        '390',
+        '--out',
+        narrowDir,
+      ])
+      const wide = await runCapture([
+        page,
+        '--selector',
+        '.t',
+        '--width',
+        '1280',
+        '--out',
+        wideDir,
+      ])
+
+      expect(narrow.exitCode, narrow.stderr).toBe(0)
+      expect(wide.exitCode, wide.stderr).toBe(0)
+      expect(pngWidth(join(narrowDir, 'page.png'))).toBe(600)
+      expect(pngWidth(join(wideDir, 'page.png'))).toBe(2000)
     },
   )
 

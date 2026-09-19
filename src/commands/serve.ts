@@ -7,6 +7,7 @@ const DEFAULT_DIR = '.'
 
 interface ServeCommandOptions {
   readonly entry?: string
+  readonly index?: boolean
   readonly json?: boolean
   readonly port?: string
 }
@@ -19,6 +20,10 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--port <number>', `Port to try first, default ${DEFAULT_PORT}`)
     .option('--entry <path>', 'Page the printed link opens, default index.html')
+    .option(
+      '--index',
+      'List a directory that has no index.html instead of answering 404',
+    )
     .option('--json', 'Emit a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -39,6 +44,7 @@ export function register(program: Command): void {
         '  canon serve .canon/teach',
         '  canon serve .canon/teach --entry 03-fde-system-design/index.html',
         '  canon serve dist --port 4000 --json',
+        '  canon serve .canon/groundwork --index',
         '',
       ].join('\n'),
     )
@@ -61,7 +67,11 @@ async function runServe(
     )
   }
 
-  const outcome = startServer(dir, { port, entry: opts.entry })
+  const outcome = startServer(dir, {
+    port,
+    entry: opts.entry,
+    index: opts.index,
+  })
   const code = report(outcome, emitJson)
   if (!outcome.ok) return code
 
