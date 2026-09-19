@@ -15,9 +15,10 @@
 # edit lands.
 absent = [".claude/standards/skill.md", "standards/skill.md"]
 
-paths = ["e2e/ui.test.ts"]
+paths = ["e2e/*.spec.ts", "src/components/*.test.tsx"]
 
-# The skill appends to the existing e2e file, writes the checklist under
+# The skill writes a component test beside the component, adds a spec for the
+# route change, writes the checklist under
 # `.claude/`, and installs Playwright to run what it wrote. Nothing else on the
 # branch is its to touch, and a run that edited `src/components/TaskList.tsx` has
 # fixed the implementation rather than tested it.
@@ -34,6 +35,8 @@ paths = ["e2e/ui.test.ts"]
 write_scope = [
   ".claude/**",
   "e2e/**",
+  "src/components/*.test.tsx",
+  ".canon/tmp/**",
   "node_modules/**",
   "bun.lock",
   "test-results/**",
@@ -61,16 +64,28 @@ manual = [
 # unchecked count, and coverage read the arm as armed the whole time.
 # `contentArray` rejects that now.
 
+# The routing this arm exists to check. The loading state is reachable by a
+# component test, so it lands beside the component and never in `e2e/`. The route
+# change needs a real browser to navigate, so it lands in a spec. A body that
+# sends both to Playwright fails the first block.
+[[content]]
+path = "src/components/*.test.tsx"
+pattern = 'Loading tasks'
+
+[[content]]
+path = "e2e/*.spec.ts"
+pattern = '/archive'
+
 # The seeded test survives. The skill adds to the existing file rather than
 # replacing it, and a run that overwrote the file has deleted coverage while
 # reporting that it added some.
 [[content]]
-path = "e2e/ui.test.ts"
+path = "e2e/task-list.spec.ts"
 pattern = 'task list renders the seeded tasks'
 
-# A test for the empty state, which is the one automatable change with a single
-# correct reading. The filter input and the count-after-filtering cases are
-# describable in wording no pattern anticipates.
+# A test for the empty state, which is the one component-layer change with a
+# single correct reading. The filter input and the count-after-filtering cases
+# are describable in wording no pattern anticipates.
 [[content]]
-path = "e2e/ui.test.ts"
-pattern = 'No tasks match that filter'
+path = "src/components/*.test.tsx"
+pattern = 'No tasks|empty'
