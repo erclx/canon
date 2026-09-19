@@ -1,3 +1,5 @@
+<div align="center">
+
 # canon
 
 [![npm version](https://img.shields.io/npm/v/@erclx/canon)](https://www.npmjs.com/package/@erclx/canon)
@@ -6,17 +8,13 @@
 
 canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories. It keeps one authoritative copy and installs it into each project on demand.
 
-![The canon catalog, listing skills, governance rules, and standards with the count each ships, the workflow skills named, and a sample of the rule and standard names](assets/evidence/hero.png)
+**[See it run at canon.erclx.dev](https://canon.erclx.dev)**
 
-The counts above are read from the catalogs when the image is built, so they're what the repo actually ships today. See it live at [canon.erclx.dev](https://canon.erclx.dev).
+</div>
 
-## It runs on itself
+![The first screen of the canon landing page, a project before and after one canon init, with the file counts each step lays down](assets/evidence/arrival.png)
 
-The workflow this toolkit ships is the workflow that built it. Several Claude Code sessions run at once, each in its own git worktree on its own branch, and each opens its own pull request.
-
-![The canon landing page's session list, with the orchestrator pinned above bands of working and completed sessions, workers and planners in both, each naming what it is doing and the pull request it opened, and one row moving from Working into Completed](demos/agent-view.gif)
-
-That is the landing page's own agent view, recorded from a local build by `canon demo run`. The session rows behind it are a real `canon sessions list --json` read. The activity text and the pull request number are transcribed, because no verb here reports either.
+The page is one real session the toolkit ran on itself, and every count on it is read from the repo when the page builds.
 
 ## Why
 
@@ -53,35 +51,37 @@ bun install --global @erclx/canon
 
 ## What is inside
 
-Each domain has a canonical source in this repo and a thin install or sync CLI on your side.
+Each domain has a canonical source in this repo and a thin install or sync CLI on your side. The domains split on one line: some are copied into your project and become yours to edit, and some are never copied at all.
 
-- Claude Code plugin: skills that plan a feature, review a diff, sync the planning docs, and run the ship chain from branch through pull request
-- Governance rules: coding and authoring rules that load into a Claude session when a matching path is edited, installed per project and refreshed by sync
-- Standards: authoring conventions for commits, branches, plans, tasks, and markdown, read by name with `canon standards <name>` rather than copied into your project
-- Snippets: reusable prompts fired by `@` reference in a Claude Code session, resolved live from the plugin with no install step
-- Tooling stacks: golden configs, seeds, and a reference per framework, laid down by `canon init` and reconciled by `canon tooling sync`
-- Design system: a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command
-- Slides: a `SLIDES.md` source format with a layout catalog, rendered to PowerPoint by `canon slides render`
-- Transcripts: `canon transcripts` pulls a YouTube transcript with metadata frontmatter into any repo
-- Sandbox: scenario-based scaffolds that provision an isolated project state for verifying each domain flow
+| Domain         | What it is                                                                                                               | How it reaches you                                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                | Loaded live from the plugin, never copied                       |
+| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                | Installed per project by `canon gov install`, refreshed by sync |
+| Standards      | Authoring conventions for commits, branches, plans, tasks, and markdown                                                  | Opened by name, read by name with `canon standards <name>`      |
+| Snippets       | Reusable prompts fired by `@` reference                                                                                  | Resolved live from the plugin                                   |
+| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
+| Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
+| Slides         | A `SLIDES.md` source format with a layout catalog                                                                        | `canon slides render` writes PowerPoint                         |
+| Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |
+| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                               | `canon sandbox`                                                 |
 
-Those domains split on one line: some are copied into your project and become yours to edit, and some are never copied at all.
+![The canon catalog as a ledger of five rows, with the count each ships and a few real names: skills, rules, standards, commands, and stacks](assets/evidence/catalog.png)
 
-![canon tooling list and canon standards list side by side, the first showing five stacks with their dependency and script counts, the second showing standards against the artifact each governs](assets/evidence/install-surface.png)
+Every count in that image is read from the catalogs when it is built, so they're what the repo ships today. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one. Governance is the third shape. A rule with a path glob loads only when a matching path is edited, and a rule with none loads every session. Run `canon gov list` to see the glob beside each rule.
 
-A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one.
+Two of the outputs are documents you open rather than files you run. A `SLIDES.md` renders to a deck, and a learning workspace renders to a small site.
 
-Governance is the third shape, and it is worth seeing rather than reading about, because the glob beside each rule is what decides whether it reaches a session at all.
+![A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a dark warm background](examples/slides/images/showcase-dark-04.png)
 
-![canon gov list, showing seven stacks with the rules each carries and a sample of rules beside the path glob that loads each one](assets/evidence/governance.png)
+![The learning workspace listing rendered by canon teach, three workspaces with their lesson and term counts, one still a stub](examples/teach/evidence/root-listing.png)
 
-Stacks compose, so a react project inherits node and node inherits base. A rule with a glob loads only when a matching path is edited, and a rule with none loads every session. Both counts and every row above are read from the catalogs when the image is built.
+## It runs on itself
 
-The toolkit tracks its own work the same way, in a task board no catalog can read back.
+The workflow this toolkit ships is the workflow that built it. Several Claude Code sessions run at once, each in its own git worktree on its own branch, and each opens its own pull request.
 
-![the task board's Run now table, one row per task in flight, each naming the files it touches and the plan it runs under](assets/evidence/task-board.png)
+![The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened](demos/agent-view.gif)
 
-`.canon/tasks/` is gitignored session scratch, so unlike the two frames above, this one is a hand-taken snapshot rather than something the build reads live, and it goes stale the moment the board moves.
+That recording is the landing page's own `dispatch` and `workers` sections, driven by `canon demo run` against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
 
 ## Documentation
 
