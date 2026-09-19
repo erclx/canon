@@ -68,6 +68,8 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 | Modifying `governance/rules/`, `governance/stacks/`                               | `internal-governance` |
 | Modifying `snippets/`                                                             | `internal-snippets`   |
 | Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
+| Modifying `web/`, `assets/`, the landing page                                     | `internal-web`        |
+| Modifying `src/teach/`, `examples/teach/`, `standards/teach.md`                   | `internal-teach`      |
 
 @canon/ARCHITECTURE.md
 @canon/context/index.md
