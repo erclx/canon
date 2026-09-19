@@ -183,6 +183,15 @@ describe('buildDesignCss', () => {
     }
   })
 
+  it('names no retired teach face in the seeded chrome', () => {
+    const css = buildDesignCss(undefined, {
+      components: TEACH_STYLESHEET_COMPONENTS,
+    })
+
+    expect(css).not.toContain('Nunito')
+    expect(css).not.toContain('Cascadia')
+  })
+
   it('declares every alias a hand-authored lesson diagram consumes, not only what a component reads', () => {
     // Shaped like the fill/stroke references in a real lesson diagram SVG
     // (.canon/teach/03-fde-system-design/lessons/0003-deployment-skeleton.html),
