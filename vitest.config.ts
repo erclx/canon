@@ -6,7 +6,7 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
-    include: ['src/**/*.test.{ts,tsx}', '*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}', 'web/src/**/*.test.ts', '*.test.ts'],
     setupFiles: ['./vitest.setup.ts'],
   },
 })
