@@ -34,6 +34,7 @@ errexit
 excalidraw
 excalifont
 execa
+execdir
 execve
 fastapi
 faststart
@@ -49,6 +50,7 @@ gsub
 heredoc
 httpx
 ibeam
+ihdr
 inplace
 issuecomment
 jsxs
@@ -73,6 +75,7 @@ mypy
 nameref
 namerefs
 nbsp
+networkidle
 nextjs
 noopener
 noreferrer

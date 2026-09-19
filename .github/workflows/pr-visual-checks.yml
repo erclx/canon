@@ -141,12 +141,25 @@ jobs:
 
       # The frames land in their committed location so the report below diffs
       # them against the baseline this repository ships, and so the artifact
-      # carries the two names a reader already knows.
+      # carries the names a reader already knows. The whole tree is copied
+      # rather than a file per name, since the case now writes a folder per
+      # section beside the two whole-page frames and a named copy per frame
+      # would go stale against the case list on the first section added.
+      #
+      # The shared golden config names the case that emulates nothing
+      # `default`, and this repository's baseline names that frame `light`, so
+      # the rename runs once per copied frame at whatever depth it landed.
+      # The committed tree is cleared first rather than copied over. A copy
+      # only adds and overwrites, so a section dropped from the case list
+      # would leave its frames in place, `git diff --quiet` below would see no
+      # change, and the one step that exists to report drift would report a
+      # baseline that matches. Clearing first shows that section as a deletion.
       - name: Stage the captured frames
         run: |
+          rm -rf assets/evidence/home
           mkdir -p assets/evidence/home
-          cp web/screenshots/localhost/home/default.png assets/evidence/home/light.png
-          cp web/screenshots/localhost/home/dark.png assets/evidence/home/dark.png
+          cp -R web/screenshots/localhost/home/. assets/evidence/home/
+          find assets/evidence/home -name default.png -execdir mv default.png light.png \;
 
       # Uploaded on success rather than on failure alone, against the artifact
       # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
