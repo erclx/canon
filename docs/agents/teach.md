@@ -141,7 +141,7 @@ The order is drawn here rather than instructed, and that is the point of the ver
 
 ## Render
 
-`canon teach render` renders a lesson body's structural blocks to HTML, through the components `src/teach/render-fixture.tsx` composes by hand. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
+`canon teach render` renders a lesson body's structural blocks to HTML, through the three lesson components. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
 
 ```bash
 echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach render --json
