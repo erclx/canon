@@ -12,9 +12,9 @@ The terminal framing is the one surface left holding its own values, and that is
 
 ## Personality
 
-Warm neutrals carry the frame under a single rust accent, rendered in the same monospace the terminal uses. The subject picks the register rather than taste: a toolkit whose primary surface is a shell has no proportional voice available, so the rendered surfaces match the terminal instead of the reverse. One accent carries every count, link, and primary action. Promoting a second and third into structural roles is what reads as a generated interface, so the palette stays at one.
+Warm neutrals carry the frame under a single rust accent, set in Geist. The subject is a toolkit for people who read documents and diffs as much as they run commands, so the voice is a proportional one and the page reads as prose. One accent carries every count, link, and primary action. Promoting a second and third into structural roles is what reads as a generated interface, so the palette stays at one.
 
-One surface is carved out of the sentence above, and it is the landing page hero. A rendered surface here shows a reader what the terminal did, so matching the terminal is what makes it legible. A public page addresses somebody who has never opened the terminal at all, and the shell has no voice available for that, which is the reverse of the case the rule was written for. The `page-display` role below is the whole of the carve-out. Every other role on that page stays monospace, including its body, its controls, and every frame it embeds, so the page reads as two families rather than as a second design system.
+Monospace is a role the page uses rather than its voice. The `code` role takes it, and so does any terminal frame a surface embeds, since those show what the shell printed and matching the shell is what makes them legible. Every other role is Geist.
 
 ## Color
 
@@ -57,39 +57,38 @@ The accent is a quiet red at hue 22 light, 28 dark, chosen over a vivid red that
 
 ## Typography
 
-One family covers every role but `page-display`, which is the landing page hero and takes the proportional sibling of the same superfamily. The size scale runs from 11.5 to 52 pixels, and six values map onto a role. Five further values are adjustments inside a single component and get no role here, since a scale with five invented steps reads as a system the surfaces do not implement. They are 11.5, 12.5, 13, 14, and 15 pixels.
+Seven sizes are on offer, named `t0` through `t6` and emitted as custom properties beside the roles. They are 3.175, 2.375, 1.375, 1.125, 0.9375, 0.8125 and 0.6875 rem, which paint at 50.8, 38, 22, 18, 15, 13 and 11 pixels, and each role takes one. A step answers what sizes exist and a role answers what a stylesheet asks for, so the two stay separate: a role whose step did not move renders as it did, and a role that moved is the only thing that changes what a surface paints. Two steps, `t3` at 18 pixels and `t6` at 11, are offered with no role pointing at them yet.
 
-The 52 pixel step sits above the 34 the rest of the scale tops out at, and it is the one size no other surface reaches, since a hero headline set at the display cap reads as an opening rather than as a section heading.
+Every role but `code` is Geist and `code` is monospace. The hero headline takes the largest step at 50.8 pixels, which no other role reaches, since a headline set at the display cap reads as an opening rather than as a section heading.
 
 A tagged cell is one no rendering surface exercises yet, which is a declaration the system has not tested rather than one it has.
 
 Two rules set tracking and no others touch it. The label role carries `0.05em`, and the display role tightens to `-0.01em`.
 
-| Role         | Family                                      | Weight       | Size          | Line height   |
-| ------------ | ------------------------------------------- | ------------ | ------------- | ------------- |
-| display      | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 34px          | 1.3           |
-| page-display | Noto Sans, DejaVu Sans, sans-serif ? verify | 700          | 52px ? verify | 1.1 ? verify  |
-| heading      | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 19px          | 1.3 ? verify  |
-| body         | Noto Sans Mono, DejaVu Sans Mono, monospace | 400 ? verify | 16px          | 1.65          |
-| label        | Noto Sans Mono, DejaVu Sans Mono, monospace | 400 ? verify | 12px          | 1.45 ? verify |
-| code         | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 14.5px        | 1.3 ? verify  |
+| Role         | Family                                      | Weight       | Size              | Line height   |
+| ------------ | ------------------------------------------- | ------------ | ----------------- | ------------- |
+| display      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 2.375rem          | 1.3           |
+| page-display | Geist Variable, DejaVu Sans, sans-serif     | 700          | 3.175rem ? verify | 1.1 ? verify  |
+| heading      | Geist Variable, DejaVu Sans, sans-serif     | 700          | 1.375rem          | 1.3 ? verify  |
+| body         | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.9375rem         | 1.65          |
+| label        | Geist Variable, DejaVu Sans, sans-serif     | 400 ? verify | 0.8125rem         | 1.45 ? verify |
+| code         | Noto Sans Mono, DejaVu Sans Mono, monospace | 700          | 0.8125rem         | 1.3 ? verify  |
 
 ## Spacing
 
-The base is six pixels, which is the largest unit dividing the values that recur: 6, 12, 18, 24, and 30. One-off paddings at 9, 10, 11, 13, 14, 16, 22, 26, 34, and 40 pixels sit off the scale entirely and get no step.
+Seven steps run from a quarter rem to six, at 4, 8, 14, 24, 40, 64 and 96 pixels on a 16 pixel root. The scale is not a grid of one base, since the 14 between the 8 and the 24 is the step a control needs and no multiple of four supplies it, so the multiplier column counts quarter rems rather than claiming a unit.
 
-The outer window padding is a single declaration reading `44px 52px 38px`, and none of its three values divides by six. They carry no multiplier for that reason, and one declaration setting all three is the only thing grouping them, so they are a frame register rather than a scale.
+The outer window padding of the capture frames, which the previous record carried as a three-value frame register, is not part of the scale. Those frames set their own padding in the template and read no step, so the register is retired here rather than mapped onto steps no frame uses.
 
-| Step         | Multiplier | Value |
-| ------------ | ---------- | ----- |
-| xs           | 1          | 6px   |
-| sm           | 2          | 12px  |
-| md           | 3          | 18px  |
-| lg           | 4          | 24px  |
-| xl           | 5          | 30px  |
-| frame-top    | none       | 44px  |
-| frame-inline | none       | 52px  |
-| frame-bottom | none       | 38px  |
+| Step | Multiplier | Value    |
+| ---- | ---------- | -------- |
+| xs   | 1          | 0.25rem  |
+| sm   | 2          | 0.5rem   |
+| md   | 3.5        | 0.875rem |
+| lg   | 6          | 1.5rem   |
+| xl   | 10         | 2.5rem   |
+| 2xl  | 16         | 4rem     |
+| 3xl  | 24         | 6rem     |
 
 ## Borders
 

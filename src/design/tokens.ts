@@ -39,6 +39,12 @@ export interface TypeToken {
   readonly verify?: readonly ('family' | 'weight' | 'size' | 'lineHeight')[]
 }
 
+/** One size the system offers, named apart from any role that takes it. */
+export interface TypeStep {
+  readonly step: string
+  readonly size: string
+}
+
 export interface SpaceToken {
   readonly step: string
   readonly multiplier: string
@@ -57,6 +63,7 @@ export interface DesignTokens {
   readonly personality: string
   readonly color: readonly ColorToken[]
   readonly colorNote: string
+  readonly typeScale: readonly TypeStep[]
   readonly typography: readonly TypeToken[]
   readonly typographyNote: string
   readonly spacing: readonly SpaceToken[]
@@ -68,20 +75,19 @@ export interface DesignTokens {
   readonly preamble: string
 }
 
-/** The monospace stack every surface but the landing page hero declares. */
+/** The monospace stack, taken by code and by the terminal frames a page embeds. */
 const MONO = 'Noto Sans Mono, DejaVu Sans Mono, monospace'
 
 /**
- * The proportional stack the landing page hero declares and nothing else does.
- * Noto Sans is the proportional sibling of the mono above rather than a face
- * picked for taste, so the pairing is one superfamily rather than two systems.
+ * The proportional stack every role but `code` declares. Geist is the face the
+ * visual-direction track set throughout, embedded through `FONT_FACES`.
  *
  * The stack stops at two names and a generic because `src/design/base.css` is
  * written by `canon design regen` and formatted by prettier, and a declaration
  * past 80 columns is wrapped by the second and flattened by the first. Every
  * emitted line stays inside the width so the two writers never disagree.
  */
-const SANS = 'Noto Sans, DejaVu Sans, sans-serif'
+const SANS = 'Geist Variable, DejaVu Sans, sans-serif'
 
 const DARK_GROUNDS = ['background', 'surface'] as const
 const LIGHT_GROUNDS = ['light-background', 'light-surface'] as const
@@ -98,9 +104,9 @@ export const TOKENS: DesignTokens = {
   ].join('\n'),
 
   personality: [
-    'Warm neutrals carry the frame under a single rust accent, rendered in the same monospace the terminal uses. The subject picks the register rather than taste: a toolkit whose primary surface is a shell has no proportional voice available, so the rendered surfaces match the terminal instead of the reverse. One accent carries every count, link, and primary action. Promoting a second and third into structural roles is what reads as a generated interface, so the palette stays at one.',
+    'Warm neutrals carry the frame under a single rust accent, set in Geist. The subject is a toolkit for people who read documents and diffs as much as they run commands, so the voice is a proportional one and the page reads as prose. One accent carries every count, link, and primary action. Promoting a second and third into structural roles is what reads as a generated interface, so the palette stays at one.',
     '',
-    'One surface is carved out of the sentence above, and it is the landing page hero. A rendered surface here shows a reader what the terminal did, so matching the terminal is what makes it legible. A public page addresses somebody who has never opened the terminal at all, and the shell has no voice available for that, which is the reverse of the case the rule was written for. The `page-display` role below is the whole of the carve-out. Every other role on that page stays monospace, including its body, its controls, and every frame it embeds, so the page reads as two families rather than as a second design system.',
+    'Monospace is a role the page uses rather than its voice. The `code` role takes it, and so does any terminal frame a surface embeds, since those show what the shell printed and matching the shell is what makes them legible. Every other role is Geist.',
   ].join('\n'),
 
   colorNote: [
@@ -236,52 +242,62 @@ export const TOKENS: DesignTokens = {
   ],
 
   typographyNote: [
-    'One family covers every role but `page-display`, which is the landing page hero and takes the proportional sibling of the same superfamily. The size scale runs from 11.5 to 52 pixels, and six values map onto a role. Five further values are adjustments inside a single component and get no role here, since a scale with five invented steps reads as a system the surfaces do not implement. They are 11.5, 12.5, 13, 14, and 15 pixels.',
+    'Seven sizes are on offer, named `t0` through `t6` and emitted as custom properties beside the roles. They are 3.175, 2.375, 1.375, 1.125, 0.9375, 0.8125 and 0.6875 rem, which paint at 50.8, 38, 22, 18, 15, 13 and 11 pixels, and each role takes one. A step answers what sizes exist and a role answers what a stylesheet asks for, so the two stay separate: a role whose step did not move renders as it did, and a role that moved is the only thing that changes what a surface paints. Two steps, `t3` at 18 pixels and `t6` at 11, are offered with no role pointing at them yet.',
     '',
-    'The 52 pixel step sits above the 34 the rest of the scale tops out at, and it is the one size no other surface reaches, since a hero headline set at the display cap reads as an opening rather than as a section heading.',
+    'Every role but `code` is Geist and `code` is monospace. The hero headline takes the largest step at 50.8 pixels, which no other role reaches, since a headline set at the display cap reads as an opening rather than as a section heading.',
     '',
     'A tagged cell is one no rendering surface exercises yet, which is a declaration the system has not tested rather than one it has.',
     '',
     'Two rules set tracking and no others touch it. The label role carries `0.05em`, and the display role tightens to `-0.01em`.',
   ].join('\n'),
 
+  typeScale: [
+    { step: 't0', size: '3.175rem' },
+    { step: 't1', size: '2.375rem' },
+    { step: 't2', size: '1.375rem' },
+    { step: 't3', size: '1.125rem' },
+    { step: 't4', size: '0.9375rem' },
+    { step: 't5', size: '0.8125rem' },
+    { step: 't6', size: '0.6875rem' },
+  ],
+
   typography: [
     {
       role: 'display',
-      family: MONO,
+      family: SANS,
       weight: '700',
-      size: '34px',
+      size: '2.375rem',
       lineHeight: '1.3',
     },
     {
       role: 'page-display',
       family: SANS,
       weight: '700',
-      size: '52px',
+      size: '3.175rem',
       lineHeight: '1.1',
-      verify: ['family', 'size', 'lineHeight'],
+      verify: ['size', 'lineHeight'],
     },
     {
       role: 'heading',
-      family: MONO,
+      family: SANS,
       weight: '700',
-      size: '19px',
+      size: '1.375rem',
       lineHeight: '1.3',
       verify: ['lineHeight'],
     },
     {
       role: 'body',
-      family: MONO,
+      family: SANS,
       weight: '400',
-      size: '16px',
+      size: '0.9375rem',
       lineHeight: '1.65',
       verify: ['weight'],
     },
     {
       role: 'label',
-      family: MONO,
+      family: SANS,
       weight: '400',
-      size: '12px',
+      size: '0.8125rem',
       lineHeight: '1.45',
       verify: ['weight', 'lineHeight'],
     },
@@ -289,27 +305,26 @@ export const TOKENS: DesignTokens = {
       role: 'code',
       family: MONO,
       weight: '700',
-      size: '14.5px',
+      size: '0.8125rem',
       lineHeight: '1.3',
       verify: ['lineHeight'],
     },
   ],
 
   spacingNote: [
-    'The base is six pixels, which is the largest unit dividing the values that recur: 6, 12, 18, 24, and 30. One-off paddings at 9, 10, 11, 13, 14, 16, 22, 26, 34, and 40 pixels sit off the scale entirely and get no step.',
+    'Seven steps run from a quarter rem to six, at 4, 8, 14, 24, 40, 64 and 96 pixels on a 16 pixel root. The scale is not a grid of one base, since the 14 between the 8 and the 24 is the step a control needs and no multiple of four supplies it, so the multiplier column counts quarter rems rather than claiming a unit.',
     '',
-    'The outer window padding is a single declaration reading `44px 52px 38px`, and none of its three values divides by six. They carry no multiplier for that reason, and one declaration setting all three is the only thing grouping them, so they are a frame register rather than a scale.',
+    'The outer window padding of the capture frames, which the previous record carried as a three-value frame register, is not part of the scale. Those frames set their own padding in the template and read no step, so the register is retired here rather than mapped onto steps no frame uses.',
   ].join('\n'),
 
   spacing: [
-    { step: 'xs', multiplier: '1', value: '6px' },
-    { step: 'sm', multiplier: '2', value: '12px' },
-    { step: 'md', multiplier: '3', value: '18px' },
-    { step: 'lg', multiplier: '4', value: '24px' },
-    { step: 'xl', multiplier: '5', value: '30px' },
-    { step: 'frame-top', multiplier: 'none', value: '44px' },
-    { step: 'frame-inline', multiplier: 'none', value: '52px' },
-    { step: 'frame-bottom', multiplier: 'none', value: '38px' },
+    { step: 'xs', multiplier: '1', value: '0.25rem' },
+    { step: 'sm', multiplier: '2', value: '0.5rem' },
+    { step: 'md', multiplier: '3.5', value: '0.875rem' },
+    { step: 'lg', multiplier: '6', value: '1.5rem' },
+    { step: 'xl', multiplier: '10', value: '2.5rem' },
+    { step: '2xl', multiplier: '16', value: '4rem' },
+    { step: '3xl', multiplier: '24', value: '6rem' },
   ],
 
   bordersNote: [

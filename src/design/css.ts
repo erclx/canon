@@ -77,6 +77,10 @@ function tokenProperties(tokens: DesignTokens): string[] {
     lines.push(`  --space-${slug(step.step)}: ${step.value};`)
   }
 
+  for (const step of tokens.typeScale) {
+    lines.push(`  --${slug(step.step)}: ${step.size};`)
+  }
+
   for (const role of tokens.typography) {
     lines.push(`  --type-${slug(role.role)}-family: ${role.family};`)
     lines.push(`  --type-${slug(role.role)}-size: ${role.size};`)
