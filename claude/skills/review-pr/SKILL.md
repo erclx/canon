@@ -135,6 +135,8 @@ Review the diff and files for the same axes as `review-branch` (bugs, edge cases
 - Contract: does a contract downstream features depend on land correctly, and should the plan itself be questioned?
 - Consumers: when the change touches a resource with more than one consumer, enumerate them and check the rule against each. A rule written for the consumer the change targets can be wrong for a sibling that writes.
 
+Read each test file the branch added or changed against the final filter in `canon:test-craft`, which owns what the filter asks. Scope it to those files rather than the suite. A fixed-pause wait is a `should-fix`, since the end to end rules already forbid it, and a test sitting at a higher layer than it needs is `minor` unless it is flaky or slows the gate measurably. Report it rather than proceeding silently when the skill does not resolve.
+
 Then read the description's `## Testing` section, which is the one part of a pull request body this session is positioned to falsify. The branch author cannot see what a sibling branch drove the same day, and the arm list is what settles the claim rather than the diff.
 
 Test every unchecked box against the testing discipline in `${CLAUDE_SKILL_DIR}/../../standards/pr.md`, which reserves an unchecked box for a capability the agent lacks. Raise the box when it names no human at all, when the human it names is a live agent session, or when it names a person for a step the repository ships a harness for, `scripts/sandbox/run.sh` and `scripts/eval/run.sh` being the two. Cost alone is not an answer, since authorizing a spend is the operator's and performing the run is not. A refusal the author actually met is an answer, and it names which one.

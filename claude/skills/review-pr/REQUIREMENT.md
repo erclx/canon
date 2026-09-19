@@ -20,6 +20,7 @@ A request written under `## For the reviewer` also reached no reader. The author
 - Detect the pass from the thread rather than taking it from the caller, matching the heading for equality so a neighboring comment cannot be read as a prior pass
 - Scope a later pass to the commits added since the prior one, once that commit is confirmed to still reach the head
 - Apply the integration, contract, and consumer lenses a self-review structurally cannot
+- Read each test the branch added or changed against `canon:test-craft`'s final filter, scoped to those files and never the suite
 - Post the closing pass even with nothing to report, since a review left unanswered reads as one nobody closed
 - State a withdrawal or a regrade on the thread with the fact that settled it, since a finding dropped in silence reads the same as one nobody answered
 - Key the body file on the pull request number and the head commit, and on the response it answers once the head repeats, so no two passes overwrite each other
