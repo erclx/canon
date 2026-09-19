@@ -63,6 +63,17 @@ describe('canon capture', () => {
     expect(result.stderr).not.toContain('.window')
   })
 
+  it('should answer the help the refusal points at', async () => {
+    const result = await execa(process.execPath, [CLI, 'capture', '--help'], {
+      cwd: REPO_ROOT,
+      reject: false,
+      timeout: RUN_TIMEOUT_MS,
+    })
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toContain('--selector')
+  })
+
   it('should refuse a missing selector ahead of a missing source', async () => {
     const result = await runCapture(['no-such-directory'])
 
