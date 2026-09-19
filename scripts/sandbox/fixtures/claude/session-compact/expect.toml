@@ -1,0 +1,45 @@
+# What a correct `/canon:session-compact` run leaves behind.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so a key written at the bottom parses clean
+# and asserts nothing.
+
+max_turns = 30
+
+# The note's name is derived from the work, so the entry is a glob. The board
+# is the control: a compact note writes one file outside it and has no reason to
+# touch a task.
+paths = [
+  ".canon/compact/*.md",
+  ".canon/tasks/index.md",
+  ".canon/tasks/v01.0-pagination.md",
+]
+
+# The orchestrator's spelling, which is what a run reaching for the wrong skill
+# writes. A path negative fails on the file existing rather than on wording.
+absent = [".canon/tasks/session-*.md"]
+
+write_scope = [".canon/compact/**", ".canon/memory/**"]
+
+manual = [
+  "The note is a single file. Semantic: the glob above finds one match and reports it, so a second note for the same work passes unseen.",
+  "The decision names what it beat. Semantic: a cursor chosen over offset paging, with the insert-between-reads reason, reads in free prose.",
+  "`## Where to pick up` carries one instruction rather than a menu. Semantic: its body is free prose.",
+]
+
+# The negative the skill states outright: a session that committed nothing has no
+# state a reader could not get from the tree. The lookbehind pins the match to the
+# start of the file, so the lookahead reads the whole note once.
+[[content]]
+path = ".canon/compact/*.md"
+pattern = '(?<![\s\S])(?![\s\S]*^## State$)'
+
+[[content]]
+path = ".canon/compact/*.md"
+pattern = '^## Where to pick up$'
+
+[[content]]
+path = ".canon/compact/*.md"
+pattern = '^## What was decided$'

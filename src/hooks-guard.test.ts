@@ -293,7 +293,7 @@ beforeAll(() => {
     },
     'precompact-handoff.sh': {
       code: 2,
-      expect: 'Run the canon:session-map skill',
+      expect: 'Run the canon:session-compact skill',
       payload: (nonce) =>
         payloadFor({
           hook_event_name: 'PreCompact',
@@ -871,7 +871,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
       // so it takes the manual path and asks.
       const result = await run(hook, payload({ session_id: 'precompact-bare' }))
 
-      expect(result.stderr).toContain('Run the canon:session-map skill')
+      expect(result.stderr).toContain('Run the canon:session-compact skill')
       expect(result.code).toBe(2)
     },
   )
@@ -887,7 +887,7 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
       const first = await run(hook, once)
       const second = await run(hook, once)
 
-      expect(first.stderr).toContain('Run the canon:session-map skill')
+      expect(first.stderr).toContain('Run the canon:session-compact skill')
       expect(first.code).toBe(2)
       expect(second.stderr).toBe('')
       expect(second.code).toBe(0)

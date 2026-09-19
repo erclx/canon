@@ -18,6 +18,7 @@ Does not govern:
 - The task board the file sits beside, its filenames, and its archiving: `tasks.md`
 - The transform from a branch name to the slug in the filename: `slug.md`
 - The role-specific sections a caller adds over the core, which belong to that caller
+- The note a plain session writes at `.canon/compact/<slug>.md`, whose shape lives in the `session-compact` skill's own reference
 - Which memories a session captures before writing, which is the capture surface's own subject
 
 ## What a working session map looks like
