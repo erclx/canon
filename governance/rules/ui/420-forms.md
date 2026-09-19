@@ -26,6 +26,15 @@ paths:
 - Show the error directly under the field that caused it, not under an unrelated field.
 - When a change to field A causes a conflict involving field B, show the error under field A (the field the user edited), not under field B.
 
+## Submission errors
+
+- When a failed submission carries several errors, move focus to a summary that links to each failing field. Keep the inline error beside each field.
+
+## Authentication and re-entry
+
+- Let a password manager fill sign-in fields and accept a pasted value. Do not block paste or autofill on a password or code field (WCAG 2.2 Accessible Authentication, 3.3.8).
+- Do not ask for information the user already gave earlier in the same flow. Prefill it or offer it for selection (WCAG 2.2 Redundant Entry, 3.3.7).
+
 ## Input sanitization
 
 - Trim leading and trailing whitespace from text inputs on blur or submit, not on every keystroke.
