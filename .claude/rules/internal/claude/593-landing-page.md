@@ -11,23 +11,23 @@ covers a failure that ships looking correct. A build passes, a browser renders,
 and the defect reaches a reader who has no way to spot it. That is why they are
 a rule rather than a note in a context entry.
 
-Two conventions were rewritten against the current composition, the motion test and the accent set. The other three describe how a page is built rather than how it looks, and each is gated by something real, so a new composition leaves them alone.
+Two conventions were rewritten against the current composition, the motion test and the accent set. The other three describe how a page is built rather than how it looks, and each is gated by something real, so their anchors were retargeted to the current page and their conventions left as written.
 
 ## Every count is read, never typed
 
 - Read a count from the CLI at build time, the way `web/src/lib/counts.ts` reads `canon gov counts --json`. Never write a literal.
 - Never add a fallback literal behind a failed read. A page that ships a stale number when the read fails is worse than one that fails the build, because nothing downstream can tell the two apart.
-- State on the page where a rendered number came from. `web/src/content/copy.ts` carries `countNote` for the catalog counts and `agentView.provenance` for the session rows.
+- State on the page where a rendered number came from. `note` in `web/src/content/copy.ts` says the counts are read at build time, and `provenance` there labels the session roster as drawn from the session it depicts.
 
 ## Every image is generated, never a screenshot pasted in
 
 - Point an image at a file some script writes. The frames under `assets/` come from `scripts/core/regen-hero.sh` and `canon capture`, and `web/public/assets/` symlinks them rather than holding a second copy.
-- Say so on the page when a frame is a hand-taken snapshot that no build refreshes, which is what `boardLifecycle.note` does for the task board.
-- Never hand-edit a generated artifact. A hand-edit after generation defeats the discipline silently, which is the failure `assets/captures/install.html.tmpl` documents for the terminal frames and `scripts/core/regen-agent-fixture.sh` inherits for the session rows.
+- Say so on the page when a frame is a hand-taken snapshot that no build refreshes.
+- Never hand-edit a generated artifact. A hand-edit after generation defeats the discipline silently, which is the failure `assets/captures/install.html.tmpl` documents for the terminal frames.
 
 ## A motion earns its place by asserting something a still cannot
 
-- Ask of each motion whether the page would say less with the end state alone. A row reaching Completed asserts a dispatch finishing, and a card arriving asserts a glob firing. A fade that only announces a section asserts nothing and is decoration.
+- Ask of each motion whether the page would say less with the end state alone. The merge figure building a trigger before the effects it causes asserts an order. A fade that only announces a section asserts nothing and is decoration.
 - Set no number on how many motions the page carries. A count never improved a call and only produced arithmetic about whether one flip belonged to a second motion. The walkthrough is the backstop, since a page that drifted to a crowd of motions is visible to a person and is not a silent failure.
 - Treat a reveal as an assertion when its order carries the claim, such as a trigger landing before the effects it causes. Treat it as an entrance when it plays the same on every section. An entrance is one decision made once, and a section that tunes its own arrival has started making a claim, so it answers to the test above.
 - Give every animation a `prefers-reduced-motion: reduce` branch that still lands the state change. A transition carried by a class survives the branch where one carried by the motion alone does not.
