@@ -36,6 +36,14 @@ The conceptual placement decision is:
 - Tutorials or human onboarding → `docs/` if a public audience exists
 - Function-level docs → read the code instead
 
+## Which tier a fact belongs in
+
+A fact goes to `.claude/rules/` when it fires on a specific path being edited and violating it ships silently, and to a context entry or a skill body otherwise. Recording it in an entry's `## Gotchas` instead reaches too little, and eager loading does not substitute: a rule delivered at session start competes with the whole file, while a glob-matched one arrives attached to the action. The test rejects most of what it is run over, because a rule per gotcha rebuilds the `CLAUDE.md` the tiers exist to prevent.
+
+Firing is one axis of three. The second is conditional presence, which a rule buys and a line in `CLAUDE.md` or a seed cannot, since an eager line loads into every session regardless of what is being edited. The third is updatability, which is what makes `governance/rules/core/` correct as rules for the fifteen of its nineteen rules carrying no `paths:` glob and loading every session anyway: a rule installed through governance sync carries a later fix to every project that installed it, where a seed line stays fixed at the scaffold it was written into. Measured at `5196cc9a` on 2026-08-27.
+
+The test ships as `governance/rules/claude/592-claude-md.md`, attached to an edit of the root file in every target that installed governance. A project scaffolding without governance is reached by neither surface, since the seed does not state the test.
+
 ## What each root holds, and what reads it
 
 The project root splits three ways: `.claude/` holds what Claude Code reads by path, `canon/` holds what the toolkit authors and commits, and `.canon/` holds every gitignored session record. One ignore line covers `.canon/`, so a record folder added later needs no row here, no ignore entry, and no manifest edit.
@@ -70,7 +78,17 @@ The rest are the toolkit's own and sit under `canon/`, since they are committed:
 | `canon/DESIGN.md`       | `canon design render`, `canon design board`, and the design skills by name                    |
 | `canon/wireframes/`     | `canon context` as an audited folder, in a project that carries one. This repository does not |
 
-The test that decides the split: `canon/` takes what the toolkit authors and commits, `.claude/` keeps what Claude Code reads, and `.canon/` keeps what is ignored.
+The test that decides the split: `canon/` takes what the toolkit authors and commits, `.claude/` keeps what Claude Code reads, and `.canon/` keeps what is ignored. `canon/ARCHITECTURE.md` carries the two tests and the alternatives they beat. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
+
+### The one ignore line
+
+The bare `.canon/` spelling is what keeps a carve-out out of reach, not git as a mechanism: the same exclusion written as `.canon/*` would let `!.canon/x/` stage `x/`, while an unnamed new record folder stays auto-ignored either way. Nothing tracked lands there only as long as the spelling stays bare, and nothing enforces that it does. Keeping the old ignore entries until every recorded target reported migrated, and gating the collapse on the target index in `src/targets/registry.ts`, were both declined for the single line.
+
+### How the move ran
+
+Every folder the committed test relocated is untracked, so `canon migrate records` performs a filesystem act no commit records. The branch that carried it shipped the resolver, the verb, the ignore entry, the manifest line, and 1,190 citations across 252 files, and the move itself ran separately, since the records live at the main root and are absent from the linked worktree a worker builds in by construction. `RECORD_ROOTS` resolves the old root behind the new one, so a target on an older binary keeps reading either root, and `CREATION_ROOT` names the new root for anything created going forward. Shipping resolver and move together was declined, since it would strand a target on an older binary reading its own records at a root its CLI does not know. Measured at `346556b1` on 2026-09-01.
+
+`canon migrate surface-roots` relocated 80 files with `git mv` and rewrote 1,040 citations across 268 files for the Claude-Code-reads test once a release carried the surface resolver. The cost is a tracked `canon/` sitting one character from the ignored `.canon/`, which a reader skimming a path cannot tell apart. Measured at `c947c27f` on 2026-09-13.
 
 ## Gotchas
 

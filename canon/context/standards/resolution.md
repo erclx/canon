@@ -29,11 +29,21 @@ The domain has no install and no sync verb, and writes no copy into a target. `c
 
 A reader who needs a concern a `Does not govern:` entry hands off runs `canon standards <name>` again for that name, rather than resolving a transitive closure the way an install selection once did.
 
-`NonInteractivePolicy` in `src/sync/engine.ts` carries a `refuse` branch that standards was the only adapter to declare, so it is now unreachable, and `hasUnattributedDrift` is read only from inside it. The type stays because it is the extension point `canon/ARCHITECTURE.md` records a reason for, and removing it would delete that reason along with the code.
+`NonInteractivePolicy` in `src/sync/engine.ts` carries a `refuse` branch that standards was the only adapter to declare, so it is now unreachable, and `hasUnattributedDrift` is read only from inside it. The type stays because it is an extension point a later adapter may declare, and removing it would delete that option along with the code.
+
+## Why the install channel closed
+
+The corpus reaches a project two ways and neither writes into it: the `claude/standards` symlink puts the whole corpus in every plugin cache for a session, and the published package carries it as the CLI's root for a machine reader. An install verb writing the flat root into a target is the alternative that lost, because every copy becomes a file sync has to reconcile forever, measured at five relocated standards sitting 12 to 45 lines behind with no command able to refresh them. Measured at `3ac31a09` on 2026-08-20.
+
+`tooling/<stack>/reference.md` closed the same channel for tooling stack references: `src/tooling/read.ts` resolves a reference at the working root ahead of the packaged corpus, mirroring `standardRoots`, and `canon tooling reference <stack>` is the read verb `canon tooling sync` stopped writing a copy through. Measured at `16591fd2` on 2026-08-27.
+
+A machine-parsed standard is exempt from any design inlining a standard into the rule that cites it, because a rule restating the list a parser reads is two sources for one list. The set is empty: the three ban sets and the six structural checkpoints that made `markdown.md` a member ship as data in `src/markdown/` instead, at the accepted cost that the prose and the shipped numbers can drift with nothing comparing them. Measured at `60fc97bf` on 2026-08-19.
 
 ## Skill-local references
 
-`standards/bundled/` and the `consumers:` frontmatter field it read do not exist. A standard several surfaces cite, however narrow its readership, sits in the flat root like every other standard and resolves through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` at zero copies. `canon/ARCHITECTURE.md` carries the reasoning that closed the folder rather than only bounding it.
+`standards/bundled/` and the `consumers:` frontmatter field it read do not exist. A standard several surfaces cite, however narrow its readership, sits in the flat root like every other standard and resolves through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` at zero copies.
+
+The folder held six sources copying out eleven times, and growing it to cover the flat corpus was declined on a duplication measurement: the most-cited standard, named by 21 skill bodies across the two catalogs, would have landed a copy in each. The fallback citation form 39 bodies already carried serves a root standard to any number of readers at zero copies, so the six sources moved to the flat root and the eleven copies came out with them. Measured at `16a80339` on 2026-08-25.
 
 A file under a skill's own `references/` is always hand-authored and skill-local. Nothing generates a copy into `references/`, so a reference living only there is written for that one skill and carries no `consumers:` field to read.
 

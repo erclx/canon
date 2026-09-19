@@ -88,7 +88,7 @@ No check parses the block. Nothing reads a plan's constraints today, and a valid
 
 The delete prohibition stays in `CLAUDE.md` while the rest of the rule lives in the standard. A path-scoped rule fires when a session edits a file the glob matches, and a bulk retire runs through the shell as a `mv`, so `559-memory.md` is never loaded at the moment the irreversible act happens.
 
-The test in `canon/ARCHITECTURE.md` asks whether a rule fires on a path being edited, and this is the case where the answer is no because the violating action is not an edit at all.
+The tier test in `canon/context/context-model.md` asks whether a rule fires on a path being edited, and this is the case where the answer is no because the violating action is not an edit at all.
 
 The rule sits in both tiers on purpose: the always-loaded copy is what reaches the shell path, and the rule copy is the reminder a session gets while editing an entry.
 
@@ -167,6 +167,12 @@ Which paths the verb reads as absent from a clone splits by root rather than com
 The check also carries a devDependency-availability design worth recording here rather than in a standard. `cspell` is a devDependency of this repository alone, per `075-dependencies.md`'s ban on importing a transitive-only package, so `src/labels/spelling.ts` resolves `node_modules/.bin/cspell` by walking from the caller's working directory up to the filesystem root, rather than shelling a bare `cspell` command. `bun src/cli.ts labels scan`, the invocation `phase-label-gate.yml` runs, sits outside `bun run` and carries no `node_modules/.bin` on `PATH`, so a bare spawn throws `ENOENT` even inside this repository. The resolved path also rules out a `bunx` fallback, which could reach the network from inside a command that has been fully offline and regex-based until now. A target project carrying no `cspell` gets no coverage from this check rather than a forced new dependency or a network call it never asked for.
 
 `scanTitleSpelling` reads the `cspell` exit code and reports `check-failed` on any value outside its two defined ones, clean or issues found, rather than reading an unreadable exit the same way a clean title reads. The `--json` record carries `spellingChecked` alongside `unspelledWords`, so a caller can tell a clean title from one nothing checked, since both would otherwise report an empty array.
+
+## The teach standard governs shape and the skill governs procedure
+
+`standards/teach.md` fixes the layout, the ordinal naming, the frontmatter, and the mission and learning-record formats of a learning workspace, while the pedagogy that decides what to teach next sits in `teach-workspace/references/`. An attribute standard beside `markdown.md` was the alternative and it is declined on the second-reader test, since a standard nothing else cites has no owner to correct it. Folding the pedagogy into `teach.md` was the other candidate, and `591-standard-authoring` rules it out, since a standard governs one document type or one attribute rather than both. `teach.md` carries only prose naming the skill's reference rather than a path a check could resolve, since `canon gov citations` never opens `standards/`. Measured at `285723bc` on 2026-09-06.
+
+The workspace is the first record folder named `<nn>-<topic>` rather than by a bare slug, so a listing sorts by when each opened, which was free because the surface was greenfield. The groundwork and intake folders then took one ordinal sequence across both kinds, derived from the first commit naming a folder where one exists and from filesystem timestamps otherwise, and slug resolution widened to match a bare topic against its ordinal-prefixed folder. Measured at `d5f519ee` on 2026-08-26.
 
 ## The glossary standard and its one stated exception
 

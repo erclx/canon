@@ -27,4 +27,4 @@ Ten bodies clear the checkpoint. Moving all of them in one pass turns a standard
 
 Pointing one skill at a sibling's folder is banned outright, since a bare relative path across folders resolves against the session cwd and breaks the moment either skill runs from a plugin cache. A reference two skills read is authored as a standard at the flat root instead, cited from each skill through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, which resolves off the `claude/standards` symlink in a plugin cache holding no project files. `git-pr` and `git-split` both citing `standards/branch.md` and `standards/pr.md` this way is the shape to expect.
 
-Where that single source lives is a fact about this repository rather than a rule the standard can carry, so the standard states the requirement and stops. `canon/ARCHITECTURE.md` carries the decision behind the fallback citation form.
+Where that single source lives is a fact about this repository rather than a rule the standard can carry, so the standard states the requirement and stops. `canon/context/standards/resolution.md` carries the decision behind the fallback citation form.

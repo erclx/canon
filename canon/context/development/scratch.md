@@ -9,7 +9,7 @@ description: Why shared scratch lives at the main worktree root, the two write r
 
 A session taking the scratch rule's second spelling used to write `<worktree>/.claude/.tmp/<slug>/` against an ignore file naming only `.canon/` and `.claude/worktrees/`, so `git check-ignore` exited 1 on it. The scratch-guard hook accepted the path and told the session it complied, while the `git add -A` in the ship chain staged the folder anyway. What caught it was a status read before staging, the same signal that caught the flat task archive below. Measured 2026-09-01 on `fix/record-tree-old-root`. <!-- canon-keep-record-root -->
 
-`.claude/.tmp/` now carries its own `.gitignore` entry and manifest array member, so the fallback spelling is covered wherever it is written, worktree or main root alike. It stays an ignore entry rather than a second scratch root: nothing changed about which path a project without `.canon/` writes to, only whether git sees it. `canon/ARCHITECTURE.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
+`.claude/.tmp/` now carries its own `.gitignore` entry and manifest array member, so the fallback spelling is covered wherever it is written, worktree or main root alike. It stays an ignore entry rather than a second scratch root: nothing changed about which path a project without `.canon/` writes to, only whether git sees it. `canon/context/context-model.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
 
 A linked worktree reads them through one tool and writes them through another. `Edit` and `Write` refuse every main-root path with a message naming session isolation and directing the session to the worktree copy, while `Read` resolves normally and `Bash` writes without complaint, so the boundary is tool-scoped rather than filesystem-scoped. That holds across all four folders and a live task file.
 
@@ -59,9 +59,19 @@ Six write material a later run or a different worktree reads back. `memory-captu
 
 `review-pr`'s `.canon/tmp/pr/review/body-<number>-<short-sha>.md` is the one exception on the other side: material a later pass reads back through the Step 2 oid comparison, with no root stated anywhere in the body. A dispatched re-review runs in its own worktree, so the second pass writes a folder the first pass never touched, which the filename scheme's PR number and head-sha segments cannot stop without the root fixed. Its Step 4 takes the same main-root heredoc route the six above use.
 
+### A durable record is named for what it is
+
+`groundwork/`, the three archives, and `.canon/evidence/` sit outside `.tmp/`, leaving it to hold only what can be deleted without loss. A folder cited by task files months after it was written fails that test, so a folder announcing itself as temporary is the wrong container for anything a later session is meant to find.
+
+A folder can be a durable record without being cited, since the disk-loss risk separating `.tmp/` from a backed folder has nothing to do with citation. That is why a retired memory sits under the pen rather than under scratch: an undo buffer left in `.tmp/` on the test that nothing cites it was the declined alternative. The memory-review archive fails the deletable test on content rather than on citation, holding 154 receipts and 261 undecided items the memory standard calls decision state the next round reads back. Measured at `961aa69c` on 2026-08-20.
+
+Nine further folders moved to `.canon/evidence/`, since a durable record names each as its evidence and no source file writes into any on a schedule of its own. Measured at `3208052c` on 2026-09-06, at nine folders, thirteen files, and twenty-nine citations across twenty-two files.
+
+Prefixing the remaining record surfaces with a dot to collapse the ignore file into one pattern was declined at 486 occurrences across roughly 150 committed files against 80 for the move that shipped. It would have been a breaking rename for every installed target and would hide the board a person opens daily.
+
 ### Where each folder archives to
 
-An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history.
+An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history. A folder earns root position only when nothing else contains it. Splitting a retired entry to `.tmp/memory-archive/` and a review receipt to `.canon/review/memory/archive/` was the declined alternative: the deletable test separates the two correctly, but the split names two surfaces for one record. Measured at `106115ba` on 2026-08-21, at 94 occurrences across 37 tracked files citing the two old spellings, with a further 139 in the gitignored record tree that no `git grep` reaches.
 
 A memory entry that leaves the pen moves to `.canon/memory/archive/`, the same rule every other record folder follows. Nothing cites a retired memory the way a task file cites a plan or a groundwork track, and a phase label derives from the task archive while no surface reads this one, but citation is not what decides whether a folder is backed: `memory/` is not one of the three names `EXCLUDED_ENTRIES` withholds from `canon records push`, so a wrong call over the folder recovers through `canon records pull` the same as any other retired record.
 
@@ -73,7 +83,7 @@ A memory-review receipt a triage takes out of `.canon/memory/review/` moves to `
 
 A task that ships moves to `.canon/tasks/archive/` the same way, through `canon tasks archive`. The `Pull request:` line `git-pr` writes onto the task is what lets the merge close it, since every merge on `main` is a squash carrying that number in its subject while the branch name never lands. The command owns the move, the `priority.md` row removal, and the index regen as one unit, so the hook and `task-board` cannot archive differently.
 
-A folder cited by a durable record as its evidence, and written by no script on a schedule of its own, leaves scratch outright rather than archiving in place. `canon migrate scratch-evidence` applies the same deletable test that emptied `.tmp/` into `groundwork/` and the three archives, walking every live and archived record for a citation and refusing a folder a source file still names by path, landing a qualifying folder at `.canon/evidence/<nn>-<folder>/`. `canon/ARCHITECTURE.md` carries the measurement behind the move.
+A folder cited by a durable record as its evidence, and written by no script on a schedule of its own, leaves scratch outright rather than archiving in place. `canon migrate scratch-evidence` applies the same deletable test that emptied `.tmp/` into `groundwork/` and the three archives, walking every live and archived record for a citation and refusing a folder a source file still names by path, landing a qualifying folder at `.canon/evidence/<nn>-<folder>/`. The durable-record section above carries the measurement behind the move.
 
 ### Changing where a folder sits
 
@@ -105,7 +115,7 @@ The marker's own comment syntax has to match the file it sits in, since the swee
 
 ### What a spike leaves behind
 
-`plan-groundwork` sends every experiment artifact to `.canon/tmp/runs/groundwork-fixtures/<slug>/`, and `canon/ARCHITECTURE.md` defines the scratch tree as holding only what can be deleted without loss. A recording an `08-spikes.md` entry cites as proof of a finding fails that test, so the skill splits an input a spike reads from evidence a spike produces, and sends each where its own lifetime puts it: the fixtures path keeps the input, and `evidence/` inside the track keeps the output.
+`plan-groundwork` sends every experiment artifact to `.canon/tmp/runs/groundwork-fixtures/<slug>/`, and the durable-record section above defines the scratch tree as holding only what can be deleted without loss. A recording an `08-spikes.md` entry cites as proof of a finding fails that test, so the skill splits an input a spike reads from evidence a spike produces, and sends each where its own lifetime puts it: the fixtures path keeps the input, and `evidence/` inside the track keeps the output.
 
 The split is input against output rather than markdown against binary. A fixture page, an arm script, and a copied theme file are re-runnable and cited by nothing. A recording and the frames pulled from it are what a later reader opens to check a claim.
 
@@ -123,7 +133,11 @@ Archiving moves a record between folders that all sit on one disk, so `canon rec
 
 The folders `canon migrate scratch-evidence` promotes out of `tmp` land inside `evidence`, a root folder the exclusion-based push already carries, so `BACKED_FOLDERS`, the allowlist a legacy `.claude/` root backs through, stays put. Both that verb and `canon migrate record-layout` number a folder there as `<nn>-<slug>/` through one shared rule, so a promotion run late lands in the same layout as one moved out of `review/evidence/`.
 
-The history lives in a second git directory at `.canon/.records.git` with `.canon/` as its work tree, so every tracked file spelling one of these paths keeps working. A separate checkout was the alternative and it moves all of them. `canon/ARCHITECTURE.md` carries the count and the anchor it was read at, since a figure repeated on two surfaces drifts on the first correction that reaches only one. Staging runs by explicit pathspec with `--force`, which is what lets a folder the project ignores reach an index while keeping anything outside the set out of it, and neither verb touches the project index or working tree.
+The history lives in a second git directory at `.canon/.records.git` with `.canon/` as its work tree, so every tracked file spelling one of these paths keeps working. A separate checkout was the alternative and it would move the 255 tracked files that spell one of these paths. An orphan branch on this repository was the cheaper alternative and the one it cannot take, since the repository is public. The work tree moved with the records rather than being pointed at them: `recordRoot` resolves the root and `workTree` takes whatever it returns, which keeps a half-migrated tree from opening a history at one root and staging a work tree at the other. Measured at `ca020184` on 2026-09-01.
+
+Three counts describe the surface and each answers a different question. Nine is what a disk loss would take, which is `BACKED_FOLDERS`. Eleven is what sat under the old root as an ignored folder, counting the deletable scratch folder and `worktrees/`. Twelve is what the move to `.canon/` relocated as ignore entries: the eleven less `worktrees/`, which stayed, plus the history directory and the `README.md` a records pull writes back.
+
+Staging runs by explicit pathspec with `--force`, which is what lets a folder the project ignores reach an index while keeping anything outside the set out of it, and neither verb touches the project index or working tree.
 
 A tree whose records sit under both roots is refused by both verbs ahead of every other gate. `recordRoot` answers for the whole tree on the first root that exists, so a folder a failed move left behind is absent from the work tree while the index still names it, and `add -A` would stage its deletion and drop it from the remote. `canon migrate records` stops on its first failed rename for the same reason, which bounds how far a tree splits without putting back what already moved.
 

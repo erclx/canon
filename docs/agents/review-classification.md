@@ -48,7 +48,7 @@ Most carry two spellings, the one a surface authors at and the one it reaches a 
 
 `CLAUDE.md` is matched as a whole path rather than as a prefix, because a prefix reaches nothing that sits in no folder. A nested `docs/CLAUDE.md` stays informational.
 
-The set is data at `src/autoship/paths.ts`. That makes it permanently exempt from any later design that folds a machine-parsed list back into the surface citing it, per the machine-parsed clause in `canon/ARCHITECTURE.md`.
+The set is data at `src/autoship/paths.ts`. That makes it permanently exempt from any later design that folds a machine-parsed list back into the surface citing it, per the toolkit's machine-parsed clause: a rule restating the list a parser reads is two sources for one list.
 
 ## Exit codes and refusals
 

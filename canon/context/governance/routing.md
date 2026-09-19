@@ -59,6 +59,12 @@ The argument runs harder for a rule carrying no `paths:` key, which arrives unco
 
 `090-code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes a `## Degradation vocabulary` heading. Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`. Discovery anchors on the heading rather than the filename, so a renumber cannot silently empty the list.
 
+## The question surface is a rule rather than a skill body
+
+A call the operator's preference decides goes through the structured question surface, stated in `governance/rules/core/005-behavior.md`, an always-loaded rule a target reaches through `canon gov sync` rather than through a seed copy nothing updates. `decision-escalate` was the one place it cannot go, since that skill fires only when typed, which would have the operator starting the interaction that exists to interrupt them.
+
+The rule carves out the half a twelve-entry rejection record was right about. Forbidding the surface outright was wrong, since nearly every rejection named a pipeline reopening a question a written artifact had already answered, which is a rule about the artifact rather than about the rendering. The escape hatch ships as a guarantee the surface supplies rather than an option to author, since `AskUserQuestion` appends its own and its contract forbids writing one. Measured at `942a32fd` on 2026-08-21.
+
 ## Two always-loaded rules that read as one
 
 `000-constitution.md` ranks native platform capabilities over third-party libraries, and `070-planning.md` says to search the project, its dependencies, and the standard library before writing new code. Both ship in `base`, both load on every session, and the pair scans as one instruction stated twice.

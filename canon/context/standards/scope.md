@@ -13,7 +13,7 @@ The root, `standards/`, is the authoring source with no consumed copy beneath it
 
 A convention governing a surface only the toolkit has lives in `internal/standards/`, a tree no CLI entry point and no plugin symlink reads. Location is what enforces the boundary, so nothing has to remember to exclude it.
 
-A convention consumed by a specific skill rather than authored by a project lives in the flat root like every other standard, cited through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`. `canon/ARCHITECTURE.md` records why a narrow-readership convention still belongs there rather than in a folder of its own.
+A convention consumed by a specific skill rather than authored by a project lives in the flat root like every other standard, cited through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`. `canon/context/standards/resolution.md` records why a narrow-readership convention still belongs there rather than in a folder of its own.
 
 A procedure several skills execute mid-run gets a standard of its own in the flat root rather than a section inside whichever standard already held one of its rules, since install and the sync adapter walk the flat root only. `standards/publish.md`, `standards/slug.md`, and `standards/session.md` are the three, each cited from every body that runs it and each taking the one-word name every installable standard carries. `session.md` also governs a document, `.canon/tasks/session-<slug>.md`, which puts it in the flat root on two counts, and it reaches a session holding no skill at all, since a compaction routes to the skill before it routes to the file.
 
@@ -46,6 +46,8 @@ A scope statement declares its boundaries from both sides. A yield, an exemption
 A standard splits when one half is machine-checkable and the other is a read a session either performs or does not. `markdown.md` carries every ban a command measures: headings, lists, code spans, punctuation, emphasis, file references, language, and frontmatter wording. Voice, rhythm, and information density go to the `write-human` skill, which a markdown edit routes to.
 
 Scoping the audit tighter inside one file is the alternative, and it leaves the enforceable rules reading as advice, which is the defect the split avoids.
+
+`standards/prose.md` is the case that set the rule. It held both halves, so a session was graded on the words it avoided and never on how the prose read. The bans, the spellings, and the frontmatter wording joined `markdown.md`, which `canon markdown audit` measures from package data, and the rest went to `write-human`, which `500-prose` routes a markdown edit to. Folding the bans into the skill instead was declined, since it would put the enforced list behind a glob-matched pointer, and a thinner `prose.md` would have left an advisory file under a name that already reached nobody. The split cost a 90-file citation sweep and a standard citing a skill, and nothing measures whether output follows the rhythm rules. Measured at `57ee7467` on 2026-08-20.
 
 ## The scope statement
 
