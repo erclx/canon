@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.90.0](https://github.com/erclx/canon/compare/v4.89.0...v4.90.0) (2026-09-19)
+
+
+### Features
+
+* **context:** bound the architecture record to slots and an entry cap ([#1705](https://github.com/erclx/canon/issues/1705)) ([57f9ff5](https://github.com/erclx/canon/commit/57f9ff53eba7918367f99a20f4395a6219578418))
+* **teach:** reach a workspace outside the record root by name ([#1703](https://github.com/erclx/canon/issues/1703)) ([6b12dfa](https://github.com/erclx/canon/commit/6b12dfa300a29a4c86870ef5074b4ee531bd41f1))
+
 ## [4.89.0](https://github.com/erclx/canon/compare/v4.88.1...v4.89.0) (2026-09-16)
 
 
