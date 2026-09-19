@@ -56,7 +56,9 @@ Eleven sections in reading order, then the footer. A skip link and a sticky nav 
 | ----- | ----------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------- |
 | light | The reader's system prefers light, or they pick it    | The page on the warm light ground                                  | `assets/evidence/home/light.png` |
 | dark  | The reader's system prefers dark, or they pick it     | The same page on its own dark ground, derived and not inverted     | `assets/evidence/home/dark.png`  |
-| still | The reader asks for reduced motion, or opens `?still` | Every figure at its end state, with no build and no control motion | not captured                     |
+| still | The reader asks for reduced motion, or opens `?still` | Every figure at its end state, with no build and no control motion | every committed frame            |
+
+Every frame above is also a still, because the capture creates its context with reduced motion and scrolls each section into view before shooting. The two whole-page frames sit beside a folder per section, seventeen of them at `assets/evidence/home/<section>/<theme>.png`, being `top` and `proof`, the eleven beats, `provenance`, `start`, `field` and `close`, so a change to one part of the page reaches review as a diff on that part.
 
 ## Copy
 
