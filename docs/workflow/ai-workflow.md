@@ -304,6 +304,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:create-snippet`    | For a reusable prompt                                                                                                               |
 | `canon:create-standard`   | For a new authoring convention                                                                                                      |
 | `canon:draft-docs`        | For a brand-new `docs/*.md` page, drafted against `standards/docs.md`                                                               |
+| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                           |
 | `canon:draft-context`     | For a brand-new `canon/context/<domain>.md` entry, drafted against `standards/context.md`                                           |
 | `canon:draft-wireframes`  | For a brand-new `canon/wireframes/<surface>.md` file, drafted against `standards/wireframes.md`                                     |
 | `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` and rendered through Mermaid or freehand SVG |

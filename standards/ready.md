@@ -11,6 +11,8 @@ The folder is gitignored, and backed wherever a records remote is configured: `c
 
 ## Scope
 
+The `draft-ready` skill owns the procedure that writes a ready folder, and this standard owns the shape it writes to.
+
 Governs a ready folder under `.canon/ready/<nn>-<slug>/`: folder layout, ordinal naming, the overview's frontmatter, what the mirrored tree holds, the thin-plan contract that ships it, and the lifecycle from the live folder to the archive.
 
 Does not govern:
