@@ -162,18 +162,20 @@ Where it lands is decided by the evidence step below rather than here, since a c
 
 ### Post the evidence comparison
 
-Run `canon pr evidence <number> --json` against the number the pull request step above resolved. Read `reason` on the record rather than the exit code.
-
-- `no-evidence`: nothing changed under an `evidence/` segment, so there is no comparison to post. Say nothing about the evidence and fall through to the checklist step below.
-- `ok`: re-run the verb with the checklist folded in when one exists, then write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does):
+Run the verb once against the number the pull request step above resolved, passing `--checklist` when the step above found a file and leaving it off when it did not:
 
 ```bash
 canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --json
 ```
 
-Skip that second call when no checklist exists and post the body the first call already rendered. The verb refuses as `unreadable-checklist` on a path it cannot read, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
+One call answers both questions because a checklist does not decide `no-evidence`. The verb reports `no-evidence` on a diff carrying no evidence image whether or not a checklist came with it, so the branch below reads the same `reason` it would have read without the flag, and the checklist is folded in only on the path that has a comparison to fold it into.
 
-Post or update the comment:
+Pass `--checklist` only for a file that exists. The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
+
+Read `reason` on the record rather than the exit code.
+
+- `no-evidence`: nothing changed under an `evidence/` segment, so there is no comparison to post and no body was rendered. Say nothing about the evidence and fall through to the checklist step below.
+- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
 
 ```bash
 gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md

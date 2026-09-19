@@ -32,12 +32,16 @@ paths = [".canon/tmp/handoff/ui-checklist/task-filter.md"]
 # there, and `.canon/tmp/**` is where the checklist itself goes.
 write_scope = [".claude/**", ".canon/tmp/**"]
 
-# Inherited from the old shape rather than re-measured. The skill no longer
-# installs a runner or runs a suite, which were most of what the 21-turn and
-# 31-turn samples paid for, so the true ceiling is expected to be well under
-# this. It stays at 30 until a run measures the new shape, since lowering it on
-# an expectation would fail correct runs on a number nobody took.
-max_turns = 30
+# Measured at 6 turns on 2026-09-20, costing $0.12 on sonnet, against the 21-turn
+# and 31-turn samples the old shape took. Installing a runner and running a suite
+# was most of what those paid for, and the skill does neither now.
+#
+# The ceiling sits at twice the measured run rather than at it, because one sample
+# cannot separate the skill's cost from this prompt's. It is also well under the
+# harness budget in `scripts/sandbox/run.sh`, which is the real cap: a declaration
+# here is asserted after the run and cannot raise what the run executes under, so
+# a ceiling at that budget asserts nothing a truncated run would fail.
+max_turns = 12
 
 manual = [
   "The spacing, padding, and color changes land on the visual list and the filter input does not. Semantic: the split between visual-only and automatable is the skill's judgment, and a pattern matching one item cannot tell a correct classification from a lucky one",
