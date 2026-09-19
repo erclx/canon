@@ -47,7 +47,7 @@ When adding a new skill:
 - Draft a `scripts/sandbox/<category>/<skill>.sh` scenario alongside `SKILL.md`, even when the skill's output is judgment-driven. The deterministic seeded input is the point. Exception: skills whose body explicitly forbids probing, listing, grepping, or reading project surfaces have nothing for a seeded sandbox to anchor against. Skip the scenario for these and do not list it as a follow-up.
 - `canon sandbox <cat:cmd>` provisions fixture state, and `scripts/sandbox/run.sh <cat:cmd> "<prompt>"` provisions the same tree and drives the arm, spawning `claude -p` and scoring its assertions. Authorizing the spend is the operator's call, performing it is not, matching `canon/context/scripts/eval.md`. "Sandbox cannot drive Claude" is not a reason to skip one, because it can.
 - `src/claude/cases/all.test.ts` requires a routing case for the new skill in one of `src/claude/cases/*.ts`, or `bun run check` fails naming the skill rather than this step. See `canon/context/claude-plugin/skill-procedures.md` for why.
-- Once the skill count changes, the Hero gate stage fails until `scripts/core/regen-hero.sh` runs and `canon capture assets/captures --selector .window --out assets` re-renders the frame. Commit the markup, the image, and the stamp together. See `canon/context/claude-plugin/skill-procedures.md` for why.
+- Once the skill count changes, the Hero gate stage fails until `scripts/core/regen-hero.sh` runs and `canon capture assets/captures --selector .window --out assets/evidence` re-renders the frame. Commit the markup, the image, and the stamp together. See `canon/context/claude-plugin/skill-procedures.md` for why.
 
 When modifying a skill:
 
