@@ -73,7 +73,7 @@ The stepper hides and shows and sets nothing else, so how a selected option look
 
 ## The block list
 
-`canon teach render` takes a JSON array of blocks and renders it through the same components the fixture lesson is generated from. Four types, and every structural body composes from them:
+`canon teach render` takes a JSON array of blocks and renders it through the same components a lesson body composes. Four types, and every structural body composes from them:
 
 - `{"type":"heading","level":1|2,"text":"<text>"}`: an `<h1>` or `<h2>`.
 - `{"type":"paragraph","text":"<text>","lede":true}`: a `<p>`, marked `lede` for the dek that opens the lesson.
