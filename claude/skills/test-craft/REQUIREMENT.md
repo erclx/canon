@@ -52,3 +52,12 @@ Moving the guidance into a path-scoped rule does not reach the session that need
 - Writing a UI change's tests and its visual checklist after implementation: `ui-test`
 - Grading the tests a pull request adds: `review-pr`
 - Whether the guidance moves where a session puts a test, which needs a measured with-and-without run rather than a rule here
+
+## Measured
+
+2026-09-19, one Sonnet run per arm over the `pull` arm of the toolkit's own sandbox scenario for this skill, a page with an end to end spec already beside it and a prompt adding a loading state.
+
+- With the skill: the loading state landed in a new component test and the existing end to end spec stayed unchanged.
+- Without it, on a plugin dir lacking the skill: no `Skill` call fired, and the run made the same placement, one component test with three cases and the spec unchanged.
+
+The arm did not discriminate, so the run shows no movement from the skill. It also shows that the pull toward extending an existing spec is too weak to move an unaided session, which is a fixture finding and not evidence about the body. A stronger pull, such as a prompt naming the spec, is the next arm to try before reading this as a rework signal on the skill. One run per arm on one model cannot separate a difference of one test from noise.
