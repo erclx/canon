@@ -27,7 +27,7 @@ canon teach list regular-expressions --json
 
 With no topic it reports one line per workspace, carrying the lesson, learning-record, reference-page, and glossary-term counts, plus `next`, the ordinal an open would take. With one it reports the filenames behind each count and the glossary entries themselves.
 
-A folder not named `NN-<topic>` is still listed rather than dropped, since dropping it hides the one folder that needs a fix. Its ordinal reads as absent, it sorts last, and it moves no ordinal, so a malformed name cannot push a new workspace into a number a reader already cites.
+A folder not named `NN-<topic>` is not a workspace, so the listing, `nav`, and every selector skip it and it moves no ordinal. That is what lets a teach root carry a sibling folder such as `evidence/` without it drawing as a stub row and receiving a contents page.
 
 The listing also names the required files a workspace does not carry, which is `MISSION.md`, `RESOURCES.md`, and `GLOSSARY.md`. That is a report rather than a refusal, because a workspace missing one is still a workspace a session can resume.
 
@@ -141,7 +141,7 @@ The order is drawn here rather than instructed, and that is the point of the ver
 
 ## Render
 
-`canon teach render` renders a lesson body's structural blocks to HTML, through the same components the fixture lesson under `examples/teach/00-fixture/` is generated from. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
+`canon teach render` renders a lesson body's structural blocks to HTML, through the components `src/teach/render-fixture.tsx` composes by hand. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
 
 ```bash
 echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach render --json

@@ -79,6 +79,19 @@ describe('listWorkspaces', () => {
     expect(outcome).toMatchObject({ ok: false, reason: 'no-teach' })
   })
 
+  it('leaves a folder that is not an ordinal workspace out of the listing', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    mkdirSync(join(teachDir(ROOT), 'evidence'))
+
+    const outcome = await listWorkspaces(ROOT)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      workspaces: [{ slug: '01-regular-expressions' }],
+      next: '02',
+    })
+  })
+
   it('reports the ordinal a new workspace would take', async () => {
     await openWorkspace(ROOT, REQUEST)
 
@@ -111,7 +124,7 @@ describe('listWorkspaces', () => {
     })
   })
 
-  it('sorts by ordinal and puts a malformed name last', async () => {
+  it('sorts by ordinal and leaves a malformed name out', async () => {
     await seed('later', { 'MISSION.md': '# Later' })
     await seed('02-second', { 'MISSION.md': '# Second' })
     await seed('01-first', { 'MISSION.md': '# First' })
@@ -121,7 +134,6 @@ describe('listWorkspaces', () => {
     expect(outcome.ok && outcome.workspaces.map((one) => one.slug)).toEqual([
       '01-first',
       '02-second',
-      'later',
     ])
   })
 
