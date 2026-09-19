@@ -17,7 +17,7 @@ A refusal names the flag in its own message and closes the fallback there, so a 
 
 Prefer pointing a chain step at an unflagged body that already performs the step over dropping the flag from the callee, since dropping a flag reopens a body to description matching its author closed on purpose. `claude/skills/role-orchestrator/references/orchestrator-dispatch.md` carries the launch-prompt form a dispatcher writes, keeping a chain to one leading slash command per launch and handing the rest to the tool.
 
-A harness hook is a third route to a skill, and `session-map` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
+A harness hook is a third route to a skill, and `session-compact` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
 
 ## A held body is checked against history
 
@@ -53,7 +53,7 @@ A routing file written under the `latest` slug can collect facts for several dom
 
 Capture leads the sequence in `git-ship`, the one body stating it.
 
-`role-orchestrator` fires capture from its pre-compact handoff runbook, which reaches it through `session-map` and states the session does not commit so routing is skipped. Both other callers ship and this session never does, so without that step the session taking every operator correction records none. The refill sweep reports the debt instead of paying it, because a capture per batch of merges bills the operator a wait while nothing is being built. What this session produces is feedback about how to work.
+`role-orchestrator` fires capture from its pre-compact handoff runbook, which reaches it through `session-map`, the board-side handoff the orchestrator keeps while a plain session takes `session-compact`, and states the session does not commit so routing is skipped. Both other callers ship and this session never does, so without that step the session taking every operator correction records none. The refill sweep reports the debt instead of paying it, because a capture per batch of merges bills the operator a wait while nothing is being built. What this session produces is feedback about how to work.
 
 The pen is bounded by that ownership test rather than by a memory's type, so the four types are equal members of the residue no entry owns. Reading all 145 `project`-typed entries against the domain catalog put 98 with a domain entry, 44 with no owner at all, and 3 already promoted elsewhere. Narrowing the pen to feedback about how to work was the alternative and it lost on the middle number, since the 44 state approaches governing how the agent works that no entry owns, which is why `standards/memory.md` admits `project` as a first-class type. Measured at `c7e92612` on 2026-08-20, at 98 entries retired into an archive then holding 100.
 

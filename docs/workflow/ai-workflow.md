@@ -280,7 +280,8 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:role-worker`       | To assert the worker role for a cold session building one branch under one plan |
 | `canon:session-relay`     | When a worker or planner owes its controller a message and holds no send tool   |
 | `canon:session-resume`    | At the start of a session, to pick up what a previous one left                  |
-| `canon:session-map`       | At the close of a session, to write the handoff a compaction would destroy      |
+| `canon:session-compact`   | Before a compaction, to write a plain session's handoff note outside the board  |
+| `canon:session-map`       | At the close of an orchestrating session, to write its board-side handoff       |
 
 ### Keep the project current with the toolkit
 
