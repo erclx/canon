@@ -1,0 +1,60 @@
+# What a correct `/canon:test-craft` run leaves behind on the seeded shop.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is placement: each behavior's test lands at the smallest
+# layer that can catch its break. The glob on the component test accepts either
+# suffix a run may pick, and excludes `OrderList.tsx` itself because it demands
+# a second dot segment.
+
+paths = [
+  "src/lib/price.test.ts",
+  "src/components/OrderList.*.tsx",
+  "e2e/*.spec.ts",
+]
+
+# The suffix rule reserves `.test.ts` for unit tests. A browser spec named that
+# way is the defect the layer routing this skill replaces used to write.
+absent = ["e2e/*.test.ts"]
+
+write_scope = [
+  "src/**",
+  "e2e/**",
+  "node_modules/**",
+  "bun.lock",
+  "package.json",
+  "test-results/**",
+]
+
+manual = [
+  "The run named the layer for each behavior before writing it. Unwired: the claim is about the session's turns, which the checker does not read.",
+  "The component test renders `OrderList` with a stubbed `load` rather than mocking React or the effect. Semantic: many spellings of a stub read the same to a pattern.",
+  "The unit test covers the refused input as well as the main path, being a negative or fractional price. Semantic: the case can be spelled several ways.",
+  "The Playwright spec waits on web-first assertions and carries no fixed pause. Unwired: an absence inside a file whose name the run derives.",
+]
+
+[[content]]
+path = "src/lib/price.test.ts"
+pattern = 'formatPrice'
+
+[[content]]
+path = "src/components/OrderList.*.tsx"
+pattern = 'Loading orders'
+
+[[content]]
+path = "src/components/OrderList.*.tsx"
+pattern = 'No orders yet'
+
+[[content]]
+path = "e2e/*.spec.ts"
+pattern = '/confirmation|Order placed'
+
+# The loading state is reachable in a component test, so no browser spec asserts
+# it. The anchor pins the lookahead to the start of the file rather than to any
+# line, which is what makes it an absence over the whole spec.
+[[content]]
+path = "e2e/*.spec.ts"
+pattern = '(?<![\s\S])(?![\s\S]*Loading orders)'

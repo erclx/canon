@@ -105,6 +105,7 @@ pyproject
 pytest
 pytestmark
 qwen
+Qwik
 readlink
 realpath
 rects

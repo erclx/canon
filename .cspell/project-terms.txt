@@ -1,4 +1,6 @@
 # canon-keep-retired: the changelog and the eval transcripts still spell it
+addyosmani
+Dodds
 Pushback
 aanerud
 ababab
@@ -163,6 +165,7 @@ subdirs
 subfolders
 succ
 taylorwilsdon
+testdesiderata
 timonwong
 toolname
 toolsets
