@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -128,6 +128,20 @@ test.describe('the section capture', () => {
     await settle(page)
 
     const home = path.join(out, 'screenshots', 'localhost', 'home')
+
+    // Read what the run wrote before measuring what was asked for. The list
+    // below is a copy of the harness's own, so a section dropped from the
+    // harness fails the measurement loudly while one added to it would fail
+    // nothing, and the eighteenth frame would reach the committed baseline
+    // with nothing having checked where it was cut from.
+    const written = await readdir(home, { withFileTypes: true })
+    expect(
+      written
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort(),
+    ).toEqual([...SECTIONS].sort())
+
     const frames = await Promise.all(
       SECTIONS.map(async (name) => ({
         name,
