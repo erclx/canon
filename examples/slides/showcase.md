@@ -71,7 +71,7 @@ layout: stat-callout
 
 - 9 : layouts in the catalog
 - 1 : source file per deck
-- 5 : safe fonts for reliable rendering
+- 5 : theme colors read from the design module
 - 2 : variants from one token set
 
 ---
