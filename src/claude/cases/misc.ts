@@ -60,6 +60,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'test-craft',
   },
   {
+    prompt:
+      "The e2e folder has specs and helpers mixed together and I'm adding two more, where should they go?",
+    expect: 'codebase-layout',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },

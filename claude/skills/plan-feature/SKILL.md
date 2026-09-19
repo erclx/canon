@@ -33,7 +33,7 @@ Coding standards live in `.claude/rules/`. Claude Code loads them automatically.
 
 Based on the feature description, identify and read source files that are directly relevant. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
-Measure against the tree rather than recall. Grep for each construct the plan will name and count the sites, so the plan carries the count the tree holds today. Confirm any work the plan sequences behind is still open, so it does not lead with an item that already shipped.
+Measure against the tree rather than recall. Grep for each construct the plan will name and count the sites, so the plan carries the count the tree holds today. The tree tells a new path what exists beside it, not where it belongs, so a flat folder is a reading to place against rather than a pattern to copy. Confirm any work the plan sequences behind is still open, so it does not lead with an item that already shipped.
 
 Open each file before describing what is in it. A count or a claim carried from an earlier session, a summary, or another document is the most common way a plan ships the wrong scope.
 
@@ -45,6 +45,7 @@ What this skill adds on top of the standard:
 
 - Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
 - Suggest a real default when best practice, the codebase, or prior context points to one.
+- Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
 - Prefer `None identified.` over low-signal fillers. A small feature should produce a short plan, not a padded one.
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
 
