@@ -1,39 +1,87 @@
 ---
 title: Landing page
-description: The one public route at canon.erclx.dev, its ten sections, and the behavior each carries
+description: The one public route at canon.erclx.dev, one agent session read top to bottom across eleven sections, drafted ahead of its build
 ---
 
 # Landing page
 
-The toolkit's only outward-facing surface, served at `canon.erclx.dev` from a single Astro route in `web/src/pages/index.astro`. A reader arrives cold, scrolls once, and decides whether to read further.
+The toolkit's only outward-facing surface, served at `canon.erclx.dev`. A reader arrives cold, scrolls once, and reads one real agent session from the ask to the merge, with every figure drawn from a real file in this repository.
 
-## Layout
+This is drafted-ahead intent. The live page still shows ten earlier sections, and the build that replaces them converts this file to a transcription of the built page. Why the page takes this shape lives in `canon/context/web.md` under `## Composition`.
 
-One column at `max-w-4xl`, centered, with every section on the same 96px vertical rhythm. Ten sections in order, each carrying an `id` so any one of them can be linked to:
+## Regions
 
-| Section                 | `id`              | What it shows                                                         |
-| ----------------------- | ----------------- | --------------------------------------------------------------------- |
-| Hero                    | `top`             | The reader's problem in the README's own words, and one action        |
-| Agent view              | `agent-view`      | Parallel sessions, three bands standing at once, one row landing      |
-| Install                 | `install`         | The two commands, selectable                                          |
-| Catalog                 | `catalog`         | Live counts, then every rule domain with its true count               |
-| Rule arrival            | `rules`           | A path edited, and the rule that arrives because of it                |
-| What a target receives  | `install-surface` | Two catalogs side by side: copied in, and never copied                |
-| Board                   | `board`           | Task rows and what closes them                                        |
-| Design token preview    | `design-preview`  | A live embed of `canon/DESIGN.md` rendered to HTML at build time      |
-| Teach workspace preview | `teach-preview`   | A live embed of one lesson from an isolated `.canon/teach/` workspace |
-| Call to action          | `start`           | Two links out                                                         |
+Eleven sections in reading order, then the footer. A skip link and a floating nav pill sit outside the sequence.
+
+- Skip link: first in the tab order, jumps to the start of the session
+- Nav pill: floats at the top, carrying the mark, the published version, one link per named beat of the session, and the theme toggle
+- Fold: the headline, a one-line lede, two actions, and a before-and-after pair on one command. It ends in a strip naming the two surfaces the command never copies
+- Proof band: one claim on its own line, full width, below the fold
+- Ask and rules: the operator's request as a turn, then the rules matching the path it touches, as a split figure with the matched rules on the right
+- Skill and plan: a four-step flow showing one skill loaded out of the catalog, then the planner's turn stating the plan is its only write
+- Dispatch and workers: a controller launching sessions, then the workers on disjoint file sets
+- Gate and memory: the test gate a worker passes before anything is shown, then where the session's facts are routed
+- Review and merge: the reviewer's turn, a before-and-after pair of real captures of one pull request, the review loop, and the merge as a chain of facts
+- Provenance: a ledger naming each session that built the change and what it produced
+- Install: three commands, one card each
+- Field: every command name and every skill name in two columns, the ones the session used lit
+- Close: the closing headline and two actions
+- Footer: the brand line and three link columns
+
+```plaintext
+[skip]  [ pill: mark  version  ask rules plan skills workers evidence merge  theme ]
+
+  headline                          ← fold
+  lede + two actions
+  [ before ] --canon init .--> [ after ]   never copies: skills, standards
+
+  one claim, alone                  ← proof band
+
+  operator turn                     ← ask and rules, tinted alternation begins
+  [ rules band | matched rules ]
+
+  skill flow band + planner turn    ← tinted
+  controller band, workers band     ← dispatch and workers
+  gate band, memory band            ← gate and memory
+  reviewer turn, capture pair, review loop, merge   ← tinted
+
+  provenance ledger
+  [ card ] [ card ] [ card ]        ← install
+  command field | skill field
+  closing headline + two actions
+  footer: brand | Reference | Surfaces | Project
+```
+
+## States
+
+| State | Reached when                                       | Shows                                                          | Evidence     |
+| ----- | -------------------------------------------------- | -------------------------------------------------------------- | ------------ |
+| light | The reader's system prefers light, or they pick it | The page on the warm light ground                              | not captured |
+| dark  | The reader's system prefers dark, or they pick it  | The same page on its own dark ground, derived and not inverted | not captured |
+| still | The reader asks for reduced motion                 | Every figure at its end state, with no build and no entrance   | not captured |
+
+## Copy
+
+- Headline: "Watch it run. That is the documentation"
+- Proof band: "Installed in eight repositories, authored in one." The count is derived, so a reader does not treat it as final text.
+- Ask: "Add a light theme to the design tokens and ship it"
+- Section heads, in order: "3 of 60 rules match this path", "One skill loaded, out of 83 in the catalog", "One controller, and the sessions it launches", "Three workers and a planner, on disjoint file sets", "No behavior reaches history ahead of its test", "What the session learned outlives the session", "Reviewed by a session that did not write it", "Four sessions built it, one reviewed it", "Three commands to put it in a project", "Two surfaces, and that session reached into both". Every count in a head is derived and reads live at build time.
+- Close: "None of that was configured for that session"
+- Install commands: `bun add -g @erclx/canon`, `/plugin marketplace add erclx/canon`, `canon init .`
+- Long-form copy: cited at `web/src/content/copy.ts`, each string tied to a `README.md` citation, and not duplicated here
 
 ## Behavior
 
-- A floating pill navigates the sections. It is hidden over the hero, where navigation is redundant, and reveals once an `IntersectionObserver` sentinel reports the hero has left. It carries the mark, one link per section, and the theme toggle.
-- The pill tracks position. Every observed section reports its own intersection ratio and the largest wins, which is what keeps a short section between two tall ones from being skipped.
-- Each section below the fold reveals on scroll, driven by one observer and one pair of CSS rules rather than per-section animation. The treatment is uniform by construction: a section given its own arrival has stopped being an entrance and counts against the demonstrative cap instead.
-- Three animations assert something and are capped at three: the rule card arriving, the working marker, and a row moving from Working to Completed. The entrance treatment asserts nothing and is a separate class.
-- Theme follows the reader's system preference before first paint, and the toggle overrides it and persists the choice. The toggle sits in the pill, so it is reachable only once the reader has scrolled past the hero.
-- Every count and every catalog row is read from the CLI at build time. Nothing on the page is a committed image.
-- Every animation carries a `prefers-reduced-motion` branch that lands the end state rather than only dropping the transition.
+- The nav pill tracks the beat the reader is on and jumps to any beat on selection
+- The theme follows the system preference before first paint, and the toggle overrides it and keeps the choice
+- Hovering, pressing, and focusing any control gives an immediate response
+- Two figures build on arrival, the ones whose shape is a cause and its consequences, and nothing else animates on scroll
+- The page reads without horizontal overflow from a 320 pixel viewport up, in both themes
 
-## Constraints
+## Not on this surface
 
-`internal/rules/claude/593-landing-page.md` holds the five conventions that fail silently: read counts, generated images, the motion cap, the single structural accent, and the quoted `README.md` citation on every string. `canon/context/web.md` holds the mechanics and the decisions behind them.
+- No placeholder figure, every figure derives from a real file or is a real capture
+- No full-bleed expansion, since a figure's height is a result of its content
+- No second accent, one accent carries every count, link, and primary action
+- No window mockup assembled from boxes, a real capture answers the question with more force
+- No width control in a capture frame, the browser's device toolbar already does that
