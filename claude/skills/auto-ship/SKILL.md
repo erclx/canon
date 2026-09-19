@@ -123,7 +123,7 @@ If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`),
 
 If `ui-test` produces a manual checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
 
-If all UI changes are covered by e2e tests, continue.
+If all UI changes are covered by tests, continue.
 
 ## Step 6: review
 

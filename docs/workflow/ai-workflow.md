@@ -58,7 +58,7 @@ Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full fi
 - When the current state is unmeasured and more than one approach is live, invoke `canon:plan-groundwork` first. It opens a track folder under `.canon/groundwork/<nn>-<slug>/` and ends in a decision, which may be to do nothing. Skip it when the approach is already settled.
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
-- For UI changes, invoke `canon:ui-test` to generate and run Playwright e2e tests
+- For UI changes, invoke `canon:ui-test` to route each change to its test layer and run the tests it writes, with Playwright kept for journeys
   End the session once the feature works and tests pass. Invoke `canon:docs-fold` to capture any decisions made during implementation before closing.
 
 The routing test is whether the repository can answer an item today. A session grepping handles the yes, and a groundwork track handles the no.
@@ -174,7 +174,7 @@ The receipt is collected once every item on it has been decided, and it survives
 
 ### UI polish
 
-Verify the change manually in the browser. Invoke `canon:ui-test` if you need e2e tests and a visual verification checklist for the session. For the fix itself, describe the change in Claude Code directly.
+Verify the change manually in the browser. Invoke `canon:ui-test` if you need tests at the right layer and a visual verification checklist for the session. For the fix itself, describe the change in Claude Code directly.
 
 ### Quick fix
 
@@ -234,7 +234,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor |
 | `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts |
 | `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                  |
-| `canon:ui-test`              | After a UI change, to generate e2e tests and a visual checklist                 |
+| `canon:ui-test`              | After a UI change, to generate layered tests and a visual checklist             |
 
 ### Check the work before it leaves the branch
 

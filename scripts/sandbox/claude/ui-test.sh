@@ -2,6 +2,8 @@
 set -e
 set -o pipefail
 
+# cspell:ignore esbuild
+
 # No project copy of the corpus, for the same reason `claude/review-branch.sh` carries
 # none. The absent project copy forces `ui-test` onto the
 # `${CLAUDE_SKILL_DIR}/../../standards/skill.md` fallback, and the branch name
@@ -21,10 +23,17 @@ stage_setup() {
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "vitest run",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0"
+    "@playwright/test": "^1.48.0",
+    "@testing-library/react": "^16.0.0",
+    "jsdom": "^25.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-router-dom": "^6.26.0",
+    "vitest": "^2.1.0"
   }
 }
 EOF
@@ -46,10 +55,20 @@ Vite and React task board. UI lives in `src/components/`.
 
 ## Commands
 
+- `bun run test`: Vitest component and unit tests
 - `bun run test:e2e`: Playwright end to end tests
 EOF
 
   mkdir -p src/components e2e
+
+  cat <<'EOF' >vitest.config.ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  esbuild: { jsx: 'automatic' },
+  test: { environment: 'jsdom', include: ['src/**/*.test.{ts,tsx}'] },
+})
+EOF
 
   cat <<'EOF' >src/components/TaskList.tsx
 export function TaskList({ tasks }: { tasks: string[] }) {
@@ -63,7 +82,7 @@ export function TaskList({ tasks }: { tasks: string[] }) {
 }
 EOF
 
-  cat <<'EOF' >e2e/ui.test.ts
+  cat <<'EOF' >e2e/task-list.spec.ts
 import { expect, test } from '@playwright/test'
 
 test('task list renders the seeded tasks', async ({ page }) => {
@@ -76,9 +95,11 @@ EOF
 
   git checkout -b feat/task-filter -q
 
-  # The diff the skill classifies. `TaskList` gains an empty state and a filter
-  # input, which are automatable, and a spacing and color change, which is not.
-  # Both kinds have to be present or the skill takes its all-automatable branch
+  # The diff the skill classifies. `TaskList` gains an empty state, a loading
+  # state, a filter input, and a link to an archive route. The states belong to a
+  # component test and the route change to an end to end spec, which is the
+  # routing this arm asserts. A spacing and color change is the visual half. All
+  # three kinds have to be present or the skill takes its all-automatable branch
   # and writes no checklist, which is the file the fallback claim is about.
   #
   # The input stays mounted alongside the empty state. Returning the paragraph
@@ -88,12 +109,23 @@ EOF
   cat <<'EOF' >src/components/TaskList.tsx
 import { useState } from 'react'
 
-export function TaskList({ tasks }: { tasks: string[] }) {
+export function TaskList({
+  tasks,
+  isLoading = false,
+}: {
+  tasks: string[]
+  isLoading?: boolean
+}) {
   const [filter, setFilter] = useState('')
   const visible = tasks.filter((task) => task.includes(filter))
 
+  if (isLoading) {
+    return <p className="task-list-loading">Loading tasks</p>
+  }
+
   return (
     <div>
+      <a href="/archive">View archive</a>
       <input
         aria-label="Filter tasks"
         onChange={(event) => setFilter(event.target.value)}
@@ -127,11 +159,27 @@ EOF
 }
 EOF
 
+  cat <<'EOF' >src/App.tsx
+import { Route, Routes } from 'react-router-dom'
+
+import { TaskList } from './components/TaskList'
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<TaskList tasks={['write', 'review']} />} />
+      <Route path="/archive" element={<h1>Archive</h1>} />
+    </Routes>
+  )
+}
+EOF
+
   git add . && git commit -m "feat(ui): filter tasks and handle the empty state" --no-verify -q
 
   log_step "Scenario ready: UI change with an automatable and a visual half"
   log_info "Context: feat/task-filter, one commit ahead of main"
-  log_info "  automatable : filter input, empty state, list count after filtering"
+  log_info "  component   : loading state, empty state, list count after filtering"
+  log_info "  end to end  : the route change to /archive"
   log_info "  visual only : 12px gap, 16px padding, muted empty-state color"
   log_info ""
   log_info "This arm also checks the standards citation, not the skill alone."
@@ -146,7 +194,7 @@ EOF
   log_info "run reported, and a correct run says the scaffold is missing rather"
   log_info "than building a Vite app to get green."
   log_info ""
-  log_info "Action:  /canon:ui-test I added a filter input and an empty state to TaskList, and restyled its spacing"
+  log_info "Action:  /canon:ui-test I added a filter input, a loading state, an empty state, and a link to the archive route to TaskList, and restyled its spacing"
   log_info "Expect:  declared in fixtures/claude/ui-test/expect.toml"
   log_info "         Check it with: canon sandbox check claude:ui-test"
 }
