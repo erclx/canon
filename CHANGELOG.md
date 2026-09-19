@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.92.0](https://github.com/erclx/canon/compare/v4.91.0...v4.92.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** add session-compact for a plain session handoff ([#1714](https://github.com/erclx/canon/issues/1714)) ([60549c1](https://github.com/erclx/canon/commit/60549c192598ba8889e7de3f803b260eb045745f))
+* **design:** set the type and space scale ([#1715](https://github.com/erclx/canon/issues/1715)) ([0ea2079](https://github.com/erclx/canon/commit/0ea2079b679ec0152a4ee856a5244f0e9f4c7cad))
+* **governance:** add WCAG 2.2 rules and a motion rule ([#1713](https://github.com/erclx/canon/issues/1713)) ([124877a](https://github.com/erclx/canon/commit/124877ad2bab851ccc2d886fda8cc7638c0e2caf))
+
 ## [4.91.0](https://github.com/erclx/canon/compare/v4.90.0...v4.91.0) (2026-09-19)
 
 
