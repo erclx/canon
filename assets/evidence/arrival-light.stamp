@@ -1,0 +1,3 @@
+source: http://localhost:4321/
+source-sha256: ee169604f4cebd35817a28306f40ab7fa34409f0eabb32806cdbad7252aabd53
+image-sha256: 9acbf389994fd9c767f3ac1c363ae108a967b4edf542c8ecc2ffd7892eeed4c6

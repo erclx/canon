@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="assets/brand/mark-accent.svg" alt="canon" width="56" height="56">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/mark-accent.svg">
+  <img src="assets/brand/mark-accent-light.svg" alt="canon" width="56" height="56">
+</picture>
 
 # canon
 
@@ -14,7 +17,10 @@ canon is a CLI and Claude Code plugin that stops your AI conventions drifting ap
 
 </div>
 
-![The first screen of the canon landing page, a project before and after one canon init, with the file counts each step lays down](assets/evidence/arrival.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/arrival.png">
+  <img src="assets/evidence/arrival-light.png" alt="The first screen of the canon landing page, a project before and after one canon init, with the file counts each step lays down">
+</picture>
 
 The page is one real session the toolkit ran on itself, and every count on it is read from the repo when the page builds.
 
@@ -39,7 +45,10 @@ claude plugin marketplace add https://github.com/erclx/canon
 claude plugin install canon@canon
 ```
 
-![Adding the canon marketplace and installing the plugin in Claude Code](assets/evidence/install.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/install.png">
+  <img src="assets/evidence/install-light.png" alt="Adding the canon marketplace and installing the plugin in Claude Code">
+</picture>
 
 The skills land as `/canon:<name>`. If your session was already open, run `/reload-plugins` to pick them up.
 
@@ -67,15 +76,24 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                               | `canon sandbox`                                                 |
 
-![The canon catalog as a ledger of five rows, with the count each ships and a few real names: skills, rules, standards, commands, and stacks](assets/evidence/catalog.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/catalog.png">
+  <img src="assets/evidence/catalog-light.png" alt="The canon catalog as a ledger of five rows, with the count each ships and a few real names: skills, rules, standards, commands, and stacks">
+</picture>
 
 Every count in that image is read from the catalogs when it is built, so they're what the repo ships today. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one. Governance is the third shape. A rule with a path glob loads only when a matching path is edited, and a rule with none loads every session. Run `canon gov list` to see the glob beside each rule.
 
 Two of the outputs are documents you open rather than files you run. A `SLIDES.md` renders to a deck, and a learning workspace renders to a small site.
 
-![A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a dark warm background](examples/slides/evidence/showcase-dark-04.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="examples/slides/evidence/showcase-dark-04.png">
+  <img src="examples/slides/evidence/showcase-light-04.png" alt="A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a warm background">
+</picture>
 
-![The learning workspace listing rendered by canon teach, three workspaces with their lesson and term counts, one still a stub](examples/teach/evidence/root-listing.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="examples/teach/evidence/root-listing.png">
+  <img src="examples/teach/evidence/root-listing-light.png" alt="The learning workspace listing rendered by canon teach, three workspaces with their lesson and term counts, one still a stub">
+</picture>
 
 ## It runs on itself
 
