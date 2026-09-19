@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.91.0](https://github.com/erclx/canon/compare/v4.90.0...v4.91.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** add draft-ready skill to write a ready folder ([#1711](https://github.com/erclx/canon/issues/1711)) ([893d971](https://github.com/erclx/canon/commit/893d971f8096bf8d6bdf546170a44a7ea8ee0c11))
+* **cli:** restore --help on the commands that lost it ([#1709](https://github.com/erclx/canon/issues/1709)) ([8c254c6](https://github.com/erclx/canon/commit/8c254c6a6abc419652dd786bc7f17fba09568391))
+* **context:** add internal skills for the teach and web domains ([#1706](https://github.com/erclx/canon/issues/1706)) ([9784840](https://github.com/erclx/canon/commit/97848406f5c3da7c90693cd5a9b48e64fbc71dca))
+* **design:** add the design-taste skill and routing rule ([#1708](https://github.com/erclx/canon/issues/1708)) ([13d6bc1](https://github.com/erclx/canon/commit/13d6bc13d40988abee062fe18081475ffc05f52b))
+* **design:** vendor the Geist variable face and widen FontFace weight ([#1707](https://github.com/erclx/canon/issues/1707)) ([ded15a7](https://github.com/erclx/canon/commit/ded15a72f0d757e06f877adc7f25275f3bf9d939))
+* **examples:** fill the teach fixture with one of every element ([#1712](https://github.com/erclx/canon/issues/1712)) ([8f5474a](https://github.com/erclx/canon/commit/8f5474a36e44ea6f082fbd7bebcaf8300cd6be3b))
+
 ## [4.90.0](https://github.com/erclx/canon/compare/v4.89.0...v4.90.0) (2026-09-19)
 
 
