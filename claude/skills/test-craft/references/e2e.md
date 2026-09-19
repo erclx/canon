@@ -28,7 +28,7 @@ Suites dominated by end to end tests inflate both runtime and flake ([Google Tes
 ## Motion off by default
 
 - Run with motion reduced unless the test asserts motion, and opt back in per test with `page.emulateMedia({ reducedMotion: 'no-preference' })`.
-- Set it once in the config's `use` block as `reducedMotion: 'reduce'` rather than per test, since the option defaults to `'no-preference'` ([TestOptions](https://playwright.dev/docs/api/class-testoptions)). A site honoring the reduced preference then has nothing to wait out in any test that does not opt back in.
+- Set it once in the config's `use` block as `contextOptions: { reducedMotion: 'reduce' }` rather than per test, since the option defaults to `'no-preference'` ([BrowserContext options](https://playwright.dev/docs/api/class-browser#browser-new-context)). A top-level `use.reducedMotion` reaches no page and type-checks nowhere, so a spec asserting the media query is what catches it. A site honoring the reduced preference then has nothing to wait out in any test that does not opt back in.
 
 ## Isolation and speed
 
