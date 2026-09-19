@@ -73,7 +73,7 @@ Every count in that image is read from the catalogs when it is built, so they're
 
 Two of the outputs are documents you open rather than files you run. A `SLIDES.md` renders to a deck, and a learning workspace renders to a small site.
 
-![A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a dark warm background](examples/slides/images/showcase-dark-04.png)
+![A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a dark warm background](examples/slides/evidence/showcase-dark-04.png)
 
 ![The learning workspace listing rendered by canon teach, three workspaces with their lesson and term counts, one still a stub](examples/teach/evidence/root-listing.png)
 
