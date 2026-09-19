@@ -75,6 +75,7 @@ mypy
 nameref
 namerefs
 nbsp
+networkidle
 nextjs
 noopener
 noreferrer
