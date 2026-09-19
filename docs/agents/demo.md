@@ -32,7 +32,7 @@ A plan can carry an optional `colorScheme` of `light` or `dark`, which the recor
 | --------------- | ----------------------------------------------------------------- |
 | `--out <dir>`   | Directory the plan and its output paths point at, default `demos` |
 | `--slug <slug>` | Plan name, defaulting to the draft filename                       |
-| `--force`       | Overwrite an existing plan, losing any timing tuned by hand       |
+| `--force`       | Overwrite an existing plan, losing any field set by hand          |
 | `--json`        | Add a record on stdout carrying the beats and what is unfilled    |
 
 ## What a run does

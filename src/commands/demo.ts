@@ -187,9 +187,10 @@ function runCompile(draftPath: string, opts: CompileOptions): number {
   if (existsSync(target) && !opts.force) {
     logStep('Plan')
     logError(`${display(target)} already exists`)
-    // Stated rather than implied, because the value at risk is timing the
-    // operator tuned by watching a recording and the draft cannot reproduce it.
-    logWarn('Pass --force to overwrite it, losing any timing tuned by hand.')
+    // Stated rather than implied, because the value at risk is whatever the
+    // operator set by hand, such as timing tuned by watching a recording or a
+    // color scheme, and the draft can reproduce neither.
+    logWarn('Pass --force to overwrite it, losing any field set by hand.')
     outro()
     emit(opts.json, { plan: target, reason: 'plan-exists' })
     return 1
