@@ -38,12 +38,14 @@ codenames
 commitlint
 conventionals
 corge
+crosshairs
 crystaldba
 cspell
 daringfireball
 dbaeumer
 declaratives
 deprioritized
+desaturate
 diffable
 disjointness
 dispatchable
@@ -72,6 +74,7 @@ frontmatter
 gdev
 gfilter
 grault
+greeking
 gterm
 gtest
 handback
@@ -84,12 +87,14 @@ hotspot
 hotspots
 invokable
 jsdom
+judgeable
 korotovsky
 lanczos
 larr
 launchable
 lede
 leonxlnx
+letterform
 lintstagedrc
 lockdown
 lockfiles
@@ -112,6 +117,7 @@ paletteuse
 parallelizable
 pbakaus
 pentesting
+performatively
 phrasability
 pipeable
 pipefail
@@ -143,6 +149,7 @@ sandboxing
 scannability
 scoutreport
 scriptable
+scrollspy
 shadcn
 shellcheck
 shfmt

@@ -20,6 +20,7 @@ This repository's own record is the one that is generated rather than authored. 
 - `src/design/adapter.ts` owns the sync adapter, and `src/design/base.css` is the generated file it installs
 - `src/design/contrast.ts` owns the WCAG reading, asserted over the record in `contrast.test.ts`
 - `claude/skills/design-extract/` owns the skill that drafts the file, from an existing codebase or from a greenfield project
+- `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/460-design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it. Building an already-decided surface stays outside the glob, so a project styling entirely in utility classes is not reached
 - `.canon/tmp/render/design/` owns the rendered preview, gitignored
 - `.claude/design/base.css` is where an install lands in a target, and `.claude/design/project/` is where that target's own values go
 

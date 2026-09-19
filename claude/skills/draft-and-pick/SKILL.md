@@ -15,11 +15,12 @@ Some decisions are settled by looking rather than by reasoning, and no draft is 
 
 ## Step 1: name the decision and the arms
 
-1. State the decision in one sentence, naming what changes between arms and what stays fixed. Name the layer that sentence puts the decision at, and check that the arms will differ there rather than somewhere cheaper to change.
-2. Derive a kebab slug from that sentence. Call the folder every file this run writes to `<dest>` below. `<dest>` is `.canon/tmp/<slug>/`, a nested `<slug>/` folder rather than a flat `<slug>-<file>.md`, which is the shape every temporary write in this project takes. Running inside a live `plan-groundwork` track is the one exception: `<dest>` is the track's own `evidence/<slug>/` instead, since a candidate render is evidence the track's decision file cites rather than spike input.
-3. Write one arm per candidate, each carrying an id, a label, and what the arm costs. An arm with no stated cost is not an option.
-4. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
-5. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
+1. State the decision in one sentence, naming what changes between arms and what stays fixed.
+2. Emit the design read in the run's own output, in the form `design-taste` fixes. The layer comes from that skill's ordered catalog rather than from a word invented here, and the arms differ at it rather than somewhere cheaper to change. A run emitting no read has not decided what it is drafting, and a missing line is visible where an unstated layer is not.
+3. Derive a kebab slug from that sentence. Call the folder every file this run writes to `<dest>` below. `<dest>` is `.canon/tmp/<slug>/`, a nested `<slug>/` folder rather than a flat `<slug>-<file>.md`, which is the shape every temporary write in this project takes. Running inside a live `plan-groundwork` track is the one exception: `<dest>` is the track's own `evidence/<slug>/` instead, since a candidate render is evidence the track's decision file cites rather than spike input.
+4. Write one arm per candidate, each carrying an id, a label, and what the arm costs. An arm with no stated cost is not an option.
+5. Make the current state arm `0`, so the baseline is a candidate rather than an absence. A decision with nothing shipped yet says so and starts at arm `1`.
+6. Stop at three to five arms. Two is a comparison the operator can hold in prose, and past five the pick stops being a look and becomes a sort.
 
 ## Step 2: author the candidate set as one page
 
@@ -29,10 +30,16 @@ Write every arm side by side on one self-contained HTML page at `<dest>/candidat
 - Wrap each arm's markup in the same class on both files, chosen once per run and reused everywhere, so one selector addresses an arm on the combined page and on its own standalone file alike.
 - Label each arm on the page with its id and its cost, so the render carries what the question will ask about.
 - Give the combined page one control that sets every arm's theme at once, beside whatever per-arm control the arms carry. A set spanning both themes cannot be compared, since the operator has to toggle each arm and hold the earlier ones in memory, which is the failure the single-page rule exists to prevent.
+- Set that theme so it survives the arm reading its own preference back. An arm that stores a theme and applies it on load will overwrite whatever the control set, which shows the control in one state and the arm in the other, and it passes a fresh browser profile because the stored value is not there yet.
+- Hand over the per-arm file addresses beside the combined page where the declared layer is composition, layout or space, and say that an arm is judged at a width by opening its own file in the browser's device toolbar. The combined page cannot answer that question at all: every arm sits in a column there while the media queries answer to the whole window, so each one renders its widest layout in a narrow space no matter how the window is sized. Build no width control of your own, since the browser already has one.
 - Take the live-app branch instead when the surface under decision is a running app: lift the rendered markup and link a copy of the built stylesheet rather than inlining, per `${CLAUDE_SKILL_DIR}/references/live-arms.md`.
 - On the default path, inline every style, script, and asset the page needs. The render reads the file off disk, so a page reaching for a build step or a network font renders without it and the arms differ by something nobody chose.
 - On the default path, declare a font stack the machine resolves, such as `system-ui` behind a generic fallback. The render refuses a page that would rewrap against a substitute rather than shipping a false comparison, so a page naming no font at all is refused on whatever the default resolves to.
+
+### What varies
+
 - Vary one property across the arms. A page whose arms differ in three ways answers no question, since the pick cannot say which difference decided it.
+- Grey-box the arms when the declared layer sits below typography, per `design-taste`. A set judged at composition that carries a finished palette is not grey-boxed, and the higher layers are what the operator will look at instead of the question. Say the set is grey-boxed when handing it over.
 - Vary the property the decision is about, which the rule above is satisfiable without. Holding composition fixed and varying color obeys it exactly and produces five skins of one design, because a set differing in the layer a reader notices least answers nothing. A palette is chosen to serve a composition, so it cannot be picked ahead of one.
 
 ## Step 3: render and hand off
@@ -96,6 +103,7 @@ Three rules no probe reaches:
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
+- `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 - `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
 - `review-branch` and `review-address` run the review pass
