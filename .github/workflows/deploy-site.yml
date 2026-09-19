@@ -18,12 +18,18 @@ on:
       - 'claude/skills/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
+  # A closed pull request runs only the cleanup job below, which deletes the
+  # preview deployments `canon pr preview` minted for its branch.
+  pull_request:
+    types: [closed]
 
 # A second push while a deploy is in flight publishes the newer commit rather
 # than racing it, and the running job is left to finish so a half-uploaded site
-# is never what a reader lands on.
+# is never what a reader lands on. The group is keyed on the ref, since GitHub
+# cancels a pending run when a newer one queues in the same group, and a branch
+# preview must never displace a production deploy waiting behind another.
 concurrency:
-  group: deploy-site
+  group: deploy-site-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -32,6 +38,7 @@ permissions:
 jobs:
   deploy:
     name: 🌐 Deploy Site
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,9 +66,58 @@ jobs:
       - name: Verify gallery excluded from build
         run: ./scripts/core/check-gallery-exclusion.sh
 
+      # `pages-deployment-alias-url` is an output from wrangler 3.78 on, so the
+      # version is pinned rather than left to the action's default.
       - name: Publish
+        id: publish
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.90.0'
           command: pages deploy web/dist --project-name=canon --branch=${{ github.ref_name }}
+
+      # `canon pr preview` reads this line out of the run log, so the marker is
+      # a contract rather than decoration. The alias is read off the deploy
+      # rather than computed from the branch name, since Cloudflare flattens
+      # and may truncate a branch into its alias.
+      - name: Report preview alias
+        if: steps.publish.outputs.pages-deployment-alias-url != ''
+        env:
+          ALIAS_URL: ${{ steps.publish.outputs.pages-deployment-alias-url }}
+        run: |
+          echo "canon-preview-alias: $ALIAS_URL"
+          echo "Preview: $ALIAS_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  cleanup-preview:
+    name: 🧹 Delete Branch Previews
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # Deployments are listed through the REST API rather than wrangler, whose
+      # listing carries no branch filter. `force=true` is what lets a deployment
+      # still holding its branch alias be deleted.
+      - name: Delete preview deployments
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_NAME: canon
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          page=1
+          ids=""
+          while :; do
+            listing=$(curl -fsS -H "$auth" "$api?env=preview&per_page=25&page=$page")
+            [ "$(echo "$listing" | jq '.result | length')" -eq 0 ] && break
+            ids="$ids $(echo "$listing" | jq -r --arg branch "$BRANCH" '.result[] | select(.deployment_trigger.metadata.branch == $branch) | .id')"
+            page=$((page + 1))
+          done
+          deleted=0
+          for id in $ids; do
+            curl -fsS -X DELETE -H "$auth" "$api/$id?force=true" >/dev/null
+            echo "Deleted $id"
+            deleted=$((deleted + 1))
+          done
+          echo "Deleted $deleted preview deployments for $BRANCH."
