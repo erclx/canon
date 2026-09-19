@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.93.0](https://github.com/erclx/canon/compare/v4.92.0...v4.93.0) (2026-09-19)
+
+
+### Features
+
+* **governance:** add scroll and motion floors to e2e reliability ([#1718](https://github.com/erclx/canon/issues/1718)) ([3e6078d](https://github.com/erclx/canon/commit/3e6078d33c779dd3995a6d076893a01e567fe499))
+* **governance:** add testing rules to the astro stack ([#1719](https://github.com/erclx/canon/issues/1719)) ([b112e89](https://github.com/erclx/canon/commit/b112e89828a1cbc7c359043c582385f16237c293))
+* **serve:** list a directory with --index and capture at --width ([#1721](https://github.com/erclx/canon/issues/1721)) ([bce5485](https://github.com/erclx/canon/commit/bce548560cb83aa8dbca24e130a5fabc9a3d9d92))
+
 ## [4.92.0](https://github.com/erclx/canon/compare/v4.91.0...v4.92.0) (2026-09-19)
 
 
