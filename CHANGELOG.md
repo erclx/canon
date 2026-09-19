@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.99.0](https://github.com/erclx/canon/compare/v4.98.0...v4.99.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** fold the UI checklist into the evidence comment ([#1746](https://github.com/erclx/canon/issues/1746)) ([a651e36](https://github.com/erclx/canon/commit/a651e3626ad0f6960b74e6279ca2750ee7f62903))
+* **demo:** let a plan set its starting color scheme ([#1742](https://github.com/erclx/canon/issues/1742)) ([d198bb0](https://github.com/erclx/canon/commit/d198bb0ea5404287b6c760d6b0125530f717027d))
+* **tasks:** move the ready folder when archive moves its plan ([#1743](https://github.com/erclx/canon/issues/1743)) ([a49b842](https://github.com/erclx/canon/commit/a49b8420a3c0eff67a5d312d467b82b0cc01b0e2))
+
 ## [4.98.0](https://github.com/erclx/canon/compare/v4.97.0...v4.98.0) (2026-09-19)
 
 
