@@ -1,6 +1,6 @@
 ---
 name: session-map
-description: Why the write procedure needs a route any session can take, why the door carries the drift step and its ref recovery, and why it states none of the shape the standard already fixes
+description: Why the write procedure needs a board-side route for the orchestrator and for a request naming the map, why the door carries the drift step and its ref recovery, and why it states none of the shape the standard already fixes
 ---
 
 # Session map requirement
@@ -23,7 +23,7 @@ A body that restates the sections, the frontmatter, or the numbered steps become
 
 ## Must
 
-- Write from any session whatever role it holds, without asserting one
+- Write for an orchestrating session, or on a request naming the session map or the board, without asserting a role the session does not hold
 - Cite the standard for the filename, the frontmatter, the sections, the numbered procedure, and the citation rule rather than restating any of them
 - Run the drift step and state how to recover the ref it reads from how long the session has run
 - Record what the drift verb names, and read a refusal as the boundary of what the verb can read
