@@ -322,9 +322,21 @@ const SPELLED: Record<string, number> = {
   ten: 10,
   eleven: 11,
   twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
+  sixteen: 16,
+  seventeen: 17,
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
 }
 
-const CARDINAL = String.raw`(\d+|${Object.keys(SPELLED).join('|')})`
+// Longest first, so `fourteen` is tried ahead of the `four` it starts with.
+const SPELLED_ALTERNATION = Object.keys(SPELLED)
+  .sort((a, b) => b.length - a.length)
+  .join('|')
+const CARDINAL = String.raw`(\d+|${SPELLED_ALTERNATION})`
 const FRAME_CLAUSE = new RegExp(String.raw`${CARDINAL}-line frame`, 'i')
 const PER_DECISION_CLAUSE = new RegExp(
   String.raw`${CARDINAL}\s+lines?\s+a\s+decision`,

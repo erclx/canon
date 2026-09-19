@@ -286,6 +286,10 @@ describe('reading the entry cap a record states for itself', () => {
     expect(readEntryCap('It holds at most nine decisions.')).toBe(9)
   })
 
+  it('should read a cap spelled past twelve', () => {
+    expect(readEntryCap('It holds at most fifteen decisions.')).toBe(15)
+  })
+
   it('should read nothing from a record stating no cap', () => {
     expect(readEntryCap('# Architecture\n\n## Overview\n')).toBeUndefined()
   })
