@@ -225,11 +225,16 @@ const TEACH_CHROME: Component = {
     '--teach-chrome',
     '--teach-shadow',
     '--color-teach-accent-bg',
+    '--type-body-family',
+    '--type-code-family',
+    '--t3',
+    '--t4',
+    '--t5',
   ],
   rules: `:root {
-  --teach-sans: 'Nunito', ui-rounded, 'Segoe UI', system-ui, sans-serif;
-  --teach-hand: 'Virgil', 'Nunito', cursive;
-  --teach-mono: 'Cascadia Code', ui-monospace, monospace;
+  --teach-sans: var(--type-body-family);
+  --teach-hand: 'Virgil', 'Excalifont', cursive;
+  --teach-mono: var(--type-code-family);
   --teach-measure: 52rem;
   --teach-chrome: 52rem;
   --teach-mast-h: 4.4rem;
@@ -268,7 +273,7 @@ body {
   background: var(--color-background);
   color: var(--color-text-body);
   font-family: var(--teach-sans);
-  font-size: 1.125rem;
+  font-size: var(--t3);
   line-height: 1.62;
   -webkit-font-smoothing: antialiased;
 }
@@ -297,7 +302,7 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   color: var(--color-muted);
 }
 
@@ -332,7 +337,7 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
   border-radius: 8px;
   text-decoration: none;
   color: var(--color-text-body);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   font-weight: 600;
   line-height: 1.3;
   box-shadow: var(--teach-shadow);
@@ -370,14 +375,14 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
    value for a character even a decorative one. */
 .crumb-sep {
   color: var(--color-muted);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   user-select: none;
 }
 
 /* One arrow, on the first segment, since that is the only one that goes up. */
 .crumb-back {
   margin-right: 0.3rem;
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1;
 }
 
@@ -612,6 +617,9 @@ const TEACH_ARTICLE: Component = {
     '--color-accent',
     '--teach-hand',
     '--teach-mono',
+    '--t4',
+    '--t5',
+    '--t6',
   ],
   rules: `/* ---- Type ---- */
 
@@ -664,7 +672,7 @@ em { font-style: italic; }
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-size: 0.6875rem;
+  font-size: var(--t6);
   margin-bottom: 0.2rem;
 }
 
@@ -680,7 +688,7 @@ code {
 
 pre {
   font-family: var(--teach-mono);
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   line-height: 1.7;
   background: var(--color-surface);
   padding: 1.15rem 1.3rem;
@@ -745,12 +753,12 @@ tbody tr.mark td { background: var(--color-teach-accent-bg); }
 }
 
 .toc a:hover { background: var(--color-surface); }
-.toc .num { font-family: var(--teach-mono); font-size: 0.8125rem; color: var(--color-accent); }
+.toc .num { font-family: var(--teach-mono); font-size: var(--t5); color: var(--color-accent); }
 .toc b { font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.012em; }
 
 .toc .blurb {
   grid-column: 2;
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1.5;
   color: var(--color-text-secondary);
   margin-top: 0.1rem;
@@ -799,7 +807,7 @@ tbody tr.mark td { background: var(--color-teach-accent-bg); }
 ol.succ {
   margin: 0 0 2.5rem;
   padding-left: 1.35rem;
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1.6;
   color: var(--color-text-secondary);
 }
@@ -846,13 +854,13 @@ ol.succ li { margin-bottom: 0.4rem; }
 
 .road-n {
   font-family: var(--teach-mono);
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   color: var(--color-accent);
 }
 
 .road-b { display: block; }
 .road-b b { display: block; margin-bottom: 0.2rem; }
-.road-b span { color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.55; }
+.road-b span { color: var(--color-text-secondary); font-size: var(--t4); line-height: 1.55; }
 
 .road-t {
   font-family: var(--teach-mono);
@@ -889,6 +897,8 @@ const TEACH_QUIZ: Component = {
     '--teach-mono',
     '--teach-shadow',
     '--color-teach-accent-bg',
+    '--t4',
+    '--t5',
   ],
   rules: `/* ---- Quiz ---- */
 
@@ -907,7 +917,7 @@ const TEACH_QUIZ: Component = {
   margin-bottom: 0.45rem;
   cursor: pointer;
   font-family: var(--teach-sans);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   background: transparent;
   width: 100%;
   text-align: left;
@@ -967,7 +977,7 @@ const TEACH_QUIZ: Component = {
 
 .fb {
   display: none;
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1.55;
   color: var(--color-text-secondary);
   background: var(--color-surface);
@@ -983,7 +993,7 @@ footer {
   margin-top: 4rem;
   padding-top: 1.4rem;
   border-top: 1px solid var(--color-border);
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   line-height: 1.6;
   color: var(--color-muted);
 }`,
@@ -1004,6 +1014,8 @@ const TEACH_GLOSSARY: Component = {
     '--color-accent',
     '--teach-sans',
     '--teach-mono',
+    '--t4',
+    '--t5',
   ],
   rules: `/* ---- Glossary view, generated from the markdown source ---- */
 
@@ -1022,7 +1034,7 @@ h2 .count {
 .filter {
   width: 100%;
   font-family: var(--teach-sans);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   color: var(--color-text-body);
   background: var(--color-background);
   border: 1px solid var(--color-border);
@@ -1064,7 +1076,7 @@ h2 .count {
   display: none;
   padding: 1.2rem 0;
   color: var(--color-muted);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
 }
 
 .gloss.none .empty { display: block; }
@@ -1072,14 +1084,14 @@ h2 .count {
 .gterm {
   padding: 0.7rem 0;
   border-bottom: 1px solid var(--color-border);
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1.55;
 }
 
 .gloss-group {
   margin: 1.1rem 0 0.4rem;
   font-family: var(--teach-sans);
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   font-weight: 600;
   color: var(--color-muted);
   text-transform: uppercase;
@@ -1101,7 +1113,7 @@ h2 .count {
 ol.succ {
   margin: 0 0 2.5rem;
   padding-left: 1.35rem;
-  font-size: 0.9375rem;
+  font-size: var(--t4);
   line-height: 1.6;
   color: var(--color-text-secondary);
 }
@@ -1137,6 +1149,7 @@ const TEACH_OUTLINE: Component = {
     '--teach-sans',
     '--teach-measure',
     '--teach-mast-h',
+    '--t5',
   ],
   rules: `/* ---- In-lesson outline, in the gutter the measure leaves over ---- */
 
@@ -1151,7 +1164,7 @@ const TEACH_OUTLINE: Component = {
   width: calc(13rem + 8px);
   max-height: calc(100vh - var(--teach-mast-h) - 4rem);
   overflow-y: auto;
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   line-height: 1.45;
 }
 
@@ -1218,12 +1231,13 @@ const TEACH_REFERENCES: Component = {
     '--color-accent',
     '--teach-mono',
     '--color-teach-accent-bg',
+    '--t5',
   ],
   rules: `footer {
   margin-top: 4rem;
   padding-top: 1.4rem;
   border-top: 1px solid var(--color-border);
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   line-height: 1.6;
   color: var(--color-muted);
 }
@@ -1252,7 +1266,7 @@ ol.refs {
   counter-reset: r;
   padding: 0;
   margin: 0.9rem 0 1.1rem;
-  font-size: 0.8125rem;
+  font-size: var(--t5);
   line-height: 1.55;
 }
 

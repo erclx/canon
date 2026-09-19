@@ -687,9 +687,9 @@ describe('writeStylesheet', () => {
     expect(body).toContain('.bar {')
     expect(body).toContain('.quiz')
     expect(body).toContain('.theme:hover { border-color: var(--color-accent)')
-    expect(body).toContain("font-family: 'Nunito';")
+    expect(body).toContain("font-family: 'Geist Variable';")
     expect(body).toContain("font-family: 'Virgil';")
-    expect(body).toContain("font-family: 'Cascadia Code';")
+    expect(body).toContain("font-family: 'Noto Sans Mono';")
   })
 
   it('aliases the retired palette so an already-written lesson diagram still resolves its fill and stroke', async () => {

@@ -25,6 +25,8 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **The chrome is spliced into each lesson rather than inserted by a template.** A lesson is a standalone file a learner opens with no build step, so a template would introduce one and a copied header would drift per lesson. The splice keeps the file directly openable and the chrome uniform, at the cost that an authored file and a generated one share a path.
 
+**Teach reads the design module's faces and keeps only the hand pair as its own.** `--teach-sans` and `--teach-mono` resolve to `--type-body-family` and `--type-code-family`, and `TEACH_FONT_FACES` is `FONT_FACES` plus `HAND_DRAWN_FONT_FACES`, so a face change reaches teach with no edit here. Font sizes equal to a step read `--t2` through `--t6`, and the sizes between steps stay as chrome tuning until a taste pass takes them. Keeping teach's own Nunito and Cascadia Code was the alternative, and it left the tree rendering three families where the design record names two.
+
 **A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
 ## Gotchas
