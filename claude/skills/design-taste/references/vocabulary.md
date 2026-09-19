@@ -54,7 +54,7 @@ How a draft is staged while unfinished.
 
 - **FPO**: a placeholder held at the true final size and marked as a placeholder, from print production where it abbreviates "for position only". Marking it is the point, since an unmarked stand-in gets read as a decision.
 - **Greeking**: standing text in for copy that does not exist yet, of which lorem ipsum is the common form. Correct while judging space and wrong once an arm is judged on content.
-- **Grey-box**: drawing every element as a flat neutral block so the layers above the one under judgment are removed from view. Avoid "wireframe", which names a committed document governed by `standards/wireframes.md` rather than a drafting stage.
+- **Grey-box**: drawing every element as a flat neutral block so the layers above the one under judgment are removed from view. Avoid "wireframe", which names a committed document governed by `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md` rather than a drafting stage.
 
 ## Terms this vocabulary deliberately does not carry
 
