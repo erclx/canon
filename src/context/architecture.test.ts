@@ -8,9 +8,11 @@ import {
   ceilingFor,
   classifyDecision,
   coveredCount,
+  isOverCount,
   isOverLength,
   measureArchitecture,
   readAllowances,
+  readEntryCap,
   risksSection,
   splitDecisions,
   testableCount,
@@ -272,6 +274,98 @@ describe('the ceiling the record derives for itself', () => {
     })
 
     expect(isOverLength(report)).toBe(false)
+  })
+})
+
+describe('reading the entry cap a record states for itself', () => {
+  it('should read a cap written in digits', () => {
+    expect(readEntryCap('This record holds at most 12 decisions.')).toBe(12)
+  })
+
+  it('should read a cap spelled in words', () => {
+    expect(readEntryCap('It holds at most nine decisions.')).toBe(9)
+  })
+
+  it('should read a cap spelled past twelve', () => {
+    expect(readEntryCap('It holds at most fifteen decisions.')).toBe(15)
+  })
+
+  it('should read nothing from a record stating no cap', () => {
+    expect(readEntryCap('# Architecture\n\n## Overview\n')).toBeUndefined()
+  })
+})
+
+describe('the entry count against the cap', () => {
+  const decisions = (count: number) =>
+    Array.from({ length: count }, (_, index) =>
+      makeDecision({ heading: `Decision ${index}` }),
+    )
+
+  it('should pass a record holding exactly its cap', () => {
+    const report = makeReport({ entryCap: 3, decisions: decisions(3) })
+
+    expect(isOverCount(report)).toBe(false)
+  })
+
+  it('should fail a record holding one entry past its cap', () => {
+    const report = makeReport({ entryCap: 3, decisions: decisions(4) })
+
+    expect(isOverCount(report)).toBe(true)
+  })
+
+  it('should never fail a record that states no cap', () => {
+    const report = makeReport({ decisions: decisions(40) })
+
+    expect(isOverCount(report)).toBe(false)
+  })
+})
+
+describe('measuring the entry cap', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+    mkdirSync(join(root, 'canon'), { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should report the cap and leave a fenced template heading uncounted', async () => {
+    const source = [
+      '# Architecture',
+      '',
+      'This record holds at most 1 decision.',
+      '',
+      '## Key technical decisions',
+      '',
+      '### Real',
+      '',
+      'Reasoning.',
+      '',
+      '```markdown',
+      '### Decision name',
+      '```',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.entryCap).toBe(1)
+    expect(report?.decisions).toHaveLength(1)
+  })
+
+  it('should report no cap for a record stating none', async () => {
+    writeFileSync(
+      join(root, 'canon', 'ARCHITECTURE.md'),
+      '# Architecture\n\n### One\n\nBody.\n',
+    )
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.entryCap).toBeUndefined()
   })
 })
 

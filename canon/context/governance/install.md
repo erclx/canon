@@ -29,6 +29,14 @@ Registering a new rule for this repository means naming it somewhere the record 
 
 A rule whose source no stack names never installs, and the drift assertion still passes, because the copy matches what the record resolves to. A file written into `.claude/rules/` by hand is deleted on the next `bun run check`.
 
+Committing the consumed copy is what lets a citation spell one path that resolves here and in every target that installed the same content, where reading the authoring root directly would have left each citation needing two spellings.
+
+### Only governance keeps a consumed copy
+
+`standards/`, `snippets/`, and `internal/` carry no mirror, since nothing installs any of the three into a project. The `standards/` mirror bought only a path this repository resolved, at a cost of 28 tracked files regenerated on every check and a citation form that read as portable and was not, which is why 40 of the 62 shipped bodies name the plugin root instead. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body. Measured at `7374bb51` on 2026-08-28.
+
+`snippets/` needed no mirror because the live `claude/snippets` symlink already served every plugin cache, and `internal/` never had an install channel to close. What came out was 15 tracked files and `mirror_dir` itself, leaving `scripts/core/regen-claude-copies.sh` with one delegation to `canon gov regen`. Measured at `23e79fbd` on 2026-08-28.
+
 ## Gotchas
 
 - `runInstall` writes two stamp records after copying rules: `recordStamp` for the file hashes a sync would refresh, and `writeChainStamp` for the single stack name the operator gave, alongside `{domain: 'governance', toolkitRoot: PROJECT_ROOT}`. The second is what lets a later sync answer what the target's stack lists without re-deriving it from installed band folders, since `resolveRules` walks that stack's own `extends` ancestors when a reader asks it again.

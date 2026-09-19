@@ -36,7 +36,7 @@ Each is invoked as the CLI the caller is running rather than as a global `canon`
 
 Five findings fail the run: an unresolved context citation, a banned character, word, or spelling, a relative link resolving to nothing on disk, a skill folder carrying no `REQUIREMENT.md`, and a credential-shaped value in the tree the package ships. Each is a fact with no false-positive class behind it.
 
-Four of the five are the ones `canon gate run` already fails a push on. The secret scan is the one entry gating without a stage behind it, added on that same fact-or-judgment test rather than as a side effect of registering a measure, and the architecture record already ranks content leaving the repository above content that stays.
+Four of the five are the ones `canon gate run` already fails a push on. The secret scan is the one entry gating without a stage behind it, added on that same fact-or-judgment test rather than as a side effect of registering a measure, and the toolkit already ranks content leaving the repository above content that stays.
 
 Everything else reports. A heavy bullet, a long entry, a board row nothing resolves, a degradation term in a comment, and an implementation reaching history ahead of its test are judgments a reader settles. A push failing on one of those teaches contributors to route around the stage, which is the split recorded across every audit here and the one this command inherits rather than moves.
 

@@ -1,4 +1,5 @@
 import {
+  architectureRecord,
   auditSet,
   captureStamps,
   clientCommandCitations,
@@ -326,7 +327,7 @@ export const STAGES: readonly Stage[] = [
   {
     // A hook, a workflow, or a husky script reaching one side of the seed or
     // config boundary and not the other is a capability withheld with no
-    // recorded reason, per the criterion in .claude/ARCHITECTURE.md.
+    // recorded reason, per the criterion in canon/context/tooling.md.
     id: 'capability-seeding',
     label: 'Capability seeding',
     checks: [
@@ -361,6 +362,13 @@ export const STAGES: readonly Stage[] = [
       },
     ],
     success: 'Context citations resolve',
+  },
+  {
+    // The record's two limits are facts it states about itself, unlike the
+    // judgment thresholds the stage above leaves out, so they gate here.
+    id: 'architecture-record',
+    label: 'Architecture record',
+    checks: [{ kind: 'measure', measure: architectureRecord }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift

@@ -5,9 +5,9 @@ description: The stages that gate a push on a measure, covering the sandbox cove
 
 # Gating stages
 
-Eight stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
+Nine stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
 
-A ninth reads a measure and reports it. `## Audit set` at the end of this entry covers it, and it sits here rather than in `canon/context/development/verification.md` because what it reads is a measure like the eight above rather than a gotcha about a stage.
+A tenth reads a measure and reports it. `## Audit set` at the end of this entry covers it, and it sits here rather than in `canon/context/development/verification.md` because what it reads is a measure like the nine above rather than a gotcha about a stage.
 
 ## What sequences them
 
@@ -15,7 +15,7 @@ A ninth reads a measure and reports it. `## Audit set` at the end of this entry 
 
 Three properties are load bearing and each has a case in `src/gate/sequencer.test.ts`. Stages run in table order. A stage that finds a fact halts the run, which is what makes a regenerate-then-assert round reveal one surface at a time. A scoped stage that the changed set carries nothing for says so rather than printing a clean line.
 
-A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
+A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Architecture record, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
 
 Every check is an argument vector rather than a shell string, so no stage runs through `eval` and no check is a quoting question. What that closes is stated under `## Quoting a pathspec changes what it matches` in `canon/context/scripts/core.md`.
 
@@ -96,6 +96,16 @@ Discovery runs through `collect_seed_roots` in `scripts/lib/tooling.sh`, shared 
 Three outcomes separate a clean walk from one that measured nothing, matching `check-plugin-boundary.sh` on the last two. A missing `tooling/` exits 1, since the walk covers nothing. Roots that resolve and carry no markdown between them exits 1 for the same reason, because a pass there says the seeds cite no CLI on the strength of having read no prose. No seed root carrying `.claude/` exits 0 and says so, because the Seed standards stage already reads that one condition as a skip.
 
 `internal/rules/claude/596-claude-md.md` carries the matching authoring rule, so a session editing the seed meets it at the edit rather than at the push. Its glob stays on the two `CLAUDE.md` paths rather than widening to every seed markdown, since the three bullets beside it govern the root-and-seed pair and mean nothing over `canon/REQUIREMENTS.md`. The stage is what covers the rest of the seed tree.
+
+### A seed gates harder than a context entry
+
+The same finding fails a push against `tooling/*/seeds/` and only reports against `canon/context/`. The corpus moves it rather than the measure: a seed is authored once and installed into every scaffolded project, so a defect there propagates, while a context entry is edited by the people who own it and a threshold failing their push teaches them to route around the stage. Widening the `paths` globs on the claude rules was the alternative, and it is only a nudge, since a rule loads only when a session opens the file. Gating a measure with a known false-positive class forces an escape hatch, so `stub: true` exempts a seed and both install paths strip it before a target sees it.
+
+## Architecture record
+
+The Architecture record stage calls `measureArchitecture` in-process and fails when `canon/ARCHITECTURE.md` holds more decisions than the entry cap it states or runs past the line ceiling its own allowances derive. Both limits are the record's own clauses, so a project whose record states neither passes, and a project with no record passes and says so.
+
+It exists because the Context citations stage runs `--citations-only`, which never opens the record, so the line ceiling `canon context audit` already gated on went unenforced by `bun run check` until this stage read it directly. The count is by `###` heading outside a fence, so a heading carrying two decisions counts once, which is the undercount a writer at the cap is asked not to exploit by merging rather than packing.
 
 ## Standard success criteria
 

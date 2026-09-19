@@ -22,7 +22,7 @@ Readership decides nothing here on its own. It is the four channels the task car
 
 ### A standard's reader set spans more than the skills that cite it
 
-Every standard resolves through the flat root at zero copies, via `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, whatever its readership. No destination copies a standard into each consumer's `references/`: `standards/bundled/` does not exist, and `canon/ARCHITECTURE.md` carries the reasoning that closed it.
+Every standard resolves through the flat root at zero copies, via `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, whatever its readership. No destination copies a standard into each consumer's `references/`: `standards/bundled/` does not exist, and `canon/context/standards/resolution.md` carries the reasoning that closed it.
 
 A standard's reader set is wider than the skill bodies that cite it. It is the skills, the flat standards that depend on it in-body, and any installed rule naming it, which is what the `versioning.md` withdrawal below turns on.
 

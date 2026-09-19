@@ -168,6 +168,8 @@ function architectureCounts(
   // zero there would read as one measured and found conforming.
   const ceiling =
     typeof record.ceiling === 'number' ? record.ceiling : undefined
+  const entryCap =
+    typeof record.entryCap === 'number' ? record.entryCap : undefined
 
   let unverifiable = 0
   let unchecked = 0
@@ -187,6 +189,10 @@ function architectureCounts(
     // rather than zero on a record that declared no ceiling.
     ...(ceiling !== undefined && {
       recordOverLength: record.lines > ceiling ? 1 : 0,
+    }),
+    // Absent on a record stating no entry cap, for the same reason.
+    ...(entryCap !== undefined && {
+      recordOverCount: decisions.length > entryCap ? 1 : 0,
     }),
     recordUnverifiable: unverifiable,
     recordUnchecked: unchecked,

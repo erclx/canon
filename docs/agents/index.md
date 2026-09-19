@@ -13,7 +13,7 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Census](census.md): Tracked-plus-untracked file count, a breakdown by extension, and a line total that skips whatever reads as binary
 - [Command catalog](commands.md): Every project-level command and every domain subcommand, plus the shape each domain exposes
 - [Comments](comments.md): Comment density by language and kind, the two structural exclusions, and how the degradation sweep finds its vocabulary
-- [Context audit checks](context-audit-checks.md): What each non-gating check reports, the unit each checkpoint is measured in, the architecture record's length gate and claim coverage, which folders each check reaches, and what moved to the attribute tier
+- [Context audit checks](context-audit-checks.md): What each non-gating check reports, the unit each checkpoint is measured in, the architecture record's length and entry cap gates and claim coverage, which folders each check reaches, and what moved to the attribute tier
 - [Context audit](context-audit.md): Running the audit, its flags and folder scope, the exit codes, the citation gate, and the widened gate the seed stage runs
 - [Doc classifier](context-classify.md): Classifying canonical-doc content as keep, replace/rewrite, history, or move in diff and sweep mode, the classifier setting pair, the record shape, and the exit codes
 - [Self-stated counts](counts.md): Reading a sentence that asserts a closed catalog's size, how a match is decided, the plausibility filter that keeps a generic word from matching a subset, and why the sweep reports rather than gates

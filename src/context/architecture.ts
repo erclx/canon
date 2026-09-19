@@ -80,6 +80,12 @@ export interface ArchitectureReport {
   readonly allowances?: Allowances
   /** The frame plus the per-decision allowance, absent alongside it. */
   readonly ceiling?: number
+  /**
+   * The most decisions the record says it holds, absent when it states no
+   * cap. Declared by the record for the reason the allowances are, so a
+   * project that never adopted a cap is measured and never gated.
+   */
+  readonly entryCap?: number
   readonly decisions: readonly DecisionReport[]
 }
 
@@ -314,12 +320,30 @@ const SPELLED: Record<string, number> = {
   eight: 8,
   nine: 9,
   ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
+  sixteen: 16,
+  seventeen: 17,
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
 }
 
-const CARDINAL = String.raw`(\d+|${Object.keys(SPELLED).join('|')})`
+// Longest first, so `fourteen` is tried ahead of the `four` it starts with.
+const SPELLED_ALTERNATION = Object.keys(SPELLED)
+  .sort((a, b) => b.length - a.length)
+  .join('|')
+const CARDINAL = String.raw`(\d+|${SPELLED_ALTERNATION})`
 const FRAME_CLAUSE = new RegExp(String.raw`${CARDINAL}-line frame`, 'i')
 const PER_DECISION_CLAUSE = new RegExp(
   String.raw`${CARDINAL}\s+lines?\s+a\s+decision`,
+  'i',
+)
+const ENTRY_CAP_CLAUSE = new RegExp(
+  String.raw`\bat\s+most\s+${CARDINAL}\s+decisions?\b`,
   'i',
 )
 
@@ -346,6 +370,17 @@ export function readAllowances(source: string): Allowances | undefined {
 
   if (frame === undefined || perDecision === undefined) return undefined
   return { frame, perDecision }
+}
+
+/**
+ * Reads the entry cap a record declares for itself, or nothing.
+ *
+ * The clause is the record's own, like the allowances above, so a record
+ * whose wording drifts past it falls back to reporting rather than to a cap
+ * held here that no project wrote.
+ */
+export function readEntryCap(source: string): number | undefined {
+  return readCardinal(source.match(ENTRY_CAP_CLAUSE)?.[1])
 }
 
 /** Whether a read failed because nothing sits at the path. */
@@ -385,6 +420,7 @@ export async function measureArchitecture(
   }
 
   const allowances = readAllowances(source)
+  const entryCap = readEntryCap(source)
   const raw = splitDecisions(source)
   const decisions = await Promise.all(
     raw.map(async (entry) => {
@@ -416,8 +452,22 @@ export async function measureArchitecture(
       allowances,
       ceiling: ceilingFor(allowances, raw.length),
     }),
+    ...(entryCap !== undefined && { entryCap }),
     decisions,
   }
+}
+
+/**
+ * Whether the record holds more decisions than the cap it states.
+ *
+ * False for a record stating no cap, for the reason `isOverLength` gives. The
+ * count is by heading, so a heading carrying several decisions counts once,
+ * which is the undercount `splitDecisions` already names.
+ */
+export function isOverCount(report: ArchitectureReport): boolean {
+  return (
+    report.entryCap !== undefined && report.decisions.length > report.entryCap
+  )
 }
 
 /**

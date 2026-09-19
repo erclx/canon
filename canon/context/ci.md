@@ -169,6 +169,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Capability seeding        | `scripts/core/check-capability-seeding.sh`                               | a hook, workflow, or husky script reaches its seed or config, or carries a `canon-no-seed:` reason       |
 | Unreferenced rules        | `bun src/cli.ts gov list --json`                                         | reports rules no stack reaches, and fails on none of them                                                |
 | Context citations         | `bun src/cli.ts context audit --citations-only`                          | every cited context path resolves                                                                        |
+| Architecture record       | `measureArchitecture` in-process                                         | the record holds no more decisions than its stated cap and sits under its own line ceiling               |
 | Rule citations            | `bun src/cli.ts gov citations`                                           | every path a rule cites and every internal frontmatter glob resolves                                     |
 | Markdown bans             | `bun src/cli.ts markdown audit --json`                                   | no markdown carries a banned character, word, or spelling                                                |
 | Seed standards            | `bun src/cli.ts context audit --gate` per root                           | no seed breaks the standard governing the folder it seeds                                                |

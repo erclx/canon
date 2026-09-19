@@ -19,6 +19,16 @@ Prefer pointing a chain step at an unflagged body that already performs the step
 
 A harness hook is a third route to a skill, and `session-map` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
 
+## A held body is checked against history
+
+A session loads a skill body once and keeps it, so an edit made this session is not picked up, and a compaction carries the held copy forward. A held body naming a file the branch deleted fails loudly, while one naming a file that still exists and says something different reads current, so the session applies the superseded rule and reports success. That is the ordinary ship shape here, since a branch touching `docs-fold`, `git-stage`, or `git-pr` runs those skills later in the chain that edited them.
+
+`canon claude skills drift <ref>` names which shipped bodies moved between a ref and `HEAD`, and `standards/session.md` runs it while a session map is written. Comparing the bytes a session holds cannot be built, since a session cannot read its own loaded body back, so the substitute reports a file moving rather than a held copy differing. `governance/rules/claude/570-skill.md` carries the instruction on the body being edited, since telling a session to re-invoke the skill fixes nothing and a re-read step in the ship chain was declined on cost. Measured at `34ce48e6` on 2026-08-20.
+
+## The diagram folder
+
+`.canon/diagrams/` holds an entry per kind under a fixed filename, chosen over a single `DIAGRAMS.md`. The kinds drift at rates spanning roughly an order of magnitude, so a deploy change rewrites one entry and leaves the others untouched, and fixed filenames are what let a session refreshing a kind find the file it is meant to overwrite rather than writing a second one beside it. A kind carrying a second question takes a suffixed name and repeats its category, which is how the folder reaches nine entries across five kinds.
+
 ## The task board split
 
 Two skills write to the task board and the split is by operation rather than by file. `task-board` brings a task file into existence and moves a shipped one to `.canon/tasks/archive/`. `docs-fold` edits the contents of a file that already exists, marking outcomes `[x]` from the diff and sweeping the plans those tasks cite. Neither crosses into the other, because two skills relocating the same file drift into relocating it differently.
@@ -37,11 +47,15 @@ A fact a session learns is routed by owner rather than filed in one place. `memo
 
 Capture never edits a context entry. It appends the fact to `.canon/tmp/handoff/memory-routing/<slug>.md` and `docs-fold` folds it in, which keeps one skill writing those files. The handoff is a file rather than a spoken result so it survives a compaction between the two steps, and so a standalone capture leaves something a later `/docs-fold` consumes.
 
+A second producer hands off through a file of its own rather than sharing this one. `teach-workspace` writes each confirmed promotion to `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing file was the obvious reuse and the one the pattern cannot take, since that file already has a writer and a reader that deletes it, so a fold triggered by one producer would discard whatever the other wrote and never read. The fold reaching the public docs corpus is the cost, since `docs-sync` owns that tree, and the carve-out is landing a page whose destination an operator already confirmed. Splitting the fold across two skills by destination was declined, since it puts one handoff file under two readers. Measured at `f0f8bd62` on 2026-08-19.
+
 A routing file written under the `latest` slug can collect facts for several domains and several sessions, so the branch consuming it owns only part of what it holds. A fold therefore takes one section at a time and deletes the file once no section is left, since folding it whole pulls an unrelated domain into the diff and deleting it whole discards a fact nobody read.
 
 Capture leads the sequence in `git-ship`, the one body stating it.
 
 `role-orchestrator` fires capture from its pre-compact handoff runbook, which reaches it through `session-map` and states the session does not commit so routing is skipped. Both other callers ship and this session never does, so without that step the session taking every operator correction records none. The refill sweep reports the debt instead of paying it, because a capture per batch of merges bills the operator a wait while nothing is being built. What this session produces is feedback about how to work.
+
+The pen is bounded by that ownership test rather than by a memory's type, so the four types are equal members of the residue no entry owns. Reading all 145 `project`-typed entries against the domain catalog put 98 with a domain entry, 44 with no owner at all, and 3 already promoted elsewhere. Narrowing the pen to feedback about how to work was the alternative and it lost on the middle number, since the 44 state approaches governing how the agent works that no entry owns, which is why `standards/memory.md` admits `project` as a first-class type. Measured at `c7e92612` on 2026-08-20, at 98 entries retired into an archive then holding 100.
 
 An entry leaving the pen is archived to `.canon/memory/archive/` rather than deleted, and `.canon/memory/index.md` is generated by a hook rather than appended by hand. The archive sits inside the pen itself, backed the same as every other memory entry, even though nothing cites a retired one the way a task file cites a plan.
 

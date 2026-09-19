@@ -13,6 +13,8 @@ A research harness lives beside the domain it measures only while it measures on
 
 ## What an arm measures
 
+An arm measures spec quality rather than efficacy: whether the artifact communicates its own central rule, and nothing about whether what it produces is useful. No baseline arm and a sample of one are correct for that question, because failure is self-evident, since a session that reads the standard and still writes the wrong shape has proved the standard failed to communicate. The accepted weakness is that the harness has confirmed twice and discriminated zero times, so a pass is weak evidence until one arm fails.
+
 Sufficiency and necessity need different arms. The original arms ask whether an artifact carries a session through a task, and no arrangement of them says whether a given line does work. An ablation variant answers the second by running one prompt twice, against the seed as it ships and against the seed with one section's lines removed.
 
 Both halves are labeled `<section>-kept` and `<section>-cut` rather than pairing a cut against the bare arm. The bare arm carries a different prompt, so pairing against it varies the prompt and the artifact at once.

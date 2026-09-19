@@ -69,7 +69,7 @@ The row count is the measure worth watching here. A map with a row per subtree w
 
 `auto-ship` Step 5 decides whether `review-branch` runs. `canon autoship classify` returns the decision, the file that decided it, and which of the two tests that file failed, reading the prefixes from `src/autoship/paths.ts`. It is an instance of the rule `ARCHITECTURE.md` states: a rule a session can talk itself out of moves into a verb rather than staying prose a body applies by hand.
 
-Being machine-parsed is what makes the set permanently exempt from any later design that folds a list back into the surface citing it, on the clause `ARCHITECTURE.md` already carries. The bar there is a list a parser reads, and this one is now read by `classifyChanges` rather than by a reader.
+Being machine-parsed is what makes the set permanently exempt from any later design that folds a list back into the surface citing it, on the clause `canon/context/standards/resolution.md` already carries. The bar there is a list a parser reads, and this one is now read by `classifyChanges` rather than by a reader.
 
 The verb takes the changed set as arguments and reads no git, which is not a convenience. `git-ship` and `review-branch` already share one diff baseline, and a classifier resolving its own range could disagree with the set the chain measured, which is the stale-baseline half a prior row closed. Handing the names over keeps one baseline for the whole chain.
 

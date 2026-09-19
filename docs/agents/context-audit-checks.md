@@ -1,6 +1,6 @@
 ---
 title: Context audit checks
-description: What each non-gating check reports, the unit each checkpoint is measured in, the architecture record's length gate and claim coverage, which folders each check reaches, and what moved to the attribute tier
+description: What each non-gating check reports, the unit each checkpoint is measured in, the architecture record's length and entry cap gates and claim coverage, which folders each check reaches, and what moved to the attribute tier
 ---
 
 # Context audit checks
@@ -91,7 +91,9 @@ The JSON record carries the findings per entry as `entries[].narration` and the 
 
 ## The architecture record
 
-Three findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first is a fact.
+Four findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first two are facts.
+
+The entry cap check counts the record's decisions against the cap it states for itself, in a clause of the form `This record holds at most 12 decisions.` Like the length check, the cap belongs to the record rather than to the toolkit, so a record stating none is measured and never gated. A decision is a `###` heading outside a fenced block, so the template a standard shows does not count, and a heading carrying two decisions counts once. The JSON record carries what it read as `architecture.entryCap`, absent where the record states no cap, and the audit catalog counts a record past it as `recordOverCount`.
 
 The length check compares the record against the ceiling it derives for itself, and only a record that states its own allowances has one. No standard sets a length rule for this document, so the numbers belong to whichever record declares them. The check reads a frame allowance and an allowance per decision out of the record's own prose and puts the ceiling at the frame plus the allowance times the decision count. The JSON record carries what it read as `architecture.allowances` and the reading as `architecture.lines` against `architecture.ceiling`.
 

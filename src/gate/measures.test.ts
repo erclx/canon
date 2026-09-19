@@ -8,6 +8,7 @@ import { CLIENT_COMMAND_MARKER } from '@/client-commands'
 import { gitEnv } from '@/git-env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
 import {
+  architectureRecord,
   auditSet,
   auditsBaselineRel,
   captureStamps,
@@ -850,5 +851,72 @@ describe('visualPathGlobs', () => {
     expect(report.emissions.map((e) => e.text).join('\n')).toContain(
       'src/design/**',
     )
+  })
+})
+
+describe('architectureRecord', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('architectureRecord reads the record and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const writeRecord = (source: string): void => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+  }
+
+  const decisions = (count: number): string =>
+    Array.from(
+      { length: count },
+      (_, index) => `### Decision ${index}\n\nReasoning.\n`,
+    ).join('\n')
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-record-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a record holding no more entries than its cap', async () => {
+    writeRecord(`# Architecture\n\nAt most 2 decisions.\n\n${decisions(2)}`)
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('fails a record holding more entries than its cap', async () => {
+    writeRecord(`# Architecture\n\nAt most 2 decisions.\n\n${decisions(3)}`)
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toContain('3 decisions against a cap of 2')
+  })
+
+  it('fails a record longer than the ceiling it derives', async () => {
+    writeRecord(
+      `# Architecture\n\nA 2-line frame plus 1 line a decision.\n\n${decisions(1)}`,
+    )
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toContain('against a ceiling of 3')
+  })
+
+  it('passes a project carrying no record', async () => {
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
   })
 })

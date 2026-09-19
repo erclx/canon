@@ -13,7 +13,7 @@ Governs per-domain narrative entries under `canon/context/`: their structure, th
 
 Does not govern:
 
-- Cross-domain decisions and system-wide risks: `architecture.md`
+- Decisions filling a stack, delivery, boundary, layout, or build-principle slot, and system-wide risks: `architecture.md`
 - Product scope, goals, and non-goals: `requirements.md`
 - Path-scoped coding rules: `rule.md`
 - Diagrams and wireframes, which answer structure and layout questions an entry hands off: `diagrams.md` and `wireframes.md`
@@ -82,7 +82,7 @@ Only the `development` entry carries this section. It is not a general-purpose h
 ## What goes in
 
 - Per-domain narrative on how the code is structured and why
-- Decisions specific to the domain. Broader cross-domain decisions belong in `canon/ARCHITECTURE.md`.
+- Decisions that constrain the domain, whether or not their reasoning touches another one. This is a decision's default home, and `canon/ARCHITECTURE.md` takes only a decision that fills one of the slots its standard names.
 - Constraints, gotchas, things tried and rejected
 - Domain-specific conventions that do not fit a `paths:`-scoped rule
 - A measured figure, anchored the way `architecture.md` states under `## Verification anchors`, so an entry and the architecture record date a number the same way.

@@ -39,6 +39,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
     recordOverLength: false,
+    recordOverCount: false,
     sections: [],
     drift: [],
     wireframes: [],
@@ -92,6 +93,16 @@ describe('isGating', () => {
 
   it('should fail a record past its own ceiling under the widened gate', () => {
     const input = makeInput({ recordOverLength: true, widened: true })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should fail a record past its own entry cap under the narrow gate', () => {
+    expect(isGating(makeInput({ recordOverCount: true }))).toBe(true)
+  })
+
+  it('should fail a record past its own entry cap under the widened gate', () => {
+    const input = makeInput({ recordOverCount: true, widened: true })
 
     expect(isGating(input)).toBe(true)
   })
