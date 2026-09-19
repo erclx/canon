@@ -246,6 +246,7 @@ async function listSlugs(dir: string): Promise<string[]> {
   return entries
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
+    .filter((name) => WORKSPACE_NAME.test(name))
     .sort()
 }
 
