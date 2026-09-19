@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  findEvidenceChecklist,
   findEvidenceCommentId,
   findEvidencePreview,
   groupEvidence,
@@ -190,6 +191,75 @@ describe('renderEvidenceBody', () => {
       ].join('\n'),
     )
   })
+
+  it('should render the checklist below the comparison and above the marker', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'web/evidence/dark/hero.png', stem: 'hero', added: false },
+          ],
+        },
+      ],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] the hero settles without a jump',
+    )
+
+    const lines = body.split('\n')
+    expect(lines.indexOf('## Evidence')).toBeLessThan(
+      lines.indexOf('## What to look at'),
+    )
+    expect(lines.indexOf('## What to look at')).toBeLessThan(
+      lines.indexOf('<!-- pr-evidence: head=bbbb111 -->'),
+    )
+    expect(body).toContain('- [ ] the hero settles without a jump')
+  })
+
+  it('should render the checklist alone when no evidence changed', () => {
+    const body = renderEvidenceBody(
+      [],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] the hero settles without a jump',
+    )
+
+    expect(body).toBe(
+      [
+        '## What to look at',
+        '',
+        '<!-- pr-checklist:start -->',
+        '- [ ] the hero settles without a jump',
+        '<!-- pr-checklist:end -->',
+        '',
+        '<!-- pr-evidence: head=bbbb111 -->',
+      ].join('\n'),
+    )
+  })
+
+  it('should round trip a rendered checklist back through the reader unchanged', () => {
+    const checklist =
+      '- [x] the hero settles without a jump\n- [ ] the nav wraps at 360px'
+    const body = renderEvidenceBody(
+      [],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      checklist,
+    )
+
+    expect(
+      findEvidenceChecklist([
+        { url: 'https://github.com/o/r/pull/1#issuecomment-222', body },
+      ]),
+    ).toBe(checklist)
+  })
 })
 
 describe('findEvidenceCommentId', () => {
@@ -257,5 +327,40 @@ describe('findEvidencePreview', () => {
     ])
 
     expect(preview).toBeUndefined()
+  })
+})
+
+describe('findEvidenceChecklist', () => {
+  it('should read the checklist out of the marked comment', () => {
+    const checklist = findEvidenceChecklist([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## What to look at\n\n<!-- pr-checklist:start -->\n- [x] the hero settles\n<!-- pr-checklist:end -->\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(checklist).toBe('- [x] the hero settles')
+  })
+
+  it('should return undefined when the marked comment carries no checklist', () => {
+    const checklist = findEvidenceChecklist([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## Evidence\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(checklist).toBeUndefined()
+  })
+
+  it('should ignore a checklist on a comment that carries no marker', () => {
+    const checklist = findEvidenceChecklist([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-111',
+        body: '<!-- pr-checklist:start -->\n- [ ] elsewhere\n<!-- pr-checklist:end -->',
+      },
+    ])
+
+    expect(checklist).toBeUndefined()
   })
 })

@@ -205,3 +205,36 @@ describe('canon pr key-changes credits a rename source and a .gitignore addition
     expect(record.unmet).toEqual([])
   })
 })
+
+describe('canon pr evidence --checklist', () => {
+  let repoRoot: string
+
+  beforeEach(async () => {
+    repoRoot = await mkdtemp(join(tmpdir(), 'canon-pr-evidence-'))
+  })
+
+  afterEach(async () => {
+    await rm(repoRoot, { recursive: true, force: true })
+  })
+
+  it('should refuse before any gh read when the checklist path resolves to nothing', async () => {
+    const result = await execa(
+      process.execPath,
+      [
+        CLI,
+        'pr',
+        'evidence',
+        '--json',
+        '--checklist',
+        'absent.md',
+        '--root',
+        repoRoot,
+      ],
+      { cwd: repoRoot, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    const record = JSON.parse(result.stdout) as { reason?: string }
+
+    expect(record.reason).toBe('unreadable-checklist')
+  })
+})

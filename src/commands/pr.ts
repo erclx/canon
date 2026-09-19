@@ -22,6 +22,7 @@ import {
 } from '@/pr/bijection'
 import { type CheckRunListing, collapseChecks } from '@/pr/checks'
 import {
+  findEvidenceChecklist,
   findEvidenceCommentId,
   findEvidencePreview,
   groupEvidence,
@@ -70,6 +71,7 @@ interface ReadOptions {
 
 interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
+  readonly checklist?: string
 }
 
 interface PreviewOptions extends ReadOptions {
@@ -137,10 +139,13 @@ type EvidenceRefusal =
   | 'no-base'
   | 'unreadable-tree'
   | 'unreadable-changes'
+  | 'unreadable-checklist'
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
+  'unreadable-checklist':
+    'The file named by --checklist could not be read, or holds nothing. Rendering without it would drop the only copy, since the caller deletes the handoff once a post reports success.',
   'no-base': 'No base resolves against the trunk. Fetch origin and re-run.',
   'unreadable-tree':
     'git could not read the tree at the base commit, so no path could be judged added or changed.',
@@ -369,6 +374,10 @@ export function register(program: Command): void {
       '--preview <url>',
       'Open the body with this preview address, from canon pr preview',
     )
+    .option(
+      '--checklist <path>',
+      'Close the body with this visual checklist file, from canon:ui-checklist',
+    )
     .addHelpText(
       'after',
       [
@@ -393,6 +402,14 @@ export function register(program: Command): void {
         'Without --preview, an address the marked comment already opens with',
         'is carried into the new body, so a re-render after a push keeps it.',
         '',
+        '--checklist closes the body with a visual checklist, below the',
+        'comparison it annotates. A checklist the marked comment already',
+        'carries is read back and carried forward the same way the preview',
+        'address is, which keeps a re-render from wiping ticked boxes. It does',
+        'not decide no-evidence: a branch with a checklist and no evidence',
+        'image still reports no-evidence, and the caller posts the checklist',
+        'on its own.',
+        '',
         'Exit codes:',
         '  0  read, whether it produced a body or reported no-evidence',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -401,6 +418,7 @@ export function register(program: Command): void {
         '  canon pr evidence --json',
         '  canon pr evidence 1341 --json',
         '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
+        '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
         '',
       ].join('\n'),
     )
@@ -1214,6 +1232,23 @@ async function runEvidence(
 
   intro('canon pr evidence')
 
+  // Read ahead of anything else, so a bad path refuses before a `gh` round
+  // trip rather than after one.
+  let suppliedChecklist: string | undefined
+  if (opts.checklist !== undefined) {
+    suppliedChecklist = await readFile(resolve(root, opts.checklist), 'utf8')
+      .then((text) => text.trim() || undefined)
+      .catch(() => undefined)
+    if (suppliedChecklist === undefined) {
+      return refuseWith(
+        'unreadable-checklist',
+        EVIDENCE_REFUSALS['unreadable-checklist'],
+        emitJson,
+        root,
+      )
+    }
+  }
+
   const read = await readIdentity(root, number)
   if (read.kind === 'refused') {
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
@@ -1294,6 +1329,7 @@ async function runEvidence(
 
   let commentId: number | undefined
   let carriedPreview: string | undefined
+  let carriedChecklist: string | undefined
   if (identity.number !== undefined) {
     const commentsRow = await gh(root, [
       'pr',
@@ -1327,11 +1363,20 @@ async function runEvidence(
     }
     commentId = findEvidenceCommentId(comments)
     carriedPreview = findEvidencePreview(comments)
+    carriedChecklist = findEvidenceChecklist(comments)
   }
 
   const preview = opts.preview ?? carriedPreview
+  const checklist = suppliedChecklist ?? carriedChecklist
   const states = grouped.kind === 'read' ? grouped.states : []
-  const body = renderEvidenceBody(states, repo, base, identity.head, preview)
+  const body = renderEvidenceBody(
+    states,
+    repo,
+    base,
+    identity.head,
+    preview,
+    checklist,
+  )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
 
@@ -1340,6 +1385,13 @@ async function runEvidence(
     `${plural(caseCount, 'case')} across ${plural(states.length, 'state')}`,
   )
   if (preview !== undefined) logInfo(`preview ${preview}`)
+  if (checklist !== undefined) {
+    logInfo(
+      suppliedChecklist === undefined
+        ? 'checklist carried forward from the marked comment'
+        : 'checklist folded in below the comparison',
+    )
+  }
 
   outro()
 
