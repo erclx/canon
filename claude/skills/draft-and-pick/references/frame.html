@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Draft and pick frame</title>
+    <style>
+      :root {
+        --bg: #f4f4f5;
+        --fg: #18181b;
+        --bar: #ffffff;
+        --line: #d4d4d8;
+      }
+      :root[data-theme='dark'] {
+        --bg: #18181b;
+        --fg: #f4f4f5;
+        --bar: #27272a;
+        --line: #3f3f46;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+      }
+      header {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 8px 12px;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+      }
+      select,
+      button {
+        font: inherit;
+        color: inherit;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 4px 8px;
+      }
+      main {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        padding: 12px;
+      }
+      iframe {
+        box-sizing: content-box;
+        max-width: 100%;
+        height: calc(100% - 2px);
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label
+        >Page
+        <select id="picker"></select
+      ></label>
+      <label
+        >Width
+        <select id="width">
+          <option value="full">Full window</option>
+          <option value="390">390</option>
+          <option value="768">768</option>
+          <option value="1280">1280</option>
+        </select></label
+      >
+      <button id="theme" type="button">Theme: light</button>
+    </header>
+    <main><iframe id="page" title="Candidate page"></iframe></main>
+    <!-- The skill replaces the token below with one JSON object: {"themeKey": "<key the arms read>", "rounds": [{"label": "...", "pages": [{"label": "...", "src": "<path relative to this file>"}]}]} -->
+    <script type="application/json" id="frame-data">
+      __FRAME_DATA__
+    </script>
+    <script>
+      const data = JSON.parse(document.getElementById('frame-data').textContent)
+      const picker = document.getElementById('picker')
+      const width = document.getElementById('width')
+      const themeButton = document.getElementById('theme')
+      const frame = document.getElementById('page')
+      let theme = 'light'
+
+      for (const round of data.rounds) {
+        for (const page of round.pages) {
+          const option = document.createElement('option')
+          option.value = page.src
+          option.textContent = round.label + ' · ' + page.label
+          picker.append(option)
+        }
+      }
+
+      // A page that stores its own theme and reads it back on load overwrites the
+      // attribute alone, so write the stored key as well as the attribute.
+      function applyTheme() {
+        document.documentElement.dataset.theme = theme
+        themeButton.textContent = 'Theme: ' + theme
+        try {
+          const win = frame.contentWindow
+          win.document.documentElement.setAttribute('data-theme', theme)
+          win.localStorage.setItem(data.themeKey, theme)
+        } catch {}
+      }
+
+      // The iframe's own width is what a media query answers to.
+      function applyWidth() {
+        frame.style.width =
+          width.value === 'full' ? 'calc(100% - 2px)' : width.value + 'px'
+      }
+
+      picker.addEventListener('change', () => {
+        frame.src = picker.value
+      })
+      width.addEventListener('change', applyWidth)
+      themeButton.addEventListener('click', () => {
+        theme = theme === 'light' ? 'dark' : 'light'
+        applyTheme()
+      })
+      frame.addEventListener('load', applyTheme)
+
+      applyWidth()
+      if (picker.options.length > 0) frame.src = picker.value
+    </script>
+  </body>
+</html>

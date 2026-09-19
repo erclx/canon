@@ -28,6 +28,7 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Names no layer at all, since the instruction to name one carries no catalog to name from and nothing reports the omission. Four consecutive rounds against one page each varied a property at the top layer while the defect sat two below it, and three of the four changed nothing the operator could see.
 - Judges a lower layer through a finished higher one, so an operator asked about composition looks at the palette instead and answers about that.
 - Hands over the combined page alone for a decision about layout, where every arm sits in a column while the media queries answer to the whole window, so no arm is ever seen at its own viewport and a fault that appears only narrower survives the pick.
+- Rebuilds a navigation harness by hand on a run with several rounds, since each round writes its own folder and nothing reaches all of them from one address. Two design tracks hand-wrote the same page picker, theme toggle and iframe width control.
 - Sets the theme on an arm that persists its own and reads it back on load, so the control reports one theme while the arm renders the other and the set is compared across two.
 
 ## Must
@@ -37,7 +38,7 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Emit the layer in the run's own output, drawn from the catalog `design-taste` fixes rather than from a word invented per run, and vary the arms at that layer alone. A layer held privately is one nothing can report missing, which is how the instruction went unfollowed while every round passed its own rules.
 - Grey-box the set when the declared layer sits below typography, and say the set is grey-boxed when handing it over, so the operator reads a flat page as the question rather than as unfinished work.
 - Render every arm in one theme at a time, with a control that sets the whole set, so the comparison holds still while the operator reads it, and set the theme in a way that survives an arm reading its own stored preference back on load.
-- Hand over the per-arm file addresses beside the combined page where the declared layer is composition, layout or space, since only a whole-page file at a real viewport answers how an arm behaves at a width, and the browser's own device toolbar is the control.
+- Hand over the per-arm file addresses beside the combined page where the declared layer is composition, layout or space, since only a whole-page file at a real viewport answers how an arm behaves at a width, and write a frame from `references/frame.html` where the run has several rounds or that layer applies, whose iframe width is the control and whose picker reaches every round from one address. The browser's device toolbar is the fallback where no frame was written.
 - Judge each render against a stated bar before handing it over, name the weakest thing on the page, and fix it where that sentence would embarrass the work.
 - Write each iteration to its own folder rather than narrowing the previous one in place, so every earlier round stays openable.
 - Write the run's renders inside the record that cites them wherever one exists, and reserve the scratch path for inputs that are re-runnable and cited by nothing.
