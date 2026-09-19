@@ -104,7 +104,7 @@ describe('draft-and-pick frame template', () => {
   })
 
   it.skipIf(!hasBrowser)(
-    'should list every round in the picker and resize the iframe with the width control',
+    'should list every round in the picker and load the page it selects',
     { timeout: TEST_TIMEOUT_MS },
     async () => {
       const { chromium } = await import('playwright-core')
@@ -112,28 +112,19 @@ describe('draft-and-pick frame template', () => {
       const server = await serve(root)
       const browser = await chromium.launch()
       try {
-        const page = await browser.newPage({
-          viewport: { width: 1400, height: 900 },
-        })
+        const page = await browser.newPage()
         await page.goto(`${server.url}/${frame}`)
 
         const options = await page.locator('#picker option').allTextContents()
-        const innerWidth = () =>
-          page.evaluate(
-            () =>
-              (document.querySelector('iframe') as HTMLIFrameElement)
-                .contentWindow!.innerWidth,
-          )
-        await page.selectOption('#width', '390')
-        const narrow = await innerWidth()
-        await page.selectOption('#width', 'full')
-        const full = await innerWidth()
+        await page.selectOption('#picker', { index: 3 })
+        const inner = page.frameLocator('iframe')
 
         expect(options).toHaveLength(4)
         expect(options.join('|')).toContain('run ·')
         expect(options.join('|')).toContain('run-2 ·')
-        expect(narrow).toBe(390)
-        expect(full).toBeGreaterThan(1000)
+        await expect
+          .poll(() => inner.locator('p').textContent())
+          .toBe('run-2 arm 1')
       } finally {
         await browser.close()
         server.close()

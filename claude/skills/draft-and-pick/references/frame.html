@@ -54,9 +54,8 @@
         padding: 12px;
       }
       iframe {
-        box-sizing: content-box;
-        max-width: 100%;
-        height: calc(100% - 2px);
+        width: 100%;
+        height: 100%;
         border: 1px solid var(--line);
         background: #fff;
       }
@@ -68,16 +67,8 @@
         >Page
         <select id="picker"></select
       ></label>
-      <label
-        >Width
-        <select id="width">
-          <option value="full">Full window</option>
-          <option value="390">390</option>
-          <option value="768">768</option>
-          <option value="1280">1280</option>
-        </select></label
-      >
       <button id="theme" type="button">Theme: light</button>
+      <span>F12 device toolbar to resize</span>
     </header>
     <main><iframe id="page" title="Candidate page"></iframe></main>
     <!-- The skill replaces the token below with one JSON object: {"themeKey": "<key the arms read>", "rounds": [{"label": "...", "pages": [{"label": "...", "src": "<path relative to this file>"}]}]} -->
@@ -87,7 +78,6 @@
     <script>
       const data = JSON.parse(document.getElementById('frame-data').textContent)
       const picker = document.getElementById('picker')
-      const width = document.getElementById('width')
       const themeButton = document.getElementById('theme')
       const frame = document.getElementById('page')
       let theme = 'light'
@@ -113,23 +103,15 @@
         } catch {}
       }
 
-      // The iframe's own width is what a media query answers to.
-      function applyWidth() {
-        frame.style.width =
-          width.value === 'full' ? 'calc(100% - 2px)' : width.value + 'px'
-      }
-
       picker.addEventListener('change', () => {
         frame.src = picker.value
       })
-      width.addEventListener('change', applyWidth)
       themeButton.addEventListener('click', () => {
         theme = theme === 'light' ? 'dark' : 'light'
         applyTheme()
       })
       frame.addEventListener('load', applyTheme)
 
-      applyWidth()
       if (picker.options.length > 0) frame.src = picker.value
     </script>
   </body>
