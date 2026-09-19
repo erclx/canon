@@ -42,6 +42,8 @@ scripts/sandbox/run.sh claude:plan-feature "/canon:plan-feature add a widget" sm
 
 The prompt is the explicit skill invocation. Use the `/canon:<skill>` form so `--plugin-dir` resolves the skill whether or not the branch changed it. A bare `/<skill>` only resolves for skills the sandbox injects, which is the subset changed on the current branch.
 
+An injected skill is a copy of its `SKILL.md` alone, made by `inject_changed_skills` in `scripts/manage-sandbox.sh`, with none of its `references/` beside it. A project skill outranks a plugin skill of the same name, so a run that reaches the skill by its bare name or by a description match loads that copy, and every `${CLAUDE_SKILL_DIR}/references/` path in it resolves to nothing. Remove the injected folder before driving an arm for a skill that carries references, so `--plugin-dir` supplies the whole skill.
+
 Carry the arguments the arm needs. A skill guarding on a missing argument answers the bare form with its own refusal and never reaches the behavior under test, so every assertion fails against a skill that is working correctly. `claude:plan-intake/file` states its invocation on the scenario's own `Action:` line, and a bare prompt returns the no-dump refusal instead. Read the `Action:` line before composing the prompt, since it is where an arm records what it expects to be handed. `internal-sandbox-check` fixes the prompt at `/canon:<skill-name>` with no arguments, so a caller following it hits this on any such arm and should report the mismatch rather than reading it as a defect in the skill.
 
 A multi-arm scenario puts the headless run out of reach of an unattended ship. `internal-sandbox-check` bans guessing the arm and sends that question to a person, so a dispatched worker with nobody watching takes the `no-mechanism` gate on every multi-arm pairing and the branch ships with its scenario provisioned and unverified. The gate is the honest report rather than a defect to route around, since `CANON_NON_INTERACTIVE=1` would hand the picker the first arm and return a verdict against an arm nobody chose.
@@ -55,6 +57,8 @@ The envelope alone decides nothing. An arm can return `error=false` having writt
 ### A tree of its own, minted per run
 
 The sandbox tree resolves from `$XDG_STATE_HOME/canon/sandbox-<run-id>`, defaulting to `~/.local/state/canon/sandbox-<run-id>`, with `CANON_SANDBOX_DIR` overriding the whole path and a path back inside the repository refused.
+
+Never point `CANON_SANDBOX_DIR` under `~/.claude/`, such as a background job's own scratch folder. Provisioning succeeds there, and the driven session then has every `Write` refused as a sensitive path, so it plans its files in the reply and writes none. Two headless runs measured it on 2026-09-19, and nothing in the provisioning guard refuses the path.
 
 `<run-id>` is a short random suffix `resolve_sandbox_dir` and `sandboxTree` mint the first time a process asks for the default, so two sessions provisioning at once land on two different trees rather than one and cannot provision over each other. `canon/context/sandbox/overview.md` carries how the id is minted and held.
 
