@@ -33,23 +33,23 @@
     },
     {
       "beat": 2,
-      "name": "Four sessions in flight",
+      "name": "One session dispatches the rest",
       "kind": "scroll",
-      "target": "#agent-view",
+      "target": "#dispatch",
       "text": "",
       "waitFor": "",
-      "holdMs": 2000,
-      "caption": "An orchestrator, its workers and its planners",
+      "holdMs": 2200,
+      "caption": "One session dispatches workers and planners",
       "still": false
     },
     {
       "beat": 3,
-      "name": "Hero, the band lands",
-      "kind": "wait",
-      "target": "",
+      "name": "Four branches on disjoint files",
+      "kind": "scroll",
+      "target": "#workers",
       "text": "",
       "waitFor": "",
-      "holdMs": 2500,
+      "holdMs": 2800,
       "caption": "Each worker opens its own pull request",
       "still": true
     }
