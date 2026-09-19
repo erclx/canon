@@ -205,12 +205,20 @@ describe('buildDesignCss', () => {
     }
   })
 
-  it('emits two @font-face blocks when asked to embed fonts', () => {
+  it('emits a @font-face block per default face when asked to embed fonts', () => {
     const css = buildDesignCss(undefined, { embedFonts: true })
 
-    expect(css.match(/@font-face/g)).toHaveLength(2)
+    expect(css.match(/@font-face/g)).toHaveLength(3)
     expect(css).toContain("font-family: 'Noto Sans Mono';")
     expect(css).toContain('url(data:font/woff2;base64,')
+  })
+
+  it('emits the Geist variable face with its weight range intact', () => {
+    const css = buildDesignCss(undefined, { embedFonts: true })
+
+    expect(css).toContain(
+      "font-family: 'Geist Variable';\n  font-weight: 100 900;",
+    )
   })
 
   it('emits no @font-face block by default', () => {
