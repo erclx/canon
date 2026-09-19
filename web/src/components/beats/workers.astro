@@ -1,0 +1,241 @@
+---
+import { workers } from '../../content/copy'
+import Band from './band.astro'
+
+/**
+ * One trunk and the branches off it, drawn as the graph they are. A lane chart
+ * says four things ran and nothing about where they came from or went back to,
+ * which is the whole claim. The rows are authored against the depicted
+ * session, which the footer states, so only the geometry is computed here.
+ */
+const WIDTH = 660
+const TRUNK_Y = 150
+const LANE_Y = 34
+const LANE_GAP = 30
+const x = (percent: number) => 46 + (percent / 100) * (WIDTH - 120)
+
+/** Where each branch leaves the trunk and where it rejoins, as a share of its length. */
+const SPANS: Record<string, readonly [number, number]> = {
+  tokens: [14, 62],
+  stylesheet: [20, 74],
+  captures: [26, 100],
+}
+
+const lanes = workers.branches
+  .filter((branch) => branch.state !== 'none')
+  .map((branch, index) => {
+    const span = SPANS[branch.short]
+    if (!span) throw new Error(`No span drawn for the ${branch.short} branch`)
+    const [from, to] = span
+    const y = LANE_Y + index * LANE_GAP
+    const start = x(from)
+    const merged = branch.state === 'merged'
+    const end = merged ? x(to) : WIDTH - 40
+    const path = merged
+      ? `M${start} ${TRUNK_Y} C ${start + 14} ${TRUNK_Y}, ${start + 14} ${y}, ${start + 30} ${y} L ${end - 30} ${y} C ${end - 14} ${y}, ${end - 14} ${TRUNK_Y}, ${end} ${TRUNK_Y}`
+      : `M${start} ${TRUNK_Y} C ${start + 14} ${TRUNK_Y}, ${start + 14} ${y}, ${start + 30} ${y} L ${end} ${y}`
+    return { ...branch, y, start, end, merged, path }
+  })
+---
+
+<Band id="workers" head={workers.head} cap={workers.cap}>
+  <div class="fig" id="fig-workers">
+    <svg
+      class="graph"
+      viewBox={`0 0 ${WIDTH} 176`}
+      role="img"
+      aria-label={workers.graphLabel}
+    >
+      <line class="trunk" x1="24" y1={TRUNK_Y} x2={WIDTH - 24} y2={TRUNK_Y}
+      ></line>
+      <circle class="dot trunk" cx="24" cy={TRUNK_Y} r="5"></circle>
+      <text class="label trunk" x="24" y={TRUNK_Y + 20}>{workers.trunk}</text>
+      {
+        lanes.map((lane) => (
+          <>
+            <path
+              class:list={['branch', { open: !lane.merged }]}
+              d={lane.path}
+            />
+            <circle class="dot" cx={lane.start + 30} cy={lane.y} r="5" />
+            <text class="label" x={lane.start + 40} y={lane.y + 4}>
+              {lane.short}
+            </text>
+            {lane.merged ? (
+              <>
+                <circle class="dot merged" cx={lane.end} cy={TRUNK_Y} r="5" />
+                <text class="pr merged" x={lane.end} y={TRUNK_Y + 18}>
+                  {lane.pullRequest}
+                </text>
+              </>
+            ) : (
+              <>
+                <circle class="dot open" cx={lane.end} cy={lane.y} r="5" />
+                <text class="pr open" x={lane.end} y={lane.y - 12}>
+                  {lane.pullRequest}
+                </text>
+              </>
+            )}
+          </>
+        ))
+      }
+    </svg>
+    <ul class="branches">
+      {
+        workers.branches.map((branch) => (
+          <li>
+            <span class:list={['marker', branch.state]} />
+            <span class:list={['bn', branch.state]}>{branch.session}</span>
+            <code class="muted">{branch.files}</code>
+            <span class="muted end">{branch.pullRequest}</span>
+            <span
+              class:list={['muted', 'end', { ok: branch.state === 'merged' }]}
+            >
+              {workers.stateLabel[branch.state]}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="footnote">{workers.foot}</p>
+  </div>
+</Band>
+
+<style>
+  /*
+   * Left-aligned at its natural size rather than stretched. Stretching scaled
+   * every label with the viewBox, which put the graph's text above the page's
+   * largest body step.
+   */
+  .graph {
+    width: 100%;
+    max-width: 660px;
+    height: auto;
+    display: block;
+    margin: 0 0 var(--space-lg);
+  }
+
+  .graph line.trunk {
+    stroke: var(--ink-faint);
+    stroke-width: 1.5;
+  }
+
+  .graph .branch {
+    fill: none;
+    stroke: var(--ring);
+    stroke-width: 1.5;
+  }
+
+  .graph .branch.open {
+    stroke-dasharray: 3 3;
+  }
+
+  .graph circle.dot {
+    fill: var(--ground);
+    stroke: var(--ink-faint);
+    stroke-width: 1.5;
+  }
+
+  .graph circle.dot.merged {
+    fill: var(--ok);
+    stroke: var(--ok);
+  }
+
+  .graph circle.dot.open {
+    fill: none;
+    stroke: var(--mark);
+  }
+
+  .graph circle.dot.trunk {
+    fill: var(--ink);
+    stroke: var(--ink);
+  }
+
+  /* SVG text sits outside the rem scale, so it is pinned to the step it sits beside. */
+  .graph text {
+    font-family: inherit;
+    font-weight: 400;
+  }
+
+  .graph .label {
+    fill: var(--ink-body);
+    font-size: 11px;
+  }
+
+  .graph .label.trunk {
+    fill: var(--ink-faint);
+  }
+
+  .graph .pr {
+    font-size: 11px;
+    text-anchor: middle;
+  }
+
+  .graph .pr.merged {
+    fill: var(--ok);
+  }
+
+  .graph .pr.open {
+    fill: var(--mark);
+  }
+
+  .branches {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .branches li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 10rem) minmax(0, 1fr) 5rem 9rem;
+    gap: var(--space-lg);
+    align-items: baseline;
+  }
+
+  .marker {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--ink-faint);
+    align-self: center;
+  }
+
+  .marker.merged {
+    background: var(--ok);
+    box-shadow: none;
+  }
+
+  .marker.open {
+    box-shadow: inset 0 0 0 1.5px var(--mark);
+  }
+
+  .bn {
+    color: var(--ink);
+  }
+
+  .bn.none,
+  .muted {
+    color: var(--ink-faint);
+  }
+
+  .end {
+    text-align: right;
+  }
+
+  .muted.ok {
+    color: var(--ok);
+  }
+
+  @media (max-width: 760px) {
+    .branches li {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-xs) var(--space-md);
+    }
+
+    .end {
+      text-align: left;
+    }
+  }
+</style>

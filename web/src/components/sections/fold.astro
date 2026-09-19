@@ -1,0 +1,293 @@
+---
+import { fold } from '../../content/copy'
+import { readSession } from '../../lib/session'
+
+/**
+ * The fold states what canon is and then shows one command's effect as a
+ * before and after, so the claim is a diff a reader can check rather than an
+ * adjective. Every count beside a step is a build-time read: the base tooling
+ * files through `canon census`, the Claude seeds through `canon claude seeds
+ * list`, and the base stack's rules through `canon gov list`.
+ */
+const session = readSession()
+const steps = [
+  { ...fold.after.tooling, count: session.toolingFiles },
+  { ...fold.after.seeds, count: session.seedFiles },
+  { ...fold.after.rules, count: session.baseRules },
+]
+const never = [
+  { ...fold.never.skills, count: session.skills.length },
+  { ...fold.never.standards, count: session.standards },
+]
+---
+
+<section class="fold" id="top">
+  <h1>{fold.headline[0]}<br />{fold.headline[1]}</h1>
+  <p class="lead">{fold.lead}</p>
+  <p class="cta">
+    <a class="btn btn-primary" href={fold.primary.href}>{fold.primary.label}</a>
+    <a class="btn btn-ghost" href={fold.secondary.href}
+      >{fold.secondary.label}</a
+    >
+  </p>
+  <div class="diff">
+    <div class="side before">
+      <p class="title">{fold.before.title}</p>
+      <p class="sub">{fold.before.sub}</p>
+      <ul class="rows">
+        {
+          fold.before.rows.map((row) => (
+            <li>
+              <b>{row.name}</b>
+              <span>{row.state}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="middle"><span class="command">{fold.command}</span></div>
+    <div class="side after">
+      <p class="title">{fold.after.title}</p>
+      <p class="sub">{fold.after.sub}</p>
+      <ol class="steps">
+        {
+          steps.map((step, index) => (
+            <li>
+              <span class="number">{index + 1}</span>
+              <span class="step">
+                <b>{step.title}</b>
+                <em>
+                  {step.count} {step.unit}
+                </em>
+                <span>{step.detail}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+  <div class="never">
+    <p class="never-title">{fold.never.title}</p>
+    <ul>
+      {
+        never.map((item) => (
+          <li>
+            <b>{item.name}</b>
+            <em>{item.count}</em>
+            <span>{item.detail}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .fold {
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta {
+    margin-bottom: var(--space-xl);
+  }
+
+  .diff {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-lg);
+    align-items: stretch;
+    text-align: left;
+    width: 100%;
+  }
+
+  .side {
+    border-radius: var(--radius-frame);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 0 1px var(--ring);
+  }
+
+  .after {
+    background: var(--card);
+    box-shadow:
+      inset 0 0 0 1px var(--ring),
+      0 16px 34px var(--shadow);
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .before .title {
+    color: var(--ink-soft);
+  }
+
+  .sub {
+    margin: 2px 0 var(--space-lg);
+    font-size: var(--t5);
+    color: var(--ink-faint);
+  }
+
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    flex: 1;
+  }
+
+  .rows li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    height: 42px;
+    font-size: var(--t5);
+    box-shadow: inset 0 -1px 0 var(--ring);
+  }
+
+  .rows li:last-child {
+    box-shadow: none;
+  }
+
+  .rows b,
+  .rows span {
+    font-weight: 400;
+    color: var(--ink-off);
+  }
+
+  .rows span {
+    text-align: right;
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-md);
+    flex: 1;
+  }
+
+  .steps li {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .number {
+    flex: 0 0 20px;
+    height: 20px;
+    border-radius: var(--radius-pill);
+    background: var(--tint);
+    display: grid;
+    place-items: center;
+    font-size: var(--t6);
+    color: var(--ink-soft);
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .step b {
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .step em,
+  .never em {
+    font-style: normal;
+    font-size: var(--t5);
+    color: var(--ink);
+  }
+
+  .step > span {
+    font-size: var(--t6);
+    color: var(--ink-faint);
+  }
+
+  .middle {
+    display: flex;
+    align-items: center;
+  }
+
+  .command {
+    font-size: var(--t6);
+    color: var(--ink-soft);
+    background: var(--tint);
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-md);
+    white-space: nowrap;
+  }
+
+  .never {
+    width: 100%;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    box-shadow: inset 0 1px 0 var(--ring);
+    text-align: left;
+  }
+
+  .never-title {
+    margin: 0 0 var(--space-md);
+    font-size: var(--t6);
+    color: var(--ink-faint);
+  }
+
+  .never ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+
+  .never li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-md);
+  }
+
+  .never b {
+    font-size: var(--t5);
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .never span {
+    flex: 1 1 100%;
+    font-size: var(--t5);
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 860px) {
+    .diff,
+    .never ul {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .fold {
+      padding-top: var(--space-xl);
+    }
+  }
+</style>

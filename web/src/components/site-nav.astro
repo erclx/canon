@@ -1,50 +1,34 @@
 ---
 import { nav } from '../content/copy'
+import { isPublished, readSession } from '../lib/session'
 
 /**
- * The floating pill, picked on 2026-09-07 over a left rail and a sticky header.
+ * A sticky flat bar carrying the mark, the published version, one link per
+ * named beat of the session, the theme toggle and the install action. A
+ * floating pill was drafted and rejected: it floats over a centred headline
+ * and reads wrong there. The bar takes the ground as its own surface, since
+ * the bands alternate tints and a sticky bar crosses a boundary at every one.
  *
- * It sits at the top and stays hidden until the reader has left the hero,
- * which is the one position where navigation is redundant. Anchored at the
- * bottom it obscured live content at every scroll position rather than only
- * the footer.
+ * The version dot is state rather than decoration: it lights only when the
+ * registry's latest matches the version this build carries, and an
+ * unreachable registry reads as unconfirmed rather than as a match.
  *
  * The mark is inlined rather than linked so it inherits `currentColor`, which
- * is the whole reason `assets/brand/mark.svg` keeps that fill. The favicon is
- * a separate generated copy for the opposite reason: a browser loads it with
- * no CSS context, so it needs a literal.
+ * is the whole reason `assets/brand/mark.svg` keeps that fill.
  */
+const { version } = readSession()
+const published = await isPublished(version)
 ---
 
-<nav
-  aria-label="Sections"
-  class="site-nav pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4"
->
-  <div
-    class="nav-pill pointer-events-auto flex items-center gap-1 rounded-[var(--radius-pill)] border border-(--color-border) bg-(--color-chrome)/90 shadow-lg backdrop-blur"
-  >
-    <a
-      href="#top"
-      class="nav-mark flex items-center gap-2 rounded-[var(--radius-pill)] px-3 py-1 font-semibold text-(--color-accent) no-underline"
-    >
-      {
-        /* The viewBox is cropped to the artwork rather than taking the source's
-          10-90 frame, which carries 5 units of padding on every side. With the
-          padding in, the rendered box is larger than the ink and no alignment
-          on the box can line the two up.
-
-          `items-center` then still aligns boxes, and "canon" is five x-height
-          letters with no ascender and no descender, so its ink sits low in its
-          own box. The nudge is that difference, measured at 0.9px between the
-          two ink centres rather than guessed. */
-      }
+<header class="nav">
+  <div class="bar">
+    <a href="#top" class="logo">
       <svg
         viewBox="15 15 70 70"
-        width="12"
-        height="12"
+        width="15"
+        height="15"
         aria-hidden="true"
         focusable="false"
-        class="mark-glyph"
       >
         <path
           d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z"
@@ -52,158 +36,203 @@ import { nav } from '../content/copy'
         <rect x="44" y="15" width="12" height="70" rx="2" fill="currentColor"
         ></rect>
       </svg>
-      {nav.mark}
+      <span>{nav.mark}</span>
     </a>
-    <ul class="m-0 hidden list-none gap-0.5 p-0 sm:flex">
+    <a
+      class="version"
+      href={nav.npm}
+      title={published ? nav.version.live : nav.version.unconfirmed}
+      data-published={String(published)}
+    >
+      <i class="dot" aria-hidden="true"></i>v{version}
+    </a>
+    <nav aria-label="Sections">
       {
         nav.links.map((link) => (
-          <li>
-            <a
-              href={`#${link.id}`}
-              data-spy={link.id}
-              class="nav-link block rounded-[var(--radius-pill)] px-3 py-1 text-[length:var(--type-label-size)] text-(--color-text-secondary) no-underline"
-            >
-              {link.label}
-            </a>
-          </li>
+          <a href={`#${link.id}`} data-spy={link.id}>
+            {link.label}
+          </a>
         ))
       }
-    </ul>
+    </nav>
     <button
       type="button"
-      class="theme-toggle ml-1 cursor-pointer rounded-[var(--radius-pill)] border-0 bg-transparent px-3 py-1 text-[length:var(--type-label-size)] text-(--color-text-secondary)"
+      class="theme-toggle"
       aria-label={nav.toggleLabel}
       aria-pressed="false"
     >
-      <span aria-hidden="true">◐</span>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <circle cx="12" cy="12" r="4"></circle>
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+        ></path>
+      </svg>
     </button>
+    <a class="btn btn-primary" href={nav.install.href}>{nav.install.label}</a>
   </div>
-</nav>
+</header>
 
 <style>
-  /*
-   * Hidden by default rather than only once the observer has run.
-   *
-   * Keyed on `data-at-top='true'` alone, the bar painted visible over the hero
-   * on every load and vanished a frame later when the script set the
-   * attribute. On a fast reload that flash of a second row of words across the
-   * headline is what reads as the hero text appearing twice.
-   */
-  .site-nav {
-    /* From the spacing scale, and the same value `scroll-padding-top` derives
-       an anchor's landing from, so the two cannot drift apart. */
-    top: var(--nav-inset);
-    opacity: 0;
-    transform: translateY(-8px);
-    pointer-events: none;
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--ground);
+    box-shadow: 0 1px 0 var(--ring);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--t4);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .logo svg {
+    color: var(--mark);
+  }
+
+  .version {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--t6);
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+  }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+  }
+
+  .version[data-published='true'] .dot {
+    background: var(--ok);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 18%, transparent);
+  }
+
+  nav {
+    display: flex;
+    gap: var(--space-xs);
+    margin: 0 auto;
+  }
+
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-pill);
+    font-size: var(--t4);
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  nav a[aria-current='true'] {
+    color: var(--ink);
+    background: var(--tint);
+  }
+
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    background: transparent;
+    color: var(--ink-soft);
+  }
+
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  :global([data-theme='dark']) .theme-toggle circle {
+    fill: currentColor;
+  }
+
+  nav a,
+  .theme-toggle,
+  .version {
     transition:
-      opacity 0.25s ease,
-      transform 0.25s ease;
+      color 0.16s var(--ease),
+      background-color 0.16s var(--ease);
   }
 
-  /* Shown once the reader has left the first screen. */
-  .site-nav[data-at-top='false'] {
-    opacity: 1;
-    transform: none;
-  }
-
-  .site-nav[data-at-top='false'] > * {
-    pointer-events: auto;
-  }
-
-  /*
-   * Every child of the pill takes one line box, which is what lets centring
-   * them produce a row that reads as level.
-   *
-   * The wordmark is 16px and the links are 12px, so their natural line boxes
-   * were 26.4px and 19.8px and the wordmark sat 6.2px low. Padding and
-   * `align-items` were identical throughout, so neither was the cause.
-   *
-   * Two other fixes were tried and measured. Aligning the row on baselines
-   * made it worse, 6.2px to 7.2px, because the wordmark is itself a flex row
-   * and a flex container takes its first item's baseline, which here is an SVG
-   * that has none to give. Laying the wordmark out inline so the word supplied
-   * the baseline dropped the glyph onto its own line. Equal line boxes leave
-   * the two text sizes about 1.5px apart at the baseline, which is ordinary
-   * for mixed sizes centred together and is what a reader sees as level.
-   */
-  /* Padding from the spacing scale rather than a utility step, so the bar's
-     size derives from the same source the rest of the page spaces by. It
-     measured 42px tall against a 900px viewport, which read undersized for
-     the only persistent chrome on the page. */
-  .nav-pill {
-    padding: var(--space-sm) var(--space-md);
-  }
-
-  .nav-pill > *,
-  .nav-pill > ul > li,
-  .nav-pill > ul > li > a {
-    line-height: 20px;
-  }
-
-  .nav-pill > ul > li > a,
-  .nav-pill > .theme-toggle,
-  .nav-pill > .nav-mark {
-    padding-block: var(--space-xs);
-    padding-inline: var(--space-md);
-  }
-
-  /*
-   * The wordmark block rides up to meet the links.
-   *
-   * Equal line boxes above make every child of the pill 28px tall, which is
-   * necessary and not sufficient: 16px text and 12px text sit differently
-   * inside the same box, so "canon" still landed 2.15px below "Workflow" by
-   * ink centre with its baseline 2.00px lower. The offset is that measurement.
-   *
-   * It moves the glyph and the word together, since the two are one element to
-   * a reader. Their alignment to each other is handled separately below and
-   * measures 0.00px, so shifting the pair preserves it.
-   */
-  .nav-mark {
-    transform: translateY(-2px);
-  }
-
-  /* An SVG has no baseline, so it is centred against the word beside it. The
-     nudge is the measured gap between the two ink centres. */
-  .mark-glyph {
-    align-self: center;
-    transform: translateY(0.9px);
-  }
-
-  .nav-link[aria-current='true'] {
-    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
-    color: var(--color-text);
-  }
-
+  nav a:hover,
   .theme-toggle:hover,
-  .nav-link:hover,
-  .nav-mark:hover {
-    color: var(--color-text);
+  .version:hover {
+    color: var(--ink);
+    background: var(--tint);
   }
 
-  /* 410-a11y: interactive elements take the page focus ring, never none. */
-  .theme-toggle:focus-visible,
-  .site-nav a:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+  /*
+   * The links go below 900. The nav's own auto margins held the two ends of
+   * the bar apart, so the first control takes the auto margin instead.
+   */
+  @media (max-width: 900px) {
+    nav {
+      display: none;
+    }
+
+    .theme-toggle {
+      margin-left: auto;
+    }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .site-nav {
-      transition: none;
+  /*
+   * The bar runs out of room before anything else does. The version goes
+   * first, since the footer states it again, and the action drops the minimum
+   * width that reserved a wider box than its own label needs.
+   */
+  @media (max-width: 430px) {
+    .bar {
+      gap: var(--space-md);
+    }
+
+    .version {
+      display: none;
+    }
+
+    .btn {
+      min-width: 0;
+      padding: 0 var(--space-md);
     }
   }
 </style>
 
 <script>
-  const bar = document.querySelector<HTMLElement>('.site-nav')
-  const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle')
   const root = document.documentElement
+  const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle')
 
   function apply(theme: 'light' | 'dark') {
     root.setAttribute('data-theme', theme)
-    root.style.colorScheme = theme
     toggle?.setAttribute('aria-pressed', String(theme === 'light'))
     try {
       localStorage.setItem('canon-theme', theme)
@@ -216,83 +245,47 @@ import { nav } from '../content/copy'
     'aria-pressed',
     String(root.getAttribute('data-theme') === 'light'),
   )
-
   toggle?.addEventListener('click', () => {
     apply(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light')
   })
 
   /**
-   * The bar publishes the height it actually rendered, which is what
-   * `scroll-padding-top` derives an anchor's landing from. A height written
-   * into the stylesheet is a guess about padding and type that goes stale
-   * silently, and the first one was already 8px out.
-   *
-   * It re-measures on resize, since the links wrap out below the small
-   * breakpoint and the bar is shorter without them.
+   * The bar publishes the height it rendered, which `scroll-padding-top`
+   * derives an anchor's landing from, and re-measures when it wraps.
    */
-  const pill = document.querySelector<HTMLElement>('.nav-pill')
-  if (pill) {
+  const bar = document.querySelector<HTMLElement>('.nav')
+  if (bar) {
     const publish = () => {
-      document.documentElement.style.setProperty(
+      root.style.setProperty(
         '--nav-height',
-        `${Math.round(pill.getBoundingClientRect().height)}px`,
+        `${Math.round(bar.getBoundingClientRect().height)}px`,
       )
     }
     publish()
-    if ('ResizeObserver' in window) new ResizeObserver(publish).observe(pill)
+    new ResizeObserver(publish).observe(bar)
   }
 
   /**
-   * The bar reveals once the hero has scrolled away. A sentinel is used rather
-   * than a scroll handler so the browser reports the crossing itself instead of
-   * the page recomputing it every frame.
+   * Which beat the reader is on. A beat counts once its top crosses a line just
+   * under the bar, and the band below 40% of the viewport is ignored, so the
+   * link that lights is the beat being read rather than the one arriving.
    */
-  const hero = document.querySelector('#top')
-  if (bar && hero) {
-    bar.setAttribute('data-at-top', 'true')
-    new IntersectionObserver(
-      ([entry]) => {
-        bar.setAttribute('data-at-top', String(entry?.isIntersecting ?? true))
-      },
-      { rootMargin: '-45% 0px 0px 0px' },
-    ).observe(hero)
-  }
-
-  /**
-   * Which section the reader is in. Every observed section reports its own
-   * ratio and the largest wins, which is what keeps a short section between two
-   * tall ones from being skipped as the page scrolls past it.
-   */
-  const links = [...document.querySelectorAll<HTMLElement>('.nav-link')]
-  const targets = links
-    .map((link) => document.getElementById(link.dataset.spy ?? ''))
-    .filter((el): el is HTMLElement => el !== null)
-
-  if (targets.length) {
-    const ratios = new Map<string, number>()
-
-    const spy = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ratios.set(entry.target.id, entry.intersectionRatio)
-        }
-
-        let best = ''
-        let seen = 0
-        for (const [id, ratio] of ratios) {
-          if (ratio > seen) {
-            seen = ratio
-            best = id
-          }
-        }
-
-        for (const link of links) {
-          link.setAttribute('aria-current', String(link.dataset.spy === best))
-        }
-      },
-      { threshold: [0, 0.15, 0.3, 0.5, 0.75, 1] },
-    )
-
-    for (const target of targets) spy.observe(target)
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')]
+  const byId = new Map(links.map((link) => [link.dataset.spy ?? '', link]))
+  const spy = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        const current = byId.get(entry.target.id)
+        if (!current) continue
+        for (const link of links) link.removeAttribute('aria-current')
+        current.setAttribute('aria-current', 'true')
+      }
+    },
+    { rootMargin: '-64px 0px -60% 0px' },
+  )
+  for (const id of byId.keys()) {
+    const target = document.getElementById(id)
+    if (target) spy.observe(target)
   }
 </script>

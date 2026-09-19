@@ -1,0 +1,145 @@
+---
+import { rules } from '../../content/copy'
+import { EDITED_PATH, readSession } from '../../lib/session'
+import Band from './band.astro'
+
+/**
+ * Which installed rules the edited path pulls in, read from the installed
+ * folder and the catalog at build time. Each card shows the one glob that
+ * matched rather than every glob the rule carries, since seven patterns on a
+ * row read as punctuation rather than as the thing that decided the match.
+ */
+const { matched, unmatched, always, total } = readSession().rules
+const note = rules.note(unmatched, always)
+---
+
+<Band id="rules" head={rules.head(matched.length, total)} cap={rules.cap}>
+  <div class="fig split" id="fig-rules">
+    <div class="edited">
+      <p class="edited-label">{rules.edited}</p>
+      <p class="path">{EDITED_PATH}</p>
+      <p class="note">
+        <b>{note.unmatched}</b>{note.unmatchedText}<b>{note.always}</b>{
+          note.alwaysText
+        }
+      </p>
+    </div>
+    <ul class="fright">
+      {
+        matched.map((rule) => (
+          <li>
+            <b>{rule.name}</b>
+            <p>{rule.description}</p>
+            <code class="glob">
+              <i>{rules.matched}</i>
+              {rule.glob}
+            </code>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Band>
+
+<style>
+  /*
+   * An asymmetric split rather than three equal cards, which the install
+   * section already uses. The artifact is the set of rules that loaded, so that
+   * half takes the one surface and the left column stays on the band as its
+   * label.
+   */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .edited {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .edited-label {
+    margin: 0;
+    font-size: var(--t6);
+    color: var(--ink-faint);
+  }
+
+  .path {
+    margin: 0;
+    font-size: var(--t4);
+    color: var(--ink);
+  }
+
+  .note {
+    margin: var(--space-md) 0 0;
+    padding-top: var(--space-md);
+    box-shadow: inset 0 1px 0 var(--ring);
+    color: var(--ink-faint);
+  }
+
+  .note b {
+    font-weight: 500;
+    color: var(--ink-body);
+  }
+
+  .fright {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-lg);
+    display: grid;
+    border-radius: var(--radius-frame);
+    background: var(--card);
+    box-shadow:
+      inset 0 0 0 1px var(--ring),
+      0 16px 34px var(--shadow);
+  }
+
+  .fright li {
+    display: grid;
+    gap: 2px;
+    padding: var(--space-md) 0;
+    box-shadow: inset 0 -1px 0 var(--ring);
+  }
+
+  .fright li:first-child {
+    padding-top: 0;
+  }
+
+  .fright li:last-child {
+    box-shadow: none;
+  }
+
+  .fright b {
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .fright p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .glob {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    font-size: var(--t6);
+    color: var(--ink-faint);
+    overflow-wrap: anywhere;
+  }
+
+  .glob i {
+    font-style: normal;
+  }
+
+  @media (max-width: 760px) {
+    .split {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+  }
+</style>

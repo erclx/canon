@@ -1,0 +1,72 @@
+---
+import { merge, turns } from '../../content/copy'
+import { readSession } from '../../lib/session'
+import Turn from './turn.astro'
+
+/**
+ * The merge as a trigger and its consequences. Each consequence is a verb
+ * `readSession` found in `.husky/post-merge`, so a verb the hook stops running
+ * drops out of the figure rather than staying on the page as a claim. The
+ * figure assembles on arrival, which `base.astro` drives.
+ *
+ * The token preview is the change this session merged, as the page itself
+ * renders it now. `scripts/core/regen-web-previews.ts` writes it at build time
+ * and it embeds live rather than as a capture.
+ */
+const { mergeActions } = readSession()
+---
+
+<Turn id="merge" {...turns.merge}>
+  <div class="fig" id="fig-merge">
+    <div class="fan">
+      <div class="trigger" data-build>
+        <b>{merge.hook}</b>
+        <span>{merge.fires}</span>
+      </div>
+      <ul class="effects">
+        {
+          mergeActions.map((action) => (
+            <li data-build>
+              <b>{action.effect}</b>
+              <code>{action.verb}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <p class="footnote">{merge.foot}</p>
+  </div>
+  <div class="fig tokens" id="fig-tokens">
+    <p class="fig-head">
+      <code>{merge.tokens.title}</code>
+    </p>
+    <iframe
+      src="/previews/design-tokens/index.html"
+      title={merge.tokens.frameTitle}
+      loading="lazy"></iframe>
+    <p class="footnote">{merge.tokens.note}</p>
+  </div>
+</Turn>
+
+<style>
+  /* The heading stays left, per the turn rule, and the component alone centres. */
+  .fan {
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .tokens {
+    margin-top: var(--space-2xl);
+  }
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: 560px;
+    border: 0;
+    border-radius: var(--radius-frame);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    background: var(--card);
+  }
+</style>

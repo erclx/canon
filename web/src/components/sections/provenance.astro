@@ -1,0 +1,120 @@
+---
+import { provenance } from '../../content/copy'
+
+/**
+ * A roster rather than a second fan: three columns on one baseline, no card
+ * and no rail, so it reads as a record beside the merge beat's diagram rather
+ * than a copy of it. Its rows build on arrival the same way the merge fan
+ * does, since the two closing beats are the page's only cause and its
+ * consequences.
+ */
+---
+
+<section class="done">
+  <div class="bin">
+    <div class="intro">
+      <p class="head">{provenance.head}</p>
+      <p class="cap">{provenance.cap}</p>
+    </div>
+    <ul class="roster">
+      {
+        provenance.roster.map((row) => (
+          <li data-build>
+            <span class="who">{row.who}</span>
+            <b>{row.made}</b>
+            <code>{row.where}</code>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .done {
+    padding: var(--space-2xl) 0;
+  }
+
+  .bin {
+    display: grid;
+    grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+    gap: 0 var(--space-2xl);
+    align-items: start;
+  }
+
+  .head {
+    max-width: none;
+    margin-bottom: var(--space-md);
+  }
+
+  .cap {
+    margin-bottom: 0;
+  }
+
+  .roster {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--t5);
+  }
+
+  .roster li {
+    display: grid;
+    grid-template-columns: minmax(0, 10rem) minmax(0, 1fr) auto;
+    gap: var(--space-lg);
+    align-items: baseline;
+    padding: var(--space-md) 0;
+    box-shadow: inset 0 -1px 0 var(--ring);
+  }
+
+  .roster li:last-child {
+    box-shadow: none;
+  }
+
+  .who,
+  .roster code {
+    color: var(--ink-faint);
+  }
+
+  .roster b {
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .roster code {
+    text-align: right;
+  }
+
+  /* Stacked, the header has no content beside it, so it takes the centred form. */
+  @media (max-width: 900px) {
+    .bin {
+      grid-template-columns: 1fr;
+    }
+
+    .intro {
+      text-align: center;
+    }
+
+    .head,
+    .cap {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .roster {
+      margin-top: var(--space-xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .roster li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-xs);
+    }
+
+    .roster code {
+      text-align: left;
+    }
+  }
+</style>

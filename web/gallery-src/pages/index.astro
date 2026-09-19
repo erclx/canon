@@ -1,17 +1,39 @@
 ---
 import '../../src/styles/global.css'
-import AgentView from '../../src/components/agent-view.astro'
-import BoardLifecycle from '../../src/components/board-lifecycle.astro'
-import CallToAction from '../../src/components/call-to-action.astro'
-import Catalog from '../../src/components/catalog.astro'
-import DesignPreview from '../../src/components/design-preview.astro'
-import Hero from '../../src/components/hero.astro'
-import Install from '../../src/components/install.astro'
+import Ask from '../../src/components/beats/ask.astro'
+import Dispatch from '../../src/components/beats/dispatch.astro'
+import Evidence from '../../src/components/beats/evidence.astro'
+import Gate from '../../src/components/beats/gate.astro'
+import Loop from '../../src/components/beats/loop.astro'
+import Memory from '../../src/components/beats/memory.astro'
+import Merge from '../../src/components/beats/merge.astro'
+import Plan from '../../src/components/beats/plan.astro'
+import Rules from '../../src/components/beats/rules.astro'
+import Skills from '../../src/components/beats/skills.astro'
+import Workers from '../../src/components/beats/workers.astro'
 import Panel from '../../src/components/panel.astro'
-import RuleArrival from '../../src/components/rule-arrival.astro'
+import Close from '../../src/components/sections/close.astro'
+import Field from '../../src/components/sections/field.astro'
+import Fold from '../../src/components/sections/fold.astro'
+import InstallSteps from '../../src/components/sections/install-steps.astro'
+import Proof from '../../src/components/sections/proof.astro'
+import Provenance from '../../src/components/sections/provenance.astro'
+import SiteFooter from '../../src/components/site-footer.astro'
 import SiteNav from '../../src/components/site-nav.astro'
-import TargetReceives from '../../src/components/target-receives.astro'
-import TeachPreview from '../../src/components/teach-preview.astro'
+
+const beats = [
+  { id: 'ask', Component: Ask },
+  { id: 'rules', Component: Rules },
+  { id: 'skills', Component: Skills },
+  { id: 'plan', Component: Plan },
+  { id: 'dispatch', Component: Dispatch },
+  { id: 'workers', Component: Workers },
+  { id: 'gate', Component: Gate },
+  { id: 'memory', Component: Memory },
+  { id: 'evidence', Component: Evidence },
+  { id: 'loop', Component: Loop },
+  { id: 'merge', Component: Merge },
+]
 ---
 
 <!doctype html>
@@ -23,53 +45,69 @@ import TeachPreview from '../../src/components/teach-preview.astro'
   </head>
   <body>
     <main>
-      <section id="agent-view">
-        <h2>agent-view</h2>
-        <AgentView />
+      <section id="site-nav">
+        <h2>site-nav</h2>
+        <SiteNav />
       </section>
-      <section id="board-lifecycle">
-        <h2>board-lifecycle</h2>
-        <BoardLifecycle />
+      <section id="fold">
+        <h2>fold</h2>
+        <Fold />
       </section>
-      <section id="call-to-action">
-        <h2>call-to-action</h2>
-        <CallToAction />
+      <section id="proof">
+        <h2>proof</h2>
+        <Proof />
       </section>
-      <section id="catalog">
-        <h2>catalog</h2>
-        <Catalog />
+      {
+        beats.map(({ id, Component }) => (
+          <section id={`beat-${id}`}>
+            <h2>{id}</h2>
+            <div class="grp">
+              <div class="bin">
+                <Component />
+              </div>
+            </div>
+          </section>
+        ))
+      }
+      <section id="provenance">
+        <h2>provenance</h2>
+        <Provenance />
       </section>
-      <section id="design-preview">
-        <h2>design-preview</h2>
-        <DesignPreview />
+      <section id="install-steps">
+        <h2>install-steps</h2>
+        <InstallSteps />
       </section>
-      <section id="hero">
-        <h2>hero</h2>
-        <Hero />
+      <section id="field">
+        <h2>field</h2>
+        <Field />
       </section>
-      <section id="install">
-        <h2>install</h2>
-        <Install />
+      <section id="close">
+        <h2>close</h2>
+        <Close />
+      </section>
+      <section id="site-footer">
+        <h2>site-footer</h2>
+        <SiteFooter />
       </section>
       <section id="panel">
         <h2>panel</h2>
         <Panel />
       </section>
-      <section id="rule-arrival">
-        <h2>rule-arrival</h2>
-        <RuleArrival />
+      <section id="group">
+        <h2>group</h2>
+        <p class="unrendered">Unrendered. Needs family (string, required).</p>
       </section>
-      <section id="site-nav">
-        <h2>site-nav</h2>
-        <SiteNav />
+      <section id="turn">
+        <h2>turn</h2>
+        <p class="unrendered">
+          Unrendered. Needs id, who, as, say, note (string, required).
+        </p>
       </section>
-      <section id="target-receives">
-        <h2>target-receives</h2>
-        <TargetReceives />
-      </section>
-      <section id="teach-preview">
-        <h2>teach-preview</h2>
-        <TeachPreview />
+      <section id="band">
+        <h2>band</h2>
+        <p class="unrendered">
+          Unrendered. Needs id, head, cap (string, required).
+        </p>
       </section>
       <section id="panel-group">
         <h2>panel-group</h2>
