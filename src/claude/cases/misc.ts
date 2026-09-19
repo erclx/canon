@@ -55,6 +55,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'test-first',
   },
   {
+    prompt:
+      'The loading state already shipped. Should its test be an e2e test or a component one, and is the one I wrote any good?',
+    expect: 'test-craft',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },

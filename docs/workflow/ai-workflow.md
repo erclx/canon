@@ -226,14 +226,15 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Build the feature
 
-| Skill                        | When to use                                                               |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `canon:session-worktree`     | At the plan-to-execute boundary, to get an isolated tree and branch       |
-| `canon:auto-ship`            | After plan approval, to chain implement, verify, review, draft PR         |
-| `canon:project-commands`     | When the project's own command needs running                              |
-| `canon:test-first`           | Before implementing a planned change, to write and run its test red first |
-| `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first            |
-| `canon:ui-test`              | After a UI change, to generate e2e tests and a visual checklist           |
+| Skill                        | When to use                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| `canon:session-worktree`     | At the plan-to-execute boundary, to get an isolated tree and branch             |
+| `canon:auto-ship`            | After plan approval, to chain implement, verify, review, draft PR               |
+| `canon:project-commands`     | When the project's own command needs running                                    |
+| `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor |
+| `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts |
+| `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                  |
+| `canon:ui-test`              | After a UI change, to generate e2e tests and a visual checklist                 |
 
 ### Check the work before it leaves the branch
 
