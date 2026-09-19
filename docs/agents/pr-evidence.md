@@ -51,7 +51,7 @@ image or marks the case new.
 | `ok`                 | A body was rendered. `commentId` is set when a marked comment already exists. |
 | `no-evidence`        | Nothing in the diff carries an `evidence/` segment. An ordinary silent no-op. |
 | `gh-missing`         | `gh` is not on the path, so no pull request could be resolved.                |
-| `gh-failed`          | `gh` could not answer for this repository or branch.                          |
+| `gh-failed`          | `gh` could not answer for this repository or branch, or read its comments.    |
 | `no-branch`          | The pull request carries no head branch name.                                 |
 | `no-object-head`     | The pull request object reported no head commit.                              |
 | `no-base`            | No base resolves against the trunk.                                           |
@@ -98,6 +98,14 @@ way `review-pr` once posted, before that skill's own guard existed. It is
 also why this verb renders the whole comment body rather than handing each
 skill a record to format on its own: a fix to the table shape or the
 collapsed-details wrapper lands once, not twice.
+
+## The preview line
+
+`--preview <url>` opens the body with the branch's preview address, and a run
+without it carries forward the address the marked comment already holds. With
+no evidence in the diff and an address in hand, the body is the address and the
+marker alone, reported as `ok`. `canon docs pr-preview` covers where the
+address comes from.
 
 ## What a collapsed comment still leaves to GitHub
 

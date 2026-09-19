@@ -1,5 +1,6 @@
+import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
 import { execa } from 'execa'
@@ -22,11 +23,20 @@ import {
 import { type CheckRunListing, collapseChecks } from '@/pr/checks'
 import {
   findEvidenceCommentId,
+  findEvidencePreview,
   groupEvidence,
   renderEvidenceBody,
 } from '@/pr/evidence'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import { KEY_CHANGES } from '@/pr/paths'
+import {
+  findDeployWorkflow,
+  mintPreview,
+  type PreviewRefusal,
+  type PreviewRunner,
+  type RunRow,
+  type WorkflowFile,
+} from '@/pr/preview'
 import { type ReviewListing, resolveReviewScope } from '@/pr/review-scope'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
 
@@ -56,6 +66,37 @@ interface KeyChangesOptions {
 interface ReadOptions {
   readonly root?: string
   readonly json?: boolean
+}
+
+interface EvidenceOptions extends ReadOptions {
+  readonly preview?: string
+}
+
+interface PreviewOptions extends ReadOptions {
+  readonly timeout?: string
+}
+
+/** How long `canon pr preview` waits on the deploy run by default, in minutes. */
+const PREVIEW_TIMEOUT_MINUTES = 15
+
+/** How often the deploy run is re-read while waiting on it. */
+const PREVIEW_POLL_MS = 15_000
+
+const PREVIEW_REFUSALS: Record<PreviewRefusal | 'bad-timeout', string> = {
+  'bad-timeout': '--timeout takes a positive number of minutes.',
+  'no-deploy':
+    'No workflow under .github/workflows/ runs pages deploy and carries a workflow_dispatch trigger, so there is nothing to dispatch.',
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
+  unfenced:
+    'The deploy workflow passes no --branch=${{ github.ref_name }}, so a dispatch from this branch would publish it to production. Add the flag before asking for a preview.',
+  'no-alias':
+    'The deploy never printed a canon-preview-alias line, so no address could be read. Add the alias step from the cloudflare stack reference to the workflow.',
+  'gh-failed':
+    'gh could not list or dispatch the deploy workflow for this branch.',
+  'run-failed':
+    'The deploy run finished without succeeding, so no preview was published. Read the run log.',
+  timeout:
+    'The deploy run did not finish inside the bound. The preview may still land. Re-run with a longer --timeout or read the run.',
 }
 
 /** Why a head-sensitive read produced no answer about a commit. */
@@ -324,6 +365,10 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--preview <url>',
+      'Open the body with this preview address, from canon pr preview',
+    )
     .addHelpText(
       'after',
       [
@@ -342,6 +387,12 @@ export function register(program: Command): void {
         '  no-evidence  nothing in the diff carries an evidence/ segment, which',
         '               is an ordinary, silent no-op rather than a refusal',
         '',
+        "--preview puts the address on the body's first line. With no evidence",
+        'in the diff, the body is that line and the marker alone, reported as',
+        'ok, so the preview still lands in one comment a later call can edit.',
+        'Without --preview, an address the marked comment already opens with',
+        'is carried into the new body, so a re-render after a push keeps it.',
+        '',
         'Exit codes:',
         '  0  read, whether it produced a body or reported no-evidence',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -349,11 +400,62 @@ export function register(program: Command): void {
         'Examples:',
         '  canon pr evidence --json',
         '  canon pr evidence 1341 --json',
+        '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
         '',
       ].join('\n'),
     )
-    .action(async (number: string | undefined, opts: ReadOptions) => {
+    .action(async (number: string | undefined, opts: EvidenceOptions) => {
       process.exitCode = await runEvidence(number, opts)
+    })
+
+  pr.command('preview')
+    .description(
+      "Deploy the pull request's branch to a Cloudflare Pages preview and report its address",
+    )
+    .argument('[number]', 'Pull request to read, defaulting to this branch')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--timeout <minutes>',
+      'How long to wait on the deploy run',
+      String(PREVIEW_TIMEOUT_MINUTES),
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Finds the workflow under .github/workflows/ that runs pages deploy with',
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
+        '--branch=${{ github.ref_name }} and a workflow_dispatch trigger,',
+        "dispatches it on the pull request's head branch, waits on that run,",
+        'and reads the address from the canon-preview-alias line the workflow',
+        'prints. The address is read rather than computed from the branch name,',
+        'since Cloudflare flattens and may truncate a branch into its alias.',
+        '',
+        'A deploy without the --branch flag is refused before anything runs,',
+        'because Pages publishes an unfenced deploy to production.',
+        '',
+        'Read `reason` on the JSON record:',
+        '  ok          the preview was published, with its address in `url`',
+        '  no-deploy   no dispatchable workflow runs pages deploy',
+        '  unfenced    the deploy passes no --branch, so nothing was dispatched',
+        '  no-alias    the workflow prints no canon-preview-alias line',
+        '  run-failed  the deploy run finished without succeeding',
+        '  timeout     the run did not finish inside --timeout minutes',
+        '',
+        'Exit codes:',
+        '  0  a preview was published',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr preview --json',
+        '  canon pr preview 1341 --json --timeout 20',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: PreviewOptions) => {
+      process.exitCode = await runPreview(number, opts)
     })
 }
 
@@ -1105,7 +1207,7 @@ async function listTreePaths(
 
 async function runEvidence(
   number: string | undefined,
-  opts: ReadOptions,
+  opts: EvidenceOptions,
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
@@ -1157,7 +1259,7 @@ async function runEvidence(
     baseTree.has(path),
   )
 
-  if (grouped.kind === 'refused') {
+  if (grouped.kind === 'refused' && opts.preview === undefined) {
     logStep('Skipped')
     logInfo(
       'No changed path carries an evidence/ segment, so there is nothing to post.',
@@ -1190,9 +1292,8 @@ async function runEvidence(
     )
   }
 
-  const body = renderEvidenceBody(grouped.states, repo, base, identity.head)
-
   let commentId: number | undefined
+  let carriedPreview: string | undefined
   if (identity.number !== undefined) {
     const commentsRow = await gh(root, [
       'pr',
@@ -1201,24 +1302,44 @@ async function runEvidence(
       '--json',
       'comments',
     ])
+    // An unread thread refuses rather than rendering, since a body built
+    // without it knows neither the comment to edit nor the preview address
+    // to carry, and posting it would duplicate the comment and drop the link.
+    let comments: readonly { url?: string; body: string }[] | undefined
     if (commentsRow !== null) {
       try {
-        const parsed = JSON.parse(commentsRow) as {
-          comments?: readonly { url?: string; body: string }[]
-        }
-        commentId = findEvidenceCommentId(parsed.comments ?? [])
+        comments = (
+          JSON.parse(commentsRow) as {
+            comments?: readonly { url?: string; body: string }[]
+          }
+        ).comments
       } catch {
-        commentId = undefined
+        comments = undefined
       }
     }
+    if (comments === undefined) {
+      return refuseWith(
+        'gh-failed',
+        EVIDENCE_REFUSALS['gh-failed'],
+        emitJson,
+        root,
+      )
+    }
+    commentId = findEvidenceCommentId(comments)
+    carriedPreview = findEvidencePreview(comments)
   }
 
-  const caseCount = grouped.states.reduce((n, s) => n + s.items.length, 0)
+  const preview = opts.preview ?? carriedPreview
+  const states = grouped.kind === 'read' ? grouped.states : []
+  const body = renderEvidenceBody(states, repo, base, identity.head, preview)
+
+  const caseCount = states.reduce((n, s) => n + s.items.length, 0)
 
   logStep('Scope')
   logInfo(
-    `${plural(caseCount, 'case')} across ${plural(grouped.states.length, 'state')}`,
+    `${plural(caseCount, 'case')} across ${plural(states.length, 'state')}`,
   )
+  if (preview !== undefined) logInfo(`preview ${preview}`)
 
   outro()
 
@@ -1232,6 +1353,172 @@ async function runEvidence(
         head: identity.head,
         body,
         ...(commentId !== undefined && { commentId }),
+      })}\n`,
+    )
+  }
+
+  return 0
+}
+
+async function readWorkflows(root: string): Promise<WorkflowFile[]> {
+  const dir = join(root, '.github', 'workflows')
+  if (!existsSync(dir)) return []
+  const paths = [
+    ...new Bun.Glob('*.{yml,yaml}').scanSync({ cwd: dir, onlyFiles: true }),
+  ]
+  return Promise.all(
+    paths.map(async (name) => ({
+      path: `.github/workflows/${name}`,
+      text: await readFile(join(dir, name), 'utf8'),
+    })),
+  )
+}
+
+function parseRun(stdout: string | null): RunRow | undefined {
+  if (stdout === null) return undefined
+  try {
+    return JSON.parse(stdout) as RunRow
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * The `gh` half of a preview. `--workflow` and `gh workflow run` both take the
+ * workflow's file name rather than its repository path.
+ */
+function ghPreviewRunner(root: string): PreviewRunner {
+  return {
+    async dispatch(workflow, ref) {
+      const out = await gh(root, [
+        'workflow',
+        'run',
+        basename(workflow),
+        '--ref',
+        ref,
+      ])
+      return out !== null
+    },
+    async listRuns(workflow, ref) {
+      const out = await gh(root, [
+        'run',
+        'list',
+        '--workflow',
+        basename(workflow),
+        '--branch',
+        ref,
+        '--event',
+        'workflow_dispatch',
+        '--limit',
+        '20',
+        '--json',
+        'databaseId,status,conclusion',
+      ])
+      if (out === null) return undefined
+      try {
+        return JSON.parse(out) as RunRow[]
+      } catch {
+        return undefined
+      }
+    },
+    async viewRun(id) {
+      return parseRun(
+        await gh(root, [
+          'run',
+          'view',
+          String(id),
+          '--json',
+          'databaseId,status,conclusion',
+        ]),
+      )
+    },
+    async readLog(id) {
+      return (await gh(root, ['run', 'view', String(id), '--log'])) ?? undefined
+    },
+    now: () => Date.now(),
+    sleep: (ms) => Bun.sleep(ms),
+  }
+}
+
+async function runPreview(
+  number: string | undefined,
+  opts: PreviewOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  intro('canon pr preview')
+
+  const minutes = Number(opts.timeout ?? PREVIEW_TIMEOUT_MINUTES)
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    return refuseWith(
+      'bad-timeout',
+      PREVIEW_REFUSALS['bad-timeout'],
+      emitJson,
+      root,
+    )
+  }
+
+  // Read ahead of the pull request, so a project with no fenced deploy is
+  // refused without a network call and never reaches a dispatch.
+  const pick = findDeployWorkflow(await readWorkflows(root))
+  if (pick.kind === 'refused') {
+    return refuseWith(
+      pick.reason,
+      PREVIEW_REFUSALS[pick.reason],
+      emitJson,
+      root,
+    )
+  }
+
+  const read = await readIdentity(root, number)
+  if (read.kind === 'refused') {
+    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+  }
+  const { identity } = read
+
+  logStep('Deploy')
+  logInfo(`${pick.path} on ${identity.branch}`)
+
+  const result = await mintPreview(ghPreviewRunner(root), {
+    workflow: pick.path,
+    branch: identity.branch,
+    timeoutMs: minutes * 60_000,
+    pollMs: PREVIEW_POLL_MS,
+  })
+
+  if (result.kind === 'refused') {
+    logStep('Refused')
+    logWarn(PREVIEW_REFUSALS[result.reason])
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          ...(identity.number !== undefined && { number: identity.number }),
+          reason: result.reason,
+          message: PREVIEW_REFUSALS[result.reason],
+          workflow: pick.path,
+          ...(result.runId !== undefined && { runId: result.runId }),
+        })}\n`,
+      )
+    }
+    return 1
+  }
+
+  logStep('Preview')
+  logInfo(result.url)
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        root,
+        ...(identity.number !== undefined && { number: identity.number }),
+        reason: 'ok',
+        url: result.url,
+        workflow: pick.path,
+        runId: result.runId,
       })}\n`,
     )
   }
