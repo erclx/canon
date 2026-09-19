@@ -27,6 +27,7 @@ paths:
 - Place all Playwright tests within the `e2e/` directory.
 - Never place Playwright tests inside `src/`.
 - Scope the three rules above to tests the Playwright runner executes. A Vitest test importing a browser driver to exercise project code stays beside its module, where Vitest looks for it.
+- Keep specs apart from their fixtures, page objects, and helpers inside `e2e/`. Load the `canon:codebase-layout` skill for the folder shape.
 
 ## Timers and async
 
