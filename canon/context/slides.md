@@ -19,7 +19,8 @@ description: SLIDES.md source shape, layout catalog, render command, draft skill
 
 - The engine is a fresh general-purpose layer, not a port of any single project's deck modes. It ships one source format with a per-slide layout, so any repo writes its own `SLIDES.md` and renders with the same command.
 - The source is committed. The rendered `.pptx` lands in the gitignored `.canon/tmp/render/slides/` and can be regenerated at any time.
-- The palette is a paper background with a rust accent, deliberately not blue. Both variants share the same accent so a deck reads consistently either way.
+- The palette is a paper background with a rust accent, deliberately not blue. The five theme colors are read from the design module by role rather than restated, so a deck moves when the decided system does. Each variant takes its own accent, a lighter rust on dark and a deeper one on light, since the module tunes each for its ground.
+- The face is read from the design module too, as Geist. A `.pptx` cannot embed it, so the first family is taken with the ` Variable` suffix dropped to the installed name `Geist` and a viewer without the face sees PowerPoint's own substitute. Point sizes stay a deck-owned scale in `TYPE`, since the module's `t0` to `t6` steps are screen pixels and a literal mapping would shrink the cover to 38 pt and the body to 11 pt.
 
 ## Source shape
 
@@ -44,7 +45,7 @@ A `toc` slide renders a clickable contents list. The render builds the navigatio
 
 ## Design tokens
 
-`src/slides/styles.ts` holds the design system: one warm palette of `background`, `surface`, `ink`, `muted`, and `accent` tokens, the safe font pair, the type scale, and the light and dark variant mapping. A deck selects the light or dark variant through its frontmatter or a render flag.
+`src/slides/styles.ts` holds the design system: one warm palette of `background`, `surface`, `ink`, `muted`, and `accent` tokens, the Geist face read from the design module, the deck-owned point scale, and the light and dark variant mapping. A deck selects the light or dark variant through its frontmatter or a render flag.
 
 ## Render command
 
@@ -60,4 +61,4 @@ After the first render it runs a one-pass quality check: convert the deck to ima
 
 ## Reference deck
 
-`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `images/` holds a dated screenshot of both variants, rendered by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass, and nothing regenerates it when the source changes. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web.md`, since nothing outside this folder depends on the screenshot staying current.
+`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `images/` holds a screenshot of both variants, set in Geist and last regenerated when the deck moved onto the design module's face, rendered by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass, and nothing regenerates it when the source changes. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web.md`, since nothing outside this folder depends on the screenshot staying current.
