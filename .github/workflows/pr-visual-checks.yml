@@ -1,7 +1,7 @@
 name: PR Visual Checks
 # canon-no-seed: builds and captures this checkout's own landing page. Seeding
 # it as-is would have a target run these two jobs against a page it never
-# built and push a commit no branch of its own asked for.
+# built.
 
 on:
   pull_request:
@@ -75,7 +75,7 @@ jobs:
     name: 📸 Landing Page Capture
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -139,44 +139,60 @@ jobs:
           }
           SCREENSHOT_BASE_URL=http://localhost:4321 bun ../tooling/web/configs/e2e/screenshot.ts
 
-      - name: Update the committed baseline
+      # The frames land in their committed location so the report below diffs
+      # them against the baseline this repository ships, and so the artifact
+      # carries the two names a reader already knows.
+      - name: Stage the captured frames
         run: |
           mkdir -p assets/evidence/home
           cp web/screenshots/localhost/home/default.png assets/evidence/home/light.png
           cp web/screenshots/localhost/home/dark.png assets/evidence/home/dark.png
 
-      # HEAD_REF carries github.head_ref through env: rather than into the
-      # script body directly, since that value is attacker-controlled on a
-      # fork pull request and this job holds contents: write.
+      # Uploaded on success rather than on failure alone, against the artifact
+      # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
+      # job's product now that it no longer commits them, so a failure-only
+      # upload would leave a passing run with nothing to review.
+      - name: Upload the captured frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: landing-page-capture
+          path: assets/evidence/home/
+          retention-days: 7
+
+      # This job used to commit the frames back onto the pull request branch
+      # and push. It stopped because the drift it was correcting is not the
+      # branch's. The render is byte-deterministic: on 2026-09-19 two capture
+      # runs on two unrelated branches, four minutes apart on separate runners,
+      # both rewrote light.png from blob 77a35b66 to 08936e29 and dark.png from
+      # fa0121af to 1f91bc04. Those two bot commits were squash-merged and their
+      # branches deleted, so read the same pair off main at fa07374d and
+      # 71a5e183, which bracket the move. No noise means no tolerance to absorb.
+      # What moves the bytes is the page reading catalog counts at build time,
+      # which a merge touching no web/ file still changes, leaving the committed
+      # baseline stale until some unrelated pull request re-renders it and
+      # commits the correction onto a branch that never asked for it.
       #
-      # A GITHUB_TOKEN push does raise a new run against its own commit, held
-      # needing approval rather than starting on its own, and approving one
-      # to get a check green un-gates it the same as any other run. What
-      # actually stops the loop is that the second capture matches the
-      # first: git diff --cached --quiet exits zero and nothing is
-      # committed, so the second run's push step never fires at all.
-      # Swapping in a personal token here does not reopen that guard, but it
-      # does remove the approval gate, so an unapproved run and an
-      # unattended loop both become possible together the moment a capture
-      # stops being byte-identical.
-      #
-      # HUSKY=0 skips this checkout's own git hooks for the commit and the
-      # push, since bun install already ran the prepare script that wires
-      # them up. The pre-push hook runs bun run check, whose Formatting
-      # stage shells out to shfmt, a binary this job never installs, and
-      # this pull request's own Verify job already runs the gate this hook
-      # would repeat.
-      - name: Commit the baseline if it moved
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-          HUSKY: '0'
+      # Reporting rather than committing keeps that signal without the commit.
+      # Refreshing the baseline on main is the other half of the fix and is out
+      # of scope by an operator decision: a commit reaching the trunk with no
+      # pull request and no reviewer is a larger change than this row was
+      # scoped for. Until that lands the baseline still goes stale, and this
+      # step is what says so.
+      - name: Report whether the baseline moved
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/evidence/home
-          if git diff --cached --quiet; then
-            echo "No change in the captured baseline."
+          if git diff --quiet -- assets/evidence/home; then
+            echo "The captured frames match the committed baseline." >>"$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          git commit -m "chore(web): update the landing page capture baseline"
-          git push origin "HEAD:$HEAD_REF"
+          {
+            echo "### The landing page capture moved"
+            echo
+            echo "These frames differ from the committed baseline. That is expected"
+            echo "when a catalog this page counts has moved, and it is not a failure."
+            echo
+            echo '```'
+            git diff --stat -- assets/evidence/home
+            echo '```'
+            echo
+            echo "Download the \`landing-page-capture\` artifact to view them."
+          } >>"$GITHUB_STEP_SUMMARY"
