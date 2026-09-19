@@ -197,6 +197,27 @@ Clean up the tmp file the way the UI-checklist step does, only after the call re
 
 Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read.
 
+### Post the preview address
+
+Run this step only when the evidence step above returned `ok` or the UI checklist step posted a comment. Either one means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. Otherwise skip it silently.
+
+The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs. Mint the preview against the same `<number>`:
+
+```bash
+canon pr preview <number> --json
+```
+
+The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production. `canon docs pr-preview` states the contract. Read `reason` on the record rather than the exit code.
+
+- `ok`: re-render the evidence body with the address on its first line, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
+
+```bash
+canon pr evidence <number> --preview <url> --json
+```
+
+- `no-deploy`: the project deploys nothing a dispatch can start. Say nothing and move on.
+- Any other `reason`, being `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report it with the record's `message` and move on without stopping the chain. A missing link costs the reviewer a click, and a held ship costs the whole chain.
+
 ### Record the number on the task
 
 Write the `number` the final command printed onto the task the branch is closing. Do not resolve it again. `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
@@ -232,5 +253,9 @@ Add a further line only when the labelling command printed its warning, quoting 
 Add a line when the UI checklist step posted a comment, naming the pull request it landed on:
 
 `📋 Posted the UI checklist to <number>.`
+
+Add a line when the preview step returned an address:
+
+`🔗 Preview: <url>`
 
 Do not add any other text.

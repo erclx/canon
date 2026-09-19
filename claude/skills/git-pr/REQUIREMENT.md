@@ -26,6 +26,8 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Label from the paths the branch changed, against a map the project declares, so the label set belongs to the project rather than to the skill
 - Apply labels after the pull request exists, so a label the remote does not carry costs a warning rather than the pull request
 - Report a refused label, since a warning nothing surfaces leaves the run indistinguishable from one that labelled
+- Put a preview address on a pull request that changes a rendered surface when the project's deploy can mint one, since screenshots and a checklist leave a reviewer nothing to click into before merging
+- Bound the wait on that preview and finish the chain without the link on a timeout, since a slow deploy must not hold the ship
 
 ## Must not
 
@@ -35,6 +37,7 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Edit a pull request that is not open, or record its number on a task
 - Name a domain of any one project in the skill body or its references
 - Create a label the map names and the remote lacks
+- Dispatch a deploy whose command names no branch, since Cloudflare Pages publishes such a deploy to production
 - Emit anything after the result line
 
 ## Guards

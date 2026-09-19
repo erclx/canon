@@ -70,6 +70,54 @@ describe('canon pr key-changes --body resolution', () => {
   })
 })
 
+describe('canon pr preview', () => {
+  let rootDir: string
+
+  async function runPreview(
+    args: string[],
+  ): Promise<{ readonly reason: string | undefined; readonly exit: number }> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'preview', '--json', '--root', rootDir, ...args],
+      { cwd: rootDir, reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+    const record = JSON.parse(result.stdout) as { reason?: string }
+    return { reason: record.reason, exit: result.exitCode ?? -1 }
+  }
+
+  beforeEach(async () => {
+    rootDir = await mkdtemp(join(tmpdir(), 'canon-pr-preview-'))
+  })
+
+  afterEach(async () => {
+    await rm(rootDir, { recursive: true, force: true })
+  })
+
+  it('should refuse as no-deploy before reading the pull request when no workflow deploys', async () => {
+    const outcome = await runPreview(['1'])
+
+    expect(outcome).toEqual({ reason: 'no-deploy', exit: 1 })
+  })
+
+  it('should refuse as unfenced when the dispatchable deploy passes no branch', async () => {
+    mkdirSync(join(rootDir, '.github', 'workflows'), { recursive: true })
+    await writeFile(
+      join(rootDir, '.github', 'workflows', 'deploy.yml'),
+      'on:\n  workflow_dispatch:\njobs:\n  d:\n    steps:\n      - run: wrangler pages deploy dist --project-name=site\n',
+    )
+
+    const outcome = await runPreview(['1'])
+
+    expect(outcome).toEqual({ reason: 'unfenced', exit: 1 })
+  })
+
+  it('should refuse a timeout that is not a positive number of minutes', async () => {
+    const outcome = await runPreview(['1', '--timeout', 'soon'])
+
+    expect(outcome).toEqual({ reason: 'bad-timeout', exit: 1 })
+  })
+})
+
 describe('canon pr key-changes credits a rename source and a .gitignore addition', () => {
   let repoRoot: string
 

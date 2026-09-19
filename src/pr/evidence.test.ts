@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   findEvidenceCommentId,
+  findEvidencePreview,
   groupEvidence,
   renderEvidenceBody,
 } from '@/pr/evidence'
@@ -149,6 +150,46 @@ describe('renderEvidenceBody', () => {
       true,
     )
   })
+
+  it('should open the body with the preview address when one is given', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'web/evidence/dark/hero.png', stem: 'hero', added: false },
+          ],
+        },
+      ],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      'https://feat-thing.annex.pages.dev',
+    )
+
+    expect(body.split('\n')[0]).toBe(
+      '**Preview:** https://feat-thing.annex.pages.dev',
+    )
+    expect(body).toContain('<summary>dark (1)</summary>')
+  })
+
+  it('should render the preview and the marker alone when no evidence changed', () => {
+    const body = renderEvidenceBody(
+      [],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      'https://feat-thing.annex.pages.dev',
+    )
+
+    expect(body).toBe(
+      [
+        '**Preview:** https://feat-thing.annex.pages.dev',
+        '',
+        '<!-- pr-evidence: head=bbbb111 -->',
+      ].join('\n'),
+    )
+  })
 })
 
 describe('findEvidenceCommentId', () => {
@@ -181,5 +222,40 @@ describe('findEvidenceCommentId', () => {
     ])
 
     expect(id).toBeUndefined()
+  })
+})
+
+describe('findEvidencePreview', () => {
+  it('should read the preview address off the marked comment', () => {
+    const preview = findEvidencePreview([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '**Preview:** https://feat-x.site.pages.dev\n\n## Evidence\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(preview).toBe('https://feat-x.site.pages.dev')
+  })
+
+  it('should return undefined when the marked comment carries no preview', () => {
+    const preview = findEvidencePreview([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## Evidence\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(preview).toBeUndefined()
+  })
+
+  it('should ignore a preview line on a comment that carries no marker', () => {
+    const preview = findEvidencePreview([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-111',
+        body: '**Preview:** https://elsewhere.pages.dev',
+      },
+    ])
+
+    expect(preview).toBeUndefined()
   })
 })

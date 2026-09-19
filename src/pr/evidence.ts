@@ -4,6 +4,9 @@ const EVIDENCE_SEGMENT = 'evidence'
 /** Prefix of the trailing marker this module writes and reads back. */
 const MARKER_PREFIX = '<!-- pr-evidence:'
 
+/** How the first line of a body names the branch's preview deployment. */
+const PREVIEW_PREFIX = '**Preview:**'
+
 /** A `#issuecomment-<id>` suffix, which is the REST comment id `gh pr view` never returns directly. */
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
 
@@ -109,13 +112,24 @@ export function evidenceMarker(head: string): string {
  * a Base/Head row per case, and the trailing marker naming the head this body
  * describes. Every image URL is pinned to a commit sha rather than a branch,
  * so the comment keeps showing what it claimed even after the branch moves.
+ *
+ * A preview address opens the body, and with no states it is the whole body
+ * apart from the marker, so a pull request whose screenshots did not change
+ * still gets one comment a later call can find and edit in place.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
   repo: string,
   base: string,
   head: string,
+  preview?: string,
 ): string {
+  const opening =
+    preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`, '']
+  if (states.length === 0) {
+    return [...opening, evidenceMarker(head)].join('\n')
+  }
+
   const sections = states.map((entry) => {
     const rows = entry.items.map((item) => {
       const before = item.added
@@ -137,7 +151,14 @@ export function renderEvidenceBody(
     ].join('\n')
   })
 
-  return ['## Evidence', '', ...sections, '', evidenceMarker(head)].join('\n')
+  return [
+    ...opening,
+    '## Evidence',
+    '',
+    ...sections,
+    '',
+    evidenceMarker(head),
+  ].join('\n')
 }
 
 export interface EvidenceComment {
@@ -168,4 +189,18 @@ export function findEvidenceCommentId(
     if (match?.[1] !== undefined) return Number(match[1])
   }
   return undefined
+}
+
+/**
+ * The preview address the marked comment already opens with. A re-render
+ * after a later push passes no address of its own, and carrying this one
+ * forward keeps that edit from deleting the link a reviewer is using.
+ */
+export function findEvidencePreview(
+  comments: readonly EvidenceComment[],
+): string | undefined {
+  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
+  const first = marked?.body.split('\n')[0]?.trim() ?? ''
+  if (!first.startsWith(PREVIEW_PREFIX)) return undefined
+  return first.slice(PREVIEW_PREFIX.length).trim() || undefined
 }
