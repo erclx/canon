@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.95.0](https://github.com/erclx/canon/compare/v4.94.0...v4.95.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** review the tests a branch adds in review-pr ([#1727](https://github.com/erclx/canon/issues/1727)) ([b6d51bc](https://github.com/erclx/canon/commit/b6d51bcd64e434de2a0009e39462c06feeb99646))
+* **claude:** route ui-test changes to their test layer ([#1729](https://github.com/erclx/canon/issues/1729)) ([1b9057d](https://github.com/erclx/canon/commit/1b9057d1cfcf36909db4dcc9edb85484ec71c39e))
+
 ## [4.94.0](https://github.com/erclx/canon/compare/v4.93.0...v4.94.0) (2026-09-19)
 
 
