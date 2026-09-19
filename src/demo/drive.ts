@@ -118,6 +118,7 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
 
     context = await browser.value.newContext({
       viewport: plan.viewport,
+      ...(plan.colorScheme && { colorScheme: plan.colorScheme }),
       // Pointed the opposite way from a test. A recording wants the motion the
       // interface was designed with, where a test wants it suppressed.
       reducedMotion: 'no-preference',

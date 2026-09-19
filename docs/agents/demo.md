@@ -24,13 +24,15 @@ So `canon demo compile` writes a second artifact rather than adding fields to a 
 
 The plan is committed, not scratch. Its timing is a starting point tuned by watching a recording, and the draft cannot reproduce a tuned value, so a recompile over an existing plan refuses and names `--force`.
 
+A plan can carry an optional `colorScheme` of `light` or `dark`, which the recording context starts in so a page following the system preference paints that scheme with no click beat of its own. An absent field keeps the engine's default, which is light, and `compile` never seeds it. Any other value makes the plan unreadable. A page keyed on a stored theme rather than the preference ignores the field.
+
 `record-screencast` is the routed way to run both verbs from a draft path: it compiles only when no plan exists yet, then runs, stopping to report any field still unresolved rather than guessing one.
 
 | Option          | Behavior                                                          |
 | --------------- | ----------------------------------------------------------------- |
 | `--out <dir>`   | Directory the plan and its output paths point at, default `demos` |
 | `--slug <slug>` | Plan name, defaulting to the draft filename                       |
-| `--force`       | Overwrite an existing plan, losing any timing tuned by hand       |
+| `--force`       | Overwrite an existing plan, losing any field set by hand          |
 | `--json`        | Add a record on stdout carrying the beats and what is unfilled    |
 
 ## What a run does

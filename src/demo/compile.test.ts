@@ -197,6 +197,38 @@ describe('parsePlan', () => {
     })
   })
 
+  it('should read a color scheme the plan sets', () => {
+    const parsed = parsePlan(
+      '{"slug":"x","url":"http://x","colorScheme":"dark","steps":[{"kind":"hold"}]}',
+    )
+
+    expect(parsed).toMatchObject({
+      status: 'parsed',
+      plan: { colorScheme: 'dark' },
+    })
+  })
+
+  it('should leave the color scheme unset when the plan carries none', () => {
+    const parsed = parsePlan(
+      '{"slug":"x","url":"http://x","steps":[{"kind":"hold"}]}',
+    )
+
+    expect(parsed.status === 'parsed' && 'colorScheme' in parsed.plan).toBe(
+      false,
+    )
+  })
+
+  it('should refuse a color scheme other than light or dark', () => {
+    const parsed = parsePlan(
+      '{"slug":"x","url":"http://x","colorScheme":"sepia","steps":[{"kind":"hold"}]}',
+    )
+
+    expect(parsed).toMatchObject({
+      status: 'failed',
+      reason: 'colorScheme is "sepia", which is not light or dark',
+    })
+  })
+
   it('should keep a hand-tuned timing rather than overwriting it with the default', () => {
     const parsed = parsePlan(
       '{"slug":"x","url":"http://x","pointer":{"travelMs":900,"typeDelayMs":40},"steps":[{"kind":"hold"}]}',
