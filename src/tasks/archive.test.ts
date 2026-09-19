@@ -36,12 +36,14 @@ interface TaskFixture {
   readonly stem?: string
   readonly pullRequest?: number
   readonly plan?: string
+  readonly ready?: string
   readonly outcomes?: string
 }
 
 function taskBody({
   pullRequest,
   plan,
+  ready,
   outcomes = '- [x] Outcome: it shipped',
 }: TaskFixture): string {
   const lines = [
@@ -55,6 +57,7 @@ function taskBody({
   ]
 
   if (plan) lines.push(`Plan: [${plan}](${plan})`)
+  if (ready) lines.push(`Ready: [${ready}](../ready/${ready}/)`)
   if (pullRequest) lines.push(`Pull request: #${pullRequest}`)
 
   lines.push(
@@ -546,6 +549,176 @@ describe('archiveTask', () => {
       ok: true,
       priorityRowRemoved: false,
     })
+  })
+})
+
+describe('archiveTask ready folder', () => {
+  const FOLDER = '03-design-taste'
+  const PLAN = 'feature-trigger.md'
+
+  async function seedReady(name = FOLDER): Promise<string> {
+    const dir = join(ROOT, '.canon', 'ready', name)
+    mkdirSync(dir, { recursive: true })
+    await writeFile(join(dir, 'overview.md'), '# Overview\n')
+    return dir
+  }
+
+  async function seedPlanText(text: string): Promise<string> {
+    const dir = join(ROOT, '.canon', 'plans')
+    mkdirSync(dir, { recursive: true })
+    const path = join(dir, PLAN)
+    await writeFile(path, text)
+    return path
+  }
+
+  const archivedReady = (name = FOLDER): string =>
+    join(ROOT, '.canon', 'ready', 'archive', name)
+
+  it('should move the ready folder its task names along with the plan', async () => {
+    const folder = await seedReady()
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({
+      ok: true,
+      ready: { from: folder, to: archivedReady() },
+    })
+    expect(existsSync(folder)).toBe(false)
+    expect(existsSync(join(archivedReady(), 'overview.md'))).toBe(true)
+  })
+
+  it('should retarget the Ready line with its trailing slash', async () => {
+    await seedReady()
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    const archived = await readFile(
+      join(archiveDir(ROOT), `${stem}.md`),
+      'utf8',
+    )
+    expect(archived).toContain(
+      `Ready: [${FOLDER}](../../ready/archive/${FOLDER}/)\n`,
+    )
+    expect(archived).toContain(
+      'Plan: [feature-trigger](../../plans/archive/feature-trigger.md)',
+    )
+  })
+
+  it('should rewrite the archived plan path to the folder', async () => {
+    await seedReady()
+    await seedPlanText(`Copy \`.canon/ready/${FOLDER}/\` verbatim.\n`)
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(await readFile(archivedPlan(), 'utf8')).toBe(
+      `Copy \`.canon/ready/archive/${FOLDER}/\` verbatim.\n`,
+    )
+  })
+
+  it('should leave other folder paths in the plan untouched', async () => {
+    await seedReady()
+    const other = '.canon/ready/archive/01-older/'
+    await seedPlanText(`Copy \`.canon/ready/${FOLDER}/\`, cf. \`${other}\`.\n`)
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(await readFile(archivedPlan(), 'utf8')).toContain(`\`${other}\`.`)
+  })
+
+  it('should read the folder from the plan Constraints when the task has no Ready line', async () => {
+    const folder = await seedReady()
+    await seedPlanText(
+      `**Constraints:**\n\n- Copy \`.canon/ready/${FOLDER}/\`.\n`,
+    )
+    const stem = await seedTask({ plan: '../plans/feature-trigger.md' })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({
+      ok: true,
+      ready: { from: folder, to: archivedReady() },
+    })
+  })
+
+  it('should leave the folder with a plan another live task still cites', async () => {
+    const folder = await seedReady()
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+    await seedTask({
+      stem: 'v28.2-sibling',
+      plan: '../plans/feature-trigger.md',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result.ok && result.ready).toBeUndefined()
+    expect(existsSync(folder)).toBe(true)
+  })
+
+  it('should move nothing when the Ready target names no folder', async () => {
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true })
+    expect(result.ok && result.ready).toBeUndefined()
+    expect(existsSync(archivedReady())).toBe(false)
+  })
+
+  it('should move nothing when the folder is already archived', async () => {
+    const archived = archivedReady()
+    mkdirSync(archived, { recursive: true })
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: `archive/${FOLDER}`,
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result.ok && result.ready).toBeUndefined()
+    expect(existsSync(archived)).toBe(true)
+  })
+
+  it('should keep the source when the destination already exists', async () => {
+    const folder = await seedReady()
+    mkdirSync(archivedReady(), { recursive: true })
+    await seedPlan()
+    const stem = await seedTask({
+      plan: '../plans/feature-trigger.md',
+      ready: FOLDER,
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true })
+    expect(result.ok && result.ready).toBeUndefined()
+    expect(existsSync(join(folder, 'overview.md'))).toBe(true)
   })
 })
 
