@@ -20,6 +20,7 @@ import {
   architectureRel,
   type ArchitectureReport,
   coveredCount,
+  isOverCount,
   isOverLength,
   measureArchitecture,
   testableCount,
@@ -98,7 +99,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, superseded-decision narration, index drift, the architecture record against its own ceiling and its word weight, and wireframe states against their evidence folders',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, superseded-decision narration, index drift, the architecture record against its own ceiling, its own entry cap, and its word weight, and wireframe states against their evidence folders',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -124,9 +125,11 @@ export function register(program: Command): void {
         'An unresolved citation always gates. An architecture record that',
         'states its own line allowances gates when it is past the ceiling',
         'those derive, on any run except --citations-only, which never',
-        'measures it. A record stating no allowance is reported and never',
-        'gated. --gate widens the gate to the other two findings that are',
-        'facts rather than judgments: a missing required section and index',
+        'measures it. A record stating an entry cap gates the same way when',
+        'it holds more decisions than the cap. A record stating neither is',
+        'reported and never gated. --gate widens the gate to the other two',
+        'findings that are facts rather than judgments: a missing required',
+        'section and index',
         'drift. Entry length, reference form, table, provenance, narration,',
         'and the record claim classification are judgments under both.',
         '',
@@ -759,6 +762,7 @@ async function runAudit(
   const gating = isGating({
     unresolvedCitations: citations.unresolved.length,
     recordOverLength: record !== undefined && isOverLength(record),
+    recordOverCount: record !== undefined && isOverCount(record),
     sections,
     drift,
     wireframes,
@@ -1253,6 +1257,20 @@ function reportRecord(
     }
     logInfo(
       `The ceiling rises with the decision count, so adding a decision buys ${allowances.perDecision} lines and the check passes exactly when the file grew.`,
+    )
+  }
+
+  if (report.entryCap === undefined) {
+    logInfo(
+      `${plural(decisions, 'decision')} and no entry cap stated, so the count is reported and never gated.`,
+    )
+  } else if (isOverCount(report)) {
+    logError(
+      `${plural(decisions, 'decision')} against a cap of ${report.entryCap}. Merge two or retire one, never compress.`,
+    )
+  } else {
+    logInfo(
+      `${plural(decisions, 'decision')} against a cap of ${report.entryCap}.`,
     )
   }
 

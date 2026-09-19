@@ -7,6 +7,11 @@ import {
   type ClientCommand,
   clientCommandCitationsIn,
 } from '@/client-commands'
+import {
+  isOverCount,
+  isOverLength,
+  measureArchitecture,
+} from '@/context/architecture'
 import { listRepositoryFiles } from '@/git-files'
 import {
   isShippedCorpus,
@@ -220,6 +225,41 @@ function citedPaths(record: { paths?: unknown } | undefined): string[] {
       ? [`${cited.path} (${cited.rewritten})`]
       : [cited.path]
   })
+}
+
+/**
+ * The architecture record against the two limits it states for itself: the
+ * line ceiling its allowances derive and the entry cap.
+ *
+ * Read in-process rather than through `context audit`, whose one gating stage
+ * here runs `--citations-only` and never opens the record, which is why the
+ * line ceiling went unenforced by `bun run check` until this stage. A project
+ * carrying no record, or a record stating neither limit, passes, since both
+ * limits belong to the record rather than to the toolkit.
+ */
+export const architectureRecord: Measure = async (ctx) => {
+  const report = await measureArchitecture(ctx.root)
+  if (report === undefined) {
+    return { emissions: [info('No architecture record to measure')] }
+  }
+
+  const decisions = report.decisions.length
+  const failures = [
+    isOverCount(report) &&
+      `${decisions} decisions against a cap of ${report.entryCap}. Merge two or retire one in ${report.rel}, never compress.`,
+    isOverLength(report) &&
+      `${report.lines} lines against a ceiling of ${report.ceiling} in ${report.rel}.`,
+  ].filter((failure): failure is string => typeof failure === 'string')
+
+  if (failures.length > 0) return { emissions: [], failure: failures.join(' ') }
+
+  const cap =
+    report.entryCap === undefined
+      ? 'no entry cap stated'
+      : `a cap of ${report.entryCap}`
+  return {
+    emissions: [info(`${decisions} decisions against ${cap}`)],
+  }
 }
 
 /**

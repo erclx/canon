@@ -102,6 +102,7 @@ describe('reading counts out of each record shape', () => {
       rel: 'canon/ARCHITECTURE.md',
       lines: 162,
       ceiling: 178,
+      entryCap: 3,
       decisions: [
         { claim: 'countable', checks: [] },
         { claim: 'invariant', checks: ['scripts/core/check.sh'] },
@@ -118,6 +119,7 @@ describe('reading counts out of each record shape', () => {
       indexDrift: 1,
       bareReferences: 1,
       recordOverLength: 0,
+      recordOverCount: 0,
       recordUnverifiable: 1,
       recordUnchecked: 1,
     })
@@ -130,6 +132,25 @@ describe('reading counts out of each record shape', () => {
     }
 
     expect(countsFor(specFor('context'), record)?.recordOverLength).toBe(1)
+  })
+
+  it('should count a record holding more entries than its cap as over count', () => {
+    const record = {
+      ...contextRecord,
+      architecture: { ...contextRecord.architecture, entryCap: 2 },
+    }
+
+    expect(countsFor(specFor('context'), record)?.recordOverCount).toBe(1)
+  })
+
+  it('should omit the count key for a record stating no cap', () => {
+    const { entryCap, ...architecture } = contextRecord.architecture
+    const counts = countsFor(specFor('context'), {
+      ...contextRecord,
+      architecture,
+    })
+
+    expect(counts).not.toHaveProperty('recordOverCount')
   })
 
   /**
