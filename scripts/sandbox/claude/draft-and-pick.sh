@@ -84,7 +84,7 @@ EOF
   log_info "         render works wherever bunx playwright install chromium has run once and takes"
   log_info "         the refusal path everywhere else. Measured 2026-09-02: chromium present, a page"
   log_info "         declaring no font refused on Times New Roman, and one declaring system-ui"
-  log_info "         rendered. The project harness ui-test needs is still absent either way,"
+  log_info "         rendered. The project harness an end to end test needs is still absent either way,"
   log_info "         since that one resolves @playwright/test out of a node_modules nobody installed."
   log_info "Action:  /canon:draft-and-pick draft candidates for the callout treatment on index.html, and take arm 2 when you put the pick to me"
   log_info "Expect:  the closed state. A headless run has no operator to say the pick is right, so it"

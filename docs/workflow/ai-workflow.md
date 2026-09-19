@@ -58,7 +58,7 @@ Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full fi
 - When the current state is unmeasured and more than one approach is live, invoke `canon:plan-groundwork` first. It opens a track folder under `.canon/groundwork/<nn>-<slug>/` and ends in a decision, which may be to do nothing. Skip it when the approach is already settled.
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
-- For UI changes, invoke `canon:ui-test` to route each change to its test layer and run the tests it writes, with Playwright kept for journeys
+- For UI changes, invoke `canon:ui-checklist` to write what a reviewer has to look at and name any behavior shipping without a test
   End the session once the feature works and tests pass. Invoke `canon:docs-fold` to capture any decisions made during implementation before closing.
 
 The routing test is whether the repository can answer an item today. A session grepping handles the yes, and a groundwork track handles the no.
@@ -81,7 +81,7 @@ When features are independent, run them in parallel instead of sequentially. Use
 
 - Create a worktree per feature, then start a Claude Code session in each
 - Invoke `canon:plan-feature` in each session. Plans land at the main worktree root as `.canon/plans/feature-<slug>.md`, one per feature, no collisions. Small features stay in chat and skip the file.
-- Implement, verify, and review each feature independently. `review-branch` writes a per-branch report at the main worktree root (`review/branch-<slug>.md`), and `ui-test` writes a per-branch checklist handoff there too (`tmp/handoff/ui-checklist/<slug>.md`) that `git-pr` posts to the pull request and removes, so parallel sessions do not overwrite each other. The slug is the branch name with any leading type segment dropped, so `feat/jwt-expiration` and the plan at `feature-jwt-expiration.md` meet on one name
+- Implement, verify, and review each feature independently. `review-branch` writes a per-branch report at the main worktree root (`review/branch-<slug>.md`), and `ui-checklist` writes a per-branch checklist handoff there too (`tmp/handoff/ui-checklist/<slug>.md`) that `git-pr` posts to the pull request and removes, so parallel sessions do not overwrite each other. The slug is the branch name with any leading type segment dropped, so `feat/jwt-expiration` and the plan at `feature-jwt-expiration.md` meet on one name
 - Ship each worktree separately with `canon:git-ship`
 - For full autonomy per worktree, invoke `canon:auto-ship` instead of the manual chain. Approve the plan, walk away, come back to a pull request the chain marked as a draft and then read the flag back on. The mark says the work has had no review yet, and it holds no window, since readying a pull request to merge lifts it directly, an act reserved to the operator or to the controlling session that closed the review.
 
@@ -174,7 +174,7 @@ The receipt is collected once every item on it has been decided, and it survives
 
 ### UI polish
 
-Verify the change manually in the browser. Invoke `canon:ui-test` if you need tests at the right layer and a visual verification checklist for the session. For the fix itself, describe the change in Claude Code directly.
+Verify the change manually in the browser. Invoke `canon:ui-checklist` if you need a written list of what to look at. For the fix itself, describe the change in Claude Code directly.
 
 ### Quick fix
 
@@ -235,7 +235,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor |
 | `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts |
 | `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                  |
-| `canon:ui-test`              | After a UI change, to generate layered tests and a visual checklist             |
+| `canon:ui-checklist`         | After a UI change, to write what to look at and name what ships untested        |
 
 ### Check the work before it leaves the branch
 

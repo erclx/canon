@@ -44,5 +44,5 @@ A session that does start one picks a runner on the spot. The reading then comes
 - Judging the interface against stated intent, which `ux-audit` owns
 - Contrast, which is computable from two color values in the token table `ux-audit` already reads. A contrast failure from a color computed at runtime stays invisible to that reader, and the cost is accepted rather than overlooked.
 - Network waterfall, bundle size, and accessibility, which no version of this measures
-- Writing behavioral tests against the interface, which `ui-test` owns
+- Writing behavioral tests against the interface, which `test-first` and `test-craft` own
 - Fixing what the reading found

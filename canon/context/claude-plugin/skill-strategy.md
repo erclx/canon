@@ -209,7 +209,7 @@ The variant format states `### N.` for a change and `#### A/B/C` for a variant e
 
 ## The candidate surface, and the composed sheet it wanted has no verb
 
-`draft-and-pick` covers work where several drafts are produced, looked at, and iterated until one is good enough. The four nearest surfaces all miss it by assuming the answer is known: `plan-feature` plans one answer, `ux-audit` reports roughness from source in one pass, `ux-measure` reads numbers off a running interface, and `ui-test` writes tests for a change already made. Each takes one pass at one answer, so a decision settled by looking landed on whichever of them matched the word "UI".
+`draft-and-pick` covers work where several drafts are produced, looked at, and iterated until one is good enough. The four nearest surfaces all miss it by assuming the answer is known: `plan-feature` plans one answer, `ux-audit` reports roughness from source in one pass, `ux-measure` reads numbers off a running interface, and `ui-checklist` writes what to look at on a change already made. Each takes one pass at one answer, so a decision settled by looking landed on whichever of them matched the word "UI".
 
 The name carries no ownership prefix, on the ownership axis above: this skill writes candidates to `.canon/tmp/<slug>/` and deletes them with the pick, so a bare verb phrase places it beside `restate-plainly` and `decision-escalate` rather than beside a workflow-surface family. A noun with no act in it was the alternative and was declined.
 

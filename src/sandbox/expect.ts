@@ -178,7 +178,7 @@ function contentArray(value: unknown): ContentAssertion[] {
     // A bare key written below a `[[content]]` header belongs to that table in
     // TOML, not to the document, so a declaration listing `manual` or
     // `max_turns` after its content blocks parses clean and silently asserts
-    // neither. The `claude/ui-test` arm shipped that way: a turn ceiling that
+    // neither. The `claude/ui-checklist` arm shipped that way: a turn ceiling that
     // never ran and five manual entries that never reached the unchecked count,
     // while `canon sandbox coverage` counted the arm as armed. Nothing at the
     // top level can see the difference, so the check belongs here.

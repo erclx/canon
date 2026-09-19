@@ -28,7 +28,8 @@
 # coverage of the loop is the mistake this paragraph exists to prevent.
 #
 # Two earlier premises were wrong and are recorded so neither is re-derived. The
-# arm first asserted a render refusal, read off `ui-test` failing in a
+# arm first asserted a render refusal, read off the arm then named `ui-test`
+# failing in a
 # sandbox, which fails because it resolves `@playwright/test` out of a
 # `node_modules` nobody installed, where `canon capture` resolves
 # `playwright-core` through the installed `canon` and renders. It then asserted

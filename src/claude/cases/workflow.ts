@@ -126,8 +126,9 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'teach-workspace',
   },
   {
-    prompt: 'Generate the Playwright tests I need after this UI change.',
-    expect: 'ui-test',
+    prompt:
+      'The restyle is finished. Write down what a reviewer has to look at by eye, and which behaviors have no test.',
+    expect: 'ui-checklist',
   },
   {
     prompt:

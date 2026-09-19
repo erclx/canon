@@ -3,8 +3,8 @@ import { isExcludedPath, renamePath, renameText } from '@/migrate/rename'
 import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
 
 describe('SKILL_NAME_MAP', () => {
-  it('should carry one row for every prefixed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(29)
+  it('should carry one row for every renamed skill', () => {
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(30)
   })
 
   it('should retire the prefix on every row', () => {
@@ -31,10 +31,25 @@ describe('SKILL_NAME_MAP', () => {
     expect(chained).toEqual([])
   })
 
-  it('should leave no two skills sharing a new name', () => {
-    const names = Object.values(SKILL_NAME_MAP)
+  it('should let two keys share a name only when one is an older spelling of the other', () => {
+    const byName = new Map<string, string[]>()
+    for (const [key, name] of Object.entries(SKILL_NAME_MAP)) {
+      byName.set(name, [...(byName.get(name) ?? []), key])
+    }
 
-    expect(new Set(names).size).toBe(names.length)
+    const unrelated = [...byName.values()]
+      .filter((keys) => keys.length > 1)
+      .filter(
+        (keys) =>
+          !keys.every(
+            (key) =>
+              key === keys[0] ||
+              key.endsWith(`-${keys[0]}`) ||
+              (keys[0] ?? '').endsWith(`-${key}`),
+          ),
+      )
+
+    expect(unrelated).toEqual([])
   })
 
   it('should carry no single-word key, which wholeToken would rewrite everywhere it appears as an ordinary word', () => {
@@ -53,6 +68,14 @@ describe('SKILL_NAME_RULES ordering', () => {
     const shorter = order.indexOf('claude-intake')
 
     expect(longer).toBeLessThan(shorter)
+  })
+
+  it('should try the prefixed ui name ahead of the bare one it contains', () => {
+    const order = SKILL_NAME_RULES.tokenOrder
+
+    expect(order.indexOf('claude-ui-test')).toBeLessThan(
+      order.indexOf('ui-test'),
+    )
   })
 
   it('should order every token longest first', () => {
@@ -126,6 +149,12 @@ describe('renameText under the skill preset', () => {
         SKILL_NAME_RULES,
       ),
     ).toBe('canon:draft-screencast and canon:draft-slides')
+  })
+
+  it('should land both ui spellings on the new name in one pass', () => {
+    expect(
+      renameText('canon:claude-ui-test and canon:ui-test', SKILL_NAME_RULES),
+    ).toBe('canon:ui-checklist and canon:ui-checklist')
   })
 
   it('should rewrite the two canon- names that take a standalone verb-first name', () => {
