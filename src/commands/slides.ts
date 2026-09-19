@@ -11,10 +11,12 @@ import { intro, outro, palette } from '@/ui'
 export function register(program: Command): void {
   const slides = program
     .command('slides')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Slide deck commands (render, list)')
 
   slides
     .command('render')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Render a SLIDES.md source into a PowerPoint deck')
     .option('-s, --source <path>', 'Source SLIDES.md path', '.claude/SLIDES.md')
     .option(
@@ -82,6 +84,7 @@ export function register(program: Command): void {
 
   slides
     .command('list')
+    .helpOption('-h, --help', 'Show this help message')
     .description('List the available slide layouts')
     .option('--json', 'Output the layout catalog as JSON')
     .action((opts: { json?: boolean }) => {

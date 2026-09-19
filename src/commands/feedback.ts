@@ -71,6 +71,7 @@ function writeLocal(body: string, mismatch: string | undefined): string {
 export function register(program: Command): void {
   program
     .command('feedback')
+    .helpOption('-h, --help', 'Show this help message')
     .description(
       'Write toolkit feedback from stdin to .canon/feedback/, or open a GitHub issue with --github',
     )

@@ -26,12 +26,14 @@ import { mainWorktreeRoot } from '@/worktree'
 export function register(program: Command): void {
   const design = program
     .command('design')
+    .helpOption('-h, --help', 'Show this help message')
     .description(
       'Design system commands (regen, css, render, board, install, sync)',
     )
 
   design
     .command('regen')
+    .helpOption('-h, --help', 'Show this help message')
     .description(
       'Rewrite canon/DESIGN.md and the base stylesheet from src/design/tokens.ts',
     )
@@ -84,6 +86,7 @@ export function register(program: Command): void {
 
   design
     .command('css')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Emit the design tokens and components as CSS on stdout')
     .option(
       '--no-components',
@@ -104,6 +107,7 @@ export function register(program: Command): void {
 
   design
     .command('render')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Render DESIGN.md tokens to HTML and CSS preview')
     .option(
       '-s, --source <path>',
@@ -137,6 +141,7 @@ export function register(program: Command): void {
 
   design
     .command('board')
+    .helpOption('-h, --help', 'Show this help message')
     .description(
       'Generate the design board, an index over a project’s design surfaces',
     )

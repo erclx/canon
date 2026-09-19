@@ -25,6 +25,7 @@ export async function resolveOutDir(opts: TranscriptOptions): Promise<string> {
 export function register(program: Command): void {
   program
     .command('transcripts <url>')
+    .helpOption('-h, --help', 'Show this help message')
     .description('Fetch a YouTube transcript with metadata frontmatter')
     .option(
       '-o, --out <path>',
