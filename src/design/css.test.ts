@@ -10,6 +10,7 @@ const minimal = (overrides: Partial<DesignTokens> = {}): DesignTokens => ({
   preamble: '',
   color: [],
   colorNote: '',
+  typeScale: [],
   typography: [],
   typographyNote: '',
   spacing: [],
@@ -50,15 +51,25 @@ describe('buildDesignCss', () => {
   it('carries the spacing, type, and radius layers beside the colors', () => {
     const css = buildDesignCss()
 
-    expect(css).toContain('--space-md: 18px;')
+    expect(css).toContain('--space-md: 0.875rem;')
     expect(css).toContain('--type-body-lh: 1.65;')
     expect(css).toContain(
-      '--type-body-family: Noto Sans Mono, DejaVu Sans Mono, monospace;',
+      '--type-body-family: Geist Variable, DejaVu Sans, sans-serif;',
     )
     expect(css).toContain(
-      '--type-page-display-family: Noto Sans, DejaVu Sans, sans-serif;',
+      '--type-code-family: Noto Sans Mono, DejaVu Sans Mono, monospace;',
     )
+    expect(css).toContain('--t0: 3.175rem;')
+    expect(css).toContain('--t6: 0.6875rem;')
     expect(css).toContain('--radius-marker: 999px;')
+  })
+
+  it('gives every role a size the type scale offers', () => {
+    const sizes = new Set(TOKENS.typeScale.map((step) => step.size))
+
+    expect(TOKENS.typography.filter((role) => !sizes.has(role.size))).toEqual(
+      [],
+    )
   })
 
   it('drops a radius the record declares as none rather than emitting it', () => {
