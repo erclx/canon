@@ -1,0 +1,20 @@
+---
+/**
+ * One narrative beat group: what was said, then the mechanism that answered
+ * it. The family decides the layout, and `tint` alternates the ground, which is
+ * the structural rule the whole page reads by. `arc` is the family the two
+ * machine beats take, so they do not become a fifth and sixth `grp`.
+ */
+interface Props {
+  family: 'grp' | 'arc'
+  tint?: boolean
+}
+
+const { family, tint = false } = Astro.props
+---
+
+<section class:list={[family, { tint }]}>
+  <div class="bin">
+    <slot />
+  </div>
+</section>

@@ -1,85 +1,26 @@
 import { expect, test } from '@playwright/test'
 
-import { loadsWhen, readRuleGroups } from '../src/lib/catalogs'
-import { readCatalogCounts } from '../src/lib/counts'
-// The spec runs outside vite, which resolves a bare JSON import for the
-// component but not for this file, so the attribute is required here and not
-// in agent-view.astro.
-import fixture from '../src/fixtures/agent-view.json' with { type: 'json' }
+/** Every settle on an observer or a transition is bounded explicitly. */
+const SETTLE = { timeout: 5_000 }
 
-test('renders the ten sections', async ({ page }) => {
+/**
+ * Journeys and whole-page behavior only a real browser computes: anchors,
+ * scroll-spy, the stored theme, the figure build and its still escape, layout
+ * at the width floor, and a lazy frame. What each figure derives is unit
+ * tested beside `web/src/lib/derive.ts`, so nothing here asserts copy.
+ */
+
+test('renders the eleven sections', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('section')).toHaveCount(10)
+  await expect(page.locator('main > section')).toHaveCount(11)
 })
 
-test('no section falls back to a committed raster', async ({ page }) => {
-  await page.goto('/')
-  // Every catalog the page shows is rendered from a build-time read now. A
-  // raster reappearing means a section regressed to a picture of its content,
-  // which is soft, carries no links, and cannot reflow.
-  await expect(page.locator('main img')).toHaveCount(0)
-})
-
-test('the design token preview iframe loads a non-empty document', async ({
-  page,
-}) => {
-  await page.goto('/')
-  // The iframe carries loading="lazy", so it stays unloaded until this
-  // section scrolls into view, the way a reader reaches it too.
-  await page.locator('#design-preview').scrollIntoViewIfNeeded()
-  const frame = page.frameLocator('#design-preview iframe')
-  await expect(frame.locator('h1')).toHaveText('Design tokens')
-  await expect(frame.locator('table').first()).toBeVisible()
-})
-
-test('the teach workspace preview iframe loads a non-empty lesson', async ({
-  page,
-}) => {
-  await page.goto('/')
-  // The iframe carries loading="lazy", so it stays unloaded until this
-  // section scrolls into view, the way a reader reaches it too.
-  await page.locator('#teach-preview').scrollIntoViewIfNeeded()
-  const frame = page.frameLocator('#teach-preview iframe')
-  await expect(frame.locator('h1')).toHaveText('How a rule reaches you')
-  await expect(frame.locator('.quiz .q')).toHaveCount(4)
-})
-
-test('the rules panel names every domain with its true count', async ({
-  page,
-}) => {
-  await page.goto('/')
-  const groups = page.locator('#catalog .panel-group')
-  // The group structure is complete and the sampling sits one level down. A
-  // flat sample of ten rules renders five of the eight domains and tells the
-  // reader nothing about the three it dropped.
-  const count = await groups.count()
-  expect(count).toBeGreaterThanOrEqual(8)
-  await expect(groups.first()).toContainText(/of \d+/)
-})
-
-test('a path-scoped rule is marked and an always-on rule is not', async ({
-  page,
-}) => {
-  // Reads the same catalog the page samples from, rather than pinning the
-  // assertion to today's first glob. A rule's `paths:` list edited on another
-  // branch should not fail this one.
-  const { groups } = readRuleGroups()
-  const scoped = groups
-    .flatMap((group) => group.sample)
-    .find((rule) => loadsWhen(rule).scoped)
-  if (!scoped) throw new Error('no path-scoped rule in the sampled catalog')
-
-  await page.goto('/')
-  const catalog = page.locator('#catalog')
-  await expect(catalog.getByText('every session').first()).toBeVisible()
-  await expect(catalog.getByText(loadsWhen(scoped).label).first()).toBeVisible()
-})
-
-test('every nav link resolves to a section on the page', async ({ page }) => {
+test('every nav link lands on a beat of the session', async ({ page }) => {
   await page.goto('/')
   const links = page.locator('nav[aria-label="Sections"] a')
   const count = await links.count()
   expect(count).toBeGreaterThan(0)
+
   for (let i = 0; i < count; i++) {
     const href = await links.nth(i).getAttribute('href')
     expect(href).toMatch(/^#/)
@@ -87,185 +28,121 @@ test('every nav link resolves to a section on the page', async ({ page }) => {
   }
 })
 
-test('the toggle flips the theme and records the choice', async ({ page }) => {
+test('following a nav link marks that beat as the one being read', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const link = page.locator('nav[aria-label="Sections"] a[href="#workers"]')
+
+  await link.click()
+
+  await expect(page.locator('#workers')).toBeInViewport(SETTLE)
+  await expect(link).toHaveAttribute('aria-current', 'true', SETTLE)
+  await expect(
+    page.locator('nav[aria-label="Sections"] a[aria-current="true"]'),
+  ).toHaveCount(1)
+})
+
+test('the toggle flips the theme and a reload keeps it', async ({ page }) => {
   await page.goto('/')
   const root = page.locator('html')
   const before = await root.getAttribute('data-theme')
-
-  // The bar is hidden over the hero, so the toggle is reached by scrolling
-  // past it, which is the only way a reader reaches it too.
-  await page.locator('#install').scrollIntoViewIfNeeded()
-  await expect(page.locator('.site-nav')).toHaveAttribute(
-    'data-at-top',
-    'false',
-  )
+  expect(before).toMatch(/^(light|dark)$/)
 
   await page.locator('.theme-toggle').click()
-
+  await expect(root).not.toHaveAttribute('data-theme', before as string)
   const after = await root.getAttribute('data-theme')
-  expect(after).not.toBe(before)
-  expect(await page.evaluate(() => localStorage.getItem('canon-theme'))).toBe(
-    after,
-  )
+
+  await page.reload()
+  await expect(root).toHaveAttribute('data-theme', after as string, SETTLE)
 })
 
-test('the rule arrives once its stage scrolls into view', async ({ page }) => {
-  await page.goto('/')
-  const stage = page.locator('.rule-arrival-stage')
-  const card = stage.locator('.rule-card')
-
-  await expect(card).toHaveCSS('opacity', '0')
-  await stage.scrollIntoViewIfNeeded()
-  await expect(stage).toHaveClass(/is-visible/)
-  await expect(card).toHaveCSS('opacity', '1')
-})
-
-test('the agent view renders all three bands at once', async ({ page }) => {
-  await page.goto('/')
-
-  // Every session plus the mover's second copy, which is what lets a row cross
-  // a heading that CSS cannot transition across.
-  await expect(page.locator('.agent-row')).toHaveCount(
-    fixture.sessions.length + 1,
-  )
-  await expect(page.locator('.agent-band')).toHaveCount(3)
-  await expect(page.locator('.agent-more')).toContainText(
-    `${fixture.summary.more} more`,
-  )
-  await expect(page.locator('.count-working')).toHaveText(
-    String(fixture.summary.working),
-  )
-})
-
-// The section is about a dispatch, so the session doing the dispatching has to
-// be in it. A branch filter in the generator excluded the orchestrator and
-// every planner, which no check here caught because the page matched its own
-// fixture the whole way through.
-test('the agent view pins the dispatching session', async ({ page }) => {
-  await page.goto('/')
-
-  const pinned = fixture.sessions.filter((s) => s.state === 'pinned')
-  expect(pinned.length).toBeGreaterThan(0)
-
-  const band = page.locator('.agent-band').first()
-  await expect(band).toHaveText('Pinned')
-  await expect(page.locator('.agent-row').first()).toContainText(pinned[0].name)
-})
-
-test('the agent view carries planners beside workers', async ({ page }) => {
-  await page.goto('/')
-
-  const planners = fixture.sessions.filter((s) => s.name.startsWith('planner-'))
-  expect(planners.length).toBeGreaterThan(0)
-
-  for (const planner of planners) {
-    await expect(
-      page.locator('.agent-row').filter({ hasText: planner.name }).first(),
-    ).toBeVisible()
-  }
-})
-
-test('the agent view names each session with its own row', async ({ page }) => {
-  await page.goto('/')
-
-  for (const session of fixture.sessions) {
-    const row = page.locator(`.agent-row[data-session="${session.name}"]`)
-    await expect(row.first()).toContainText(session.name)
-    await expect(row.first()).toContainText(session.activity)
-  }
-})
-
-test('a working row moves into completed on scroll', async ({ page }) => {
-  await page.goto('/')
-  const stage = page.locator('.agent-stage')
-  const mover = stage.locator('.agent-row-mover')
-  const landed = stage.locator('.agent-row-landed')
-
-  await expect(mover).toBeVisible()
-  await expect(landed).toBeHidden()
-
-  await stage.scrollIntoViewIfNeeded()
-
-  // The row survives the scroll that reveals it. Moving it on the intersection
-  // itself showed a reader the finished state and never the one it finished
-  // from, so this asserts the dwell rather than only its outcome.
-  //
-  // The wait is the assertion rather than a settle. Reading the class straight
-  // after the scroll passes whether or not a dwell exists, since the observer
-  // callback has not necessarily run yet either way, so the check has to land
-  // inside the dwell window to mean anything.
-  await page.waitForTimeout(400)
-  await expect(stage).not.toHaveClass(/is-complete/)
-  await expect(mover).toBeVisible()
-
-  await expect(stage).toHaveClass(/is-complete/)
-  await expect(landed).toBeVisible()
-  await expect(mover).toBeHidden()
-
-  // The count moves with the row, so the summary never contradicts the list
-  // sitting under it.
-  await expect(stage.locator('.agent-summary-after')).toContainText(
-    `${fixture.summary.working - 1} working`,
-  )
-  await expect(stage.locator('.agent-summary-before')).toBeHidden()
-})
-
-test('both marker states are on screen together', async ({ page }) => {
-  await page.goto('/')
-
-  // The two bands stand at once, so a working marker and a finished one are
-  // visible in the same view rather than one replacing the other.
-  await expect(page.locator('.marker-working').first()).toBeVisible()
-  await expect(page.locator('.marker-done').last()).toBeVisible()
-})
-
-test('the agent view names an outcome for every session', async ({ page }) => {
-  await page.goto('/')
-
-  for (const session of fixture.sessions) {
-    if (session.pullRequest === null) continue
-    const row = page.locator(`.agent-row[data-session="${session.name}"]`)
-    await expect(row.first().locator('.agent-pr')).toHaveText(
-      `#${session.pullRequest}`,
-    )
-  }
-})
-
-test.describe('with motion turned down', () => {
-  test.use({ reducedMotion: 'reduce' })
-
-  // The move is carried by the class rather than by the motion, which is the
-  // property that lets the slide and the marker animation drop out without
-  // taking the state change with them.
-  test('the row still lands', async ({ page }) => {
+test.describe('the closing figures', () => {
+  test('build as they arrive when motion is allowed', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto('/')
-    const stage = page.locator('.agent-stage')
+    const node = page.locator('#fig-merge [data-build]').first()
 
-    await stage.scrollIntoViewIfNeeded()
-    await expect(stage).toHaveClass(/is-complete/)
-    await expect(stage.locator('.agent-row-landed')).toBeVisible()
-    await expect(stage.locator('.agent-row-mover')).toBeHidden()
+    await expect(node).toHaveCSS('opacity', '0')
+    await node.scrollIntoViewIfNeeded()
+    await expect(node).toHaveClass(/is-built/, SETTLE)
+    await expect(node).toHaveCSS('opacity', '1', SETTLE)
+  })
+
+  // A full-page capture scrolls nothing, so the observer never fires. Each
+  // escape has to land every piece at its end state without a scroll.
+  test('reach their end state without a scroll under reduced motion', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const pieces = page.locator('[data-build]')
+    const count = await pieces.count()
+    expect(count).toBeGreaterThan(0)
+
+    for (let i = 0; i < count; i++) {
+      await expect(pieces.nth(i)).toHaveCSS('opacity', '1', SETTLE)
+    }
+  })
+
+  test('reach their end state without a scroll with ?still', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/?still')
+    const pieces = page.locator('[data-build]')
+    const count = await pieces.count()
+    expect(count).toBeGreaterThan(0)
+
+    for (let i = 0; i < count; i++) {
+      await expect(pieces.nth(i)).toHaveCSS('opacity', '1', SETTLE)
+    }
   })
 })
 
-test('the hero cta points at the install section', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('link', { name: 'See how it installs' }).click()
-  await expect(page).toHaveURL(/#install$/)
-  await expect(page.locator('#install')).toBeInViewport()
+test.describe('at the 320 pixel floor', () => {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`the ${theme} page scrolls no wider than the viewport`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: theme })
+      await page.setViewportSize({ width: 320, height: 800 })
+      await page.goto('/')
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      )
+      expect(overflow).toBe(0)
+    })
+  }
 })
 
-test('catalog counts match a live canon gov counts read', async ({ page }) => {
-  const live = readCatalogCounts()
+test('the token preview loads once the merge beat is reached', async ({
+  page,
+}) => {
   await page.goto('/')
+  // The frame is lazy, so it loads only once the beat nears the viewport.
+  await page.locator('#fig-tokens').scrollIntoViewIfNeeded()
+  const frame = page.frameLocator('#fig-tokens iframe')
+  await expect(frame.locator('table').first()).toBeVisible(SETTLE)
+})
 
-  // Scoped to the counts panel by its own hook. The section carries a second
-  // definition list for the domain summaries, and a bare `dl > div` matched
-  // both, with a catalog name appearing inside the prose of the other.
-  for (const [name, value] of Object.entries(live)) {
-    const card = page
-      .locator('[data-catalog-counts] > div')
-      .filter({ hasText: name })
-    await expect(card.locator('dd')).toHaveText(String(value))
+test('each field lists as many names as its heading counts', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const fields = page.locator('[data-field]')
+  await expect(fields).toHaveCount(2)
+
+  for (let i = 0; i < 2; i++) {
+    const field = fields.nth(i)
+    const label = await field.locator('.label').innerText()
+    const [total, used] = (label.match(/\d+/g) ?? []).map(Number)
+    expect(total).toBeGreaterThan(0)
+
+    await expect(field.locator('li')).toHaveCount(total as number)
+    await expect(field.locator('li.on')).toHaveCount(used as number)
   }
 })

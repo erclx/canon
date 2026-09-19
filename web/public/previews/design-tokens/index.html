@@ -1,690 +1,88 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2210%2010%2080%2080%22%3E%3Cpath%20d%3D%22M34%2C20%20L15%2C28%20L15%2C72%20L34%2C80%20Z%20M66%2C20%20L85%2C28%20L85%2C72%20L66%2C80%20Z%22%20fill%3D%22%23a4471c%22%20%2F%3E%3Crect%20x%3D%2244%22%20y%3D%2215%22%20width%3D%2212%22%20height%3D%2270%22%20rx%3D%222%22%20fill%3D%22%23a4471c%22%20%2F%3E%3C%2Fsvg%3E"
-    />
-    <title>Design tokens</title>
-    <link rel="stylesheet" href="design.css" />
-    <style>
-      :root {
-        --preview-paper: #faf7f2;
-        --preview-panel: #f4efe6;
-        --preview-ink: #1a1815;
-        --preview-muted: #726b62;
-        --preview-rule: #e4dcd0;
-        --preview-accent: #a4471c;
-      }
-      body {
-        font-family: system-ui, sans-serif;
-        margin: 2rem;
-        max-width: 960px;
-        color: var(--preview-ink);
-        background: var(--preview-paper);
-      }
-      h1 {
-        margin-top: 0;
-      }
-      h2 {
-        margin-top: 2rem;
-        border-bottom: 1px solid var(--preview-rule);
-        padding-bottom: 0.25rem;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 0.5rem;
-      }
-      th,
-      td {
-        text-align: left;
-        padding: 0.5rem 0.75rem;
-        border-bottom: 1px solid var(--preview-rule);
-        font-size: 14px;
-      }
-      th {
-        background: var(--preview-panel);
-        font-weight: 600;
-      }
-      .swatch {
-        display: inline-block;
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 4px;
-        border: 1px solid var(--preview-rule);
-        vertical-align: middle;
-        margin-right: 0.5rem;
-      }
-      .bar {
-        display: inline-block;
-        height: 1rem;
-        background: var(--preview-muted);
-        border-radius: 2px;
-        vertical-align: middle;
-      }
-      .note {
-        color: var(--preview-muted);
-        font-size: 13px;
-        margin-top: 0.5rem;
-      }
-      .empty {
-        color: var(--preview-muted);
-        font-style: italic;
-      }
-      .verify {
-        color: var(--preview-accent);
-        font-size: 12px;
-        font-weight: 600;
-        margin-left: 0.35rem;
-        white-space: nowrap;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Design tokens</h1>
-    <p class="note">
-      Generated from <code>canon/DESIGN.md</code> by
-      <code>canon design render</code>. Token preview only, not a screen mock.
-    </p>
-    <p class="note">
-      77 of 88 cells are anchored to a source. The other 11 carry
-      <code>? verify</code>, so nothing anchors them yet.
-    </p>
-    <h2>Personality</h2>
-    <p>
-      Warm neutrals carry the frame under a single rust accent, rendered in the
-      same monospace the terminal uses. The subject picks the register rather
-      than taste: a toolkit whose primary surface is a shell has no proportional
-      voice available, so the rendered surfaces match the terminal instead of
-      the reverse. One accent carries every count, link, and primary action.
-      Promoting a second and third into structural roles is what reads as a
-      generated interface, so the palette stays at one. One surface is carved
-      out of the sentence above, and it is the landing page hero. A rendered
-      surface here shows a reader what the terminal did, so matching the
-      terminal is what makes it legible. A public page addresses somebody who
-      has never opened the terminal at all, and the shell has no voice available
-      for that, which is the reverse of the case the rule was written for. The
-      `page-display` role below is the whole of the carve-out. Every other role
-      on that page stays monospace, including its body, its controls, and every
-      frame it embeds, so the page reads as two families rather than as a second
-      design system.
-    </p>
-    <h2>Color</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Role</th>
-          <th>Intent</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #191512"></span>background
-          </td>
-          <td>page canvas</td>
-          <td><code>#191512</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #211c19"></span>surface
-          </td>
-          <td>cards, panels, raised blocks</td>
-          <td><code>#211c19</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #241e1a"></span>chrome
-          </td>
-          <td>the window titlebar, one step above the canvas</td>
-          <td><code>#241e1a</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #2f2823"></span>border
-          </td>
-          <td>every rule and panel edge</td>
-          <td><code>#2f2823</code></td>
-        </tr>
-        <tr>
-          <td><span class="swatch" style="background: #f4efe9"></span>text</td>
-          <td>headings, counts, emphasized runs</td>
-          <td><code>#f4efe9</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #c9c0b7"></span>text-body
-          </td>
-          <td>default body copy</td>
-          <td><code>#c9c0b7</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #a79d94"></span
-            >text-secondary
-          </td>
-          <td>labels, captions, supporting copy</td>
-          <td><code>#a79d94</code></td>
-        </tr>
-        <tr>
-          <td><span class="swatch" style="background: #948a81"></span>muted</td>
-          <td>the faintest step, trailing notes</td>
-          <td><code>#948a81</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #e0724b"></span>accent
-          </td>
-          <td>install command, mark, primary action</td>
-          <td><code>#e0724b</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #61c454"></span>success
-          </td>
-          <td>confirmations, rendered and in the terminal</td>
-          <td><code>#61c454</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: ANSI 33"></span>warning
-          </td>
-          <td>terminal cautions</td>
-          <td><code>ANSI 33</code></td>
-        </tr>
-        <tr>
-          <td><span class="swatch" style="background: ANSI 31"></span>error</td>
-          <td>terminal failures</td>
-          <td><code>ANSI 31</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #faf7f2"></span
-            >light-background
-          </td>
-          <td>page canvas on a light ground</td>
-          <td><code>#faf7f2</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #f4efe6"></span
-            >light-surface
-          </td>
-          <td>cards and panels on a light ground</td>
-          <td><code>#f4efe6</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #ede4d6"></span>light-chrome
-          </td>
-          <td>the window titlebar, one step above the canvas</td>
-          <td><code>#ede4d6</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #1a1815"></span>light-text
-          </td>
-          <td>primary text on a light ground</td>
-          <td><code>#1a1815</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #3d3630"></span
-            >light-text-body
-          </td>
-          <td>default body copy on a light ground</td>
-          <td><code>#3d3630</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #5c544b"></span
-            >light-text-secondary
-          </td>
-          <td>labels, captions, supporting copy on a light ground</td>
-          <td><code>#5c544b</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #726b62"></span>light-muted
-          </td>
-          <td>secondary text on a light ground</td>
-          <td><code>#726b62</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #a4471c"></span>light-accent
-          </td>
-          <td>links and primary action on light</td>
-          <td><code>#a4471c</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #2d6b22"></span
-            >light-success
-          </td>
-          <td>confirmations, rendered and in the terminal, on light</td>
-          <td><code>#2d6b22</code></td>
-        </tr>
-        <tr>
-          <td>
-            <span class="swatch" style="background: #e4dcd0"></span>light-border
-          </td>
-          <td>rules and panel edges on light</td>
-          <td>
-            <code>#e4dcd0</code>
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h2>Typography</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Role</th>
-          <th>Family</th>
-          <th>Weight</th>
-          <th>Size</th>
-          <th>Line height</th>
-          <th>Sample</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>display</td>
-          <td>Noto Sans Mono, DejaVu Sans Mono, monospace</td>
-          <td>700</td>
-          <td>34px</td>
-          <td>1.3</td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans Mono,
-                  DejaVu Sans Mono,
-                  monospace;
-                font-weight: 700;
-                font-size: 34px;
-                line-height: 1.3;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-        <tr>
-          <td>page-display</td>
-          <td>
-            Noto Sans, DejaVu Sans, sans-serif
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>700</td>
-          <td>
-            52px
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            1.1
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans,
-                  DejaVu Sans,
-                  sans-serif;
-                font-weight: 700;
-                font-size: 52px;
-                line-height: 1.1;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-        <tr>
-          <td>heading</td>
-          <td>Noto Sans Mono, DejaVu Sans Mono, monospace</td>
-          <td>700</td>
-          <td>19px</td>
-          <td>
-            1.3
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans Mono,
-                  DejaVu Sans Mono,
-                  monospace;
-                font-weight: 700;
-                font-size: 19px;
-                line-height: 1.3;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-        <tr>
-          <td>body</td>
-          <td>Noto Sans Mono, DejaVu Sans Mono, monospace</td>
-          <td>
-            400
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>16px</td>
-          <td>1.65</td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans Mono,
-                  DejaVu Sans Mono,
-                  monospace;
-                font-weight: 400;
-                font-size: 16px;
-                line-height: 1.65;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-        <tr>
-          <td>label</td>
-          <td>Noto Sans Mono, DejaVu Sans Mono, monospace</td>
-          <td>
-            400
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>12px</td>
-          <td>
-            1.45
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans Mono,
-                  DejaVu Sans Mono,
-                  monospace;
-                font-weight: 400;
-                font-size: 12px;
-                line-height: 1.45;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-        <tr>
-          <td>code</td>
-          <td>Noto Sans Mono, DejaVu Sans Mono, monospace</td>
-          <td>700</td>
-          <td>14.5px</td>
-          <td>
-            1.3
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            <span
-              style="
-                font-family:
-                  Noto Sans Mono,
-                  DejaVu Sans Mono,
-                  monospace;
-                font-weight: 700;
-                font-size: 14.5px;
-                line-height: 1.3;
-              "
-              >The quick brown fox</span
-            >
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h2>Spacing</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Step</th>
-          <th>Multiplier</th>
-          <th>Value</th>
-          <th>Sample</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>xs</td>
-          <td>1</td>
-          <td><code>6px</code></td>
-          <td><span class="bar" style="width: 6px"></span></td>
-        </tr>
-        <tr>
-          <td>sm</td>
-          <td>2</td>
-          <td><code>12px</code></td>
-          <td><span class="bar" style="width: 12px"></span></td>
-        </tr>
-        <tr>
-          <td>md</td>
-          <td>3</td>
-          <td><code>18px</code></td>
-          <td><span class="bar" style="width: 18px"></span></td>
-        </tr>
-        <tr>
-          <td>lg</td>
-          <td>4</td>
-          <td><code>24px</code></td>
-          <td><span class="bar" style="width: 24px"></span></td>
-        </tr>
-        <tr>
-          <td>xl</td>
-          <td>5</td>
-          <td><code>30px</code></td>
-          <td><span class="bar" style="width: 30px"></span></td>
-        </tr>
-        <tr>
-          <td>frame-top</td>
-          <td>none</td>
-          <td><code>44px</code></td>
-          <td><span class="bar" style="width: 44px"></span></td>
-        </tr>
-        <tr>
-          <td>frame-inline</td>
-          <td>none</td>
-          <td><code>52px</code></td>
-          <td><span class="bar" style="width: 52px"></span></td>
-        </tr>
-        <tr>
-          <td>frame-bottom</td>
-          <td>none</td>
-          <td><code>38px</code></td>
-          <td><span class="bar" style="width: 38px"></span></td>
-        </tr>
-      </tbody>
-    </table>
-    <h2>Borders</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Role</th>
-          <th>Radius</th>
-          <th>Width</th>
-          <th>When used</th>
-          <th>Sample</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>frame</td>
-          <td><code>12px</code></td>
-          <td><code>none</code></td>
-          <td>the outer window, radius only</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: none solid #888;
-                border-radius: 12px;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-        <tr>
-          <td>panel</td>
-          <td><code>10px</code></td>
-          <td><code>1px</code></td>
-          <td>cards and columns</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: 1px solid #888;
-                border-radius: 10px;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-        <tr>
-          <td>action</td>
-          <td><code>7px</code></td>
-          <td><code>none</code></td>
-          <td>the install command block</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: none solid #888;
-                border-radius: 7px;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-        <tr>
-          <td>rule</td>
-          <td><code>none</code></td>
-          <td><code>1px</code></td>
-          <td>horizontal dividers between bands</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: 1px solid #888;
-                border-radius: none;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-        <tr>
-          <td>pill</td>
-          <td>
-            <code>999px</code>
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>
-            <code>none</code>
-            <span class="verify" title="No source anchors this value"
-              >? verify</span
-            >
-          </td>
-          <td>tags and status chips, none built</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: none solid #888;
-                border-radius: 999px;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-        <tr>
-          <td>marker</td>
-          <td><code>999px</code></td>
-          <td><code>none</code></td>
-          <td>the status dot, sized at 6px</td>
-          <td>
-            <span
-              style="
-                display: inline-block;
-                width: 2rem;
-                height: 1.5rem;
-                background: #eee;
-                border: none solid #888;
-                border-radius: 999px;
-                vertical-align: middle;
-              "
-            ></span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h2>Motion</h2>
-    <p>
-      Motion is not used. No transition, animation, or keyframe declaration
-      appears on any rendered surface, and the capture pipeline screenshots a
-      static frame.
-    </p>
-    <h2>Iconography</h2>
-    <p>
-      No icon library is installed. `assets/brand/mark.svg` is the one authored
-      icon, embedded inline in the hero topbar, and the surfaces otherwise draw
-      literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing.
-      The same mark also ships as a favicon on every rendered surface, as three
-      independently-maintained copies that track different accents by design
-      rather than by drift: `regen-hero.sh` derives one from the live SVG
-      colored with whatever `--color-accent` (`#e0724b`) the fetched token CSS
-      carries, `src/design/render.ts` carries the path data as a hardcoded
-      literal colored via `colorValue('light-accent')` (`#a4471c`), since a data
-      URI has no CSS context and that page renders on light chrome, and
-      `teach-workspace`'s `SKILL.md` names one in prose colored
-      `rgb(224,114,75)`, the same value as the dark accent written as decimal
-      rather than hex to clear the shipped-references gate's commit-sha check.
-      Unifying the three or repairing the one that looks drifted would break the
-      fit each was chosen for.
-    </p>
-  </body>
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2210%2010%2080%2080%22%3E%3Cpath%20d%3D%22M34%2C20%20L15%2C28%20L15%2C72%20L34%2C80%20Z%20M66%2C20%20L85%2C28%20L85%2C72%20L66%2C80%20Z%22%20fill%3D%22%23ad4a4b%22%20%2F%3E%3Crect%20x%3D%2244%22%20y%3D%2215%22%20width%3D%2212%22%20height%3D%2270%22%20rx%3D%222%22%20fill%3D%22%23ad4a4b%22%20%2F%3E%3C%2Fsvg%3E">
+<title>Design tokens</title>
+<link rel="stylesheet" href="design.css">
+<style>
+  :root {
+    --preview-paper: #fbfaf8;
+    --preview-panel: #f1f1ee;
+    --preview-ink: #2c2c29;
+    --preview-muted: #6e6d6c;
+    --preview-rule: #d5d4d1;
+    --preview-accent: #ad4a4b;
+  }
+  body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 960px; color: var(--preview-ink); background: var(--preview-paper); }
+  h1 { margin-top: 0; }
+  h2 { margin-top: 2rem; border-bottom: 1px solid var(--preview-rule); padding-bottom: 0.25rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+  th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--preview-rule); font-size: 14px; }
+  th { background: var(--preview-panel); font-weight: 600; }
+  .swatch { display: inline-block; width: 1.5rem; height: 1.5rem; border-radius: 4px; border: 1px solid var(--preview-rule); vertical-align: middle; margin-right: 0.5rem; }
+  .bar { display: inline-block; height: 1rem; background: var(--preview-muted); border-radius: 2px; vertical-align: middle; }
+  .note { color: var(--preview-muted); font-size: 13px; margin-top: 0.5rem; }
+  .empty { color: var(--preview-muted); font-style: italic; }
+  .verify { color: var(--preview-accent); font-size: 12px; font-weight: 600; margin-left: 0.35rem; white-space: nowrap; }
+</style>
+</head>
+<body>
+<h1>Design tokens</h1>
+<p class="note">Generated from <code>canon/DESIGN.md</code> by <code>canon design render</code>. Token preview only, not a screen mock.</p>
+<p class="note">77 of 87 cells are anchored to a source. The other 10 carry <code>? verify</code>, so nothing anchors them yet.</p>
+<h2>Personality</h2>
+<p>Warm neutrals carry the frame under a single rust accent, set in Geist. The subject is a toolkit for people who read documents and diffs as much as they run commands, so the voice is a proportional one and the page reads as prose. One accent carries every count, link, and primary action. Promoting a second and third into structural roles is what reads as a generated interface, so the palette stays at one.
+Monospace is a role the page uses rather than its voice. The `code` role takes it, and so does any terminal frame a surface embeds, since those show what the shell printed and matching the shell is what makes them legible. Every other role is Geist.</p>
+<h2>Color</h2>
+<table><thead><tr><th>Role</th><th>Intent</th><th>Value</th></tr></thead><tbody><tr><td><span class="swatch" style="background:#0f0e0c"></span>background</td><td>page canvas</td><td><code>#0f0e0c</code></td></tr>
+<tr><td><span class="swatch" style="background:#151412"></span>surface</td><td>cards, panels, raised blocks</td><td><code>#151412</code></td></tr>
+<tr><td><span class="swatch" style="background:#1b1a18"></span>chrome</td><td>the window titlebar, one step above the canvas</td><td><code>#1b1a18</code></td></tr>
+<tr><td><span class="swatch" style="background:#2a2926"></span>border</td><td>every rule and panel edge</td><td><code>#2a2926</code></td></tr>
+<tr><td><span class="swatch" style="background:#d9d7d4"></span>text</td><td>headings, counts, emphasized runs</td><td><code>#d9d7d4</code></td></tr>
+<tr><td><span class="swatch" style="background:#aeada9"></span>text-body</td><td>default body copy</td><td><code>#aeada9</code></td></tr>
+<tr><td><span class="swatch" style="background:#8c8b86"></span>text-secondary</td><td>labels, captions, supporting copy</td><td><code>#8c8b86</code></td></tr>
+<tr><td><span class="swatch" style="background:#7f7f7c"></span>muted</td><td>the faintest step, trailing notes</td><td><code>#7f7f7c</code></td></tr>
+<tr><td><span class="swatch" style="background:#c76b5f"></span>accent</td><td>install command, mark, primary action</td><td><code>#c76b5f</code></td></tr>
+<tr><td><span class="swatch" style="background:#61c454"></span>success</td><td>confirmations, rendered and in the terminal</td><td><code>#61c454</code></td></tr>
+<tr><td><span class="swatch" style="background:ANSI 33"></span>warning</td><td>terminal cautions</td><td><code>ANSI 33</code></td></tr>
+<tr><td><span class="swatch" style="background:ANSI 31"></span>error</td><td>terminal failures</td><td><code>ANSI 31</code></td></tr>
+<tr><td><span class="swatch" style="background:#fbfaf8"></span>light-background</td><td>page canvas on a light ground</td><td><code>#fbfaf8</code></td></tr>
+<tr><td><span class="swatch" style="background:#f1f1ee"></span>light-surface</td><td>cards and panels on a light ground</td><td><code>#f1f1ee</code></td></tr>
+<tr><td><span class="swatch" style="background:#e9e8e5"></span>light-chrome</td><td>the window titlebar, one step above the canvas</td><td><code>#e9e8e5</code></td></tr>
+<tr><td><span class="swatch" style="background:#2c2c29"></span>light-text</td><td>primary text on a light ground</td><td><code>#2c2c29</code></td></tr>
+<tr><td><span class="swatch" style="background:#4b4947"></span>light-text-body</td><td>default body copy on a light ground</td><td><code>#4b4947</code></td></tr>
+<tr><td><span class="swatch" style="background:#666561"></span>light-text-secondary</td><td>labels, captions, supporting copy on a light ground</td><td><code>#666561</code></td></tr>
+<tr><td><span class="swatch" style="background:#6e6d6c"></span>light-muted</td><td>secondary text on a light ground</td><td><code>#6e6d6c</code></td></tr>
+<tr><td><span class="swatch" style="background:#ad4a4b"></span>light-accent</td><td>links and primary action on light</td><td><code>#ad4a4b</code></td></tr>
+<tr><td><span class="swatch" style="background:#2d6b22"></span>light-success</td><td>confirmations, rendered and in the terminal, on light</td><td><code>#2d6b22</code></td></tr>
+<tr><td><span class="swatch" style="background:#d5d4d1"></span>light-border</td><td>rules and panel edges on light</td><td><code>#d5d4d1</code> <span class="verify" title="No source anchors this value">? verify</span></td></tr></tbody></table>
+<h2>Typography</h2>
+<table><thead><tr><th>Role</th><th>Family</th><th>Weight</th><th>Size</th><th>Line height</th><th>Sample</th></tr></thead><tbody><tr><td>display</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>700</td><td>2.375rem</td><td>1.3</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:700;font-size:2.375rem;line-height:1.3">The quick brown fox</span></td></tr>
+<tr><td>page-display</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>700</td><td>3.175rem <span class="verify" title="No source anchors this value">? verify</span></td><td>1.1 <span class="verify" title="No source anchors this value">? verify</span></td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:700;font-size:3.175rem;line-height:1.1">The quick brown fox</span></td></tr>
+<tr><td>heading</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>700</td><td>1.375rem</td><td>1.3 <span class="verify" title="No source anchors this value">? verify</span></td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:700;font-size:1.375rem;line-height:1.3">The quick brown fox</span></td></tr>
+<tr><td>body</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>400 <span class="verify" title="No source anchors this value">? verify</span></td><td>0.9375rem</td><td>1.65</td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:400;font-size:0.9375rem;line-height:1.65">The quick brown fox</span></td></tr>
+<tr><td>label</td><td>Geist Variable, DejaVu Sans, sans-serif</td><td>400 <span class="verify" title="No source anchors this value">? verify</span></td><td>0.8125rem</td><td>1.45 <span class="verify" title="No source anchors this value">? verify</span></td><td><span style="font-family:Geist Variable, DejaVu Sans, sans-serif;font-weight:400;font-size:0.8125rem;line-height:1.45">The quick brown fox</span></td></tr>
+<tr><td>code</td><td>Noto Sans Mono, DejaVu Sans Mono, monospace</td><td>700</td><td>0.8125rem</td><td>1.3 <span class="verify" title="No source anchors this value">? verify</span></td><td><span style="font-family:Noto Sans Mono, DejaVu Sans Mono, monospace;font-weight:700;font-size:0.8125rem;line-height:1.3">The quick brown fox</span></td></tr></tbody></table>
+<h2>Spacing</h2>
+<table><thead><tr><th>Step</th><th>Multiplier</th><th>Value</th><th>Sample</th></tr></thead><tbody><tr><td>xs</td><td>1</td><td><code>0.25rem</code></td><td><span class="bar" style="width:0.25rem"></span></td></tr>
+<tr><td>sm</td><td>2</td><td><code>0.5rem</code></td><td><span class="bar" style="width:0.5rem"></span></td></tr>
+<tr><td>md</td><td>3.5</td><td><code>0.875rem</code></td><td><span class="bar" style="width:0.875rem"></span></td></tr>
+<tr><td>lg</td><td>6</td><td><code>1.5rem</code></td><td><span class="bar" style="width:1.5rem"></span></td></tr>
+<tr><td>xl</td><td>10</td><td><code>2.5rem</code></td><td><span class="bar" style="width:2.5rem"></span></td></tr>
+<tr><td>2xl</td><td>16</td><td><code>4rem</code></td><td><span class="bar" style="width:4rem"></span></td></tr>
+<tr><td>3xl</td><td>24</td><td><code>6rem</code></td><td><span class="bar" style="width:6rem"></span></td></tr></tbody></table>
+<h2>Borders</h2>
+<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody><tr><td>frame</td><td><code>12px</code></td><td><code>none</code></td><td>the outer window, radius only</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:12px;vertical-align:middle"></span></td></tr>
+<tr><td>panel</td><td><code>10px</code></td><td><code>1px</code></td><td>cards and columns</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1px solid #888;border-radius:10px;vertical-align:middle"></span></td></tr>
+<tr><td>action</td><td><code>7px</code></td><td><code>none</code></td><td>the install command block</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:7px;vertical-align:middle"></span></td></tr>
+<tr><td>rule</td><td><code>none</code></td><td><code>1px</code></td><td>horizontal dividers between bands</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:1px solid #888;border-radius:none;vertical-align:middle"></span></td></tr>
+<tr><td>pill</td><td><code>999px</code> <span class="verify" title="No source anchors this value">? verify</span></td><td><code>none</code> <span class="verify" title="No source anchors this value">? verify</span></td><td>tags and status chips, none built</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:999px;vertical-align:middle"></span></td></tr>
+<tr><td>marker</td><td><code>999px</code></td><td><code>none</code></td><td>the status dot, sized at 6px</td><td><span style="display:inline-block;width:2rem;height:1.5rem;background:#eee;border:none solid #888;border-radius:999px;vertical-align:middle"></span></td></tr></tbody></table>
+<h2>Motion</h2>
+<p>Motion is not used. No transition, animation, or keyframe declaration appears on any rendered surface, and the capture pipeline screenshots a static frame.</p>
+<h2>Iconography</h2>
+<p>No icon library is installed. `assets/brand/mark.svg` is the one authored icon, embedded inline in the hero topbar, and the surfaces otherwise draw literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing.
+The same mark ships as a favicon on every rendered surface, as three independently-maintained copies that track different accents by design rather than by drift, colored to fit the chrome each renders on: the dark accent (`#e0724b`) for a dark-chrome surface and the light accent (`#a4471c`) for a light-chrome one. Unifying the three or repairing the one that looks drifted would break the fit each was chosen for. `canon/context/design.md` carries which file holds each copy.</p>
+</body>
 </html>

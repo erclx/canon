@@ -1,0 +1,125 @@
+---
+import { skills } from '../../content/copy'
+import { readSession } from '../../lib/session'
+import Band from './band.astro'
+
+/**
+ * The skill catalog as a process rather than a roster, since the field at the
+ * end of the page already shows the roster. The actor is named on every step
+ * so the hand-off from session to skill to CLI is what the figure draws.
+ */
+const total = readSession().skills.length
+const { session, ask, match, act } = skills.flow
+const steps = [
+  { ...session, how: skills.loaded(total), actor: 'session' },
+  { ...ask, actor: 'skill' },
+  { ...match, actor: 'skill' },
+  { ...act, actor: 'cli' },
+]
+---
+
+<Band id="skills" head={skills.head(total)} cap={skills.cap}>
+  <div class="fig" id="fig-skills">
+    <ol class="flow">
+      {
+        steps.map((step) => (
+          <li>
+            <span class:list={['who', step.actor]}>{step.who}</span>
+            <b>{step.what}</b>
+            <code>{step.how}</code>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="footnote">{skills.foot}</p>
+  </div>
+</Band>
+
+<style>
+  .flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-lg);
+  }
+
+  /* The ring is what makes the box a box on the tinted ground it sits on. */
+  .flow li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    border-radius: var(--radius-frame);
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--ring);
+  }
+
+  .flow li + li::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--space-lg) * -1);
+    top: 50%;
+    width: var(--space-lg);
+    height: 1px;
+    background: var(--ring);
+  }
+
+  .flow li + li::after {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-top: 1px solid var(--ring);
+    border-right: 1px solid var(--ring);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  .flow b {
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .flow code {
+    color: var(--ink-faint);
+    overflow-wrap: anywhere;
+  }
+
+  .who {
+    padding: 2px var(--space-md);
+    border-radius: var(--radius-pill);
+    font-size: var(--t6);
+  }
+
+  .who.session {
+    background: var(--ring);
+    color: var(--ink-body);
+  }
+
+  .who.skill {
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  .who.cli {
+    box-shadow: inset 0 0 0 1px var(--ring);
+    color: var(--ink);
+  }
+
+  @media (max-width: 760px) {
+    .flow {
+      grid-template-columns: 1fr;
+    }
+
+    .flow li + li::before,
+    .flow li + li::after {
+      display: none;
+    }
+  }
+</style>

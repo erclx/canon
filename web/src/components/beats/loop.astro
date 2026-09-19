@@ -1,0 +1,232 @@
+---
+import { loop } from '../../content/copy'
+import Band from './band.astro'
+
+/**
+ * The review as the loop it is. The workers band already says who ran, and
+ * this says who spoke, in what order, and that the exchange closes. Two named
+ * lanes carry who owns a message, a bubble with a tail and an avatar carries
+ * who it is from, and an arrow crosses the gutter on each hand-off.
+ */
+const rows = loop.turns.map((turn, index) => {
+  const previous = loop.turns[index - 1]
+  const crosses = previous !== undefined && previous.who !== turn.who
+  return {
+    ...turn,
+    arrow: crosses ? (turn.who === 'worker' ? 'to' : 'back') : undefined,
+  }
+})
+---
+
+<Band id="loop" head={loop.head} cap={loop.cap}>
+  <div class="fig" id="fig-loop">
+    <div class="lanes">
+      <span>{loop.lanes.reviewer}</span><span></span><span
+        >{loop.lanes.worker}</span
+      >
+    </div>
+    {
+      rows.map((row) => {
+        const message = (
+          <div class:list={['message', row.who]}>
+            <span class="avatar" aria-hidden="true">
+              {loop.avatars[row.who]}
+            </span>
+            <div class="bubble">
+              <b>{row.what}</b>
+              <code>{row.how}</code>
+            </div>
+          </div>
+        )
+        return (
+          <div class="row">
+            <div class="cell">{row.who === 'reviewer' && message}</div>
+            <div class="gutter">
+              {row.arrow && <span class:list={['arrow', row.arrow]} />}
+            </div>
+            <div class="cell">{row.who === 'worker' && message}</div>
+          </div>
+        )
+      })
+    }
+    <p class="footnote">{loop.foot}</p>
+  </div>
+</Band>
+
+<style>
+  .lanes,
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 4.5rem minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .lanes {
+    padding-bottom: var(--space-md);
+    box-shadow: inset 0 -1px 0 var(--ring);
+    margin-bottom: var(--space-md);
+    color: var(--ink-faint);
+  }
+
+  .lanes span:last-child {
+    text-align: right;
+  }
+
+  .row {
+    padding: var(--space-sm) 0;
+  }
+
+  .cell {
+    display: flex;
+    min-width: 0;
+  }
+
+  .row .cell:last-child {
+    justify-content: flex-end;
+  }
+
+  .message {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-md);
+    min-width: 0;
+  }
+
+  .message.worker {
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--tint);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    display: grid;
+    place-items: center;
+    font-size: var(--t6);
+    color: var(--ink-soft);
+  }
+
+  .bubble {
+    position: relative;
+    padding: var(--space-lg);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--ring);
+  }
+
+  .bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    width: 10px;
+    height: 10px;
+    background: var(--card);
+    border-left: 1px solid var(--ring);
+    border-bottom: 1px solid var(--ring);
+  }
+
+  .reviewer .bubble {
+    border-bottom-left-radius: 4px;
+  }
+
+  .reviewer .bubble::after {
+    left: -6px;
+    transform: rotate(45deg);
+  }
+
+  .worker .bubble {
+    border-bottom-right-radius: 4px;
+  }
+
+  .worker .bubble::after {
+    right: -6px;
+    transform: rotate(-135deg);
+  }
+
+  .bubble b {
+    display: block;
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .bubble code {
+    color: var(--ink-faint);
+  }
+
+  .gutter {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--ink-faint);
+  }
+
+  .arrow::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    width: 7px;
+    height: 7px;
+    border-top: 1px solid var(--ink-faint);
+    border-right: 1px solid var(--ink-faint);
+  }
+
+  .arrow.to::after {
+    right: 0;
+    transform: rotate(45deg);
+  }
+
+  .arrow.back::after {
+    left: 0;
+    transform: rotate(-135deg);
+  }
+
+  /*
+   * One column below 700, where two lanes leave each bubble too narrow to hold
+   * a line. The gutter and the second lane header go, and the worker's tail
+   * flips so every message reads from the same side once the sides are gone.
+   */
+  @media (max-width: 700px) {
+    .lanes,
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .gutter,
+    .lanes span:nth-child(2),
+    .lanes span:last-child {
+      display: none;
+    }
+
+    .row .cell:last-child {
+      justify-content: flex-start;
+    }
+
+    .message.worker {
+      flex-direction: row;
+      margin-left: var(--space-xl);
+    }
+
+    .worker .bubble {
+      border-bottom-right-radius: 16px;
+      border-bottom-left-radius: 4px;
+    }
+
+    .worker .bubble::after {
+      right: auto;
+      left: -6px;
+      transform: rotate(45deg);
+    }
+  }
+</style>

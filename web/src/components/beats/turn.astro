@@ -1,0 +1,19 @@
+---
+/** Something a participant said: who, in what capacity, and what. */
+interface Props {
+  id: string
+  who: string
+  capacity: string
+  say: string
+  note: string
+}
+
+const { id, who, capacity, say, note } = Astro.props
+---
+
+<div class="turn" id={id}>
+  <p class="eyebrow">{who}<i>{capacity}</i></p>
+  <p class="turn-head">{say}</p>
+  <p class="cap">{note}</p>
+  <slot />
+</div>

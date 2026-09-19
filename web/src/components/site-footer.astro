@@ -1,0 +1,134 @@
+---
+import { footer, nav } from '../content/copy'
+import { readSession } from '../lib/session'
+
+/** A brand block over three columns of real destinations, each a path that resolves in the repository. */
+const { version } = readSession()
+---
+
+<footer class="foot">
+  <div class="top">
+    <div class="brand">
+      <span class="logo">{nav.mark}</span>
+      <p>{footer.line}</p>
+      <a class="version" href={nav.npm}>v{version}</a>
+    </div>
+    <nav class="columns" aria-label="Elsewhere">
+      {
+        footer.columns.map((column) => (
+          <div>
+            <p class="title">{column.title}</p>
+            <ul>
+              {column.links.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+  </div>
+  <div class="bottom">
+    <a href={footer.license.href}>{footer.license.label}</a>
+    <span>{footer.note}</span>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    box-shadow: inset 0 1px 0 var(--ring);
+  }
+
+  .top {
+    display: grid;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-xl);
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .logo {
+    font-size: var(--t4);
+    color: var(--ink);
+  }
+
+  .brand p {
+    margin: 0;
+    font-size: var(--t5);
+    color: var(--ink-faint);
+    max-width: 30ch;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .title {
+    margin: 0 0 var(--space-md);
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  a {
+    font-size: var(--t5);
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.16s var(--ease);
+  }
+
+  a:hover {
+    color: var(--ink);
+  }
+
+  .version {
+    font-size: var(--t6);
+  }
+
+  .bottom {
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: var(--space-md) var(--space-lg) var(--space-xl);
+    display: flex;
+    gap: var(--space-lg);
+    justify-content: space-between;
+    font-size: var(--t5);
+    color: var(--ink-faint);
+  }
+
+  .bottom a {
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 640px) {
+    .top {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .bottom {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+  }
+</style>

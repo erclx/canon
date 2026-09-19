@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css'
-import { footer, site } from '../content/copy'
+import { FONT_FACES } from '../../../src/design/fonts'
+import SiteFooter from '../components/site-footer.astro'
 import SiteNav from '../components/site-nav.astro'
+import { site, skipLink } from '../content/copy'
 
 interface Props {
   title: string
@@ -16,6 +18,17 @@ const { title, description } = Astro.props
  * resolved against the deployed origin rather than written as a path.
  */
 const cardImage = new URL('/assets/hero.png', site.origin).href
+
+/**
+ * `tokens.css` names Geist for every role, and nothing served the face, so the
+ * page rendered in the visitor's system sans. The vendored subset is inlined
+ * once here with `font-display: block`, which is what the reference was judged
+ * in, rather than fetched as a second request that paints the fallback first.
+ */
+const geist = FONT_FACES.find((face) => face.family === 'Geist Variable')
+if (!geist)
+  throw new Error('src/design/fonts.ts carries no Geist Variable face')
+const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.weight};font-display:block;src:url(data:font/woff2;base64,${geist.base64}) format('woff2');}`
 ---
 
 <!doctype html>
@@ -24,8 +37,10 @@ const cardImage = new URL('/assets/hero.png', site.origin).href
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={site.origin} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
@@ -38,12 +53,13 @@ const cardImage = new URL('/assets/hero.png', site.origin).href
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={cardImage} />
 
+    <style is:inline set:html={fontFace}></style>
+
     <script is:inline>
       /**
-       * Runs before first paint so a stored or preferred theme never flashes
-       * the other ground. The stylesheet keys its light block on the
-       * attribute, and `color-scheme` is set alongside it so form controls
-       * and scrollbars follow.
+       * Runs before first paint, so a stored or preferred theme never flashes
+       * the other ground, and so a still asked for with ?still lands every
+       * figure at its end state before the first frame rather than after it.
        */
       const stored = (() => {
         try {
@@ -58,68 +74,46 @@ const cardImage = new URL('/assets/hero.png', site.origin).href
         : 'dark'
       const theme = stored === 'light' || stored === 'dark' ? stored : preferred
       document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.colorScheme = theme
+      if (new URLSearchParams(location.search).has('still')) {
+        document.documentElement.classList.add('still')
+      }
     </script>
   </head>
   <body>
+    <a class="skip" href="#ask">{skipLink}</a>
     <SiteNav />
     <main>
       <slot />
     </main>
+    <SiteFooter />
 
     <script>
       /**
-       * One observer drives every entrance on the page, which is what makes the
-       * treatment uniform by construction rather than by convention. A section
-       * opting in carries `data-reveal`; children staggering inside one carry it
-       * too, with `--reveal-index` deciding the order.
-       *
-       * It disconnects per element after firing, so a section never re-animates
-       * on the way back up, and it never runs at all when the reader prefers
-       * reduced motion: the stylesheet already lands the end state there, so
-       * observing would only risk removing it.
+       * The figure build. Each `[data-build]` element lands once as it enters
+       * the viewport, staggered by its place among its siblings, and is then
+       * unobserved, since a reveal that replays on every pass is looping motion.
+       * The class is added whatever the motion preference: the stylesheet
+       * decides whether it animates, so a reader who prefers no motion still
+       * reaches the end state rather than an empty figure.
        */
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-      if (!reduced.matches) {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (!entry.isIntersecting) continue
-              entry.target.classList.add('is-revealed')
-              observer.unobserve(entry.target)
-            }
-          },
-          { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
-        )
-        for (const node of document.querySelectorAll('[data-reveal]')) {
-          observer.observe(node)
-        }
+      const pieces = [...document.querySelectorAll<HTMLElement>('[data-build]')]
+      for (const piece of pieces) {
+        const siblings = piece.parentElement?.children
+        const index = siblings ? [...siblings].indexOf(piece) : 0
+        piece.style.setProperty('--build-index', String(index))
       }
+
+      const builder = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue
+            entry.target.classList.add('is-built')
+            builder.unobserve(entry.target)
+          }
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -6% 0px' },
+      )
+      for (const piece of pieces) builder.observe(piece)
     </script>
-    <footer
-      class="mx-auto flex max-w-4xl flex-col gap-4 px-6 py-12 text-[length:var(--type-label-size)] text-(--color-text-secondary) sm:flex-row sm:items-center sm:justify-between"
-    >
-      <p class="m-0 max-w-md">{footer.note}</p>
-      {
-        /* Each label stays on one line. In a row with the note taking its
-          natural width, the links were compressed to 73px and "MIT license"
-          broke across two lines mid-phrase. */
-      }
-      <nav
-        aria-label="Elsewhere"
-        class="flex shrink-0 flex-wrap gap-x-6 gap-y-1"
-      >
-        {
-          footer.links.map((link) => (
-            <a
-              href={link.href}
-              class="whitespace-nowrap text-(--color-text-secondary)"
-            >
-              {link.label}
-            </a>
-          ))
-        }
-      </nav>
-    </footer>
   </body>
 </html>

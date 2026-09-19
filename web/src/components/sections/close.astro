@@ -1,0 +1,42 @@
+---
+import { close } from '../../content/copy'
+---
+
+<section class="close-band">
+  <div class="close">
+    <h2>{close.head}</h2>
+    <p class="lead">{close.lead}</p>
+    <p class="cta">
+      <a class="btn btn-primary" href={close.primary.href}
+        >{close.primary.label}</a
+      >
+      <a class="btn btn-ghost" href={close.secondary.href}
+        >{close.secondary.label}</a
+      >
+    </p>
+  </div>
+</section>
+
+<style>
+  .close-band {
+    background: linear-gradient(
+      var(--ground) 0,
+      var(--tint) 16%,
+      var(--tint) 100%
+    );
+  }
+
+  .close {
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-lg);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .lead {
+    max-width: 52ch;
+  }
+</style>

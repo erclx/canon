@@ -1,29 +1,52 @@
 ---
+import Ask from '../components/beats/ask.astro'
+import Dispatch from '../components/beats/dispatch.astro'
+import Evidence from '../components/beats/evidence.astro'
+import Gate from '../components/beats/gate.astro'
+import Loop from '../components/beats/loop.astro'
+import Memory from '../components/beats/memory.astro'
+import Merge from '../components/beats/merge.astro'
+import Plan from '../components/beats/plan.astro'
+import Rules from '../components/beats/rules.astro'
+import Skills from '../components/beats/skills.astro'
+import Workers from '../components/beats/workers.astro'
+import Close from '../components/sections/close.astro'
+import Field from '../components/sections/field.astro'
+import Fold from '../components/sections/fold.astro'
+import Group from '../components/sections/group.astro'
+import InstallSteps from '../components/sections/install-steps.astro'
+import Proof from '../components/sections/proof.astro'
+import Provenance from '../components/sections/provenance.astro'
+import { site } from '../content/copy'
 import Base from '../layouts/base.astro'
-import Hero from '../components/hero.astro'
-import AgentView from '../components/agent-view.astro'
-import Install from '../components/install.astro'
-import Catalog from '../components/catalog.astro'
-import RuleArrival from '../components/rule-arrival.astro'
-import TargetReceives from '../components/target-receives.astro'
-import BoardLifecycle from '../components/board-lifecycle.astro'
-import DesignPreview from '../components/design-preview.astro'
-import TeachPreview from '../components/teach-preview.astro'
-import CallToAction from '../components/call-to-action.astro'
 ---
 
-<Base
-  title="canon"
-  description="canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories."
->
-  <Hero />
-  <AgentView />
-  <Install />
-  <Catalog />
-  <RuleArrival />
-  <TargetReceives />
-  <BoardLifecycle />
-  <DesignPreview />
-  <TeachPreview />
-  <CallToAction />
+<Base title={site.title} description={site.description}>
+  <Fold />
+  <Proof />
+  <Group family="grp">
+    <Ask />
+    <Rules />
+  </Group>
+  <Group family="grp" tint>
+    <Skills />
+    <Plan />
+  </Group>
+  <Group family="arc">
+    <Dispatch />
+    <Workers />
+  </Group>
+  <Group family="arc" tint>
+    <Gate />
+    <Memory />
+  </Group>
+  <Group family="grp" tint>
+    <Evidence />
+    <Loop />
+    <Merge />
+  </Group>
+  <Provenance />
+  <InstallSteps />
+  <Field />
+  <Close />
 </Base>

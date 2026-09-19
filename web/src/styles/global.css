@@ -2,248 +2,498 @@
 @import './tokens.css';
 
 /*
+ * The page is one session read top to bottom, built against the reference
+ * build `.canon/groundwork/95-visual-direction/evidence/system-15/` locked on
+ * 2026-09-19. That build inlined its own values, and this sheet reads every
+ * one from `tokens.css` instead, which is generated from `src/design/tokens.ts`.
+ *
  * Tailwind v4 generates its utility classes inside `@layer utilities`, and an
- * unlayered rule always wins over a layered one regardless of specificity.
- * These defaults have to sit in `@layer base` (Tailwind's own reset layer) so
- * a `text-(--color-*)` utility on a link or heading can still override them.
+ * unlayered rule always wins over a layered one regardless of specificity, so
+ * everything here sits in `@layer base` where the shared panel primitives can
+ * still override it with a utility.
  */
 @layer base {
+  /*
+   * The reference named its surfaces by role rather than by token, and five of
+   * its roles map onto tokens directly. Two do not. A figure card sits one step
+   * above whatever ground it lands on, which is the background in light and the
+   * chrome step in dark, since the dark ladder climbs where the light one
+   * descends. The shadow is a variable because one alpha reads as depth on the
+   * dark ground and as grime on the light one.
+   */
+  :root {
+    --ground: var(--color-background);
+    --tint: var(--color-surface);
+    --ring: var(--color-border);
+    --card: var(--color-chrome);
+    --ink: var(--color-text);
+    --ink-body: var(--color-text-body);
+    --ink-soft: var(--color-text-secondary);
+    --ink-faint: var(--color-muted);
+    --ink-off: color-mix(in srgb, var(--color-muted) 62%, transparent);
+    --mark: var(--color-accent);
+    --ok: var(--color-success);
+    --shadow: rgb(0 0 0 / 0.35);
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --bin: 1040px;
+    color-scheme: dark;
+  }
+
+  [data-theme='light'] {
+    --card: var(--color-background);
+    --shadow: rgb(15 23 42 / 0.03);
+    color-scheme: light;
+  }
+
   * {
     box-sizing: border-box;
   }
 
-  :root {
-    /*
-     * The bar's inset and its own height, declared once so the page can reason
-     * about the space it occupies rather than each rule guessing.
-     *
-     * The inset is a step on the design system's spacing scale rather than a
-     * number chosen to look right.
-     */
-    --nav-inset: var(--space-lg);
-    /*
-     * A fallback only. `site-nav.astro` measures the bar it actually rendered
-     * and overwrites this, because a height written here is a guess that goes
-     * stale the moment the bar's padding or type changes. It was already wrong
-     * by 8px when first written.
-     */
-    --nav-height: 42px;
-  }
-
   html {
-    color-scheme: dark;
-
-    /*
-     * Where an anchor lands, given a bar that floats over the page.
-     *
-     * Without this the landing worked by accident: every section carries 96px
-     * of top padding, which happened to exceed the bar, so a heading cleared
-     * it. A section with less padding would have landed underneath and nothing
-     * would have reported it. Derived from the bar rather than measured
-     * against the sections it must clear.
-     */
-    scroll-padding-top: calc(
-      var(--nav-inset) + var(--nav-height) + var(--space-md)
-    );
+    /* The bar is sticky and measured, so an anchor lands clear of it. */
+    scroll-padding-top: calc(var(--nav-height, 64px) + var(--space-md));
   }
 
+  /*
+   * Body leading is set once. The reference measured 331 elements rendering at
+   * the browser's own normal before this existed, so one size painted three
+   * leadings depending on where it sat.
+   */
   body {
     margin: 0;
-    background: var(--color-background);
-    color: var(--color-text-body);
+    background: var(--ground);
+    color: var(--ink-body);
     font-family: var(--type-body-family);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-  }
-
-  h1,
-  h2,
-  h3 {
-    color: var(--color-text);
-    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
   }
 
   /*
-   * A section heading takes the display step, which the scale already declares
-   * and nothing was using. It previously took the heading step at 19px against
-   * 16px body copy at the same weight, a 1.19x difference with no weight
-   * change, so a reader scanning the page had nothing to scan by.
-   *
-   * Set here rather than on each section, because eight components each
-   * declaring their own heading size is how a scale grows a step nobody chose.
+   * Monospace is retired as a role on this page, so a bare code element falling
+   * back to the browser's own monospace is always a defect here. At the root the
+   * guard cannot be escaped by a new wrapper.
    */
-  h2 {
-    font-family: var(--type-display-family);
-    font-size: var(--type-display-size);
-    line-height: var(--type-display-lh);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  a {
-    color: var(--color-accent);
-  }
-
   code,
+  kbd,
+  samp,
   pre {
-    font-family: var(--type-code-family);
-    font-size: var(--type-code-size);
-  }
-}
-
-/*
- * The action treatment, settled on 2026-09-07 across two rounds.
- *
- * The first round asked what stops a button reading as flat and picked a lift:
- * a one-pixel top highlight and a drop shadow, rising on hover and settling on
- * press. That still stands and is what carries the affordance.
- *
- * The second round asked why the result read as imported from another design
- * system, and the answer was that it had departed from the page three ways at
- * once. The material now comes from the panels instead, which is the arm that
- * won against five alternatives drawn beside the rows a button sits next to.
- *
- * The shadow is a variable rather than a literal because the same alpha reads
- * as depth on the dark ground and as grime on the light one.
- */
-@layer base {
-  :root {
-    --shadow-action: 0 4px 12px rgb(0 0 0 / 0.42);
-    --shadow-action-hover: 0 7px 18px rgb(0 0 0 / 0.5);
-    --shadow-action-pressed: 0 1px 3px rgb(0 0 0 / 0.4);
-    --edge-top: rgb(255 255 255 / 0.22);
+    font-family: inherit;
   }
 
-  [data-theme='light'] {
-    --shadow-action: 0 3px 9px rgb(60 45 30 / 0.16);
-    --shadow-action-hover: 0 6px 14px rgb(60 45 30 / 0.22);
-    --shadow-action-pressed: 0 1px 2px rgb(60 45 30 / 0.2);
-    --edge-top: rgb(255 255 255 / 0.35);
+  h1 {
+    font-size: var(--t0);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    font-weight: 500;
+    text-wrap: balance;
+    color: var(--ink);
+    margin: 0 0 var(--space-md);
+  }
+
+  h2,
+  .head {
+    font-size: var(--t1);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 var(--space-md);
+    max-width: 30ch;
+    text-wrap: balance;
+  }
+
+  .turn-head {
+    font-size: var(--t2);
+    line-height: 1.26;
+    letter-spacing: -0.025em;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 var(--space-sm);
+    max-width: 44ch;
+    text-wrap: balance;
+  }
+
+  .lead {
+    font-size: var(--t2);
+    line-height: 1.26;
+    letter-spacing: -0.025em;
+    color: var(--ink-soft);
+    margin: 0 0 var(--space-xl);
+    max-width: 44ch;
+  }
+
+  .cap {
+    font-size: var(--t3);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    color: var(--ink-soft);
+    margin: 0 0 var(--space-lg);
+    max-width: 54ch;
+  }
+
+  .eyebrow {
+    font-size: var(--t5);
+    margin: 0 0 var(--space-md);
+    color: var(--ink-soft);
+  }
+
+  .eyebrow i {
+    font-style: normal;
+    color: var(--ink-faint);
+    margin-left: var(--space-md);
+  }
+
+  /* The display steps come down with the viewport. */
+  @media (max-width: 1100px) {
+    h1 {
+      font-size: 2.75rem;
+    }
+    h2,
+    .head {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2.25rem;
+    }
+    h2,
+    .head {
+      font-size: 1.75rem;
+      max-width: none;
+    }
+  }
+
+  @media (max-width: 430px) {
+    h1 {
+      font-size: 2rem;
+    }
+    h2,
+    .head {
+      font-size: 1.5rem;
+    }
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: var(--radius-action);
+  }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 50;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 0 0 var(--radius-action) 0;
+    font-size: var(--t5);
+  }
+
+  .skip:focus {
+    left: 0;
   }
 
   /*
-   * A button is the panel vocabulary at button scale.
-   *
-   * An earlier cut answered "boring" by departing from the page three ways at
-   * once, with a proportional label, a gradient fill and an off-white label.
-   * It stopped being boring and started reading as an element from another
-   * design system, which is a worse failure: the page is monospace panels on
-   * surface and border tokens, and nothing else on it looks like that.
-   *
-   * So the material is borrowed rather than invented. Same border token, same
-   * panel radius, same mono family as every row it sits beside. The lift is
-   * what carries the affordance, and the accent carries the label rather than
-   * the fill, which keeps the accent's one structural use intact.
+   * Actions. Every control answers hover, press and focus in 160ms, which
+   * closed a real defect in the reference rather than adding polish: before it,
+   * every control changed state instantly.
    */
   .btn {
-    display: inline-block;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-panel);
-    padding: 0.75rem 1.4rem;
-    font-family: inherit;
-    font-size: var(--type-body-size);
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    min-width: 92px;
+    padding: 0 var(--space-lg);
+    border-radius: var(--radius-pill);
+    font-size: var(--t5);
+    font-weight: 500;
+    line-height: 1;
     text-decoration: none;
-    cursor: pointer;
-    background: var(--color-chrome);
-    color: var(--color-text);
-    box-shadow:
-      0 1px 0 var(--edge-top) inset,
-      var(--shadow-action);
     transition:
-      transform 0.18s ease,
-      box-shadow 0.18s ease;
+      color 0.16s var(--ease),
+      background-color 0.16s var(--ease),
+      box-shadow 0.16s var(--ease),
+      transform 0.16s var(--ease);
   }
 
-  /* The primary leads on its border and its label rather than on a fill, which
-     is how the scoped chip already marks the row it sits on. */
   .btn-primary {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: var(--ink);
+    color: var(--ground);
   }
 
-  .btn-secondary {
-    border-color: var(--color-border);
-    color: var(--color-text);
+  .btn-ghost {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--ring);
   }
-
-  /*
-   * Hover is the lift alone.
-   *
-   * Two color treatments were tried and both were wrong. Tinting the ground
-   * toward the accent mixed a saturated hue into a warm neutral and read as
-   * muddy; brightening the label to the text color washed the accent out of
-   * the primary action, so the button lost the one thing marking it primary at
-   * the moment a reader reached for it. The depth change says pressable
-   * without repainting anything.
-   */
 
   .btn:hover {
     transform: translateY(-1px);
     box-shadow:
-      0 1px 0 var(--edge-top) inset,
-      var(--shadow-action-hover);
+      0 4px 14px var(--shadow),
+      0 1px 3px rgb(0 0 0 / 0.06);
   }
 
   .btn:active {
-    transform: translateY(1px);
-    box-shadow: var(--shadow-action-pressed);
+    transform: translateY(0);
+    box-shadow: none;
   }
 
-  .btn:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
+  .cta {
+    display: flex;
+    gap: var(--space-sm);
+    margin: 0;
   }
 
-  /* The lift is the affordance, so the branch keeps the depth and drops only
-     the movement. A button with neither reads as flat again. */
-  @media (prefers-reduced-motion: reduce) {
-    .btn {
-      transition: none;
-    }
-
-    .btn:hover,
-    .btn:active {
-      transform: none;
+  @media (max-width: 640px) {
+    .cta {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
-}
 
-/*
- * The entrance treatment, applied uniformly to every section.
- *
- * `internal/rules/claude/593-landing-page.md` caps the page at three
- * animations, and that cap is about motion which asserts something: a row
- * reaching Completed is the dispatch completing, and a rule card arriving is
- * the glob firing. An entrance asserts nothing, so it is a second class rather
- * than a fourth animation. What keeps that from being a loophole is that it is
- * one decision applied to every section: the moment a section earns its own
- * arrival, it is making a claim again and counts against the three.
- *
- * The branch below is what the same rule requires of every animation, and it
- * lands the end state rather than only dropping the transition, so a reader
- * with the preference set sees the finished section rather than a blank one.
- */
-@layer base {
-  [data-reveal] {
+  /* The container every band shares. */
+  .bin {
+    max-width: var(--bin);
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  /*
+   * Section families. The structural rule is the tint alternation: a tinted
+   * band fades in from the ground and back out, so two neighboring sections
+   * never meet on a hard edge.
+   */
+  .grp,
+  .arc {
+    padding: var(--space-3xl) 0;
+  }
+
+  .tint {
+    background: linear-gradient(
+      var(--ground) 0,
+      var(--tint) 12%,
+      var(--tint) 88%,
+      var(--ground) 100%
+    );
+  }
+
+  /* A turn is something a participant said, and a band is the mechanism that answered it. */
+  .turn + .turn {
+    margin-top: var(--space-2xl);
+  }
+
+  .turn + .band {
+    margin-top: var(--space-2xl);
+  }
+
+  /* A figure ending and a new speaker starting is the larger change of register. */
+  .band + .turn {
+    margin-top: var(--space-3xl);
+  }
+
+  .band .head,
+  .band .cap {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .band .head {
+    max-width: 28ch;
+  }
+
+  .band .cap {
+    max-width: 52ch;
+    margin-bottom: var(--space-xl);
+  }
+
+  /*
+   * The machine beats take a family of their own rather than a fifth and sixth
+   * grp: the band heading sits left over a rule instead of centred, which is
+   * the one structural difference a reader notices without being told.
+   */
+  .arc .band .head,
+  .arc .band .cap {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 52ch;
+    text-align: left;
+  }
+
+  .arc .band + .band {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-2xl);
+    box-shadow: inset 0 1px 0 var(--ring);
+  }
+
+  @media (max-width: 900px) {
+    .turn {
+      padding: var(--space-2xl) 0;
+    }
+  }
+
+  /*
+   * Figure primitives several beats share. A figure carries no card of its
+   * own: the artifact inside it takes the one surface, so a card never nests
+   * inside a card.
+   */
+  .fig {
+    padding: 0;
+    font-size: var(--t5);
+  }
+
+  .fig-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin: 0 0 var(--space-lg);
+    padding-bottom: var(--space-md);
+    box-shadow: inset 0 -1px 0 var(--ring);
+  }
+
+  .fig-head code {
+    font-size: var(--t4);
+    color: var(--ink);
+  }
+
+  .aside {
+    color: var(--ink-faint);
+  }
+
+  .footnote {
+    margin: var(--space-lg) 0 0;
+    padding-top: var(--space-md);
+    box-shadow: inset 0 1px 0 var(--ring);
+    font-size: var(--t5);
+    color: var(--ink-faint);
+  }
+
+  .footnote b {
+    font-weight: 500;
+    color: var(--ink-body);
+  }
+
+  /*
+   * A trigger and its consequences, which the merge beat and nothing else draws.
+   * The rail is drawn once, by each row, rather than by the list as well.
+   */
+  .fan {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .trigger {
+    align-self: flex-start;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-frame);
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--ring);
+  }
+
+  .trigger b,
+  .effects b {
+    display: block;
+    font-size: var(--t4);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .trigger span,
+  .effects code {
+    display: block;
+    color: var(--ink-faint);
+  }
+
+  .effects {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 var(--space-xl);
+  }
+
+  .effects li {
+    position: relative;
+    padding: var(--space-md) 0 var(--space-md) var(--space-lg);
+  }
+
+  .effects li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    background: var(--ring);
+  }
+
+  .effects li:last-child::before {
+    height: 1.7rem;
+  }
+
+  .effects li::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.7rem;
+    width: var(--space-lg);
+    height: 1px;
+    background: var(--ring);
+  }
+
+  /*
+   * The build. The merge figure and the provenance ledger are the only two
+   * figures whose shape is a cause and its consequences, so they are the only
+   * two that assemble: the node, then each consequence 90ms after its cause.
+   * The delay is on the lit state alone, so the reveal staggers and nothing
+   * resets. Bands do not rise, since a page partly invisible until scrolled is
+   * the shape that once returned a whole-page capture of ten thousand blank
+   * pixels.
+   */
+  [data-build] {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
     transition:
-      opacity 0.5s ease,
-      transform 0.5s ease;
-    transition-delay: calc(var(--reveal-index, 0) * 60ms);
+      opacity 0.45s var(--ease),
+      transform 0.45s var(--ease);
   }
 
-  [data-reveal].is-revealed {
+  [data-build].is-built {
     opacity: 1;
     transform: none;
+    transition-delay: calc(140ms + var(--build-index, 0) * 90ms);
+  }
+
+  /*
+   * A still needs the end state. A full-page screenshot captures beyond the
+   * viewport without scrolling, so the observer never fires, measured at 0 of 9
+   * revealed before this existed. Two escapes, and a capture only has to take
+   * one: asking for reduced motion, or appending ?still for a tool that cannot
+   * set the emulation.
+   */
+  .still [data-build] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-reveal] {
-      transition: none;
-      transform: none;
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+
+    [data-build] {
       opacity: 1;
+      transform: none;
     }
   }
 }

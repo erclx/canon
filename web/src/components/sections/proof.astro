@@ -1,0 +1,32 @@
+---
+import { proof } from '../../content/copy'
+---
+
+<section class="proof">
+  <p>{proof}</p>
+</section>
+
+<style>
+  .proof {
+    background: linear-gradient(
+      var(--ground) 0,
+      var(--tint) 18%,
+      var(--tint) 82%,
+      var(--ground) 100%
+    );
+    margin-top: var(--space-2xl);
+    padding: var(--space-2xl) var(--space-lg);
+    text-align: center;
+  }
+
+  p {
+    margin: 0 auto;
+    max-width: 32ch;
+    font-size: var(--t2);
+    line-height: 1.26;
+    letter-spacing: -0.025em;
+    font-weight: 500;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+</style>

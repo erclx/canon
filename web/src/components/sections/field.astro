@@ -1,0 +1,181 @@
+---
+import { field } from '../../content/copy'
+import { readSession, usedNames } from '../../lib/session'
+
+/**
+ * Every command and every skill, with the ones the session used lit. The names
+ * and both totals are build-time reads, the command names off `canon --help`
+ * and the skills off `canon claude skills list`, so each heading's count is the
+ * length of the list under it. The lit names are authored and checked against
+ * the catalog, so a rename fails the build rather than lighting nothing.
+ */
+const session = readSession()
+const skillNames = session.skills.map((skill) => skill.name)
+const commandNames = [...session.commands].sort()
+const fields = [
+  {
+    names: commandNames,
+    lit: usedNames(field.usedCommands, commandNames, 'commands'),
+    label: field.commands(commandNames.length, field.usedCommands.length),
+    kind: 'commands',
+  },
+  {
+    names: skillNames,
+    lit: usedNames(field.usedSkills, skillNames, 'skills'),
+    label: field.skills(skillNames.length, field.usedSkills.length),
+    kind: 'skills',
+  },
+]
+---
+
+<section class="coda">
+  <div class="bin">
+    <p class="head">{field.head}</p>
+    <p class="cap">{field.cap}</p>
+    <div class="fields">
+      {
+        fields.map((entry) => (
+          <div class="field" data-field={entry.kind}>
+            <p class="label">
+              {entry.label.total}
+              <i>{entry.label.used}</i>
+            </p>
+            <ul
+              class="names"
+              style={`--rows: ${Math.ceil(entry.names.length / 4)}`}
+            >
+              {entry.names.map((name) => (
+                <li class:list={{ on: entry.lit.has(name) }}>{name}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .coda {
+    padding: var(--space-2xl) 0;
+  }
+
+  .head,
+  .cap {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .head {
+    max-width: 28ch;
+  }
+
+  .cap {
+    max-width: 52ch;
+    margin-bottom: var(--space-xl);
+  }
+
+  .fields {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  /*
+   * width:100% is load-bearing: margin:auto alone makes a grid item shrink to
+   * its content, which sized a field of short command names narrower than a
+   * field of long skill names.
+   */
+  .field {
+    width: 100%;
+  }
+
+  .label {
+    margin: 0 0 var(--space-lg);
+    padding-bottom: var(--space-md);
+    box-shadow: inset 0 -1px 0 var(--ring);
+    font-size: var(--t5);
+    color: var(--ink);
+  }
+
+  .label i {
+    font-style: normal;
+    color: var(--ink-faint);
+    margin-left: var(--space-md);
+  }
+
+  /*
+   * Fixed tracks, one width for both fields, so a short command name and a long
+   * skill name still produce two tables that align. The track is the longest
+   * name on either field, and the count and the gap carry the ladder below.
+   */
+  .names {
+    list-style: none;
+    padding: 0 var(--space-2xl);
+    margin: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--rows), auto);
+    grid-template-columns: repeat(4, 10.5rem);
+    justify-content: center;
+    gap: var(--space-sm) var(--space-2xl);
+    font-size: var(--t5);
+  }
+
+  .names li {
+    color: var(--ink-faint);
+    padding: var(--space-xs) 0;
+  }
+
+  /* Full ink at weight 500 against a faint sibling carries the distinction alone. */
+  .names li.on {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  @media (max-width: 1040px) {
+    .names {
+      column-gap: var(--space-xl);
+      padding: 0;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .names {
+      grid-template-columns: repeat(3, 10.5rem);
+      grid-template-rows: none;
+      grid-auto-flow: row;
+      column-gap: var(--space-2xl);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .names {
+      column-gap: var(--space-lg);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .names {
+      grid-template-columns: repeat(2, 10.5rem);
+      column-gap: var(--space-2xl);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .names {
+      column-gap: var(--space-lg);
+    }
+  }
+
+  /*
+   * Two fractional columns rather than one fixed track: a 10.5rem track cannot
+   * fit twice here, and one column of eighty rows is worse than a few long
+   * names wrapping.
+   */
+  @media (max-width: 430px) {
+    .names {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

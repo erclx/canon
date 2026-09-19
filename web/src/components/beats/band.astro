@@ -1,0 +1,16 @@
+---
+/** The mechanism that answered a turn: a headline, its caption, then the figure. */
+interface Props {
+  id: string
+  head: string
+  cap: string
+}
+
+const { id, head, cap } = Astro.props
+---
+
+<div class="band" id={id}>
+  <p class="head">{head}</p>
+  <p class="cap">{cap}</p>
+  <slot />
+</div>
