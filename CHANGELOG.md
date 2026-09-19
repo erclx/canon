@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.100.0](https://github.com/erclx/canon/compare/v4.99.0...v4.100.0) (2026-09-19)
+
+
+### Features
+
+* **readme:** serve each still in light and dark ([#1748](https://github.com/erclx/canon/issues/1748)) ([40d6ae0](https://github.com/erclx/canon/commit/40d6ae047acb40e2a7fe2ecfca0b7d56b14068ab))
+* **tooling:** capture a frame per named section ([#1750](https://github.com/erclx/canon/issues/1750)) ([60e5347](https://github.com/erclx/canon/commit/60e534780104f52159d68931e0aa53aaf7cebe1e))
+
 ## [4.99.0](https://github.com/erclx/canon/compare/v4.98.0...v4.99.0) (2026-09-19)
 
 
