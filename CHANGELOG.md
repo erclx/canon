@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.97.0](https://github.com/erclx/canon/compare/v4.96.0...v4.97.0) (2026-09-19)
+
+
+### Features
+
+* **claude:** add a codebase-layout skill loaded by plan-feature ([#1733](https://github.com/erclx/canon/issues/1733)) ([fa07374](https://github.com/erclx/canon/commit/fa07374d7ca333cefce7eaa18cf4887acff18954))
+* **cli:** add an on-demand pull request preview deploy ([#1737](https://github.com/erclx/canon/issues/1737)) ([a7b8f08](https://github.com/erclx/canon/commit/a7b8f087a77b8fce302b1863d2b4942113c79325))
+
+
+### Bug Fixes
+
+* **tooling:** move reduced motion to the context option in golden Playwright configs ([#1734](https://github.com/erclx/canon/issues/1734)) ([72c939f](https://github.com/erclx/canon/commit/72c939f46950df666dc0eaeefd4d8b90563530e0))
+
 ## [4.96.0](https://github.com/erclx/canon/compare/v4.95.0...v4.96.0) (2026-09-19)
 
 
