@@ -1,4 +1,4 @@
-import { bareHex, colorValue } from '@/design/tokens'
+import { bareHex, colorValue, TOKENS } from '@/design/tokens'
 
 export type Variant = 'light' | 'dark'
 
@@ -23,11 +23,36 @@ const ROLES: Record<keyof Theme, readonly [dark: string, light: string]> = {
   accent: ['accent', 'light-accent'],
 }
 
+/**
+ * `PptxGenJS` takes one installed family name where the record declares a
+ * stack, and a `.pptx` cannot embed the face. The first family is taken with
+ * its ` Variable` suffix dropped, since that suffix names the CSS package and
+ * not the installed family, and PowerPoint picks its own substitute when the
+ * face is missing.
+ */
+function familyName(role: string): string {
+  const token = TOKENS.typography.find((entry) => entry.role === role)
+  const family = token?.family
+    .split(',')[0]
+    ?.trim()
+    .replace(/ Variable$/, '')
+  if (!family) {
+    throw new Error(`The design record declares no ${role} type role`)
+  }
+
+  return family
+}
+
 export const FONTS = {
-  heading: 'Arial',
-  body: 'Calibri',
+  heading: familyName('display'),
+  body: familyName('body'),
 } as const
 
+/**
+ * Deck-owned point sizes. The record's `t0` to `t6` steps are screen pixels,
+ * which read as points on a 13.33 inch slide would shrink the cover to 38 and
+ * the body to 11, so only the face and the colors come from the record.
+ */
 export const TYPE = {
   cover: 44,
   section: 40,
