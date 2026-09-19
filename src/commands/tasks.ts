@@ -146,6 +146,11 @@ export function register(program: Command): void {
         'plan, and the archived task keeps a working Plan: pointer at the new',
         'path. A plan several tasks share stays where it is.',
         '',
+        'The ready folder the task names moves to .canon/ready/archive/ with its',
+        'plan, and the Ready: line and the plan path to it are retargeted. A',
+        'folder that does not resolve, or a destination already taken, moves',
+        'nothing and refuses nothing.',
+        '',
         'Exit codes:',
         '  0  the task was archived',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -1310,6 +1315,11 @@ function report(
     logAdd(relative(root, outcome.plan.to))
     logInfo('retargeted the Plan: line')
   }
+  if (outcome.ready) {
+    logRemove(relative(root, outcome.ready.from))
+    logAdd(relative(root, outcome.ready.to))
+    logInfo('retargeted the Ready: line')
+  }
   if (outcome.priorityRowRemoved) logInfo('cleared the ordering row')
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
   if (outcome.cut > 0) logInfo(`${outcome.cut} outcome(s) cut`)
@@ -1342,6 +1352,12 @@ function recordFor(
       ? {
           from: relative(root, outcome.plan.from),
           to: relative(root, outcome.plan.to),
+        }
+      : null,
+    ready: outcome.ready
+      ? {
+          from: relative(root, outcome.ready.from),
+          to: relative(root, outcome.ready.to),
         }
       : null,
     closed: outcome.closed,

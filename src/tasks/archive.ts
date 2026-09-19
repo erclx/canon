@@ -7,6 +7,7 @@ import { recordDir, recordDirs } from '@/record-root'
 
 const TASKS = 'tasks'
 const PLANS = 'plans'
+const READY = 'ready'
 const ARCHIVE = 'archive'
 const DECLINED = 'declined'
 const BACKLOG = 'backlog.md'
@@ -75,6 +76,12 @@ export interface PlanMove {
   readonly to: string
 }
 
+/** A ready folder carried into the archive alongside the plan that is its verbatim source. */
+export interface ReadyMove {
+  readonly from: string
+  readonly to: string
+}
+
 export interface ArchiveSuccess {
   readonly ok: true
   readonly stem: string
@@ -84,6 +91,8 @@ export interface ArchiveSuccess {
   readonly indexRegenerated: boolean
   /** Undefined when the task cited no live plan, or when another task still holds it. */
   readonly plan: PlanMove | undefined
+  /** Undefined when the plan stays, or when no ready folder resolves and can move. */
+  readonly ready: ReadyMove | undefined
   readonly closed: number
   readonly cut: number
 }
@@ -278,6 +287,32 @@ export function planLine(target: string): string {
  */
 export function retargetPlanLine(text: string, target: string): string {
   return text.replace(PLAN_PATTERN, () => planLine(target))
+}
+
+/** The `Ready:` line in either form, matched the way `PLAN_PATTERN` matches `Plan:`. */
+const READY_PATTERN = /^Ready:[ \t]*(?:\[[^\]]*\]\(([^)]+)\)|(\S+))[ \t]*$/m
+
+/** A ready folder path as a plan's constraints write it, the folder name captured. */
+const READY_PATH_PATTERN = /(\.(?:canon|claude)\/ready\/)([^\s/`)]+)(?=\/)/g
+
+export function readReadyTarget(text: string): string | undefined {
+  const match = READY_PATTERN.exec(text)
+  if (!match) return undefined
+  return match[1] ?? match[2]
+}
+
+/**
+ * Builds a `Ready:` line as a link whose target keeps the trailing slash a
+ * folder carries, the label taken from the folder's own name.
+ */
+export function readyLine(target: string): string {
+  const folder = target.replace(/\/+$/, '')
+
+  return `Ready: [${basename(folder)}](${folder}/)`
+}
+
+export function retargetReadyLine(text: string, target: string): string {
+  return text.replace(READY_PATTERN, () => readyLine(target))
 }
 
 /**
@@ -731,22 +766,41 @@ export async function archiveTask(
   }
 
   const plan = await planToArchive(dir, root, stem, text)
+  const ready = plan && (await readyToArchive(dir, root, text, plan))
   const destination = archiveDir(root)
   const to = join(destination, `${stem}.md`)
 
   // The plan moves first so the line written below describes a file already at
   // its new path. Writing the retarget first and failing the move would leave a
   // pointer at a folder holding nothing, and `.canon/plans/` is gitignored, so
-  // no history recovers the target it named.
+  // no history recovers the target it named. The folder follows the plan and
+  // both precede the task, so a failed rename never leaves the task archived
+  // with its folder live, which the unattended post-merge hook cannot repair.
   if (plan) {
     await mkdir(dirname(plan.to), { recursive: true })
     await rename(plan.from, plan.to)
   }
 
+  if (ready) {
+    await mkdir(dirname(ready.to), { recursive: true })
+    await rename(ready.from, ready.to)
+    await writeFile(
+      plan.to,
+      retargetReadyPaths(await readFile(plan.to, 'utf8'), basename(ready.from)),
+    )
+  }
+
   await mkdir(destination, { recursive: true })
   await rename(from, to)
-  if (plan)
-    await writeFile(to, retargetPlanLine(text, linkTo(destination, plan.to)))
+  if (plan) {
+    const retargeted = retargetPlanLine(text, linkTo(destination, plan.to))
+    await writeFile(
+      to,
+      ready
+        ? retargetReadyLine(retargeted, `${linkTo(destination, ready.to)}/`)
+        : retargeted,
+    )
+  }
 
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
   const regen = await regenOne(dir, { dryRun: false })
@@ -759,6 +813,7 @@ export async function archiveTask(
     priorityRowRemoved,
     indexRegenerated: regen.action === 'written',
     plan,
+    ready: ready || undefined,
     closed: closed.length,
     cut: cut.length,
   }
@@ -795,6 +850,63 @@ async function planToArchive(
     from: live,
     to: join(recordDir(root, PLANS, ARCHIVE), basename(live)),
   }
+}
+
+/**
+ * The ready folder that travels with the plan, or nothing. It is read from the
+ * task's `Ready:` line, falling back to a folder path in the plan's own text for
+ * a task written before the line was defined. It moves only with its plan,
+ * since the folder is the plan's verbatim source and a plan another task still
+ * cites still needs it, so the caller passes the plan `planToArchive` settled.
+ *
+ * A target naming no folder, one already archived, or a destination taken
+ * yields nothing and refuses nothing, the way a mistyped `Plan:` does.
+ */
+async function readyToArchive(
+  dir: string,
+  root: string,
+  text: string,
+  plan: PlanMove,
+): Promise<ReadyMove | undefined> {
+  const live =
+    readyFolder(dir, root, text) ??
+    readyFolder(dir, root, await readFile(plan.from, 'utf8'))
+  if (!live) return undefined
+
+  const to = join(recordDir(root, READY, ARCHIVE), basename(live))
+  if (existsSync(to)) return undefined
+
+  return { from: live, to }
+}
+
+function readyFolder(
+  dir: string,
+  root: string,
+  text: string,
+): string | undefined {
+  const target = readReadyTarget(text)
+  const named = target ? [resolve(dir, target), resolve(root, target)] : []
+  const constrained = [...text.matchAll(READY_PATH_PATTERN)].map(([, , name]) =>
+    join(recordDir(root, READY), name),
+  )
+  const archives = recordDirs(root, READY, ARCHIVE)
+
+  return [...named, ...constrained].find(
+    (path) =>
+      recordDirs(root, READY).some((base) => dirname(path) === base) &&
+      basename(path) !== ARCHIVE &&
+      !archives.some((base) => isUnder(path, base)) &&
+      existsSync(path),
+  )
+}
+
+/** Points the plan's literal folder paths at `ready/archive/`, since the folder no longer sits where they say. */
+function retargetReadyPaths(text: string, folder: string): string {
+  return text.replace(
+    READY_PATH_PATTERN,
+    (whole: string, prefix: string, name: string) =>
+      name === folder ? `${prefix}${ARCHIVE}/${name}` : whole,
+  )
 }
 
 /**
