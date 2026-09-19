@@ -201,7 +201,7 @@ export const STAGES: readonly Stage[] = [
         kind: 'drift',
         pathspec: 'assets/captures/*.html',
         failure:
-          'A generated frame drifted from the catalogs or the design source. Run bun run check, then canon capture assets/captures --selector .window --out assets, and commit each assets/captures/*.html with its .png and .stamp.',
+          'A generated frame drifted from the catalogs or the design source. Run bun run check, then canon capture assets/captures --selector .window --out assets/evidence, and commit each assets/captures/*.html with its .png and .stamp.',
       },
       { kind: 'measure', measure: captureStamps },
     ],

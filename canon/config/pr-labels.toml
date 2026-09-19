@@ -127,16 +127,16 @@ release-managed = [
 # commit that changed its source, which already carries that source's label. A
 # row over any of them adds a second label to a mechanical edit.
 generated = [
-  "assets/hero.png",
-  "assets/hero.stamp",
-  "assets/install.png",
-  "assets/install.stamp",
-  "assets/governance.png",
-  "assets/governance.stamp",
-  "assets/install-surface.png",
-  "assets/install-surface.stamp",
-  "assets/task-board.png",
-  "assets/task-board.stamp",
+  "assets/evidence/hero.png",
+  "assets/evidence/hero.stamp",
+  "assets/evidence/install.png",
+  "assets/evidence/install.stamp",
+  "assets/evidence/governance.png",
+  "assets/evidence/governance.stamp",
+  "assets/evidence/install-surface.png",
+  "assets/evidence/install-surface.stamp",
+  "assets/evidence/task-board.png",
+  "assets/evidence/task-board.stamp",
   "canon/config/baseline.json",
 ]
 # Each is a reason of its own rather than another generated file, since a reader
