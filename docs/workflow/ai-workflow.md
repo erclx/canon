@@ -65,7 +65,9 @@ The routing test is whether the repository can answer an item today. A session g
 
 A groundwork track may run experiments to settle a question, writing a fixture it reads itself under `.canon/tmp/runs/groundwork-fixtures/<slug>/` and spawning up to three billed headless runs before it asks. A fixture a headless run is pointed at sits outside the repository, since a session started under the project root inherits that project's `CLAUDE.md` and rules and would measure them instead of the arm.
 
-What a spike produces goes somewhere else again. An input the run reads is re-runnable and cited by nothing, so the scratch path above is the right lifetime for it, while a recording or a render the track cites as evidence for a finding is what a later reader opens to check the claim. Evidence therefore lives in `evidence/` inside the track beside the file citing it, since the scratch tree holds only what can be deleted without loss.
+A spike starts against a sample, bounded on input size, duration, and spend, and scales up once the sample shows the method works. Nothing checks this, so it holds while a session reads the standard.
+
+What a spike leaves behind splits on whether a later reader needs the file to check a claim. Bulk input, such as a large fixture, is re-runnable and cited by nothing, so the scratch path above is the right lifetime for it. Everything a reader opens to verify a result lives inside the track in one of three folders: `evidence/` for a recording or a render, `scripts/` for the arm scripts, and `clones/` for checkouts and copies of outside material a claim rests on. The scratch tree holds only what can be deleted without loss, which none of those is.
 
 #### Session 2
 
