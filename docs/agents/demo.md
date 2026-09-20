@@ -26,6 +26,8 @@ The plan is committed, not scratch. Its timing is a starting point tuned by watc
 
 A plan can carry an optional `colorScheme` of `light` or `dark`, which the recording context starts in so a page following the system preference paints that scheme with no click beat of its own. An absent field keeps the engine's default, which is light, and `compile` never seeds it. Any other value makes the plan unreadable. A page keyed on a stored theme rather than the preference ignores the field.
 
+A recording that has to match both themes takes one plan per scheme, committed side by side, rather than one plan run twice. The pair shares its beats and differs in `colorScheme`, `slug`, and the `output` paths. Neither plan clicks a theme toggle, since a stored theme overrides the preference. Nothing checks that the two plans keep the same beats, so an edit to one is made to both.
+
 `record-screencast` is the routed way to run both verbs from a draft path: it compiles only when no plan exists yet, then runs, stopping to report any field still unresolved rather than guessing one.
 
 | Option          | Behavior                                                          |
