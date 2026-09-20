@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.105.0](https://github.com/erclx/canon/compare/v4.104.0...v4.105.0) (2026-09-20)
+
+
+### Features
+
+* **governance:** require reflow evidence, state the 1.4.10 criterion ([#1775](https://github.com/erclx/canon/issues/1775)) ([4a3110a](https://github.com/erclx/canon/commit/4a3110a5a4013835447719a71f8033a822fc7563))
+* **tasks:** check board groups against the plan a task cites ([#1773](https://github.com/erclx/canon/issues/1773)) ([d194f21](https://github.com/erclx/canon/commit/d194f21561221c06ceca3aec26d832914a21657c))
+
+
+### Bug Fixes
+
+* **web:** refresh the frames that record the preview's fallback face ([#1774](https://github.com/erclx/canon/issues/1774)) ([a0ef2f6](https://github.com/erclx/canon/commit/a0ef2f654b7a720929ce8d915a487029b28e1697))
+
 ## [4.104.0](https://github.com/erclx/canon/compare/v4.103.0...v4.104.0) (2026-09-20)
 
 
