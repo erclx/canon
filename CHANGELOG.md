@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.107.0](https://github.com/erclx/canon/compare/v4.106.0...v4.107.0) (2026-09-20)
+
+
+### Features
+
+* **cli:** group the help listing and check it against commands ([#1783](https://github.com/erclx/canon/issues/1783)) ([f5e44fd](https://github.com/erclx/canon/commit/f5e44fdabff1e9da346be681b40125eb6c9b48ad))
+* **gate:** move capture frame regeneration to a post-merge refresh ([#1785](https://github.com/erclx/canon/issues/1785)) ([7c72a01](https://github.com/erclx/canon/commit/7c72a01b7034237c0eb9906666ec6f1a8d8fa060))
+
+
+### Bug Fixes
+
+* **teach:** repair chrome measure and dead references ([#1784](https://github.com/erclx/canon/issues/1784)) ([4a6dc14](https://github.com/erclx/canon/commit/4a6dc14a5111887451c84651b40d3c5dfbdf4caa))
+
 ## [4.106.0](https://github.com/erclx/canon/compare/v4.105.0...v4.106.0) (2026-09-20)
 
 
