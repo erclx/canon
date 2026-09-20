@@ -25,7 +25,13 @@ paths:
 
 ## What a capture covers
 
-- Capture the full page at the viewport its case declares. Do not capture a component in isolation.
+- Capture the full page. Do not capture a component in isolation.
+- Declare the widths a layout case captures. Always include 320, the reflow floor from the reflow criterion in `410-a11y`, then add each breakpoint bucket the project writes rules for, read from the `## Layout` section of `DESIGN.md`.
+- Fall back to the 320 floor alone when the project has no `DESIGN.md` or its record carries no `## Layout` section. Do not impose another project's breakpoints.
+- Apply the declaration to a case that covers layout only. A case driving a menu open or an answer chosen tests a state, so it takes one width rather than the full set.
+- Read a capture at 320 as proof that a frame was taken there, not that the page reflows correctly. The criterion is stated in `410-a11y` and nothing here enforces it.
+- Write the capture into a folder named `evidence`. The image is collected for the pull request comment when any segment of its path is literally `evidence` and its filename carries an image extension, so the folder name is fixed and its position in the tree is the project's own.
+- Several `evidence/` folders in one project is the ordinary shape rather than a problem to consolidate. One per surface is how a project with more than one rendered surface ends up.
 - Drive a state a screenshot cannot reach. An initial render reports nothing about a menu that opens, an answer that is chosen, or a rail that tracks scrolling.
 - Add a case to the capture record when adding a surface.
 - Remove a surface's case in the change that removes the surface.
