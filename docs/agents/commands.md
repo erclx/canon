@@ -5,7 +5,7 @@ description: Every project-level command and every domain subcommand, plus the s
 
 # Command catalog
 
-Full help: `canon <command> --help`. Bare `canon --help` lists every top-level command under five headings, Project, Domains, Author and render, Session and ship, and Repo reports, with descriptions cut at 80 columns. Behavior notes for the install and sync verbs live in `install-and-sync.md`.
+Full help: `canon <command> --help`. Bare `canon --help` lists every top-level command under five headings, Project, Domains, Author and render, Session and ship, and Repo reports, with descriptions cut at 80 columns. Piped into another command, the block prints without its frame glyphs and carries the same text. Behavior notes for the install and sync verbs live in `install-and-sync.md`.
 
 ## Project-level
 
