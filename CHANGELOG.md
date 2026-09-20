@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.108.0](https://github.com/erclx/canon/compare/v4.107.0...v4.108.0) (2026-09-20)
+
+
+### Features
+
+* **capture:** rebuild the install frame on the token record ([#1788](https://github.com/erclx/canon/issues/1788)) ([a92fc8a](https://github.com/erclx/canon/commit/a92fc8aed64f9c7021f610bbf6cbe3212054d14a))
+* **claude:** add the document health skill ([#1786](https://github.com/erclx/canon/issues/1786)) ([693fc9b](https://github.com/erclx/canon/commit/693fc9b1063257b3e19829a8e6052b1d95eb00a5))
+
 ## [4.107.0](https://github.com/erclx/canon/compare/v4.106.0...v4.107.0) (2026-09-20)
 
 
