@@ -168,7 +168,7 @@ The list stays written in the skill body as the fallback for a target whose inst
 
 Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
 
-If capture wrote at least one memory file, `memory-review` then proposes a decision-ready fix scoped to those entries while context is fresh, otherwise it is skipped. It stops at Propose. Review the receipt and run Apply yourself, on its own commit separate from the feature.
+The chain ends at capture, and review is run on its own.
 
 Run `memory-review` standalone to curate the whole pen. An entry it retires moves to `.canon/memory/archive/` rather than being deleted, since a bulk pass has no undo.
 
@@ -262,7 +262,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                        |
 | `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                  |
 | `canon:git-pr`         | When a pull request needs a title and body written from the diff                      |
-| `canon:memory-review`  | After capture writes an entry, to propose where each one belongs                      |
+| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                           |
 
 ### After the pull request opens
 

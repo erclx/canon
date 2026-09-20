@@ -11,7 +11,7 @@ Chain the post-plan pipeline in a single run. Every step has a stop condition. S
 ## Guards
 
 - All `.canon/plans/` and `.canon/review/` reads resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
-- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree, the review receipt, the branch, and the memory proposal, regardless of which plan Step 1 reads.
+- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree, the review receipt, and the branch, regardless of which plan Step 1 reads.
 - Resolve `<plan>` in Step 1, ahead of any other read.
 - If the working tree has uncommitted changes unrelated to the plan, stop: `❌ Uncommitted changes outside the plan. Commit or stash before autoshipping.`
 
@@ -188,7 +188,7 @@ This chain owns the receipt's lifetime, which is what makes the Output block's c
 
 ## Step 8: ship
 
-Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, memory capture, both doc syncs, staging, the commit grouping, the branch rename, the pull request, the CI watch, and the scoped memory review, along with the reason each step sits where it does. This step used to restate that list and the two drifted apart with nothing comparing them, so read the order there and never here.
+Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, memory capture, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. This step used to restate that list and the two drifted apart with nothing comparing them, so read the order there and never here.
 
 One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, then read the flag back:
 
@@ -207,21 +207,20 @@ Placement is why the call sits ahead of the watch rather than after it. Marking 
 
 ## Output
 
-Respond with up to five lines:
+Respond with up to four lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
 <N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
-<Memory proposal at .canon/memory/review/memory-review-<slug>.md>
 ```
 
 `<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the undo asked for. Writing the word `draft` there unconditionally is what this line used to do, and it named a state no step had read.
 
-Omit the second line if there were no minor findings, and the third if nothing routed. Omit the fourth and fifth if `memory-capture` wrote no memory file this session, since an empty pen means no scoped review and no proposal. A run that routes every fact and writes none is the shape to expect, and it reports three lines.
+Omit the second line if there were no minor findings, and the third if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session. A run that routes every fact and writes none is the shape to expect, and it reports three lines.
 
-This block replaces the one `git-ship` closes on rather than following it. The two carry the same three trailing lines and differ on the two above them, since the first names the state the read returned and the second reports the minor findings Step 7 kept, neither of which that body has a counterpart for. Emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
+This block replaces the one `git-ship` closes on rather than following it. The two carry the same two trailing lines and differ on the two above them, since the first names the state the read returned and the second reports the minor findings Step 7 kept, neither of which that body has a counterpart for. Emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 
 ## Failure recovery
 

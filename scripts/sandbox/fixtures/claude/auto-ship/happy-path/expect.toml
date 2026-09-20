@@ -25,6 +25,6 @@ reply = ["Autoshipped (draft)"]
 
 manual = [
   "The pull request itself opened, and opened as a draft. Unwired: the sandbox tree and the reply text are what expect.toml can read, and confirming the PR object needs a gh call this declaration has no channel for.",
-  "Capture found something worth persisting and Step 9 ran Propose over the pen, leaving a receipt at .canon/memory/review/memory-review-add-farewell.md. Judgment: the fixture's plan carries no Risks or Questions and the run is a single headless pass with no user exchange, so a correct run may just as well report 'Nothing worth capturing' and skip Step 9, and either shape is consistent with a working chain.",
+  "Capture may or may not write a memory file, and no memory proposal line is reported either way. Judgment: the fixture's plan carries no Risks or Questions and the run is a single headless pass with no user exchange, so a correct run may just as well report 'Nothing worth capturing', and either shape is consistent with a working chain.",
   "docs-sync and docs-fold left the tree exactly where a run with no public docs and no owning task would leave it. Semantic: both skills sync against what a session finds, and a project this small may give either nothing to change, so an assertion pinned to a specific edit would fail a correct run that found none to make.",
 ]

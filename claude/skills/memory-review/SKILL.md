@@ -30,12 +30,11 @@ If the user re-pings the skill with no new phrase and a receipt exists, default 
 
 ## Propose phase
 
-Propose is the ship-time entry point. The ship skills run it right after capture, so the fix is written while session context is fresh.
+Propose is the entry point for a standalone run. The ship skills stop at capture and never invoke it.
 
 ### Scope
 
-- **Ship-scoped:** when a ship caller (`git-ship`, `auto-ship`) names the entries captured this session, classify only those entries. Read the full pen for merge and absorbed comparison, but do not propose actions on carried entries the captures do not touch. Each carried entry was already proposed on in its own ship cycle.
-- **Full sweep:** when invoked standalone with no named set, classify every entry in the pen, including entries carried from earlier sessions, so cross-session duplicates merge into one rule.
+- **Full sweep:** classify every entry in the pen, including entries carried from earlier sessions, so cross-session duplicates merge into one rule.
 
 ### Step 1: read the memory folder
 
