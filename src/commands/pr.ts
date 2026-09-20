@@ -20,7 +20,11 @@ import {
   compareKeyChanges,
   treeRoots,
 } from '@/pr/bijection'
-import { type CheckRunListing, collapseChecks } from '@/pr/checks'
+import {
+  type CheckRunListing,
+  collapseChecks,
+  withMergeState,
+} from '@/pr/checks'
 import {
   findEvidenceChecklist,
   findEvidenceCommentId,
@@ -306,6 +310,11 @@ export function register(program: Command): void {
         'still going, since the endpoint has answered with a non-zero count and',
         'an empty row list, and reading that as passing is the false green the',
         'sha key alone does not close.',
+        '',
+        'A branch conflicting with its base gets no merge ref, so no run ever',
+        'starts for it and the state stays pending. The record carries',
+        '`conflicted: true` beside it when `mergeStateStatus` reads DIRTY and no',
+        'run belongs to the tip, and a caller stops waiting and rebases.',
         '',
         'Exit codes:',
         '  0  the runs for the tip were read, whatever they say',
@@ -865,6 +874,7 @@ interface PullIdentity {
   readonly number: number | undefined
   readonly branch: string
   readonly head?: string
+  readonly mergeState?: string
 }
 
 type IdentityRead =
@@ -911,12 +921,17 @@ async function readIdentity(
 
   const args = ['pr', 'view']
   if (number !== undefined) args.push(number)
-  args.push('--json', 'number,headRefName,headRefOid')
+  args.push('--json', 'number,headRefName,headRefOid,mergeStateStatus')
 
   const stdout = await gh(cwd, args)
   if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
 
-  let row: { number?: number; headRefName?: string; headRefOid?: string }
+  let row: {
+    number?: number
+    headRefName?: string
+    headRefOid?: string
+    mergeStateStatus?: string
+  }
   try {
     row = JSON.parse(stdout)
   } catch {
@@ -933,6 +948,9 @@ async function readIdentity(
       number: row.number,
       branch: row.headRefName,
       ...(row.headRefOid !== undefined && { head: row.headRefOid }),
+      ...(row.mergeStateStatus !== undefined && {
+        mergeState: row.mergeStateStatus,
+      }),
     },
   }
 }
@@ -1071,7 +1089,10 @@ async function runChecks(
     )
   }
 
-  const reading = collapseChecks(resolved.tip, listing)
+  const reading = withMergeState(
+    identity.mergeState,
+    collapseChecks(resolved.tip, listing),
+  )
 
   logStep('Scope')
   logInfo(
@@ -1101,6 +1122,10 @@ async function runChecks(
     logInfo('every run on the tip completed and none failed')
   } else if (reading.state === 'failing') {
     logWarn('a run on the tip failed, which no run still going can clear')
+  } else if (reading.conflicted) {
+    logWarn(
+      'the branch conflicts with its base, so no run will start for the tip. Rebase onto the base rather than waiting.',
+    )
   } else if (reading.matched === 0) {
     logInfo(
       `no run belongs to the tip yet${reading.reported > 0 ? `, against a reported count of ${reading.reported}` : ''}. That is unread rather than clean.`,
