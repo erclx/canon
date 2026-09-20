@@ -22,8 +22,15 @@ import {
 
 const FAVICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
 
+/**
+ * Narrower and steeper than the mark it replaces, with round caps and joins.
+ * The old one painted a 5.4 by 2.7 pixel butt-capped dash whose only claim to
+ * pointing was the mitre at its vertex, and the path is shifted so its ink
+ * centres in its own viewBox rather than sitting a pixel below the cap band of
+ * the label beside it.
+ */
 const CARET =
-  '<svg class="caret" width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 4l3 3 3-3"/></svg>'
+  '<svg class="caret" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 3.7l2.4 2.6 2.4-2.6"/></svg>'
 
 const THEME_BUTTON =
   '<button class="theme" type="button" aria-label="Switch between light and dark"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>'
@@ -33,22 +40,67 @@ const THEME_SCRIPT =
 
 const CLOSE_OUTSIDE_CLICK_SCRIPT = `<script>
 (function () {
+  var MENUS = "details.jump[open], details.sb-ws[open]";
+
   function close(except) {
-    document.querySelectorAll("details.jump[open]").forEach(function (d) {
+    document.querySelectorAll(MENUS).forEach(function (d) {
       if (d !== except) d.open = false;
     });
   }
   document.addEventListener("click", function (e) {
-    var inside = e.target.closest("details.jump");
+    var inside = e.target.closest("details.jump, details.sb-ws");
     close(inside);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    var open = document.querySelector("details.jump[open]");
+    var open = document.querySelector(MENUS);
     if (!open) return;
     open.open = false;
     var s = open.querySelector("summary");
     if (s) s.focus();
+  });
+
+  /* Hover intent on the breadcrumb only. The sidebar's workspace switcher stays
+     click-only on purpose: its panel opens directly over the lesson list, which
+     is where the pointer is headed, so hovering it would cover the thing
+     being reached for. The breadcrumb's panel drops over body text instead. */
+  var OPEN = 120, SHUT = 260;
+
+  document.querySelectorAll("details.jump").forEach(function (d) {
+    var host = d.closest(".crumb-item") || d;
+    var timer = null;
+    var openedByHover = false;
+
+    function arm(want) {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        if (want) close(d);
+        d.open = want;
+      }, want ? OPEN : SHUT);
+    }
+
+    host.addEventListener("mouseenter", function () {
+      if (!d.open) openedByHover = true;
+      arm(true);
+    });
+    host.addEventListener("mouseleave", function () {
+      openedByHover = false;
+      arm(false);
+    });
+    /* Keeps it open while the pointer is inside the panel, without cancelling a
+       pending open, which is what silently disabled this on one of two menus. */
+    d.addEventListener("mouseenter", function () { if (d.open) clearTimeout(timer); });
+
+    /* Hover and click were wired to one disclosure and fought: hover opened the
+       panel, then the summary's native click toggled what hover had already
+       opened, so reaching for an item shut it. A click on a panel hover opened
+       keeps it open, and a second click closes. The click path stays live for
+       touch, where no hover exists, and for the keyboard, where Enter is the
+       only way in. */
+    var summary = d.querySelector("summary");
+    if (summary) summary.addEventListener("click", function (e) {
+      if (d.open && openedByHover) { e.preventDefault(); openedByHover = false; }
+    });
   });
 })();
 </script>`
@@ -178,29 +230,151 @@ export function focusLine(
   return compiled(scrollY, max, innerHeight)
 }
 
-const OUTLINE_SCRIPT = `<script>
-(function () {
-  var hs = Array.prototype.slice.call(document.querySelectorAll("main h2"));
-  if (hs.length < 3) return;
-  var nav = document.createElement("nav");
-  nav.className = "outline";
-  nav.innerHTML = '<button class="to-top" type="button">On this page</button>';
-  nav.querySelector(".to-top").addEventListener("click", function () {
-    scrollTo({ top: 0, behavior: "smooth" });
-  });
-  hs.forEach(function (h, i) {
-    if (!h.id) h.id = "s" + i;
-    var a = document.createElement("a");
-    a.href = "#" + h.id;
-    a.textContent = h.textContent.trim();
-    nav.appendChild(a);
-  });
-  document.body.appendChild(nav);
-  var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+/**
+ * The panel's state, settled before the first paint rather than after it. An
+ * arm that set the narrow default afterwards slid the panel in and back out on
+ * every load, and a restored custom width animated in from the default.
+ *
+ * A listing page starts shut because the body already lists what the panel
+ * would, and a lesson starts open because there the panel is the only
+ * cross-lesson navigation on the page. A stored preference beats both. A count
+ * threshold on its own was built and reverted, since it hides the panel on a
+ * lesson too.
+ */
+function headScript(page: 'index' | 'lesson', lessons: number): string {
+  return `<script>(function(){var r=document.documentElement,s=null;
+r.dataset.page="${page}";
+r.dataset.lessons="${lessons}";
+if(matchMedia("(max-width: 1100px)").matches){r.classList.add("sb-shut");return}
+try{s=localStorage.getItem("teach-sb")}catch(e){}
+var idx=r.dataset.page==="index";
+if(s==="shut"||(s===null&&idx))r.classList.add("sb-shut");
+var w=null;try{w=localStorage.getItem("teach-sb-w")}catch(e){}
+if(w)r.style.setProperty("--sb-w",w+"px")})();</script>`
+}
 
-  function mark(i) {
-    links.forEach(function (l, j) { l.classList.toggle("on", j === i); });
+const SIDEBAR_SCRIPT = `<script>
+(function () {
+  var root = document.documentElement;
+  var panel = document.querySelector(".sb");
+  if (!panel) return;
+
+  var fold = document.querySelector(".sb-fold");
+  var narrow = matchMedia("(max-width: 1100px)");
+
+  function shut() {
+    root.classList.add("sb-shut");
+    try { localStorage.setItem("teach-sb", "shut"); } catch (e) {}
   }
+
+  if (fold) fold.addEventListener("click", function () {
+    root.classList.toggle("sb-shut");
+    try {
+      localStorage.setItem("teach-sb", root.classList.contains("sb-shut") ? "shut" : "open");
+    } catch (e) {}
+    /* An overlay takes focus with it. Without this a keyboard reader opens the
+       panel and goes on tabbing through the lesson behind the scrim. */
+    if (!narrow.matches || root.classList.contains("sb-shut")) return;
+    var first = panel.querySelector("a, button, summary, input");
+    if (first) first.focus();
+  });
+
+  var scrim = document.createElement("div");
+  scrim.className = "sb-scrim";
+  document.body.appendChild(scrim);
+  scrim.addEventListener("click", shut);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && narrow.matches) shut();
+  });
+
+  /* The panel covers the masthead and the toggle that opened it, so it carries
+     its own way out rather than leaving the scrim as the only route. */
+  var close = document.createElement("button");
+  close.type = "button";
+  close.className = "sb-close";
+  close.setAttribute("aria-label", "Close the course panel");
+  close.textContent = "\\u00d7";
+  close.addEventListener("click", function () {
+    shut();
+    if (fold) fold.focus();
+  });
+  panel.appendChild(close);
+
+  var MIN = 208, MAX = 296, DEF = 256;
+  var grip = document.querySelector(".sb-grip");
+  var lastWidth = parseInt(root.style.getPropertyValue("--sb-w"), 10) || DEF;
+
+  function setWidth(px, save) {
+    var w = Math.max(MIN, Math.min(MAX, Math.round(px)));
+    root.style.setProperty("--sb-w", w + "px");
+    lastWidth = w;
+    if (save) { try { localStorage.setItem("teach-sb-w", String(w)); } catch (e) {} }
+  }
+
+  if (grip) {
+    var dragging = false;
+    grip.addEventListener("pointerdown", function (e) {
+      dragging = true;
+      grip.setPointerCapture(e.pointerId);
+      root.classList.add("sb-drag");
+      e.preventDefault();
+    });
+    grip.addEventListener("pointermove", function (e) {
+      if (dragging) setWidth(e.clientX, false);
+    });
+    grip.addEventListener("pointerup", function (e) {
+      if (!dragging) return;
+      dragging = false;
+      root.classList.remove("sb-drag");
+      grip.releasePointerCapture(e.pointerId);
+      setWidth(lastWidth, true);
+    });
+    grip.addEventListener("dblclick", function () { setWidth(DEF, true); });
+    grip.addEventListener("keydown", function (e) {
+      var step = e.shiftKey ? 32 : 8;
+      if (e.key === "ArrowLeft") { setWidth(lastWidth - step, true); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { setWidth(lastWidth + step, true); e.preventDefault(); }
+      else if (e.key === "Home") { setWidth(DEF, true); e.preventDefault(); }
+    });
+  }
+
+  var filter = document.querySelector(".sb-filter input");
+  if (filter) filter.addEventListener("input", function () {
+    var q = filter.value.trim().toLowerCase();
+    document.querySelectorAll(".sb-list > li").forEach(function (li) {
+      li.classList.toggle("hide", q !== "" && li.textContent.toLowerCase().indexOf(q) === -1);
+    });
+  });
+
+  var slot = document.querySelector(".sb-out-slot");
+  var hs = Array.prototype.slice.call(document.querySelectorAll("main h2"));
+  var links = [];
+
+  if (slot && hs.length) {
+    var list = document.createElement("ul");
+    list.className = "sb-out";
+    hs.forEach(function (h, i) {
+      if (!h.id) h.id = "s" + i;
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = "#" + h.id;
+      a.textContent = h.textContent.trim();
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+    slot.parentNode.replaceChild(list, slot);
+    links = Array.prototype.slice.call(list.querySelectorAll("a"));
+  }
+
+  /* The bar reports position inside the lesson, which nothing reported before
+     the segmented track retired. The breadcrumb's last segment carries the
+     lesson title once the real one has scrolled off. */
+  var bar = document.querySelector(".bar");
+  var here = document.querySelector(".crumb-here");
+  var h1 = document.querySelector("main h1");
+  var counter = here ? here.textContent.trim() : "";
+  var title = h1 ? h1.textContent.trim() : "";
 
   function focusLine() {
     var max = document.documentElement.scrollHeight - innerHeight;
@@ -208,17 +382,28 @@ const OUTLINE_SCRIPT = `<script>
   }
 
   function sync() {
-    var best = 0;
-    var line = focusLine();
-    for (var i = 0; i < hs.length; i++) {
-      if (hs[i].getBoundingClientRect().top <= line) best = i;
+    if (bar) {
+      var max = document.documentElement.scrollHeight - innerHeight;
+      var pct = max > 0 ? Math.min(100, Math.max(0, (scrollY / max) * 100)) : 0;
+      bar.style.setProperty("--read", pct.toFixed(1) + "%");
     }
-    mark(best);
-  }
 
-  links.forEach(function (l, i) {
-    l.addEventListener("click", function () { mark(i); });
-  });
+    if (here && h1 && title && counter) {
+      var want = h1.getBoundingClientRect().bottom < 56 ? title : counter;
+      if (here.textContent !== want) here.textContent = want;
+    }
+
+    if (links.length) {
+      /* Nothing is marked until a heading has actually passed the line, so the
+         first section is not reported as current while the title is on screen. */
+      var best = -1;
+      var line = focusLine();
+      for (var i = 0; i < hs.length; i++) {
+        if (hs[i].getBoundingClientRect().top <= line) best = i;
+      }
+      links.forEach(function (l, j) { l.classList.toggle("on", j === best); });
+    }
+  }
 
   addEventListener("scroll", sync, { passive: true });
   addEventListener("resize", sync);
@@ -254,15 +439,23 @@ interface JumpEntry {
   readonly ordinal: string
   readonly label: string
   readonly href: string | undefined
-  readonly done: boolean
   readonly at: boolean
+  /**
+   * The row's third column. The workspace menu puts a lesson count here and the
+   * lesson menu leaves it empty, which is what retired the status dot that used
+   * to sit there reading the same value on every row.
+   */
+  readonly trailing?: string
 }
 
 function renderJumpList(entries: readonly JumpEntry[]): string {
   return entries
     .map((entry) => {
-      const dot = `<span class="dot${entry.done ? ' done' : ''}"></span>`
-      const body = `<span class="n">${entry.ordinal}</span><span>${escapeHtml(entry.label)}</span>${dot}`
+      const trailing =
+        entry.trailing === undefined
+          ? ''
+          : `<span class="ct">${escapeHtml(entry.trailing)}</span>`
+      const body = `<span class="n">${entry.ordinal}</span><span>${escapeHtml(entry.label)}</span>${trailing}`
 
       if (entry.href === undefined) {
         return `<li class="soon"><a href="#" aria-disabled="true" tabindex="-1">${body}</a></li>`
@@ -312,26 +505,91 @@ function renderBreadcrumb(segments: readonly CrumbSegment[]): string {
     .join('')
 }
 
-type TrackState = 'done' | 'here' | ''
+interface SidebarItem {
+  readonly ordinal: string
+  readonly label: string
+  readonly href: string
+  readonly at: boolean
+}
 
-function renderTrack(states: readonly TrackState[]): string {
-  const dots = states
-    .map((state) => `<i${state ? ` class="${state}"` : ''}></i>`)
+interface Sidebar {
+  /** The switcher's own label: the workspace on a page inside one, else the root. */
+  readonly heading: string
+  readonly switcher: readonly JumpEntry[]
+  readonly meta: string
+  readonly items: readonly SidebarItem[]
+  readonly foot: string | undefined
+}
+
+/**
+ * Past this many rows a reader scans rather than reads, which is where a filter
+ * starts earning the width it takes from the list.
+ */
+const FILTER_FLOOR = 8
+
+/**
+ * The course, as a column. It replaces a segmented progress strip that gave
+ * each lesson one `flex: 1` segment and rendered fifty of them as a row of
+ * dots, and the right-hand outline rail that only existed above 1420px. The
+ * outline folds under the lesson being read, so one column reports position in
+ * the course and position inside the lesson at every window width.
+ */
+function renderSidebar(sidebar: Sidebar): string {
+  const filter =
+    sidebar.items.length > FILTER_FLOOR
+      ? '<div class="sb-filter"><input type="search" placeholder="Filter lessons" aria-label="Filter lessons"></div>'
+      : ''
+
+  const rows = sidebar.items
+    .map((item) => {
+      const slot = item.at ? '<div class="sb-out-slot"></div>' : ''
+      return `<li><a class="sb-l${item.at ? ' sb-on' : ''}" href="${item.href}"><span class="sb-n">${item.ordinal}</span>${escapeHtml(item.label)}</a>${slot}</li>`
+    })
     .join('')
 
-  return `<div class="track" role="presentation">${dots}</div>`
+  const body = rows
+    ? `<ol class="sb-list">${rows}</ol>`
+    : '<p class="sb-empty">No lessons yet.</p>'
+
+  const foot =
+    sidebar.foot === undefined
+      ? ''
+      : `<div class="sb-foot">${sidebar.foot}</div>`
+
+  return `<aside class="sb">
+  <div class="sb-top">
+    <details class="sb-ws" name="mast"><summary><span class="ws-name">${escapeHtml(sidebar.heading)}</span><span class="car">${CARET}</span></summary><div class="sb-wl"><ul class="jump-list">${renderJumpList(sidebar.switcher)}</ul></div></details>
+  </div>
+  <div class="sb-scroll">
+    <div class="sb-meta">${escapeHtml(sidebar.meta)}</div>
+    ${filter}
+    <nav class="sb-nav">${body}</nav>
+  </div>
+  ${foot}
+  <button class="sb-grip" type="button" role="separator" aria-orientation="vertical" aria-label="Resize the course panel"></button>
+</aside>`
 }
+
+/**
+ * Everything but the sidebar sits inside one pane, so the two lay out as a flex
+ * row and the sticky sidebar's containing block is the flex container rather
+ * than a body carrying bottom padding it could never travel into. The opening
+ * tag rides with the header and `PANE_CLOSE` shuts it after the footer
+ * navigation, which on a lesson is a separate spliced region.
+ */
+const PANE_CLOSE = '</div>'
 
 function renderHeader(
   segments: readonly CrumbSegment[],
-  track: readonly TrackState[],
+  sidebar: Sidebar,
 ): string {
-  return `<header class="bar">
+  return `${renderSidebar(sidebar)}
+<div class="pane">
+<header class="bar">
   <div class="mast">
-    <span class="mast-left">${renderBreadcrumb(segments)}</span>
+    <span class="mast-left"><button class="sb-fold" type="button" aria-label="Toggle the course panel">&#9776;</button>${renderBreadcrumb(segments)}</span>
     <span class="mast-right">${THEME_BUTTON}</span>
   </div>
-  ${renderTrack(track)}
 </header>`
 }
 
@@ -339,7 +597,7 @@ function renderScripts(
   includeQuiz: boolean,
   includeGlossaryFilter: boolean,
 ): string {
-  const scripts = [THEME_SCRIPT, CLOSE_OUTSIDE_CLICK_SCRIPT, OUTLINE_SCRIPT]
+  const scripts = [THEME_SCRIPT, CLOSE_OUTSIDE_CLICK_SCRIPT, SIDEBAR_SCRIPT]
   if (includeGlossaryFilter) scripts.push(GLOSSARY_FILTER_SCRIPT)
   if (includeQuiz) scripts.push(QUIZ_SCRIPT)
   return scripts.join('\n')
@@ -349,6 +607,7 @@ function pageHead(
   title: string,
   cssHref: string | undefined,
   embeddedCss: string | undefined,
+  lessons: number,
 ): string {
   const style =
     embeddedCss === undefined
@@ -363,6 +622,7 @@ function pageHead(
 <title>${escapeHtml(title)}</title>
 ${FAVICON}
 ${style}
+${headScript('index', lessons)}
 </head>
 `
 }
@@ -396,9 +656,27 @@ function workspaceJumpEntries(
     ordinal: ordinalOf(workspace),
     label: titleCase(workspace.topic),
     href: hrefForWorkspace(workspace, prefix),
-    done: workspace.lessons > 0,
     at: workspace.slug === currentSlug,
+    trailing: String(workspace.lessons),
   }))
+}
+
+/**
+ * What the workspace holds beyond its lessons, for the foot of the sidebar.
+ * Undefined where it holds neither, so the panel closes on the list rather than
+ * on an empty rule.
+ */
+function workspaceFoot(detail: WorkspaceDetail): string | undefined {
+  const bits: string[] = []
+
+  if (detail.terms > 0) {
+    bits.push(`${detail.terms} term${detail.terms === 1 ? '' : 's'}`)
+  }
+  if (detail.records > 0) {
+    bits.push(`${detail.records} session${detail.records === 1 ? '' : 's'}`)
+  }
+
+  return bits.length > 0 ? bits.join(' &middot; ') : undefined
 }
 
 interface LessonMeta {
@@ -436,7 +714,6 @@ function lessonJumpEntries(
     ordinal: String(index + 1).padStart(2, '0'),
     label: meta.title,
     href: `${workspacePrefix}${TEACH_LESSONS}/${meta.file}`,
-    done: true,
     at: meta.file === currentFile,
   }))
 }
@@ -576,9 +853,18 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
     },
   ]
 
-  const track = workspaces.map<TrackState>((workspace) =>
-    workspace.lessons > 0 ? 'done' : '',
-  )
+  const sidebar: Sidebar = {
+    heading: 'Workspaces',
+    switcher: workspaceJumpEntries(workspaces, '', undefined),
+    meta: `${workspaces.length} workspace${workspaces.length === 1 ? '' : 's'}`,
+    items: workspaces.map((workspace) => ({
+      ordinal: ordinalOf(workspace),
+      label: titleCase(workspace.topic),
+      href: hrefForWorkspace(workspace, '') ?? '#',
+      at: false,
+    })),
+    foot: undefined,
+  }
 
   const rows = workspaces
     .map((workspace) => {
@@ -597,8 +883,8 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
     })
     .join('')
 
-  return `${pageHead('Learning workspaces', TEACH_STYLESHEET, undefined)}<body>
-${renderHeader(segments, track)}
+  return `${pageHead('Learning workspaces', TEACH_STYLESHEET, undefined, workspaces.length)}<body>
+${renderHeader(segments, sidebar)}
 <main class="wide-body">
 
 
@@ -608,6 +894,7 @@ ${renderHeader(segments, track)}
 <ul class="toc">${rows}</ul>
 
 </main>
+${PANE_CLOSE}
 ${renderScripts(false, false)}
 </body>
 </html>
@@ -671,7 +958,18 @@ async function renderContentsPage(
     },
   ]
 
-  const track = metas.map<TrackState>(() => 'done')
+  const sidebar: Sidebar = {
+    heading: titleCase(detail.topic),
+    switcher: workspaceJumpEntries(workspaces, '../', detail.slug),
+    meta: `${metas.length} lesson${metas.length === 1 ? '' : 's'}`,
+    items: metas.map((meta, index) => ({
+      ordinal: String(index + 1).padStart(2, '0'),
+      label: meta.title,
+      href: `${TEACH_LESSONS}/${meta.file}`,
+      at: false,
+    })),
+    foot: workspaceFoot(detail),
+  }
 
   const lessonRows = metas
     .map(
@@ -710,8 +1008,8 @@ async function renderContentsPage(
     .filter((section) => section !== '')
     .join('\n\n')
 
-  return `${pageHead(`${title}, contents`, `${TEACH_ASSETS}/${TEACH_STYLESHEET}`, undefined)}<body>
-${renderHeader(segments, track)}
+  return `${pageHead(`${title}, contents`, `${TEACH_ASSETS}/${TEACH_STYLESHEET}`, undefined, metas.length)}<body>
+${renderHeader(segments, sidebar)}
 <main class="wide-body">
 
 
@@ -719,6 +1017,7 @@ ${renderHeader(segments, track)}
 ${sections}
 
 </main>
+${PANE_CLOSE}
 ${renderScripts(false, true)}
 </body>
 </html>
@@ -814,7 +1113,18 @@ async function rewriteLesson(
       },
       { label: `Lesson ${index + 1} of ${metas.length}` },
     ],
-    metas.map<TrackState>((_, i) => (i === index ? 'here' : 'done')),
+    {
+      heading: titleCase(detail.topic),
+      switcher: workspaceJumpEntries(workspaces, teachPrefix, detail.slug),
+      meta: `${metas.length} lesson${metas.length === 1 ? '' : 's'}`,
+      items: metas.map((meta, i) => ({
+        ordinal: String(i + 1).padStart(2, '0'),
+        label: meta.title,
+        href: meta.file,
+        at: i === index,
+      })),
+      foot: workspaceFoot(detail),
+    },
   )
 
   // One detector decides both mechanisms, because a lesson carries one quiz
@@ -827,9 +1137,14 @@ async function rewriteLesson(
   const regions: ReadonlyArray<readonly [Region, string]> = [
     // The stepper follows the workspace stylesheet so it wins the cascade at
     // equal specificity, which is what reaches a workspace seeded before it.
-    ['style', `<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>`],
+    // The head script settles the panel before first paint, so it rides in the
+    // one region that sits inside `<head>`.
+    [
+      'style',
+      `<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson', metas.length)}`,
+    ],
     ['header', header],
-    ['footnav', renderFootNav(metas, index)],
+    ['footnav', `${renderFootNav(metas, index)}\n${PANE_CLOSE}`],
     ['scripts', renderScripts(legacy, false)],
   ]
 
