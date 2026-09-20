@@ -39,6 +39,12 @@ interface SyncOptions {
   readonly skip?: string
   readonly check?: boolean
   readonly write?: boolean
+  readonly diff?: { readonly json: boolean }
+}
+
+interface DiffOptions {
+  readonly skip?: string
+  readonly json?: boolean
 }
 
 interface InjectOptions {
@@ -74,7 +80,10 @@ export function register(program: Command): void {
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--skip <stack>', 'Drop a layer from the extends chain')
-    .option('--check', 'Report what would change and write nothing')
+    .option(
+      '--check',
+      'Report what would change and write nothing, always exiting 0. Prefer `canon tooling diff`',
+    )
     .option('--write', 'Apply every change without prompting')
     .addHelpText(
       'after',
@@ -95,6 +104,42 @@ export function register(program: Command): void {
     .action(
       async (stack: string | undefined, target: string, opts: SyncOptions) => {
         process.exitCode = await runSync(stack, target, opts)
+      },
+    )
+
+  tooling
+    .command('diff')
+    .description('Report how a target differs from a stack and write nothing')
+    .argument('[stack]', 'Tooling stack name (e.g. base, vite-react)')
+    .argument('[target]', 'Target directory', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--skip <stack>', 'Drop a layer from the extends chain')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'The comparison `canon tooling sync --check` reports, under a name that',
+        'says it only asks. Exit codes:',
+        '  0  the target matches the stack',
+        '  1  a file, script, dependency, or gitignore entry differs, or a refusal',
+        '',
+        '`sync --check` reports the same list and always exits 0. Use `diff` to',
+        'gate CI, and keep `--check` for scripts that already call it.',
+        '',
+        'Examples:',
+        '  canon tooling diff base',
+        '  canon tooling diff base --json',
+        '',
+      ].join('\n'),
+    )
+    .action(
+      async (stack: string | undefined, target: string, opts: DiffOptions) => {
+        process.exitCode = await runSync(stack, target, {
+          skip: opts.skip,
+          check: true,
+          diff: { json: opts.json === true },
+        })
       },
     )
 
@@ -275,7 +320,7 @@ async function runSync(
   target: string,
   opts: SyncOptions,
 ): Promise<number> {
-  intro('canon tooling sync')
+  intro(opts.diff === undefined ? 'canon tooling sync' : 'canon tooling diff')
 
   if (opts.check === true && opts.write === true) {
     logWarn('Pass --check or --write, not both.')
@@ -308,6 +353,12 @@ async function runSync(
   const result = scan(prepared.chain, prepared.target)
 
   report(result)
+
+  if (opts.diff !== undefined) {
+    if (opts.diff.json) process.stdout.write(`${JSON.stringify(result)}\n`)
+    outro()
+    return result.totalChanges === 0 ? 0 : 1
+  }
 
   const mode = resolveWriteMode(opts)
   const { GREEN, NC } = palette(process.stderr)
