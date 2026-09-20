@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.106.0](https://github.com/erclx/canon/compare/v4.105.0...v4.106.0) (2026-09-20)
+
+
+### Features
+
+* **claude:** give the social card a route source it can re-render ([#1778](https://github.com/erclx/canon/issues/1778)) ([dea5b47](https://github.com/erclx/canon/commit/dea5b47b90ca0f6ce7a62e9f31ef7da604767e22))
+* **claude:** rescope session-relay and role-planner ([#1776](https://github.com/erclx/canon/issues/1776)) ([4abcddb](https://github.com/erclx/canon/commit/4abcddb130ed06956167ddad06684de5204158b7))
+* **labels:** cover generated asset siblings by stem prefix ([#1779](https://github.com/erclx/canon/issues/1779)) ([66380b3](https://github.com/erclx/canon/commit/66380b301027517bcf420ad4ad3b087fb0ac3eb2))
+* **tasks:** rebase archived task links for the deeper folder ([#1781](https://github.com/erclx/canon/issues/1781)) ([fc86462](https://github.com/erclx/canon/commit/fc864629c5808a6e1eaaaa789a3f672062ff9416))
+* **web:** trigger the capture job on its harness path ([#1780](https://github.com/erclx/canon/issues/1780)) ([f1771df](https://github.com/erclx/canon/commit/f1771df4a72a54c13dc8482dc1a8e83fe082ef24))
+
 ## [4.105.0](https://github.com/erclx/canon/compare/v4.104.0...v4.105.0) (2026-09-20)
 
 
