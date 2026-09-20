@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.104.0](https://github.com/erclx/canon/compare/v4.103.0...v4.104.0) (2026-09-20)
+
+
+### Features
+
+* **claude:** merge the six setup skills into target-setup ([#1772](https://github.com/erclx/canon/issues/1772)) ([c6bb4c1](https://github.com/erclx/canon/commit/c6bb4c1ac637863fdf1a3b91df06414e8703a025))
+* **governance:** add an interface casing rule to the ui stacks ([#1768](https://github.com/erclx/canon/issues/1768)) ([eacf87c](https://github.com/erclx/canon/commit/eacf87c8bfa1c4f358c3109f3e015d2a1aea3265))
+
+
+### Bug Fixes
+
+* **claude:** edit pr comments with -F and gate the raw flag ([#1769](https://github.com/erclx/canon/issues/1769)) ([6235cef](https://github.com/erclx/canon/commit/6235cef84dbb88fdc8e866b231dd651681274d28))
+
 ## [4.103.0](https://github.com/erclx/canon/compare/v4.102.0...v4.103.0) (2026-09-20)
 
 
