@@ -1,11 +1,11 @@
 ---
 title: Per-standard decisions
-description: What the plan standard fixes and why its sections are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, the memory standard, what the memory pen measured, the widened readiness test, the architecture record's verification anchor, the cross-reference form split by destination, the wireframe standard's transcription carve-out, and its copy rule narrowing to structural text
+description: What the plan standard fixes and why its sections are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, the memory standard, what the memory pen measured, the widened readiness test, the architecture record's verification anchor, the cross-reference form split by destination, the wireframe standard's transcription carve-out, its copy rule narrowing to structural text, and why the wiki standard got a reader rather than the move its reader count implied
 ---
 
 # Per-standard decisions
 
-Five standards in the corpus cost more reasoning than their shape rules show.
+Six standards in the corpus cost more reasoning than their shape rules show.
 
 - The plan and memory standards were both drafted against a live folder holding two or three files, so the plan standard shipped a rule the whole corpus failed and the memory standard was measured against the pen instead
 - The plan standard costs a second time for an unrelated reason, two rules under separate headings that read as pointing opposite ways
@@ -13,6 +13,7 @@ Five standards in the corpus cost more reasoning than their shape rules show.
 - The tasks standard carries a readiness test that has to admit a row no fact on disk can confirm
 - The architecture standard borrows a marker from a sibling surface that has two writers and gets none of its own
 - The publish standard splits one rule by destination, so the same reference takes opposite spellings on either side of the remote and no check can reach the half that goes wrong
+- The wiki standard was cited by nothing, which made every page conforming by memory rather than by a read, and the fix is a reader rather than the move the ownership test would otherwise have taken
 
 What each one settled belongs here rather than in the file itself, which states the rule and not the count behind it.
 
@@ -219,3 +220,15 @@ A sibling rule closes the matching gap on the commit side. The built-in `subject
 `snippets.md` was filed for the same move and stayed. Re-counting at `c175ec5d` found two readers behind the one the row carried: `create-snippet`, and the toolkit-internal `internal-snippets` skill, which sends a session to its cadence and audience tests before it admits a snippet. A skill reading a file to do its job is a reader, where a context entry pointing at it is not, so a second one ends the case. `skill.md` also names it as the sibling standard for chat prompts.
 
 The count is the test, and it decays: a filed count that predates a later citation moves a file a second reader still needs, so re-count before every move.
+
+## The wiki standard acquires its first reader
+
+`wiki.md` was written and then cited by nothing. Every page under the wiki folder conformed to it, which is the reading that matters: the standard was being followed from the author's memory rather than from a read, so its rules were never once checked against the tree they govern. `draft-wiki` is the citation, and drafting it forced the check the standard had never had. All fourteen pages passed, including the sourcing rule, which is the one a session working from recall breaks silently.
+
+A standard with no reader was nearly moved into its reader's skill under the ownership test above, which is what happened to `issue.md`. The move is wrong here for a reason the count does not show. `issue.md` had one reader and the test put the fact inside it. `wiki.md` had none, and a standard with zero readers is not a one-reader fact waiting to be relocated, it is a rule nothing enforces. Adding the reader is what closes that, where the move would have buried the rule inside the only thing that reads it and left the fourteen existing pages answering to nothing.
+
+The write frequency is why this standard got a skill and three siblings did not. Measured at `f635d673` across all 1725 commits, the wiki folder appears in 90 against 8 for `canon/ARCHITECTURE.md` and 1 each for `canon/REQUIREMENTS.md` and `canon/decisions/`. The 90 counts commits rather than pages authored, so it overstates the writing, but not by enough to close a gap that wide.
+
+Read over the last 200 commits instead and the order inverts: wiki 5, architecture 8, requirements 1, decisions 1. The two readings disagree because the wiki was written heavily and early while the other three were touched only recently, so every one of their commits sits inside that window and 85 of the wiki's sit outside it. The all-time figure is the one the decision rests on, since a skill is built for the traffic a surface attracts across its life rather than for whichever quarter is busiest. Both are recorded here because the recent window is the reading that would have argued for `draft-architecture` first, and a later reader re-running the count on a short range will land there and should know the choice was made against the long one.
+
+A standard governing a surface nobody writes to does not need a drafting skill, however uneven that leaves the standard-and-skill table.
