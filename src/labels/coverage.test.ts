@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { resolveCoverage } from '@/labels/coverage'
-import { parseLabelMap } from '@/labels/map'
+import { join } from 'node:path'
+import { parseLabelMap, readLabelMap } from '@/labels/map'
 
 const FIXTURE = `
 [domains]
@@ -145,6 +146,26 @@ formatting = [".prettierignore"]
 
     expect(coverage.labels).toEqual([])
     expect(coverage.uncovered).toEqual(['infra/main.tf'])
+  })
+})
+
+describe("resolveCoverage against the repository's own map", () => {
+  function repositoryMap() {
+    const map = readLabelMap(join(import.meta.dirname, '..', '..'))
+    if (map.kind !== 'map') throw new Error('repository map did not parse')
+    return map
+  }
+
+  it('should decline a light sibling, its stamp, and a home frame the real config names by stem', () => {
+    const coverage = resolveCoverage(repositoryMap(), [
+      'assets/evidence/hero-light.png',
+      'assets/evidence/hero-light.stamp',
+      'assets/captures/hero-light.html',
+      'assets/evidence/home/frame-1.png',
+    ])
+
+    expect(coverage.uncovered).toEqual([])
+    expect(coverage.declined).toHaveLength(4)
   })
 })
 
