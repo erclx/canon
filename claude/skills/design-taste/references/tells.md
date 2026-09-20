@@ -61,7 +61,7 @@ These are the rules with numbers, so they are checked by counting rather than by
 
 - **A layout family appears once.** Once a section uses a shape, no other section on the surface uses it. Eight sections need at least four distinct families.
 - **Two consecutive splits, never three.** Alternating image-left and image-right reads as considered twice and as filler by the third. Break it with a full-width section, a vertical stack, a grid, or anything else.
-- **One small uppercase label per three sections.** The tiny wide-tracked line above a heading is the single most over-reached default in model output. Count them: more than `ceil(sections / 3)` is too many, and the first screen counts as one. The fix is usually to delete it, since a section's position already says what it is.
+- **One small uppercase label per three sections.** The tiny wide-tracked line above a heading is the single most over-reached default in model output. `465-interface-casing` carries the count. The fix is usually to delete it, since a section's position already says what it is.
 - **One marquee.** Two sliding strips on one surface read as filler rather than as a device.
 - **Cells equal items.** A grid with a hole in it, or a blank tile at the end, means the grid was shaped before the content was counted. Reshape it.
 - **Over five items wants a different component.** A longer list is the lazy answer. Group into clusters, split into columns, give each item a card, make them scrollable, or collapse the tail behind a disclosure.

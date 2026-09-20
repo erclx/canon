@@ -28,7 +28,7 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 - [ ] No layout family used twice. Eight sections carry at least four families
 - [ ] No three consecutive sections sharing the image-and-text split
-- [ ] Small uppercase labels above headings number no more than one per three sections
+- [ ] Small uppercase labels above headings stay within the `465-interface-casing` budget
 - [ ] At most one horizontal marquee
 - [ ] Grid cells equal content items, with no blank tile filling a gap
 - [ ] Lists over five items use something other than a longer list
@@ -62,7 +62,7 @@ Skip this group where the surface draws on a system already settled.
 - [ ] Every number either real, labeled as sample, or removed
 - [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
 - [ ] No filler verbs
-- [ ] Sentence case throughout
+- [ ] Casing follows `465-interface-casing`
 - [ ] Every claim about what the product does is a thing it does
 
 ## Motion
