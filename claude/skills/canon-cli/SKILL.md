@@ -31,7 +31,7 @@ Consult before running an unfamiliar `canon` verb, before a sync or install, or 
 
 A golden config is any file a stack ships under `configs/`, and the category is wider than its name suggests. It carries the CI workflow, the git hooks, the end-to-end harness, the shell scripts under `scripts/`, and the editor settings, alongside the linters and compilers a reader expects. A stack inherits its parent's configs, so syncing `astro` also writes everything `web` and `base` hold.
 
-Run `canon tooling sync <stack> <target> --check` for the list resolved against a real target. It reports every path and writes nothing. The list below is what the stacks hold as shipped, before any chain resolution.
+Run `canon tooling diff <stack> <target>` for the list resolved against a real target. It reports every path, writes nothing, and exits 1 when any differs. The list below is what the stacks hold as shipped, before any chain resolution.
 
 <!-- generated:tooling-paths -->
 

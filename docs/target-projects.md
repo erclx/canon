@@ -265,7 +265,7 @@ Add `--json` for the machine-readable report, and `--exit-code` to fail a CI job
 
 Tooling reports under a section of its own, and `measured` there says whether the target ever recorded a chain. One that never ran a tooling sync reports unmeasured rather than clean, which is what separates tooling nobody has looked at from tooling that is current. A workspace root records nothing either way, since each package resolves its own chain.
 
-Reconcile the configs with `canon tooling sync <stack> <path> --check` to read which files differ, then re-run it with `--write` to apply them. The drift report counts categories and the sync names paths, which is the difference worth knowing before a golden config the project edited is replaced.
+Reconcile the configs with `canon tooling diff <stack> <path>` to read which files differ, then run `canon tooling sync <stack> <path> --write` to apply them. The drift report counts categories and the diff names paths, which is the difference worth knowing before a golden config the project edited is replaced.
 
 ### Catch-all
 

@@ -75,6 +75,12 @@ toolkit's own `snippets/`, so a session reaches one at its `@` reference with
 no copy to reconcile. `canon snippets list --json` carries the catalog and
 `canon snippets create` is the one verb left that still writes a file.
 
+## Tooling diff and sync
+
+`canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout with `ok: true`, and the frame goes to stderr. A refusal such as an unknown stack, an excluded stack, or a toolkit-root target still exits 1 and answers `{ ok: false, reason, message }`, so a caller branches on the record and reads a typo'd stack name as a refusal rather than as drift.
+
+`canon tooling sync <stack> [target] --check` reports the same list and always exits 0. It stays for scripts that already call it. `sync` itself writes only under `--write`, and a headless run with neither flag reports and exits 1.
+
 ## Install guards
 
 `canon gov install` requires its first argument under
@@ -188,7 +194,7 @@ since `src/tooling/` runs its own inject machinery and has no walk to attribute.
 The chain is ordered nearest stack first, which is what a `--skip` run needs:
 recording the leaf alone would send the next report measuring against a layer the
 target deliberately does not carry. The report loads exactly those stacks, scans
-them the way `canon tooling sync` would, and counts what differs per category
+them the way `canon tooling diff` would, and counts what differs per category
 under `tooling.counts`.
 
 `measured` is the field the section exists for. A target carrying no chain

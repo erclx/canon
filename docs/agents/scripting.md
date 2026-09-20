@@ -78,7 +78,7 @@ surface is in `skills-audit.md`.
 CANON_NON_INTERACTIVE=1 canon tooling create astro
 
 # Report what a stack would change, writing nothing
-CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --check
+CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
 
 # Sync a stack into a target project, overwriting its golden configs
 CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write

@@ -12,6 +12,7 @@ const LOCAL_EDIT = '# a project owns this line\n'
 interface Run {
   readonly status: null | number
   readonly stderr: string
+  readonly stdout?: string
 }
 
 let target: string
@@ -25,17 +26,36 @@ const buildEnv = (extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   ...extra,
 })
 
-const sync = (args: readonly string[], headless = true): Run => {
+const runVerb = (
+  verb: 'diff' | 'sync',
+  args: readonly string[],
+  headless = true,
+): Run => {
   const run = spawnSync(
     'bun',
-    [CLI, 'tooling', 'sync', 'base', target, ...args],
+    [CLI, 'tooling', verb, 'base', target, ...args],
     {
       encoding: 'utf8',
       env: buildEnv(headless ? { CANON_NON_INTERACTIVE: '1' } : {}),
     },
   )
 
-  return { status: run.status, stderr: run.stderr }
+  return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+}
+
+const sync = (args: readonly string[], headless = true): Run =>
+  runVerb('sync', args, headless)
+
+const diff = (args: readonly string[]): Run => runVerb('diff', args)
+
+const diffStack = (stack: string, args: readonly string[] = []): Run => {
+  const run = spawnSync(
+    'bun',
+    [CLI, 'tooling', 'diff', stack, target, ...args],
+    { encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+  )
+
+  return { status: run.status, stderr: run.stderr, stdout: run.stdout }
 }
 
 const goldenContent = (): string => readFileSync(join(target, GOLDEN), 'utf8')
@@ -105,6 +125,78 @@ describe('tooling sync write authorization', () => {
     sync([])
 
     expect(() => readFileSync(stampPath(target))).toThrow()
+  })
+})
+
+describe('tooling diff', () => {
+  it('should exit 1 when a file differs, matching the headless gate', () => {
+    expect(diff([]).status).toBe(1)
+  })
+
+  it('should exit 0 once the target matches the stack', () => {
+    sync(['--write'])
+
+    expect(diff([]).status).toBe(0)
+  })
+
+  it('should leave a local edit in place', () => {
+    diff([])
+
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should write no install stamp', () => {
+    diff([])
+
+    expect(() => readFileSync(stampPath(target))).toThrow()
+  })
+
+  it('should name the drifted path on stderr', () => {
+    expect(diff([]).stderr).toContain(GOLDEN)
+  })
+
+  it('should refuse a run passing --check, which sync alone carries', () => {
+    expect(diff(['--check']).status).not.toBe(0)
+  })
+
+  it('should emit a record on stdout under --json that parses clean', () => {
+    const record = JSON.parse(diff(['--json']).stdout ?? '') as {
+      configs: { rel: string; state: string }[]
+    }
+
+    expect(record.configs).toContainEqual(
+      expect.objectContaining({ rel: GOLDEN, state: 'drifted' }),
+    )
+  })
+
+  it('should carry ok true on the record when the run measured', () => {
+    const record = JSON.parse(diff(['--json']).stdout ?? '') as { ok: boolean }
+
+    expect(record.ok).toBe(true)
+  })
+
+  it('should emit an unknown-stack reason under --json for a bad stack name', () => {
+    const record = JSON.parse(
+      diffStack('no-such-stack', ['--json']).stdout ?? '',
+    ) as { ok: boolean; reason: string }
+
+    expect(record).toMatchObject({ ok: false, reason: 'unknown-stack' })
+  })
+
+  it('should emit an excluded-stack reason under --json for the claude stack', () => {
+    const record = JSON.parse(diffStack('claude', ['--json']).stdout ?? '') as {
+      reason: string
+    }
+
+    expect(record.reason).toBe('excluded-stack')
+  })
+
+  it('should keep exit 1 on a refusal under --json', () => {
+    expect(diffStack('no-such-stack', ['--json']).status).toBe(1)
+  })
+
+  it('should still exit 1 under --json when a file differs', () => {
+    expect(diff(['--json']).status).toBe(1)
   })
 })
 
