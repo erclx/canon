@@ -1,0 +1,97 @@
+name: Refresh Capture Frames
+# canon-no-seed: regenerates this checkout's own landing-page frames from its
+# own catalogs. Seeding it as-is would have a target regenerate frames it does
+# not carry.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # The count and token inputs regen-hero.sh reads. The frames themselves
+      # are not listed, so the refresh pull request merging does not start
+      # another run.
+      - 'src/design/**'
+      - 'src/cli.ts'
+      - 'governance/rules/**'
+      - 'standards/**'
+      - 'snippets/**'
+      - 'claude/skills/**'
+      - 'tooling/**'
+      - 'assets/brand/mark.svg'
+      - 'assets/captures/*.tmpl'
+      - 'scripts/core/regen-hero.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# One refresh at a time, and a newer merge supersedes an older run, since every
+# run rebuilds from main HEAD and force-updates the same branch.
+concurrency:
+  group: refresh-capture-frames
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: 🖼️ Refresh Frames
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Not GITHUB_TOKEN, which opens a pull request no check ever runs on
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      # Exits 2 with no output on about one run in five on WSL2, so it retries
+      # once and then fails loudly rather than leaving a refresh nobody sees.
+      - name: Regenerate Frame Markup
+        run: bash scripts/core/regen-hero.sh || bash scripts/core/regen-hero.sh
+
+      # Only when the markup moved. A capture rewrites every image and stamp, and
+      # a runner's chromium bytes differ from the committed ones, so capturing
+      # unconditionally would open a pull request on every push to main.
+      - name: Capture Frames
+        run: |
+          if [ -z "$(git status --porcelain assets/captures)" ]; then
+            echo "Markup is current, nothing to capture."
+            exit 0
+          fi
+          bun src/cli.ts capture assets/captures --selector .window --out assets/evidence
+
+      - name: Open or Update the Refresh Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain assets/captures assets/evidence)" ]; then
+            echo "Frames are current, nothing to refresh."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B chore/refresh-capture-frames
+          git add assets/captures assets/evidence
+          git commit -m "chore(web): refresh capture frames"
+          git push --force origin chore/refresh-capture-frames
+          if [ -z "$(gh pr list --head chore/refresh-capture-frames --state open --json number --jq '.[0].number')" ]; then
+            gh pr create \
+              --base main \
+              --head chore/refresh-capture-frames \
+              --title "chore(web): refresh capture frames" \
+              --body "## Key Changes
+
+          - Regenerates the count and token bearing frames, their images, and their stamps from main.
+          - Merge by hand. Nothing in this workflow merges it."
+          fi
