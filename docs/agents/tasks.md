@@ -27,7 +27,7 @@ Exit codes: `0` derived, `1` refused with `no-board`, `2` refused with `label-co
 
 The minor digit rolls from 9 to 0 on the next major rather than growing a second digit, which is the single-digit-minor shape every phase label already takes. `canon tasks archive` moves a task's file from the live folder into the archive without renumbering it, so the same label counts toward the maximum wherever it currently sits, and a label claimed by two different files folds into the same scan without a dedicated check.
 
-A claim is an exclusive `mkdir` at `.canon/ordinal-locks/<label>`, and the scan counts every reservation beside the task files, since the file lands after the verb returns. Reservations never expire, so a claim that died leaves a gap, which `standards/versioning.md` permits. A bare read still reports without reserving, so two bare reads in the same second can take the same answer.
+A claim is an exclusive `mkdir` at `.canon/ordinal-locks/<label>`, and the scan counts every reservation beside the task files, since the file lands after the verb returns. Reservations never expire, so a claim that died leaves a gap, which `standards/versioning.md` permits. A bare read still reports without reserving, and it does not count reservations either, so it can return a label a claim already holds until that claim's task file lands. Two bare reads in the same second can also take the same answer.
 
 ```bash
 canon tasks next-label --json | jq -r '.label'
