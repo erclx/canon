@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.109.0](https://github.com/erclx/canon/compare/v4.108.0...v4.109.0) (2026-09-20)
+
+
+### Features
+
+* **cli:** print help without the frame in a pipe ([#1793](https://github.com/erclx/canon/issues/1793)) ([f80f6c7](https://github.com/erclx/canon/commit/f80f6c773aba8f4f2326c877f8b5d1fabe1b8188))
+* **pr:** report a conflicted pull request from pr checks ([#1791](https://github.com/erclx/canon/issues/1791)) ([c5ecc10](https://github.com/erclx/canon/commit/c5ecc109b97696272659849cc68f73335742b2f1))
+* **tasks:** claim a board label through an exclusive reservation ([#1790](https://github.com/erclx/canon/issues/1790)) ([6d90b24](https://github.com/erclx/canon/commit/6d90b242912d15b43b14a4c68476dc78f97b24c6))
+
 ## [4.108.0](https://github.com/erclx/canon/compare/v4.107.0...v4.108.0) (2026-09-20)
 
 
