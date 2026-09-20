@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { collapseChecks } from '@/pr/checks'
+import { collapseChecks, withMergeState } from '@/pr/checks'
 
 const TIP = 'a0cf1a39aa1d0d510e16360e98a18129a8fddc78'
 const PRIOR = '5653721cbb1d0d510e16360e98a18129a8fddc78'
@@ -230,5 +230,53 @@ describe('collapseChecks', () => {
       reported: 2,
       collapsed: 1,
     })
+  })
+})
+
+describe('withMergeState', () => {
+  const listing = (runs: readonly object[]) => ({
+    total_count: runs.length,
+    check_runs: runs,
+  })
+  const completed = {
+    head_sha: TIP,
+    status: 'completed',
+    conclusion: 'success',
+  }
+
+  it('should read conflicted when the branch is DIRTY and no run belongs to the tip', () => {
+    const reading = withMergeState('DIRTY', collapseChecks(TIP, listing([])))
+
+    expect(reading).toMatchObject({ state: 'pending', conflicted: true })
+  })
+
+  it('should keep the run verdict when the branch is DIRTY and a run completed', () => {
+    const reading = withMergeState(
+      'DIRTY',
+      collapseChecks(TIP, listing([completed])),
+    )
+
+    expect(reading).toMatchObject({ state: 'passing', conflicted: false })
+  })
+
+  it.each(['UNKNOWN', 'CLEAN', undefined])(
+    'should not read conflicted when the merge state is %s',
+    (mergeState) => {
+      const reading = withMergeState(
+        mergeState,
+        collapseChecks(TIP, listing([])),
+      )
+
+      expect(reading).toMatchObject({ state: 'pending', conflicted: false })
+    },
+  )
+
+  it('should read conflicted when the branch is DIRTY and only a prior commit has runs', () => {
+    const reading = withMergeState(
+      'DIRTY',
+      collapseChecks(TIP, listing([{ ...completed, head_sha: PRIOR }])),
+    )
+
+    expect(reading).toMatchObject({ state: 'pending', conflicted: true })
   })
 })

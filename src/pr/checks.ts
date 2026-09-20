@@ -29,6 +29,35 @@ export interface ChecksReading {
   readonly collapsed: number
 }
 
+export interface ConflictedReading extends ChecksReading {
+  /** The branch conflicts with its base, so no run will ever start for the tip. */
+  readonly conflicted: boolean
+  /** The pull request's `mergeStateStatus`, absent when the read carried none. */
+  readonly mergeState?: string
+}
+
+/**
+ * Tells a conflicted pull request from a tip whose runs have not started.
+ *
+ * A branch that conflicts with its base gets no merge ref, so no
+ * `pull_request` workflow runs and the listing stays empty, which
+ * `collapseChecks` can only call pending. Only `DIRTY` separates the two, and
+ * only while no run belongs to the tip: a conflict arising after runs
+ * completed leaves those runs standing as a real answer. `UNKNOWN` is
+ * transient while GitHub computes it, so it reads as not conflicted and costs
+ * a caller one more poll.
+ */
+export function withMergeState(
+  mergeState: string | undefined,
+  reading: ChecksReading,
+): ConflictedReading {
+  return {
+    ...reading,
+    conflicted: mergeState === 'DIRTY' && reading.matched === 0,
+    ...(mergeState !== undefined && { mergeState }),
+  }
+}
+
 /**
  * Puts a check-run row into the shape `rollup` reads.
  *
