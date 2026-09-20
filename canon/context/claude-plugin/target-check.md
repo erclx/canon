@@ -43,5 +43,5 @@ The same asymmetry is why an unread domain is a third state beside current and b
 ## Open
 
 - The tooling section calls `canon tooling sync --check <stack>`. `canon tooling diff` is the verb it wants and does not exist yet, and `--check` stays working as an alias by design, so the retarget when that verb lands is a change of name rather than of behavior.
-- Document health is a content question rather than a structural one and is absent here by design.
+- Document health is a content question rather than a structural one and is absent from the six by design. `canon/context/claude-plugin/document-health.md` carries the skill that answers it, so a target now gets both readings and can tell which one failed. `claude/skills/target-check/REQUIREMENT.md` still names that scope without naming the skill holding it.
 - Nothing checks that the domain list in the body, the reference, and this entry stay the same six. A domain added to one and not the others drifts silently.

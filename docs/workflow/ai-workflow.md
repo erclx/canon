@@ -240,6 +240,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | ------------------------ | --------------------------------------------------------------------------------------- |
 | `canon:review-branch`    | On the local branch diff, before anything is pushed                                     |
 | `canon:standards-audit`  | When changed markdown has to answer to the authoring standards                          |
+| `canon:document-health`  | When the documents themselves have to answer for length, placement, and staleness       |
 | `canon:markdown-propose` | When a markdown claim needs rewriting and the change should wait for an answer per file |
 | `canon:ux-audit`         | To read UI source for missing states, edge cases, and inconsistencies                   |
 | `canon:ux-measure`       | To start the interface and measure paint, processor, and layout cost                    |
