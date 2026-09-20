@@ -519,6 +519,143 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['task-unresolved'])
   })
 
+  describe('group plan claims', () => {
+    function claimKinds(findings: readonly Finding[]): FindingKind[] {
+      return kinds(findings).filter(
+        (kind) => kind === 'plan-parked' || kind === 'plan-absent',
+      )
+    }
+
+    async function seedArchivedPlan(stem: string): Promise<void> {
+      const archive = recordDir(ROOT, 'plans', 'archive')
+      mkdirSync(archive, { recursive: true })
+      await writeFile(join(archive, `feature-${stem}.md`), `# ${stem}\n`)
+    }
+
+    const needsPlanRow = '| [v3.0-third](v3.0-third.md) | ranked last |'
+    const upNextRow = '| [v3.0-third](v3.0-third.md) | `src/c.ts` | nothing |'
+
+    it('should report a needs a plan row whose task cites a live plan on disk', async () => {
+      await seedTask('v3.0-third')
+      await seedPlan('v3.0-third')
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-parked',
+      ])
+      expect(outcome.ok && outcome.findings[0]).toMatchObject({
+        group: 'Needs a plan',
+        subject: 'v3.0-third',
+      })
+    })
+
+    it('should leave a needs a plan row whose task cites an archived plan unreported', async () => {
+      await seedTask(
+        'v3.0-third',
+        '',
+        undefined,
+        '../plans/archive/feature-v3.0-third.md',
+      )
+      await seedArchivedPlan('v3.0-third')
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([])
+    })
+
+    it('should leave a needs a plan row whose task cites no plan unreported', async () => {
+      await seedTask('v3.0-third', '', undefined, NO_PLAN)
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([])
+    })
+
+    it('should leave a needs a plan row whose cited plan is absent from disk unreported', async () => {
+      await seedTask('v3.0-third')
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([])
+    })
+
+    it('should report an up next row whose task cites no plan', async () => {
+      await seedTask('v3.0-third', '', undefined, NO_PLAN)
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-absent',
+      ])
+      expect(outcome.ok && outcome.findings[0]).toMatchObject({
+        group: 'Up next',
+        subject: 'v3.0-third',
+      })
+    })
+
+    it('should report an up next row whose task cites an archived plan', async () => {
+      await seedTask(
+        'v3.0-third',
+        '',
+        undefined,
+        '../plans/archive/feature-v3.0-third.md',
+      )
+      await seedArchivedPlan('v3.0-third')
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-absent',
+      ])
+    })
+
+    it('should report an up next row whose cited plan is absent from disk', async () => {
+      await seedTask('v3.0-third')
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-absent',
+      ])
+    })
+
+    it('should leave an up next row whose task cites a live plan unreported', async () => {
+      await seedTask('v3.0-third')
+      await seedPlan('v3.0-third')
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([])
+    })
+
+    it('should leave a parked row whose task file is gone to the mapping check', async () => {
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['task-unresolved'])
+    })
+
+    it('should keep reporting a run now row whose task cites no plan', async () => {
+      await seedTask('v1.0-first', '', undefined, NO_PLAN)
+      await seedPlan('v1.0-first')
+      await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-uncited'])
+    })
+  })
+
   it('should report a task file that neither surface names as unplaced rather than a finding', async () => {
     await seedTask('v1.0-first')
     await seedTask('v9.0-orphan')
@@ -794,6 +931,7 @@ describe('validateBoard', () => {
   it('should leave an up next collision unreported', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -810,6 +948,7 @@ describe('validateBoard', () => {
   it('should report a parked row whose cited task is archived', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedArchivedTask('v3.0-gone')
     await seedPlan('v1.0-first')
     await seedBoard(
@@ -834,6 +973,7 @@ describe('validateBoard', () => {
   it('should report a parked row whose cited task was declined', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedDeclinedTask('v3.0-declined')
     await seedPlan('v1.0-first')
     await seedBoard(
@@ -858,6 +998,7 @@ describe('validateBoard', () => {
   it('should report a cited task that is neither on the board nor archived', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -882,6 +1023,7 @@ describe('validateBoard', () => {
   it('should report a parked row whose cited pull request reached the trunk', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -906,6 +1048,7 @@ describe('validateBoard', () => {
   it('should leave a parked row whose cited pull request is not on the trunk unreported', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -925,6 +1068,7 @@ describe('validateBoard', () => {
   it('should park a row whose cited task closed every outcome but names no pull request', async () => {
     await seedTask('v1.0-first', '- [x] shipped')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -950,6 +1094,7 @@ describe('validateBoard', () => {
   it('should park a row whose trunk could not be read', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -975,6 +1120,7 @@ describe('validateBoard', () => {
   it('should leave a parked row whose cited task has an open outcome unreported', async () => {
     await seedTask('v1.0-first', '- [x] one\n- [ ] two')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -991,6 +1137,7 @@ describe('validateBoard', () => {
   it('should leave a parked row whose cited task carries no outcome box unreported', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1011,6 +1158,7 @@ describe('validateBoard', () => {
       673,
     )
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1029,6 +1177,7 @@ describe('validateBoard', () => {
   it('should read no task out of a blocker cell pointing at a plan', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1050,6 +1199,7 @@ describe('validateBoard', () => {
   it('should resolve the task cited after a record link in a blocker cell', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1068,6 +1218,7 @@ describe('validateBoard', () => {
   it('should read no task out of a blocker cell citing only a record', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1089,6 +1240,7 @@ describe('validateBoard', () => {
   it('should keep resolving a blocker cell whose task link comes first, before a later record link', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1107,6 +1259,7 @@ describe('validateBoard', () => {
   it('should not stop at an in-page anchor link, whose target is empty rather than slashed', async () => {
     await seedTask('v1.0-first', '- [x] shipped', 673)
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1125,6 +1278,7 @@ describe('validateBoard', () => {
   it('should report a parked row whose cited file nothing under run now holds', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1149,6 +1303,7 @@ describe('validateBoard', () => {
   it('should leave a parked row whose cited file is still held unreported', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1165,6 +1320,7 @@ describe('validateBoard', () => {
   it('should call a row untested when it declares files but its blocker cites none', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([
@@ -1186,6 +1342,7 @@ describe('validateBoard', () => {
   it('should report a parked row citing no task and naming no file as untested', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
     await seedPlan('v1.0-first')
     await seedBoard(
       boardBody([

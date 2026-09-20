@@ -8,6 +8,7 @@ import {
   readOutcomes,
   readPlanTarget,
   readPullRequest,
+  resolveLivePlan,
   tasksDir,
 } from '@/tasks/archive'
 import { gitTrunkReader, type TrunkReader } from '@/tasks/trunk'
@@ -38,6 +39,8 @@ export const FINDING_KINDS = [
   'plan-unresolved',
   'plan-uncited',
   'plan-mismatched',
+  'plan-parked',
+  'plan-absent',
   'task-unresolved',
   'row-duplicated',
   'row-misshapen',
@@ -748,6 +751,70 @@ async function planDisagreement(
 }
 
 /**
+ * Tests the claim a group name makes about a plan. `## Needs a plan` says none
+ * is live and `## Up next` says one is written, and neither group has a `Plan`
+ * column, so the task file's own `Plan:` line is the only place either claim
+ * can be read against.
+ *
+ * A live plan is one the archive's resolution accepts and the disk holds, so a
+ * plan already archived reads as not live and a cited path with no file behind
+ * it reads the same way. A row whose task file is gone is left to
+ * `task-unresolved`, which owns that report.
+ */
+async function checkGroupClaims(
+  rows: readonly BoardRow[],
+  dir: string,
+  root: string,
+): Promise<Finding[]> {
+  const parked = rows.filter(
+    (row) => row.group === 'Needs a plan' || row.group === 'Up next',
+  )
+
+  const found = await Promise.all(
+    parked.map(async (row) => groupClaimFinding(row, dir, root)),
+  )
+
+  return found.filter((finding): finding is Finding => finding !== undefined)
+}
+
+async function groupClaimFinding(
+  row: BoardRow,
+  dir: string,
+  root: string,
+): Promise<Finding | undefined> {
+  if (!row.stem) return undefined
+
+  const file = join(dir, `${row.stem}.md`)
+  if (!existsSync(file)) return undefined
+
+  const target = readPlanTarget(await readFile(file, 'utf8'))
+  const live = target ? resolveLivePlan(target, dir, root) : undefined
+  const hasLivePlan = live !== undefined && existsSync(live)
+
+  if (row.group === 'Needs a plan' && hasLivePlan) {
+    return {
+      kind: 'plan-parked',
+      group: row.group,
+      subject: row.stem,
+      message: `sits under ${row.group} and its task cites ${target}, a live plan. A row with a plan belongs under Up next or Run now, or the plan is stale and belongs in the archive.`,
+    }
+  }
+
+  if (row.group === 'Up next' && !hasLivePlan) {
+    return {
+      kind: 'plan-absent',
+      group: row.group,
+      subject: row.stem,
+      message: target
+        ? `sits under ${row.group}, which claims a written plan, and its task cites ${target}, which is not a live plan.`
+        : `sits under ${row.group}, which claims a written plan, and its task carries no Plan: line.`,
+    }
+  }
+
+  return undefined
+}
+
+/**
  * Where a plan pointer lands, resolved against the board and against the
  * project root the way the archive resolves the same line. Neither base
  * existing leaves the board-relative reading, so two pointers at one absent
@@ -1186,6 +1253,7 @@ export async function validateBoard(
     ...checkMapping(rows, backlog, dir),
     ...checkPlans(rows, dir, root),
     ...(await checkPlanAgreement(rows, dir, root)),
+    ...(await checkGroupClaims(rows, dir, root)),
     ...checkCollisions(rows),
     ...checkOrdering(rows),
     ...parked.findings,
