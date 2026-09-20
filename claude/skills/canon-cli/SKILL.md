@@ -91,12 +91,15 @@ Run `canon tooling sync <stack> <target> --check` for the list resolved against 
 
 ### web
 
+- `.github/workflows/readme-screenshot.yml`
 - `.github/workflows/verify.yml`
 - `.vscode/extensions.json`
 - `.vscode/settings.json`
 - `e2e/home.spec.ts`
 - `e2e/screenshot.ts`
 - `eslint.config.js`
+- `scripts/lib/preview-server.sh`
+- `scripts/readme-screenshot.sh`
 - `scripts/screenshot.sh`
 - `scripts/verify.sh`
 - `scripts/worktree-port.sh`
