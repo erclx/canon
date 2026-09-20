@@ -137,10 +137,15 @@ async function settle(
       for (const frame of document.querySelectorAll('iframe')) {
         try {
           const inner = frame.contentDocument
-          if (inner !== null && inner.readyState !== 'complete') return false
+          if (inner === null) continue
+          if (inner.readyState !== 'complete') return false
+          // A frame's own fonts load after its `readyState` reads complete, and
+          // the swap reflows its text. The outer document's fonts never cover
+          // them.
+          if (inner.fonts.status !== 'loaded') return false
         } catch {
-          // Cross-origin, so there is no readyState to read and nothing here
-          // can wait on it.
+          // Cross-origin, so there is nothing here to read and nothing to
+          // wait on.
         }
       }
       return true
