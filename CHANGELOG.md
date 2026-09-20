@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.101.0](https://github.com/erclx/canon/compare/v4.100.0...v4.101.0) (2026-09-20)
+
+
+### Features
+
+* **readme:** serve the demo gif in light and dark ([#1752](https://github.com/erclx/canon/issues/1752)) ([36072c8](https://github.com/erclx/canon/commit/36072c8db862c2cc687cfd34e9a5b677d2fc1d7f))
+* **tasks:** report each task file's readiness in a list verb ([#1753](https://github.com/erclx/canon/issues/1753)) ([0243971](https://github.com/erclx/canon/commit/024397152cfacf2960492a1e56483b1d3a55e7f4))
+
+
+### Bug Fixes
+
+* **tooling:** wait out an embedded frame's own fonts before shooting ([#1751](https://github.com/erclx/canon/issues/1751)) ([d29e59a](https://github.com/erclx/canon/commit/d29e59afec820c63c3d681945feb417e3ae1a3aa))
+
 ## [4.100.0](https://github.com/erclx/canon/compare/v4.99.0...v4.100.0) (2026-09-19)
 
 
