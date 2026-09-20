@@ -60,6 +60,22 @@ describe('the shipped-references stage scope', () => {
   })
 })
 
+describe('the raw-field-file-reference stage scope', () => {
+  it('should fire on a shipped corpus path', () => {
+    const scope = scopeOf('raw-field-file-reference')
+
+    expect(scope.test('claude/skills/git-pr/SKILL.md')).toBe(true)
+    expect(scope.test('docs/agents/pr.md')).toBe(true)
+  })
+
+  it('should not fire on a path outside the shipped corpora', () => {
+    const scope = scopeOf('raw-field-file-reference')
+
+    expect(scope.test('src/gate/measures.ts')).toBe(false)
+    expect(scope.test('canon/context/development/gates.md')).toBe(false)
+  })
+})
+
 describe('the readme-citations stage scope', () => {
   it('should fire on either file a citation can drift between', () => {
     const scope = scopeOf('readme-citations')

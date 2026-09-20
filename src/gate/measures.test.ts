@@ -14,6 +14,7 @@ import {
   captureStamps,
   clientCommandCitations,
   readmeCitations,
+  rawFieldFileReference,
   recordIdempotence,
   SANDBOX_ASSERTED_FLOOR,
   SANDBOX_UNDECLARED_CEILING,
@@ -921,5 +922,85 @@ describe('architectureRecord', () => {
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toBeUndefined()
+  })
+})
+
+describe('rawFieldFileReference', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('rawFieldFileReference runs no command')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const write = (path: string, content: string): void => {
+    const full = join(root, path)
+    mkdirSync(join(full, '..'), { recursive: true })
+    writeFileSync(full, content)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-raw-field-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('fails on a -f body=@ file reference and names the file and line', async () => {
+    write(
+      'claude/skills/alpha/SKILL.md',
+      'first\ngh api -X PATCH repos/o/r/issues/comments/1 -f body=@x/body.md\n',
+    )
+
+    const report = await rawFieldFileReference(context())
+
+    expect(report.failure).toContain('One raw-field')
+    expect(report.emissions).toHaveLength(1)
+    expect(report.emissions[0]?.text).toContain(
+      'claude/skills/alpha/SKILL.md:2',
+    )
+    expect(report.emissions[0]?.text).toContain('-F')
+  })
+
+  it('fails on a --raw-field file reference', async () => {
+    write('docs/agents/alpha.md', 'gh api x --raw-field body=@x/body.md\n')
+
+    const report = await rawFieldFileReference(context())
+
+    expect(report.failure).toContain('One raw-field')
+  })
+
+  it('passes a -F body=@ file reference', async () => {
+    write('claude/skills/alpha/SKILL.md', 'gh api x -F body=@x/body.md\n')
+
+    const report = await rawFieldFileReference(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions[0]?.text).toContain('No raw-field')
+  })
+
+  it('passes a -f body with a literal string', async () => {
+    write('claude/skills/alpha/SKILL.md', 'gh api x -f body="literal text"\n')
+
+    const report = await rawFieldFileReference(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('reads a tree carrying none of the corpora as unmeasured', async () => {
+    write('src/alpha.ts', 'gh api x -f body=@x\n')
+
+    const report = await rawFieldFileReference(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions).toEqual([])
+    expect(report.unmeasured).toContain('no shipped file was read')
   })
 })

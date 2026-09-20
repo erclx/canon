@@ -10,6 +10,7 @@ import {
   recordIdempotence,
   sandboxCoverage,
   seedStandards,
+  rawFieldFileReference,
   shippedReferences,
   standardCriteria,
   unreferencedRules,
@@ -422,6 +423,15 @@ export const STAGES: readonly Stage[] = [
     scope: new RegExp(SHIPPED_CORPORA.map((corpus) => `^${corpus}/`).join('|')),
     skipped: 'No shipped corpus changed, so no reference was read',
     checks: [{ kind: 'measure', measure: shippedReferences }],
+  },
+  {
+    // Same corpora as shipped-references and a separate stage, since the
+    // verdict is a flag spelling rather than an unresolvable reference.
+    id: 'raw-field-file-reference',
+    label: 'Raw-field file references',
+    scope: new RegExp(SHIPPED_CORPORA.map((corpus) => `^${corpus}/`).join('|')),
+    skipped: 'No shipped corpus changed, so no flag was read',
+    checks: [{ kind: 'measure', measure: rawFieldFileReference }],
   },
   {
     // Scoped to the two files a citation can drift between, so an edit to
