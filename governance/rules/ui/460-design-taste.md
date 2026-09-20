@@ -25,5 +25,5 @@ paths:
 
 - Accessibility, keyboard interaction and ARIA are a separate topic. `410-a11y` routes them, on every rendered path.
 - States, empty and loading coverage, and destructive confirmation are a separate topic. `430-ux-completeness` routes them.
-- Rendered copy casing, button labels and error wording are a separate topic. `400-ui` routes them.
+- Rendered copy casing is a separate topic. `465-interface-casing` routes it. Button labels and error wording are separate too, and `400-ui` routes them.
 - The floor those three carry is not restated in the skill, and it is not traded against a preference where the two collide.

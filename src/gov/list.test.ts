@@ -115,6 +115,7 @@ describe('governance/rules/ui', () => {
       '430-ux-completeness',
       '440-surface-capture',
       '450-link-behavior',
+      '465-interface-casing',
       '470-motion',
     ])
   })
