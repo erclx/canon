@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { resolveCoverage } from '@/labels/coverage'
-import { parseLabelMap } from '@/labels/map'
+import { join } from 'node:path'
+import { parseLabelMap, readLabelMap } from '@/labels/map'
 
 const FIXTURE = `
 [domains]
@@ -145,5 +146,74 @@ formatting = [".prettierignore"]
 
     expect(coverage.labels).toEqual([])
     expect(coverage.uncovered).toEqual(['infra/main.tf'])
+  })
+})
+
+describe("resolveCoverage against the repository's own map", () => {
+  function repositoryMap() {
+    const map = readLabelMap(join(import.meta.dirname, '..', '..'))
+    if (map.kind !== 'map') throw new Error('repository map did not parse')
+    return map
+  }
+
+  it('should decline a light sibling, its stamp, and a home frame the real config names by stem', () => {
+    const coverage = resolveCoverage(repositoryMap(), [
+      'assets/evidence/hero-light.png',
+      'assets/evidence/hero-light.stamp',
+      'assets/captures/hero-light.html',
+      'assets/evidence/home/frame-1.png',
+    ])
+
+    expect(coverage.uncovered).toEqual([])
+    expect(coverage.declined).toHaveLength(4)
+  })
+})
+
+describe('resolveCoverage with stem prefixes', () => {
+  const stemMap = () => {
+    const map = parseLabelMap(`
+[domains]
+docs = ["docs/"]
+
+[declined]
+generated = ["assets/evidence/hero", "assets/evidence/home/"]
+rides-with-generated = ["assets/captures/hero"]
+`)
+    if (map.kind !== 'map') throw new Error('stem map did not parse')
+    return map
+  }
+
+  it('should decline a light sibling of a declared frame, its stamp, and its capture', () => {
+    const coverage = resolveCoverage(stemMap(), [
+      'assets/evidence/hero-light.png',
+      'assets/evidence/hero-light.stamp',
+      'assets/captures/hero-light.html',
+      'assets/captures/hero.html.tmpl',
+    ])
+
+    expect(coverage.uncovered).toEqual([])
+    expect(coverage.declined).toEqual([
+      { path: 'assets/evidence/hero-light.png', reason: 'generated' },
+      { path: 'assets/evidence/hero-light.stamp', reason: 'generated' },
+      {
+        path: 'assets/captures/hero-light.html',
+        reason: 'rides-with-generated',
+      },
+      {
+        path: 'assets/captures/hero.html.tmpl',
+        reason: 'rides-with-generated',
+      },
+    ])
+  })
+
+  it('should decline a path under a declined folder prefix', () => {
+    const coverage = resolveCoverage(stemMap(), [
+      'assets/evidence/home/frame-3.png',
+    ])
+
+    expect(coverage.uncovered).toEqual([])
+    expect(coverage.declined).toEqual([
+      { path: 'assets/evidence/home/frame-3.png', reason: 'generated' },
+    ])
   })
 })
