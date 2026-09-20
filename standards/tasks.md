@@ -37,6 +37,8 @@ Does not govern:
 └── v13.0-toolkit-drift.md   # canon-allow-reference: illustrates the vXX.Y-slug filename this section defines
 ```
 
+`canon tasks list` reports each file's readiness from those two surfaces, so a reader never infers it from the folder.
+
 One file per task is what keeps the board safe under parallel sessions. Two sessions working different tasks never write the same file, which matters because a gitignored board has no history to recover a clobbered write from.
 
 Siblings sit in the folder without being tasks, and each earns its place by being governed somewhere. `index.md`, `priority.md`, and `backlog.md` are governed here. Every `session-` file is a pre-compaction handoff governed by `session.md`, and each is optional: a project whose sessions never approach a compaction carries none. Anything filtering the folder to tasks skips all of them, so a name outside the set is a task whatever it holds.

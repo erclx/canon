@@ -14,6 +14,7 @@ import {
   planCitations,
 } from '@/tasks/archive'
 import { type LabelOutcome, nextLabel } from '@/tasks/label'
+import { listTasks } from '@/tasks/list'
 import {
   type Claim,
   type Holder,
@@ -111,6 +112,11 @@ interface OutcomeCommandOptions {
   readonly close?: readonly string[]
   readonly json?: boolean
   readonly plan?: string
+  readonly root?: string
+}
+
+interface ListCommandOptions {
+  readonly json?: boolean
   readonly root?: string
 }
 
@@ -522,6 +528,37 @@ export function register(program: Command): void {
     .action(async (opts: NextLabelCommandOptions) => {
       process.exitCode = await runNextLabel(opts)
     })
+
+  tasks
+    .command('list')
+    .description('Report each live task file with its readiness')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Readiness is one of Run now, Up next, Needs a plan, backlog, unplaced,',
+        'or both, read from priority.md and backlog.md through the parsers',
+        'validate uses. It lists the live root only, never archive/ or declined/.',
+        '',
+        'Exit codes:',
+        '  0  the list is derived',
+        '  1  refused with no-board',
+        '',
+        'It reports and never writes, and judges nothing: a file named on both',
+        'surfaces reads as both, and validate owns the finding.',
+        '',
+        'Examples:',
+        '  canon tasks list',
+        '  canon tasks list --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: ListCommandOptions) => {
+      process.exitCode = await runList(opts)
+    })
 }
 
 function collectPosition(value: string, previous: string[]): string[] {
@@ -787,6 +824,38 @@ function reportOutcome(
   for (const already of outcome.alreadyClosed) logInfo(`${already} (already)`)
 
   if (outcome.closed.length > 0) logInfo(relative(root, outcome.path))
+  outro()
+
+  return 0
+}
+
+async function runList(opts: ListCommandOptions): Promise<number> {
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const outcome = await listTasks(root)
+
+  if (!outcome.ok) {
+    if (opts.json) {
+      process.stdout.write(
+        `${JSON.stringify({ ok: false, reason: outcome.reason, message: outcome.message })}\n`,
+      )
+      return 1
+    }
+
+    intro('canon tasks list')
+    logStep('Refused')
+    logError(outcome.message)
+    outro()
+    return 1
+  }
+
+  if (opts.json) {
+    process.stdout.write(`${JSON.stringify({ ...outcome, root })}\n`)
+    return 0
+  }
+
+  intro('canon tasks list')
+  logStep(`${outcome.tasks.length} task files`)
+  for (const task of outcome.tasks) logInfo(`${task.readiness}: ${task.stem}`)
   outro()
 
   return 0

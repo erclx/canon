@@ -292,6 +292,30 @@ Exit codes: `0` closed, `1` refused. The `reason` field adds `no-outcomes`, `out
 
 Both verbs exist because the write is an edit inside a file that already exists. `Edit` and `Write` refuse a main-root path from a linked worktree, and a shell stream editor is banned for in-place edits, so a verb resolving the board root in-process is the only route a skill body has. Creating a whole file needs no verb, because a heredoc through `Bash` writes it safely.
 
+## List
+
+`canon tasks list` reports each live task file with its readiness, so a reader learns which file is parked and which is live without opening `priority.md` or `backlog.md`. It reads and never writes, and every file stays in the folder it is in.
+
+```bash
+canon tasks list
+canon tasks list --json
+```
+
+| Option          | Effect                                      |
+| --------------- | ------------------------------------------- |
+| `--json`        | Emit a machine-readable record on stdout    |
+| `--root <path>` | Board root, defaulting to the main worktree |
+
+The record carries `tasks`, one entry per file with its `stem` and its `readiness`. Readiness is one of `Run now`, `Up next`, `Needs a plan`, `backlog`, `unplaced`, or `both`. The first three are the group names the board standard fixes, `backlog` is a line on `backlog.md`, `unplaced` is a file neither surface names, and `both` is a file both surfaces name, which `validate` reports as a finding and this verb does not judge.
+
+The verb calls the parsers `validate` uses, so the two cannot disagree on what a surface names. It lists the live root only, never `archive/` or `declined/`, and skips the same siblings `validate` skips.
+
+Exit codes: `0` derived, `1` refused with `no-board`.
+
+```bash
+canon tasks list --json | jq -r '.tasks[] | select(.readiness == "backlog") | .stem'
+```
+
 ## Validate
 
 `canon tasks validate` reports what each row of `priority.md` claims against what the tree holds. It reads and never writes, because a row is a session's claim about readiness and a validator that repaired one would be asserting the claim it exists to test.
