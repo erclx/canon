@@ -9,12 +9,33 @@ interface CaptureSection {
   selector: string
 }
 
+interface Viewport {
+  readonly name: string
+  readonly width: number
+  readonly height: number
+  /** Whether a case flagged `evidence: true` also writes its frames at this width. */
+  readonly evidence: boolean
+}
+
+/**
+ * The breakpoint buckets every case is crossed with, named by width. 320 is
+ * the base a page has to hold without wrapping or clipping. Committing every
+ * width multiplies the tracked frames by the width count, so only the base and
+ * the desktop width carry `evidence`.
+ */
+const VIEWPORTS: readonly Viewport[] = [
+  { name: '320', width: 320, height: 800, evidence: true },
+  { name: '768', width: 768, height: 800, evidence: false },
+  { name: '1280', width: 1280, height: 800, evidence: true },
+  { name: '1536', width: 1536, height: 800, evidence: false },
+]
+
 interface CaptureCase {
   section: string
   theme: string
   route: string
-  width: number
-  height: number
+  /** Names of viewports this case skips, for a route that reflows rather than breaks at that width. */
+  excludeViewports?: readonly string[]
   evidence?: boolean
   sections?: CaptureSection[]
   setup?: (page: Page) => Promise<void>
@@ -50,8 +71,6 @@ const CASES: CaptureCase[] = [
     section: 'home',
     theme: 'default',
     route: '/',
-    width: 1280,
-    height: 800,
     evidence: true,
     sections: HOME_SECTIONS,
   },
@@ -59,12 +78,27 @@ const CASES: CaptureCase[] = [
     section: 'home',
     theme: 'dark',
     route: '/',
-    width: 1280,
-    height: 800,
     sections: HOME_SECTIONS,
     setup: (page) => page.emulateMedia({ colorScheme: 'dark' }),
   },
 ]
+
+/** One case at one viewport, which is the unit a filter selects and a context is built for. */
+interface CaptureRun {
+  readonly captureCase: CaptureCase
+  readonly viewport: Viewport
+  readonly label: string
+}
+
+const ALL_RUNS: readonly CaptureRun[] = CASES.flatMap((captureCase) =>
+  VIEWPORTS.filter(
+    (viewport) => !captureCase.excludeViewports?.includes(viewport.name),
+  ).map((viewport) => ({
+    captureCase,
+    viewport,
+    label: `${captureCase.section}/${viewport.name}--${captureCase.theme}`,
+  })),
+)
 
 const args = process.argv.slice(2)
 const checkConsoleClean = args.includes('--check-console-clean')
@@ -86,6 +120,28 @@ try {
 }
 
 const OUT_DIR = path.join('screenshots', hostname)
+
+const SCREENSHOT_FILTER = process.env.SCREENSHOT_FILTER?.trim() ?? ''
+
+const filterTerms = SCREENSHOT_FILTER.split(',')
+  .map((term) => term.trim())
+  .filter(Boolean)
+
+const RUNS =
+  filterTerms.length > 0
+    ? ALL_RUNS.filter((run) =>
+        filterTerms.some((term) => run.label.includes(term)),
+      )
+    : ALL_RUNS
+
+if (filterTerms.length > 0 && RUNS.length === 0) {
+  console.error(
+    `No cases matched SCREENSHOT_FILTER=${SCREENSHOT_FILTER}. Available labels:\n${ALL_RUNS.map(
+      (run) => `  ${run.label}`,
+    ).join('\n')}`,
+  )
+  process.exit(1)
+}
 
 /** Every wait on a lazy load is bounded explicitly. */
 const SETTLE_TIMEOUT = 15_000
@@ -198,12 +254,12 @@ const browser = await chromium.launch()
 const consoleErrors: string[] = []
 let ranCases = 0
 
-for (const captureCase of CASES) {
+for (const { captureCase, viewport, label } of RUNS) {
   if (captureCase.evidence && requireBaseUrl) continue
 
   ranCases++
   const context = await browser.newContext({
-    viewport: { width: captureCase.width, height: captureCase.height },
+    viewport: { width: viewport.width, height: viewport.height },
     // A page honoring the preference lands its own motion at the end state,
     // which is what a still frame has to show. Playwright reads it as a
     // context option, so it reaches no page written beside `viewport` above.
@@ -214,9 +270,7 @@ for (const captureCase of CASES) {
   if (checkConsoleClean) {
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
-        consoleErrors.push(
-          `${captureCase.section}/${captureCase.theme}: ${msg.text()}`,
-        )
+        consoleErrors.push(`${label}: ${msg.text()}`)
       }
     })
   }
@@ -226,21 +280,21 @@ for (const captureCase of CASES) {
   await page.goto(`${BASE_URL}${captureCase.route}`)
   await page.waitForLoadState('networkidle')
 
-  const label = `${captureCase.section}/${captureCase.theme}`
   const sections = await settle(page, label, captureCase.sections ?? [])
 
   const sweepDir = path.join(OUT_DIR, captureCase.section)
   const evidenceDir = path.join('evidence', captureCase.section)
-  const file = `${captureCase.theme}.png`
+  const file = `${viewport.name}--${captureCase.theme}.png`
+  const writesEvidence = captureCase.evidence && viewport.evidence
 
   await shoot(page, sweepDir, file)
-  if (captureCase.evidence) await shoot(page, evidenceDir, file)
+  if (writesEvidence) await shoot(page, evidenceDir, file)
 
   if (sections.length > 0) await markFloatingChrome(page)
 
   for (const { name, selector } of sections) {
     await shoot(page, path.join(sweepDir, name), file, selector)
-    if (captureCase.evidence) {
+    if (writesEvidence) {
       await shoot(page, path.join(evidenceDir, name), file, selector)
     }
   }
