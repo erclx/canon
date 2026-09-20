@@ -7,7 +7,7 @@ description: GitHub Actions workflow triggers and checks
 
 ## Overview
 
-Owns the GitHub Actions verification that gates pull requests into `main`, and the release automation that runs after one merges. CI runs every gate stage through one entry point, `bun run check:ci`, plus one further step outside the gate, `bun run check:install`. Three workflows exist, `verify.yml`, `phase-label-gate.yml`, and `release-please.yml`.
+Owns the GitHub Actions verification that gates pull requests into `main`, and the release automation that runs after one merges. CI runs every gate stage through one entry point, `bun run check:ci`, plus one further step outside the gate, `bun run check:install`. Four workflows are described here, `verify.yml`, `phase-label-gate.yml`, `release-please.yml`, and `refresh-capture-frames.yml`.
 
 Three things differ from the local gate:
 
@@ -160,7 +160,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Format check              | `bun run check:format`                                                   | prettier and shfmt are clean                                                                             |
 | Indexes                   | `scripts/core/regen-indexes.sh`                                          | no `index.md` was committed stale or left untracked                                                      |
 | Consumed copies           | `scripts/core/regen-claude-copies.sh`                                    | `.claude/rules` matches source                                                                           |
-| Hero                      | `scripts/core/regen-hero.sh`                                             | every `assets/captures/*.html` carries current counts and tokens, and each stamp matches its pair        |
+| Hero                      | `scripts/core/regen-hero.sh --check`                                     | the regen runs clean into a temp folder, and each stamp matches its pair                                 |
 | Ignore parity             | `scripts/core/check-ignore-parity.sh`                                    | the ignore set a target receives matches this repository's own                                           |
 | Skill paths               | `scripts/core/check-skill-paths.sh`                                      | no shipped skill cites a repo-local path                                                                 |
 | Plugin boundary           | `scripts/core/check-plugin-boundary.sh`                                  | nothing the plugin ships resolves under `internal/`                                                      |
@@ -190,7 +190,7 @@ Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing row
 
 ### The regeneration stages
 
-The three drift stages, Indexes, Consumed copies, and Hero, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`, once with `git diff --exit-code` for modified tracked files and once with `git ls-files --others --exclude-standard` for new untracked ones. They catch content that was regenerated locally but committed stale, which is the failure a local-only gate lets through.
+The two drift stages, Indexes and Consumed copies, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`, once with `git diff --exit-code` for modified tracked files and once with `git ls-files --others --exclude-standard` for new untracked ones. They catch content that was regenerated locally but committed stale, which is the failure a local-only gate lets through.
 
 Regeneration runs in both modes, so `check:ci` writes to the working tree even though it never formats. Only the format stage changes behavior between modes.
 

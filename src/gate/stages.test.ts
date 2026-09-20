@@ -119,3 +119,22 @@ describe('the client-command-citations stage', () => {
     ])
   })
 })
+
+describe('the hero stage', () => {
+  const heroChecks = () =>
+    STAGES.find((candidate) => candidate.id === 'hero')?.checks ?? []
+
+  it('should not assert the frames against the trunk, so a branch commits none', () => {
+    expect(heroChecks().some((check) => check.kind === 'drift')).toBe(false)
+  })
+
+  it('should run the regen health check rather than a writing regen', () => {
+    const commands = heroChecks().flatMap((check) =>
+      check.kind === 'command' ? [check.argv] : [],
+    )
+
+    expect(commands).toEqual([
+      ['bash', 'scripts/core/regen-hero.sh', '--check'],
+    ])
+  })
+})
