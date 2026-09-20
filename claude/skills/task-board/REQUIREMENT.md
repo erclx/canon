@@ -18,7 +18,7 @@ Placing a row without checking for another writer collides the same way. Two ses
 - Resolve the board at the main worktree root, since a linked worktree writing to `pwd` creates a second board nothing reads
 - Read the tasks standard before writing, rather than working the filename and frontmatter from memory
 - Require an origin at creation, because that is the only moment the invariant is enforceable
-- Read the phase label from `canon tasks next-label` rather than proposing one by hand
+- Claim the phase label with `canon tasks next-label --claim` rather than reading or proposing one by hand
 - Check the roster for a live orchestrator before writing a row, and hand off rather than write when one is found
 - Confirm the work reached the default branch before archiving
 - Run the archive command and route on the reason it refuses, since each reason has one resolution
