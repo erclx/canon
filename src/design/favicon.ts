@@ -1,6 +1,6 @@
 export interface FaviconColors {
-  light: string
-  dark: string
+  readonly light: string
+  readonly dark: string
 }
 
 /** The favicon's own fills, chosen for tab size and apart from the page accent tokens. */
