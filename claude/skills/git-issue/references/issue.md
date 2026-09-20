@@ -1,8 +1,3 @@
----
-title: Issue reference
-description: GitHub issue title, labels, and body conventions
----
-
 # Issue reference
 
 ## Scope
@@ -11,10 +6,10 @@ Governs a tracker issue: its title, its labels, and the sections its body carrie
 
 Does not govern:
 
-- Pull request title and body: `pr.md`
-- Whether a phase label may appear in issue text: `versioning.md`
+- Pull request title and body: the pull request standard
+- Whether a phase label may appear in issue text: the versioning standard
 - Voice, rhythm, and sentence construction in issue prose: the `write-human` skill
-- Punctuation, formatting, and banned words in issue prose: `markdown.md`
+- Punctuation, formatting, and banned words in issue prose: the markdown standard
 
 ## Title
 
