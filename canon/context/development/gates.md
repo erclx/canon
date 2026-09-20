@@ -183,7 +183,7 @@ Running only the verbs the earlier stages skip was the cheaper shape and it give
 
 ### A regen-then-assert stage clears one round at a time
 
-The indexes, consumed-copy, hero, and tooling-path gates in `src/gate/stages.ts` regenerate and then assert with `git diff --exit-code` against the index, so a correct regen fails the run until the rewritten files are staged. The gates are sequential and each halts the run, so clearing the indexes stage only reveals the consumed-copy stage behind it, and a change touching several regenerated surfaces at once costs a stage-and-rerun round per surface rather than one. Expecting a single staging to clear the run is what makes the second failure read as a real mismatch.
+The indexes, consumed-copy, and hero gates in `src/gate/stages.ts` regenerate and then assert with `git diff --exit-code` against the index, so a correct regen fails the run until the rewritten files are staged. The gates are sequential and each halts the run, so clearing the indexes stage only reveals the consumed-copy stage behind it, and a change touching several regenerated surfaces at once costs a stage-and-rerun round per surface rather than one. Expecting a single staging to clear the run is what makes the second failure read as a real mismatch.
 
 `bun run check:install` packs and installs from the extracted tarball rather than cloning, so it reads the same working tree the other gates read rather than the last commit. A change staged for one of the regenerated surfaces is visible to `check:install` with no separate commit required first.
 

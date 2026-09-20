@@ -21,14 +21,6 @@ Staging to clear the stage changes what the next skill in that chain measures. `
 
 The producer clears `.claude/rules/` before installing, so a rule dropped from the record disappears rather than lingering as an unsourced file. That is also why `internal/rules/` exists: a rule governing toolkit authoring alone needs a source somewhere outside `governance/rules/`, which ships to every target. Those rules land at the one path they are authored at, since nothing under `internal/` mirrors anywhere.
 
-## Tooling paths
-
-The Tooling paths stage runs `scripts/core/regen-tooling-paths.sh` and then asserts no drift on `claude/skills/canon-cli/SKILL.md`. The script rewrites the block between the `generated:tooling-paths` markers with every file each installable stack ships under `configs/`, which is the list a session reads before deciding whether `canon tooling sync` is safe to run against a project.
-
-Stack names come from `canon tooling list --json` rather than from a walk of `tooling/`, so a stack `isStackExcluded` rejects stays out of a contract describing what the verb does. The block is the only part of the body the script owns, and a missing start marker fails the stage rather than appending a second block.
-
-The whole file is asserted rather than the block alone, since a drift check over a fragment needs a parser and the file has one writer for that region and one author for the rest. What that costs is a stage that goes red when the surrounding prose is edited and left unstaged, which is the Consumed copies shape above and clears the same way.
-
 ## Sample content on disk
 
 Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers. cspell still reads suffixed files, so spell coverage survives the move.

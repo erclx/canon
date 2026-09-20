@@ -17,7 +17,7 @@ Consult before running an unfamiliar `canon` verb, before a sync or install, or 
 
 | Surface                                                  | Command              | Effect on existing files                                                    |
 | -------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------- |
-| Golden configs, listed in full below                     | `canon tooling sync` | Overwritten once `--write` is passed. Local edits are lost.                 |
+| Golden configs                                           | `canon tooling sync` | Overwritten once `--write` is passed. Local edits are lost.                 |
 | Dictionary seeds (`.cspell/*.txt`)                       | `canon tooling sync` | Merged and sorted. Existing terms preserved.                                |
 | Other seeds (`cspell.json`, `.lintstagedrc`, state docs) | `canon tooling sync` | Copy-once. Dropped on first install, untouched after.                       |
 | Standards                                                | none                 | Nothing installs. `canon standards <name>` reads and never writes.          |
@@ -31,86 +31,12 @@ Consult before running an unfamiliar `canon` verb, before a sync or install, or 
 
 A golden config is any file a stack ships under `configs/`, and the category is wider than its name suggests. It carries the CI workflow, the git hooks, the end-to-end harness, the shell scripts under `scripts/`, and the editor settings, alongside the linters and compilers a reader expects. A stack inherits its parent's configs, so syncing `astro` also writes everything `web` and `base` hold.
 
-Run `canon tooling diff <stack> <target>` for the list resolved against a real target. It reports every path, writes nothing, and exits 1 when any differs. The list below is what the stacks hold as shipped, before any chain resolution.
-
-<!-- generated:tooling-paths -->
-
-### astro
-
-- `astro.config.mjs`
-- `eslint.config.js`
-- `playwright.config.ts`
-- `src/components/dev/scenarios.astro`
-- `tsconfig.json`
-- `vitest.config.ts`
-
-### base
-
-- `.editorconfig`
-- `.github/pull_request_template.md`
-- `.github/workflows/phase-label-gate.yml`
-- `.github/workflows/verify.yml`
-- `.husky/commit-msg`
-- `.husky/post-merge`
-- `.husky/post-rewrite`
-- `.husky/pre-commit`
-- `.husky/pre-push`
-- `.prettierrc`
-- `.shellcheckrc`
-- `.vscode/extensions.json`
-- `.vscode/settings.json`
-- `commitlint.config.js`
-- `scripts/verify.sh`
-
-### cloudflare
-
-- `.github/workflows/deploy.yml`
-
-### nextjs
-
-- `eslint.config.js`
-- `next.config.ts`
-- `playwright.config.ts`
-- `vitest.config.ts`
-
-### python
-
-- `.coveragerc`
-- `.python-version`
-- `mypy.ini`
-- `pytest.ini`
-- `ruff.toml`
-- `scripts/verify.sh`
-
-### vite-react
-
-- `playwright.config.ts`
-- `tsconfig.json`
-- `vite.config.ts`
-- `vitest.config.ts`
-
-### web
-
-- `.github/workflows/readme-screenshot.yml`
-- `.github/workflows/verify.yml`
-- `.vscode/extensions.json`
-- `.vscode/settings.json`
-- `e2e/home.spec.ts`
-- `e2e/screenshot.ts`
-- `eslint.config.js`
-- `scripts/lib/preview-server.sh`
-- `scripts/readme-screenshot.sh`
-- `scripts/screenshot.sh`
-- `scripts/verify.sh`
-- `scripts/worktree-port.sh`
-- `src/test/setup.ts`
-
-<!-- /generated:tooling-paths -->
+No list of those paths ships in this body, since a copy would go stale on a different cadence than the stacks. Run `canon tooling diff <stack> <target>` for the list resolved against a real target. It reports every path, writes nothing, and exits 1 when any differs. A binary older than that verb answers the same question through `canon tooling sync <stack> <target> --check`, which names each file it would replace.
 
 ## Rules
 
 - `canon tooling sync` writes nothing until `--write` is passed. A headless run without it reports and exits 1, so a script that forgets the flag fails rather than silently skipping the sync.
-- Run `--check` first when the project carries local edits to any path above. The report names each file it would replace, which is the warning the user needs before the write.
+- Run `--check` first when the project carries local edits to a config the stack ships. The report names each file it would replace, which is the warning the user needs before the write.
 - An interactive run still prompts. `--write` skips the prompt, and `--check` refuses to write even with a TTY.
 - Seeds are user-owned. Dictionary `.txt` files merge and sort. Other seeds are copy-once, so re-seeding a structured file means deleting it and syncing again.
 - No command writes a standard into a project. A `.claude/standards/` folder from an older toolkit is inert, and deleting it costs nothing.
