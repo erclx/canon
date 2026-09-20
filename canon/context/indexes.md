@@ -13,7 +13,7 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 
 - `src/indexes/` owns the engine: frontmatter parsing, the walker, the renderer, regen orchestration, and `list.ts`'s catalog flattening
 - `src/commands/indexes.ts` owns the command surface
-- `claude/skills/setup-indexes/` owns the bootstrap skill
+- `claude/skills/setup/references/indexes.md` owns the bootstrap procedure, reached as the `indexes` phase
 - `claude/skills/index-lookup/` owns the topic-search skill wrapping `list`
 
 ## Decisions
@@ -168,7 +168,7 @@ The index system only pays off when sessions consult the catalogs instead of sea
 
 ## Bootstrap
 
-Use the `setup-indexes` plugin skill to add the system to a project that does not have it yet. The skill scans for markdown-heavy folders, drafts `title` and `description` for each sibling from its first heading and paragraph, scaffolds `index.md` per chosen folder, and runs `canon indexes regen --dry-run` to validate before writing.
+Use the `setup` plugin skill's `indexes` phase to add the system to a project that does not have it yet. The phase scans for markdown-heavy folders, drafts `title` and `description` for each sibling from its first heading and paragraph, scaffolds `index.md` per chosen folder, and runs `canon indexes regen --dry-run` to validate before writing.
 
 ## Command surface
 
@@ -179,4 +179,4 @@ See `docs/agents/indexes.md` for the `canon indexes regen` and `canon indexes li
 - `docs/agents/indexes.md`: CLI flags, exit codes, JSON output
 - `canon/context/cli/commands.md`: the TypeScript layer and the migration boundary
 - `scripts/lib.md`: `lib/frontmatter.sh`, the one bash reader that stayed
-- `claude/skills/setup-indexes/`: bootstrap skill source
+- `claude/skills/setup/references/indexes.md`: bootstrap procedure source

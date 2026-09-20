@@ -37,7 +37,7 @@ The same asymmetry is why an unread domain is a third state beside current and b
 ## Where it sits against the neighbors
 
 - `canon-operator` routes one plain-language intent to the command or skill that satisfies it, and diagnoses along the way. This skill answers one fixed question across a fixed domain list and routes nothing, which is what makes its output comparable between two targets and between two waves.
-- `setup-init` scaffolds a project that holds nothing. This one reads a project that already holds something.
+- `setup` scaffolds a project that holds nothing. This one reads a project that already holds something.
 - `seed-sync` proposes per-section seed edits. This one counts seed states and names that skill.
 
 ## Open

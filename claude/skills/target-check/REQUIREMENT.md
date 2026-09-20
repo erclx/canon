@@ -39,4 +39,4 @@ The second half of the gap is silence. A session that runs a verb the target's b
 - Document health, which asks a content question rather than a structural one and takes its own surface
 - Repairing anything a section names. Each routes to the command or skill that owns it.
 - A target's own routes, which `canon inventory` reports as a listing rather than a verdict and which is a fact about the project rather than about what the toolkit ships
-- First-time scaffold, which is `setup-init`, and per-intent routing of a single toolkit operation, which is `canon-operator`
+- First-time scaffold, which is `setup`, and per-intent routing of a single toolkit operation, which is `canon-operator`

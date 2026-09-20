@@ -69,9 +69,9 @@ describe('skillForScenario', () => {
   })
 
   it('should fall back to the bare command when no prefixed skill exists', () => {
-    const skills = new Set(['setup-init'])
+    const skills = new Set(['setup'])
 
-    expect(skillForScenario('claude', 'setup-init', skills)).toBe('setup-init')
+    expect(skillForScenario('claude', 'setup', skills)).toBe('setup')
   })
 
   it('should pair no skill for a scenario exercising a CLI domain', () => {

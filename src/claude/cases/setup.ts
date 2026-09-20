@@ -1,39 +1,40 @@
 import type { SkillCase } from '@/claude/skills-rank'
 
 /**
- * `setup-*`, `migration-*`, `canon-*`, and `create-rule`: scaffolding,
+ * `setup`, `migration-*`, `canon-*`, and `create-rule`: scaffolding,
  * proposal-only migrations, and the toolkit's own reference and feedback
  * surfaces.
+ *
+ * The five `setup` cases are one skill read through five entry phrasings
+ * rather than five rows that collapsed to a duplicate. Each names a different
+ * phase, and the merged description has to carry every one of them, which is
+ * the discrimination the six-skill family failed at from the other direction.
  */
 export const SETUP_CASES: readonly SkillCase[] = [
   {
     prompt:
       'This project has no rules installed yet, get the right governance in place.',
-    expect: 'setup-gov',
+    expect: 'setup',
   },
   {
     prompt:
       "Get the index.md system bootstrapped across this project's folders.",
-    expect: 'setup-indexes',
+    expect: 'setup',
   },
   {
     prompt:
       'This is a brand-new project, get the toolkit bootstrapped in one shot.',
-    expect: 'setup-init',
-  },
-  {
-    prompt: 'Get the usual Claude Code plugins provisioned on this machine.',
-    expect: 'setup-plugins',
+    expect: 'setup',
   },
   {
     prompt:
       "Run through the generated scaffold's scripts and confirm each one passes.",
-    expect: 'setup-verify',
+    expect: 'setup',
   },
   {
     prompt:
       'Check that the dev server actually starts and the end-to-end suite passes against the scaffold.',
-    expect: 'setup-smoke',
+    expect: 'setup',
   },
   {
     prompt:
@@ -76,7 +77,7 @@ export const SETUP_CASES: readonly SkillCase[] = [
   {
     prompt:
       "Whatever the right toolkit command is, get this project's rules installed.",
-    expect: 'setup-gov',
+    expect: 'setup',
   },
   {
     prompt:

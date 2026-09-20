@@ -41,5 +41,5 @@ Two failures belong to the audit rather than to the diff. A decision taken in ch
 - Bulk install and sync of a whole domain, which `canon <domain> install` and `canon <domain> sync` own and `canon-cli` documents. Reach for this skill when the target holds edits worth keeping, and for those commands when it does not.
 - Golden configs, which overwrite by design and carry no section structure to diff
 - Governance rules: `canon gov sync`
-- First-time scaffold of a project that has installed nothing yet: `setup-init`
+- First-time scaffold of a project that has installed nothing yet: `setup`
 - Public `README.md` and `docs/` prose: `docs-sync`

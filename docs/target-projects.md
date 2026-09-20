@@ -51,19 +51,19 @@ claude --plugin-dir <toolkit>/claude
 Two steps, in order:
 
 1. Run the framework's own scaffold if the project needs one, such as `bun init`, `npm create vite`, or `npm create astro`. The toolkit does not wrap framework scaffolding.
-2. Invoke `canon:setup-init` in Claude Code. The skill detects the stack, resolves flags, previews the full chain, and runs it end-to-end.
+2. Invoke `canon:setup` in Claude Code. The skill detects the stack, resolves flags, previews the full chain, and runs it end-to-end.
 
 The chain is:
 
 - `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/` in the same pass
 - `canon tooling sync <stack> --write` adds stack-specific deps, scripts, and gitignore entries
 - The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate eslint, vitest, playwright configs and the stack's setup script, and extends `canon/context/ci.md` and `canon/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: canon/context/development.md -->
-- `setup-verify` runs the installed `package.json` scripts (lint, typecheck, check, test, build) and reports pass or fail
-- `setup-indexes` bootstraps the `index.md` system over the project's own documentation folders, confirming candidate folders with the operator rather than running unattended
+- The `verify` phase runs the installed `package.json` scripts (lint, typecheck, check, test, build) and reports pass or fail
+- The `indexes` phase bootstraps the `index.md` system over the project's own documentation folders, confirming candidate folders with the operator rather than running unattended
 
-The chain stops at the project edge. `repo-metadata` and `git-commit` also ship, reaching a remote and the project's history respectively, and neither runs as part of it. The chain serves a fresh scaffold and names a destination for the three states it does not. An existing project goes to `canon:canon-operator`, which reads what the project already carries before naming a per-domain command. An install wanting the Claude layer without the tooling chain runs `canon claude init` for the seed docs and then `canon:setup-indexes` for the index system. A language the toolkit ships no stack for is the one of the three the chain still runs for, on `base`, with the fallback marked in the preview so it can be declined there.
+The chain stops at the project edge. `repo-metadata` and `git-commit` also ship, reaching a remote and the project's history respectively, and neither runs as part of it. The chain serves a fresh scaffold and names a destination for the three states it does not. An existing project goes to `canon:canon-operator`, which reads what the project already carries before naming a per-domain command. An install wanting the Claude layer without the tooling chain runs `canon claude init` for the seed docs and then `canon:setup indexes` for the index system. A language the toolkit ships no stack for is the one of the three the chain still runs for, on `base`, with the fallback marked in the preview so it can be declined there.
 
-Run `canon:setup-smoke` by hand once `setup-verify` passes, for the heavier server smoke, end-to-end, and screenshot pass, since the same flakiness reasons that excluded those stages from `setup-verify` keep it out of this unattended chain too.
+Run `canon:setup verify deep` by hand once the default depth passes, for the heavier server smoke, end-to-end, and screenshot pass, since the same flakiness reasons that keep those stages out of the default depth keep them out of this unattended chain too.
 
 Keep the `## Scripts` table in `canon/context/development.md` current as scripts are added. Base tooling seeds that entry with the commands it installs, and each stack reference extends the table. `project-commands` reads it to start the app or run a check on request, so a command missing from the table cannot be run that way. A project whose entry outgrew one file and split into `canon/context/development/` keeps the table in `overview.md`, which is where the skill looks next. <!-- audit-ignore-citations: canon/context/development.md -->
 
@@ -86,13 +86,13 @@ Each diagram entry records the commit and date it was last verified against, and
 
 The default path is `base`. `canon init` on `base` installs base tooling configs, Claude seeds, and governance core rules, and scaffolds an empty `.claude/wiki/`. Most projects need nothing more.
 
-Escalate only for real web apps. The `setup-init` skill reads `package.json` and root configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the matching governance stack (`react`, `astro`, `node`).
+Escalate only for real web apps. The `setup` skill reads `package.json` and root configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the matching governance stack (`react`, `astro`, `node`).
 
 `node-server` is named rather than detected. It carries the server-side security and persistence rules for a project writing request handlers or a persistence layer in TypeScript, and the detect step matches a runtime or a framework against stack names, so nothing there marks a project as a backend. Pass it deliberately with `canon init --stack node-server` or `canon gov install node-server <target>`.
 
 Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
 
-A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:setup-gov` for the governance layer alone, which is language-neutral.
+A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:setup gov` for the governance layer alone, which is language-neutral.
 
 Run `canon tooling list --json` and `canon gov list --json` to see the current catalogs. Never hardcode stack names.
 
@@ -115,9 +115,9 @@ The plugin corpus carries runtime behavior rather than reference prose alone, be
 
 When a new need appears after scaffold, install the one domain without re-running `canon init`.
 
-- Governance rule for a newly adopted library: invoke `canon:setup-gov`, or run `canon gov install <stack> --add <rule> <path>`
+- Governance rule for a newly adopted library: invoke `canon:setup gov`, or run `canon gov install <stack> --add <rule> <path>`
 - Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/` with a non-colliding number, and `canon gov sync` leaves it untouched.
-- Index.md system for a markdown-heavy folder that emerged: invoke `canon:setup-indexes`
+- Index.md system for a markdown-heavy folder that emerged: invoke `canon:setup indexes`
 
 Standards and snippets are not on that list, and there is nothing to add for either. Neither installs into a project, by default or by flag, so a session reads a standard with `canon standards <name>` and a snippet through its `@` reference off the live plugin symlink, both resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` or `.claude/snippets/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe.
 
@@ -300,7 +300,7 @@ cd <your-project>
 claude
 ```
 
-In the session, invoke `canon:setup-init`. The skill detects no framework and resolves tooling to `base` and governance to `base`. The preview marks both stacks as fallbacks, since neither came from a match, then the chain runs `canon init`.
+In the session, invoke `canon:setup`. The skill detects no framework and resolves tooling to `base` and governance to `base`. The preview marks both stacks as fallbacks, since neither came from a match, then the chain runs `canon init`.
 
 Ongoing: run `canon sync --check .` to see what has drifted, then invoke `canon:seed-sync` for seed drift or `canon sync .` for a catch-all refresh.
 
@@ -311,7 +311,7 @@ bun create vite my-app && cd my-app
 claude
 ```
 
-Invoke `canon:setup-init`. The skill reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `react`, and runs `canon init` with the resolved flags.
+Invoke `canon:setup`. The skill reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `react`, and runs `canon init` with the resolved flags.
 
 Ongoing maintenance:
 

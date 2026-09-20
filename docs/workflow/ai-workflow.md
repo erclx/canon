@@ -200,19 +200,14 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Set up a project
 
-| Skill                  | When to use                                                                                                     |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `canon:setup-init`     | On a fresh scaffold, to detect the stack and run the whole install chain in one pass                            |
-| `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                           |
-| `canon:setup-gov`      | When the governance rules are wanted without the tooling chain                                                  |
-| `canon:setup-indexes`  | When a markdown-heavy folder needs an `index.md` a session can browse                                           |
-| `canon:setup-plugins`  | On a new machine, to install the community and official plugins user-scoped                                     |
-| `canon:setup-verify`   | After the agent generates configs, to run the installed scripts and report pass or fail                         |
-| `canon:setup-smoke`    | After `setup-verify` passes, to check the dev and preview servers, end-to-end tests, and the screenshot harness |
-| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs            |
-| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                         |
-| `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                            |
-| `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README          |
+| Skill                  | When to use                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `canon:setup`          | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone  |
+| `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                  |
+| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs   |
+| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                |
+| `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                   |
+| `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README |
 
 ### Decide what to build
 
