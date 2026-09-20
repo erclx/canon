@@ -14,6 +14,7 @@ import {
   readOutcomes,
   readPlanTarget,
   readPullRequest,
+  rebaseRelativeLinks,
   removeBacklogRow,
   removePriorityRow,
   retargetPlanLine,
@@ -248,6 +249,63 @@ describe('retargetPlanLine', () => {
   })
 })
 
+describe('rebaseRelativeLinks', () => {
+  const FROM = '/repo/.canon/tasks'
+  const TO = '/repo/.canon/tasks/archive'
+
+  it('should re-resolve a plan link whose target stayed put', () => {
+    const text = 'Plan: [feature-x](../plans/feature-x.md)\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(
+      'Plan: [feature-x](../../plans/feature-x.md)\n',
+    )
+  })
+
+  it('should re-resolve untouched Groundwork and Intake links', () => {
+    const text =
+      'Groundwork: [g](../groundwork/01-g/)\nIntake: [i](../intake/02-i/item.md)\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(
+      'Groundwork: [g](../../groundwork/01-g/)\nIntake: [i](../../intake/02-i/item.md)\n',
+    )
+  })
+
+  it('should re-resolve a bare-path origin line and keep its trailing slash', () => {
+    const text = 'Plan: ../plans/feature-x.md\nReady: ../ready/01-x/\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(
+      'Plan: ../../plans/feature-x.md\nReady: ../../ready/01-x/\n',
+    )
+  })
+
+  it('should leave a bare origin value that is not a path alone', () => {
+    const text = 'Plan: none\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(text)
+  })
+
+  it('should re-resolve a link in the body and keep its fragment', () => {
+    const text = 'See [the finding](./other.md#why) for detail.\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(
+      'See [the finding](../other.md#why) for detail.\n',
+    )
+  })
+
+  it('should leave a link inside a fenced block alone', () => {
+    const text = '```md\n[x](../plans/feature-x.md)\n```\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(text)
+  })
+
+  it('should leave absolute urls, anchors, and rooted paths alone', () => {
+    const text =
+      '[a](https://example.com/x) [b](#section) [c](/abs/path.md) [d](mailto:a@b.c)\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(text)
+  })
+})
+
 describe('removePriorityRow', () => {
   it('should drop the row linking to the archived task', () => {
     const text = [
@@ -295,6 +353,36 @@ describe('removePriorityRow', () => {
 })
 
 describe('archiveTask', () => {
+  it('should rebase links whose targets stayed put', async () => {
+    const stem = await seedTask()
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    const text = await readFile(path, 'utf8')
+    await writeFile(
+      path,
+      text.replace(
+        '# v28.1: A task\n',
+        '# v28.1: A task\n\nGroundwork: [g](../groundwork/01-g/)\n',
+      ),
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain('Groundwork: [g](../../groundwork/01-g/)')
+  })
+
+  it('should keep a moved plan on its retargeted line after rebasing', async () => {
+    await seedPlan()
+    const stem = await seedTask({ plan: '../plans/feature-trigger.md' })
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain('(../../plans/archive/feature-trigger.md)')
+  })
+
   it('should move a closed task into the archive', async () => {
     const stem = await seedTask()
 
@@ -781,6 +869,25 @@ describe('declineTask', () => {
     expect(
       await declineTask(ROOT, stem, 'no longer needed', 'Alex'),
     ).toMatchObject({ ok: true })
+  })
+
+  it('should rebase links whose targets stayed put', async () => {
+    const stem = await seedTask()
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    const text = await readFile(path, 'utf8')
+    await writeFile(
+      path,
+      text.replace(
+        '# v28.1: A task\n',
+        '# v28.1: A task\n\nGroundwork: [g](../groundwork/01-g/)\n',
+      ),
+    )
+
+    await declineTask(ROOT, stem, 'no longer needed', 'Alex')
+
+    expect(
+      await readFile(join(declinedDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain('Groundwork: [g](../../groundwork/01-g/)')
   })
 
   it('should write the Declined: line under the origin lines', async () => {
