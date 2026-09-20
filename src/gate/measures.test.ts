@@ -856,6 +856,47 @@ describe('visualPathGlobs', () => {
       'src/design/**',
     )
   })
+
+  it('passes when the visual workflow adds only a declared visual-only glob', async () => {
+    const shared = ['web/**', 'assets/**']
+    write('.github/workflows/deploy-site.yml', deploy(shared))
+    write(
+      '.github/workflows/pr-visual-checks.yml',
+      visual([...shared, 'tooling/web/configs/e2e/**']),
+    )
+
+    const report = await visualPathGlobs(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.emissions[0]?.text).toContain('agree')
+    expect(report.emissions[0]?.text).toContain('tooling/web/configs/e2e/**')
+  })
+
+  it('fails when the visual workflow adds an undeclared visual-only glob', async () => {
+    const shared = ['web/**', 'assets/**']
+    write('.github/workflows/deploy-site.yml', deploy(shared))
+    write(
+      '.github/workflows/pr-visual-checks.yml',
+      visual([...shared, 'tooling/**']),
+    )
+
+    const report = await visualPathGlobs(context())
+
+    expect(report.failure).toContain('carry different path globs')
+  })
+
+  it('fails when the deploy workflow carries a declared visual-only glob', async () => {
+    const shared = ['web/**', 'assets/**']
+    write(
+      '.github/workflows/deploy-site.yml',
+      deploy([...shared, 'tooling/web/configs/e2e/**']),
+    )
+    write('.github/workflows/pr-visual-checks.yml', visual(shared))
+
+    const report = await visualPathGlobs(context())
+
+    expect(report.failure).toContain('carry different path globs')
+  })
 })
 
 describe('architectureRecord', () => {

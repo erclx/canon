@@ -11,6 +11,9 @@ on:
       # edited, so the catalogs it reads are on this list beside the page
       # itself. Question 2 in .canon/plans/archive/feature-render-visibility.md
       # names the two literal copies rather than a single shared source.
+      # The e2e harness entry has no deploy counterpart: a harness edit changes
+      # no byte of the built site, so it reports the capture and never deploys.
+      # VISUAL_ONLY_GLOBS in src/gate/measures.ts declares it to the gate.
       - 'web/**'
       - 'assets/**'
       - 'src/design/**'
@@ -19,6 +22,7 @@ on:
       - 'snippets/**'
       - 'claude/skills/**'
       - '.github/workflows/deploy-site.yml'
+      - 'tooling/web/configs/e2e/**'
   workflow_dispatch:
 
 jobs:
