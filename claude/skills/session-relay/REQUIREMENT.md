@@ -46,7 +46,7 @@ together, since the mechanics are the same whichever route carries the text.
 - Resolve the addressee from a `sessionId` or a branch at the moment of sending, never by a name prefix
 - Check the resolved name against the agent listing, sending it bare under a single row and completing it with the `[ref]` under more than one
 - Send through a message-sending tool where one exists, and compose the copyable block where none does or where the listing carries no row to address
-- State block-before-prompt once, since a roleless session reads it in no other body
+- State block-before-prompt, since the shipped channel rule carrying it for a session holding neither role reaches only a target that installed governance
 - Carry the message body verbatim from whatever names it
 - Open the composed text with a header naming the sender, the addressee, and what the message is
 - State the header as a default a session may write around, rather than a fixed vocabulary

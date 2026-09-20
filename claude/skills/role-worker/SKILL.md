@@ -99,8 +99,8 @@ The rungs above restate the resolution the relay also carries. What is a
 worker's own is the last of them, the inference over sessions holding no feature
 branch, which discriminates here because a worker holds one and a controller
 does not. The rest is duplicated deliberately, so this body still reads whole
-for a session that reaches it with the relay unresolved, and collapsing it to
-the relay alone is a follow-up rather than part of this change.
+for a session that reaches it with the relay unresolved, which is the ordinary
+case in a target that installed governance without the plugin.
 
 ## Refusing is part of the job
 

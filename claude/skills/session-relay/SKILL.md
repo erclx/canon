@@ -76,8 +76,12 @@ wherever an inference decided it.
 Send the block out as a message before it becomes an interactive prompt. A
 session already waiting on input never reaches the tool round that drains an
 inbound message, so an answer relayed afterwards arrives under the open question
-and changes nothing. This holds on both routes and it is stated here because a
-roleless session reads it nowhere else.
+and changes nothing. This holds on both routes.
+
+The shipped channel rule states the same thing for a session holding neither
+role, so the restatement here is for the target that installed the plugin and
+not governance, where that rule never arrives. A session that does load it reads
+the rule and this body in agreement rather than one of them alone.
 
 Carry the message body verbatim from whatever names it. This skill composes and
 never drafts, so a pull request announcement, an address-review announcement, or
