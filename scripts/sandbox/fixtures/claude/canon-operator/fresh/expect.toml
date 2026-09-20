@@ -16,12 +16,12 @@
 # The one arm of the four with no observed cost. Its 2026-08-04 run passed and
 # `record_run` failed to write the record, so the envelope carrying the turn count
 # went with it. The ceiling stays at the cap on the shape of the run instead: it
-# continued into `setup-init`, installed six domains and ran verify behind them,
-# which is what `claude/setup-init/fresh` does at 20 turns against the same cap.
+# continued into `setup`, installed six domains and ran verify behind them,
+# which is what `claude/setup/fresh` does at 20 turns against the same cap.
 max_turns = 30
 
 # The route, named by the skill the body hands off to rather than by the command
-# that skill runs. `setup-init` resolves a stack before it calls `canon init`, so
+# that skill runs. `setup` resolves a stack before it calls `canon init`, so
 # a reply routing correctly and naming only the skill would fail a pin on the
 # command while the routing decision was right.
 #
@@ -29,11 +29,11 @@ max_turns = 30
 # never touched reports every seed as missing, which routes a fresh project to
 # the skill that reconciles seed drift section by section instead of to the one
 # that installs.
-reply = ["setup-init"]
+reply = ["setup"]
 
 # Prose the checker cannot assert, each with the reason it stays here.
 manual = [
   "The reply does not route to `seed-sync`. Semantic: a negative substring passes on every reply that phrases the wrong route differently, and the positive above already fails a reply that named only the seed skill",
   "The three `canon docs` calls ran before anything was decided. Unwired: the claim is about which commands were invoked, which the envelope does not carry",
-  "Nothing was installed inline. Semantic: a handoff to `setup-init` may legitimately continue into that skill and write the whole scaffold, so no path or scope assertion separates the router doing the work from the router routing to something that does it",
+  "Nothing was installed inline. Semantic: a handoff to `setup` may legitimately continue into that skill and write the whole scaffold, so no path or scope assertion separates the router doing the work from the router routing to something that does it",
 ]
