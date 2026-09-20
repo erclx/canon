@@ -5,25 +5,40 @@ description: A single lesson's article view, with its chrome, panels, callouts, 
 
 # Teach lesson
 
-One page per written lesson, at `<workspace>/lessons/NNNN-<slug>.html`. `rewriteLesson` in `src/teach/nav.ts:669-731` splices the header, the foot nav, and the embedded stylesheet into four marker comments on every `canon teach nav` run, leaving the `<h1>`, lede, body, and quiz hand-authored between them. Primary source for the body: `lessons/0001-scoping-before-solving.html`, the richest of the three fde lessons and the only one carrying `.road` and `.no`.
+One page per written lesson, at `<workspace>/lessons/NNNN-<slug>.html`. `rewriteLesson` in `src/teach/nav.ts:1081-1159` splices the header, the foot nav, and the embedded stylesheet into four marker comments on every `canon teach nav` run, leaving the `<h1>`, lede, body, and quiz hand-authored between them. Primary source for the body: `lessons/0001-scoping-before-solving.html`, the richest of the three fde lessons and the only one carrying `.road` and `.no`.
 
 The chrome shown here comes from `nav.ts`'s current render functions rather than from that file. This workspace's lessons predate the marker-splice convention, and re-running `canon teach nav` for this plan refused to rewrite any of them, each reported `skipped` for a missing `canon:teach:style` marker. The authored body sits outside that gap and is read straight off disk.
 
-## Article (≥1421px, outline rail visible)
+## Article (above 1100px, sidebar beside the lesson)
 
 ```plaintext
-┌──────────────────────────────────────────────┐  ┌───────────────┐
-│  ← masthead, breadcrumb, jump menu, theme:    │  │ On this page  │← .outline, fixed to
-│    see chrome.md                              │  │  First, a…    │  the viewport rather
-├────────────────────────────────────────────── ┤  │  The round…   │  than the scroll
-│ ▰▰▰(here)  ▰▰▰  ▰▰▰                             │  │  Why you…     │  position. Starts
-├────────────────────────────────────────────── ┤  │  The procedure│  below the bar, sits
-│                                                │  │  Worked example│ in the gutter right
-│  Scoping before solving                       │← h1  Your week    │  of the measure, one
-│  Lesson 1. What the forward-deployed design…  │← lede  Where the…  │  link per h2
-│                                               │  │  The advantage│
-│                                               │  │  Retrieval…   │
-│                                               │  └───────────────┘
+┌────────────────┬─────────────────────────────────────────────────┐
+│  Fixture    ⌄   │  ☰  Workspaces ⌄ / Fixture ⌄ / Lesson 1 of 3  ☀/☾ │← see chrome.md
+│                │▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+├────────────────┼─────────────────────────────────────────────────┤
+│  3 lessons     │                                                 │
+│                │                                                 │
+│  01 Scoping…   │← .sb-on, the lesson being read                   │
+│     First, a…  │← .sb-out, the outline folded under it, one row   │
+│     The round… │  per h2. Every other lesson shows its title      │
+│     Why you…   │  alone.                                         │
+│     The rest…  │                                                 │
+│  02 Sizing…    │                                                 │
+│  03 The enter… │                                                 │
+│                │                                                 │
+├────────────────┤                                                 │
+│  8 terms · 1 … │← .sb-foot                                       │
+└────────────────┴─────────────────────────────────────────────────┘
+   .sb              .pane
+```
+
+The pane's own content, which is every teach page's article column and is what the rest of this wireframe draws:
+
+```plaintext
+┌──────────────────────────────────────────────┐
+│                                                │
+│  Scoping before solving                       │← h1
+│  Lesson 1. What the forward-deployed design…  │← lede
 │                                                │
 │  Assumes: you have shipped real systems…      │← .assumes panel,
 │  Covers: the shape of the round…              │  one line per field,
@@ -100,9 +115,24 @@ The chrome shown here comes from `nav.ts`'s current render functions rather than
 └──────────────────────────────────────────────┘
 ```
 
-## Narrow (≤1420px, no outline rail)
+## Narrow (1100px and below, sidebar over the lesson)
 
-The same single-column article. The outline rail is removed outright rather than resized or relocated, the one structural breakpoint on this surface. Nothing else in the layout changes below it, and the 640px rules under that only reflow spacing and turn the jump-menu dropdown into a full-width sheet.
+```plaintext
+┌─────────────────────────────┐
+│  Fixture   ⌄             ×  │← .sb, fixed and full height, over a
+│                             │  .sb-scrim covering the lesson. The
+│  3 lessons                  │  × is .sb-close, which the panel
+│                             │  carries because it covers the ☰ that
+│  01 Scoping…                │  opened it.
+│     First, a…               │
+│  02 Sizing…                 │
+│  03 The enter…              │
+└─────────────────────────────┘
+```
+
+The panel arrives shut and slides in from the left edge, at `min(21rem, 86vw)`. It overlays the lesson rather than squeezing it, so the reading measure keeps its width. The sidebar was hidden outright here in an earlier round, which left the `☰` painted exactly where it could not act and deleted the filter and the folded outline, neither of which the breadcrumb menu carries.
+
+Nothing else in the layout changes below this width. The 640px rules under it only reflow spacing and turn the jump-menu dropdown into a full-width sheet.
 
 ## Table block (from the sibling workspace, no fde lesson uses it)
 
@@ -120,7 +150,9 @@ Every column but the first is right-aligned.
 
 ## Copy
 
-- Outline heading: "On this page".
+- Sidebar meta line: "N lessons", above the list. The foot reads "N terms · N sessions", and drops either half the workspace does not have.
+- Filter placeholder and label: "Filter lessons".
+- Empty list: "No lessons yet."
 - `.assumes` panel labels: "Assumes:", "Covers:", "Sources:", each on its own line.
 - Quiz section title: "Retrieval check", with the standing instruction "Answer before scrolling back. Getting one wrong and then reading why is worth more than a clean pass."
 - Footer line, per lesson: "Lesson N of the `<workspace-slug>` workspace."
@@ -129,8 +161,14 @@ Every column but the first is right-aligned.
 
 ## Behavior
 
-- The outline lists every `<h2>` on the page, skipped outright under three headings. Clicking a link scrolls to that heading and marks it active.
-- Scrolling the page also marks the nearest heading passed, against a line that starts near the top of the viewport and ramps down to the viewport's own bottom edge as the page runs out of scroll, so the last heading stays reachable even with little content trailing it.
+- The folded outline lists every `<h2>` on the page, under the lesson being read and under no other. Clicking a link scrolls to that heading.
+- Scrolling the page marks the nearest heading passed, against a line that starts near the top of the viewport and ramps down to its bottom edge as the page runs out of scroll. That ramp is what keeps the last heading reachable with little content trailing it.
+- Nothing is marked until a heading has passed that line, so the first section is not reported as current while the title is still on screen.
+- The sidebar opens by default on a lesson and stays shut on a page that lists the lessons itself, with a stored preference beating both. A lesson-count threshold on its own was built and reverted, since it hides the panel where it is the only cross-lesson navigation there is.
+- The panel resizes by dragging its right edge, between 208 and 296 pixels, defaulting to 256. The ceiling was cut twice from 448, since past 296 the panel takes width the reading measure needs.
+- A chosen width is written to the root element and restored before first paint, so it never animates in. Arrow keys on the grip step it by 8 pixels, or 32 with Shift, and Home returns it to the default.
+- A filter appears above the list once the workspace holds more than eight lessons, and hides every row whose text does not match.
+- Below 1100px the panel takes focus when it opens and returns it to the `☰` when it closes. Escape, the scrim, and the panel's own close control each shut it. A shut panel is hidden rather than only transformed off screen, so it leaves the tab order with it.
 - Clicking a quiz option locks that question: every option in it gets a state, right, wrong, or chosen, and the feedback panel opens beneath. A second click in the same question does nothing further. An injected script drives this button shape, which the three lessons this page is drawn from carry. A lesson using radio options instead, where only the first question is on screen, selecting an option opens that question's feedback and reveals the next one, and no script is in the loop, is a different quiz shape outside this wireframe's surface.
 - This workspace's quiz options carry no visible letter badge. The stylesheet reserves the space for one, keyed off an attribute the authored markup here does not set, so the badge area renders empty rather than missing.
 - The foot nav is asymmetric at both ends: the first lesson gets no previous slot at all, not even a placeholder, and the last lesson swaps its next slot for the end-of-lessons message. A lesson in the middle gets a live link on both sides.
