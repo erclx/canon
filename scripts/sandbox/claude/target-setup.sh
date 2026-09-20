@@ -24,7 +24,7 @@ EOF
 
     log_step "Scenario ready: setup skill on an empty repo"
     log_info "Context: package.json only, no framework evidence"
-    log_info "Action:  /canon:setup"
+    log_info "Action:  /canon:target-setup"
     log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "no-stack")
@@ -44,7 +44,7 @@ EOF
 
     log_step "Scenario ready: setup skill on a language with no stack"
     log_info "Context: go.mod and main.go, no package.json and no JavaScript evidence"
-    log_info "Action:  /canon:setup"
+    log_info "Action:  /canon:target-setup"
     log_info "Expect:  both stacks resolve to 'base' and the preview marks each a fallback, naming what lands with no package.json present: configs, seeds, and gitignore entries, but no dev dependencies, scripts, or hook activation. The chain runs on that default rather than stopping, and names the gov phase as where a project declining it takes the language-neutral rule layer. The indexes phase runs and finds no candidate folder, and the report names repo-metadata and git-commit as outside the chain."
     ;;
   "vite-react")
@@ -61,7 +61,7 @@ EOF
 
     log_step "Scenario ready: setup skill on a Vite + React project"
     log_info "Context: real bunx create-vite output (index.html, public/, src/App.tsx, src/index.css)"
-    log_info "Action:  /canon:setup"
+    log_info "Action:  /canon:target-setup"
     log_info "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "astro")
@@ -78,7 +78,7 @@ EOF
 
     log_step "Scenario ready: setup skill on an Astro project"
     log_info "Context: real bunx create-astro output (src/pages, astro.config.mjs, tsconfig.json)"
-    log_info "Action:  /canon:setup"
+    log_info "Action:  /canon:target-setup"
     log_info "Expect:  governance stack 'astro', tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "verify-pass")
@@ -102,7 +102,7 @@ EOF
 
     log_step "Scenario ready: setup verify phase, happy path"
     log_info "Context: package.json with lint:fix, typecheck, check, test:run, build all echoing ok"
-    log_info "Action:  /canon:setup verify"
+    log_info "Action:  /canon:target-setup verify"
     log_info "Expect:  five green checks, summary 'Scaffold verified' naming the default depth"
     ;;
   "verify-fail")
@@ -126,7 +126,7 @@ EOF
 
     log_step "Scenario ready: setup verify phase, fail path"
     log_info "Context: package.json with typecheck that exits non-zero"
-    log_info "Action:  /canon:setup verify"
+    log_info "Action:  /canon:target-setup verify"
     log_info "Expect:  lint passes, typecheck fails, run stops before check/test/build, failing output surfaced"
     ;;
   "smoke-pass")
@@ -149,7 +149,7 @@ EOF
 
     log_step "Scenario ready: setup verify phase at deep depth, happy path"
     log_info "Context: package.json with dev, preview, test:e2e, screenshot all succeeding"
-    log_info "Action:  /canon:setup verify deep"
+    log_info "Action:  /canon:target-setup verify deep"
     log_info "Expect:  four green checks, summary 'Scaffold verified' naming the deep depth"
     ;;
   "smoke-fail")
@@ -172,7 +172,7 @@ EOF
 
     log_step "Scenario ready: setup verify phase at deep depth, fail path"
     log_info "Context: package.json with test:e2e exiting non-zero"
-    log_info "Action:  /canon:setup verify deep"
+    log_info "Action:  /canon:target-setup verify deep"
     log_info "Expect:  dev and preview pass, test:e2e fails, run stops before screenshot, failing output surfaced"
     ;;
   *)

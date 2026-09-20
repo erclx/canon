@@ -15,11 +15,11 @@ No version-sequencing surface exists. `role-orchestrator` and `review-pr` each r
 
 A router is reviewable only through what it says. Almost every `canon-operator` route ends in a handoff or a report rather than a file, so a review reads a body claiming a route and cannot tell on its own whether the route fires.
 
-The `reply` expectation closes it. It reads `result` off the envelope `max_turns` already reads, so scoring a route costs nothing beyond the run, and the token worth pinning is the name of the skill or command the route hands to. `claude/setup/fresh` is one arm using it this way.
+The `reply` expectation closes it. It reads `result` off the envelope `max_turns` already reads, so scoring a route costs nothing beyond the run, and the token worth pinning is the name of the skill or command the route hands to. `claude/target-setup/fresh` is one arm using it this way.
 
 Pinning phrasing is the cost, and it is why every route pin is paired. A reply naming a skill in a sentence declining to route still passes a substring check, so each arm carries a `manual` entry stating the negative a substring cannot express, and the arms whose skills may execute nothing assert the tree as well: the root layout is still at the root and nothing appeared under `.claude/`.
 
-Where a handoff may legitimately continue into the skill it names, as a fresh target's does into `setup`, no tree assertion is declared at all, since none separates the router doing the work from the router routing to something that does it. The arms themselves are catalogued in `canon/context/sandbox/coverage.md`.
+Where a handoff may legitimately continue into the skill it names, as a fresh target's does into `target-setup`, no tree assertion is declared at all, since none separates the router doing the work from the router routing to something that does it. The arms themselves are catalogued in `canon/context/sandbox/coverage.md`.
 
 ## The review two-pass model
 

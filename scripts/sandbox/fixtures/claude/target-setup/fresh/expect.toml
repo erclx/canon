@@ -1,4 +1,4 @@
-# What a correct `/canon:setup` run leaves behind on the `fresh` arm. Read by
+# What a correct `/canon:target-setup` run leaves behind on the `fresh` arm. Read by
 # `canon sandbox check`. Patterns use TOML literal strings so a regex needs no
 # backslash escaping.
 #

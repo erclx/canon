@@ -30,7 +30,7 @@ That filter is the literal string `fixtures` in three places, `scripts/manage-sa
 ### Scenario defaults and the reset contract
 
 - Sandboxes are minimal by default: no seeds, no standards, no gov rules, and auto-commit on. A scenario declares only the flags it needs, so the fixture states exactly what it depends on.
-- `claude/` scenarios default to `SANDBOX_INJECT_SEEDS="true"` so each models a real post-`canon init` project. Two documented exceptions: `setup.sh` tests `canon init` itself, and `autoship.sh` wipes the anchor after injection.
+- `claude/` scenarios default to `SANDBOX_INJECT_SEEDS="true"` so each models a real post-`canon init` project. Two documented exceptions: `target-setup.sh` tests `canon init` itself, and `autoship.sh` wipes the anchor after injection.
 - The reset contract belongs to the scenario, not the framework. A scenario that touches a real remote closes its own PRs and force-pushes a fresh main, because only the scenario knows what it created.
 
 ### Headless runs and permissions

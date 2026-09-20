@@ -108,7 +108,9 @@ function renderCheck(report: CheckReport): void {
   if (!report.managed) {
     logStep('Not a toolkit project')
     logWarn('No .claude/ directory and no CLAUDE.md at the target.')
-    logInfo('Run `canon init` to install, or /canon:setup to resolve a stack.')
+    logInfo(
+      'Run `canon init` to install, or /canon:target-setup to resolve a stack.',
+    )
     outro()
     return
   }

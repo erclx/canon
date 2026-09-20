@@ -1,4 +1,4 @@
-# What a correct `/canon:setup verify deep` run leaves behind on the `smoke-pass` arm. Read
+# What a correct `/canon:target-setup verify deep` run leaves behind on the `smoke-pass` arm. Read
 # by `canon sandbox check`. Each staged script touches a marker file as its
 # first action, so a marker's presence proves the skill invoked that script
 # regardless of what the script's own stdout says.

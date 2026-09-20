@@ -1,5 +1,5 @@
 ---
-name: setup
+name: target-setup
 description: Why getting a project onto the toolkit is one skill with phases rather than a family a session has to pick among
 ---
 

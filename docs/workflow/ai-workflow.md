@@ -202,7 +202,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 | Skill                  | When to use                                                                                            |
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `canon:setup`          | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone  |
+| `canon:target-setup`   | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone  |
 | `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                  |
 | `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs   |
 | `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                |

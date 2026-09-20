@@ -1,9 +1,9 @@
-# What a correct `/canon:setup indexes` run leaves behind against a bare folder of
+# What a correct `/canon:target-setup indexes` run leaves behind against a bare folder of
 # five raw markdown files with no frontmatter and no index.md. Read by
 # `canon sandbox check`, which only asserts against what a run left behind
 # and drives nothing itself. `scripts/sandbox/run.sh infra:indexes
-# "/canon:setup indexes" bootstrap` drives this arm headlessly the same way
-# it drives any `claude:setup` arm, category is not what gates it.
+# "/canon:target-setup indexes" bootstrap` drives this arm headlessly the same way
+# it drives any `claude:target-setup` arm, category is not what gates it.
 #
 # Driven twice on 2026-09-07: the scan finds `docs/` as the sole candidate
 # and the skill reaches `## Present candidates`, which lists it and asks

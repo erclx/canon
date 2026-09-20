@@ -29,7 +29,7 @@ A scenario enumerates from its script under `scripts/sandbox/<category>/`, not f
 
 Arm a skill when a wrong run is silent and the damage lands in a target project rather than in the sandbox. Blast radius decides rather than a coverage percentage. A percentage names no particular skill and counts an arm asserting one provisioning fact the same as one asserting eleven things about a run, so it rewards whichever arm is cheapest to write next.
 
-The rule explains the arms already written as well as the next ones. Every skill armed before it was stated mutates a tree with no reader watching, so it describes existing practice rather than only constraining what comes next. `seed-sync` and `setup` are the two it selects that the harness can reach.
+The rule explains the arms already written as well as the next ones. Every skill armed before it was stated mutates a tree with no reader watching, so it describes existing practice rather than only constraining what comes next. `seed-sync` and `target-setup` are the two it selects that the harness can reach.
 
 ### The task board arms
 
@@ -61,7 +61,7 @@ The `route` arm asserts a refusal instead of an artifact. Its three `absent` ent
 
 `reply` is what lets a routing decision be asserted at all. An arm pins the skill or command each route names, paired with a `manual` entry naming the negative a substring cannot carry. Most such arms also assert over the tree in the direction a correct run must leave it alone: the staged root layout stays where it was staged, nothing appears under `.claude/`, and a staged entry or plan survives a pass that only measures.
 
-The `gitignore` arm instead pins what the write produced, the managed entries back in the file and the install stamp left as the inject wrote it, which separates the narrow mode from a full inject running under its name. The `fresh` arm carries no such pin, because a handoff to `setup` may legitimately continue into that skill and write the whole scaffold, and no path assertion separates the router doing the work from the router routing to something that does it, which leaves `fresh` reachable only from a real run rather than a standalone `canon sandbox check`.
+The `gitignore` arm instead pins what the write produced, the managed entries back in the file and the install stamp left as the inject wrote it, which separates the narrow mode from a full inject running under its name. The `fresh` arm carries no such pin, because a handoff to `target-setup` may legitimately continue into that skill and write the whole scaffold, and no path assertion separates the router doing the work from the router routing to something that does it, which leaves `fresh` reachable only from a real run rather than a standalone `canon sandbox check`.
 
 `unclaimed` is the arm whose reply names no skill and no command: the reverse walk reports a folder the toolkit stopped shipping and offers nothing, so the token that has to survive is the attribution rather than a route. Provisioning refuses a CLI whose report attributes no unclaimed folder at all, which is the two-speed release risk `ARCHITECTURE.md` records arriving in the harness rather than in a target. Reading attribution rather than the bare key is what makes the guard prove the walk reached the staged folder instead of proving only that the field exists, and a guard reading attribution still cannot separate a binary predating the walk from a walk that ran and reached nothing, which is why the refusal message names both causes rather than a version to install.
 
@@ -111,7 +111,7 @@ The first failure ran wider than its count reported. The fixture stages a target
 
 The second failure's cause was structural rather than a wandering session. `## Route` maps an intent or a diagnostic finding to one lifecycle phase, and the audit offers sat in a subsection below it with no row of their own, so the table had no way to reach them when a fixture's target fires a lifecycle row and audit conditions at once. It now carries a measurement row, and the preamble above the table ranks a lifecycle row ahead of the offers, since the ranking has to sit there rather than inside the section it ranks: a session acting on the lifecycle row never opens that section, and is exactly the reader the rule is for.
 
-The arm pins `setup` beside the two audit commands, which scores that ranking rather than assuming it, and the order between the handoff and the offers stays in `manual` because a substring set is unordered.
+The arm pins `target-setup` beside the two audit commands, which scores that ranking rather than assuming it, and the order between the handoff and the offers stays in `manual` because a substring set is unordered.
 
 ### The audits arm passes on the repaired route
 
@@ -243,7 +243,7 @@ The denominators disagree on purpose. Fewer skills are asserted than scenarios a
 
 ### Pairing a scenario to a skill
 
-Pairing tries two spellings, `<category>-<command>` first and bare `<command>` second. The fallback is what pairs `claude/setup.sh` to `setup` rather than to a `claude-setup` that does not exist. The rule lives in `skillForScenario`, and this paragraph describes code rather than substituting for it.
+Pairing tries two spellings, `<category>-<command>` first and bare `<command>` second. The fallback is what pairs `claude/target-setup.sh` to `target-setup` rather than to a `claude-target-setup` that does not exist. The rule lives in `skillForScenario`, and this paragraph describes code rather than substituting for it.
 
 The census counts `claude/skills/`, not `.claude/skills/`. The second holds toolkit-internal skills that reach no target, and folding them in would inflate a denominator meant to describe what ships.
 
@@ -255,7 +255,7 @@ The census reaches skills alone, so the audit's script mapping keeps a prompt of
 
 The prompt survives where evidence of a scenario outlives both spellings. A skill the census carries with no scenario can still have a file at `infra/<rest>.sh`, and the audit offers that path and records neither answer on its own, because the file proves a scenario exists rather than proving it exercises the skill.
 
-The pair that shaped this rule was `setup-gov` against `infra/gov.sh` and `setup-indexes` against `infra/indexes.sh`, neither reachable by either spelling because no `setup` category existed and both sat under `infra/`. The setup merge retired both skills, so the rule now stands on its shape rather than on those instances: `infra/indexes.sh` is what settled the harder of the two, since it declares a `bootstrap` arm whose own log line named the skill it seeded for, which is the kind of evidence a filename alone never carries. The merged `setup` skill needs none of this, pairing to `claude/setup.sh` through the bare-command fallback.
+The pair that shaped this rule was `setup-gov` against `infra/gov.sh` and `setup-indexes` against `infra/indexes.sh`, neither reachable by either spelling because no `target-setup` category existed and both sat under `infra/`. The setup merge retired both skills, so the rule now stands on its shape rather than on those instances: `infra/indexes.sh` is what settled the harder of the two, since it declares a `bootstrap` arm whose own log line named the skill it seeded for, which is the kind of evidence a filename alone never carries. The merged `target-setup` skill needs none of this, pairing to `claude/target-setup.sh` through the bare-command fallback.
 
 A file at `infra/<rest>.sh` can also be a vacuous offer: a scenario staging trees a CLI walks can exercise nothing the skill it is offered against actually decides, so the correct pairing is the scenario that exercises the skill's decision rather than the first file the prompt turns up. An internal skill draws no prompt at all, being absent from the denominator above by construction rather than unknown.
 
@@ -277,7 +277,7 @@ Losing an exemption is invisible in the counts, because the skill reclassifies t
 
 ### A scope that admits everything asserts nothing
 
-A bounding key whose only passing value admits the whole tree asserts nothing. The `claude:setup` `fresh` arm runs the real installer with `bun install` behind it, so the narrowest `write_scope` glob admitting a correct run was `**`, and the first pass reported 7772 in-scope `node_modules` paths and 0 failures, a green count no wrong run could have moved. Dropping the key left ten assertions that can each fail. Before declaring a bounding key, name the wrong run it would catch. Where none falls outside it, the honest form is its absence plus a stated reason and a `manual` entry keeping the gap in the unchecked count.
+A bounding key whose only passing value admits the whole tree asserts nothing. The `claude:target-setup` `fresh` arm runs the real installer with `bun install` behind it, so the narrowest `write_scope` glob admitting a correct run was `**`, and the first pass reported 7772 in-scope `node_modules` paths and 0 failures, a green count no wrong run could have moved. Dropping the key left ten assertions that can each fail. Before declaring a bounding key, name the wrong run it would catch. Where none falls outside it, the honest form is its absence plus a stated reason and a `manual` entry keeping the gap in the unchecked count.
 
 ### A declaration can bind to the wrong scope and still count as armed
 

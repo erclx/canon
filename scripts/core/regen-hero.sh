@@ -197,7 +197,7 @@ const FEATURED_SKILLS = [
   "review-pr",
   "task-board",
   "git-ship",
-  "setup",
+  "target-setup",
   "systematic-debugging",
 ]
 

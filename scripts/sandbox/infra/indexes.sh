@@ -231,13 +231,13 @@ stage_setup() {
   "bootstrap")
     seed_bare_folder
     log_step "Seeded docs/ with 5 raw markdown files (no frontmatter, no index.md)"
-    log_info "Open Claude in this sandbox and invoke /canon:setup indexes"
+    log_info "Open Claude in this sandbox and invoke /canon:target-setup indexes"
     log_info "The skill should detect docs/ as a candidate and walk the bootstrap flow"
     ;;
   "no-candidate")
     seed_no_candidate
     log_step "Seeded a bare CLAUDE.md with no markdown-heavy folder anywhere"
-    log_info "Open Claude in this sandbox and invoke /canon:setup indexes"
+    log_info "Open Claude in this sandbox and invoke /canon:target-setup indexes"
     log_info "The skill should report an empty scan and skip straight to the convention seed offer"
     ;;
   *)
