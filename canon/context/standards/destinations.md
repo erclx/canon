@@ -84,11 +84,10 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 
 ### To a skill, cited from the flat root
 
-Six standards route to a narrow readership rather than to a governance rule. All six sit at the flat root and reach their skills through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, the fallback citation form.
+Five standards route to a narrow readership rather than to a governance rule. All five sit at the flat root and reach their skills through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, the fallback citation form.
 
 - `branch.md` fixes the branch name and its type vocabulary. `git-branch`, `git-split`, `git-pr`, and `session-worktree`, arrived.
 - `commit.md` fixes the commit subject. `git-commit` and `git-stage`, arrived.
-- `issue.md` fixes an issue body. `git-issue`, arrived.
 - `pr.md` fixes a pull request title and body. `git-split` and `git-pr`, arrived.
 - `snippets.md` fixes a snippet file. `create-snippet`, arrived.
 - `glossary.md` fixes the file holding one entry per term a body of material defines. `teach-workspace`, arrived. Its path is fixed by whichever surface holds a glossary rather than by the standard, so no glob covers it while one skill reads it.

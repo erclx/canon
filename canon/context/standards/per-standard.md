@@ -211,3 +211,11 @@ The three rules are checked independently, `structure`, the two casing pairs, an
 It does not check `<type>` against `standards/commit.md`'s fixed type enum, though a pull request title and a commit subject share the same form. `pr.md`'s own `## Title` section states format, casing, and length only, and cites `commit.md` for the structure it shares rather than for a type list, so checking a type list `pr.md` never names would enforce a rule from the wrong document.
 
 A sibling rule closes the matching gap on the commit side. The built-in `subject-case` rule tests the whole subject string's casing, which would reject a legitimate capitalized proper noun anywhere in it rather than the first word alone `standards/commit.md` actually governs, and that is why `commitlint.config.js` leaves it at `[0]`. A local rule function checks the subject's leading letter run alone instead, mirroring the title check's own subject-casing rule rather than the built-in rule's whole-subject scope.
+
+## A standard with one reader lives in that reader's skill
+
+`issue.md` left the flat catalog for `claude/skills/git-issue/references/issue.md`, since `git-issue` is the only thing that reads it and the ownership test puts a one-reader fact inside its reader. It lost its frontmatter on the way, because a reference answers to its skill rather than to the standards template, so `canon standards issue` does not resolve it.
+
+`snippets.md` was filed for the same move and stayed. Re-counting at `c175ec5d` found two readers behind the one the row carried: `create-snippet`, and the toolkit-internal `internal-snippets` skill, which sends a session to its cadence and audience tests before it admits a snippet. A skill reading a file to do its job is a reader, where a context entry pointing at it is not, so a second one ends the case. `skill.md` also names it as the sibling standard for chat prompts.
+
+The count is the test, and it decays: a filed count that predates a later citation moves a file a second reader still needs, so re-count before every move.
