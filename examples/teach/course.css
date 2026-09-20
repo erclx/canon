@@ -310,6 +310,7 @@ body {
    them. A narrower `.wide-body` was what put the navigation and the content on
    two different measures. */
 main {
+  box-sizing: border-box;
   max-width: calc(var(--teach-measure) + 3rem);
   margin: 0 auto;
   padding: 2.25rem 1.5rem 0;
@@ -1174,6 +1175,7 @@ ol.succ li {
   font-family: var(--teach-sans);
   font-size: var(--t4);
   background: transparent;
+  box-sizing: border-box;
   width: 100%;
   text-align: left;
   color: inherit;

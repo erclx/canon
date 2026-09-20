@@ -284,7 +284,7 @@ body {
    listing page and a lesson start at the same left edge as the chrome above
    them. A narrower \`.wide-body\` was what put the navigation and the content on
    two different measures. */
-main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.25rem 1.5rem 0; }
+main { box-sizing: border-box; max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.25rem 1.5rem 0; }
 .wide-body { max-width: calc(var(--teach-measure) + 3rem); }
 
 .bar {
@@ -928,6 +928,7 @@ const TEACH_QUIZ: Component = {
   font-family: var(--teach-sans);
   font-size: var(--t4);
   background: transparent;
+  box-sizing: border-box;
   width: 100%;
   text-align: left;
   color: inherit;

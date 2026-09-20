@@ -222,6 +222,16 @@ describe('buildDesignCss', () => {
       )
     })
 
+    it('sizes every padded full-width box by its border box so none overflows a narrow viewport', () => {
+      const css = teachCss()
+
+      for (const selector of ['main', '.nav', '.opt']) {
+        expect(declarationsOf(css, selector)).toContain(
+          'box-sizing: border-box',
+        )
+      }
+    })
+
     it('leaves smooth scrolling off, since a jump during reading competes with it', () => {
       expect(teachCss()).not.toContain('scroll-behavior')
     })
