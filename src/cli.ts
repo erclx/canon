@@ -95,7 +95,7 @@ const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
     title: 'Session and ship',
     rows: [
       ['sandbox [cat:cmd]', 'Provision and run sandbox scenarios'],
-      ['tasks [cmd]', 'Task board (archive)'],
+      ['tasks [cmd]', 'Task board (validate, archive)'],
       ['intake [cmd]', 'Intake folders under .canon/intake/ (list, answer)'],
       ['records [cmd]', 'Session records (validate, size, push, pull)'],
       ['sessions [cmd]', 'Resolve live sessions to worktree and branch'],

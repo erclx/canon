@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 type Registration = { register?: (program: Command) => void }
 
@@ -81,10 +81,16 @@ function readListing(): string[] {
 }
 
 describe('top-level help listing', () => {
-  const listing = readListing()
-  const rows = listing.filter((line) => /^\W*?\s{4}[a-z]/.test(line))
-  const listed = rows.map((row) => row.match(/([a-z][a-z-]*)/)![1])
   const registered = buildProgram().commands.map((c) => c.name())
+  let listing: string[] = []
+  let listed: string[] = []
+
+  beforeAll(() => {
+    listing = readListing()
+    listed = listing
+      .filter((line) => /^\W*?\s{4}[a-z]/.test(line))
+      .map((row) => row.match(/([a-z][a-z-]*)/)![1])
+  })
 
   it('should list every registered command', () => {
     expect(registered.filter((name) => !listed.includes(name))).toEqual([])
