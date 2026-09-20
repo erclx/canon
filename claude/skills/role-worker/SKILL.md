@@ -89,10 +89,18 @@ with no roster row at all. Those nine were driving through Remote Control, which
 writes no local process record, so a controller working from a phone is exactly
 the case this read answers nothing for.
 
-Compose the relay through `canon:session-relay` when this section finds no
-message-sending tool to send through, rather than leaving a resolved addressee
-with nothing to reach it. It runs the same ladder above and carries the
-message already owed, so nothing here is stated twice.
+Send through `canon:session-relay`. It holds the mechanical half of the send,
+turning the `sessionId` the launch named into an address at the moment of
+sending, checking the result against the agent listing, and falling back to a
+copyable block where this session holds no tool to send through. The message
+owed stays in its own bullet above.
+
+The rungs above restate the resolution the relay also carries. What is a
+worker's own is the last of them, the inference over sessions holding no feature
+branch, which discriminates here because a worker holds one and a controller
+does not. The rest is duplicated deliberately, so this body still reads whole
+for a session that reaches it with the relay unresolved, and collapsing it to
+the relay alone is a follow-up rather than part of this change.
 
 ## Refusing is part of the job
 

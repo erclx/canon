@@ -155,7 +155,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I owe my controller the pull request announcement but I have no message-sending tool. Compose the relay so an operator can copy it over.',
+      'Relay this over to the session that dispatched me. It gave me a sessionId rather than a name, so work out who that is and send it.',
     expect: 'session-relay',
   },
 

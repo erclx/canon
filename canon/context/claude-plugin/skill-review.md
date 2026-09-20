@@ -187,13 +187,15 @@ Moving the protocol inline into each role body was the other alternative, and it
 
 `session-relay` is the shape that keeps both. The firing condition survives because the pointer sits inside `## The channel`, a section both role bodies already read at session start rather than one reached by request match alone, and what remains duplicated across the two bodies is two sentences naming one skill rather than the protocol itself. A pointer drifting from its target fails loudly, since the skill it names either resolves or does not, where two copies of one protocol drift from each other in silence.
 
-### A third case neither shape reaches
+### The third case, reached by widening rather than by a third shape
 
-A session holding neither role has no `## The channel` section to carry the pointer, so it reads neither `role-worker`'s nor `role-planner`'s ladder and never learns `session-relay` exists to compose through. `canon-rollout`'s worker role is the concrete instance, structurally barred from `role-worker` since that body resolves session scratch against a main worktree root a target does not carry, and it meets the gap by restating the block-before-prompt line inline rather than by finding a surface to read it from.
+A session holding neither role has no `## The channel` section to carry the pointer, so a relay scoped to the two roles read neither ladder and never learned the skill existed. `canon-rollout`'s worker role is the concrete instance, structurally barred from `role-worker` since that body resolves session scratch against a main worktree root a target does not carry, and it met the gap by restating the block-before-prompt line inline rather than by finding a surface to read it from.
 
-`core/091-channel.md` states the addressing and timing once, for a session that reaches it directly. A skill body may not depend on that arrival, since a plugin skill reaches a target the moment it merges while a governance rule reaches one only through a separate install nothing forces alongside it. `session-relay`'s own guard, and `canon-rollout`'s, each restate the fact plainly rather than citing the rule's path, so a target holding the plugin without governance is refused with something to act on rather than pointed at a file that is not there.
+The relay now serves that session directly. Both guards came off, the one refusing a caller holding neither role and the one refusing a caller holding a send tool, and the description fires on any relay rather than on a missing tool. What the skill holds is the mechanical half of the send: naming the sender, turning a `sessionId` or a branch into an address, and putting the text through whichever route exists. Each role keeps only who it addresses and its own last-rung inference, which a worker and a thinking session resolve differently because a worker holds a feature branch and neither of the others does.
 
-`session-relay`'s guard checks role membership before it checks tool availability, so a session failing both learns the deeper reason rather than stopping at the shallower one.
+`core/091-channel.md` states the addressing and timing once, for a session that reaches it directly. A skill body may not depend on that arrival, since a plugin skill reaches a target the moment it merges while a governance rule reaches one only through a separate install nothing forces alongside it. The relay restates block-before-prompt plainly for that reason, and `canon-rollout` still carries its own inline copy until its branch merges and a follow-up points it here.
+
+The routing eval is the only check that the widened description still fires, since nothing else tests what a roleless session reaches.
 
 ### What the announcement bought and what it did not
 
