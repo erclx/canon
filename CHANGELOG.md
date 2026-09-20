@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.103.0](https://github.com/erclx/canon/compare/v4.102.0...v4.103.0) (2026-09-20)
+
+
+### Features
+
+* **claude:** add a header block slot to draft-readme ([#1765](https://github.com/erclx/canon/issues/1765)) ([6ff68c2](https://github.com/erclx/canon/commit/6ff68c21df2757294c38fc1d7d0ba4e428c59221))
+* **claude:** add a widths block to the ui-checklist skill ([#1763](https://github.com/erclx/canon/issues/1763)) ([5a3e804](https://github.com/erclx/canon/commit/5a3e8044bb9c6f9996dccf11eab89166cf230ae6))
+* **claude:** report a target per domain against what ships ([#1762](https://github.com/erclx/canon/issues/1762)) ([e1df567](https://github.com/erclx/canon/commit/e1df567a2809a7f44bb04798b870e5081c028bcb))
+* **design:** declare the face in the embedded token preview ([#1766](https://github.com/erclx/canon/issues/1766)) ([24d38f1](https://github.com/erclx/canon/commit/24d38f1a84cb81a88058a00092135f897fa667ee))
+* **tooling:** ship a README screenshot workflow and widen web captures ([#1761](https://github.com/erclx/canon/issues/1761)) ([980c58f](https://github.com/erclx/canon/commit/980c58f3df7613db1227d99fcdff9dd1ab0d343c))
+
 ## [4.102.0](https://github.com/erclx/canon/compare/v4.101.0...v4.102.0) (2026-09-20)
 
 
