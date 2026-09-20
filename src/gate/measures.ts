@@ -819,8 +819,16 @@ export const readmeCitations: Measure = async (ctx) => {
 }
 
 /**
+ * Globs `pr-visual-checks.yml` carries with no `deploy-site.yml` counterpart,
+ * because the path changes no byte of the built site. The capture harness is
+ * the one case: a change there should report the capture job and never deploy.
+ */
+const VISUAL_ONLY_GLOBS: readonly string[] = ['tooling/web/configs/e2e/**']
+
+/**
  * `deploy-site.yml` and `pr-visual-checks.yml` each carry their own literal
- * copy of the eight path globs a landing-page change should trigger on, per
+ * copy of the eight path globs a landing-page change should trigger on, plus
+ * the `VISUAL_ONLY_GLOBS` the visual workflow adds for itself, per
  * Question 2 in `.canon/plans/archive/feature-render-visibility.md`. A YAML
  * anchor cannot cross files here, so the two copies are read live and compared
  * rather than one asserting a literal the other could drift behind unnoticed,
@@ -858,14 +866,25 @@ export const visualPathGlobs: Measure = async (ctx) => {
     }
   }
 
-  const onlyDeploy = deployPaths.filter((path) => !visualPaths.includes(path))
-  const onlyVisual = visualPaths.filter((path) => !deployPaths.includes(path))
+  const onlyDeploy = deployPaths.filter(
+    (path) => !visualPaths.includes(path) || VISUAL_ONLY_GLOBS.includes(path),
+  )
+  const onlyVisual = visualPaths.filter(
+    (path) => !deployPaths.includes(path) && !VISUAL_ONLY_GLOBS.includes(path),
+  )
+  const declaredVisualOnly = visualPaths.filter((path) =>
+    VISUAL_ONLY_GLOBS.includes(path),
+  )
 
   if (onlyDeploy.length === 0 && onlyVisual.length === 0) {
+    const visualOnlyNote =
+      declaredVisualOnly.length > 0
+        ? `, plus visual-only ${declaredVisualOnly.join(', ')}`
+        : ''
     return {
       emissions: [
         info(
-          `${deployPaths.length} path glob(s) agree between ${deployPath} and ${visualPath}`,
+          `${deployPaths.length} path glob(s) agree between ${deployPath} and ${visualPath}${visualOnlyNote}`,
         ),
       ],
     }
@@ -874,7 +893,11 @@ export const visualPathGlobs: Measure = async (ctx) => {
   return {
     emissions: [
       ...onlyDeploy.map((path) =>
-        warn(`${deployPath} carries ${path}, absent from ${visualPath}`),
+        warn(
+          VISUAL_ONLY_GLOBS.includes(path)
+            ? `${deployPath} carries ${path}, which is visual-only and must not trigger a deploy`
+            : `${deployPath} carries ${path}, absent from ${visualPath}`,
+        ),
       ),
       ...onlyVisual.map((path) =>
         warn(`${visualPath} carries ${path}, absent from ${deployPath}`),
