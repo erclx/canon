@@ -42,7 +42,7 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 - `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
 - `canon:draft-and-pick` for a call settled by looking, drafting several candidates onto one page and taking your pick
 - `canon:ux-walkthrough` for a multi-finding inspection pass over a running app with the operator, drafting arms from the app's own markup and recording each pick for a builder
-- `canon:draft-identity` to draft a project's logo mark and compose it into an icon sequence and a social card, through `draft-and-pick`'s own render-and-pick loop
+- `canon:draft-identity` to draft a project's logo mark and compose it into an icon sequence and a social card, through `draft-and-pick`'s own render-and-pick loop. On an Astro project holding the card route scaffold, the card lands as a route the project keeps and is captured through a running server, so it reads the project's real stylesheet rather than typed copies of every color. Everywhere else it ships as a PNG and the run says so.
 - Anthropic's `frontend-design` plugin optional for light visual steering
 
 ### When to pick

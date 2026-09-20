@@ -71,6 +71,15 @@ main() {
   run_check "bun run build" "Build failed"
   log_info "Build passed"
 
+  # Runs whenever the stack shipped a card exclusion check, which keeps the
+  # stage stack-agnostic here and the check itself in the stack that owns the
+  # card route's shape. It reads the build above, so it sits after it.
+  if [ -f scripts/check-card-exclusion.sh ]; then
+    log_step "Card exclusion"
+    run_check "bash scripts/check-card-exclusion.sh" "Card exclusion check failed"
+    log_info "Card exclusion passed"
+  fi
+
   if [ "$NESTED" = false ]; then
     echo -e "${GREY}└${NC}\n"
     echo -e "${GREEN}✓ Verification passed${NC}"

@@ -21,6 +21,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 - `vitest.config.ts`: uses `getViteConfig` from `astro/config` (not `mergeConfig`). jsdom, globals, setup file, `passWithNoTests: true`, v8 coverage, `**/*.astro` in coverage excludes.
 - `playwright.config.ts`: all browsers, `webServer` runs `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`. Astro's dev/prod gap is wide (MDX, island hydration, asset optimization), so E2E always tests the built `dist/`. `DIST_PREBUILT` set in the environment drops the `build` half, running `bun run preview` alone against a `dist/` a prior CI job already produced.
 - `tsconfig.json`: extends `astro/tsconfigs/strict`, adds `skipLibCheck`, `vitest/globals` and `@testing-library/jest-dom` in types, `@/` paths.
+- `card.config.mjs`, `card-src/pages/og-card.astro`, and `scripts/check-card-exclusion.sh`: the social card route, its structural build exclusion, and the check enforcing it. See `## Social card route` below.
 - `eslint.config.js`: overrides the web layer. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/tooling.md` for the measurement.
 
 ## Typecheck
@@ -59,11 +60,37 @@ Append to the `## Scripts` table:
 
 In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `astro check` passes ``. The Build row's assertion reads: `` `astro build` succeeds ``.
 
+## Social card route
+
+The social card is a route the project keeps rather than a page a render writes and deletes, so re-rendering it after a rename is an edit to one string and a re-capture instead of another pass through `draft-identity`'s pick loop with an operator in it. `canon:draft-identity` writes the picked composition into the route and captures it through the server below.
+
+### What ships
+
+- `card.config.mjs`: a second Astro config whose `srcDir` points at `./card-src`, which the main config's page router never reads. That is what excludes the card from the published build structurally rather than by a filename convention, the same mechanism `scenarios.astro` reaches for with `import.meta.env.DEV`. Its base port is `4421` plus `WORKTREE_PORT_OFFSET`, outside the band `astro.config.mjs` serves from, so a card server and a dev server of one worktree never contend.
+- `card-src/pages/og-card.astro`: the route, shipped as a working placeholder so it serves before any pick has been taken. It imports the project's own global stylesheet, which is what lets the composition read real tokens and real fonts instead of typed copies. It reads `--color-background` and `--color-text`, the names `canon design css` emits, and sets no `font-family` at all so the card inherits the project's body font rather than reading a font token the design system does not emit.
+- `scripts/check-card-exclusion.sh`: fails when the route's `<meta name="og-card-marker">` tag reaches `dist/`, and fails when the route dropped that tag, since the marker is what the leak test reads for.
+- `bun run card:dev` serves the route. `bun run card:check` runs the exclusion check, which the web layer's `scripts/verify.sh` also runs after its build stage whenever the script is installed.
+
+### Why each piece is shaped that way
+
+The stylesheet import points at `@/styles/global.css`. A project keeping its stylesheet elsewhere retargets that one line, and an unresolved path then refuses the card server by name, which is the loud direction rather than the convenient one. The quiet failure it replaces is a card captured against no stylesheet at all: it renders as an unstyled box and reports success.
+
+A custom property the stylesheet does not define is the same silent failure in a second costume. It takes its fallback, captures cleanly and reports success, so the card ships on typed values while reading as though it read real ones. That is why the route names only properties `canon design css` emits, and why a project retargeting the stylesheet import checks the names against what its own stylesheet defines.
+
+The exclusion is a check rather than a convention because the route has three consumers and only one of them can be enforced. The card server reads it, the capture reads it, and the published build must not carry it.
+
+`.card` is declared at 600x315, half of the 1200x630 target. `canon capture` opens every page at a fixed 2x device scale factor with no flag to change it, so a half-size element is what lands the captured PNG on the literal size. Declaring it at 1200x630 captures at 2400x1260.
+
+### Why v1 is Astro-only
+
+Astro is the one web stack whose config gives a route a structural build exclusion. Next's App Router has no build-time route exclusion at all, and it needs none on the path it will take, since `ImageResponse` is that framework's own production mechanism and a card route there is meant to be served. `vite-react` builds a single-page app with no page router, so a card is a second Rollup entry rather than a route.
+
 ## Gitignore (extend)
 
 `[gitignore]` groups this stack edits, restated here per the manifest-to-reference symmetry:
 
 - `"# Astro" = [".astro/"]`
+- `"# Social card" = ["card-dist/"]`
 
 ## Scenario switcher
 
