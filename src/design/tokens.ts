@@ -70,6 +70,7 @@ export interface DesignTokens {
   readonly spacingNote: string
   readonly borders: readonly BorderToken[]
   readonly bordersNote: string
+  readonly layout: string
   readonly motion: string
   readonly iconography: string
   readonly preamble: string
@@ -370,6 +371,9 @@ export const TOKENS: DesignTokens = {
       when: 'the status dot, sized at 6px',
     },
   ],
+
+  layout:
+    'Capture widths are 320, 768, 1280 and 1536 pixels, declared once in `tooling/web/configs/e2e/screenshot.ts`, with 320 and 1280 committed as evidence. 320 is the reflow floor and the rest are the breakpoint buckets. The landing page under `web/` sets its own `max-width` media queries between 430 and 1100 pixels per component rather than from a shared scale.',
 
   motion:
     'Motion is not used. No transition, animation, or keyframe declaration appears on any rendered surface, and the capture pipeline screenshots a static frame.',

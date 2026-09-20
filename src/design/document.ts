@@ -134,6 +134,8 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
       ),
     ),
     '',
+    section('Layout', tokens.layout),
+    '',
     section('Motion', tokens.motion),
     '',
     section('Iconography', tokens.iconography),

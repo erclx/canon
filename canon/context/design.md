@@ -41,6 +41,7 @@ This repository's own record is the one that is generated rather than authored. 
 - The confidence count reads the columns a source could anchor rather than every cell. Each table's first column names its row, and `Multiplier` and `When used` restate what the row already carries, so none of the four is counted. A cell tagged outside that set counts anyway, which keeps a marker the preview draws from sitting outside the ratio beside it.
 - Counting every non-blank cell is the rejected alternative: it shipped a denominator of 120 against the toolkit's own record, 43 of which could only ever be anchored, reading 93 percent confidence over a record carrying eight proposals. The scoped count reads 64 of 72.
 - A record with no tagged cell gets neither the count nor the marker style, so nothing about it moves.
+- `## Layout` is read as text by the `440-surface-capture` rule to find a project's breakpoints, and the renderer and the parser ignore it. It therefore never appears on the rendered preview, and nothing visual confirms it landed. This repository's own record carries it through `layout` in `src/design/tokens.ts`, because the document is generated and a hand edit would fail the `design` gate stage.
 
 ## Gotchas
 
