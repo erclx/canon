@@ -1,0 +1,41 @@
+---
+title: Social card route
+description: Why the card became a route the project keeps, the build-exclusion measurement that narrowed v1 to Astro, and why the Next path waits
+---
+
+# Social card route
+
+`draft-identity` used to write the picked card to a scratch page, capture it, and delete the page. What survived was a PNG, so renaming a project meant another pass through the pick loop with an operator in it to move one string. The page inlined every rule and typed every color because it had nowhere to live. The card is now a route the project keeps, captured through a running server, so the composition reads the project's own stylesheet, tokens and fonts.
+
+## The exclusion measurement, taken 2026-09-20
+
+The open question was whether Next and vite-react carry a structural build exclusion as clean as Astro's `srcDir`. They do not, and the three differ enough that one shared scaffold does not cover them.
+
+- **Astro: yes, structural.** A second config sets `srcDir` at a folder the page router never reads. This repository proves it with the gallery's own second config, whose comment states it excludes the gallery structurally rather than by a filename convention, and a shell check fails on a leak.
+- **Next: no.** The App Router has no build-time route exclusion. Its practical workaround is a `pageExtensions` regex over a filename pattern, which is the convention the Astro approach was chosen over, and a route group such as `app/(debug)/` needs a runtime environment check instead. Four open discussions ask for the feature, which is the clearest evidence it does not exist.
+  - [#56781](https://github.com/vercel/next.js/discussions/56781), [#81242](https://github.com/vercel/next.js/discussions/81242), [#76096](https://github.com/vercel/next.js/discussions/76096), [#65322](https://github.com/vercel/next.js/discussions/65322)
+- **vite-react: the question does not apply.** It builds a single-page app with no page router, so routes are client-side and a build has nothing to exclude. A card there is a second Rollup entry rather than a route, which is a third shape.
+
+What the measurement settles is that the exclusion problem belongs to the serve-and-capture approach alone, where the card page is scaffolding rather than product. Next needs no exclusion at all on the path it will eventually take, because `ImageResponse` is that framework's own intended production mechanism and a card route there is meant to be served.
+
+## Why the Next path waits
+
+The operator settled the direction on 2026-09-20: serve-and-capture ships first, `ImageResponse` follows. Both were available and one was picked rather than both built.
+
+Serve-and-capture covers Astro and vite-react and reads real values off a running page. The `ImageResponse` path fixes less than the measurement makes it look like it would: satori supports a CSS subset and wants `display: flex` on nearly every box, so a card written for it carries inline styles rather than the project's own cascade, which is the defect this change exists to close. No target is asking for it. The row is therefore narrower than it was written rather than blocked, and v1 is Astro.
+
+A project with no page router at all still takes the old scratch-page capture, and the skill says so rather than reporting a source it did not write. That arm is what keeps the skill working on a project that is not a web app.
+
+## The favicon keeps its own path
+
+The favicon is not conformed to the shape the card takes, and the divergence is deliberate rather than unfinished. It is generated from a token file with no browser in the loop, it carries a `prefers-color-scheme` branch a captured PNG cannot hold, and it already has its own color source. A card route reading a running stylesheet answers none of those three, so pointing the favicon at one would cost the theme branch and buy nothing.
+
+What the card route does change for the favicon is where it lands, since `draft-identity` writes both into the same detected folder and that detection now walks one level down.
+
+## Where the pieces sit
+
+The route, its second config, and the exclusion check ship as golden configs in the `astro` tooling stack rather than the `web` layer, because all three are Astro-format files and that layer's own rule puts framework glue in the per-stack adapter. The plan for this change named the `web` layer's config folder, and the stack's own precedent, a dev-only scenario switcher shipped as an `.astro` golden config, settled it the other way.
+
+What the `web` layer does own is when the check runs. Its `scripts/verify.sh` runs the card exclusion check after its build stage whenever that script is installed, testing for the script rather than for a framework. That keeps the exclusion on the default path rather than behind a flag, and it leaves a project with no card route one stage shorter with no override to write.
+
+The capture needed nothing added to it. `canon capture` already reads an `http(s)://` source, where `--out` names the destination PNG rather than a directory. Its 2x device scale factor is fixed with no flag, which is why the route declares its card element at 600x315 to land a 1200x630 capture, and why the route carries that halving as a comment rather than as a surprise.
