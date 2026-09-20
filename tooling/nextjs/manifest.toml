@@ -17,6 +17,7 @@ packages = [
 [scripts.override]
 "dev" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && next dev --port $((3000 + WORKTREE_PORT_OFFSET))"
 "screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 3000) && export PREVIEW_PORT && bash scripts/screenshot.sh"
+"readme-screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 3000) && export PREVIEW_PORT && bash scripts/readme-screenshot.sh"
 
 [gitignore]
 "# Next" = [".next/"]

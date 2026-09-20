@@ -1,0 +1,110 @@
+name: README Screenshot
+# canon-no-seed: a stack-specific workflow with no root counterpart by design, since this repository reports its own capture in pr-visual-checks.yml and never commits it.
+
+# No `workflow_dispatch`: the job commits onto a pull request's head branch,
+# and a manual run has no pull request to commit onto.
+on:
+  pull_request:
+    paths:
+      # Project-specific. Replace the placeholder with the paths whose change
+      # moves the README frame, such as the component and styles it renders.
+      # The three entries below the placeholder keep the job firing on this
+      # file's own installation, which is what lets the first step refuse an
+      # unfilled template instead of the job never running.
+      - 'REPLACE_WITH_PROJECT_PATHS'
+      - 'scripts/readme-screenshot.sh'
+      - 'scripts/lib/preview-server.sh'
+      - '.github/workflows/readme-screenshot.yml'
+
+concurrency:
+  group: readme-screenshot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    name: 🖼️ Refresh README Screenshot
+    runs-on: ubuntu-latest
+    # The default GITHUB_TOKEN cannot push to a fork's branch, so a PR from
+    # outside this repository is skipped rather than left to fail on the push
+    # step below.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Refuse An Unfilled Template
+        # A path list left at its placeholder never fires on the pages it was
+        # installed to watch, and that failure leaves no run, no diff, and no
+        # complaint. Failing here is what tells the project it has not
+        # finished installing.
+        run: |
+          if grep -q "^ *- 'REPLACE_WITH_PROJECT_PATHS'" .github/workflows/readme-screenshot.yml; then
+            echo "::error file=.github/workflows/readme-screenshot.yml::The paths list still holds REPLACE_WITH_PROJECT_PATHS. Replace it with the paths that move the README frame."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Cache Playwright Browser
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-${{ hashFiles('**/package.json') }}
+
+      - name: Install Playwright System Dependencies
+        # Unconditional: the cache holds browser binaries and nothing apt
+        # wrote, so gating this on a cache hit leaves a warm run launching
+        # chromium without the libraries it needs.
+        run: bunx playwright install-deps chromium
+
+      - name: Install Playwright Browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: bunx playwright install chromium
+
+      - name: Capture README Screenshot
+        run: bun run readme-screenshot
+
+      - name: Check For Changes
+        id: diff
+        run: |
+          if git status --porcelain assets/evidence/readme | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit And Push
+        # Self-terminating: this push retriggers this same workflow on the PR,
+        # which captures again, finds no diff against what was just pushed,
+        # and stops here without pushing a second time.
+        if: steps.diff.outputs.changed == 'true'
+        # The hooks are off because this commit carries nothing they can read.
+        # `pre-push` runs the full verify, whose format step shells out to
+        # `shfmt`, which the runner does not install, so a push through them
+        # exits 127. The jobs in verify.yml already run those checks against
+        # the source, and what this step pushes is PNG bytes a capture
+        # produced.
+        env:
+          HUSKY: 0
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/evidence/readme
+          git commit -m "chore(readme): refresh README screenshot"
+          git push origin "HEAD:${{ github.head_ref }}"

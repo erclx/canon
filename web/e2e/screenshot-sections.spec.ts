@@ -21,11 +21,14 @@ const HARNESS = fileURLToPath(
 )
 
 /**
- * The viewport the `home` cases declare. A frame is compared against a box
+ * The viewport the run below is filtered to. A frame is compared against a box
  * read in this page, so a section whose height follows the viewport has to be
  * measured at the height the harness used.
  */
 const VIEWPORT = { width: 1280, height: 800 }
+
+/** The one case-and-width the harness is asked for, so the run shoots one width rather than every bucket. */
+const FILTER = 'home/1280--dark'
 
 /**
  * The sections the `home` cases name, one frame each. Restated rather than
@@ -118,7 +121,11 @@ test.describe('the section capture', () => {
     // dark case alone to run, which halves what this test waits for.
     await run('bun', [HARNESS, '--require-base-url'], {
       cwd: out,
-      env: { ...process.env, SCREENSHOT_BASE_URL: baseURL },
+      env: {
+        ...process.env,
+        SCREENSHOT_BASE_URL: baseURL,
+        SCREENSHOT_FILTER: FILTER,
+      },
     })
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/')
@@ -145,7 +152,7 @@ test.describe('the section capture', () => {
     const frames = await Promise.all(
       SECTIONS.map(async (name) => ({
         name,
-        frame: await measurePng(path.join(home, name, 'dark.png')),
+        frame: await measurePng(path.join(home, name, '1280--dark.png')),
         section: await measureSection(page, name),
       })),
     )
@@ -165,7 +172,7 @@ test.describe('the section capture', () => {
       )
     expect(mismatched).toEqual([])
 
-    const whole = await measurePng(path.join(home, 'dark.png'))
+    const whole = await measurePng(path.join(home, '1280--dark.png'))
     expect(whole.width).toBe(VIEWPORT.width)
     expect(whole.height).toBeGreaterThan(VIEWPORT.height)
   })

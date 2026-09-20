@@ -39,6 +39,17 @@ paths:
 - Install with `bun install --frozen-lockfile`.
 - Key the Playwright browser cache on the Playwright version string, never a static key.
 
+## Commit-back
+
+- Commit a refreshed file back to the pull request branch only when the branch's own change moved it. Report the diff without committing when something outside the branch can move it, such as a count read at build time or a font that renders differently per machine, since that commit lands on a branch that never asked for it.
+- Commit only what a deterministic step regenerates from source, and run the diff check before the commit step so an unchanged capture pushes nothing.
+- Skip a pull request from a fork with `github.event.pull_request.head.repo.full_name == github.repository`, since the default token cannot push to a fork's branch.
+- Set the concurrency group on the ref so a newer push cancels the run committing onto a stale head.
+- Set `HUSKY: 0` on the commit step when the runner lacks a tool a hook shells out to.
+- Never commit back to the trunk. A commit with no pull request and no reviewer needs an operator's decision, not a workflow's.
+- Leave `workflow_dispatch` off a commit-back workflow. A manual run has no branch to commit onto, so the trigger would pass and do nothing.
+- Fail a template's first step while a path list still holds its placeholder, so an unfinished install fails loudly rather than never firing.
+
 ## Authority
 
 - Load the `canon:ci-workflow` skill for the workflow template and the per-project adaptation. Report it rather than proceeding silently when the skill does not resolve.

@@ -52,6 +52,7 @@ packages = [
 [scripts.override]
 "lint" = "eslint . --max-warnings 0"
 "screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4173) && export PREVIEW_PORT && bash scripts/screenshot.sh"
+"readme-screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4173) && export PREVIEW_PORT && bash scripts/readme-screenshot.sh"
 
 [gitignore]
 "# Build" = ["dist/"]
