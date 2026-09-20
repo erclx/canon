@@ -30,7 +30,7 @@ Also read the CI check status so the fixes cover failing checks, not only review
 canon pr checks <number> --json
 ```
 
-Read the verdict off the record's `state` rather than off the exit. Treat `failing` as a finding to resolve alongside the review comments. A `pending` covers a tip whose runs have yet to conclude and a tip carrying no run at all, which the record separates on `matched`, and neither is a green to continue on. Fall back to `gh pr checks <number>` when no record comes back at all, which is a target whose CLI predates the verb.
+Read the verdict off the record's `state` rather than off the exit. Treat `failing` as a finding to resolve alongside the review comments. A `pending` covers a tip whose runs have yet to conclude and a tip carrying no run at all, which the record separates on `matched`, and neither is a green to continue on. A record carrying `conflicted: true` is a third case: the branch conflicts with its base, so no run will start and the wait never ends. Stop and report it, since a rebase is the repair. Fall back to `gh pr checks <number>` when no record comes back at all, which is a target whose CLI predates the verb.
 
 ## Step 2: address each finding
 
@@ -170,8 +170,9 @@ echo "${comment_url##*issuecomment-}" > .canon/tmp/pr/reply/reply-<number>.id
 ## Step 7: confirm resolution
 
 After the follow-up push, watch CI on the PR. Poll
-`canon pr checks <number> --json` until the record's `state` leaves `pending`,
-then read it. When every finding is addressed and the state is `passing`, append
+`canon pr checks <number> --json` until the record's `state` leaves `pending`
+or it carries `conflicted: true`, then read it. On `conflicted`, stop and report
+that a rebase is the repair rather than polling on. When every finding is addressed and the state is `passing`, append
 the closing confirmation to the reply file Step 6 already posted, so the thread
 carries one terminal state rather than a second comment under no heading:
 
