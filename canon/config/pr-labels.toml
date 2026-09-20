@@ -125,16 +125,14 @@ release-managed = [
 ]
 # Each is rewritten by a command rather than authored, and it travels in the
 # commit that changed its source, which already carries that source's label. A
-# row over any of them adds a second label to a mechanical edit.
+# row over any of them adds a second label to a mechanical edit. An `assets/`
+# entry is a stem, so it covers the light sibling and the stamp.
 generated = [
-  "assets/evidence/hero.png",
-  "assets/evidence/hero.stamp",
-  "assets/evidence/install.png",
-  "assets/evidence/install.stamp",
-  "assets/evidence/catalog.png",
-  "assets/evidence/catalog.stamp",
-  "assets/evidence/arrival.png",
-  "assets/evidence/arrival.stamp",
+  "assets/evidence/hero",
+  "assets/evidence/install",
+  "assets/evidence/catalog",
+  "assets/evidence/arrival",
+  "assets/evidence/home/",
   "canon/config/baseline.json",
 ]
 # Each is a reason of its own rather than another generated file, since a reader
@@ -142,10 +140,11 @@ generated = [
 # `docs` would spuriously label every commit that regenerated its image
 # alongside an unrelated surface. The match is a prefix, so each entry covers
 # the `.tmpl` beside it, which travels in the same commit for the same reason.
+# Each entry is a stem, so it also covers the light sibling.
 rides-with-generated = [
-  "assets/captures/hero.html",
-  "assets/captures/install.html",
-  "assets/captures/catalog.html",
+  "assets/captures/hero",
+  "assets/captures/install",
+  "assets/captures/catalog",
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.
