@@ -5,9 +5,9 @@ description: The stages that gate a push on a measure, covering the sandbox cove
 
 # Gating stages
 
-Nine stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
+Ten stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
 
-A tenth reads a measure and reports it. `## Audit set` at the end of this entry covers it, and it sits here rather than in `canon/context/development/verification.md` because what it reads is a measure like the nine above rather than a gotcha about a stage.
+An eleventh reads a measure and reports it. `## Audit set` at the end of this entry covers it, and it sits here rather than in `canon/context/development/verification.md` because what it reads is a measure like the ten above rather than a gotcha about a stage.
 
 ## What sequences them
 
@@ -140,6 +140,12 @@ The commit-sha pattern reads 7 to 40 contiguous hex characters with no narrower 
 The marker mutes a line and nothing narrower, because `isMarked` reads the line itself and the one above and stops there. Twenty-one lines carry it: examples illustrating the `#123` spelling in `standards/publish.md`, the `verified` field format in `standards/diagrams.md` and in `draft-diagram`, a copyable `canon claude skills drift` invocation in `docs/agents/skills-audit.md` whose argument has to be a literal git ref, two same-repository citations in `docs/agents/context-audit-checks.md` and `docs/agents/key-changes.md`, and a phase label's own format illustrated across `docs/agents/tasks.md`, `standards/tasks.md`, `standards/versioning.md`, and `claude/skills/task-board/SKILL.md`. One of the twenty-one was never authored as an exemption at all: `standards/publish.md` states the convention on its own line, so the token sits inside a code span as documentation of the format, and `isMarked` reads a code span exactly as it reads a comment, which arms the marker over that line and the line below it with nothing anywhere naming them as exempt.
 
 A real citation later added beside any of the twenty-one ships unreported.
+
+## Raw-field file references
+
+The Raw-field file references stage walks the same seven corpora as Shipped references through the same file list, and fails a push on a `gh api` raw-string flag carrying a file reference. `-f body=@<path>` posts the literal path as the field value, so a comment edited that way is overwritten with the path and loses the marker a later read resolves it by. `-F` is the flag that reads the file, and the defect reached a shipped skill body twice before a gate existed.
+
+The pattern is `(?:^|\s)(?:-f|--raw-field)[ =]\S+=@`, which needs the `=@` and so passes `-F`, `--field`, and a raw string such as `-f body="text"`, the last being what `scripts/sandbox/git/followup.sh` posts on purpose. It needs no judgment, since a raw-string flag followed by an `@` file reference has no correct reading. The stage stands apart from Shipped references because its verdict is a flag spelling rather than an unresolvable reference, and it scans prose, so a body quoting the wrong spelling to explain it fails and gets reworded rather than exempted.
 
 ## Audit set
 

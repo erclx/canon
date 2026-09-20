@@ -629,6 +629,63 @@ export const shippedReferences: Measure = async (ctx) => {
   }
 }
 
+const RAW_FIELD_FILE_REFERENCE = /(?:^|\s)(?:-f|--raw-field)[ =]\S+=@/
+
+/**
+ * A `gh api` raw-string flag carrying a file reference, over the seven shipped
+ * corpora.
+ *
+ * `-f body=@<path>` sends the literal path as the field value, so a comment
+ * edited that way is overwritten with the path itself and loses the marker a
+ * later read resolves it by. `-F` is the flag that reads the file. The pattern
+ * requires `=@`, so `-F`, `--field`, and a raw string such as `-f body="text"`
+ * all pass.
+ *
+ * It scans prose rather than parsing a command, so a body quoting the wrong
+ * spelling to explain it fails too. Reword it rather than exempting it, since an
+ * exemption is what lets a real occurrence hide.
+ */
+export const rawFieldFileReference: Measure = async (ctx) => {
+  const files = shippedCorpusFiles(ctx.root)
+
+  if (files.length === 0) {
+    return {
+      emissions: [],
+      unmeasured: `No corpus under ${SHIPPED_CORPORA.join(', ')} is present, so no shipped file was read.`,
+    }
+  }
+
+  const found = files.flatMap((file) =>
+    readFileSync(join(ctx.root, file), 'utf8')
+      .split('\n')
+      .flatMap((text, index) =>
+        RAW_FIELD_FILE_REFERENCE.test(text) ? [`${file}:${index + 1}`] : [],
+      ),
+  )
+
+  if (found.length === 0) {
+    return {
+      emissions: [
+        info(
+          `No raw-field file reference across ${files.length} files in ${SHIPPED_CORPORA.length} shipped corpora`,
+        ),
+      ],
+    }
+  }
+
+  return {
+    emissions: found.map((location) =>
+      warn(
+        `${location} passes a file reference through a raw-string flag, which posts the path as the field value. Use -F instead`,
+      ),
+    ),
+    failure:
+      found.length === 1
+        ? 'One raw-field file reference in the shipped corpora. Change -f or --raw-field to -F or --field where the value reads a file with @, or reword a prose line quoting the wrong spelling.'
+        : `${found.length} raw-field file references in the shipped corpora. Change -f or --raw-field to -F or --field where the value reads a file with @, or reword a prose line quoting the wrong spelling.`,
+  }
+}
+
 /**
  * Every git-tracked file quoting a listed client command with the wrong
  * argument, over the whole tree rather than one corpus, since a wrong

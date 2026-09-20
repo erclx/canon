@@ -181,10 +181,10 @@ Read `reason` on the record rather than the exit code.
 gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
 ```
 
-When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`:
+When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`, which needs the typed-field flag `-F` because the raw-string flag `-f` posts the path itself as the body:
 
 ```bash
-gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -f body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
+gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
 ```
 
 Delete the handoff file once that call reports success, per the cleanup below, since the checklist now lives on the pull request. Clean up the tmp body file the same way.
