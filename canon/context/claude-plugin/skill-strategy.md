@@ -304,6 +304,8 @@ Read that as a state on a date rather than a verdict. The gate can lift without 
 
 What shipped instead is the half nothing blocks. `canon claude skills rank` and `reach` now read a target's own `.claude/skills/` through `resolveSkillsCorpus`, and `rank --cases` takes a project's own prompts as JSON, so the two live targets carrying 23 skills between them can be measured on routing for the first time. Routing against a project's own vocabulary is the axis no external runner will ever cover, because only that project can pose the question.
 
+Neither measure has a recorded floor in `canon/config/baseline.json`, so `bun run check` never gates on the rank score or the collision count. That matters most when a change edits a skill's `description`, since the field is what the corpus scores and a widened one silently takes cases off its neighbors. A standing collision and a fresh regression read identically in one run, so the only way to tell them apart is to measure both sides. The verb takes a project root as its argument, which makes the comparison cheap: extract the trunk with `git archive origin/main` into a scratch tree, rank that tree, and read the branch against it. A rewrite of two role bodies and the relay moved the score from 73 of 95 to 71 before the descriptions were narrowed again, and the two cases it had broken were neighbors neither the plan nor the diff named.
+
 ## Redundancy audit
 
 Toolkit skills with a plausible community counterpart are compared below. Every one is kept, some have taken a borrowed section from the counterpart, and each taken borrow carries the body it landed in.
