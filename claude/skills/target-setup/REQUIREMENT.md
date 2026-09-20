@@ -41,6 +41,7 @@ two copies could disagree with nothing comparing them.
 - Generate a config the tooling stack ships as a golden file
 - Install Claude Code plugins, which provision a machine rather than a project
 - Fail an unattended scaffold on a server start, which is flaky enough to be a depth the operator asks for
+- Survive as a skill nothing invokes but a person typing its name. `canon-operator` hands first-time scaffold here and the target-projects page names it as the scaffold step, so a later read finding no caller but the author has found a body that should have stayed a verb
 
 ## Guards
 
