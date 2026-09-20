@@ -64,6 +64,10 @@ export function firstSentence(text: string): string {
 
 const ANSI = /\u001b\[[0-9;]*m/g
 
+// A blank frame line or a colon-less group heading sits between two groups of
+// rows, while a heading ending in a colon opens the next block and ends them.
+const GROUP_BREAK = /^\W*$|^\W*\s{2}[A-Z][A-Za-z ]*$/
+
 /**
  * Every top-level command the help text lists. The help is the surface a
  * reader meets, so a command registered but left out of it is left out here
@@ -79,8 +83,12 @@ export function commandNamesFromHelp(help: string): string[] {
   const names: string[] = []
   for (const line of lines.slice(start + 1)) {
     const name = line.match(/^\W*?\s{4}([a-z][a-z-]*)\b/)?.[1]
-    if (!name) break
-    names.push(name)
+    if (name) {
+      names.push(name)
+      continue
+    }
+    if (GROUP_BREAK.test(line)) continue
+    break
   }
   if (names.length === 0) {
     throw new Error('canon --help lists no command under Commands')

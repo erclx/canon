@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 type Registration = { register?: (program: Command) => void }
 
@@ -61,5 +61,58 @@ describe('registered commands', () => {
       .filter((name) => !FORWARDS_HELP_TO_SCRIPT.has(name))
 
     expect(missing).toEqual([])
+  })
+})
+
+const LISTING_WIDTH = 80
+const ANSI = /\u001b\[[0-9;]*m/g
+
+function readListing(): string[] {
+  const { stdout } = Bun.spawnSync(
+    ['bun', join(import.meta.dirname, 'cli.ts'), '--help'],
+    { env: { ...process.env, NO_COLOR: '1' } },
+  )
+  const lines = stdout.toString().replace(ANSI, '').split('\n')
+  const start = lines.findIndex((line) => /^\W*Commands:\s*$/.test(line))
+  const end = lines.findIndex(
+    (line, index) => index > start && /^\W*\s{2}[A-Z][a-z]+:\s*$/.test(line),
+  )
+  return lines.slice(start + 1, end)
+}
+
+describe('top-level help listing', () => {
+  const registered = buildProgram().commands.map((c) => c.name())
+  let listing: string[] = []
+  let listed: string[] = []
+
+  beforeAll(() => {
+    listing = readListing()
+    listed = listing
+      .filter((line) => /^\W*?\s{4}[a-z]/.test(line))
+      .map((row) => row.match(/([a-z][a-z-]*)/)![1])
+  })
+
+  it('should list every registered command', () => {
+    expect(registered.filter((name) => !listed.includes(name))).toEqual([])
+  })
+
+  it('should list only registered commands', () => {
+    expect(listed.filter((name) => !registered.includes(name))).toEqual([])
+  })
+
+  it('should list each command once', () => {
+    expect(listed.filter((name, i) => listed.indexOf(name) !== i)).toEqual([])
+  })
+
+  it('should group the rows under headings', () => {
+    const headings = listing.filter((line) => /^\W*\s{2}[A-Z]/.test(line))
+
+    expect(headings.length).toBeGreaterThan(1)
+  })
+
+  it('should hold every row to the listing width', () => {
+    const wide = listing.filter((line) => line.length > LISTING_WIDTH)
+
+    expect(wide).toEqual([])
   })
 })

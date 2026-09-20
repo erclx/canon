@@ -78,6 +78,23 @@ describe('commandNamesFromHelp', () => {
     expect(commandNamesFromHelp(help)).toEqual(['init', 'gov', 'upgrade'])
   })
 
+  it('should read names across group headings', () => {
+    const grouped = [
+      '│  Commands:',
+      '│',
+      '│  Project',
+      '│    init [path]        # Bootstrap a project',
+      '│',
+      '│  Domains',
+      '│    gov [command]      # Governance commands',
+      '│',
+      '│  Examples:',
+      '│    canon sync ../my-app',
+    ].join('\n')
+
+    expect(commandNamesFromHelp(grouped)).toEqual(['init', 'gov'])
+  })
+
   it('should read names through terminal color codes', () => {
     const escape = '\u001b'
     const colored = help.replace(
