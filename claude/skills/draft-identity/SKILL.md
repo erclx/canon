@@ -38,7 +38,7 @@ Announce which of the two decided the sequence.
 
 ## Step 3: detect the write folder
 
-A root-only check misses most projects. Measured across four repositories on 2026-09-20, one kept `public/` at the root and was found, two kept theirs at `web/public/`, and one kept its favicon under `web/src/app/` with no `public/` anywhere. So three of four received their files at the repository root while the announcement reported a detected folder. Walk one level down and know the Next convention rather than falling through to the root.
+A root-only check finds a project's assets only where the project keeps them at the root. A repository holding its site in a subfolder keeps them a level down, and a Next project keeps its favicon under the App Router convention with no `public/` at all, so both fall through to the root fallback while the announcement reads as a detected folder. Walk one level down and know that convention rather than falling through.
 
 Read both, from the project root:
 
@@ -87,7 +87,7 @@ The card leaves this batch and takes Step 7 instead. An icon is the mark alone a
 
 A card captured from a page this run deletes leaves the project a PNG and nothing that produced it, so renaming the project means another pass through the pick loop with an operator in it to move one string. Write the composition into a route the project keeps, and capture that route through a running server so it reads the project's real stylesheet, tokens and fonts.
 
-This is Astro-shaped in v1, and the narrowing is measured rather than a deferral. A project already holding the card route scaffold takes the route path. Everything else falls to the page path below. Say which one decided, since the two leave the project different things.
+This is Astro-shaped in v1, because Astro is the one web stack whose config gives a route a structural build exclusion. A project already holding the card route scaffold takes the route path, and everything else falls to the page path below. Say which one decided, since the two leave the project different things.
 
 ### The route path
 

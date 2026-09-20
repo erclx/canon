@@ -48,11 +48,22 @@ import '@/styles/global.css'
         justify-content: center;
         gap: 0.5rem;
         padding: 3rem;
-        /* Written as rgb() rather than hex so the shipped-reference gate does
+        /* These two names are what `canon design css` emits, so a project
+           carrying the design files resolves both and neither fallback fires.
+           A name the design system does not emit would take its fallback,
+           capture cleanly and report success, which is the silent failure this
+           route exists to close. Check the names against the stylesheet when
+           retargeting the import above.
+
+           Written as rgb() rather than hex so the shipped-reference gate does
            not read a six-digit hex fallback as a pull request number. */
-        background: var(--color-ground, rgb(255 255 255));
-        color: var(--color-ink, rgb(17 17 17));
-        font-family: var(--font-body, system-ui, sans-serif);
+        background: var(--color-background, rgb(255 255 255));
+        color: var(--color-text, rgb(17 17 17));
+        /* No font-family here on purpose. The design system emits no font
+           token, so the card inherits the project's own body font rather than
+           reading a custom property that does not exist. `canon capture` reads
+           the computed family off this element, so inheritance still gives it
+           a family to check and it refuses when that family cannot resolve. */
       }
       .mark {
         width: 64px;

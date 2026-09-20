@@ -26,6 +26,18 @@ Serve-and-capture covers Astro and vite-react and reads real values off a runnin
 
 A project with no page router at all still takes the old scratch-page capture, and the skill says so rather than reporting a source it did not write. That arm is what keeps the skill working on a project that is not a web app.
 
+## The write-folder measurement the skill body cannot carry
+
+Measured across four repositories on 2026-09-20: one kept `public/` at the root and was found, two kept theirs at `web/public/` and were missed, and one kept its favicon under `web/src/app/` with no `public/` anywhere. Three of four therefore received their files at the repository root while the announcement read as a detected folder.
+
+That measurement lives here rather than in the skill body, because a body shipping to every target may not state a count or a folder shape true of one operator's checkout. A reader in a target cannot open those four repositories, so the number tells them nothing about their own tree. The body carries the principle the number produced: a root-only check misses a project keeping its assets a level down or under a framework convention.
+
+## The card reads only properties the design system emits
+
+The route names `--color-background` and `--color-text`, which is what `canon design css` emits. An earlier draft named `--color-ground`, `--color-ink`, and `--font-body`, none of which the design system defines, so a project carrying the design files would have taken all three fallbacks, rendered a white card in the browser default face, captured at the right dimensions and reported success.
+
+That is the same failure this whole change closes, with the palette swapped for the font. A card built from typed values is the defect, and a card reading custom properties that resolve to nothing is that defect wearing the syntax of the fix. The route sets no `font-family` at all for the same reason, since the design system emits no font token and inheriting the project's body font reads a real value where a token would have read nothing.
+
 ## The favicon keeps its own path
 
 The favicon is not conformed to the shape the card takes, and the divergence is deliberate rather than unfinished. It is generated from a token file with no browser in the loop, it carries a `prefers-color-scheme` branch a captured PNG cannot hold, and it already has its own color source. A card route reading a running stylesheet answers none of those three, so pointing the favicon at one would cost the theme branch and buy nothing.

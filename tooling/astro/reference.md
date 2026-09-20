@@ -67,7 +67,7 @@ The social card is a route the project keeps rather than a page a render writes 
 ### What ships
 
 - `card.config.mjs`: a second Astro config whose `srcDir` points at `./card-src`, which the main config's page router never reads. That is what excludes the card from the published build structurally rather than by a filename convention, the same mechanism `scenarios.astro` reaches for with `import.meta.env.DEV`. Its base port is `4421` plus `WORKTREE_PORT_OFFSET`, outside the band `astro.config.mjs` serves from, so a card server and a dev server of one worktree never contend.
-- `card-src/pages/og-card.astro`: the route, shipped as a working placeholder so it serves before any pick has been taken. It imports the project's own global stylesheet, which is what lets the composition read real tokens and real fonts instead of typed copies.
+- `card-src/pages/og-card.astro`: the route, shipped as a working placeholder so it serves before any pick has been taken. It imports the project's own global stylesheet, which is what lets the composition read real tokens and real fonts instead of typed copies. It reads `--color-background` and `--color-text`, the names `canon design css` emits, and sets no `font-family` at all so the card inherits the project's body font rather than reading a font token the design system does not emit.
 - `scripts/check-card-exclusion.sh`: fails when the route's `<meta name="og-card-marker">` tag reaches `dist/`, and fails when the route dropped that tag, since the marker is what the leak test reads for.
 - `bun run card:dev` serves the route. `bun run card:check` runs the exclusion check, which the web layer's `scripts/verify.sh` also runs after its build stage whenever the script is installed.
 
@@ -75,13 +75,15 @@ The social card is a route the project keeps rather than a page a render writes 
 
 The stylesheet import points at `@/styles/global.css`. A project keeping its stylesheet elsewhere retargets that one line, and an unresolved path then refuses the card server by name, which is the loud direction rather than the convenient one. The quiet failure it replaces is a card captured against no stylesheet at all: it renders as an unstyled box and reports success.
 
+A custom property the stylesheet does not define is the same silent failure in a second costume. It takes its fallback, captures cleanly and reports success, so the card ships on typed values while reading as though it read real ones. That is why the route names only properties `canon design css` emits, and why a project retargeting the stylesheet import checks the names against what its own stylesheet defines.
+
 The exclusion is a check rather than a convention because the route has three consumers and only one of them can be enforced. The card server reads it, the capture reads it, and the published build must not carry it.
 
 `.card` is declared at 600x315, half of the 1200x630 target. `canon capture` opens every page at a fixed 2x device scale factor with no flag to change it, so a half-size element is what lands the captured PNG on the literal size. Declaring it at 1200x630 captures at 2400x1260.
 
 ### Why v1 is Astro-only
 
-The narrowing is measured rather than a deferral. Next's App Router has no build-time route exclusion at all, and it needs none on the path it will take, since `ImageResponse` is that framework's own production mechanism and a card route there is meant to be served. `vite-react` builds a single-page app with no page router, so a card is a second Rollup entry rather than a route.
+Astro is the one web stack whose config gives a route a structural build exclusion. Next's App Router has no build-time route exclusion at all, and it needs none on the path it will take, since `ImageResponse` is that framework's own production mechanism and a card route there is meant to be served. `vite-react` builds a single-page app with no page router, so a card is a second Rollup entry rather than a route.
 
 ## Gitignore (extend)
 
