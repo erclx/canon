@@ -62,6 +62,11 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
     expect: 'draft-wireframes',
   },
   {
+    prompt:
+      'Write a wiki reference page for Claude Code output styles, no page covers that subject yet.',
+    expect: 'draft-wiki',
+  },
+  {
     prompt: 'Say what that dense answer actually means in plain terms.',
     expect: 'restate-plainly',
   },
