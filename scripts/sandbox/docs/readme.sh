@@ -6,7 +6,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "no-readme" "scaffold-readme" "authored-readme"
+  select_or_route_scenario "Which scenario?" "no-readme" "scaffold-readme" "authored-readme" "web-project"
 
   mkdir -p src
 
@@ -19,6 +19,26 @@ stage_setup() {
 EOF
 
   case "$SELECTED_OPTION" in
+  "web-project")
+    mkdir -p public
+    cat <<'EOF' >package.json
+{
+  "name": "sample-site",
+  "version": "0.1.0",
+  "description": "A landing page for the sample thing.",
+  "homepage": "https://sample-site.example.com",
+  "dependencies": { "astro": "^5.0.0" }
+}
+EOF
+    printf '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="30"/></svg>\n' >public/logo.svg
+    printf '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="#eee"/></svg>\n' >public/screenshot.svg
+    git add . && git commit -m "chore: seed a site project with a mark and a product image" -q
+    log_step "Scenario ready: a project with a page, a mark, and a product image"
+    log_info "Context: package.json declares a site framework and a homepage, public/ holds logo.svg and screenshot.svg"
+    log_info "Action:  /canon:draft-readme write the project README"
+    log_info "Expect:  header fills mark, title, claim, live link, and screenshot, each read off the repository"
+    ;;
+
   "no-readme")
     log_step "Scenario ready: no README exists"
     git add . && git commit -m "chore: seed a CLI package with no README" -q

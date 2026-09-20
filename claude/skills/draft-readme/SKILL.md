@@ -27,10 +27,16 @@ Read these files in parallel:
 - Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) for a `bin` field or CLI entry point, an installable package name, and its declared dependencies.
 - Check for a `claude/skills/` or `.claude/skills/` folder, a `plugin.json`, or a marketplace manifest, each naming an agent-facing or marketplace-distributed surface.
 - A project is often several of these at once. Note every type that applies rather than stopping at the first match, since the Draft step covers each one the project actually is.
+- Check for a page. A dependency on a site framework or a site config file in the manifest or the tree marks a project as having one. Read a live URL separately, from a `homepage` field or a deploy config, since a project can have a page and no known URL.
+- A monorepo can carry a page in one package and a CLI in another, so both signals may fire. Report each rather than picking one.
+- Look for the mark and the screenshot among images the project already commits: scan the existing README for image references, then the asset and public folders.
 
 ## Draft
 
 - Draft the page against `${CLAUDE_SKILL_DIR}/../../standards/readme.md`: H1, a 2-3 sentence description in plain text, then the required sections, then whichever optional sections and per-type content the Detect step found.
+- Open the page with the standard's header block, filling each slot from what Detect found: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot.
+- Fill the screenshot slot only with an image the project already commits, referenced with alt text naming what it depicts. This skill cannot capture one. Omit the slot when no such image exists and say so in the preview. Never write a placeholder path.
+- Omit the link and the screenshot for a project with no page, and the mark for a project with none, without a note in the drafted page. A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link.
 - Cover every applicable project type from the standard's `## Content` list rather than picking the closest one.
 - Candidate badges: check for a published package (a registry field in the manifest), a CI workflow, and a `LICENSE` file.
 - State each candidate's rendered value in the preview rather than trusting a fetch's status code, since a badge service answers 200 for a query it cannot satisfy.
@@ -38,7 +44,8 @@ Read these files in parallel:
 
 ## Confirm
 
-- Show the resolved path, the detected project types, the badge candidates and what backs each one, and the full drafted content before writing.
+- Show the resolved path, the detected project types, the header slots filled or skipped with the reason for each, the badge candidates and what backs each one, and the full drafted content before writing.
+- The skill can confirm that an image file exists and is referenced, and it cannot verify the picture shows the product. Ask the user to look at it in the preview.
 - Confirm with the user. This skill waits for that answer rather than treating the tool permission dialog as the gate, since project-type detection and badge selection are judgment calls with no diff to preview them against.
 
 ## Write
@@ -52,6 +59,7 @@ Read these files in parallel:
 
 **Target:** `<path>` (root | nested)
 **Detected:** `<project types>`
+**Header:** `<each slot as filled (source) or skipped (reason)>`
 **Badges:** `<candidates, or none>`
 
 ```markdown

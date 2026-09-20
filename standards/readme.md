@@ -11,7 +11,7 @@ The reader is what changes. Reference prose serves someone who already committed
 
 ## Scope
 
-Governs every `README.md`: voice, heading structure, required and optional sections, badge selection, and what the page links out to instead of carrying.
+Governs every `README.md`: voice, heading structure, required and optional sections, the header block, badge selection, and what the page links out to instead of carrying.
 
 Does not govern:
 
@@ -34,20 +34,39 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 
 - H1 title, H2 major sections, H3 subsections. Maintain proper hierarchy for GitHub's auto-generated table of contents.
 - Use sentence case for all headings (proper nouns and product names retain their casing)
-- Project description in plain text directly under H1. Keep it to 2-3 sentences.
+- Project description in plain text below the header block, or directly under the H1 when the block holds nothing beneath the title. Keep it to 2-3 sentences.
 - Do not create deeply nested heading structures that harm scannability
 - Do not use horizontal rules or dividers (`---`)
 
 ## Sections
 
 - Required: project description, installation/setup, usage examples, support/help resources
-- Optional: badges (at top, before description), features, contributing (link to `CONTRIBUTING.md`), license (link to `LICENSE`)
+- Optional: the header block below, features, contributing (link to `CONTRIBUTING.md`), license (link to `LICENSE`)
 - Do not include full API documentation. Link to separate docs instead.
 - Do not include license text. Reference the `LICENSE` file.
 - Do not include detailed contribution guidelines. Reference `CONTRIBUTING.md`.
 - Do not include extensive troubleshooting guides. Use a wiki or separate documentation.
 - A README that points to the project's own context entries instead of restating them satisfies the required list by routing rather than carrying. A repository documented in `docs/` or `canon/context/` names the entry point and the listing command, then stops. The reader is one hop away, the same way `## Badges` treats zero as complete.
 - A README missing an H1, or whose headings restate the tool that scaffolded it rather than the project, is unedited generator output rather than a page anyone wrote. Draft over it. Nothing here asks a session to preserve a section a scaffold wrote and nobody replaced.
+
+### Header block
+
+The opening of a root README is a block of up to six elements in a fixed order. Every element is read off the repository rather than written from scratch, and each one is a slot: a project that holds nothing for it leaves it out.
+
+1. Mark: the project's logo or icon, from an image the repository already commits. Omit it when the project has none.
+2. Title: the H1, naming the project.
+3. Badges: the block `### Badges` below governs, placed directly under the title.
+4. Claim: one line saying what the project does, taken from the manifest description or the repository description.
+5. Live link: the URL of the running surface, from a `homepage` field or a deploy config. Omit it when the project has no page or no known URL.
+6. Product screenshot: an image the project already commits and references, shown with alt text naming what it depicts. Present only when the project has a page. Omit it when no such image exists rather than writing a placeholder path.
+
+The description of 2-3 sentences follows the block and expands the claim rather than repeating it.
+
+- A project with no page omits the link and the screenshot. A library or a CLI reads as a complete block with a title, badges, and a claim.
+- The order is the block's rather than the page's. The screenshot sits last inside the block, which puts it in the first row of content a reader meets below the title, badges, and claim.
+- A themed light and dark pair counts as one element in the slot rather than two. The block does not require a pair and leaves the handling of themes to the project.
+- Centering the block in an HTML wrapper is optional. Plain markdown reaches every host a README renders on, and a wrapper is styling a project can add.
+- Never invent an element. A mark or a screenshot the project does not hold stays out of the page.
 
 ### Badges
 
