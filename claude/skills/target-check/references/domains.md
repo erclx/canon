@@ -49,15 +49,17 @@ Routes to `canon <domain> sync`, or to `canon sync` for every installed domain a
 
 ## 4. Tooling
 
-Read the `tooling` block off the report, then run `canon tooling sync --check`.
+Read the `tooling` block off the report first, because the comparison command needs a value it carries.
 
 Read `measured` before anything under it. Every count is zero when `measured` is false, which is an absence of measurement rather than a measured zero.
+
+On a measured report, take `<stack>` from the first name in `chain` and run `canon tooling sync --check <stack>`. Never run it bare. The stack argument is what the target carries, and omitting it reaches a prompt that the non-interactive variable resolves to the catalog's first entry rather than refusing, which compares the target against a stack it does not use and reports the difference as drift.
 
 - Current: `measured` true, `chain` naming stacks the toolkit still ships, and `--check` reporting nothing it would change.
 - Behind: `--check` naming files it would replace, or `counts.gitignore` carrying missing managed entries.
 - Unread: `measured` false. It splits three ways, and each is reported as unmeasured with its cause named rather than as clean. An empty `chain` at a workspace root is by design, since a chain there would guess at what the packages hold. An empty `chain` anywhere else means no tooling install is recorded. A `chain` carrying names the toolkit no longer ships means injecting would write against a retired name.
 
-Routes to `canon tooling sync <stack>`, or to `canon tooling inject --gitignore <stack>` for ignore entries alone. Take `<stack>` from the first name in `chain`, which records the stack nearest the target, and only on a measured report.
+Routes to `canon tooling sync <stack>`, or to `canon tooling inject --gitignore <stack>` for ignore entries alone, taking `<stack>` the same way the comparison above does. An unmeasured report names no stack, so it routes to neither.
 
 `canon tooling diff` is the verb this section wants and it does not exist yet. `--check` answers the same question today and stays working as an alias by design, so the retarget when that verb lands is a change of name rather than of behavior.
 

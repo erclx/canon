@@ -23,13 +23,22 @@ Run these from the target root, in parallel:
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon sync --check . --json
-CANON_NON_INTERACTIVE=1 canon tooling sync --check
 CANON_NON_INTERACTIVE=1 canon context audit --json
 ```
 
-The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, and `reverse`. The other two deepen a domain that first read only counts.
+The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, and `reverse`. The second deepens a domain that first read only counts.
 
 Then run `CANON_NON_INTERACTIVE=1 canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
+
+### The tooling read takes a stack, always
+
+The tooling comparison runs last, because it needs a value the first read returns. Take `<stack>` from the first name in the report's `tooling.chain`, which records the stack nearest the target, and pass it:
+
+```bash
+CANON_NON_INTERACTIVE=1 canon tooling sync --check <stack>
+```
+
+Refuse the domain and report it unread when `chain` names nothing, rather than running the command bare. A bare call reaches the stack prompt, and the non-interactive variable this skill's Guards make mandatory resolves that prompt to the first option in the catalog instead of refusing it. The domain would then compare every target against whichever stack sorts first, and report drift that is an artifact of the wrong comparison rather than anything the target did. It would fire on every run rather than on an edge, since nothing about the target is read on the way to that default.
 
 Read every installed domain from the catalog the report returns rather than from a name written into this body. `domains` enumerates what the target actually stamped, so a domain the toolkit adds later reaches this report with no edit here, and a name hardcoded here is a bug.
 

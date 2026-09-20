@@ -14,7 +14,7 @@ Five answer from a verb that already exists and one answers from nothing.
 - Toolkit version, from `skew` on `canon sync --check . --json`
 - The `canon/` folder, from `unmigrated`, `superseded`, and `reverse` on that report, plus `canon context audit` and `canon records validate`
 - Governance rules, from the `domains` array on that report
-- Tooling, from the `tooling` block plus `canon tooling sync --check`
+- Tooling, from the `tooling` block plus `canon tooling sync --check <stack>`
 - Seeds, from `seeds.entries`
 - The Claude harness, which no verb reads
 
@@ -42,6 +42,6 @@ The same asymmetry is why an unread domain is a third state beside current and b
 
 ## Open
 
-- The tooling section calls `canon tooling sync --check`. `canon tooling diff` is the verb it wants and does not exist yet, and `--check` stays working as an alias by design, so the retarget when that verb lands is a change of name rather than of behavior.
+- The tooling section calls `canon tooling sync --check <stack>`. `canon tooling diff` is the verb it wants and does not exist yet, and `--check` stays working as an alias by design, so the retarget when that verb lands is a change of name rather than of behavior.
 - Document health is a content question rather than a structural one and is absent here by design.
 - Nothing checks that the domain list in the body, the reference, and this entry stay the same six. A domain added to one and not the others drifts silently.
