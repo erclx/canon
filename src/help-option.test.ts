@@ -63,3 +63,50 @@ describe('registered commands', () => {
     expect(missing).toEqual([])
   })
 })
+
+const LISTING_WIDTH = 80
+const ANSI = /\u001b\[[0-9;]*m/g
+
+function readListing(): string[] {
+  const { stdout } = Bun.spawnSync(
+    ['bun', join(import.meta.dirname, 'cli.ts'), '--help'],
+    { env: { ...process.env, NO_COLOR: '1' } },
+  )
+  const lines = stdout.toString().replace(ANSI, '').split('\n')
+  const start = lines.findIndex((line) => /^\W*Commands:\s*$/.test(line))
+  const end = lines.findIndex(
+    (line, index) => index > start && /^\W*\s{2}[A-Z][a-z]+:\s*$/.test(line),
+  )
+  return lines.slice(start + 1, end)
+}
+
+describe('top-level help listing', () => {
+  const listing = readListing()
+  const rows = listing.filter((line) => /^\W*?\s{4}[a-z]/.test(line))
+  const listed = rows.map((row) => row.match(/([a-z][a-z-]*)/)![1])
+  const registered = buildProgram().commands.map((c) => c.name())
+
+  it('should list every registered command', () => {
+    expect(registered.filter((name) => !listed.includes(name))).toEqual([])
+  })
+
+  it('should list only registered commands', () => {
+    expect(listed.filter((name) => !registered.includes(name))).toEqual([])
+  })
+
+  it('should list each command once', () => {
+    expect(listed.filter((name, i) => listed.indexOf(name) !== i)).toEqual([])
+  })
+
+  it('should group the rows under headings', () => {
+    const headings = listing.filter((line) => /^\W*\s{2}[A-Z]/.test(line))
+
+    expect(headings.length).toBeGreaterThan(1)
+  })
+
+  it('should hold every row to the listing width', () => {
+    const wide = listing.filter((line) => line.length > LISTING_WIDTH)
+
+    expect(wide).toEqual([])
+  })
+})

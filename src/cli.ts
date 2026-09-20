@@ -45,6 +45,95 @@ import { register as upgrade } from '@/commands/upgrade'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { palette } from '@/ui'
 
+const HELP_WIDTH = 80
+const SIGNATURE_WIDTH = 19
+const ROW_INDENT = '│    '.length
+
+type CommandRow = [signature: string, description: string]
+
+// The grouping mirrors the README's domain table and has no other source, so a
+// command added to the program needs a row here or help-option.test.ts fails.
+const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
+  {
+    title: 'Project',
+    rows: [
+      ['init [path]', 'Bootstrap a project with toolkit domains'],
+      ['sync [path]', 'Sync all installed domains in a project'],
+      ['upgrade', 'Reinstall the CLI with the manager that installed it'],
+      ['migrate [cmd]', 'Move a project off a retired name or layout'],
+      ['targets [cmd]', 'Projects this toolkit installed into (list, pulls)'],
+    ],
+  },
+  {
+    title: 'Domains',
+    rows: [
+      ['gov [cmd]', 'Governance rules (install, sync, list)'],
+      ['standards [cmd]', 'Standards (install, sync, list, <name>)'],
+      ['snippets [cmd]', 'Prompt snippets (create, list)'],
+      ['tooling [cmd]', 'Tooling stacks (sync, ref, create)'],
+      ['claude [cmd]', 'Claude workflow (init, sync, setup)'],
+      ['wiki [cmd]', 'Wiki pages (init)'],
+      ['indexes [cmd]', 'Regenerate index.md files (regen)'],
+      ['docs [cmd|topic]', 'Emit toolkit reference docs (list, <topic>)'],
+    ],
+  },
+  {
+    title: 'Author and render',
+    rows: [
+      ['design [cmd]', 'Design system (render, board)'],
+      ['slides [cmd]', 'Slide decks (render, list)'],
+      ['capture [source]', 'Render HTML capture sources to PNG'],
+      ['serve [dir]', 'Serve a directory on localhost, print the link'],
+      ['demo [cmd]', 'Record a running app (compile, run)'],
+      ['inventory [subj]', 'Report one computed property across every route'],
+      ['drive <url> <run>', 'Walk a page through interactions, measure each'],
+      ['transcripts <url>', 'Fetch a YouTube transcript with frontmatter'],
+      ['teach [cmd]', 'Learning workspaces (list, open, resource, glossary)'],
+    ],
+  },
+  {
+    title: 'Session and ship',
+    rows: [
+      ['sandbox [cat:cmd]', 'Provision and run sandbox scenarios'],
+      ['tasks [cmd]', 'Task board (archive)'],
+      ['intake [cmd]', 'Intake folders under .canon/intake/ (list, answer)'],
+      ['records [cmd]', 'Session records (validate, size, push, pull)'],
+      ['sessions [cmd]', 'Resolve live sessions to worktree and branch'],
+      ['worktrees [cmd]', 'Reclaim worktrees whose branches merged'],
+      ['autoship [cmd]', 'Decide whether a changed set needs review'],
+      ['pr [cmd]', 'Read a pull request (key-changes, head, checks)'],
+      ['feedback', 'Write toolkit feedback from stdin'],
+    ],
+  },
+  {
+    title: 'Repo reports',
+    rows: [
+      ['audits [cmd]', 'Run every health check as one set (run, list)'],
+      ['gate [cmd]', 'Run the merge gate stage by stage (run)'],
+      ['secrets [cmd]', 'Scan the shipped tree for credentials (scan)'],
+      ['deps [cmd]', 'Read the dependency set for advisories (audit)'],
+      ['labels [cmd]', 'Read a changed set against the label map (audit)'],
+      ['comments [cmd]', 'Measure comment density and trend (scan)'],
+      ['context [cmd]', 'Report context folder health (audit)'],
+      ['markdown [cmd]', 'Report markdown against the standards (audit)'],
+      ['repo [cmd]', 'Remote metadata (metadata propose, apply)'],
+      ['census [path]', 'Report file count, extensions, and line totals'],
+    ],
+  },
+]
+
+// A row past the width is cut rather than wrapped, since a wrapped row breaks
+// the alignment the grouping exists to buy.
+function commandRow(signature: string, description: string): string {
+  const { GREY, NC } = palette(process.stdout)
+  const room = HELP_WIDTH - ROW_INDENT - SIGNATURE_WIDTH - '# '.length
+  const text =
+    description.length > room
+      ? `${description.slice(0, room - 1)}…`
+      : description
+  return `${GREY}│${NC}    ${signature.padEnd(SIGNATURE_WIDTH)}${GREY}# ${text}${NC}`
+}
+
 function showHelp(): void {
   // The help text is the one framed surface written to stdout, so it asks
   // about that stream rather than the stderr every other writer here uses.
@@ -54,46 +143,13 @@ function showHelp(): void {
     `${GREY}├${NC} ${WHITE}Usage:${NC} canon [command]`,
     `${GREY}│${NC}`,
     `${GREY}│${NC}  ${WHITE}Commands:${NC}`,
-    `${GREY}│${NC}    init [path]        ${GREY}# Bootstrap a project with toolkit domains${NC}`,
-    `${GREY}│${NC}    sync [path]        ${GREY}# Sync all installed domains in a project${NC}`,
-    `${GREY}│${NC}    sandbox [cat:cmd]  ${GREY}# Provision and run sandbox scenarios${NC}`,
-    `${GREY}│${NC}    gov [command]      ${GREY}# Governance commands (install, sync)${NC}`,
-    `${GREY}│${NC}    standards [cmd]    ${GREY}# Standards commands (install, sync, list, <name>)${NC}`,
-    `${GREY}│${NC}    snippets [cmd]     ${GREY}# Snippets commands (create, list)${NC}`,
-    `${GREY}│${NC}    tooling [cmd]      ${GREY}# Manage tooling stacks (sync, ref, create)${NC}`,
-    `${GREY}│${NC}    claude [cmd]       ${GREY}# Claude workflow (init, sync, setup)${NC}`,
-    `${GREY}│${NC}    wiki [cmd]         ${GREY}# Wiki commands (init)${NC}`,
-    `${GREY}│${NC}    indexes [cmd]      ${GREY}# Regenerate index.md files (regen)${NC}`,
-    `${GREY}│${NC}    docs [cmd|topic]   ${GREY}# Emit toolkit reference docs (list, <topic>)${NC}`,
-    `${GREY}│${NC}    design [cmd]       ${GREY}# Design system commands (render, board)${NC}`,
-    `${GREY}│${NC}    slides [cmd]       ${GREY}# Slide deck commands (render, list)${NC}`,
-    `${GREY}│${NC}    capture [source]   ${GREY}# Render HTML capture sources to PNG${NC}`,
-    `${GREY}│${NC}    serve [dir]        ${GREY}# Serve a directory over localhost and print the preview link${NC}`,
-    `${GREY}│${NC}    demo [cmd]         ${GREY}# Record a running app (compile, run)${NC}`,
-    `${GREY}│${NC}    inventory [subj]   ${GREY}# Report one computed property across every route${NC}`,
-    `${GREY}│${NC}    drive <url> <run>  ${GREY}# Walk a page through named interactions and measure each state${NC}`,
-    `${GREY}│${NC}    feedback           ${GREY}# Write toolkit feedback from stdin to .canon/feedback/${NC}`,
-    `${GREY}│${NC}    transcripts <url>  ${GREY}# Fetch a YouTube transcript with metadata frontmatter${NC}`,
-    `${GREY}│${NC}    tasks [cmd]        ${GREY}# Task board commands (archive)${NC}`,
-    `${GREY}│${NC}    intake [cmd]       ${GREY}# Intake folders under .canon/intake/ (list, answer)${NC}`,
-    `${GREY}│${NC}    teach [cmd]        ${GREY}# Learning workspaces under .canon/teach/ (list, open, resource, glossary)${NC}`,
-    `${GREY}│${NC}    comments [cmd]     ${GREY}# Measure comment density and trend (scan)${NC}`,
-    `${GREY}│${NC}    context [cmd]      ${GREY}# Report context folder health (audit)${NC}`,
-    `${GREY}│${NC}    markdown [cmd]     ${GREY}# Report markdown against the attribute standards (audit)${NC}`,
-    `${GREY}│${NC}    records [cmd]      ${GREY}# Session records under .claude/ (validate, size, push, pull)${NC}`,
-    `${GREY}│${NC}    sessions [cmd]     ${GREY}# Resolve live sessions to worktree and branch (list)${NC}`,
-    `${GREY}│${NC}    targets [cmd]      ${GREY}# Report the projects this toolkit installed into (list, pulls)${NC}`,
-    `${GREY}│${NC}    worktrees [cmd]    ${GREY}# Reclaim the worktrees whose branches merged (list, reclaim)${NC}`,
-    `${GREY}│${NC}    secrets [cmd]      ${GREY}# Read the shipped tree for credential-shaped values (scan)${NC}`,
-    `${GREY}│${NC}    deps [cmd]         ${GREY}# Read the resolved dependency set for advisories (audit)${NC}`,
-    `${GREY}│${NC}    labels [cmd]       ${GREY}# Read a changed set against the pull request label map (audit)${NC}`,
-    `${GREY}│${NC}    autoship [cmd]     ${GREY}# Decide whether a changed set needs the review pass (classify)${NC}`,
-    `${GREY}│${NC}    pr [cmd]           ${GREY}# Read a pull request against its own diff and its branch tip (key-changes, head, checks)${NC}`,
-    `${GREY}│${NC}    repo [cmd]         ${GREY}# This repository's own remote metadata (metadata propose, apply)${NC}`,
-    `${GREY}│${NC}    census [path]      ${GREY}# Report tracked file count, extension breakdown, and line totals${NC}`,
-    `${GREY}│${NC}    audits [cmd]       ${GREY}# Run every health check as one set (run, list)${NC}`,
-    `${GREY}│${NC}    gate [cmd]         ${GREY}# Run the merge gate stage by stage (run)${NC}`,
-    `${GREY}│${NC}    upgrade            ${GREY}# Reinstall the CLI globally with the manager that installed it${NC}`,
+    ...COMMAND_GROUPS.flatMap((group) => [
+      `${GREY}│${NC}`,
+      `${GREY}│${NC}  ${WHITE}${group.title}${NC}`,
+      ...group.rows.map(([signature, description]) =>
+        commandRow(signature, description),
+      ),
+    ]),
     `${GREY}│${NC}`,
     `${GREY}│${NC}  ${WHITE}Sandbox:${NC}`,
     `${GREY}│${NC}    canon sandbox             ${GREY}# Interactive scenario picker${NC}`,
