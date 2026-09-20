@@ -51,7 +51,7 @@ Use `## Personality`, `## Color`, `## Typography`, `## Spacing`, `## Borders`, `
 
 Add either optional section when the project has content for it:
 
-- `## Layout`: page width, breakpoints, and grid rules, as current constraints
+- `## Layout`: page width, breakpoints, and grid rules, as current constraints. The surface-capture rule reads the breakpoints from here, so a project with none declared here is captured at the 320 reflow floor alone.
 - `## Mark`: the logo's construction rules and the files that carry it
 
 ## Template
