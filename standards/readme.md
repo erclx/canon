@@ -63,6 +63,7 @@ The opening of a root README is a block of up to six elements in a fixed order. 
 The description of 2-3 sentences follows the block and expands the claim rather than repeating it.
 
 - A project with no page omits the link and the screenshot. A library or a CLI reads as a complete block with a title, badges, and a claim.
+- The order is the block's rather than the page's. The screenshot sits last inside the block, which puts it in the first row of content a reader meets below the title, badges, and claim.
 - A themed light and dark pair counts as one element in the slot rather than two. The block does not require a pair and leaves the handling of themes to the project.
 - Centering the block in an HTML wrapper is optional. Plain markdown reaches every host a README renders on, and a wrapper is styling a project can add.
 - Never invent an element. A mark or a screenshot the project does not hold stays out of the page.

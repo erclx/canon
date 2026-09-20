@@ -30,6 +30,10 @@ Read these files in parallel:
 - Check for a page. A dependency on a site framework or a site config file in the manifest or the tree marks a project as having one. Read a live URL separately, from a `homepage` field or a deploy config, since a project can have a page and no known URL.
 - A monorepo can carry a page in one package and a CLI in another, so both signals may fire. Report each rather than picking one.
 - Look for the mark and the screenshot among images the project already commits: scan the existing README for image references, then the asset and public folders.
+
+## Draft
+
+- Draft the page against `${CLAUDE_SKILL_DIR}/../../standards/readme.md`: H1, a 2-3 sentence description in plain text, then the required sections, then whichever optional sections and per-type content the Detect step found.
 - Open the page with the standard's header block, filling each slot from what Detect found: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot.
 - Fill the screenshot slot only with an image the project already commits, referenced with alt text naming what it depicts. This skill cannot capture one. Omit the slot when no such image exists and say so in the preview. Never write a placeholder path.
 - Omit the link and the screenshot for a project with no page, and the mark for a project with none, without a note in the drafted page. A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link.
