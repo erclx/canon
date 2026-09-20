@@ -28,6 +28,8 @@ canon sandbox clean                  # wipe sandbox entirely
 
 When a scenario argument is passed, `manage-sandbox.sh` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1` automatically. Multi-scenario scripts call `select_or_route_scenario` from `lib/ui.sh`, which reads `SANDBOX_SCENARIO` and skips the picker when set.
 
+Every verb above is toolkit-only and refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. The refusal names its cause, so it does not read as a broken tree, but a session that takes it at face value concludes the verb no longer exists rather than reaching for the local CLI. A linked worktree meets this on every sandbox read, since the `canon` on the path resolves to the published binary rather than to the branch under it.
+
 The `internal-sandbox-check` skill maps changed plugin skills and changed `scripts/` files on a feature branch to their matching scenarios, so an e2e gap on a script edit surfaces the same way it does on a skill edit.
 
 ## Headless skill testing

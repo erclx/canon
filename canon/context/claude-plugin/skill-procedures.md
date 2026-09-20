@@ -107,6 +107,12 @@ Repairing only after entry would still admit a repository broken by an earlier s
 
 Both call sites confirm the repository's common dir is named `.git` before writing, which separates the defect from a genuinely bare repository that keeps its objects at the root and would be broken by the repair. The skill states the upstream issue inline rather than pointing at `wiki/claude/claude-worktrees.md`, since a shipped skill runs where no `wiki/` path resolves and `check-skill-paths.sh` fails the build on one.
 
+### A skill whose subject is the banned folder
+
+The ban above constrains a citation, and it constrains the shape of a whole body when the folder is the skill's subject rather than an aside in it. `draft-wiki` is that case and it names no path at all. It cites its standard through `${CLAUDE_SKILL_DIR}/../../standards/wiki.md`, resolves the folder and its vendor subfolder from what that standard's own placement section states, and carries both as placeholders through every later step. The standard is therefore the single owner of the path, which is the outcome the citation rule wants anyway and which the ban forces here rather than leaving to judgment.
+
+`check-skill-paths.sh` anchors its pattern on a non-path character, so a nested spelling such as `.claude/wiki/` stays legal and only the bare one fails. A body reaching for that nested form to satisfy the pattern would pass the gate and still be wrong, since it names a layout the target does not necessarily have. Resolving from the standard is what separates passing the check from being portable.
+
 ### Step 6's dependency check is a literal test, not a description
 
 `session-worktree` Step 6 carries the test itself: Node and python each read against a literal `[ -f ... ]` / `[ -d ... ]` pair, and the closing "no manifest" line takes its own direct test, run ahead of both rather than reached by falling through them unmatched. `<install>` resolves off a fixed four-row lockfile table, `bun.lock` or `bun.lockb`, `pnpm-lock.yaml`, `yarn.lock`, then `package-lock.json`, checked in that order and falling back to `bun install` when none match.
