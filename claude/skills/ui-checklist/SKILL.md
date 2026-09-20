@@ -31,6 +31,23 @@ Group visual items by feature area. Use `- [ ]` checkbox syntax, and write each 
 - [ ] <action> → <expected visual result>
 ```
 
+## The widths block
+
+A screenshot shows one width, so a reviewer cannot tell from the picture alone whether any other width was looked at. When a change touches layout, spacing, or anything responsive, put this block above the visual items, since it frames what the screenshots beside it can support:
+
+```markdown
+**Widths:**
+
+Seen at: <the widths the reviewer looked at>
+Not seen at: <the widths nobody looked at, or "none">
+```
+
+Leave both lines for the reviewer to complete. This session cannot verify a width, so the block asks what was seen and never asserts coverage. Fix no width list in the block, since which widths matter belongs to the project.
+
+Keep the `Not seen at:` line even when the answer is "none", so an omission reads as a claim rather than a gap.
+
+Omit the block when the change cannot differ by width, such as copy, color, or a state that renders the same everywhere, the way the missing-test heading is omitted below.
+
 ## The missing-test list
 
 Name every automatable change this branch ships with no test, one per line, with the layer `test-craft` would place it at. Do not write the test and do not read the project's test config to write one against.
