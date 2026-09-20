@@ -208,20 +208,6 @@ export const STAGES: readonly Stage[] = [
     success: 'Hero clean',
   },
   {
-    id: 'tooling-paths',
-    label: 'Tooling paths',
-    checks: [
-      script('regen-tooling-paths.sh', 'Tooling-path regen failed'),
-      {
-        kind: 'drift',
-        pathspec: 'claude/skills/canon-cli/SKILL.md',
-        failure:
-          'The overwrite contract drifted from what the stacks hold. Run bun run check and commit claude/skills/canon-cli/SKILL.md.',
-      },
-    ],
-    success: 'Tooling paths clean',
-  },
-  {
     // `canon/DESIGN.md`, the base stylesheet, the web stylesheet, and the
     // tab icon are all written from `src/design/tokens.ts` and none is edited
     // by hand. Four artifacts from one source is the cost of the token move,

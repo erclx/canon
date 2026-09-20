@@ -71,6 +71,8 @@ An empty operator slot in an intake folder means unread, where a plan file's bla
 
 ## What a skill carries
 
+`canon-cli` is the instance of the rule against restating a catalog. Its body says neither the verb list nor the docs list belongs in it, and it once carried a generated listing of every golden config path across the tooling stacks, which ran 70 of 122 lines. The listing went, along with its generator and gate stage, and the body keeps what no verb answers: the overwrite table, the sync rules, and the copy-once note on `CLAUDE.md`. The skill survives because `canon --help` names top-level commands with partial hints and enumerates no subcommands, so nothing in help says whether a sync overwrites. A reader wanting the paths runs `canon tooling diff`, which resolves them against a real target, or `canon tooling sync --check` on a binary older than that verb.
+
 A file a skill body cites has to arrive by the channel the skill itself travels on. Skills load live from the plugin root while standards, snippets, and governance rules are copied by a `canon` command, so a body naming an installed path is a dependency crossing that boundary and resolves only for a project that ran the matching install. Nothing reports the break, because an unresolved path produces no error until a session opens it.
 
 The three orchestrator runbooks settle the rule: they sit in `role-orchestrator`'s own `references/`, cited with `${CLAUDE_SKILL_DIR}`, which resolves from any working directory in any target. What this narrows to is a test on readership rather than on topic: a file one skill reads ships inside it, and a file several surfaces reach stays in the catalog that publishes it.
