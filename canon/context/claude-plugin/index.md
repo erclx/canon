@@ -10,6 +10,7 @@ Plugin skills shipped to target projects, the canon claude CLI, and overlap with
 - [Boundaries](boundaries.md): Where built-in Claude Code features overlap toolkit skills and how the two compose
 - [CLI](cli.md): The canon claude command surface and what each verb writes into a target project
 - [Distribution](distribution.md): The marketplace entry, the install-shape traps it avoids, and the release wiring for the plugin manifest
+- [Machine plugins](machine-plugins.md): The curated third-party plugin list the retired setup-plugins skill carried, kept as a record of what was picked and why
 - [Overview](overview.md): What the plugin domain owns, where its boundary sits, and the layout of the plugin root
 - [Skill archiving on merge](skill-archiving.md): The post-merge hook that closes a shipped task, how a pull request number reaches the board, and where the archive gates live
 - [Skill diff baseline](skill-baseline.md): The merge-base block six skills share, the read against write asymmetry when it fails to resolve, and the narrower test autoship carries

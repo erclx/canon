@@ -26,7 +26,7 @@ EOF
     log_step "Scenario ready: canon-operator skill on an empty repo"
     log_info "Context: package.json only, toolkit not yet installed"
     log_info "Action:  /canon:canon-operator then 'help me set up this project'"
-    log_info "Expect:  orients via canon docs, routes first-time scaffold to setup-init"
+    log_info "Expect:  orients via canon docs, routes first-time scaffold to setup"
     log_info "Assert:  declared in fixtures/claude/canon-operator/fresh/expect.toml"
     ;;
   "audits")
@@ -89,7 +89,7 @@ EOF
     log_step "Scenario ready: canon-operator skill on a target carrying two of four audit surfaces"
     log_info "Context: canon/context/ and .canon/plans/ present, no TypeScript or shell source"
     log_info "Action:  /canon:canon-operator then 'what can you measure about this project'"
-    log_info "Expect:  names the setup-init handoff, then offers the context and records audits, withholds the comment scan"
+    log_info "Expect:  names the setup handoff, then offers the context and records audits, withholds the comment scan"
     log_info "Assert:  declared in fixtures/claude/canon-operator/audits/expect.toml"
     ;;
   "gitignore")

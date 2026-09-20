@@ -58,15 +58,15 @@ Use the local entry point for the reason the `Provisioning:` line does. A global
 For each changed skill path under `claude/skills/<skill-name>/SKILL.md` or `.claude/skills/<skill-name>/SKILL.md`, apply the first matching rule:
 
 1. Split `<skill-name>` on the first `-` into `<category>` and `<rest>`. If `scripts/sandbox/<category>/<rest>.sh` exists in the worktree, record that path as the scenario.
-2. If the skill's census entry names a scenario `<category>:<command>`, record `scripts/sandbox/<category>/<command>.sh`. The census pairs a second spelling this step's split does not, which is what reaches `setup-init` through `claude:setup-init`.
+2. If the skill's census entry names a scenario `<category>:<command>`, record `scripts/sandbox/<category>/<command>.sh`. The census pairs a second spelling this step's split does not, which is what reaches `target-setup` through `claude:target-setup`, a name rule 1 cannot split at all.
 3. If the census carries the skill with no scenario and `scripts/sandbox/infra/<rest>.sh` exists, a scenario file is sitting where no spelling reaches it. Ask, naming the candidate: `Scenario for <skill-name>? Candidate: scripts/sandbox/infra/<rest>.sh (path under scripts/sandbox/, or "none")`. Accept `none` as an explicit opt-out.
 4. If the census carries the skill with no scenario and no candidate exists, record its `verdict`, carrying the `reason` for an exempt one. Do not ask. A verdict is a standing ruling, and re-deciding it per branch is what produces an answer that lives one session.
 5. If the path is under `.claude/skills/`, record `outside-census`. The census counts `claude/skills/` alone, so an internal skill is absent by construction rather than unknown, and asking would repeat the question every branch.
 6. Otherwise the skill is a plugin skill the census has yet to see, which is a genuine unknown. Ask the user: `Scenario for <skill-name>? (path under scripts/sandbox/, or "none" if the skill has no scenario)`. Record the answer. Accept `none` as an explicit opt-out.
 
-Rule 3 offers the candidate and does not record it. Both answers are live, because a file at that path is evidence a scenario exists rather than proof it exercises this skill. A coincidental name match would report a skill as covered by a scenario that stages an unrelated tree, which is the vacuous pass the coverage entry exists to prevent, while `setup-gov` against `infra/gov.sh` is a real pairing. One person settling that beats either rule deciding it.
+Rule 3 offers the candidate and does not record it. Both answers are live, because a file at that path is evidence a scenario exists rather than proof it exercises this skill. A coincidental name match would report a skill as covered by a scenario that stages an unrelated tree, which is the vacuous pass the coverage entry exists to prevent, while `setup-gov` against `infra/gov.sh` was a real pairing before the setup merge retired that skill. One person settling that beats either rule deciding it.
 
-Do not guess past the candidate. Fuzzy matching across sandbox categories produces wrong pairings (`setup-gov` is `infra/gov.sh`, not `gov/install.sh`), so rule 3 tests one path and offers it rather than searching for a plausible one.
+Do not guess past the candidate. Fuzzy matching across sandbox categories produces wrong pairings, such as the retired `setup-gov` pairing to `infra/gov.sh` rather than to `gov/install.sh`, so rule 3 tests one path and offers it rather than searching for a plausible one.
 
 Do not write to `scripts/sandbox/exempt.toml` from this step. An exemption is a claim about the harness rather than about the branch in hand, and one authored mid-ship-check is how the file's two-kinds rule erodes. Entries are hand-authored.
 

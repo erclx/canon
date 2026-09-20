@@ -53,9 +53,9 @@ The last failure is a section no route reaches. `## Route` maps an intent or a d
 
 ## Out of scope
 
-- First-time scaffold of a fresh project: `setup-init`
+- First-time scaffold of a fresh project: `target-setup`
 - Seed and preamble drift in installed files: `seed-sync`
-- Governance rule install and index bootstrap: `setup-gov` and `setup-indexes`
+- Governance rule install and index bootstrap: `target-setup`, on its `gov` and `indexes` phases
 - What a given sync overwrites once it runs: `canon-cli`
 
 That last contract carries no row for the governance install this skill routes to, so the overwrite `Must` above reads nothing at one of its own destinations. The row belongs to the skill owning the table. This file records the silence rather than answering it, since a rule written here for a silent contract teaches a session that silence means safe.

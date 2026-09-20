@@ -23,7 +23,7 @@ max_turns = 12
 # offers alongside it rather than behind it. Pinning the handoff beside the offers
 # is what separates that ranking from a reply reaching the audits by dropping the
 # handoff.
-reply = ["setup-init", "canon context audit", "canon records validate"]
+reply = ["target-setup", "canon context audit", "canon records validate"]
 
 # Prose the checker cannot assert, each with the reason it stays here.
 manual = [

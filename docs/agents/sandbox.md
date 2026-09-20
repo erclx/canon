@@ -65,7 +65,7 @@ The record carries every scenario with the arms that declare, plus `totalScenari
 
 `--skills` answers what the scenario count cannot, which is whether anything can fail a given skill. It adds `skills`, `totalSkills`, `asserted`, `shouldBeAsserted`, `exempt`, `staleExemptions`, and `supersededExemptions` to the record, and keeps the scenario view rather than replacing it. The two denominators disagree on purpose: an armed scenario under `infra/` or `tooling/` exercises a CLI domain and pairs with no skill at all.
 
-A skill pairs to a scenario by filename, `<category>-<command>` first and bare `<command>` second, so `claude/setup-init.sh` reaches the `setup-init` skill. `should-be-asserted` is the default rather than a queue to drain, and which of those skills earns an arm is a project decision the census does not make.
+A skill pairs to a scenario by filename, `<category>-<command>` first and bare `<command>` second, so `claude/target-setup.sh` reaches the `target-setup` skill. `should-be-asserted` is the default rather than a queue to drain, and which of those skills earns an arm is a project decision the census does not make.
 
 `exempt` means no arm should be written and holds only with a reason, declared in `scripts/sandbox/exempt.toml` and limited to a harness limit the checker cannot reach past or a skill that writes no artifact. An armed arm outranks an exemption. An exemption naming no shipped skill, or naming one an arm now asserts, exits 1 without `--strict`. Each armed arm reports as `<category>:<command>/<arm>`, so two same-named arms under different scenarios stay distinct.
 

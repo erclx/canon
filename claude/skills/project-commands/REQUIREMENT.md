@@ -38,5 +38,5 @@ Two more failures are mechanical. A command that stays up run in the foreground 
 
 - Confirming a change works in the running app, which is a verification request and needs the steps this skill refuses
 - Deploying, publishing, releasing, migrating, and resetting
-- Running the scaffold verification chain against `package.json` scripts: `setup-verify`
+- Running the scaffold verification chain against `package.json` scripts: the `target-setup` skill's `verify` phase
 - Writing the entry it reads, which belongs to the project's own development docs

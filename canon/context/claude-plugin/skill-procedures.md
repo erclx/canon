@@ -7,7 +7,7 @@ description: The CLI shell-out pattern every skill follows, the label map a proj
 
 ## The CLI shell-out pattern
 
-Plugin skills that shell out to the CLI follow a consistent pattern: read the toolkit catalog via `canon <domain> list --json`, match against project context, then execute the CLI with `CANON_NON_INTERACTIVE=1` so it skips prompts. Claude Code's tool permission dialog is the single confirmation gate. Skills never reimplement CLI logic or hardcode rule, stack, or snippet names. `setup-gov` is the reference.
+Plugin skills that shell out to the CLI follow a consistent pattern: read the toolkit catalog via `canon <domain> list --json`, match against project context, then execute the CLI with `CANON_NON_INTERACTIVE=1` so it skips prompts. Claude Code's tool permission dialog is the single confirmation gate. Skills never reimplement CLI logic or hardcode rule, stack, or snippet names. `target-setup` is the reference.
 
 ### The non-interactive variable answers a prompt rather than refusing it
 
@@ -155,9 +155,9 @@ The caller-supplied tier is what a dispatched worker reaches, and it exists beca
 
 ### Bundled references
 
-`setup-plugins` bundles `references/plugin-catalog.md`, which holds install data alone. `canon/context/claude-plugin/skill-strategy.md` argues the install-versus-author decision and is not reachable from the shipped file by design, since a `references/` file is read by a session running in a target project, where no `canon/context/` path resolves.
+`target-setup` bundles `references/detect.md`, `references/indexes.md`, and `references/verify.md`, each holding the per-phase procedure its body routes to. A `references/` file is read by a session running in a target project, where no `canon/context/` path resolves, so nothing in one cites the reasoning behind it.
 
-It is recorded here instead, on a surface that never ships, for the maintainer editing the catalog.
+That reasoning is recorded here instead, on a surface that never ships, for the maintainer editing a reference. `setup-plugins` carried the same split with a `references/plugin-catalog.md` holding install data alone, and `canon/context/claude-plugin/machine-plugins.md` keeps that catalog now that the skill has retired.
 
 ## Procedures defined once and cited
 

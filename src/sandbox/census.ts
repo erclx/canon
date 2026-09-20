@@ -71,9 +71,9 @@ export function listSkills(root: string): string[] {
  *
  * `<category>-<command>` is the rule `canon/context/sandbox/coverage.md` states, and it
  * alone pairs 29 of 54 skills. The bare `<command>` fallback is what reaches the
- * rest: `claude/setup-init.sh` drives the `setup-init` skill, not a
- * `claude-setup-init` that does not exist. Stating one spelling and shipping two
- * is what let the audit report a paired skill as unpaired.
+ * rest: `claude/target-setup.sh` drives the `target-setup` skill, not a `claude-target-setup` that
+ * does not exist. Stating one spelling and shipping two is what let the audit
+ * report a paired skill as unpaired.
  *
  * Returns undefined for a scenario driving no skill at all, which is every
  * `infra/` and `tooling/` scenario. Those exercise a CLI domain rather than a

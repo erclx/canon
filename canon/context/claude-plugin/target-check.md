@@ -22,7 +22,7 @@ Five answer from a verb that already exists and one answers from nothing.
 
 ## Why the harness ships as a stated gap
 
-`canon claude` carries `init`, `sync`, `setup`, `seeds`, `list`, `routing`, `plugin-update`, and `skills` with `drift`, `audit`, `reach`, and `rank` beneath it, and none of them answers whether a target's hooks fire, whether `.claude/settings.json` registers them, or which plugin version that target's sessions load. `canon claude skills drift` comes nearest and reads this toolkit's own history against a ref, which says what moved upstream rather than what a target holds.
+`canon claude` carries `init`, `sync`, `target-setup`, `seeds`, `list`, `routing`, `plugin-update`, and `skills` with `drift`, `audit`, `reach`, and `rank` beneath it, and none of them answers whether a target's hooks fire, whether `.claude/settings.json` registers them, or which plugin version that target's sessions load. `canon claude skills drift` comes nearest and reads this toolkit's own history against a ref, which says what moved upstream rather than what a target holds.
 
 The seeds domain reads `.claude/settings.json` and every `.claude/hooks/*.sh` as seed entries, so a `matching` verdict there says the bytes match what ships. It says nothing about whether the harness those files configure is wired, which is the part that goes unread.
 
@@ -37,7 +37,7 @@ The same asymmetry is why an unread domain is a third state beside current and b
 ## Where it sits against the neighbors
 
 - `canon-operator` routes one plain-language intent to the command or skill that satisfies it, and diagnoses along the way. This skill answers one fixed question across a fixed domain list and routes nothing, which is what makes its output comparable between two targets and between two waves.
-- `setup-init` scaffolds a project that holds nothing. This one reads a project that already holds something.
+- `target-setup` scaffolds a project that holds nothing. This one reads a project that already holds something.
 - `seed-sync` proposes per-section seed edits. This one counts seed states and names that skill.
 
 ## Open

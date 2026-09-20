@@ -41,7 +41,7 @@ The stack carries those two rules and nothing else. `300-testing-ts` and `310-zo
 
 `--add 360-security-server,370-database` still works as a route onto a `node` target. The flag layers on any stack, so it stays the way to reach a rule no stack names rather than the way to reach these two specifically, which `node-server` now names directly.
 
-Nothing detects the stack. `setup-init` and `setup-gov` both pick by matching a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `node-server` is therefore named deliberately until one of those skills carries a rule for the backend case, which needs a decision about what evidence marks a project as one.
+Nothing detects the stack. `target-setup` picks by matching a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `node-server` is therefore named deliberately until that skill carries a rule for the backend case, which needs a decision about what evidence marks a project as one.
 
 ### The extras flag layers rather than defines
 

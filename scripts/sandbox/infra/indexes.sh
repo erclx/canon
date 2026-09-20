@@ -66,7 +66,7 @@ seed_bare_folder() {
   cat <<'EOF' >CLAUDE.md
 # Project
 
-Sample project for testing the setup-indexes skill.
+Sample project for testing the indexes phase of the setup skill.
 
 ## Rules
 
@@ -123,7 +123,7 @@ seed_no_candidate() {
   cat <<'EOF' >CLAUDE.md
 # Project
 
-Sample project for testing the setup-indexes skill on an empty scan.
+Sample project for testing the indexes phase of the setup skill on an empty scan.
 EOF
 }
 
@@ -146,7 +146,7 @@ stage_setup() {
   log_info "path        : passes a positional file and confirms walk-up"
   log_info "lint-staged : stages sibling, regen stages regenerated index"
   log_info "no-stage    : same as lint-staged but --no-stage skips git add"
-  log_info "bootstrap   : seeds raw markdown for the setup-indexes skill"
+  log_info "bootstrap   : seeds raw markdown for the indexes phase of the setup skill"
   log_info "no-candidate: bare CLAUDE.md, no markdown-heavy folder to bootstrap"
 
   select_or_route_scenario "Which scenario?" "regen" "nested" "dry-run" "json" "opt-out" "path" "lint-staged" "no-stage" "bootstrap" "no-candidate"
@@ -231,13 +231,13 @@ stage_setup() {
   "bootstrap")
     seed_bare_folder
     log_step "Seeded docs/ with 5 raw markdown files (no frontmatter, no index.md)"
-    log_info "Open Claude in this sandbox and invoke /setup-indexes"
+    log_info "Open Claude in this sandbox and invoke /canon:target-setup indexes"
     log_info "The skill should detect docs/ as a candidate and walk the bootstrap flow"
     ;;
   "no-candidate")
     seed_no_candidate
     log_step "Seeded a bare CLAUDE.md with no markdown-heavy folder anywhere"
-    log_info "Open Claude in this sandbox and invoke /setup-indexes"
+    log_info "Open Claude in this sandbox and invoke /canon:target-setup indexes"
     log_info "The skill should report an empty scan and skip straight to the convention seed offer"
     ;;
   *)

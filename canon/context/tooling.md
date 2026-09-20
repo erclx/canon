@@ -179,7 +179,7 @@ Every stack-name lookup in `src/commands/tooling.ts` (`prepare`, `promptForStack
 
 ## Common workflows
 
-Bootstrap a new project with `canon init`, which installs base configs, Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` is the way to decline it. Neither standards nor snippets installs into a project, so neither carries a flag. The `setup-init` skill resolves the flags from project detection and runs the chain in one shot.
+Bootstrap a new project with `canon init`, which installs base configs, Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` is the way to decline it. Neither standards nor snippets installs into a project, so neither carries a flag. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
 
 Sync tooling with `canon tooling` and pick stack and path. Pass `--skip <stack>` to drop a layer from the resolved chain. A stack's reference doc reads through `canon tooling reference <stack>` and takes no part in sync.
 

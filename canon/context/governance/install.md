@@ -63,7 +63,7 @@ Commands that write files require confirmation before running, and `CANON_NON_IN
 
 ### Why `list` is TypeScript
 
-Bash cannot express the folder-entry match. A regex bash could apply against a rules array, `"[0-9]{3}-[a-z0-9-]+"`, matches nothing for a folder entry, and `base` reporting zero rules to `setup-gov`, which dedupes `--add` extras against that list, is the failure that shape would produce. Expanding the match in bash beside the resolver would also put the same rule-matching logic in two languages.
+Bash cannot express the folder-entry match. A regex bash could apply against a rules array, `"[0-9]{3}-[a-z0-9-]+"`, matches nothing for a folder entry, and `base` reporting zero rules to the `target-setup` skill, which dedupes `--add` extras against that list, is the failure that shape would produce. Expanding the match in bash beside the resolver would also put the same rule-matching logic in two languages.
 
 `gov list --json` carries `unreferenced` alongside `stacks` and `rules`, on every invocation rather than behind a flag. The verify stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
 

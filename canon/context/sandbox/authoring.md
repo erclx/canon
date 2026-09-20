@@ -164,6 +164,12 @@ An anchor arm that declares `use_anchor` and never calls `configure_sandbox_anch
 
 ## Gotchas
 
+### A green gate says nothing about whether an arm parses
+
+The Sandbox coverage stage counts scenarios declaring expectations without reading what they declare, so a malformed `expect.toml` passes `bun run check` and surfaces only under `canon sandbox check`. Parse a hand-edited arm directly before trusting a green gate over it.
+
+A `pattern` is a TOML literal string, which cannot hold an apostrophe at all, so fixture prose a pattern matches verbatim stays apostrophe-free rather than escaped. Shell-style `'"'"'` quoting inside one produces a file that does not parse while still reading as plausible, which is how a retarget pass shipped a broken declaration under a passing gate.
+
 ### Diff a fixture against what the real verb installs
 
 An injector that reproduces by hand what a real CLI verb installs drifts silently, and the cheap proof is running the verb into a scratch target and diffing the two trees. `SANDBOX_INJECT_GOV` follows this discipline already, running `canon gov install` rather than copying a source tree, so the sandbox cannot drift from what a target receives.
@@ -220,7 +226,7 @@ A `[[content]]` pattern carrying `(?i)` reports `invalid pattern` and fails the 
 
 ### A fixture modeling a timed heuristic has to outrun the window it is staged against
 
-A scenario staging a long-running process for an arm that judges it by waiting a fixed window and then checking whether the process is still alive races that window when the fixture sleeps the same duration. Two independently-scheduled sleeps of equal length finish in whichever order machine load happens to put them in, so the arm reads flaky on the one axis it exists to prove reliable. `claude:setup-smoke`'s `dev` and `preview` fixtures sleep three times the skill's five-second check window for this reason. Stage a timed fixture to outlast its check window by a wide margin rather than matching it.
+A scenario staging a long-running process for an arm that judges it by waiting a fixed window and then checking whether the process is still alive races that window when the fixture sleeps the same duration. Two independently-scheduled sleeps of equal length finish in whichever order machine load happens to put them in, so the arm reads flaky on the one axis it exists to prove reliable. The `dev` and `preview` fixtures on `claude:target-setup`'s `smoke-pass` and `smoke-fail` arms sleep three times the skill's five-second check window for this reason. Stage a timed fixture to outlast its check window by a wide margin rather than matching it.
 
 ### A refusal arm that stages nothing still owes a commit call the check
 

@@ -30,6 +30,6 @@ Without this skill, `canon indexes list --json` exists as a verb with nobody wra
 
 ## Out of scope
 
-- Regenerating or scaffolding an index, which `canon indexes regen` and the `setup-indexes` skill own
+- Regenerating or scaffolding an index, which `canon indexes regen` and the `target-setup` skill's `indexes` phase own
 - Reading a folder's contents once a hit names it, which is an ordinary file read rather than part of the lookup
-- Chaining this skill into `setup-indexes`'s bootstrap flow as a verification step. Left independent: `setup-indexes` already validates through `canon indexes regen --dry-run`, and a second skill call inside a bootstrap flow duplicates a check that already runs.
+- Chaining this skill into the `target-setup` skill's `indexes` phase as a verification step. Left independent: that phase already validates through `canon indexes regen --dry-run`, and a second skill call inside a bootstrap flow duplicates a check that already runs.

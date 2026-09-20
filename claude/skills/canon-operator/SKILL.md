@@ -1,6 +1,6 @@
 ---
 name: canon-operator
-description: Front door to the toolkit in a target project. Orients on the toolkit's own docs and live `canon` catalogs, then runs or routes any toolkit operation from a plain-language intent. Use when you want one entry point instead of picking a specific setup or sync skill, or when asked to "use the toolkit", "what can the toolkit do", "sync my standards", "install rules", or "help me set up this project". User-invoked only. Defers first-time scaffold to setup-init and seed drift to seed-sync.
+description: Front door to the toolkit in a target project. Orients on the toolkit's own docs and live `canon` catalogs, then runs or routes any toolkit operation from a plain-language intent. Use when you want one entry point instead of picking a specific setup or sync skill, or when asked to "use the toolkit", "what can the toolkit do", "sync my standards", "install rules", or "help me set up this project". User-invoked only. Defers first-time scaffold to setup and seed drift to seed-sync.
 disable-model-invocation: true
 ---
 
@@ -47,9 +47,9 @@ The two can name different rows, and a reply answers both rather than picking on
 - Anything in `superseded`: name which files and what replaced them, then hand off to `migration-superseded`. Both skills propose, so neither moves nor deletes the file
 - A folder in `unclaimed`: name it and the attribution it carries. No command moves it and the content may be the project's own, so the decision is the user's
 
-- First-time scaffold of a fresh project: hand off to `setup-init`
-- Governance rules for the project stack: hand off to `setup-gov`
-- Bootstrap the `index.md` system: hand off to `setup-indexes`
+- First-time scaffold of a fresh project: hand off to `target-setup`
+- Governance rules for the project stack: hand off to `target-setup`, which installs them alone on its `gov` phase
+- Bootstrap the `index.md` system: hand off to `target-setup`, which bootstraps it on its `indexes` phase
 - Seed or standards drift in `CLAUDE.md` or `.claude/` preambles: hand off to `seed-sync`
 - Install one snippet, standard, or rule: run the domain `install` command
 - Sync one domain or every installed domain: run `canon <domain> sync` or `canon sync`
@@ -104,5 +104,5 @@ The comparison needs the earlier report. When `## Diagnose` was skipped because 
 ## Boundaries
 
 - Run `canon`. Never reimplement its install or sync logic, and never edit managed files like rules, configs, or seeds by hand.
-- Hand off the deep flows. Do not duplicate `setup-init` detection or `seed-sync` part-diffing inline.
+- Hand off the deep flows. Do not duplicate `target-setup` detection or `seed-sync` part-diffing inline.
 - Resolve names from catalogs at runtime. A hardcoded name is a bug.

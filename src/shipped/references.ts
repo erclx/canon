@@ -210,7 +210,7 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
  *
  * Anchored on the trailing `\d{3}-[\w-]+\.md` rather than on the bare
  * `.claude/rules/` prefix, which is what keeps a folder mention carrying no
- * number, such as `create-rule`, `memory-review`, and `setup-gov` already
+ * number, such as `create-rule`, `memory-review`, and `target-setup` already
  * write correctly, from matching. The segment group between `rules/` and the
  * numbered file admits both a governance-namespace path
  * (`canon/core/055-scratch.md`) and a project-namespace one

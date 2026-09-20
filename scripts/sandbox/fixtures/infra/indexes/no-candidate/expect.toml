@@ -1,4 +1,4 @@
-# What a correct `/canon:setup-indexes` run leaves behind against a bare
+# What a correct `/canon:target-setup indexes` run leaves behind against a bare
 # CLAUDE.md with no markdown-heavy folder anywhere. Read by `canon sandbox
 # check`, which only asserts against what a run left behind and drives
 # nothing itself. The scan finds no candidate, so the skill skips straight
@@ -25,4 +25,4 @@ manual = [
 # excludes from the arm's asserted count.
 [[content]]
 path = "CLAUDE.md"
-pattern = '^# Project\n\nSample project for testing the setup-indexes skill on an empty scan\.\n$'
+pattern = '^# Project\n\nSample project for testing the indexes phase of the setup skill on an empty scan\.\n$'

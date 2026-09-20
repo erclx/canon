@@ -1,4 +1,4 @@
-# What a correct `/canon:setup-init` run leaves behind on the `fresh` arm. Read by
+# What a correct `/canon:target-setup` run leaves behind on the `fresh` arm. Read by
 # `canon sandbox check`. Patterns use TOML literal strings so a regex needs no
 # backslash escaping.
 #
@@ -42,8 +42,8 @@ absent = [
   ".claude/standards",
 ]
 
-# No `write_scope`. `canon init` writes a whole project scaffold and `setup-verify`
-# runs `bun install` behind it, so the narrowest glob admitting a correct run is
+# No `write_scope`. `canon init` writes a whole project scaffold and the verify
+# phase runs `bun install` behind it, so the narrowest glob admitting a correct run is
 # `**`. A first pass declared exactly that and asserted 7772 node_modules paths,
 # none of which can fail. A scope that cannot go red is the silent-green shape
 # the checker exists to prevent, so this arm makes no scope claim at all.
@@ -51,7 +51,7 @@ absent = [
 reply = ["base"]
 
 manual = [
-  "`setup-verify` runs and reports the base scripts alone. Unwired: the claim is about which commands were invoked, which the envelope does not carry",
+  "The verify phase runs and reports the base scripts alone. Unwired: the claim is about which commands were invoked, which the envelope does not carry",
   "The preview names each detected technology beside the file it was detected in. Semantic: this arm carries no framework evidence, so a correct preview reports an empty detection and no substring separates that from a preview that skipped the step",
   "The run reaches nothing outside the sandbox tree. Semantic: the install legitimately writes the whole tree, so no `write_scope` glob distinguishes a correct run from a wrong one and the claim has no mechanical form here",
 ]
