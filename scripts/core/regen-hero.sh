@@ -46,6 +46,21 @@ PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 ASSET_DIR="$PROJECT_ROOT/assets/captures"
 LISTED=10
 
+# `--check` fills every template into a temp folder and discards it, so a renamed
+# featured skill, an empty catalog, or an unresolved placeholder still fails a
+# branch while no frame file changes. Frames are refreshed after a merge rather
+# than committed by each branch, so a branch asks whether the regen can run and
+# never whether its output is current.
+OUT_DIR="$ASSET_DIR"
+case "${1:-}" in
+'') ;;
+--check) OUT_DIR="$(mktemp -d)" ;;
+*)
+  echo "regen-hero: unknown argument $1" >&2
+  exit 1
+  ;;
+esac
+
 # `bun src/cli.ts` rather than `canon`, since a globally linked binary resolves to
 # the main checkout no matter which worktree is running.
 catalog() {
@@ -97,7 +112,7 @@ done
 # fails the exec with E2BIG before any stage can report a stale count. A file
 # path is bounded whatever the catalogs grow to.
 PAYLOAD_DIR="$(mktemp -d)"
-trap 'rm -rf "$PAYLOAD_DIR"' EXIT
+trap 'rm -rf "$PAYLOAD_DIR"; [ "$OUT_DIR" = "$ASSET_DIR" ] || rm -rf "$OUT_DIR"' EXIT
 
 printf '%s' "$COUNTS_JSON" >"$PAYLOAD_DIR/counts.json"
 printf '%s' "$SKILLS_JSON" >"$PAYLOAD_DIR/skills.json"
@@ -109,12 +124,12 @@ printf '%s' "$COMMANDS_HELP" >"$PAYLOAD_DIR/commands-help.txt"
 printf '%s' "$TOKEN_CSS" >"$PAYLOAD_DIR/tokens.css"
 
 export PAYLOAD_DIR
-export ASSET_DIR LISTED PROJECT_ROOT
+export ASSET_DIR OUT_DIR LISTED PROJECT_ROOT
 
 bun --eval '
 const { readFileSync, readdirSync } = require("node:fs")
 
-const { PAYLOAD_DIR, ASSET_DIR, LISTED, PROJECT_ROOT } = process.env
+const { PAYLOAD_DIR, ASSET_DIR, OUT_DIR, LISTED, PROJECT_ROOT } = process.env
 
 const payload = (name) => readFileSync(PAYLOAD_DIR + "/" + name + ".json", "utf8")
 
@@ -438,6 +453,6 @@ for (const { template, out, tokens } of frames) {
     process.exit(1)
   }
 
-  await Bun.write(ASSET_DIR + "/" + out, html)
+  await Bun.write(OUT_DIR + "/" + out, html)
 }
 '

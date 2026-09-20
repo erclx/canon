@@ -197,12 +197,10 @@ export const STAGES: readonly Stage[] = [
     id: 'hero',
     label: 'Hero',
     checks: [
-      script('regen-hero.sh', 'Hero regen failed'),
       {
-        kind: 'drift',
-        pathspec: 'assets/captures/*.html',
-        failure:
-          'A generated frame drifted from the catalogs or the design source. Run bun run check, then canon capture assets/captures --selector .window --out assets/evidence, and commit each assets/captures/*.html with its .png and .stamp.',
+        kind: 'command',
+        argv: ['bash', 'scripts/core/regen-hero.sh', '--check'],
+        failure: 'Hero regen health check failed',
       },
       { kind: 'measure', measure: captureStamps },
     ],

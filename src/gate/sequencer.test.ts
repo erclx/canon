@@ -307,22 +307,13 @@ describe('the shipped stage table', () => {
     })
   })
 
-  it('should regenerate the hero frame from the catalogs before asserting it', () => {
+  it('should health check the hero regen without writing a frame', () => {
     const hero = STAGES.find((entry) => entry.id === 'hero')
 
     expect(hero?.checks[0]).toEqual({
       kind: 'command',
-      argv: ['bash', 'scripts/core/regen-hero.sh'],
-      failure: 'Hero regen failed',
-    })
-  })
-
-  it('should assert every generated frame for drift beside the regen', () => {
-    const hero = STAGES.find((entry) => entry.id === 'hero')
-
-    expect(hero?.checks[1]).toMatchObject({
-      kind: 'drift',
-      pathspec: 'assets/captures/*.html',
+      argv: ['bash', 'scripts/core/regen-hero.sh', '--check'],
+      failure: 'Hero regen health check failed',
     })
   })
 
