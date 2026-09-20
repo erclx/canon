@@ -78,6 +78,25 @@ describe('commandNamesFromHelp', () => {
     expect(commandNamesFromHelp(help)).toEqual(['init', 'gov', 'upgrade'])
   })
 
+  it('should read names from the plain form a pipe receives', () => {
+    const plain = [
+      'Usage: canon [command]',
+      '',
+      '  Commands:',
+      '',
+      '  Project',
+      '    init [path]        # Bootstrap a project',
+      '',
+      '  Domains',
+      '    gov [command]      # Governance commands',
+      '',
+      '  Sandbox:',
+      '    canon sandbox      # Interactive scenario picker',
+    ].join('\n')
+
+    expect(commandNamesFromHelp(plain)).toEqual(['init', 'gov'])
+  })
+
   it('should read names across group headings', () => {
     const grouped = [
       '│  Commands:',
