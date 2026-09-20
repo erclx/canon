@@ -1,3 +1,10 @@
+/* Seeded by `canon teach stylesheet` from the design source in
+   src/design/tokens.ts, and rewritten on every call. The tokens and the two
+   components below are the system this workspace renders in. Read a value
+   through its custom property rather than restating the hex, which is what
+   let one workspace fork the palette from every other. Add lesson rules to
+   course.css instead, which imports this file and is never rewritten. */
+
 @font-face {
   font-family: 'Noto Sans Mono';
   font-weight: 400;
