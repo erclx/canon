@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.102.0](https://github.com/erclx/canon/compare/v4.101.0...v4.102.0) (2026-09-20)
+
+
+### Features
+
+* **claude:** stop the ship cycle at memory capture ([#1760](https://github.com/erclx/canon/issues/1760)) ([04773f7](https://github.com/erclx/canon/commit/04773f7aec6dedaf62b998b5ec554cc251227dd2))
+* **standards:** start a spike small and name a track's folders ([#1754](https://github.com/erclx/canon/issues/1754)) ([d36454c](https://github.com/erclx/canon/commit/d36454cd33fec87529732fb8266043982f3edc14))
+* **tooling:** add a read-only diff verb beside sync ([#1758](https://github.com/erclx/canon/issues/1758)) ([46b2bf7](https://github.com/erclx/canon/commit/46b2bf78485613db052e301ba2300d7ea04fe0ef))
+* **tooling:** name shell files in base's shfmt verbs ([#1759](https://github.com/erclx/canon/issues/1759)) ([5043bc4](https://github.com/erclx/canon/commit/5043bc42ed4737ace786a3493c2fda59e71bca1d))
+* **web:** give the favicon its own color source ([#1755](https://github.com/erclx/canon/issues/1755)) ([c175ec5](https://github.com/erclx/canon/commit/c175ec5d43a093b45afd113f23ac1a82437773f2))
+
 ## [4.101.0](https://github.com/erclx/canon/compare/v4.100.0...v4.101.0) (2026-09-20)
 
 
