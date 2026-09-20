@@ -792,15 +792,16 @@ export async function archiveTask(
 
   await mkdir(destination, { recursive: true })
   await rename(from, to)
-  if (plan) {
-    const retargeted = retargetPlanLine(text, linkTo(destination, plan.to))
-    await writeFile(
-      to,
-      ready
-        ? retargetReadyLine(retargeted, `${linkTo(destination, ready.to)}/`)
-        : retargeted,
-    )
-  }
+  const rebased = rebaseRelativeLinks(text, dir, destination)
+  const retargeted = plan
+    ? retargetPlanLine(rebased, linkTo(destination, plan.to))
+    : rebased
+  await writeFile(
+    to,
+    ready
+      ? retargetReadyLine(retargeted, `${linkTo(destination, ready.to)}/`)
+      : retargeted,
+  )
 
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
   const regen = await regenOne(dir, { dryRun: false })
@@ -918,6 +919,69 @@ export function linkTo(taskDir: string, plan: string): string {
   return relative(taskDir, plan).split(sep).join('/')
 }
 
+const MARKDOWN_LINK_PATTERN = /(\]\()([^)\s]+)/g
+/** The capture group makes `split` keep each code span, at the odd positions. */
+const INLINE_CODE_PATTERN = /(`+[^`]*`+)/
+const BARE_ORIGIN_PATTERN =
+  /^((?:Plan|Ready|Groundwork|Intake):[ \t]*)([^\s[\]()]+)[ \t]*$/
+
+function isRelativeTarget(target: string): boolean {
+  return !/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(target)
+}
+
+function rebaseTarget(target: string, fromDir: string, toDir: string): string {
+  if (!isRelativeTarget(target)) return target
+
+  const suffixAt = target.search(/[#?]/)
+  const path = suffixAt === -1 ? target : target.slice(0, suffixAt)
+  const suffix = suffixAt === -1 ? '' : target.slice(suffixAt)
+  if (path === '') return target
+
+  const rebased = relative(toDir, resolve(fromDir, path)).split(sep).join('/')
+  const slash = path.endsWith('/') ? '/' : ''
+
+  return `${rebased}${slash}${suffix}`
+}
+
+/**
+ * Re-resolves every relative link in a task written for `fromDir` so it reads
+ * the same target from `toDir`. Every link rather than the four origin lines,
+ * since the body breaks one folder short the same way. Fenced samples stay
+ * verbatim, and a URL, an anchor, or a rooted path names nothing depth changes.
+ */
+export function rebaseRelativeLinks(
+  text: string,
+  fromDir: string,
+  toDir: string,
+): string {
+  const lines = text.split('\n')
+  const fenced = fenceMask(lines)
+
+  return lines
+    .map((line, index) => {
+      if (fenced[index]) return line
+
+      const bare = BARE_ORIGIN_PATTERN.exec(line)
+      if (bare?.[2].includes('/')) {
+        return `${bare[1]}${rebaseTarget(bare[2], fromDir, toDir)}`
+      }
+
+      return line
+        .split(INLINE_CODE_PATTERN)
+        .map((part, position) =>
+          position % 2 === 1
+            ? part
+            : part.replace(
+                MARKDOWN_LINK_PATTERN,
+                (_whole: string, open: string, target: string) =>
+                  `${open}${rebaseTarget(target, fromDir, toDir)}`,
+              ),
+        )
+        .join('')
+    })
+    .join('\n')
+}
+
 async function clearPriorityRow(dir: string, stem: string): Promise<boolean> {
   const path = join(dir, 'priority.md')
   if (!existsSync(path)) return false
@@ -984,7 +1048,10 @@ export async function declineTask(
   await rename(from, to)
 
   const date = new Date().toISOString().slice(0, 10)
-  const declined = insertDeclinedLine(text, declineLine(reason, by, date))
+  const declined = insertDeclinedLine(
+    rebaseRelativeLinks(text, dir, destination),
+    declineLine(reason, by, date),
+  )
   const final = plan
     ? retargetPlanLine(declined, linkTo(destination, plan.to))
     : declined
