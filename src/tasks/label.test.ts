@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { type LabelOutcome, nextLabel } from '@/tasks/label'
+import { type LabelOutcome, claimLabel, nextLabel } from '@/tasks/label'
 
 let ROOT: string
 
@@ -157,5 +157,71 @@ describe('nextLabel', () => {
 
     assertOk(outcome)
     expect(outcome.label).toBe('v05.1')
+  })
+})
+
+describe('claimLabel', () => {
+  it('should return different labels for two claims taken back to back', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v03.2-something')
+
+    const first = await claimLabel(ROOT)
+    const second = await claimLabel(ROOT)
+
+    assertOk(first)
+    assertOk(second)
+    expect(first.label).toBe('v03.3')
+    expect(second.label).toBe('v03.4')
+  })
+
+  it('should return different labels for claims taken at once', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v03.2-something')
+
+    const outcomes = await Promise.all([
+      claimLabel(ROOT),
+      claimLabel(ROOT),
+      claimLabel(ROOT),
+    ])
+
+    const labels = outcomes.map((outcome) => outcome.ok && outcome.label)
+    expect(new Set(labels).size).toBe(3)
+  })
+
+  it('should count a reservation with no file behind it toward the next scan', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+    mkdirSync(join(ROOT, '.canon', 'ordinal-locks', 'v05.2'), {
+      recursive: true,
+    })
+
+    const outcome = await claimLabel(ROOT)
+
+    assertOk(outcome)
+    expect(outcome.label).toBe('v05.3')
+  })
+
+  it('should report the claim in the record and leave a bare read unclaimed', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+
+    const claimed = await claimLabel(ROOT)
+    const peeked = await nextLabel(ROOT)
+
+    assertOk(claimed)
+    assertOk(peeked)
+    expect(claimed.claimed).toBe(true)
+    expect(peeked.claimed).toBe(false)
+    expect(peeked.label).toBe('v01.1')
+  })
+
+  it('should refuse a board that does not exist', async () => {
+    const outcome = await claimLabel(ROOT)
+
+    expect(outcome.ok === false && outcome.reason).toBe('no-board')
+  })
+
+  it('should refuse as contended once every attempt loses its reservation', async () => {
+    await seed(join(ROOT, '.canon', 'tasks'), 'v01.0-first')
+
+    const outcome = await claimLabel(ROOT, { reserve: async () => false })
+
+    expect(outcome.ok === false && outcome.reason).toBe('label-contended')
   })
 })

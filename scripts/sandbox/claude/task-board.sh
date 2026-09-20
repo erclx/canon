@@ -32,7 +32,7 @@ stage_setup() {
     log_info "         Check it with: canon sandbox check claude:task-board create"
     log_info "         A v04.0 task carrying both frontmatter fields, a Plan: link"
     log_info "         relative to the board, an open outcome, and a test strategy."
-    log_info "         The label is proposed from the board, not from a version file."
+    log_info "         The label is claimed from the board, not from a version file."
     log_info "         The three existing tasks survive untouched."
     log_info "         Two expectations need a reader and report as unchecked."
     ;;

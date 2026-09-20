@@ -297,7 +297,7 @@ The `sessions` field carries `{name, kind, id}` per holder rather than a bare na
 
 Phase labels stay inside the task board, in both the filename and the title. They never appear in PR titles or bodies, review comments, issues, commit messages, or git tags. What catches a leak on the way out is the scan in `standards/publish.md`, which reads the label rule from `standards/versioning.md` beside it. See that file for the rules and the why.
 
-A phase label absent from the live board can already belong to an archived or a declined task, since archiving or declining moves the file to `.canon/tasks/archive/` or `.canon/tasks/declined/` under its own name. `canon tasks next-label` is what `task-board` Step 2 calls for the next one: it reads the live board, the archive, and the declined folder together and reports the true maximum, since a board-only scan can return a duplicate an archived sibling already holds. It reports rather than gates, so two sessions calling it in the same second can still land on the same answer.
+A phase label absent from the live board can already belong to an archived or a declined task, since archiving or declining moves the file to `.canon/tasks/archive/` or `.canon/tasks/declined/` under its own name. `canon tasks next-label` is what `task-board` Step 2 calls for the next one: it reads the live board, the archive, and the declined folder together and reports the true maximum, since a board-only scan can return a duplicate an archived sibling already holds. Bare it reports rather than gates, so two sessions calling it in the same second can still land on the same answer, and `--claim` is what closes that: it reserves the label under `.canon/ordinal-locks/` and counts every reservation in the scan.
 
 ## Gotchas
 

@@ -29,13 +29,13 @@ Accept work whose origin is the conversation itself only when the user says so e
 
 ### Step 2: allocate the phase label
 
-Run `canon tasks next-label --json` and take its `label` field. The verb reads the live board and its `archive/` sibling together, so the label it returns accounts for what the board alone no longer shows.
+Run `canon tasks next-label --claim --json` and take its `label` field. The verb reads the live board and its `archive/` sibling together, so the label it returns accounts for what the board alone no longer shows, and `--claim` reserves it under `.canon/ordinal-locks/` so a second session filing at the same moment gets the next one. Branch on the record's `reason` rather than the exit: `label-contended` means re-run the claim, and a usage error from an unknown `--claim` means the installed binary predates the flag, so report the verb as unavailable rather than falling back to a bare read, which reopens the race.
 
 Do not derive the label from a version file. `${CLAUDE_SKILL_DIR}/../../standards/versioning.md` permits free renumbering, so the verb's two folders are the only surface that knows what a label currently means.
 
 ### Step 3: write the file
 
-Write `.canon/tasks/vXX.Y-<slug>.md` following the format in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Include a link line only when the file or folder it names exists. A link to a plan nobody has written yet is the broken pointer the archive rules exist to prevent.
+Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file first if a session ever stubbed it, following the format in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Include a link line only when the file or folder it names exists. A link to a plan nobody has written yet is the broken pointer the archive rules exist to prevent.
 
 Write `Plan:`, `Groundwork:`, and `Intake:` as markdown links relative to `.canon/tasks/`, as in `Plan: [feature-<slug>](../plans/feature-<slug>.md)`. Leave `Issue:` a bare `#NNN`. A task written in the older bare-path form still parses, so it costs the board a clickable line rather than an archive, but it leaves the board in two shapes for every reader after.
 

@@ -13,7 +13,12 @@ import {
   type PlanCitations,
   planCitations,
 } from '@/tasks/archive'
-import { type LabelOutcome, nextLabel } from '@/tasks/label'
+import {
+  type LabelOutcome,
+  type LabelRefused,
+  claimLabel,
+  nextLabel,
+} from '@/tasks/label'
 import { listTasks } from '@/tasks/list'
 import {
   type Claim,
@@ -122,6 +127,7 @@ interface ListCommandOptions {
 
 interface NextLabelCommandOptions {
   readonly json?: boolean
+  readonly claim?: boolean
   readonly root?: string
 }
 
@@ -503,6 +509,7 @@ export function register(program: Command): void {
     )
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--claim', 'Reserve the label so a second claim gets another')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
     .addHelpText(
       'after',
@@ -515,14 +522,18 @@ export function register(program: Command): void {
         'Exit codes:',
         '  0  the label is derived',
         '  1  refused with no-board',
+        '  2  refused with label-contended, on --claim only',
         '',
-        'It reports and never writes. Two sessions calling it in the same',
-        'second can still take the same answer, since the board is',
-        'gitignored files rather than a store with a lock.',
+        'Bare, it reports and never writes, so two sessions calling it in the',
+        'same second can take the same answer. --claim reserves the label',
+        'under .canon/ordinal-locks/ and counts every reservation in the',
+        'scan, so two claims return different labels. A dead claim leaves a',
+        'gap, which standards/versioning.md permits.',
         '',
         'Examples:',
         '  canon tasks next-label',
         '  canon tasks next-label --json',
+        '  canon tasks next-label --claim --json',
         '',
       ].join('\n'),
     )
@@ -864,9 +875,13 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
 async function runNextLabel(opts: NextLabelCommandOptions): Promise<number> {
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await nextLabel(root)
+  const outcome = opts.claim ? await claimLabel(root) : await nextLabel(root)
 
   return reportNextLabel(outcome, opts.json ?? false, root)
+}
+
+function refusalExit(outcome: LabelRefused): number {
+  return outcome.reason === 'label-contended' ? 2 : 1
 }
 
 function reportNextLabel(
@@ -879,14 +894,14 @@ function reportNextLabel(
       process.stdout.write(
         `${JSON.stringify({ ok: false, reason: outcome.reason, message: outcome.message })}\n`,
       )
-      return 1
+      return refusalExit(outcome)
     }
 
     intro('canon tasks next-label')
     logStep('Refused')
     logError(outcome.message)
     outro()
-    return 1
+    return refusalExit(outcome)
   }
 
   if (emitJson) {
