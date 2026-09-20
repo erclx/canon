@@ -327,19 +327,21 @@ canon tasks validate --json
 
 Seven checks run. Plan and Collisions reach one half each of the `## Run now` test the board standard states. Mapping and Grouping test the folder contract and hold for every group, and Shape holds for every group too, ahead of the four. Ordering reaches only the `## Needs a plan` rows, and Blockers reaches every row outside `## Run now`:
 
-| Check      | What it reports                                                                                                         |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Shape      | A row whose cell count disagrees with its table's header, or one stranded behind a table a blank line already closed    |
-| Plan       | A `## Run now` row whose Plan column carries no link, resolves to no file, or disagrees with the task's own line        |
-| Mapping    | A row or backlog line naming no task file                                                                               |
-| Grouping   | A task carrying a row in more than one readiness group, or on both surfaces                                             |
-| Ordering   | A `## Needs a plan` row whose stated position disagrees with where it actually sits, or which states no position at all |
-| Collisions | Two `## Run now` rows whose Touches columns name a path in common                                                       |
-| Blockers   | A parked row whose blocker has stopped holding, whose cited task resolves nowhere, or whose cited task was declined     |
+| Check      | What it reports                                                                                                                                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shape      | A row whose cell count disagrees with its table's header, or one stranded behind a table a blank line already closed                                                                                                 |
+| Plan       | A `## Run now` row whose Plan column carries no link, resolves to no file, or disagrees with the task's own line, a `## Needs a plan` row whose task cites a live plan, or an `## Up next` row whose task cites none |
+| Mapping    | A row or backlog line naming no task file                                                                                                                                                                            |
+| Grouping   | A task carrying a row in more than one readiness group, or on both surfaces                                                                                                                                          |
+| Ordering   | A `## Needs a plan` row whose stated position disagrees with where it actually sits, or which states no position at all                                                                                              |
+| Collisions | Two `## Run now` rows whose Touches columns name a path in common                                                                                                                                                    |
+| Blockers   | A parked row whose blocker has stopped holding, whose cited task resolves nowhere, or whose cited task was declined                                                                                                  |
 
 Shape runs before any other check reads a row, since a row failing it carries no dependable fields for the rest to check. A blank or prose line closes the table above it, so the walk treats the next pipe line as a fresh header candidate rather than as a continuation. That candidate counts as a header only when the line behind it is a separator carrying the same cell count, and one that fails is `row-untabled`, stranded behind a table that already closed. Cell count still has to match the header on every row that clears that test, and a row whose count disagrees is `row-misshapen`, the shape a dropped pipe or a merged column produces.
 
 The Plan check reads the row and the task file both, because the two are written by different hands and only the task's own `Plan:` line reaches the archive. A row carrying a plan whose task states none is `plan-uncited`, and a pair naming two different plans is `plan-mismatched`. Both sides resolve against the board and against the project root before they compare, so a row writing `../plans/x.md` and a task writing `.canon/plans/x.md` name one file rather than two.
+
+The other two groups have no Plan column, so the same check reads the task file's own `Plan:` line against what the group name claims. A `## Needs a plan` row whose task cites a plan that sits live on disk is `plan-parked`, since the group says no such plan exists and the row is either misplaced or its plan is stale and belongs in the archive. An `## Up next` row whose task cites no live plan is `plan-absent`, since that group says one is written. A plan already archived, or a cited path with no file behind it, reads as not live on both sides. A row whose task file is gone is left to `task-unresolved`.
 
 Mapping spans two surfaces, because a task sits on `priority.md` when it would plausibly be planned soon and on `backlog.md` otherwise. A row or a backlog line naming no task file is `task-unresolved`, and a file both surfaces name is `row-duplicated` for the reason a task in two groups is: it claims two things about itself and only one can hold. A task file neither surface names is `unplaced` rather than a finding, since that is the normal state between a session filing it and a live orchestrator placing it on the board. One check across both is what lets a task move between them without the move reading as a dropped file.
 

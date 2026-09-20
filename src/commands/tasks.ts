@@ -218,6 +218,7 @@ export function register(program: Command): void {
         '',
         'Checks:',
         '  every Run now row points at a plan file that resolves',
+        '  no Needs a plan row has a live plan, and every Up next row has one',
         '  every task file carries a board row or a backlog line, never both',
         '  no task carries more than one row',
         '  no two Run now rows touch the same file',
