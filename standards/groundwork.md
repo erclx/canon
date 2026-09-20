@@ -130,9 +130,15 @@ Each spike carries four things:
 
 Cost is a report rather than a limit, and it is what makes the next spike estimable before anyone commits to it. Record it even when it comes to a single read.
 
-A spike also leaves files behind, and they split on whether the track cites them rather than on whether they are markdown. An input the run reads, being a fixture page, an arm script, or a copied asset, is re-runnable and cited by nothing, so it stays outside the track wherever the surface driving the spike puts it. Evidence the record cites, being a recording, a render, or a frame pulled from one, is what a later reader opens to check a claim, so it lives in `evidence/` inside the track beside the file citing it. Name the split rather than the file types, which is what keeps this from going stale on the next kind of artifact a spike produces.
+Start a spike against a sample and scale up only once the sample shows the method works. Bound the sample on all three of input size, duration, and spend, since fifty minutes of audio is a runtime and a bill before it is a file size, and three minutes of it usually shows whether the pipeline runs at all. The same holds for a dataset, an image set, or a batch of queries. Record the sample's bounds and the figure for the full input in the spike, so a reader can tell what the result was measured on and what the scale-up costs. The rule reaches only a track, since that is the surface that reads this standard, and nothing checks that a spike ran small first, so it holds only while a session reads it.
 
-`evidence/` takes no number, since numbering is the read order over the files a reader opens in sequence and an artifact is reached from the claim that cites it instead.
+A spike also leaves files behind, and they split on whether a later reader needs the file to check a claim rather than on whether it is markdown or re-runnable. A file a reader opens to verify how a result was produced or what it showed lives inside the track. A file that is only bulk input, such as a large fixture or a copied asset, stays outside it wherever the surface driving the spike puts it. Three subfolders inside the track carry the first kind, and none takes a number, since numbering is the read order over the files a reader opens in sequence and these are reached from the claim that cites them instead:
+
+- `evidence/`: what a run produced and the record cites, being a recording, a render, or a frame pulled from one, beside the file citing it.
+- `scripts/`: the arm scripts and harnesses a spike ran. An arm script is re-runnable, and it is also what a reader opens to check the method, so this refines the earlier split, which sorted on re-runnable alone, and does not contradict it.
+- `clones/`: checkouts and copies of outside material a claim rests on, kept small enough to hold in the folder. A checkout too large to keep is cited by its address and commit instead.
+
+`spikes/`, `web/`, and `research/` were considered and folded into these, so do not reopen them. A spike's files sit under the three above, and a fetched page belongs in `clones/`. The `web/` case is the arguable one, since a screenshot of a reference site could sit apart, and it folds into `evidence/` because that is where a cited artifact already lives.
 
 Reach for a test harness the project already carries before building one. A track needing an experiment no existing harness can express has found a finding, and it belongs in the folder rather than in a new abstraction.
 

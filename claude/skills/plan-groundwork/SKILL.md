@@ -21,7 +21,7 @@ Read `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md` before writing any file
 
 - Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source changes, a standard, a rule, and a reference doc all live outside that folder, so this one rule forbids every one of them.
 - One exception, at close only: write one task file recording what the track concluded.
-- A second exception, for what a spike reads: write an input under `.canon/tmp/runs/groundwork-fixtures/<slug>/`. Keep it out of `.canon/groundwork/` so mode detection never matches a fixture as a track. A fixture a headless run is pointed at goes outside the repository instead, per the rule in `## Running a spike`.
+- A second exception, for what a spike reads as bulk input: write a large fixture under `.canon/tmp/runs/groundwork-fixtures/<slug>/`. Keep it out of `.canon/groundwork/` so mode detection never matches a fixture as a track. A fixture a headless run is pointed at goes outside the repository instead, per the rule in `## Running a spike`. An arm script and a checkout a claim rests on are not fixtures, and go inside the track under `scripts/` and `clones/`, per the standard.
 - What a spike produces stays inside the track rather than joining the two exceptions above: write evidence a spike file cites under `.canon/groundwork/<nn>-<slug>/evidence/`, which the first rule already permits. Mode detection matches entries at the top level of the tracks directory, so the sibling the fixtures rule guards against cannot be a folder nested inside a track, and the scratch path holds only what can be deleted without loss, which a recording a finding rests on is not.
 - A `draft-and-pick` run invoked from inside a live track follows its own branch for this, writing to `evidence/` here rather than `.canon/tmp/<slug>/`.
 - Reading is not restricted. External research is in scope, so read documentation, comparable projects, and papers whenever a live question needs them.
@@ -33,12 +33,13 @@ Read `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md` before writing any file
 A track may run an experiment to settle an open question without stopping to ask. What it takes depends on what the experiment does.
 
 - Reading or computing: run it. Unrestricted reading already covers this, and it is what most spikes turn out to be.
+- Anything that processes an input: start against a sample and scale up after it works, per the sample rule in the standard's spikes section, which bounds it on size, duration, and spend.
 - Writing a fixture this session reads or provisions itself: run it, under the fixtures path above. Provisioning is the usual blocker rather than spend, and it costs nothing.
 - Spawning a billed headless session: run up to three, then ask before spawning more. The bound is a run count rather than a budget, because a headless run reports its total cost only after it finishes, so a dollar ceiling is reportable and not enforceable while a run count is checkable before spawning.
 
 A fixture a headless run is pointed at goes outside the repository, under `mktemp -d`, and never under `.canon/tmp/`. A session started anywhere beneath the project root loads that project's `CLAUDE.md` and `.claude/rules/` through the ancestor chain, so an in-repo fixture measures the repository instead of the arm. Record the fixture as contaminated and re-run it outside if this is discovered after the fact, because the result reads as evidence either way.
 
-Record method, result, measured cost, and caveats in `08-spikes.md`. Put whatever the run produced that the record cites in `evidence/` beside it, so a reader checking a claim opens the artifact rather than taking the prose for it. Reach for a test harness the project already carries before building one, and copy how it isolates its fixture rather than only what it asserts.
+Record method, result, measured cost, and caveats in `08-spikes.md`. Put whatever the run produced that the record cites in `evidence/` beside it, so a reader checking a claim opens the artifact rather than taking the prose for it, and keep the arm scripts in `scripts/`. Reach for a test harness the project already carries before building one, and copy how it isolates its fixture rather than only what it asserts.
 
 ## Step 1: detect the mode
 
