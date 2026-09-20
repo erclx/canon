@@ -18,9 +18,9 @@ packages = [
 
 [scripts]
 "check:spell" = "cspell '**' '.*/**' '.*' --no-progress --color --show-context"
-"check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --diff --indent 2 scripts/"
+"check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --diff --indent 2 {} +"
 "check:shell" = "find scripts -name '*.sh' -exec shellcheck --severity=warning {} +"
-"format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --write --indent 2 scripts/"
+"format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --write --indent 2 {} +"
 "prepare" = "husky"
 "check" = "./scripts/verify.sh"
 
