@@ -1,0 +1,87 @@
+---
+/**
+ * The social card as a route the project keeps, rather than a scratch page a
+ * render deletes. `canon capture` drives it through the server this config
+ * serves, so the composition reads the project's own stylesheet, tokens and
+ * fonts instead of carrying typed copies of each. Renaming the project is then
+ * an edit to one string here and a re-capture, not another pass through the
+ * pick loop with an operator in it.
+ *
+ * `canon:draft-identity` writes the picked composition into the `.card`
+ * element below and leaves everything around it alone. What ships is a working
+ * placeholder, so the route serves before any pick has been taken.
+ *
+ * The card is declared at half of 1200x630. `canon capture` opens every page at
+ * a fixed 2x device scale factor and screenshots the element at that scale, so
+ * a 600x315 element is what lands the captured PNG on the literal target size.
+ * Declaring it at 1200x630 captures at 2400x1260.
+ *
+ * `card.config.mjs` is the only config whose page router reaches this file, and
+ * `scripts/check-card-exclusion.sh` fails a build that carries the marker
+ * below, which is what keeps the route out of the published site.
+ */
+import '@/styles/global.css'
+
+// Retarget the import above when this project keeps its global stylesheet
+// somewhere else. An unresolved path refuses the card server by name, which is
+// the loud direction: a card captured against no stylesheet renders as an
+// unstyled box and reports success.
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Social card</title>
+    <!-- Read by scripts/check-card-exclusion.sh. A build carrying this tag
+         published the card route. Do not reword it. -->
+    <meta name="og-card-marker" content="og-card-marker" />
+    <style>
+      body {
+        margin: 0;
+      }
+      .card {
+        box-sizing: border-box;
+        width: 600px;
+        height: 315px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 3rem;
+        /* Written as rgb() rather than hex so the shipped-reference gate does
+           not read a six-digit hex fallback as a pull request number. */
+        background: var(--color-ground, rgb(255 255 255));
+        color: var(--color-ink, rgb(17 17 17));
+        font-family: var(--font-body, system-ui, sans-serif);
+      }
+      .mark {
+        width: 64px;
+        height: 64px;
+      }
+      .title {
+        margin: 0;
+        font-size: 2.25rem;
+        line-height: 1.1;
+      }
+      .tagline {
+        margin: 0;
+        font-size: 1.125rem;
+        opacity: 0.75;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <svg
+        class="mark"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-label="Project mark"
+      >
+        <rect width="64" height="64" rx="12" fill="currentColor"></rect>
+      </svg>
+      <h1 class="title">REPLACE_WITH_PROJECT_NAME</h1>
+      <p class="tagline">REPLACE_WITH_PROJECT_TAGLINE</p>
+    </div>
+  </body>
+</html>
