@@ -19,7 +19,7 @@ Rules follow a numbering scheme by band, so a new rule's number states its domai
 | `100–199` | lang (TypeScript, Python, etc.)                                                                                                                                                   |
 | `200–299` | framework (React, Tailwind, FastAPI, etc.)                                                                                                                                        |
 | `300–399` | lib (testing libs, Zod, Pydantic, security, etc.)                                                                                                                                 |
-| `400–499` | ui (UI copy, accessibility, forms, UX completeness, surface capture, link behavior)                                                                                               |
+| `400–499` | ui (UI copy, interface casing, accessibility, forms, UX completeness, surface capture, link behavior)                                                                             |
 | `500–599` | claude (markdown prose, markdown mechanics, .claude/ context, wireframe, canonical-doc, task-board, learning workspace, session map, skill, readme, rule, and standard authoring) |
 | `700–799` | ci (GitHub Actions workflow files)                                                                                                                                                |
 
