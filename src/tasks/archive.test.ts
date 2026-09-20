@@ -298,6 +298,14 @@ describe('rebaseRelativeLinks', () => {
     expect(rebaseRelativeLinks(text, FROM, TO)).toBe(text)
   })
 
+  it('should leave a link inside an inline code span alone', () => {
+    const text = 'Write `[x](../a.md)` as shown, then see [y](../b.md).\n'
+
+    expect(rebaseRelativeLinks(text, FROM, TO)).toBe(
+      'Write `[x](../a.md)` as shown, then see [y](../../b.md).\n',
+    )
+  })
+
   it('should leave absolute urls, anchors, and rooted paths alone', () => {
     const text =
       '[a](https://example.com/x) [b](#section) [c](/abs/path.md) [d](mailto:a@b.c)\n'

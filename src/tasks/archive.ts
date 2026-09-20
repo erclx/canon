@@ -920,6 +920,8 @@ export function linkTo(taskDir: string, plan: string): string {
 }
 
 const MARKDOWN_LINK_PATTERN = /(\]\()([^)\s]+)/g
+/** The capture group makes `split` keep each code span, at the odd positions. */
+const INLINE_CODE_PATTERN = /(`+[^`]*`+)/
 const BARE_ORIGIN_PATTERN =
   /^((?:Plan|Ready|Groundwork|Intake):[ \t]*)([^\s[\]()]+)[ \t]*$/
 
@@ -964,11 +966,18 @@ export function rebaseRelativeLinks(
         return `${bare[1]}${rebaseTarget(bare[2], fromDir, toDir)}`
       }
 
-      return line.replace(
-        MARKDOWN_LINK_PATTERN,
-        (_whole: string, open: string, target: string) =>
-          `${open}${rebaseTarget(target, fromDir, toDir)}`,
-      )
+      return line
+        .split(INLINE_CODE_PATTERN)
+        .map((part, position) =>
+          position % 2 === 1
+            ? part
+            : part.replace(
+                MARKDOWN_LINK_PATTERN,
+                (_whole: string, open: string, target: string) =>
+                  `${open}${rebaseTarget(target, fromDir, toDir)}`,
+              ),
+        )
+        .join('')
     })
     .join('\n')
 }
