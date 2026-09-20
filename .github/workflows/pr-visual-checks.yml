@@ -149,6 +149,11 @@ jobs:
       # The shared golden config names the case that emulates nothing
       # `default`, and this repository's baseline names that frame `light`, so
       # the rename runs once per copied frame at whatever depth it landed.
+      #
+      # The sweep holds all four widths and this repository commits two, 320
+      # and 1280. The other two are dropped after the copy, and the case list
+      # is the place to change if that set moves.
+      #
       # The committed tree is cleared first rather than copied over. A copy
       # only adds and overwrites, so a section dropped from the case list
       # would leave its frames in place, `git diff --quiet` below would see no
@@ -159,7 +164,8 @@ jobs:
           rm -rf assets/evidence/home
           mkdir -p assets/evidence/home
           cp -R web/screenshots/localhost/home/. assets/evidence/home/
-          find assets/evidence/home -name default.png -execdir mv default.png light.png \;
+          find assets/evidence/home \( -name '768--*.png' -o -name '1536--*.png' \) -delete
+          find assets/evidence/home -name '*--default.png' -execdir sh -c 'mv "$1" "${1%--default.png}--light.png"' _ {} \;
 
       # Uploaded on success rather than on failure alone, against the artifact
       # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
