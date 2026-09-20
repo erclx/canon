@@ -19,3 +19,4 @@ Plugin skills shipped to target projects, the canon claude CLI, and overlap with
 - [Skill requirements](skill-requirements.md): The REQUIREMENT.md sibling, what loads it, and the admission test universal coverage retired
 - [Skill review paths](skill-review.md): The version-sequencing surface that was gated and then retired, the two-pass model a pull request review posts under, the rebase stage the worker's return leg carries, and the worker role holding its own half of the channel
 - [Skill strategy](skill-strategy.md): Where a plugin skill lives, the catalog command, the workflow against domain-knowledge split, the redundancy audit, and the trim read at seventy-three
+- [Target check](target-check.md): The six domains the target check reports, why the harness ships as a stated gap, and where the skill sits against canon-operator and the rollout worker

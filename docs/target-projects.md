@@ -215,6 +215,8 @@ Neither `canon sync --check` nor any other command notices a surface still sitti
 
 `canon sync --check <path>` reports what has drifted without writing anything. It splits each difference by cause, which is the question that decides what to do next.
 
+`canon:target-check` is the same reading grouped by domain rather than by cause, run from inside the project. It reports the toolkit version, the `canon/` folder, governance rules, tooling, and seeds from the verbs that own each comparison, and reports the Claude harness as unchecked because no verb reads it. It repairs nothing, so it is what to run before deciding rather than instead of deciding.
+
 #### The binary first
 
 The report opens by naming the binary running it. The installed version reads against the newest published one, and a version behind that points you at `canon upgrade`, since every section under it is a reading taken by whichever toolkit you happen to have. An unreachable registry reports unknown with its reason rather than failing, so `--exit-code` still gates on the drift the check measured locally and an offline machine stays green.

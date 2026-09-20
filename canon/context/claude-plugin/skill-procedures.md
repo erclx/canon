@@ -9,6 +9,14 @@ description: The CLI shell-out pattern every skill follows, the label map a proj
 
 Plugin skills that shell out to the CLI follow a consistent pattern: read the toolkit catalog via `canon <domain> list --json`, match against project context, then execute the CLI with `CANON_NON_INTERACTIVE=1` so it skips prompts. Claude Code's tool permission dialog is the single confirmation gate. Skills never reimplement CLI logic or hardcode rule, stack, or snippet names. `setup-gov` is the reference.
 
+### The non-interactive variable answers a prompt rather than refusing it
+
+`CANON_NON_INTERACTIVE=1` skips a prompt by resolving it, not by declining to proceed. `select` in `src/ui.ts` returns the first option under that variable, so a verb whose argument a prompt would have asked for takes whatever sorts first in its catalog. A body that both mandates the variable and calls such a verb bare therefore runs against a value nothing about the target produced, and it reports the difference as a finding.
+
+`canon tooling sync --check` with no stack is the measured case. The stack catalog sorts `astro` first, so every target reached that way compared against `astro` and the tooling section reported drift that was an artifact of the comparison. `target-check` closed it by taking the stack from the drift report's own `tooling.chain`, which the same step already reads, and refusing the domain when that field names none.
+
+The general rule is that a skill mandating the variable owes every verb it calls each argument a prompt would have asked for. A default reached this way is silent in both directions: the command exits zero and the report reads as measured, so nothing downstream can tell the answer apart from one the target earned.
+
 ### Reading a report rather than rediscovering
 
 `canon-operator` reads `canon sync --check --json` rather than walking the tree itself, and treats an absent report key as unread rather than as an empty answer. An absent key and an empty array are separate states: reading an absent key as empty exits zero, takes the nothing-to-report branch, and reports a clean target the CLI never actually measured, while a current CLI reporting an empty array has looked and found nothing.

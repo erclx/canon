@@ -289,16 +289,17 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Keep the project current with the toolkit
 
-| Skill                            | When to use                                                                        |
-| -------------------------------- | ---------------------------------------------------------------------------------- |
-| `canon:seed-sync`                | After a toolkit update, to reconcile installed seeds without losing customizations |
-| `canon:migration-claude-md`      | When `CLAUDE.md` grew past what always-load context should carry                   |
-| `canon:migration-context`        | When `docs/` holds agent-flavored files belonging in `canon/context/`              |
-| `canon:migration-superseded`     | When a drift report names a `.claude/` file a folder has replaced                  |
-| `canon:migration-standards-drop` | When the project still holds an installed `.claude/standards/` tree                |
-| `canon:canon-feedback-file`      | When something in the toolkit is broken, missing, or off                           |
-| `canon:canon-feedback-triage`    | In the toolkit repo, to work through the open feedback issues                      |
-| `canon:canon-rollout`            | In the toolkit repo, to take one change out to every consuming project at once     |
+| Skill                            | When to use                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| `canon:target-check`             | In a target project, to report per domain what it holds against what the toolkit ships |
+| `canon:seed-sync`                | After a toolkit update, to reconcile installed seeds without losing customizations     |
+| `canon:migration-claude-md`      | When `CLAUDE.md` grew past what always-load context should carry                       |
+| `canon:migration-context`        | When `docs/` holds agent-flavored files belonging in `canon/context/`                  |
+| `canon:migration-superseded`     | When a drift report names a `.claude/` file a folder has replaced                      |
+| `canon:migration-standards-drop` | When the project still holds an installed `.claude/standards/` tree                    |
+| `canon:canon-feedback-file`      | When something in the toolkit is broken, missing, or off                               |
+| `canon:canon-feedback-triage`    | In the toolkit repo, to work through the open feedback issues                          |
+| `canon:canon-rollout`            | In the toolkit repo, to take one change out to every consuming project at once         |
 
 ### Generate an artifact on demand
 

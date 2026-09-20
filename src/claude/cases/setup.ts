@@ -91,6 +91,14 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'Take this change out to every project that installed the toolkit and get each one to a pull request.',
     expect: 'canon-rollout',
   },
+  // Reporting per domain is what separates this from canon-operator, which
+  // diagnoses on the way to running the operation an intent named. This answers
+  // one fixed question across a fixed domain list and repairs nothing.
+  {
+    prompt:
+      'Report what this project has fallen behind the toolkit on, domain by domain, and fix nothing.',
+    expect: 'target-check',
+  },
   {
     prompt:
       "This project needs its own coding rule that the toolkit doesn't ship.",
