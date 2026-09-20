@@ -1,6 +1,6 @@
 /**
- * Writes web/public/favicon.svg from assets/brand/mark.svg and the design
- * source's two accent values.
+ * Writes web/public/favicon.svg from assets/brand/mark.svg and the favicon's
+ * own colors in src/design/favicon.ts, apart from the page accent tokens.
  *
  * The page is the fourth surface to carry the mark as a favicon and the only
  * one that can answer for itself. `regen-hero.sh` and `src/design/render.ts`
@@ -17,6 +17,8 @@
  */
 import { writeFileSync } from 'node:fs'
 
+import { FAVICON_COLORS, renderFavicon } from '../../src/design/favicon'
+
 const root = new URL('../..', import.meta.url).pathname
 
 const mark = (await Bun.file(`${root}assets/brand/mark.svg`).text()).trim()
@@ -25,43 +27,10 @@ if (!mark) {
   process.exit(1)
 }
 
-const tokenCss = await Bun.file(`${root}web/src/styles/tokens.css`).text()
-const read = (name: string): string => {
-  const match = tokenCss.match(
-    new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{3,8})`),
-  )
-  if (!match) {
-    console.error(
-      `regen-web-favicon: tokens.css carries no --color-${name}, refusing to write a colorless favicon`,
-    )
-    process.exit(1)
-  }
-  return match[1] as string
-}
-
-const dark = read('accent')
-const light = read('light-accent')
-
-// The shapes only, with the source's authoring comment dropped. Both fills are
-// replaced by a rule rather than an attribute so one branch can flip both.
-const shapes = mark
-  .replace(/<!--[\s\S]*?-->/, '')
-  .trim()
-  .replace(/^<svg[^>]*>/, '')
-  .replace(/<\/svg>$/, '')
-  .replaceAll(' fill="currentColor"', '')
-  .trim()
-
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80">
-  <style>
-    path, rect { fill: ${light}; }
-    @media (prefers-color-scheme: dark) { path, rect { fill: ${dark}; } }
-  </style>
-  ${shapes.replace(/\n\s*/g, '\n  ')}
-</svg>
-`
-
-writeFileSync(`${root}web/public/favicon.svg`, svg)
+writeFileSync(
+  `${root}web/public/favicon.svg`,
+  renderFavicon(mark, FAVICON_COLORS),
+)
 console.log(
-  `regen-web-favicon: wrote web/public/favicon.svg (${light} / ${dark})`,
+  `regen-web-favicon: wrote web/public/favicon.svg (${FAVICON_COLORS.light} / ${FAVICON_COLORS.dark})`,
 )

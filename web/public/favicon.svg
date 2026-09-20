@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80">
   <style>
-    path, rect { fill: #ad4a4b; }
-    @media (prefers-color-scheme: dark) { path, rect { fill: #c76b5f; } }
+    path, rect { fill: #c42938; }
+    @media (prefers-color-scheme: dark) { path, rect { fill: #e54e40; } }
   </style>
   <path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" />
   <rect x="44" y="15" width="12" height="70" rx="2" />
