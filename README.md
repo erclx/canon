@@ -99,7 +99,10 @@ Two of the outputs are documents you open rather than files you run. A `SLIDES.m
 
 The workflow this toolkit ships is the workflow that built it. Several Claude Code sessions run at once, each in its own git worktree on its own branch, and each opens its own pull request.
 
-![The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened](demos/agent-view.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="demos/agent-view.gif">
+  <img src="demos/agent-view-light.gif" alt="The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened">
+</picture>
 
 That recording is the landing page's own `dispatch` and `workers` sections, driven by `canon demo run` against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
 
