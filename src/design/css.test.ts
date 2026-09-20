@@ -17,6 +17,7 @@ const minimal = (overrides: Partial<DesignTokens> = {}): DesignTokens => ({
   spacingNote: '',
   borders: [],
   bordersNote: '',
+  layout: '',
   motion: '',
   iconography: '',
   ...overrides,

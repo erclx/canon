@@ -45,6 +45,7 @@ describe('renderDesignDocument', () => {
       '## Typography',
       '## Spacing',
       '## Borders',
+      '## Layout',
       '## Motion',
       '## Iconography',
     ]) {
