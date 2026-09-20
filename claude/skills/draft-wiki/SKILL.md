@@ -62,7 +62,7 @@ The standard forbids working from training knowledge, so the draft is built on a
 
 - Write the file at the confirmed path.
 - Run `canon markdown audit <path>`.
-- Run `canon indexes regen <wiki-root>`, so the page reaches the catalog immediately rather than drifting until the next unrelated regen.
+- Run `canon indexes regen <wiki-root>/<vendor>`, naming the folder the page landed in rather than the root above it. The verb rewrites the `index.md` sitting in the folder it is given and does not walk down, so regenerating at the root leaves the vendor catalog untouched and the new page missing from the one the Collision step reads. A page absent there is invisible to the next run, which then drafts a second page on the same subject.
 
 ## Response format
 
