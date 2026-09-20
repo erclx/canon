@@ -13,6 +13,10 @@ on:
       # another run.
       - 'src/design/**'
       - 'src/cli.ts'
+      # The command count comes from the registered set, and a module here is
+      # what registers one, so a branch adding a command moves the frame
+      # without touching src/cli.ts.
+      - 'src/commands/**'
       - 'governance/rules/**'
       - 'standards/**'
       - 'snippets/**'
