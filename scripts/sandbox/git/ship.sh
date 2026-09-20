@@ -87,7 +87,6 @@ EOF
     log_info "Action:  /git:ship"
     log_info "Expect:  the verify gate finds no command named and says so rather than stopping,"
     log_info "         then README updated, changes committed, branch renamed, PR opened, changelog appended"
-    log_info "         then captures session memory and runs Propose; receipt at .canon/memory/review/memory-review-<slug>.md, Apply not run"
     ;;
   "without-changelog")
     log_step "Scenario ready: without changelog"
@@ -95,7 +94,6 @@ EOF
     log_info "Action:  /git:ship"
     log_info "Expect:  the verify gate finds no command named and says so rather than stopping,"
     log_info "         then README updated, changes committed, branch renamed, PR opened, changelog step skipped"
-    log_info "         then captures session memory and runs Propose; receipt at .canon/memory/review/memory-review-<slug>.md, Apply not run"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

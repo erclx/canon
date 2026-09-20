@@ -9,7 +9,7 @@ description: What memory review is for, the gaps it closes, and why every action
 
 Without this skill, the memory folder grows and never drains. Entries pile up restating rules a durable surface already carries, nothing decides which memory has earned a place in one, and a rule that does get promoted arrives verbatim in a file whose voice it does not match. The folder then reads as a second source of truth that no surface points at.
 
-A pen the caller cannot face is the same gap wearing a different shape. Routing at capture takes the domain facts and whatever the ownership test leaves stays, in whatever mix of types that is, so the folder still reaches a size nobody reads in one sitting. A ship-time run is scoped to the entries that session captured for exactly that reason, and the full sweep is what an operator asks for when the cross-session duplicates are the point. An entry leaving the pen is archived rather than deleted, because a folder git does not hold gives a wrong bulk call no undo.
+A pen the caller cannot face is the same gap wearing a different shape. Routing at capture takes the domain facts and whatever the ownership test leaves stays, in whatever mix of types that is, so the folder still reaches a size nobody reads in one sitting. The full sweep is what an operator asks for when the cross-session duplicates are the point. An entry leaving the pen is archived rather than deleted, because a folder git does not hold gives a wrong bulk call no undo.
 
 ## Must
 

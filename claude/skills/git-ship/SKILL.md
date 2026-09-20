@@ -32,7 +32,6 @@ Run `git diff --cached --name-only 2>/dev/null` to check for staged files. If ou
 7. Invoke `canon:git-branch` to rename branch to match conventional format
 8. Invoke `canon:git-pr` to push branch and open pull request
 9. After the PR opens, watch CI. Poll `canon pr checks <number> --json` until the record's `state` leaves `pending`, branching on that field rather than on the exit, and fall back to `gh pr checks <number>` when no record comes back at all, which is a target whose CLI predates the verb. On `passing`, continue. On `failing`, stop the sequence and report the failing check with its URL. Do not auto-fix. This step may output on failure, the one exception to the no-text-between-steps rule.
-10. If step 1 wrote or updated at least one memory file, invoke `canon:memory-review` scoped to those entries to propose fixes while session context is fresh. If the pen got nothing, skip this step.
 
 A caller wrapping this sequence may act between step 8 and step 9, which is the one gap the order leaves open, since the pull request exists there and nothing has read its checks yet. `auto-ship` marks the pull request draft in it. Nothing else may go there, and a caller that needs a step anywhere else in the sequence is asking for a change to this body rather than for a place to stand.
 
@@ -48,19 +47,16 @@ An installed binary carrying no `plan-reach` subcommand reports the reach unread
 
 Capture leads the sequence because a routed fact lands in a context entry, which is a tracked file. Running it after the pull request opens leaves that edit off the branch entirely, so the fact reaches nothing. Memory files are gitignored either way, which is what hid the ordering while capture wrote only those.
 
-Stop at the Propose phase. Do not run Apply. Promoting an entry to an always-loaded rule or a skill body ships as its own change, separate from this feature.
-
 ## After completion
 
-Output up to four lines:
+Output up to three lines:
 
 ```plaintext
 ✅ Shipped
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
-<Memory proposal at .canon/memory/review/memory-review-<slug>.md>
 ```
 
-Omit the second line if nothing routed. Omit the third and fourth if `memory-capture` wrote no memory file this session, since an empty pen means no scoped review and no proposal.
+Omit the second line if nothing routed and the third if `memory-capture` wrote no memory file this session.
 
-Emit nothing here when a wrapping caller states it closes on its own block. `auto-ship` is that caller and its block carries these same three trailing lines above a first line naming the draft state, so emitting both reports one run twice. A caller that states no such thing gets this block, which is every direct invocation.
+Emit nothing here when a wrapping caller states it closes on its own block. `auto-ship` is that caller and its block carries these same two trailing lines above a first line naming the draft state, so emitting both reports one run twice. A caller that states no such thing gets this block, which is every direct invocation.

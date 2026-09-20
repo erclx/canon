@@ -100,12 +100,6 @@ When anything routed, add a line naming the handoff so the caller knows a `docs-
 
 Omit that line when the caller runs `docs-fold` itself later in its own chain.
 
-When at least one memory file was written or updated, add a closing line so the standalone caller proposes fixes while context is fresh:
-
-`→ Run /memory-review to propose fixes for the pen before the session ends.`
-
-The ship skills run review Propose themselves, so this line is for the standalone `/memory-capture` path.
-
 If nothing was captured, output:
 
 `✅ Nothing worth capturing.`
