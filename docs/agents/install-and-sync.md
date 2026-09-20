@@ -77,7 +77,7 @@ no copy to reconcile. `canon snippets list --json` carries the catalog and
 
 ## Tooling diff and sync
 
-`canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout, with the frame on stderr.
+`canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout with `ok: true`, and the frame goes to stderr. A refusal such as an unknown stack, an excluded stack, or a toolkit-root target still exits 1 and answers `{ ok: false, reason, message }`, so a caller branches on the record and reads a typo'd stack name as a refusal rather than as drift.
 
 `canon tooling sync <stack> [target] --check` reports the same list and always exits 0. It stays for scripts that already call it. `sync` itself writes only under `--write`, and a headless run with neither flag reports and exits 1.
 

@@ -65,7 +65,7 @@ interface ListOptions {
 
 type Prepared =
   | { readonly ok: true; readonly chain: Manifest[]; readonly target: string }
-  | { readonly ok: false; readonly error: string }
+  | { readonly ok: false; readonly reason: string; readonly error: string }
 
 export function register(program: Command): void {
   const tooling = program
@@ -284,18 +284,27 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
   if (mismatch !== undefined) logWarn(mismatch)
 
   if (!stackExists(PROJECT_ROOT, stack)) {
-    return { ok: false, error: `Stack not found: ${stack}` }
+    return {
+      ok: false,
+      reason: 'unknown-stack',
+      error: `Stack not found: ${stack}`,
+    }
   }
 
   if (skip !== undefined) {
     if (skip === stack) {
       return {
         ok: false,
+        reason: 'bad-skip',
         error: `Cannot --skip the stack being synced: ${skip}`,
       }
     }
     if (!stackExists(PROJECT_ROOT, skip)) {
-      return { ok: false, error: `Stack to skip not found: ${skip}` }
+      return {
+        ok: false,
+        reason: 'unknown-skip',
+        error: `Stack to skip not found: ${skip}`,
+      }
     }
   }
 
@@ -303,6 +312,7 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
   if (resolved === PROJECT_ROOT) {
     return {
       ok: false,
+      reason: 'toolkit-root',
       error:
         'Cannot run against toolkit root. Files here are the source of truth.',
     }
@@ -323,39 +333,37 @@ async function runSync(
   intro(opts.diff === undefined ? 'canon tooling sync' : 'canon tooling diff')
 
   if (opts.check === true && opts.write === true) {
-    logWarn('Pass --check or --write, not both.')
-    outro()
-    return 1
+    return refuse(
+      opts,
+      'conflicting-flags',
+      'Pass --check or --write, not both.',
+    )
   }
 
   const selected = stack ?? (await promptForStack())
   if (selected === undefined) {
-    logWarn('No tooling stacks found')
-    outro()
-    return 1
+    return refuse(opts, 'no-stacks', 'No tooling stacks found')
   }
 
   if (isStackExcluded(selected)) {
-    logWarn(
+    return refuse(
+      opts,
+      'excluded-stack',
       'Claude is managed by `canon claude`, not `canon tooling`. Run `canon claude sync` instead.',
     )
-    outro()
-    return 1
   }
 
   const prepared = prepare(selected, target, opts.skip)
-  if (!prepared.ok) {
-    logWarn(prepared.error)
-    outro()
-    return 1
-  }
+  if (!prepared.ok) return refuse(opts, prepared.reason, prepared.error)
 
   const result = scan(prepared.chain, prepared.target)
 
   report(result)
 
   if (opts.diff !== undefined) {
-    if (opts.diff.json) process.stdout.write(`${JSON.stringify(result)}\n`)
+    if (opts.diff.json) {
+      process.stdout.write(`${JSON.stringify({ ok: true, ...result })}\n`)
+    }
     outro()
     return result.totalChanges === 0 ? 0 : 1
   }
@@ -402,6 +410,20 @@ async function runSync(
   outro()
   process.stderr.write(`${GREEN}✓ Tooling sync complete${NC}\n`)
   return 0
+}
+
+/**
+ * A diff caller branches on the record rather than the exit, since a shell
+ * wrapper can flatten the status. Every refusal therefore answers with a reason
+ * on stdout under `--json`, beside the exit 1 that keeps a gate failing.
+ */
+function refuse(opts: SyncOptions, reason: string, message: string): number {
+  logWarn(message)
+  if (opts.diff?.json) {
+    process.stdout.write(`${JSON.stringify({ ok: false, reason, message })}\n`)
+  }
+  outro()
+  return 1
 }
 
 type WriteMode = 'apply' | 'prompt' | 'report' | 'unauthorized'

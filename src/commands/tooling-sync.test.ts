@@ -48,6 +48,16 @@ const sync = (args: readonly string[], headless = true): Run =>
 
 const diff = (args: readonly string[]): Run => runVerb('diff', args)
 
+const diffStack = (stack: string, args: readonly string[] = []): Run => {
+  const run = spawnSync(
+    'bun',
+    [CLI, 'tooling', 'diff', stack, target, ...args],
+    { encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+  )
+
+  return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+}
+
 const goldenContent = (): string => readFileSync(join(target, GOLDEN), 'utf8')
 
 beforeEach(() => {
@@ -157,6 +167,32 @@ describe('tooling diff', () => {
     expect(record.configs).toContainEqual(
       expect.objectContaining({ rel: GOLDEN, state: 'drifted' }),
     )
+  })
+
+  it('should carry ok true on the record when the run measured', () => {
+    const record = JSON.parse(diff(['--json']).stdout ?? '') as { ok: boolean }
+
+    expect(record.ok).toBe(true)
+  })
+
+  it('should emit an unknown-stack reason under --json for a bad stack name', () => {
+    const record = JSON.parse(
+      diffStack('no-such-stack', ['--json']).stdout ?? '',
+    ) as { ok: boolean; reason: string }
+
+    expect(record).toMatchObject({ ok: false, reason: 'unknown-stack' })
+  })
+
+  it('should emit an excluded-stack reason under --json for the claude stack', () => {
+    const record = JSON.parse(diffStack('claude', ['--json']).stdout ?? '') as {
+      reason: string
+    }
+
+    expect(record.reason).toBe('excluded-stack')
+  })
+
+  it('should keep exit 1 on a refusal under --json', () => {
+    expect(diffStack('no-such-stack', ['--json']).status).toBe(1)
   })
 
   it('should still exit 1 under --json when a file differs', () => {
