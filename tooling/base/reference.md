@@ -35,7 +35,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - Runtime: `bun` as package manager and script runner, `bunx` over `npx` for a one-off executable.
 - Formatting: Prettier for what it parses, shfmt for shell. Two formatters because Prettier has no shell parser.
 - Spelling: cspell over the whole tree, with project vocabulary split into a project-terms dictionary and a tech-stack one.
-- Shell: shfmt formats and shellcheck lints at warning severity. shfmt takes a directory argument, shellcheck has no directory mode and needs `find`.
+- Shell: shfmt formats and shellcheck lints at warning severity. Both take their files from `find scripts -name '*.sh'`, since `scripts/` can mix shell with TypeScript and shellcheck has no directory mode.
 - Commits: commitlint against conventional commits, wired through the husky `commit-msg` hook. Format is `<type>(<scope>): <subject>` in imperative mood with no trailing period.
 - Dev dependencies: `prettier`, `cspell`, `husky`, `@commitlint/cli`, `@commitlint/config-conventional`. Install via `bun add -D`.
 
