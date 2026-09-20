@@ -21,6 +21,7 @@ const root = new URL('../..', import.meta.url).pathname
 const { cssPath } = renderDesignDoc(
   `${root}${DESIGN_DOCUMENT}`,
   `${root}web/public/previews/design-tokens`,
+  { embedFonts: true },
 )
 
 const css = readFileSync(cssPath, 'utf8')

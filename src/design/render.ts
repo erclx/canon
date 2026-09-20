@@ -2,6 +2,9 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Cell, DesignDoc, Row } from '@/design/parse'
 import { parseDesignDoc } from '@/design/parse'
+import { fontFaceBlock } from '@/design/css'
+import type { FontFace } from '@/design/fonts'
+import { FONT_FACES } from '@/design/fonts'
 import { colorValue } from '@/design/tokens'
 
 export interface RenderResult {
@@ -19,17 +22,53 @@ const FAVICON_HREF = `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80"><path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" fill="${FAVICON_COLOR}" /><rect x="44" y="15" width="12" height="70" rx="2" fill="${FAVICON_COLOR}" /></svg>`,
 )}`
 
+export interface RenderOptions {
+  /**
+   * Declare each vendored face the typography table names, and let the page
+   * body take the body role's stack. Off by default, since a face is a large
+   * base64 block a target's render would otherwise grow by unasked.
+   */
+  readonly embedFonts?: boolean
+}
+
 export function renderDesignDoc(
   sourcePath: string,
   outDir: string,
+  options: RenderOptions = {},
 ): RenderResult {
   const doc = parseDesignDoc(sourcePath)
   mkdirSync(outDir, { recursive: true })
   const cssPath = join(outDir, 'design.css')
   const htmlPath = join(outDir, 'index.html')
-  writeFileSync(cssPath, buildCss(doc))
-  writeFileSync(htmlPath, buildHtml(doc))
+  const faces = options.embedFonts ? namedFaces(doc) : []
+  writeFileSync(cssPath, buildCss(doc, faces))
+  writeFileSync(htmlPath, buildHtml(doc, bodyFamily(doc, faces)))
   return { htmlPath, cssPath }
+}
+
+/** The vendored faces whose family appears in a typography `Family` cell. */
+function namedFaces(doc: DesignDoc): FontFace[] {
+  const named = new Set(
+    doc.typography.flatMap((row) =>
+      val(row, 'Family')
+        .split(',')
+        .map((family) => family.trim().replace(/^['"]|['"]$/g, '')),
+    ),
+  )
+  return FONT_FACES.filter((face) => named.has(face.family))
+}
+
+/** A stack lands raw in a `<style>` block, where HTML escaping does nothing. */
+const SAFE_STACK = /^[\w\s,'"-]+$/
+
+/** The stack the body role names, once a face for it is embedded. */
+function bodyFamily(doc: DesignDoc, faces: readonly FontFace[]): string {
+  if (!faces.length) return 'system-ui, sans-serif'
+  const row =
+    doc.typography.find((r) => slug(val(r, 'Role')) === 'body') ??
+    doc.typography[0]
+  const family = val(row, 'Family')
+  return SAFE_STACK.test(family) ? family : 'system-ui, sans-serif'
 }
 
 function slug(s: string): string {
@@ -105,7 +144,7 @@ function confidence(doc: DesignDoc): Confidence {
   return { tagged, total }
 }
 
-function buildCss(doc: DesignDoc): string {
+function buildCss(doc: DesignDoc, faces: readonly FontFace[]): string {
   const lines: string[] = [':root {']
   for (const row of doc.color) {
     if (val(row, 'Value')) {
@@ -135,7 +174,8 @@ function buildCss(doc: DesignDoc): string {
     }
   }
   lines.push('}')
-  return lines.join('\n') + '\n'
+  const root = lines.join('\n') + '\n'
+  return faces.length ? `${fontFaceBlock(faces, 'block')}\n\n${root}` : root
 }
 
 function escape(s: string): string {
@@ -178,7 +218,7 @@ function previewChrome(): string {
   return ['  :root {', ...lines, '  }'].join('\n')
 }
 
-function buildHtml(doc: DesignDoc): string {
+function buildHtml(doc: DesignDoc, bodyStack: string): string {
   const sections = [
     sectionPersonality(doc.personality),
     sectionColor(doc.color),
@@ -205,7 +245,7 @@ function buildHtml(doc: DesignDoc): string {
 <link rel="stylesheet" href="design.css">
 <style>
 ${previewChrome()}
-  body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 960px; color: var(--preview-ink); background: var(--preview-paper); }
+  body { font-family: ${bodyStack}; margin: 2rem; max-width: 960px; color: var(--preview-ink); background: var(--preview-paper); }
   h1 { margin-top: 0; }
   h2 { margin-top: 2rem; border-bottom: 1px solid var(--preview-rule); padding-bottom: 0.25rem; }
   table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
