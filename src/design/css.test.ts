@@ -184,6 +184,49 @@ describe('buildDesignCss', () => {
     }
   })
 
+  describe('teach footer and anchor chrome', () => {
+    const teachCss = (): string =>
+      buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
+
+    const declarationsOf = (css: string, selector: string): string =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter((match) => match[1].trim().split('\n').pop() === selector)
+        .map((match) => match[2])
+        .join('\n')
+
+    it('caps the footer nav to the page measure and centres it', () => {
+      const nav = declarationsOf(teachCss(), '.nav')
+
+      expect(nav).toContain('max-width: calc(var(--teach-measure) + 3rem)')
+      expect(nav).toMatch(/margin:\s*4rem auto 0/)
+    })
+
+    it('offsets an anchor jump past the sticky masthead on the root', () => {
+      const root = declarationsOf(teachCss(), 'html')
+
+      expect(root).toContain('scroll-padding-top: calc(var(--teach-mast-h)')
+    })
+
+    it('targets no footer wrapper the generated markup never emits', () => {
+      expect(teachCss()).not.toContain('.nav-foot')
+    })
+
+    it('gives a lone footer card half the measure on the side it points', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, '.nav > :only-child')).toContain(
+        'flex: 0 1 calc(50% - 0.3rem)',
+      )
+      expect(declarationsOf(css, '.nav > .to-next:only-child')).toContain(
+        'margin-left: auto',
+      )
+    })
+
+    it('leaves smooth scrolling off, since a jump during reading competes with it', () => {
+      expect(teachCss()).not.toContain('scroll-behavior')
+    })
+  })
+
   it('names no retired teach face in the seeded chrome', () => {
     const css = buildDesignCss(undefined, {
       components: TEACH_STYLESHEET_COMPONENTS,

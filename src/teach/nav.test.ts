@@ -289,6 +289,49 @@ describe('generateNav', () => {
     expect(lesson).toContain('.added-later { color: red; }')
   })
 
+  it('should drop the unresolvable @import from a lesson inlining course.css', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+
+    await generateNav(ROOT)
+
+    const lesson = await readFile(path, 'utf8')
+    expect(lesson).not.toContain('@import')
+    expect(lesson).toContain('<style>')
+  })
+
+  it('should seed the stylesheet pair a contents page links when the workspace has none', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    const assets = join(workspaceDir('01-regular-expressions'), 'assets')
+    expect(existsSync(join(assets, 'course.css'))).toBe(false)
+
+    await generateNav(ROOT)
+
+    expect(existsSync(join(assets, 'course.css'))).toBe(true)
+    expect(existsSync(join(assets, 'base.css'))).toBe(true)
+  })
+
+  it('should keep a workspace course.css it already holds when seeding', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const cssPath = join(
+      workspaceDir('01-regular-expressions'),
+      'assets',
+      'course.css',
+    )
+    await writeFile(cssPath, '.mine { color: red; }\n')
+
+    await generateNav(ROOT)
+
+    expect(await readFile(cssPath, 'utf8')).toBe('.mine { color: red; }\n')
+  })
+
   it('should place the quiz stepper after the embedded stylesheet', async () => {
     await openWorkspace(ROOT, REQUEST)
     await writeStylesheet(ROOT, 'regular-expressions')
