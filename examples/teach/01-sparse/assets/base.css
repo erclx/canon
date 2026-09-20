@@ -295,6 +295,10 @@ figcaption {
   --teach-shadow: none;
 }
 
+html {
+  scroll-padding-top: calc(var(--teach-mast-h) + 1rem);
+}
+
 /* No horizontal padding on the body, so the sticky bar reaches both window
    edges. The gutter moves onto `main`, which is the only thing that needed it. */
 body {
@@ -313,6 +317,7 @@ body {
    them. A narrower `.wide-body` was what put the navigation and the content on
    two different measures. */
 main {
+  box-sizing: border-box;
   max-width: calc(var(--teach-measure) + 3rem);
   margin: 0 auto;
   padding: 2.25rem 1.5rem 0;
@@ -402,6 +407,12 @@ main {
   font-weight: 400;
   box-shadow: none;
 }
+.nav > :only-child {
+  flex: 0 1 calc(50% - 0.3rem);
+}
+.nav > .to-next:only-child {
+  margin-left: auto;
+}
 
 .nav .lbl {
   display: block;
@@ -422,9 +433,6 @@ main {
 .nav .to-index {
   flex: 0 0 auto;
   text-align: center;
-}
-.nav-foot {
-  margin: 4.5rem 0 0;
 }
 
 /* ---- Masthead contents ---- */
@@ -586,7 +594,10 @@ main {
 /* ---- Footer navigation, the only place it appears ---- */
 
 .nav {
-  margin: 4rem 0 0;
+  max-width: calc(var(--teach-measure) + 3rem);
+  margin: 4rem auto 0;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
   align-items: stretch;
 }
 
@@ -1171,6 +1182,7 @@ ol.succ li {
   font-family: var(--teach-sans);
   font-size: var(--t4);
   background: transparent;
+  box-sizing: border-box;
   width: 100%;
   text-align: left;
   color: inherit;

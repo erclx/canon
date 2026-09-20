@@ -265,6 +265,8 @@ const TEACH_CHROME: Component = {
   --teach-shadow: none;
 }
 
+html { scroll-padding-top: calc(var(--teach-mast-h) + 1rem); }
+
 /* No horizontal padding on the body, so the sticky bar reaches both window
    edges. The gutter moves onto \`main\`, which is the only thing that needed it. */
 body {
@@ -282,7 +284,7 @@ body {
    listing page and a lesson start at the same left edge as the chrome above
    them. A narrower \`.wide-body\` was what put the navigation and the content on
    two different measures. */
-main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.25rem 1.5rem 0; }
+main { box-sizing: border-box; max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.25rem 1.5rem 0; }
 .wide-body { max-width: calc(var(--teach-measure) + 3rem); }
 
 .bar {
@@ -346,6 +348,8 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
 
 .nav > a:hover { border-color: var(--color-accent); background: var(--color-teach-accent-bg); }
 .nav > .end { color: var(--color-muted); border-style: dashed; font-weight: 400; box-shadow: none; }
+.nav > :only-child { flex: 0 1 calc(50% - 0.3rem); }
+.nav > .to-next:only-child { margin-left: auto; }
 
 .nav .lbl {
   display: block;
@@ -360,7 +364,6 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
 .nav > a:hover .lbl { color: var(--color-accent); }
 .nav .to-next { text-align: right; }
 .nav .to-index { flex: 0 0 auto; text-align: center; }
-.nav-foot { margin: 4.5rem 0 0; }
 
 /* ---- Masthead contents ---- */
 
@@ -476,7 +479,13 @@ main { max-width: calc(var(--teach-measure) + 3rem); margin: 0 auto; padding: 2.
 
 /* ---- Footer navigation, the only place it appears ---- */
 
-.nav { margin: 4rem 0 0; align-items: stretch; }
+.nav {
+  max-width: calc(var(--teach-measure) + 3rem);
+  margin: 4rem auto 0;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  align-items: stretch;
+}
 
 .nav > a, .nav > span { display: flex; flex-direction: column; justify-content: center; }
 
@@ -919,6 +928,7 @@ const TEACH_QUIZ: Component = {
   font-family: var(--teach-sans);
   font-size: var(--t4);
   background: transparent;
+  box-sizing: border-box;
   width: 100%;
   text-align: left;
   color: inherit;

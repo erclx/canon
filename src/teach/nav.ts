@@ -17,6 +17,7 @@ import {
   type TeachRefused,
   type WorkspaceDetail,
   type WorkspaceSummary,
+  writeStylesheet,
 } from '@/teach/workspace'
 
 const FAVICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
@@ -769,6 +770,15 @@ interface LessonRefused {
  * check first. Nothing is written when any region is missing, which is what
  * keeps a partially-spliced file off disk.
  */
+/**
+ * A lesson embeds the workspace stylesheet, and an `@import` resolves against
+ * the lesson's own folder there rather than the assets folder, so it never
+ * loaded anything. The base sheet reaches the page through the `<link>`.
+ */
+function stripImports(css: string): string {
+  return css.replace(/^@import[^;]*;[ \t]*\n?/gm, '')
+}
+
 async function rewriteLesson(
   root: string,
   detail: WorkspaceDetail,
@@ -899,6 +909,9 @@ export async function generateNav(
     const detail = found.workspace
     const metas = await readLessonMetas(root, detail)
 
+    const cssPath = join(root, detail.path, TEACH_ASSETS, TEACH_STYLESHEET)
+    if (!existsSync(cssPath)) await writeStylesheet(root, detail.slug)
+
     const contentsPath = join(root, detail.path, 'index.html')
     await writeFile(
       contentsPath,
@@ -906,8 +919,7 @@ export async function generateNav(
     )
     contents.push(relative(root, contentsPath))
 
-    const cssPath = join(root, detail.path, TEACH_ASSETS, TEACH_STYLESHEET)
-    const css = existsSync(cssPath) ? await readFile(cssPath, 'utf8') : ''
+    const css = stripImports(await readFile(cssPath, 'utf8'))
 
     for (let index = 0; index < metas.length; index += 1) {
       const outcome = await rewriteLesson(
