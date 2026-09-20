@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/mark-accent.svg">
-  <img src="assets/brand/mark-accent-light.svg" alt="canon" width="56" height="56">
+ <source media="(prefers-color-scheme: dark)" srcset="assets/brand/mark-accent.svg">
+ <img src="assets/brand/mark-accent-light.svg" alt="canon" width="56" height="56">
 </picture>
 
 # canon
@@ -17,12 +17,7 @@ canon is a CLI and Claude Code plugin that stops your AI conventions drifting ap
 
 </div>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/arrival.png">
-  <img src="assets/evidence/arrival-light.png" alt="The first screen of the canon landing page, a project before and after one canon init, with the file counts each step lays down">
-</picture>
-
-The page is one real session the toolkit ran on itself, and every count on it is read from the repo when the page builds.
+That page is one real session the toolkit ran on itself, and every count on it is read from this repository when the page builds.
 
 ## Why
 
@@ -46,8 +41,8 @@ claude plugin install canon@canon
 ```
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/install.png">
-  <img src="assets/evidence/install-light.png" alt="Adding the canon marketplace and installing the plugin in Claude Code">
+ <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/install.png">
+ <img src="assets/evidence/install-light.png" alt="Adding the canon marketplace and installing the plugin in Claude Code">
 </picture>
 
 The skills land as `/canon:<name>`. If your session was already open, run `/reload-plugins` to pick them up.
@@ -73,35 +68,21 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
 | Slides         | A `SLIDES.md` source format with a layout catalog                                                                        | `canon slides render` writes PowerPoint                         |
+| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                              | `canon teach`                                                   |
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                               | `canon sandbox`                                                 |
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/catalog.png">
-  <img src="assets/evidence/catalog-light.png" alt="The canon catalog as a ledger of five rows, with the count each ships and a few real names: skills, rules, standards, commands, and stacks">
-</picture>
+Those domains reach you in three shapes. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one.
 
-Every count in that image is read from the catalogs when it is built, so they're what the repo ships today. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one. Governance is the third shape. A rule with a path glob loads only when a matching path is edited, and a rule with none loads every session. Run `canon gov list` to see the glob beside each rule.
-
-Two of the outputs are documents you open rather than files you run. A `SLIDES.md` renders to a deck, and a learning workspace renders to a small site.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="examples/slides/evidence/showcase-dark-04.png">
-  <img src="examples/slides/evidence/showcase-light-04.png" alt="A slide from the showcase deck rendered by canon slides render, a bulleted list under a heading on a warm background">
-</picture>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="examples/teach/evidence/root-listing.png">
-  <img src="examples/teach/evidence/root-listing-light.png" alt="The learning workspace listing rendered by canon teach, three workspaces with their lesson and term counts, one still a stub">
-</picture>
+Governance is the third shape. A rule with a path glob loads only when a matching path is edited, and a rule with none loads every session. Run `canon gov list` to see the glob beside each rule.
 
 ## It runs on itself
 
 The workflow this toolkit ships is the workflow that built it. Several Claude Code sessions run at once, each in its own git worktree on its own branch, and each opens its own pull request.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="demos/agent-view.gif">
-  <img src="demos/agent-view-light.gif" alt="The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened">
+ <source media="(prefers-color-scheme: dark)" srcset="demos/agent-view.gif">
+ <img src="demos/agent-view-light.gif" alt="The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened">
 </picture>
 
 That recording is the landing page's own `dispatch` and `workers` sections, driven by `canon demo run` against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
@@ -109,6 +90,8 @@ That recording is the landing page's own `dispatch` and `workers` sections, driv
 ## Documentation
 
 Scaffolding your first project? Start with target projects, then the AI workflow loop. Everything else answers questions that arrive later.
+
+Working with an agent rather than reading this yourself? It loads `CLAUDE.md` at your project root first, then whichever rules under `.claude/rules/` match the paths it edits. Run `canon docs agents` for the command catalog with flags, exit codes, and JSON shapes.
 
 - [AI workflow](docs/workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
 - [Operating model](docs/workflow/operating-model.md): orchestrator, planner, and worker roles for building across parallel sessions
@@ -165,7 +148,9 @@ git init
 canon init
 ```
 
-`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the coding and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project. Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. A snippet resolves the same way, reached at its `@` reference through the plugin's live `claude/snippets` symlink rather than a copy. Run `canon tooling list --json` to see the catalog.
+`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the coding and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project.
+
+Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. A snippet resolves the same way, reached at its `@` reference through the plugin's live `claude/snippets` symlink rather than a copy. Run `canon tooling list --json` to see the catalog.
 
 For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target-projects.md).
 
