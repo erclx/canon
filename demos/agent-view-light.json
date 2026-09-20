@@ -1,0 +1,58 @@
+{
+  "slug": "agent-view-light",
+  "title": "Four sessions, four branches",
+  "url": "http://localhost:4321/",
+  "viewport": {
+    "width": 1280,
+    "height": 940
+  },
+  "colorScheme": "light",
+  "output": {
+    "video": "demos/agent-view-light.webm",
+    "still": "demos/agent-view-light.png"
+  },
+  "pointer": {
+    "travelMs": 400,
+    "typeDelayMs": 110
+  },
+  "annotations": {
+    "durationMs": 900,
+    "position": "bottom-right",
+    "fontSize": 22
+  },
+  "steps": [
+    {
+      "beat": 1,
+      "name": "The page opens",
+      "kind": "navigate",
+      "target": "",
+      "text": "",
+      "waitFor": "",
+      "holdMs": 600,
+      "caption": "canon's landing page",
+      "still": false
+    },
+    {
+      "beat": 2,
+      "name": "One session dispatches the rest",
+      "kind": "scroll",
+      "target": "#dispatch",
+      "text": "",
+      "waitFor": "",
+      "holdMs": 2200,
+      "caption": "One session dispatches workers and planners",
+      "still": false
+    },
+    {
+      "beat": 3,
+      "name": "Four branches on disjoint files",
+      "kind": "scroll",
+      "target": "#workers",
+      "text": "",
+      "waitFor": "",
+      "holdMs": 2800,
+      "caption": "Each worker opens its own pull request",
+      "still": true
+    }
+  ]
+}
