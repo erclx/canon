@@ -24,7 +24,7 @@ The `hero` template takes catalog data, so a stack gaining a rule moves the fram
 
 The README shows each still in two themes through `<picture>`, so a frame is a pair named `<name>` and `<name>-light`. `install` takes the light half from its template, which `regen-hero.sh` fills a second time with the plain color roles pointed at the light ones, and each half is its own capture set with its own stamp. `arrival-light.png` is the same `.fold` capture of the same address taken without forcing dark, so it is retaken by hand alongside `arrival.png`, and nothing catches one drifting from the other.
 
-A stamp for a URL source digests the address string rather than the page it served, so two themes of one address carry one `source-sha256` and only `image-sha256` tells the frames apart. That holds for `assets/evidence/arrival-light.png` beside `arrival.png`.
+A stamp for a URL source digests the address string rather than the page it served, so two themes of one address carry one `source-sha256` and only `image-sha256` tells the frames apart. That holds for `examples/teach/evidence/root-listing-light.png`, which is retaken by serving a copy of the fixture with `data-theme="light"` on its `<html>` element at the same address, since the page follows the dark default and the command takes no scheme.
 
 `assets/captures/` is read flat and never descends, by the regeneration script and by this command alike. A source nested a further folder down is skipped by both with nothing reported, so a new frame is a template dropped directly in rather than a folder of its own. The split is what retired the name prefix the flat layout used to need: a frame is named for itself now, since `assets/captures/` no longer mixes markup in with the images.
 

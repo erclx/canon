@@ -130,6 +130,7 @@ release-managed = [
 generated = [
   "assets/evidence/hero",
   "assets/evidence/install",
+  "assets/evidence/catalog",
   "assets/evidence/arrival",
   "assets/evidence/home/",
   "canon/config/baseline.json",
@@ -143,6 +144,7 @@ generated = [
 rides-with-generated = [
   "assets/captures/hero",
   "assets/captures/install",
+  "assets/captures/catalog",
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.
