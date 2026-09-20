@@ -897,6 +897,19 @@ describe('visualPathGlobs', () => {
 
     expect(report.failure).toContain('carry different path globs')
   })
+
+  it('fails when both workflows carry a declared visual-only glob', async () => {
+    const paths = ['web/**', 'assets/**', 'tooling/web/configs/e2e/**']
+    write('.github/workflows/deploy-site.yml', deploy(paths))
+    write('.github/workflows/pr-visual-checks.yml', visual(paths))
+
+    const report = await visualPathGlobs(context())
+
+    expect(report.failure).toContain('carry different path globs')
+    expect(report.emissions.map((e) => e.text).join('\n')).toContain(
+      'tooling/web/configs/e2e/**',
+    )
+  })
 })
 
 describe('architectureRecord', () => {

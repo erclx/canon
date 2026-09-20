@@ -866,7 +866,9 @@ export const visualPathGlobs: Measure = async (ctx) => {
     }
   }
 
-  const onlyDeploy = deployPaths.filter((path) => !visualPaths.includes(path))
+  const onlyDeploy = deployPaths.filter(
+    (path) => !visualPaths.includes(path) || VISUAL_ONLY_GLOBS.includes(path),
+  )
   const onlyVisual = visualPaths.filter(
     (path) => !deployPaths.includes(path) && !VISUAL_ONLY_GLOBS.includes(path),
   )
@@ -891,7 +893,11 @@ export const visualPathGlobs: Measure = async (ctx) => {
   return {
     emissions: [
       ...onlyDeploy.map((path) =>
-        warn(`${deployPath} carries ${path}, absent from ${visualPath}`),
+        warn(
+          VISUAL_ONLY_GLOBS.includes(path)
+            ? `${deployPath} carries ${path}, which is visual-only and must not trigger a deploy`
+            : `${deployPath} carries ${path}, absent from ${visualPath}`,
+        ),
       ),
       ...onlyVisual.map((path) =>
         warn(`${visualPath} carries ${path}, absent from ${deployPath}`),
