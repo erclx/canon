@@ -2,6 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { RenderOptions } from '@/design/render'
 import { renderDesignDoc } from '@/design/render'
 
 let root: string
@@ -11,10 +12,10 @@ interface Rendered {
   html: string
 }
 
-const render = (body: string): Rendered => {
+const render = (body: string, options?: RenderOptions): Rendered => {
   const source = join(root, 'DESIGN.md')
   writeFileSync(source, body)
-  const result = renderDesignDoc(source, join(root, 'out'))
+  const result = renderDesignDoc(source, join(root, 'out'), options)
   return {
     css: readFileSync(result.cssPath, 'utf8'),
     html: readFileSync(result.htmlPath, 'utf8'),
@@ -50,6 +51,17 @@ const spacingTable = (rows: string[]): string[] => [
   ...rows,
   '',
 ]
+
+const typographyTable = (rows: string[]): string[] => [
+  '## Typography',
+  '',
+  '| Role | Family | Weight | Size | Line height |',
+  '| ---- | ------ | ------ | ---- | ----------- |',
+  ...rows,
+  '',
+]
+
+const GEIST_STACK = 'Geist Variable, DejaVu Sans, sans-serif'
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'design-render-'))
@@ -202,5 +214,70 @@ describe('renderDesignDoc', () => {
       '  .empty { color: var(--preview-muted); font-style: italic; }\n</style>',
     )
     expect(css).toContain('--color-accent: #e0724b;')
+  })
+
+  describe('with embedded fonts', () => {
+    const embed = { embedFonts: true }
+    const geistDoc = doc(
+      typographyTable([
+        `| heading | ${GEIST_STACK} | 700 | 1.4rem | 1.3 |`,
+        `| body | ${GEIST_STACK} | 400 | 1rem | 1.6 |`,
+      ]),
+    )
+
+    it('should declare one face block for a vendored family the typography names', () => {
+      const { css } = render(geistDoc, embed)
+
+      expect(css.match(/@font-face/g)).toHaveLength(1)
+      expect(css).toContain("font-family: 'Geist Variable';")
+    })
+
+    it('should block rather than swap while the face loads', () => {
+      const { css } = render(geistDoc, embed)
+
+      expect(css).toContain('font-display: block;')
+    })
+
+    it('should set the body to the body role stack', () => {
+      const { html } = render(geistDoc, embed)
+
+      expect(html).toContain(`body { font-family: ${GEIST_STACK};`)
+    })
+
+    it('should keep a family carrying markup out of the style block', () => {
+      const { html } = render(
+        doc(
+          typographyTable([
+            '| body | Geist Variable, </style><script> | 400 | 1rem | 1.6 |',
+          ]),
+        ),
+        embed,
+      )
+
+      expect(html).toContain('body { font-family: system-ui, sans-serif;')
+    })
+
+    it('should declare no face for a doc naming no vendored family', () => {
+      const { css, html } = render(
+        doc(typographyTable(['| body | Georgia, serif | 400 | 1rem | 1.6 |'])),
+        embed,
+      )
+
+      expect(css).not.toContain('@font-face')
+      expect(html).toContain('body { font-family: system-ui, sans-serif;')
+    })
+  })
+
+  it('should leave the output byte-identical unless embedding is asked for', () => {
+    const body = doc(
+      typographyTable([`| body | ${GEIST_STACK} | 400 | 1rem | 1.6 |`]),
+    )
+
+    const plain = render(body)
+    const explicitOff = render(body, { embedFonts: false })
+
+    expect(plain.css).not.toContain('@font-face')
+    expect(plain.html).toContain('body { font-family: system-ui, sans-serif;')
+    expect(explicitOff).toEqual(plain)
   })
 })

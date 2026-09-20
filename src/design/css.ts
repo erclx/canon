@@ -136,14 +136,17 @@ ${component.rules}`,
  * installed. Defaults to the mono stack's primary family; teach passes its own
  * three faces instead of widening this default for every consumer.
  */
-function fontFaceBlock(faces: readonly FontFace[]): string {
+export function fontFaceBlock(
+  faces: readonly FontFace[],
+  display: 'swap' | 'block' = 'swap',
+): string {
   return faces
     .map(
       (face) => `@font-face {
   font-family: '${face.family}';
   font-weight: ${face.weight};
   font-style: normal;
-  font-display: swap;
+  font-display: ${display};
   src: url(data:font/woff2;base64,${face.base64}) format('woff2');
 }`,
     )

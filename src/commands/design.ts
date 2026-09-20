@@ -119,7 +119,11 @@ export function register(program: Command): void {
       'Output directory',
       creationRel(process.cwd(), SCRATCH, 'render', 'design'),
     )
-    .action((opts: { source: string; out: string }) => {
+    .option(
+      '--embed-fonts',
+      'Declare each vendored face the typography table names, and set the page body in the body stack',
+    )
+    .action((opts: { source: string; out: string; embedFonts?: boolean }) => {
       const sourcePath = resolve(process.cwd(), opts.source)
       const outDir = resolve(process.cwd(), opts.out)
       const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
@@ -133,7 +137,9 @@ export function register(program: Command): void {
       process.stderr.write(
         `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}Render design tokens${NC}\n`,
       )
-      const result = renderDesignDoc(sourcePath, outDir)
+      const result = renderDesignDoc(sourcePath, outDir, {
+        embedFonts: opts.embedFonts,
+      })
       process.stderr.write(
         `${GREY}│${NC} ${GREEN}✓${NC} ${result.htmlPath}\n${GREY}│${NC} ${GREEN}✓${NC} ${result.cssPath}\n${GREY}└${NC}\n`,
       )
