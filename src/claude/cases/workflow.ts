@@ -117,6 +117,16 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
       'Check whether the markdown I changed violates any authoring standards.',
     expect: 'standards-audit',
   },
+  // Rot across documents nobody changed is what separates this from
+  // `standards-audit`, which is diff-scoped and reports a stated rule broken on
+  // a given line. It is also not `target-check`, which asks whether a document
+  // exists and holds its sections rather than whether it still describes the
+  // tree.
+  {
+    prompt:
+      'Which of our docs have gone stale, grown too long, or ended up in the wrong file?',
+    expect: 'document-health',
+  },
   {
     prompt: 'Open a new entry on the task board for this piece of work.',
     expect: 'task-board',
