@@ -174,6 +174,8 @@ With no topic it rewrites every workspace. The teach-root listing is always rewr
 
 A lesson carries its chrome as four marker pairs the authoring skill writes empty: `canon:teach:style`, `canon:teach:header`, `canon:teach:footnav`, and `canon:teach:scripts`. This verb splices each one from the current workspace state, embedding the toolkit's favicon, the shared stylesheet, and the script that settles the course panel before the page paints, rebuilding the course sidebar, the breadcrumb and jump menus, the prev/next footer nav, and the behavior scripts, and leaves the authored `<h1>`, lede, body, and quiz between the header and the footnav untouched.
 
+It also deletes the one icon link the authoring skill used to have a session write by hand into a lesson's `<head>`, matched as that exact string, so the page keeps only the icon the `style` region carries. Any other link an author wrote stays.
+
 A workspace carrying no `course.css` gets its stylesheet pair seeded first, so the contents page it links is never unstyled, and an existing `course.css` is never overwritten. The embedded copy drops the seed's `@import` line, which resolved against the lesson's own folder and never loaded anything.
 
 That seeding fires on the absent file alone, so a workspace already holding a `course.css` has neither half rewritten here and its lessons go on embedding the sheet they were built against. A change to the shared chrome therefore takes `canon teach stylesheet <topic>` per workspace first, which rewrites `assets/base.css`, and then this verb to embed the result. Running this one alone renders every lesson missing whatever the change added, and nothing reports it.

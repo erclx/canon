@@ -28,6 +28,22 @@ import {
 const BRAND_MARK = 'assets/brand/mark.svg'
 
 /**
+ * The link `teach-workspace` once had a session write by hand into every page.
+ * A lesson keeps whatever sits outside its marked regions, so the old icon
+ * would stay beside the spliced one. Matching the exact string the skill
+ * mandated removes it without touching a link an author chose on purpose.
+ */
+const HAND_WRITTEN_ICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
+
+function dropHandWrittenIcon(html: string): string {
+  return html
+    .split('\n')
+    .filter((line) => line.trim() !== HAND_WRITTEN_ICON)
+    .join('\n')
+    .replaceAll(HAND_WRITTEN_ICON, '')
+}
+
+/**
  * Built from the brand mark and the favicon's own pair, the same two inputs
  * `web/public/favicon.svg` is generated from, so every teach page carries the
  * icon the landing page does rather than a copy of its own.
@@ -1148,7 +1164,7 @@ async function rewriteLesson(
 ): Promise<LessonRewritten | LessonRefused> {
   const file = metas[index].file
   const path = join(root, detail.path, TEACH_LESSONS, file)
-  let html = await readFile(path, 'utf8')
+  let html = dropHandWrittenIcon(await readFile(path, 'utf8'))
 
   const teachPrefix = '../../'
   const workspacePrefix = '../'
