@@ -34,5 +34,5 @@ reason = "Gates how other work proceeds and writes nothing of its own. What it c
 [session-resume]
 reason = "Reads tracked work and context and writes nothing. A run leaves the tree byte-identical, so every mechanical assertion would pass on a session that did nothing."
 
-[canon-feedback-file]
-reason = "Writes into the toolkit's own .canon/review/ rather than the project it runs in. run.sh reports that as an escape and cannot assert its content, since the path is outside the tree the snapshot covers."
+[canon-feedback]
+reason = "Opens an issue on the toolkit repository, or writes into the toolkit's own .canon/feedback/ on a failed call, rather than touching the project it runs in. run.sh reports that as an escape and cannot assert its content, since the path is outside the tree the snapshot covers."

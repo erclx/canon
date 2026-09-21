@@ -194,7 +194,7 @@ canon() {
 
 - On Windows, back-to-back headless runs can briefly fail to wipe the sandbox tree with a busy-lock. Re-run or `canon sandbox clean` first.
 - An autonomous sonnet run costs roughly $0.10 to $0.60 and tracks the turn count, measured at $0.28 for 7 turns and $0.58 for 17 on 2026-08-13. Drive one skill on demand rather than sweeping the catalog.
-- Skills whose body forbids probing project surfaces, such as `canon-feedback-file`, have no fixture to anchor and stay out of scope. The command such a skill drives can still earn an arm under `infra/`, which is where `infra:feedback` asserts `canon feedback` refusing a report missing a required field. The refusal is the half a sandbox can see, since a report that passes validation writes into the toolkit's own `.canon/feedback/` rather than into the tree the snapshot covers.
+- Skills whose body forbids probing project surfaces, such as `canon-feedback`, have no fixture to anchor and stay out of scope. The command such a skill drives can still earn an arm under `infra/`, which is where `infra:feedback` asserts `canon feedback` refusing a report missing a required field. The refusal is the half a sandbox can see, since a report that passes validation writes into the toolkit's own `.canon/feedback/` rather than into the tree the snapshot covers.
 - Anchor scenarios take their starting tree from a fixture, so provisioning does not depend on what the previous arm published to the remote. The force-pushes remain, so an assertion that reads `origin/main` rather than the working tree is still order-sensitive.
 
 ### A scenario faking a live session writes to the real registry
