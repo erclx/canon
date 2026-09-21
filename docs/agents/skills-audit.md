@@ -11,12 +11,16 @@ description: Measuring both skill corpora against standards/skill.md, the checks
 canon claude skills audit
 canon claude skills audit --json
 canon claude skills audit --requirements-only
+canon claude skills audit --arrivals --json
 ```
 
-| Option                | Behavior                                                             |
-| --------------------- | -------------------------------------------------------------------- |
-| `--json`              | Add a machine-readable record on stdout, keeping the frame           |
-| `--requirements-only` | Run the gating presence check alone, printing nothing when it passes |
+| Option                | Behavior                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `--json`              | Add a machine-readable record on stdout, keeping the frame                                      |
+| `--requirements-only` | Run the gating presence check alone, printing nothing when it passes                            |
+| `--arrivals`          | List each `SKILL.md` present in the working tree and absent at the merge base, and nothing else |
+
+`--arrivals` and `--requirements-only` refuse together and exit `1` naming both, since the first reports and always exits `0` while the second gates.
 
 ## Corpus scope
 
@@ -53,6 +57,12 @@ Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folde
 `--requirements-only` is the half wired into `bun run check`. Presence of a required file is a fact with no false positives, and the rule had nothing reading it, so a skill shipped without the sibling passed every stage while the standard required it.
 
 The check is preventive rather than diagnostic. Every mechanical rule passed across both corpora the day it shipped, so what it buys is the regression it stops rather than a backlog it surfaces.
+
+## Arrivals on a branch
+
+`--arrivals` reads the diff rather than the corpus. It names every skill body across both trees that exists in the working tree and not at the merge base, so a branch that lands a skill under a plan calling the work a merge or a refactor still surfaces it. The `auto-ship` chain runs it after verify and asks the creation-time questions for each body it names.
+
+Rename detection is off, so a folder moved or split into a corpus counts as an arrival, which is correct since the questions apply and noisy for a pure move. The record carries `kind: 'measured'` with the `base` and the `arrivals`, or `kind: 'refused'` with a `reason` of `no-base` or `unreadable`. An unreadable base refuses rather than returning an empty list, since silence reads as nothing arrived. Exit codes are `0` when the diff was read, whether or not a body arrived, and `1` on a refusal. It cannot judge the answers a session gives, so it never gates.
 
 ## Drift since a ref
 

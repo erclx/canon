@@ -1385,6 +1385,17 @@ async function runSkillsAudit(
   opts: SkillsAuditOptions,
 ): Promise<number> {
   const root = resolve(path ?? process.cwd())
+  if (opts.arrivals && opts.requirementsOnly) {
+    const message =
+      '--arrivals and --requirements-only cannot combine: the first reports and exits 0, the second gates.'
+    frameError(message)
+    if (opts.json) {
+      process.stdout.write(
+        `${JSON.stringify({ root, reason: 'conflicting-flags', message })}\n`,
+      )
+    }
+    return 1
+  }
   if (opts.arrivals) return runSkillsArrivals(root, opts.json ?? false)
 
   const gateOnly = opts.requirementsOnly ?? false

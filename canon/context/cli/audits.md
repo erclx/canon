@@ -400,6 +400,8 @@ Depth is the one measure no slice triaged, and the reading it would start from i
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 
+`--arrivals` is a second mode of the same verb and shares nothing else with it. It lives in `src/claude/skills-arrivals.ts` beside the audit because both read the two corpora, lifts the add-only diff from the standards audit with rename detection off, and reports without gating since it cannot grade the answers a session gives. It refuses beside `--requirements-only` rather than picking a precedence, because the gate exits nonzero on a fact and the report exits zero, so a caller passing both would read a clean exit as a pass.
+
 The audit reads raw frontmatter rather than `listSkills`, which prefers the folder name over the declared one and can never surface a disagreement between them. The two also resolve their root differently. The listing reads its own install root and the audit reads the cwd, which is what lets a branch be measured by the checkout running it.
 
 A clean run is the expected outcome rather than a broken check, since a preventive check reads as broken unless the report states what it measured. Its value is the regression it stops rather than a backlog it surfaces.
