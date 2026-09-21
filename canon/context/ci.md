@@ -105,6 +105,14 @@ The runner installs no browser binary, so a test needing one skips rather than f
 
 The commit-and-push step runs with `HUSKY: 0`, because `pre-push` runs `bun run check` and its format step shells out to `shfmt`, which the runner does not install, so the push was refused and no pull request opened. Installing the tool, scoping the hook, and `--no-verify` were the alternatives. Installing fixes one missing tool per failure, scoping edits `.husky/pre-push` for every other pusher, and `--no-verify` leaves `commit-msg` live. The pull request the push opens runs every stage in `verify.yml` against the source, so the local gate is not the only check. The `readme-screenshot.yml` config carries the same setting for the same reason, and the CI workflow rule states it. Nothing local reproduces a missing runner tool, so only a run on `main` proves the fix.
 
+`refresh-capture-frames.yml` also owns the home page baseline in `assets/evidence/home/`, through `scripts/core/capture-home.sh`, the same script `pr-visual-checks.yml` runs. It rides the branch and pull request of the hero frames, since one merge moves both sets and the `concurrency` group already serializes runs. A second job would need its own merge order against the first.
+
+Its path filter adds `web/**` and `src/audits/**`, the two render inputs the hero frames do not share. `assets/**` stays off, because that folder holds this job's own outputs. The pull request job only reports whether its frames match, since committing back to a pull request branch was moved off deliberately and nothing reaches `main` without a reviewer.
+
+The job runs only on `main`, since it checks out a branch from whatever ref it started on and force-pushes it, so a dispatch elsewhere would carry that ref's whole diff into the open refresh pull request.
+
+One risk stays unmeasured. The refresh runner installs `fonts-noto-mono` and the pull request runner does not. The page sets every `code`, `kbd`, `samp` and `pre` to `font-family: inherit` in `web/src/styles/global.css`, and the face they inherit is Geist, embedded in `web/src/layouts/base.astro`, so that font reaches no text on the page. What remains is glyph fallback, and byte-determinism was measured across two runs of one job rather than across the two runners.
+
 ## Releases
 
 ### The release pull request
