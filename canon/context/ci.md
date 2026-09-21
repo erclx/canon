@@ -109,7 +109,9 @@ The commit-and-push step runs with `HUSKY: 0`, because `pre-push` runs `bun run 
 
 Its path filter adds `web/**` and `src/audits/**`, the two render inputs the hero frames do not share. `assets/**` stays off, because that folder holds this job's own outputs. The pull request job only reports whether its frames match, since committing back to a pull request branch was moved off deliberately and nothing reaches `main` without a reviewer.
 
-Two things stay unmeasured. The refresh runner installs `fonts-noto-mono` and the pull request runner does not, so a face resolving against that font would make the next pull request report drift the refresh wrote a moment earlier. Byte-determinism was measured across two runs of one job, not across the two. The first run also lands the backlog of frames stale since `980c58f3` as one large pull request.
+The job runs only on `main`, since it checks out a branch from whatever ref it started on and force-pushes it, so a dispatch elsewhere would carry that ref's whole diff into the open refresh pull request.
+
+One risk stays unmeasured. The refresh runner installs `fonts-noto-mono` and the pull request runner does not. The page sets every `code`, `kbd`, `samp` and `pre` to `font-family: inherit` in `web/src/styles/global.css`, and the face they inherit is Geist, embedded in `web/src/layouts/base.astro`, so that font reaches no text on the page. What remains is glyph fallback, and byte-determinism was measured across two runs of one job rather than across the two runners.
 
 ## Releases
 

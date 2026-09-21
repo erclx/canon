@@ -47,6 +47,9 @@ concurrency:
 jobs:
   refresh:
     name: 🖼️ Refresh Frames
+    # A dispatch on any other ref would force-push that ref's whole diff into
+    # the open refresh pull request under a chore title.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
