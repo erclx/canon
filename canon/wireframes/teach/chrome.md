@@ -5,13 +5,13 @@ description: The masthead, breadcrumb, jump menu, theme toggle, collapse control
 
 # Teach chrome
 
-Every teach page shares one header and one course sidebar. `renderHeader`, `renderBreadcrumb`, `renderJump`, and `renderSidebar` in `src/teach/nav.ts` build both, and the `.bar`, `.mast`, `.jump`, and `.sb` rules in `course.css`, generated from `TEACH_CHROME` in `src/design/components.ts`, size them: a 52rem chrome measure (`--teach-chrome`) and a 4.4rem bar height (`--teach-mast-h`). The footer nav shares the article's measure rather than the page width, and an anchor jump lands below the bar rather than behind it. The three page wireframes each point back here rather than redrawing it.
+Every teach page shares one header and one course sidebar. At 3.5rem tall (`--teach-mast-h`), the bar's row spans the window rather than the reading measure, so the collapse control and the theme control sit at the same inset on every page. The footer nav shares the article's measure rather than the page width, and an anchor jump lands below the bar rather than behind it. The three page wireframes each point back here rather than redrawing it.
 
 ## Header
 
 ```plaintext
 ┌────────────────┬─────────────────────────────────────────────────────┐
-│  Fixture    ⌄   │  ☰  Workspaces ⌄ / Fixture ⌄ / Lesson 2 of 3   ☀/☾   │← .mast, 4.4rem tall,
+│  Fixture    ⌄   │  ☰  Workspaces ⌄ / Fixture ⌄ / Lesson 2 of 3   ☀/☾   │← .mast, 3.5rem tall,
 │                │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│  sticky. The strip on
 ├────────────────┼─────────────────────────────────────────────────────┤  its bottom edge is
 │  3 lessons     │                                                     │  .bar::after
@@ -26,6 +26,8 @@ Every teach page shares one header and one course sidebar. `renderHeader`, `rend
 ```
 
 The crumb grows with depth: one segment (`Workspaces`) on the root page, two (`Workspaces / <workspace>`) on a contents page, three (`Workspaces / <workspace> / Lesson N of M`) on a lesson. Only that trailing segment drops its jump menu. Every other one, current page or not, still opens one.
+
+A crumb and its caret form one chip: the label goes to the page, the caret opens the menu, and the whole chip fills with the chrome hover ground while the pointer is over it or its menu is open. Crumb links are neutral rather than accented, since the accent marks where you are rather than where you can go. The caret stays drawn and muted in every state.
 
 The `☰` control left of the crumb collapses the sidebar. It is the panel's only trigger on any window width, and below 1100px it opens the panel over the lesson rather than beside it.
 

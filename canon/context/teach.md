@@ -35,6 +35,17 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
+## Departures from the nav-04 prototype
+
+The chrome matches the nav-04 prototype, measured as computed styles on both sides at three widths in both themes and compared frame by frame across rest, hover and open states. Where it does not match, the reason is below, and nothing else departs.
+
+- The jump menu is one component in both mounts. The prototype drew the breadcrumb menu as a grid at `0.38rem` row padding and the sidebar switcher as a flex row at `0.34rem` with a 12px numeral. Both now take the breadcrumb recipe, so the switcher opens 4px taller than drawn and its numeral is a pixel smaller.
+- The current row's numeral takes the accent in both menus. The prototype muted it in the breadcrumb menu and kept the accent in the switcher, so one of its mounts had to give way, and the accent is what marks where you are.
+- A breadcrumb menu row fills with `--color-chrome` on hover. The prototype left that mount on `--color-surface` while moving every other hover in the chrome to the chrome ground, and the row rule is shared with the switcher, which it moved.
+- `.bar` keeps its own side padding, `1.5rem` wide and `1rem` on a phone, under the `0.9rem` the full-width `.mast` adds. The prototype's `.bar` computes that same padding, so the controls sit 38px in from the window edge on both.
+- `.track` and `.outline` are gone from the markup. The prototype kept both elements and hid them with `display: none`.
+- The trailing count column keeps `text-align: right`, where the prototype's flex switcher row read `start`. The column is sized to its content, so the value moves nothing.
+
 ## Gotchas
 
 - `canon teach nav` rewrites lessons in place and refuses a lesson missing its four marker pairs, `canon:teach:style`, `canon:teach:header`, `canon:teach:footnav` and `canon:teach:scripts`. A hand-edit inside a pair is overwritten by the next run with nothing reporting it. The authored heading, lede, body and quiz sit between the header and footnav markers and are left untouched.
