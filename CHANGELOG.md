@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.112.0](https://github.com/erclx/canon/compare/v4.111.0...v4.112.0) (2026-09-21)
+
+
+### Features
+
+* **teach:** build the favicon from the shared mark and colors ([#1813](https://github.com/erclx/canon/issues/1813)) ([bb7b406](https://github.com/erclx/canon/commit/bb7b40659bf999b26024e56f15e7e5ded55da250))
+* **teach:** map the reading rules onto the type scale ([#1808](https://github.com/erclx/canon/issues/1808)) ([25a71b7](https://github.com/erclx/canon/commit/25a71b727ee5323d22ca5596d884dc1b3dd34172))
+* **teach:** retire the listing dot, accent and boxed filter ([#1812](https://github.com/erclx/canon/issues/1812)) ([6781619](https://github.com/erclx/canon/commit/678161975e1a1a73e3013a2c5adc57c9942e2fe0))
+
+
+### Bug Fixes
+
+* **claude:** bind ship chain pull request writes to their own head ([#1809](https://github.com/erclx/canon/issues/1809)) ([082dafd](https://github.com/erclx/canon/commit/082dafdb77d08c01ed795d85cc85d919fdb6557c))
+
 ## [4.111.0](https://github.com/erclx/canon/compare/v4.110.0...v4.111.0) (2026-09-21)
 
 
