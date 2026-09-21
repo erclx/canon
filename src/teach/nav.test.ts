@@ -8,6 +8,7 @@ import {
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
+import { FAVICON_COLORS } from '@/design/favicon'
 import { focusLine, generateNav } from '@/teach/nav'
 import {
   listWorkspaces,
@@ -925,5 +926,21 @@ describe('course sidebar', () => {
     expect(lesson).toContain('scrim.className = "sb-scrim"')
     expect(lesson).toContain('e.key === "Escape" && narrow.matches')
     expect(lesson).toContain('first.focus()')
+  })
+
+  it('should carry exactly one icon link in the head of every page kind, built from the favicon pair', async () => {
+    const pages = await generateThreePages()
+
+    for (const page of [pages.root, pages.contents, pages.lesson]) {
+      const head = page.slice(0, page.indexOf('</head>'))
+      const icons = [...head.matchAll(/<link rel="icon" href="([^"]+)"/g)]
+      expect(icons).toHaveLength(1)
+
+      const svg = decodeURIComponent(icons[0][1])
+      expect(svg).toContain(FAVICON_COLORS.light)
+      expect(svg).toContain(FAVICON_COLORS.dark)
+      expect(svg).toContain('prefers-color-scheme: dark')
+      expect(page).not.toContain('rgb(224,114,75)')
+    }
   })
 })

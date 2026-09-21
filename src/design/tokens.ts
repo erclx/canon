@@ -381,7 +381,7 @@ export const TOKENS: DesignTokens = {
   iconography: [
     'No icon library is installed. `assets/brand/mark.svg` is the one authored icon, embedded inline in the hero topbar, and the surfaces otherwise draw literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing.',
     '',
-    'The same mark ships in six independently-maintained copies that carry different colors by design rather than by drift, each fitted to the chrome it renders on: the dark accent for a dark-chrome surface, the light accent for a light-chrome one, and the pair the web favicon takes from `src/design/favicon.ts`. Unifying them or repairing the one that looks drifted would break the fit each was chosen for. `canon/context/design.md` carries which file holds each copy.',
+    'The same mark ships in five independently-maintained copies that carry different colors by design rather than by drift, each fitted to the chrome it renders on: the dark accent for a dark-chrome surface, the light accent for a light-chrome one, and the pair the web favicon takes from `src/design/favicon.ts`, which teach pages also take by rendering the live mark. Unifying them or repairing the one that looks drifted would break the fit each was chosen for. `canon/context/design.md` carries which file holds each copy.',
   ].join('\n'),
 }
 

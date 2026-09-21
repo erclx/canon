@@ -17,6 +17,7 @@
     "claude",
     "docs",
     "tsconfig.json",
+    "assets/brand/mark.svg",
     "!scripts/sandbox",
     "!scripts/eval",
     "!**/*.test.ts",

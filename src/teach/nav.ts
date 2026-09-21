@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import {
@@ -6,7 +6,9 @@ import {
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
+import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
+import { PROJECT_ROOT } from '@/project-root'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
 import {
   listWorkspaces,
@@ -23,7 +25,17 @@ import {
   writeStylesheet,
 } from '@/teach/workspace'
 
-const FAVICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
+const BRAND_MARK = 'assets/brand/mark.svg'
+
+/**
+ * Built from the brand mark and the favicon's own pair, the same two inputs
+ * `web/public/favicon.svg` is generated from, so every teach page carries the
+ * icon the landing page does rather than a copy of its own.
+ */
+function teachFavicon(): string {
+  const mark = readFileSync(join(PROJECT_ROOT, BRAND_MARK), 'utf8')
+  return faviconLink(renderFavicon(mark, FAVICON_COLORS))
+}
 
 /**
  * Narrower and steeper than the mark it replaces, with round caps and joins.
@@ -662,7 +674,7 @@ function pageHead(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
-${FAVICON}
+${teachFavicon()}
 ${style}
 ${headScript('index')}
 </head>
@@ -1185,11 +1197,12 @@ async function rewriteLesson(
   const regions: ReadonlyArray<readonly [Region, string]> = [
     // The stepper follows the workspace stylesheet so it wins the cascade at
     // equal specificity, which is what reaches a workspace seeded before it.
-    // The head script settles the panel before first paint, so it rides in the
-    // one region that sits inside `<head>`.
+    // The icon and the head script both belong in `<head>`, so they ride in the
+    // one region that sits there rather than a fifth marker every seeded
+    // lesson would lack.
     [
       'style',
-      `<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson')}`,
+      `${teachFavicon()}\n<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson')}`,
     ],
     ['header', header],
     ['footnav', `${renderFootNav(metas, index)}\n${PANE_CLOSE}`],
