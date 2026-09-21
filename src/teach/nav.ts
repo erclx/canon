@@ -164,6 +164,7 @@ const GLOSSARY_FILTER_SCRIPT = `<script>
 (function () {
   var input = document.getElementById("gfilter");
   var list = document.getElementById("gloss");
+  var count = document.getElementById("gloss-count");
   if (!input || !list) return;
   function updateGroups() {
     list.querySelectorAll(".gloss-group").forEach(function (heading) {
@@ -186,6 +187,10 @@ const GLOSSARY_FILTER_SCRIPT = `<script>
     });
     list.classList.toggle("none", n === 0);
     updateGroups();
+    if (count) {
+      var total = list.querySelectorAll(".gterm").length;
+      count.textContent = (n === total ? total : n + " of " + total) + (total === 1 ? " term" : " terms");
+    }
   });
   var clear = list.querySelector(".clear");
   if (clear) {
@@ -861,6 +866,12 @@ function renderGlossaryGroup(group: GlossaryGroup): string {
   return `<h3 class="gloss-group">${escapeHtml(group.heading)}</h3>${entries}`
 }
 
+function termCount(shown: number, total: number): string {
+  const noun = total === 1 ? 'term' : 'terms'
+
+  return shown === total ? `${total} ${noun}` : `${shown} of ${total} ${noun}`
+}
+
 function renderGlossarySection(
   entries: readonly string[],
   metas: readonly LessonMeta[],
@@ -870,7 +881,7 @@ function renderGlossarySection(
     .join('')
 
   return `<h2>Glossary <span class="count">${entries.length}</span></h2>
-<input class="filter" type="search" id="gfilter" aria-label="Filter glossary terms" aria-controls="gloss" placeholder="term">
+<div class="filter-row"><input class="filter" type="search" id="gfilter" aria-label="Filter glossary terms" aria-controls="gloss" placeholder="Filter terms"><span class="filter-count" id="gloss-count" aria-live="polite">${termCount(entries.length, entries.length)}</span></div>
 <div class="gloss" id="gloss"><p class="empty">No term matches that. <button type="button" class="clear">Clear the filter</button></p>${rendered}</div>
 `
 }
@@ -912,7 +923,7 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
           ? 'Live'
           : 'Open'
       const blurb = `${workspace.lessons} lesson(s) &middot; ${workspace.reference} reference page(s) &middot; ${workspace.terms} term(s)`
-      const inner = `<span class="num">${ordinalOf(workspace)}</span><b>${escapeHtml(titleCase(workspace.topic))}</b><span class="state${state === 'Live' ? ' done' : ''}">${state}</span><span class="blurb">${blurb}</span>`
+      const inner = `<span class="num">${ordinalOf(workspace)}</span><b>${escapeHtml(titleCase(workspace.topic))}</b><span class="state">${state}</span><span class="blurb">${blurb}</span>`
 
       return href === undefined
         ? `<li class="soon"><a href="#" aria-disabled="true" tabindex="-1">${inner}</a></li>`
@@ -1011,7 +1022,7 @@ async function renderContentsPage(
   const lessonRows = metas
     .map(
       (meta, index) =>
-        `<li><a href="${TEACH_LESSONS}/${meta.file}"><span class="num">${String(index + 1).padStart(2, '0')}</span><b>${escapeHtml(meta.title)}</b><span class="state done">Written</span><span class="blurb">${escapeHtml(meta.lede)}</span></a></li>`,
+        `<li><a href="${TEACH_LESSONS}/${meta.file}"><span class="num">${String(index + 1).padStart(2, '0')}</span><b>${escapeHtml(meta.title)}</b><span class="blurb">${escapeHtml(meta.lede)}</span></a></li>`,
     )
     .join('')
 
