@@ -59,6 +59,21 @@ jobs:
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
 
+      # The frames declare Noto Sans Mono, which the runner lacks, and the capture guard refuses a fallback render
+      - name: Install Frame Font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-mono
+
+      # Family from src/design/tokens.ts MONO, checked by name so a missing face fails here
+      - name: Check Frame Font
+        run: |
+          family="Noto Sans Mono"
+          if ! fc-list "$family" | grep -q .; then
+            echo "::error::Font family '$family' does not resolve on this runner."
+            exit 1
+          fi
+
       # Exits 2 with no output on about one run in five on WSL2, so it retries
       # once and then fails loudly rather than leaving a refresh nobody sees.
       - name: Regenerate Frame Markup
