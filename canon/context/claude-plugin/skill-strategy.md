@@ -129,7 +129,7 @@ The collision that made the ownership axis unavoidable rather than merely untidy
 
 Where a skill writes does not decide the ownership answer. A thin wrapper over a `canon` verb that happens to write under `.claude/` still takes the phase-or-subject prefix rather than a location-based one, since a durable record folder written under `.claude/` by a skill that does maintain a workflow surface stays wherever its subject places it. The two are not the same rule.
 
-The feedback pair is the one place the axis alone is not enough. `canon-feedback-file` and `canon-feedback-triage` share a subject and split on the act, which is the rule `## The interface pair splits on the act rather than the subject` already states, so the prefix places the family and the second word separates the producer from the consumer. Naming both for the subject would ship `canon-feedback` and `canon-triage`, which read as unrelated in a listing.
+The feedback pair is the one place the axis alone is not enough. `canon-feedback` and `canon-feedback-triage` share a subject and split on the act, which is the rule `## The interface pair splits on the act rather than the subject` already states, so the prefix places the family and the trailing word separates the consumer from the producer. Naming both for the subject alone would ship `canon-feedback` and `canon-triage`, which read as unrelated in a listing.
 
 ## The direction axis sorts by which repository a skill writes into
 

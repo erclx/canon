@@ -64,7 +64,7 @@ export const SETUP_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Something about the toolkit itself is broken, write it up and send it back to the maintainers.',
-    expect: 'canon-feedback-file',
+    expect: 'canon-feedback',
   },
   {
     prompt:

@@ -52,7 +52,7 @@ No code filters an internal category out of a publishable one. The plugin symlin
 
 - A target's `.claude/snippets/` predates this retirement if it exists at all. Nothing writes it now, nothing reads it in preference to the live symlink, and nothing reconciles it against the source. Treat it as a stale copy rather than as the current install surface.
 - The three orchestrator runbooks are the live instance now. A project that installed the retired `orchestrator` preset still holds all three under `.claude/snippets/claude/` and can delete them once the skill carries the same text
-- The toolkit feedback flow is the `canon-feedback-file` plugin skill plus the `canon feedback` CLI, not a snippet.
+- The toolkit feedback flow is the `canon-feedback` plugin skill plus the `canon feedback` CLI, not a snippet.
 - The memory review phases (challenge, discuss, apply, cleanup) live in the `memory-review` skill body rather than in snippets of their own. Re-ping the skill with the matching phase phrase.
 
 Counting what depends on a prose contract means scanning `snippets/` alongside `claude/skills/`, since a snippet can carry a procedure that reads the same string a skill does and is invisible to a skills-only grep. Grep `claude/`, `snippets/`, `governance/`, `standards/`, and `internal/` in one pass and account for every hit, including the ones that turn out to be labels rather than reads. An undercount is the dangerous direction, because it is the count a Files-to-touch list is scoped from.

@@ -1,6 +1,6 @@
 ---
 name: canon-feedback-triage
-description: Triage open GitHub issues labeled `feedback` in the toolkit repo. List them, pick one, classify it as a direct fix or plan-worthy work, route to the right skill, and link the issue for close-out. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback-file`), or for general GitHub issue triage unrelated to toolkit feedback.
+description: Triage open GitHub issues labeled `feedback` in the toolkit repo. List them, pick one, classify it as a direct fix or plan-worthy work, route to the right skill, and link the issue for close-out. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback`), or for general GitHub issue triage unrelated to toolkit feedback.
 ---
 
 # Canon feedback triage

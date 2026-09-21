@@ -293,7 +293,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:migration-context`        | When `docs/` holds agent-flavored files belonging in `canon/context/`                  |
 | `canon:migration-superseded`     | When a drift report names a `.claude/` file a folder has replaced                      |
 | `canon:migration-standards-drop` | When the project still holds an installed `.claude/standards/` tree                    |
-| `canon:canon-feedback-file`      | When something in the toolkit is broken, missing, or off                               |
+| `canon:canon-feedback`           | When something in the toolkit is broken, missing, or off, to open an issue on it       |
 | `canon:canon-feedback-triage`    | In the toolkit repo, to work through the open feedback issues                          |
 | `canon:canon-rollout`            | In the toolkit repo, to take one change out to every consuming project at once         |
 

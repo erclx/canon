@@ -1,6 +1,6 @@
 ---
 name: git-issue
-description: Format a bug or task from the current session into a GitHub issue and file it on the current repo via `gh issue create`. Use when asked to "file an issue", "open an issue", "log this bug", "raise an issue", or "track this as an issue". Do NOT use to report a toolkit defect from a target project (that is `canon-feedback-file`), or to open a pull request (that is `git-pr`).
+description: Format a bug or task from the current session into a GitHub issue and file it on the current repo via `gh issue create`. Use when asked to "file an issue", "open an issue", "log this bug", "raise an issue", or "track this as an issue". Do NOT use to report a toolkit defect from a target project (that is `canon-feedback`), or to open a pull request (that is `git-pr`).
 ---
 
 # Git issue
