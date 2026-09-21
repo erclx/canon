@@ -168,7 +168,7 @@ printf 'number=%s\nurl=%s\nhead=%s\n' "$pr_number" "$pr_url" "$head_branch"
 
 The check compares a number against a branch and never derives a number from one, so it adds no lookup of the kind `### Resolving the pull request` retired. It holds whichever way a wrong number arrives. A number a session retyped by hand, or inferred from the newest pull request in view, reads as a foreign head here and stops.
 
-The last output line carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison first, reading `gh pr view <number> --json headRefName,state` and matching it against `head` and `OPEN`.
+The last output line carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison in the shell first, reading `gh pr view <number> --json headRefName,state` and refusing unless it matches `head` and `OPEN`.
 
 ### Find the UI checklist
 
