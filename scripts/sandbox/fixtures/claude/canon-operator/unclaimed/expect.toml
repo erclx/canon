@@ -31,6 +31,5 @@ absent = [".claude/prompts"]
 manual = [
   "The reply does not offer to delete, move, or sync the folder. Semantic: a negative substring passes on every reply that phrases the wrong proposal differently, and proposing a move is the specific mistake the attribution work exists to prevent",
   "The `since` revision is reported as where the content was published rather than as when the folder was dropped. Semantic: both readings put the same short hash in the reply",
-  "No migration was named. Unwired: this fixture stages no `CLAUDE.md` and no `docs/`, so `migrations` is empty and an arm covering that route needs a fixture that stages one",
   "The verdict came off the report's `reverse` section rather than from the run listing the tree itself. Semantic: both routes name the same folder, and provisioning proves the section attributed it without proving the run is what read it",
 ]

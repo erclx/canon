@@ -26,8 +26,8 @@ The last failure is a section no route reaches. `## Route` maps an intent or a d
 - Resolve every stack, rule, snippet, and standard name from a catalog at runtime
 - Run the CLI non-interactively and report the command run, what changed, and the full path of anything written
 - Read the overwrite contract from the body before any install or sync, and name each surface it lists as overwritten before running one
-- Read the reverse walk beside the forward sections, so a folder the toolkit stopped shipping and a migration with a live case both reach the user
-- Hand off a named migration to the skill the report names, and name an unmigrated domain's root and install path for the user to move themselves when no skill covers it
+- Read the reverse walk beside the forward sections, so a folder the toolkit stopped shipping reaches the user
+- Name an unmigrated domain's root and install path for the user to move themselves, since no skill covers the move
 - Route a measurement intent to the audit offers from the route table itself, rather than leaving the section reachable only by reading past the table
 - Rank a lifecycle row against the audit offers where the route table itself states it, so a session acting on the lifecycle row reads the ranking without opening the section being ranked
 - Offer every audit whose surface the target carries, and offer none whose surface it lacks

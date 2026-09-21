@@ -123,9 +123,9 @@ Three verdicts come out of that one pass. Content matching a published blob is `
 
 The walk reaches none of that on an unmanaged target. `isManagedTarget` gates it the way it gates its three siblings, and the early branch returns `emptyReverseReport()`, so a project holding a dropped root reports nothing unclaimed until it carries a `.claude/` directory, a `CLAUDE.md`, or an unmigrated domain. A consumer staging a folder to observe the walk stages the marker too, or it reads an empty section as a clean answer.
 
-### Migration candidates and the gate
+### The gate
 
-`detectMigrations` gives the two proposal-only skills a report field of their own. Both tests read what the skill itself acts on, so a proposal the report makes is one the skill has work to do for. The `CLAUDE.md` line threshold is the `context.md` checkpoint raised, because that file legitimately carries more than one domain, and it gates a proposal rather than a failure so being approximate costs a line an operator can ignore.
+The report carried a `migrations` field naming two proposal-only skills until both retired. Nothing replaced it, since `target-check` reads a target against current documentation rather than against a fixed list of transitions.
 
 Nothing in the reverse section reaches `hasDrift`. Every entry is a judgment about a file the project may own, and one verdict is a labelled unknown by design. The sandbox `unclaimed` arm asserts the exit code stays 0 with a finding present.
 

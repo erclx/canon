@@ -25,10 +25,10 @@ Run `canon sync --check . --json` before routing. It reports what a target is be
 Read seven fields off the report and carry each to `## Route`:
 
 - `unmigrated`: a domain sitting at the root layout with nothing under `.claude/`. The most urgent finding, because that domain reports no drift of its own while being entirely behind
-- `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own, so this routes to the skill that proposes the split rather than ending at the report
+- `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own, so this routes to `canon:target-check` for the full per-domain reading rather than ending at the report
 - `seeds`: entries are `matching`, `stale`, `drifted`, or `missing`. Anything but `matching` needs the seed handoff
 - `domains[].entries`: per-file `stale`, `customized`, `stranded`, and `orphaned` as before
-- `reverse`: what the target holds that no live catalog claims. `unclaimed` lists folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`. Act on the first two and leave `project` alone, which history proved the project owns. `migrations` names a proposal-only skill with a live case here and the `reason` it was measured from
+- `reverse`: what the target holds that no live catalog claims. `unclaimed` lists folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`. Act on the first two and leave `project` alone, which history proved the project owns
 - `historyUnavailable` on a domain, on `seeds`, or on `reverse`: nothing could be dated, so treat every difference as unverified and say so rather than reporting a file as untouched. It is set on `reverse` when the toolkit itself ships without history, which is the registry-install case, so the walk found nothing rather than finding a clean target
 - `tooling`: read `measured` first. Every count under it is zero when it is false, which is an absence of measurement rather than a measured zero. Past that, `chain` names the stacks the install resolved, nearest first, and `counts.gitignore` counts the managed ignore entries the target is missing.
 
@@ -43,8 +43,7 @@ Map the stated intent, or what `## Diagnose` found, to one lifecycle phase, then
 The two can name different rows, and a reply answers both rather than picking one. Run or hand off what the finding names, then answer the intent in the same reply. A measurement intent therefore reaches the audit offers below even on a target whose diagnostic found scaffold work, which is the case a session leaving from the scaffold row would otherwise never read.
 
 - A domain in `unmigrated`: name it, the root path, and the install path. No command moves it, so the user runs the relocation themselves
-- An entry in `migrations`: hand off to the skill its `skill` field names, spelled as the report spells it. Both of them propose without writing, so the handoff is where this stops
-- Anything in `superseded`: name which files and what replaced them, then hand off to `migration-superseded`. Both skills propose, so neither moves nor deletes the file
+- Anything in `superseded`: name which files and what replaced them, then hand off to `canon:target-check`, which reports and never moves or deletes the file
 - A folder in `unclaimed`: name it and the attribution it carries. No command moves it and the content may be the project's own, so the decision is the user's
 
 - First-time scaffold of a fresh project: hand off to `target-setup`

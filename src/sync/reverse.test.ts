@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git-env'
-import { buildReverseReport, detectMigrations } from '@/sync/reverse'
+import { buildReverseReport } from '@/sync/reverse'
 
 let TARGET: string
 let TOOLKIT: string
@@ -161,75 +161,5 @@ describe('buildReverseReport', () => {
     expect(report.unclaimed).toEqual([])
 
     rmSync(unversioned, { recursive: true, force: true })
-  })
-
-  it('should still detect migrations when history is unavailable', () => {
-    const unversioned = mkdtempSync(join(tmpdir(), 'canon-reverse-plain-'))
-    writeTarget('CLAUDE.md', 'line\n'.repeat(400))
-
-    expect(buildReverseReport(unversioned, TARGET).migrations).toHaveLength(1)
-
-    rmSync(unversioned, { recursive: true, force: true })
-  })
-})
-
-describe('detectMigrations', () => {
-  it('should return nothing for a target with neither case', () => {
-    writeTarget('CLAUDE.md', 'short\n')
-
-    expect(detectMigrations(TARGET)).toEqual([])
-  })
-
-  it('should name migration-claude-md for an oversized CLAUDE.md', () => {
-    writeTarget('CLAUDE.md', 'line\n'.repeat(400))
-
-    expect(detectMigrations(TARGET)[0]?.skill).toBe('migration-claude-md')
-  })
-
-  it('should not fire on a CLAUDE.md inside the threshold', () => {
-    writeTarget('CLAUDE.md', 'line\n'.repeat(200))
-
-    expect(detectMigrations(TARGET)).toEqual([])
-  })
-
-  it('should not fire on a CLAUDE.md sitting exactly at the threshold', () => {
-    writeTarget('CLAUDE.md', 'line\n'.repeat(250))
-
-    expect(detectMigrations(TARGET)).toEqual([])
-  })
-
-  it('should count lines the way wc does, ignoring the trailing newline', () => {
-    writeTarget('CLAUDE.md', 'line\n'.repeat(300))
-
-    expect(detectMigrations(TARGET)[0]?.reason).toContain('300 lines')
-  })
-
-  it('should name migration-context for docs with no context tier', () => {
-    writeTarget(join('docs', 'architecture.md'))
-
-    expect(detectMigrations(TARGET)[0]?.skill).toBe('migration-context')
-  })
-
-  it('should not fire on docs once the context tier holds files', () => {
-    writeTarget(join('docs', 'architecture.md'))
-    writeTarget(join('.claude', 'context', 'cli.md'))
-
-    expect(detectMigrations(TARGET)).toEqual([])
-  })
-
-  it('should ignore a docs folder carrying no markdown', () => {
-    writeTarget(join('docs', 'diagram.png'))
-
-    expect(detectMigrations(TARGET)).toEqual([])
-  })
-
-  it('should report both cases independently', () => {
-    writeTarget('CLAUDE.md', 'line\n'.repeat(400))
-    writeTarget(join('docs', 'architecture.md'))
-
-    expect(detectMigrations(TARGET).map((entry) => entry.skill)).toEqual([
-      'migration-claude-md',
-      'migration-context',
-    ])
   })
 })

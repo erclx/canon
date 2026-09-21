@@ -256,11 +256,9 @@ seed tree rather than from a fixed set of filenames, so a folder added later is
 covered without a code change. Only an exact stem matches, which leaves a
 suffixed variant such as `TASKS-ARCHIVE.md` unreported.
 
-Route it to `migration-superseded`. That skill resolves the standard governing
-`replacedBy` from the `appliesTo` the standards catalog declares, reads the
-destination shape with `canon standards <name>`, and proposes the split without
-writing. Where a folder has no governing standard, the entry earns a named
-refusal rather than a shape nobody stated.
+No skill splits the file. The standard governing `replacedBy` is the one the
+`appliesTo` the standards catalog declares, and `canon standards <name>` reads
+its destination shape, so the split is the project's own to make.
 
 `unmigrated` names a domain sitting at the root layout an older toolkit installed
 to, with nothing at the path the current one reads. It carries `rootPath`,
@@ -350,7 +348,7 @@ check.
 `reverse` is the one section built by walking the target rather than the
 catalog. Every other surface enumerates toolkit-owned keys and asks whether the
 target matches, so a folder the toolkit deleted appears in none of them. It
-carries `unclaimed`, `migrations`, and `historyUnavailable`.
+carries `unclaimed` and `historyUnavailable`.
 
 `unclaimed` names a folder the target holds at a top-level path the toolkit once
 shipped and has since deleted. The candidate roots come from the toolkit's own
@@ -380,13 +378,6 @@ Only files whose path the toolkit once held are hashed, so a project folder
 colliding on a retired name costs the walk no reads. The cost is that a file the
 toolkit shipped and the target renamed goes unmatched, the same limit the
 `unmigrated` count carries.
-
-`migrations` names a proposal-only skill with a live case in this target. It
-fires on a `CLAUDE.md` past 250 lines for `migration-claude-md`, and on a `docs/` folder
-holding markdown with no populated `canon/context/` for `migration-context`.
-Each entry carries the skill name and the measurement behind it, so a consumer
-can check the proposal before running it. Without the field both skills are
-documented and unreachable from any report.
 
 #### What counts toward the gate
 
