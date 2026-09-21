@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { FAVICON_COLORS, renderFavicon } from './favicon'
+import { FAVICON_COLORS, faviconLink, renderFavicon } from './favicon'
 
 const PAGE_ACCENTS = ['#c76b5f', '#ad4a4b']
 
@@ -32,5 +32,23 @@ describe('renderFavicon', () => {
 
     expect(svg).not.toContain('authoring note')
     expect(svg).not.toContain('currentColor')
+  })
+})
+
+describe('faviconLink', () => {
+  it('should carry the rendered SVG as a data URI that decodes back to it', () => {
+    const svg = renderFavicon(buildMark(), FAVICON_COLORS)
+
+    const href = /^<link rel="icon" href="data:image\/svg\+xml,([^"]+)">$/.exec(
+      faviconLink(svg),
+    )?.[1]
+
+    expect(decodeURIComponent(href ?? '')).toBe(svg)
+  })
+
+  it('should leave no character that ends the attribute or starts a fragment', () => {
+    const link = faviconLink(renderFavicon(buildMark(), FAVICON_COLORS))
+
+    expect(link.slice(link.indexOf(',') + 1, -2)).not.toMatch(/[#"<>\s]/)
   })
 })

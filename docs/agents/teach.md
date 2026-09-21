@@ -172,7 +172,9 @@ canon teach nav regular-expressions --json
 
 With no topic it rewrites every workspace. The teach-root listing is always rewritten regardless, since it reports on every workspace and a scoped run leaving it stale would be a second kind of drift this verb exists to end.
 
-A lesson carries its chrome as four marker pairs the authoring skill writes empty: `canon:teach:style`, `canon:teach:header`, `canon:teach:footnav`, and `canon:teach:scripts`. This verb splices each one from the current workspace state, embedding the shared stylesheet and the script that settles the course panel before the page paints, rebuilding the course sidebar, the breadcrumb and jump menus, the prev/next footer nav, and the behavior scripts, and leaves the authored `<h1>`, lede, body, and quiz between the header and the footnav untouched.
+A lesson carries its chrome as four marker pairs the authoring skill writes empty: `canon:teach:style`, `canon:teach:header`, `canon:teach:footnav`, and `canon:teach:scripts`. This verb splices each one from the current workspace state, embedding the toolkit's favicon, the shared stylesheet, and the script that settles the course panel before the page paints, rebuilding the course sidebar, the breadcrumb and jump menus, the prev/next footer nav, and the behavior scripts, and leaves the authored `<h1>`, lede, body, and quiz between the header and the footnav untouched.
+
+It also deletes the one icon link the authoring skill used to have a session write by hand into a lesson's `<head>`, matched as that exact string, so the page keeps only the icon the `style` region carries. Any other link an author wrote stays.
 
 A workspace carrying no `course.css` gets its stylesheet pair seeded first, so the contents page it links is never unstyled, and an existing `course.css` is never overwritten. The embedded copy drops the seed's `@import` line, which resolved against the lesson's own folder and never loaded anything.
 

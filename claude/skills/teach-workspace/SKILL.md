@@ -18,7 +18,7 @@ The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teac
 - Write nothing outside the workspace folder, apart from the one handoff file Step 6 names. A durable page stays in `reference/` and is copied out by the skill that owns the destination, never by this one.
 - Do not open a second workspace on a subject one already covers. Resume that one.
 - Never promote a lesson. It is generated markup carrying a quiz and a learner, and no request makes it promotable.
-- Carry the toolkit's favicon on every page this skill writes, index and lesson alike, in the `<head>` verbatim: `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
+- Never write a favicon link by hand. `canon teach nav` puts the toolkit's icon on every page it generates and inside a lesson's `style` region, so a hand-written one in a lesson's `<head>` gives the page two.
 
 ## Step 0: let the CLI resolve the workspace root
 

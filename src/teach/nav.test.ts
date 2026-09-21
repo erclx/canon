@@ -8,6 +8,7 @@ import {
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
+import { FAVICON_COLORS } from '@/design/favicon'
 import { focusLine, generateNav } from '@/teach/nav'
 import {
   listWorkspaces,
@@ -30,6 +31,9 @@ const REQUEST = {
 function workspaceDir(slug: string): string {
   return join(teachDir(ROOT), slug)
 }
+
+/** The exact link the authoring skill used to have a session write into every page. */
+const HAND_WRITTEN_ICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
 
 /** The shape the stepper gates, which the skill body now states in full. */
 const RADIO_QUIZ = `<div class="quiz">
@@ -925,5 +929,46 @@ describe('course sidebar', () => {
     expect(lesson).toContain('scrim.className = "sb-scrim"')
     expect(lesson).toContain('e.key === "Escape" && narrow.matches')
     expect(lesson).toContain('first.focus()')
+  })
+
+  it('should carry exactly one icon link in the head of every page kind, built from the favicon pair', async () => {
+    const pages = await generateThreePages()
+
+    for (const page of [pages.root, pages.contents, pages.lesson]) {
+      const head = page.slice(0, page.indexOf('</head>'))
+      const icons = [...head.matchAll(/<link rel="icon" href="([^"]+)"/g)]
+      expect(icons).toHaveLength(1)
+
+      const svg = decodeURIComponent(icons[0][1])
+      expect(svg).toContain(FAVICON_COLORS.light)
+      expect(svg).toContain(FAVICON_COLORS.dark)
+      expect(svg).toContain('prefers-color-scheme: dark')
+      expect(page).not.toContain('rgb(224,114,75)')
+    }
+  })
+
+  it('should drop the icon link the skill once had a lesson write by hand', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    const seeded = await readFile(path, 'utf8')
+    await writeFile(
+      path,
+      seeded.replace(
+        '<!-- canon:teach:style -->',
+        `${HAND_WRITTEN_ICON}\n<!-- canon:teach:style -->`,
+      ),
+    )
+
+    await generateNav(ROOT)
+
+    const head = (await readFile(path, 'utf8')).split('</head>')[0]
+    expect(head.match(/<link rel="icon"/g)).toHaveLength(1)
+    expect(head).not.toContain('rgb(224,114,75)')
   })
 })
