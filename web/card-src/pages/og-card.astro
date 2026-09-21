@@ -18,8 +18,10 @@
  * Declaring it at 1200x630 captures at 2400x1260.
  *
  * `card.config.mjs` is the only config whose page router reaches this file, and
- * `scripts/check-card-exclusion.sh` fails a build that carries the marker
- * below, which is what keeps the route out of the published site.
+ * `bun run web:card:check` fails a build that carries the marker below, which
+ * is what keeps the route out of the published site. That script runs the
+ * stack's `tooling/astro/configs/scripts/check-card-exclusion.sh` in place
+ * against `web/dist` rather than a copy beside this route.
  *
  * This copy differs from the `astro` stack's in three ways. It emits the Geist
  * face itself, since `global.css` names the family and declares no face, the
@@ -36,11 +38,6 @@ import mark from '../../../assets/brand/mark.svg?raw'
 import { FAVICON_COLORS } from '../../../src/design/favicon'
 import { FONT_FACES } from '../../../src/design/fonts'
 
-// Retarget the import above when this project keeps its global stylesheet
-// somewhere else. An unresolved path refuses the card server by name, which is
-// the loud direction: a card captured against no stylesheet renders as an
-// unstyled box and reports success.
-
 // `fontFaceBlock` in `src/design/css.ts` is the shared writer, and it cannot
 // load here: that module imports through `@/`, which this config aliases to
 // `web/src`, so the face is spelled from `FONT_FACES` the way `base.astro` does.
@@ -55,7 +52,7 @@ const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.w
   <head>
     <meta charset="utf-8" />
     <title>Social card</title>
-    <!-- Read by scripts/check-card-exclusion.sh. A build carrying this tag
+    <!-- Read by bun run web:card:check. A build carrying this tag
          published the card route. Do not reword it. -->
     <meta name="og-card-marker" content="og-card-marker" />
     <style is:inline set:html={fontFace}></style>
