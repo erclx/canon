@@ -49,6 +49,8 @@
     "web:previews": "bun scripts/core/regen-web-previews.ts",
     "web:build": "bun run web:tokens && bun run web:favicon && bun run web:previews && cd web && astro check && astro build",
     "web:gallery": "cd web && astro build --config gallery.config.mjs",
+    "web:card": "cd web && astro dev --config card.config.mjs",
+    "web:card:check": "PROJECT_ROOT=web bash tooling/astro/configs/scripts/check-card-exclusion.sh",
     "web:preview": "cd web && astro preview",
     "web:e2e": "cd web && playwright test"
   },
