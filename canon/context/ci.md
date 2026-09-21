@@ -101,6 +101,8 @@ An exit-code flag counts only states some documented action can drive to zero, s
 
 The runner installs no browser binary, so a test needing one skips rather than fails, and a green pipeline is not evidence that test ran. `src/demo/drive.e2e.test.ts` guards itself with a launch probe and reports the skip in its own header. Adding the install would slow every run for one suite, so the gap stays open and a change to the demo driver is verified locally. The plugin CLI install above is the precedent for closing it if the count of such tests grows.
 
+`refresh-capture-frames.yml` installs `fonts-noto-mono` before the capture step, because the frames declare Noto Sans Mono and the capture guard refuses any render that falls back to another face. Nothing in the gate sees the absence, since the workflow runs only after a merge, so a `Check Frame Font` step fails by family name ahead of the capture. On Ubuntu 24.04 that package ships Noto Sans Mono and `fonts-noto-core` ships none of it.
+
 ## Releases
 
 ### The release pull request
