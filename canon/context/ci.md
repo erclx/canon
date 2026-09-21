@@ -105,6 +105,12 @@ The runner installs no browser binary, so a test needing one skips rather than f
 
 The commit-and-push step runs with `HUSKY: 0`, because `pre-push` runs `bun run check` and its format step shells out to `shfmt`, which the runner does not install, so the push was refused and no pull request opened. Installing the tool, scoping the hook, and `--no-verify` were the alternatives. Installing fixes one missing tool per failure, scoping edits `.husky/pre-push` for every other pusher, and `--no-verify` leaves `commit-msg` live. The pull request the push opens runs every stage in `verify.yml` against the source, so the local gate is not the only check. The `readme-screenshot.yml` config carries the same setting for the same reason, and the CI workflow rule states it. Nothing local reproduces a missing runner tool, so only a run on `main` proves the fix.
 
+`refresh-capture-frames.yml` also owns the home page baseline in `assets/evidence/home/`, through `scripts/core/capture-home.sh`, the same script `pr-visual-checks.yml` runs. It rides the branch and pull request of the hero frames, since one merge moves both sets and the `concurrency` group already serializes runs. A second job would need its own merge order against the first.
+
+Its path filter adds `web/**` and `src/audits/**`, the two render inputs the hero frames do not share. `assets/**` stays off, because that folder holds this job's own outputs. The pull request job only reports whether its frames match, since committing back to a pull request branch was moved off deliberately and nothing reaches `main` without a reviewer.
+
+Two things stay unmeasured. The refresh runner installs `fonts-noto-mono` and the pull request runner does not, so a face resolving against that font would make the next pull request report drift the refresh wrote a moment earlier. Byte-determinism was measured across two runs of one job, not across the two. The first run also lands the backlog of frames stale since `980c58f3` as one large pull request.
+
 ## Releases
 
 ### The release pull request

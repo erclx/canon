@@ -25,6 +25,13 @@ on:
       - 'assets/brand/mark.svg'
       - 'assets/captures/*.tmpl'
       - 'scripts/core/regen-hero.sh'
+      # The inputs to the home render the hero frames do not share. The page is
+      # built from web/ and reads its counts from the audit catalog under
+      # src/audits/. assets/** stays off the list, since it holds the outputs
+      # this job writes and would start a run from its own merge.
+      - 'web/**'
+      - 'src/audits/**'
+      - 'scripts/core/capture-home.sh'
   workflow_dispatch:
 
 permissions:
@@ -90,6 +97,14 @@ jobs:
           fi
           bun src/cli.ts capture assets/captures --selector .window --out assets/evidence
 
+      # The home baseline `canon pr evidence` compares a page change against.
+      # pr-visual-checks.yml runs the same script and reports whether its frames
+      # match, so a merge that moves the render leaves a reviewed pull request
+      # behind it instead of a stale baseline. It writes under assets/evidence,
+      # which the status check and the add below already cover.
+      - name: Capture Home Baseline
+        run: bash scripts/core/capture-home.sh
+
       # Hooks off, since pre-push runs a check whose format step needs shfmt, which the runner lacks. verify.yml checks the pull request.
       - name: Open or Update the Refresh Pull Request
         env:
@@ -114,5 +129,6 @@ jobs:
               --body "## Key Changes
 
           - Regenerates the count and token bearing frames, their images, and their stamps from main.
+          - Recaptures the home page baseline under assets/evidence/home.
           - Merge by hand. Nothing in this workflow merges it."
           fi
