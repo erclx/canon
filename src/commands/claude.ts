@@ -1391,7 +1391,7 @@ async function runSkillsAudit(
     frameError(message)
     if (opts.json) {
       process.stdout.write(
-        `${JSON.stringify({ root, reason: 'conflicting-flags', message })}\n`,
+        `${JSON.stringify({ root, kind: 'refused', reason: 'conflicting-flags', message })}\n`,
       )
     }
     return 1
