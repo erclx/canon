@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.111.0](https://github.com/erclx/canon/compare/v4.110.0...v4.111.0) (2026-09-21)
+
+
+### Features
+
+* **ci:** refresh the home baseline from the post-merge job ([#1806](https://github.com/erclx/canon/issues/1806)) ([c94b636](https://github.com/erclx/canon/commit/c94b6364d18c1eec5640f3af1f3698929ecfe6c5))
+* **claude:** retire the four migration skills ([#1802](https://github.com/erclx/canon/issues/1802)) ([c23611c](https://github.com/erclx/canon/commit/c23611c4bfb6db2b186520e8dda9654d5458d5e6))
+* **teach:** bring the masthead and jump menu to nav-04 parity ([#1805](https://github.com/erclx/canon/issues/1805)) ([8290d92](https://github.com/erclx/canon/commit/8290d9283cc80beaadcee82b7404c045b6033bb0))
+
+
+### Bug Fixes
+
+* **ci:** push the refresh branch with hooks off ([#1801](https://github.com/erclx/canon/issues/1801)) ([3c8bc4c](https://github.com/erclx/canon/commit/3c8bc4c98584800e1d650c3be555645cd451ae85))
+
 ## [4.110.0](https://github.com/erclx/canon/compare/v4.109.0...v4.110.0) (2026-09-21)
 
 
