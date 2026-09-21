@@ -103,6 +103,24 @@ Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests). On fail
 
 Do not loop. Do not bypass hooks.
 
+### Skill arrivals
+
+A plan that calls the work a merge or a refactor can still land a new skill, and this chain builds only what the plan describes, so the plan's framing cannot decide whether the creation-time questions get asked. The diff decides. Run:
+
+```bash
+canon claude skills audit --arrivals --json
+```
+
+Branch on the record's `kind` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
+
+- `kind: 'measured'`, `arrivals` empty. No skill body arrived. Continue to Step 4.
+- `kind: 'measured'`, `arrivals` non-empty. Load the `canon:create-skill` questions for each named skill and answer the two that gate in writing, then carry the third into that skill's `REQUIREMENT.md` as its review criterion. Keep the answers for `git-ship`, which puts them in the pull request description under `## Technical Context`. This step reports and answers. It cannot check that the answers are good, so it never stops the chain.
+- `kind: 'refused'`. Report the `message` and continue to Step 4. An unreadable base means the check did not run, which is not the same as no arrivals.
+
+#### When the verb is absent
+
+The verb ships with the CLI and this body ships with the plugin, so a target holding an older binary meets a missing flag. Report that the arrival check did not run rather than reading the missing flag as no arrivals, and continue to Step 4.
+
 ## Step 4: test order
 
 Run `canon gov test-order --json` from the worktree this chain is building in, which is the one tree holding the branch's own commits. The Guards send a `.canon/plans/` and a `.canon/review/` read to the main worktree root and this is not one of those: that checkout sits on the trunk on an ordinary run, so the range closes on itself there and every finding the branch carries reads as clean.

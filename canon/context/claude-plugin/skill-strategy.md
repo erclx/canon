@@ -257,6 +257,8 @@ Both skills take `draft-docs`'s five-step shape whole rather than inventing a se
 
 The redundancy audit below runs outward, against community counterparts. Inward, against the catalog's own two zero-cost tells, a folder wrapping something already reachable and a folder nobody calls, `create-skill` asks the first two before a folder exists, and `570-skill.md` carries the same check for whatever creates a `SKILL.md` some other way.
 
+A third path skips both, a branch that lands a skill body under a plan calling the work a merge or a refactor. `auto-ship` reads the diff through `canon claude skills audit --arrivals` and asks the questions for each body absent at the merge base, so the plan's framing no longer decides. The verb reports an arrival and cannot grade the answers, which is why the step answers and never gates, and why no push stage fails on an arrival without recorded answers.
+
 The third question, whether anything invokes the skill beyond the author typing its name, has no answer at creation time. It ships in the skill's own `REQUIREMENT.md` as a review criterion, read against a usage census rather than gated on up front.
 
 ### What a verdict requires

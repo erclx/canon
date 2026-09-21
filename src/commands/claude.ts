@@ -21,6 +21,7 @@ import {
   type Seed,
 } from '@/claude/seeds'
 import { listSeeds, readSeedContents } from '@/claude/seeds-list'
+import { readArrivals } from '@/claude/skills-arrivals'
 import {
   auditExitCode,
   auditSkills,
@@ -94,6 +95,7 @@ interface SkillsListOptions {
 interface SkillsAuditOptions {
   readonly json?: boolean
   readonly requirementsOnly?: boolean
+  readonly arrivals?: boolean
 }
 
 interface SkillsDriftOptions {
@@ -385,6 +387,10 @@ export function register(program: Command): void {
       '--requirements-only',
       'Run the gating requirement-presence check alone',
     )
+    .option(
+      '--arrivals',
+      'List each SKILL.md present in the working tree and absent at the merge base',
+    )
     .addHelpText(
       'after',
       [
@@ -397,10 +403,14 @@ export function register(program: Command): void {
         'Only a missing REQUIREMENT.md sets a failing exit code. Name, description,',
         'folder, and requirement-section findings are advisory.',
         '',
+        '--arrivals reports rather than gates, so it exits 0 whether or not a body',
+        'arrived, and 1 when no merge base resolves.',
+        '',
         'Examples:',
         '  canon claude skills audit',
         '  canon claude skills audit --json',
         '  canon claude skills audit --requirements-only',
+        '  canon claude skills audit --arrivals --json',
         '',
       ].join('\n'),
     )
@@ -1375,6 +1385,8 @@ async function runSkillsAudit(
   opts: SkillsAuditOptions,
 ): Promise<number> {
   const root = resolve(path ?? process.cwd())
+  if (opts.arrivals) return runSkillsArrivals(root, opts.json ?? false)
+
   const gateOnly = opts.requirementsOnly ?? false
   const report = await auditSkills(root)
 
@@ -1429,6 +1441,32 @@ async function runSkillsAudit(
   }
 
   return auditExitCode(report)
+}
+
+/** Reports arrivals and never gates, since it cannot check the answers a session gives. */
+async function runSkillsArrivals(
+  root: string,
+  emitJson: boolean,
+): Promise<number> {
+  const result = await readArrivals(root)
+
+  intro('canon claude skills audit --arrivals')
+  if (result.kind === 'refused') {
+    logStep('Refused')
+    logWarn(result.message)
+  } else if (result.arrivals.length === 0) {
+    logStep('No skill body arrived on this branch')
+  } else {
+    logStep(`${result.arrivals.length} skill body arrived on this branch`)
+    pipeOutput(result.arrivals.map((arrival) => arrival.path).join('\n'))
+  }
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify({ root, ...result })}\n`)
+  }
+
+  return result.kind === 'refused' ? 1 : 0
 }
 
 function refuseAudit(

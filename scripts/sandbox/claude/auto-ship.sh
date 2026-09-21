@@ -13,7 +13,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "happy-path" "prose-informational" "prose-executable" "test-order-violation"
+  select_or_route_scenario "Which scenario?" "happy-path" "prose-informational" "prose-executable" "test-order-violation" "skill-arrival"
 
   log_step "Configuring autoship environment ($ANCHOR_REPO)"
 
@@ -272,6 +272,8 @@ EOF
     log_info "         the diff is all markdown, so the extension test passes and the path test fails"
     log_info "         .claude/skills/ is a behavior path, so Step 6 must invoke review-branch"
     log_info "         a skipped review here is the defect this arm exists to catch"
+    log_info "         Step 3 reads the skill arrival check as no arrivals, since the body was"
+    log_info "         edited in place, so no creation-time questions are asked"
     ;;
   "test-order-violation")
     cat <<'EOF' >package.json
@@ -406,6 +408,72 @@ EOF
     log_info "         and stopping in the CI watch on the harness background ceiling. baseRef"
     log_info "         took, the branch carried both shout commits intact, Step 4 reported the"
     log_info "         one finding, and whisper shipped with its test."
+    ;;
+  "skill-arrival")
+    cat <<'EOF' >package.json
+{
+  "name": "sandbox-autoship-arrival",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "echo 'format ok'"
+  }
+}
+EOF
+
+    cat <<'EOF' >CLAUDE.md
+# My App
+
+Service repo carrying its own project-local skills.
+
+## Commands
+
+- `bun run check`: format check
+EOF
+
+    mkdir -p docs
+    cat <<'EOF' >docs/intro.md
+# Intro
+
+Project overview goes here.
+EOF
+
+    git add . && git commit --allow-empty -m "feat(project): initial service layout" --no-verify -q
+    git push --force origin HEAD:main
+
+    git push origin --delete feat/merge-release-checks -q 2>/dev/null || true
+
+    mkdir -p .canon/plans .canon/review
+
+    # The plan calls the work a merge on purpose. The trigger is the diff, so
+    # the framing must not decide whether the questions are asked.
+    cat <<'EOF' >.canon/plans/feature-merge-release-checks.md
+# Feature: merge the release checks
+
+Merge the two ad hoc release checks into one project-local skill so the steps live in one place.
+
+**Files to touch:**
+
+- `.claude/skills/release-check/SKILL.md`: new, one step per former check
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.
+EOF
+
+    log_step "Scenario ready: autoship over a plan framed as a merge that adds a skill body"
+    log_info "Context: main, with a plan staged for feat/merge-release-checks adding one SKILL.md"
+    log_info "Action:  /auto-ship"
+    log_info "Expect:  Step 3 runs canon claude skills audit --arrivals --json, which lists"
+    log_info "         .claude/skills/release-check/SKILL.md, then the chain loads create-skill's"
+    log_info "         questions and records the answers for the pull request description"
+    log_info "         an unasked question here is the defect this arm exists to catch"
+    log_info "         the edit-only counterpart is prose-executable, which reports no arrivals"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"
