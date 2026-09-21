@@ -306,9 +306,19 @@ describe('buildDesignCss', () => {
         'display: none',
       )
 
+      // Scoped to each selector inside the query rather than searched across
+      // the whole block, so deleting either rule's own `display` fails here
+      // instead of being satisfied by a sibling that happens to declare one.
       const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
-      expect(narrow?.[1]).toContain('display: inline-flex')
-      expect(narrow?.[1]).toContain('display: block')
+      expect(narrow).not.toBeNull()
+
+      // `declarationsOf` keys on the selector's own line untrimmed, so a rule
+      // indented inside a query is invisible to it until the indent is dropped.
+      const inQuery = (narrow?.[1] ?? '').replace(/^ {2}/gm, '')
+      expect(declarationsOf(inQuery, '.sb-close')).toContain(
+        'display: inline-flex',
+      )
+      expect(declarationsOf(inQuery, '.sb-scrim')).toContain('display: block')
     })
 
     it('should take a shut panel out of the tab order rather than only out of sight', () => {
