@@ -1,7 +1,10 @@
 import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
+import {
+  TEACH_SIDEBAR_BREAKPOINT,
+  TEACH_STYLESHEET_COMPONENTS,
+} from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
@@ -241,11 +244,10 @@ export function focusLine(
  * threshold on its own was built and reverted, since it hides the panel on a
  * lesson too.
  */
-function headScript(page: 'index' | 'lesson', lessons: number): string {
+function headScript(page: 'index' | 'lesson'): string {
   return `<script>(function(){var r=document.documentElement,s=null;
 r.dataset.page="${page}";
-r.dataset.lessons="${lessons}";
-if(matchMedia("(max-width: 1100px)").matches){r.classList.add("sb-shut");return}
+if(matchMedia("(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)").matches){r.classList.add("sb-shut");return}
 try{s=localStorage.getItem("teach-sb")}catch(e){}
 var idx=r.dataset.page==="index";
 if(s==="shut"||(s===null&&idx))r.classList.add("sb-shut");
@@ -260,11 +262,25 @@ const SIDEBAR_SCRIPT = `<script>
   if (!panel) return;
 
   var fold = document.querySelector(".sb-fold");
-  var narrow = matchMedia("(max-width: 1100px)");
+  var narrow = matchMedia("(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)");
 
+  var FOCUSABLE = "a[href], button:not([disabled]), summary, input, [tabindex]:not([tabindex='-1'])";
+
+  function panelStops() {
+    return Array.prototype.slice.call(panel.querySelectorAll(FOCUSABLE))
+      .filter(function (el) { return el.offsetParent !== null || el === document.activeElement; });
+  }
+
+  /* The focus return belongs here rather than on the close control, because all
+     three routes out land here and only one of them used to move focus. The
+     shut panel takes visibility: hidden 180ms later, so a reader who pressed
+     Escape kept focus on a control that then disappeared under them and the
+     browser dropped them at the top of the document. */
   function shut() {
+    var inside = panel.contains(document.activeElement);
     root.classList.add("sb-shut");
     try { localStorage.setItem("teach-sb", "shut"); } catch (e) {}
+    if (inside && fold) fold.focus();
   }
 
   if (fold) fold.addEventListener("click", function () {
@@ -285,7 +301,30 @@ const SIDEBAR_SCRIPT = `<script>
   scrim.addEventListener("click", shut);
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && narrow.matches) shut();
+    if (e.key === "Escape" && narrow.matches) { shut(); return; }
+
+    /* The scrim says the lesson is unavailable, so Tab must not reach it.
+       Moving focus into the panel on open only defers this by however many
+       controls the panel holds. */
+    if (e.key !== "Tab") return;
+    if (!narrow.matches || root.classList.contains("sb-shut")) return;
+
+    var stops = panelStops();
+    if (!stops.length) return;
+
+    var first = stops[0];
+    var last = stops[stops.length - 1];
+
+    if (!panel.contains(document.activeElement)) {
+      (e.shiftKey ? last : first).focus();
+      e.preventDefault();
+    } else if (e.shiftKey && document.activeElement === first) {
+      last.focus();
+      e.preventDefault();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      first.focus();
+      e.preventDefault();
+    }
   });
 
   /* The panel covers the masthead and the toggle that opened it, so it carries
@@ -295,10 +334,7 @@ const SIDEBAR_SCRIPT = `<script>
   close.className = "sb-close";
   close.setAttribute("aria-label", "Close the course panel");
   close.textContent = "\\u00d7";
-  close.addEventListener("click", function () {
-    shut();
-    if (fold) fold.focus();
-  });
+  close.addEventListener("click", shut);
   panel.appendChild(close);
 
   var MIN = 208, MAX = 296, DEF = 256;
@@ -607,7 +643,6 @@ function pageHead(
   title: string,
   cssHref: string | undefined,
   embeddedCss: string | undefined,
-  lessons: number,
 ): string {
   const style =
     embeddedCss === undefined
@@ -622,7 +657,7 @@ function pageHead(
 <title>${escapeHtml(title)}</title>
 ${FAVICON}
 ${style}
-${headScript('index', lessons)}
+${headScript('index')}
 </head>
 `
 }
@@ -883,7 +918,7 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
     })
     .join('')
 
-  return `${pageHead('Learning workspaces', TEACH_STYLESHEET, undefined, workspaces.length)}<body>
+  return `${pageHead('Learning workspaces', TEACH_STYLESHEET, undefined)}<body>
 ${renderHeader(segments, sidebar)}
 <main class="wide-body">
 
@@ -1008,7 +1043,7 @@ async function renderContentsPage(
     .filter((section) => section !== '')
     .join('\n\n')
 
-  return `${pageHead(`${title}, contents`, `${TEACH_ASSETS}/${TEACH_STYLESHEET}`, undefined, metas.length)}<body>
+  return `${pageHead(`${title}, contents`, `${TEACH_ASSETS}/${TEACH_STYLESHEET}`, undefined)}<body>
 ${renderHeader(segments, sidebar)}
 <main class="wide-body">
 
@@ -1141,7 +1176,7 @@ async function rewriteLesson(
     // one region that sits inside `<head>`.
     [
       'style',
-      `<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson', metas.length)}`,
+      `<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson')}`,
     ],
     ['header', header],
     ['footnav', `${renderFootNav(metas, index)}\n${PANE_CLOSE}`],

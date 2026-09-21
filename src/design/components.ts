@@ -200,6 +200,16 @@ export const COMPONENTS: readonly Component[] = [
   HAND_DRAWN_FIGURE,
 ]
 
+/**
+ * Where the course sidebar stops being a column and becomes an overlay.
+ *
+ * The media query below and both `matchMedia` calls in `@/teach/nav` read this
+ * one value. Three literals is what it was, and each had a test asserting its
+ * own copy, so a half-finished move passed green while the scripts switched at
+ * one width and the layout at another.
+ */
+export const TEACH_SIDEBAR_BREAKPOINT = 1100
+
 const TEACH_CHROME: Component = {
   name: 'teach-chrome',
   note: [
@@ -856,7 +866,7 @@ html.sb-shut .sb-grip { display: none; }
    breadcrumb caret does not carry. The panel becomes an overlay instead, and it
    states its own ground because \`.sb\` is transparent by design for a column
    sitting on the page rather than floating over the lesson. */
-@media (max-width: 1100px) {
+@media (max-width: ${TEACH_SIDEBAR_BREAKPOINT}px) {
   .pane { border-left: 0; }
 
   .sb {

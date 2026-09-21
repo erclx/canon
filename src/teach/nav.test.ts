@@ -3,6 +3,11 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  TEACH_SIDEBAR_BREAKPOINT,
+  TEACH_STYLESHEET_COMPONENTS,
+} from '@/design/components'
+import { buildDesignCss } from '@/design/css'
 import { focusLine, generateNav } from '@/teach/nav'
 import {
   listWorkspaces,
@@ -799,12 +804,27 @@ describe('course sidebar', () => {
     expect(many.lesson).toContain('class="sb-filter"')
   })
 
-  it('should declare the page kind and lesson count so the pre-paint script can size the panel', async () => {
+  it('should declare the page kind, which is what the pre-paint script branches on', async () => {
     const pages = await generateThreePages()
 
     expect(pages.contents).toContain('r.dataset.page="index"')
     expect(pages.lesson).toContain('r.dataset.page="lesson"')
-    expect(pages.lesson).toContain('r.dataset.lessons="1"')
+    expect(pages.lesson).not.toContain('r.dataset.lessons')
+  })
+
+  it('should switch both scripts at the width the stylesheet switches at', async () => {
+    const { lesson } = await generateThreePages()
+    const css = buildDesignCss(undefined, {
+      components: TEACH_STYLESHEET_COMPONENTS,
+    })
+
+    const query = `(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)`
+    expect(
+      lesson.match(
+        new RegExp(`matchMedia\\("${query.replace(/[()]/g, '\\$&')}"\\)`, 'g'),
+      ),
+    ).toHaveLength(2)
+    expect(css).toContain(`@media ${query} {`)
   })
 
   it('should settle the panel state in the head, before anything paints', async () => {
@@ -814,6 +834,28 @@ describe('course sidebar', () => {
     expect(head).toContain('r.classList.add("sb-shut")')
     expect(head).toContain('s==="shut"||(s===null&&idx)')
     expect(head).toContain('localStorage.getItem("teach-sb-w")')
+  })
+
+  it('should return focus to the toggle from every route that shuts the overlay', async () => {
+    const { lesson } = await generateThreePages()
+
+    const shutBody = /function shut\(\) \{([\s\S]*?)\n  \}/.exec(lesson)?.[1]
+    expect(shutBody).toContain('panel.contains(document.activeElement)')
+    expect(shutBody).toContain('fold.focus()')
+
+    // The close control returns focus by calling shut(), not on its own, so
+    // Escape and the scrim cannot diverge from it.
+    expect(lesson).toContain('close.addEventListener("click", shut)')
+  })
+
+  it('should contain Tab within the overlay while it is open', async () => {
+    const { lesson } = await generateThreePages()
+
+    expect(lesson).toContain('if (e.key !== "Tab") return;')
+    expect(lesson).toContain('panelStops()')
+    expect(lesson).toContain('last.focus()')
+    expect(lesson).toContain('first.focus()')
+    expect(lesson).toContain('e.preventDefault()')
   })
 
   it('should open the panel as an overlay below the breakpoint, with a scrim and an escape', async () => {
