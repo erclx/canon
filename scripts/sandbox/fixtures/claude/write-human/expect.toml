@@ -24,8 +24,8 @@ write_scope = ["docs/**"]
 # This is a judgment rather than a bound, and the distinction is worth stating
 # because the number looks like a measurement. The cost has a moving part: a run
 # may or may not dereference the tells catalog, and the rule calls a cost with
-# something that moves variable, which is why `migration-superseded/retired`
-# sits at the default after a single 17-turn pass. One observation does not
+# something that moves variable, which is why a proposal-only arm, since
+# retired, sat at the default after a single 17-turn pass. One observation does not
 # bound a variable cost.
 #
 # Twenty against eight is deliberately generous for that reason. It stays under

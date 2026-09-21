@@ -25,7 +25,7 @@ Read three fields off the same report, then two verbs:
 
 - `unmigrated`: a domain still at the root layout with nothing under `.claude/`. The most urgent finding, because such a domain reports no drift of its own while being entirely behind.
 - `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own.
-- `reverse`: `unclaimed` names folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`. `migrations` names a proposal-only skill with a live case here and the `reason` behind it.
+- `reverse`: `unclaimed` names folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`.
 - `canon context audit --json`: required sections, entry length, citations, and index drift across the context folder.
 - `canon records validate <kind> --json`, once per record folder the target carries.
 
@@ -33,7 +33,7 @@ Read three fields off the same report, then two verbs:
 - Behind: any of those carrying an entry. Name the entry and its attribution.
 - Unread: `historyUnavailable` set on `reverse`, a `reverse` key the report does not carry at all, or either verb refusing. A missing `reverse` key is a binary predating the field rather than a target with nothing unclaimed.
 
-Routes by finding. `unmigrated` routes to a relocation the user runs, since no command moves it. `superseded` routes to `migration-superseded`. A `migrations` entry routes to the skill its `skill` field names, spelled as the report spells it. An `unclaimed` folder carrying `project` attribution routes nowhere, since history proved the project owns it.
+Routes by finding. `unmigrated` routes to a relocation the user runs, since no command moves it. `superseded` routes to a split the user makes, since no command moves the content and no skill proposes it. An `unclaimed` folder carrying `project` attribution routes nowhere, since history proved the project owns it.
 
 ## 3. Governance rules
 

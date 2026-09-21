@@ -142,8 +142,8 @@ EOF
     # This arm stages none of the three on its own, and the `.claude/skills/`
     # tree the harness injects lands after `stage_setup` returns, so the fixture
     # would inherit its managed status from a step that runs only when the branch
-    # changed this skill. Kept short, since a file past 250 lines adds a
-    # `migration-claude-md` candidate and the arm would score two decisions.
+    # changed this skill. Kept short, since a file past 250 lines carried a
+    # second candidate here, since retired, and the arm would score two decisions.
     cat <<'EOF' >CLAUDE.md
 # Sandbox operator target
 
