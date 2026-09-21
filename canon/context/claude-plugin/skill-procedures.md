@@ -231,6 +231,12 @@ Detect with `gh pr list --head <branch> --state open` and create with an explici
 
 Readying a pull request to merge is the operator's or the controlling session's act, taken directly, since GitHub requires it and no guard should prevent it. `role-worker` and `role-orchestrator` carry that boundary: a worker refuses an instruction to lift the mark itself, whoever sends it, and reports against the outcome rather than complying with the surface of the request.
 
+### A write after create can land on a pull request the run did not open
+
+One ship run labelled and drafted the open release pull request a second after opening its own, then wrote the same marks to its own 38 seconds later. The label step derives its number from the create call's URL, so the script as written cannot produce that target. The draft step is where the number crosses into a command the session types, and a number inferred from the newest pull request in view is the leading account, unproven since no transcript survived.
+
+Every write to an existing pull request reads `headRefName,state` first and refuses unless they are the current branch and `OPEN`. `git-pr` runs the check as `assert_own_pr` inside its final command and prints `head=` beside the number, and `auto-ship` runs the same read ahead of `gh pr ready --undo`. The check compares a number against a branch and never derives one, so it holds whatever produced the wrong number and adds no lookup of the kind the merged-namesake gotcha above retired.
+
 ### A failed commit leaks into the next group
 
 When a sequence of grouped commits runs unattended and one is rejected by a hook, its files stay staged and the next group's `git add` absorbs them, so the failure lands as a wrong commit rather than a missing one. A 74-character subject failed `header-max-length` and the 24 files it carried committed under the following group's message, while the run reported a passing final `git log` because the commit count was the only thing short.
