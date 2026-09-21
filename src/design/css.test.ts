@@ -299,6 +299,18 @@ describe('buildDesignCss', () => {
       expect(narrow?.[1]).toContain('.sb-close')
     })
 
+    it('should hide the overlay-only controls above the breakpoint, where the script still appends them', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, '.sb-close, .sb-scrim')).toContain(
+        'display: none',
+      )
+
+      const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
+      expect(narrow?.[1]).toContain('display: inline-flex')
+      expect(narrow?.[1]).toContain('display: block')
+    })
+
     it('should take a shut panel out of the tab order rather than only out of sight', () => {
       const css = teachCss()
 

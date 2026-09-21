@@ -719,6 +719,12 @@ html.sb-shut .sb { flex-basis: 0; width: 0; overflow: hidden; }
 html.sb-drag { cursor: col-resize; user-select: none; }
 html.sb-shut .sb-grip { display: none; }
 
+/* Both belong to the overlay and the script appends both on every page, so
+   each is hidden until the breakpoint hands it a job. Without this the close
+   control renders as an unstyled button stretched across the column, and the
+   scrim becomes a flex item of the body. */
+.sb-close, .sb-scrim { display: none; }
+
 /* ---- Footer navigation, the only place it appears ---- */
 
 .nav {
@@ -907,6 +913,9 @@ html.sb-shut .sb-grip { display: none; }
      It carries no border, at 1.75rem to match \`.sb-fold\` and \`.theme\`, which also clears
      the 24 pixel pointer target floor. */
   .sb-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     top: 0.55rem;
     right: 0.6rem;
@@ -927,6 +936,7 @@ html.sb-shut .sb-grip { display: none; }
   .sb-close:hover { color: var(--color-text); background: var(--color-surface); }
 
   .sb-scrim {
+    display: block;
     position: fixed;
     inset: 0;
     z-index: 55;
