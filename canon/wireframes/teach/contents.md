@@ -39,7 +39,7 @@ The sidebar here lists this workspace's lessons and marks none of them, since no
 │  Reference pages                                                       │← h2, dropped when the
 │  R1  Scoping a design problem before proposing components              │  workspace has none
 │                                                                        │
-│  Glossary                                                       [7]   │← h2, count badge,
+│  Glossary                                                              │← h2, always present
 │  Filter terms                                                7 terms │← filter input, no border
 │                                                                        │  with the term count
 │  Agency: Taking on work nobody assigned, and fixing a problem on      │← scrollable term list

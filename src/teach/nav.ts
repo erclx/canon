@@ -880,7 +880,7 @@ function renderGlossarySection(
     .map(renderGlossaryGroup)
     .join('')
 
-  return `<h2>Glossary <span class="count">${entries.length}</span></h2>
+  return `<h2>Glossary</h2>
 <div class="filter-row"><input class="filter" type="search" id="gfilter" aria-label="Filter glossary terms" aria-controls="gloss" placeholder="Filter terms"><span class="filter-count" id="gloss-count" aria-live="polite">${termCount(entries.length, entries.length)}</span></div>
 <div class="gloss" id="gloss"><p class="empty">No term matches that. <button type="button" class="clear">Clear the filter</button></p>${rendered}</div>
 `

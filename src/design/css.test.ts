@@ -552,7 +552,6 @@ describe('buildDesignCss', () => {
       ['.road-t', '--t5'],
       ['.toc .state', '--t5'],
       ['.toc .ext', '--t4'],
-      ['h2 .count', '--t5'],
       ['.gloss .empty .clear', '--t4'],
       ['.opt::before', '--t6'],
       ['.opt[data-state="chosen"]::after', '--t6'],
@@ -616,6 +615,10 @@ describe('buildDesignCss', () => {
 
         expect(css).not.toContain('.toc .state::before')
         expect(css).not.toMatch(/\.toc \.state\.(done|next)/)
+      })
+
+      it('should state the glossary size once, in the live count beside the filter', () => {
+        expect(teachCss()).not.toContain('h2 .count')
       })
 
       it('should set the glossary filter with no border on the page ground', () => {

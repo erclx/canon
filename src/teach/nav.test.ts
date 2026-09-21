@@ -704,6 +704,7 @@ describe('generateNav', () => {
       'utf8',
     )
 
+    expect(contents).toContain('<h2>Glossary</h2>')
     expect(contents).toMatch(
       /<div class="filter-row"><input class="filter"[^>]*id="gfilter"[^>]*><span class="filter-count" id="gloss-count"[^>]*>1 term<\/span><\/div>/,
     )

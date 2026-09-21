@@ -1671,18 +1671,6 @@ footer {
 
 /* ---- Glossary view, generated from the markdown source ---- */
 
-h2 .count {
-  font-family: var(--teach-mono);
-  font-size: var(--t5);
-  font-weight: 400;
-  color: var(--color-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 99px;
-  padding: 0.1rem 0.5rem;
-  margin-left: 0.5rem;
-  vertical-align: middle;
-}
-
 /* No border, sitting on the page ground, with the count beside it. The border and the
    reading surface are what made the control look like something to fill in,
    and the count is what says it filters the list under it. */
