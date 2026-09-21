@@ -31,3 +31,11 @@ export function renderFavicon(mark: string, colors: FaviconColors): string {
 </svg>
 `
 }
+
+/**
+ * The `<link rel="icon">` a page carries the rendered favicon in, inlined so a
+ * generated page needs no sibling file and no href that varies with its depth.
+ */
+export function faviconLink(svg: string): string {
+  return `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(svg)}">`
+}
