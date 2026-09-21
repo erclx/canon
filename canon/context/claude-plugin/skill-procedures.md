@@ -27,17 +27,7 @@ The fallback does not key on `historyUnavailable`, since that field reports fail
 
 ### Where the fallback stops being the safe answer
 
-`migration-superseded` reads the `superseded` array off the same report and takes the opposite branch when the key is absent. It stops and names the CLI rather than degrading to a listing, because the two detections fail differently. `unmigrated` pairs against domain folders whose worst listing error is an unfiltered count, while `superseded` pairs against the seed subdirectory names and an uppercase stem is not the test.
-
-A listing of `.claude/*.md` also reaches `ARCHITECTURE.md`, `REQUIREMENTS.md`, and `DESIGN.md`, each a single file the layout intends to stay one, so the fallback that costs a count on one skill costs three shredded documents on the other. A fallback is worth having when its failure is an imprecision and worth refusing when its failure is a proposal nobody can undo.
-
-The destination standard is the second place the skill declines a route every sibling takes. `skill.md` has a body cite the plugin copy at `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, which is correct for a standard the skill follows itself. Here the standard is the project's own agreement about the shape of a folder, resolved by matching the replacement path against the `appliesTo` the standards catalog declares.
-
-A proposal drawn from the plugin copy would hand back a shape the project never adopted, against content only the user can place, so an absent standard names itself and the install command and proposes nothing. Resolving through `appliesTo` rather than through the folder stem is what lets the four seed folders nobody has observed degrade by mechanism, since `.claude/hooks/` matches no entry and earns a decline rather than a guessed shape.
-
-### Reading the report for a precondition rather than a detection
-
-`migration-standards-drop` reads the same report for its `skew` object alone and detects from a directory read. Nothing in the report names an installed `.claude/standards/` tree: `src/sync/check.ts` registers governance alone and `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty by decision, so there is no key to test for and no absent-key branch to get wrong. What the report answers instead is whether the sync the proposal names may run at all, since a binary behind the published version installs rules citing the path the move removes. The absent-key discipline above still applies to the field it does read, where an unread version reports as unknown and continues rather than as current.
+A fallback is worth having when its failure is an imprecision and worth refusing when its failure is a proposal nobody can undo. `unmigrated` pairs against domain folders whose worst listing error is an unfiltered count, so a skill reading it degrades to a listing when the key is absent. The `superseded` pairing failed differently: a listing of `.claude/*.md` also reaches `ARCHITECTURE.md`, `REQUIREMENTS.md`, and `DESIGN.md`, each a single file the layout intends to stay one, so a fallback there would have shredded three documents. The two skills that read these fields, `migration-superseded` and `migration-standards-drop`, are retired, and the principle stays for whichever skill reads such a key next.
 
 ### Configuration a project declares rather than a skill ships
 

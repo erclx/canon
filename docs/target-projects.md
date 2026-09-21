@@ -261,8 +261,6 @@ Each entry carries a verdict, since a dropped folder and one the project wrote a
 
 Nothing acts on any of them, and the verdict is what makes the list safe to read.
 
-The same field names a proposal-only skill with a live case here under `migrations`, which is how `canon:migration-claude-md` and `canon:migration-context` become reachable. Each entry carries the measurement behind the proposal rather than the proposal alone.
-
 Add `--json` for the machine-readable report, and `--exit-code` to fail a CI job when a target falls behind. Files the project authored itself never count toward that exit code, and neither do superseded artifacts, seed drift, tooling, or anything the reverse walk reports, since each names content the project is expected to edit or place itself. An unmigrated domain does count, because running the relocation closes it.
 
 Tooling reports under a section of its own, and `measured` there says whether the target ever recorded a chain. One that never ran a tooling sync reports unmeasured rather than clean, which is what separates tooling nobody has looked at from tooling that is current. A workspace root records nothing either way, since each package resolves its own chain.

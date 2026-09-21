@@ -57,6 +57,8 @@ The `route` arm asserts a refusal instead of an artifact. Its three `absent` ent
 
 `claude:canon-operator/unmigrated`, `claude:canon-operator/installed`, and the whole of `claude/migration-standards.sh` are retired along with `canon snippets install`/`sync` and the `migration-standards` skill. `ROOT_LAYOUTS` in `src/sync/layout.ts` now permanently reports no unmigrated domain, so the routing those two arms scored can never fire again.
 
+The four `migration-*` scenarios, `claude/migration-claude-md.sh`, `migration-context.sh`, `migration-standards-drop.sh`, and `migration-superseded.sh`, are retired with the skills they drove, and `detectMigrations` in the reverse walk went with them. `target-check` reads what a target holds against current documentation in their place, and its own scenario is that skill's work rather than a port of these. The superseded arm's lesson outlives it: a proposal-only skill cannot be covered by tree assertions alone, since a session that did nothing passes every negative one.
+
 `claude/canon-operator.sh` drives a skill whose subject is a decision rather than an artifact. Almost everything the operator routes ends in a handoff or a report, so a rule selecting on what a wrong run leaves behind exempts nearly all of it, and the damage is real either way: a target sent to the seed reconciler instead of the installer, or to a domain sync for a domain that has nothing installed to sync. The ignore-only route is the exception, since it runs `canon tooling inject --gitignore` itself and the file it merges into is the artifact.
 
 `reply` is what lets a routing decision be asserted at all. An arm pins the skill or command each route names, paired with a `manual` entry naming the negative a substring cannot carry. Most such arms also assert over the tree in the direction a correct run must leave it alone: the staged root layout stays where it was staged, nothing appears under `.claude/`, and a staged entry or plan survives a pass that only measures.
@@ -65,7 +67,7 @@ The `gitignore` arm instead pins what the write produced, the managed entries ba
 
 `unclaimed` is the arm whose reply names no skill and no command: the reverse walk reports a folder the toolkit stopped shipping and offers nothing, so the token that has to survive is the attribution rather than a route. Provisioning refuses a CLI whose report attributes no unclaimed folder at all, which is the two-speed release risk `ARCHITECTURE.md` records arriving in the harness rather than in a target. Reading attribution rather than the bare key is what makes the guard prove the walk reached the staged folder instead of proving only that the field exists, and a guard reading attribution still cannot separate a binary predating the walk from a walk that ran and reached nothing, which is why the refusal message names both causes rather than a version to install.
 
-Every section of the report, the reverse walk included, is gated on `isManagedTarget`. The fixture stages a `package.json` and a dropped folder, and, since an arm inheriting its premise from dev-skill injection holds only while the branch changes that skill, a short `CLAUDE.md` as the one marker `isManagedTarget` needs from it. Short is load-bearing, since a file past the 250-line checkpoint adds a `migration-claude-md` candidate and the arm would score two decisions in one reply.
+Every section of the report, the reverse walk included, is gated on `isManagedTarget`. The fixture stages a `package.json` and a dropped folder, and, since an arm inheriting its premise from dev-skill injection holds only while the branch changes that skill, a short `CLAUDE.md` as the one marker `isManagedTarget` needs from it.
 
 The declaration also pins the folder name beside the verdict, against the general rule that a name history decides does not belong in a pin, because the second guard fails provisioning the moment that root comes back and a reader sees the fragility where it is rather than inside a declaration going quietly vacuous.
 
@@ -121,23 +123,9 @@ The ceiling holds at 12, with room for a reply that runs longer without the skil
 
 What a pass does not reach is whether the ranking holds on a target shaped differently. The fixture stages one shape, with nothing installed, so another target could rank the scaffold and audit rows the other way with no assertion here seeing it.
 
-### The superseded arm and the guard that fixed the skill
-
-`claude/migration-superseded.sh` stages three retired `.claude/` files against the folders that replaced them, and its assertions run in the two directions the proposal shape demands. Three `paths` entries and three `content` pins hold the retired files byte-identical, since the content is project-authored and a run that produced a correct split and then applied it fails nowhere else.
-
-Three `absent` entries name the destination folders, and `.claude/hooks` carries the extra weight: no standard declares `appliesTo` over it, so a run proposing a shape there had to invent one, which the absence catches whether or not the reply admitted to it. The reply pins name the standard each entry resolved to rather than the destination folder, because the folder comes free off the report while the standard separates a shape read from the project's installed copy from one the run made up.
-
-A driven run passes, scoring higher than the standalone figure: the three `reply` pins score only against an envelope, so the standalone figure describes ten no-write claims holding on a tree the skill never touched. The cap stays at the default against that one observation, which is a floor on what a correct run costs rather than a bound on it.
-
-Only the three `reply` pins separate a correct proposal from a session that did nothing. An arm whose tree assertions are all negative earns that note rather than the count it prints, which generalizes past this one: a proposal-only skill cannot be covered by tree assertions alone.
-
-Provisioning is what corrected the skill rather than the run. The fixture asserts its own premise, that the staged file is tracked and ignored at once, and the guard failed against a tree that was correct. `git check-ignore` consults the index and reports a tracked path as not ignored, so the flagless form returns nothing in exactly the state the step exists to find. Both the skill and the guard read `--no-index` now.
-
-An arm that staged the state without asserting it would have shipped a step that reports every tracked-while-ignored file as clean, and no reply pin could have seen it, since the skill would have said nothing about a file it believed was fine.
-
 ### The orchestrate arm scores a routing decision on three reply pins
 
-`claude/role-orchestrator.sh` drives a skill that reads a board and reports state, so it is proposal-only and inherits what the superseded arm generalized. Three `reply` pins carry the verdict and two `absent` entries carry the tree, and nothing asserts that the staged board is still staged, since a pin over provisioning counts the same as a real one and is what makes a coverage number lie.
+`claude/role-orchestrator.sh` drives a skill that reads a board and reports state, so it is proposal-only and inherits the proposal-only lesson recorded under the routing arms. Three `reply` pins carry the verdict and two `absent` entries carry the tree, and nothing asserts that the staged board is still staged, since a pin over provisioning counts the same as a real one and is what makes a coverage number lie.
 
 The pins split the skill's one routing decision. `.canon/plans/feature-log-entry.md` proves the run opened the plans folder rather than reporting the task board alone, and `auto-ship` is the route a task with a plan earns. That route is spelled without a leading slash, because a session invoking through the plugin writes `/canon:auto-ship`, which carries the bare name and not the slashed one. `Next:` asserts the output contract's last slot and neither the singleness the scenario expects nor the route it names, which are the fourth and fifth of seven `manual` entries.
 
@@ -194,14 +182,6 @@ What the local file proves is that a body was written under `## Review closed` n
 The four manual entries are confirmed by hand through the pull request's own review API, the read the arm cannot make for itself: the thread carries one `## Review` and one `## Review closed` with no reply-family comment, and the close-out's `commit_id` still names the commit it was first submitted against while its rewritten body names the newer one.
 
 That last pair is the most useful reading the run produced and the half no assertion covers. A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the field `review-pr` Step 2 and `poll.sh` both derive a prior commit from goes stale the moment the guard fires. `canon/context/claude-plugin/skill-review.md` holds why that cost was accepted rather than repaired.
-
-### The standards-drop arm scores a three-way split against the catalog
-
-`claude/migration-standards-drop.sh` stages four files under `.claude/standards/` across the three verdicts the skill reaches, plus a runtime reader and three citing surfaces. Its two toolkit copies come out of `canon standards list --json` rather than out of this repository's own `standards/`, because the skill compares an installed file against that catalog's `content` field while `canon standards <name>` strips frontmatter on its way to stdout. A fixture staged through the verb reads as drifted against a corpus it came from, and the unchanged branch of the split would never run.
-
-Repeated runs against the same fixture read the same arm: the split comes back one unchanged, one drifted, and two matching no standard every time. Four of the six manual entries are confirmed by reading the reply: the sync is named ahead of the drop, the project-local skill repoints to `canon standards slug` rather than to the plugin-root form, `prose` lands under `You supply` rather than taking a one-to-one repoint, and `slug` and `branch` sort into the right buckets. The other two are unwired, needing an arm that stages a stale binary and one that leaves the tree out of the index.
-
-The cap stays at the default against a wide turn spread across identical assertions, which is what a variable path looks like: the low end of the spread is one route through the reads rather than a floor.
 
 ### The prompt sets the working directory, and two arms over one tree is what that buys
 
