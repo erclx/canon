@@ -664,6 +664,51 @@ describe('generateNav', () => {
     expect(delimiterTerm).toBeGreaterThan(otherHeading)
   })
 
+  it('should report a state on the root listing only where it differs, and none on a lesson row', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+
+    await generateNav(ROOT)
+
+    const root = await readFile(join(teachDir(ROOT), 'index.html'), 'utf8')
+    const contents = await readFile(
+      join(workspaceDir('01-regular-expressions'), 'index.html'),
+      'utf8',
+    )
+
+    expect(root).not.toContain('state done')
+    expect(contents).not.toContain('class="state')
+  })
+
+  it('should put the term count beside the glossary filter', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    await seedGlossary('01-regular-expressions', [
+      '**anchor**: Marks a fixed position. First seen in 0001-anchors.html.',
+    ])
+
+    await generateNav(ROOT)
+
+    const contents = await readFile(
+      join(workspaceDir('01-regular-expressions'), 'index.html'),
+      'utf8',
+    )
+
+    expect(contents).toMatch(
+      /<div class="filter-row"><input class="filter"[^>]*id="gfilter"[^>]*><span class="filter-count" id="gloss-count"[^>]*>1 term<\/span><\/div>/,
+    )
+  })
+
   it('should render every term as a flat .gterm sibling so the workspace-wide filter still matches across every group', async () => {
     await openWorkspace(ROOT, REQUEST)
     await seedLesson(
