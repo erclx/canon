@@ -520,6 +520,103 @@ describe('buildDesignCss', () => {
     }
   })
 
+  describe('teach type scale', () => {
+    const teachCss = (): string =>
+      buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
+
+    const declarationsOf = (css: string, selector: string): string =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter((match) => match[1].trim().split('\n').pop() === selector)
+        .map((match) => match[2])
+        .join('\n')
+
+    it.each([
+      ['h1', '--t1', '1.1'],
+      ['h2', '--t2', '1.3'],
+      ['h3', '--t3', '1.55'],
+      ['.lede', '--t3', '1.55'],
+      ['.assumes, .progress', '--t5', '1.6'],
+    ])('should paint %s from %s at leading %s', (selector, step, leading) => {
+      const rule = declarationsOf(teachCss(), selector)
+
+      expect(rule).toContain(`font-size: var(${step})`)
+      expect(rule).toContain(`line-height: ${leading}`)
+    })
+
+    it.each([
+      ['body', '--t3'],
+      ['.hard-label', '--t3'],
+      ['.toc b', '--t3'],
+      ['table', '--t4'],
+      ['th', '--t5'],
+      ['.road-t', '--t5'],
+      ['.toc .state', '--t5'],
+      ['.toc .ext', '--t4'],
+      ['h2 .count', '--t5'],
+      ['.gloss .empty .clear', '--t4'],
+      ['.opt::before', '--t6'],
+      ['.opt[data-state="chosen"]::after', '--t6'],
+      ['.opt[data-state="right"]::after', '--t6'],
+      ['sup.cite', '--t6'],
+      ['.nav .lbl', '--t6'],
+    ])('should paint %s from %s', (selector, step) => {
+      expect(declarationsOf(teachCss(), selector)).toContain(
+        `font-size: var(${step})`,
+      )
+    })
+
+    it('should hold the body at one leading on every width', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, 'body')).toContain('line-height: 1.55')
+      expect(css).not.toContain('body { font-size: 1.0625rem; }')
+    })
+
+    it('should keep the glossary group label on its own small step rather than the heading step', () => {
+      const rule = declarationsOf(teachCss(), '.gloss-group')
+
+      expect(rule).toContain('font-size: var(--t5)')
+      expect(rule).toContain('text-transform: uppercase')
+    })
+
+    it.each(['th', '.nav .lbl'])(
+      'should set %s in sentence case with no tracking',
+      (selector) => {
+        const rule = declarationsOf(teachCss(), selector)
+
+        expect(rule).not.toContain('text-transform: uppercase')
+        expect(rule).toContain('letter-spacing: 0')
+      },
+    )
+
+    it('should leave no rem literal font size in the reading rules', () => {
+      const literals = [...teachCss().matchAll(/font-size:\s*[\d.]+rem/g)]
+        .map((match) => match[0])
+        .filter((size) => size !== 'font-size: 0.75rem')
+
+      expect(literals).toEqual(['font-size: 1rem'])
+    })
+
+    it.each([
+      ['.fb', '--t4', '1.55'],
+      ['.gterm', '--t4', '1.55'],
+      ['.road-b span', '--t4', '1.55'],
+      ['.toc .blurb', '--t4', '1.55'],
+      ['ol.succ', '--t4', '1.55'],
+      ['pre', '--t5', '1.6'],
+      ['footer', '--t5', '1.6'],
+      ['ol.refs', '--t5', '1.6'],
+    ])(
+      'should set %s on %s at the one leading that step carries',
+      (selector, step, leading) => {
+        const rule = declarationsOf(teachCss(), selector)
+
+        expect(rule).toContain(`font-size: var(${step})`)
+        expect(rule).toContain(`line-height: ${leading}`)
+      },
+    )
+  })
+
   it('emits a @font-face block per default face when asked to embed fonts', () => {
     const css = buildDesignCss(undefined, { embedFonts: true })
 

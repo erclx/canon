@@ -46,12 +46,21 @@ The chrome matches the nav-04 prototype, measured as computed styles on both sid
 - `.track` and `.outline` are gone from the markup. The prototype kept both elements and hid them with `display: none`.
 - The trailing count column keeps `text-align: right`, where the prototype's flex switcher row read `start`. The column is sized to its content, so the value moves nothing.
 
+## The reading rules sit on the declared type scale
+
+Every reading rule takes its size from `--t1` through `--t6`, and the body carries no phone override, since the steps are the same at every width. The mapping is the nav-04 prototype's `data-scale` block landed as the default, with two changes. `h3` reads `--t3` but the glossary group label keeps its own `--t5` and uppercase rule, because the prototype's `main h3` selector would have painted that label at 18px and it never rendered a glossary page. `th` and `.nav .lbl` drop their uppercase and tracking, matching the sentence case the landing page already uses.
+
+Each step carries one leading across reading text: 1.1 on `--t1`, 1.3 on `--t2`, 1.55 on `--t3` and `--t4`, and 1.6 on `--t5`. `h3` takes 1.55 where the prototype drew 1.4, so a step holds one value. Controls keep their own tuning, such as the option rows at 1.45 and the jump menu rows, since a one-line control is not reading text.
+
+Two literals stay on purpose. `code` sets `0.85em` and `pre code` sets `1em`, because inline code must scale with the text around it rather than sit at a fixed step. The chrome's `0.75rem` sizes and the figure caption's `1rem` are outside this mapping and remain literals. Spacing is untouched: `var(--space-*)` is still unused, and moving it changes what groups with what.
+
 ## Gotchas
 
 - `canon teach nav` rewrites lessons in place and refuses a lesson missing its four marker pairs, `canon:teach:style`, `canon:teach:header`, `canon:teach:footnav` and `canon:teach:scripts`. A hand-edit inside a pair is overwritten by the next run with nothing reporting it. The authored heading, lede, body and quiz sit between the header and footnav markers and are left untouched.
 - One `nav` run rewrites the teach root, the contents pages, and every lesson's chrome, so its diff reaches files the change did not name. That is the verb working rather than a defect, and the diff is still the cheapest place to notice a wrong pipeline change.
 - `canon teach nav` seeds a workspace's stylesheet pair only when `course.css` is absent, so a change to `TEACH_CHROME` never reaches a workspace that already has one. Running `nav` alone leaves every lesson embedding the sheet it was built against, which renders as a page missing whatever the change added.
 - No browser harness in this repository reaches a generated teach page. `web/playwright.config.ts` is the only browser config that is not a seed for a target, and nothing under `web/e2e/` names teach, so what a rendered lesson does has nowhere to be asserted above the unit layer. A change carrying collapse, resize, filter, focus, or overlay work therefore ships it named as untested rather than covered, and what is missing is the harness rather than a person to look.
+- Regenerating the fixture takes `bun src/cli.ts teach ...` rather than an installed `canon`. The installed binary carries the components it was published with, so a branch that changes `src/design/components.ts` regenerates the older stylesheet and reverts whatever landed since, with nothing failing.
 - `canon teach stylesheet <topic>` rewrites the generated half, `assets/base.css`, unconditionally. A components change therefore takes that verb per workspace and then a `nav` run to re-embed the result in the lessons.
 - `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach` below it, so a path ending in `teach` behaves differently from one that does not.
 - A bare `canon teach list` reads the operator's live workspaces. Reaching the committed fixture takes `--root examples/teach`, and a claim about the fixture made without the flag describes a different tree.

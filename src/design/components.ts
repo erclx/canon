@@ -291,7 +291,7 @@ body {
   color: var(--color-text-body);
   font-family: var(--teach-sans);
   font-size: var(--t3);
-  line-height: 1.62;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -393,10 +393,9 @@ html.sb-shut .pane { border-left: 0; }
 
 .nav .lbl {
   display: block;
-  font-size: 0.6563rem;
+  font-size: var(--t6);
   font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--color-muted);
   margin-bottom: 0.15rem;
 }
@@ -991,6 +990,9 @@ const TEACH_ARTICLE: Component = {
     '--color-accent',
     '--teach-hand',
     '--teach-mono',
+    '--t1',
+    '--t2',
+    '--t3',
     '--t4',
     '--t5',
     '--t6',
@@ -998,8 +1000,8 @@ const TEACH_ARTICLE: Component = {
   rules: `/* ---- Type ---- */
 
 h1 {
-  font-size: 2.15rem;
-  line-height: 1.14;
+  font-size: var(--t1);
+  line-height: 1.1;
   font-weight: 800;
   letter-spacing: -0.022em;
   margin: 0 0 0.55rem;
@@ -1007,19 +1009,20 @@ h1 {
 }
 
 h2 {
-  font-size: 1.3rem;
+  font-size: var(--t2);
+  line-height: 1.3;
   font-weight: 700;
   letter-spacing: -0.012em;
   margin: 3rem 0 0.85rem;
 }
 
-h3 { font-size: 1.03rem; font-weight: 700; margin: 1.9rem 0 0.4rem; }
+h3 { font-size: var(--t3); line-height: 1.55; font-weight: 700; margin: 1.9rem 0 0.4rem; }
 
 p { margin: 0 0 1.15rem; }
 
 .lede {
-  font-size: 1.1875rem;
-  line-height: 1.5;
+  font-size: var(--t3);
+  line-height: 1.55;
   color: var(--color-text-secondary);
   margin-bottom: 2rem;
 }
@@ -1031,8 +1034,8 @@ em { font-style: italic; }
 /* ---- Panels ---- */
 
 .assumes, .progress {
-  font-size: 0.8438rem;
-  line-height: 1.7;
+  font-size: var(--t5);
+  line-height: 1.6;
   color: var(--color-text-secondary);
   background: var(--color-surface);
   border-radius: 7px;
@@ -1063,7 +1066,7 @@ code {
 pre {
   font-family: var(--teach-mono);
   font-size: var(--t5);
-  line-height: 1.7;
+  line-height: 1.6;
   background: var(--color-surface);
   padding: 1.15rem 1.3rem;
   border-radius: 7px;
@@ -1084,7 +1087,7 @@ pre code { background: none; padding: 0; font-size: 1em; }
 
 .hard-label {
   font-family: var(--teach-hand);
-  font-size: 1.0625rem;
+  font-size: var(--t3);
   color: var(--color-accent);
   display: block;
   margin-bottom: 0.35rem;
@@ -1094,15 +1097,14 @@ pre code { background: none; padding: 0; font-size: 1em; }
 
 /* ---- Tables ---- */
 
-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 0 0 1.5rem; }
+table { width: 100%; border-collapse: collapse; font-size: var(--t4); margin: 0 0 1.5rem; }
 th, td { text-align: right; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--color-border); }
 th:first-child, td:first-child { text-align: left; }
 
 th {
   font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--t5);
+  letter-spacing: 0;
   color: var(--color-muted);
   border-bottom-color: var(--color-border);
 }
@@ -1128,12 +1130,12 @@ tbody tr.mark td { background: var(--color-teach-accent-bg); }
 
 .toc a:hover { background: var(--color-surface); }
 .toc .num { font-family: var(--teach-mono); font-size: var(--t5); color: var(--color-accent); }
-.toc b { font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.012em; }
+.toc b { font-size: var(--t3); font-weight: 700; letter-spacing: -0.012em; }
 
 .toc .blurb {
   grid-column: 2;
   font-size: var(--t4);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--color-text-secondary);
   margin-top: 0.1rem;
 }
@@ -1146,7 +1148,7 @@ tbody tr.mark td { background: var(--color-teach-accent-bg); }
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
-  font-size: 0.75rem;
+  font-size: var(--t5);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -1171,7 +1173,7 @@ tbody tr.mark td { background: var(--color-teach-accent-bg); }
 /* A link leaving the page says so with a mark beside it rather than with a
    badge spelling out the sentence. */
 .toc .ext {
-  font-size: 0.875rem;
+  font-size: var(--t4);
   color: var(--color-muted);
   margin-left: 0.35rem;
 }
@@ -1182,7 +1184,7 @@ ol.succ {
   margin: 0 0 2.5rem;
   padding-left: 1.35rem;
   font-size: var(--t4);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--color-text-secondary);
 }
 
@@ -1204,10 +1206,6 @@ ol.succ li { margin-bottom: 0.4rem; }
 /* The browser default ring is white on a dark ground, which reads as a second
    accent. Suppressing it only where the token above replaces it. */
 :where(a, button, summary, input, .opt):focus:not(:focus-visible) { outline: none; }
-
-@media (max-width: 640px) {
-  body { font-size: 1.0625rem; }
-}
 
 /* The week plan. Its markup shipped with no rule matching any of its five
    classes, so it rendered as a run of inline spans with the ordinal, the
@@ -1238,7 +1236,7 @@ ol.succ li { margin-bottom: 0.4rem; }
 
 .road-t {
   font-family: var(--teach-mono);
-  font-size: 0.75rem;
+  font-size: var(--t5);
   color: var(--color-muted);
   white-space: nowrap;
 }
@@ -1273,6 +1271,7 @@ const TEACH_QUIZ: Component = {
     '--color-teach-accent-bg',
     '--t4',
     '--t5',
+    '--t6',
   ],
   rules: `/* ---- Quiz ---- */
 
@@ -1304,7 +1303,7 @@ const TEACH_QUIZ: Component = {
 .opt::before {
   content: attr(data-k);
   font-family: var(--teach-mono);
-  font-size: 0.7188rem;
+  font-size: var(--t6);
   color: var(--color-muted);
   border: 1px solid var(--color-border);
   border-radius: 5px;
@@ -1331,7 +1330,7 @@ const TEACH_QUIZ: Component = {
 .opt[data-state="chosen"]::after {
   content: "your answer";
   margin-left: auto;
-  font-size: 0.6563rem;
+  font-size: var(--t6);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1342,7 +1341,7 @@ const TEACH_QUIZ: Component = {
 .opt[data-state="right"]::after {
   content: "correct";
   margin-left: auto;
-  font-size: 0.6563rem;
+  font-size: var(--t6);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1396,7 +1395,7 @@ const TEACH_GLOSSARY: Component = {
 
 h2 .count {
   font-family: var(--teach-mono);
-  font-size: 0.75rem;
+  font-size: var(--t5);
   font-weight: 400;
   color: var(--color-muted);
   border: 1px solid var(--color-border);
@@ -1489,7 +1488,7 @@ ol.succ {
   margin: 0 0 2.5rem;
   padding-left: 1.35rem;
   font-size: var(--t4);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--color-text-secondary);
 }
 
@@ -1499,7 +1498,7 @@ ol.succ li { margin-bottom: 0.4rem; }
 /* A filter that matches nothing needs a way back, not just a sentence. */
 .gloss .empty .clear {
   font-family: var(--teach-sans);
-  font-size: 0.875rem;
+  font-size: var(--t4);
   color: var(--color-accent);
   background: none;
   border: 0;
@@ -1554,6 +1553,7 @@ const TEACH_REFERENCES: Component = {
     '--teach-mono',
     '--color-teach-accent-bg',
     '--t5',
+    '--t6',
   ],
   rules: `footer {
   margin-top: 4rem;
@@ -1568,7 +1568,7 @@ const TEACH_REFERENCES: Component = {
 
 sup.cite {
   font-family: var(--teach-mono);
-  font-size: 0.6875em;
+  font-size: var(--t6);
   line-height: 0;
   margin-left: 0.1em;
 }
@@ -1589,7 +1589,7 @@ ol.refs {
   padding: 0;
   margin: 0.9rem 0 1.1rem;
   font-size: var(--t5);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 ol.refs li {
