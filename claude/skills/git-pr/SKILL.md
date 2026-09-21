@@ -135,22 +135,40 @@ This command reuses `.canon/tmp/pr/body.md`, which the pre-publish scan above al
 
 ```bash
 pr_labels="<comma-separated labels, empty when the map resolves to nothing>"
+head_branch=$(git branch --show-current)
 git push -u origin HEAD || exit 1
 base_branch=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) || exit 1
-pr_number=$(gh pr list --head "$(git branch --show-current)" --base "$base_branch" --state open --json number --jq '.[0].number // empty')
+assert_own_pr() {
+  target=$(gh pr view "$1" --json headRefName,state --jq '"\(.headRefName) \(.state)"') || exit 1
+  if [ "$target" != "$head_branch OPEN" ]; then
+    printf 'Refused: #%s reads "%s", not "%s OPEN". Nothing was written to it.\n' "$1" "$target" "$head_branch" >&2
+    exit 1
+  fi
+}
+pr_number=$(gh pr list --head "$head_branch" --base "$base_branch" --state open --json number --jq '.[0].number // empty')
 if [ -n "$pr_number" ]; then
+  assert_own_pr "$pr_number"
   pr_url=$(gh pr edit "$pr_number" --title "<title>" --body-file .canon/tmp/pr/body.md) || exit 1
 else
   pr_url=$(gh pr create --title "<title>" --body-file .canon/tmp/pr/body.md) || exit 1
   pr_number=${pr_url##*/}
+  assert_own_pr "$pr_number"
 fi
 if [ -n "$pr_labels" ]; then
   gh pr edit "$pr_number" --add-label "$pr_labels" >/dev/null ||
     printf 'Label apply failed. Create a missing label with: gh label create <name>\n' >&2
 fi
 rm -rf .canon/tmp/pr/body
-printf 'number=%s\nurl=%s\n' "$pr_number" "$pr_url"
+printf 'number=%s\nurl=%s\nhead=%s\n' "$pr_number" "$pr_url" "$head_branch"
 ```
+
+### Binding every write to this branch's pull request
+
+`assert_own_pr` runs ahead of both writes this command makes to a pull request that already exists, the title and body edit and the label edit. It reads the target's head branch and state and refuses unless they are this branch and `OPEN`. A refusal exits before anything is written, so a wrong number costs the run rather than a stranger's pull request. The function lives only inside this command, so the steps below that post comments or record the task are covered by taking `<number>` from this output rather than by the check itself.
+
+The check compares a number against a branch and never derives a number from one, so it adds no lookup of the kind `### Resolving the pull request` retired. It holds whichever way a wrong number arrives. A number a session retyped by hand, or inferred from the newest pull request in view, reads as a foreign head here and stops.
+
+The last output line carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison first, reading `gh pr view <number> --json headRefName,state` and matching it against `head` and `OPEN`.
 
 ### Find the UI checklist
 
@@ -238,7 +256,7 @@ canon pr evidence <number> --preview <url> --json
 
 ### Record the number on the task
 
-Write the `number` the final command printed onto the task the branch is closing. Do not resolve it again. `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
+Write the `number` the final command printed onto the task the branch is closing. Do not resolve it again. A final command that refused on a head mismatch printed no number, so this step writes nothing on that run. `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
 
 The task is the one whose `Plan:` line names the plan this branch implemented. Name that plan by its file, which is `.canon/plans/feature-<slug>.md` at the main worktree root with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. `plan-feature` writes the plan under the branch slug, so the two correspond on any branch that came through the plan-to-execute path. When the session already knows which plan it implemented, because a caller read it earlier in the chain, use that filename instead of re-deriving.
 

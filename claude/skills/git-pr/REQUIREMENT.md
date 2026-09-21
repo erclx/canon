@@ -23,6 +23,8 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Detect an open pull request and edit it in place, so a follow-up push keeps the body in sync instead of failing
 - Scope that detection to an open pull request on the current head and the default base, so neither a reused branch name nor a second base resolves the wrong one
 - Resolve the pull request once and reuse what that resolution returned, so the number recorded never depends on how a lookup ranks two pull requests sharing a head
+- Prove before every write to an existing pull request that its head is the current branch and its state is open, and refuse with nothing written on a mismatch, so a wrong number reaching a write never lands on another branch's pull request
+- Print the head branch beside the number, so a caller writing to the pull request later has a value to check the number against
 - Label from the paths the branch changed, against a map the project declares, so the label set belongs to the project rather than to the skill
 - Apply labels after the pull request exists, so a label the remote does not carry costs a warning rather than the pull request
 - Report a refused label, since a warning nothing surfaces leaves the run indistinguishable from one that labelled
