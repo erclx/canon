@@ -115,61 +115,19 @@ jobs:
             exit 1
           }
 
-      - name: Build
-        run: bun run web:build
+      # Builds, serves, and captures the page, then clears and refills
+      # assets/evidence/home so the report below diffs the frames against the
+      # baseline this repository ships. refresh-capture-frames.yml calls the
+      # same script to write that baseline, so the two cannot capture
+      # differently.
+      - name: Build, capture, and stage the frames
+        run: bash scripts/core/capture-home.sh
 
       - name: Build gallery
         run: bun run web:gallery
 
       - name: Verify gallery excluded from build
         run: ./scripts/core/check-gallery-exclusion.sh
-
-      # `tooling/web/configs/e2e/screenshot.ts` is reused as is (Constraints,
-      # .canon/plans/archive/feature-render-visibility.md). This checkout has no
-      # web/package.json, so the preview server and the two cases run against
-      # the root-level scripts rather than through screenshot.sh, which assumes
-      # a per-project `bun run build`/`bun run preview` pair.
-      - name: Serve and capture
-        working-directory: web
-        run: |
-          (cd .. && bun run web:preview) &
-          for _ in $(seq 1 40); do
-            curl -sSf http://localhost:4321/ >/dev/null 2>&1 && break
-            sleep 0.25
-          done
-          curl -sSf http://localhost:4321/ >/dev/null 2>&1 || {
-            echo "Preview server not responding on port 4321 after 10s." >&2
-            exit 1
-          }
-          SCREENSHOT_BASE_URL=http://localhost:4321 bun ../tooling/web/configs/e2e/screenshot.ts
-
-      # The frames land in their committed location so the report below diffs
-      # them against the baseline this repository ships, and so the artifact
-      # carries the names a reader already knows. The whole tree is copied
-      # rather than a file per name, since the case now writes a folder per
-      # section beside the two whole-page frames and a named copy per frame
-      # would go stale against the case list on the first section added.
-      #
-      # The shared golden config names the case that emulates nothing
-      # `default`, and this repository's baseline names that frame `light`, so
-      # the rename runs once per copied frame at whatever depth it landed.
-      #
-      # The sweep holds all four widths and this repository commits two, 320
-      # and 1280. The other two are dropped after the copy, and the case list
-      # is the place to change if that set moves.
-      #
-      # The committed tree is cleared first rather than copied over. A copy
-      # only adds and overwrites, so a section dropped from the case list
-      # would leave its frames in place, `git diff --quiet` below would see no
-      # change, and the one step that exists to report drift would report a
-      # baseline that matches. Clearing first shows that section as a deletion.
-      - name: Stage the captured frames
-        run: |
-          rm -rf assets/evidence/home
-          mkdir -p assets/evidence/home
-          cp -R web/screenshots/localhost/home/. assets/evidence/home/
-          find assets/evidence/home \( -name '768--*.png' -o -name '1536--*.png' \) -delete
-          find assets/evidence/home -name '*--default.png' -execdir sh -c 'mv "$1" "${1%--default.png}--light.png"' _ {} \;
 
       # Uploaded on success rather than on failure alone, against the artifact
       # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
@@ -196,11 +154,11 @@ jobs:
       # commits the correction onto a branch that never asked for it.
       #
       # Reporting rather than committing keeps that signal without the commit.
-      # Refreshing the baseline on main is the other half of the fix and is out
-      # of scope by an operator decision: a commit reaching the trunk with no
-      # pull request and no reviewer is a larger change than this row was
-      # scoped for. Until that lands the baseline still goes stale, and this
-      # step is what says so.
+      # Refreshing the baseline on main is the other half of the fix, and
+      # refresh-capture-frames.yml owns it: a post-merge job that opens a pull
+      # request, since a commit reaching the trunk with no pull request and no
+      # reviewer was ruled out. This step keeps reporting whether the captured
+      # frames match the baseline, which stays true on a pull request.
       - name: Report whether the baseline moved
         run: |
           if git diff --quiet -- assets/evidence/home; then
