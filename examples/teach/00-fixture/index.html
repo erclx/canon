@@ -255,7 +255,6 @@
           <li>
             <a href="lessons/0001-alpha-element.html"
               ><span class="num">01</span><b>Alpha element</b
-              ><span class="state done">Written</span
               ><span class="blurb"
                 >Lesson 1. A deliberately meaningless lesson that carries one of
                 every prose element the shell can draw.</span
@@ -265,7 +264,6 @@
           <li>
             <a href="lessons/0002-beta-element.html"
               ><span class="num">02</span><b>Beta element</b
-              ><span class="state done">Written</span
               ><span class="blurb"
                 >Lesson 2. A second meaningless lesson carrying the figure and
                 the road.</span
@@ -275,7 +273,6 @@
           <li>
             <a href="lessons/0003-gamma-element.html"
               ><span class="num">03</span><b>Gamma element</b
-              ><span class="state done">Written</span
               ><span class="blurb"
                 >Lesson 3. A last meaningless lesson, present so the jump list
                 and the footer navigation have a third row.</span
@@ -285,14 +282,18 @@
         </ul>
 
         <h2>Glossary <span class="count">8</span></h2>
-        <input
-          class="filter"
-          type="search"
-          id="gfilter"
-          aria-label="Filter glossary terms"
-          aria-controls="gloss"
-          placeholder="term"
-        />
+        <div class="filter-row">
+          <input
+            class="filter"
+            type="search"
+            id="gfilter"
+            aria-label="Filter glossary terms"
+            aria-controls="gloss"
+            placeholder="Filter terms"
+          /><span class="filter-count" id="gloss-count" aria-live="polite"
+            >8 terms</span
+          >
+        </div>
         <div class="gloss" id="gloss">
           <p class="empty">
             No term matches that.
@@ -692,6 +693,7 @@
       ;(function () {
         var input = document.getElementById('gfilter')
         var list = document.getElementById('gloss')
+        var count = document.getElementById('gloss-count')
         if (!input || !list) return
         function updateGroups() {
           list.querySelectorAll('.gloss-group').forEach(function (heading) {
@@ -714,6 +716,12 @@
           })
           list.classList.toggle('none', n === 0)
           updateGroups()
+          if (count) {
+            var total = list.querySelectorAll('.gterm').length
+            count.textContent =
+              (n === total ? total : n + ' of ' + total) +
+              (total === 1 ? ' term' : ' terms')
+          }
         })
         var clear = list.querySelector('.clear')
         if (clear) {

@@ -1,3 +1,3 @@
-source: http://localhost:8767/index.html
-source-sha256: 7b37269c62458f24c0d16d5a5dc77b57025cc7cd13f995ab846e177a3d9cd93a
-image-sha256: 51c20dbef91f447e5fe7a2df672e608793af6721967ec1ff7fb2a7159fb4ea75
+source: http://localhost:8766/index.html
+source-sha256: 7a56cc274b1eb2a70165f9a88cfe8da5b0162b0403ee76a91cb5ca0a5fa47613
+image-sha256: edebaa0db6beb2749b382d853d89133b4536b5541b81eabbb7a21a8048624c48

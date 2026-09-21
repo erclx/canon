@@ -1290,8 +1290,7 @@ em {
   display: block;
   color: var(--color-muted);
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   font-size: var(--t6);
   margin-bottom: 0.2rem;
 }
@@ -1406,7 +1405,7 @@ tbody tr.mark td {
 .toc .num {
   font-family: var(--teach-mono);
   font-size: var(--t5);
-  color: var(--color-accent);
+  color: var(--color-muted);
 }
 .toc b {
   font-size: var(--t3);
@@ -1422,42 +1421,16 @@ tbody tr.mark td {
   margin-top: 0.1rem;
 }
 
-/* A dot and a word, not a pill. The jump menus already say written and
-   planned with a filled or hollow dot, so the bordered uppercase badge was a
-   second vocabulary for a fact the design system already had one for. Sentence
-   case and no tracking, per the UI copy rule. */
+/* A word, not a pill and not a dot. A mark reading the same on every live row
+   reports nothing, so the dot retired here as it did from the jump menus.
+   Sentence case and no tracking, per the UI copy rule. */
 .toc .state {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
   font-size: var(--t5);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
   color: var(--color-muted);
   white-space: nowrap;
-}
-
-.toc .state::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 99px;
-  background: var(--color-border);
-  flex: none;
-}
-
-.toc .state.done {
-  color: var(--color-text-secondary);
-}
-.toc .state.done::before {
-  background: var(--color-accent);
-}
-.toc .state.next {
-  color: var(--color-text-secondary);
-}
-.toc .state.next::before {
-  background: var(--color-accent);
 }
 
 /* A link leaving the page says so with a mark beside it rather than with a
@@ -1652,23 +1625,21 @@ ol.succ li {
 }
 
 .opt[data-state='chosen']::after {
-  content: 'your answer';
+  content: 'Your answer';
   margin-left: auto;
   font-size: var(--t6);
   font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--color-muted);
   align-self: center;
 }
 
 .opt[data-state='right']::after {
-  content: 'correct';
+  content: 'Correct';
   margin-left: auto;
   font-size: var(--t6);
   font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--color-accent);
   align-self: center;
 }
@@ -1719,24 +1690,37 @@ h2 .count {
   vertical-align: middle;
 }
 
-.filter {
-  width: 100%;
-  font-family: var(--teach-sans);
-  font-size: var(--t4);
-  color: var(--color-text-body);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  padding: 0.55rem 0.8rem;
+/* No border, sitting on the page ground, with the count beside it. The border and the
+   reading surface are what made the control look like something to fill in,
+   and the count is what says it filters the list under it. */
+.filter-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
   margin: 0 0 1rem;
 }
 
-/* Scoped to pointer focus. Written as `.filter:focus` it outranked the
-   `:where(...)` focus token, whose specificity is zero, and the filter was the
-   one control on the page that a keyboard reached with no ring at all. */
-.filter:focus {
-  border-color: var(--color-accent);
+.filter {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--teach-sans);
+  font-size: var(--t4);
+  color: var(--color-text-body);
+  background: transparent;
+  border: 0;
+  padding: 0.3rem 0;
 }
+
+.filter-count {
+  font-family: var(--teach-mono);
+  font-size: var(--t5);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* The `:where(...)` focus token has zero specificity, so a `.filter:focus`
+   rule outranks it and leaves a keyboard reaching the control with no ring.
+   The ring stays the token's and only the pointer ring is dropped. */
 .filter:focus:not(:focus-visible) {
   outline: none;
 }
@@ -1794,8 +1778,7 @@ h2 .count {
   font-size: var(--t5);
   font-weight: 600;
   color: var(--color-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .gloss-group:first-of-type {
