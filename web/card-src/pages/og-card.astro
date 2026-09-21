@@ -1,0 +1,153 @@
+---
+/**
+ * The social card as a route the project keeps, rather than a scratch page a
+ * render deletes. `canon capture` drives it through the server this config
+ * serves, so the composition reads the project's own stylesheet, tokens and
+ * fonts instead of carrying typed copies of each. Renaming the project is then
+ * an edit to one string here and a re-capture, not another pass through the
+ * pick loop with an operator in it.
+ *
+ * The `.card` element below holds the composition the operator picked through
+ * `canon:draft-identity`: the mark on a tile, the name, the tagline, and a
+ * byline. Captured as `assets/evidence/social-card.png`, and with
+ * `?theme=light` as its `-light` twin.
+ *
+ * The card is declared at half of 1200x630. `canon capture` opens every page at
+ * a fixed 2x device scale factor and screenshots the element at that scale, so
+ * a 600x315 element is what lands the captured PNG on the literal target size.
+ * Declaring it at 1200x630 captures at 2400x1260.
+ *
+ * `card.config.mjs` is the only config whose page router reaches this file, and
+ * `bun run web:card:check` fails a build that carries the marker below, which
+ * is what keeps the route out of the published site. That script runs the
+ * stack's `tooling/astro/configs/scripts/check-card-exclusion.sh` in place
+ * against `web/dist` rather than a copy beside this route.
+ *
+ * This copy differs from the `astro` stack's in three ways. It emits the Geist
+ * face itself, since `global.css` names the family and declares no face, the
+ * page taking it from `base.astro` instead, so a route importing the stylesheet
+ * alone captures in a fallback or refuses. It reads the mark, the copy, and the
+ * mark's fills from their sources rather than pasting any in, so none forks.
+ * And it takes a light theme from the query, which the stack's single-theme
+ * placeholder has no need for.
+ */
+import '@/styles/global.css'
+import { site } from '@/content/copy'
+
+import mark from '../../../assets/brand/mark.svg?raw'
+import { FAVICON_COLORS } from '../../../src/design/favicon'
+import { FONT_FACES } from '../../../src/design/fonts'
+
+// `fontFaceBlock` in `src/design/css.ts` is the shared writer, and it cannot
+// load here: that module imports through `@/`, which this config aliases to
+// `web/src`, so the face is spelled from `FONT_FACES` the way `base.astro` does.
+const geist = FONT_FACES.find((face) => face.family === 'Geist Variable')
+if (!geist)
+  throw new Error('src/design/fonts.ts carries no Geist Variable face')
+const host = new URL(site.origin).host
+const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.weight};font-display:block;src:url(data:font/woff2;base64,${geist.base64}) format('woff2');}`
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Social card</title>
+    <!-- Read by bun run web:card:check. A build carrying this tag
+         published the card route. Do not reword it. -->
+    <meta name="og-card-marker" content="og-card-marker" />
+    <style is:inline set:html={fontFace}></style>
+    <script is:inline>
+      /**
+       * The dark ground is the page's default and ships as `og:image`.
+       * `?theme=light` renders the same composition on the light ground, the
+       * `-light` twin every README image pairs with. Read in the browser, since
+       * a static route never sees the query on the server.
+       */
+      if (new URLSearchParams(location.search).get('theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light')
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+      }
+      .card {
+        box-sizing: border-box;
+        width: 600px;
+        height: 315px;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0 3rem;
+        background: var(--color-background);
+        color: var(--color-text);
+      }
+      .tile {
+        flex: none;
+        width: 108px;
+        height: 108px;
+        border-radius: 22px;
+        background: var(--color-surface);
+        outline: 1px solid var(--color-border);
+        display: grid;
+        place-items: center;
+      }
+      /* The badge is the favicon at card size, so the mark takes the
+         favicon's own pair rather than the page accent. */
+      .mark {
+        width: 62px;
+        height: 62px;
+        color: var(--badge-dark);
+      }
+      :global([data-theme='light']) .mark {
+        color: var(--badge-light);
+      }
+      .mark :global(svg) {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      /* Set on the element rather than inherited: `global.css` colors
+         headings through a variable resolved at the root, which a card
+         rendered under a theme attribute of its own would not reach. */
+      .title {
+        margin: 0;
+        font-size: 2.4rem;
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--color-text);
+      }
+      .tagline {
+        margin: 0 0 0.35rem;
+        font-size: 1rem;
+        color: var(--color-text-secondary);
+      }
+      .byline {
+        margin: 0;
+        font-size: 0.72rem;
+        color: var(--color-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="card"
+      style={`--badge-dark: ${FAVICON_COLORS.dark}; --badge-light: ${FAVICON_COLORS.light}`}
+    >
+      <span class="tile">
+        <span class="mark" role="img" aria-label="canon mark" set:html={mark} />
+      </span>
+      <div class="text">
+        <h1 class="title">{site.name}</h1>
+        <p class="tagline">{site.tagline}</p>
+        <p class="byline">{site.author} · {host}</p>
+      </div>
+    </div>
+  </body>
+</html>

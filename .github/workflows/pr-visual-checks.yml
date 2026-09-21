@@ -129,6 +129,9 @@ jobs:
       - name: Verify gallery excluded from build
         run: ./scripts/core/check-gallery-exclusion.sh
 
+      - name: Verify social card excluded from build
+        run: bun run web:card:check
+
       # Uploaded on success rather than on failure alone, against the artifact
       # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
       # job's product now that it no longer commits them, so a failure-only

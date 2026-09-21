@@ -28,6 +28,10 @@ export const site = {
   // README.md: canon-allow-readme-paraphrase: describes the page's own shape, which the README never states.
   description:
     'One real session, from the ask to the merge. What happened, and which part of canon caused it.',
+  // README.md: canon-allow-readme-paraphrase: the plugin's slogan, stated in `.claude-plugin/marketplace.json`'s description rather than the README.
+  tagline: "One source for your repos' AI conventions.",
+  /** The copyright holder `LICENSE` names, which the social card signs with. */
+  author: 'Eric Le',
 }
 
 export const skipLink = 'Skip to the session'

@@ -66,6 +66,9 @@ jobs:
       - name: Verify gallery excluded from build
         run: ./scripts/core/check-gallery-exclusion.sh
 
+      - name: Verify social card excluded from build
+        run: bun run web:card:check
+
       # `pages-deployment-alias-url` is an output from wrangler 3.78 on, so the
       # version is pinned rather than left to the action's default.
       - name: Publish
