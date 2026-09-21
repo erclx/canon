@@ -27,22 +27,21 @@ The sidebar here lists this workspace's lessons and marks none of them, since no
 │  …                                                                     │
 │                                                                        │
 │  Lessons                                                               │← h2, dropped when no
-│  01  Scoping before solving                              ● Written    │  lesson exists yet
+│  01  Scoping before solving                                          │  lesson exists yet
 │      Lesson 1. What the forward-deployed design round actually is…    │
 │  ──────────────────────────────────────────────────────────────────   │
-│  02  Sizing out loud                                       ● Written  │
+│  02  Sizing out loud                                                  │
 │      Lesson 2. Three numbers, said out loud, before a single…         │
 │  ──────────────────────────────────────────────────────────────────   │
-│  03  The enterprise deployment skeleton                    ● Written  │
+│  03  The enterprise deployment skeleton                               │
 │      Lesson 3. Trust boundary, what may leave, whose identity…        │
 │                                                                        │
 │  Reference pages                                                       │← h2, dropped when the
 │  R1  Scoping a design problem before proposing components              │  workspace has none
 │                                                                        │
-│  Glossary                                                       [7]   │← h2, count badge,
-│  ┌────────────────────────────────────────────────────────────────┐  │  always present
-│  │ term                                                             │← filter input
-│  └────────────────────────────────────────────────────────────────┘  │
+│  Glossary                                                              │← h2, always present
+│  Filter terms                                                7 terms │← filter input, no border
+│                                                                        │  with the term count
 │  Agency: Taking on work nobody assigned, and fixing a problem on      │← scrollable term list
 │  noticing it rather than routing it to someone else. First seen in    │
 │  lessons/0001-scoping-before-solving.html.                            │
@@ -64,8 +63,8 @@ No term matches that.   Clear the filter                                 ← rep
 ## Copy
 
 - Section headings: "Finished when you can do all of these unaided", "Lessons", "Reference pages", "Glossary".
-- A lesson row's state reads "Written" once it exists on disk. There is no in-between state: a lesson not yet written does not appear in this list at all.
-- Glossary filter placeholder: "term". Empty state: "No term matches that." beside a "Clear the filter" button.
+- A lesson row carries no state mark. Every listed lesson is written, since one not yet written does not appear at all, so a mark would read the same on every row.
+- Glossary filter placeholder: "Filter terms", with the count beside it reading "N terms", or "M of N terms" while a filter narrows the list. Empty state: "No term matches that." beside a "Clear the filter" button.
 - A glossary entry appends its own provenance, for example "First seen in lessons/0001-scoping-before-solving.html."
 
 ## Behavior

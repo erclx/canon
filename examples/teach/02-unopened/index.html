@@ -201,15 +201,19 @@
       </header>
       <main class="wide-body">
         <h1>Unopened</h1>
-        <h2>Glossary <span class="count">0</span></h2>
-        <input
-          class="filter"
-          type="search"
-          id="gfilter"
-          aria-label="Filter glossary terms"
-          aria-controls="gloss"
-          placeholder="term"
-        />
+        <h2>Glossary</h2>
+        <div class="filter-row">
+          <input
+            class="filter"
+            type="search"
+            id="gfilter"
+            aria-label="Filter glossary terms"
+            aria-controls="gloss"
+            placeholder="Filter terms"
+          /><span class="filter-count" id="gloss-count" aria-live="polite"
+            >0 terms</span
+          >
+        </div>
         <div class="gloss" id="gloss">
           <p class="empty">
             No term matches that.
@@ -550,6 +554,7 @@
       ;(function () {
         var input = document.getElementById('gfilter')
         var list = document.getElementById('gloss')
+        var count = document.getElementById('gloss-count')
         if (!input || !list) return
         function updateGroups() {
           list.querySelectorAll('.gloss-group').forEach(function (heading) {
@@ -572,6 +577,12 @@
           })
           list.classList.toggle('none', n === 0)
           updateGroups()
+          if (count) {
+            var total = list.querySelectorAll('.gterm').length
+            count.textContent =
+              (n === total ? total : n + ' of ' + total) +
+              (total === 1 ? ' term' : ' terms')
+          }
         })
         var clear = list.querySelector('.clear')
         if (clear) {

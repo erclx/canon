@@ -48,7 +48,11 @@ The chrome matches the nav-04 prototype, measured as computed styles on both sid
 
 ## The reading rules sit on the declared type scale
 
-Every reading rule takes its size from `--t1` through `--t6`, and the body carries no phone override, since the steps are the same at every width. The mapping is the nav-04 prototype's `data-scale` block landed as the default, with two changes. `h3` reads `--t3` but the glossary group label keeps its own `--t5` and uppercase rule, because the prototype's `main h3` selector would have painted that label at 18px and it never rendered a glossary page. `th` and `.nav .lbl` drop their uppercase and tracking, matching the sentence case the landing page already uses.
+Every reading rule takes its size from `--t1` through `--t6`, and the body carries no phone override, since the steps are the same at every width. The mapping is the nav-04 prototype's `data-scale` block landed as the default, with two changes. `h3` reads `--t3` but the glossary group label keeps its own `--t5`, because the prototype's `main h3` selector would have painted that label at 18px and it never rendered a glossary page. `th`, `.nav .lbl`, the panel labels, the glossary group label and the two quiz tags drop their uppercase and tracking, matching the sentence case the landing page already uses. The quiz tags write their own text in `content`, so the strings are capitalized in the rule.
+
+## The listing body carries no accent and no status dot
+
+The chrome pass narrowed the accent to marking state, and the listing body follows it: `.toc .num` is muted because no listing row is a position you occupy, and the repeated status dot is gone because a mark reading the same on every live row reports nothing. The workspace row keeps its state word, which is the only one that can differ (`Stub`), and a lesson row carries none, since every listed lesson is written. The glossary filter is an input with no border on the page ground with the term count beside it, `N terms` narrowing to `M of N terms` while a filter is typed. The jump menus are a separate component and keep their own state marks.
 
 Each step carries one leading across reading text: 1.1 on `--t1`, 1.3 on `--t2`, 1.55 on `--t3` and `--t4`, and 1.6 on `--t5`. `h3` takes 1.55 where the prototype drew 1.4, so a step holds one value. Controls keep their own tuning, such as the option rows at 1.45 and the jump menu rows, since a one-line control is not reading text.
 

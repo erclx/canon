@@ -552,7 +552,6 @@ describe('buildDesignCss', () => {
       ['.road-t', '--t5'],
       ['.toc .state', '--t5'],
       ['.toc .ext', '--t4'],
-      ['h2 .count', '--t5'],
       ['.gloss .empty .clear', '--t4'],
       ['.opt::before', '--t6'],
       ['.opt[data-state="chosen"]::after', '--t6'],
@@ -576,18 +575,60 @@ describe('buildDesignCss', () => {
       const rule = declarationsOf(teachCss(), '.gloss-group')
 
       expect(rule).toContain('font-size: var(--t5)')
-      expect(rule).toContain('text-transform: uppercase')
     })
 
-    it.each(['th', '.nav .lbl'])(
-      'should set %s in sentence case with no tracking',
-      (selector) => {
-        const rule = declarationsOf(teachCss(), selector)
+    it.each([
+      'th',
+      '.nav .lbl',
+      '.assumes b, .progress b',
+      '.opt[data-state="chosen"]::after',
+      '.opt[data-state="right"]::after',
+      '.gloss-group',
+    ])('should set %s in sentence case with no tracking', (selector) => {
+      const rule = declarationsOf(teachCss(), selector)
 
-        expect(rule).not.toContain('text-transform: uppercase')
-        expect(rule).toContain('letter-spacing: 0')
-      },
-    )
+      expect(rule).not.toContain('text-transform: uppercase')
+      expect(rule).toContain('letter-spacing: 0')
+    })
+
+    it.each([
+      ['chosen', 'Your answer'],
+      ['right', 'Correct'],
+    ])('should write the %s quiz tag in sentence case', (state, text) => {
+      const rule = declarationsOf(
+        teachCss(),
+        `.opt[data-state="${state}"]::after`,
+      )
+
+      expect(rule).toContain(`content: "${text}"`)
+    })
+
+    describe('listing marks', () => {
+      it('should paint the listing ordinal neutral rather than in the accent', () => {
+        expect(declarationsOf(teachCss(), '.toc .num')).not.toContain(
+          '--color-accent',
+        )
+      })
+
+      it('should draw no status dot on a listing row', () => {
+        const css = teachCss()
+
+        expect(css).not.toContain('.toc .state::before')
+        expect(css).not.toMatch(/\.toc \.state\.(done|next)/)
+      })
+
+      it('should state the glossary size once, in the live count beside the filter', () => {
+        expect(teachCss()).not.toContain('h2 .count')
+      })
+
+      it('should set the glossary filter with no border on the page ground', () => {
+        const rule = declarationsOf(teachCss(), '.filter')
+
+        expect(rule).toContain('border: 0')
+        expect(rule).not.toContain('border-radius')
+        expect(rule).not.toContain('width: 100%')
+      })
+    })
 
     it('should leave no rem literal font size in the reading rules', () => {
       const literals = [...teachCss().matchAll(/font-size:\s*[\d.]+rem/g)]
