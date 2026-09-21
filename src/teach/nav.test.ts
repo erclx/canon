@@ -3,6 +3,11 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  TEACH_SIDEBAR_BREAKPOINT,
+  TEACH_STYLESHEET_COMPONENTS,
+} from '@/design/components'
+import { buildDesignCss } from '@/design/css'
 import { focusLine, generateNav } from '@/teach/nav'
 import {
   listWorkspaces,
@@ -676,5 +681,189 @@ describe('generateNav', () => {
     expect(contents.match(/class="gterm"/g)).toHaveLength(entries.length)
     expect(contents).toContain('list.querySelectorAll(".gterm")')
     expect(contents).toContain('updateGroups()')
+  })
+})
+
+describe('course sidebar', () => {
+  function basename(file: string): string {
+    return file.replace(/^\d+-/, '').replace(/\.html$/, '')
+  }
+
+  /** The three page kinds the chrome renders, read back off one generated tree. */
+  async function generateThreePages(
+    lessonFiles: readonly string[] = ['0001-anchors.html'],
+  ): Promise<{ root: string; contents: string; lesson: string }> {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+
+    for (const file of lessonFiles) {
+      await seedLesson(
+        '01-regular-expressions',
+        file,
+        basename(file),
+        'Where a pattern starts and ends.',
+        '<h2>First</h2><p>One.</p><h2>Second</h2><p>Two.</p>',
+      )
+    }
+
+    await generateNav(ROOT)
+
+    return {
+      root: await readFile(join(teachDir(ROOT), 'index.html'), 'utf8'),
+      contents: await readFile(
+        join(workspaceDir('01-regular-expressions'), 'index.html'),
+        'utf8',
+      ),
+      lesson: await readFile(
+        join(workspaceDir('01-regular-expressions'), 'lessons', lessonFiles[0]),
+        'utf8',
+      ),
+    }
+  }
+
+  it('should carry the sidebar and its content pane on every page kind', async () => {
+    const pages = await generateThreePages()
+
+    for (const page of [pages.root, pages.contents, pages.lesson]) {
+      expect(page).toContain('<aside class="sb">')
+      expect(page).toContain('<div class="pane">')
+      expect(page).toContain('class="sb-fold"')
+    }
+  })
+
+  it('should close the content pane after the footer navigation on a lesson', async () => {
+    const { lesson } = await generateThreePages()
+
+    expect(lesson.indexOf('<div class="pane">')).toBeLessThan(
+      lesson.indexOf('<main'),
+    )
+    expect(lesson.indexOf('</nav>\n</div>')).toBeGreaterThan(
+      lesson.indexOf('</main>'),
+    )
+  })
+
+  it('should retire the segmented progress track from all three page kinds', async () => {
+    const pages = await generateThreePages()
+
+    for (const page of [pages.root, pages.contents, pages.lesson]) {
+      expect(page).not.toContain('class="track"')
+    }
+  })
+
+  it('should list every lesson in the sidebar and mark the one being read', async () => {
+    const { lesson } = await generateThreePages([
+      '0001-anchors.html',
+      '0002-groups.html',
+    ])
+
+    expect(lesson.match(/class="sb-l(?: sb-on)?"/g)).toHaveLength(2)
+    expect(lesson.match(/class="sb-l sb-on"/g)).toHaveLength(1)
+  })
+
+  it('should fold the outline under the lesson being read rather than beside it', async () => {
+    const { lesson, contents } = await generateThreePages()
+
+    expect(lesson.indexOf('<div class="sb-out-slot"></div>')).toBeGreaterThan(
+      lesson.indexOf('class="sb-l sb-on"'),
+    )
+    expect(contents).not.toContain('<div class="sb-out-slot"></div>')
+  })
+
+  it('should retire the fixed outline rail the lesson used to build after the body', async () => {
+    const { lesson } = await generateThreePages()
+
+    expect(lesson).not.toContain('nav.className = "outline"')
+    expect(lesson).not.toContain('class="outline"')
+  })
+
+  it('should carry a lesson count in the workspace menu and nothing in the lesson menu', async () => {
+    const { lesson } = await generateThreePages([
+      '0001-anchors.html',
+      '0002-groups.html',
+    ])
+
+    expect(lesson).toContain('<span class="ct">2</span>')
+    expect(lesson).not.toContain('class="dot"')
+  })
+
+  it('should show the filter only once the list is longer than a reader can scan', async () => {
+    const short = await generateThreePages(['0001-anchors.html'])
+
+    expect(short.lesson).not.toContain('class="sb-filter"')
+
+    rmSync(ROOT, { recursive: true, force: true })
+    ROOT = mkdtempSync(join(tmpdir(), 'canon-teach-nav-'))
+
+    const many = await generateThreePages(
+      Array.from(
+        { length: 9 },
+        (_, index) => `${String(index + 1).padStart(4, '0')}-lesson.html`,
+      ),
+    )
+
+    expect(many.lesson).toContain('class="sb-filter"')
+  })
+
+  it('should declare the page kind, which is what the pre-paint script branches on', async () => {
+    const pages = await generateThreePages()
+
+    expect(pages.contents).toContain('r.dataset.page="index"')
+    expect(pages.lesson).toContain('r.dataset.page="lesson"')
+    expect(pages.lesson).not.toContain('r.dataset.lessons')
+  })
+
+  it('should switch both scripts at the width the stylesheet switches at', async () => {
+    const { lesson } = await generateThreePages()
+    const css = buildDesignCss(undefined, {
+      components: TEACH_STYLESHEET_COMPONENTS,
+    })
+
+    const query = `(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)`
+    expect(
+      lesson.match(
+        new RegExp(`matchMedia\\("${query.replace(/[()]/g, '\\$&')}"\\)`, 'g'),
+      ),
+    ).toHaveLength(2)
+    expect(css).toContain(`@media ${query} {`)
+  })
+
+  it('should settle the panel state in the head, before anything paints', async () => {
+    const { lesson } = await generateThreePages()
+
+    const head = lesson.slice(0, lesson.indexOf('<body'))
+    expect(head).toContain('r.classList.add("sb-shut")')
+    expect(head).toContain('s==="shut"||(s===null&&idx)')
+    expect(head).toContain('localStorage.getItem("teach-sb-w")')
+  })
+
+  it('should return focus to the toggle from every route that shuts the overlay', async () => {
+    const { lesson } = await generateThreePages()
+
+    const shutBody = /function shut\(\) \{([\s\S]*?)\n  \}/.exec(lesson)?.[1]
+    expect(shutBody).toContain('panel.contains(document.activeElement)')
+    expect(shutBody).toContain('fold.focus()')
+
+    // The close control returns focus by calling shut(), not on its own, so
+    // Escape and the scrim cannot diverge from it.
+    expect(lesson).toContain('close.addEventListener("click", shut)')
+  })
+
+  it('should contain Tab within the overlay while it is open', async () => {
+    const { lesson } = await generateThreePages()
+
+    expect(lesson).toContain('if (e.key !== "Tab") return;')
+    expect(lesson).toContain('panelStops()')
+    expect(lesson).toContain('last.focus()')
+    expect(lesson).toContain('first.focus()')
+    expect(lesson).toContain('e.preventDefault()')
+  })
+
+  it('should open the panel as an overlay below the breakpoint, with a scrim and an escape', async () => {
+    const { lesson } = await generateThreePages()
+
+    expect(lesson).toContain('matchMedia("(max-width: 1100px)")')
+    expect(lesson).toContain('scrim.className = "sb-scrim"')
+    expect(lesson).toContain('e.key === "Escape" && narrow.matches')
+    expect(lesson).toContain('first.focus()')
   })
 })

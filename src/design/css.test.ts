@@ -237,6 +237,118 @@ describe('buildDesignCss', () => {
     })
   })
 
+  describe('teach course sidebar', () => {
+    const teachCss = (): string =>
+      buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
+
+    const declarationsOf = (css: string, selector: string): string =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter((match) => match[1].trim().split('\n').pop() === selector)
+        .map((match) => match[2])
+        .join('\n')
+
+    it('should lay the sidebar and the content pane out as one flex row', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, 'body')).toContain('display: flex')
+      expect(declarationsOf(css, '.sb')).toContain('position: sticky')
+      expect(declarationsOf(css, '.pane')).toContain('flex: 1 1 auto')
+    })
+
+    it('should keep the bottom room off the body, which a sticky sidebar can never travel into', () => {
+      const body = declarationsOf(teachCss(), 'body')
+
+      expect(body).toMatch(/padding:\s*0;/)
+      expect(body).not.toContain('7rem')
+    })
+
+    it('should give the pane the bottom room and size it by its border box', () => {
+      const pane = declarationsOf(teachCss(), '.pane')
+
+      expect(pane).toContain('padding-bottom: 7rem')
+      expect(pane).toContain('box-sizing: border-box')
+      expect(pane).toContain('min-height: 100vh')
+    })
+
+    it('should report reading position on the masthead edge rather than as its own element', () => {
+      expect(declarationsOf(teachCss(), '.bar::after')).toContain(
+        'width: var(--read, 0%)',
+      )
+    })
+
+    it('should retire the segmented progress track', () => {
+      const css = teachCss()
+
+      expect(css).not.toContain('.track')
+    })
+
+    it('should retire the fixed right-hand outline rail in favor of the folded list', () => {
+      const css = teachCss()
+
+      expect(css).not.toContain('.outline')
+      expect(declarationsOf(css, '.sb-out a')).toContain('display: block')
+    })
+
+    it('should overlay the panel rather than squeeze the lesson below the sidebar breakpoint', () => {
+      const css = teachCss()
+      const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
+
+      expect(narrow).not.toBeNull()
+      expect(narrow?.[1]).toContain('position: fixed')
+      expect(narrow?.[1]).toContain('.sb-scrim')
+      expect(narrow?.[1]).toContain('.sb-close')
+    })
+
+    it('should hide the overlay-only controls above the breakpoint, where the script still appends them', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, '.sb-close, .sb-scrim')).toContain(
+        'display: none',
+      )
+
+      // Scoped to each selector inside the query rather than searched across
+      // the whole block, so deleting either rule's own `display` fails here
+      // instead of being satisfied by a sibling that happens to declare one.
+      const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
+      expect(narrow).not.toBeNull()
+
+      // `declarationsOf` keys on the selector's own line untrimmed, so a rule
+      // indented inside a query is invisible to it until the indent is dropped.
+      const inQuery = (narrow?.[1] ?? '').replace(/^ {2}/gm, '')
+      expect(declarationsOf(inQuery, '.sb-close')).toContain(
+        'display: inline-flex',
+      )
+      expect(declarationsOf(inQuery, '.sb-scrim')).toContain('display: block')
+    })
+
+    it('should take a shut panel out of the tab order rather than only out of sight', () => {
+      const css = teachCss()
+
+      expect(css).toContain('html.sb-shut .sb { visibility: hidden')
+    })
+
+    it('should restate the panel width in the shut narrow state, which the wide rule collapses to zero', () => {
+      const css = teachCss()
+      const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
+
+      expect(narrow?.[1]).toContain('html.sb-shut .sb { width: min(')
+    })
+
+    it('should drop every transition under a reduced-motion preference', () => {
+      const css = teachCss()
+      const reduced = [
+        ...css.matchAll(
+          /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g,
+        ),
+      ]
+        .map((match) => match[1])
+        .join('\n')
+
+      expect(reduced).toContain('.sb')
+      expect(reduced).toContain('transition: none')
+    })
+  })
+
   it('names no retired teach face in the seeded chrome', () => {
     const css = buildDesignCss(undefined, {
       components: TEACH_STYLESHEET_COMPONENTS,

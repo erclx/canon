@@ -80,6 +80,7 @@ nextjs
 noopener
 noreferrer
 nothrow
+nums
 noto
 nowrap
 nullglob

@@ -6,12 +6,12 @@
 
 A lesson carries four empty marker pairs and `canon teach nav` fills each from what the workspace holds:
 
-| Marker                | Carries                                                 |
-| --------------------- | ------------------------------------------------------- |
-| `canon:teach:style`   | the workspace stylesheet link                           |
-| `canon:teach:header`  | the masthead and breadcrumb                             |
-| `canon:teach:footnav` | the previous and next lesson navigation                 |
-| `canon:teach:scripts` | whatever the lesson chrome needs at the end of the body |
+| Marker                | Carries                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `canon:teach:style`   | the embedded stylesheet and the panel's pre-paint script |
+| `canon:teach:header`  | the course sidebar, the masthead, and the breadcrumb     |
+| `canon:teach:footnav` | the previous and next lesson navigation                  |
+| `canon:teach:scripts` | whatever the lesson chrome needs at the end of the body  |
 
 `nav` refuses a lesson missing them rather than inventing a place to put the chrome.
 

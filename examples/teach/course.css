@@ -243,7 +243,7 @@ figcaption {
 }
 
 /* teach-chrome
-   The masthead, breadcrumb, jump menu, theme toggle, progress track, and footer
+   The masthead, breadcrumb, jump menu, theme toggle, course sidebar, and footer
    navigation shared by every teach page. Recovered from two gitignored
    course.css files that predate a regression that dropped this layer from the
    generator, and rewritten onto this module's tokens rather than the
@@ -292,11 +292,16 @@ html {
   scroll-padding-top: calc(var(--teach-mast-h) + 1rem);
 }
 
-/* No horizontal padding on the body, so the sticky bar reaches both window
-   edges. The gutter moves onto `main`, which is the only thing that needed it. */
+/* No padding at all on the body, so the sticky bar reaches both window edges
+   and the sidebar can travel the full height. The gutter moves onto `main` and
+   the bottom room onto `.pane`: a flex item's sticky containing block is the
+   flex container's content box, so padding here is space the sidebar could
+   never reach and it would ride up by exactly that much near the foot. */
 body {
   margin: 0;
-  padding: 0 0 7rem;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
   background: var(--color-background);
   color: var(--color-text-body);
   font-family: var(--teach-sans);
@@ -319,6 +324,26 @@ main {
   max-width: calc(var(--teach-measure) + 3rem);
 }
 
+/* Everything but the sidebar. `flow-root` rather than a bare block, because a
+   bottom margin collapsing out of here makes the document taller than the flex
+   container and a sticky sidebar can only travel inside its containing block,
+   so it would ride up by exactly the escaped margin on a tall window. The
+   border box is what keeps `min-height: 100vh` plus the bottom room from
+   scrolling every short page by that padding. */
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flow-root;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-bottom: 7rem;
+  border-left: 1px solid var(--color-border);
+}
+
+html.sb-shut .pane {
+  border-left: 0;
+}
+
 .bar {
   position: sticky;
   top: 0;
@@ -328,10 +353,27 @@ main {
   padding: 0 1.5rem;
 }
 
+/* The reading bar rides the masthead's own bottom edge rather than arriving as
+   a second element. It reports position inside the lesson, which nothing
+   reported, where the retired track reported position in the course, which the
+   sidebar now reports. */
+.bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: var(--read, 0%);
+  background: var(--color-accent);
+}
+
+/* The height is the token rather than the sum of two paddings, so the sidebar's
+   own top row lands on the same seam the bar's bottom border draws. */
 .mast {
   max-width: var(--teach-chrome);
   margin: 0 auto;
-  padding: 0.8rem 0 0.7rem;
+  min-height: var(--teach-mast-h);
+  padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -556,32 +598,289 @@ main {
   }
 }
 
-/* ---- Track: where you are in the course ---- */
+/* ---- The course sidebar ---- */
 
-/* The track rides inside the bar, so it needs no sticky position, no seam
-   overlap, and no stacking context of its own. */
+/* A segmented progress strip used to sit here, one `flex: 1` segment per
+   lesson, and it stopped working at the scale a reader most needs it: fifty
+   lessons rendered as a row of dots. The sidebar reports course position
+   instead, at any length, and the bar reports position inside the lesson. */
 
-.track {
+/* The toggle in the masthead, left of the breadcrumb. */
+.sb-fold {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.35rem;
+  font: inherit;
+  font-size: var(--t5);
+  line-height: 1;
+  color: var(--color-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sb-fold:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.sb {
+  flex: 0 0 var(--sb-w, 16rem);
+  width: var(--sb-w, 16rem);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
   display: flex;
-  gap: 0.25rem;
-  max-width: var(--teach-chrome);
-  margin: 0 auto;
-  padding: 0 0 0.75rem;
+  flex-direction: column;
+  overflow: visible;
+  background: transparent;
+  font-family: var(--teach-sans);
+  transition:
+    flex-basis 0.14s,
+    width 0.14s;
 }
 
-.track i {
-  flex: 1;
-  height: 3px;
+html.sb-shut .sb {
+  flex-basis: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sb-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: var(--teach-mast-h);
+  padding: 0 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sb-ws {
+  position: relative;
+}
+
+.sb-ws > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  font-size: var(--t4);
+  font-weight: 650;
+  color: var(--color-text);
+}
+
+.sb-ws > summary::-webkit-details-marker {
+  display: none;
+}
+.sb-ws > summary:hover,
+.sb-ws[open] > summary {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.sb-ws .car {
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+}
+
+.sb-wl {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 40;
+  min-width: 13rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 0.25rem;
+}
+
+:root[data-theme='dark'] .sb-wl {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* The popover chrome comes from `.sb-wl`, so the list nested inside it drops
+   its own rather than drawing a second border inside the first. */
+.sb-wl .jump-list {
+  position: static;
+  min-width: 0;
+  max-width: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+
+.sb-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
+.sb-meta {
+  padding: 1rem 1.25rem 0.55rem;
+  color: var(--color-muted);
+  font-size: var(--t6);
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-filter {
+  padding: 0 0.95rem 0.6rem;
+}
+
+.sb-filter input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: var(--t6);
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  padding: 0.3rem 0.55rem;
+}
+
+.sb-filter input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.sb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.7rem;
+}
+.sb-list li {
+  margin: 0;
+}
+.sb-list li.hide {
+  display: none;
+}
+
+.sb-l {
+  position: relative;
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.38rem 0.55rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--color-text-body);
+  font-size: var(--t5);
+  line-height: 1.45;
+}
+
+.sb-l:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.sb-n {
+  flex: none;
+  font-family: var(--teach-mono);
+  font-size: var(--t6);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-on {
+  color: var(--color-text);
+  font-weight: 650;
+}
+
+.sb-on::before {
+  content: '';
+  position: absolute;
+  left: -0.6rem;
+  top: 0.28rem;
+  bottom: 0.28rem;
+  width: 2px;
   border-radius: 2px;
-  background: var(--color-border);
+  background: var(--color-accent);
 }
 
-.track i.done {
+.sb-on .sb-n {
+  color: var(--color-accent);
+}
+
+.sb-empty {
+  padding: 0.3rem 1.2rem;
+  color: var(--color-muted);
+  font-size: var(--t6);
+}
+
+.sb-foot {
+  flex: none;
+  padding: 0.7rem 1.25rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: var(--t6);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The panel is resizable between a width that still fits a lesson title and one
+   that would start eating the reading measure. */
+.sb-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  width: 7px;
+  z-index: 25;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sb-grip::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 2.2rem;
+  border-radius: 1px;
+  background: var(--color-border);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.sb-grip:hover::before,
+.sb-grip:focus-visible::before,
+html.sb-drag .sb-grip::before {
+  opacity: 1;
   background: var(--color-accent);
 }
-.track i.here {
-  background: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-teach-accent-bg);
+
+.sb-grip:focus-visible {
+  outline: none;
+}
+html.sb-drag {
+  cursor: col-resize;
+  user-select: none;
+}
+html.sb-shut .sb-grip {
+  display: none;
+}
+
+/* Both belong to the overlay and the script appends both on every page, so
+   each is hidden until the breakpoint hands it a job. Without this the close
+   control renders as an unstyled button stretched across the column, and the
+   scrim becomes a flex item of the body. */
+.sb-close,
+.sb-scrim {
+  display: none;
 }
 
 /* ---- Footer navigation, the only place it appears ---- */
@@ -694,15 +993,17 @@ main {
   font-size: 0.75rem;
   color: var(--color-muted);
 }
-.jump-list .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 99px;
-  background: var(--color-border);
+/* The third column used to hold a status dot that read the same on every row,
+   so it reported nothing. It is a per-entry trailing slot now: the workspace
+   menu puts a lesson count there and the lesson menu leaves it empty. */
+.jump-list .ct {
+  font-family: var(--teach-mono);
+  font-size: var(--t6);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
-.jump-list .dot.done {
-  background: var(--color-accent);
-}
+
 .jump-list li.at a {
   background: var(--color-teach-accent-bg);
 }
@@ -784,6 +1085,124 @@ main {
     top: auto;
     min-width: 0;
     max-width: none;
+  }
+}
+
+/* ---- What gives way below 1100px ---- */
+
+/* Hiding the sidebar outright leaves the toggle painted exactly where it cannot
+   act, and it deletes the filter and the per-lesson outline, which the
+   breadcrumb caret does not carry. The panel becomes an overlay instead, and it
+   states its own ground because `.sb` is transparent by design for a column
+   sitting on the page rather than floating over the lesson. */
+@media (max-width: 1100px) {
+  .pane {
+    border-left: 0;
+  }
+
+  .sb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    width: min(21rem, 86vw);
+    height: 100dvh;
+    overflow-y: auto;
+    background: var(--color-background);
+    border-right: 1px solid var(--color-border);
+    box-shadow: 0 0 40px rgb(0 0 0 / 35%);
+    transform: translateX(-100%);
+    transition: transform 0.18s;
+  }
+
+  html:not(.sb-shut) .sb {
+    transform: none;
+  }
+
+  /* The wide rule collapses a shut panel to `width: 0` and outranks a bare
+     `.sb` in here, which produced a one-pixel panel whose contents spilled out
+     and intercepted every click on the toggle. The shut state restates the
+     width so the transform is what moves the panel off screen. */
+  html.sb-shut .sb {
+    width: min(21rem, 86vw);
+    flex-basis: auto;
+    overflow-y: auto;
+  }
+
+  /* A transform moves the panel out of sight and leaves every control inside it
+     in the tab order, so the first Tab from a shut page landed on the workspace
+     switcher inside an invisible panel. Visibility takes it out of the
+     sequence, delayed on the way out so the slide still shows. */
+  html.sb-shut .sb {
+    visibility: hidden;
+    transition:
+      transform 0.18s,
+      visibility 0s linear 0.18s;
+  }
+  html:not(.sb-shut) .sb {
+    visibility: visible;
+    transition:
+      transform 0.18s,
+      visibility 0s;
+  }
+
+  .sb-grip {
+    display: none;
+  }
+
+  /* The panel covers the masthead and the toggle that opened it, so it carries
+     its own way out rather than leaving the scrim as the only route on a phone.
+     It carries no border, at 1.75rem to match `.sb-fold` and `.theme`, which also clears
+     the 24 pixel pointer target floor. */
+  .sb-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0.55rem;
+    right: 0.6rem;
+    z-index: 61;
+    appearance: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    font: inherit;
+    font-size: var(--t5);
+    line-height: 1;
+    color: var(--color-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .sb-close:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+
+  .sb-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgb(0 0 0 / 45%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s;
+  }
+
+  html:not(.sb-shut) .sb-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb,
+  .sb-scrim,
+  .sb-grip::before {
+    transition: none;
   }
 }
 
@@ -1421,85 +1840,36 @@ ol.succ li {
 }
 
 /* teach-outline
-   The in-lesson outline rail in the gutter the reading measure leaves over, and
-   the workspace-switcher row inside the lesson jump menu. */
+   The in-lesson outline, folded under the lesson being read in the course
+   sidebar. It used to be a fixed rail in the gutter the reading measure left
+   over, which reported the same thing twice once the sidebar carried the
+   course and disappeared entirely below 1420px. */
 
-/* ---- In-lesson outline, in the gutter the measure leaves over ---- */
+/* ---- In-lesson outline, folded under the lesson being read ---- */
 
-.outline {
-  position: fixed;
-  top: calc(var(--teach-mast-h) + 2.2rem);
-  /* Four pixels of padding with the position pulled back by the same amount,
-     so a focus ring at the rail's edge has somewhere to draw. `overflow-y`
-     clips horizontally too, which took a bite out of every ring in here. */
-  left: calc(50% + var(--teach-measure) / 2 + 2.5rem - 4px);
-  padding: 0 4px;
-  width: calc(13rem + 8px);
-  max-height: calc(100vh - var(--teach-mast-h) - 4rem);
-  overflow-y: auto;
-  font-size: var(--t5);
-  line-height: 1.45;
+/* The rail this replaces was `position: fixed` in the right-hand gutter, which
+   only existed above 1420px and reported nothing at all below it. Folding the
+   headings under the current lesson puts the course and the lesson in one
+   column, so a reader tracks both in one place at any window width. */
+.sb-out {
+  list-style: none;
+  margin: 0.1rem 0 0.55rem;
+  padding: 0 0 0 1.45rem;
 }
 
-/* The heading is a control rather than a label, because returning to the top
-   of a long lesson is the one thing the rail could not do. */
-.outline .to-top {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  font-family: var(--teach-sans);
-  font-size: 0.6563rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--color-border);
-  border-radius: 3px 3px 0 0;
-  margin: 0 0 0.6rem;
-  padding: 0.2rem 0 0.55rem;
-  cursor: pointer;
-  text-align: left;
-}
-
-.outline .to-top:hover {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-border);
-}
-
-.outline .to-top::before {
-  content: '';
-  width: 11px;
-  height: 8px;
-  background:
-    linear-gradient(var(--color-muted) 0 0) 0 0 / 11px 1.5px no-repeat,
-    linear-gradient(var(--color-muted) 0 0) 0 3.2px / 8px 1.5px no-repeat,
-    linear-gradient(var(--color-muted) 0 0) 0 6.5px / 11px 1.5px no-repeat;
-}
-
-.outline a {
+.sb-out a {
   display: block;
-  padding: 0.3rem 0 0.3rem 0.7rem;
-  border-left: 2px solid var(--color-border);
-  color: var(--color-muted);
+  padding: 0.18rem 0.5rem;
   text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: var(--t6);
 }
 
-.outline a:hover {
-  color: var(--color-text-body);
-  border-left-color: var(--color-border);
+.sb-out a:hover {
+  color: var(--color-text);
 }
-.outline a.on {
+.sb-out a.on {
   color: var(--color-accent);
-  border-left-color: var(--color-accent);
-}
-
-@media (max-width: 1420px) {
-  .outline {
-    display: none;
-  }
 }
 
 /* teach-references

@@ -5,13 +5,15 @@ description: The workspace roster at .canon/teach/index.html, one row per learni
 
 # Teach root
 
-The entry page into every learning workspace. `renderRootPage` in `src/teach/nav.ts:422-469` regenerates it wholesale on every `canon teach nav` run, from `listWorkspaces` scanning `.canon/teach/` on disk. Source: `.canon/teach/index.html`, regenerated for this plan against `5cc60c86`.
+The entry page into every learning workspace. `renderRootPage` in `src/teach/nav.ts:845-903` regenerates it wholesale on every `canon teach nav` run, from `listWorkspaces` scanning `.canon/teach/` on disk. Source: `.canon/teach/index.html`, regenerated for this plan against `5cc60c86`.
+
+The sidebar here lists the workspaces rather than the lessons, and folds no outline under any of them. It arrives shut, because the roster below already lists what the panel would.
 
 ## Roster
 
 ```plaintext
 ┌──────────────────────────────────────────────────────────────────────┐
-│  ← masthead, breadcrumb, jump menu, theme toggle: see chrome.md      │
+│  ← sidebar, masthead, breadcrumb, jump menu, theme: see chrome.md    │
 ├──────────────────────────────────────────────────────────────────────┤
 │                                                                        │
 │  Learning workspaces                                                  │← h1
