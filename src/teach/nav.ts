@@ -517,14 +517,16 @@ interface CrumbSegment {
 
 /**
  * Every ancestor renders as a link, and the current page renders as plain
- * text, whether or not it still carries a jump widget of its own.
+ * text, whether or not it still carries a jump widget of its own. A link's
+ * label sits in its own span because `text-box` is ignored on the
+ * `inline-flex` link, so the cap trim needs a plain box to land on.
  */
 function renderBreadcrumb(segments: readonly CrumbSegment[]): string {
   return segments
     .map((segment, index) => {
       const text =
         segment.href !== undefined
-          ? `<a class="crumb" href="${segment.href}">${escapeHtml(segment.label)}</a>`
+          ? `<a class="crumb" href="${segment.href}"><span class="crumb-t">${escapeHtml(segment.label)}</span></a>`
           : `<span class="crumb crumb-here">${escapeHtml(segment.label)}</span>`
 
       const jump = segment.jump

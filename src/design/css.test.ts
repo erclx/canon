@@ -349,6 +349,135 @@ describe('buildDesignCss', () => {
     })
   })
 
+  describe('teach masthead', () => {
+    const teachCss = (): string =>
+      buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
+
+    const declarationsOf = (css: string, selector: string): string =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter((match) => match[1].trim().split('\n').pop() === selector)
+        .map((match) => match[2])
+        .join('\n')
+
+    const phoneRules = (css: string): string =>
+      [...css.matchAll(/@media \(max-width: 640px\) \{([\s\S]*?)\n\}/g)]
+        .map((match) => match[1])
+        .join('\n')
+        .replace(/^ +/gm, '')
+
+    it('should set the bar height to 3.5rem', () => {
+      expect(declarationsOf(teachCss(), ':root')).toContain(
+        '--teach-mast-h: 3.5rem',
+      )
+    })
+
+    it('should span the window rather than cap the bar row to the reading measure', () => {
+      const mast = declarationsOf(teachCss(), '.mast')
+
+      expect(mast).toContain('max-width: none')
+      expect(mast).toMatch(/margin:\s*0;/)
+      expect(mast).toContain('padding: 0 0.9rem')
+      expect(mast).toContain('gap: 0.55rem')
+    })
+
+    it('should keep the prototype gaps inside the bar at every width', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, '.mast-left')).toContain('gap: 0.3rem')
+      expect(declarationsOf(css, '.mast-right')).toContain('gap: 0.2rem')
+      expect(declarationsOf(css, '.crumb-sep')).toContain('margin: 0 0.1rem')
+      expect(phoneRules(css)).not.toMatch(/\.mast(-left)? \{[^}]*(?<!row-)gap:/)
+    })
+
+    it('should paint a breadcrumb link neutral rather than in the accent', () => {
+      const css = teachCss()
+
+      expect(declarationsOf(css, '.mast a.crumb')).toContain(
+        'color: var(--color-text-secondary)',
+      )
+      expect(declarationsOf(css, '.crumb-item:hover a.crumb')).toContain(
+        'color: var(--color-text)',
+      )
+    })
+
+    it('should draw the label and its caret as one chip that fills on hover and while open', () => {
+      const css = teachCss()
+      const item = declarationsOf(css, '.crumb-item')
+
+      expect(item).toContain('border-radius: 7px')
+      expect(item).toContain('padding: 0.1rem 0.15rem 0.1rem 0.35rem')
+      expect(item).toContain('gap: 0')
+      expect(item).toContain('cursor: pointer')
+      expect(
+        declarationsOf(css, '.crumb-item:has(details.jump[open])'),
+      ).toContain('background: var(--color-chrome)')
+      expect(css).toContain('.crumb-item:has(details.jump):hover,')
+    })
+
+    it('should hold the caret visible and muted in every state', () => {
+      const css = teachCss()
+
+      expect(css).not.toMatch(/\.caret \{ opacity: 0\.55/)
+      expect(css).not.toMatch(/\.jump summary:hover \{[^}]*--color-accent/)
+      expect(css).not.toMatch(/\.jump\[open\] summary \{[^}]*--color-accent/)
+      expect(declarationsOf(css, '.jump summary .caret')).toContain(
+        'color: var(--color-muted)',
+      )
+    })
+
+    it('should draw the theme control without a border at the fold control size and radius', () => {
+      const css = teachCss()
+      const theme = declarationsOf(css, '.theme')
+
+      expect(theme).toContain('border: 0')
+      expect(theme).toContain('width: 1.75rem')
+      expect(theme).toContain('border-radius: 6px')
+      expect(theme).not.toContain('99px')
+      expect(declarationsOf(css, '.theme:hover')).toContain(
+        'background: var(--color-chrome)',
+      )
+    })
+
+    it('should fill every chrome hover with the chrome token rather than the panel surface', () => {
+      const css = teachCss()
+
+      for (const selector of [
+        '.sb-fold:hover',
+        '.theme:hover',
+        '.sb-l:hover',
+        '.jump-list a:hover',
+        '.sb-ws > summary:hover, .sb-ws[open] > summary',
+      ]) {
+        expect(declarationsOf(css, selector)).toContain(
+          'background: var(--color-chrome)',
+        )
+      }
+    })
+
+    it('should fit the jump menu to its content in the base rule shared by every mount', () => {
+      const css = teachCss()
+      const row = declarationsOf(css, '.jump-list a')
+
+      expect(css).toContain('min-width: min(11rem, calc(100vw - 2rem))')
+      expect(css).not.toContain('21rem, calc')
+      expect(row).toContain('padding: 0.38rem 0.55rem')
+      expect(row).toContain('font-size: var(--t5)')
+      expect(css).not.toContain('.mast .jump-list')
+    })
+
+    it('should trim each crumb label to its cap band so the caret centres on the capitals', () => {
+      expect(
+        declarationsOf(teachCss(), '.crumb-t, .crumb-here, .sb-ws .ws-name'),
+      ).toContain('text-box: trim-both cap alphabetic')
+    })
+
+    it('should mark the current crumb at the weight the current sidebar row paints', () => {
+      expect(declarationsOf(teachCss(), '.crumb-here')).toContain(
+        'font-weight: 650',
+      )
+    })
+  })
+
   it('names no retired teach face in the seeded chrome', () => {
     const css = buildDesignCss(undefined, {
       components: TEACH_STYLESHEET_COMPONENTS,

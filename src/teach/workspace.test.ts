@@ -686,7 +686,7 @@ describe('writeStylesheet', () => {
 
     expect(body).toContain('.bar {')
     expect(body).toContain('.quiz')
-    expect(body).toContain('.theme:hover { border-color: var(--color-accent)')
+    expect(body).toContain('.theme:hover { color: var(--color-text)')
     expect(body).toContain("font-family: 'Geist Variable';")
     expect(body).toContain("font-family: 'Virgil';")
     expect(body).toContain("font-family: 'Noto Sans Mono';")

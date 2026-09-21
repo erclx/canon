@@ -169,11 +169,25 @@ describe('generateNav', () => {
       'utf8',
     )
     expect(contents).toContain(
-      '<a class="crumb" href="../index.html">Workspaces</a>',
+      '<a class="crumb" href="../index.html"><span class="crumb-t">Workspaces</span></a>',
     )
     expect(contents).toContain(
       '<span class="crumb crumb-here">Regular expressions</span>',
     )
+  })
+
+  it('should wrap a crumb link label in its own span, since the cap trim is ignored on the inline-flex link', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await generateNav(ROOT)
+
+    const contents = await readFile(
+      join(workspaceDir('01-regular-expressions'), 'index.html'),
+      'utf8',
+    )
+    expect(contents).toMatch(
+      /<a class="crumb" href="[^"]+"><span class="crumb-t">[^<]+<\/span><\/a>/,
+    )
+    expect(contents).not.toMatch(/<a class="crumb" href="[^"]+">[^<]/)
   })
 
   it('should link a generated course.css from the root page rather than embedding it', async () => {

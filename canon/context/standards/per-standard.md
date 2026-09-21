@@ -189,7 +189,7 @@ The taller-than-wide rule in `standards/mermaid.md` is decided by the widest ran
 
 ## The wireframe standard's transcription carve-out
 
-The standard's `## What moves to canon/context/` sent class or token names and pixel-exact spacing out of a wireframe, and `## Layout` told an author a role label reads better than a class name. Both wireframes this repository has ever shipped do the opposite on purpose. `canon/wireframes/slides.md` names `src/slides/layouts.ts`'s `MX` and `BODY_Y` constants and states outright that each block transcribes its render function's placement rather than approximating it, and the four `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 4.4rem bar height on the same pattern.
+The standard's `## What moves to canon/context/` sent class or token names and pixel-exact spacing out of a wireframe, and `## Layout` told an author a role label reads better than a class name. Both wireframes this repository has ever shipped do the opposite on purpose. `canon/wireframes/slides.md` names `src/slides/layouts.ts`'s `MX` and `BODY_Y` constants and states outright that each block transcribes its render function's placement rather than approximating it, and the four `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height on the same pattern.
 
 The carve-out states the mode rather than repealing the rule. `## Transcription wireframes` permits a source citation, class or token names, and exact geometry only where the wireframe is regenerated from an already-built surface's own render code, and it requires the file to open by naming that source. A wireframe drafted ahead of any build keeps the original rule, since there is no source yet to check it against.
 

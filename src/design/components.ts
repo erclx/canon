@@ -223,6 +223,7 @@ const TEACH_CHROME: Component = {
   reads: [
     '--color-background',
     '--color-surface',
+    '--color-chrome',
     '--color-border',
     '--color-text',
     '--color-text-body',
@@ -232,7 +233,6 @@ const TEACH_CHROME: Component = {
     '--teach-sans',
     '--teach-mono',
     '--teach-measure',
-    '--teach-chrome',
     '--teach-shadow',
     '--color-teach-accent-bg',
     '--type-body-family',
@@ -247,8 +247,7 @@ const TEACH_CHROME: Component = {
   --teach-hand: 'Virgil', 'Excalifont', cursive;
   --teach-mono: var(--type-code-family);
   --teach-measure: 52rem;
-  --teach-chrome: 52rem;
-  --teach-mast-h: 4.4rem;
+  --teach-mast-h: 3.5rem;
   --teach-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
   --color-teach-accent-bg: color-mix(in srgb, var(--color-accent) 14%, var(--color-background));
 
@@ -328,6 +327,7 @@ html.sb-shut .pane { border-left: 0; }
   background: var(--color-background);
   border-bottom: 1px solid var(--color-border);
   padding: 0 1.5rem;
+  cursor: default;
 }
 
 /* The reading bar rides the masthead's own bottom edge rather than arriving as
@@ -345,36 +345,25 @@ html.sb-shut .pane { border-left: 0; }
 }
 
 /* The height is the token rather than the sum of two paddings, so the sidebar's
-   own top row lands on the same seam the bar's bottom border draws. */
+   own top row lands on the same seam the bar's bottom border draws. The row
+   spans the window rather than the reading measure: capped, the toggle and the
+   theme control floated in from the edges by an amount that changed per page. */
 .mast {
-  max-width: var(--teach-chrome);
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   min-height: var(--teach-mast-h);
-  padding: 0;
+  padding: 0 0.9rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.55rem;
   font-size: var(--t5);
   color: var(--color-muted);
+  cursor: default;
 }
 
 .mast a { color: var(--color-accent); text-decoration: none; font-weight: 600; }
 .mast a:hover { text-decoration: underline; }
-
-.theme {
-  font-family: var(--teach-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-muted);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 99px;
-  padding: 0.25rem 0.7rem;
-  cursor: pointer;
-}
-
-.theme:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
 .nav {
   width: 100%;
@@ -422,7 +411,7 @@ html.sb-shut .pane { border-left: 0; }
    restates either. */
 /* A breadcrumb rather than a row of links. The gap tightens because the
    separators now carry the spacing the gap used to. */
-.mast-left { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.mast-left { display: flex; align-items: center; gap: 0.3rem; min-width: 0; flex-wrap: wrap; cursor: default; }
 
 /* \`--rule\` measured 1.27:1 here. It is a border token, and a border is a
    shape a reader infers rather than a glyph they resolve, so it is the wrong
@@ -430,6 +419,7 @@ html.sb-shut .pane { border-left: 0; }
 .crumb-sep {
   color: var(--color-muted);
   font-size: var(--t4);
+  margin: 0 0.1rem;
   user-select: none;
 }
 
@@ -442,26 +432,54 @@ html.sb-shut .pane { border-left: 0; }
 
 .crumb { display: inline-flex; align-items: center; }
 
-/* The label and its caret are one segment visually and two controls in fact:
-   the label navigates, the caret opens the menu. */
-.crumb-item { display: inline-flex; align-items: center; gap: 0.1rem; }
+/* The label and its caret are one component with two zones, like a split
+   button: the label navigates, the caret opens the menu, and one surface fills
+   for both so the pair reads as a single chip rather than two loose pieces.
+   The pointer covers the gap between them, which is interactive on both sides. */
+.crumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border-radius: 7px;
+  padding: 0.1rem 0.15rem 0.1rem 0.35rem;
+  cursor: pointer;
+}
 
-.crumb-here { color: var(--color-text); font-weight: 600; }
+.crumb-item:has(details.jump):hover,
+.crumb-item:has(details.jump[open]) { background: var(--color-chrome); }
 
-/* The caret is now the whole control, so it carries the 24 pixel minimum on
-   its own rather than inheriting a label's width. */
+/* Accent reports where you are. A crumb is navigation you can take, so it is
+   neutral, and \`.mast a\` keeps the accent for any other bar link. */
+.mast a.crumb { color: var(--color-text-secondary); padding: 0.1rem 0.15rem 0.1rem 0; }
+.mast a.crumb:hover { text-decoration: none; }
+.crumb-item:hover a.crumb { color: var(--color-text); }
+
+.crumb-here { color: var(--color-text); font-weight: 650; }
+
+/* \`align-items: center\` centres boxes, and a label's line box carries
+   half-leading above the cap and descender room below, so its capitals sit
+   above its own centre by an amount that scales with the font size. Trimming
+   the label to its cap band fixes the box rather than nudging the mark. It
+   lands on a span holding the text alone, since the link's own \`inline-flex\`
+   ignores it. Firefox ships no \`text-box\` and keeps the caret a pixel low. */
+.crumb-t, .crumb-here, .sb-ws .ws-name {
+  display: block;
+  text-box: trim-both cap alphabetic;
+}
+
+/* The caret is the whole control, so it carries the 24 pixel minimum on its
+   own rather than inheriting a label's width. It fills nothing itself, since
+   the chip around it does. */
 .crumb-item > .jump > summary {
   min-width: 1.5rem;
   min-height: 1.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0.15rem 0.3rem 0.15rem 0;
   border: 0;
   background: transparent;
 }
-
-.crumb-item > .jump > summary:hover { background: var(--color-surface); border-radius: 5px; }
 
 /* A bar link is its own tap target rather than a line of text, so it carries
    the 24 pixel minimum the a11y rule sets. */
@@ -478,23 +496,25 @@ html.sb-shut .pane { border-left: 0; }
   color: var(--color-muted);
 }
 
-.mast-right { display: flex; align-items: center; gap: 0.85rem; }
+.mast-right { display: flex; align-items: center; gap: 0.2rem; margin-left: auto; }
 
+/* No border, at the fold control's size and radius, so every control on the
+   bar is drawn one way. */
 .theme {
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 99px;
+  border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-muted);
   cursor: pointer;
 }
 
-.theme:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.theme:hover { color: var(--color-text); background: var(--color-chrome); }
 .theme svg { width: 0.95rem; height: 0.95rem; display: block; }
 .theme .moon { display: none; }
 :root[data-theme="dark"] .theme .sun { display: none; }
@@ -528,7 +548,7 @@ html.sb-shut .pane { border-left: 0; }
   cursor: pointer;
 }
 
-.sb-fold:hover { color: var(--color-text); background: var(--color-surface); }
+.sb-fold:hover { color: var(--color-text); background: var(--color-chrome); }
 
 .sb {
   flex: 0 0 var(--sb-w, 16rem);
@@ -564,7 +584,7 @@ html.sb-shut .sb { flex-basis: 0; width: 0; overflow: hidden; }
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.4rem;
+  padding: 0.25rem 0.3rem;
   border-radius: 6px;
   font-size: var(--t4);
   font-weight: 650;
@@ -572,7 +592,7 @@ html.sb-shut .sb { flex-basis: 0; width: 0; overflow: hidden; }
 }
 
 .sb-ws > summary::-webkit-details-marker { display: none; }
-.sb-ws > summary:hover, .sb-ws[open] > summary { background: var(--color-surface); color: var(--color-text); }
+.sb-ws > summary:hover, .sb-ws[open] > summary { background: var(--color-chrome); color: var(--color-text); }
 .sb-ws .car { color: var(--color-muted); display: inline-flex; align-items: center; }
 
 .sb-wl {
@@ -585,7 +605,7 @@ html.sb-shut .sb { flex-basis: 0; width: 0; overflow: hidden; }
   border: 1px solid var(--color-border);
   border-radius: 9px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  padding: 0.25rem;
+  padding: 0.3rem;
 }
 
 :root[data-theme="dark"] .sb-wl { box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
@@ -644,7 +664,7 @@ html.sb-shut .sb { flex-basis: 0; width: 0; overflow: hidden; }
   line-height: 1.45;
 }
 
-.sb-l:hover { background: var(--color-surface); color: var(--color-text); }
+.sb-l:hover { background: var(--color-chrome); color: var(--color-text); }
 
 .sb-n {
   flex: none;
@@ -764,46 +784,47 @@ html.sb-shut .sb-grip { display: none; }
 }
 
 .jump summary::-webkit-details-marker { display: none; }
-.jump summary:hover { border-color: var(--color-accent); color: var(--color-accent); }
-/* The caret says "this is a menu" and nothing else. It used to flip to say
-   "the menu is open", which the open panel underneath already says, so the
-   motion carried no information a reader could not already see. */
-.jump summary .caret { opacity: 0.55; }
-.jump summary:hover .caret { opacity: 1; }
-.jump[open] summary { border-color: var(--color-accent); color: var(--color-accent); }
-.jump[open] summary .caret { opacity: 1; }
+/* The caret says "this is a menu" and nothing else, so it is drawn at full
+   strength in every state and stays muted. A reveal on hover hid the only
+   route into the menu from a reader who cannot hover, and an affordance is not
+   a state, so it takes no accent on hover or while open. */
+.jump summary .caret { color: var(--color-muted); }
 
 .jump-list {
   position: absolute;
   top: calc(100% + 0.4rem);
   left: 0;
   z-index: 20;
-  min-width: 21rem;
   background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 9px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  padding: 0.35rem;
+  padding: 0.25rem;
   list-style: none;
   margin: 0;
 }
 
 :root[data-theme="dark"] .jump-list { box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
 
+/* One row recipe wherever the menu is mounted, on the steps the lesson list
+   beside it already reads: the label at \`--t5\` and the numeral at \`--t6\` mono.
+   The weight is restated because \`.mast a\` sets 600 for the bar's own links. */
 .jump-list a {
   display: grid;
   grid-template-columns: 1.65rem 1fr auto;
-  gap: 0.7rem;
+  gap: 0.55rem;
   align-items: center;
-  padding: 0.45rem 0.55rem;
+  padding: 0.38rem 0.55rem;
   border-radius: 6px;
   text-decoration: none;
   color: var(--color-text-body);
-  font-size: 0.875rem;
+  font-size: var(--t5);
+  font-weight: 400;
+  line-height: 1.45;
 }
 
-.jump-list a:hover { background: var(--color-surface); }
-.jump-list .n { font-family: var(--teach-mono); font-size: 0.75rem; color: var(--color-muted); }
+.jump-list a:hover { background: var(--color-chrome); }
+.jump-list .n { font-family: var(--teach-mono); font-size: var(--t6); color: var(--color-muted); }
 /* The third column used to hold a status dot that read the same on every row,
    so it reported nothing. It is a per-entry trailing slot now: the workspace
    menu puts a lesson count there and the lesson menu leaves it empty. */
@@ -825,11 +846,11 @@ html.sb-shut .sb-grip { display: none; }
 .jump-list li.all a { color: var(--color-accent); }
 .jump-list li.all .n { color: var(--color-accent); }
 
-/* The menu is \`min-width: 21rem\` and anchored to its summary, which puts its
-   right edge 35 pixels past a 390 pixel viewport. Clamping the width and
-   letting a long row wrap keeps it on screen without a breakpoint. */
+/* The menu fits its content above an 11rem floor rather than padding three
+   short titles out to a wide panel. It is anchored to its summary, so the
+   clamp keeps a long row wrapping on screen without a breakpoint. */
 .jump-list {
-  min-width: min(21rem, calc(100vw - 2rem));
+  min-width: min(11rem, calc(100vw - 2rem));
   max-width: calc(100vw - 2rem);
 }
 
@@ -850,8 +871,7 @@ html.sb-shut .sb-grip { display: none; }
 @media (max-width: 640px) {
   .bar { padding: 0 1rem; }
     main { padding-left: 1rem; padding-right: 1rem; }
-    .mast { font-size: 0.75rem; gap: 0.5rem; }
-    .mast-left { gap: 0.5rem; row-gap: 0.35rem; }
+    .mast { font-size: 0.75rem; }
 }
 
 @media (max-width: 640px) {
@@ -933,7 +953,7 @@ html.sb-shut .sb-grip { display: none; }
     cursor: pointer;
   }
 
-  .sb-close:hover { color: var(--color-text); background: var(--color-surface); }
+  .sb-close:hover { color: var(--color-text); background: var(--color-chrome); }
 
   .sb-scrim {
     display: block;
