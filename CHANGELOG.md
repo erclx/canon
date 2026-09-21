@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.110.0](https://github.com/erclx/canon/compare/v4.109.0...v4.110.0) (2026-09-21)
+
+
+### Features
+
+* **claude:** add the draft-wiki skill ([#1795](https://github.com/erclx/canon/issues/1795)) ([8dcbc75](https://github.com/erclx/canon/commit/8dcbc75f74ea8eb47dc6c673a0230b29cb286067))
+* **claude:** rename canon-feedback-file to canon-feedback ([#1798](https://github.com/erclx/canon/issues/1798)) ([86467c8](https://github.com/erclx/canon/commit/86467c8b32cd4c5b4be019b2a7e99641b01c3537))
+* **teach:** replace the progress track with a collapsible sidebar ([#1796](https://github.com/erclx/canon/issues/1796)) ([767588c](https://github.com/erclx/canon/commit/767588cc53a524a751d21c90a20935a39a575a1d))
+
+
+### Bug Fixes
+
+* **ci:** install the frame font on the refresh runner ([#1800](https://github.com/erclx/canon/issues/1800)) ([7e042fc](https://github.com/erclx/canon/commit/7e042fc3acf40620c3d44580c66483e0fb088796))
+
 ## [4.109.0](https://github.com/erclx/canon/compare/v4.108.0...v4.109.0) (2026-09-20)
 
 
