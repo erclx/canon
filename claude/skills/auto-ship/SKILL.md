@@ -190,14 +190,23 @@ This chain owns the receipt's lifetime, which is what makes the Output block's c
 
 Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, memory capture, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. This step used to restate that list and the two drifted apart with nothing comparing them, so read the order there and never here.
 
-One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, then read the flag back:
+One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch. Run it as one command, where the shell proves the target before the mark and reads the flag back after it:
 
 ```bash
+target=$(gh pr view <number> --json headRefName,state --jq '"\(.headRefName) \(.state)"') || exit 1
+if [ "$target" != "$(git branch --show-current) OPEN" ]; then
+  printf '❌ #%s reads "%s", not "%s OPEN". The draft mark was not written.\n' "<number>" "$target" "$(git branch --show-current)" >&2
+  exit 1
+fi
 gh pr ready --undo <number>
 gh pr view <number> --json isDraft
 ```
 
-Name the number `git-ship`'s pull request step returned on both calls rather than leaving either to resolve by branch. `${CLAUDE_SKILL_DIR}/../git-pr/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
+Name the number `git-ship`'s pull request step returned in every position rather than leaving any to resolve by branch. `${CLAUDE_SKILL_DIR}/../git-pr/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
+
+A refusal is a stop. Report the line the shell printed, then resolve the number from the `number=` and `head=` lines of `git-pr`'s output and re-run the command by hand. The comparison sits in the shell rather than in the session's reading of a printed value, which is the same split `git-pr`'s `assert_own_pr` makes, because the judgment that picked a wrong number is the one that would read the check.
+
+The number crosses from that step's output into a command this session types, which is the one place a number gets authored rather than derived. A number misread there, or inferred from the newest pull request in view, would draft a stranger's pull request. A release pull request is the worst such target, since the mark holds the release and this role may not lift it again.
 
 Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state. A `true` reports a draft. A `false` reports the pull request as opened ready and unsupervised, and the chain stops there. Never re-issue the undo on a disagreeing read, which fights whoever readied it instead of guarding anything.
 
@@ -243,3 +252,4 @@ Every stop point leaves recoverable state. The user resumes manually from the ap
 | Inherited review findings                  | Fix findings, run `/git-ship`                                                                                                                   |
 | Self-introduced finding survived           | Read the receipt for what the one repair pass left open, fix it, run `/git-ship`                                                                |
 | git-ship fails                             | Inspect hook or remote error, run again                                                                                                         |
+| Draft target is not this branch's          | Nothing was marked. Read the number and `head=` from `git-pr`'s output, confirm they match, then run the mark by hand                           |
