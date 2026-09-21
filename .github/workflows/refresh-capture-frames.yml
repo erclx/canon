@@ -90,9 +90,11 @@ jobs:
           fi
           bun src/cli.ts capture assets/captures --selector .window --out assets/evidence
 
+      # Hooks off, since pre-push runs a check whose format step needs shfmt, which the runner lacks. verify.yml checks the pull request.
       - name: Open or Update the Refresh Pull Request
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          HUSKY: 0
         run: |
           if [ -z "$(git status --porcelain assets/captures assets/evidence)" ]; then
             echo "Frames are current, nothing to refresh."
