@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { execaSync } from 'execa'
 import { gitEnv } from '@/git-env'
@@ -10,15 +10,6 @@ import {
 } from '@/sync/history'
 
 const CLAUDE_DIR = '.claude'
-
-/**
- * A `CLAUDE.md` past this many lines has more in it than the always-load tier
- * is for. The figure is the checkpoint `standards/context.md` sets for
- * a context entry, raised because `CLAUDE.md` legitimately carries more than
- * one domain. It gates a proposal rather than a failure, so being approximate
- * costs a line an operator can ignore.
- */
-const CLAUDE_MD_LINES = 250
 
 /**
  * Who put an unclaimed folder in the target. A dropped folder and one the
@@ -45,26 +36,14 @@ export interface UnclaimedFolder {
   readonly since?: string
 }
 
-/**
- * A proposal-only skill with a live case in this target. The skills propose and
- * never execute, so the report names one rather than queueing a change.
- */
-export interface MigrationCandidate {
-  readonly skill: string
-  /** What was measured, so the proposal is checkable before it is run. */
-  readonly reason: string
-}
-
 export interface ReverseReport {
   readonly unclaimed: readonly UnclaimedFolder[]
-  readonly migrations: readonly MigrationCandidate[]
   /** Set when the walk needed history to run and this toolkit has none. */
   readonly historyUnavailable: boolean
 }
 
 const EMPTY_REVERSE: ReverseReport = {
   unclaimed: [],
-  migrations: [],
   historyUnavailable: false,
 }
 
@@ -89,10 +68,9 @@ export function buildReverseReport(
   target: string,
 ): ReverseReport {
   const roots = readDroppedRoots(toolkitRoot)
-  const migrations = detectMigrations(target)
 
   if (roots === undefined) {
-    return { unclaimed: [], migrations, historyUnavailable: true }
+    return { unclaimed: [], historyUnavailable: true }
   }
 
   const unclaimed: UnclaimedFolder[] = []
@@ -106,7 +84,7 @@ export function buildReverseReport(
     }
   }
 
-  return { unclaimed, migrations, historyUnavailable: false }
+  return { unclaimed, historyUnavailable: false }
 }
 
 export function emptyReverseReport(): ReverseReport {
@@ -204,55 +182,6 @@ function attributeFolder(
 
 function covers(index: HistoryIndex, sourceRel: string): boolean {
   return index.get(sourceRel) !== undefined
-}
-
-/**
- * Live cases for the two proposal-only skills no other report field names.
- * Without this, both are documented and unreachable.
- *
- * Both tests read what the skill itself acts on, so a proposal the report makes
- * is one the skill has work to do for. A context tier that already holds files
- * settles the `docs/` split, whether or not the toolkit is what made it.
- */
-export function detectMigrations(target: string): MigrationCandidate[] {
-  const found: MigrationCandidate[] = []
-  const claudeMd = join(target, 'CLAUDE.md')
-
-  if (existsSync(claudeMd)) {
-    const lines = countLines(readFileSync(claudeMd, 'utf8'))
-    if (lines > CLAUDE_MD_LINES) {
-      found.push({
-        skill: 'migration-claude-md',
-        reason: `CLAUDE.md carries ${lines} lines, past the ${CLAUDE_MD_LINES} the three-tier split is for`,
-      })
-    }
-  }
-
-  const docs = listFiles(join(target, 'docs')).filter(isMarkdown).length
-  const context = listFiles(join(target, CLAUDE_DIR, 'context')).length
-
-  if (docs > 0 && context === 0) {
-    found.push({
-      skill: 'migration-context',
-      reason: `${docs} markdown files under docs/ with no canon/context/ tier`,
-    })
-  }
-
-  return found
-}
-
-function isMarkdown(rel: string): boolean {
-  return rel.endsWith('.md')
-}
-
-/**
- * Lines as `wc -l` counts them, so the figure in the reason matches what an
- * operator gets from the shell. Splitting alone overstates a file ending in a
- * newline by one, and the reason states a measurement rather than a rank.
- */
-function countLines(content: string): number {
-  const parts = content.split('\n')
-  return parts.at(-1) === '' ? parts.length - 1 : parts.length
 }
 
 /**

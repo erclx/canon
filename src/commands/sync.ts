@@ -189,7 +189,6 @@ function renderCheck(report: CheckReport): void {
   }
 
   renderUnclaimed(report)
-  renderMigrations(report)
 
   outro()
   // Scanned domains only. Tooling renders a section on every managed target, so
@@ -332,21 +331,6 @@ function describeUnclaimed(entry: UnclaimedFolder): string {
   if (entry.since === undefined) return counted
 
   return `${counted}, content published at ${entry.since.slice(0, 7)}`
-}
-
-/**
- * The proposal-only skills no other field reaches.
- */
-function renderMigrations(report: CheckReport): void {
-  const { migrations } = report.reverse
-  if (migrations.length === 0) return
-
-  logStep('Migrations with a case here')
-
-  for (const candidate of migrations) {
-    logWarn(candidate.reason)
-    logInfo(`Run /canon:${candidate.skill} for a proposal.`)
-  }
 }
 
 async function runSync(target: string): Promise<number> {

@@ -460,7 +460,7 @@ describe('referencesIn', () => {
     it('should pass a rule path illustrating a placeholder shape', () => {
       expect(
         referencesIn(
-          'claude/skills/migration-standards-drop/SKILL.md',
+          'claude/skills/create-standard/SKILL.md',
           'Repoint the citation at `.claude/rules/canon/core/<n>-<slug>.md`.',
           root,
         ),

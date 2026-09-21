@@ -1,9 +1,8 @@
 import type { SkillCase } from '@/claude/skills-rank'
 
 /**
- * `target-setup`, `migration-*`, `canon-*`, and `create-rule`: scaffolding,
- * proposal-only migrations, and the toolkit's own reference and feedback
- * surfaces.
+ * `target-setup`, `canon-*`, and `create-rule`: scaffolding and the
+ * toolkit's own reference and feedback surfaces.
  *
  * The five `target-setup` cases are one skill read through five entry phrasings
  * rather than five rows that collapsed to a duplicate. Each names a different
@@ -35,26 +34,6 @@ export const SETUP_CASES: readonly SkillCase[] = [
     prompt:
       'Check that the dev server actually starts and the end-to-end suite passes against the scaffold.',
     expect: 'target-setup',
-  },
-  {
-    prompt:
-      'This CLAUDE.md file has grown huge, break it apart into the tiered context model.',
-    expect: 'migration-claude-md',
-  },
-  {
-    prompt:
-      'Move the agent-flavored docs out of the docs folder and into context.',
-    expect: 'migration-context',
-  },
-  {
-    prompt:
-      'This file was replaced by a folder, help me split its content into it.',
-    expect: 'migration-superseded',
-  },
-  {
-    prompt:
-      'This project still carries a copy of the standards folder, get rid of it and point everything at the CLI.',
-    expect: 'migration-standards-drop',
   },
   {
     prompt:

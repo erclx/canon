@@ -172,8 +172,7 @@ const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
  * deliberate placeholder rather than a real citation. A body illustrating
  * the shape a project's own `standards/<name>.md` takes writes a bracketed
  * token this pattern also matches, such as `standards/<slug>.md` in
- * `create-standard/SKILL.md` or `standards/<name>.md` in
- * `migration-standards-drop/SKILL.md`, and neither names a real file. A bare,
+ * `create-standard/SKILL.md`, which names no real file. A bare,
  * non-bracketed match now reports whether or not the file exists, unlike
  * `DOCS_PATH`, which still gates on existence: a same-repository citation
  * under this corpus names no target project's own tree the way a `docs/`
