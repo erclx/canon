@@ -146,3 +146,49 @@ test('each field lists as many names as its heading counts', async ({
     await expect(field.locator('li.on')).toHaveCount(used as number)
   }
 })
+
+test.describe('the social card', () => {
+  const card = '/assets/social-card.png'
+
+  test('both card tags name the composed card on the deployed origin', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const expected = new URL(card, 'https://canon.erclx.dev').href
+
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      'content',
+      expected,
+    )
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+      'content',
+      expected,
+    )
+  })
+
+  test('the card tags declare the size the served image has', async ({
+    page,
+    request,
+  }) => {
+    await page.goto('/')
+    const response = await request.get(card)
+    expect(response.ok()).toBe(true)
+
+    // A PNG carries its width and height as two big-endian words in the IHDR
+    // chunk, at a fixed offset after the eight-byte signature.
+    const png = await response.body()
+    const size = { width: png.readUInt32BE(16), height: png.readUInt32BE(20) }
+
+    expect(size).toEqual({ width: 1200, height: 630 })
+    await expect(
+      page.locator('meta[property="og:image:width"]'),
+    ).toHaveAttribute('content', String(size.width))
+    await expect(
+      page.locator('meta[property="og:image:height"]'),
+    ).toHaveAttribute('content', String(size.height))
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+      'content',
+      /\S/,
+    )
+  })
+})
