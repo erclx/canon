@@ -105,7 +105,7 @@ Every border is one pixel solid at the `border` role, and that value appears in 
 
 ## Layout
 
-Capture widths are 320, 768, 1280 and 1536 pixels, declared once in `tooling/web/configs/e2e/screenshot.ts`, with 320 and 1280 committed as evidence. 320 is the reflow floor and the rest are the breakpoint buckets. The landing page under `web/` sets its own `max-width` media queries between 430 and 1100 pixels per component rather than from a shared scale.
+Capture widths are 320, 768, 1280 and 1536 pixels, declared once in `tooling/web/configs/e2e/screenshot.ts`, with 320 and 1280 committed as evidence. 320 is the reflow floor. Every range the width queries in the generated base and teach stylesheets lay out holds at least one of these widths, so a capture photographs every layout state those stylesheets have, and a design test fails when a query moves or is added so that it opens a range none of them reaches. The landing page under `web/` sets its own `max-width` media queries between 430 and 1100 pixels per component rather than from a shared scale.
 
 ## Motion
 
