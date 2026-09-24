@@ -797,6 +797,7 @@ function reportNav(
         root: outcome.root,
         contents: outcome.contents,
         lessons: outcome.lessons,
+        reference: outcome.reference,
         skipped: outcome.skipped,
       })}\n`,
     )
@@ -810,9 +811,11 @@ function reportNav(
   for (const path of outcome.contents) logInfo(path)
   logStep('Lessons rewritten')
   logInfo(String(outcome.lessons))
+  logStep('Reference pages rendered')
+  logInfo(String(outcome.reference))
 
   if (outcome.skipped.length > 0) {
-    logStep('Refused, missing a chrome marker')
+    logStep('Refused, missing a chrome marker or the markdown renderer')
     for (const skip of outcome.skipped) {
       logWarn(`${skip.file}: no ${skip.missing}`)
     }

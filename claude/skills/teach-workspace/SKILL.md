@@ -86,7 +86,7 @@ Reading the last record alone is what the schedule replaces. A topic missed thre
 Two outputs with two lifetimes, and the split decides the format.
 
 - A lesson is a self-contained page carrying its own quiz, a teach-back block, and the feedback for each question. It embeds one shared stylesheet rather than restating styles, and it is disposable and never promoted.
-- A reference page goes to `reference/<slug>.md`, written for a reader with no learner in it. This is the half that survives the workspace, so it is written in markdown to pass the authoring gates a promotion would put it through.
+- A reference page goes to `reference/<slug>.md`, written for a reader with no learner in it. This is the half that survives the workspace, so it is written in markdown to pass the authoring gates a promotion would put it through. `canon teach nav` renders it to a `reference/<slug>.html` sibling, and a lesson links that sibling, since a served `.md` opens as plain text.
 
 Resolve the lesson before writing it, rather than composing its name or its quiz order by hand:
 
@@ -167,11 +167,13 @@ Follow `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` for what makes a lesson 
 
 ### Hand over a link, never a path
 
-A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link they can click:
+A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link they can click. Take the serve line from the `Open` step of `canon teach list <topic>`, which resolves the teach folder against the directory the session runs in:
 
 ```bash
-canon serve .canon/teach --entry <nn>-<topic>/index.html --json
+canon teach list <topic>
 ```
+
+Run the line it prints with `--json` appended, rather than writing `canon serve .canon/teach` by hand. `canon serve` resolves its folder against the cwd, so that literal serves an absent folder from a linked worktree, where the list verb reads the main worktree root.
 
 Start it in the background so the session keeps going, and read `url` off the record rather than composing one. The verb walks past a port already in use, so the port it took is exactly the half a guessed URL gets wrong. Report the refusal and its `reason` when `ok` is false, and report it rather than proceeding silently when the verb does not resolve at all, which is an installed CLI predating it.
 

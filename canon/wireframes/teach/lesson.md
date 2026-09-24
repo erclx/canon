@@ -5,7 +5,7 @@ description: A single lesson's article view, with its chrome, panels, callouts, 
 
 # Teach lesson
 
-One page per written lesson, at `<workspace>/lessons/NNNN-<slug>.html`. `rewriteLesson` in `src/teach/nav.ts:1197-1286` splices the header, the foot nav, and the embedded stylesheet into four marker comments on every `canon teach nav` run, leaving the `<h1>`, lede, body, and quiz hand-authored between them and wrapping them in `<main>` when the lesson holds none. Primary source for the body: `lessons/0001-scoping-before-solving.html`, the richest of the three fde lessons and the only one carrying `.road` and `.no`.
+One page per written lesson, at `<workspace>/lessons/NNNN-<slug>.html`. `rewriteLesson` in `src/teach/nav.ts:1355-1444` splices the header, the foot nav, and the embedded stylesheet into four marker comments on every `canon teach nav` run, leaving the `<h1>`, lede, body, and quiz hand-authored between them and wrapping them in `<main>` when the lesson holds none. Primary source for the body: `lessons/0001-scoping-before-solving.html`, the richest of the three fde lessons and the only one carrying `.road` and `.no`.
 
 The chrome shown here comes from `nav.ts`'s current render functions rather than from that file. This workspace's lessons predate the marker-splice convention, and re-running `canon teach nav` for this plan refused to rewrite any of them, each reported `skipped` for a missing `canon:teach:style` marker. The authored body sits outside that gap and is read straight off disk.
 

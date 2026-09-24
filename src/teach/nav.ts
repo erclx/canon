@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { join, posix, relative } from 'node:path'
 import {
   TEACH_SIDEBAR_BREAKPOINT,
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
+import { stripFrontmatter } from '@/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { PROJECT_ROOT } from '@/project-root'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
@@ -14,6 +15,7 @@ import {
   listWorkspaces,
   readWorkspace,
   TEACH_ASSETS,
+  TEACH_GLOSSARY,
   TEACH_LESSONS,
   TEACH_MISSION,
   TEACH_REFERENCE,
@@ -695,6 +697,8 @@ function pageHead(
   title: string,
   cssHref: string | undefined,
   embeddedCss: string | undefined,
+  page: 'index' | 'lesson' = 'index',
+  extraHead = '',
 ): string {
   const style =
     embeddedCss === undefined
@@ -706,10 +710,10 @@ function pageHead(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)}</title>
+${extraHead}<title>${escapeHtml(title)}</title>
 ${teachFavicon()}
 ${style}
-${headScript('index')}
+${headScript(page)}
 </head>
 `
 }
@@ -1015,13 +1019,15 @@ async function readLessonMetas(
  * on disk: the mission, the lessons already written, the reference pages, and
  * the glossary. A workspace with no `index.html` yet gets one the same way a
  * workspace that already had one gets its rewrite, since both read the same
- * sources.
+ * sources. A reference row links the rendered sibling, or the markdown itself
+ * on a Bun that cannot render one, so no row points at a file never written.
  */
 async function renderContentsPage(
   root: string,
   workspaces: readonly WorkspaceSummary[],
   detail: WorkspaceDetail,
   metas: readonly LessonMeta[],
+  canRenderMarkdown: boolean,
 ): Promise<string> {
   const missionPath = join(root, detail.path, TEACH_MISSION)
   const description = existsSync(missionPath)
@@ -1076,9 +1082,10 @@ async function renderContentsPage(
       detail.referenceFiles.map(async (file, index) => {
         const title = await readTitle(
           join(root, detail.path, TEACH_REFERENCE, file),
-          basenameTitle(file),
+          referenceFallbackTitle(file),
         )
-        return `<li><a href="${TEACH_REFERENCE}/${file}"><span class="num">R${index + 1}</span><b>${escapeHtml(title)}</b></a></li>`
+        const target = canRenderMarkdown ? renderedReferenceName(file) : file
+        return `<li><a href="${TEACH_REFERENCE}/${target}"><span class="num">R${index + 1}</span><b>${escapeHtml(title)}</b></a></li>`
       }),
     )
   ).join('')
@@ -1115,6 +1122,157 @@ ${renderScripts(false, true)}
 </body>
 </html>
 `
+}
+
+/**
+ * Marks a reference page as nav's own output, which is the one test nav applies
+ * before deleting a page whose markdown source is gone. A hand-written HTML
+ * file beside the reference pages carries none and is never touched.
+ */
+const REFERENCE_GENERATOR = '<meta name="generator" content="canon teach nav">'
+
+/** A formatter closes the tag as `/>`, which still marks the page as generated. */
+const REFERENCE_GENERATOR_PATTERN =
+  /<meta name="generator" content="canon teach nav"\s*\/?>/
+
+function renderedReferenceName(file: string): string {
+  return file.replace(/\.md$/, '.html')
+}
+
+function referenceFallbackTitle(file: string): string {
+  return titleCase(file.replace(/\.md$/, ''))
+}
+
+/**
+ * A relative href landing on another reference page's markdown is retargeted
+ * to its rendered sibling, and one landing on the workspace glossary goes to
+ * the glossary the contents page renders under `#gloss`, dropping any fragment
+ * since the entries there carry no per-term anchor. The resources page has no
+ * rendered form, so a blanket suffix swap would break a link to it.
+ */
+function retargetReferenceLinks(
+  html: string,
+  referenceFiles: ReadonlySet<string>,
+): string {
+  return html.replace(
+    /href="([^"#?:]+)\.md([#?][^"]*)?"/g,
+    (match, stem: string, suffix: string | undefined) => {
+      const target = posix.normalize(posix.join(TEACH_REFERENCE, `${stem}.md`))
+      if (target === TEACH_GLOSSARY) return 'href="../index.html#gloss"'
+
+      const [folder, file, ...rest] = target.split('/')
+      if (folder !== TEACH_REFERENCE || rest.length > 0) return match
+      if (!referenceFiles.has(file)) return match
+      return `href="${stem}.html${suffix ?? ''}"`
+    },
+  )
+}
+
+/**
+ * One reference page as a styled page carrying the workspace chrome. The
+ * markdown beside it stays the durable, promotable half, and this file is
+ * regenerated from it on every run. Raw HTML in the markdown is escaped rather
+ * than passed through, since a reference page is plain markdown by contract.
+ */
+async function renderReferencePage(
+  root: string,
+  workspaces: readonly WorkspaceSummary[],
+  detail: WorkspaceDetail,
+  metas: readonly LessonMeta[],
+  file: string,
+): Promise<string> {
+  const source = await readFile(
+    join(root, detail.path, TEACH_REFERENCE, file),
+    'utf8',
+  )
+  const title =
+    readField(parseFrontmatter(source), 'title') ?? referenceFallbackTitle(file)
+
+  const rendered = retargetReferenceLinks(
+    Bun.markdown.html(stripFrontmatter(source), {
+      noHtmlBlocks: true,
+      noHtmlSpans: true,
+    }),
+    new Set(detail.referenceFiles),
+  )
+  const body = /<h1[\s>]/.test(rendered)
+    ? rendered
+    : `<h1>${escapeHtml(title)}</h1>\n${rendered}`
+
+  const teachPrefix = '../../'
+  const workspacePrefix = '../'
+
+  const header = renderHeader(
+    [
+      {
+        label: 'Workspaces',
+        href: `${teachPrefix}index.html`,
+        jump: {
+          ariaLabel: 'Switch workspace',
+          entries: workspaceJumpEntries(workspaces, teachPrefix, detail.slug),
+        },
+      },
+      {
+        label: workspaceLabel(detail),
+        href: `${workspacePrefix}index.html`,
+        jump: {
+          ariaLabel: 'Jump to a lesson',
+          entries: lessonJumpEntries(metas, workspacePrefix, undefined),
+        },
+      },
+      { label: title },
+    ],
+    {
+      heading: workspaceLabel(detail),
+      switcher: workspaceJumpEntries(workspaces, teachPrefix, detail.slug),
+      meta: `${metas.length} lesson${metas.length === 1 ? '' : 's'}`,
+      items: metas.map((meta, index) => ({
+        ordinal: String(index + 1).padStart(2, '0'),
+        label: meta.title,
+        href: `${workspacePrefix}${TEACH_LESSONS}/${meta.file}`,
+        at: false,
+      })),
+      foot: workspaceFoot(detail),
+    },
+  )
+
+  // The sidebar opens as on a lesson, since this page lists no lessons itself.
+  return `${pageHead(title, `${workspacePrefix}${TEACH_ASSETS}/${TEACH_STYLESHEET}`, undefined, 'lesson', `${REFERENCE_GENERATOR}\n`)}<body>
+${header}
+<main class="ref">
+${body.trim()}
+</main>
+${PANE_CLOSE}
+${renderScripts(false, false)}
+</body>
+</html>
+`
+}
+
+/**
+ * Deletes a generated reference page whose markdown source is gone, so a
+ * renamed or removed page leaves nothing no contents row reaches.
+ */
+async function removeOrphanReferencePages(
+  root: string,
+  detail: WorkspaceDetail,
+): Promise<void> {
+  const dir = join(root, detail.path, TEACH_REFERENCE)
+  if (!existsSync(dir)) return
+
+  const sources = new Set(detail.referenceFiles.map(renderedReferenceName))
+  const orphans = (await readdir(dir)).filter(
+    (file) => file.endsWith('.html') && !sources.has(file),
+  )
+
+  await Promise.all(
+    orphans.map(async (file) => {
+      const path = join(dir, file)
+      if (REFERENCE_GENERATOR_PATTERN.test(await readFile(path, 'utf8'))) {
+        await rm(path)
+      }
+    }),
+  )
 }
 
 const REGIONS = ['style', 'header', 'footnav', 'scripts'] as const
@@ -1296,8 +1454,20 @@ export interface NavGenerated {
   readonly root: string
   readonly contents: readonly string[]
   readonly lessons: number
-  /** A lesson file missing a chrome marker, refused rather than rewritten. */
+  /** Reference pages rendered to their `.html` sibling. */
+  readonly reference: number
+  /**
+   * A lesson file missing a chrome marker, refused rather than rewritten, or a
+   * reference page left unrendered on a Bun carrying no markdown renderer.
+   */
   readonly skipped: readonly LessonSkipped[]
+}
+
+const MARKDOWN_RENDERER = 'Bun.markdown'
+
+/** An older Bun carries no `Bun.markdown`, and calling it there throws. */
+function hasMarkdownRenderer(): boolean {
+  return typeof Bun.markdown?.html === 'function'
 }
 
 export type NavOutcome = NavGenerated | TeachRefused
@@ -1343,6 +1513,8 @@ export async function generateNav(
   const contents: string[] = []
   const skipped: LessonSkipped[] = []
   let lessons = 0
+  let reference = 0
+  const canRenderMarkdown = hasMarkdownRenderer()
 
   for (const slug of targetSlugs) {
     const found = await readWorkspace(root, slug)
@@ -1357,9 +1529,30 @@ export async function generateNav(
     const contentsPath = join(root, detail.path, 'index.html')
     await writeFile(
       contentsPath,
-      await renderContentsPage(root, listed.workspaces, detail, metas),
+      await renderContentsPage(
+        root,
+        listed.workspaces,
+        detail,
+        metas,
+        canRenderMarkdown,
+      ),
     )
     contents.push(relative(root, contentsPath))
+
+    for (const file of detail.referenceFiles) {
+      const source = join(detail.path, TEACH_REFERENCE, file)
+      if (!canRenderMarkdown) {
+        skipped.push({ file: source, missing: MARKDOWN_RENDERER })
+        continue
+      }
+
+      await writeFile(
+        join(root, detail.path, TEACH_REFERENCE, renderedReferenceName(file)),
+        await renderReferencePage(root, listed.workspaces, detail, metas, file),
+      )
+      reference += 1
+    }
+    await removeOrphanReferencePages(root, detail)
 
     const css = stripImports(await readFile(cssPath, 'utf8'))
 
@@ -1389,6 +1582,7 @@ export async function generateNav(
     root: relative(root, rootPath),
     contents,
     lessons,
+    reference,
     skipped,
   }
 }
