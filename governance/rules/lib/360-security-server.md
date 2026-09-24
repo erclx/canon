@@ -4,6 +4,8 @@ paths:
   - '**/*.py'
   - '**/*.ts'
   - '**/*.js'
+  - '**/*.go'
+  - '**/*.php'
 ---
 
 # Server security standards
