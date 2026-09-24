@@ -96,4 +96,4 @@ Sweep mode's findings carry a `heading` field alongside `file` and use the sweep
 | `0`  | the run completed, whatever the findings say                  |
 | `1`  | refused: a bad range, an unreadable file, or a malformed flag |
 
-Findings never set a failing exit code, in either mode. Diff mode refuses on a git range it cannot resolve. Both modes refuse on a file the run could not read.
+Findings never set a failing exit code, in either mode. `canon audits run` carries sweep mode as its placement entry for the same reason, pinned to `--backend off` so the tally it retains is the regex layer's on every machine. `docs/agents/audits.md` states why. Diff mode refuses on a git range it cannot resolve. Both modes refuse on a file the run could not read.
