@@ -11,6 +11,7 @@ import {
   resolveRules,
   unreferencedRules,
 } from '@/gov/stacks'
+import { PROJECT_ROOT } from '@/project-root'
 
 let root: string
 let target: string
@@ -110,6 +111,22 @@ describe('resolveRules', () => {
     expect(resolveRules(root, 'a')).toEqual({
       ok: true,
       rules: ['010-b', '000-a'],
+    })
+  })
+})
+
+describe('resolveRules on the shipped stacks', () => {
+  it('should leave the Next.js rule out of react', () => {
+    expect(resolveRules(PROJECT_ROOT, 'react')).toEqual({
+      ok: true,
+      rules: expect.not.arrayContaining(['230-nextjs']),
+    })
+  })
+
+  it('should give nextjs the Next.js rule on top of the react rules', () => {
+    expect(resolveRules(PROJECT_ROOT, 'nextjs')).toEqual({
+      ok: true,
+      rules: expect.arrayContaining(['200-react', '230-nextjs']),
     })
   })
 })
