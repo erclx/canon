@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.116.0](https://github.com/erclx/canon/compare/v4.115.0...v4.116.0) (2026-09-24)
+
+
+### Features
+
+* **sessions:** export and import a session between machines ([#1869](https://github.com/erclx/canon/issues/1869)) ([9675872](https://github.com/erclx/canon/commit/96758722302e5b5507f41686dedc64eafd051ffc))
+* **teach:** link lesson mentions and report unknown ones ([#1868](https://github.com/erclx/canon/issues/1868)) ([9568cd4](https://github.com/erclx/canon/commit/9568cd47b134c209e2b4950f8f49c87055011447))
+* **teach:** render paragraph cites and a refs block ([#1864](https://github.com/erclx/canon/issues/1864)) ([2c6ddef](https://github.com/erclx/canon/commit/2c6ddef3e4de1c217bf5438cab02cc2b952cd245))
+
 ## [4.115.0](https://github.com/erclx/canon/compare/v4.114.0...v4.115.0) (2026-09-24)
 
 
