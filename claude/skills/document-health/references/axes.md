@@ -40,7 +40,7 @@ Weight is a judgment a reader settles rather than a defect, which the verb state
 
 **Evidence class:** `measured` for the audit's findings, `classified` for the sweep's verdicts.
 
-The audit answers required sections, entry length, citation resolution, reference form, catalog tables, provenance, and index drift. A citation resolving to nothing is a fact and gates. Entry length, reference form, table shape, and provenance are judgments under every flag.
+The audit answers required sections, entry length, citation resolution, reference form, catalog tables, provenance, and index drift. Required sections reach wireframes as well as context entries, naming each wireframe short of the regions, states, copy, or exclusions section its standard requires, which is how a surface on an older wireframe shape reports rather than reading as clean. A citation resolving to nothing is a fact and gates. Entry length, reference form, table shape, and provenance are judgments under every flag.
 
 The sweep classifies each section as keep, replace or rewrite, history, or move. A `move` verdict is the placement finding proper, naming content sitting in the wrong document. Each verdict carries its own confidence, which is why the class is `classified` rather than `measured`, and a low-confidence `move` is a prompt to look rather than an instruction to cut.
 

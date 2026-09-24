@@ -14,6 +14,8 @@ import {
   missingSections,
   PROVENANCE_FOLDER,
   REQUIRED_SECTIONS,
+  REQUIRED_SECTIONS_BY_FOLDER,
+  requiredSections,
   type SectionFinding,
 } from '@/context/audit'
 import {
@@ -129,8 +131,9 @@ export function register(program: Command): void {
         'it holds more decisions than the cap. A record stating neither is',
         'reported and never gated. --gate widens the gate to the other two',
         'findings that are facts rather than judgments: a missing required',
-        'section and index',
-        'drift. Entry length, reference form, table, provenance, narration,',
+        'section and index drift. A context entry requires Overview and',
+        'Layout, and a wireframe requires Regions, States, Copy, and Not on',
+        'this surface. Entry length, reference form, table, provenance, narration,',
         'and the record claim classification are judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
@@ -740,6 +743,10 @@ async function runAudit(
           renderWidth: RENDER_WIDTH,
           provenanceFolder: PROVENANCE_FOLDER,
           requiredSections: REQUIRED_SECTIONS,
+          // Keyed on the audited folder name. The flat key above stays for a
+          // caller that read it before wireframes owed a section, since turning
+          // it into this map would break that caller without an error.
+          requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
           // Three states rather than two, so a record showing no finding says
           // which terms were looked for. The key is absent when the run never
           // scanned, which is `--citations-only`, and null when it scanned and
@@ -946,7 +953,8 @@ function reportReferenceForm(
 
 /**
  * Names the path each finding belongs to, which is an entry in the folder named
- * under `.claude/` and the folder itself in a domain split across one. States
+ * under `.claude/`, the folder itself in a domain split across one, and the
+ * file in any wireframe folder. States
  * the reach on every run for the reason the provenance report does.
  *
  * This prints ahead of the four readability measures because a missing section
@@ -959,19 +967,31 @@ function reportSections(
 ): void {
   logStep('Sections')
 
-  const governed = folders.filter(governsContent)
-  if (governed.length === 0) {
+  const names = [
+    ...new Set(
+      folders
+        .filter((folder) => requiredSections(folder).length > 0)
+        .map((folder) => folder.name),
+    ),
+  ]
+  if (names.length === 0) {
     logInfo(
-      `Out of scope. The list is stated in the standard governing canon/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
+      `Out of scope. The lists are stated in the standards governing ${Object.keys(
+        REQUIRED_SECTIONS_BY_FOLDER,
+      )
+        .map((name) => `canon/${name}/`)
+        .join(' and ')}, and no audited folder is one of them.`,
     )
     return
   }
 
+  for (const name of names) {
+    logInfo(
+      `canon/${name}/ requires ${REQUIRED_SECTIONS_BY_FOLDER[name].join(', ')}.`,
+    )
+  }
   logInfo(
-    `Covers canon/${PROVENANCE_FOLDER}/ alone, whose standard requires ${REQUIRED_SECTIONS.join(' and ')}.`,
-  )
-  logInfo(
-    'A heading at any level counts. Each entry answers for itself, except in a domain split across a folder, where a sibling answers for the rest.',
+    'A heading at any level counts. Each entry answers for itself, except in a context domain split across a folder, where a sibling answers for the rest. A wireframe answers for itself in every folder.',
   )
 
   if (missing.length === 0) {

@@ -864,4 +864,52 @@ describe('missingSections', () => {
 
     expect(await missingIn('.claude/diagrams/components.md')).toEqual([])
   })
+
+  const WIREFRAME =
+    '# Header\n\n## Regions\n\n- Bar: top\n\n## States\n\nNone.\n\n## Copy\n\n- Home\n\n## Not on this surface\n\n- No search\n'
+
+  it('should report each wireframe section the file is short of', async () => {
+    seedFolder('canon/wireframes', {
+      'header.md': '# Header\n\n## Copy\n\n- Home\n\n## Behavior\n\nNone.\n',
+    })
+
+    expect(await missingIn('canon/wireframes/header.md')).toEqual([
+      'Regions',
+      'States',
+      'Not on this surface',
+    ])
+  })
+
+  it('should leave a wireframe declaring every required section unreported', async () => {
+    seedFolder('canon/wireframes', { 'header.md': WIREFRAME })
+
+    expect(await missingIn('canon/wireframes/header.md')).toEqual([])
+  })
+
+  it('should hold a nested wireframe to the sections itself', async () => {
+    // One surface per file, so a conforming sibling answers for nothing even
+    // inside a subfolder, where a context split would roll up.
+    seedFolder('canon/wireframes', { 'header.md': WIREFRAME })
+    seedFolder('canon/wireframes/teach', {
+      'root.md': WIREFRAME,
+      'lesson.md': '# Lesson\n\n## Copy\n\n- Next\n',
+    })
+
+    expect(await missingIn('canon/wireframes/teach')).toEqual([])
+    expect(await missingIn('canon/wireframes/teach/lesson.md')).toEqual([
+      'Regions',
+      'States',
+      'Not on this surface',
+    ])
+  })
+
+  it('should leave a stub wireframe unreported', async () => {
+    seedFolder('canon/wireframes', {})
+    writeFileSync(
+      join(root, 'canon/wireframes/header.md'),
+      '---\ntitle: Header\ndescription: A surface\nstub: true\n---\n\n# Header\n',
+    )
+
+    expect(await missingIn('canon/wireframes/header.md')).toEqual([])
+  })
 })

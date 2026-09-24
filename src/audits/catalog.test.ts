@@ -78,6 +78,25 @@ describe('the audit catalog', () => {
     expect(isTracked(specFor('markdown'))).toBe(true)
   })
 
+  /**
+   * The regex layer is pinned so the retained tally is the same on every
+   * machine, whichever model a clone has configured.
+   */
+  it('should run the placement sweep on the regex layer without gating', () => {
+    const placement = specFor('placement')
+
+    expect(placement.argv).toEqual([
+      'context',
+      'classify',
+      'sweep',
+      '--backend',
+      'off',
+      '--json',
+    ])
+    expect(placement.gatingExits).toEqual([])
+    expect(placement.corpus).toBe('tracked')
+  })
+
   it('should carry the duration the caller measured the spawn at', () => {
     const result = classify(specFor('markdown'), 0, '{}', 42)
 
@@ -343,6 +362,27 @@ describe('reading counts out of each record shape', () => {
     }
 
     expect(countsFor(specFor('labels'), record)).toEqual({ uncovered: 1 })
+  })
+
+  it('should tally the placement sweep findings by verdict', () => {
+    const record = {
+      decision: 'ok',
+      findings: [
+        { file: 'a.md', verdict: 'KEEP' },
+        { file: 'a.md', verdict: 'KEEP' },
+        { file: 'b.md', verdict: 'REWRITE' },
+      ],
+    }
+
+    expect(countsFor(specFor('placement'), record)).toEqual({
+      keep: 2,
+      rewrite: 1,
+      move: 0,
+    })
+  })
+
+  it('should read no placement counts from a record carrying no findings', () => {
+    expect(countsFor(specFor('placement'), { decision: 'ok' })).toBeUndefined()
   })
 
   it('should retain the census totals and leave the extension breakdown out', () => {
