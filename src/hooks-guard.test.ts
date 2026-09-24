@@ -12,7 +12,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
-import { afterAll, beforeAll, describe, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const ROOT = join(import.meta.dirname, '..')
 
@@ -586,6 +586,42 @@ describe('silent-turn.sh basename collision', () => {
       },
     )
   }
+})
+
+// macOS ships bash 3.2 as `/usr/bin/env bash`, which refuses every construct
+// below. A hook using one fails on a stock Mac and passes on every Linux
+// runner, so nothing but a scan of the source catches it.
+const BASH4_CONSTRUCTS = [
+  { label: 'declare -A', pattern: /\bdeclare\s+-[A-Za-z]*A/ },
+  { label: 'declare -n', pattern: /\bdeclare\s+-[A-Za-z]*n/ },
+  { label: 'local -n', pattern: /\blocal\s+-[A-Za-z]*n/ },
+  ...['mapfile', 'readarray', 'coproc'].map((word) => ({
+    label: word,
+    pattern: new RegExp(`\\b${word}\\b`),
+  })),
+  { label: 'case modification', pattern: /\$\{[A-Za-z_]\w*(\^\^?|,,?)\}/ },
+]
+
+function findBash4Constructs(dir: string): string[] {
+  return readdirSync(dir)
+    .filter((name) => name.endsWith('.sh'))
+    .flatMap((name) =>
+      readFileSync(join(dir, name), 'utf8')
+        .split('\n')
+        .flatMap((line, index) =>
+          line.trimStart().startsWith('#')
+            ? []
+            : BASH4_CONSTRUCTS.filter(({ pattern }) => pattern.test(line)).map(
+                ({ label }) => `${name}:${index + 1} ${label}`,
+              ),
+        ),
+    )
+}
+
+describe('bash 3.2 compatibility', () => {
+  it.each(TREES)('should use no bash-4-only construct in $label', ({ dir }) => {
+    expect(findBash4Constructs(dir)).toEqual([])
+  })
 })
 
 // Both copies shell out to the audit verb, and this one resolves two runners

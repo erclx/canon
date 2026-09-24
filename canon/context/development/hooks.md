@@ -105,7 +105,7 @@ It blocks rather than advising the way every other seeded hook does, because a d
 
 A missing input exits quiet rather than blocking, on every guard from `transcript_path` down to the boundary match, so a transient miss never reports as though it were the defect this hook exists to catch. A payload missing `transcript_path`, `prompt_id`, or a `promptId` match is malformed rather than stale, since reading `last_assistant_message` off the payload rather than off `transcript_path` removes the lag this design would otherwise carry.
 
-Two written paths sharing a basename would otherwise let one mention clear both, since the ordinary check tests only the basename. The hook counts basenames across the turn's written paths first, and a basename shared by more than one falls back to matching the full path instead.
+Two written paths sharing a basename would otherwise let one mention clear both, since the ordinary check tests only the basename. The hook counts basenames across the turn's written paths first, and a basename shared by more than one falls back to matching the full path instead. The count pipes the basenames through `sort | uniq -d` rather than keeping an associative array, since macOS ships bash 3.2 and `declare -A` fails there on every turn. A scan in `src/hooks-guard.test.ts` fails on any bash-4-only construct in either hook tree.
 
 ### The bare flag repair
 

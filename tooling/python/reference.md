@@ -10,14 +10,13 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 
 ## Scaffold checklist
 
-1. Scaffold with `uv init --app <name>`. This creates `pyproject.toml`, `.python-version` pinned to 3.14, `src/<name>/`, and a starter `main.py`. `uv init` defaults `requires-python` to `>=3.14`, which matches the `.python-version` pin this stack ships.
+1. Scaffold with `uv init --package <name>`. This creates `pyproject.toml` with a `uv_build` backend, `.python-version` pinned to 3.14, and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`, so source lands under `src/` where `mypy.ini`, `pytest.ini`, and `.coveragerc` look for it. `uv init` defaults `requires-python` to `>=3.14`, which matches the `.python-version` pin this stack ships.
 2. Seed `package.json` so the base layer's bun-side tools (husky, prettier, cspell, commitlint) have a target to install into: `bun init -y`. Without this the sync drops base configs but skips the dep install, since `resolve_missing_deps` short-circuits when `package.json` is absent.
 3. Install base tooling: `canon tooling sync base . --write`
 4. Install python tooling: `canon tooling sync python . --write`
 5. Install Python tooling deps: `uv add --dev ruff mypy pytest pytest-cov`. v1 of this stack does not declare these in `[dependencies.dev]` because manifest injection hardcodes `bun add -D`, which can not install Python packages. Until the injector branches on `runtime`, this step is manual.
 6. Sync the lockfile and create the venv: `uv sync`.
-7. Annotate `main()` in the scaffold-generated `main.py` with `-> None`. `uv init --app` ships an unannotated `main()` that fails strict mypy on the first run.
-8. Run `bun run lint:fix` then `bun run check`.
+7. Run `bun run lint:fix` then `bun run check`.
 
 The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` collects at least one test on first run, so `bun run test:run` exits 0 instead of the empty-collection exit code 5. Delete or replace the smoke test with real tests.
 
@@ -27,7 +26,7 @@ The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` 
 - `mypy.ini`: strict mode, `python_version = 3.14`, `mypy_path = src`, excludes `tests/` and `docs/`.
 - `pytest.ini`: tests live under `tests/`, source under `src/`.
 - `.coveragerc`: branch coverage on `src/`, html report under `.coverage_cache/html`.
-- `.python-version`: pinned to `3.14` to match `uv init --app` defaults.
+- `.python-version`: pinned to `3.14` to match `uv init` defaults.
 - `scripts/verify.sh`: overrides base verify to add Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) phases.
 
 ## Hybrid project shape

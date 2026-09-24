@@ -2,7 +2,7 @@
 name = "python"
 extends = "base"
 runtime = "uv"
-scaffold = "uv init --app {{name}}"
+scaffold = "uv init --package {{name}}"
 
 [scripts]
 "lint" = "uv run ruff check . && uv run ruff format --check ."
