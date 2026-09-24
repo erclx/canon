@@ -28,6 +28,8 @@ paths:
 - Capture the full page. Do not capture a component in isolation.
 - Declare the widths a layout case captures. Always include 320, the reflow floor from the reflow criterion in `410-a11y`, then add each breakpoint bucket the project writes rules for, read from the `## Layout` section of `DESIGN.md`.
 - Fall back to the 320 floor alone when the project has no `DESIGN.md` or its record carries no `## Layout` section. Do not impose another project's breakpoints.
+- Add a layout case at each bound when a surface renders persistent chrome a person can resize, such as a draggable sidebar or a split pane, one with the chrome at its narrowest and one at its widest. Take both at the narrowest declared width where the chrome stays persistent rather than collapsing, since a frame where it has turned into an overlay shows none of the width it takes.
+- Read those bounds from the code that clamps the chrome, since `## Layout` has no slot for them. Judge each frame by the content width left beside the chrome rather than by the window width, against the 320 floor `410-a11y` holds for that region.
 - Apply the declaration to a case that covers layout only. A case driving a menu open or an answer chosen tests a state, so it takes one width rather than the full set.
 - Read a capture at 320 as proof that a frame was taken there, not that the page reflows correctly. The criterion is stated in `410-a11y` and nothing here enforces it.
 - Write the capture into a folder named `evidence`. The image is collected for the pull request comment when any segment of its path is literally `evidence` and its filename carries an image extension, so the folder name is fixed and its position in the tree is the project's own.
