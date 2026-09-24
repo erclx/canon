@@ -471,6 +471,14 @@ describe('buildDesignCss', () => {
       ).toContain('text-box: trim-both cap alphabetic')
     })
 
+    it('should clamp the sidebar workspace name to two lines so a long title stays inside the top band', () => {
+      const name = declarationsOf(teachCss(), '.sb-ws .ws-name')
+
+      expect(name).toContain('-webkit-line-clamp: 2')
+      expect(name).toContain('overflow: hidden')
+      expect(name).toContain('text-box: normal')
+    })
+
     it('should mark the current crumb at the weight the current sidebar row paints', () => {
       expect(declarationsOf(teachCss(), '.crumb-here')).toContain(
         'font-weight: 650',

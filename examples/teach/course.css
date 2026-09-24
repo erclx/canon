@@ -712,6 +712,25 @@ html.sb-shut .sb {
   align-items: center;
 }
 
+/* The top band is as tall as the masthead and a mission title can run to a
+   sentence, so the name stops at two lines rather than overflowing the rule.
+   Nav carries the whole title in the element's `title` attribute. The cap
+   trim the crumb labels share is dropped here, since it ends the box at the
+   last baseline and the clip would cut every descender on the second line. */
+.sb-ws {
+  min-width: 0;
+}
+.sb-ws .ws-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+  line-height: 1.2;
+  text-box: normal;
+}
+
 .sb-wl {
   position: absolute;
   top: calc(100% + 0.35rem);

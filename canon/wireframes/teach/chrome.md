@@ -52,6 +52,7 @@ The panel opens beneath its trigger, overlapping the page content below it rathe
 - Collapse control label: "Toggle the course panel". The close control inside the overlay reads "Close the course panel", and the resize grip reads "Resize the course panel".
 - Breadcrumb separator between segments: "/".
 - Each jump row pairs a two-digit ordinal with the item's name: a workspace's mission title, falling back to its sentence-cased slug.
+- The sidebar's workspace heading stops at two lines with an ellipsis and carries the whole title in its `title` attribute, so a long mission title stays inside the top band.
 
 ## Behavior
 

@@ -646,7 +646,7 @@ function renderSidebar(sidebar: Sidebar): string {
 
   return `<aside class="sb">
   <div class="sb-top">
-    <details class="sb-ws" name="mast"><summary><span class="ws-name">${escapeHtml(sidebar.heading)}</span><span class="car">${CARET}</span></summary><div class="sb-wl"><ul class="jump-list">${renderJumpList(sidebar.switcher)}</ul></div></details>
+    <details class="sb-ws" name="mast"><summary><span class="ws-name" title="${escapeHtml(sidebar.heading)}">${escapeHtml(sidebar.heading)}</span><span class="car">${CARET}</span></summary><div class="sb-wl"><ul class="jump-list">${renderJumpList(sidebar.switcher)}</ul></div></details>
   </div>
   <div class="sb-scroll">
     <div class="sb-meta">${escapeHtml(sidebar.meta)}</div>

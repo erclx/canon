@@ -915,11 +915,13 @@ describe('workspace labels', () => {
     )
   })
 
-  it('should head the sidebar with the mission title', async () => {
+  it('should head the sidebar with the mission title, carried whole in a title attribute', async () => {
     const { contents, lesson } = await generateTitled()
 
     for (const page of [contents, lesson]) {
-      expect(page).toContain('<span class="ws-name">Regex &amp; friends</span>')
+      expect(page).toContain(
+        '<span class="ws-name" title="Regex &amp; friends">Regex &amp; friends</span>',
+      )
     }
   })
 
