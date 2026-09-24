@@ -108,6 +108,7 @@ EOF
     log_step "Running: canon tooling sync vite-react ./frontend --skip base"
     log_info "Expected: frontend gets web and vite-react configs, no base configs."
     log_info "Expected: only the root .husky exists, no frontend/.husky."
+    log_info "Expected: .github/ is withheld and named with 'working-directory: frontend', and frontend/cspell.json lands."
     exec bun "$PROJECT_ROOT/src/cli.ts" tooling sync vite-react ./frontend --skip base
     ;;
   "create")

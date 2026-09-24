@@ -10,19 +10,30 @@ import { ancestorsFirst, listFiles, type Manifest } from '@/tooling/manifest'
 import {
   applyScripts,
   collectDeps,
+  collectScripts,
   readPackage,
   serializePackage,
 } from '@/tooling/package'
-import { logAdd, logRemove, logStep } from '@/ui'
+import {
+  hasSpellConfig,
+  isSubfolderTarget,
+  isWithheldInSubfolder,
+  SUBFOLDER_SPELL_CONFIG,
+  subfolderSpellConfig,
+} from '@/tooling/subfolder'
+import { logAdd, logRemove, logStep, logWarn } from '@/ui'
 
 export async function injectConfigs(
   chain: readonly Manifest[],
   target: string,
 ): Promise<string[]> {
   const applied: string[] = []
+  const isSubfolder = isSubfolderTarget(target)
 
   for (const manifest of ancestorsFirst(chain)) {
-    const files = listFiles(manifest.configsDir)
+    const files = listFiles(manifest.configsDir).filter(
+      (rel) => !(isSubfolder && isWithheldInSubfolder(rel)),
+    )
     if (files.length === 0) continue
 
     logStep(`Applying ${manifest.name} configs`)
@@ -100,6 +111,16 @@ export async function injectSeeds(
     }
   }
 
+  const spellConfig = isSubfolderTarget(target)
+    ? subfolderSpellConfig(chain)
+    : undefined
+  if (spellConfig !== undefined && !hasSpellConfig(target)) {
+    logStep('Applying subfolder spell config')
+    await writeFile(join(target, SUBFOLDER_SPELL_CONFIG), spellConfig)
+    logAdd(SUBFOLDER_SPELL_CONFIG)
+    applied.push(SUBFOLDER_SPELL_CONFIG)
+  }
+
   return applied
 }
 
@@ -158,8 +179,9 @@ export async function pruneGitignore(
 
 /**
  * Installs missing dev dependencies, fills package scripts, and merges
- * gitignore entries. This is the `inject_tooling_manifest` sequence, which
- * assumed a target that already has a package.json.
+ * gitignore entries. A target with no package.json gets the gitignore alone,
+ * plus a warning naming every install it skipped, since seeding a package.json
+ * would pick a package manager and a project name on the target's behalf.
  */
 export async function injectManifest(
   chain: readonly Manifest[],
@@ -192,4 +214,21 @@ export async function injectManifest(
   }
 
   await injectGitignore(chain, target)
+
+  if (!pkg) warnSkippedInstalls(chain, target)
+}
+
+function warnSkippedInstalls(chain: readonly Manifest[], target: string): void {
+  const deps = collectDeps(chain, {}).map((dep) => dep.spec)
+  const scripts = collectScripts(chain, {}).map((script) => script.key)
+  if (deps.length === 0 && scripts.length === 0) return
+
+  logStep('Skipped installs')
+  if (deps.length > 0) {
+    logWarn(`Dev dependencies not installed: ${deps.join(', ')}`)
+  }
+  if (scripts.length > 0) {
+    logWarn(`Scripts not added: ${scripts.join(', ')}`)
+  }
+  logWarn(`No package.json: run 'bun init' in ${target}, then sync again`)
 }

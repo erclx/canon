@@ -10,6 +10,13 @@ import {
   readPackage,
   type ScriptState,
 } from '@/tooling/package'
+import {
+  hasSpellConfig,
+  isSubfolderTarget,
+  isWithheldInSubfolder,
+  SUBFOLDER_SPELL_CONFIG,
+  subfolderSpellConfig,
+} from '@/tooling/subfolder'
 
 export interface ConfigState {
   readonly rel: string
@@ -27,8 +34,15 @@ export interface EntryState {
   readonly state: 'missing' | 'present'
 }
 
+export interface WithheldState {
+  readonly rel: string
+  readonly stack: string
+  readonly present: boolean
+}
+
 export interface ScanResult {
   readonly configs: readonly ConfigState[]
+  readonly withheld: readonly WithheldState[]
   readonly seeds: readonly SeedState[]
   readonly scripts: readonly ScriptState[]
   readonly deps: readonly DepState[]
@@ -48,9 +62,16 @@ function isIdentical(a: string, b: string): boolean {
  * category and mirrors the bash: configs, seeds, and scripts resolve nearest
  * stack first, while dependencies and gitignore entries resolve from the
  * furthest ancestor inward.
+ *
+ * A target below its git toplevel is scanned as a subfolder: a path GitHub
+ * reads only at the root moves to `withheld` and counts as no change, and the
+ * nested spell config joins the seeds. The scope is read here so every caller
+ * of `scan` agrees without passing a flag.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
+  const isSubfolder = isSubfolderTarget(target)
   const configs: ConfigState[] = []
+  const withheld: WithheldState[] = []
   const seenConfigs = new Set<string>()
 
   for (const manifest of chain) {
@@ -60,6 +81,12 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
       const source = join(manifest.configsDir, rel)
       const dest = join(target, rel)
+
+      if (isSubfolder && isWithheldInSubfolder(rel)) {
+        withheld.push({ rel, stack: manifest.name, present: existsSync(dest) })
+        continue
+      }
+
       const state = !existsSync(dest)
         ? 'new'
         : isIdentical(source, dest)
@@ -87,6 +114,13 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     }
   }
 
+  if (isSubfolder && subfolderSpellConfig(chain) !== undefined) {
+    seeds.push({
+      rel: SUBFOLDER_SPELL_CONFIG,
+      state: hasSpellConfig(target) ? 'present' : 'missing',
+    })
+  }
+
   const packagePath = join(target, 'package.json')
   const pkg = readPackage(packagePath)
   const scripts = pkg ? collectScripts(chain, pkg) : []
@@ -107,6 +141,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
   return {
     configs,
+    withheld,
     seeds,
     scripts,
     deps,

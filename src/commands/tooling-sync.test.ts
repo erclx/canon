@@ -1,5 +1,12 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -231,5 +238,90 @@ describe('tooling sync checkout-mismatch warning', () => {
 
   it('should warn nothing from an ordinary target-style cwd', () => {
     expect(syncFrom(target).stderr).not.toContain('checkout')
+  })
+})
+
+describe('tooling sync into a subfolder', () => {
+  const WORKFLOW = '.github/workflows/verify.yml'
+  let repo: string
+  let stateDir: string
+  let web: string
+
+  beforeEach(() => {
+    repo = mkdtempSync(join(tmpdir(), 'tooling-sync-mono-'))
+    stateDir = mkdtempSync(join(tmpdir(), 'tooling-sync-state-'))
+    spawnSync('git', ['init', '-q', repo], { env: buildEnv() })
+    web = join(repo, 'web')
+    mkdirSync(web)
+  })
+
+  afterEach(() => {
+    rmSync(repo, { force: true, recursive: true })
+    rmSync(stateDir, { force: true, recursive: true })
+  })
+
+  const runSubfolder = (
+    verb: 'diff' | 'sync',
+    args: readonly string[],
+  ): Run => {
+    const run = spawnSync(
+      'bun',
+      [CLI, 'tooling', verb, 'vite-react', web, '--skip', 'base', ...args],
+      {
+        encoding: 'utf8',
+        env: buildEnv({
+          CANON_NON_INTERACTIVE: '1',
+          CANON_STATE_DIR: stateDir,
+        }),
+      },
+    )
+
+    return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+  }
+
+  it('should write no .github folder into the subfolder', () => {
+    runSubfolder('sync', ['--write'])
+
+    expect(existsSync(join(web, '.github'))).toBe(false)
+  })
+
+  it('should name the withheld workflow on stderr', () => {
+    expect(runSubfolder('sync', ['--write']).stderr).toContain(WORKFLOW)
+  })
+
+  it('should give the path a root job runs the subfolder from', () => {
+    expect(runSubfolder('sync', ['--write']).stderr).toContain(
+      'working-directory: web',
+    )
+  })
+
+  it('should write the nested spell config', () => {
+    runSubfolder('sync', ['--write'])
+
+    expect(existsSync(join(web, 'cspell.json'))).toBe(true)
+  })
+
+  it('should still end on the success line with no package.json', () => {
+    expect(runSubfolder('sync', ['--write']).stderr).toContain(
+      'Tooling sync complete',
+    )
+  })
+
+  it('should report the withheld paths under diff --json', () => {
+    runSubfolder('sync', ['--write'])
+
+    const record = JSON.parse(
+      runSubfolder('diff', ['--json']).stdout ?? '',
+    ) as { withheld: { rel: string }[] }
+
+    expect(record.withheld).toContainEqual(
+      expect.objectContaining({ rel: WORKFLOW }),
+    )
+  })
+
+  it('should exit 0 from diff once the subfolder is synced', () => {
+    runSubfolder('sync', ['--write'])
+
+    expect(runSubfolder('diff', ['--json']).status).toBe(0)
   })
 })
