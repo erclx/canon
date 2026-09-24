@@ -103,11 +103,22 @@ const output = (text: string): Emission => ({ kind: 'output', text })
  * `snippets` as a folder-whole entry of its own and the rule reaches every base
  * consumer through that instead.
  *
- * Both are recorded here rather than in a config file: the list is what a
+ * `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in by
+ * `--add` until a Go or PHP stack ships, which `target-setup` reaches by
+ * matching a detected language against each rule's description.
+ *
+ * All are recorded here rather than in a config file: the list is what a
  * reader compares a new arrival against, and a config file would absorb the
  * arrival silently.
  */
-export const GOV_EXPECTED_UNREFERENCED = ['260-shadcn', '320-tanstack-query']
+export const GOV_EXPECTED_UNREFERENCED = [
+  '130-go',
+  '140-php',
+  '260-shadcn',
+  '320-tanstack-query',
+  '335-testing-go',
+  '336-testing-php',
+]
 
 /**
  * Scenarios declaring no expectation, taken from `canon sandbox coverage`

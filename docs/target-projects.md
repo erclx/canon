@@ -92,7 +92,7 @@ Escalate only for real web apps. The `target-setup` skill reads `package.json` a
 
 Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
 
-A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:target-setup gov` for the governance layer alone, which is language-neutral.
+A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:target-setup gov` for the governance layer alone, which is language-neutral. Go and PHP are the exception: they ship language and testing rules but no stack, so a project in either lands on `base` and picks those rules up through `--add`, for example `canon gov install base --add 130-go,335-testing-go .`
 
 Run `canon tooling list --json` and `canon gov list --json` to see the current catalogs. Never hardcode stack names.
 

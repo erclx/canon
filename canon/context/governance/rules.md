@@ -92,7 +92,7 @@ Create a `.md` file anywhere under `governance/rules/` using the numbering conve
 
 Whether it reaches anyone depends on the stack roster rather than on the file. A rule added to `core/`, `claude/`, `snippets/`, or `ci/` reaches every `base` consumer with no stack edit, since `base` names each of those folders whole, and a rule in any other folder needs its name in the relevant `governance/stacks/*.toml`. See `canon/context/governance/stacks.md` for both cases and for the stage that reports the gap.
 
-Glob the rule against every ecosystem it governs rather than only the one its stack serves, since `--add` layers a rule onto a stack that never names it. `360-security-server` and `370-database` sit on `python` alone and glob `**/*.py` beside `**/*.ts` and `**/*.js`, so a Node API project pulls either one in and the globs already match. A glob narrowed to the naming stack's language installs a rule that matches nothing in that case.
+Glob the rule against every ecosystem it governs rather than only the one its stack serves, since `--add` layers a rule onto a stack that never names it. `360-security-server` and `370-database` sit on `python` and `node-server` and glob `**/*.go` and `**/*.php` beside `**/*.py`, `**/*.ts`, and `**/*.js`, so a Go or PHP backend pulls either one in through `--add` and the globs already match. A glob narrowed to the naming stack's language installs a rule that matches nothing in that case.
 
 ## Project-local rules
 

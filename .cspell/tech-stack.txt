@@ -32,6 +32,7 @@ dunder
 elif
 enotdir
 errexit
+errorf
 excalidraw
 excalifont
 execa
@@ -39,6 +40,7 @@ execdir
 execve
 fastapi
 faststart
+fatalf
 firecrawl
 flowchart
 fromdateiso
@@ -49,6 +51,7 @@ gitlink
 glama
 gsub
 heredoc
+httptest
 httpx
 ibeam
 ihdr
