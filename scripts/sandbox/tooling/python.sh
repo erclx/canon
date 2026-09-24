@@ -7,8 +7,8 @@ stage_setup() {
     log_error "uv is not installed. Install from https://docs.astral.sh/uv/"
   fi
 
-  log_step "Scaffolding python (uv init --app)"
-  uv init --app --name sandbox-python --no-readme . >/dev/null
+  log_step "Scaffolding python (uv init --package)"
+  uv init --package --name sandbox-python --no-readme . >/dev/null
   log_info "uv init complete"
 
   log_step "Seeding package.json (bun init -y)"
@@ -33,12 +33,6 @@ stage_setup() {
   log_step "Syncing python venv"
   uv sync >/dev/null 2>&1
   log_info "uv sync complete"
-
-  log_step "Annotating scaffold main()"
-  if [ -f main.py ]; then
-    sed -i 's/^def main():/def main() -> None:/' main.py
-    log_info "main.py annotated"
-  fi
 
   log_step "Running lint:fix"
   if bun run lint:fix >/dev/null 2>&1; then
