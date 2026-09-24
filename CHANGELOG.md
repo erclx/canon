@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.113.0](https://github.com/erclx/canon/compare/v4.112.0...v4.113.0) (2026-09-24)
+
+
+### Features
+
+* **cli:** label feedback issues with the domains their surface names ([#1841](https://github.com/erclx/canon/issues/1841)) ([b3ac323](https://github.com/erclx/canon/commit/b3ac323fcf37703183dbd9c1d7322a786760113d))
+* **teach:** point teach help and list at canon serve ([#1840](https://github.com/erclx/canon/issues/1840)) ([453193c](https://github.com/erclx/canon/commit/453193c94b47eb466638a2c31be2728d2121ec04))
+* **web:** compose a social card for the landing page ([#1814](https://github.com/erclx/canon/issues/1814)) ([880af08](https://github.com/erclx/canon/commit/880af085e89fb59ee95b3c3c3ad915b738b851c4))
+
+
+### Bug Fixes
+
+* **indexes:** stop an unquoted colon in frontmatter ending a run ([#1842](https://github.com/erclx/canon/issues/1842)) ([f4f7d8a](https://github.com/erclx/canon/commit/f4f7d8abe5f9f9ac2c76cc4274f245647d738595))
+* **pr:** embed evidence images through the blob raw form ([#1839](https://github.com/erclx/canon/issues/1839)) ([cef025e](https://github.com/erclx/canon/commit/cef025ea851bdcca87d35e72d6a9a5384df39b3f))
+* **tooling:** correct four seed and golden config defects ([#1843](https://github.com/erclx/canon/issues/1843)) ([b59e6f9](https://github.com/erclx/canon/commit/b59e6f9d7ce0e5ab5e901d34dabc979b10d35bf4))
+
 ## [4.112.0](https://github.com/erclx/canon/compare/v4.111.0...v4.112.0) (2026-09-21)
 
 
