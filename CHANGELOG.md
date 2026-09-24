@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.115.0](https://github.com/erclx/canon/compare/v4.114.0...v4.115.0) (2026-09-24)
+
+
+### Features
+
+* **ci:** merge the frame refresh on its required check ([#1858](https://github.com/erclx/canon/issues/1858)) ([e3a63ce](https://github.com/erclx/canon/commit/e3a63ce2bfe267f600a380e2fcf354432e41925c))
+* **claude:** detect language roots below the repository root ([#1861](https://github.com/erclx/canon/issues/1861)) ([9aa5969](https://github.com/erclx/canon/commit/9aa596994708b68b84cc69db0f65112f85b16b10))
+* **context:** audit wireframe sections and classifier placement ([#1856](https://github.com/erclx/canon/issues/1856)) ([9b5af28](https://github.com/erclx/canon/commit/9b5af28679715381d448c292365aef2f604c67a2))
+* **teach:** render reference pages to an html sibling ([#1857](https://github.com/erclx/canon/issues/1857)) ([eea9358](https://github.com/erclx/canon/commit/eea9358acd2a510fc5a9d9c09dad184aceebfbd8))
+* **tooling:** add go and php tooling stacks ([#1855](https://github.com/erclx/canon/issues/1855)) ([9917442](https://github.com/erclx/canon/commit/99174421ee94836dfae49eb302d23b0ded5512b1))
+
 ## [4.114.0](https://github.com/erclx/canon/compare/v4.113.0...v4.114.0) (2026-09-24)
 
 
