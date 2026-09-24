@@ -30,7 +30,7 @@ since the chain reaches the tooling resolution a moment later.
 Read these from the project root in parallel, skipping any that do not exist:
 
 - `package.json`: `dependencies` and `devDependencies`
-- Root configs: `astro.config.*`, `next.config.*`, `vite.config.*`, `tailwind.config.*`, `tsconfig.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`
+- Root configs: `astro.config.*`, `next.config.*`, `vite.config.*`, `tailwind.config.*`, `tsconfig.json`, `pyproject.toml`, `go.mod`, `composer.json`, `Cargo.toml`
 - `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md` if present
 - Directory structure via `ls -1` of the project root and `src/` if present
 
