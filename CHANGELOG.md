@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.114.0](https://github.com/erclx/canon/compare/v4.113.0...v4.114.0) (2026-09-24)
+
+
+### Features
+
+* **gov:** add Go and PHP rules and scope server rules to them ([#1852](https://github.com/erclx/canon/issues/1852)) ([c1fa3af](https://github.com/erclx/canon/commit/c1fa3af737c04ea8c4b917f4aafa91e11cf90bfe))
+* **governance:** capture resizable chrome at its bounds ([#1847](https://github.com/erclx/canon/issues/1847)) ([ac64c92](https://github.com/erclx/canon/commit/ac64c92473a774c2da9eb52be9585894ab1dc544))
+* **gov:** move the Next.js rule into a nextjs stack ([#1844](https://github.com/erclx/canon/issues/1844)) ([d31b2fb](https://github.com/erclx/canon/commit/d31b2fbcabaaff64a081527d219eafe960bc4cc6))
+* **records:** guard the push payload and keep excluded names out ([#1846](https://github.com/erclx/canon/issues/1846)) ([43bd75a](https://github.com/erclx/canon/commit/43bd75a06ef5dfe78f2eb8703ba00ee4c63f5712))
+* **teach:** supply the lesson skeleton and title-first labels ([#1845](https://github.com/erclx/canon/issues/1845)) ([f4838d8](https://github.com/erclx/canon/commit/f4838d8f487539a624f5b7fdab8a25c8d21a1d4b))
+* **tooling:** sync a subfolder target as a subfolder ([#1853](https://github.com/erclx/canon/issues/1853)) ([efd7939](https://github.com/erclx/canon/commit/efd79398b33bae2eff90755a357fc19718ec158d))
+
 ## [4.113.0](https://github.com/erclx/canon/compare/v4.112.0...v4.113.0) (2026-09-24)
 
 
