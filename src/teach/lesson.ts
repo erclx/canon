@@ -13,7 +13,7 @@ import {
 const LESSON_WIDTH = 4
 
 /** The ordinal a lesson filename opens with, which fixes its read order. */
-const LESSON_NUMBER = /^(\d{4})-/
+export const LESSON_NUMBER = /^(\d{4})-/
 
 const LESSON_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 

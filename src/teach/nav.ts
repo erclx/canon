@@ -10,7 +10,9 @@ import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
 import { stripFrontmatter } from '@/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { PROJECT_ROOT } from '@/project-root'
+import { linkLessonReferences } from '@/teach/cross-references'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
+import { LESSON_NUMBER } from '@/teach/lesson'
 import {
   listWorkspaces,
   readWorkspace,
@@ -1306,6 +1308,7 @@ function spliceRegion(
 interface LessonRewritten {
   readonly ok: true
   readonly file: string
+  readonly unresolved: readonly string[]
 }
 
 interface LessonRefused {
@@ -1334,15 +1337,57 @@ const FOOTNAV_OPEN = '<!-- canon:teach:footnav -->'
  * alone, which keeps a second run byte-identical.
  */
 function wrapMain(html: string): string {
-  const start = html.indexOf(HEADER_CLOSE)
-  const end = html.indexOf(FOOTNAV_OPEN, start)
-  if (start === -1 || end === -1) return html
+  const bounds = authoredBounds(html)
+  if (bounds === undefined) return html
 
-  const bodyStart = start + HEADER_CLOSE.length
-  const body = html.slice(bodyStart, end)
+  const body = html.slice(bounds.start, bounds.end)
   if (/<main[\s>]/.test(body)) return html
 
-  return `${html.slice(0, bodyStart)}\n<main>\n${body.trim()}\n</main>\n${html.slice(end)}`
+  return `${html.slice(0, bounds.start)}\n<main>\n${body.trim()}\n</main>\n${html.slice(bounds.end)}`
+}
+
+function authoredBounds(
+  html: string,
+): { readonly start: number; readonly end: number } | undefined {
+  const start = html.indexOf(HEADER_CLOSE)
+  const end = html.indexOf(FOOTNAV_OPEN, start)
+  if (start === -1 || end === -1) return undefined
+  return { start: start + HEADER_CLOSE.length, end }
+}
+
+/** Each lesson number to the file carrying it, the first in filename order. */
+function lessonTargets(
+  lessonFiles: readonly string[],
+): ReadonlyMap<string, string> {
+  const targets = new Map<string, string>()
+  for (const file of [...lessonFiles].sort()) {
+    const number = LESSON_NUMBER.exec(file)?.[1]
+    if (number !== undefined && !targets.has(number)) targets.set(number, file)
+  }
+  return targets
+}
+
+/**
+ * Links the "lesson NNNN" mentions in the authored region, the one rewrite nav
+ * makes between the header and footnav markers besides the `<main>` wrap.
+ */
+function linkAuthoredRegion(
+  html: string,
+  targets: ReadonlyMap<string, string>,
+  file: string,
+): { readonly html: string; readonly unresolved: readonly string[] } {
+  const bounds = authoredBounds(html)
+  if (bounds === undefined) return { html, unresolved: [] }
+
+  const linked = linkLessonReferences(
+    html.slice(bounds.start, bounds.end),
+    targets,
+    file,
+  )
+  return {
+    html: `${html.slice(0, bounds.start)}${linked.html}${html.slice(bounds.end)}`,
+    unresolved: linked.unresolved,
+  }
 }
 
 /**
@@ -1359,6 +1404,7 @@ async function rewriteLesson(
   metas: readonly LessonMeta[],
   workspaces: readonly WorkspaceSummary[],
   css: string,
+  targets: ReadonlyMap<string, string>,
 ): Promise<LessonRewritten | LessonRefused> {
   const file = metas[index].file
   const path = join(root, detail.path, TEACH_LESSONS, file)
@@ -1439,8 +1485,9 @@ async function rewriteLesson(
     html = spliced
   }
 
-  await writeFile(path, wrapMain(html))
-  return { ok: true, file }
+  const linked = linkAuthoredRegion(wrapMain(html), targets, file)
+  await writeFile(path, linked.html)
+  return { ok: true, file, unresolved: linked.unresolved }
 }
 
 export interface LessonSkipped {
@@ -1461,6 +1508,17 @@ export interface NavGenerated {
    * reference page left unrendered on a Bun carrying no markdown renderer.
    */
   readonly skipped: readonly LessonSkipped[]
+  /**
+   * A "lesson NNNN" mention naming no lesson in its workspace, one per distinct
+   * number per lesson. The lesson still rewrote, so it counts in `lessons`.
+   */
+  readonly unresolved: readonly LessonReferenceUnresolved[]
+}
+
+export interface LessonReferenceUnresolved {
+  /** Relative to the root, the way a `skipped` entry is. */
+  readonly file: string
+  readonly lesson: string
 }
 
 const MARKDOWN_RENDERER = 'Bun.markdown'
@@ -1512,6 +1570,7 @@ export async function generateNav(
 
   const contents: string[] = []
   const skipped: LessonSkipped[] = []
+  const unresolved: LessonReferenceUnresolved[] = []
   let lessons = 0
   let reference = 0
   const canRenderMarkdown = hasMarkdownRenderer()
@@ -1555,6 +1614,7 @@ export async function generateNav(
     await removeOrphanReferencePages(root, detail)
 
     const css = stripImports(await readFile(cssPath, 'utf8'))
+    const targets = lessonTargets(detail.lessonFiles)
 
     for (let index = 0; index < metas.length; index += 1) {
       const outcome = await rewriteLesson(
@@ -1564,10 +1624,17 @@ export async function generateNav(
         metas,
         listed.workspaces,
         css,
+        targets,
       )
 
       if (outcome.ok) {
         lessons += 1
+        for (const lesson of outcome.unresolved) {
+          unresolved.push({
+            file: join(detail.path, TEACH_LESSONS, outcome.file),
+            lesson,
+          })
+        }
       } else {
         skipped.push({
           file: join(detail.path, TEACH_LESSONS, outcome.file),
@@ -1584,5 +1651,6 @@ export async function generateNav(
     lessons,
     reference,
     skipped,
+    unresolved,
   }
 }
