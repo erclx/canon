@@ -1,8 +1,8 @@
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -36,6 +36,14 @@ async function runTeach(
 }
 
 describe('canon teach', () => {
+  const tempDirs: string[] = []
+
+  afterEach(() => {
+    for (const dir of tempDirs.splice(0)) {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   it('should name canon serve in the parent help', async () => {
     const result = await runTeach(['--help'])
 
@@ -59,6 +67,7 @@ describe('canon teach', () => {
 
   it('should print the absolute teach folder when it sits outside the cwd', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'teach-serve-'))
+    tempDirs.push(outside)
 
     const result = await runTeach(
       ['list', '00-fixture', '--root', FIXTURE_ROOT],
