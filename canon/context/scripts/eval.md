@@ -60,7 +60,7 @@ The row is appended with `>>` and anchors on no existing line, so its table has 
 
 ### The snapshot blind spot
 
-A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. `scripts/eval/` compares a before-and-after hash of the fixture, and a cut half of the memory ablation can write into `~/.claude/projects/<fixture>/memory/` while the run reports no files changed, which is true of the fixture and false of the machine. The sandbox harness reports `write_scope` from a manifest diff over its sandbox tree and carries the same blind spot rather than a different one, recorded in `canon/context/sandbox/overview.md`. Read the transcript alongside the file list in either, and clear the stray path afterward.
+A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. `scripts/eval/` compares a before-and-after hash of the fixture, and a cut half of the memory ablation can write into `~/.claude/projects/<fixture>/memory/` while the run reports no files changed, which is true of the fixture and false of the machine. The sandbox harness reports `write_scope` from a manifest diff over its sandbox tree and carries the same blind spot rather than a different one, recorded in `canon/context/sandbox/isolation.md`. Read the transcript alongside the file list in either, and clear the stray path afterward.
 
 The sandbox picked a boundary, watching the four shared-scratch directories under each toolkit root and naming what it leaves out, so the deciding is done rather than deferred and the eval fixture can copy the shape or state its own.
 

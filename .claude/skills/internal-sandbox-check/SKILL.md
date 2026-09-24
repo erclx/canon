@@ -102,7 +102,7 @@ The census does not reach this step. It is a census of skills, and a script doma
 - **none**: the user answered `none` at a Step 2a rule 3 or rule 6 prompt, or at a Step 2b prompt.
 - **unmapped**: no scenario was identified, no census verdict applies, and the user did not answer `none`, or the item is under `src/**`.
 
-The two verdict rows are reports rather than decisions, and `canon/context/sandbox/coverage.md` owns what each verdict means. Do not restate that here. `none` now covers only an answer someone gave this run, which is what separates deferring verification on one branch from ruling that no arm should ever exist.
+The two verdict rows are reports rather than decisions, and `canon/context/sandbox/coverage/census.md` owns what each verdict means. Do not restate that here. `none` now covers only an answer someone gave this run, which is what separates deferring verification on one branch from ruling that no arm should ever exist.
 
 Every status but `aligned` and `stale` leaves the row with no scenario. The four skip conditions below test that one property rather than restating the five labels, which is what keeps them from drifting apart as labels are added.
 
