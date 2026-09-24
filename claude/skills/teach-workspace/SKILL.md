@@ -113,7 +113,7 @@ Write each option as a `<label class="opt" data-k="<letter>">` holding a radio `
 
 Then carry a teach-back block beside the quiz. A quiz is recognition and the pedagogy prefers production, so a lesson offering only a quiz tests the weak form. Ask for an explanation to a named audience, and carry a `<details>` listing what a complete explanation covers, closed by default, so a learner reading with no session in the room can grade themselves. The reference states both shapes in full.
 
-Compose the quiz and the teach-back block as one string. Below, that string is the block list's trailing `raw` entry, rather than markup written into the file by hand.
+Compose the quiz and the teach-back block as one string. Below, that string is the block list's last `raw` entry, followed only by `refs`, rather than markup written into the file by hand.
 
 ### Building the lesson body
 
@@ -126,12 +126,14 @@ echo '[
   {"type":"heading","level":1,"text":"<title>"},
   {"type":"paragraph","lede":true,"text":"<the dek>"},
   {"type":"paragraph","text":"<a body paragraph>"},
+  {"type":"paragraph","text":"<a claim resting on a source>","cites":[1]},
   {"type":"list","ordered":true,"items":["<step one>","<step two>"]},
-  {"type":"raw","html":"<the quiz and teach-back block composed above>"}
+  {"type":"raw","html":"<the quiz and teach-back block composed above>"},
+  {"type":"refs","items":[{"title":"<source name>","url":"<https URL>"}]}
 ]' | canon teach render --json
 ```
 
-A `heading`, a `paragraph` (`lede: true` for the dek), and a `list` cover the structural body. Reach for `raw` only where none of the three can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's trailing `raw` entry every time, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file.
+A `heading`, a `paragraph` (`lede: true` for the dek, `cites` for a claim resting on a source), a `list`, and the one `refs` block the cites number into cover the structural body. Reach for `raw` only where none of those can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's last `raw` entry every time, followed only by `refs`, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file.
 
 Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it, and never compose the lesson body by hand as a fallback. That is the state this section exists to end, and a target holds this skill body before it holds the verb, since a plugin skill reaches a target the moment it merges while the CLI reaches one only when a release publishes.
 

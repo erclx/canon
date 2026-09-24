@@ -73,14 +73,17 @@ The stepper hides and shows and sets nothing else, so how a selected option look
 
 ## The block list
 
-`canon teach render` takes a JSON array of blocks and renders it through the same components a lesson body composes. Four types, and every structural body composes from them:
+`canon teach render` takes a JSON array of blocks and renders it through the same components a lesson body composes. Five types, and every structural body composes from them:
 
 - `{"type":"heading","level":1|2,"text":"<text>"}`: an `<h1>` or `<h2>`.
-- `{"type":"paragraph","text":"<text>","lede":true}`: a `<p>`, marked `lede` for the dek that opens the lesson.
+- `{"type":"paragraph","text":"<text>","lede":true,"cites":[1]}`: a `<p>`, marked `lede` for the dek that opens the lesson. `cites` adds a footnote marker per reference number after the text, and a lede takes none.
 - `{"type":"list","items":["<text>", ...],"ordered":true}`: a `<ul>` or, with `ordered`, an `<ol>`.
+- `{"type":"refs","items":[{"title":"<name>","url":"<https URL>","note":"<text>"}, ...]}`: the lesson's one reference list, numbered from 1 in item order. `url` and `note` are optional, and a `url` must be http or https.
 - `{"type":"raw","html":"<markup>"}`: the escape hatch, passed through unescaped.
 
-The quiz and the teach-back block above are the one case `raw` is always needed for, since their fixed contract is not a components concern. Give them the array's trailing entry rather than reaching for `raw` anywhere the other three could carry the content instead.
+The quiz and the teach-back block above are the one case `raw` is always needed for, since their fixed contract is not a components concern. Give them the array's last `raw` entry, followed only by `refs`, rather than reaching for `raw` anywhere the other types could carry the content instead.
+
+A claim resting on a source carries a `cites` number, and the source goes in the lesson's one `refs` block rather than into the sentence. Draw every reference from what `canon teach resource --read` recorded, never from a lead, since a lead is a source nobody opened. Render refuses a cite no reference resolves, so number the list before citing into it.
 
 ## Teach back
 
