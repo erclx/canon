@@ -200,6 +200,8 @@ No `canon teach` verb serves the workspace. `canon serve` does, taking the teach
 canon serve .canon/teach --entry 03-fde-system-design/index.html --json
 ```
 
+`canon teach list <topic>` ends its human output with this line for that workspace, with the teach folder written relative to the cwd, or absolute when it sits outside it, since `canon serve` resolves its directory against the cwd while the list verb reads the main worktree root. The JSON record carries no such field.
+
 It stays general rather than becoming `canon teach serve`, because nothing about serving a directory is specific to a learning workspace, and the same verb carries a slide render and a design preview.
 
 Read `url` off the record rather than building one from the port that was asked for. The verb walks forward past a port already in use, which is routine when a second workspace is already open, and the port it took is the one thing a composed URL gets wrong.

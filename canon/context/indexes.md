@@ -70,7 +70,7 @@ The field is all-or-nothing per folder, the same shape the `title` and `descript
 
 A child folder's own `index.md` `category` reaches nothing in the parent. `readCatalogs` reads `title` and `subtitle` off a child index and never its `category`, and grouped mode collects every child under the trailing `## Sub-catalogs` heading, so a child index declaring the category its pages left does not rejoin that heading.
 
-Quote a `description` opening with a backtick or a colon. YAML reserves both at the start of a scalar, so `Bun.YAML.parse` rejects the block and the folder fails per the rule above. A hand-maintained catalog never exercises the parser, so a folder converting to generation surfaces these on its first regen rather than as it grew.
+Quote a `description` opening with a backtick or a colon. YAML reserves both at the start of a scalar, so `Bun.YAML.parse` rejects the block and the folder fails per the rule above. `parseFrontmatter` reads a block that will not parse as absent, so the error names the file as missing its `title` and `description` even though it carries both. A hand-maintained catalog never exercises the parser, so a folder converting to generation surfaces these on its first regen rather than as it grew.
 
 ## Format reference
 

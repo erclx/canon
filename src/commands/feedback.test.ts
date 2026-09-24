@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   REQUIRED_FIELDS,
+  deriveDomainLabels,
   deriveSlug,
   deriveTitle,
   missingField,
@@ -133,5 +134,65 @@ describe('deriveSlug', () => {
 
   it('should fall back to general when no Surface field is present', () => {
     expect(deriveSlug('no surface here')).toBe('general')
+  })
+})
+
+describe('deriveDomainLabels', () => {
+  it('should map a plugin skill surface to the skills label', () => {
+    expect(deriveDomainLabels(report())).toEqual(['skills'])
+  })
+
+  it('should map a surface naming two domains to both labels in table order', () => {
+    const body = report({ Surface: 'plugin skill and CLI, canon feedback' })
+
+    expect(deriveDomainLabels(body)).toEqual(['skills', 'cli'])
+  })
+
+  it('should map tooling and governance words together', () => {
+    const body = report({
+      Surface: 'tooling config and governance rules, base',
+    })
+
+    expect(deriveDomainLabels(body)).toEqual(['tooling', 'governance'])
+  })
+
+  it('should match the domain word in a near variant of the tooling type', () => {
+    const body = report({ Surface: 'tooling sync, base' })
+
+    expect(deriveDomainLabels(body)).toEqual(['tooling'])
+  })
+
+  it('should match the domain word in a near variant of the governance type', () => {
+    const body = report({ Surface: 'governance stack, core' })
+
+    expect(deriveDomainLabels(body)).toEqual(['governance'])
+  })
+
+  it('should return a label once when two words map to it', () => {
+    const body = report({ Surface: 'seed, tooling/claude/seeds/CLAUDE.md' })
+
+    expect(deriveDomainLabels(body)).toEqual(['tooling'])
+  })
+
+  it('should ignore domain words after the first comma', () => {
+    const body = report({ Surface: 'CLI, canon teach nav' })
+
+    expect(deriveDomainLabels(body)).toEqual(['cli'])
+  })
+
+  it('should map a snippet surface to the snippets label', () => {
+    const body = report({ Surface: 'snippet, review' })
+
+    expect(deriveDomainLabels(body)).toEqual(['snippets'])
+  })
+
+  it('should return no labels for a surface type the table does not name', () => {
+    const body = report({ Surface: 'standard, markdown.md' })
+
+    expect(deriveDomainLabels(body)).toEqual([])
+  })
+
+  it('should return no labels when no Surface field is present', () => {
+    expect(deriveDomainLabels('no surface here')).toEqual([])
   })
 })

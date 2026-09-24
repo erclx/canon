@@ -18,6 +18,7 @@ clack
 commander
 conftest
 contentful
+coproc
 coreutils
 coveragerc
 crxjs
@@ -63,6 +64,7 @@ licence
 listitem
 longtask
 lucide
+mapfile
 mermaid
 metacharacter
 metacharacters
@@ -110,6 +112,7 @@ pytest
 pytestmark
 qwen
 Qwik
+readarray
 readlink
 realpath
 rects

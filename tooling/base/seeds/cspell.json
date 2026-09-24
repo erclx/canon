@@ -16,5 +16,5 @@
     }
   ],
   "dictionaries": ["project-terms", "tech-stack"],
-  "ignorePaths": [".cspell/**", ".git/**"]
+  "ignorePaths": [".cspell/**", ".git/**", ".claude/rules/canon/**"]
 }

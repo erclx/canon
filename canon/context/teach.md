@@ -35,6 +35,8 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **The sidebar and everything else lay out as a flex row, which constrains where the page's bottom room can sit.** A flex item's sticky containing block is the flex container's content box, so bottom padding on `body` is space the sidebar can never travel into and it rides up by exactly that much near the foot of a short page. The room moves onto `.pane`, which is what it was spacing anyway, and that pane needs `box-sizing: border-box` beside its `min-height: 100vh` or the same padding scrolls every short page. Both reproduce only at a window tall enough for the page to be short, which reads as intermittent, and neither is visible in markup review.
 
+**`canon teach list` prints the `canon serve` line with the teach folder it read, rather than a literal `.canon/teach`.** `canon serve` resolves its directory against the cwd while the list verb reads the main worktree root, so the literal serves an absent folder from a linked worktree. The folder prints relative to the cwd when it sits under it and absolute otherwise, since a `../` path climbing out of a worktree reads as a mistake. The static `--help` footer keeps the literal and points at `list <topic>` for the exact line, and the JSON record carries no serve field.
+
 **A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
 ## Departures from the nav-04 prototype

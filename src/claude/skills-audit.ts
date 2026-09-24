@@ -1,10 +1,6 @@
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import {
-  type Frontmatter,
-  parseFrontmatter,
-  readField,
-} from '@/indexes/frontmatter'
+import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
@@ -149,7 +145,7 @@ async function readSkill(
       : Promise.resolve(undefined),
   ])
 
-  const fields = readFields(body)
+  const fields = parseFrontmatter(body)
 
   return {
     rel: join(rel, folder),
@@ -159,19 +155,6 @@ async function readSkill(
     description: declared(readField(fields, 'description')),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
-  }
-}
-
-/**
- * Returns undefined rather than throwing on unparseable YAML, so one malformed
- * body reports as missing its required fields instead of ending the audit
- * before it reaches the rest of the corpus.
- */
-function readFields(body: string): Frontmatter | undefined {
-  try {
-    return parseFrontmatter(body)
-  } catch {
-    return undefined
   }
 }
 

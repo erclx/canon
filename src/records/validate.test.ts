@@ -939,6 +939,25 @@ describe('validateRecords', () => {
     })
   })
 
+  it('should report an intake item whose frontmatter will not parse', async () => {
+    await seedFolder('intake', 'overview', {
+      '00-overview.md': frontmatter(
+        'title: Dump\ndescription: One line\ndate: 2026-08-04',
+      ),
+      '05-groundwork.md': frontmatter(
+        'title: Groundwork\ndescription: Demo: a colon',
+      ),
+    })
+    const outcome = await validateRecords(ROOT, 'intake')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings[0]).toMatchObject({
+      kind: 'frontmatter-incomplete',
+      record: 'overview',
+    })
+  })
+
   it('should report a malformed item inside an intake cluster', async () => {
     await seedFolder('intake', 'overview', {
       '00-overview.md': frontmatter(

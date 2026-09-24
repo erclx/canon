@@ -11,12 +11,21 @@ export interface Frontmatter {
  * `raw` keeps the delimiters so an index can be rewritten with its own
  * frontmatter untouched, including comments and key order that a parse and
  * re-emit would lose.
+ *
+ * A block that will not parse reads as absent rather than throwing, so one
+ * malformed file reports through the path a caller already takes for a
+ * missing block instead of ending the caller's whole run.
  */
 export function parseFrontmatter(source: string): Frontmatter | undefined {
   const match = source.match(FRONTMATTER)
   if (!match) return undefined
 
-  const parsed = Bun.YAML.parse(match[1])
+  let parsed: unknown
+  try {
+    parsed = Bun.YAML.parse(match[1])
+  } catch {
+    return undefined
+  }
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     return undefined
   }
