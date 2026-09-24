@@ -14,19 +14,33 @@ name and a stack exposing a different set is covered without an edit here.
 
 ## Guards
 
-- If `package.json` does not exist at the project root, stop: `❌ No package.json found. Cannot verify.`
-- If `node_modules/` does not exist, run `bun install` first, then proceed.
+A monorepo syncs each language root into its own subfolder, so the project root
+is one folder to verify among several rather than the only one. Collect the
+folders first:
+
+```bash
+canon targets list --sweep <root> --json
+```
+
+- The root is a folder to verify when it carries a `package.json`.
+- Each path in the record's `targets` that sits under the root and carries its own `package.json` is a folder to verify.
+- A path under the root with no `package.json` is not verified. Name it as skipped with its fix, `run 'bun init' in <path>, then sync the stack again`, and carry on with the rest.
+- If neither the root nor any stamped subfolder carries a `package.json`, stop: `❌ No package.json at the root or in any synced subfolder. Cannot verify.`
+- In each folder to verify, if `node_modules/` does not exist, run `bun install` there first, then proceed.
 
 ## Step 1: read scripts
 
-Read `package.json` from the project root and extract the `scripts` block. Do
-not hardcode script names. Different stacks expose different scripts.
+Read `package.json` from each folder and extract its `scripts` block. Do not
+hardcode script names. Different stacks expose different scripts, and a
+subfolder synced with `--skip base` declares none of the scripts the root owns.
 
 ## Step 2: run the chain
 
-Run the scripts for the requested depth in order. Stop on the first failure and
-surface the error. Skip any script not present in `package.json`. Do not invent
-a fallback command. Run each as `bun run <script>` from the project root.
+Run the chain once per folder, root first. In each, run the scripts for the
+requested depth in order, stop that folder on its first failure, and surface the
+error. Skip any script not present in that folder's `package.json`. Do not
+invent a fallback command. Run each as `bun run <script>` from the folder it was
+read from.
 
 ### Default depth
 
@@ -79,15 +93,17 @@ port to poll across stacks, so port-probing is out of reach here.
 
 ## Step 3: report
 
-For each script run, report one of:
+Report per folder, under a heading naming its path relative to the root, and
+list each skipped folder with its `bun init` fix. For each script run, report
+one of:
 
 - `✅ <script>`
 - `❌ <script>` followed by the failing output (last 40 lines) or, for a server script, the reason judged (process died, or a fatal string in its output)
 
 End with a summary line naming the depth that ran:
 
-- On pass: `✅ Scaffold verified at <depth> (<n> scripts passed).`
-- On fail: `❌ Scaffold failed at <script>. Fix the error and re-run the verify phase.`
+- On pass: `✅ Scaffold verified at <depth> (<n> scripts passed across <m> folders).`
+- On fail: `❌ Scaffold failed at <script> in <folder>. Fix the error and re-run the verify phase.`
 
 ## Out of scope
 
