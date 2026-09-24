@@ -5,7 +5,7 @@ description: A workspace reference page rendered from its markdown, with the sha
 
 # Teach reference
 
-One page per reference page, at `<workspace>/reference/<slug>.html`, beside the `<slug>.md` it is rendered from. `renderReferencePage` in `src/teach/nav.ts:1173-1246` rewrites it wholesale on every `canon teach nav` run: it drops the frontmatter, renders the body through `Bun.markdown.html` with raw HTML escaped, and wraps it in `<main class="ref">`. Source: `examples/teach/00-fixture/reference/element-table.html`, regenerated from `element-table.md` for this plan.
+One page per reference page, at `<workspace>/reference/<slug>.html`, beside the `<slug>.md` it is rendered from. `renderReferencePage` in `src/teach/nav.ts:1177-1250` rewrites it wholesale on every `canon teach nav` run: it drops the frontmatter, renders the body through `Bun.markdown.html` with raw HTML escaped, and wraps it in `<main class="ref">`. Source: `examples/teach/00-fixture/reference/element-table.html`, regenerated from `element-table.md` for this plan.
 
 ## Regions
 
@@ -22,11 +22,11 @@ One page per reference page, at `<workspace>/reference/<slug>.html`, beside the 
 ## Copy
 
 - Breadcrumb: "Workspaces", the workspace title, then the page's frontmatter `title` as plain text, falling back to the filename in sentence case. The document `<title>` reads the same value.
-- Body: cited at the workspace's `reference/<slug>.md`, not duplicated here. The renderer adds no words of its own apart from an H1 carrying the frontmatter `title` when the body opens with none.
+- Body: cited at the workspace's `reference/<slug>.md`, not duplicated here. The renderer adds no words of its own apart from an H1 carrying the frontmatter `title` when the body holds none.
 
 ## Behavior
 
-- A relative link to another reference page's markdown opens that page's `.html` sibling. A link to any other markdown file, such as `../GLOSSARY.md`, stays as written and opens as plain text.
+- A relative link to another reference page's markdown opens that page's `.html` sibling, and one to the workspace glossary opens the glossary on the contents page. A link to any other markdown file, such as `../RESOURCES.md`, stays as written and opens as plain text.
 - Raw HTML in the markdown, such as a `<kbd>` or a `<details>`, shows as escaped text rather than rendering.
 - An edit to the markdown reaches this page only on the next `canon teach nav` run, and a hand edit here is lost on that run with nothing reporting it.
 

@@ -5,7 +5,7 @@ description: A learning workspace's own index page, listing its success criteria
 
 # Teach contents
 
-One page per workspace, at `<workspace>/index.html`. `renderContentsPage` in `src/teach/nav.ts:1024-1124` rewrites it wholesale on every `canon teach nav` run, from what the workspace folder holds on disk: `MISSION.md`, the lessons already written, its reference pages, and `GLOSSARY.md`. Source: `.canon/teach/03-fde-system-design/index.html`, regenerated for this plan against `5cc60c86`.
+One page per workspace, at `<workspace>/index.html`. `renderContentsPage` in `src/teach/nav.ts:1025-1125` rewrites it wholesale on every `canon teach nav` run, from what the workspace folder holds on disk: `MISSION.md`, the lessons already written, its reference pages, and `GLOSSARY.md`. Source: `.canon/teach/03-fde-system-design/index.html`, regenerated for this plan against `5cc60c86`.
 
 The sidebar here lists this workspace's lessons and marks none of them, since no lesson is being read. It arrives shut, because the `Lessons` section below lists the same set with a lede against each.
 

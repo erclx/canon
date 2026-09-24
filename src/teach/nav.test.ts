@@ -1372,7 +1372,7 @@ description: Every token the lessons use, in one table
   it('should rewrite a link to a sibling reference page and leave other markdown links alone', async () => {
     await seedReference(
       'summary.md',
-      `${SUMMARY}\nSee [flags](flags.md#case), [again](./flags.md), [missing](gone.md), and the [glossary](../GLOSSARY.md).\n`,
+      `${SUMMARY}\nSee [flags](flags.md#case), [again](./flags.md), [missing](gone.md), and the [resources](../RESOURCES.md).\n`,
     )
     await writeFile(referencePath('flags.md'), '# Flags\n')
 
@@ -1382,7 +1382,21 @@ description: Every token the lessons use, in one table
     expect(main).toContain('href="flags.html#case"')
     expect(main).toContain('href="./flags.html"')
     expect(main).toContain('href="gone.md"')
-    expect(main).toContain('href="../GLOSSARY.md"')
+    expect(main).toContain('href="../RESOURCES.md"')
+  })
+
+  it('should point a link to the workspace glossary at the glossary on the contents page', async () => {
+    await seedReference(
+      'summary.md',
+      `${SUMMARY}\nSee the [glossary](../GLOSSARY.md) and its [callout entry](../GLOSSARY.md#callout).\n`,
+    )
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain()
+    expect(main).toContain('href="../index.html#gloss">glossary</a>')
+    expect(main).toContain('href="../index.html#gloss">callout entry</a>')
+    expect(main).not.toContain('GLOSSARY.md')
   })
 
   it('should supply an h1 from the frontmatter title when the body carries none', async () => {

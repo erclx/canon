@@ -15,6 +15,7 @@ import {
   listWorkspaces,
   readWorkspace,
   TEACH_ASSETS,
+  TEACH_GLOSSARY,
   TEACH_LESSONS,
   TEACH_MISSION,
   TEACH_REFERENCE,
@@ -1143,10 +1144,11 @@ function referenceFallbackTitle(file: string): string {
 }
 
 /**
- * Only a relative href landing on another reference page's markdown is
- * retargeted, since that target is known to get a rendered sibling. A link to
- * the glossary or the resources page has none, so a blanket suffix swap would
- * break it.
+ * A relative href landing on another reference page's markdown is retargeted
+ * to its rendered sibling, and one landing on the workspace glossary goes to
+ * the glossary the contents page renders under `#gloss`, dropping any fragment
+ * since the entries there carry no per-term anchor. The resources page has no
+ * rendered form, so a blanket suffix swap would break a link to it.
  */
 function retargetReferenceLinks(
   html: string,
@@ -1156,6 +1158,8 @@ function retargetReferenceLinks(
     /href="([^"#?:]+)\.md([#?][^"]*)?"/g,
     (match, stem: string, suffix: string | undefined) => {
       const target = posix.normalize(posix.join(TEACH_REFERENCE, `${stem}.md`))
+      if (target === TEACH_GLOSSARY) return 'href="../index.html#gloss"'
+
       const [folder, file, ...rest] = target.split('/')
       if (folder !== TEACH_REFERENCE || rest.length > 0) return match
       if (!referenceFiles.has(file)) return match
