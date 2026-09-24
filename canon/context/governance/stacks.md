@@ -7,15 +7,16 @@ description: How a stack resolves its rule set, why an entry may name a whole fo
 
 Each stack declares an optional `extends` chain and a `rules` list. An entry names a rule or a whole rule folder. The chain resolves recursively, so `react` resolves through `node` to `base` and the full deduplicated set installs.
 
-| Stack            | Extends | Rules                                                                                                                                                                                                                                       |
-| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `base`           | -       | the `core/` and `claude/` folders whole, which is every core rule plus every claude authoring rule, plus 120-bash                                                                                                                           |
-| `node`           | base    | 100-typescript                                                                                                                                                                                                                              |
-| `node-server`    | node    | 360-security-server, 370-database                                                                                                                                                                                                           |
-| `react`          | node    | 200-react, 230-nextjs, 250-tailwind, 300-testing-ts, 305-e2e-reliability, 306-test-scope, 310-zod, 350-security-web, 400-ui, 410-a11y, 420-forms, 430-ux-completeness, 440-surface-capture, 450-link-behavior, 460-design-taste, 470-motion |
-| `astro`          | node    | 210-astro, 300-testing-ts, 305-e2e-reliability, 306-test-scope, 350-security-web, 400-ui, 410-a11y, 420-forms, 430-ux-completeness, 440-surface-capture, 450-link-behavior, 460-design-taste, 470-motion                                    |
-| `python`         | base    | 110-python, 330-testing-py, 340-pydantic, 360-security-server, 370-database                                                                                                                                                                 |
-| `python-fastapi` | python  | 220-fastapi                                                                                                                                                                                                                                 |
+| Stack            | Extends | Rules                                                                                                                                                                                                                                                 |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `base`           | -       | the `core/` and `claude/` folders whole, which is every core rule plus every claude authoring rule, plus 120-bash                                                                                                                                     |
+| `node`           | base    | 100-typescript                                                                                                                                                                                                                                        |
+| `node-server`    | node    | 360-security-server, 370-database                                                                                                                                                                                                                     |
+| `react`          | node    | 200-react, 250-tailwind, 300-testing-ts, 305-e2e-reliability, 306-test-scope, 310-zod, 350-security-web, 400-ui, 410-a11y, 420-forms, 430-ux-completeness, 440-surface-capture, 450-link-behavior, 460-design-taste, 465-interface-casing, 470-motion |
+| `nextjs`         | react   | 230-nextjs                                                                                                                                                                                                                                            |
+| `astro`          | node    | 210-astro, 300-testing-ts, 305-e2e-reliability, 306-test-scope, 350-security-web, 400-ui, 410-a11y, 420-forms, 430-ux-completeness, 440-surface-capture, 450-link-behavior, 460-design-taste, 465-interface-casing, 470-motion                        |
+| `python`         | base    | 110-python, 330-testing-py, 340-pydantic, 360-security-server, 370-database                                                                                                                                                                           |
+| `python-fastapi` | python  | 220-fastapi                                                                                                                                                                                                                                           |
 
 `360-security-server` and `370-database` glob Python alongside TypeScript and JavaScript, so both reach a Python backend and a Node one and the stack naming them is what decides which target sees them. `350-security-web` globs component and markup files alone and matches nothing on a request handler or a query. `python` and `node-server` therefore carry the server pair, while `node`, `react`, and `astro` carry neither rule.
 
@@ -43,6 +44,12 @@ The stack carries those two rules and nothing else. `300-testing-ts` and `310-zo
 
 Nothing detects the stack. `target-setup` picks by matching a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `node-server` is therefore named deliberately until that skill carries a rule for the backend case, which needs a decision about what evidence marks a project as one.
 
+### A meta-framework takes a child stack rather than a rule in its parent
+
+`230-nextjs` globs `**/*.ts` and `**/*.tsx`, the same files every React target holds, so its `paths:` scope cannot keep it off a Vite app. Stack membership is the only scope such a rule has, and a `react` listing would load App Router instructions on every source file of a Vite React target. `nextjs` carries it instead, extending `react` the way `python-fastapi` extends `python` and adding that one rule.
+
+Moving a rule between stacks changes what a new install writes and nothing on a target that already holds the file. Sync matches an installed rule to its source by basename across `governance/rules/`, whichever stack names it, so a held `230-nextjs.md` reads as matching and keeps receiving updates. A target stamped `react` that deletes it gets no `missing` report back, since the `react` chain does not list the rule. A Next.js target stamped `react` reports a rule added to `nextjs` as missing only after it runs `canon gov install nextjs`, which rewrites the stamp's chain. No verb removes the file, so each kind of target learns what to do from the release note alone.
+
 ### The extras flag layers rather than defines
 
 `--add` takes rule names alone and does not expand a folder. The flag layers onto a resolved stack rather than defining one, and a folder there has no case behind it yet. An unknown name warns rather than aborting, so `--add core` is loud rather than silent.
@@ -65,7 +72,7 @@ The `Unreferenced rules` stage in `src/gate/stages.ts` reports rules no stack re
 
 Create a new `.toml` file in `governance/stacks/`. Set `extends` to the parent stack name or leave it empty. List rule names without `.md` in the `rules` array, or a folder name under `governance/rules/` to take that folder whole. Nothing compiles the stack, so the file is live to `canon gov install` as soon as it is written.
 
-`bun run check` still has something to say about it. Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html` and the Hero stage fails until `canon capture assets/captures/hero.html --selector .window --out assets/evidence` re-renders the image. The capture writes `assets/evidence/hero.stamp` alongside, and the `captureStamps` measure in `src/gate/measures.ts` compares the two digests it holds against the markup and the image on disk.
+Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html`. The branch adding the stack owes no render. The Hero stage runs `regen-hero.sh --check`, which fills every template into a temporary folder and discards it, so a changed count does not fail it. `refresh-capture-frames.yml` regenerates the frames from `main` after the merge and carries the new count in its own pull request. Its path filter does not list `governance/stacks/`, so a merge touching only a stack file starts no refresh, and the count waits for the next merge that does.
 
 ```toml
 extends = "node"

@@ -62,7 +62,7 @@ EOF
     log_step "Scenario ready: setup skill on a Vite + React project"
     log_info "Context: real bunx create-vite output (index.html, public/, src/App.tsx, src/index.css)"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
+    log_info "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/ with 200-react.md and no 230-nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "astro")
     log_step "Running bun create astro"

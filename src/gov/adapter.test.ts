@@ -13,7 +13,7 @@ import {
   indexSourceRules,
   rulesSourceDir,
 } from '@/gov/adapter'
-import type { InstalledFile } from '@/sync/engine'
+import { type InstalledFile, planSync } from '@/sync/engine'
 import { writeChainStamp } from '@/sync/stamp'
 
 let ROOT: string
@@ -186,6 +186,54 @@ describe('createGovAdapter', () => {
     })
 
     it('should report nothing when the target carries no recorded chain', () => {
+      const adapter = createGovAdapter(TOOLKIT)
+
+      expect(adapter.collectMissing?.(TARGET)).toEqual([])
+    })
+  })
+
+  describe('a rule its recorded stack stopped listing', () => {
+    beforeEach(async () => {
+      writeFixture(
+        join(TOOLKIT, 'governance/rules/framework/200-react.md'),
+        '# 200-react\n',
+      )
+      writeFixture(
+        join(TOOLKIT, 'governance/rules/framework/230-nextjs.md'),
+        '# 230-nextjs\n',
+      )
+      writeFixture(
+        join(TOOLKIT, 'governance/stacks/react.toml'),
+        'extends = ""\nrules = ["200-react"]\n',
+      )
+      writeFixture(
+        join(TARGET, '.claude/rules/canon/framework/200-react.md'),
+        '# 200-react\n',
+      )
+      await writeChainStamp(
+        TARGET,
+        { domain: 'governance', toolkitRoot: TOOLKIT },
+        ['react'],
+        new Date('2026-09-24T00:00:00.000Z'),
+      )
+    })
+
+    it('should read the installed rule as matching and queue no delete', () => {
+      writeFixture(
+        join(TARGET, '.claude/rules/canon/framework/230-nextjs.md'),
+        '# 230-nextjs\n',
+      )
+
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+      expect(plan.entries).toContainEqual({
+        state: 'matching',
+        rel: join('.claude', 'rules', 'canon', 'framework', '230-nextjs.md'),
+      })
+      expect(plan.changes).toEqual([])
+    })
+
+    it('should not report the rule missing once the target deletes it', () => {
       const adapter = createGovAdapter(TOOLKIT)
 
       expect(adapter.collectMissing?.(TARGET)).toEqual([])
