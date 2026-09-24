@@ -49,19 +49,18 @@ paths=$(tail -n +"$line_start" "$transcript_path" | jq -r '
 
 # Two written paths can share a basename, and a bare basename match would then
 # read one mention as covering both. Counting first is what lets a collision
-# fall back to the full path, which the ordinary case never needs.
-declare -A base_count
-while IFS= read -r path; do
+# fall back to the full path, which the ordinary case never needs. The count
+# avoids an associative array, since macOS ships bash 3.2.
+colliding=$(while IFS= read -r path; do
   [ -n "$path" ] || continue
-  base=$(basename "$path")
-  base_count["$base"]=$((${base_count["$base"]:-0} + 1))
-done <<<"$paths"
+  printf '%s\n' "${path##*/}"
+done <<<"$paths" | sort | uniq -d)
 
 unmentioned=()
 while IFS= read -r path; do
   [ -n "$path" ] || continue
-  base=$(basename "$path")
-  if [ "${base_count[$base]}" -gt 1 ]; then
+  base=${path##*/}
+  if [ -n "$colliding" ] && printf '%s\n' "$colliding" | grep -Fxq -- "$base"; then
     needle="$path"
   else
     needle="$base"
