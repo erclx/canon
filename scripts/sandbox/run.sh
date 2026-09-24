@@ -121,8 +121,8 @@ ESCAPE_SCRATCH_DIRS=(.canon/plans .canon/review .canon/memory .canon/tasks)
 # It bounds a legitimate write, not the run. Nothing here stops a session from
 # writing outside these eight destinations, and nothing separates this run's
 # writes from a sibling's within them, so a scoped pass says the declared
-# destinations held and nothing more. Read `canon/context/sandbox/overview.md`
-# and `canon/context/sandbox/coverage.md` before writing a claim past that.
+# destinations held and nothing more. Read `canon/context/sandbox/isolation.md`
+# and `canon/context/sandbox/coverage/arms.md` before writing a claim past that.
 
 # Set whenever any watched root holds at least one of the four directories,
 # across every call this run makes. A root with none of them contributes no
@@ -356,7 +356,7 @@ main() {
 
   # Taken after provisioning, so a scenario that stages a live session record of
   # its own is already in the before manifest rather than reported as a dispatch
-  # this run made. `canon/context/sandbox/overview.md` carries why such a
+  # this run made. `canon/context/sandbox/isolation.md` carries why such a
   # scenario writes to the real registry at all.
   local sessions_before sessions_after session_records session_concurrent
   sessions_before="$(mktemp)"

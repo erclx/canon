@@ -61,7 +61,7 @@ A shipped body names one path for a standard, and the command route is what near
 
 The resolve has exactly one caller, `src/commands/standards.ts`, and no shipped body invokes the verb directly. Its second root is the package corpus, which is the route a machine reader takes and the reason a command reading a standard answers in any target. `<canon>` is how a resolve from that root spells itself, since the other label is project-relative and a report could join it to a root.
 
-`infra:standards read` is the sandbox arm that covers it, and `canon/context/sandbox/coverage.md` records what the arm reaches and what it leaves to the plugin-root route.
+`infra:standards read` is the sandbox arm that covers it, and `canon/context/sandbox/coverage/arms.md` records what the arm reaches and what it leaves to the plugin-root route.
 
 ## Gotchas
 
