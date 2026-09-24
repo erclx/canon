@@ -73,5 +73,5 @@ Check every test written this session against each line. A test that fails one i
 - The red, green, refactor procedure and its order: `test-first`, which loads this skill at its first step
 - Reproducing a failure with no known cause: `systematic-debugging`
 - Test structure floors such as arrange, act, assert, one behavior per test, isolation, and no snapshots: `010-testing`
-- Runner, file suffix, placement, and query conventions per language: `300-testing-ts` and `330-testing-py`
+- Runner, file suffix, placement, and query conventions per language: `300-testing-ts`, `330-testing-py`, `335-testing-go`, and `336-testing-php`
 - Settle, guard, and run-scope rules inside an end to end file: `305-e2e-reliability` and `306-test-scope`
