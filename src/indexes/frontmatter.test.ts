@@ -20,6 +20,11 @@ describe('parseFrontmatter', () => {
     expect(parseFrontmatter(buildSource('- one\n- two'))).toBeUndefined()
   })
 
+  it('should return undefined rather than throw when the block will not parse', () => {
+    const source = buildSource('title: Demo\ndescription: Demo: a colon')
+    expect(parseFrontmatter(source)).toBeUndefined()
+  })
+
   it('should preserve key order and comments in raw', () => {
     const source = buildSource('# note\nb: second\na: first')
     expect(parseFrontmatter(source)?.raw).toContain(

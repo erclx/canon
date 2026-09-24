@@ -579,8 +579,8 @@ function missionText(
 
   return [
     '---',
-    `title: ${title}`,
-    `description: ${request.subject}`,
+    `title: ${yamlValue(title)}`,
+    `description: ${yamlValue(request.subject)}`,
     `date: ${date}`,
     '---',
     '',
@@ -606,8 +606,8 @@ function missionText(
 function resourcesText(title: string): string {
   return [
     '---',
-    `title: Sources for ${title}`,
-    `description: Sources read for ${title}, and leads found but not opened`,
+    `title: ${yamlValue(`Sources for ${title}`)}`,
+    `description: ${yamlValue(`Sources read for ${title}, and leads found but not opened`)}`,
     '---',
     '',
     `# Sources for ${title}`,
@@ -628,8 +628,8 @@ function resourcesText(title: string): string {
 function glossaryText(title: string): string {
   return [
     '---',
-    `title: Glossary for ${title}`,
-    `description: Terms ${title} defines, one entry each`,
+    `title: ${yamlValue(`Glossary for ${title}`)}`,
+    `description: ${yamlValue(`Terms ${title} defines, one entry each`)}`,
     '---',
     '',
     `# Glossary for ${title}`,
@@ -639,6 +639,14 @@ function glossaryText(title: string): string {
     PLACEHOLDER,
     '',
   ].join('\n')
+}
+
+/**
+ * Serializes a frontmatter value, quoting only what YAML would otherwise read
+ * as something other than the string, so a plain title stays byte-identical.
+ */
+function yamlValue(value: string): string {
+  return Bun.YAML.stringify(value)
 }
 
 /** Today as `YYYY-MM-DD`, which is the one field the mission dates. */
