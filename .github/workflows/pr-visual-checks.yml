@@ -159,8 +159,8 @@ jobs:
       # Reporting rather than committing keeps that signal without the commit.
       # Refreshing the baseline on main is the other half of the fix, and
       # refresh-capture-frames.yml owns it: a post-merge job that opens a pull
-      # request, since a commit reaching the trunk with no pull request and no
-      # reviewer was ruled out. This step keeps reporting whether the captured
+      # request, since a commit reaching the trunk with no pull request was
+      # ruled out. This step keeps reporting whether the captured
       # frames match the baseline, which stays true on a pull request.
       - name: Report whether the baseline moved
         run: |
