@@ -89,6 +89,30 @@ export function deriveSlug(body: string): string {
   return slug || SLUG_FALLBACK
 }
 
+/**
+ * Each label must exist on the toolkit repository, because `gh issue create`
+ * refuses the whole issue on an unknown label rather than dropping it.
+ */
+const DOMAIN_LABELS: readonly { pattern: RegExp; label: string }[] = [
+  { pattern: /\bskills?\b/, label: 'skills' },
+  { pattern: /\b(?:cli)s?\b/, label: 'cli' },
+  { pattern: /\b(?:tooling|seeds?)\b/, label: 'tooling' },
+  { pattern: /\b(?:governance)s?\b/, label: 'governance' },
+  { pattern: /\bsnippets?\b/, label: 'snippets' },
+]
+
+/**
+ * Reads only the surface type, the text before the first comma, so a path or
+ * name after it never adds a label.
+ */
+export function deriveDomainLabels(body: string): string[] {
+  const type = (surfaceField(body) ?? '').split(',')[0]?.toLowerCase() ?? ''
+  const labels = DOMAIN_LABELS.filter(({ pattern }) => pattern.test(type)).map(
+    ({ label }) => label,
+  )
+  return [...new Set(labels)]
+}
+
 export function deriveTitle(body: string): string {
   const surface = surfaceField(body)
   const title = surface ? `feedback: ${surface}` : 'toolkit feedback'
