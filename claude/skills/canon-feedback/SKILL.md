@@ -5,7 +5,7 @@ description: Format a report about something broken, missing, or off in canon an
 
 # Canon feedback
 
-Format a `## Toolkit feedback` block from the current session, then open it as a GitHub issue labeled `feedback` on the toolkit repo. `canon-feedback-triage` reads that queue.
+Format a `## Toolkit feedback` block from the current session, then open it as a GitHub issue on the toolkit repo, labeled `feedback` plus the domain label its surface type names. `canon-feedback-triage` reads that queue.
 
 ## Guards
 
@@ -18,7 +18,7 @@ Format a `## Toolkit feedback` block from the current session, then open it as a
 From the conversation so far, identify:
 
 - Target project name or kind, never its full path. The path names a folder on one machine and says nothing a triage session can route on, where the project's own name does. Name a private project by its kind instead, such as `a Next.js app`, since the report leaves the machine.
-- Toolkit surface and its type (plugin skill, snippet, tooling config, governance rule, seed, or CLI)
+- Toolkit surface and its type (plugin skill, snippet, tooling config, governance rule, seed, or CLI). The type leads the `### Surface` field, ahead of the first comma, because the CLI picks the issue's domain labels from that text alone.
 - Specific toolkit file or name when the session cites one
 - Observed behavior
 - Expected behavior, or `unclear`
@@ -81,7 +81,7 @@ cat <<'EOF' | canon feedback --github
 EOF
 ```
 
-The CLI opens a GitHub issue labeled `feedback` on the toolkit repo and prints the issue URL, which this skill reports back on its own line. It needs `gh` authenticated. `git-issue` is not the route, since it files on the current repository and this report belongs on the toolkit's.
+The CLI opens a GitHub issue on the toolkit repo, labeled `feedback` and each domain label the surface type names, such as `skills` for a plugin skill, and prints the issue URL, which this skill reports back on its own line. It needs `gh` authenticated. `git-issue` is not the route, since it files on the current repository and this report belongs on the toolkit's.
 
 From a toolkit checkout, a call that produces no URL falls back to `.canon/feedback/feedback-<slug>-<ts>.md` and prints the reason on stderr. Say so in the same reply, naming the file and the reason, since a silent fallback leaves the report where nothing reads it. A target project has no such folder, so a failed call there prints the block in chat.
 
