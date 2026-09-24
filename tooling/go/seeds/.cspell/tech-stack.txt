@@ -1,0 +1,16 @@
+bodyclose
+Errorf
+errorlint
+Fatalf
+gofmt
+goimports
+golangci
+goroutine
+goroutines
+gosec
+httptest
+noctx
+nolint
+rowserrcheck
+sqlclosecheck
+unconvert
