@@ -38,7 +38,7 @@ Read these from the project root in parallel, skipping any that do not exist:
 
 - **Stack:** pick the closest governance stack by matching detected runtime or framework against stack names in the catalog. If nothing matches, fall back to `base` and carry the fallback into the preview.
 - **Tooling stack:** pick the closest tooling stack from `canon tooling list --json` (e.g. `vite-react`, `astro`, `nextjs`). Distinct from the governance stack. Fall back to `base` if no framework match, and carry that fallback into the preview too.
-- **Next.js:** map `next` in `package.json` dependencies, or a root `next.config.ts`/`.js`/`.mjs` file, to the `nextjs` tooling stack. The dependency name does not match the stack name by itself.
+- **Next.js:** map `next` in `package.json` dependencies, or a root `next.config.ts`/`.js`/`.mjs` file, to the `nextjs` governance stack and the `nextjs` tooling stack. The dependency name does not match either stack name by itself.
 - **Extras:** identify technologies not already covered by the picked stack. For each, find a rule whose `description` or `paths` points at that technology and pass it via `--add`. Dedupe against the stack's own rules. Do not add a rule the stack already pulls in.
 - **Skip (`--skip`):** `wiki` installs by default. Add `--skip wiki` only when the user explicitly wants it left out.
 
