@@ -1,0 +1,13 @@
+[stack]
+name = "go"
+extends = "base"
+runtime = "go"
+scaffold = "mkdir {{name}} && cd {{name}} && go mod init example.com/{{name}}"
+
+[scripts]
+"lint" = "golangci-lint run ./..."
+"lint:fix" = "golangci-lint fmt ./... && golangci-lint run --fix ./..."
+"typecheck" = "go vet ./..."
+"test" = "go test ./..."
+"test:run" = "go test -v ./..."
+"build" = "go build ./..."

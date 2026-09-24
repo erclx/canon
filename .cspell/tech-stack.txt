@@ -43,12 +43,14 @@ faststart
 fatalf
 firecrawl
 flowchart
+friendsofphp
 fromdateiso
 getline
 gitattributes
 gitdir
 gitlink
 glama
+golangci
 gsub
 heredoc
 httptest
@@ -103,6 +105,8 @@ pathspec
 pathspecs
 pdftoppm
 pgid
+phpstan
+phpunit
 pip
 pnpm
 pptx
