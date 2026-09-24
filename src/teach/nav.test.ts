@@ -1180,3 +1180,229 @@ describe('course sidebar', () => {
     expect(head).not.toContain('rgb(224,114,75)')
   })
 })
+
+describe('renderReferencePage', () => {
+  const WORKSPACE = '01-regular-expressions'
+
+  const SUMMARY = `---
+title: Pattern summary
+description: Every token the lessons use, in one table
+---
+
+# Pattern summary
+
+## Anchors
+
+| Token | Matches |
+| ----- | ------- |
+| \`^\` | The start of the subject |
+| \`$\` | The end of the subject |
+`
+
+  function referencePath(file: string): string {
+    return join(workspaceDir(WORKSPACE), 'reference', file)
+  }
+
+  async function seedReference(file: string, text: string): Promise<string> {
+    await openWorkspace(ROOT, REQUEST)
+    mkdirSync(join(workspaceDir(WORKSPACE), 'reference'), { recursive: true })
+    const path = referencePath(file)
+    await writeFile(path, text)
+    return path
+  }
+
+  async function renderedMain(file = 'summary.html'): Promise<string> {
+    const page = await readFile(referencePath(file), 'utf8')
+    const match = /<main class="ref">([\s\S]*?)<\/main>/.exec(page)
+    return match ? match[1] : ''
+  }
+
+  it('should render a sibling html page with the body inside main.ref', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    expect(await renderedMain()).toContain('<h2>Anchors</h2>')
+  })
+
+  it('should drop the frontmatter from the rendered page', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain()
+    expect(main).not.toContain('description:')
+    expect(main).not.toContain('---')
+  })
+
+  it('should render a pipe table as a table element', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain()
+    expect(main).toContain('<table>')
+    expect(main).toContain('<td>The start of the subject</td>')
+  })
+
+  it('should leave the markdown source byte-identical', async () => {
+    const path = await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    expect(await readFile(path, 'utf8')).toBe(SUMMARY)
+  })
+
+  it('should link the rendered page from the contents page rather than the markdown', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    const contents = await readFile(
+      join(workspaceDir(WORKSPACE), 'index.html'),
+      'utf8',
+    )
+    expect(contents).toContain('href="reference/summary.html"')
+    expect(contents).not.toContain('href="reference/summary.md"')
+  })
+
+  it('should skip reference pages and link the markdown on a Bun carrying no markdown renderer', async () => {
+    await seedReference('summary.md', SUMMARY)
+    const markdown = Bun.markdown
+    Reflect.set(Bun, 'markdown', undefined)
+
+    let outcome: Awaited<ReturnType<typeof generateNav>>
+    try {
+      outcome = await generateNav(ROOT)
+    } finally {
+      Reflect.set(Bun, 'markdown', markdown)
+    }
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      reference: 0,
+      skipped: [
+        {
+          file: expect.stringContaining(
+            join(WORKSPACE, 'reference', 'summary.md'),
+          ),
+          missing: 'Bun.markdown',
+        },
+      ],
+    })
+    expect(existsSync(referencePath('summary.html'))).toBe(false)
+    const contents = await readFile(
+      join(workspaceDir(WORKSPACE), 'index.html'),
+      'utf8',
+    )
+    expect(contents).toContain('href="reference/summary.md"')
+  })
+
+  it('should count the rendered reference pages in the record', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    expect(await generateNav(ROOT)).toMatchObject({ ok: true, reference: 1 })
+  })
+
+  it('should link the workspace stylesheet and open the sidebar as a lesson does', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    const page = await readFile(referencePath('summary.html'), 'utf8')
+    expect(page).toContain(
+      '<link rel="stylesheet" href="../assets/course.css">',
+    )
+    expect(page).toContain('r.dataset.page="lesson"')
+    expect(page).toContain(
+      '<span class="crumb crumb-here">Pattern summary</span>',
+    )
+    expect(page).toContain(
+      '<a class="crumb" href="../index.html"><span class="crumb-t">Regular expressions</span></a>',
+    )
+  })
+
+  it('should escape raw html written inside the markdown', async () => {
+    await seedReference(
+      'summary.md',
+      `${SUMMARY}\n<script>alert(1)</script>\n\nPress <kbd>Enter</kbd>.\n`,
+    )
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain()
+    expect(main).not.toContain('<script>')
+    expect(main).toContain('&lt;kbd&gt;')
+  })
+
+  it('should remove a generated page whose markdown source is gone', async () => {
+    await seedReference('summary.md', SUMMARY)
+    await generateNav(ROOT)
+    rmSync(referencePath('summary.md'))
+
+    await generateNav(ROOT)
+
+    expect(existsSync(referencePath('summary.html'))).toBe(false)
+  })
+
+  it('should remove an orphaned generated page a formatter closed with a slash', async () => {
+    await seedReference('summary.md', SUMMARY)
+    await writeFile(
+      referencePath('renamed.html'),
+      '<head>\n    <meta name="generator" content="canon teach nav" />\n</head>\n',
+    )
+
+    await generateNav(ROOT)
+
+    expect(existsSync(referencePath('renamed.html'))).toBe(false)
+  })
+
+  it('should keep a hand-written html page that carries no generator marker', async () => {
+    const handWritten = '<!doctype html><p>Drawn by hand.</p>\n'
+    await seedReference('summary.md', SUMMARY)
+    await writeFile(referencePath('diagram.html'), handWritten)
+
+    await generateNav(ROOT)
+
+    expect(await readFile(referencePath('diagram.html'), 'utf8')).toBe(
+      handWritten,
+    )
+  })
+
+  it('should rewrite a link to a sibling reference page and leave other markdown links alone', async () => {
+    await seedReference(
+      'summary.md',
+      `${SUMMARY}\nSee [flags](flags.md#case), [again](./flags.md), [missing](gone.md), and the [glossary](../GLOSSARY.md).\n`,
+    )
+    await writeFile(referencePath('flags.md'), '# Flags\n')
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain()
+    expect(main).toContain('href="flags.html#case"')
+    expect(main).toContain('href="./flags.html"')
+    expect(main).toContain('href="gone.md"')
+    expect(main).toContain('href="../GLOSSARY.md"')
+  })
+
+  it('should supply an h1 from the frontmatter title when the body carries none', async () => {
+    await seedReference(
+      'summary.md',
+      SUMMARY.replace('# Pattern summary\n', ''),
+    )
+
+    await generateNav(ROOT)
+
+    expect((await renderedMain()).trimStart()).toMatch(
+      /^<h1>Pattern summary<\/h1>/,
+    )
+  })
+
+  it('should not add a second h1 when the body carries one', async () => {
+    await seedReference('summary.md', SUMMARY)
+
+    await generateNav(ROOT)
+
+    expect((await renderedMain()).match(/<h1>/g)).toHaveLength(1)
+  })
+})
