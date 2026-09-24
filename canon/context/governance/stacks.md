@@ -72,7 +72,7 @@ The `Unreferenced rules` stage in `src/gate/stages.ts` reports rules no stack re
 
 Create a new `.toml` file in `governance/stacks/`. Set `extends` to the parent stack name or leave it empty. List rule names without `.md` in the `rules` array, or a folder name under `governance/rules/` to take that folder whole. Nothing compiles the stack, so the file is live to `canon gov install` as soon as it is written.
 
-Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html`. The branch adding the stack owes no render. The Hero stage runs `regen-hero.sh --check`, which fills every template into a temporary folder and discards it, so a changed count does not fail it. `refresh-capture-frames.yml` regenerates the frames from `main` after the merge and carries the new count in its own pull request. Its path filter does not list `governance/stacks/`, so a merge touching only a stack file starts no refresh, and the count waits for the next merge that does.
+Governance stacks are one of the five catalogs `scripts/core/regen-hero.sh` counts, so a new file moves the count on `assets/captures/hero.html`. The branch adding the stack owes no render. The Hero stage runs `regen-hero.sh --check`, which fills every template into a temporary folder and discards it, so a changed count does not fail it. `refresh-capture-frames.yml` regenerates the frames from `main` after the merge and carries the new count in its own pull request. Its path filter lists `governance/stacks/**`, so a merge touching only a stack file starts a refresh of its own.
 
 ```toml
 extends = "node"

@@ -32,14 +32,21 @@ on:
       - 'web/**'
       - 'src/audits/**'
       - 'scripts/core/capture-home.sh'
+      # The version canon --version reads into the footer and nav of the home
+      # page, so a release merge moves the baseline.
+      - 'package.json'
+      # GOV_STACK_COUNT in regen-hero.sh and the stacks web/src/lib/session.ts
+      # reads, so a stack-only merge moves both renders.
+      - 'governance/stacks/**'
   workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
-# One refresh at a time, and a newer merge supersedes an older run, since every
-# run rebuilds from main HEAD and force-updates the same branch.
+# One refresh at a time, and a newer merge supersedes an older run. A run renders
+# from the commit that started it rather than main HEAD, so its push step moves
+# the frames onto main as fetched at push time before force-updating the branch.
 concurrency:
   group: refresh-capture-frames
   cancel-in-progress: true
@@ -109,6 +116,10 @@ jobs:
         run: bash scripts/core/capture-home.sh
 
       # Hooks off, since pre-push runs a check whose format step needs shfmt, which the runner lacks. verify.yml checks the pull request.
+      # The frames commit where they rendered, then carry across as whole files
+      # onto main fetched now, so a merge landing mid-run cannot leave the
+      # branch on an older base. The pull request resolves by number, since
+      # every merged refresh leaves a closed one on the same head.
       - name: Open or Update the Refresh Pull Request
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
@@ -120,11 +131,20 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B chore/refresh-capture-frames
           git add assets/captures assets/evidence
           git commit -m "chore(web): refresh capture frames"
+          rendered=$(git rev-parse HEAD)
+          git fetch --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          git checkout -B chore/refresh-capture-frames origin/main
+          git checkout "$rendered" -- assets/captures assets/evidence
+          if git diff --cached --quiet -- assets/captures assets/evidence; then
+            echo "Main already carries these frames, nothing to refresh."
+            exit 0
+          fi
+          git commit -m "chore(web): refresh capture frames"
           git push --force origin chore/refresh-capture-frames
-          if [ -z "$(gh pr list --head chore/refresh-capture-frames --state open --json number --jq '.[0].number')" ]; then
+          number=$(gh pr list --head chore/refresh-capture-frames --state open --json number --jq '.[0].number')
+          if [ -z "$number" ]; then
             gh pr create \
               --base main \
               --head chore/refresh-capture-frames \
@@ -133,5 +153,8 @@ jobs:
 
           - Regenerates the count and token bearing frames, their images, and their stamps from main.
           - Recaptures the home page baseline under assets/evidence/home.
-          - Merge by hand. Nothing in this workflow merges it."
+          - Merges itself by squash once its required check passes."
+            number=$(gh pr list --head chore/refresh-capture-frames --state open --json number --jq '.[0].number')
           fi
+          # Every run, so a force-push from a later run leaves it queued either way
+          gh pr merge "$number" --auto --squash
