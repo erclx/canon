@@ -318,7 +318,7 @@ function failed(action: string, result: GitResult): BackupRefused {
  * as written passes a records origin that publishes the payload through the
  * other protocol.
  */
-function remoteIdentity(url: string): string {
+export function remoteIdentity(url: string): string {
   return url
     .trim()
     .toLowerCase()

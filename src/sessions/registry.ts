@@ -48,19 +48,23 @@ export interface SessionRecord {
 }
 
 /**
- * Resolves the folder holding one file per session.
+ * Resolves the client's configuration directory, which holds both the session
+ * registry and the projects folder a transcript lives in.
  *
  * `CLAUDE_CONFIG_DIR` comes first because a client honouring it writes its
  * records nowhere near the home directory, and a read that ignored it would
  * report an empty roster on a machine running sessions.
  */
-export function registryDir(): string {
+export function claudeConfigDir(): string {
   const configured = process.env.CLAUDE_CONFIG_DIR
-  const base =
-    configured && configured.length > 0
-      ? configured
-      : join(homedir(), '.claude')
-  return join(base, 'sessions')
+  return configured && configured.length > 0
+    ? configured
+    : join(homedir(), '.claude')
+}
+
+/** Resolves the folder holding one file per session. */
+export function registryDir(): string {
+  return join(claudeConfigDir(), 'sessions')
 }
 
 /**
