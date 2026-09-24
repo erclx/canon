@@ -5,7 +5,7 @@ description: Where rules land in a target, why install and sync and build stay s
 
 # Install and sync
 
-Rules install per-file at `.claude/rules/canon/<subdir>/<rule>.md` with subdirectories preserved, covering `core/`, `lang/`, `framework/`, `lib/`, `ui/`, and `claude/`. Source rules already carry the Claude shape, so the copy is a passthrough rather than a transform.
+Rules install per-file at `.claude/rules/canon/<subdir>/<rule>.md` with each band subdirectory preserved. Source rules already carry the Claude shape, so the copy is a passthrough rather than a transform.
 
 ## Decisions
 
@@ -15,72 +15,59 @@ Install bootstraps a stack and overwrites. Sync updates only what is already pre
 
 Install overwrites existing rules on purpose. Delete the rules you do not want after install rather than adding optional or addon complexity to stack definitions.
 
-### Gov was the first domain on the shared engine
+### Gov runs on the shared sync engine
 
-Gov went first because its source lookup is the thinnest of the four. The engine owns target validation, the scan report, the prompt, and the apply loop, and the adapter supplies two things only: where a destination file's source lives, and what counts as a change beyond a content diff.
+The engine in `src/sync/engine.ts` owns target validation, the scan report, the prompt, and the apply loop. The gov adapter supplies two things only: where a destination file's source lives, and what counts as a change beyond a content diff.
 
-Sync matches an installed rule to its source by rule name rather than by relative path. A rule that moves between bands in the toolkit still syncs into the subdirectory the target already uses, so a reorganization here does not strand installed copies.
+Sync matches an installed rule to its source by rule name rather than by relative path. A rule that moves between bands here still syncs into the subdirectory the target already uses, so a reorganization does not strand installed copies.
 
 ### This repository's own rules are produced, not written
 
-The toolkit's `.claude/rules/` is produced from `internal/governance.toml` rather than copied by hand. The record names one stack and its extras, `canon gov regen` resolves it into `.claude/rules/canon/` through the same stack machinery an install uses, and anything under `internal/rules/` installs alongside into a separate `.claude/rules/internal/`, since it governs this repository's own authoring paths and ships nowhere. Recording the subset stops the producer from reading its own output to decide what that output should be.
+The toolkit's `.claude/rules/` is produced from `internal/governance.toml` rather than copied by hand. The record names one stack and its extras, `canon gov regen` resolves it into `.claude/rules/canon/` through the same stack machinery an install uses, and everything under `internal/rules/` installs beside it into `.claude/rules/internal/`. Recording the subset stops the producer from reading its own output to decide what that output should be.
 
-Registering a new rule for this repository means naming it somewhere the record resolves. Add it to a stack in `governance/stacks/`, to the `add` list in `internal/governance.toml`, or to `internal/rules/` when it governs toolkit authoring alone.
+Registering a new rule for this repository means naming it somewhere the record resolves: a stack in `governance/stacks/`, the `add` list in `internal/governance.toml`, or `internal/rules/` when it governs toolkit authoring alone. A rule no stack names never installs, and the drift assertion still passes, because the copy matches what the record resolves to.
 
-A rule whose source no stack names never installs, and the drift assertion still passes, because the copy matches what the record resolves to. A file written into `.claude/rules/` by hand is deleted on the next `bun run check`.
-
-Committing the consumed copy is what lets a citation spell one path that resolves here and in every target that installed the same content, where reading the authoring root directly would have left each citation needing two spellings.
+Committing the consumed copy lets a citation spell one path that resolves here and in every target that installed the same content, where reading the authoring root directly would leave each citation needing two spellings.
 
 ### Only governance keeps a consumed copy
 
-`standards/`, `snippets/`, and `internal/` carry no mirror, since nothing installs any of the three into a project. The `standards/` mirror bought only a path this repository resolved, at a cost of 28 tracked files regenerated on every check and a citation form that read as portable and was not, which is why 40 of the 62 shipped bodies name the plugin root instead. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body. Measured at `7374bb51` on 2026-08-28.
+`standards/`, `snippets/`, and `internal/` carry no mirror, since nothing installs any of the three into a project. A `standards/` mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
 
-`snippets/` needed no mirror because the live `claude/snippets` symlink already served every plugin cache, and `internal/` never had an install channel to close. What came out was 15 tracked files and `mirror_dir` itself, leaving `scripts/core/regen-claude-copies.sh` with one delegation to `canon gov regen`. Measured at `23e79fbd` on 2026-08-28.
+`snippets/` needs no mirror because the `claude/snippets` symlink already serves every plugin cache, and `internal/` has no install channel to mirror. `scripts/core/regen-claude-copies.sh` is one delegation to `canon gov regen`.
 
 ## Gotchas
 
-- `runInstall` writes two stamp records after copying rules: `recordStamp` for the file hashes a sync would refresh, and `writeChainStamp` for the single stack name the operator gave, alongside `{domain: 'governance', toolkitRoot: PROJECT_ROOT}`. The second is what lets a later sync answer what the target's stack lists without re-deriving it from installed band folders, since `resolveRules` walks that stack's own `extends` ancestors when a reader asks it again.
-- `canon gov sync` diffs before applying and requires confirmation, so it is safe to run repeatedly.
+- `runInstall` in `src/commands/gov.ts` writes two stamp records after copying: `recordStamp` for the file hashes a sync refreshes, and `writeChainStamp` for the stack name the operator gave. The chain stamp lets a later sync answer what the target's stack lists without re-deriving it from installed band folders.
 - `canon gov install` and `canon gov sync` refuse to run against the toolkit root, because a target's rules are the operator's to edit. `canon gov regen` runs against it on purpose, since the destination there is produced output.
-- `scripts/lib/gov.sh` is narrowed to `rule_subdir` alone. It is called once per rule file inside a loop, so routing it through the CLI would cost a process per file, and it stays permanently because four of its five callers are sandbox scripts.
+- `scripts/lib/gov.sh` holds `rule_subdir` alone. It is called once per rule file inside a loop, so routing it through the CLI would cost a process per file, and it stays because the sandbox scripts are its callers.
 - The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
-- A project holding `.cursor/rules/` from an earlier toolkit version retains those files, since sync does not touch them. Run `rm -rf .cursor/rules/` to clean up if Cursor is no longer in use.
-- A target still on the flat `.claude/rules/<subdir>/` layout, predating the current `canon/`-wrapped one, is invisible to both bootstrap verbs. `canon gov sync` narrows its walk to `.claude/rules/canon/`, so it reports the missing-surfaces message and exits 0 rather than reading the flat tree at all. `canon gov install` writes only into that same narrowed destination and never reads or clears the flat one, so the target ends up holding both, and Claude Code loads both copies of an edited rule at session start, one of them frozen. `canon migrate rule-layout` moves a target off the flat layout first. Run it before either bootstrap verb sees anything.
+- A project holding `.cursor/rules/` from an earlier toolkit version keeps those files, since sync does not touch them. Remove the folder by hand in a project that does not use Cursor.
+- A target on the flat `.claude/rules/<subdir>/` layout is invisible to both bootstrap verbs. Sync walks only `.claude/rules/canon/` and exits 0, and install writes there without clearing the flat tree. Claude Code then loads both copies of an edited rule, one of them frozen. Run `canon migrate rule-layout` before either verb.
 
 ## CLI
 
-| Command             | What it does                                                      |
-| ------------------- | ----------------------------------------------------------------- |
-| `canon gov install` | Bootstrap rules for a stack into `.claude/rules/canon/`           |
-| `canon gov sync`    | Update installed rules in target, clean up stale `.claude/GOV.md` |
-| `canon gov build`   | Concatenate installed rules into `.canon/tmp/gov/rules.md`        |
-| `canon gov regen`   | Rebuild this repository's own `.claude/rules/` from its record    |
-| `canon gov list`    | Emit catalog of stacks, rules, and rules no stack reaches         |
-
-Flags, arguments, and JSON shapes live in `docs/agents/index.md`. Every verb is TypeScript and carries a real commander option surface, so a mistyped flag fails with a suggestion.
-
-Commands that write files require confirmation before running, and `CANON_NON_INTERACTIVE=1` resolves each confirm prompt to its first option. The stack picker is the exception and refuses headlessly, since defaulting there would choose a whole stack for the caller.
+- `canon gov install` bootstraps a stack, `sync` refreshes what is installed and clears a stale `.claude/GOV.md`, `build` writes the paste payload, `regen` rebuilds this repository's own copy, and `list` emits the catalog.
+- Flags, arguments, and JSON shapes live in `docs/agents/install-and-sync.md` and `canon gov --help`.
+- `CANON_NON_INTERACTIVE=1` resolves each confirm prompt to its first option. The stack picker refuses headlessly instead, since defaulting there would choose a whole stack for the caller.
 
 ### Why `list` is TypeScript
 
-Bash cannot express the folder-entry match. A regex bash could apply against a rules array, `"[0-9]{3}-[a-z0-9-]+"`, matches nothing for a folder entry, and `base` reporting zero rules to the `target-setup` skill, which dedupes `--add` extras against that list, is the failure that shape would produce. Expanding the match in bash beside the resolver would also put the same rule-matching logic in two languages.
+Bash cannot express the folder-entry match. The regex bash would apply to a rules array matches nothing for a folder entry, so `base` would report zero rules to the `target-setup` skill, which dedupes `--add` extras against that list. Expanding the match in bash beside the resolver would also put one rule-matching logic in two languages.
 
-`gov list --json` carries `unreferenced` alongside `stacks` and `rules`, on every invocation rather than behind a flag. The verify stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
+`gov list --json` carries `unreferenced` beside `stacks` and `rules` on every invocation rather than behind a flag. The gate stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
 
 ## Workflow
 
-To set up a new project:
+Set up a new project:
 
 ```bash
 canon gov install react ../my-app
 # resolves react → node → base, copies each rule to .claude/rules/canon/<subdir>/<rule>.md
 ```
 
-To layer extra rules on top of a stack without creating a new stack definition:
+Layer extra rules on a stack without defining a new one:
 
 ```bash
 canon gov install astro --add 200-react,260-shadcn,300-testing-ts ../my-app
 # installs astro stack rules plus the three extras, deduped
 ```
-
-`sync` and `build` take a target path and no other argument, so the CLI table above is the whole surface.
