@@ -141,7 +141,7 @@ The order is drawn here rather than instructed, and that is the point of the ver
 
 ## Render
 
-`canon teach render` renders a lesson body's structural blocks to HTML, through the three lesson components. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
+`canon teach render` renders a lesson body's structural blocks to HTML, through the four lesson components. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
 
 ```bash
 echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach render --json
@@ -151,9 +151,21 @@ echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach re
 | -------- | ---------------------------------------- |
 | `--json` | Emit a machine-readable record on stdout |
 
-It reads a JSON array of blocks from stdin, each a `heading`, `paragraph`, `list`, or `raw` block, and reports `{ ok: true, html }` on `--json` or the bare rendered HTML on stdout otherwise. Content none of the three components can express takes a `raw` block, carrying its own HTML verbatim and unescaped, which is the shape the quiz and the teach-back block travel in.
+It reads a JSON array of blocks from stdin, each a `heading`, `paragraph`, `list`, `refs`, or `raw` block, and reports `{ ok: true, html }` on `--json` or the bare rendered HTML on stdout otherwise. Content none of the components can express takes a `raw` block, carrying its own HTML verbatim and unescaped, which is the shape the quiz and the teach-back block travel in.
 
-It refuses `bad-input` on empty stdin, on malformed JSON, on stdin that does not parse to an array, and on a block carrying an unrecognized `type` or a field of the wrong shape for its type, naming the block's index in the message.
+A citation takes two shapes. A `paragraph` carries an optional `cites` array of reference numbers, rendered as `sup.cite` markers after its text. The one `refs` block carries `items` of `{ title, url?, note? }`, rendered as `ol.refs` and numbered from 1, so cite `1` links to the first item.
+
+```json
+[
+  { "type": "paragraph", "text": "North is fixed.", "cites": [1] },
+  {
+    "type": "refs",
+    "items": [{ "title": "Compass manual", "url": "https://example.com" }]
+  }
+]
+```
+
+It refuses `bad-input` on empty stdin, on malformed JSON, on stdin that does not parse to an array, and on a block carrying an unrecognized `type` or a field of the wrong shape for its type, naming the block's index in the message. Citations add four refusals, each naming the offending block: a cite that resolves to no reference, `cites` on a lede paragraph, a second `refs` block, and a reference `url` that is not `http` or `https`.
 
 ## Nav
 
