@@ -106,8 +106,10 @@ export async function groupEvidence(
   return { kind: 'read', states }
 }
 
+// The raw host serves nothing to a private repository's browser, while the
+// blob form redirects to the bytes carrying the viewer's session.
 function rawUrl(repo: string, sha: string, path: string): string {
-  return `https://raw.githubusercontent.com/${repo}/${sha}/${path}`
+  return `https://github.com/${repo}/blob/${sha}/${path}?raw=true`
 }
 
 export function evidenceMarker(head: string): string {

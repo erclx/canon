@@ -141,10 +141,10 @@ describe('renderEvidenceBody', () => {
 
     expect(body).toContain('<summary>dark (2)</summary>')
     expect(body).toContain(
-      '![](https://raw.githubusercontent.com/erclx/annex/aaaa000/web/evidence/dark/hero.png)',
+      '![](https://github.com/erclx/annex/blob/aaaa000/web/evidence/dark/hero.png?raw=true)',
     )
     expect(body).toContain(
-      '![](https://raw.githubusercontent.com/erclx/annex/bbbb111/web/evidence/dark/hero.png)',
+      '![](https://github.com/erclx/annex/blob/bbbb111/web/evidence/dark/hero.png?raw=true)',
     )
     expect(body).toContain('| new-case | *(new)* |')
     expect(body.trim().endsWith('<!-- pr-evidence: head=bbbb111 -->')).toBe(
