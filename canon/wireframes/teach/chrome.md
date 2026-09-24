@@ -51,7 +51,7 @@ The panel opens beneath its trigger, overlapping the page content below it rathe
 - Theme button label: "Switch between light and dark".
 - Collapse control label: "Toggle the course panel". The close control inside the overlay reads "Close the course panel", and the resize grip reads "Resize the course panel".
 - Breadcrumb separator between segments: "/".
-- Each jump row pairs a two-digit ordinal with the item's title-cased name.
+- Each jump row pairs a two-digit ordinal with the item's name: a workspace's mission title, falling back to its sentence-cased slug.
 
 ## Behavior
 

@@ -6,18 +6,18 @@
 
 A lesson carries four empty marker pairs and `canon teach nav` fills each from what the workspace holds:
 
-| Marker                | Carries                                                  |
-| --------------------- | -------------------------------------------------------- |
-| `canon:teach:style`   | the embedded stylesheet and the panel's pre-paint script |
-| `canon:teach:header`  | the course sidebar, the masthead, and the breadcrumb     |
-| `canon:teach:footnav` | the previous and next lesson navigation                  |
-| `canon:teach:scripts` | whatever the lesson chrome needs at the end of the body  |
+| Marker                | Carries                                                                        |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `canon:teach:style`   | the base sheet link, the embedded stylesheet, and the panel's pre-paint script |
+| `canon:teach:header`  | the course sidebar, the masthead, and the breadcrumb                           |
+| `canon:teach:footnav` | the previous and next lesson navigation                                        |
+| `canon:teach:scripts` | whatever the lesson chrome needs at the end of the body                        |
 
 `nav` refuses a lesson missing them rather than inventing a place to put the chrome.
 
 ## What is authored and what is generated
 
-The authored heading, lede, body and quiz sit between the header and footnav markers. The splice leaves that region untouched and rewrites everything inside the four pairs.
+The authored heading, lede, body and quiz sit between the header and footnav markers. The splice leaves that region untouched apart from wrapping it in `<main>` when it holds none, and rewrites everything inside the four pairs.
 
 So the boundary is positional rather than per-file. Edit between the markers freely. Never edit inside them, and never edit the root or contents pages at all, since `nav` regenerates those whole.
 
