@@ -77,17 +77,47 @@ ${body}
 `
 }
 
+/**
+ * The lesson `teach-workspace` has a session write: the four marker pairs and a
+ * rendered body, with no `<main>` and no stylesheet link, both of which `nav`
+ * supplies.
+ */
+function skillLessonSkeleton(h1: string, lede: string, body = ''): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${h1}</title>
+<!-- canon:teach:style -->
+<!-- /canon:teach:style -->
+</head>
+<body>
+<!-- canon:teach:header -->
+<!-- /canon:teach:header -->
+<h1>${h1}</h1>
+<p class="lede">${lede}</p>
+${body}
+<!-- canon:teach:footnav -->
+<!-- /canon:teach:footnav -->
+<!-- canon:teach:scripts -->
+<!-- /canon:teach:scripts -->
+</body>
+</html>
+`
+}
+
 async function seedLesson(
   slug: string,
   file: string,
   h1: string,
   lede: string,
   body = '',
+  skeleton = lessonSkeleton,
 ): Promise<string> {
   const dir = join(workspaceDir(slug), 'lessons')
   mkdirSync(dir, { recursive: true })
   const path = join(dir, file)
-  await writeFile(path, lessonSkeleton(h1, lede, body))
+  await writeFile(path, skeleton(h1, lede, body))
   return path
 }
 
@@ -745,6 +775,184 @@ describe('generateNav', () => {
     expect(contents.match(/class="gterm"/g)).toHaveLength(entries.length)
     expect(contents).toContain('list.querySelectorAll(".gterm")')
     expect(contents).toContain('updateGroups()')
+  })
+})
+
+describe('lesson skeleton', () => {
+  const BASE_LINK = '<link rel="stylesheet" href="../assets/base.css">'
+  const HAND_WRITTEN_COURSE_LINK =
+    '<link rel="stylesheet" href="../assets/course.css" />'
+
+  async function seedSkillLesson(file = '0001-anchors.html'): Promise<string> {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    return seedLesson(
+      '01-regular-expressions',
+      file,
+      'Anchors',
+      'Where a pattern starts and ends.',
+      '',
+      skillLessonSkeleton,
+    )
+  }
+
+  it('should wrap a lesson written with no main in exactly one, inside the pane', async () => {
+    const path = await seedSkillLesson()
+
+    await generateNav(ROOT)
+
+    const lesson = await readFile(path, 'utf8')
+    expect(lesson.match(/<main[\s>]/g)).toHaveLength(1)
+    const [beforeMain, fromMain] = lesson.split('<main>')
+    expect(beforeMain).toContain('<!-- /canon:teach:header -->')
+    expect(beforeMain).toContain('<div class="pane"')
+    expect(fromMain.indexOf('</main>')).toBeLessThan(
+      fromMain.indexOf('<!-- canon:teach:footnav -->'),
+    )
+    expect(fromMain.indexOf('<h1>Anchors</h1>')).toBeLessThan(
+      fromMain.indexOf('</main>'),
+    )
+  })
+
+  it('should leave a lesson that already holds a main with its one element', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    const seeded = await readFile(path, 'utf8')
+    await writeFile(path, seeded.replace('<main>', '<main class="x">'))
+
+    await generateNav(ROOT)
+
+    const lesson = await readFile(path, 'utf8')
+    expect(lesson.match(/<main[\s>]/g)).toHaveLength(1)
+    expect(lesson).toContain('<main class="x">')
+  })
+
+  it('should link the base sheet ahead of the embedded workspace rules', async () => {
+    const path = await seedSkillLesson()
+
+    await generateNav(ROOT)
+
+    const lesson = await readFile(path, 'utf8')
+    const style = lesson.split('<!-- canon:teach:style -->')[1]
+    expect(style).toContain(BASE_LINK)
+    expect(style.indexOf(BASE_LINK)).toBeLessThan(style.indexOf('<style>'))
+  })
+
+  it('should drop the course.css link a lesson once carried by hand', async () => {
+    const path = await seedSkillLesson()
+    const seeded = await readFile(path, 'utf8')
+    await writeFile(
+      path,
+      seeded.replace(
+        '<!-- canon:teach:style -->',
+        `${HAND_WRITTEN_COURSE_LINK}\n<!-- canon:teach:style -->`,
+      ),
+    )
+
+    await generateNav(ROOT)
+
+    expect(await readFile(path, 'utf8')).not.toContain('course.css')
+  })
+
+  it('should emit no base link where the workspace carries no base sheet', async () => {
+    const path = await seedSkillLesson()
+    rmSync(join(workspaceDir('01-regular-expressions'), 'assets', 'base.css'))
+
+    await generateNav(ROOT)
+
+    expect(await readFile(path, 'utf8')).not.toContain('base.css')
+  })
+
+  it('should be byte-identical on a second run over a lesson written with no main', async () => {
+    const path = await seedSkillLesson()
+
+    await generateNav(ROOT)
+    const first = await readFile(path, 'utf8')
+    await generateNav(ROOT)
+
+    expect(await readFile(path, 'utf8')).toBe(first)
+  })
+})
+
+describe('workspace labels', () => {
+  async function generateTitled(): Promise<{
+    root: string
+    contents: string
+    lesson: string
+  }> {
+    await openWorkspace(ROOT, { ...REQUEST, title: 'Regex & friends' })
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const lessonPath = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+
+    await generateNav(ROOT)
+
+    return {
+      root: await readFile(join(teachDir(ROOT), 'index.html'), 'utf8'),
+      contents: await readFile(
+        join(workspaceDir('01-regular-expressions'), 'index.html'),
+        'utf8',
+      ),
+      lesson: await readFile(lessonPath, 'utf8'),
+    }
+  }
+
+  it('should label the breadcrumb with the mission title', async () => {
+    const { lesson } = await generateTitled()
+
+    expect(lesson).toContain(
+      '<a class="crumb" href="../index.html"><span class="crumb-t">Regex &amp; friends</span></a>',
+    )
+  })
+
+  it('should head the sidebar with the mission title, carried whole in a title attribute', async () => {
+    const { contents, lesson } = await generateTitled()
+
+    for (const page of [contents, lesson]) {
+      expect(page).toContain(
+        '<span class="ws-name" title="Regex &amp; friends">Regex &amp; friends</span>',
+      )
+    }
+  })
+
+  it('should list the mission title in the workspace switcher', async () => {
+    const { lesson } = await generateTitled()
+
+    expect(lesson).toContain(
+      '<span class="n">01</span><span>Regex &amp; friends</span>',
+    )
+  })
+
+  it('should list the mission title on the root row', async () => {
+    const { root } = await generateTitled()
+
+    expect(root).toContain('<b>Regex &amp; friends</b>')
+    expect(root).not.toContain('Regular expressions')
+  })
+
+  it('should fall back to the sentence-cased slug where the mission carries no title', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    const missionPath = join(
+      workspaceDir('01-regular-expressions'),
+      'MISSION.md',
+    )
+    const mission = await readFile(missionPath, 'utf8')
+    await writeFile(missionPath, mission.replace(/^title: .*\n/m, ''))
+
+    await generateNav(ROOT)
+
+    const root = await readFile(join(teachDir(ROOT), 'index.html'), 'utf8')
+    expect(root).toContain('<b>Regular expressions</b>')
   })
 })
 

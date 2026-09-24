@@ -18,6 +18,7 @@ import {
   TEACH_MISSION,
   TEACH_REFERENCE,
   TEACH_STYLESHEET,
+  TEACH_STYLESHEET_BASE,
   teachDir,
   type TeachRefused,
   type WorkspaceDetail,
@@ -35,12 +36,23 @@ const BRAND_MARK = 'assets/brand/mark.svg'
  */
 const HAND_WRITTEN_ICON = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 10 80 80'%3E%3Cpath d='M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z' fill='rgb(224,114,75)' /%3E%3Crect x='44' y='15' width='12' height='70' rx='2' fill='rgb(224,114,75)' /%3E%3C/svg%3E" />`
 
-function dropHandWrittenIcon(html: string): string {
-  return html
-    .split('\n')
-    .filter((line) => line.trim() !== HAND_WRITTEN_ICON)
-    .join('\n')
-    .replaceAll(HAND_WRITTEN_ICON, '')
+/**
+ * The stylesheet link lessons used to carry by hand outside every region. The
+ * `style` region now links the base sheet itself, so keeping this one would
+ * load the base twice.
+ */
+const HAND_WRITTEN_STYLESHEET = `<link rel="stylesheet" href="../${TEACH_ASSETS}/${TEACH_STYLESHEET}" />`
+
+const HAND_WRITTEN_HEAD = [HAND_WRITTEN_ICON, HAND_WRITTEN_STYLESHEET]
+
+function dropHandWrittenHead(html: string): string {
+  return HAND_WRITTEN_HEAD.reduce(
+    (text, link) => text.replaceAll(link, ''),
+    html
+      .split('\n')
+      .filter((line) => !HAND_WRITTEN_HEAD.includes(line.trim()))
+      .join('\n'),
+  )
 }
 
 /**
@@ -504,6 +516,11 @@ function titleCase(slug: string): string {
   ].join(' ')
 }
 
+/** The mission's own title, falling back to the slug where it names none. */
+function workspaceLabel(workspace: WorkspaceSummary): string {
+  return workspace.title ?? titleCase(workspace.topic)
+}
+
 interface JumpEntry {
   readonly ordinal: string
   readonly label: string
@@ -629,7 +646,7 @@ function renderSidebar(sidebar: Sidebar): string {
 
   return `<aside class="sb">
   <div class="sb-top">
-    <details class="sb-ws" name="mast"><summary><span class="ws-name">${escapeHtml(sidebar.heading)}</span><span class="car">${CARET}</span></summary><div class="sb-wl"><ul class="jump-list">${renderJumpList(sidebar.switcher)}</ul></div></details>
+    <details class="sb-ws" name="mast"><summary><span class="ws-name" title="${escapeHtml(sidebar.heading)}">${escapeHtml(sidebar.heading)}</span><span class="car">${CARET}</span></summary><div class="sb-wl"><ul class="jump-list">${renderJumpList(sidebar.switcher)}</ul></div></details>
   </div>
   <div class="sb-scroll">
     <div class="sb-meta">${escapeHtml(sidebar.meta)}</div>
@@ -724,7 +741,7 @@ function workspaceJumpEntries(
 ): JumpEntry[] {
   return workspaces.map((workspace) => ({
     ordinal: ordinalOf(workspace),
-    label: titleCase(workspace.topic),
+    label: workspaceLabel(workspace),
     href: hrefForWorkspace(workspace, prefix),
     at: workspace.slug === currentSlug,
     trailing: String(workspace.lessons),
@@ -935,7 +952,7 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
     meta: `${workspaces.length} workspace${workspaces.length === 1 ? '' : 's'}`,
     items: workspaces.map((workspace) => ({
       ordinal: ordinalOf(workspace),
-      label: titleCase(workspace.topic),
+      label: workspaceLabel(workspace),
       href: hrefForWorkspace(workspace, '') ?? '#',
       at: false,
     })),
@@ -951,7 +968,7 @@ function renderRootPage(workspaces: readonly WorkspaceSummary[]): string {
           ? 'Live'
           : 'Open'
       const blurb = `${workspace.lessons} lesson(s) &middot; ${workspace.reference} reference page(s) &middot; ${workspace.terms} term(s)`
-      const inner = `<span class="num">${ordinalOf(workspace)}</span><b>${escapeHtml(titleCase(workspace.topic))}</b><span class="state">${state}</span><span class="blurb">${blurb}</span>`
+      const inner = `<span class="num">${ordinalOf(workspace)}</span><b>${escapeHtml(workspaceLabel(workspace))}</b><span class="state">${state}</span><span class="blurb">${blurb}</span>`
 
       return href === undefined
         ? `<li class="soon"><a href="#" aria-disabled="true" tabindex="-1">${inner}</a></li>`
@@ -1014,7 +1031,7 @@ async function renderContentsPage(
       )
     : undefined
 
-  const title = detail.title ?? titleCase(detail.topic)
+  const title = workspaceLabel(detail)
 
   const segments: CrumbSegment[] = [
     {
@@ -1026,7 +1043,7 @@ async function renderContentsPage(
       },
     },
     {
-      label: titleCase(detail.topic),
+      label: workspaceLabel(detail),
       jump: {
         ariaLabel: 'Jump to a lesson',
         entries: lessonJumpEntries(metas, '', undefined),
@@ -1035,7 +1052,7 @@ async function renderContentsPage(
   ]
 
   const sidebar: Sidebar = {
-    heading: titleCase(detail.topic),
+    heading: workspaceLabel(detail),
     switcher: workspaceJumpEntries(workspaces, '../', detail.slug),
     meta: `${metas.length} lesson${metas.length === 1 ? '' : 's'}`,
     items: metas.map((meta, index) => ({
@@ -1140,20 +1157,43 @@ interface LessonRefused {
 }
 
 /**
- * Splices the four chrome regions into one lesson file, in a fixed order so a
- * missing marker is always reported against the same region a session can
- * check first. Nothing is written when any region is missing, which is what
- * keeps a partially-spliced file off disk.
- */
-/**
  * A lesson embeds the workspace stylesheet, and an `@import` resolves against
  * the lesson's own folder there rather than the assets folder, so it never
- * loaded anything. The base sheet reaches the page through the `<link>`.
+ * loaded anything. The base sheet reaches the page through the `<link>` the
+ * `style` region carries ahead of the embedded rules.
  */
 function stripImports(css: string): string {
   return css.replace(/^@import[^;]*;[ \t]*\n?/gm, '')
 }
 
+const HEADER_CLOSE = '<!-- /canon:teach:header -->'
+const FOOTNAV_OPEN = '<!-- canon:teach:footnav -->'
+
+/**
+ * The authored body between the header and footnav regions, wrapped in
+ * `<main>` when it holds none. The skill has a session write the body bare,
+ * and the column width hangs off `main`. A body already holding one is left
+ * alone, which keeps a second run byte-identical.
+ */
+function wrapMain(html: string): string {
+  const start = html.indexOf(HEADER_CLOSE)
+  const end = html.indexOf(FOOTNAV_OPEN, start)
+  if (start === -1 || end === -1) return html
+
+  const bodyStart = start + HEADER_CLOSE.length
+  const body = html.slice(bodyStart, end)
+  if (/<main[\s>]/.test(body)) return html
+
+  return `${html.slice(0, bodyStart)}\n<main>\n${body.trim()}\n</main>\n${html.slice(end)}`
+}
+
+/**
+ * Splices the four chrome regions into one lesson file, in a fixed order so a
+ * missing marker is always reported against the same region a session can
+ * check first, then wraps the authored body in `<main>` where it holds none.
+ * Nothing is written when any region is missing, which is what keeps a
+ * partially-spliced file off disk.
+ */
 async function rewriteLesson(
   root: string,
   detail: WorkspaceDetail,
@@ -1164,7 +1204,7 @@ async function rewriteLesson(
 ): Promise<LessonRewritten | LessonRefused> {
   const file = metas[index].file
   const path = join(root, detail.path, TEACH_LESSONS, file)
-  let html = dropHandWrittenIcon(await readFile(path, 'utf8'))
+  let html = dropHandWrittenHead(await readFile(path, 'utf8'))
 
   const teachPrefix = '../../'
   const workspacePrefix = '../'
@@ -1180,7 +1220,7 @@ async function rewriteLesson(
         },
       },
       {
-        label: titleCase(detail.topic),
+        label: workspaceLabel(detail),
         href: `${workspacePrefix}index.html`,
         jump: {
           ariaLabel: 'Jump to a lesson',
@@ -1190,7 +1230,7 @@ async function rewriteLesson(
       { label: `Lesson ${index + 1} of ${metas.length}` },
     ],
     {
-      heading: titleCase(detail.topic),
+      heading: workspaceLabel(detail),
       switcher: workspaceJumpEntries(workspaces, teachPrefix, detail.slug),
       meta: `${metas.length} lesson${metas.length === 1 ? '' : 's'}`,
       items: metas.map((meta, i) => ({
@@ -1210,6 +1250,16 @@ async function rewriteLesson(
   // the class the script reveals feedback with.
   const legacy = html.includes(LEGACY_OPTION)
 
+  // Linked ahead of the embedded rules so those still win the cascade.
+  // Embedding it instead repeats a sheet carrying its fonts inline in every
+  // lesson. A workspace seeded before the pair has no base sheet to link.
+  const hasBase = existsSync(
+    join(root, detail.path, TEACH_ASSETS, TEACH_STYLESHEET_BASE),
+  )
+  const baseLink = hasBase
+    ? `<link rel="stylesheet" href="../${TEACH_ASSETS}/${TEACH_STYLESHEET_BASE}">\n`
+    : ''
+
   const regions: ReadonlyArray<readonly [Region, string]> = [
     // The stepper follows the workspace stylesheet so it wins the cascade at
     // equal specificity, which is what reaches a workspace seeded before it.
@@ -1218,7 +1268,7 @@ async function rewriteLesson(
     // lesson would lack.
     [
       'style',
-      `${teachFavicon()}\n<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson')}`,
+      `${teachFavicon()}\n${baseLink}<style>\n${legacy ? css : `${css}\n${QUIZ_CSS}`}\n</style>\n${headScript('lesson')}`,
     ],
     ['header', header],
     ['footnav', `${renderFootNav(metas, index)}\n${PANE_CLOSE}`],
@@ -1231,7 +1281,7 @@ async function rewriteLesson(
     html = spliced
   }
 
-  await writeFile(path, html)
+  await writeFile(path, wrapMain(html))
   return { ok: true, file }
 }
 
