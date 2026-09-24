@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import {
   defineTerms,
   listWorkspaces,
@@ -143,6 +144,20 @@ describe('listWorkspaces', () => {
     expect(await listWorkspaces(ROOT)).toMatchObject({ ok: true, next: '01' })
   })
 
+  it('keeps listing past a sibling whose mission will not parse', async () => {
+    await seed('01-broken', {
+      'MISSION.md': '---\ntitle: Broken\ndescription: Demo: a colon\n---\n',
+    })
+    await openWorkspace(ROOT, REQUEST)
+
+    const outcome = await listWorkspaces(ROOT)
+
+    expect(outcome.ok && outcome.workspaces.map((one) => one.slug)).toEqual([
+      '01-broken',
+      '02-regular-expressions',
+    ])
+  })
+
   it('names every required file a workspace does not carry', async () => {
     await seed('01-first', { 'MISSION.md': '# First' })
 
@@ -257,6 +272,27 @@ describe('openWorkspace', () => {
     expect(
       await openWorkspace(ROOT, { ...REQUEST, success: [] }),
     ).toMatchObject({ ok: false, reason: 'bad-input' })
+  })
+
+  it('reads back a subject and title that each carry a colon', async () => {
+    await openWorkspace(ROOT, {
+      ...REQUEST,
+      title: 'Demo: a colon',
+      subject: 'Regex: groups and anchors',
+    })
+    const dir = workspaceDir('01-regular-expressions')
+
+    const outcome = await listWorkspaces(ROOT)
+    const mission = parseFrontmatter(
+      await readFile(join(dir, 'MISSION.md'), 'utf8'),
+    )
+    const glossary = parseFrontmatter(
+      await readFile(join(dir, 'GLOSSARY.md'), 'utf8'),
+    )
+
+    expect(outcome.ok && outcome.workspaces[0].title).toBe('Demo: a colon')
+    expect(readField(mission, 'description')).toBe('Regex: groups and anchors')
+    expect(readField(glossary, 'title')).toBe('Glossary for Demo: a colon')
   })
 
   it('titles the workspace from the topic when none is given', async () => {
