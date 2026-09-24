@@ -7,9 +7,9 @@ description: The two roots a record folder resolves at, validating the session r
 
 ## Record roots
 
-Every verb here resolves a record folder at two roots rather than one. `.canon/<folder>` is read first, `.claude/<folder>` second, and a folder neither root carries resolves to the creation default, which is `.claude/`. The scratch folder is the one name that differs by root, spelled `.canon/tmp` and `.canon/tmp`, since inside a dotted root the leading dot hides nothing already hidden.
+Every verb here resolves a record folder at two roots rather than one. `.canon/<folder>` is read first, `.claude/<folder>` second, and a folder neither root carries resolves to the creation default, which is `.canon/`. The scratch folder is the one name that differs by root, spelled `.canon/tmp` and `.claude/.tmp`, since inside a dotted root the leading dot hides nothing already hidden. <!-- canon-keep-record-root -->
 
-The read order and the creation default disagree deliberately. The gitignored record folders are moving to a root of their own, and the CLI learns to read both roots in a release that ships ahead of the move, so the binary a session already holds knows where to look by the time a tree relocates. Creating under the new root before then would write records to a root whose ignore line may not have reached a project yet, and it would split one project's records across two roots with no verb able to reconcile them. The move flips the default and nothing else.
+The read order and the creation default agree. While the record folders were moving to a root of their own, creation stayed at `.claude/` so no record landed under a root whose ignore line had yet to reach a project. The ignore line ships now, so a fresh project scaffolds `.canon/` alone, and `.claude/` stays as a read fallback for a project the move has not reached.
 
 A caller never spells a record root by hand for the same reason. A path written as `.canon/plans/...` resolves against one root and reports nothing when it is wrong, which is the quiet failure this ordering exists to prevent: a stale binary meeting a moved layout, writing to the old path, and reporting success. Read a folder through the verb that owns it, and where a skill needs the path itself, take it from that verb's record rather than composing one.
 
@@ -17,7 +17,7 @@ A refusal names every root it looked at, so a message reading `no-folder` says w
 
 ## Validate
 
-`canon records validate <kind>` reports where a file and the standard governing it disagree. Five kinds are gitignored folders under `.claude/`: `plans`, `groundwork`, `intake`, `memory`, and `teach`. The sixth is `standards`, the authoring corpus, which is tracked and installed rather than scratch.
+`canon records validate <kind>` reports where a file and the standard governing it disagree. Five kinds are gitignored folders under the record root, resolved at `.canon/` first: `plans`, `groundwork`, `intake`, `memory`, and `teach`. The sixth is `standards`, the authoring corpus, which is tracked and installed rather than scratch.
 
 ```bash
 canon records validate plans
@@ -189,7 +189,9 @@ canon records push --json
 canon records pull
 ```
 
-At the `.canon` root, the backed folders are every top-level directory less three: `tmp`, which is deletable without loss, `ordinal-locks`, whose entries are transient per claim and would race the claim they guard, and `.records.git`, which is the history the rest are pushed into. Nothing bounds the set from outside, since the claude manifest ships one `.canon/` root entry and names no folder, so a record folder added later enters the payload on its own rather than waiting on a name written here. A push names each folder in scope that the records index has never tracked before, so a folder that picked up a name by mistake, such as a misrouted scratch write, is visible in the report rather than entering the payload silently. The legacy `.claude` root keeps a fixed allowlist instead, since that root also holds tracked `skills/`, `rules/`, and `hooks/` a push must never carry, and an exclusion set there would stage all three. Each name is a top-level record folder and every archive sits inside the one it archives, so the set stays at one entry per surface however many archives appear, and it deliberately does not match the six record kinds `validate` hardcodes.
+At the `.canon` root, the backed folders are every top-level directory less three: `tmp`, which is deletable without loss, `ordinal-locks`, whose entries are transient per claim and would race the claim they guard, and `.records.git`, which is the history the rest are pushed into. Nothing bounds the set from outside, since the claude manifest ships one `.canon/` root entry and names no folder, so a record folder added later enters the payload on its own rather than waiting on a name written here. A push names each folder in scope that the records index has never tracked before, so a folder that picked up a name by mistake, such as a misrouted scratch write, is visible in the report rather than entering the payload silently. The report also lists every file new to the history under `added`, since a stray file inside a folder already tracked is visible only by name.
+
+The three excluded names bound the records index as well as the disk. A name an older binary committed, such as `tmp`, is removed from the history once and reported under `dropped`, and no later push stages it again. That removes it from the tip going forward and purges nothing from earlier commits the remote already holds. A project's own drafts folder needs no config to be backed: moved to `.canon/<name>/`, it is a top-level directory like any other and enters the payload on the next push. The legacy `.claude` root keeps a fixed allowlist instead, since that root also holds tracked `skills/`, `rules/`, and `hooks/` a push must never carry, and an exclusion set there would stage all three. Each name is a top-level record folder and every archive sits inside the one it archives, so the set stays at one entry per surface however many archives appear, and it deliberately does not match the six record kinds `validate` hardcodes.
 
 Records are gitignored by design, so the history lives in a second git directory at `.records.git` inside the record root, with that root as its work tree. Both resolve off the root together rather than folder by folder, since a history opened at one root beside a work tree at the other would stage the deletion of every folder a move relocated. Every path stays where it is, which is what a separate checkout could not do. The verbs stage the backed folders by explicit pathspec with `--force`, so nothing outside them can enter the index however the ignore rules read, and the project working tree and its index are never touched. Each pathspec is a bare folder name and git reads it against the current directory rather than against the work tree the same call names, so the invocation carries `-C` at the work tree beside the other two flags. That is what lets either verb run from a linked worktree under `.claude/worktrees/`, which sits inside the records work tree and would otherwise prefix every name with its own path.
 
@@ -209,19 +211,24 @@ Point it at a private repository, and at one that is not a remote of the project
 
 ### Refusals
 
-| Reason              | What fired                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| `split-roots`       | Record folders sit under both roots, so the resolved work tree is not the whole set  |
-| `no-repository`     | No `.canon/.records.git`, answered with the two setup commands                       |
-| `no-remote`         | The records history has no `origin`                                                  |
-| `remote-unreadable` | The project's own remotes could not be read, so the shared-origin gate could not run |
-| `remote-shared`     | The records origin is also a remote of the project                                   |
-| `no-remote-records` | `pull` found no branch on the records origin                                         |
-| `local-changes`     | `pull` found records on disk that the history does not carry                         |
-| `local-ahead`       | `pull` found local commits that never reached the origin                             |
-| `git-failed`        | A git call failed, with its stderr in the message                                    |
+| Reason              | What fired                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| `split-roots`       | Record folders sit under both roots, so the resolved work tree is not the whole set    |
+| `no-repository`     | No `.canon/.records.git`, answered with the two setup commands                         |
+| `no-remote`         | The records history has no `origin`                                                    |
+| `remote-unreadable` | The project's own remotes could not be read, so the shared-origin gate could not run   |
+| `remote-shared`     | The records origin is also a remote of the project                                     |
+| `no-remote-records` | `pull` found no branch on the records origin                                           |
+| `local-changes`     | `pull` found records on disk that the history does not carry                           |
+| `local-ahead`       | `pull` found local commits that never reached the origin                               |
+| `unsafe-payload`    | `push` found a pending file over 25 MB or carrying a credential, named under `blocked` |
+| `git-failed`        | A git call failed, with its stderr in the message                                      |
 
 `split-roots` runs ahead of every gate below it and fires on a half-migrated tree, which is what a `canon migrate records` run that failed partway leaves. `recordRoot` answers for the whole tree on the first root that exists, so a folder left at the old root is absent from the work tree while the records index still names it, and an unguarded `add -A` would stage its deletion and drop it from the remote on the next push. Finish the move, or put the stranded folders back beside the others.
+
+`unsafe-payload` runs before anything is staged, so a refusal leaves the index, the log, and the object store as it found them. It reads every new or changed file the push would stage and blocks one over 25 MB, which is read off the file's size without opening it, or one carrying a value `canon secrets scan` would report, through the same patterns and the same `canon-allow-secret` marker. It refuses the whole push rather than skipping the file, and `--json` lists each path with its cause and a detail that names the credential's kind and line, never its value. Move the file out of the record folders, such as into `.canon/tmp/`, or remove the credential, then push again. The guard reads only what this push would add, so a credential committed before it existed stays in the history unreported.
+
+A push the remote rejects undoes the commit that run made and leaves the records on disk, so the next run does not send a payload the remote already refused. A history an older binary committed and left unpushed is outside that undo, and the guard never reads it either, so every push sends the same blob again. Reset it by hand from the project root to the last commit the origin holds, `git --git-dir=.canon/.records.git --work-tree=.canon reset <commit>`, and push again. The `--work-tree` is required, since the setup `init` marks the history bare and git refuses that reset on a bare repository.
 
 The two `pull` refusals exist because the directions are not symmetric. A push only adds, while a pull onto a machine holding work that never left it would discard that work. Resolve either by running `push` first, or by moving the local folders aside. A machine holding no backed folders has nothing to lose, so a restore onto a fresh checkout runs straight through.
 
