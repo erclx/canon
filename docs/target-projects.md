@@ -86,7 +86,7 @@ Each diagram entry records the commit and date it was last verified against, and
 
 The default path is `base`. `canon init` on `base` installs base tooling configs, Claude seeds, and governance core rules, and scaffolds an empty `.claude/wiki/`. Most projects need nothing more.
 
-Escalate only for real web apps. The `target-setup` skill reads `package.json` and root configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the matching governance stack (`react`, `astro`, `node`).
+Escalate only for real web apps. The `target-setup` skill reads `package.json` and root configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the matching governance stack (`react`, `nextjs`, `astro`, `node`). A Next.js app lands on `nextjs`, which extends `react` with the App Router rule a Vite React app does not get.
 
 `node-server` is named rather than detected. It carries the server-side security and persistence rules for a project writing request handlers or a persistence layer in TypeScript, and the detect step matches a runtime or a framework against stack names, so nothing there marks a project as a backend. Pass it deliberately with `canon init --stack node-server` or `canon gov install node-server <target>`.
 
