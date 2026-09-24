@@ -124,3 +124,162 @@ describe('renderLessonBody', () => {
     })
   })
 })
+
+describe('renderLessonBody citations', () => {
+  const REFS_BLOCK = {
+    type: 'refs',
+    items: [
+      { title: 'Compass manual', url: 'https://example.com/compass' },
+      { title: 'Field notes', note: 'Recorded on the ridge' },
+    ],
+  }
+
+  it('should render a paragraph carrying cites as markers after its text', () => {
+    const outcome = renderLessonBody([
+      { type: 'paragraph', text: 'North is fixed.', cites: [1, 2] },
+      REFS_BLOCK,
+    ])
+    expect(outcome).toMatchObject({
+      ok: true,
+      html: expect.stringContaining(
+        '<p>North is fixed.' +
+          '<sup class="cite"><a href="#r1">1</a></sup>' +
+          '<sup class="cite"><a href="#r2">2</a></sup></p>',
+      ),
+    })
+  })
+
+  it('should render a refs block with and without a url and note', () => {
+    const outcome = renderLessonBody([REFS_BLOCK])
+    expect(outcome).toEqual({
+      ok: true,
+      html:
+        '<ol class="refs">' +
+        '<li id="r1"><cite>Compass manual</cite> <a href="https://example.com/compass">example.com</a></li>' +
+        '<li id="r2"><cite>Field notes</cite>. Recorded on the ridge</li>' +
+        '</ol>',
+    })
+  })
+
+  it('should escape a reference title carrying markup characters', () => {
+    const outcome = renderLessonBody([
+      { type: 'refs', items: [{ title: 'Maps & <legends>' }] },
+    ])
+    expect(outcome).toEqual({
+      ok: true,
+      html: '<ol class="refs"><li id="r1"><cite>Maps &amp; &lt;legends&gt;</cite></li></ol>',
+    })
+  })
+
+  it('should refuse cites that are not positive integers', () => {
+    const outcome = renderLessonBody([
+      { type: 'paragraph', text: 'North.', cites: [0] },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message:
+        'Block 0: paragraph cites must be a non-empty array of positive integers',
+    })
+  })
+
+  it('should refuse an empty cites array', () => {
+    const outcome = renderLessonBody([
+      { type: 'paragraph', text: 'North.', cites: [] },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message:
+        'Block 0: paragraph cites must be a non-empty array of positive integers',
+    })
+  })
+
+  it('should refuse cites on a lede paragraph', () => {
+    const outcome = renderLessonBody([
+      { type: 'paragraph', text: 'A bearing.', lede: true, cites: [1] },
+      REFS_BLOCK,
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: a lede paragraph cannot carry cites',
+    })
+  })
+
+  it('should refuse a refs block with no items', () => {
+    const outcome = renderLessonBody([{ type: 'refs', items: [] }])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: refs needs a non-empty items array',
+    })
+  })
+
+  it('should refuse a reference with an empty title', () => {
+    const outcome = renderLessonBody([{ type: 'refs', items: [{ title: '' }] }])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: reference 1 needs a non-empty string title',
+    })
+  })
+
+  it('should refuse a reference whose note is not a string', () => {
+    const outcome = renderLessonBody([
+      { type: 'refs', items: [{ title: 'Manual', note: 3 }] },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: reference 1 note must be a string',
+    })
+  })
+
+  it('should refuse a reference url that is not http or https', () => {
+    const outcome = renderLessonBody([
+      {
+        type: 'refs',
+        items: [{ title: 'Manual', url: 'javascript:alert(1)' }],
+      },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: reference 1 url must be an http or https URL',
+    })
+  })
+
+  it('should refuse a reference url that does not parse', () => {
+    const outcome = renderLessonBody([
+      { type: 'refs', items: [{ title: 'Manual', url: 'not a url' }] },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: reference 1 url must be an http or https URL',
+    })
+  })
+
+  it('should refuse a second refs block', () => {
+    const outcome = renderLessonBody([REFS_BLOCK, REFS_BLOCK])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 1: a lesson carries one refs block',
+    })
+  })
+
+  it('should refuse a cite past the reference count, naming the citing block', () => {
+    const outcome = renderLessonBody([
+      { type: 'heading', level: 1, text: 'Bearings' },
+      { type: 'paragraph', text: 'North.', cites: [3] },
+      REFS_BLOCK,
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 1: cite 3 resolves to no reference',
+    })
+  })
+
+  it('should refuse a cite when no refs block is present', () => {
+    const outcome = renderLessonBody([
+      { type: 'paragraph', text: 'North.', cites: [1] },
+    ])
+    expect(outcome).toMatchObject({
+      ok: false,
+      message: 'Block 0: cite 1 resolves to no reference',
+    })
+  })
+})
