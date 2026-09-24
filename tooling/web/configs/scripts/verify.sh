@@ -16,11 +16,38 @@ log_error() {
   exit 1
 }
 log_step() { echo -e "${GREY}│${NC}\n${GREY}├${NC} ${WHITE}$1${NC}"; }
+log_skip() { echo -e "${GREY}│ - $1${NC}"; }
 
 pipe_output() { while IFS= read -r line; do echo -e "${GREY}│${NC}  $line"; done; }
 
 check_dependencies() {
   command -v bun >/dev/null 2>&1 || log_error "bun is not installed"
+}
+
+check_package() {
+  [ -f package.json ] || log_error "No package.json here. Run 'bun init', then sync the stack again"
+}
+
+has_script() {
+  bun -e 'process.exit(require(process.cwd() + "/package.json").scripts?.[process.argv[1]] ? 0 : 1)' "$1"
+}
+
+# A subfolder synced with --skip base declares none of base's scripts, since
+# the repository root owns them. Each base phase runs only where its script is
+# declared, so this script passes on its own in that subfolder.
+run_base_phase() {
+  local title=$1
+  local script=$2
+  local err_msg=$3
+  local pass_msg=$4
+
+  log_step "$title"
+  if ! has_script "$script"; then
+    log_skip "Skipped: $script is not declared here, so the repository root runs it"
+    return
+  fi
+  run_check "bun run $script" "$err_msg"
+  log_info "$pass_msg"
 }
 
 run_check() {
@@ -36,6 +63,7 @@ run_check() {
 
 main() {
   check_dependencies
+  check_package
 
   if [ "$NESTED" = false ]; then echo -e "${GREY}┌${NC}"; fi
 
@@ -47,21 +75,10 @@ main() {
   run_check "bun run lint" "Lint failed"
   log_info "Lint passed"
 
-  log_step "Formatting"
-  run_check "bun run format" "Format failed"
-  log_info "Format applied"
-
-  log_step "Format check"
-  run_check "bun run check:format" "Format check failed"
-  log_info "Format check passed"
-
-  log_step "Spelling"
-  run_check "bun run check:spell" "Spell check failed"
-  log_info "Spell check passed"
-
-  log_step "Shell"
-  run_check "bun run check:shell" "Shell check failed"
-  log_info "Shell check passed"
+  run_base_phase "Formatting" "format" "Format failed" "Format applied"
+  run_base_phase "Format check" "check:format" "Format check failed" "Format check passed"
+  run_base_phase "Spelling" "check:spell" "Spell check failed" "Spell check passed"
+  run_base_phase "Shell" "check:shell" "Shell check failed" "Shell check passed"
 
   log_step "Unit tests"
   run_check "bun run test:run" "Unit tests failed"

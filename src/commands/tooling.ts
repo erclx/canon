@@ -20,6 +20,7 @@ import {
 import { readReference, resolveReference } from '@/tooling/read'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
+import { subfolderPath } from '@/tooling/subfolder'
 import {
   intro,
   isNonInteractive,
@@ -93,6 +94,11 @@ export function register(program: Command): void {
         '  canon tooling sync base',
         '  canon tooling sync base --check',
         '  CANON_NON_INTERACTIVE=1 canon tooling sync base --write',
+        '  canon tooling sync vite-react web --skip base',
+        '',
+        'A target below its git root syncs as a subfolder. It withholds',
+        '.github/, which GitHub reads only at the root, and writes a nested',
+        'cspell.json registering the stack word lists.',
         '',
         'To gate CI on tooling drift, run headlessly with neither flag. That',
         'exits 1 when a file would be replaced and 0 when none would, which is',
@@ -358,7 +364,7 @@ async function runSync(
 
   const result = scan(prepared.chain, prepared.target)
 
-  report(result)
+  report(result, prepared.target)
 
   if (opts.diff !== undefined) {
     if (opts.diff.json) {
@@ -568,7 +574,7 @@ async function promptForStack(): Promise<string | undefined> {
   })
 }
 
-function report(result: ScanResult): void {
+function report(result: ScanResult, target: string): void {
   logStep('Scanning configs')
   for (const entry of result.configs) {
     if (entry.state === 'matching') logInfo(entry.rel)
@@ -579,6 +585,8 @@ function report(result: ScanResult): void {
   for (const entry of result.configs) {
     if (entry.state === 'new') logAdd(entry.rel)
   }
+
+  if (result.withheld.length > 0) reportWithheld(result, target)
 
   logStep('Scanning seeds')
   for (const entry of result.seeds) {
@@ -591,6 +599,7 @@ function report(result: ScanResult): void {
   if (result.hasPackageJson) {
     reportPackage(result)
   } else {
+    logStep('Scanning package.json')
     logWarn(
       "Skipped scripts and deps: no package.json found (run 'bun init' to enable)",
     )
@@ -603,6 +612,20 @@ function report(result: ScanResult): void {
   for (const entry of result.gitignore) {
     if (entry.state === 'missing') logAdd(entry.entry)
   }
+}
+
+function reportWithheld(result: ScanResult, target: string): void {
+  logStep('Withheld from a subfolder')
+  for (const entry of result.withheld) logWarn(entry.rel)
+  for (const entry of result.withheld) {
+    if (entry.present) {
+      logWarn(`${entry.rel} is already here, and GitHub never reads this copy`)
+    }
+  }
+  logInfo(
+    'GitHub reads workflows only at the repository root. Add a root job that runs this folder with:',
+  )
+  logInfo(`working-directory: ${subfolderPath(target) ?? '.'}`)
 }
 
 function reportPackage(result: ScanResult): void {
