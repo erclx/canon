@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { COMPONENTS, TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
 import { buildDesignCss, slug, unmappedOnLight } from '@/design/css'
@@ -684,5 +686,88 @@ describe('buildDesignCss', () => {
     expect(css.match(/@font-face/g)).toHaveLength(2)
     expect(css).toContain("font-family: 'Virgil';")
     expect(css).toContain("font-family: 'Excalifont';")
+  })
+})
+
+const SCREENSHOT_CONFIG = join(
+  import.meta.dirname,
+  '../../tooling/web/configs/e2e/screenshot.ts',
+)
+
+const readCaptureWidths = (): number[] => {
+  const source = readFileSync(SCREENSHOT_CONFIG, 'utf8')
+  const viewports = source.match(/const VIEWPORTS[^=]*=\s*\[([\s\S]*?)\n\]/)
+  const widths = [...(viewports?.[1] ?? '').matchAll(/\bwidth:\s*(\d+)/g)]
+
+  return widths.map((match) => Number(match[1]))
+}
+
+const readWidthCuts = (css: string): number[] => {
+  const widthQueries = [...css.matchAll(/@media\s*([^{]*)\{/g)]
+    .map((match) => match[1].trim())
+    .filter((query) => query.includes('width'))
+
+  return widthQueries.map((query) => {
+    const match = query.match(/^\((max|min)-width:\s*(\d+)px\)$/)
+    if (match === null) {
+      throw new Error(`Unparsed width query: ${query}`)
+    }
+    const value = Number(match[2])
+
+    return match[1] === 'max' ? value : value - 1
+  })
+}
+
+const uncoveredRanges = (cuts: number[], widths: number[]): string[] => {
+  const sortedCuts = [...new Set(cuts)].sort((a, b) => a - b)
+  const bounds = [0, ...sortedCuts, Number.POSITIVE_INFINITY]
+  const ranges = bounds
+    .slice(1)
+    .map((upper, index) => ({ lower: bounds[index] + 1, upper }))
+
+  return ranges
+    .filter(
+      ({ lower, upper }) =>
+        !widths.some((width) => width >= lower && width <= upper),
+    )
+    .map(({ lower, upper }) => `${lower} to ${upper}`)
+}
+
+describe('capture widths', () => {
+  it('reads a width from every viewport the capture config declares', () => {
+    expect(readCaptureWidths()).toEqual([320, 768, 1280, 1536])
+  })
+
+  it('reach every range the base and teach width queries lay out', () => {
+    const cuts = [
+      ...readWidthCuts(buildDesignCss()),
+      ...readWidthCuts(
+        buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS }),
+      ),
+    ]
+
+    expect(uncoveredRanges(cuts, readCaptureWidths())).toEqual([])
+  })
+
+  it('reports the range a moved query opens with no width inside it', () => {
+    expect(uncoveredRanges([640, 1300, 1420], [320, 768, 1280, 1536])).toEqual([
+      '1301 to 1420',
+    ])
+  })
+
+  it('refuses a width query it cannot parse rather than skipping it', () => {
+    expect(() =>
+      readWidthCuts('@media (min-width: 40em) { a { color: red } }'),
+    ).toThrow('Unparsed width query: (min-width: 40em)')
+  })
+
+  it('names the declared widths and the range check in the layout record', () => {
+    const widths = readCaptureWidths()
+    const named = [...TOKENS.layout.matchAll(/\b(\d{3,4})\b/g)]
+      .map((match) => Number(match[1]))
+      .filter((width) => widths.includes(width))
+
+    expect([...new Set(named)]).toEqual(widths)
+    expect(TOKENS.layout).toContain('a range none of them reaches')
   })
 })
