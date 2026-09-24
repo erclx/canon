@@ -1,8 +1,9 @@
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, lstatSync, readdirSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git-env'
-import { RECORD_ROOTS, recordRoot } from '@/record-root'
+import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/record-root'
+import { type BlockedPath, guardPayload } from '@/records/push-guard'
 
 /**
  * The legacy `.claude`-root allowlist, read only when a project has not moved
@@ -81,12 +82,31 @@ const RECORDS_GIT_NAME = '.records.git'
  * every entry already keeps a pull's `README.md` out, so this is the one name
  * that still has to be said: without it a listing would stage the history
  * into itself.
+ *
+ * The list bounds the records index as well as the disk. `scopedFolders`
+ * filters the names the index tracks through `isExcluded`, so a name an older
+ * binary committed is removed from the history once rather than re-staged on
+ * every push by the `-f` that carries the payload.
  */
 export const EXCLUDED_ENTRIES = [
   'tmp',
   'ordinal-locks',
   RECORDS_GIT_NAME,
 ] as const
+
+/**
+ * Whether a top-level name stays out of every push, at either root.
+ *
+ * `SCRATCH` is the legacy `.tmp` spelling, which a records index opened before
+ * the move can still carry and which `EXCLUDED_ENTRIES` names at its `.canon`
+ * spelling only.
+ */
+function isExcluded(name: string): boolean {
+  return (
+    name === SCRATCH ||
+    EXCLUDED_ENTRIES.includes(name as (typeof EXCLUDED_ENTRIES)[number])
+  )
+}
 
 /**
  * The record folders sitting at `dir` right now, at either root spelling.
@@ -112,10 +132,7 @@ function foldersAt(dir: string): string[] {
   return entries
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .filter(
-      (name) =>
-        !EXCLUDED_ENTRIES.includes(name as (typeof EXCLUDED_ENTRIES)[number]),
-    )
+    .filter((name) => !isExcluded(name))
 }
 
 /**
@@ -197,6 +214,7 @@ export const BACKUP_REFUSALS = [
   'no-remote-records',
   'local-changes',
   'local-ahead',
+  'unsafe-payload',
   'git-failed',
 ] as const
 
@@ -206,6 +224,8 @@ export interface BackupRefused {
   readonly ok: false
   readonly reason: BackupRefusal
   readonly message: string
+  /** Every pending path the payload guard refused, carried on `unsafe-payload` only. */
+  readonly blocked?: readonly BlockedPath[]
 }
 
 export interface PushReport {
@@ -214,6 +234,10 @@ export interface PushReport {
   readonly folders: readonly string[]
   /** A folder in scope this push found on disk but the records index had never tracked. */
   readonly firstSeen: readonly string[]
+  /** Every file this push stages that the records history has never carried. */
+  readonly added: readonly string[]
+  /** An excluded name the records index still tracked, removed from the history going forward. */
+  readonly dropped: readonly string[]
   readonly changed: number
   readonly commit?: string
   readonly pushed: boolean
@@ -450,10 +474,14 @@ function refuseSplitRoots(root: string): BackupRefused | undefined {
   )
 }
 
-/** A pathspec-safe subset, plus which of it never entered the records index before. */
+/**
+ * A pathspec-safe subset, which of it never entered the records index before,
+ * and which excluded names the index still tracks.
+ */
 interface FolderScope {
   readonly scope: readonly string[]
   readonly firstSeen: readonly string[]
+  readonly dropped: readonly string[]
 }
 
 /**
@@ -476,12 +504,19 @@ interface FolderScope {
  * tracked, which is the read a caller reports rather than acts on: a folder
  * `.canon` picked up that should have been excluded is visible in the push
  * report instead of entering the payload silently.
+ *
+ * The index half passes through `isExcluded` before the union, since the index
+ * is the one side an excluded name can still reach the pathspec through. A
+ * name it drops is returned as `dropped` rather than silently forgotten, so the
+ * push can remove it from the history once and say so.
  */
 async function scopedFolders(root: string): Promise<FolderScope> {
   const tracked = await records(root, ['ls-files'])
-  const indexed = new Set(
+  const everIndexed = new Set(
     tracked.ok ? tracked.text.split('\n').filter(Boolean).map(topSegment) : [],
   )
+  const indexed = new Set([...everIndexed].filter((name) => !isExcluded(name)))
+  const dropped = [...everIndexed].filter(isExcluded).sort()
 
   const present = new Set(foldersAt(workTree(root)))
   const retired = RETIRED_FOLDERS.filter(
@@ -492,7 +527,7 @@ async function scopedFolders(root: string): Promise<FolderScope> {
     (folder) => present.has(folder) && !indexed.has(folder),
   )
 
-  return { scope, firstSeen }
+  return { scope, firstSeen, dropped }
 }
 
 function topSegment(path: string): string {
@@ -531,12 +566,105 @@ function countLines(text: string): number {
   return text.split('\n').filter(Boolean).length
 }
 
+function splitNul(text: string): string[] {
+  return text.split('\0').filter(Boolean)
+}
+
+/**
+ * The files `add -A -f` is about to stage from `scope`, split into those the
+ * history has never carried and every pending one.
+ *
+ * `ls-files -o` without `--exclude-standard` lists ignored files too, which is
+ * what `-f` stages. `-m` also lists a deleted file and `-o` lists an embedded
+ * repository as a `dir/` entry, so both are filtered down to regular files,
+ * which is all a payload check has bytes to read.
+ */
+async function pendingFiles(
+  root: string,
+  scope: readonly string[],
+): Promise<{ added: string[]; pending: string[] } | BackupRefused> {
+  if (scope.length === 0) return { added: [], pending: [] }
+
+  const [others, modified] = await Promise.all([
+    records(root, ['ls-files', '-z', '-o', '--', ...scope]),
+    records(root, ['ls-files', '-z', '-m', '--', ...scope]),
+  ])
+  if (!others.ok) return failed('ls-files', others)
+  if (!modified.ok) return failed('ls-files', modified)
+
+  const tree = workTree(root)
+  const isRegularFile = (path: string): boolean => {
+    try {
+      return lstatSync(join(tree, path)).isFile()
+    } catch {
+      return false
+    }
+  }
+
+  const added = splitNul(others.text).filter(isRegularFile).sort()
+  const pending = [
+    ...new Set([...added, ...splitNul(modified.text).filter(isRegularFile)]),
+  ].sort()
+
+  return { added, pending }
+}
+
+function refuseBlocked(blocked: readonly BlockedPath[]): BackupRefused {
+  return {
+    ...refuse(
+      'unsafe-payload',
+      [
+        `${blocked.length} record(s) cannot be backed up, so nothing was staged or pushed:`,
+        ...blocked.map(
+          (finding) =>
+            `  ${finding.path} (${finding.cause}: ${finding.detail})`,
+        ),
+        'Move each out of the record folders, such as into .canon/tmp/, or remove the credential, then push again.',
+      ].join('\n'),
+    ),
+    blocked,
+  }
+}
+
+/**
+ * Puts HEAD and the index back where they stood before this run committed.
+ *
+ * A mixed reset to the recorded HEAD rather than `reset --soft HEAD~1`. A soft
+ * reset leaves a dropped name's deletion staged while the next run's index read
+ * no longer lists the name, so that run's diff never sees the deletion and it
+ * is never committed. The recorded HEAD also covers the root commit, where
+ * `HEAD~1` does not exist and only removing the ref restores an unborn branch.
+ *
+ * Returns an error sentence when the undo itself failed, so the caller appends
+ * it rather than reporting a clean history that is not.
+ */
+async function undoCommit(
+  root: string,
+  priorHead: string,
+): Promise<string | undefined> {
+  if (priorHead.length > 0) {
+    const reset = await records(root, ['reset', '--quiet', priorHead])
+    return reset.ok ? undefined : `Undoing it failed: ${reset.stderr}.`
+  }
+
+  const unref = await records(root, ['update-ref', '-d', 'HEAD'])
+  if (!unref.ok) return `Undoing it failed: ${unref.stderr}.`
+  const reset = await records(root, ['reset', '--quiet'])
+  return reset.ok ? undefined : `Undoing it failed: ${reset.stderr}.`
+}
+
 /**
  * Stages the backed folders, commits when any of them changed, and pushes.
  *
- * The push runs whether or not this call committed, because a previous run can
- * have committed and then failed to reach the network. Skipping it would leave
- * that commit on one disk, which is the state the whole verb exists to end.
+ * The payload guard reads every pending file ahead of the stage, so a refusal
+ * leaves the index and the object store exactly as it found them. It reads what
+ * this run would add, never a commit already in the history.
+ *
+ * The push runs whether or not this call committed, because an older binary
+ * can have committed and then failed to reach the network. Skipping it would
+ * leave that commit on one disk, which is the state the whole verb exists to
+ * end. A commit this call made is undone when the push fails, so a remote that
+ * rejects the payload is not handed the same commit again on every later run.
  */
 export async function pushRecords(root: string): Promise<PushOutcome> {
   const split = refuseSplitRoots(root)
@@ -546,26 +674,55 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
   const remote = await resolveRemote(root, enclosing)
   if (typeof remote !== 'string') return remote
 
-  const { scope, firstSeen } = await scopedFolders(root)
+  const { scope, firstSeen, dropped } = await scopedFolders(root)
+
+  const files = await pendingFiles(root, scope)
+  if ('ok' in files) return files
+
+  const blocked = await guardPayload(workTree(root), files.pending)
+  if (blocked.length > 0) return refuseBlocked(blocked)
 
   if (scope.length > 0) {
     // `-f` is what carries the payload: every backed folder is ignored by the
     // enclosing repository, and the pathspecs are the whole list, so nothing
-    // outside them can enter the index however the ignore rules read.
+    // outside them can enter the index however the ignore rules read. An
+    // excluded name never reaches the list, whatever the records index holds.
     const staged = await records(root, ['add', '-A', '-f', '--', ...scope])
     if (!staged.ok) return failed('add', staged)
   }
 
+  if (dropped.length > 0) {
+    const removed = await records(root, [
+      'rm',
+      '-r',
+      '--cached',
+      '--quiet',
+      '--',
+      ...dropped,
+    ])
+    if (!removed.ok) return failed('rm', removed)
+  }
+
+  // Scope alone would miss the dropped deletions, which sit outside it.
   const diff = await records(root, [
     'diff',
     '--cached',
     '--name-only',
     '--',
     ...scope,
+    ...dropped,
   ])
   if (!diff.ok) return failed('diff', diff)
 
   const changed = countLines(diff.text)
+
+  const prior = await records(root, [
+    'rev-parse',
+    '--verify',
+    '--quiet',
+    'HEAD',
+  ])
+  const priorHead = prior.ok ? prior.text : ''
 
   if (changed > 0) {
     const stamp = new Date().toISOString().replace('T', ' ').slice(0, 16)
@@ -579,11 +736,17 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
     if (!commit.ok) return failed('commit', commit)
   }
 
-  const folders = presentFolders(root)
+  const report = {
+    ok: true,
+    root,
+    folders: presentFolders(root),
+    firstSeen,
+    added: files.added,
+    dropped,
+    changed,
+  } as const
   const head = await records(root, ['rev-parse', '--short', 'HEAD'])
-  if (!head.ok) {
-    return { ok: true, root, folders, firstSeen, changed, pushed: false }
-  }
+  if (!head.ok) return { ...report, pushed: false }
 
   const branch = await projectBranch(root, enclosing)
   const pushed = await records(root, [
@@ -591,17 +754,24 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
     'origin',
     `HEAD:refs/heads/${branch}`,
   ])
-  if (!pushed.ok) return failed('push', pushed)
+  if (!pushed.ok) {
+    const refused = failed('push', pushed)
+    if (changed === 0) return refused
 
-  return {
-    ok: true,
-    root,
-    folders,
-    firstSeen,
-    changed,
-    commit: head.text,
-    pushed: true,
+    const undoError = await undoCommit(root, priorHead)
+    return refuse(
+      'git-failed',
+      [
+        refused.message,
+        'The commit this run made was undone, and the records are still on disk.',
+        undoError,
+      ]
+        .filter(Boolean)
+        .join(' '),
+    )
   }
+
+  return { ...report, commit: head.text, pushed: true }
 }
 
 /**

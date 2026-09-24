@@ -113,7 +113,11 @@ else
   # the one-time setup. Nothing to report.
   if [ "$reason" != "no-repository" ]; then
     printf '\n🗄️  Records not backed up: %s\n' "${reason:-unknown}"
-    printf 'Run canon records push when the remote is reachable.\n\n'
+    if [ "$reason" = "unsafe-payload" ]; then
+      printf 'Run canon records push to see the blocked paths.\n\n'
+    else
+      printf 'Run canon records push when the remote is reachable.\n\n'
+    fi
   fi
 fi
 

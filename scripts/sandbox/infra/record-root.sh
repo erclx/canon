@@ -240,6 +240,15 @@ stage_setup() {
     rm -rf "$origin"
     git init --quiet --bare "$origin"
 
+    # A push lands on one branch per project, named from the project's own
+    # origin or directory, so the read follows whichever branch the push made
+    # rather than naming one.
+    origin_tree() {
+      local branch
+      branch=$(git -C "$origin" for-each-ref --count=1 --format='%(refname:short)' refs/heads)
+      git -C "$origin" ls-tree -r --name-only "$branch" | sort
+    }
+
     # The history is opened at the old root because this arm builds an
     # unmigrated tree, which is what gives the split-root refusal below
     # something to refuse. A sweep rewriting either line would have the arm
@@ -253,7 +262,7 @@ stage_setup() {
     run_cli records push --root . --json
     log_info "Expect: ok true, the three seeded folders, and a commit on the bare origin"
     log_step "Reading the origin back"
-    git -C "$origin" ls-tree -r --name-only main | sort
+    origin_tree
     log_info "Expect: bare paths such as tasks/index.md, with no record root in any of them"
 
     # Half a move is what a failed rename leaves, and it is the state the push
@@ -268,7 +277,7 @@ stage_setup() {
     run_cli records push --root . --json
     log_info "Expect: ok false with reason split-roots, naming the two left at .claude/"
     log_step "Reading the origin back"
-    git -C "$origin" ls-tree -r --name-only main | sort
+    origin_tree
     log_info "Expect: unchanged, so the refusal is what kept the folders on the remote"
     log_step "Running: canon records pull --root ."
     run_cli records pull --root . --json
@@ -280,7 +289,7 @@ stage_setup() {
     run_cli records push --root . --json
     log_info "Expect: ok true again, the work tree now resolving at .canon/"
     log_step "Reading the origin back"
-    git -C "$origin" ls-tree -r --name-only main | sort
+    origin_tree
     log_info "Expect: the same paths and changed 0, since the history stores none of the root"
     ;;
 

@@ -4,6 +4,7 @@ import {
   readFileSync,
   renameSync,
   rmSync,
+  truncateSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -18,6 +19,7 @@ import {
   pullRecords,
   pushRecords,
 } from '@/records/backup'
+import { MAX_RECORD_BYTES } from '@/records/push-guard'
 
 let ROOT: string
 let ORIGIN: string
@@ -68,6 +70,56 @@ async function makeRecordsRepo(root: string, origin: string): Promise<void> {
   await recordsGit(root, ['remote', 'add', 'origin', origin])
 }
 
+const CANON_ROOTS: string[] = []
+
+function writeCanonRecord(root: string, path: string, text: string): void {
+  const full = join(root, '.canon', path)
+  mkdirSync(join(full, '..'), { recursive: true })
+  writeFileSync(full, text)
+}
+
+function canonRecordsGit(root: string, args: string[]): Promise<string> {
+  const tree = join(root, '.canon')
+  return git([
+    '-C',
+    tree,
+    '--git-dir',
+    join(tree, '.records.git'),
+    '--work-tree',
+    tree,
+    ...args,
+  ])
+}
+
+/**
+ * A git project at the `.canon` root holding `records`, keyed by path under
+ * that root, with a records history pointed at `ORIGIN` and nothing committed.
+ */
+async function makeCanonProject(
+  records: Record<string, string>,
+): Promise<string> {
+  const root = mkdtempSync(join(tmpdir(), 'canon-backup-canon-'))
+  CANON_ROOTS.push(root)
+  for (const [path, text] of Object.entries(records)) {
+    writeCanonRecord(root, path, text)
+  }
+  await git(['init', '--quiet', root])
+
+  const gitDir = join(root, '.canon', '.records.git')
+  await git(['--git-dir', gitDir, 'init'])
+  await git(['--git-dir', gitDir, 'remote', 'add', 'origin', ORIGIN])
+  return root
+}
+
+/** The log, the index, and the object count, which a refused push must leave alone. */
+async function recordsState(root: string): Promise<string[]> {
+  return Promise.all([
+    recordsGit(root, ['log', '--oneline']),
+    recordsGit(root, ['ls-files']),
+    recordsGit(root, ['count-objects', '-v']),
+  ])
+}
+
 /**
  * Runs `verb` with the process sitting inside the records work tree, which is
  * where a session in a linked worktree under `.claude/worktrees/<name>/`
@@ -102,6 +154,9 @@ beforeEach(async () => {
 afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
   rmSync(ORIGIN, { recursive: true, force: true })
+  for (const root of CANON_ROOTS.splice(0)) {
+    rmSync(root, { recursive: true, force: true })
+  }
 })
 
 describe('BACKED_FOLDERS', () => {
@@ -351,19 +406,13 @@ describe('pushRecords', () => {
   // folder set from outside any more, so a new top-level directory is carried
   // and named as first seen, while the two excluded folder names are not.
   it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
-    const canonRoot = mkdtempSync(join(tmpdir(), 'canon-backup-canon-'))
-    mkdirSync(join(canonRoot, '.canon', 'memory'), { recursive: true })
-    writeFileSync(join(canonRoot, '.canon', 'memory', 'entry.md'), '# memory\n')
-    mkdirSync(join(canonRoot, '.canon', 'tmp'), { recursive: true })
-    writeFileSync(join(canonRoot, '.canon', 'tmp', 'scratch.md'), 'scratch\n')
+    const canonRoot = await makeCanonProject({
+      'memory/entry.md': '# memory\n',
+      'tmp/scratch.md': 'scratch\n',
+    })
     mkdirSync(join(canonRoot, '.canon', 'ordinal-locks', '01'), {
       recursive: true,
     })
-    await git(['init', '--quiet', canonRoot])
-
-    const canonGitDir = join(canonRoot, '.canon', '.records.git')
-    await git(['--git-dir', canonGitDir, 'init'])
-    await git(['--git-dir', canonGitDir, 'remote', 'add', 'origin', ORIGIN])
 
     const outcome = await pushRecords(canonRoot)
 
@@ -375,8 +424,151 @@ describe('pushRecords', () => {
     expect(tracked).toContain('memory/entry.md')
     expect(tracked).not.toContain('tmp/')
     expect(tracked).not.toContain('ordinal-locks/')
+  })
 
-    rmSync(canonRoot, { recursive: true, force: true })
+  // An older binary put `tmp` into the records index, and folding the index
+  // into the scope re-admitted it on every later push through `add -f`,
+  // whatever the exclusion list said. The name leaves the history once and
+  // then stays out.
+  it('should drop an excluded name the records index still tracks, once', async () => {
+    const canonRoot = await makeCanonProject({
+      'memory/entry.md': '# memory\n',
+      'tmp/old/notes.md': 'old scratch\n',
+    })
+    await canonRecordsGit(canonRoot, ['add', '-f', '--', 'memory', 'tmp'])
+    await canonRecordsGit(canonRoot, [
+      '-c',
+      'user.name=t',
+      '-c',
+      'user.email=t@t',
+      'commit',
+      '--quiet',
+      '-m',
+      'older binary',
+    ])
+    writeCanonRecord(canonRoot, 'tmp/new-slug/backup.md', 'new scratch\n')
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.dropped).toEqual(['tmp'])
+    expect(await trackedOnOrigin(canonRoot)).not.toContain('tmp/')
+
+    const second = await pushRecords(canonRoot)
+
+    expect(second.ok).toBe(true)
+    if (!second.ok) return
+    expect(second.dropped).toEqual([])
+    expect(second.changed).toBe(0)
+  })
+
+  it('should name a new file under a tracked folder as added, not first seen', async () => {
+    const canonRoot = await makeCanonProject({
+      'memory/entry.md': '# memory\n',
+    })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'memory/second.md', '# second\n')
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.added).toEqual(['memory/second.md'])
+    expect(outcome.firstSeen).toEqual([])
+  })
+
+  it('should refuse the whole push on an oversized record, staging nothing', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    await pushRecords(ROOT)
+    const before = await recordsState(ROOT)
+    const big = join(ROOT, '.claude', 'groundwork', 'backup.tar')
+    writeFileSync(big, '')
+    truncateSync(big, MAX_RECORD_BYTES + 1)
+    writeFileSync(join(ROOT, '.claude', 'memory', 'fine.md'), '# fine\n')
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('unsafe-payload')
+    expect(outcome.blocked?.map((finding) => finding.path)).toEqual([
+      'groundwork/backup.tar',
+    ])
+    expect(await recordsState(ROOT)).toEqual(before)
+  })
+
+  it('should refuse the whole push on a record carrying a credential', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    await pushRecords(ROOT)
+    const before = await recordsState(ROOT)
+    writeFileSync(
+      join(ROOT, '.claude', 'plans', '.env'),
+      `TOKEN=ghp_${'a'.repeat(36)}\n`,
+    )
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('unsafe-payload')
+    expect(outcome.blocked).toEqual([
+      {
+        path: 'plans/.env',
+        cause: 'credential',
+        detail: 'GitHub token at line 1',
+      },
+    ])
+    expect(outcome.message).toContain('plans/.env')
+    expect(await recordsState(ROOT)).toEqual(before)
+  })
+
+  it('should undo its own root commit when the push is rejected', async () => {
+    await makeRecordsRepo(ROOT, join(ORIGIN, 'missing'))
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.message).toContain('undone')
+    expect(
+      await recordsGit(ROOT, ['rev-parse', '--verify', '--quiet', 'HEAD']),
+    ).toBe('')
+    expect(await recordsGit(ROOT, ['ls-files'])).toBe('')
+
+    await recordsGit(ROOT, ['remote', 'set-url', 'origin', ORIGIN])
+    const retried = await pushRecords(ROOT)
+
+    expect(retried.ok).toBe(true)
+    if (!retried.ok) return
+    expect(retried.changed).toBe(BACKED_FOLDERS.length)
+    expect(retried.pushed).toBe(true)
+  })
+
+  it('should undo a later commit when the push is rejected', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    await pushRecords(ROOT)
+    const priorHead = await recordsGit(ROOT, ['rev-parse', 'HEAD'])
+    writeFileSync(join(ROOT, '.claude', 'memory', 'later.md'), '# later\n')
+    await recordsGit(ROOT, [
+      'remote',
+      'set-url',
+      'origin',
+      join(ORIGIN, 'missing'),
+    ])
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    expect(await recordsGit(ROOT, ['rev-parse', 'HEAD'])).toBe(priorHead)
+
+    await recordsGit(ROOT, ['remote', 'set-url', 'origin', ORIGIN])
+    const retried = await pushRecords(ROOT)
+
+    expect(retried.ok).toBe(true)
+    if (!retried.ok) return
+    expect(retried.changed).toBe(1)
+    expect(await trackedOnOrigin(ROOT)).toContain('memory/later.md')
   })
 
   it('should commit nothing on a second push that changed no record', async () => {
