@@ -92,7 +92,7 @@ Step 2: `canon tooling sync <tooling-stack> --write` installs stack deps, script
 CANON_NON_INTERACTIVE=1 canon tooling sync <tooling-stack> <target> --write
 ```
 
-Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, prettier, cspell, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped.
+Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, prettier, cspell, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped. Take the subtree commands from the per-root rows the preview printed rather than picking folders by hand. Detection found each root and its stack, and the two commands below show the shape.
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon tooling sync vite-react ./frontend --skip base --write

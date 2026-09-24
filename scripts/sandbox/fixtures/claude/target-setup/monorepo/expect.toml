@@ -1,0 +1,44 @@
+# What a correct `/canon:target-setup` run leaves behind on the `monorepo` arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# The tree holds three language roots below a root `package.json` carrying no
+# dependencies: `web/` with React and Vite, `api/` with a Python project, and
+# `svc/` with a Go module. Detection has to find all three to pass, since a run
+# reading markers at the root alone resolves everything to `base`.
+
+# The `fresh` arm cost 20 turns against the default cap of 30, and this arm adds
+# two subfolder syncs on top of the same chain. The ceiling holds at the default
+# until a first run gives a measurement to set it from.
+max_turns = 30
+
+# Governance installs once at the root, so each subfolder's language reaches the
+# rule set through `--add` rather than through a stack of its own. One rule per
+# root proves the walk reached it. The two tooling configs prove each subfolder
+# took its own sync.
+#
+# `svc/` carries no tooling assertion. A driven session calls the published
+# `canon`, and a Go tooling config asserted here fails against any release
+# predating that stack while the detection under test ran correctly.
+paths = [
+  ".claude/rules/canon/lang/110-python.md",
+  ".claude/rules/canon/lang/130-go.md",
+  ".claude/rules/canon/framework/200-react.md",
+  "web/eslint.config.js",
+  "api/ruff.toml",
+]
+
+# A subfolder sync that ran without `--skip base` re-drops husky, and git honors
+# one `core.hooksPath`, so the extra hook folder breaks silently. A subtree sync
+# also withholds `.github/`, which GitHub reads only at the repository root.
+absent = [
+  "web/.github/workflows/verify.yml",
+  "api/.github",
+  "web/.husky",
+  "api/.husky",
+]
+
+manual = [
+  "The preview prints one tooling row per language root, each with its path, stack, and command. Unwired: the envelope carries the final reply rather than the preview, and a substring naming each folder cannot separate a row from a passing mention",
+  "The root row resolves to 'base' and adds no command of its own. Semantic: `canon init` lands the same layer, so no tree assertion separates a redundant sync from a skipped one",
+]
