@@ -330,6 +330,12 @@ function backupHelp(verb: 'push' | 'pull'): string {
           'It commits nothing outside the folders above and leaves the project working',
           'tree untouched. The push runs even when this call committed nothing, since a',
           'previous run can have committed and then failed to reach the network.',
+          '',
+          'Before staging, it refuses the whole push as unsafe-payload when any new or',
+          'changed file is over 25 MB or carries a credential canon secrets scan would',
+          'report, naming each path. Nothing is staged or committed when it refuses.',
+          'A push the remote rejects undoes the commit this call made, so the records',
+          'stay on disk and no later run sends that commit again.',
         ]
       : [
           'It refuses rather than discarding local records that never reached the remote,',
@@ -569,6 +575,12 @@ async function runPush(opts: BackupCommandOptions): Promise<number> {
   if (outcome.firstSeen.length > 0) {
     logWarn(`first seen: ${outcome.firstSeen.join(', ')}`)
   }
+  for (const path of outcome.added) logInfo(`added: ${path}`)
+  if (outcome.dropped.length > 0) {
+    logWarn(
+      `excluded but still tracked, removed from the history going forward: ${outcome.dropped.join(', ')}`,
+    )
+  }
   logStep(outcome.pushed ? 'Pushed' : 'Nothing to push')
   logInfo(
     outcome.commit
@@ -609,7 +621,11 @@ async function runPull(opts: BackupCommandOptions): Promise<number> {
  */
 function reportRefusal(
   banner: string,
-  outcome: { readonly reason: string; readonly message: string },
+  outcome: {
+    readonly reason: string
+    readonly message: string
+    readonly blocked?: readonly unknown[]
+  },
   emitJson: boolean,
 ): number {
   if (emitJson) {
@@ -619,6 +635,7 @@ function reportRefusal(
         ok: false,
         reason: outcome.reason,
         message: outcome.message,
+        ...(outcome.blocked ? { blocked: outcome.blocked } : {}),
       })}\n`,
     )
     return 1
