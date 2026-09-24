@@ -11,6 +11,11 @@ import {
   selfOf,
 } from '@/sessions/resolve'
 import {
+  type Behind,
+  exportSession,
+  importSession,
+} from '@/sessions/transfer/bundle'
+import {
   intro,
   logInfo,
   logStep,
@@ -19,6 +24,7 @@ import {
   pipeOutput,
   plural,
 } from '@/ui'
+import { mainWorktreeRoot } from '@/worktree'
 
 interface ListCommandOptions {
   readonly json?: boolean
@@ -144,6 +150,220 @@ export function register(program: Command): void {
     .action(async (opts: ListCommandOptions) => {
       process.exitCode = await runList(opts)
     })
+
+  sessions
+    .command('export')
+    .description(
+      'Pack a session transcript, its side folder, and a manifest into one local bundle',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .argument('<id>', 'The sessionId to export')
+    .option(
+      '--out <path>',
+      'Write the bundle here rather than under .canon/tmp/session-export/',
+    )
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the bundle was written',
+        '  1  refused, with the reason on stderr and in the record',
+        '',
+        'The bundle is a gzip tarball on local disk and is never uploaded. It',
+        'holds whatever tool output passed through the session, so treat it as',
+        'private. Export runs no skill: write and push a handoff first where one',
+        'is wanted, and the manifest reports whether one was found and pushed.',
+        '',
+        'Refusal reasons: "not-found" (no transcript carries the id) and',
+        '"no-archive" (this Bun has no Bun.Archive).',
+        '',
+        'Examples:',
+        '  canon sessions export <id>',
+        '  canon sessions export <id> --out ~/session.tar.gz --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (id: string, opts: ExportCommandOptions) => {
+      process.exitCode = await runExport(id, opts)
+    })
+
+  sessions
+    .command('import')
+    .description(
+      'Place an exported session under this machine so claude can resume it',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .argument('<bundle>', 'The bundle an export wrote')
+    .option(
+      '--root <path>',
+      'The repository to resume in. Defaults to the main worktree',
+    )
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the session was placed, with any lag reported in "behind"',
+        '  1  refused, with the reason on stderr and in the record',
+        '',
+        'Refusal reasons: "not-a-bundle", "other-repository" (the origin',
+        'differs), "exists" (the transcript or side folder is already there),',
+        '"live-here" (the id is live on this machine), and "no-archive".',
+        '',
+        '"behind" lists "repository-behind" when this checkout lacks the',
+        'exported HEAD, and "records-behind" when the records history lacks',
+        'the exported records commit, which canon records pull brings.',
+        '',
+        'Examples:',
+        '  canon sessions import session.tar.gz',
+        '  canon sessions import session.tar.gz --root ~/repos/canon --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (bundle: string, opts: ImportCommandOptions) => {
+      process.exitCode = await runImport(bundle, opts)
+    })
+}
+
+interface ExportCommandOptions {
+  readonly out?: string
+  readonly json?: boolean
+}
+
+interface ImportCommandOptions {
+  readonly root?: string
+  readonly json?: boolean
+}
+
+/**
+ * Whether a session id is live in the local roster. An unreadable roster
+ * answers false, since the roster is advisory here and the manifest says so.
+ */
+async function isLiveHere(id: string): Promise<boolean> {
+  const report = await resolveSessions()
+  return (
+    report.kind === 'resolved' &&
+    report.sessions.some((session) => session.sessionId === id)
+  )
+}
+
+function writeRecord(json: boolean | undefined, record: object): void {
+  if (json) process.stdout.write(`${JSON.stringify(record)}\n`)
+}
+
+async function runExport(
+  id: string,
+  opts: ExportCommandOptions,
+): Promise<number> {
+  const outcome = await exportSession({
+    id,
+    out: opts.out ? resolve(opts.out) : undefined,
+    isLive: isLiveHere,
+  })
+
+  intro('canon sessions export')
+
+  if (!outcome.ok) {
+    logStep('Refused')
+    logWarn(outcome.message)
+    outro()
+    writeRecord(opts.json, { ...outcome, sessionId: id })
+    return 1
+  }
+
+  const { manifest } = outcome
+  logStep('Bundle')
+  logInfo(`Wrote ${outcome.path}`)
+  logInfo(`${plural(outcome.files.length, 'side file')} beside the transcript`)
+
+  if (manifest.live) {
+    logWarn(
+      'The session is live, so the copy stops at its last whole line and resuming elsewhere forks it.',
+    )
+  }
+
+  logStep('Handoff')
+  if (manifest.handoff === null) {
+    logInfo(
+      'No compact note since the session began, so resume the transcript.',
+    )
+  } else if (manifest.handoffCommitted) {
+    logInfo(`${manifest.handoff} is in the records history. Prefer it.`)
+  } else {
+    logWarn(
+      `${manifest.handoff} is not in the records history yet. Run canon records push so the other machine can pull it.`,
+    )
+  }
+  outro()
+
+  writeRecord(opts.json, {
+    ok: true,
+    path: outcome.path,
+    sessionId: id,
+    files: outcome.files,
+    manifest,
+  })
+  return 0
+}
+
+const BEHIND_REMEDIES: Record<Behind, string> = {
+  'repository-behind':
+    'This checkout lacks the exported HEAD. Fetch and check out the branch before resuming.',
+  'records-behind':
+    'The records history lacks the exported commit. Run canon records pull to bring the handoff.',
+}
+
+async function runImport(
+  bundle: string,
+  opts: ImportCommandOptions,
+): Promise<number> {
+  const root = opts.root ? resolve(opts.root) : await mainWorktreeRoot()
+  const outcome = await importSession({
+    bundle: resolve(bundle),
+    root,
+    isLive: isLiveHere,
+  })
+
+  intro('canon sessions import')
+
+  if (!outcome.ok) {
+    logStep('Refused')
+    logWarn(outcome.message)
+    outro()
+    writeRecord(opts.json, outcome)
+    return 1
+  }
+
+  logStep('Placed')
+  logInfo(outcome.transcript)
+  logInfo(
+    `Folder ${outcome.folder}, derived from ${root}. --continue looks there, and --resume finds the id in any folder.`,
+  )
+  for (const lag of outcome.behind) logWarn(BEHIND_REMEDIES[lag])
+
+  logStep('Resume')
+  logInfo(
+    outcome.manifest.recommend === 'handoff'
+      ? `Recommended: the handoff at ${outcome.manifest.handoff}, since the transcript carries the source machine's absolute paths.`
+      : 'Recommended: the transcript, since no handoff was written since the session began.',
+  )
+  for (const route of outcome.routes) logInfo(route)
+  outro()
+
+  writeRecord(opts.json, {
+    ok: true,
+    sessionId: outcome.manifest.sessionId,
+    folder: outcome.folder,
+    transcript: outcome.transcript,
+    files: outcome.files,
+    behind: outcome.behind,
+    routes: outcome.routes,
+    manifest: outcome.manifest,
+  })
+  return 0
 }
 
 async function runList(opts: ListCommandOptions): Promise<number> {
