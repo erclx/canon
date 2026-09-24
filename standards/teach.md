@@ -44,18 +44,19 @@ A workspace failing these is non-conforming even when it satisfies every shape r
 
 ## Layout
 
-| Path                  | Holds                                                  | Required |
-| --------------------- | ------------------------------------------------------ | -------- |
-| `MISSION.md`          | The subject, the learner's starting point, and success | Always   |
-| `RESOURCES.md`        | Sources read and sources found but not opened          | Always   |
-| `GLOSSARY.md`         | Terms the subject defines, one entry each              | Always   |
-| `NOTES.md`            | Session scratch that belongs to no other file          | Optional |
-| `reference/<slug>.md` | Durable reference pages, the promotable half           | Optional |
-| `learning-records/`   | Numbered records of what the learner was taken through | Optional |
-| `lessons/`            | Numbered lessons, generated and disposable             | Optional |
-| `assets/`             | Files several lessons share, including the stylesheet  | Optional |
+| Path                    | Holds                                                                   | Required |
+| ----------------------- | ----------------------------------------------------------------------- | -------- |
+| `MISSION.md`            | The subject, the learner's starting point, and success                  | Always   |
+| `RESOURCES.md`          | Sources read and sources found but not opened                           | Always   |
+| `GLOSSARY.md`           | Terms the subject defines, one entry each                               | Always   |
+| `NOTES.md`              | Session scratch that belongs to no other file                           | Optional |
+| `reference/<slug>.md`   | Durable reference pages, the promotable half                            | Optional |
+| `reference/<slug>.html` | Each reference page rendered by `canon teach nav`, never edited by hand | Optional |
+| `learning-records/`     | Numbered records of what the learner was taken through                  | Optional |
+| `lessons/`              | Numbered lessons, generated and disposable                              | Optional |
+| `assets/`               | Files several lessons share, including the stylesheet                   | Optional |
 
-Only the markdown half answers to a conformance check: `MISSION.md`, `RESOURCES.md`, `GLOSSARY.md`, `NOTES.md`, `reference/`, and `learning-records/`. A lesson is generated markup that nothing downstream cites, so this standard fixes its filename and its location and says nothing about what it contains.
+Only the markdown half answers to a conformance check: `MISSION.md`, `RESOURCES.md`, `GLOSSARY.md`, `NOTES.md`, the markdown under `reference/`, and `learning-records/`. A lesson is generated markup that nothing downstream cites, so this standard fixes its filename and its location and says nothing about what it contains. A rendered reference page is the same kind of output, rewritten from its markdown on every `nav` run.
 
 ## Frontmatter
 

@@ -192,6 +192,12 @@ One detector decides both regions. A lesson carrying `<button class="opt"`, the 
 
 Splicing the stepper into a lesson of either shape was measured against a browser and reverted. Its rules match a button question, which can never hold a checked radio, so a lesson given both hides every question past the first for good and outranks the class the script reveals feedback with. Nothing else caught that: the markup is valid, the splice succeeds, and the page renders.
 
+### Reference pages
+
+Each reference page is rendered to a `reference/<slug>.html` sibling carrying the same chrome, and the contents page links that sibling rather than the markdown, which `canon serve` hands over as plain text. The render drops the frontmatter, turns tables into `<table>` markup, and escapes raw HTML written in the markdown rather than passing it through. A body with no H1 gets one from the frontmatter `title`. A relative link to another reference page's markdown points at that page's `.html` sibling, and every other link, such as `../GLOSSARY.md`, stays as written. The markdown file is never touched.
+
+Every rendered page carries a `<meta name="generator" content="canon teach nav">` tag. A `.html` file under `reference/` whose markdown is gone is deleted when it carries that tag, and a hand-written HTML file there, carrying none, is left alone. The record's `reference` field counts the pages rendered. On a Bun with no `Bun.markdown`, each reference page lands in `skipped` with `Bun.markdown` as what is missing, and the rest of the run goes on.
+
 ## Opening a workspace
 
 No `canon teach` verb serves the workspace. `canon serve` does, taking the teach root as its directory and the workspace contents page as its entry:
