@@ -1,4 +1,4 @@
-import { relative } from 'node:path'
+import { isAbsolute, relative, resolve, sep } from 'node:path'
 import type { Command } from 'commander'
 import { type LessonOutcome, planLesson } from '@/teach/lesson'
 import { type NavOutcome, generateNav } from '@/teach/nav'
@@ -18,6 +18,7 @@ import {
   type TeachRefused,
   type Term,
   type TermOutcome,
+  teachDir,
   type WorkspaceSummary,
   writeStylesheet,
 } from '@/teach/workspace'
@@ -91,6 +92,18 @@ export function register(program: Command): void {
     .command('teach')
     .description('Manage learning workspaces in .canon/teach/')
     .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Opening a workspace:',
+        '  canon serve .canon/teach --entry <nn>-<topic>/index.html',
+        '',
+        'canon teach list <topic> prints the exact line, with the teach folder',
+        'written from where you stand rather than as this literal.',
+        '',
+      ].join('\n'),
+    )
 
   teach
     .command('list')
@@ -117,6 +130,9 @@ export function register(program: Command): void {
         '',
         'A workspace not named NN-<topic> is still listed. It sorts last and',
         'moves no ordinal, since dropping it hides the folder needing a fix.',
+        '',
+        'The human output ends with the canon serve line that opens a',
+        'workspace, a template with no topic and the exact line with one.',
         '',
         'Examples:',
         '  canon teach list',
@@ -852,6 +868,22 @@ function describe(workspace: WorkspaceSummary): string {
   return `${workspace.slug}: ${workspace.lessons} lesson(s), ${workspace.records} record(s), ${workspace.reference} reference page(s), ${workspace.terms} term(s)`
 }
 
+/**
+ * `canon serve` resolves its folder against the caller's cwd, while the list
+ * verb reads the teach folder at the main worktree root, so the line carries
+ * the folder actually read. A literal `.canon/teach` serves an absent folder
+ * from a linked worktree.
+ */
+function serveLine(root: string, entry: string): string {
+  const dir = resolve(teachDir(root))
+  const fromCwd = relative(process.cwd(), dir)
+  const isOutsideCwd =
+    fromCwd === '..' || fromCwd.startsWith(`..${sep}`) || isAbsolute(fromCwd)
+  const printed = fromCwd === '' ? '.' : isOutsideCwd ? dir : fromCwd
+
+  return `canon serve ${printed} --entry ${entry}`
+}
+
 function reportList(
   outcome: ListOutcome,
   emitJson: boolean,
@@ -890,6 +922,12 @@ function reportList(
 
   logStep('Next ordinal')
   logInfo(outcome.next)
+
+  if (outcome.workspaces.length > 0) {
+    logStep('Open')
+    logInfo(serveLine(root, '<nn>-<topic>/index.html'))
+  }
+
   outro()
 
   return 0
@@ -940,6 +978,8 @@ function reportWorkspace(
     logWarn(`no ${workspace.missing.join(' and no ')}`)
   }
 
+  logStep('Open')
+  logInfo(serveLine(root, `${workspace.slug}/index.html`))
   outro()
 
   return 0
