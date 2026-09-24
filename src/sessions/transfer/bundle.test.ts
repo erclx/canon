@@ -306,6 +306,38 @@ describe('importSession', () => {
     expect(existsSync(join(TARGET_PROJECTS, 'escape.txt'))).toBe(false)
   })
 
+  it('should remove what it placed when a write fails partway', async () => {
+    const bundle = await craftBundle({
+      'manifest.json': await readManifest(await exportBundle()),
+      [`session/${ID}.jsonl`]: '{}\n',
+      [`session/${ID}/tool-results`]: 'a file where a folder is needed next',
+      [`session/${ID}/tool-results/result-1.txt`]: 'x',
+    })
+
+    const outcome = await importBundle(bundle)
+
+    const folder = join(TARGET_PROJECTS, encodeProjectPath(TARGET))
+    expect(outcome).toMatchObject({ ok: false, reason: 'write-failed' })
+    expect(existsSync(join(folder, `${ID}.jsonl`))).toBe(false)
+    expect(existsSync(join(folder, ID))).toBe(false)
+  })
+
+  it('should accept the same bundle again after a partial failure was rolled back', async () => {
+    const manifest = await readManifest(await exportBundle())
+    await importBundle(
+      await craftBundle({
+        'manifest.json': manifest,
+        [`session/${ID}.jsonl`]: '{}\n',
+        [`session/${ID}/tool-results`]: 'x',
+        [`session/${ID}/tool-results/result-1.txt`]: 'x',
+      }),
+    )
+
+    const outcome = await importBundle(await exportBundle())
+
+    expect(outcome).toMatchObject({ ok: true })
+  })
+
   it('should refuse a bundle carrying an absolute path', async () => {
     const bundle = await craftBundle({
       'manifest.json': await readManifest(await exportBundle()),

@@ -3,7 +3,9 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmdirSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative } from 'node:path'
@@ -59,6 +61,7 @@ export type TransferRefusal =
   | 'other-repository'
   | 'exists'
   | 'live-here'
+  | 'write-failed'
 
 /** A lag the import reports and does not refuse on, since each has a remedy the reader runs. */
 export type Behind = 'repository-behind' | 'records-behind'
@@ -346,6 +349,45 @@ async function unpack(bytes: Uint8Array): Promise<Unpacked | TransferRefused> {
   return { manifest, transcript, side }
 }
 
+/** Removes a directory tree bottom-up, keeping any folder that still holds a file. */
+function pruneEmpty(dir: string): void {
+  let entries
+  try {
+    entries = readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory()) pruneEmpty(join(dir, entry.name))
+  }
+  try {
+    rmdirSync(dir)
+  } catch {
+    // Not empty, so something besides this run's files sits there.
+  }
+}
+
+/**
+ * Removes the files an import wrote and the folders it created, and returns
+ * whatever could not be removed. A folder is removed only once empty, so a
+ * file some other writer placed there in the meantime survives.
+ */
+function rollBack(
+  written: readonly string[],
+  created: readonly string[],
+): string[] {
+  const left: string[] = []
+  for (const path of written) {
+    try {
+      unlinkSync(path)
+    } catch {
+      left.push(path)
+    }
+  }
+  for (const dir of [...created].reverse()) pruneEmpty(dir)
+  return left
+}
+
 export interface ImportOptions {
   readonly bundle: string
   /** The repository the session resumes in, which decides the encoded folder. */
@@ -442,20 +484,51 @@ export async function importSession(
   }
 
   // The existence check above and these writes are not atomic, so `wx` is what
-  // keeps a copy that appeared in between from being overwritten.
+  // keeps a copy that appeared in between from being overwritten. A failure
+  // partway removes what this run placed, since a leftover would make the next
+  // import of the same bundle refuse on it.
+  const written: string[] = []
+  const created: string[] = []
+  // `mkdir` over a file raises EEXIST too, so the code alone cannot say a copy
+  // appeared. Only a `wx` write refusing an existing path means that.
+  let isWriting = false
+  const makeDir = (dir: string): void => {
+    const first = mkdirSync(dir, { recursive: true })
+    if (first !== undefined) created.push(first)
+  }
+  const place = (path: string, content: Uint8Array): void => {
+    makeDir(dirname(path))
+    isWriting = true
+    writeFileSync(path, content, { flag: 'wx' })
+    isWriting = false
+    written.push(path)
+  }
   try {
-    mkdirSync(folder, { recursive: true })
-    writeFileSync(transcript, unpacked.transcript, { flag: 'wx' })
+    place(transcript, unpacked.transcript)
     for (const [name, content] of unpacked.side) {
-      const path = join(sideDir, name)
-      mkdirSync(dirname(path), { recursive: true })
-      writeFileSync(path, content, { flag: 'wx' })
+      place(join(sideDir, name), content)
     }
   } catch (error) {
-    return refuse(
-      'exists',
-      `A file appeared under ${folder} while the import was writing, so it stopped rather than overwrite it: ${error instanceof Error ? error.message : String(error)}.`,
-    )
+    const left = rollBack(written, created)
+    const cause = error instanceof Error ? error.message : String(error)
+    const residue =
+      left.length === 0
+        ? 'Everything this run wrote was removed.'
+        : `These could not be removed, so move them aside before retrying: ${left.join(', ')}.`
+    const isTaken =
+      isWriting &&
+      error instanceof Error &&
+      'code' in error &&
+      error.code === 'EEXIST'
+    return isTaken
+      ? refuse(
+          'exists',
+          `A file appeared under ${folder} while the import was writing, so it stopped rather than overwrite it: ${cause}. ${residue}`,
+        )
+      : refuse(
+          'write-failed',
+          `The import could not write under ${folder}: ${cause}. ${residue}`,
+        )
   }
 
   return {
