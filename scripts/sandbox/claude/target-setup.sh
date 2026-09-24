@@ -7,7 +7,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "fresh" "no-stack" "vite-react" "astro" "verify-pass" "verify-fail" "smoke-pass" "smoke-fail"
+  select_or_route_scenario "Which scenario?" "fresh" "no-stack" "monorepo" "vite-react" "astro" "verify-pass" "verify-fail" "smoke-pass" "smoke-fail"
 
   case "$SELECTED_OPTION" in
   "fresh")
@@ -40,12 +40,72 @@ package main
 func main() {}
 EOF
 
-    git add . && git commit -m "chore(sandbox): go project the toolkit ships no stack for" --no-verify -q
+    git add . && git commit -m "chore(sandbox): go project the toolkit ships no governance stack for" --no-verify -q
 
-    log_step "Scenario ready: setup skill on a language with no stack"
+    log_step "Scenario ready: setup skill on a language with no governance stack"
     log_info "Context: go.mod and main.go, no package.json and no JavaScript evidence"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  both stacks resolve to 'base' and the preview marks each a fallback, naming what lands with no package.json present: configs, seeds, and gitignore entries, but no dev dependencies, scripts, or hook activation. The chain runs on that default rather than stopping, and names the gov phase as where a project declining it takes the language-neutral rule layer. The indexes phase runs and finds no candidate folder, and the report names repo-metadata and git-commit as outside the chain."
+    log_info "Expect:  the governance stack resolves to 'base' and the preview marks it a fallback, with the Go language rule passed through --add. The tooling stack resolves to 'go' on a canon whose catalog carries it, and the preview names it with no fallback mark. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names repo-metadata and git-commit as outside the chain."
+    ;;
+  "monorepo")
+    cat <<'EOF' >package.json
+{
+  "name": "sandbox-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}
+EOF
+
+    mkdir -p web api svc
+
+    cat <<'EOF' >web/package.json
+{
+  "name": "sandbox-monorepo-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
+EOF
+
+    cat <<'EOF' >web/vite.config.ts
+import { defineConfig } from 'vite'
+
+export default defineConfig({})
+EOF
+
+    cat <<'EOF' >api/pyproject.toml
+[project]
+name = "sandbox-monorepo-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+EOF
+
+    cat <<'EOF' >svc/go.mod
+module example.com/svc
+
+go 1.23
+EOF
+
+    cat <<'EOF' >svc/main.go
+package main
+
+func main() {}
+EOF
+
+    git add . && git commit -m "chore(sandbox): monorepo with web, api, and svc language roots" --no-verify -q
+
+    log_step "Scenario ready: setup skill on a monorepo with subfolder language roots"
+    log_info "Context: root package.json with no dependencies, web/ holding react and vite, api/pyproject.toml, svc/go.mod"
+    log_info "Action:  /canon:target-setup"
+    log_info "Expect:  the preview lists one tooling row per language root (web, api, svc) with its path and command, the root row resolving to 'base' with no command of its own. Governance resolves once at the root to 'base' with the React, Python, and Go rules passed through --add. One canon init runs at the root, and each subfolder takes its own tooling sync with --skip base, so no subfolder carries .husky or .github."
     ;;
   "vite-react")
     log_step "Running bun create vite"
