@@ -119,6 +119,8 @@ The Indexes stage asserts drift against the working tree, so the first `bun run 
 
 The pathspec matches by name rather than by how a file changed, so an unstaged hand edit to any `*index.md`-matching file trips the same failure, `auto: false` or not, since the check never asks whether the walk touched it. A file under `auto: false` frontmatter that `canon indexes regen` correctly skips still reports as drifted by `bun run check` until it is staged.
 
+The same name match reaches a file that is no index at all. A new untracked file whose name ends in `index.md`, such as a fixture page called `element-index.md`, fails the stage with "Indexes drifted" though no index changed, since the pathspec asserts the untracked set as well. Name such a file so it does not end in `index.md`.
+
 `.cspell/banned-spellings.txt` is a third dictionary holding the British spellings `canon markdown audit` reports, and an `overrides` entry in `cspell.json` scopes it to the files that carry, assert, or explain the set rather than loading it repo-wide. Both gate a push now, the spell check over the whole tree and the audit over its ban half, so a repo-wide load would spell-approve everywhere the words the ban gate still fails on and leave the two stages disagreeing about one word. A file that needs one of them is added to the override list, never to `project-terms.txt`, which reads as vocabulary this repository writes.
 
 Its membership is the shipped `SPELLINGS` plus `analyse`, a word no set carries and a comment in `src/markdown/bans.ts` explains the absence of. The two are therefore not the same list and neither derives from the other, which is what `bans.test.ts` asserts.

@@ -5,7 +5,7 @@ description: A learning workspace's own index page, listing its success criteria
 
 # Teach contents
 
-One page per workspace, at `<workspace>/index.html`. `renderContentsPage` in `src/teach/nav.ts:927-1025` rewrites it wholesale on every `canon teach nav` run, from what the workspace folder holds on disk: `MISSION.md`, the lessons already written, its reference pages, and `GLOSSARY.md`. Source: `.canon/teach/03-fde-system-design/index.html`, regenerated for this plan against `5cc60c86`.
+One page per workspace, at `<workspace>/index.html`. `renderContentsPage` in `src/teach/nav.ts:1024-1124` rewrites it wholesale on every `canon teach nav` run, from what the workspace folder holds on disk: `MISSION.md`, the lessons already written, its reference pages, and `GLOSSARY.md`. Source: `.canon/teach/03-fde-system-design/index.html`, regenerated for this plan against `5cc60c86`.
 
 The sidebar here lists this workspace's lessons and marks none of them, since no lesson is being read. It arrives shut, because the `Lessons` section below lists the same set with a lede against each.
 
@@ -72,4 +72,4 @@ No term matches that.   Clear the filter                                 ← rep
 - Every section but the glossary is conditional: no success line, no lesson written yet, or no reference page each drop their whole heading and body, rather than rendering an empty one.
 - The glossary always renders, heading and filter included, down to zero terms.
 - Typing into the filter narrows the term list live, matching against both a term and its definition. Clearing the filter, or pressing "Clear the filter" once nothing matches, restores the full list and returns focus to the input.
-- A reference page listed here is a separate authored document rather than one of the three page types this wireframe set covers. This page only links out to it.
+- A reference page row opens the page's rendered `reference/<slug>.html` sibling rather than its markdown, drawn in `reference.md`.
