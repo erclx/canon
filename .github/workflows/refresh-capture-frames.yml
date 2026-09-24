@@ -116,9 +116,9 @@ jobs:
         run: bash scripts/core/capture-home.sh
 
       # Hooks off, since pre-push runs a check whose format step needs shfmt, which the runner lacks. verify.yml checks the pull request.
-      # The frames commit where they rendered, then carry across as whole files
-      # onto main fetched now, so a merge landing mid-run cannot leave the
-      # branch on an older base. The pull request resolves by number, since
+      # The frames commit where they rendered, then only the files that commit
+      # wrote or dropped carry onto main fetched now, so a merge landing mid-run
+      # neither leaves the branch on an older base nor loses a frame it moved. The pull request resolves by number, since
       # every merged refresh leaves a closed one on the same head.
       - name: Open or Update the Refresh Pull Request
         env:
@@ -134,9 +134,16 @@ jobs:
           git add assets/captures assets/evidence
           git commit -m "chore(web): refresh capture frames"
           rendered=$(git rev-parse HEAD)
+          written=$(git diff --name-only --no-renames --diff-filter=d HEAD~1 HEAD)
+          dropped=$(git diff --name-only --no-renames --diff-filter=D HEAD~1 HEAD)
           git fetch --depth=1 origin +refs/heads/main:refs/remotes/origin/main
           git checkout -B chore/refresh-capture-frames origin/main
-          git checkout "$rendered" -- assets/captures assets/evidence
+          if [ -n "$written" ]; then
+            printf '%s\n' "$written" | xargs -d '\n' git checkout "$rendered" --
+          fi
+          if [ -n "$dropped" ]; then
+            printf '%s\n' "$dropped" | xargs -d '\n' git rm -q --ignore-unmatch --
+          fi
           if git diff --cached --quiet -- assets/captures assets/evidence; then
             echo "Main already carries these frames, nothing to refresh."
             exit 0
