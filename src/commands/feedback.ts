@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
 import {
+  deriveDomainLabels,
   deriveSlug,
   deriveTitle,
   missingField,
@@ -107,7 +108,7 @@ export function register(program: Command): void {
         const result = await createGithubIssue({
           title: deriveTitle(body),
           body,
-          labels: ['feedback'],
+          labels: ['feedback', ...deriveDomainLabels(body)],
         })
         if (result.ok) {
           frameSuccess('canon feedback', result.url)
