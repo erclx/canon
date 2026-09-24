@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   TEACH_SIDEBAR_BREAKPOINT,
@@ -578,6 +578,115 @@ describe('generateNav', () => {
     )
 
     expect(second).toEqual(first)
+  })
+
+  it('should link a lesson mention in the body and leave the chrome regions as a run without one writes them', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0002-groups.html',
+      'Capture groups',
+      'A parenthesised part of a pattern whose match is kept.',
+      '<p>Plain body.</p>',
+    )
+    await generateNav(ROOT)
+    const plain = await readFile(path, 'utf8')
+    await seedLesson(
+      '01-regular-expressions',
+      '0002-groups.html',
+      'Capture groups',
+      'A parenthesised part of a pattern whose match is kept.',
+      '<p>Recall lesson 0001.</p>',
+    )
+
+    await generateNav(ROOT)
+
+    const linked = await readFile(path, 'utf8')
+    expect(linked).toContain(
+      '<p>Recall <a href="0001-anchors.html" data-lesson-ref>lesson 0001</a>.</p>',
+    )
+    expect(
+      linked.replace(
+        '<p>Recall <a href="0001-anchors.html" data-lesson-ref>lesson 0001</a>.</p>',
+        '<p>Plain body.</p>',
+      ),
+    ).toBe(plain)
+  })
+
+  it('should report a mention naming no lesson while still rewriting the lesson', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+      '<p>Lesson 0007 comes later.</p>',
+    )
+
+    const outcome = await generateNav(ROOT)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      lessons: 1,
+      unresolved: [{ file: relative(ROOT, path), lesson: '0007' }],
+    })
+    expect(await readFile(path, 'utf8')).toContain(
+      '<p>Lesson 0007 comes later.</p>',
+    )
+  })
+
+  it('should report nothing for a lesson refused for a missing marker', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+      '<p>Lesson 0007 comes later.</p>',
+    )
+    const original = (await readFile(path, 'utf8')).replace(
+      '<!-- canon:teach:footnav -->\n<!-- /canon:teach:footnav -->\n',
+      '',
+    )
+    await writeFile(path, original)
+
+    const outcome = await generateNav(ROOT)
+
+    expect(outcome).toMatchObject({ ok: true, lessons: 0, unresolved: [] })
+    expect(await readFile(path, 'utf8')).toBe(original)
+  })
+
+  it('should be byte-identical on a second run over a body carrying a lesson mention', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    const path = await seedLesson(
+      '01-regular-expressions',
+      '0002-groups.html',
+      'Capture groups',
+      'A parenthesised part of a pattern whose match is kept.',
+      '<p>Recall lesson 0001.</p>',
+    )
+
+    await generateNav(ROOT)
+    const first = await readFile(path, 'utf8')
+    await generateNav(ROOT)
+
+    expect(await readFile(path, 'utf8')).toBe(first)
   })
 
   it('should write the previous and next links between two lessons', async () => {

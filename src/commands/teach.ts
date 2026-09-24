@@ -806,6 +806,7 @@ function reportNav(
         lessons: outcome.lessons,
         reference: outcome.reference,
         skipped: outcome.skipped,
+        unresolved: outcome.unresolved,
       })}\n`,
     )
     return 0
@@ -825,6 +826,13 @@ function reportNav(
     logStep('Refused, missing a chrome marker or the markdown renderer')
     for (const skip of outcome.skipped) {
       logWarn(`${skip.file}: no ${skip.missing}`)
+    }
+  }
+
+  if (outcome.unresolved.length > 0) {
+    logStep('Lesson references naming no lesson')
+    for (const reference of outcome.unresolved) {
+      logWarn(`${reference.file}: lesson ${reference.lesson}`)
     }
   }
 

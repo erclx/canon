@@ -14,6 +14,7 @@ A workspace accumulates lessons over weeks. The learner reads them as one body o
 - `canon teach nav` embeds and re-embeds the shared stylesheet into every lesson on each run, so growing that stylesheet, by promoting anything used a second time into it, is the only step left by hand.
 - Keep the structural furniture identical across lessons: where the title sits, where the quiz sits, what a correct answer looks like
 - Do not restate styles inside a lesson. A local override is a decision the next lesson has to either copy or contradict.
+- Refer to another lesson in the same workspace as "lesson" followed by its four-digit number, such as "lesson 0003", and let `canon teach nav` turn the mention into a link and report a number naming no lesson. A hand-written link is the one form nav never checks.
 
 ## Typography
 

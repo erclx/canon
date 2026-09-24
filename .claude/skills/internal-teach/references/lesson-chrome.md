@@ -17,7 +17,7 @@ A lesson carries four empty marker pairs and `canon teach nav` fills each from w
 
 ## What is authored and what is generated
 
-The authored heading, lede, body and quiz sit between the header and footnav markers. The splice leaves that region untouched apart from wrapping it in `<main>` when it holds none, and rewrites everything inside the four pairs.
+The authored heading, lede, body and quiz sit between the header and footnav markers. The splice leaves that region untouched apart from two rewrites: it wraps the region in `<main>` when it holds none, and it links each "lesson NNNN" mention to the lesson file carrying that number. Nav owns only a link carrying `data-lesson-ref`, re-pointing or unwrapping it on every run, and never touches an author's own `<a>`. It rewrites everything inside the four pairs.
 
 So the boundary is positional rather than per-file. Edit between the markers freely. Never edit inside them, and never edit the root or contents pages at all, since `nav` regenerates those whole.
 
