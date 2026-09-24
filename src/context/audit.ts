@@ -45,19 +45,35 @@ export const CATALOG_ROW_CHECKPOINT = 6
 const CATALOG_NAMED_RATIO = 0.6
 
 /**
- * Sections `standards/context.md` marks required, in the order it states them.
+ * Required sections per audited folder name, each in the order its standard
+ * states them.
  *
- * The list is held here rather than read out of the standard, the way the four
- * checkpoints above quote their numbers. A parser over the standard's prose
+ * The lists are held here rather than read out of the standards, the way the
+ * four checkpoints above quote their numbers. A parser over a standard's prose
  * would decide which sections are required from the wording around them, so it
  * fails on a rewrite of that wording rather than on a defect in an entry.
  *
  * These names do not generalize the way a length threshold does, which is why
- * the measure is scoped to the folder `governsContent` names. A diagram entry
- * declares a heading per kind and a wireframe entry per screen, and neither
- * sibling standard states a required section at all.
+ * each list is keyed on the folder whose standard states it. `context.md`
+ * requires an overview and a layout. `wireframes.md` asks four questions of a
+ * surface and answers each in a section, so those four are required and
+ * `## Behavior` is not, since a static surface has no interaction to state. A
+ * diagram entry declares a heading per kind and its standard requires none.
  */
-export const REQUIRED_SECTIONS: readonly string[] = ['Overview', 'Layout']
+export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
+  Record<string, readonly string[]>
+> = {
+  context: ['Overview', 'Layout'],
+  wireframes: ['Regions', 'States', 'Copy', 'Not on this surface'],
+}
+
+/**
+ * The context standard's list, kept as its own export because the audit record
+ * has published it flat under `checkpoints.requiredSections` since before any
+ * other folder required a section.
+ */
+export const REQUIRED_SECTIONS: readonly string[] =
+  REQUIRED_SECTIONS_BY_FOLDER.context
 
 const HEADING_TEXT = /^#{1,6}\s+(.+?)\s*$/
 const TABLE_ROW = /^\s*\|/
@@ -226,7 +242,7 @@ export interface EntryReport {
   readonly bareReferences: readonly BareReferenceFinding[]
   /**
    * Required sections this entry declares, in the standard's order, and empty
-   * outside the folder whose standard names them. What the folder is short of
+   * outside a folder whose standard names them. What the folder is short of
    * is `missingSections`, since one entry answers for its siblings.
    */
   readonly sections: readonly string[]
@@ -550,17 +566,20 @@ function narration(
  * Fenced blocks are skipped for the reason the scans above skip them. A
  * standard quoted inside an example declares nothing about the entry quoting it.
  */
-function declaredSections(lines: readonly BodyLine[]): string[] {
+function declaredSections(
+  lines: readonly BodyLine[],
+  required: readonly string[],
+): string[] {
   const found = new Set<string>()
 
   for (const line of lines) {
     if (line.fenced) continue
 
     const match = line.text.match(HEADING_TEXT)
-    if (match && REQUIRED_SECTIONS.includes(match[1])) found.add(match[1])
+    if (match && required.includes(match[1])) found.add(match[1])
   }
 
-  return REQUIRED_SECTIONS.filter((section) => found.has(section))
+  return required.filter((section) => found.has(section))
 }
 
 /**
@@ -611,7 +630,9 @@ function bareReferences(
  * The caller passes jurisdiction rather than deriving it from `rel`, because a
  * path prefix hardcodes what `--folder` exists to override and misses a domain
  * split into `context/<sub-area>/`. Sibling names arrive the same way and for
- * the same reason, since the folder an entry sits in is what holds them.
+ * the same reason, since the folder an entry sits in is what holds them. The
+ * required sections arrive apart from jurisdiction, since a wireframe owes
+ * sections under a standard that states no provenance rule.
  */
 export function measureEntry(
   rel: string,
@@ -619,6 +640,7 @@ export function measureEntry(
   governsContent = true,
   terms?: NarrationTerms,
   siblings: readonly string[] = [],
+  required: readonly string[] = governsContent ? REQUIRED_SECTIONS : [],
 ): EntryReport {
   const lines = bodyLines(source)
 
@@ -632,7 +654,7 @@ export function measureEntry(
     provenance: governsContent ? provenance(lines) : [],
     narration: governsContent && terms ? narration(lines, terms) : [],
     bareReferences: bareReferences(lines, siblings),
-    sections: governsContent ? declaredSections(lines) : [],
+    sections: declaredSections(lines, required),
     stub: isStubSeed(source),
     governed: governsContent,
   }
@@ -713,6 +735,7 @@ export async function measureFolders(
           governsContent(folder),
           terms,
           names.filter((name) => name !== self),
+          requiredSections(folder),
         ),
       )
     }
@@ -724,6 +747,13 @@ export async function measureFolders(
 /** Reports whether the folder's standard is the one carrying the exclusion. */
 export function governsContent(folder: AuditedFolder): boolean {
   return folder.name === PROVENANCE_FOLDER
+}
+
+/** Names the sections the folder's standard requires, empty where it states none. */
+export function requiredSections(folder: AuditedFolder): readonly string[] {
+  return Object.hasOwn(REQUIRED_SECTIONS_BY_FOLDER, folder.name)
+    ? REQUIRED_SECTIONS_BY_FOLDER[folder.name]
+    : []
 }
 
 /**
@@ -765,6 +795,11 @@ export function matchesSiblings(folder: AuditedFolder): boolean {
  * The standard sanctions omitting `## Layout` from a domain owning no paths,
  * which no measure can tell from an entry that forgot it. An entry of that
  * shape therefore reports, which is a reason this is printed and never gated on.
+ *
+ * A wireframe folder answers per file whether nested or not, since its
+ * standard keeps one surface per file. A subfolder of wireframes groups
+ * surfaces the way the named context folder groups domains, so a conforming
+ * sibling there says nothing about the surface beside it.
  */
 export function missingSections(
   root: string,
@@ -774,11 +809,12 @@ export function missingSections(
   const byRel = new Map(entries.map((entry) => [entry.rel, entry]))
   const findings: SectionFinding[] = []
 
-  const shortOf = (declared: readonly string[]): string[] =>
-    REQUIRED_SECTIONS.filter((name) => !declared.includes(name))
-
   for (const folder of folders) {
-    if (!governsContent(folder) || folder.entries.length === 0) continue
+    const required = requiredSections(folder)
+    if (required.length === 0 || folder.entries.length === 0) continue
+
+    const shortOf = (declared: readonly string[]): string[] =>
+      required.filter((name) => !declared.includes(name))
 
     // A stub owes no sections, so it is dropped before either branch rather
     // than inside them. Leaving one in the split-folder aggregate would let a
@@ -790,7 +826,7 @@ export function missingSections(
 
     if (reports.length === 0) continue
 
-    if (folder.nested) {
+    if (folder.nested && governsContent(folder)) {
       const missing = shortOf(reports.flatMap((entry) => entry.sections))
       if (missing.length > 0) findings.push({ rel: folder.rel, missing })
       continue

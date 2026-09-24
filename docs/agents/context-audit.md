@@ -88,7 +88,7 @@ The pattern spells both record-root prefixes, so a citation into a folder that h
 
 ## The wireframe states gate
 
-Every entry under `canon/wireframes/` carrying a `## States` table is checked one-to-one against its evidence folders, matching the table's `State` and `Evidence` columns by header text rather than position, so a project reordering the template's own columns still resolves. An entry with no such table reports nothing, which is what leaves a project on an older wireframe shape silent until it adopts one.
+Every entry under `canon/wireframes/` carrying a `## States` table is checked one-to-one against its evidence folders, matching the table's `State` and `Evidence` columns by header text rather than position, so a project reordering the template's own columns still resolves. An entry with no such table has no rows to match, and the required-section check reports it as short of `## States` instead, so a project on an older wireframe shape is told what it lacks rather than read as clean.
 
 An evidence cell resolves as the literal path it names, taken from the project root. A state whose cited folder does not exist is a states mismatch, and so is a folder sitting under a cited evidence root that no row names. A `not captured` cell is the one exception the standard admits, and it excuses that row from both readings. A `plaintext` sketch still carried once a state's evidence exists on disk is a third finding this check adds, reading the entry as a whole rather than one row.
 

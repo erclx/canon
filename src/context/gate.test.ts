@@ -117,6 +117,26 @@ describe('isGating', () => {
     expect(isGating(input)).toBe(true)
   })
 
+  it('should leave a wireframe missing a required section advisory under the narrow gate', () => {
+    const section = makeSection({
+      rel: 'canon/wireframes/header.md',
+      missing: ['Regions'],
+    })
+
+    expect(isGating(makeInput({ sections: [section] }))).toBe(false)
+  })
+
+  it('should fail a wireframe missing a required section under the widened gate', () => {
+    const section = makeSection({
+      rel: 'canon/wireframes/header.md',
+      missing: ['Regions'],
+    })
+
+    expect(isGating(makeInput({ sections: [section], widened: true }))).toBe(
+      true,
+    )
+  })
+
   it('should leave index drift advisory under the narrow gate', () => {
     const input = makeInput({ drift: [makeDrift({ unlisted: ['cli.md'] })] })
 
