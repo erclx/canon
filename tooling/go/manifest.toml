@@ -2,7 +2,7 @@
 name = "go"
 extends = "base"
 runtime = "go"
-scaffold = "mkdir {{name}} && cd {{name}} && go mod init example.com/{{name}}"
+scaffold = "mkdir {{name}} && cd {{name}} && go mod init example.com/{{name}} && go mod edit -ignore=./node_modules"
 
 [scripts]
 "lint" = "golangci-lint run ./..."

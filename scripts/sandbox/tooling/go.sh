@@ -12,7 +12,8 @@ stage_setup() {
 
   log_step "Scaffolding go (go mod init)"
   go mod init example.com/sandbox-go >/dev/null 2>&1
-  log_info "go mod init complete"
+  go mod edit -ignore=./node_modules
+  log_info "go mod init complete, node_modules ignored"
 
   log_step "Seeding package.json (bun init -y)"
   bun init -y >/dev/null 2>&1
