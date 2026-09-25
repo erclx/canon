@@ -17,7 +17,7 @@ Local-first habit tracking web app.
 - `bun run check`: lint and typecheck
 EOF
 
-  mkdir -p .canon/plans .claude
+  mkdir -p .canon/plans canon
   cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 

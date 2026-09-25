@@ -43,7 +43,7 @@ Task API. Route handlers live in `src/`.
 - `bun run check`: lint and typecheck
 EOF
 
-  mkdir -p .claude
+  mkdir -p canon
   cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
@@ -116,7 +116,7 @@ Task API. Route handlers live in `src/`.
 - `bun run check`: lint and typecheck
 EOF
 
-  mkdir -p .claude
+  mkdir -p canon
   cat <<'EOF' >canon/REQUIREMENTS.md
 # Requirements
 
