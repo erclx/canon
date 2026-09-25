@@ -176,11 +176,11 @@ As each item resolves, update its status in the review file: flip the H2 emoji f
 
 ### Sweep the receipt
 
-Count the items still 📝 pending once the parse above has run. Apply leaves one pending on `defer`, on empty, and on any unrecognized verb, so a receipt reaching this point may still be holding decisions.
+Count the items still pending once the parse above has run. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot reads neither `apply` nor `skip`, since a receipt written by hand or by an older binary may lack the marker. Apply leaves one pending on `defer`, on empty, and on any unrecognized verb, so a receipt reaching this point may still be holding decisions.
 
 Leave the receipt in place when any remain. When none do, collect it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, which owns what a fold writes and which entry types take one.
 
-`docs-fold` Step 10 sweeps the same folder on the same rule once per shipped branch, and either may reach a receipt first. Whichever does, the other finds no file and moves on.
+`docs-fold` Step 9 sweeps the same folder on the same rule once per shipped branch, and either may reach a receipt first. Whichever does, the other finds no file and moves on.
 
 End with: `✅ Applied: <nums> | ⏭ Skipped: <nums> | 📝 Pending: <nums>`. Omit empty buckets. If anything is pending, remind the user they can refine `Decision:` lines and re-ping, run "discuss" for question items, or commit a skip with `skip <nums>` in chat.
 
@@ -188,11 +188,11 @@ End with: `✅ Applied: <nums> | ⏭ Skipped: <nums> | 📝 Pending: <nums>`. Om
 
 Trigger: user says "cleanup" or "delete the receipt" after Apply has run.
 
-Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `docs-fold` Step 10 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/memory/archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
+Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `docs-fold` Step 9 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/memory/archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
 
 If no `.canon/memory/review/memory-review-*.md` exists at the main root, stop: `✅ No review receipt to clean up.` Every other refusal in this skill carries a message, and the phase reads a receipt before it does anything else.
 
-1. Read the latest `.canon/memory/review/memory-review-*.md` at the main root and confirm Apply has run against it. If any item is still 📝 pending, stop and name the pending numbers.
+1. Read the latest `.canon/memory/review/memory-review-*.md` at the main root and confirm Apply has run against it. If any item is still pending, by the test the Apply sweep states, stop and name the pending numbers.
 2. Collect it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, folding each ⏭ skipped item before the file goes. The fold happens wherever a receipt is collected, so this phase runs the same rule the Apply sweep does.
 3. Delete that one file. Leave every other receipt beside it in place, because the pending test above covers the file it read and nothing has tested the rest.
 4. Leave every memory entry in the pen. A skip records the decline on the entry and keeps the file, and applied promotions, governance handoffs, and user-type memories each stay as the review left them.
