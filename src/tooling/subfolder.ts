@@ -50,9 +50,9 @@ export function subfolderPath(target: string): string | undefined {
 
 /**
  * GitHub reads workflows only at the repository root, so a `.github/` copied
- * into a subfolder is a file nothing runs. `scan` and `injectConfigs` both
- * read this, so the set the diff withholds and the set the sync skips cannot
- * disagree.
+ * into a subfolder is a file nothing runs. `scan`, `injectConfigs`, and
+ * `injectSeeds` all read this, so the set the diff withholds and the set the
+ * sync skips cannot disagree, whether the path ships as a config or a seed.
  */
 export function isWithheldInSubfolder(rel: string): boolean {
   return rel.startsWith(WITHHELD_PREFIX)

@@ -45,6 +45,15 @@ export function listFiles(dir: string): string[] {
 }
 
 /**
+ * Every path any stack in the chain ships as a config. A seed at one of these
+ * paths is shadowed, since the config overwrites it on every sync. `scan` and
+ * `injectSeeds` both read this, so the report and the write cannot disagree.
+ */
+export function configPaths(chain: readonly Manifest[]): Set<string> {
+  return new Set(chain.flatMap((manifest) => listFiles(manifest.configsDir)))
+}
+
+/**
  * Reverses a chain so the furthest ancestor is applied first and nearer
  * stacks overwrite it.
  */

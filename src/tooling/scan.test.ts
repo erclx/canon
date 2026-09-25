@@ -158,6 +158,18 @@ describe('scan', () => {
     expect(result.totalChanges).toBe(5)
   })
 
+  it('should report a path shipped as a config and a seed once, as a config', () => {
+    const child = makeManifest('web')
+    const parent = makeManifest('base')
+    seedFile(join(child.configsDir, 'shared.yml'), 'on: push\n')
+    seedFile(join(parent.seedsDir, 'shared.yml'), 'on: pull_request\n')
+
+    const result = scan([child, parent], target())
+
+    expect(result.seeds).toEqual([])
+    expect(result.totalChanges).toBe(1)
+  })
+
   it('should report nothing to do when the target already matches', () => {
     const dir = target()
     const manifest = makeManifest('base')
@@ -238,6 +250,29 @@ describe('scan in a subfolder', () => {
     const result = scan([webManifest()], repoWithSubfolder())
 
     expect(result.totalChanges).toBe(3)
+  })
+
+  it('should report a .github seed as withheld rather than as a missing seed', () => {
+    const manifest = makeManifest('base')
+    seedFile(join(manifest.seedsDir, WORKFLOW), 'on: push\n')
+
+    const result = scan([manifest], repoWithSubfolder())
+
+    expect(result.seeds).toEqual([])
+    expect(result.withheld).toEqual([
+      { rel: WORKFLOW, stack: 'base', present: false },
+    ])
+  })
+
+  it('should report a seed shadowed by a withheld config once', () => {
+    const base = makeManifest('base')
+    seedFile(join(base.seedsDir, WORKFLOW), 'on: pull_request\n')
+
+    const result = scan([webManifest(), base], repoWithSubfolder())
+
+    expect(result.withheld).toEqual([
+      { rel: WORKFLOW, stack: 'web', present: false },
+    ])
   })
 
   it('should keep .github in configs at a root', () => {

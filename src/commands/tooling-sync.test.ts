@@ -135,6 +135,35 @@ describe('tooling sync write authorization', () => {
   })
 })
 
+describe('tooling sync over an extended base workflow and PR template', () => {
+  const WORKFLOW = '.github/workflows/verify.yml'
+  const TEMPLATE = '.github/pull_request_template.md'
+  const EXTRA_JOB = '\n  extra:\n    runs-on: ubuntu-latest\n'
+  const EXTRA_LINE = '- [ ] A line this project added\n'
+
+  const extend = (rel: string, addition: string): void => {
+    sync(['--write'])
+    const path = join(target, rel)
+    writeFileSync(path, readFileSync(path, 'utf8') + addition)
+  }
+
+  it('should keep a job the target added to verify.yml', () => {
+    extend(WORKFLOW, EXTRA_JOB)
+
+    sync(['--write'])
+
+    expect(readFileSync(join(target, WORKFLOW), 'utf8')).toContain(EXTRA_JOB)
+  })
+
+  it('should keep a line the target added to the PR template', () => {
+    extend(TEMPLATE, EXTRA_LINE)
+
+    sync(['--write'])
+
+    expect(readFileSync(join(target, TEMPLATE), 'utf8')).toContain(EXTRA_LINE)
+  })
+})
+
 describe('tooling diff', () => {
   it('should exit 1 when a file differs, matching the headless gate', () => {
     expect(diff([]).status).toBe(1)

@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -103,6 +104,27 @@ describe('injectSeeds in a subfolder', () => {
     await injectSeeds(chain(), sub)
 
     expect(() => readFileSync(join(sub, 'cspell.json'))).toThrow()
+  })
+})
+
+describe('injectSeeds with the base stack in a subfolder', () => {
+  it('should write no .github seed into the subfolder', async () => {
+    captureStderr()
+    const sub = subfolder()
+
+    await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), sub)
+
+    expect(existsSync(join(sub, '.github'))).toBe(false)
+  })
+})
+
+describe('injectSeeds with a config at the same path', () => {
+  it('should leave the path to the config the chain ships', async () => {
+    captureStderr()
+
+    const applied = await injectSeeds(resolveChain(PROJECT_ROOT, 'web'), target)
+
+    expect(applied).not.toContain('.github/workflows/verify.yml')
   })
 })
 
