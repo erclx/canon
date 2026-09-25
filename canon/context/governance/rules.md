@@ -76,6 +76,7 @@ Create a `.md` file under `governance/rules/` using the numbering bands above. D
 
 - Commit the regenerated `.claude/rules/` copy, which the Consumed copies stage asserts against git.
 - Run `canon gov counts` and fix every figure it names, per the gotcha above.
+- A rename or renumber adds an entry to `governance/renames.toml` in the same change, mapping the old basename to the new one, so `canon gov sync` moves a target across rather than only deleting the old file. A fold of several rules into one takes no entry, since the ledger declares one-to-one identity only.
 - The branch owes no hero render. The Hero stage runs `regen-hero.sh --check`, which discards what it fills, and `refresh-capture-frames.yml` lists `governance/rules/**` in its path filter, so the frames refresh in their own pull request after the merge.
 
 A rule added to `core/`, `claude/`, `snippets/`, or `ci/` reaches every `base` consumer with no stack edit, since `base` names each of those folders whole. A rule in any other folder needs its name in the relevant `governance/stacks/*.toml`.
