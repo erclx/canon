@@ -149,11 +149,12 @@ stage_setup() {
     stage_fixtures claude docs-fold receipt-sweep 03-receipts
 
     log_step "Scenario ready: review sweep collects a resolved memory receipt"
-    log_info "Context: two memory-review receipts in .canon/review/, neither named for this branch"
+    log_info "Context: three memory-review receipts in .canon/memory/review/, none named for this branch"
     log_info "  memory-review-legacy-inbox.md has every item decided, so it is collected"
     log_info "  Its two skips are the fold: one feedback entry takes a decline, one reference entry does not"
     log_info "  memory-review-stale-pen.md still carries a 📝 item and is the control. It must survive."
-    log_info "  Neither slug matches the branch, which is what a slug-keyed sweep fails on"
+    log_info "  memory-review-unmarked-slot.md carries no status emoji and one blank Decision: slot. It must survive too."
+    log_info "  No slug matches the branch, which is what a slug-keyed sweep fails on"
     log_info ""
     log_info "Narrate nothing about the receipts. The arm fails if the sweep only"
     log_info "reaches a receipt named for the current branch, and it fails the other"
@@ -162,7 +163,7 @@ stage_setup() {
     log_info "Action:  /docs-fold"
     log_info "Expect:  declared in fixtures/claude/docs-fold/receipt-sweep/expect.toml"
     log_info "         Check it with: canon sandbox check claude:docs-fold receipt-sweep"
-    log_info "         One receipt deleted, one decline folded into a **Why:** line, the control untouched"
+    log_info "         One receipt deleted, one decline folded into a **Why:** line, both controls untouched"
     log_info "         One expectation needs a reader and reports as unchecked."
     ;;
   "classify-findings")

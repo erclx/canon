@@ -2,8 +2,8 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# The arm asserts the review half of Step 10 the way `board-sweep` asserts the
-# plans half. Neither receipt here carries the branch's slug, so a sweep keyed on
+# The arm asserts the review half of Step 9 the way `board-sweep` asserts the
+# plans half. No receipt here carries the branch's slug, so a sweep keyed on
 # the current slug finds nothing and leaves the resolved one in place, which is
 # the first assertion below. That is the whole point: the skill that writes these
 # receipts runs after `docs-fold` in every ship chain, so a slug-keyed sweep
@@ -19,25 +19,23 @@
 # the two turns to the default cap.
 max_turns = 30
 
-# Every `.claude/` path in this file names the legacy record root the scenario
-# stages on purpose, per the scenario script's own header comment, never the
-# root a real project resolves at today. canon-keep-record-root
 paths = [
-  ".claude/review/memory-review-stale-pen.md",         # canon-keep-record-root
-  ".claude/memory/feedback-confirm-before-editing.md", # canon-keep-record-root
-  ".claude/memory/reference-transport-dashboard.md",   # canon-keep-record-root
+  ".canon/memory/review/memory-review-stale-pen.md",
+  ".canon/memory/review/memory-review-unmarked-slot.md",
+  ".canon/memory/feedback-confirm-before-editing.md",
+  ".canon/memory/reference-transport-dashboard.md",
 ]
 
 # The resolved receipt goes. Both its items are decided, so the collection rule
 # in `standards/memory.md` folds the declines and deletes the file.
-absent = [".claude/review/memory-review-legacy-inbox.md"] # canon-keep-record-root
+absent = [".canon/memory/review/memory-review-legacy-inbox.md"]
 
-write_scope = [".claude/**"] # canon-keep-record-root
+write_scope = [".canon/**"]
 
 # The type rule has no negative assertion available, so it reports as unchecked
 # and a reader settles it.
 manual = [
-  "`.claude/memory/reference-transport-dashboard.md` carries no decline. It is a `reference` entry, whose body is one sentence with no `**Why:**` line, and it was declined for having no in-repo target, which its type already states. A run that wrote a decline onto it restated the type and broke the body shape.", # canon-keep-record-root
+  "`.canon/memory/reference-transport-dashboard.md` carries no decline. It is a `reference` entry, whose body is one sentence with no `**Why:**` line, and it was declined for having no in-repo target, which its type already states. A run that wrote a decline onto it restated the type and broke the body shape.",
 ]
 
 # The pending receipt is the control. Its second item is still 📝, which the
@@ -46,26 +44,35 @@ manual = [
 # the arm cannot tell a sweep that reads item status from one that deletes every
 # receipt it finds.
 [[content]]
-path = ".claude/review/memory-review-stale-pen.md" # canon-keep-record-root
+path = ".canon/memory/review/memory-review-stale-pen.md"
 pattern = '^## 2\. 📝 Retire'
+
+# The unmarked receipt is the #1621 case: a receipt written by hand or by an
+# older binary, carrying no status emoji on any item, with one `Decision:` slot
+# still blank. A sweep reading only the 📝 marker finds nothing pending and
+# deletes it with the undecided slot inside, so it must survive with that slot
+# still empty.
+[[content]]
+path = ".canon/memory/review/memory-review-unmarked-slot.md"
+pattern = '^Decision:\s*$'
 
 # The fold lands in the `**Why:**` line, which is where a decline belongs on a
 # `feedback` entry because that is the line a later reader tests the rule
 # against. The pattern stays loose on wording and strict on placement, since the
 # sentence is written by the run and the line it goes on is fixed.
 [[content]]
-path = ".claude/memory/feedback-confirm-before-editing.md" # canon-keep-record-root
+path = ".canon/memory/feedback-confirm-before-editing.md"
 pattern = '^\*\*Why:\*\*.*(declined|decline|not promoted|turned down|rejected)'
 
 # The entry keeps its original signal too. A fold that replaced the Why line
 # rather than extending it loses what earned the rule, which is the half a later
 # reader needs to tell whether it still holds.
 [[content]]
-path = ".claude/memory/feedback-confirm-before-editing.md" # canon-keep-record-root
+path = ".canon/memory/feedback-confirm-before-editing.md"
 pattern = 'four files under `src/`'
 
 # The board work still lands, so a run that swept receipts and skipped the rest
 # of the step fails here rather than reading as a pass.
 [[content]]
-path = ".claude/tasks/v01.0-notify.md" # canon-keep-record-root
+path = ".canon/tasks/v01.0-notify.md"
 pattern = '^- \[x\] Outcome: a notification carries a retry budget'
