@@ -6,10 +6,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { once } from 'node:events'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { execa, execaSync } from 'execa'
+import { execa, execaSync, type ResultPromise } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
@@ -357,6 +358,7 @@ describe('canon pr local', () => {
   let commentsFile: string
   let apiLog: string
   let bin: string
+  let server: ResultPromise | undefined
 
   async function runLocal(
     args: string[],
@@ -398,8 +400,51 @@ describe('canon pr local', () => {
   })
 
   afterEach(() => {
+    server?.kill()
+    server = undefined
     rmSync(tempDir, { recursive: true, force: true })
   })
+
+  /**
+   * Serves an HTML page from inside the worktree under the name the kernel
+   * cuts Next's `next-server (vX.Y.Z)` title down to, and resolves its port.
+   */
+  async function serveAsNext(): Promise<number> {
+    const script = [
+      "require('fs').writeFileSync('/proc/self/comm', 'next-server (v1')",
+      "const s = Bun.serve({ port: 0, fetch: () => new Response('<p>', { headers: { 'content-type': 'text/html' } }) })",
+      'process.stdout.write(`${s.port}\\n`)',
+    ].join('\n')
+    const child = execa(process.execPath, ['-e', script], {
+      cwd: repoRoot,
+      reject: false,
+      timeout: RUN_TIMEOUT_MS,
+    })
+    server = child
+    const [chunk] = await Promise.race([
+      once(child.stdout, 'data'),
+      child.then(() => {
+        throw new Error('the server exited before printing its port')
+      }),
+    ])
+    return Number(String(chunk).trim())
+  }
+
+  it.runIf(existsSync('/proc/self/comm'))(
+    'should report a server whose process name holds an unmatched parenthesis',
+    async () => {
+      const port = await serveAsNext()
+
+      const outcome = await runLocal([])
+
+      expect(outcome.record).toEqual(
+        expect.objectContaining({
+          reason: 'ok',
+          url: expect.stringContaining(`:${port}`),
+        }),
+      )
+    },
+  )
 
   it('should refuse as no-server when nothing listens inside the worktree', async () => {
     const outcome = await runLocal([])
