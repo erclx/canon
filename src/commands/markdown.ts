@@ -67,7 +67,7 @@ export function register(program: Command): void {
   markdown
     .command('audit')
     .description(
-      'Fail on a banned character, word, or spelling, and report bullet, paragraph, cadence, depth, and length',
+      'Fail on a banned character, and report bullet, paragraph, cadence, depth, and length',
     )
     .argument(
       '[path...]',
@@ -82,8 +82,8 @@ export function register(program: Command): void {
         'Exit codes:',
         '  0  the audit completed with no gating finding',
         '  1  refused, with the reason on stderr',
-        '  2  a banned character, word, or spelling is present, or a relative',
-        '     link resolves to nothing on disk',
+        '  2  a banned character is present, or a relative link resolves',
+        '     to nothing on disk',
         '  3  a shipped ban set is empty, so the run measured nothing',
         '',
         'A ban hit and a dead link are each a fact and gate unconditionally.',
@@ -192,8 +192,6 @@ async function runAudit(
         unmatchedPaths: scope.unmatched,
         bans: {
           characters: bans.characters,
-          words: bans.words,
-          spellings: bans.spellings,
           emptySets: empty,
         },
         checkpoints: {
@@ -284,19 +282,19 @@ function reportBans(
 
   if (empty.length > 0) {
     logWarn(
-      `Not measured. The shipped set is empty for: ${empty.join(', ')}. The sets ship with the canon package, so an empty one is a defect in the build rather than a missing install.`,
+      `Not measured. The shipped set is empty for: ${empty.join(', ')}. The set ships with the canon package, so an empty set is a defect in the build rather than a missing install.`,
     )
     return
   }
 
   logInfo(
-    `${plural(bans.characters.length, 'character')}, ${plural(bans.words.length, 'word')}, and ${plural(bans.spellings.length, 'spelling')} shipped with the canon package`,
+    `${plural(bans.characters.length, 'character')} shipped with the canon package`,
   )
   logInfo(
     'Frontmatter, fenced blocks, code spans, and link destinations are excluded.',
   )
   logInfo(
-    'Phrase bans and every voice rule are patterns rather than closed sets, and stay a judgment for the reader.',
+    'Word bans, phrase bans, and every voice rule are guidance for the reader',
   )
 
   const carrying = reports
@@ -304,7 +302,7 @@ function reportBans(
     .sort((a, b) => b.bans.length - a.bans.length)
 
   if (carrying.length === 0) {
-    logInfo('No banned character, word, or spelling.')
+    logInfo('No banned character.')
     return
   }
 

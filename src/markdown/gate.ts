@@ -21,7 +21,7 @@ export interface GateInput {
 /**
  * Whether the audit found something that should fail the caller.
  *
- * A banned character, word, or spelling and a relative link resolving to
+ * A banned character and a relative link resolving to
  * nothing on disk are both facts rather than a threshold, so either gates
  * unconditionally and there is no widened mode to reach for. The standards
  * decide what counts as banned, which keeps this answering how many rather

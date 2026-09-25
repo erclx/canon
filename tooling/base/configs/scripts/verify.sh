@@ -48,14 +48,14 @@ check_markdown_bans() {
 
   case "$code" in
   0)
-    log_info "No banned character, word, or spelling"
+    log_info "No banned character"
     ;;
   1)
     log_info "Skipped: canon markdown audit refused and measured nothing."
     ;;
   2)
     echo "$output" | pipe_output
-    log_error "Markdown prose carries a banned character, word, or spelling, or a relative link resolves to nothing on disk"
+    log_error "Markdown prose carries a banned character, or a relative link resolves to nothing on disk"
     ;;
   3)
     echo "$output" | pipe_output

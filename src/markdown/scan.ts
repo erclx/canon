@@ -55,20 +55,9 @@ export interface BodyLine {
   readonly text: string
   /** True on a fence delimiter and on every line between one pair. */
   readonly fenced: boolean
-  /**
-   * Which fenced block the line sits in, counted from one, and undefined
-   * outside one. Two blocks written with nothing between them are one
-   * contiguous run of fenced lines, so this is the only field telling them
-   * apart. Counting from one keeps the outside answer from reading as a block.
-   *
-   * The name carries the fence because `block` alone already names a run of
-   * `BodyLine` values in `src/markdown/structure.ts`, and one word meaning both
-   * an aggregate of lines and an index on each line reads as a bug.
-   */
-  readonly fenceBlock: number | undefined
 }
 
-export type BanKind = 'character' | 'word' | 'spelling'
+export type BanKind = 'character'
 
 export interface BanFinding {
   readonly line: number
@@ -80,30 +69,20 @@ export interface BanFinding {
 
 export interface BanSets {
   readonly characters: readonly string[]
-  readonly words: readonly string[]
-  readonly spellings: readonly string[]
 }
 
 /**
- * Marks which lines sit inside a fence without dropping them, and which block
- * each of those lines belongs to.
+ * Marks which lines sit inside a fence without dropping them.
  *
  * Each measure excludes a fence for its own reason and needs a different
  * response. The depth measure skips a fenced line so an example cannot break
  * the run around it, bullet folding treats one as a break so a bullet does not
  * absorb the block below it, and the ban scan ignores it outright. Returning
  * the mark rather than a filtered list is what lets one walk serve all three.
- *
- * The block index answers the consumer that has to decide per block rather
- * than per contiguous run, since two adjacent blocks are indistinguishable
- * through the mark alone. It is counted here because the walk already holds
- * the opening delimiter, and a consumer parsing its own would be the second
- * fence walker this repository consolidated away.
  */
 function markFences(texts: readonly string[], offset: number): BodyLine[] {
   const lines: BodyLine[] = []
   let fence: string | undefined
-  let fenceBlock = 0
 
   for (const [index, text] of texts.entries()) {
     const match = FENCE.exec(text.trim())
@@ -117,15 +96,9 @@ function markFences(texts: readonly string[], offset: number): BodyLine[] {
     } else if (match) {
       fenced = true
       fence = match[1]
-      fenceBlock += 1
     }
 
-    lines.push({
-      number: offset + index + 1,
-      text,
-      fenced,
-      fenceBlock: fenced ? fenceBlock : undefined,
-    })
+    lines.push({ number: offset + index + 1, text, fenced })
   }
 
   return lines
@@ -227,66 +200,18 @@ export function visibleText(text: string): string {
   return visible + drop(text.slice(read))
 }
 
-function escape(term: string): string {
-  return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
 /**
- * Bounds a banned word on a word character or a hyphen either side.
+ * Finds every banned character outside a fence, a code span, and a link.
  *
- * `\b` sits after a hyphen, so a banned word ending a hyphenated compound
- * reports from inside it: `allows` came back out of `auto-allows`. A compound
- * is one word to a reader, and the ban is on the word rather than on a morpheme
- * of it. Stripping hyphens before matching was the alternative and it joins the
- * compound into a token neither half reaches.
- *
- * A spelling ban takes `wordBoundary` instead. This is not that rule with a
- * wider fence, since the two bans target different things.
- */
-function bannedWord(term: string): RegExp {
-  return new RegExp(`(?<![\\w-])${escape(term)}(?![\\w-])`, 'gi')
-}
-
-/**
- * Bounds a banned spelling on a word character alone, hyphens included.
- *
- * A word ban targets the word, so a compound reading as one word is correct.
- * A spelling ban targets the orthography inside it, and a compound is exactly
- * where the orthography still sits: `behaviour-driven` carries the banned
- * spelling as plainly as `behaviour` does, and rejecting a hyphen here would
- * leave the usual spelling of that phrase unreported.
- */
-function bannedSpelling(term: string): RegExp {
-  return new RegExp(`\\b${escape(term)}\\b`, 'gi')
-}
-
-/**
- * Finds every banned term outside a fence, a code span, and a link.
- *
- * A word ban matches in either casing, since the standard states each in
- * lowercase and bans the word rather than a spelling of it. A closed set of
- * whole words separates the check from the pattern that produced most of the
- * intake's false positives: `exercises` and `promises` end in the banned
- * suffix and are not the banned words, and a closed set never reaches them.
+ * Characters are the whole set because a character is the one class a literal
+ * match settles. A word carries honest uses no match separates, which is why
+ * word choice is guidance a reader applies rather than a finding this reports.
  */
 export function scanBans(
   lines: readonly BodyLine[],
   bans: BanSets,
 ): BanFinding[] {
   const found: BanFinding[] = []
-
-  const patterns: { kind: BanKind; term: string; pattern: RegExp }[] = [
-    ...bans.words.map((term) => ({
-      kind: 'word' as const,
-      term,
-      pattern: bannedWord(term),
-    })),
-    ...bans.spellings.map((term) => ({
-      kind: 'spelling' as const,
-      term,
-      pattern: bannedSpelling(term),
-    })),
-  ]
 
   for (const line of lines) {
     if (line.fenced) continue
@@ -297,12 +222,6 @@ export function scanBans(
       while (column !== -1) {
         found.push({ line: line.number, column, kind: 'character', term })
         column = text.indexOf(term, column + term.length)
-      }
-    }
-
-    for (const { kind, term, pattern } of patterns) {
-      for (const match of text.matchAll(pattern)) {
-        found.push({ line: line.number, column: match.index, kind, term })
       }
     }
   }

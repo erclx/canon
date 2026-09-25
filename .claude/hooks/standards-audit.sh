@@ -28,11 +28,10 @@ esac
 
 [ -f "$file" ] || exit 0
 
-# The audit verb owns the ban sets, so the hook an author meets at edit time and
-# the stage that fails the push read one set. The awk this replaces parsed the
-# word bans out of a standards file, hardcoded the em-dash and semicolon, and reached
-# none of the spellings, so a British spelling passed here and failed the push
-# with nothing in between explaining the difference.
+# The audit verb owns the ban set, so the hook an author meets at edit time and
+# the stage that fails the push read one set. The awk this replaces parsed its
+# bans out of a standards file and hardcoded the rest, so this hook and the push
+# could disagree with nothing in between explaining the difference.
 #
 # The verb resolves its own paths under the cwd, so the project root is named
 # rather than inherited. The payload carries an absolute file path, which is

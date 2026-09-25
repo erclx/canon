@@ -10,8 +10,6 @@ import {
 
 const BANS: BanSets = {
   characters: ['—', ';'],
-  words: ['simply', 'leverage', 'just'],
-  spellings: ['organise', 'colour', 'behaviour'],
 }
 
 function scan(source: string) {
@@ -55,37 +53,6 @@ describe('bodyLines', () => {
     // Under-reporting a malformed file beats reporting its remainder as
     // content, since the remainder is whatever the unclosed block holds.
     expect(bodyLines(source).filter((line) => line.fenced)).toHaveLength(4)
-  })
-
-  it('should leave the fence block undefined outside every fence', () => {
-    const lines = bodyLines('Before.\n```ts\nconst x = 1\n```\nAfter.\n')
-
-    // Counting from one is what keeps the outside answer from reading as a
-    // block a consumer can compare against.
-    expect(lines.map((line) => line.fenceBlock)).toEqual([
-      undefined,
-      1,
-      1,
-      1,
-      undefined,
-    ])
-  })
-
-  it('should number an indented block and the unindented one behind it apart', () => {
-    const source = '  ```bash\n  a\n  ```\n```bash\nb\n```\n'
-
-    // Nothing sits between the two, so the fenced mark reads them as one run.
-    expect(bodyLines(source).map((line) => line.fenceBlock)).toEqual([
-      1, 1, 1, 2, 2, 2,
-    ])
-  })
-
-  it('should number an unindented block and the indented one behind it apart', () => {
-    const source = '```bash\na\n```\n  ```bash\n  b\n  ```\n'
-
-    expect(bodyLines(source).map((line) => line.fenceBlock)).toEqual([
-      1, 1, 1, 2, 2, 2,
-    ])
   })
 })
 
@@ -198,73 +165,24 @@ describe('scanBans', () => {
     expect(terms('A clause; another.\n')).toEqual([';'])
   })
 
-  it('should report a banned word in either casing', () => {
-    expect(terms('Simply run it.\n')).toEqual(['simply'])
-  })
-
-  it('should report a banned spelling', () => {
-    expect(terms('We organise the files.\n')).toEqual(['organise'])
-  })
-
-  it('should not report a word that merely ends in the banned suffix', () => {
-    // The intake scanner matched `-ise` as a pattern and produced 46 bad hits
-    // from words like these, which a closed set of whole words never reaches.
-    expect(terms('The exercises and promises were revised.\n')).toEqual([])
-  })
-
-  it('should not report a banned word inside a longer one', () => {
-    // `just` sits inside `adjustment`, which a substring match would report.
-    expect(terms('The adjustment held.\n')).toEqual([])
-  })
-
-  it('should not report a banned word ending a hyphenated compound', () => {
-    // A word boundary sits after a hyphen, so `\b` reported `just` out of
-    // `auto-just`. A compound is one word to the reader who wrote it.
-    expect(terms('The auto-just setting held.\n')).toEqual([])
-  })
-
-  it('should not report a banned word opening a hyphenated compound', () => {
-    expect(terms('The just-in-time path held.\n')).toEqual([])
-  })
-
-  it('should still report a banned word standing on its own', () => {
-    // The boundary is tightened either side, so the plain hit has to survive it.
-    expect(terms('Just run it.\n')).toEqual(['just'])
-  })
-
-  it('should report a banned spelling inside a hyphenated compound', () => {
-    // A word ban reads a compound as the one word it is, and a spelling ban
-    // targets the orthography sitting inside it. `behaviour-driven` is the
-    // usual spelling of BDD and the likeliest route a British spelling takes in.
-    expect(terms('We run behaviour-driven development.\n')).toEqual([
-      'behaviour',
-    ])
-  })
-
-  it('should report a banned spelling opening a hyphenated compound', () => {
-    expect(terms('A colour-blind palette.\n')).toEqual(['colour'])
-  })
-
   it('should report nothing inside frontmatter', () => {
-    expect(terms('---\ntitle: Simply; a title\n---\n\nBody.\n')).toEqual([])
+    expect(terms('---\ntitle: A; title — here\n---\n\nBody.\n')).toEqual([])
   })
 
   it('should report nothing inside a fenced block', () => {
-    expect(terms('# H\n\n```ts\nconst a = 1; // simply\n```\n')).toEqual([])
+    expect(terms('# H\n\n```ts\nconst a = 1; // x — y\n```\n')).toEqual([])
   })
 
   it('should report nothing inside either of two adjacent blocks', () => {
     // The ban half of `canon markdown audit` fails a push, so the exclusion this
-    // scan walks around has to survive the walker learning about blocks.
+    // scan walks around has to hold for a block with no gap before the next.
     expect(
-      terms(
-        '# H\n\n```ts\nconst a = 1; // simply\n```\n```sh\ncanon --colour\n```\n',
-      ),
+      terms('# H\n\n```ts\nconst a = 1;\n```\n```sh\ncanon a; canon b\n```\n'),
     ).toEqual([])
   })
 
   it('should report nothing inside an inline code span', () => {
-    expect(terms('The `a; b` operator and `simply` flag.\n')).toEqual([])
+    expect(terms('The `a; b` operator and `x — y` flag.\n')).toEqual([])
   })
 
   it('should point at the column the term sits in', () => {
@@ -274,12 +192,12 @@ describe('scanBans', () => {
   })
 
   it('should sort findings by line then column', () => {
-    const found = scan('Simply; go.\n\nWe organise it.\n')
+    const found = scan('Go — now; then.\n\nWe stop; here.\n')
 
     expect(found.map((each) => [each.line, each.term])).toEqual([
-      [1, 'simply'],
+      [1, '—'],
       [1, ';'],
-      [3, 'organise'],
+      [3, ';'],
     ])
   })
 })

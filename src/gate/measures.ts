@@ -438,8 +438,8 @@ export const recordIdempotence: Measure = async (ctx) => {
 }
 
 /**
- * A banned character, word, or spelling is a fact rather than a threshold, so
- * it fails the push while bullet, paragraph, and depth weight stay advisory.
+ * A banned character is a fact rather than a threshold, so it fails the push
+ * while bullet, paragraph, and depth weight stay advisory.
  *
  * The whole corpus is measured rather than the changed files, because a
  * `Do not use` bullet added to a standard bans a token retroactively and no
@@ -453,7 +453,7 @@ export const markdownBans: Measure = async (ctx) => {
   const { exitCode } = await ctx.cli(['markdown', 'audit', '--json'])
 
   if (exitCode === 0) {
-    return { emissions: [info('No banned character, word, or spelling')] }
+    return { emissions: [info('No banned character')] }
   }
 
   if (exitCode === 1) {
@@ -476,7 +476,7 @@ export const markdownBans: Measure = async (ctx) => {
     return {
       emissions: [output(frame.all)],
       failure:
-        'Markdown prose carries a banned character, word, or spelling, or a relative link resolves to nothing on disk. Rewrite the sentence or fix the link, and reach for a code span only where the token is genuinely an identifier under discussion.',
+        'Markdown prose carries a banned character, or a relative link resolves to nothing on disk. Rewrite the sentence or fix the link, and reach for a code span only where the token is genuinely an identifier under discussion.',
     }
   }
 
