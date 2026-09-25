@@ -40,6 +40,10 @@ Plan mode is a permission mode that restricts Claude to read-only exploration. `
 
 `plan-groundwork` sits ahead of all three. It runs before a topic is ready to plan, and its output is a scratch folder that can conclude in doing nothing. Reach for it when the current state is unmeasured and more than one approach is live, then run `plan-feature` on the decision it produces.
 
+Both skills close their questions with a lean, and the two leans differ in strength on purpose. A plan's `- Suggested:` is decision-ready, so a blank `- Answer:` means accept it at execution time. A groundwork `- Leaning:` is weaker: it records where the evidence currently points on a question still open by definition, and pairs with an `- Overturned by:` line naming what would change it.
+
+Collapsing the two would turn a groundwork track into premature planning, the failure the container exists to prevent. A measurement question carries no lean at all, since a guess at a number is worse than an admission.
+
 ### Groundwork experiments
 
 A track may run its own experiments. Reading and computing were always in scope, so the permission that mattered is the fixture write, and it lands under `.canon/tmp/runs/groundwork-fixtures/<slug>/` rather than inside the track folder so mode detection never matches a fixture as a track. A billed headless run is bounded by a count of three rather than by a dollar figure, because a headless run reports its total cost only after it finishes, which makes a budget reportable and not enforceable while a count is checkable before spawning. The record lands in `08-spikes.md`, the one reserved number sitting after the closing files, because it holds evidence rather than a topic.
@@ -57,18 +61,10 @@ The fixture path splits by who reads it. A fixture this session provisions and r
 
 The built-in delegates to a project skill when it finds one, so the two compose rather than compete. The split is the stop condition. `run` continues past a passing health check by design, because its job is confirming a change. That is the wrong shape for "start the server so I can use it", which is the request `project-commands` answers.
 
+The no-fallback rule is what keeps the boundary sharp. A skill that guesses at a command source when the entry is missing becomes a second launcher, and the two would then disagree about what a project runs.
+
 ## Background session isolation
 
 Claude Code isolates a `claude --bg` session into its own `.claude/worktrees/` entry automatically, but only lazily: the move happens right before the session's first file edit rather than at dispatch. `auto-ship` Step 0 calls `EnterWorktree` through `session-worktree` ahead of any edit tool, so a worker dispatched through the ship chain never observes the built-in trigger firing at all. Its own explicit move always lands first.
 
 A session read taken in the first seconds after dispatch, before either mechanism has moved it, reports the main worktree as `cwd` and `main` as the branch regardless of which one would have isolated it. That reading settles nothing about whether the built-in default is active, only that neither mechanism has run yet.
-
-## Only one variable expands in a skill body
-
-`${CLAUDE_SKILL_DIR}` is substituted into a skill body before the model sees it, while `${CLAUDE_PLUGIN_ROOT}` arrives as a literal string and a bare `../../` arrives unresolved, so only the first names a path without inference. Three probe skills in a project with no `.claude/` all reported the standard's sentinel, which reads as three working forms until the resolved paths separate them: the `${CLAUDE_SKILL_DIR}` arm quoted an absolute path and the other two quoted the literal text and guessed a base correctly. A form that works by inference fails wherever the inference goes to the session cwd. Ask a probe for the path it resolved rather than the content it read, since content alone cannot distinguish expansion from a lucky guess.
-
-The no-fallback rule is what keeps the boundary sharp. A skill that guesses at a command source when the entry is missing becomes a second launcher, and the two would then disagree about what a project runs.
-
-Both skills close their questions with a lean, and the two leans differ in strength on purpose. A plan's `- Suggested:` is decision-ready, so a blank `- Answer:` means accept it at execution time. A groundwork `- Leaning:` is weaker: it records where the evidence currently points on a question still open by definition, and pairs with an `- Overturned by:` line naming what would change it.
-
-Collapsing the two would turn a groundwork track into premature planning, the failure the container exists to prevent. A measurement question carries no lean at all, since a guess at a number is worse than an admission.

@@ -51,5 +51,5 @@ Both are the same rule `target-check` states as "unread is not current", taken o
 ## Open
 
 - The skill and `standards-audit` are still two entries a session picks between on description alone. The boundary is stated in both requirements and nothing checks that the two descriptions stay disjoint as either is edited.
-- Nothing checks that the axis list in the body, the reference, and this entry stay the same three. An axis added to one and not the others drifts silently, which is the gap `target-check.md` records against its own six domains.
+- Nothing checks that the axis list in the body, the reference, and this entry stay the same three. An axis added to one and not the others drifts silently, which is the gap `canon/context/claude-plugin/target-check.md` records against its own six domains.
 - The staleness axis has no sandbox assertion that can fail on a wrong reading, since the reading is the thing under test. The scenario seeds a document carrying a path that resolves to nothing, which tests that the axis fires rather than that its judgment is sound.

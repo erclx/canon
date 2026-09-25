@@ -5,18 +5,16 @@ description: The canon claude command surface and what each verb writes into a t
 
 # CLI
 
-| Command                   | Description                                                  |
-| ------------------------- | ------------------------------------------------------------ |
-| `canon claude init`       | Seed `.claude/` workflow docs and `CLAUDE.md` into a project |
-| `canon claude seeds list` | List seed doc sources, plain text or `--json` for skills     |
-| `canon claude sync`       | Reconcile `.gitignore` against the claude manifest           |
-| `canon claude setup`      | Install user-level Claude config, `~/.claude/` by default    |
+- `canon claude init` seeds the project docs, `.claude/settings.json`, its hook scripts, and `CLAUDE.md` into a project
+- `canon claude seeds list` lists each seed destination beside its source
+- `canon claude sync` reconciles `.gitignore` against the claude manifest
+- `canon claude setup` installs user-level Claude config, `~/.claude/` by default
 
 ## init
 
 ### What lands
 
-Seeds `.claude/` with project docs (`REQUIREMENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `context/`, `tasks/`, `wireframes/`, `settings.json`) and hook scripts under `.claude/hooks/`. Also seeds `CLAUDE.md` at the project root and merges `.gitignore` entries. Skips files already present. Run once per project.
+`canon claude seeds list` names every file `init` writes and where it comes from, so this entry does not restate the set. `init` also merges `.gitignore` entries, skips a file already present, and runs once per project.
 
 Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `500-prose.md`, `501-markdown.md`, `510-context.md`, and `520-wireframes.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
 
@@ -24,11 +22,11 @@ Coding and doc-authoring standards arrive separately via `canon gov install`, wh
 
 The `canon/wireframes/` folder ships with an `index.md` discovery anchor. Add a file per surface as the UI grows, following `standards/wireframes.md`. Read `index.md` first, then load only the surface files the current task touches. Per-surface files keep the lazy-load model honest as the project grows.
 
-The `canon/context/` folder ships only its `index.md` discovery anchor. The entries themselves come from elsewhere: `tooling/base/seeds/` installs `development.md` and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude seed pass skips what is already present. Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path, since two seed sources writing one destination resolve by whichever domain runs first.
+The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` installs the folder's `index.md`, `development.md`, and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude seed pass skips what is already present. Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path, since two seed sources writing one destination resolve by whichever domain runs first.
 
 ### PostToolUse hooks
 
-The seed `settings.json` ships eight hook scripts across four blocks. All eight open with the bounded stdin read covered in `development.md`, so a hook run by hand refuses instead of blocking, and seven stay byte-identical to their counterparts under `.claude/hooks/`.
+The seed `settings.json` ships eight hook scripts across five blocks on three events. `pr-create-log.sh` and `silent-turn.sh` are covered in `canon/context/development/hooks.md`, and the rest below. All eight open with the bounded stdin read covered in that same entry, so a hook run by hand refuses instead of blocking, and seven stay byte-identical to their counterparts under `.claude/hooks/`.
 
 A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `canon markdown audit` against the edited file, reads the hits out of the `--json` record, and emits `additionalContext` so the agent self-corrects on the next turn. A checkout's own `src/cli.ts` wins over an installed binary, so the hook and the push stage read one build. Scratch dirs `.canon/tmp/`, `.canon/memory/`, `.canon/review/`, and `.canon/plans/` are skipped.
 
@@ -46,7 +44,7 @@ The hook derives the walk-up boundary from the file path rather than the session
 
 A PreToolUse hook on `Grep` and `Glob` pairs with `.claude/hooks/index-reminder.sh`, which walks up from the search path to the nearest `index.md` and reminds the agent to read it first, once per folder per session. It fires only where an index exists, so it self-scales to a project's index density.
 
-A PreToolUse hook on `Write` and `Edit` pairs with `.claude/hooks/scratch-guard.sh`, which fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It exempts anything under `CLAUDE_PROJECT_DIR` before matching the temp patterns, because the bare `*/tmp/*` match has no notion of a project root and fired on every source write in a project whose own path carried a `tmp` segment.
+A PreToolUse hook on `Write` and `Edit` pairs with `.claude/hooks/scratch-guard.sh`, which fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It exempts anything under `CLAUDE_PROJECT_DIR` before matching the temp patterns, because the bare `*/tmp/*` match has no notion of a project root and would fire on every source write in a project whose own path carries a `tmp` segment.
 
 That trade gives up warning on a write to `<project>/tmp/`, which is a real violation, in exchange for silencing a false positive that fired constantly. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose the harness scratchpad instruction competes with.
 
