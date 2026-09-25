@@ -273,15 +273,15 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Run several tracks at once
 
-| Skill                     | When to use                                                                                          |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `canon:role-orchestrator` | To assert the control session that owns the queue and reviews each worker's PR                       |
-| `canon:role-planner`      | To assert the thinking role for a cold session writing a plan, a groundwork track, or an intake pass |
-| `canon:role-worker`       | To assert the worker role for a cold session building one branch under one plan                      |
-| `canon:session-relay`     | When this session owes another session a message, with or without a role                             |
-| `canon:session-resume`    | At the start of a session, to pick up what a previous one left                                       |
-| `canon:session-compact`   | Before a compaction, to write a plain session's handoff note outside the board                       |
-| `canon:session-map`       | At the close of an orchestrating session, to write its board-side handoff                            |
+| Skill                     | When to use                                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `canon:role-orchestrator` | To assert the control session that owns the queue and reviews each worker's PR                              |
+| `canon:role-planner`      | To assert the thinking role for a cold session writing a plan, a groundwork track, or an intake pass        |
+| `canon:role-worker`       | To assert the worker role for a cold session building one branch under one plan                             |
+| `canon:session-relay`     | When this session owes another session a message, with or without a role                                    |
+| `canon:session-resume`    | At the start of a session, to pick up what a previous one left                                              |
+| `canon:session-compact`   | Before a compaction or a move to another machine, to write a plain session's handoff note outside the board |
+| `canon:session-map`       | At the close of an orchestrating session, to write its board-side handoff                                   |
 
 ### Keep the project current with the toolkit
 

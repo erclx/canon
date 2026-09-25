@@ -1,6 +1,6 @@
 ---
 name: session-compact
-description: Captures a session's memory, then writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped. Use before running /compact, when asked to "write a handoff", "prepare for compaction", "save where we got to", or when a PreCompact hook blocks and names this skill. Do NOT use for a session holding the orchestrator role, whose board handoff is `session-map`. Do NOT use to record a decision a groundwork track owns, which is `plan-groundwork`.
+description: Captures a session's memory, then writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped. Use before running /compact, when asked to "write a handoff", "prepare for compaction", "save where we got to", or before moving a session to another machine, or when a PreCompact hook blocks and names this skill. Do NOT use for a session holding the orchestrator role, whose board handoff is `session-map`. Do NOT use to record a decision a groundwork track owns, which is `plan-groundwork`.
 ---
 
 # Session compact
@@ -36,7 +36,10 @@ Overwrite a note of the same name. One session's work has one note, and a second
 ```plaintext
 ✅ Handoff written: .canon/compact/<slug>.md
 <the line memory-capture returned, where a fact routed>
+Move: canon records push, then canon sessions export <id>
 ```
+
+Print the `Move:` line only when the caller named moving the session to another machine, and leave it off every other report. Fill `<id>` from the `sessionId` of `canon sessions list --self --json`, and leave the literal `<id>` where that read refuses, since an id taken from any other row packs the wrong session. The push comes first so the note travels with the session. Name both commands for the operator and run neither: an export packs a transcript that can hold credentials, so the order belongs to the caller.
 
 A decline reports itself so a caller can tell it from a failure:
 
@@ -57,4 +60,5 @@ A decline reports itself so a caller can tell it from a failure:
 - The memory pass, its routing, and the pen's shape: `canon:memory-capture`
 - The orchestrator's handoff, which carries a drift check and writes a task row: `canon:session-map`
 - Reading a handoff back at the start of the next session: `canon:session-resume`
+- Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume` on the arriving side
 - A decision a groundwork track owns, which belongs in its own `06-decision.md`: `canon:plan-groundwork`
