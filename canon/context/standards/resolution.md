@@ -37,7 +37,7 @@ The corpus reaches a project two ways and neither writes into it: the `claude/st
 
 `tooling/<stack>/reference.md` closed the same channel for tooling stack references: `src/tooling/read.ts` resolves a reference at the working root ahead of the packaged corpus, mirroring `standardRoots`, and `canon tooling reference <stack>` is the read verb `canon tooling sync` stopped writing a copy through. Measured at `16591fd2` on 2026-08-27.
 
-A machine-parsed standard is exempt from any design inlining a standard into the rule that cites it, because a rule restating the list a parser reads is two sources for one list. The set is empty: the three ban sets and the six structural checkpoints that made `markdown.md` a member ship as data in `src/markdown/` instead, at the accepted cost that the prose and the shipped numbers can drift with nothing comparing them. Measured at `60fc97bf` on 2026-08-19.
+A machine-parsed standard is exempt from any design inlining a standard into the rule that cites it, because a rule restating the list a parser reads is two sources for one list. The set is empty: the ban set and the six structural checkpoints that made `markdown.md` a member ship as data in `src/markdown/` instead, at the accepted cost that the prose and the shipped numbers can drift with nothing comparing them. Measured at `60fc97bf` on 2026-08-19.
 
 ## Skill-local references
 

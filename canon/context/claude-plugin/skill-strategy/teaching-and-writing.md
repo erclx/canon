@@ -41,7 +41,7 @@ The teach-back miss lands under what the learner got wrong rather than under a h
 
 ## The writing surface
 
-`write-human` carries voice, rhythm, sentence construction, and information density. The bans, the spellings, and the frontmatter wording live in `markdown.md`, read by a command. This skill carries the half no check settles, and it is a skill because nothing reads a standard nobody opens.
+`write-human` carries voice, word choice, rhythm, sentence construction, and information density. The character bans and the frontmatter wording live in `markdown.md`, and a command reads the bans. This skill carries the half no check settles, and it is a skill because nothing reads a standard nobody opens.
 
 The name follows the job rather than the medium. `prose` names what is being written and every other candidate named the defect, where the job is removing machine tells and putting a person back into the writing. It is model-invocable, unlike the bodies carrying `disable-model-invocation`, since each of those is a workflow a person starts and this is guidance a session should reach for mid-draft.
 

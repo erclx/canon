@@ -34,7 +34,7 @@ What the rule delivers is arrival rather than text. It fires on the glob while t
 
 ### A verb is the home for a rule stated across every reader
 
-One attribute standard lands on the CLI: `markdown.md`, whose ban sets and structural checkpoints ship as data in `src/markdown/`. A closed list a check already walks earns a verb. A value every caller reads and no caller restates does not, because there is no duplication for the verb to collapse and the standard still has to state the rule for the reader, which is what the two withdrawals below turn on.
+One attribute standard lands on the CLI: `markdown.md`, whose character bans and structural checkpoints ship as data in `src/markdown/`. A closed list a check already walks earns a verb. A value every caller reads and no caller restates does not, because there is no duplication for the verb to collapse and the standard still has to state the rule for the reader, which is what the two withdrawals below turn on.
 
 ## Gotchas
 
