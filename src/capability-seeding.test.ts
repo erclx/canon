@@ -114,6 +114,17 @@ describe('check-capability-seeding', () => {
     expect(check().status).toBe(0)
   })
 
+  it('should pass when a workflow reaches a stack seed', () => {
+    writeHook('.github/workflows', 'verify.yml', 'name: Verify\n')
+    writeHook(
+      'tooling/base/seeds/.github/workflows',
+      'verify.yml',
+      'name: Verify\n',
+    )
+
+    expect(check().status).toBe(0)
+  })
+
   it('should fail when a workflow reaches no stack config', () => {
     writeHook('.github/workflows', 'release.yml', 'name: Release\n')
 
@@ -182,6 +193,20 @@ describe('check-capability-seeding', () => {
     expect(result.status).toBe(1)
     expect(result.output).toContain(
       'Workflows: tooling/web/configs/.github/workflows/orphaned.yml is seeded or configured with no source at .github/workflows/orphaned.yml',
+    )
+  })
+
+  it('should fail on a seeded workflow whose source here is gone', () => {
+    writeHook(
+      'tooling/base/seeds/.github/workflows',
+      'orphaned.yml',
+      'name: Orphaned\n',
+    )
+
+    const result = check()
+    expect(result.status).toBe(1)
+    expect(result.output).toContain(
+      'Workflows: tooling/base/seeds/.github/workflows/orphaned.yml is seeded or configured with no source at .github/workflows/orphaned.yml',
     )
   })
 
