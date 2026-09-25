@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.121.0](https://github.com/erclx/canon/compare/v4.120.0...v4.121.0) (2026-09-25)
+
+
+### Features
+
+* **markdown:** retire the word and spelling bans ([#1920](https://github.com/erclx/canon/issues/1920)) ([a258fa5](https://github.com/erclx/canon/commit/a258fa583614eb0a5e784217fa2cb50b4ea88792))
+* **skills:** add review-craft for what a review looks for ([#1922](https://github.com/erclx/canon/issues/1922)) ([3877320](https://github.com/erclx/canon/commit/3877320859e207246f1dd2c0d218383001cbcea5))
+
+
+### Bug Fixes
+
+* **pr:** read /proc before lsof when finding a local server ([#1917](https://github.com/erclx/canon/issues/1917)) ([478e614](https://github.com/erclx/canon/commit/478e61402983e6fadc05fa7819a3090672daa3ce))
+
 ## [4.120.0](https://github.com/erclx/canon/compare/v4.119.0...v4.120.0) (2026-09-25)
 
 
