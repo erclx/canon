@@ -118,7 +118,7 @@ The plugin corpus carries runtime behavior rather than reference prose alone, be
 When a new need appears after scaffold, install the one domain without re-running `canon init`.
 
 - Governance rule for a newly adopted library: invoke `canon:target-setup gov`, or run `canon gov install <stack> --add <rule> <path>`
-- Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/` with a non-colliding number, and `canon gov sync` leaves it untouched.
+- Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
 - Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
 
 Standards and snippets are not on that list, and there is nothing to add for either. Neither installs into a project, by default or by flag, so a session reads a standard with `canon standards <name>` and a snippet through its `@` reference off the live plugin symlink, both resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` or `.claude/snippets/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe.
@@ -225,7 +225,7 @@ The report opens by naming the binary running it. The installed version reads ag
 
 #### Then the causes
 
-A `stale` file still matches what the toolkit installed, so the update is mechanical. A `customized` file carries local edits, so taking the upstream version is a decision and `canon:seed-sync` is the tool for it. A `stranded` file sits where an older toolkit installed it and the toolkit has since moved, which is a relocation the report names but no command runs.
+A `stale` file still matches what the toolkit installed, so the update is mechanical. A `customized` file carries local edits, so taking the upstream version is a decision and `canon:seed-sync` is the tool for it. A `stranded` file sits where an older toolkit installed it and the toolkit has since moved, which is a relocation the report names but no command runs. A `retired` rule is one under `.claude/rules/canon/` the toolkit no longer ships, and the next `canon gov sync` deletes it.
 
 That attribution comes from `canon/config/config.json`, which every install and sync now writes, falling back to `.claude/canon/config.json` for a target stamped before that move. A target stamped before that path shipped is read from the retired `.claude/canon.json` instead, reported rather than migrated. Governance records a hash per installed file, plus the stack `canon gov install` was given, and tooling records the stack chain it resolved instead of any file hash, since its install runs no per-file walk to attribute.
 

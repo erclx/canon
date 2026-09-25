@@ -39,7 +39,7 @@ Routes by finding. `unmigrated` routes to a relocation the user runs, since no c
 
 Read `domains` off the report and take every entry it carries rather than naming governance here. Each entry carries `stamped`, per-state `counts`, and `entries` with a `state` and a `rel` path.
 
-The states are `matching`, `stale`, `customized`, `drifted`, `orphaned`, `stranded`, and `missing`.
+The states are `matching`, `stale`, `customized`, `drifted`, `orphaned`, `retired`, `stranded`, and `missing`. A `retired` rule is one the toolkit no longer ships, and the next sync deletes it.
 
 - Current: every count but `matching` reads zero.
 - Behind: any other count is non-zero. Report the counts and name the paths behind `stale` and `missing`, which a sync repairs, separately from `customized` and `drifted`, which the project wrote and a sync would overwrite.
