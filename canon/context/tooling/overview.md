@@ -48,7 +48,7 @@ The verb is per domain rather than a top-level `canon diff <domain>`, since each
 
 `canon tooling inject <stack>` applies one stack without the scan and prompt, for `canon claude` and the sandbox. The excluded-stack guard sits on `sync` rather than in the shared path, which is what lets `canon claude` drive the `claude` stack through it.
 
-A whole-stack install records the chain it resolved into `canon/config/config.json` through `recordToolingChain` in `src/tooling/stamp.ts`, which is what makes tooling drift measurable in `canon sync --check`. The write lands after the copies, so a partial apply that throws leaves the previous record rather than a claim the target does not meet. The rationale and the workspace-root refusal sit in `canon/context/cli/sync.md`.
+A whole-stack install records the chain it resolved into `canon/config/config.json` through `recordToolingChain` in `src/tooling/stamp.ts`, which is what makes tooling drift measurable in `canon sync --check`. The write lands after the copies, so a partial apply that throws leaves the previous record rather than a claim the target does not meet. The rationale and the workspace-root refusal sit in `canon/context/cli/stamp.md`.
 
 ### Stack lookups resolve against the package
 

@@ -58,7 +58,7 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 
 A child folder's own `index.md` `category` reaches nothing in the parent. `readCatalogs` reads `title` and `subtitle` off a child index and never its `category`, and grouped mode collects every child under `## Sub-catalogs`, so a child index declaring a category does not rejoin that heading.
 
-Quote a `description` opening with a backtick or a colon. YAML reserves both at the start of a scalar, so `Bun.YAML.parse` rejects the block and the folder fails. `parseFrontmatter` reads a block that will not parse as absent, so the error names the file as missing its `title` and `description` even though it carries both. A hand-maintained catalog never exercises the parser, so a folder converting to generation surfaces these on its first regen rather than as it grew.
+Quote a `description` opening with a backtick or a colon, or carrying a colon followed by a space anywhere in it. YAML reserves the first two at the start of a scalar and reads the third as a mapping key, so `Bun.YAML.parse` rejects the block and the folder fails. `parseFrontmatter` reads a block that will not parse as absent, so the error names the file as missing its `title` and `description` even though it carries both. A hand-maintained catalog never exercises the parser, so a folder converting to generation surfaces these on its first regen rather than as it grew.
 
 ## Hidden contracts
 
@@ -95,5 +95,5 @@ The system pays off only when sessions consult the catalogs instead of searching
 ## Related
 
 - `docs/agents/indexes.md`: CLI flags, exit codes, and JSON output
-- `canon/context/cli/commands.md`: the TypeScript layer and the migration boundary
+- `canon/context/cli/commands/overview.md`: the TypeScript layer and the migration boundary
 - `canon/context/scripts/lib.md`: `lib/frontmatter.sh`, the one bash reader that stayed

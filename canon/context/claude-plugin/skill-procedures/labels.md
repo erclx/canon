@@ -15,7 +15,7 @@ Matching is prefix-anchored, so a row written for an authoring root reaches noth
 
 ### The audit verb and its fallback
 
-`canon labels audit`, living in `src/labels/` rather than in the skill body, names an uncovered branch before it merges. A second table, `[declined]`, separates a surface nobody covered from one somebody decided against, since prose can carry that distinction only to a reader rather than to a command. `canon/context/cli/audits.md` carries the reasoning behind the verb.
+`canon labels audit`, living in `src/labels/` rather than in the skill body, names an uncovered branch before it merges. A second table, `[declined]`, separates a surface nobody covered from one somebody decided against, since prose can carry that distinction only to a reader rather than to a command. `canon/context/cli/audits/reports.md` carries the reasoning behind the verb.
 
 What it cannot see is a row that has gone stale: an entry naming a path that no longer exists still parses, still loads, and stops matching, so a branch moving a file the map enumerates literally leaves a dead row behind and the audit reports clean over it. Verify a rename against the moved tree rather than trust a passing run. A moved path shows up under `declined` against the row that caught it, where a dead entry appears in neither `declined` nor `uncovered`.
 

@@ -35,7 +35,7 @@ The three tests are read in order, so widening `## Up next` alone leaves its new
 
 The external kind names what would satisfy the condition rather than the condition alone. Without that clause the kind admits any excuse, including a row nobody has looked at.
 
-The `## Needs a plan` cell takes the same treatment. It states why the row sits where it does, never why the row matters, since a reason of that shape admits every row at once and leaves the order to whenever each was filed. Naming the row or the class it is ranked against is what a comparison costs. `canon tasks validate` reads it back, and the mechanism sits in `canon/context/cli/audits.md`.
+The `## Needs a plan` cell takes the same treatment. It states why the row sits where it does, never why the row matters, since a reason of that shape admits every row at once and leaves the order to whenever each was filed. Naming the row or the class it is ranked against is what a comparison costs. `canon tasks validate` reads it back, and the mechanism sits in `canon/context/cli/audits/board.md`.
 
 `canon tasks validate` resolves the `Task`, `Plan`, and `Touches` columns by header text and never reads the `Waiting on` cell, so the widened test holds on reading alone and the standard says so. A non-empty check lost, since every row already passes it. Every finding the validator reports compares a written claim against the tree, and an external condition puts no fact there to disagree with.
 

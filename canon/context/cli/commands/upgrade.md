@@ -1,0 +1,17 @@
+---
+title: Upgrade and skew
+description: The upgrade verb, the version skew read and its two callers, and the record shapes that keep a behind report honest
+---
+
+# Upgrade and skew
+
+- Reporting that the binary is behind is the fourth thing that earns a verb, and `canon upgrade` is the only one mutating the machine rather than a project. It reads the manager off the install path in `src/version/manager.ts` rather than guessing from `PATH`, names what it matched first, and refuses a path under no install tree. Reinstalling over a clone is what that prevents.
+- It refuses a second time when the manifest carries no `name`. The value reaches a global install command, so a manifest that failed to parse would install whatever sits under the placeholder, and the confirm defaults to yes headlessly, which leaves the refusal as the only thing in the path.
+- The reinstall runs with the child's stdout pointed at stderr rather than inherited. A package manager writes progress to stdout, and inheriting all three streams puts that output ahead of the `--json` record on the one stream a wrapper parses.
+- The skew read sits in `src/version/skew.ts` and has exactly two callers, `canon sync --check` and `canon claude skills drift`, each a moment a target already stops to reconcile. Putting it behind a catalog read was rejected: an agent runs those in a loop, so a registry round trip per read fails offline and needs a cache that is a second mechanism.
+- It reports three states and never a fourth. `unknown` absorbs every failure with its reason, so `hasDrift` ignores the field and an offline machine cannot turn `canon sync --check --exit-code` red over a condition it never measured. A version ahead of the published one reports `current`, being a checkout between a release commit and the publish job rather than skew.
+- `SkewReport` is a union on `state` rather than one shape with optional fields, so a `behind` report cannot exist without the version it is behind. Both fields are rendered into a line an operator reads, and an optional one renders the word `undefined` there.
+- `InstalledPackage` runs the opposite way and carries both fields optional, since either is genuinely absent when the manifest did not parse. A sentinel string typed `string` reads as an ordinary value at each call site, which is what let a placeholder name reach a global install command unremarked. Optional forces the narrowing.
+- `describeSkew` picks the remedy from the same detection the verb runs, because both callers run from a source checkout routinely and that is exactly where `canon upgrade` refuses. A line naming the verb unconditionally sends a contributor whose clone sits a release behind to a command that declines.
+- `UpgradeRecord` carries a `message` field alongside `state`, rendered once per outcome rather than left for a caller to reconstruct from `before`, `after`, and `latest` by hand. The `current` branch reuses `describeSkew` verbatim. `.husky/post-merge` is the first caller reading `message` off `--json` rather than parsing the raw fields itself, covered in `canon/context/development/hooks/husky.md`.
+- `message` is the one field carrying arbitrary text, since `describeSkew`'s `unknown` branch embeds a registry error verbatim. `emit` runs it through `singleLine`, collapsing whitespace and swapping a double quote for an apostrophe, because the field's one caller reads it with a shell pattern that stops at the first `"` a raw registry error can carry.

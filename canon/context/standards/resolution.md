@@ -53,7 +53,7 @@ A file under a skill's own `references/` is always hand-authored and skill-local
 
 Both govern a gitignored folder no check reaches, which puts them in one class with the plan and memory standards. `.claude/hooks/standards-audit.sh` exits early on the scratch paths and the audit skill reads changed files from git, which never lists a gitignored one, so all four are enforced by a session reading them and by nothing else. `canon records validate <kind>` reports against each of the four without writing, which is what makes a verb safe over a folder with no history to recover from.
 
-A fifth kind, `standards`, reads this corpus rather than a gitignored folder and keeps the same reporting-only discipline for the opposite reason: a standard is tracked and cited by bare filename across the tree, so the risk a write carries is a rename reaching further than the file it moved rather than a repair nothing can undo. `canon/context/cli/audits.md` holds the check and its two roots.
+A fifth kind, `standards`, reads this corpus rather than a gitignored folder and keeps the same reporting-only discipline for the opposite reason: a standard is tracked and cited by bare filename across the tree, so the risk a write carries is a rename reaching further than the file it moved rather than a repair nothing can undo. `canon/context/cli/audits/records.md` holds the check and its two roots.
 
 ## The command route
 
@@ -61,7 +61,7 @@ A shipped body names one path for a standard, and the command route is what near
 
 The resolve has exactly one caller, `src/commands/standards.ts`, and no shipped body invokes the verb directly. Its second root is the package corpus, which is the route a machine reader takes and the reason a command reading a standard answers in any target. `<canon>` is how a resolve from that root spells itself, since the other label is project-relative and a report could join it to a root.
 
-`infra:standards read` is the sandbox arm that covers it, and `canon/context/sandbox/coverage/arms.md` records what the arm reaches and what it leaves to the plugin-root route.
+`infra:standards read` is the sandbox arm that covers it, and `canon/context/sandbox/coverage/workflow-arms.md` records what the arm reaches and what it leaves to the plugin-root route.
 
 ## Gotchas
 
