@@ -29,4 +29,4 @@ pattern = '^## Review[ \t]*$'
 
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
-pattern = '(no|No|missing|Missing|absent|Absent|stale|Stale|outdated|Outdated|without|Without)( an?)? ([a-z]+ )?(screenshots?|captures?|evidence)|re-capture|Re-capture|recapture|Recapture'
+pattern = '(no|No|missing|Missing|absent|Absent|stale|Stale|outdated|Outdated|without|Without)( an?)? ([a-z]+ )?(screenshots?|captures?|evidence)|re-capture|Re-capture|recapture|Recapture|(no|No) [^\n]{0,4}## Evidence'

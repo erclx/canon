@@ -8,7 +8,7 @@ The diff touches a file that paints: markup, a stylesheet, a component or templa
 
 ## First, check that a screenshot exists
 
-Run this before any other section, since a pass that finds nothing to open otherwise reads the stylesheet instead and reports as if it had looked.
+Run this before any other section, since a pass that finds nothing to open otherwise reads the stylesheet instead and reports as if it had looked. Read its answer before composing any report or body, never in the same batch as the write, since what it decides is a finding the report has to carry.
 
 Read `gh pr view <number> --json comments,headRefOid` and take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with a `**Preview:**` line when the project has a preview address.
 
