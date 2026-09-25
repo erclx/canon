@@ -168,6 +168,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
       'Relay this over to the session that dispatched me. It gave me a sessionId rather than a name, so work out who that is and send it.',
     expect: 'session-relay',
   },
+  {
+    prompt:
+      'I am stuck on a question only the operator can answer. Before I stop and ask it, tell the session that dispatched me, it gave me a sessionId.',
+    expect: 'session-relay',
+  },
 
   // Negatives: pairs whose bodies already carry an explicit Do NOT boundary.
   {
