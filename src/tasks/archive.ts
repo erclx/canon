@@ -235,12 +235,19 @@ export function readOutcomes(text: string): TaskOutcomes {
 
 /**
  * Reads the `Pull request:` line `git-pr` writes when a pull request opens.
- * The number is a bare `#NNN` the way `Issue:` is, since neither is a path and
- * a full URL would write the remote into a gitignored file.
+ * Each number is a bare `#NNN` the way `Issue:` is, since neither is a path and
+ * a full URL would write the remote into a gitignored file. A task shipped in
+ * slices lists one per slice, oldest first, so the line reads as a list. A line
+ * carrying anything besides that list reads as naming none, rather than as the
+ * numbers that happened to parse.
  */
-export function readPullRequest(text: string): number | undefined {
-  const match = /^Pull request:\s*#(\d+)\s*$/m.exec(text)
-  return match ? Number(match[1]) : undefined
+export function readPullRequest(text: string): readonly number[] {
+  const match = /^Pull request:[ \t]*(#\d+(?:[ \t]*,[ \t]*#\d+)*)[ \t]*$/m.exec(
+    text,
+  )
+  if (!match) return []
+
+  return match[1].split(',').map((entry) => Number(entry.trim().slice(1)))
 }
 
 /**
@@ -628,11 +635,13 @@ async function matchByPullRequest(
   const read = await Promise.all(
     stems.map(async (stem) => ({
       stem,
-      number: readPullRequest(await readFile(join(dir, `${stem}.md`), 'utf8')),
+      numbers: readPullRequest(await readFile(join(dir, `${stem}.md`), 'utf8')),
     })),
   )
 
-  return read.filter((entry) => entry.number === number).map(({ stem }) => stem)
+  return read
+    .filter((entry) => entry.numbers.includes(number))
+    .map(({ stem }) => stem)
 }
 
 /**

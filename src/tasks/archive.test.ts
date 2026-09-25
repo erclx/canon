@@ -35,7 +35,7 @@ One file per task, ordered by phase label
 
 interface TaskFixture {
   readonly stem?: string
-  readonly pullRequest?: number
+  readonly pullRequest?: number | readonly number[]
   readonly plan?: string
   readonly ready?: string
   readonly outcomes?: string
@@ -59,7 +59,13 @@ function taskBody({
 
   if (plan) lines.push(`Plan: [${plan}](${plan})`)
   if (ready) lines.push(`Ready: [${ready}](../ready/${ready}/)`)
-  if (pullRequest) lines.push(`Pull request: #${pullRequest}`)
+  if (pullRequest) {
+    const numbers =
+      typeof pullRequest === 'number' ? [pullRequest] : pullRequest
+    lines.push(
+      `Pull request: ${numbers.map((number) => `#${number}`).join(', ')}`,
+    )
+  }
 
   lines.push(
     '',
@@ -187,15 +193,25 @@ describe('readOutcomes', () => {
 
 describe('readPullRequest', () => {
   it('should read the number from the pull request line', () => {
-    expect(readPullRequest('Pull request: #673\n')).toBe(673)
+    expect(readPullRequest('Pull request: #673\n')).toEqual([673])
   })
 
-  it('should return undefined when the line is absent', () => {
-    expect(readPullRequest('Issue: #12\n')).toBeUndefined()
+  it('should read every number on a list line, oldest first', () => {
+    expect(readPullRequest('Pull request: #12, #673, #700\n')).toEqual([
+      12, 673, 700,
+    ])
+  })
+
+  it('should return no number when the line carries anything besides the list', () => {
+    expect(readPullRequest('Pull request: #12, #673 (closed)\n')).toEqual([])
+  })
+
+  it('should return no number when the line is absent', () => {
+    expect(readPullRequest('Issue: #12\n')).toEqual([])
   })
 
   it('should not read a number out of prose naming a pull request', () => {
-    expect(readPullRequest('Split from #646, which shipped.\n')).toBeUndefined()
+    expect(readPullRequest('Split from #646, which shipped.\n')).toEqual([])
   })
 })
 
@@ -607,6 +623,14 @@ describe('archiveTask', () => {
     ).toMatchObject({ ok: true, stem })
   })
 
+  it('should resolve a task by a number that is not the first on its line', async () => {
+    const stem = await seedTask({ pullRequest: [12, 673] })
+
+    expect(
+      await archiveTask(ROOT, { kind: 'pull-request', number: 673 }),
+    ).toMatchObject({ ok: true, stem })
+  })
+
   it('should refuse when no task names the pull request', async () => {
     await seedTask({ pullRequest: 673 })
 
@@ -618,6 +642,15 @@ describe('archiveTask', () => {
   it('should refuse when two tasks name one pull request', async () => {
     await seedTask({ stem: 'v28.1-first', pullRequest: 673 })
     await seedTask({ stem: 'v28.2-second', pullRequest: 673 })
+
+    expect(
+      await archiveTask(ROOT, { kind: 'pull-request', number: 673 }),
+    ).toMatchObject({ ok: false, reason: 'ambiguous' })
+  })
+
+  it('should refuse when a second task lists the number later on its line', async () => {
+    await seedTask({ stem: 'v28.1-first', pullRequest: 673 })
+    await seedTask({ stem: 'v28.2-second', pullRequest: [12, 673] })
 
     expect(
       await archiveTask(ROOT, { kind: 'pull-request', number: 673 }),

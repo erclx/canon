@@ -1071,7 +1071,9 @@ async function checkCitedTask(
   const { open, closed } = readOutcomes(text)
   if (open.length > 0 || closed.length === 0) return nothing()
 
-  const pullRequest = readPullRequest(text)
+  // The last number is the newest slice, and an earlier one closed without
+  // merging never lands, so only the last says whether the work reached trunk.
+  const pullRequest = readPullRequest(text).at(-1)
   if (pullRequest === undefined) {
     return untestedRow(
       group,

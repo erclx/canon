@@ -65,11 +65,14 @@ const NO_PLAN = ''
 async function seedTask(
   stem: string,
   outcomes = '',
-  pullRequest?: number,
+  pullRequest?: number | readonly number[],
   plan: string = `../plans/feature-${stem}.md`,
 ): Promise<void> {
   mkdirSync(tasksDir(ROOT), { recursive: true })
-  const origin = pullRequest ? `Pull request: #${pullRequest}\n\n` : ''
+  const numbers = typeof pullRequest === 'number' ? [pullRequest] : pullRequest
+  const origin = numbers
+    ? `Pull request: ${numbers.map((number) => `#${number}`).join(', ')}\n\n`
+    : ''
   const cites = plan ? `Plan: [feature-${stem}](${plan})\n\n` : ''
   await writeFile(
     join(tasksDir(ROOT), `${stem}.md`),
@@ -1043,6 +1046,51 @@ describe('validateBoard', () => {
           'waits on v1.0-first, whose pull request #673 reached the trunk.',
       },
     ])
+  })
+
+  it('should settle a parked row on the last pull request its blocker lists', async () => {
+    await seedTask('v1.0-first', '- [x] shipped', [12, 673])
+    await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', touches: '`src/a.ts`' }]),
+        parkedTable([
+          '| [v2.0-second](v2.0-second.md) | `src/a.ts` | [v1.0-first](v1.0-first.md) |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, trunkHolding(673))
+
+    expect(outcome.ok && outcome.findings).toMatchObject([
+      {
+        kind: 'blocker-settled',
+        message:
+          'waits on v1.0-first, whose pull request #673 reached the trunk.',
+      },
+    ])
+  })
+
+  it('should not settle a parked row on an earlier pull request its blocker lists', async () => {
+    await seedTask('v1.0-first', '- [x] shipped', [12, 673])
+    await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', touches: '`src/a.ts`' }]),
+        parkedTable([
+          '| [v2.0-second](v2.0-second.md) | `src/a.ts` | [v1.0-first](v1.0-first.md) |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, trunkHolding(12))
+
+    expect(outcome.ok && outcome.findings).toEqual([])
+    expect(outcome.ok && outcome.untested).toEqual([])
   })
 
   it('should leave a parked row whose cited pull request is not on the trunk unreported', async () => {
