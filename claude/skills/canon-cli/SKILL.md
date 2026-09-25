@@ -15,21 +15,21 @@ Consult before running an unfamiliar `canon` verb, before a sync or install, or 
 
 ## Overwrite contract
 
-| Surface                                                  | Command              | Effect on existing files                                                    |
-| -------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------- |
-| Golden configs                                           | `canon tooling sync` | Overwritten once `--write` is passed. Local edits are lost.                 |
-| Dictionary seeds (`.cspell/*.txt`)                       | `canon tooling sync` | Merged and sorted. Existing terms preserved.                                |
-| Other seeds (`cspell.json`, `.lintstagedrc`, state docs) | `canon tooling sync` | Copy-once. Dropped on first install, untouched after.                       |
-| Standards                                                | none                 | Nothing installs. `canon standards <name>` reads and never writes.          |
-| Seed docs and `CLAUDE.md`                                | `canon claude init`  | Skipped when present. Never overwritten.                                    |
-| Seed docs                                                | `canon claude sync`  | Never touched. Only `.gitignore` is written.                                |
-| Stack references                                         | none                 | Nothing installs. `canon tooling reference <stack>` reads and never writes. |
-| `.gitignore`, deps, scripts                              | any sync             | Additive. Existing entries preserved. Deps re-pin on major skew.            |
-| Generated `index.md`                                     | any sync or regen    | Rewritten from target state. Hand edits are lost.                           |
+| Surface                                                                                       | Command              | Effect on existing files                                                    |
+| --------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------- |
+| Golden configs                                                                                | `canon tooling sync` | Overwritten once `--write` is passed. Local edits are lost.                 |
+| Dictionary seeds (`.cspell/*.txt`)                                                            | `canon tooling sync` | Merged and sorted. Existing terms preserved.                                |
+| Other seeds (`cspell.json`, `.lintstagedrc`, base's `verify.yml` and PR template, state docs) | `canon tooling sync` | Copy-once. Dropped on first install, untouched after.                       |
+| Standards                                                                                     | none                 | Nothing installs. `canon standards <name>` reads and never writes.          |
+| Seed docs and `CLAUDE.md`                                                                     | `canon claude init`  | Skipped when present. Never overwritten.                                    |
+| Seed docs                                                                                     | `canon claude sync`  | Never touched. Only `.gitignore` is written.                                |
+| Stack references                                                                              | none                 | Nothing installs. `canon tooling reference <stack>` reads and never writes. |
+| `.gitignore`, deps, scripts                                                                   | any sync             | Additive. Existing entries preserved. Deps re-pin on major skew.            |
+| Generated `index.md`                                                                          | any sync or regen    | Rewritten from target state. Hand edits are lost.                           |
 
 ## What a tooling sync can overwrite
 
-A golden config is any file a stack ships under `configs/`, and the category is wider than its name suggests. It carries the CI workflow, the git hooks, the end-to-end harness, the shell scripts under `scripts/`, and the editor settings, alongside the linters and compilers a reader expects. A stack inherits its parent's configs, so syncing `astro` also writes everything `web` and `base` hold.
+A golden config is any file a stack ships under `configs/`, and the category is wider than its name suggests. It carries the phase-label gate workflow, the web stack's CI workflow, the git hooks, the end-to-end harness, the shell scripts under `scripts/`, and the editor settings, alongside the linters and compilers a reader expects. A stack inherits its parent's configs, so syncing `astro` also writes everything `web` and `base` hold.
 
 No list of those paths ships in this body, since a copy would go stale on a different cadence than the stacks. Run `canon tooling diff <stack> <target>` for the list resolved against a real target. It reports every path, writes nothing, and exits 1 when any differs. A binary older than that verb answers the same question through `canon tooling sync <stack> <target> --check`, which names each file it would replace.
 
