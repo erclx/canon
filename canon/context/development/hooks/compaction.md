@@ -49,7 +49,7 @@ The operator's own `autoCompactWindow`, covered in `canon/context/development/ho
 
 ## The silent turn hook
 
-`silent-turn.sh` registers on `Stop` with no `matcher` field at all, since the event carries no `tool_name` to filter on. It ships through the seed rather than staying toolkit-only, on the capability-seeding criterion in `canon/context/tooling.md`: the defect it reports is exactly as real in a scaffolded target as it is here, and nothing in its detection logic reads a toolkit-specific path.
+`silent-turn.sh` registers on `Stop` with no `matcher` field at all, since the event carries no `tool_name` to filter on. It ships through the seed rather than staying toolkit-only, on the capability-seeding criterion in `canon/context/tooling/seeds.md`: the defect it reports is exactly as real in a scaffolded target as it is here, and nothing in its detection logic reads a toolkit-specific path.
 
 `last_assistant_message` sits directly on the `Stop` payload, a field neither vendor page names, and carries the turn's closing text with no lag, so the hook reads it straight off the payload rather than parsing `transcript_path` for the same text. `transcript_path` lags in both directions, whether a turn wrote files or wrote none, leaving the file missing its own closing entry for roughly two seconds after `Stop` fires. Every `Write` and `Edit` tool call, by contrast, is already in the file the moment `Stop` fires, so the hook reads paths from there with no retry.
 
