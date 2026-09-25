@@ -27,7 +27,7 @@ A bare run measures every markdown file git lists, tracked plus untracked-and-no
 
 ## Where the rules come from
 
-The three ban sets and all ten checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same sets whether or not it installed any standards, and no file has to resolve for a run to mean something.
+The ban set and all ten checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same set whether or not it installed any standards, and no file has to resolve for a run to mean something.
 
 Seven of the ten are stated in `markdown.md` and the three cadence numbers are stated in the `write-human` skill. That split is the content boundary rather than an accident: `markdown.md` carries the enforced rules a scan can decide, and the skill carries the rhythm rules a ban list cannot express. A cadence number moved in the skill and left in the code drifts the same way, so move both.
 
@@ -35,11 +35,9 @@ Reading them out of the standards per run was the original design. It put a pars
 
 `markdown.md` still states every ban and every checkpoint, and a reader follows it rather than the code. Nothing compares the two, so a number moved in one place and left in the other drifts silently. Move both in the same change.
 
-The sets are closed rather than extensible, so a project cannot add a term by editing a file. What decides that is the measurement behind them: 21 terms across 483 markdown files report a clean exit, and every occurrence of a banned word in the corpus sits inside the ban list itself or inside an example demonstrating the ban. The set is a prior an author already knows rather than a filter that has caught anything, and enumeration cannot close the gap it aims at, since `just`, `allows`, and `very` carry honest uses no literal match separates.
+The set is closed rather than extensible, so a project cannot add a term by editing a file. It holds the two characters alone, since a character is the one class a literal match settles. The set once carried 13 words and 6 British spellings as well. The words moved to the `write-human` skill as guidance, because a word ban catches the token and misses the habit, and `just`, `allows`, and `very` carry honest uses no literal match separates. Spelling went to a project's spell checker, which already reads every word.
 
-Freezing the spellings gave up a property worth naming. They were derived by applying the standard's own suffix pairs to its own examples, so an example added there extended the check with no code edit. The set is now carried whole, and `analyse` stays out of it for the reason it was always out: the standard's example is `analyze`, which ends in `-yze` rather than the `-ize` its rule states.
-
-A set shipped empty is reported rather than passed. It finds nothing and would exit clean, which reports a corpus nobody checked as a corpus carrying no violation, so the run names the empty set and exits `1`. The sets ship with the package, so a defect in the build is the only cause left.
+A set shipped empty is reported rather than passed. It finds nothing and would exit clean, which reports a corpus nobody checked as a corpus carrying no violation, so the run names the empty set and exits `3`. The set ships with the package, so a defect in the build is the only cause left.
 
 `canon standards <name>` still resolves a standard at the authoring root, then the package corpus, and prints it, so the human catalog reads without a project copy on disk.
 
@@ -47,17 +45,11 @@ A set shipped empty is reported rather than passed. It finds nothing and would e
 
 ### Bans
 
-Three closed sets report a hit: the characters `markdown.md` bans under `## Punctuation`, the single lowercase words it bans under `## Language`, and the British spellings of the American examples that section lists.
-
-Deriving the spellings rather than pattern-matching a suffix is what keeps `exercises`, `promises`, and `revised` out of the report. A suffix pattern over the same corpus produced 46 false positives from words of that shape, and a closed set of whole words reaches none of them.
+One closed set reports a hit: the characters `markdown.md` bans under `## Punctuation`.
 
 Frontmatter, fenced blocks, inline code spans, and link destinations are excluded. Without the code-span exclusion each standard would report its own backticked examples, and without the link exclusion a semicolon in a query string would report as prose no rewrite can fix.
 
-A banned word is bounded on a word character or a hyphen either side. A plain word boundary sits after a hyphen, so a banned word ending a hyphenated compound reported from inside one, and a compound is a single word to the reader who wrote it.
-
-A banned spelling keeps the plain word boundary, hyphens included. The two bans target different things: a word ban targets the word, so reading a compound as one word is correct, while a spelling ban targets the orthography inside it, which sits in `behaviour-driven` as plainly as it sits alone.
-
-Two ban shapes stay unmeasured and the report says so on every run. A multi-word ban escapes the harvest by width, whether it carries a placeholder standing in for the rest of the sentence or spells the phrase out in full, and every rule under `## Voice` is a judgment. The bans `## Language` states over what a sentence may claim sit in the first group by construction, since a literal match over a pattern reports the compliant text and reaches none of the violations. A report listing hits without naming those would read as a verdict on the whole standard.
+Word choice stays unmeasured and the report says so on every run. Single words travel in the `write-human` skill as guidance a reader applies. A multi-word ban escapes the harvest by width, whether it carries a placeholder standing in for the rest of the sentence or spells the phrase out in full, and every rule under `## Voice` is a judgment. The bans `## Language` states over what a sentence may claim are patterns of the multi-word kind by construction, since a literal match over a pattern reports the compliant text and reaches none of the violations. A report listing hits without naming those would read as a verdict on the whole standard.
 
 ### Links
 
@@ -108,7 +100,7 @@ A bullet, a heading, a table row, a blockquote, a blank line, and a fence each e
 
 ### Cadence
 
-Uniform cadence is the failure a ban list cannot express. A ban set states negatives, and fragments, verbless clauses, and sentences that all run one length are each the absence of something, so no addition to the thirteen banned words reaches any of them. The shape layer already measured a bullet, a paragraph, and a run, and stopped one level above where that failure lives.
+Uniform cadence is the failure a ban list cannot express. A ban set states negatives, and fragments, verbless clauses, and sentences that all run one length are each the absence of something, so no word added to a ban list reaches any of them. The shape layer already measured a bullet, a paragraph, and a run, and stopped one level above where that failure lives.
 
 Cadence measures a paragraph on two numbers. The spread is the words between its longest and shortest sentence, and the opener count is the times one word opens a sentence in it. A spread of five words or under reads as one cadence, and a word opening more than two sentences is a pattern rather than a coincidence. Both come from `## Rhythm` in the `write-human` skill, which states them about prose a person reads, and this measures against that statement rather than setting a threshold of its own.
 
@@ -134,7 +126,7 @@ The Length step sums rendered lines over the whole source, frontmatter and fence
 
 ## Exit codes
 
-Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character, word, or spelling and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
+Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
 
 `3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown bans` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
 
@@ -154,11 +146,11 @@ Rewrite the sentence rather than swapping the banned token for a near-synonym. T
 
 A code span clears the report too, since the ban scan walks around one, and it is the answer only where the token is genuinely an identifier under discussion. `## Code and identifiers` in `markdown.md` reserves the span for commands, API names, file paths, and identifiers, so backticking a quoted utterance spends one rule to satisfy another and leaves the corpus no cleaner.
 
-A hit the closed set cannot separate from correct prose is the case with no third option. `markdown.md` bans vague qualifiers and lists the tokens those qualifiers happen to spell, so the temporal `just` reports as the vague one. The rule as written reaches neither, and rewriting the sentence is what the toolkit settled on over building an exemption path, for the reasons below.
+A hit the closed set could not separate from correct prose was the case with no third option while the set still carried words. The temporal `just` reported as the vague qualifier it happened to spell, and rewriting the sentence is what the toolkit settled on over building an exemption path, for the reasons below. That class is part of why the words left the gate.
 
 ### Where the rules are enforced
 
-Five surfaces apply the ban sets and four of them go through this verb. `.claude/hooks/standards-audit.sh` runs it against a single file after each markdown edit, the seed copy a project installs does the same, the `Markdown bans` stage in `canon gate run` runs it across the whole corpus before this repository's own push, and the same-named stage in `tooling/base/configs/scripts/verify.sh` runs it across a scaffolded project's tracked markdown before its own push. Each hook parsed its own copy of the word bans in awk before that, which left a British spelling passing at edit time and failing the push with nothing in between explaining the difference.
+Five surfaces apply the ban set and four of them go through this verb. `.claude/hooks/standards-audit.sh` runs it against a single file after each markdown edit, the seed copy a project installs does the same, the `Markdown bans` stage in `canon gate run` runs it across the whole corpus before this repository's own push, and the same-named stage in `tooling/base/configs/scripts/verify.sh` runs it across a scaffolded project's tracked markdown before its own push. Each hook parsed its own copy of the word bans in awk before that, which left a British spelling passing at edit time and failing the push with nothing in between explaining the difference.
 
 The seed copy moved onto the verb when the sets became data, since its awk had nothing left to parse. It resolves one runner where the toolkit copy resolves two, looking for no checkout source, and a machine carrying no `canon` gets a report naming the binary to install rather than a silent pass. `scripts/core/check-seed-independence.sh` scopes its walk to markdown and leaves the seed hooks outside it, which its own comment records as deliberate.
 
@@ -170,7 +162,7 @@ The fifth surface reads the standards directly and is not a consolidation left h
 
 The hook prefers a checkout's own `src/cli.ts` over a globally installed binary, so it and the push stage read one build. A published binary lags a branch by whatever has not been released, which would put a ban kind added on the branch into the push and not into the edit. It reads its findings out of the `--json` record rather than off the exit code, so an older binary still reports where the fallback applies. It reads `bans.emptySets` out of the same record, so a set the verb shipped empty reaches the author as a check narrowed to what it could measure rather than as a clean pass.
 
-That field replaced `bans.missingStandards`, which answered a standard resolving under none of three roots. The sets ship with the package now, so the state it named cannot occur and the narrowed check has one cause left, a defect in the build. The hook keeps reading a field either way, since a reader cannot tell a narrowed check from a clean one without it.
+That field replaced `bans.missingStandards`, which answered a standard resolving under none of three roots. The set ships with the package now, so the state it named cannot occur and the narrowed check has one cause left, a defect in the build. The hook keeps reading a field either way, since a reader cannot tell a narrowed check from a clean one without it.
 
 Both hooks answer an absent record as well. A completed run always writes the record and a refusal writes none, so an empty one means the verb declined to measure rather than measured and found nothing. The verb needs a git repository to build its corpus and refuses without one, which is a project the seeded hook can be installed into, and reading the findings alone reported that as a clean file.
 
@@ -188,9 +180,11 @@ Masking took 7 of the weight-only paragraphs the checkpoint reported at 400 and 
 
 ### How the ban count reached zero
 
+The set still carried words and spellings when the gate turned on, so this section and the next are history rather than a description of the current scan.
+
 Eight word hits stood between the baseline and a gate, and only three carried the sense the standard bans. `leverage` sat in the requirements worldview, `allows` in the claude stack reference, and one `just` was the vague qualifier in a skill body. Those three lost the qualifier rather than the word.
 
-The other five were correct prose the closed set cannot separate from a violation. Four were the temporal `just`, meaning a moment ago, in phrases like the implementation `just` completed and the field the user `just` edited. The fifth quoted an anti-pattern a skill exists to forbid. `markdown.md` bans vague qualifiers and lists the tokens those qualifiers happen to spell, so the rule as written reaches none of the five while the scan reaches all of them.
+The other five were correct prose the closed set cannot separate from a violation. Four were the temporal `just`, meaning a moment ago, in phrases like the implementation `just` completed and the field the user `just` edited. The fifth quoted an anti-pattern a skill exists to forbid. `markdown.md` banned vague qualifiers and listed the tokens those qualifiers happen to spell, so the rule as written reached none of the five while the scan reached all of them.
 
 ### Why they were rewritten rather than exempted
 

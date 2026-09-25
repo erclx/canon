@@ -102,7 +102,7 @@ Run `canon tooling list --json` and `canon gov list --json` to see the current c
 
 `canon init` installs base tooling, Claude workflow, and governance, and scaffolds `.claude/wiki/`. Governance defaults to the `base` stack, so a bare init carries the rules that route a project. Pass `--stack <name>` to install a framework stack instead.
 
-No standard is written into the project. Each governance rule's authority line names `canon standards <name>`, which answers from the corpus inside the CLI's own package, and every toolkit skill names the copy in its own plugin root. `canon markdown audit` needs no standard at all, its ban sets and checkpoints shipping with the package as data.
+No standard is written into the project. Each governance rule's authority line names `canon standards <name>`, which answers from the corpus inside the CLI's own package, and every toolkit skill names the copy in its own plugin root. `canon markdown audit` needs no standard at all, its ban set and checkpoints shipping with the package as data.
 
 No snippet is written into the project either. `claude/snippets` in the plugin cache symlinks to the toolkit's own `snippets/`, so a session reaches one at its `@` reference with no install step, the same live resolution `claude/standards` gives a rule's authority line.
 
