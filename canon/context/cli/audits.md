@@ -400,13 +400,21 @@ Depth is the one measure no slice triaged, and the reading it would start from i
 
 ## The skill audit
 
-`canon claude skills audit` measures both skill corpora against `standards/skill.md`, gating on one check and reporting six, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
+`canon claude skills audit` measures both skill corpora against `standards/skill.md`, gating on one check and reporting seven, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 
 The audit reads raw frontmatter rather than `listSkills`, which prefers the folder name over the declared one and can never surface a disagreement between them. The two also resolve their root differently. The listing reads its own install root and the audit reads the cwd, which is what lets a branch be measured by the checkout running it.
 
 A clean run is the expected outcome rather than a broken check, since a preventive check reads as broken unless the report states what it measured. Its value is the regression it stops rather than a backlog it surfaces.
+
+### Dated provenance
+
+The seventh check reads `SKILL.md` and every `references/**/*.md` under a skill folder for an ISO date outside a fence or a code span, and reports each as `datedProvenance`. `REQUIREMENT.md` and `EVAL.md` are not read, since the skill standard sends the incident and its date to the requirement's `Gap` or to git, which makes a date there the rule working rather than a breach of it.
+
+The skill rule drops the carve-out the context standard keeps for a date after "measured" or "verified". A context entry is a record of what the tree held when someone read it, where a skill body is an instruction a session follows today, and a measurement stamp in one is the exact shape the reporting target found. So the check does not call the context audit's private `provenance()` detector, which clears those stamps and would have passed 5 of the 26 dates the shipped corpus carried when the check landed. It runs its own date pattern over `bodyLines` and `maskDisplayed` from `src/markdown/scan.ts`, which is all the two detectors share.
+
+It reports and never sets the failing exit. Targets run this verb, and a date in prose is a judgment a reader settles, the same reason the frontmatter measures report. Holding this repository's own count at zero is a gate stage's job rather than this verb's, and that stage is a separate row not yet built. The check reads ISO dates only, so a date in words, a month with no day, and undated provenance pass, and the Unmeasured step says so on every run.
 
 ## The citation reach check
 

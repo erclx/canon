@@ -180,6 +180,7 @@ Without this skill, a session <observed failure>, <observed failure>.
 - Contain only behavioral rules (what to do, what not to do) and pointers to reference docs. Narrative descriptions of what files are or how the system works belong in `docs/`, not in the skill body.
 - State rules, not inventories. Reference docs for lists that change, and phrase a rule as a ban on the forbidden shape rather than an enumeration of allowed options, so it stays stable as categories change.
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
+- State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git. A date inside a fence or a code span is example data and stays. `canon claude skills audit` names every other ISO date.
 - Group bullets under H2 headings by domain concern. Keep dos and don'ts together under the topic they belong to rather than splitting them into flat rules and constraints sections.
 - One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
 - Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer.

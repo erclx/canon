@@ -13,6 +13,8 @@ A skill born without its requirement is the second failure, and it surfaces much
 
 A third failure is a folder created for a moment a rule, a verb, or an existing skill already reaches, or for a procedure no session would get wrong from first principles. Nothing caught that before the folder existed, so the corpus grew by a skill an inward audit later had to argue for removing, with only a commit body recording the argument.
 
+A fourth failure is dated provenance in the body. A target asked for an edit citing a measurement taken that day, and the draft carried "measured on" and the date inline, with the authoring standard, the markdown audit, and this skill all passing it. A body collecting those notes reads as history rather than as the rule a session follows.
+
 ## Must
 
 - Read the authoring standard and the prose standard before drafting, so the draft starts conformant rather than getting corrected into shape
@@ -20,6 +22,7 @@ A third failure is a folder created for a moment a rule, a verb, or an existing 
 - Draft the sibling `REQUIREMENT.md` beside the body, from what the skill is for rather than from the drafted body
 - Confirm the name and both files with the user before writing. The name is the routing key and a folder that disagrees with its frontmatter fails silently.
 - Write to the conventional skills path, so discovery finds it without configuration
+- Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident moved to the requirement's `Gap`
 
 ## Must not
 

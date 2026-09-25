@@ -1397,6 +1397,7 @@ async function runSkillsAudit(
     reportFrontmatter(report)
     reportFolder(report)
     reportRequirementShape(report)
+    reportProvenance(report)
     reportUnmeasured()
     outro()
   }
@@ -1418,6 +1419,7 @@ async function runSkillsAudit(
           readme: report.readme,
           folderName: report.folderName,
           requirementSections: report.requirementSections,
+          datedProvenance: report.datedProvenance,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
@@ -1589,6 +1591,31 @@ function reportRequirementShape(report: SkillsAudit): void {
 }
 
 /**
+ * Names where the date belongs, since the finding is a date to move rather
+ * than one to delete, and reports without failing the run for the same reason
+ * the frontmatter measures do.
+ */
+function reportProvenance(report: SkillsAudit): void {
+  logStep('Provenance')
+  logInfo(
+    'A SKILL.md and its references state the current rule, with no ISO date outside a fence or code span.',
+  )
+  logInfo(
+    'The incident and date that earned a rule go in REQUIREMENT.md under Gap, or stay in git.',
+  )
+
+  if (report.datedProvenance.length === 0) {
+    logInfo('No body or reference carries a date.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.datedProvenance.length, 'date')} in a body or reference`,
+  )
+  reportFindings(report.datedProvenance)
+}
+
+/**
  * Stated on every run, including the run where everything above passed. A
  * report that lists only what it measured reads as a verdict on the standard
  * rather than on the half of it a parser can reach.
@@ -1603,5 +1630,8 @@ function reportUnmeasured(): void {
   )
   logInfo(
     'The 150-line body checkpoint is mechanical and still absent here, and it would print a count rather than a defect.',
+  )
+  logInfo(
+    'Undated provenance, such as "a pull request dropped...", and a date written in words or without its day are not read.',
   )
 }
