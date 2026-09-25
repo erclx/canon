@@ -1,13 +1,13 @@
 ---
 title: Gating stages
-description: The stages that gate a push on a measure, covering the sandbox coverage ceiling, plugin manifest validation, and the seed independence token walk, plus the one measure-reading stage that reports instead
+description: The stages that gate a push on a measure, covering the sandbox coverage ceiling, plugin manifest validation, and the seed independence token walk, plus the two measure-reading stages that report instead
 ---
 
 # Gating stages
 
-Ten stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
+Eleven stages read a measure and fail a push on it rather than regenerating anything. Each states what it does when its input is missing, since a stage that skips quietly reports the pass it exists to withhold.
 
-An eleventh reads a measure and reports it. `## Audit set` at the end of this entry covers it, and it sits here rather than in `canon/context/development/verification.md` because what it reads is a measure like the ten above rather than a gotcha about a stage.
+Two more read a measure and report it, Document ceiling and Audit set, each under its own heading below. They sit here rather than in `canon/context/development/verification.md` because what they read is a measure like the eleven above rather than a gotcha about a stage.
 
 ## What sequences them
 
@@ -15,7 +15,7 @@ An eleventh reads a measure and reports it. `## Audit set` at the end of this en
 
 Three properties are load bearing and each has a case in `src/gate/sequencer.test.ts`. Stages run in table order. A stage that finds a fact halts the run, which is what makes a regenerate-then-assert round reveal one surface at a time. A scoped stage that the changed set carries nothing for says so rather than printing a clean line.
 
-A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Architecture record, Document ceiling, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
+A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Architecture record, Document ceiling, Skill provenance, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
 
 Every check is an argument vector rather than a shell string, so no stage runs through `eval` and no check is a quoting question. What that closes is stated under `## Quoting a pathspec changes what it matches` in `canon/context/scripts/core.md`.
 
@@ -116,6 +116,12 @@ It exists because the Context citations stage runs `--citations-only`, which nev
 The Document ceiling stage reads every markdown file git lists, sums `documentHeight` over the whole source, and names each one past `CHECKPOINTS.ceiling`, 300 rendered lines. Frontmatter and fenced blocks count, since a session pays for every line it loads. A file named `CHANGELOG.md` is exempt by name, because the release tool rewrites it and would drop a marker, and any other file is exempt only through a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence. A committed list of exempt paths was the alternative, and every rename would have made it a second edit with nothing checking it.
 
 It merged report-only: each document past the ceiling is a `warn` and the stage passes, since about fifty hand-authored documents sat past 300 when it landed. The flip changes the measure to return a `failure` and deletes the `warn` path, once the count reads zero. `canon markdown audit` prints the same list under its Length step and never exits 2 on it, because the plan and groundwork skills run that audit on a gitignored record where a long plan is not a defect. The stage owns the verdict for the same reason the Architecture record stage owns its record's cap while `canon context audit` only reports.
+
+## Skill provenance
+
+The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or a `references/` file, outside a fence or a code span, across both `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git. A tree holding neither corpus reports as unmeasured.
+
+It fails from its first commit rather than merging report-only the way Document ceiling did, because one sweep brought the corpus to zero before the stage landed, so a report-only phase would have had nothing left to wait for. `canon claude skills audit` prints the same finding under its Provenance step and keeps its exit code on a missing requirement alone, so a target running the verb is told about a date and never fails on one. The stage is what makes the finding fail here, where the corpus is held at zero, and it reads the report in-process rather than through the verb's exit for that reason.
 
 ## Standard success criteria
 

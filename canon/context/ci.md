@@ -169,7 +169,7 @@ The dispatch path also skips the credential preflight, which sits in the skipped
 
 ## Checks
 
-Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Three rows can still report something other than a pass, and the table marks each.
+Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Three rows report rather than gate, and the table marks each.
 
 | Stage                     | Command                                                                  | What it asserts                                                                                          |
 | ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -190,6 +190,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Markdown bans             | `bun src/cli.ts markdown audit --json`                                   | no markdown carries a banned character, word, or spelling                                                |
 | Seed standards            | `bun src/cli.ts context audit --gate` per root                           | no seed breaks the standard governing the folder it seeds                                                |
 | Skill requirements        | `bun src/cli.ts claude skills audit --requirements-only`                 | every skill folder carries a `REQUIREMENT.md`                                                            |
+| Skill provenance          | `auditSkills` in-process over both skill corpora                         | no skill body or reference carries an ISO date outside a fence or code span                              |
 | Standard success criteria | `bun src/cli.ts standards audit --arrivals-only`                         | a standard new to the branch carries a `## Success criterion` section                                    |
 | Sandbox coverage          | `bun src/cli.ts sandbox coverage --json`                                 | undeclared scenarios stay at or under the ceiling `src/gate/measures.ts` pins                            |
 | Audit set                 | `bun src/cli.ts audits run --corpus tracked --corpus per-machine --json` | reports the judgment half of every tracked and per-machine audit and its growth, and fails on none of it |
@@ -199,9 +200,9 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Types                     | `bun run check:types`                                                    | `tsc --noEmit` passes against `src/`                                                                     |
 | Tests                     | `bun run test`                                                           | the vitest suite passes                                                                                  |
 
-Two rows report rather than gate, Unreferenced rules and Audit set, because every finding they carry is a judgment call, and a push failing on one would teach a contributor to route around the stage. Both still print what they found.
+Unreferenced rules and Audit set report rather than gate because every finding they carry is a judgment call, and a push failing on one would teach a contributor to route around the stage. Document ceiling reports for a different reason: its finding is a fact, and it stays report-only until the documents past the ceiling are brought under it. All three still print what they found.
 
-The third qualification is a stage that could not read its input at all, which is a state any row can reach. Under `check:ci` that fails the run, since an absent tool on a runner is a broken workflow step. On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass. Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys.
+One more qualification is a stage that could not read its input at all, which is a state any row can reach. Under `check:ci` that fails the run, since an absent tool on a runner is a broken workflow step. On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass. Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys.
 
 Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. Both format stages are entries in that table, so a rebuild reaches them the way it reaches every other row. This table names the check side, since `check:ci` passes `--no-write` and the write side heads its output `Formatting` instead. Nothing compares this table to the table it describes, so a stage added later can leave it wrong until the next rebuild.
 
