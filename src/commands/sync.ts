@@ -133,9 +133,9 @@ function renderCheck(report: CheckReport): void {
       logWarn(entry.notice ?? `${entry.rel} (${entry.state})`)
     }
 
-    const { stale, customized, drifted, stranded, orphaned, missing } =
+    const { stale, customized, drifted, stranded, retired, orphaned, missing } =
       domain.counts
-    if (stale + customized + drifted + stranded === 0) {
+    if (stale + customized + drifted + stranded + retired === 0) {
       logInfo(orphaned === 0 ? 'up to date' : `up to date (${orphaned} local)`)
     }
     // A local file is not a deficiency and a missing rule is, so this never

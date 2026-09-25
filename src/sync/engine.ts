@@ -8,8 +8,11 @@ import {
   type DomainHashes,
   hashFile,
   readStamp,
+  type Stamp,
+  type StampDomain,
   type StampSource,
   stampedHashes,
+  stampedVersion,
   toStampKey,
   writeStamp,
 } from '@/sync/stamp'
@@ -26,6 +29,8 @@ import {
   palette,
   select,
 } from '@/ui'
+import { compareVersions, parseVersion } from '@/version/compare'
+import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 
 /**
  * One installed file in three path flavours: absolute, relative to the
@@ -58,10 +63,12 @@ export type SyncChange =
  * who moved it. `stale` and `customized` need the stamp to tell apart, so
  * `drifted` stays the verdict for a difference no stamp covers.
  *
- * `orphaned` and `stranded` both mean the walk found no source, and they are
- * separate because they need opposite treatment. A project-authored file is
- * orphaned and stays that way forever. A stamped file the toolkit no longer
- * installs to is stranded, which is a relocation waiting on a decision.
+ * `orphaned`, `retired`, and `stranded` all mean the walk found no source, and
+ * they are separate because they need different treatment. A project-authored
+ * file is orphaned and stays that way forever. A file under a root the toolkit
+ * owns outright is retired, since only the toolkit ever wrote there, and a
+ * sync deletes it. A stamped file the toolkit no longer installs to is
+ * stranded, which is a relocation waiting on a decision.
  *
  * `missing` is the one state the walk cannot produce on its own, since the
  * walk only iterates files that exist. It comes from `collectMissing`
@@ -73,6 +80,7 @@ export type EntryState =
   | 'customized'
   | 'drifted'
   | 'orphaned'
+  | 'retired'
   | 'stranded'
   | 'missing'
 
@@ -152,6 +160,14 @@ export interface SyncAdapter {
    * inference orphans a file sitting anywhere else.
    */
   readonly projectSubdir?: string
+  /**
+   * Every file under `installedRoot` is the toolkit's, so a walked file with
+   * no source is a leftover of a rule the toolkit retired or renamed rather
+   * than something a project wrote. Setting it turns that file into a
+   * `retired` entry and queues its delete, edited or not, whatever the stamp
+   * holds. Unset, the file stays `orphaned` and untouched.
+   */
+  readonly ownsInstalledRoot?: boolean
   /** Defaults to applying. */
   readonly nonInteractive?: NonInteractivePolicy
   /** Runs on a completed sync, including one with no changes. */
@@ -195,15 +211,18 @@ export function listInstalled(
 
 /**
  * Classifies every installed file against its source without writing anything.
- * A file with no source is left alone rather than deleted, which is what keeps
- * project-authored rules alive across a sync.
+ * A file with no source is deleted only when the adapter owns its installed
+ * root outright, and left alone otherwise, which is what keeps a
+ * project-authored file alive across a sync of a root the project shares.
  */
 export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
   const entries: ScanEntry[] = []
   const changes: SyncChange[] = []
   const unattributed: UnattributedFile[] = []
 
-  const hashes = stampedHashes(readStamp(target), adapter.stamp?.domain)
+  const stamp = readStamp(target)
+  const hashes = stampedHashes(stamp, adapter.stamp?.domain)
+  const newerInstall = newerInstallingVersion(stamp, adapter.stamp?.domain)
   const walked = new Set<string>()
 
   for (const file of listInstalled(
@@ -222,7 +241,18 @@ export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
     const source = adapter.locateSource(file)
 
     if (source === undefined || !existsSync(source)) {
-      entries.push(misplacedOrphan(adapter, target, file))
+      if (adapter.ownsInstalledRoot !== true) {
+        entries.push(misplacedOrphan(adapter, target, file))
+      } else if (newerInstall !== undefined) {
+        entries.push(heldForNewerInstall(file, newerInstall))
+      } else {
+        entries.push({
+          state: 'retired',
+          rel: file.rel,
+          notice: `${file.rel} (no longer shipped by the toolkit, removing)`,
+        })
+        changes.push({ kind: 'delete', dest: file.path, rel: file.rel })
+      }
       continue
     }
 
@@ -438,6 +468,8 @@ function report(adapter: SyncAdapter, plan: SyncPlan): void {
       )
     else if (entry.state === 'customized')
       logWarn(`${entry.rel} (locally customized)`)
+    else if (entry.state === 'retired')
+      logWarn(entry.notice ?? `${entry.rel} (no longer shipped by the toolkit)`)
     else if (entry.state === 'stranded')
       logWarn(`${entry.rel} (installed here by an older toolkit, now moved)`)
     else if (entry.state === 'missing')
@@ -528,6 +560,10 @@ function isProjectAuthored(adapter: SyncAdapter, file: InstalledFile): boolean {
  * Naming the destination is all this does. Moving the file rewrites a path the
  * project's own rules, skills, and docs may cite, so the sync leaves it where
  * it is.
+ *
+ * An adapter declaring `ownsInstalledRoot` never reaches this, since owning
+ * the root answers the question neither the name nor the stamp can, and its
+ * sourceless file is retired instead.
  */
 function misplacedOrphan(
   adapter: SyncAdapter,
@@ -549,6 +585,49 @@ function misplacedOrphan(
   }
 }
 
+/**
+ * The release that last wrote this domain, when it is newer than the one
+ * running. A binary older than that release cannot tell a rule it retired
+ * from one added after it, so it holds every sourceless file rather than
+ * deleting rules the newer release installed. An unparseable side holds too,
+ * since deleting on a comparison that never ran is the failure this guards.
+ * A stamp with no version predates the field and is never newer.
+ */
+function newerInstallingVersion(
+  stamp: Stamp | undefined,
+  domain: StampDomain | undefined,
+): { readonly stamped: string; readonly running: string } | undefined {
+  if (domain === undefined) return undefined
+
+  const stamped = stampedVersion(stamp, domain)
+  if (stamped === undefined) return undefined
+
+  const running = readInstalled().version ?? UNKNOWN_LABEL
+  const parsedStamped = parseVersion(stamped)
+  const parsedRunning = parseVersion(running)
+
+  if (
+    parsedStamped !== undefined &&
+    parsedRunning !== undefined &&
+    compareVersions(parsedStamped, parsedRunning) <= 0
+  ) {
+    return undefined
+  }
+
+  return { stamped, running }
+}
+
+function heldForNewerInstall(
+  file: InstalledFile,
+  versions: { readonly stamped: string; readonly running: string },
+): ScanEntry {
+  return {
+    state: 'orphaned',
+    rel: file.rel,
+    notice: `${file.rel} (installed by canon ${versions.stamped}, newer than this ${versions.running}. Upgrade canon to sync it.)`,
+  }
+}
+
 function isInside(target: string, path: string): boolean {
   const rel = relative(target, path)
   return rel !== '' && !rel.startsWith('..') && !isAbsolute(rel)
@@ -567,8 +646,9 @@ function hasUnattributedDrift(plan: SyncPlan): boolean {
 /**
  * Records what the toolkit placed, after the copies land, so a partial apply
  * that throws leaves the previous stamp rather than a claim the target does not
- * meet. A file with no source, or one orphaned by location, is
- * project-authored and stays out.
+ * meet. A file with no source stays out, whether it is project-authored or a
+ * retired leftover a declined sync did not delete, and so does one orphaned by
+ * location.
  *
  * Reads the installed tree rather than the caller's file list, so a partial
  * install still stamps the domain's whole installed set.

@@ -5,6 +5,8 @@ import { dirname, join, sep } from 'node:path'
 import { execa } from 'execa'
 import { resolveExisting } from '@/legacy-path'
 import { recordTarget } from '@/targets/registry'
+import { compareVersions, parseVersion } from '@/version/compare'
+import { readInstalled } from '@/version/installed'
 
 /**
  * Domains the stamp can record. Governance and design both attribute file by
@@ -38,6 +40,14 @@ export type DomainHashes = Readonly<Record<string, string>>
 export interface DomainStamp {
   /** Toolkit revision this domain last synced from. Absent outside a git clone. */
   readonly commit?: string
+  /**
+   * Newest canon release that has written this domain. A sync deletes an
+   * installed file its toolkit does not ship, and a binary older than the one
+   * that installed the file cannot tell a retired file from one added after
+   * its own release, so this is what it reads before deleting anything.
+   * Absent on a stamp written before the field existed.
+   */
+  readonly version?: string
   readonly syncedAt: string
   readonly files: DomainHashes
   /**
@@ -178,6 +188,14 @@ function readStampFile(path: string): Stamp | undefined {
   }
 }
 
+/** The newest canon release that has written this domain, when one was recorded. */
+export function stampedVersion(
+  stamp: Stamp | undefined,
+  domain: StampDomain,
+): string | undefined {
+  return stamp?.domains[domain]?.version
+}
+
 /** The revision this domain last synced from, which bounds its upstream range. */
 export function stampedCommit(
   stamp: Stamp | undefined,
@@ -245,9 +263,11 @@ async function putDomain(
   const previous = readStamp(target)
   const previousRecord = previous?.domains[source.domain]
   const commit = await toolkitCommit(source.toolkitRoot)
+  const version = newerVersion(readInstalled().version, previousRecord?.version)
 
   const record: DomainStamp = {
     ...(commit === undefined ? {} : { commit }),
+    ...(version === undefined ? {} : { version }),
     syncedAt: now.toISOString(),
     files: payload.files ?? previousRecord?.files ?? {},
     ...resolveChainField(payload.chain, previousRecord?.chain),
@@ -302,6 +322,27 @@ async function readCommit(root: string): Promise<string | undefined> {
   return result.exitCode === 0 && result.stdout.trim() !== ''
     ? result.stdout.trim()
     : undefined
+}
+
+/**
+ * Keeps the newer of the running release and the one already recorded, so an
+ * older binary syncing after a newer one cannot lower the mark and let a later
+ * run delete a rule the newer release installed. An unparseable side loses to
+ * a parseable one, and a recorded value survives an unreadable manifest.
+ */
+function newerVersion(
+  running: string | undefined,
+  recorded: string | undefined,
+): string | undefined {
+  if (running === undefined) return recorded
+  if (recorded === undefined) return running
+
+  const parsedRunning = parseVersion(running)
+  const parsedRecorded = parseVersion(recorded)
+  if (parsedRecorded === undefined) return running
+  if (parsedRunning === undefined) return recorded
+
+  return compareVersions(parsedRecorded, parsedRunning) > 0 ? recorded : running
 }
 
 /**
@@ -363,6 +404,9 @@ function isDomainStamp(value: unknown): value is DomainStamp {
   if (!isRecord(value) || !isRecord(value.files)) return false
   if (typeof value.syncedAt !== 'string') return false
   if (value.commit !== undefined && typeof value.commit !== 'string') {
+    return false
+  }
+  if (value.version !== undefined && typeof value.version !== 'string') {
     return false
   }
   if (value.chain !== undefined && !isStringArray(value.chain)) return false

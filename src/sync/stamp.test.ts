@@ -20,12 +20,14 @@ import {
   stampedChain,
   stampedCommit,
   stampedHashes,
+  stampedVersion,
   stampPath,
   toStampKey,
   writeChainStamp,
   writeStamp,
 } from '@/sync/stamp'
 import { readTargetRegistry } from '@/targets/registry'
+import { readInstalled } from '@/version/installed'
 
 let TARGET: string
 
@@ -597,5 +599,64 @@ describe('stampedHashes', () => {
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
 
     expect(stampedHashes(readStamp(TARGET), undefined)).toEqual({})
+  })
+})
+
+describe('stampedVersion', () => {
+  const RUNNING = readInstalled().version
+
+  it('should record the running version on a file write', async () => {
+    await writeStamp(TARGET, GOVERNANCE, {}, NOW)
+
+    expect(stampedVersion(readStamp(TARGET), 'governance')).toBe(RUNNING)
+  })
+
+  it('should record the running version on a chain-only write', async () => {
+    await writeChainStamp(TARGET, GOVERNANCE, ['astro'], NOW)
+
+    expect(stampedVersion(readStamp(TARGET), 'governance')).toBe(RUNNING)
+  })
+
+  it('should keep a newer recorded version when an older binary rewrites the domain', async () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: {
+          governance: { version: '999.0.0', syncedAt: 'then', files: {} },
+        },
+      }),
+    )
+
+    await writeStamp(TARGET, GOVERNANCE, {}, NOW)
+
+    expect(stampedVersion(readStamp(TARGET), 'governance')).toBe('999.0.0')
+  })
+
+  it('should read a stamp written without a version as unversioned', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { syncedAt: 'then', files: {} } },
+      }),
+    )
+
+    const stamp = readStamp(TARGET)
+
+    expect(stamp).toBeDefined()
+    expect(stampedVersion(stamp, 'governance')).toBeUndefined()
+  })
+
+  it('should read a stamp whose version is not a string as absent', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: { governance: { version: 4, syncedAt: 'then', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)).toBeUndefined()
   })
 })

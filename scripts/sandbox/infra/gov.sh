@@ -26,6 +26,10 @@ stage_setup() {
     echo "# stale" >>"$dest_dir/${rule}.md"
   done < <(find "$src_rules" -type f -name "*.md" | sort | head -n 2)
 
+  mkdir -p sync/.claude/rules/canon/core sync/.claude/rules/project/core
+  echo "# A rule the toolkit retired" >sync/.claude/rules/canon/core/999-retired.md
+  echo "# A rule the project wrote" >sync/.claude/rules/project/core/900-local.md
+
   while IFS= read -r file; do
     local subdir
     subdir=$(rule_subdir "$file" "$src_rules")
@@ -104,7 +108,7 @@ RULE
 
   log_step "Governance sandbox"
   log_info "install/ : clean target, no rules present"
-  log_info "sync/    : stale .claude/rules/canon/ present"
+  log_info "sync/    : stale .claude/rules/canon/ present, canon/core/999-retired.md deleted, project/core/900-local.md kept"
   log_info "build/   : full .claude/rules/ present, generates .canon/tmp/gov/rules.md"
   log_info "list     : read-only catalog dump, no target needed"
   log_info "regen/   : toolkit-shaped root, orphan and drifted rule present"

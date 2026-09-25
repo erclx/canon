@@ -271,6 +271,7 @@ describe('countStates', () => {
       { state: 'orphaned', rel: 'f.md' },
       { state: 'stranded', rel: 'g.md' },
       { state: 'missing', rel: 'h.md' },
+      { state: 'retired', rel: 'i.md' },
     ])
 
     expect(counts).toEqual({
@@ -281,6 +282,7 @@ describe('countStates', () => {
       orphaned: 1,
       stranded: 1,
       missing: 1,
+      retired: 1,
     })
   })
 
@@ -293,6 +295,7 @@ describe('countStates', () => {
       orphaned: 0,
       stranded: 0,
       missing: 0,
+      retired: 0,
     })
   })
 })
@@ -322,6 +325,12 @@ describe('hasDrift', () => {
 
   it('should report drift for a stranded file', () => {
     expect(hasDrift(buildReport([{ state: 'stranded', rel: 'a.md' }]))).toBe(
+      true,
+    )
+  })
+
+  it('should report drift for a file the toolkit no longer ships', () => {
+    expect(hasDrift(buildReport([{ state: 'retired', rel: 'a.md' }]))).toBe(
       true,
     )
   })
