@@ -21,6 +21,7 @@ import {
   type SyncAdapter,
 } from '@/sync/engine'
 import { hashContent, readStamp, type StampDomain } from '@/sync/stamp'
+import { readInstalled } from '@/version/installed'
 
 let ROOT: string
 let SOURCE: string
@@ -357,6 +358,96 @@ describe('planSync', () => {
     )
 
     expect(plan.changes).toEqual([])
+  })
+})
+
+describe('planSync on a root the toolkit owns', () => {
+  const RETIRED_RULE = join('.claude', 'rules', 'core', '505-gone.md')
+  const owning = (): SyncAdapter =>
+    createAdapter({
+      ownsInstalledRoot: true,
+      stamp: { domain: 'governance', toolkitRoot: ROOT },
+    })
+
+  function writeStampVersion(version: string): void {
+    writeFixture(
+      join(TARGET, '.claude/canon/config.json'),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: {
+          governance: { version, syncedAt: 'then', files: {} },
+        },
+      }),
+    )
+  }
+
+  it('should classify a file with no source as retired', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'shipped once\n')
+
+    const plan = planSync(owning(), TARGET)
+
+    expect(plan.entries).toEqual([
+      {
+        state: 'retired',
+        rel: RETIRED_RULE,
+        notice: `${RETIRED_RULE} (no longer shipped by the toolkit, removing)`,
+      },
+    ])
+  })
+
+  it('should queue a delete for a retired file', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'shipped once\n')
+
+    const plan = planSync(owning(), TARGET)
+
+    expect(plan.changes).toEqual([
+      { kind: 'delete', dest: join(TARGET, RETIRED_RULE), rel: RETIRED_RULE },
+    ])
+  })
+
+  it('should delete an edited file with no source the same as an untouched one', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'edited by the project\n')
+    writeStampFixture('governance', {
+      [RETIRED_RULE]: hashContent('shipped once\n'),
+    })
+
+    const plan = planSync(owning(), TARGET)
+
+    expect(plan.changes.map((change) => change.kind)).toEqual(['delete'])
+  })
+
+  it('should keep a file with no source orphaned when the adapter does not own the root', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'shipped once\n')
+
+    const plan = planSync(createAdapter(), TARGET)
+
+    expect(plan.entries[0].state).toBe('orphaned')
+    expect(plan.changes).toEqual([])
+  })
+
+  it('should keep a file orphaned when a newer binary installed the domain', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'shipped later\n')
+    writeStampVersion('999.0.0')
+
+    const plan = planSync(owning(), TARGET)
+
+    expect(plan.entries).toEqual([
+      {
+        state: 'orphaned',
+        rel: RETIRED_RULE,
+        notice: `${RETIRED_RULE} (installed by canon 999.0.0, newer than this ${readInstalled().version}. Upgrade canon to sync it.)`,
+      },
+    ])
+    expect(plan.changes).toEqual([])
+  })
+
+  it('should retire a file when an older binary installed the domain', () => {
+    writeFixture(join(TARGET, RETIRED_RULE), 'shipped once\n')
+    writeStampVersion('0.0.1')
+
+    const plan = planSync(owning(), TARGET)
+
+    expect(plan.entries[0].state).toBe('retired')
   })
 })
 

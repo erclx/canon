@@ -139,6 +139,31 @@ describe('createGovAdapter', () => {
     expect(createGovAdapter(TOOLKIT).projectSubdir).toBeUndefined()
   })
 
+  it('should retire a rule under canon/ the toolkit no longer ships and queue its delete', () => {
+    writeFixture(join(TOOLKIT, 'governance/rules/core/000-const.md'), 'a')
+    const retired = join(TARGET, '.claude/rules/canon/core/505-gone.md')
+    writeFixture(retired, 'shipped once\n')
+    const rel = join('.claude', 'rules', 'canon', 'core', '505-gone.md')
+
+    const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+    expect(plan.entries.map((entry) => entry.state)).toEqual(['retired'])
+    expect(plan.changes).toEqual([{ kind: 'delete', dest: retired, rel }])
+  })
+
+  it('should never walk a project rule under .claude/rules/project/', () => {
+    writeFixture(join(TARGET, '.claude/rules/canon/core/000-const.md'), 'a')
+    writeFixture(join(TOOLKIT, 'governance/rules/core/000-const.md'), 'a')
+    writeFixture(join(TARGET, '.claude/rules/project/core/900-mine.md'), 'b')
+
+    const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+    expect(plan.entries.map((entry) => entry.rel)).toEqual([
+      join('.claude', 'rules', 'canon', 'core', '000-const.md'),
+    ])
+    expect(plan.changes).toEqual([])
+  })
+
   it('should not ship a project/ rule category, which the subfolder reserves for a target', () => {
     expect(existsSync(join(rulesSourceDir(process.cwd()), 'project'))).toBe(
       false,

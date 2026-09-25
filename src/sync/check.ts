@@ -79,6 +79,7 @@ export interface StateCounts {
   readonly orphaned: number
   readonly stranded: number
   readonly missing: number
+  readonly retired: number
 }
 
 export interface DomainReport {
@@ -314,6 +315,7 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
     orphaned: count(entries, 'orphaned'),
     stranded: count(entries, 'stranded'),
     missing: count(entries, 'missing'),
+    retired: count(entries, 'retired'),
   }
 }
 
@@ -342,6 +344,9 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
  * sync that adds a rule silently changes what a project is governed by, and
  * nobody chose that, so gating CI on the count would pressure a target into
  * adopting a rule nobody picked.
+ *
+ * `retired` counts, since a sync deletes it mechanically. A target's CI goes
+ * red the day a release retires a rule it holds, and one sync clears it.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
@@ -351,7 +356,8 @@ export function hasDrift(report: CheckReport): boolean {
       domain.counts.stale +
         domain.counts.customized +
         domain.counts.drifted +
-        domain.counts.stranded >
+        domain.counts.stranded +
+        domain.counts.retired >
       0,
   )
 }

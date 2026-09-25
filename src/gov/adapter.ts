@@ -44,12 +44,13 @@ export function indexSourceRules(root: string): Map<string, string> {
  * path, so a rule that moved between subdirectories in the toolkit still
  * syncs into the subdirectory the target already uses.
  *
- * Declares no `projectSubdir`. That exemption existed to keep a project's
- * `.claude/rules/project/` folder out of the walk by location before any
- * name lookup ran, and `installedRoot` narrowing to `.claude/rules/canon/`
- * already leaves `project/` outside the walked root, so a second exemption
- * computing a stale `canon/project/` destination would be wrong rather than
- * merely redundant.
+ * Declares `ownsInstalledRoot` and no `projectSubdir`. A project keeps its own
+ * rules under `.claude/rules/project/`, which `installedRoot` narrowing to
+ * `.claude/rules/canon/` leaves outside the walk, so everything the walk does
+ * reach is the toolkit's. A rule there with no source is one the toolkit
+ * retired or renamed, and the sync deletes it rather than leaving it loaded.
+ * A `projectSubdir` would compute a stale `canon/project/` destination, which
+ * is wrong rather than merely redundant.
  */
 export function createGovAdapter(root: string): SyncAdapter {
   const index = indexSourceRules(root)
@@ -65,6 +66,7 @@ export function createGovAdapter(root: string): SyncAdapter {
       index.get(basename(file.path, '.md')),
     collectRetired: (target: string) => collectRetiredGov(target),
     collectMissing: (target: string) => collectMissingGov(root, target),
+    ownsInstalledRoot: true,
     stamp: { domain: 'governance', toolkitRoot: root },
   }
 }
