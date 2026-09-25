@@ -57,4 +57,4 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `go vet ./...` passes ``. Add a Lint row whose assertion reads: `` `golangci-lint run` passes ``. Add a Tests row whose assertion reads: `` `go test -race ./...` exits 0 ``.
+In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `go vet ./...` passes ``. Add a Lint row whose assertion reads: `` `golangci-lint run` passes ``. Add a Tests row whose assertion reads: `` `go test -race ./...` exits 0 ``. <!-- audit-ignore-citations: canon/context/ci.md -->

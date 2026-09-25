@@ -84,7 +84,7 @@ Sticky negative knowledge. Do not relearn.
 
 ## CI docs (extend)
 
-Extend `canon/context/ci.md` so the `## Checks` table reflects the web jobs.
+Extend `canon/context/ci.md` so the `## Checks` table reflects the web jobs. <!-- audit-ignore-citations: canon/context/ci.md -->
 
 Append rows:
 

@@ -47,7 +47,7 @@ No stage carries either shape. Every reading that needs a payload runs through `
 
 ## Verification
 
-CI runs every stage through `bun run check:ci`, which passes `--all`. The local run scopes shell, types, and tests to the changed-file set, so it is the weaker of the two. See `canon/context/ci.md`.
+CI runs every stage through `bun run check:ci`, which passes `--all`. The local run scopes shell, types, and tests to the changed-file set, so it is the weaker of the two. See `canon/context/ci/overview.md`.
 
 `repair_bare_flag` runs ahead of every stage rather than as one of them, because Claude Code's worktree entry leaves `core.bare` set in the shared config and that flag breaks the git reads that scope the run. It writes only when the flag is set and the repository's common dir is named `.git`, which spares a genuinely bare repository that keeps its objects at the root. `session-worktree` carries the same repair at entry, and this copy covers the entries that never go through the skill. See `canon/context/claude-plugin/skill-procedures/worktree-entry.md` for the split and `wiki/claude/claude-worktrees.md` for the upstream issue.
 

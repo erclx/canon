@@ -58,7 +58,7 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `astro check` passes ``. The Build row's assertion reads: `` `astro build` succeeds ``.
+In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `astro check` passes ``. The Build row's assertion reads: `` `astro build` succeeds ``. <!-- audit-ignore-citations: canon/context/ci.md -->
 
 ## Social card route
 
