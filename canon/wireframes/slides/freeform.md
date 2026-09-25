@@ -10,7 +10,7 @@ A figure the other eight layouts cannot draw, selected by `layout: freeform`. Ea
 ## Regions
 
 - Title band: the slide's title, drawn as on every titled layout
-- Shape area: anywhere below the title band, each shape at the box its line declares, drawn in source order so a later shape sits over an earlier one
+- Shape area: anywhere on the canvas, each shape at the box its line declares, drawn in source order so a later shape sits over an earlier one
 - Footer: as `canvas.md` draws it
 
 ## States
@@ -31,7 +31,7 @@ Flat captures, per `canvas.md` `## States`. The showcase slide carries two recta
 ## Behavior
 
 - A color is one of five palette roles, `background`, `surface`, `ink`, `muted`, or `accent`, so a shape follows the deck's variant rather than carrying a hex value.
-- A shape declared above `y=1.4` renders underneath the title rather than beside it, so the band is a floor for shape placement.
+- The title draws before any shape and nothing clamps a shape's `y`, so a shape overlapping the band above `y=1.4` covers the title. Keeping shapes below 1.4in is the author's job.
 
 ## Not on this surface
 

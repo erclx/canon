@@ -9,7 +9,7 @@ The cover slide a deck opens on, selected by `layout: title` or inferred for a s
 
 ## Regions
 
-- Deck title: full content width from `y=2.6` for `h=1.4`, in the lower half of the canvas rather than in the title band
+- Deck title: full content width from `y=2.6` for `h=1.4`, in the middle band of the canvas rather than in the title band, the box straddling the midline
 - Subtitle: directly under the deck title, from `y=4.1` for `h=1`
 
 ## States

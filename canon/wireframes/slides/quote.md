@@ -9,7 +9,7 @@ A pull quote, selected by `layout: quote` and transcribed from `renderQuote` in 
 
 ## Regions
 
-- Quote: full content width from `y=2.2` for `h=2.6`, set in italics, opening the slide where the title band would sit on other layouts
+- Quote: full content width from `y=2.2` for `h=2.6`, set in italics, opening the slide with nothing drawn above it
 - Attribution: under the quote, from `y=5` for `h=0.6`
 - Footer: as `canvas.md` draws it
 
