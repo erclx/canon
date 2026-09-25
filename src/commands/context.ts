@@ -57,12 +57,6 @@ import {
 import { isGating } from '@/context/gate'
 import { auditIndexes, type FolderDrift } from '@/context/index-drift'
 import {
-  loadNarration,
-  type Narration,
-  PRONOUN_HEADING,
-  VERB_HEADING,
-} from '@/context/narration'
-import {
   measureWireframeFolder,
   type WireframeStatesReport,
 } from '@/context/wireframe-states'
@@ -101,7 +95,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, superseded-decision narration, index drift, the architecture record against its own ceiling, its own entry cap, and its word weight, and wireframe states against their evidence folders',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, its own entry cap, and its word weight, and wireframe states against their evidence folders',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -133,8 +127,8 @@ export function register(program: Command): void {
         'findings that are facts rather than judgments: a missing required',
         'section and index drift. A context entry requires Overview and',
         'Layout, and a wireframe requires Regions, States, Copy, and Not on',
-        'this surface. Entry length, reference form, table, provenance, narration,',
-        'and the record claim classification are judgments under both.',
+        'this surface. Entry length, reference form, table, provenance, and the',
+        'record claim classification are judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
         'than over a context entry, so `canon markdown audit` measures them.',
@@ -653,24 +647,13 @@ async function runAudit(
     )
   }
 
-  const narration: Narration = gateOnly
-    ? { kind: 'absent' }
-    : await loadNarration(root)
-  const entries = gateOnly
-    ? []
-    : await measureFolders(
-        root,
-        folders,
-        narration.kind === 'loaded' ? narration : undefined,
-      )
+  const entries = gateOnly ? [] : await measureFolders(root, folders)
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
   const length = gateOnly ? undefined : lengthFindings(entries)
   // Absent under `--citations-only` and null when the project carries no
-  // record, for the reason `checkpoints.narration` states about its own two
-  // absences. A run that never looked and a project with nothing to look at
-  // are different answers, and one value for both reports the second as the
-  // first.
+  // record. A run that never looked and a project with nothing to look at are
+  // different answers, and one value for both reports the second as the first.
   const record = gateOnly ? undefined : await measureArchitecture(root)
   const wireframes = gateOnly
     ? []
@@ -693,7 +676,6 @@ async function runAudit(
     reportLength(length ?? [])
     reportTables(entries)
     reportProvenance(entries, folders)
-    reportNarration(entries, folders, narration)
     reportDrift(drift)
     reportRecord(record, root)
     reportWireframeStates(wireframes)
@@ -722,10 +704,11 @@ async function runAudit(
         // answers, and one wrong restatement is a cause reported against the
         // wrong entry.
         //
-        // Absent rather than empty under `--citations-only`, for the reason
-        // `checkpoints.narration` below carries. That mode measures no entry,
-        // so an empty array here reads as a corpus with nothing past the
-        // checkpoint rather than as a run that never looked.
+        // Absent rather than empty under `--citations-only`. That mode
+        // measures no entry, so an empty array here reads as a corpus with
+        // nothing past the checkpoint rather than as a run that never looked,
+        // and collapsing the two reports a measured answer for a run that
+        // never opened an entry.
         length,
         missingSections: sections,
         indexDrift: drift,
@@ -747,20 +730,6 @@ async function runAudit(
           // caller that read it before wireframes owed a section, since turning
           // it into this map would break that caller without an error.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
-          // Three states rather than two, so a record showing no finding says
-          // which terms were looked for. The key is absent when the run never
-          // scanned, which is `--citations-only`, and null when it scanned and
-          // no rule published both headings. Collapsing the first into null
-          // reports an absent rule against a run that never opened one.
-          narration: gateOnly
-            ? undefined
-            : narration.kind === 'loaded'
-              ? {
-                  source: narration.source,
-                  pronouns: narration.pronouns,
-                  verbs: narration.verbs,
-                }
-              : null,
         },
       })}\n`,
     )
@@ -1138,75 +1107,6 @@ function reportProvenance(
         (entry) =>
           `${entry.rel}  ${plural(entry.provenance.length, 'marker')}\n${entry.provenance
             .map((found) => `  :${found.line}  ${found.kind}  ${found.text}`)
-            .join('\n')}`,
-      )
-      .join('\n'),
-  )
-}
-
-/**
- * Reports the bullets narrating a decision the bullet above them replaced.
- *
- * The reach line names the rule the sets were read from, since the check is
- * silent when no rule publishes them and a run that scanned nothing otherwise
- * prints the same clean line as a run that scanned everything.
- *
- * The legitimate-hit line is here for the same reason the provenance section
- * says a marker is a judgment. The standard keeps a rejected alternative and
- * why it lost, which is a back-reference in the past tense by construction, and
- * no measure separates one from the shape the rule bans.
- */
-function reportNarration(
-  entries: readonly EntryReport[],
-  folders: readonly AuditedFolder[],
-  narration: Narration,
-): void {
-  logStep('Narration')
-
-  const governed = folders.filter(governsContent)
-  if (governed.length === 0) {
-    logInfo(
-      `Out of scope. The rule is stated in the standard governing canon/${PROVENANCE_FOLDER}/, and no audited folder is that one.`,
-    )
-    return
-  }
-
-  if (narration.kind === 'absent') {
-    logWarn(
-      `Not scanned. No rule under .claude/rules/ or governance/rules/ publishes both ${PRONOUN_HEADING} and ${VERB_HEADING}.`,
-    )
-    return
-  }
-
-  logInfo(
-    `Covers canon/${PROVENANCE_FOLDER}/ alone, reading ${plural(narration.pronouns.length, 'pronoun')} and ${plural(narration.verbs.length, 'verb')} from ${narration.source}.`,
-  )
-  logInfo(
-    'A rejected alternative is a legitimate hit, since the standard keeps what was tried and why it lost.',
-  )
-
-  const carrying = entries
-    .filter((entry) => entry.narration.length > 0)
-    .sort((a, b) => b.narration.length - a.narration.length)
-
-  if (carrying.length === 0) {
-    logInfo('No bullet narrates a decision the bullet above it replaced.')
-    return
-  }
-
-  const total = carrying.reduce((sum, entry) => sum + entry.narration.length, 0)
-  logWarn(
-    `${plural(total, 'bullet')} to read across ${carrying.length} ${carrying.length === 1 ? 'entry' : 'entries'}`,
-  )
-  pipeOutput(
-    carrying
-      .map(
-        (entry) =>
-          `${entry.rel}  ${plural(entry.narration.length, 'bullet')}\n${entry.narration
-            .map(
-              (found) =>
-                `  :${found.line}  ${found.pronoun} with ${found.verb}`,
-            )
             .join('\n')}`,
       )
       .join('\n'),
