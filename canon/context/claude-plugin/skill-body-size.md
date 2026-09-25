@@ -5,7 +5,9 @@ description: The line checkpoint that replaced a word cap nothing reached, the m
 
 # Skill body size
 
-`standards/skill.md` checks a skill body against 150 lines and names what moves to `references/` past it. The number is a prompt to look rather than a gate, matching the context-entry checkpoint the repository already runs, so nothing enforces it and a body carrying nothing but procedure stays whole at any length.
+`standards/skill.md` checks a skill body against 150 lines and names what moves to `references/` past it. The number is a prompt to look rather than a gate, matching the context-entry checkpoint the repository already runs. Above it sits the 300 rendered line document ceiling from `standards/markdown.md`, which binds a body and each reference alike.
+
+Keeping a procedure-only body whole at any length was the alternative, and it lost to the Document ceiling stage, which cannot fail a push until it reads zero while procedure bodies sit past 300 with nothing else to move. Past the ceiling a whole step now moves to a reference, the body keeping the step heading and one line naming the file to read on reaching it. The cost is a second read at that step, which the load line carries, and a session that skips the line skips the step.
 
 ## Why the cap counts lines rather than words
 
@@ -15,9 +17,9 @@ Words and lines also disagree about what a body is heavy with. A signal table or
 
 ## What the move rule names
 
-A catalog, a table of cases, or a format spec running past roughly fifteen lines goes to `references/`. Procedure prose stays, since a session sent to a reference for its own steps pays two reads for one job.
+A catalog, a table of cases, or a format spec running past roughly fifteen lines goes to `references/` at any body length. Below the ceiling procedure prose stays, since a session sent to a reference for its own steps pays two reads for one job.
 
-Each move owes a named branch that skips it. Body lines are paid on every invocation and a reference only when the body sends the session to it, so a block every run dereferences costs a read and saves nothing, and the asymmetry is the entire argument for moving anything. The body keeps the trigger, the skip condition, and the guard, because a run that never reaches the block has to decide that without opening the reference.
+Below the ceiling, each move owes a named branch that skips it. Body lines are paid on every invocation and a reference only when the body sends the session to it, so a block every run dereferences costs a read and saves nothing, and the asymmetry is the entire argument for moving anything. The body keeps the trigger, the skip condition, and the guard, because a run that never reaches the block has to decide that without opening the reference.
 
 That test is what bounds the rule. In `docs-fold`, a project with no wireframe folder skips the wireframe-sweep reference outright, and an architecture record carrying no anchored entry skips the architecture-sweep reference the same way. The rebase machinery in `review-address` sits in a reference because a branch that still merges never reaches it, while the reply format that same skill writes on every run stays in the body, having failed the test.
 

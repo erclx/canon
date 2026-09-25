@@ -21,4 +21,5 @@ paths:
 
 ## Authority
 
-- Follow the skill standard for skill structure, frontmatter fields, invocation rules, and the shape a `REQUIREMENT.md` states. It is the single source. Read it with `canon standards skill`.
+- Follow the skill standard for skill structure, frontmatter fields, and invocation rules. It is the single source. Read it with `canon standards skill`.
+- Follow the skill requirement standard for the shape a `REQUIREMENT.md` states. Read it with `canon standards skill-requirement`.

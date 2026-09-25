@@ -35,7 +35,7 @@ The rule's glob is recursive, so it governs a standard at any depth the same way
 
 `standards/standard.md` carries two rules about a standard's own lifecycle, distinct from the shape rules governing what it contains.
 
-A standard states a success criterion, near the top and above the shape rules. Specifying structure exhaustively and success nowhere leaves nothing to argue a proposed change against, so the standard gets edited on whichever input arrived most recently. `standards/context.md` states its own as `## What a working entry looks like`, and `standards/skill.md` states one under `## Requirement`, scoped to the requirement file rather than the skill.
+A standard states a success criterion, near the top and above the shape rules. Specifying structure exhaustively and success nowhere leaves nothing to argue a proposed change against, so the standard gets edited on whichever input arrived most recently. `standards/context.md` states its own as `## What a working entry looks like`, and `standards/skill-requirement.md` states one as `## What a working requirement looks like`, scoped to the requirement file rather than the skill.
 
 A standard then changes on a failure rather than on a finding. A finding is that the vendor docs say X or a paper suggests Y, and it goes to the task board as a hypothesis. A failure is an artifact that satisfied every shape rule and still missed the criterion, and it edits the standard. The change cites the failing artifact.
 

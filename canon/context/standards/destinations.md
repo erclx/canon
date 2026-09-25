@@ -77,6 +77,7 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 - `rule.md` fixes a path-scoped governance rule. `590-rule-authoring.md`.
 - `session.md` fixes the pre-compaction handoff. `562-session.md`, which globs the `session-` file alone because `555-tasks.md` globs the board around it and one rule over both shapes would carry two.
 - `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `570-skill.md`.
+- `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `570-skill.md`, which already globs the requirement file beside the body.
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `591-standard-authoring.md`.
 - `tasks.md` fixes the board, its filenames, and its readiness groups. `555-tasks.md`.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `561-teach.md`, whose frontmatter states that most targets open no workspace for it to fire on. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
