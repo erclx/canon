@@ -63,7 +63,7 @@ The fields are `<prior-oid>` off `commit`, `<prior-heading>` off `heading`, and 
 
 `source` says which stamp answered. `marker` is the pass's own read-time record and is the authority. `fallback` is a pass posted before this mechanism shipped, so its commit is whatever the head was when GitHub recorded the review rather than what that session read, and a push inside its compose window is invisible. `none` is a thread carrying no pass at all.
 
-Do not read `commit.oid` or `submittedAt` off `gh pr view --json reviews` here. Both are stamped at submission, so a push landing between a pass's read and its post moves them onto a commit that pass never saw, and this step then scopes the delta past it and reports it covered. That fired for real on a pull request in this toolkit on 2026-09-07, and what it skipped was a genuine fix.
+Do not read `commit.oid` or `submittedAt` off `gh pr view --json reviews` here. Both are stamped at submission, so a push landing between a pass's read and its post moves them onto a commit that pass never saw, and this step then scopes the delta past it and reports it covered.
 
 A target whose CLI predates the verb meets a missing subcommand rather than a record. Fall back there to the jq below, which reads the stamps and carries the defect above, and say the fallback answered so a reader can tell a marker read from a stamped one:
 
@@ -119,7 +119,7 @@ A non-empty result carries the comment id Step 4 needs for the third filename se
 
 A `## Post-review findings` reply carries no argued finding behind it, since it asserts a new defect rather than answering one, and this pass is its first independent reader. Restating it as a finding without opening anything is repeating the worker's claim rather than checking it. Read the file the comment names at `<headRefOid>`, the same `git show <headRefOid>:<path>` read Step 3 already runs to confirm a ticked box, and confirm the defect before it becomes a finding of this pass's own.
 
-A moved head has its own way to add nothing, which the ancestor test cannot see. When `<prior-heading>` reads `## Review closed`, the standing verdict already reports the branch clear, so a pass over the new commits that raises nothing posts a comment saying what the one above it said. Two close-outs landed that way on 2026-08-28, and the operator caught the pair rather than any check.
+A moved head has its own way to add nothing, which the ancestor test cannot see. When `<prior-heading>` reads `## Review closed`, the standing verdict already reports the branch clear, so a pass over the new commits that raises nothing posts a comment saying what the one above it said.
 
 The producing shape is narrow. A prior pass tells the author a change is their own call, the author makes it, and the delta reaching the next pass has nothing left to say by construction.
 

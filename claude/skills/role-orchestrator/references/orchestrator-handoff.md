@@ -27,7 +27,7 @@ The read is the report this session is holding. Retire a session whose delivery 
 
 ### The act, and the order it runs in
 
-`claude rm <id>` is meant to remove a background session and its worktree together, though its own report is not reliable, so `canon worktrees list` is the reading to trust afterward. It takes one target per call, so a wave costs one call per session. The argument is the id rather than the name, which `claude agents --json` carries beside the name on every row, so a session read off a roster by name is matched to its id there before the call. Both readings are from 2026-09-02, where the name form answered `No job matching`.
+`claude rm <id>` is meant to remove a background session and its worktree together, though its own report is not reliable, so `canon worktrees list` is the reading to trust afterward. It takes one target per call, so a wave costs one call per session. The argument is the id rather than the name, which `claude agents --json` carries beside the name on every row, so a session read off a roster by name is matched to its id there before the call. The name form answers `No job matching`.
 
 The command belongs to the client rather than to this toolkit, so a target running another client performs whatever removal that client offers.
 

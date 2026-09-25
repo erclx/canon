@@ -5,7 +5,7 @@ description: Which external writing patterns this skill adopted, which it declin
 
 # Source material
 
-Two external writing skills were read on 2026-08-19 as source material for this one. The first catalogs 31 patterns of machine-sounding prose. The second layers document mode, sentence construction, information density, and ambiguity prevention.
+Two external writing skills were read as source material for this one. The first catalogs 31 patterns of machine-sounding prose. The second layers document mode, sentence construction, information density, and ambiguity prevention.
 
 Neither was imported wholesale, and one measurement settles why. Read this before adding a rule from outside this corpus, and extend the position below rather than deriving a second one.
 
@@ -24,7 +24,7 @@ The ambiguity rules travel with that layer for the same reason. Compression is w
 - **Any restatement of a banned word set.** The bans ship as package data that `canon markdown audit` reads, and a copy here would be a second source for one list with a machine reading the other.
 - **A voice register per surface.** One baseline covers every surface. A surface needing a warmer register states its own voice and claims the yield, which lifts voice alone and leaves the bans, the rhythm rules, and the tells in force.
 
-The first of those four rests on a count. The source names `surface` among the nouns it bans, and tracked markdown in the authoring repository used `surface` 593 times, `harness` 95, `scaffolding` 17, and `primitive` 4, measured on 2026-08-19. Adopting the item either rewrites established vocabulary across the corpus or is ignored in silence, and a reader arriving later cannot tell which happened.
+The first of those four rests on a count. The source names `surface` among the nouns it bans, and tracked markdown in the authoring repository used `surface` 593 times, `harness` 95, `scaffolding` 17, and `primitive` 4. Adopting the item either rewrites established vocabulary across the corpus or is ignored in silence, and a reader arriving later cannot tell which happened.
 
 ## Where this diverges
 

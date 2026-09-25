@@ -43,6 +43,8 @@ Cost never enters the decision to widen a wave. The rule weighing how many track
 
 The session also records nothing of what it learns. Both other callers of memory capture are ship-chain skills and this one never ships, so the session taking every operator correction is the session with no moment that writes one down. Hanging that moment on the merge sweep answers it and bills the operator a capture pass per batch of merges while nothing is being built, which is a cost paid on the days shipping is fastest.
 
+Dispatch parts from what it checked in three measured ways. The gate and the worker each derived the branch from their own reading of one plan until 2026-09-06: one run checked `docs/remaining-skill-verdicts` against a worker that took `docs/skill-verdicts-decide`, another checked `fix/path-form-hook` against `feat/path-form-hook`, and four dispatches on 2026-09-05 produced three strings for one plan. A launched worker inherits its launcher's model rather than the configured default, measured on 2026-08-27 with `~/.claude/settings.json` set to `sonnet` while both dispatched workers ran `claude-opus-5`. A cleared file set does not hold either, since three tracks in the wave of 2026-09-08 crossed a set they had cleared against and every one merged clean.
+
 ## Must
 
 - Read the priority file for execution order, since the index sorts by filename and states no order

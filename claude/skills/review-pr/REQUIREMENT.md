@@ -13,6 +13,8 @@ A finding also stops being true by argument rather than by a fix. A worker namin
 
 A request written under `## For the reviewer` also reached no reader. The authoring standard names it as what the reviewing session should confirm, and nothing on this side read the section by that name, so a branch author's question sat in the body until this skill answered it.
 
+Scoping a later pass off GitHub's review stamp skipped real work. On 2026-09-07 an author pushed between a pass's read and its post, the stamp moved onto a commit that pass never saw, and the next pass scoped its delta past it and skipped a genuine fix. A closed review invites a second close-out too: on 2026-08-28 two passes over commits that raised nothing each posted a comment repeating the verdict above it, and the operator caught the pair rather than any check.
+
 ## Must
 
 - Post until the review closes. A first pass opens against the whole change, and each later pass checks whether the prior findings landed.
