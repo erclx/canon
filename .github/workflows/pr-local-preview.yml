@@ -1,0 +1,40 @@
+name: PR Local Preview Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  remove-local-preview:
+    name: 🖥️ Remove Local Preview Link
+    runs-on: ubuntu-latest
+    steps:
+      # A fork pull request gets a read-only token, so the edit cannot land.
+      # Say so and pass rather than failing a close nobody can fix.
+      - name: Skip a fork pull request
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: echo "::notice::Fork pull request, so the token cannot edit the evidence comment. The local preview line stays."
+
+      - name: Checkout
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: bun install --frozen-lockfile
+
+      - name: Replace the local preview line on the evidence comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bun src/cli.ts pr local ${{ github.event.pull_request.number }} --remove --json
