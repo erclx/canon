@@ -9,7 +9,9 @@ description: What the plan standard fixes and why its section markers are mixed,
 
 `standards/plan.md` fixes the section list, the suggested-and-answer contract, and the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. `plan-feature`, `auto-ship`, and `docs-fold` each cite the half they read rather than restating it.
 
-The section markers are mixed on purpose, `## Summary` as a heading and the other four as bold labels, because that is what the corpus writes. Across the plan archive, `Summary` is nearly always a heading and never a label, while `Files to touch` and the other three sections mostly take the bold-label form.
+The section markers are mixed on purpose, `## Summary` as a heading and the other six as bold labels, because that is what the corpus writes. Across the plan archive, `Summary` is nearly always a heading and never a label, while `Files to touch` and the sections the archive already carried mostly take the bold-label form.
+
+`**Review focus:**` is its own section rather than a part of `**Risks:**`, because the two have different readers. A risk is something the executing session plans around, and a focus item is an input the finished diff must be shown to handle, which `review-pr` confirms on a first pass.
 
 Measure a format claim against the archive rather than the live folder, since the live folder typically holds only a handful of files and says nothing about the corpus convention.
 
