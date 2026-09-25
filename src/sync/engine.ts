@@ -70,6 +70,11 @@ export type SyncChange =
  * sync deletes it. A stamped file the toolkit no longer installs to is
  * stranded, which is a relocation waiting on a decision.
  *
+ * `renamed` is the fourth sourceless state and the only one that installs.
+ * It is a retired file whose rule the adapter declares still ships under a
+ * new name, so the sync deletes the old file and copies the rule to the new
+ * one.
+ *
  * `missing` is the one state the walk cannot produce on its own, since the
  * walk only iterates files that exist. It comes from `collectMissing`
  * instead, an adapter naming an entitled file the target does not hold.
@@ -81,6 +86,7 @@ export type EntryState =
   | 'drifted'
   | 'orphaned'
   | 'retired'
+  | 'renamed'
   | 'stranded'
   | 'missing'
 
@@ -165,9 +171,20 @@ export interface SyncAdapter {
    * no source is a leftover of a rule the toolkit retired or renamed rather
    * than something a project wrote. Setting it turns that file into a
    * `retired` entry and queues its delete, edited or not, whatever the stamp
-   * holds. Unset, the file stays `orphaned` and untouched.
+   * holds, or a `renamed` one when `locateSuccessor` names where it ships
+   * now. Unset, the file stays `orphaned` and untouched.
    */
   readonly ownsInstalledRoot?: boolean
+  /**
+   * Where a sourceless file's rule ships now, when the toolkit declares it
+   * renamed rather than retired. Reached only on a root the adapter owns and
+   * never past the newer-install guard. Unset, or returning nothing, leaves
+   * the file `retired`.
+   */
+  locateSuccessor?(
+    file: InstalledFile,
+    target: string,
+  ): { readonly source: string; readonly dest: string } | undefined
   /** Defaults to applying. */
   readonly nonInteractive?: NonInteractivePolicy
   /** Runs on a completed sync, including one with no changes. */
@@ -224,6 +241,7 @@ export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
   const hashes = stampedHashes(stamp, adapter.stamp?.domain)
   const newerInstall = newerInstallingVersion(stamp, adapter.stamp?.domain)
   const walked = new Set<string>()
+  const pendingCopies = new Set<string>()
 
   for (const file of listInstalled(
     adapter.installedRoot(target),
@@ -243,16 +261,44 @@ export function planSync(adapter: SyncAdapter, target: string): SyncPlan {
     if (source === undefined || !existsSync(source)) {
       if (adapter.ownsInstalledRoot !== true) {
         entries.push(misplacedOrphan(adapter, target, file))
-      } else if (newerInstall !== undefined) {
+        continue
+      }
+
+      if (newerInstall !== undefined) {
         entries.push(heldForNewerInstall(file, newerInstall))
-      } else {
+        continue
+      }
+
+      const successor = adapter.locateSuccessor?.(file, target)
+      if (successor === undefined) {
         entries.push({
           state: 'retired',
           rel: file.rel,
           notice: `${file.rel} (no longer shipped by the toolkit, removing)`,
         })
         changes.push({ kind: 'delete', dest: file.path, rel: file.rel })
+        continue
       }
+
+      const destRel = relative(target, successor.dest)
+      entries.push({
+        state: 'renamed',
+        rel: file.rel,
+        notice: renamedNotice(file, destRel, attribute(hashes, file)),
+      })
+
+      // A second predecessor of one successor, or a successor the target
+      // already holds, still loses its old file but must not overwrite.
+      if (!existsSync(successor.dest) && !pendingCopies.has(successor.dest)) {
+        pendingCopies.add(successor.dest)
+        changes.push({
+          kind: 'copy',
+          source: successor.source,
+          dest: successor.dest,
+          rel: destRel,
+        })
+      }
+      changes.push({ kind: 'delete', dest: file.path, rel: file.rel })
       continue
     }
 
@@ -470,6 +516,8 @@ function report(adapter: SyncAdapter, plan: SyncPlan): void {
       logWarn(`${entry.rel} (locally customized)`)
     else if (entry.state === 'retired')
       logWarn(entry.notice ?? `${entry.rel} (no longer shipped by the toolkit)`)
+    else if (entry.state === 'renamed')
+      logWarn(entry.notice ?? `${entry.rel} (renamed by the toolkit)`)
     else if (entry.state === 'stranded')
       logWarn(`${entry.rel} (installed here by an older toolkit, now moved)`)
     else if (entry.state === 'missing')
@@ -615,6 +663,22 @@ function newerInstallingVersion(
   }
 
   return { stamped, running }
+}
+
+/**
+ * The new name gets the toolkit's source rather than the old file's content,
+ * so a local edit is dropped the way a retire drops one. With no stamp the
+ * edit cannot be proven either way, so the line hedges rather than asserts.
+ */
+function renamedNotice(
+  file: InstalledFile,
+  destRel: string,
+  state: EntryState,
+): string {
+  const base = `${file.rel} (renamed to ${destRel} by the toolkit, moving`
+  if (state === 'customized') return `${base}. Local edits were not carried.)`
+  if (state === 'drifted') return `${base}. Any local edits were not carried.)`
+  return `${base})`
 }
 
 function heldForNewerInstall(

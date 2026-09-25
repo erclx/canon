@@ -13,7 +13,7 @@ import {
   indexSourceRules,
   rulesSourceDir,
 } from '@/gov/adapter'
-import { type InstalledFile, planSync } from '@/sync/engine'
+import { applyChanges, type InstalledFile, planSync } from '@/sync/engine'
 import { writeChainStamp } from '@/sync/stamp'
 
 let ROOT: string
@@ -262,6 +262,104 @@ describe('createGovAdapter', () => {
       const adapter = createGovAdapter(TOOLKIT)
 
       expect(adapter.collectMissing?.(TARGET)).toEqual([])
+    })
+  })
+
+  describe('a rule the toolkit renamed', () => {
+    const OLD_PATH = () => join(TARGET, '.claude/rules/canon/core/505-old.md')
+    const NEW_PATH = () => join(TARGET, '.claude/rules/canon/code/510-new.md')
+
+    async function syncTarget(): Promise<void> {
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+      await applyChanges(plan.changes)
+    }
+
+    beforeEach(() => {
+      writeFixture(
+        join(TOOLKIT, 'governance/rules/code/510-new.md'),
+        '# 510-new\n',
+      )
+      writeFixture(
+        join(TOOLKIT, 'governance/stacks/base.toml'),
+        'extends = ""\nrules = ["code"]\n',
+      )
+      writeFixture(
+        join(TOOLKIT, 'governance/renames.toml'),
+        '[renamed]\n"505-old" = "510-new"\n',
+      )
+    })
+
+    it('should install the new name and remove the old one with a chain stamped', async () => {
+      writeFixture(OLD_PATH(), '# 505-old\n')
+      await writeChainStamp(
+        TARGET,
+        { domain: 'governance', toolkitRoot: TOOLKIT },
+        ['base'],
+        new Date('2026-09-25T00:00:00.000Z'),
+      )
+
+      await syncTarget()
+
+      expect([existsSync(NEW_PATH()), existsSync(OLD_PATH())]).toEqual([
+        true,
+        false,
+      ])
+    })
+
+    it('should install the new name and remove the old one with no stamp at all', async () => {
+      writeFixture(OLD_PATH(), '# 505-old\n')
+
+      await syncTarget()
+
+      expect([existsSync(NEW_PATH()), existsSync(OLD_PATH())]).toEqual([
+        true,
+        false,
+      ])
+    })
+
+    it('should not report the new name missing while the old one is held', async () => {
+      writeFixture(OLD_PATH(), '# 505-old\n')
+      await writeChainStamp(
+        TARGET,
+        { domain: 'governance', toolkitRoot: TOOLKIT },
+        ['base'],
+        new Date('2026-09-25T00:00:00.000Z'),
+      )
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should leave a new name the target already holds in another band', () => {
+      writeFixture(OLD_PATH(), '# 505-old\n')
+      const held = join(TARGET, '.claude/rules/canon/core/510-new.md')
+      writeFixture(held, '# 510-new\n')
+
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+      expect(plan.changes.map((change) => change.kind)).toEqual(['delete'])
+    })
+
+    it('should still retire a sourceless rule the ledger does not name', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/core/506-gone.md'), 'x\n')
+
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+      expect(plan.changes.map((change) => change.kind)).toEqual(['delete'])
+    })
+
+    it('should install nothing in a target that never held the old name', () => {
+      writeFixture(
+        join(TARGET, '.claude/rules/canon/core/000-const.md'),
+        '# 000-const\n',
+      )
+      writeFixture(
+        join(TOOLKIT, 'governance/rules/core/000-const.md'),
+        '# 000-const\n',
+      )
+
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+      expect(plan.changes).toEqual([])
     })
   })
 })
