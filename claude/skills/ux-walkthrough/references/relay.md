@@ -4,7 +4,7 @@ Read when the operator calls a batch, and at the start of the walkthrough when a
 
 ## Where the batch goes
 
-- Send it to the controller where the session was dispatched by one, resolved per the Channel rule, matched by name through `canon gov list --rules --json` rather than a path a target may not have installed.
+- Send it to the controller where the session was dispatched by one, through `canon:session-relay`, which resolves the address and carries the send.
 - Give it to the operator as one list in the conversation where no controller exists. The walkthrough file is the handoff either way.
 
 ## When

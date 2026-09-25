@@ -44,24 +44,15 @@ and nothing else.
 - Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, and the task it closes. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch because of it.
 - Carry the reach in that same message: the paths this branch wrote that another live plan or `## Run now` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`. The gate cleared this branch against a prediction it has since outgrown, so the controller holds a disjointness reading that stopped being true hours ago and nothing else tells it. Say the reach was unread rather than clear when the installed binary carries no such subcommand, and leave the undeclared list to the pull request.
 - Announce when an address-review pass finishes, as `review-address` Step 8 returns, carrying what was addressed and the PR's new CI state. That transition is the other moment only this session knows, and it is what tells the controller to re-review rather than leaving it to poll for an answer nothing marks as landed.
-- Send a block out as a message before it becomes an interactive prompt. A session already waiting on input never reaches the tool round that drains an inbound message, so a relayed answer arrives under the open question and changes nothing.
+- Send a block out as a message before it becomes an interactive prompt.
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
 
-Address the session the launch named. It names a `sessionId` rather than a name,
-so read `canon sessions list --json`, find the row carrying that id, and send to
-the `name` on it. Resolve that name at the moment of sending rather than at
-launch, since a name is derived from what a session turned out to be doing and
-has gone stale inside the hour that a build takes.
-
-Check that name against the agent listing before sending it. A name is not
-unique, and the roster carries no field that separates two live sessions holding
-one, so the resolution can end on a string that reaches the wrong session. Send
-the name bare where the listing shows one row under it. Where it shows more than
-one, complete the address with the `[ref]` that listing prints beside each row
-rather than sending to the name alone, which lands on whichever row the channel
-resolves first. Two sessions differing only by a trailing ` (3)` is the shape
-this meets in practice, and one of them being a controller is what makes the
-wrong pick silent.
+Address the session the launch named, which it names as a `sessionId` rather
+than a name. `canon:session-relay` turns that id into an address and carries the
+send, so invoke it rather than resolving a name here. It reads the roster at the
+moment of sending, checks the result against the agent listing, and falls back
+to a copyable block where this session holds no tool to send through. The
+message owed stays in its own bullet above.
 
 Ask the operator when the launch named nobody and a person is there to answer.
 Put the candidate rows to them through the structured question surface, so they
@@ -76,31 +67,9 @@ looks.
 Infer only where no operator is present. Read `canon sessions list --json` and
 take the sessions holding no feature branch as the candidates, since a
 controlling session holds none. Say the addressee was inferred so the reader can
-correct it. Never filter that roster by name prefix: every self-dispatched
-worker is named `worker-<project>-<slug>`, so a prefix scan returns a sibling or
-this session itself, which is the defect that sent messages owed to a controller
-somewhere else.
-
-Report a resolution that returns nothing rather than falling back to a guess.
-The roster and the send channel enumerate different populations in both
-directions, measured at one moment: a live background session sat on the roster
-that the agent listing did not carry, and nine sessions were addressable there
-with no roster row at all. Those nine were driving through Remote Control, which
-writes no local process record, so a controller working from a phone is exactly
-the case this read answers nothing for.
-
-Send through `canon:session-relay`. It holds the mechanical half of the send,
-turning the `sessionId` the launch named into an address at the moment of
-sending, checking the result against the agent listing, and falling back to a
-copyable block where this session holds no tool to send through. The message
-owed stays in its own bullet above.
-
-The rungs above restate the resolution the relay also carries. What is a
-worker's own is the last of them, the inference over sessions holding no feature
-branch, which discriminates here because a worker holds one and a controller
-does not. The rest is duplicated deliberately, so this body still reads whole
-for a session that reaches it with the relay unresolved, which is the ordinary
-case in a target that installed governance without the plugin.
+correct it. This rung stays here rather than in the relay because it differs
+between roles, and it discriminates for a worker because a worker holds a
+feature branch and a controller does not.
 
 ## Refusing is part of the job
 
