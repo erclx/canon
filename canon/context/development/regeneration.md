@@ -29,7 +29,7 @@ Sample content committed at its real filename gets rewritten by every repo-wide 
 
 ## Hero
 
-`assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web.md`, which is why every render here gates on drift rather than carrying a disclaimer.
+`assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web/assets.md`, which is why every render here gates on drift rather than carrying a disclaimer.
 
 The Hero stage runs `scripts/core/regen-hero.sh`, which fills every `assets/captures/*.html.tmpl` and writes the `.html` beside it, then asserts no drift over `assets/captures/*.html`. Two inputs reach the templates: five catalogs supply the counts, so no figure on a README frame is maintained by hand, and `canon design css --no-components` supplies the palette, so no frame carries its own copy of a hex value. A sixth value, `{{FAVICON}}`, fills the same map, derived from the live `assets/brand/mark.svg` colored with the accent hex parsed out of the same palette output.
 

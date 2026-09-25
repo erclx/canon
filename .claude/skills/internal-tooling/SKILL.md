@@ -5,11 +5,11 @@ description: Tooling stacks, golden configs, seeds, references, and manifests. U
 
 # Tooling
 
-Read `canon/context/tooling.md` for system overview, configs vs seeds vs references, extends chain, and manifest authoring before editing.
+Read `canon/context/tooling/index.md` for system overview, configs vs seeds vs references, extends chain, and manifest authoring before editing, then the file it names for the change at hand.
 
 ## Layer model
 
-Stack-specific configs override extends-chain configs at the same relative path. `scan` in `src/tooling/scan.ts` walks current-first. Refer to `canon/context/tooling.md` for the layer inventory and what each one owns.
+Stack-specific configs override extends-chain configs at the same relative path. `scan` in `src/tooling/scan.ts` walks current-first. Run `canon tooling list` for the layer inventory, and read `canon/context/tooling/manifests.md` for how each category resolves a duplicate.
 
 ## Manifest rules
 
@@ -63,5 +63,5 @@ Seed files merge across layers. Each stack contributes words to the target's `.c
 
 ## Reference
 
-- `canon/context/tooling.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
+- `canon/context/tooling/index.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
 - `internal/standards/tooling-reference.md`: conventions for writing reference.md docs

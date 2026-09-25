@@ -14,7 +14,7 @@ Read every added or changed line in the diff under this rule's eight corpora: `i
 For each `canon/context/<name>.md` token:
 
 - **Fine.** The sentence reads as an instruction for a target session to consult its own project's copy if one exists, or illustrates the path shape a target's own tree would take, never naming a fact only this checkout holds. `ux-measure/SKILL.md`'s `canon/context/development/: the documented run commands and the port each serves` is this case, read as "check your own project's entry."
-- **Fails.** The sentence names a fact true of this repository specifically, one only this checkout's own `canon/context/` resolves, such as a documented decision or a domain narrative a target reader cannot open. `canon-cli/SKILL.md`'s prior citation of `canon/context/tooling.md` as "the toolkit's" was this case.
+- **Fails.** The sentence names a fact true of this repository specifically, one only this checkout's own `canon/context/` resolves, such as a documented decision or a domain narrative a target reader cannot open. `canon-cli/SKILL.md`'s prior citation of the tooling context entry as "the toolkit's" was this case.
 
 Do not test a token against what a scaffolded project's seed happens to ship. That discriminator was measured and rejected: the seed's own contents drift, and a token reading as an instruction is fine regardless of what any seed carries.
 

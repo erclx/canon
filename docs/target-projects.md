@@ -350,5 +350,5 @@ Sync also refuses a target whose working tree is dirty, so commit or stash befor
 
 - [agents](agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [AI workflow](workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
-- [tooling](../canon/context/tooling.md), [governance](../canon/context/governance/index.md), [claude plugin](../canon/context/claude-plugin/index.md), [indexes](../canon/context/indexes.md), [snippets](../canon/context/snippets.md), [standards](../canon/context/standards/index.md): per-domain mechanics
+- [tooling](../canon/context/tooling/index.md), [governance](../canon/context/governance/index.md), [claude plugin](../canon/context/claude-plugin/index.md), [indexes](../canon/context/indexes.md), [snippets](../canon/context/snippets.md), [standards](../canon/context/standards/index.md): per-domain mechanics
 - [sandbox](../canon/context/sandbox/index.md): scenario catalog for verifying domain flows

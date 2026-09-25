@@ -5,7 +5,7 @@ description: The one public route at canon.erclx.dev, one agent session read top
 
 # Landing page
 
-The toolkit's only outward-facing surface, served at `canon.erclx.dev`. A reader arrives cold, scrolls once, and reads one real agent session from the ask to the merge. Every count is read from the repository at build time. Why the page takes this shape lives in `canon/context/web.md`.
+The toolkit's only outward-facing surface, served at `canon.erclx.dev`. A reader arrives cold, scrolls once, and reads one real agent session from the ask to the merge. Every count is read from the repository at build time. Why the page takes this shape lives in `canon/context/web/overview.md`.
 
 ## Regions
 

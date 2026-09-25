@@ -77,11 +77,11 @@ Two literals stay on purpose. `code` sets `0.85em` and `pre code` sets `1em`, be
 - `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach` below it, so a path ending in `teach` behaves differently from one that does not.
 - A bare `canon teach list` reads the operator's live workspaces. Reaching the committed fixture takes `--root examples/teach`, and a claim about the fixture made without the flag describes a different tree.
 - `governance/rules/claude/561-teach.md` is scoped to `.canon/teach/**`, which is workspace content. It reaches neither `src/teach/` nor `examples/teach/`, so an implementation or fixture edit is routed by the `internal-teach` skill rather than by that rule. Widening the rule is wrong, since it ships to targets through governance sync and a target has no `src/teach/`.
-- Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. `canon/context/web.md` draws that line between `assets/` and `examples/` on who each folder addresses.
+- Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. `canon/context/web/assets.md` draws that line between `assets/` and `examples/` on who each folder addresses.
 
 ## Related
 
 - `canon standards teach`: the workspace artifact
 - `canon standards glossary`: the glossary every workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy and the promotion handoff
-- `canon/context/design.md`: the token values a workspace stylesheet is seeded from
+- `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from

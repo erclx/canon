@@ -205,7 +205,7 @@ export const dispatch = {
 /**
  * The branch graph is authored against the depicted session rather than read,
  * since nothing on a build machine records which files four sessions held. The
- * footer says so, which is the label `canon/context/web.md` names as the
+ * footer says so, which is the label `canon/context/web/build.md` names as the
  * repair for an authored figure.
  */
 // README.md: canon-allow-readme-paraphrase: "each in its own git worktree on its own branch, and each opens its own pull request"
