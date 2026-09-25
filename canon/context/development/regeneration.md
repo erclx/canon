@@ -11,7 +11,9 @@ Three stages regenerate a tracked artifact and then assert it did not move. Rege
 
 The Consumed copies stage runs `scripts/core/regen-claude-copies.sh` and then asserts no drift across `.claude/rules`. It is the only mirror this stage regenerates: standards and snippets ship with no mirror, since nothing installs their corpus into a project, and `internal/` carries no mirror either, since nothing installs it and both readers of the one standard under it sit at the root beside the source.
 
-The assert reads the unstaged diff, so the first `bun run check` after an edit under `governance/rules/` reports its own regeneration as drift and exits red. Stage the rewritten copy and run again. The failure message asks for a commit while staging is what clears the stage, which is the distinction a ship chain needs, since it regenerates before the step that groups its commits. `canon/context/development/verification.md` records the same shape for the Indexes and Skill references stages. The Design stage shares it too: an edit to `src/design/tokens.ts` reports the regenerated `canon/DESIGN.md` as drift until that record is staged.
+The assert reads the unstaged diff, so the first `bun run check` after an edit under `governance/rules/` reports its own regeneration as drift and exits red. Stage the rewritten copy and run again.
+
+The failure message asks for a commit while staging is what clears the stage, which is the distinction a ship chain needs, since it regenerates before the step that groups its commits. `canon/context/development/verification.md` records the same shape for the Indexes and Skill references stages. The Design stage shares it too: an edit to `src/design/tokens.ts` reports the regenerated `canon/DESIGN.md` as drift until that record is staged.
 
 Staging to clear the stage changes what the next skill in that chain measures. `review-branch` scopes to the staged set whenever one is non-empty, so a run that staged three regenerated rules reviews those three files and reports a clean branch for the source sitting untracked beside them. Reset the index before the review step and let the chain restage at its own commit step. Nothing reports the narrowed scope, since a review of three files is indistinguishable from a branch that changed three files.
 
@@ -45,15 +47,23 @@ Only the markup half reads that way. `captureBases` lists `assets/captures/`, th
 
 ### What the assert covers
 
-The assert covers the HTML and not the PNG beside it. A capture is a chromium render whose bytes move with the browser version, so asserting the image would fail on a machine whose browser differs rather than on a stale count. A second assert closes the gap that leaves without rendering anything: `canon capture` writes a digest of the markup it read and one of the image it wrote into a `.stamp` beside each PNG, and the stage hashes both committed files of each set and compares them. It takes its set of frames off the `.html` files in `assets/captures/`, which is the same thing `canon capture assets/captures` reads to decide what to render, so a frame added later is covered without a second edit and an image in `assets/` that no markup renders is left alone.
+The assert covers the HTML and not the PNG beside it. A capture is a chromium render whose bytes move with the browser version, so asserting the image would fail on a machine whose browser differs rather than on a stale count. A second assert closes the gap that leaves without rendering anything: `canon capture` writes a digest of the markup it read and one of the image it wrote into a `.stamp` beside each PNG, and the stage hashes both committed files of each set and compares them.
 
-`canon capture` ships now, so an installed binary renders rather than refusing, and that makes the wrong route quieter rather than safe. A session clearing this stage in this repository runs it through the source entry point, as `bun src/cli.ts capture assets/captures/hero.html --selector .window --out assets/evidence`, since the global binary is whatever release last published and this stage compares against the branch. `--selector` carries no default, so a run that omits it refuses before rendering anything.
+The stage takes its set of frames off the `.html` files in `assets/captures/`, which is the same thing `canon capture assets/captures` reads to decide what to render, so a frame added later is covered without a second edit and an image in `assets/` that no markup renders is left alone.
+
+### Run a branch-reading verb from source
+
+An installed `canon capture` renders rather than refusing, which makes the wrong route quiet rather than safe. A session clearing this stage in this repository runs it through the source entry point, as `bun src/cli.ts capture assets/captures/hero.html --selector .window --out assets/evidence`, since the global binary is whatever release last published and this stage compares against the branch. `--selector` carries no default, so a run that omits it refuses before rendering anything.
 
 The rule generalizes past this stage to every verb reading data the branch authors. `canon claude skills rank` is the second instance: it ranks prompts against the case list of whatever release last published, so a branch editing `src/claude/cases/` reads its own change as absent and reports the old prompt beside the old expected skill, which reads as a case that never routed at all. Run such a verb through `bun src/cli.ts` whenever the branch touches what it reads. A verb reading the checkout instead, such as `canon gov test-order`, answers correctly from the global binary, since what it reads moves with the tree rather than with the release.
 
-Reading the commit that last touched each file measures timing rather than agreement, so a pair moved by one commit passes whatever the image holds. `canon/context/development/gates.md` carries what the digest proves and the merge case that needs it. The cost is unchanged: a capture cannot ship as a follow-up commit, so regenerate, capture, and commit all three files in one step.
+### Committing a capture
+
+Reading the commit that last touched each file measures timing rather than agreement, so a pair moved by one commit passes whatever the image holds. `canon/context/development/gates/content-stages.md` carries what the digest proves and the merge case that needs it. The cost is unchanged: a capture cannot ship as a follow-up commit, so regenerate, capture, and commit all three files in one step.
 
 The assert compares against the index, the way the Consumed copies stage above does, so running `canon capture` is not what clears the stage. All three files have to be staged before the next `bun run check`, and until they are the stage repeats the same message it printed before the capture ran. Reading that repeat as the capture having failed is the trap, since the render succeeded and only the staging is outstanding.
+
+### One writer per frame
 
 The frame carries no version number. `package.json` is bumped on `main` by the release tooling, and a pull request builds against the merge commit, so an embedded version drifts on every open branch the moment a release lands and the stage then fails for work that touched nothing. Counts have the same shape and are kept, because a catalog change is what the stage exists to catch and the branch that changes a catalog is the one that goes red.
 
@@ -63,4 +73,4 @@ That entry is a folder glob rather than a list of frames. The script writes what
 
 ### An exit 2 with no message
 
-`scripts/core/regen-hero.sh` exits 2 with nothing on stderr on roughly one run in five, reported as `✗ Hero regen failed` inside `bun run check`. The rate, the failing command, and what to do about it sit under `## Hero provenance` in `canon/context/development/gates.md`, beside the stage that reports it, which is the canonical record for this flake rather than a duplicate kept here.
+`scripts/core/regen-hero.sh` intermittently exits 2 with nothing on stderr. `canon/context/development/gates/content-stages.md` holds the record under `## Hero provenance`.

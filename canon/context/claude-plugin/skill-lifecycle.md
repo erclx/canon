@@ -17,7 +17,7 @@ A refusal names the flag in its own message and closes the fallback there, so a 
 
 Prefer pointing a chain step at an unflagged body that already performs the step over dropping the flag from the callee, since dropping a flag reopens a body to description matching its author closed on purpose. `claude/skills/role-orchestrator/references/orchestrator-dispatch.md` carries the launch-prompt form a dispatcher writes, keeping a chain to one leading slash command per launch and handing the rest to the tool.
 
-A harness hook is a third route to a skill, and `session-compact` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
+A harness hook is a third route to a skill, and `session-compact` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks/compaction.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
 
 ## A held body is checked against history
 

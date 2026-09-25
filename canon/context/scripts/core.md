@@ -7,7 +7,7 @@ description: Repo maintenance scripts, the guard stages check fires, and the bar
 
 `scripts/core/` holds repo maintenance: the scripts a contributor runs by `bun run` name and the guard stages `check` fires on every push. Nothing here is a `canon` verb, so the catalog below is the discoverable surface.
 
-What sequences those guards is not here. `bun run check` resolves to `canon gate run`, and the stage table, the changed-file scoping, and every threshold comparison sit in `src/gate/`, described in `canon/context/development/gates.md`. Each check stayed the script it already was, so this folder is what the gate runs rather than what decides when to run it.
+What sequences those guards is not here. `bun run check` resolves to `canon gate run`, and the stage table, the changed-file scoping, and every threshold comparison sit in `src/gate/`, described in `canon/context/development/gates/overview.md`. Each check stayed the script it already was, so this folder is what the gate runs rather than what decides when to run it.
 
 ## The catalog
 
