@@ -15,7 +15,7 @@ A slash command expands as a user invocation only at position zero of a prompt. 
 
 A refusal names the flag in its own message and closes the fallback there, so a refused caller correctly has no route left and stops rather than degrading. It repeats identically on a retry inside the same session.
 
-Prefer pointing a chain step at an unflagged body that already performs the step over dropping the flag from the callee, since dropping a flag reopens a body to description matching its author closed on purpose. `claude/skills/role-orchestrator/references/orchestrator-dispatch.md` carries the launch-prompt form a dispatcher writes, keeping a chain to one leading slash command per launch and handing the rest to the tool.
+Prefer pointing a chain step at an unflagged body that already performs the step over dropping the flag from the callee, since dropping a flag reopens a body to description matching its author closed on purpose. `claude/skills/role-orchestrator/references/orchestrator-launch.md` carries the launch-prompt form a dispatcher writes, keeping a chain to one leading slash command per launch and handing the rest to the tool.
 
 A harness hook is a third route to a skill, and `session-compact` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks/compaction.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
 
