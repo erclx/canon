@@ -63,32 +63,6 @@ A release label reports with or without its leading `v` at three segments, since
 
 Fenced blocks are excluded, which keeps a pinned version in an install command from reading as a claim the entry makes. Frontmatter is excluded with them, since the content checks read the body alone, and that is what keeps a diagram entry's dated `verified` stamp a record of its last check rather than a marker to settle. Length is the exception, counting the whole file, so a reader applying the 150-rendered-line checkpoint against the body alone lands a few lines under what the tool reports.
 
-## Narration
-
-The narration check reports a bullet that states the design a sibling bullet replaced instead of rewriting it. `standards/context.md` asks for the rewrite because the subject is still live and two bullets on one subject leave a reader to work out which of them is current, and no other measure sees that shape.
-
-It reads structure rather than words, which the corpus decided. Measured across the 39 entries this toolkit held the day it shipped, the terms carrying clean signal for a supersession are too rare to catch anything: `superseded` appears twice, `previously` three times, and `formerly`, `originally`, and `at first` never. The one term that would have caught the case a review caught by hand is `now`, which appears 57 times across 24 entries in correct present-tense prose. A list including it reports 57 lines to catch one, and a list excluding it reports nothing.
-
-What it matches instead is a bullet doing three things at once: opening with a pronoun whose antecedent is the bullet above it, carrying a past-tense verb, and following another top-level bullet. All three are required. Eight bullets in the corpus open with a back-reference, and the verb set narrows those to one.
-
-The pronoun is matched cased and anchored to the opening, since a mid-sentence `this` is a determiner rather than a reference back. The verb is matched uncased anywhere in the bullet, and rejected when a copula sits in front of it, since `is used to resolve the folder` is the passive of `use` rather than the past habitual the set means.
-
-Both sets are published under `## Narration pronouns` and `## Narration verbs` in a governance rule and read at run time, so widening either costs a rule edit rather than a TypeScript change. The copula list stays in code, because it is English grammar rather than corpus vocabulary and a rule publishing two of three headings would be another absent state to carry. Discovery keys on the headings rather than the filename, because rules are numbered and a renumber would empty the sets while the check kept reporting clean. A run finding no rule that publishes both says it scanned nothing rather than reporting clean.
-
-A blank line does not end the run. Markdown reads the bullets around one as a single loose list, so a walker that broke there would leave the shape reachable by anyone who spaced their bullets out. What ends a run is content that is neither a bullet nor indented under one, which is what keeps the first bullet under a heading from reading as a reply to the last bullet above it.
-
-A fence answers that test for itself, because every scan here skips a fenced line before reaching it. An unindented fence ends the run, since CommonMark reads one at column zero as interrupting the list and the bullets around it are then two lists with no antecedent crossing between them. A fence indented under its bullet stays inside the item and leaves the run intact.
-
-The opening delimiter decides that for the whole block rather than each line deciding for itself. A blank line inside an indented fence carries no indentation to read, and a content line may sit at column zero inside one because CommonMark strips the fence's own indent and nothing further. Reading either as unindented ends a run that should have continued, which costs findings rather than inventing them, so no corpus count moves when it is wrong.
-
-Two fenced blocks with nothing between them are one contiguous run of fenced lines, so the mark alone cannot say where the first ends. The line walker reports which block each line sits in, and the boundary re-reads indentation whenever that number changes, so an unindented block written directly behind an indented one ends the run rather than inheriting the answer above it. No markdown file this repository tracks holds that shape, because a formatter inserts a blank line between two fences on contact, and a target running these commands over an unformatted tree still can.
-
-Precision is the whole value, so recall is the accepted exposure, and two shapes are knowingly out of reach. A narration written as one bullet carrying its own before and after slips through, and nothing else sees it either. So does the perfect passive, since `has been superseded` narrates a supersession and the copula guard rejects it with the passives it exists for.
-
-A rejected alternative is a back-reference in the past tense by construction, and the standard keeps what was tried and why it lost, so a legitimate hit exists and no measure separates it from a violation. The report states that on every run, which is why the finding names a line to read rather than a line to delete.
-
-The JSON record carries the findings per entry as `entries[].narration` and the sets as `checkpoints.narration`, which is absent under `--citations-only` where the run never loads them and null where no rule publishes both.
-
 ## The architecture record
 
 Four findings read `canon/ARCHITECTURE.md` rather than a folder, and only the first two are facts.
@@ -127,9 +101,9 @@ All three wireframe findings are printed under a bare run. The states-mismatch f
 
 ## Which folders each check reaches
 
-The provenance and narration checks cover `canon/context/` alone, the reference-form check covers the split folders inside it, the required-section check covers `canon/context/` and `canon/wireframes/`, length and the table finding reach every audited folder, and the wireframe states check covers `canon/wireframes/` alone.
+The provenance check covers `canon/context/` alone, the reference-form check covers the split folders inside it, the required-section check covers `canon/context/` and `canon/wireframes/`, length and the table finding reach every audited folder, and the wireframe states check covers `canon/wireframes/` alone.
 
-What narrows the first two is stated in `standards/context.md`, which opens its scope by handing diagrams and wireframes to `diagrams.md` and `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere, and a diagram entry carries a heading per kind rather than a run of bullets deciding anything. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
+What narrows the provenance check is stated in `standards/context.md`, which opens its scope by handing diagrams and wireframes to `diagrams.md` and `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
 
 Length and the table finding generalize as judgments about how far a reader travels, so both reach wherever the audit is pointed. Required sections narrow for a plainer reason: each list is one standard's own, so it reaches the folder that standard governs. The context and wireframe standards each state a set, and the diagram standard states none.
 

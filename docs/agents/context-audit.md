@@ -41,7 +41,7 @@ Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating find
 
 `bun run check` in the toolkit repository reads both limits through its own Architecture record stage rather than through this verb, since the verb's only gating stage there runs `--citations-only` and never opens the record.
 
-Entry length, reference form, table, provenance, narration, the record's claim classification, and every word figure print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around. Narration is the weakest of the printed measures, since whether two bullets share a subject is a call the measure approximates from structure alone, and one of the shapes it matches is the rejected alternative the standard asks an entry to keep.
+Entry length, reference form, table, provenance, the record's claim classification, and every word figure print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around.
 
 Required-section, index, and wireframe-states findings sit between the two. All three are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. Sketch-with-evidence sits with the printed measures instead, for the reason `context-audit-checks.md` states: it reads a whole entry against whether any of its states has evidence, not one layout against its own evidence, so a conforming file can still trip it. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
 
