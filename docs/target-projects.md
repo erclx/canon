@@ -225,7 +225,7 @@ The report opens by naming the binary running it. The installed version reads ag
 
 #### Then the causes
 
-A `stale` file still matches what the toolkit installed, so the update is mechanical. A `customized` file carries local edits, so taking the upstream version is a decision and `canon:seed-sync` is the tool for it. A `stranded` file sits where an older toolkit installed it and the toolkit has since moved, which is a relocation the report names but no command runs. A `retired` rule is one under `.claude/rules/canon/` the toolkit no longer ships, and the next `canon gov sync` deletes it.
+A `stale` file still matches what the toolkit installed, so the update is mechanical. A `customized` file carries local edits, so taking the upstream version is a decision and `canon:seed-sync` is the tool for it. A `stranded` file sits where an older toolkit installed it and the toolkit has since moved, which is a relocation the report names but no command runs. A `retired` rule is one under `.claude/rules/canon/` the toolkit no longer ships, and the next `canon gov sync` deletes it. A `renamed` rule is one the toolkit now ships under a new name, and the next sync installs the new name and deletes the old file.
 
 That attribution comes from `canon/config/config.json`, which every install and sync now writes, falling back to `.claude/canon/config.json` for a target stamped before that move. A target stamped before that path shipped is read from the retired `.claude/canon.json` instead, reported rather than migrated. Governance records a hash per installed file, plus the stack `canon gov install` was given, and tooling records the stack chain it resolved instead of any file hash, since its install runs no per-file walk to attribute.
 

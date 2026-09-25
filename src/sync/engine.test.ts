@@ -451,6 +451,144 @@ describe('planSync on a root the toolkit owns', () => {
   })
 })
 
+describe('planSync on a declared rename', () => {
+  const OLD_RULE = join('.claude', 'rules', 'core', '505-old.md')
+  const OTHER_OLD_RULE = join('.claude', 'rules', 'core', '506-older.md')
+  const NEW_RULE = join('.claude', 'rules', 'code', '510-new.md')
+
+  const renaming = (): SyncAdapter =>
+    createAdapter({
+      ownsInstalledRoot: true,
+      stamp: { domain: 'governance', toolkitRoot: ROOT },
+      locateSource: (file) =>
+        file.relToRoot === 'code/510-new.md'
+          ? join(SOURCE, 'code', '510-new.md')
+          : undefined,
+      locateSuccessor: (file) =>
+        file.relToRoot === 'core/505-old.md' ||
+        file.relToRoot === 'core/506-older.md'
+          ? {
+              source: join(SOURCE, 'code', '510-new.md'),
+              dest: join(TARGET, NEW_RULE),
+            }
+          : undefined,
+    })
+
+  function writeStampVersion(version: string): void {
+    writeFixture(
+      join(TARGET, '.claude/canon/config.json'),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: {
+          governance: { version, syncedAt: 'then', files: {} },
+        },
+      }),
+    )
+  }
+
+  it('should classify a file with a declared successor as renamed', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+    writeStampFixture('governance', {
+      [OLD_RULE]: hashContent('shipped once\n'),
+    })
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.entries).toEqual([
+      {
+        state: 'renamed',
+        rel: OLD_RULE,
+        notice: `${OLD_RULE} (renamed to ${NEW_RULE} by the toolkit, moving)`,
+      },
+    ])
+  })
+
+  it('should queue a copy to the new name and a delete of the old file', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.changes).toEqual([
+      {
+        kind: 'copy',
+        source: join(SOURCE, 'code', '510-new.md'),
+        dest: join(TARGET, NEW_RULE),
+        rel: NEW_RULE,
+      },
+      { kind: 'delete', dest: join(TARGET, OLD_RULE), rel: OLD_RULE },
+    ])
+  })
+
+  it('should name the dropped edits when the stamp shows the old file was edited', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'edited by the project\n')
+    writeStampFixture('governance', {
+      [OLD_RULE]: hashContent('shipped once\n'),
+    })
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.entries[0].notice).toBe(
+      `${OLD_RULE} (renamed to ${NEW_RULE} by the toolkit, moving. Local edits were not carried.)`,
+    )
+  })
+
+  it('should hedge on dropped edits when no stamp covers the old file', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.entries[0].notice).toBe(
+      `${OLD_RULE} (renamed to ${NEW_RULE} by the toolkit, moving. Any local edits were not carried.)`,
+    )
+  })
+
+  it('should only delete the old file when the new name is already installed', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+    writeFixture(join(TARGET, NEW_RULE), 'shipped now\n')
+    writeFixture(join(SOURCE, 'code', '510-new.md'), 'shipped now\n')
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.changes).toEqual([
+      { kind: 'delete', dest: join(TARGET, OLD_RULE), rel: OLD_RULE },
+    ])
+  })
+
+  it('should copy once when two old files resolve to one new name', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+    writeFixture(join(TARGET, OTHER_OLD_RULE), 'shipped before\n')
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.changes.map((change) => [change.kind, change.rel])).toEqual([
+      ['copy', NEW_RULE],
+      ['delete', OLD_RULE],
+      ['delete', OTHER_OLD_RULE],
+    ])
+  })
+
+  it('should hold a renamed file orphaned when a newer binary installed the domain', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+    writeStampVersion('999.0.0')
+
+    const plan = planSync(renaming(), TARGET)
+
+    expect(plan.entries[0].state).toBe('orphaned')
+    expect(plan.changes).toEqual([])
+  })
+
+  it('should retire the file when the adapter declares no successor lookup', () => {
+    writeFixture(join(TARGET, OLD_RULE), 'shipped once\n')
+
+    const plan = planSync(
+      createAdapter({ ownsInstalledRoot: true, locateSource: () => undefined }),
+      TARGET,
+    )
+
+    expect(plan.entries[0].state).toBe('retired')
+  })
+})
+
 describe('planSync attribution', () => {
   const stamped = (): SyncAdapter =>
     createAdapter({ stamp: { domain: 'governance', toolkitRoot: ROOT } })

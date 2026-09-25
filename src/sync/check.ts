@@ -4,6 +4,7 @@ import { execa } from 'execa'
 import { gitEnv } from '@/git-env'
 import { createDesignAdapter, DESIGN_INSTALL_DIR } from '@/design/adapter'
 import { createGovAdapter, rulesSourceDir } from '@/gov/adapter'
+import { successorResolver } from '@/gov/renames'
 import { loadGovStack, resolveMissingRules, resolveRules } from '@/gov/stacks'
 import { planSync, type ScanEntry, type SyncAdapter } from '@/sync/engine'
 import {
@@ -80,6 +81,7 @@ export interface StateCounts {
   readonly stranded: number
   readonly missing: number
   readonly retired: number
+  readonly renamed: number
 }
 
 export interface DomainReport {
@@ -316,6 +318,7 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
     stranded: count(entries, 'stranded'),
     missing: count(entries, 'missing'),
     retired: count(entries, 'retired'),
+    renamed: count(entries, 'renamed'),
   }
 }
 
@@ -347,6 +350,8 @@ export function countStates(entries: readonly ScanEntry[]): StateCounts {
  *
  * `retired` counts, since a sync deletes it mechanically. A target's CI goes
  * red the day a release retires a rule it holds, and one sync clears it.
+ * `renamed` counts on the same grounds, since the sync that moves it is
+ * equally mechanical.
  */
 export function hasDrift(report: CheckReport): boolean {
   if (report.unmigrated.length > 0) return true
@@ -357,7 +362,8 @@ export function hasDrift(report: CheckReport): boolean {
         domain.counts.customized +
         domain.counts.drifted +
         domain.counts.stranded +
-        domain.counts.retired >
+        domain.counts.retired +
+        domain.counts.renamed >
       0,
   )
 }
@@ -488,8 +494,14 @@ export function parseNewSkills(paths: string): string[] {
  * chain a target consumed survives nowhere else. `installRules` copies each
  * rule into the subdirectory it was authored in, which is what makes the band
  * folders legible as evidence.
+ *
+ * `successorOf` adds the name a held rule was renamed to, which the next sync
+ * installs, so the fallback does not report it as new.
  */
-export function readInstalledRules(target: string): {
+export function readInstalledRules(
+  target: string,
+  successorOf?: (name: string) => string | undefined,
+): {
   held: Set<string>
   bands: Set<string>
 } {
@@ -506,7 +518,10 @@ export function readInstalledRules(target: string): {
     const posix = rel.split(sep).join('/')
     const boundary = posix.indexOf('/')
 
-    held.add(basename(posix, '.md'))
+    const name = basename(posix, '.md')
+    held.add(name)
+    const successor = successorOf?.(name)
+    if (successor !== undefined) held.add(successor)
     if (boundary > 0) bands.add(posix.slice(0, boundary))
   }
 
@@ -640,7 +655,7 @@ export async function readNewRules(
     'governance/rules/',
   ])
 
-  const { held, bands } = readInstalledRules(target)
+  const { held, bands } = readInstalledRules(target, successorResolver(root))
   return selectNewRules(paths, held, bands.union(baseBands(root)))
 }
 

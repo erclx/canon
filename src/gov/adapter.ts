@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
-import { canonRulesDir } from '@/gov/install'
+import { canonRulesDir, ruleSubdir } from '@/gov/install'
+import { loadRenames, resolveSuccessor } from '@/gov/renames'
 import { resolveMissingRules } from '@/gov/stacks'
 import type { InstalledFile, RetiredSurface, SyncAdapter } from '@/sync/engine'
 import { readStamp, stampedChain } from '@/sync/stamp'
@@ -49,11 +50,14 @@ export function indexSourceRules(root: string): Map<string, string> {
  * `.claude/rules/canon/` leaves outside the walk, so everything the walk does
  * reach is the toolkit's. A rule there with no source is one the toolkit
  * retired or renamed, and the sync deletes it rather than leaving it loaded.
+ * A rename `governance/renames.toml` declares also installs the rule under its
+ * new name.
  * A `projectSubdir` would compute a stale `canon/project/` destination, which
  * is wrong rather than merely redundant.
  */
 export function createGovAdapter(root: string): SyncAdapter {
   const index = indexSourceRules(root)
+  const renames = loadRenames(root)
 
   return {
     banner: 'canon gov sync',
@@ -67,8 +71,54 @@ export function createGovAdapter(root: string): SyncAdapter {
     collectRetired: (target: string) => collectRetiredGov(target),
     collectMissing: (target: string) => collectMissingGov(root, target),
     ownsInstalledRoot: true,
+    locateSuccessor: (file: InstalledFile, target: string) => {
+      const successor = resolveSuccessor(
+        renames,
+        index,
+        basename(file.path, '.md'),
+      )
+      if (successor === undefined) return undefined
+
+      const source = index.get(successor)
+      if (source === undefined) return undefined
+
+      return {
+        source,
+        dest:
+          heldRulePath(target, successor) ??
+          join(
+            canonRulesDir(target),
+            ruleSubdir(source, rulesSourceDir(root)),
+            `${successor}.md`,
+          ),
+      }
+    },
     stamp: { domain: 'governance', toolkitRoot: root },
   }
+}
+
+/**
+ * Where the target already holds a rule, in whichever band folder. A
+ * successor held outside the source's band stays where it is, the same way
+ * `locateSource` syncs a moved rule in place, rather than gaining a second copy.
+ *
+ * Holding the predecessor is the whole entitlement test, so no stamped chain
+ * is read here. That covers a rule `--add` layered on and a target installed
+ * before chains were stamped alike.
+ */
+function heldRulePath(target: string, rule: string): string | undefined {
+  const dir = canonRulesDir(target)
+  if (!existsSync(dir)) return undefined
+
+  for (const rel of new Bun.Glob(`**/${rule}.md`).scanSync({
+    cwd: dir,
+    onlyFiles: true,
+    dot: true,
+  })) {
+    return join(dir, rel)
+  }
+
+  return undefined
 }
 
 /**

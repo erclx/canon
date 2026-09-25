@@ -1,0 +1,13 @@
+# Rule renames a sync carries a target across. Each key under [renamed] is an
+# old rule basename and its value the basename the same rule ships under now,
+# so `canon gov sync` replaces a held old file with the rule under its new name
+# rather than only deleting it.
+#
+# An entry declares one-to-one identity and nothing else. A fold of several
+# rules into one, or a split of one into several, is a retirement plus an
+# addition and takes no entry here. Add the entry in the same change as the
+# rename or renumber, and never prune one: a target can sit any number of
+# releases behind, and a chain A to B to C resolves A only while both links
+# stay. A key must name no live rule and every chain must end on one, which
+# `src/gov/renames.test.ts` checks against this file.
+[renamed]

@@ -272,6 +272,7 @@ describe('countStates', () => {
       { state: 'stranded', rel: 'g.md' },
       { state: 'missing', rel: 'h.md' },
       { state: 'retired', rel: 'i.md' },
+      { state: 'renamed', rel: 'j.md' },
     ])
 
     expect(counts).toEqual({
@@ -283,6 +284,7 @@ describe('countStates', () => {
       stranded: 1,
       missing: 1,
       retired: 1,
+      renamed: 1,
     })
   })
 
@@ -296,6 +298,7 @@ describe('countStates', () => {
       stranded: 0,
       missing: 0,
       retired: 0,
+      renamed: 0,
     })
   })
 })
@@ -331,6 +334,12 @@ describe('hasDrift', () => {
 
   it('should report drift for a file the toolkit no longer ships', () => {
     expect(hasDrift(buildReport([{ state: 'retired', rel: 'a.md' }]))).toBe(
+      true,
+    )
+  })
+
+  it('should report drift for a file the toolkit renamed', () => {
+    expect(hasDrift(buildReport([{ state: 'renamed', rel: 'a.md' }]))).toBe(
       true,
     )
   })
@@ -659,6 +668,21 @@ describe('readNewRules', () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base')
     authorRule(join('ui', '400-ui.md'), 'add ui')
     install(join('core', '000-constitution.md'))
+
+    await expect(
+      readNewRules(TOOLKIT, TARGET, commitStamp(anchor)),
+    ).resolves.toEqual([])
+  })
+
+  it('should omit the new name of a rule the target holds under its old one', async () => {
+    const anchor = authorRule(join('core', '000-constitution.md'), 'base')
+    authorRule(join('core', '510-new.md'), 'rename 505-old to 510-new')
+    writeFileSync(
+      join(TOOLKIT, 'governance', 'renames.toml'),
+      '[renamed]\n"505-old" = "510-new"\n',
+    )
+    install(join('core', '000-constitution.md'))
+    install(join('core', '505-old.md'))
 
     await expect(
       readNewRules(TOOLKIT, TARGET, commitStamp(anchor)),

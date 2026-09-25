@@ -19,10 +19,13 @@ removes a stale `.claude/GOV.md` from the retired build. Use
 
 Everything under `.claude/rules/canon/` belongs to the toolkit, so a rule
 there that the toolkit no longer ships is deleted on sync, edited or not. That
-is how a retired or renamed rule stops loading in a target. The sync lists each
-deletion by path before it applies, and the target's git diff is the record
-afterwards. `canon sync --check` lists the same file as `retired` before any
-sync runs. A project's own rules belong under `.claude/rules/project/`, where
+is how a retired rule stops loading in a target. A renamed or renumbered rule
+the toolkit declares in `governance/renames.toml` moves instead: the sync
+installs the rule under its new name and deletes the old file, whether or not
+the target's stamp records a stack. Local edits to the old file are not
+carried, and the sync says so. The sync lists each change by path before it
+applies, and the target's git diff is the record afterwards. `canon sync
+--check` lists the same file as `retired` or `renamed` before any sync runs. A project's own rules belong under `.claude/rules/project/`, where
 `canon standards rule` reserves `900-999` for them, and a rule placed under
 `canon/` instead is lost on the next sync.
 
@@ -164,9 +167,11 @@ matches what the toolkit installed, `customized` when the project edited it,
 `stranded` when it sits at a path the toolkit no longer installs to, `orphaned`
 when the project authored it, or `drifted` when no stamp covers it. Governance
 also reports `missing`, for a rule the target's recorded stack lists that its
-tree does not hold at all, and `retired`, for a rule under
+tree does not hold at all, `retired`, for a rule under
 `.claude/rules/canon/` the toolkit no longer ships, which the next sync
-deletes. A `retired` file counts toward `--exit-code`, since one sync clears it.
+deletes, and `renamed`, for one the toolkit ships under a new name, which the
+next sync moves. A `retired` or `renamed` file counts toward `--exit-code`,
+since one sync clears it.
 
 Use `--json` for the machine-readable report and `--exit-code` to fail a CI job. Orphaned
 and missing files are both excluded from that exit code: a project-authored
