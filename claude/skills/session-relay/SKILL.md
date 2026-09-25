@@ -1,6 +1,6 @@
 ---
 name: session-relay
-description: Relays a message to another session, turning the sessionId the caller named into an address at the moment of sending and composing a copyable block where no send tool exists. Use when asked to "relay this", "message the controller", "send this over to the session that dispatched me", or "tell the other session", with or without a role. Do NOT use to decide what the message says, and do NOT use to assert what a session may write or is on the hook for, which is `role-worker` or `role-planner`.
+description: Relays a message to another session, turning the sessionId the caller named into an address at the moment of sending and composing a copyable block where no send tool exists. Use when asked to "relay this", "message the controller", "send this over to the session that dispatched me", or "tell the other session", with or without a role, and when a session stuck on a question owes the session that dispatched it a message before it stops to ask. Do NOT use to decide what the message says, and do NOT use to assert what a session may write or is on the hook for, which is `role-worker` or `role-planner`.
 ---
 
 # Session relay
@@ -14,7 +14,9 @@ own `## The channel` section where the session holds a role.
 
 It fires for a session holding a role and for one holding none. A roleless
 session reaches this body directly and finds everything it owes stated here,
-rather than reading a ladder written for a role it does not have.
+rather than reading a ladder written for a role it does not have. No rule and
+no other skill carries the send mechanics or the timing of a block against a
+prompt, so this body is the only place either is stated.
 
 ## Step 1: name the sender
 
@@ -77,11 +79,6 @@ Send the block out as a message before it becomes an interactive prompt. A
 session already waiting on input never reaches the tool round that drains an
 inbound message, so an answer relayed afterwards arrives under the open question
 and changes nothing. This holds on both routes.
-
-The shipped channel rule states the same thing for a session holding neither
-role, so the restatement here is for the target that installed the plugin and
-not governance, where that rule never arrives. A session that does load it reads
-the rule and this body in agreement rather than one of them alone.
 
 Carry the message body verbatim from whatever names it. This skill composes and
 never drafts, so a pull request announcement, an address-review announcement, or
