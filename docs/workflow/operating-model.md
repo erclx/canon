@@ -263,4 +263,4 @@ port-collision detail.
 
 - [Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md) for the isolation and fan-out mechanics
 - [Claude Code subagents](../../wiki/claude/claude-subagents.md) for in-session parallelism without worktrees
-- `canon/context/claude-plugin/skill-strategy.md` for how the skills in the loop are categorized
+- `canon/context/claude-plugin/skill-strategy/overview.md` for how the skills in the loop are categorized

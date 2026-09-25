@@ -150,7 +150,7 @@ Resist over-tiering early. Moving up is cheap because tiers stack. Moving down m
 ## References
 
 - [Claude Design](../../wiki/claude/claude-design.md): first-party hosted design product and handoff bundle
-- `canon/context/claude-plugin/skill-strategy.md`: how to decide between workflow and domain-knowledge skills
+- `canon/context/claude-plugin/skill-strategy/overview.md`: how to decide between workflow and domain-knowledge skills
 - [`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp): browser automation MCP used in tier 1 and tier 2
 - [`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp): live frontend debugging MCP used in tier 1 and tier 2
 - [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 wireframe companion

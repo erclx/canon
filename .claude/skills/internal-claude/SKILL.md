@@ -10,7 +10,7 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 ## Editing rules
 
 - When updating an internal skill, write to `{base-dir}/SKILL.md` where `{base-dir}` is the path shown in the skill header at load time.
-- Read `canon/context/claude-plugin/skill-strategy.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one. Run `canon claude skills list` for the plugin roster, which no entry restates.
+- Read `canon/context/claude-plugin/skill-strategy/overview.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one. Run `canon claude skills list` for the plugin roster, which no entry restates.
 - Follow `standards/skill.md` for skill structure and frontmatter conventions.
 - Audit skill bodies against `standards/skill.md`, `standards/markdown.md`, and the `write-human` skill. The first covers structure and frontmatter. The second covers the body's word choice, punctuation, and formatting. The third covers its voice and rhythm.
 
@@ -18,7 +18,7 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 
 - Write a new skill only when it encodes workflow specific to this toolkit or a convention the author consistently applies. The test: would this same skill be invoked on every target project the author owns?
 - Install a community skill rather than writing one when the need is domain expertise the toolkit does not maintain, such as frontend design, security audits, or stack-specific patterns. Reference it in per-tier install recommendations rather than absorbing it.
-- Do not fork a community skill. Propose a thin toolkit wrapper that composes the upstream one, and fork only when upstream diverges hard from a stated need and the maintenance cost is accepted explicitly. See `canon/context/claude-plugin/skill-strategy.md` for the reasoning and the redundancy audit.
+- Do not fork a community skill. Propose a thin toolkit wrapper that composes the upstream one, and fork only when upstream diverges hard from a stated need and the maintenance cost is accepted explicitly. See `canon/context/claude-plugin/skill-strategy/overview.md` for the reasoning and `canon/context/claude-plugin/skill-strategy/redundancy-audit.md` for the redundancy audit.
 - Task skills with preview+execute patterns must execute commands immediately after the preview. Do not add a "confirm before running" step or pause for user input. Claude Code's tool permission dialog is the confirmation gate. The user hits Enter to approve or Escape to interrupt and revise.
 - When a skill persists output to `.claude/` (plans, review, audits), follow `standards/slug.md`. Cite that standard from the skill body and state which empty-case the skill takes, rather than restating the derivation.
 - Never reference a repo-local path such as `wiki/` from a file under `claude/skills/`. It resolves to nothing in a target project, and the Skill paths stage of `bun run check` fails on it.
@@ -46,8 +46,8 @@ When adding a new skill:
 - Add a row to the skill's group in `docs/workflow/ai-workflow.md`'s Skills table. Every name `canon claude skills list --names` reports takes exactly one row there, per that file's own coverage rule.
 - Draft a `scripts/sandbox/<category>/<skill>.sh` scenario alongside `SKILL.md`, even when the skill's output is judgment-driven. The deterministic seeded input is the point. Exception: skills whose body explicitly forbids probing, listing, grepping, or reading project surfaces have nothing for a seeded sandbox to anchor against. Skip the scenario for these and do not list it as a follow-up.
 - `canon sandbox <cat:cmd>` provisions fixture state, and `scripts/sandbox/run.sh <cat:cmd> "<prompt>"` provisions the same tree and drives the arm, spawning `claude -p` and scoring its assertions. Authorizing the spend is the operator's call, performing it is not, matching `canon/context/scripts/eval.md`. "Sandbox cannot drive Claude" is not a reason to skip one, because it can.
-- `src/claude/cases/all.test.ts` requires a routing case for the new skill in one of `src/claude/cases/*.ts`, or `bun run check` fails naming the skill rather than this step. See `canon/context/claude-plugin/skill-procedures.md` for why.
-- Once the skill count changes, the Hero gate stage fails until `scripts/core/regen-hero.sh` runs and `canon capture assets/captures --selector .window --out assets/evidence` re-renders the frame. Commit the markup, the image, and the stamp together. See `canon/context/claude-plugin/skill-procedures.md` for why.
+- `src/claude/cases/all.test.ts` requires a routing case for the new skill in one of `src/claude/cases/*.ts`, or `bun run check` fails naming the skill rather than this step. See `canon/context/claude-plugin/skill-procedures/overview.md` for why.
+- Once the skill count changes, the Hero gate stage fails until `scripts/core/regen-hero.sh` runs and `canon capture assets/captures --selector .window --out assets/evidence` re-renders the frame. Commit the markup, the image, and the stamp together. See `canon/context/claude-plugin/skill-procedures/overview.md` for why.
 
 When modifying a skill:
 

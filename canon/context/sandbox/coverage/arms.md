@@ -122,7 +122,7 @@ A scenario staging a subdirectory read inside its own script is the other mechan
 
 `claude/review-pr.sh`'s `repeat-close-out` arm seeds a `## Review`, then a `## Review closed`, then one commit that raises nothing, which is the state a pass has to meet without posting a second close-out. The local file proves a body was written under `## Review closed` naming what the pass covered. Whether a second close-out was posted beside the standing one is the shape of a remote thread, which no assertion kind reads, so four entries sit in `manual` and are confirmed through the pull request's review API.
 
-A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the field `review-pr` Step 2 and `poll.sh` derive a prior commit from goes stale when the guard fires. `canon/context/claude-plugin/skill-review.md` holds why that cost stands.
+A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the field `review-pr` Step 2 and `poll.sh` derive a prior commit from goes stale when the guard fires. `canon/context/claude-plugin/skill-review/two-pass.md` holds why that cost stands.
 
 ## UX walkthrough
 

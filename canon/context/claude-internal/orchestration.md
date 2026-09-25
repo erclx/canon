@@ -349,7 +349,7 @@ Marking a pull request a draft and reading the flag back are two separate calls,
 
 ### The expansion trial's citations
 
-The expansion-route findings `orchestrator-dispatch.md` states without a number are grounded in a trial rather than asserted from reasoning alone. The dispatch-to-address-a-review case is narrated in full under `canon/context/claude-plugin/skill-review.md`'s channel section.
+The expansion-route findings `orchestrator-dispatch.md` states without a number are grounded in a trial rather than asserted from reasoning alone. The dispatch-to-address-a-review case is narrated in full under the channel section of `canon/context/claude-plugin/skill-review/worker.md`.
 
 ### A plan's Files to touch can assume an answer its own Questions section has not given yet
 
