@@ -20,6 +20,7 @@ Sessions also write the wrong thing into a handoff. They restate the tree, which
 - Carry a stated shape for the note, so what belongs in it is not re-derived per session.
 - Require a citation for every claim, and a rejected alternative beside every decision.
 - Decline in one line where the session holds nothing a compaction would destroy.
+- Name `canon records push` then `canon sessions export` in the report when the caller asked to move the session to another machine, since this is the step a session takes before it moves and no other skill names either verb.
 
 ## Must not
 
@@ -34,7 +35,7 @@ Sessions also write the wrong thing into a handoff. They restate the tree, which
 - No repository is required. The slug comes from the work, so a session outside git still writes a note.
 - `.canon/` resolves at the main worktree root. From a linked worktree the write goes through the shell, since the file-editing tools refuse that path.
 - Decline rather than pad. A note a reader finds is a note a reader trusts.
-- The note is backed up by `canon records push`, which carries every top-level `.canon/` folder, and the push is a run someone makes. Until it runs, or where no remote is configured, the note sits on one disk. The skill's report does not say so, since it would restate a run the operator owns on every note.
+- The note is backed up by `canon records push`, which carries every top-level `.canon/` folder, and the push is a run someone makes. Until it runs, or where no remote is configured, the note sits on one disk. The skill's report does not say so on an ordinary note, since it would restate a run the operator owns on every note. A caller who named a move is the exception, because the push is then the step the move depends on rather than a reminder, and the line prints on that report alone.
 
 ## Out of scope
 
