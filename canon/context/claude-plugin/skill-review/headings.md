@@ -13,7 +13,7 @@ Coupling the heading to the pass number instead reads wrong whenever a later pas
 
 Sharing a prefix across that family is why the detection matches the first line for equality rather than testing a prefix. A prefix test also accepts `## Review response`, and it is safe only because `review-address` posts through `gh pr comment`, which lands in `.comments` and never in `.reviews`. An equality test costs the same and owes nothing to a sibling's choice of command.
 
-A finding withdrawn on a reply's argument leaves that count too, so a pass withdrawing every finding it carried reads as a close-out while still owing a body the short close-out line cannot carry, since that line credits a fix nobody made. `canon/context/claude-internal/orchestration.md` holds why a reply reaches the thread at all and which class of reply stays off it.
+A finding withdrawn on a reply's argument leaves that count too, so a pass withdrawing every finding it carried reads as a close-out while still owing a body the short close-out line cannot carry, since that line credits a fix nobody made. `canon/context/claude-internal/orchestration/review.md` holds why a reply reaches the thread at all and which class of reply stays off it.
 
 ## The full set, stated once
 
