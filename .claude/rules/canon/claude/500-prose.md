@@ -12,4 +12,4 @@ paths:
 - Load it before drafting a passage, not after revising one.
 - Report it rather than proceeding silently when the skill does not resolve.
 - Do not work these rules from memory.
-- Banned words, spellings, punctuation, formatting, and file references are a separate topic. `501-markdown` routes them.
+- Punctuation, formatting, and file references are a separate topic. `501-markdown` routes them.
