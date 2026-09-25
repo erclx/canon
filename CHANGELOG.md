@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.118.0](https://github.com/erclx/canon/compare/v4.117.0...v4.118.0) (2026-09-25)
+
+
+### Features
+
+* **context:** retire the narration check ([#1889](https://github.com/erclx/canon/issues/1889)) ([5bcf591](https://github.com/erclx/canon/commit/5bcf5910a9dffd17aa0e8327a0c914255dedff17))
+* **gate:** fail a push on dated provenance in a skill body ([#1885](https://github.com/erclx/canon/issues/1885)) ([4f7cde4](https://github.com/erclx/canon/commit/4f7cde48a69aded01c7a7b2b343690f3e4b6dec3))
+* **governance:** narrow the degradation vocabulary to four markers ([#1888](https://github.com/erclx/canon/issues/1888)) ([0600ce1](https://github.com/erclx/canon/commit/0600ce105850dd456d808279ce6331e999a1a08a))
+* **governance:** trim always-on rules to what no other surface carries ([#1890](https://github.com/erclx/canon/issues/1890)) ([fa58bdd](https://github.com/erclx/canon/commit/fa58bdd87897a8bc4151e3fb3720913ee8362722))
+* **records:** require verification and review focus in a plan ([#1891](https://github.com/erclx/canon/issues/1891)) ([886eeae](https://github.com/erclx/canon/commit/886eeaee0bbfa78ba87531fff5ebab3d3c14e139))
+* **sync:** delete a rule the toolkit no longer ships ([#1892](https://github.com/erclx/canon/issues/1892)) ([031015f](https://github.com/erclx/canon/commit/031015ffd436161994779ed7f5a13929bd7ecc34))
+
 ## [4.117.0](https://github.com/erclx/canon/compare/v4.116.0...v4.117.0) (2026-09-25)
 
 
