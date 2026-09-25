@@ -324,7 +324,7 @@ Add a line when the evidence step posted the local link:
 
 `🖥️ Local preview: <url>`
 
-Add a line instead when the local step refused as `no-server` or `no-listener-reader` and the evidence or checklist step posted something, since that pull request changes a rendered surface and a reviewer could have used the link. Start the server and run `git-followup` to add it:
+Add a line instead when the local step refused as `no-server` or `no-listener-reader` and the evidence or checklist step posted something, since that pull request changes a rendered surface and a reviewer could have used the link. To add it later, start the server, run `canon pr local --json`, then run `canon pr evidence <number> --local <url> --json`, adding `--checklist` when one is still owed, and post the body the way the evidence step does. `git-followup` only carries a line forward, so it cannot add one the comment never had:
 
 `🖥️ No local preview: <reason>`
 
