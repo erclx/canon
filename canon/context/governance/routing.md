@@ -69,7 +69,9 @@ A rule with no `paths:` key arrives unconditionally, so the argument runs harder
 
 #### Rules that always load
 
-`core/091-channel.md` states only what a session holding neither worker nor planner role carries nowhere else, and points at the two role bodies' own addressee ladders rather than restating them. No glob exists for a session's own role, so it loads into every session in every governed target, and an inert rule where nobody relays is the accepted cost. `session-relay` also carries the mechanical send for any session that invokes it, and the rule still answers for a session that never does and for a target holding governance without the plugin.
+No rule carries the channel between sessions. `session-relay` owns the send and the timing of a block against a prompt, and each role body and each dispatch states only which message it owes. A core rule once stated the addressing and the timing for a session holding neither worker nor planner role, loading into every session in every governed target since no glob exists for a session's own role. It pointed that session at two role ladders it did not hold and never named the relay, and the operator retired it in intake 118.
+
+The retirement is a stated exception to the cut test under "What an always-loaded bullet has to carry alone" below. A project installing governance without the plugin receives no surface carrying block-before-prompt, so a roleless session there goes without it. The operator accepted that cost over a rule paying its bytes in every session of every governed target.
 
 `090-code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes `## Degradation vocabulary`. Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`. Discovery anchors on the heading rather than the filename, so a renumber cannot empty the list.
 
@@ -87,7 +89,7 @@ They govern different moments. The constitution ranks options a session is alrea
 
 ### What an always-loaded bullet has to carry alone
 
-An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `015-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source.
+An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `015-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. The retirement recorded under "Rules that always load" above is the one cut this test would refuse, taken by the operator's choice rather than by the test.
 
 Three always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
 
