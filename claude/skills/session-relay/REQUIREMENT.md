@@ -39,6 +39,12 @@ role and a send tool was refused too, which left the resolution ladder
 duplicated in both role bodies for the ordinary case. Both guards came off
 together, since the mechanics are the same whichever route carries the text.
 
+No governance rule carries the addressing or the reason for the order, so this
+body is the only surface stating either for a session holding neither role. A
+project that installs governance without the plugin therefore gets no surface
+telling a roleless session to send before it prompts, a cost the operator
+accepted over a rule loading into every session of every governed target.
+
 ## Must
 
 - Fire for any session sending to another session, with or without a role and with or without a message-sending tool
@@ -46,7 +52,7 @@ together, since the mechanics are the same whichever route carries the text.
 - Resolve the addressee from a `sessionId` or a branch at the moment of sending, never by a name prefix
 - Check the resolved name against the agent listing, sending it bare under a single row and completing it with the `[ref]` under more than one
 - Send through a message-sending tool where one exists, and compose the copyable block where none does or where the listing carries no row to address
-- State block-before-prompt, since the shipped channel rule carrying it for a session holding neither role reaches only a target that installed governance
+- State why a block goes out before a prompt as the only surface carrying that reason, since no rule carries it and a caller restating the reason drifts from this body with nothing comparing them, while each caller still states that the message is owed
 - Carry the message body verbatim from whatever names it
 - Open the composed text with a header naming the sender, the addressee, and what the message is
 - State the header as a default a session may write around, rather than a fixed vocabulary

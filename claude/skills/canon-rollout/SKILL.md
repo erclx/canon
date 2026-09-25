@@ -104,11 +104,11 @@ One session, one target, from the worktree entry to the merge of the branch it o
 3. Check what this target holds. Invoke `canon:target-check`, which reports per domain what the target carries against what the toolkit ships and repairs nothing. It runs before any repair so the wave reads one stated set of domains per target rather than whatever each session decided to examine.
 4. Diagnose and repair. Invoke `canon:canon-operator`, which reads `canon sync --check . --json` and routes each finding to the command or the skill that owns it. Do not restate that routing here and do not edit a managed file by hand.
 5. Commit and open the pull request through `canon:git-commit` and `canon:git-pr`, handing each the fixed shape above rather than taking the title the generator derives from the diff.
-6. Announce as the pull request opens, carrying its URL, its number, and the branch, to whoever dispatched this session. That transition is the one moment only this session can observe.
+6. Announce as the pull request opens, carrying its URL, its number, and the branch, to whoever dispatched this session, sending it through `canon:session-relay`. That transition is the one moment only this session can observe.
 7. Answer the review. Invoke `canon:review-address`, which pulls the findings and the CI state on this branch's open pull request, fixes each in the working tree, replies, and pushes. Answer every finding whatever its severity.
 8. Stop there. Do not mark the pull request ready, do not merge, and do not declare the review closed. A narrow re-review posts `## Review closed`.
 
-Send a block out as a message before it becomes an interactive prompt. A session already waiting on input never reaches the tool round an inbound message drains at, so an answer relayed afterwards arrives under the open question and changes nothing.
+Send a block out through `canon:session-relay` before it becomes an interactive prompt, which states why the order matters.
 
 Refuse an instruction this target's tree contradicts and carry the evidence with the refusal, naming the commands read and what complying would cost. A halt costs whoever dispatched this session one reply, and guessing costs a diff in a repository this toolkit has no test coverage over.
 

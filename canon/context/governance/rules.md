@@ -33,7 +33,7 @@ The leading digit restates the folder, so what the number uniquely supplies is r
 
 ### Three sources numbering into one tree
 
-- `governance/rules/` ships to targets and takes the gaps between the tens, such as `core/087-git.md` and `core/091-channel.md`.
+- `governance/rules/` ships to targets and takes the gaps between the tens, such as `core/087-git.md`.
 - `internal/rules/` governs this repository alone and takes the top of a band, a division stated in `standards/rule.md`. The core band is full at every ten, which is what forces the split rather than leaving it to convention.
 - A target's own rules take `900-999`, since the two bands the toolkit crowds most, `core/` and `claude/`, have almost no top-of-band room left for a target to claim.
 
