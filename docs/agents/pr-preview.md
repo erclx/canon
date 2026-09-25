@@ -100,5 +100,5 @@ request never deploys.
 ## What this does not cover
 
 The verb builds only the deployed-and-public case. A private repository whose
-previews need access protection, and a project with no deploy at all where a
-local server would stand in, both wait for a project that needs them.
+previews need access protection waits for a project that needs it. A local
+server stands in where there is no deploy, through `canon docs pr-local`.

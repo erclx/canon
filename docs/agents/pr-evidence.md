@@ -122,13 +122,29 @@ already holds, the same way the preview address is carried. That is what keeps
 already ticked, since `git-pr` deletes the handoff once the first post reports
 success and no later call has a file to pass.
 
-The option does not decide `no-evidence`. A branch with a checklist and no
-changed evidence image still reports `no-evidence`, and the caller posts the
-checklist on its own, which is what it did before this option existed. A path
+The option does not decide `no-evidence` alone. A branch with a checklist and
+no changed evidence image still reports `no-evidence`, and the caller posts the
+checklist on its own, which is what it did before this option existed. A
+checklist passed together with `--local` is the exception, covered below. A path
 that cannot be read, or one holding nothing, refuses as
 `unreadable-checklist` rather than rendering without it: the caller deletes the
 handoff once a post succeeds, so a silently dropped checklist is the only copy
 gone.
+
+## The local preview line
+
+`--local <url>` adds `**Local preview:** <url>` to the opening block: under the
+hosted `**Preview:**` line when there is one, and as the first line when there
+is not. The hosted line always keeps the first position, since that is the one
+line the carry-forward reads for it. A run without the option carries forward
+the local address the marked comment already holds, the same as the other two.
+
+The option does not turn `no-evidence` into `ok` on its own. A branch with a
+dev server running and no rendered change would otherwise get a comment holding
+a link and nothing else. Together with `--checklist` it does, so the link and
+the checklist land in one comment rather than the checklist going out alone.
+`canon docs pr-local` covers where the address comes from and how the line is
+removed at close.
 
 ## What a collapsed comment still leaves to GitHub
 
