@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.119.0](https://github.com/erclx/canon/compare/v4.118.0...v4.119.0) (2026-09-25)
+
+
+### Features
+
+* **claude:** make session-worktree own the main-root write routing ([#1901](https://github.com/erclx/canon/issues/1901)) ([86d3dcf](https://github.com/erclx/canon/commit/86d3dcfc403db5f2b7061dc90ab0a00404dda0fd))
+* **design:** install a neutral base rather than the toolkit palette ([#1896](https://github.com/erclx/canon/issues/1896)) ([91de120](https://github.com/erclx/canon/commit/91de1200d848ba6c0869831339c30dab2826c04f))
+* **governance:** retire the channel rule for session-relay ([#1899](https://github.com/erclx/canon/issues/1899)) ([cfc2c6d](https://github.com/erclx/canon/commit/cfc2c6d72d3c06a7effa0b1330fcd1c9e05cb81a))
+* **sync:** install a declared renamed rule under its new name ([#1904](https://github.com/erclx/canon/issues/1904)) ([78e76b6](https://github.com/erclx/canon/commit/78e76b66e1da6e217aa97d2b23d81bfe9ad4bd71))
+* **tasks:** keep every number on a task's pull request line ([#1902](https://github.com/erclx/canon/issues/1902)) ([ed6f675](https://github.com/erclx/canon/commit/ed6f6752e73d4469349a4bb1fbeca4bce5044b52))
+
 ## [4.118.0](https://github.com/erclx/canon/compare/v4.117.0...v4.118.0) (2026-09-25)
 
 
