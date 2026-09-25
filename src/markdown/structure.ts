@@ -116,6 +116,7 @@ export const CHECKPOINTS = {
   cadence: 3,
   spread: 5,
   opener: 2,
+  ceiling: 300,
 } as const
 
 /**
@@ -167,6 +168,11 @@ export interface Checkpoints {
   readonly spread: number
   /** Times one opening word may open a sentence in a paragraph before it is a pattern. */
   readonly opener: number
+  /**
+   * Rendered lines a whole document may reach, read by the Document ceiling
+   * gate stage rather than by any exit code of the audit.
+   */
+  readonly ceiling: number
 }
 
 export interface BulletFinding {
@@ -245,6 +251,22 @@ export interface StructureReport {
  */
 export function renderedHeight(text: string, width = RENDER_WIDTH): number {
   return Math.max(1, Math.ceil(visibleText(text).length / width))
+}
+
+/**
+ * Height a whole source occupies once wrapped, frontmatter and fenced blocks
+ * included.
+ *
+ * Nothing is excluded because a session pays for every line it loads, which is
+ * what separates this from the depth measure. The context audit's length
+ * reading and the document ceiling both count through here, so the two report
+ * one unit.
+ */
+export function documentHeight(source: string, width = RENDER_WIDTH): number {
+  return source
+    .replace(/\n$/, '')
+    .split('\n')
+    .reduce((sum, text) => sum + renderedHeight(text, width), 0)
 }
 
 /**

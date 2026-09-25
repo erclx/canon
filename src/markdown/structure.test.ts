@@ -4,6 +4,7 @@ import {
   BASELINE,
   CHECKPOINTS,
   type Checkpoints,
+  documentHeight,
   measureStructure,
   RENDER_WIDTH,
 } from '@/markdown/structure'
@@ -110,7 +111,16 @@ describe('CHECKPOINTS', () => {
       cadence: 3,
       spread: 5,
       opener: 2,
+      ceiling: 300,
     })
+  })
+})
+
+describe('documentHeight', () => {
+  it('counts a line past the render width as the lines it wraps to', () => {
+    const source = `# Title\n\n${'a'.repeat(RENDER_WIDTH * 2 + 1)}\n`
+
+    expect(documentHeight(source)).toBe(5)
   })
 })
 

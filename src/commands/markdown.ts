@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
+import { lengthExemption } from '@/markdown/ceiling'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import { isGating } from '@/markdown/gate'
 import { decodePath, findBrokenLinks, type LinkFinding } from '@/markdown/links'
@@ -16,6 +17,7 @@ import {
   BASELINE,
   CHECKPOINTS,
   type Checkpoints,
+  documentHeight,
   measureStructure,
   type StructureReport,
 } from '@/markdown/structure'
@@ -51,6 +53,9 @@ interface FileReport {
   readonly bans: readonly BanFinding[]
   readonly links: readonly LinkFinding[]
   readonly structure: StructureReport
+  readonly renderedLines: number
+  /** The stated reason, or null where the document is not exempt. */
+  readonly exempt: string | null
 }
 
 export function register(program: Command): void {
@@ -62,7 +67,7 @@ export function register(program: Command): void {
   markdown
     .command('audit')
     .description(
-      'Fail on a banned character, word, or spelling, and report bullet, paragraph, cadence, and depth',
+      'Fail on a banned character, word, or spelling, and report bullet, paragraph, cadence, depth, and length',
     )
     .argument(
       '[path...]',
@@ -84,6 +89,11 @@ export function register(program: Command): void {
         'A ban hit and a dead link are each a fact and gate unconditionally.',
         'Bullet, paragraph, and depth weight are judgments a reader settles,',
         'so all three report and none of them fails a run.',
+        '',
+        'Length reports a whole document past the ceiling and never exits 2.',
+        'The Document ceiling gate stage owns that verdict, since this audit also',
+        'runs on a record kept out of version control, where a long plan is not',
+        'a defect.',
         '',
         'Cadence reports the same way and carries one more caveat. Its range is',
         'drawn from prose a person reads, so terse reference prose sits below',
@@ -148,7 +158,8 @@ async function runAudit(
   const reports: FileReport[] = await Promise.all(
     scope.files.map(async (rel) => {
       const abs = resolve(root, rel)
-      const lines = bodyLines(await readFile(abs, 'utf8'))
+      const source = await readFile(abs, 'utf8')
+      const lines = bodyLines(source)
       return {
         rel,
         bans: scanBans(lines, bans),
@@ -156,6 +167,8 @@ async function runAudit(
           existsSync(resolve(dirname(abs), path)),
         ),
         structure: measureStructure(rel, lines, checkpoints),
+        renderedLines: documentHeight(source, checkpoints.renderWidth),
+        exempt: lengthExemption(rel, source),
       }
     }),
   )
@@ -168,6 +181,7 @@ async function runAudit(
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
   reportDepth(reports, checkpoints)
+  reportLength(reports, checkpoints)
   outro()
 
   if (opts.json) {
@@ -192,6 +206,7 @@ async function runAudit(
           cadence: checkpoints.cadence,
           spread: checkpoints.spread,
           opener: checkpoints.opener,
+          ceiling: checkpoints.ceiling,
         },
         entries: reports.map((report) => ({
           path: report.rel,
@@ -202,6 +217,8 @@ async function runAudit(
           heavyBullets: report.structure.heavyBullets,
           heavyParagraphs: report.structure.heavyParagraphs,
           cadence: report.structure.cadence,
+          renderedLines: report.renderedLines,
+          exempt: report.exempt,
         })),
       })}\n`,
     )
@@ -605,4 +622,48 @@ function reportDepth(
       )
       .join('\n'),
   )
+}
+
+/**
+ * Lists every document past the ceiling and counts the exempt ones rather than
+ * naming them, since an exemption is settled where its marker sits.
+ */
+function reportLength(
+  reports: readonly FileReport[],
+  checkpoints: Checkpoints,
+): void {
+  logStep('Length')
+  logInfo(
+    `Whole documents measure rendered lines at ${checkpoints.renderWidth} columns, frontmatter and fenced blocks included.`,
+  )
+  logInfo(
+    'A changelog is exempt by name, and so is a document carrying a canon-length-exempt marker that names a reason.',
+  )
+
+  const past = reports.filter(
+    (report) => report.renderedLines > checkpoints.ceiling,
+  )
+  const over = past
+    .filter((report) => report.exempt === null)
+    .sort((a, b) => b.renderedLines - a.renderedLines)
+  const exempt = past.length - over.length
+
+  if (over.length === 0) {
+    logInfo(`No document past the ${checkpoints.ceiling}-line ceiling.`)
+  } else {
+    logWarn(
+      `${plural(over.length, 'document')} past the ${checkpoints.ceiling}-line ceiling`,
+    )
+    pipeOutput(
+      over
+        .map(
+          (report) => `${report.rel}  ${report.renderedLines} rendered lines`,
+        )
+        .join('\n'),
+    )
+  }
+
+  if (exempt > 0) {
+    logInfo(`${plural(exempt, 'exempt document')} past the ceiling.`)
+  }
 }
