@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.117.0](https://github.com/erclx/canon/compare/v4.116.0...v4.117.0) (2026-09-25)
+
+
+### Features
+
+* **claude:** name the machine move in the session-compact report ([#1875](https://github.com/erclx/canon/issues/1875)) ([102f988](https://github.com/erclx/canon/commit/102f98885b9c886c832c7bb3241ee6c306c5cf7a))
+* **claude:** report dated provenance in skill bodies ([#1878](https://github.com/erclx/canon/issues/1878)) ([eeb49f2](https://github.com/erclx/canon/commit/eeb49f2b150ad71c7aa7aa82941134275d10640e))
+* **governance:** mask a live value before the double capture ([#1876](https://github.com/erclx/canon/issues/1876)) ([2745576](https://github.com/erclx/canon/commit/2745576a151f9a04800ad24e6b65f3bfb7dc54ee))
+* **markdown:** add a 300-line document ceiling the gate reports ([#1879](https://github.com/erclx/canon/issues/1879)) ([1f8451f](https://github.com/erclx/canon/commit/1f8451f985901133d645ebb523ab9c91b4f4dbcb))
+* **tooling:** ship base verify.yml and PR template as seeds ([#1880](https://github.com/erclx/canon/issues/1880)) ([7355cdb](https://github.com/erclx/canon/commit/7355cdb9e342830bd6b3ca9434cd9e9503ee8f0c))
+
+
+### Bug Fixes
+
+* **memory:** hold a receipt whose unmarked item is still undecided ([#1874](https://github.com/erclx/canon/issues/1874)) ([deb186e](https://github.com/erclx/canon/commit/deb186e65c4442ac1162c65220b084faffb00a61))
+
 ## [4.116.0](https://github.com/erclx/canon/compare/v4.115.0...v4.116.0) (2026-09-24)
 
 
