@@ -73,7 +73,7 @@ four carried at least one, caught only because the planner ran
 - Tell a planner to report the path with no account of what the row got wrong. That instruction came from a trial condition holding a blind comparison intact, and it is not a durable obligation.
 - Report progress through the channel, which rebuilds on the sender's side the poll the announcement exists to retire
 - Write the priority board or the backlog, at any size, or the task file outside `plan-groundwork`'s close-time exception
-- Be a skill nothing invokes but its author typing the name. `orchestrator-dispatch.md` names it on the planning launch the way it names `role-worker` on a build, so a stretch where only a typed invocation reaches it is the signal that the role never took.
+- Be a skill nothing invokes but its author typing the name. `orchestrator-launch.md` names it on the planning launch the way it names `role-worker` on a build, so a stretch where only a typed invocation reaches it is the signal that the role never took.
 
 ## Guards
 

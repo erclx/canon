@@ -59,7 +59,7 @@ Run `plan-feature` for each, carrying the constraint per in-flight track that `#
 
 Stop where `## Parallelism` stops rather than planning every row the pass cleared. A plan whose file set collides with every track in flight is one nobody can dispatch.
 
-Do not restate the refill procedure. `role-orchestrator` owns it under `## Refilling the ready queue` and `orchestrator-sweep.md` wraps it for a batch of merges, so this pass promotes through that method rather than a second one.
+Do not restate the refill procedure. `orchestrator-refill.md` owns it and `orchestrator-sweep.md` wraps it for a batch of merges, so this pass promotes through that method rather than a second one.
 
 ## Two results that are not a re-test
 
@@ -82,4 +82,4 @@ Still backlogged: <row>, <what was checked> found unchanged
 
 Omit any row with nothing in it. Name what was measured rather than the verdict alone, since a re-test the reader cannot check is the same claim the row already carried.
 
-Lead the reply with the three slots under `### Every later turn` in `role-orchestrator`, so the human reads what they own before the evidence for it.
+Lead the reply with the three slots under `## Every later turn` in `orchestrator-output.md`, so the human reads what they own before the evidence for it.

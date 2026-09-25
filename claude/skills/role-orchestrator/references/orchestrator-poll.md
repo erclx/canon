@@ -68,7 +68,7 @@ The state reaches every stalled dispatch, since one threshold governs the headin
 
 ### The count behind the review fallback
 
-The report is also where the count in `## Parallelism` is legible. That threshold trips on open pull requests awaiting a first pass, which is what `OPENED` and a pull request with no prior pass name here and what `SEEN` excludes, so read the count off these lines rather than off `gh pr list`, which counts a branch closed out and waiting on a merge the same as one nobody has read. It is a separate condition from the poll-start fallback above, which decides when this loop runs rather than where a review runs.
+The report is also where the count in `orchestrator-review-fallback.md` is legible. That threshold trips on open pull requests awaiting a first pass, which is what `OPENED` and a pull request with no prior pass name here and what `SEEN` excludes, so read the count off these lines rather than off `gh pr list`, which counts a branch closed out and waiting on a merge the same as one nobody has read. It is a separate condition from the poll-start fallback above, which decides when this loop runs rather than where a review runs.
 
 The count used to read low, and it erred in the direction that breaks the trigger. A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so an author pushing between the diff read and the post left the pass recorded against a commit it never saw, and `SEEN` then fired on a head still awaiting its first look at that delta.
 

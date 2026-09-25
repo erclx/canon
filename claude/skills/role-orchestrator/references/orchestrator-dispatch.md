@@ -1,6 +1,6 @@
 ---
 title: Orchestrator dispatch runbook
-description: The plan-answer gate, the collision check before a self-dispatch, the file-set disjointness gate, the branch and model the launch names, the planning and handback dispatch shapes, and the loop's stopping condition
+description: The plan-answer gate, the collision check before a self-dispatch, the file-set disjointness gate, the branch and model the launch names, the fallback to a human launch, and the loop's stopping condition
 ---
 
 Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The disjointness gate below is where that row's file set is tested against every track in flight.
@@ -74,7 +74,7 @@ A declared set is what a branch sets out to write rather than a bound on it, so 
 
 Disjointness is necessary and not sufficient, so hold a candidate whose sets do not touch when a stated reason serializes it, and write the reason on the hold. One row creating a skill and another auditing that catalog and counting it write nothing in common, and dispatching both still leaves the audit counting a denominator that moves underneath it. Nothing verifies that a reason was written, so the rule holds only while the dispatcher applies it.
 
-What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review fallback's count of three in `## Parallelism`, which moves a review rather than binding a track, and this runbook carries none.
+What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review fallback's count of three in `orchestrator-review-fallback.md`, which moves a review rather than binding a track, and this runbook carries none.
 
 ## Pick the model
 
@@ -84,196 +84,7 @@ Name `<model>` on the launch, and pick it against the task rather than copying w
 
 ## Dispatch
 
-```bash
-claude --bg --model <model> -n "worker-<project>-<slug>" "/canon:auto-ship <plan>
-Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pull request opens, carrying the number, the branch, the head sha, the CI state, and every point you departed from the plan on, and message it again if you stop on a question."
-```
-
-`--bg, --background` starts the session as a background agent and returns immediately, `-n, --name` sets the display name that tells a self-dispatched worker from an operator's own launch in `canon sessions list`, and `--model` overrides the inheritance the section above states. Pass `-n` on every dispatch rather than letting the client derive one. A launch that omits it leaves the session named for a fragment of its own identifier, which is both its address on the send channel and the whole of what the operator sees for it in agent view.
-
-The prefix reads `worker-` because that is the role it marks. A prefix naming a role the session does not hold sends a worker filtering the roster for that string to a sibling or itself on every row. Nothing matches the prefix programmatically, which keeps a rename down to three strings.
-
-`<project>` is the basename of the main worktree root, not of wherever the dispatcher happens to be running. Resolve the main root first, the way `session-worktree` Step 1 does, since a bare `git rev-parse --show-toplevel` inside a linked worktree returns the worktree path rather than the project's.
-
-`claude agents` lists every session on the machine with no path column and no per-project filter, so `<project>` in the name is the only thing left telling two fleets apart, and a session named off the worktree path instead would carry the branch folder rather than the project. Two projects each dispatching a bare `worker-page-driver` used to read as one row in that view.
-
-Read `<dispatcher-id>` with `canon sessions list --self --json` and interpolate the `sessionId` that row carries. Carry the id rather than the name. A name is derived from whatever the session turned out to be doing, and across the 181 records stamping both fields, nine were renamed after launch at a median of 5.4 minutes and a maximum of 509. Three landed more than ten minutes in, which is inside the window a worker announces its pull request in, so a name written into the prompt is aimed at a send that happens after it goes stale.
-
-Where the installed CLI answers `--self` with an unknown option, that flag is newer than the release the target holds. Read the `sessionId` from the record the client writes for this session under its configuration directory, and say which route answered so the reader knows whether the id was read or inferred.
-
-The worker resolves that id back to a name through `canon sessions list --json`, which carries `sessionId` per row, rather than through the agent listing, which prints a name and a short ref and no id at all. A worker reaching for the listing first therefore finds no lookup and can conclude there is none. That failure is silent in both directions: the session has nothing useful to do with the message it owes and goes idle holding it, and nothing on this side reports the quiet, so the loss surfaces as a missing worktree or a pull request that never opens rather than as anything watching for it.
-
-The template carries no worktree call. `auto-ship` Step 0 invokes `canon:role-worker` and then `canon:session-worktree` itself, and neither carries the flag, so both are reachable through the `Skill` tool regardless of where a call to them would sit in a prompt. The autoship call carries `<plan>`, the same file this runbook already read to derive the branch, so its Step 1 takes it as the caller-supplied plan rather than re-deriving one from the slug the worker's branch happens to carry.
-
-The template names no branch, and it does not need to. `auto-ship` Step 0 runs `canon tasks plan-branch <plan>` on the same file this runbook derived the candidate from, and hands the `<type>/<slug>` it reports to `session-worktree` as its tier 0 argument, so the two sides agree by calling one derivation rather than by a string copied between them.
-
-That retires the inference four workers took before the verb existed, which was to derive the name from `<plan>` by their own reading of it. Nothing has to reach `session-worktree`'s ladder now, which mattered because a worker launched onto `main` cannot match tier 1, a board carrying more than one plan puts tier 2 out of reach, and tier 3 tells it to ask a person who is not there. What still travels on judgment is the fallback: a worker whose installed binary carries no `plan-branch` derives by prose, which is where both live disagreements came from.
-
-### Expansion needs position zero and a clean delimiter, not leading order alone
-
-The client expands a slash command at position zero of a launch prompt as a
-user invocation, which is the route `disable-model-invocation: true` permits
-and gates. Everything that reaches the session as prose instead falls to the
-model, which invokes it through the `Skill` tool, and that route answers a
-flagged skill inconsistently. `auto-ship` has carried the flag since early in its life, and seven other
-shipped skills carry it too.
-
-Three launches bound what makes a command take
-that route. Observation A is the first refused worker, launched as `Run
-/canon:session-worktree ..., then /canon:auto-ship ...`, which expanded
-nothing. Observation B is a re-dispatch launched as `/canon:auto-ship
-<plan>` with a space before the path, which expanded and shipped.
-
-Observation C is a planning dispatch launched as `/canon:role-planner, then
-/canon:plan-feature <task>` with a comma glued to the command name at
-position zero, which expanded nothing and reached both bodies through the
-`Skill` tool instead. A rules out leading order alone, C rules out position
-zero on its own, and the only visible difference between B and C is the
-delimiter after the command token: a space in B, a comma in C.
-
-Read that delimiter reading as a candidate with a falsifier rather than as
-settled. The cheapest test is one dispatch leading with a bare command whose
-name is followed directly by a period, and the next real dispatch can carry it
-at no extra cost. Until it fails, the operational rule is the conjunction the
-three observations support: put the flagged command at position zero, followed
-by a space and its argument, with nothing before it.
-
-Four sessions made the same tool call against the same plugin cache on one
-day. Two were answered with the body and shipped, and two were refused
-with `Skill canon:auto-ship cannot be used with Skill tool due to
-disable-model-invocation`. Prefixing separated nothing, since three of the
-four carried the namespace and those three landed on both answers, so nothing
-a dispatcher writes predicts which answer a launch through the tool gets.
-
-Read that as a route a dispatch may not depend on rather than one that usually
-works. The refusal closes the fallback in the same message, telling the
-session not to replicate the workflow by other means, so a refused worker has
-no route left and stops with a clean worktree. Both failed dispatches produced
-nothing rather than a degraded run, which is the correct outcome and not a
-thing to soften.
-
-Recovery belongs to whoever writes the next prompt, since a blocked session
-cannot replay its own launch. The refusal is sticky inside a session rather
-than something a retry clears, measured when one refused worker repeated the
-identical prefixed call and got the byte-identical error back. Re-dispatch
-onto the same branch with the build template above, which already leads with
-the one command that needs the expansion route.
-
-The review shape and the planning shape below depend on no expansion at all.
-None of `role-worker`, `review-address`, `role-planner`, or
-`plan-feature` carries the flag, so both correctly keep their leading word
-regardless of the delimiter or the position it sits at.
-
-The same collapse reaches a human relay rather than a `claude --bg` string. A
-controller that hands an operator two chained blocks to paste as separate
-messages risks both landing as one, where everything after the first
-command's name is read as that command's own argument and the second command
-never fires, measured four times out of four.
-A slash command expands as a user invocation only at position zero of a
-prompt, and a later one in the same text reaches the session as prose instead.
-The fix is what the template above already takes: one message, one command,
-at position zero.
-
-### What the brief may carry
-
-The prompt carries pointers and standing context, and stops there. The branch and the plan stay arguments, because a skill resolves an argument through a documented ladder and reads no prose at all. What the prose reaches is the worker's judgment, so it holds only what a session has to weigh:
-
-- Name the addressee and what it is owed, which the two message clauses above already do.
-- Carry standing context this session holds that a cold one cannot derive, such as a constraint settled in conversation that never reached the plan.
-- Leave out anything scope-shaped. A file list, a naming convention, or a check to run belongs in the plan, where the review reads it back against the diff.
-
-The last bullet is the one under pressure, since the dispatch that first proved unattended work possible sent a prompt naming the task file, the likely files, the conventions, and the check to run. It shipped in 874 seconds and touched four files its task never named. Scope that arrives as prose is scope nothing verifies afterward.
-
-Report the dispatch as loudly as the human-launch line it replaces: name the branch, the model, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
-
-## Dispatch to address a review
-
-`review-address` is a single pass, not a chain, so a launch naming it
-alone reaches no `role-worker` and takes no role, which owes no message
-either. A replacement session was launched that way once, onto the branch a
-review had already posted findings against, and it answered by posting a
-thread reply and telling its controller nothing. Reach the role directly on
-this launch instead of wrapping a second chain around one skill that has none
-of its own.
-
-The branch already exists here, opened by whatever built it, so this shape
-skips the plan-derived name the build shape resolves above. Take `<branch>`
-off the pull request's own head ref. Enter the worktree the original build
-left on disk, `.claude/worktrees/<slug>/`, with `EnterWorktree`'s `path` form
-when it is still there, or `git worktree add .claude/worktrees/<slug>/
-<branch>` when it was cleaned up, so `<slug>` is that directory name either
-way.
-
-`EnterWorktree` refuses that path in the ordinary case, because the original
-build session stays registered against its own worktree after going idle and
-holds a harness-level lock the roster does not report. Work in the folder
-directly with `Bash`, `Read`, and `Edit` instead of retrying the tool, which
-is the route two workers already took today on two different branches.
-
-```bash
-claude --bg --model <model> -n "worker-<project>-<slug>" "Enter the worktree for <branch> at .claude/worktrees/<slug>/, creating it from that branch if the folder is gone. Run /canon:role-worker, then /canon:review-address. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the address pass finishes, carrying what was addressed and the PR's CI state, and message it again if you stop on a question."
-```
-
-`<dispatcher-id>`, `<model>`, and `<project>` resolve the same way the build
-shape resolves them above.
-
-Take this shape wherever a review needs answering and no live session already
-holds the branch. Where one does, message it to run `review-address`
-instead, per the loop's own step 6, since a session already there needs no
-second one dispatched onto the same branch.
-
-That check is blind to a session working through the direct-path fallback
-above, since a session that never runs `EnterWorktree` never moves its
-registered branch off `main`, so `canon sessions list --branch` reports nothing
-holding it. A dispatch landing on a branch worked that way collides with
-nothing the check can see.
-
-## Dispatch to plan a row
-
-`plan-feature` is a procedure rather than a role, so a launch naming it alone
-reaches no `role-planner` and takes no role, which owes no message either.
-Both trials of this shape ran on prose the controller retyped into each launch,
-which held every obligation those sessions took and is where the first one's
-in-flight read went wrong. Reach the role directly on this launch, the way the
-build shape above reaches `role-worker`.
-
-No branch and no worktree exist here and none is created. A planner writes one
-gitignored file at the main worktree root, so this shape names the row's task
-file rather than a branch and opens with the role instead of a worktree call.
-That write meets the isolation guard the same way a linked worktree's
-main-root write does, with no worktree here to redirect it to, so
-`role-planner` sends it as a `Bash` heredoc rather than through `Write`.
-
-```bash
-claude --bg --model <model> -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
-```
-
-`<task>` is the row's task file path and `<slug>` the slug its plan will take,
-resolved off the row the way the build shape resolves one off a plan.
-`<dispatcher-id>`, `<model>`, and `<project>` resolve the same way they do
-above. The prefix reads `planner-` for the reason the worker's reads `worker-`,
-which is that it marks the role of the session it names rather than the one
-that launched it.
-
-None of the three checks above binds this shape. The branch check has no
-candidate to read, and the disjointness gate has nothing to compare, since a
-planner writes one file no track in flight can hold. The plan-answer gate
-reaches no plan at all, because the planner is dispatched to write the file a
-build would later read, so running it here would refuse every planning dispatch
-over a plan nobody has written yet.
-
-What a planning dispatch owes instead is the reverse reading, because the plan
-it produces carries a constraint per track in flight and a row planned during a
-wave is planned against a tree that wave is changing. `role-planner` composes
-the session roster with the pull request list for that read rather than reading
-pull requests alone, which is why the brief carries no branch list for it: the
-planner takes this reading itself either way.
-
-One row per dispatch. A session reused across a batch pays the context load once
-and ages its picture of the tree while it works, which is what puts the in-flight
-read on the task rather than on the batch, and one that compacts mid-batch loses
-the reasoning behind its earlier plans with nothing reporting it. Cap a reused
-session where the saving is worth it and say what the cap was.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template. It also holds the review-address and planning shapes, which skip the checks above.
 
 ## Fall back to the human
 
@@ -281,7 +92,7 @@ Hand the row to the human-launch line in step 4 instead of dispatching when any 
 
 The first of those five is the one that reaches a person rather than the board. A row held for a collision or for a serialize reason waits on the wave clearing, where a row held on its plan waits on an answer only the operator can give, so hand that one over with the question label and its stated reason attached rather than as a name and a refusal.
 
-Hand the person one command: `/canon:auto-ship <plan>`, naming the row, the plan path, and the branch together, with no worktree call ahead of it. A leading worktree call adds nothing beyond what `auto-ship` Step 0 already reaches for itself, by the same judgment the template above calls a residual risk rather than a settled contract. A second command also risks a client folding two commands into one message, which reads everything after the first command's name as its own argument and drops the second: that happened in four dispatches out of four before the fix became one message carrying the autoship call alone.
+Hand the person one command: `/canon:auto-ship <plan>`, naming the row, the plan path, and the branch together, with no worktree call ahead of it. A leading worktree call adds nothing beyond what `auto-ship` Step 0 already reaches for itself. A second command also risks a client folding two commands into one message, which reads everything after the first command's name as its own argument and drops the second, per `### Position zero` in `orchestrator-launch.md`.
 
 Suggest, as one line to the operator, that they rename their own session to the row's id, so a process listing shows what the session is for without a cross-reference to the board.
 

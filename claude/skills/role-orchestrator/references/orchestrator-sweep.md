@@ -6,7 +6,7 @@ description: The once-per-batch board sweep, plan re-verification, and where eac
 Sweep the board as orchestrator after merging. Run this once per batch of merges, before answering what to do next, because the surfaces that record what shipped are the ones nothing updates on its own.
 
 1. Pull into the main worktree rather than fetching. A fetch leaves the local branch behind, so `git log` reports a state that has not arrived. A repository that adds a post-merge hook to name archive candidates gets it on a pull and never on a fetch.
-2. Follow `## Refilling the ready queue` in `role-orchestrator`, every step in order. It owns the procedure. Do not restate it here and do not run it from memory.
+2. Follow `orchestrator-refill.md`, every step in order. It owns the procedure. Do not restate it here and do not run it from memory.
 3. Re-verify every plan already written, not only the ones this sweep writes. A queued plan goes stale from whatever merged while it waited, and the loop's verify step fires at handoff rather than after a merge, so nothing else catches it. Grep each construct the plan names and count the sites against its claim, then open each file rather than trusting its account.
 4. Re-check any precondition a plan states about live state outside the repository. A remote branch, an open issue, or an installed version was true when the plan was written and is not a fact about the tree.
 
