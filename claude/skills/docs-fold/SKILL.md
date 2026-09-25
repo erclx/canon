@@ -100,7 +100,7 @@ For each doc with relevant changes, apply updates following these rules. Read a 
 - Do not touch task files this session did not change.
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it.
 
-The verb resolves the board at the main worktree root in-process, which is the route because this is an edit inside an existing file and the file-editing tools refuse that path from a linked worktree.
+The verb resolves the board at the main worktree root in-process, which is the route `session-worktree` states for an edit inside an existing main-root file.
 
 Read `ok` and `reason` out of that record rather than the exit. An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command and takes the second status, which flattens every non-zero exit to zero. A refusal arriving as success leaves the outcome unmarked while the chain moves on, so the board reports shipped work as open and the next session re-plans it.
 
@@ -216,7 +216,7 @@ Report a block left unfolded rather than dropping it:
 
 Sweep the review and memory receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 
-Every delete below is a shell operation, so send each as a plain single `Bash` command rather than joining two with `&&`, which is refused as compound from a linked worktree.
+Every delete below is a plain `rm`, one per call, routed the way `session-worktree` states.
 
 Plans are not swept here. A plan is settled by the merge rather than by an outcome this run marked, and `canon tasks archive` moves it with the task the `post-merge` hook archives. Sweeping it from this step read a closure Step 3 had written moments earlier and moved a plan the branch was still building from.
 

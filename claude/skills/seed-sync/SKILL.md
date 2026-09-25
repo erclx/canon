@@ -70,7 +70,7 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to 
 
 Write the full proposal to `.canon/review/seed-audit-<slug>.md` at the main worktree root. Do not print the proposal inline.
 
-From a linked worktree the file-editing tools refuse that path, so the proposal goes out through `Bash`. Send the `mkdir -p` and the heredoc as two plain commands rather than joining them with `&&`, which is refused as compound.
+The proposal is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
 
 Structure: a summary block at the top, a legend, a scope table, then one H2 per numbered item. Number items across all files so the user can reference them by number. Fuse the status, action, and target into each H2. Every item starts as 📝 pending.
 

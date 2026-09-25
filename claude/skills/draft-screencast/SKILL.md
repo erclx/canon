@@ -43,7 +43,7 @@ Build a 2-to-4-word kebab-case slug from the topic and discovery answers. Exampl
 
 Create `.canon/tmp/screencast/<slug>.md` at the main worktree root. Create the directory if it does not exist. The file is gitignored.
 
-From a linked worktree the file-editing tools refuse that path, so the draft goes out through `Bash`. Send the `mkdir -p` and the heredoc as two plain commands rather than joining them with `&&`, which is refused as compound.
+The draft is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
 
 Write all eight sections. Pre-seed every section with concrete content so the draft is shippable as-is. The user edits down rather than fills blanks.
 

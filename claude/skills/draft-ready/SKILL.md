@@ -53,7 +53,7 @@ install -D -m 0644 <source> <main-root>/.canon/ready/<nn>-<slug>/<destination pa
 
 - Copy whole and edit nothing. A change wanted now is made in the source file first and copied after.
 - Carry no notes, alternates, or drafts into the folder. Anything else belongs in the plan or the pull request body.
-- Write each of these at the main root through `Bash`, one plain command apiece. From a linked worktree `Edit` and `Write` are refused there, and the refusal's redirect names a second gitignored copy no later session reads, per `085-worktrees.md`. Create a whole new file with a heredoc.
+- Write each of these at the main root, routed the way `session-worktree` states. Create a whole new file with a heredoc.
 
 ## Step 5: write the thin plan
 

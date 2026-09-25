@@ -72,7 +72,7 @@ When a checklist is produced, write it directly to `.canon/tmp/handoff/ui-checkl
 
 The path names the artifact rather than this skill, so it does not move when the skill is renamed. A checklist written by an older binary still lands where the consumer looks.
 
-From a linked worktree the file-editing tools refuse that path, so the checklist goes out through `Bash`. Send the `mkdir -p` and the heredoc as two plain commands rather than joining them with `&&`, which is refused as compound.
+The checklist is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
 
 Skip the file write when there is nothing to verify visually and nothing shipping untested.
 

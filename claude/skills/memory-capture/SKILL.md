@@ -14,7 +14,7 @@ The filename and its type prefix, the frontmatter, the body shape each type carr
 ## Guards
 
 - All `.canon/memory/` reads and writes resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
-- From a linked worktree the file-editing tools refuse every path below, so each write in this skill goes out through `Bash` as a plain single command. A memory entry holds one fact and this session has read it, so an update rewrites the whole file with a heredoc rather than editing a line inside it.
+- Every path below sits at the main root, so each write in this skill goes out as a heredoc, routed the way `session-worktree` states. A memory entry holds one fact and this session has read it, so an update rewrites the whole file with a heredoc rather than editing a line inside it.
 - If `.canon/memory/` does not exist at the main worktree root, create it, along with an `index.md` carrying `title` and `subtitle` frontmatter. `canon claude init` seeds both, and a project predating that seed has neither. Regeneration errors without the index, so the first write into a bare folder would report a frontmatter failure against a file that is fine.
 - If the session produced no user corrections, confirmations, or context disclosures worth persisting, stop: `✅ Nothing worth capturing.`
 - Routing edits a tracked file, so it runs only where the caller commits. When the session is in the main worktree, or the caller states it does not commit, skip Step 3 and write every candidate as a memory file. `role-orchestrator` is the caller this covers.
@@ -44,7 +44,7 @@ For each project candidate, match its subject against `canon/context/index.md`. 
 
 Fail closed. A project candidate matching no entry stays a memory file, and so does one matching two entries where neither is clearly the owner. The residue is what the folder is for, and a fact filed under the wrong entry is worse than one in memory because a context entry is a surface sessions trust.
 
-Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation the shell does directly, so send it as a plain single `Bash` command carrying a heredoc:
+Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation, so send it as a heredoc:
 
 A flat domain takes:
 
@@ -78,7 +78,7 @@ Two of its rules are the ones a capture pass gets wrong under time pressure. Sta
 
 Do not edit the index. `.canon/memory/index.md` is generated from sibling frontmatter by a `PostToolUse` hook, the same way the task board's index is, so a hand-appended row is drift the next regeneration discards.
 
-The hook matches `Write|Edit|MultiEdit`, so nothing fires on the shell writes a linked worktree makes. Regenerate the index once after the last write when the entries went out through `Bash`:
+A shell write skips that hook, as `session-worktree` states. Regenerate the index once after the last write when the entries went out through `Bash`:
 
 ```bash
 canon indexes regen --no-stage --root <main-root> <main-root>/.canon/memory/index.md

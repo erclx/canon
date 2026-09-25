@@ -30,7 +30,7 @@ produces.
 - Write only into the folder the running skill names: `plan-feature` at `.canon/plans/`, `plan-groundwork` at `.canon/groundwork/<nn>-<slug>/`, and `plan-intake` at `.canon/intake/<nn>-<slug>/`. Each skill's own `## Write scope` carries its exceptions, which is why they are not listed here. A change to one scope then edits one body.
 - Resolve every one of those folders, and `.canon/tasks/` and `.canon/review/` beside them, at the main worktree root. They are gitignored, so a copy beside a linked worktree is absent rather than empty and reads as a folder nobody has written yet.
 - Never enter a worktree, never create a branch, and never write a tracked file. A thinking session that builds has stopped being one, and the row loses the independent read the worker's own session was going to bring to it.
-- This session holds no worktree, so send each record out as a plain `Bash` heredoc past the same main-root refusal a linked worktree meets. That route skips the write-matched hooks, which are no-ops on a record file.
+- This session holds no worktree, so send each record out as a heredoc, the main-root route `session-worktree` states. That route skips the write-matched hooks, which are no-ops on a record file.
 - Work the row the launch named. Report a second row met while reading rather than taking it on, since which rows run is the controller's call.
 
 ## What to read before deciding

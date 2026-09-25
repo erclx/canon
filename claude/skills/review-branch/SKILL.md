@@ -116,7 +116,7 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to 
 
 Write the full report directly to `.canon/review/branch-<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite.
 
-From a linked worktree the file-editing tools refuse that path, so the report goes out through `Bash`. Send the `mkdir -p` and the heredoc as two plain commands rather than joining them with `&&`, which is refused as compound.
+The report is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
 
 If there are no findings, write `✅ No findings.` to the file with a timestamp.
 

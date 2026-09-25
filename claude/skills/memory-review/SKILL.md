@@ -26,7 +26,7 @@ If the user re-pings the skill with no new phrase and a receipt exists, default 
 - If `.canon/memory/` contains no top-level `*.md` entries other than `index.md`, stop: `✅ No memory entries to review.` The pen holds two subfolders now, `review/` and `archive/`, and neither is a memory entry, so this count and every entry read below stay at the top level and never recurse into either.
 - Cleanup is exempt from the two stops above. It works on receipts in `.canon/review/`, and a drained pen is the normal state once Apply has run, so a pen-shaped stop would strand the receipt it exists to delete.
 - Resolve the main root via `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`. All review and memory reads anchor here.
-- From a linked worktree the file-editing tools refuse every main-root path, so each write below goes out through `Bash` as a plain single command. The receipt and a memory entry are both short and this session has read them whole, so a rewrite replaces the file with a heredoc rather than editing a line inside it. Promotion targets are tracked files at `pwd` and keep taking `Edit`.
+- Every main-root write below goes out as a heredoc, routed the way `session-worktree` states. The receipt and a memory entry are both short and this session has read them whole, so a rewrite replaces the file with a heredoc rather than editing a line inside it. Promotion targets are tracked files at `pwd` and keep taking `Edit`.
 
 ## Propose phase
 
@@ -156,7 +156,7 @@ Action by action type:
 - **Hand off**: do not edit governance. Archive the memory file only if the user confirmed the handoff explicitly. Otherwise leave it in place.
 - **Retire**: archive the memory file.
 
-Archiving means creating `.canon/memory/archive/` at the main worktree root and moving the file there under its original name, overwriting any file already at that name. Send the `mkdir -p` and the `mv` as two plain commands rather than joining them with `&&`, which is refused as compound from a linked worktree. Never delete a memory entry. Nothing recovers one from a gitignored folder.
+Archiving means creating `.canon/memory/archive/` at the main worktree root and moving the file there under its original name, overwriting any file already at that name. Send the `mkdir -p` and a plain `mv`, routed the way `session-worktree` states for a main-root move. Never delete a memory entry. Nothing recovers one from a gitignored folder.
 
 Do not hand-edit `.canon/memory/index.md`. Once every archive move is done, regenerate it instead:
 
@@ -164,7 +164,7 @@ Do not hand-edit `.canon/memory/index.md`. Once every archive move is done, rege
 canon indexes regen --no-stage --root <main-root> <main-root>/.canon/memory/index.md
 ```
 
-The `PostToolUse` hook that keeps the index current matches `Write|Edit|MultiEdit`, and an archive move is a shell `mv`, so nothing fires on it. Without this call the index keeps a row per archived entry and drifts exactly the way the hand-appended one did. Run it once after the last move rather than per item.
+An archive move is a shell `mv`, which skips the index hook the way `session-worktree` states. Without this call the index keeps a row per archived entry and drifts exactly the way the hand-appended one did. Run it once after the last move rather than per item.
 
 Apply promotion edits one at a time via `Edit`. Claude Code's tool permission dialog is the confirmation gate per edit. Never rewrite a whole promotion target.
 
