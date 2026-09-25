@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
+import { bodyLines, maskDisplayed } from '@/markdown/scan'
 
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
@@ -33,6 +34,14 @@ const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const HEADING = /^#{1,6}\s+(.+?)\s*$/
 
+/**
+ * An ISO date, read as provenance wherever a reader is told it. The context
+ * audit's detector clears a date after "measured" or "verified", and a skill
+ * body keeps no such carve-out, since the standard sends every incident and its
+ * date to the requirement's Gap or to git.
+ */
+const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
+
 export interface SkillFinding {
   readonly rel: string
   readonly detail: string
@@ -59,6 +68,7 @@ export interface SkillsAudit {
   readonly nameMismatch: readonly SkillFinding[]
   readonly longDescription: readonly SkillFinding[]
   readonly requirementSections: readonly SkillFinding[]
+  readonly datedProvenance: readonly SkillFinding[]
 }
 
 interface SkillSource {
@@ -69,6 +79,17 @@ interface SkillSource {
   readonly description: string | undefined
   /** Undefined when the folder carries no `REQUIREMENT.md` at all. */
   readonly requirementHeadings: readonly string[] | undefined
+  /**
+   * `SKILL.md` and every reference below the folder, keyed by the path a
+   * finding names. `REQUIREMENT.md` and `EVAL.md` are left out, since the
+   * requirement is where the standard sends a date.
+   */
+  readonly bodies: readonly SkillText[]
+}
+
+interface SkillText {
+  readonly rel: string
+  readonly text: string
 }
 
 /**
@@ -110,6 +131,9 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     nameMismatch: sources.flatMap(nameFindings),
     longDescription: sources.flatMap(lengthFindings),
     requirementSections: sources.flatMap(sectionFindings),
+    datedProvenance: sources.flatMap((source) =>
+      source.bodies.flatMap(dateFindings),
+    ),
   }
 }
 
@@ -138,23 +162,41 @@ async function readSkill(
   const skillDir = join(dir, folder)
   const requirementPath = join(skillDir, 'REQUIREMENT.md')
 
-  const [body, requirement] = await Promise.all([
+  const references = [
+    ...new Bun.Glob('references/**/*.md').scanSync({
+      cwd: skillDir,
+      onlyFiles: true,
+    }),
+  ].sort()
+
+  const [body, requirement, referenceTexts] = await Promise.all([
     Bun.file(join(skillDir, 'SKILL.md')).text(),
     existsSync(requirementPath)
       ? Bun.file(requirementPath).text()
       : Promise.resolve(undefined),
+    Promise.all(
+      references.map((path) => Bun.file(join(skillDir, path)).text()),
+    ),
   ])
 
   const fields = parseFrontmatter(body)
+  const skillRel = join(rel, folder)
 
   return {
-    rel: join(rel, folder),
+    rel: skillRel,
     folder,
     hasReadme: existsSync(join(skillDir, 'README.md')),
     name: declared(readField(fields, 'name')),
     description: declared(readField(fields, 'description')),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
+    bodies: [
+      { rel: join(skillRel, 'SKILL.md'), text: body },
+      ...references.map((path, index) => ({
+        rel: join(skillRel, path),
+        text: referenceTexts[index] ?? '',
+      })),
+    ],
   }
 }
 
@@ -208,4 +250,19 @@ function sectionFindings(source: SkillSource): SkillFinding[] {
       detail: `missing: ${missing.join(', ')}`,
     },
   ]
+}
+
+/**
+ * A date inside a fence or a code span is example data a reader is shown, such
+ * as a sample frontmatter block, so only prose outside both is read.
+ */
+function dateFindings(source: SkillText): SkillFinding[] {
+  return bodyLines(source.text)
+    .filter((line) => !line.fenced)
+    .flatMap((line) =>
+      [...maskDisplayed(line.text).matchAll(ISO_DATE)].map((match) => ({
+        rel: source.rel,
+        detail: `line ${line.number}: ${match[0]}`,
+      })),
+    )
 }

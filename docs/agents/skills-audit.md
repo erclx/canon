@@ -35,18 +35,25 @@ Each check traces to a line in the standard.
 - No `README.md` inside a skill folder
 - Folder name in kebab-case
 - Each `REQUIREMENT.md` declaring `Gap` and `Must`, matched at any heading level
+- No ISO date in `SKILL.md` or any file under `references/`, reported as `datedProvenance` in the JSON record's `findings`
 
 A body whose frontmatter does not parse reports as declaring neither field rather than ending the run, so one malformed file cannot hide the corpus behind it. A key present with an empty value reads as absent, since a blank `name` would otherwise report as a name disagreeing with every folder. A folder carrying no requirement is reported once under presence rather than counted again for the sections it therefore lacks.
+
+The date check reads prose alone. A date inside a fence or a code span is example data, such as a sample frontmatter block, and a date in the body's own frontmatter is metadata, so neither reports. `REQUIREMENT.md` and `EVAL.md` are not read, since the requirement's `Gap` is where the standard sends the incident and the date that earned a rule.
+
+Each finding names the file and the line, such as `claude/skills/<name>/references/<file>.md  line 12: <date>`. A date after "measured" or "verified" reports like any other, unlike the context audit, because a skill body states the rule a session follows today rather than a reading of the tree.
 
 ## What it leaves alone
 
 The report names its own blind spots on every run, including the run where everything passed. Whether each `Must` traces to a stated gap is the rule in that standard worth the most and no parser reads it. Whether a gap states an observed failure rather than an intent, and whether a description routes, are the same kind of judgment. The 150-line body checkpoint is the one mechanical rule still absent here, and adding it would print a count rather than a defect, since the standard makes it a prompt to look with nothing enforcing it.
 
+The date check reads ISO dates alone. A date written in words, a month with no day, and provenance carrying no date at all pass it.
+
 A check with no rule behind it prints an opinion as a defect, which is where the list stops.
 
 ## Exit codes
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, and requirement-section findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around.
+Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, requirement-section, and dated-provenance findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around.
 
 ## The requirement gate
 

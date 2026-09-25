@@ -54,6 +54,7 @@ describe('auditSkills', () => {
       nameMismatch: [],
       longDescription: [],
       requirementSections: [],
+      datedProvenance: [],
     })
   })
 
@@ -262,6 +263,104 @@ describe('auditSkills', () => {
   })
 })
 
+describe('auditSkills dated provenance', () => {
+  function skillWithBody(body: string): string {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `${frontmatter('git-commit', 'Commits')}\n${body}`,
+    )
+    return dir
+  }
+
+  const skillPath = join('claude', 'skills', 'git-commit', 'SKILL.md')
+
+  it('should report a date in body prose', async () => {
+    skillWithBody('A worker lost its branch on 2026-08-27.\n')
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([
+      { rel: skillPath, detail: 'line 8: 2026-08-27' },
+    ])
+  })
+
+  it('should report a date after a measurement stamp', async () => {
+    skillWithBody('Measured on 2026-09-01 across the corpus.\n')
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([
+      { rel: skillPath, detail: 'line 8: 2026-09-01' },
+    ])
+  })
+
+  it('should stay silent on a date inside a fenced block', async () => {
+    skillWithBody('```yaml\n---\ncreated: 2026-08-27\n---\n```\n')
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([])
+  })
+
+  it('should stay silent on a date inside a code span', async () => {
+    skillWithBody('Write the date as `2026-08-27` in the header.\n')
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([])
+  })
+
+  it('should stay silent on a date in the skill frontmatter', async () => {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      '---\nname: git-commit\ndescription: Commits\nupdated: 2026-08-27\n---\n\n# Body\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([])
+  })
+
+  it('should report a date in a nested reference with its path', async () => {
+    const dir = conformingSkill('git-commit')
+    mkdirSync(join(dir, 'references', 'deep'), { recursive: true })
+    writeFileSync(
+      join(dir, 'references', 'deep', 'notes.md'),
+      '# Notes\n\nLearned from a target, 2026-07-04.\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([
+      {
+        rel: join(
+          'claude',
+          'skills',
+          'git-commit',
+          'references',
+          'deep',
+          'notes.md',
+        ),
+        detail: 'line 3: 2026-07-04',
+      },
+    ])
+  })
+
+  it('should stay silent on a date in the requirement', async () => {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(
+      join(dir, 'REQUIREMENT.md'),
+      `${REQUIREMENT}\nObserved on 2026-08-27.\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toEqual([])
+  })
+})
+
 describe('auditExitCode', () => {
   it('should fail on a missing requirement', async () => {
     const dir = skillDir('git-commit')
@@ -281,6 +380,19 @@ describe('auditExitCode', () => {
 
     expect(report.nameMismatch).toHaveLength(1)
     expect(report.readme).toHaveLength(1)
+    expect(auditExitCode(report)).toBe(0)
+  })
+
+  it('should pass when only dated provenance is reported', async () => {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `${frontmatter('git-commit', 'Commits')}\nFixed on 2026-08-27.\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.datedProvenance).toHaveLength(1)
     expect(auditExitCode(report)).toBe(0)
   })
 
