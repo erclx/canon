@@ -7,7 +7,7 @@ description: The self-dispatch that launches a background worker for a Run now r
 
 ## The self-dispatch
 
-Step 4 of the loop can launch a background `claude --bg` worker itself for a `## Run now` row, rather than only naming the invocation for a human to run. `orchestrator-dispatch.md` holds the procedure: derive the candidate branch with `canon tasks plan-branch <plan> --json`, check the row's plan against `canon tasks plan-answers <plan> --json`, check the branch against `canon sessions list --branch <branch> --json`, check the row's file set against every track in flight, then dispatch.
+Step 4 of the loop can launch a background `claude --bg` worker itself for a `## Run now` row, rather than only naming the invocation for a human to run. `orchestrator-dispatch.md` holds the procedure: derive the candidate branch with `canon tasks plan-branch <plan> --json`, check the row's plan against `canon tasks plan-answers <plan> --json`, check the branch against `canon sessions list --branch <branch> --json`, check the row's file set against every track in flight, then dispatch from the template in `orchestrator-launch.md`.
 
 Spawning a worker with the Agent tool stays forbidden, since an in-process subagent cannot be steered or reached independently. The `claude --bg` dispatch is a separate process with its own worktree and its own pull request, which is the property the boundary protects rather than the mechanism it happens to name.
 

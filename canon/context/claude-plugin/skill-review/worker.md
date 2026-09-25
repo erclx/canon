@@ -47,7 +47,7 @@ Three messages are owed and no more. One announces the pull request when it open
 
 That ordering matters: a queued message drains at the next tool round, and a session already waiting on input never reaches one, so an answer relayed to an open prompt renders beneath the question and changes nothing. Nothing is sent on progress, since a worker reporting progress rebuilds the poll on the other side of the channel.
 
-A launch naming `review-address` alone reaches no `role-worker` and takes no role either, which risks a worker addressing a posted review and telling its controller nothing. `orchestrator-dispatch.md` carries a second launch shape reaching the role directly for that case rather than reusing the plan-build shape's chain, carrying the same `<dispatcher-id>` resolution the build shape already documents.
+A launch naming `review-address` alone reaches no `role-worker` and takes no role either, which risks a worker addressing a posted review and telling its controller nothing. `orchestrator-launch.md` carries a second launch shape reaching the role directly for that case rather than reusing the plan-build shape's chain, carrying the same `<dispatcher-id>` resolution the build shape already documents.
 
 Refusing stays a first-class move rather than a failure mode: a worker arguing back with evidence rather than complying has reached corrections a report-upward-only body would suppress.
 
