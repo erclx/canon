@@ -47,7 +47,7 @@ Record what the verb names under `## Standing cautions`. A refusal is the bounda
 
 Follow items 4 through 6. Write only what a compaction destroys and no other artifact already carries, and cite a commit, a task, or a file and line for every claim.
 
-The file sits at the main worktree root, which the file-editing tools refuse from inside a linked worktree while offering a copy under that worktree instead. Take neither the refusal nor the copy. The map is written whole every time, so send it out as one plain shell command carrying a heredoc.
+The file sits at the main worktree root and is written whole every time, so send it out as a heredoc, routed the way `session-worktree` states.
 
 ## Step 4: extend it only where a role is held
 

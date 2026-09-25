@@ -13,7 +13,7 @@ Write only what a compaction destroys. Everything a later session can read from 
 
 - If `git rev-parse --git-dir` does not resolve, the note still writes. The filename comes from the work rather than from the branch, so nothing here needs a repository.
 - Decline where the session holds no reasoning a reader could not get faster from git or from a record already written. Say so in one line and write nothing. A padded note is worse than an absent one, because a reader who finds a note trusts it.
-- Resolve `.canon/` at the main worktree root, the way `session-worktree` does. From a linked worktree the file-editing tools refuse that path, so the write goes out through `Bash` as one plain command carrying a heredoc.
+- Resolve `.canon/` at the main worktree root and send the write out as a heredoc, both the way `session-worktree` states.
 
 ## Step 1: capture memory
 

@@ -1,11 +1,13 @@
 ---
 name: session-worktree
-description: Enters a Claude Code worktree at `.claude/worktrees/<name>/` with a name derived from the active plan or branch. Use when asked to "enter a worktree", "start a worktree", "work in a worktree", or at the plan-to-execute boundary after `/plan-feature`. Do NOT use to list, clean up, or rotate worktrees (use `git-worktree`).
+description: Enters a Claude Code worktree at `.claude/worktrees/<name>/` with a name derived from the active plan or branch. Use when asked to "enter a worktree", "start a worktree", "work in a worktree", or at the plan-to-execute boundary after `/plan-feature`. Also use when an `Edit` or `Write` to a main-root file such as a plan, a task, or a memory entry was refused for session isolation. Do NOT use to list, clean up, or rotate worktrees (use `git-worktree`).
 ---
 
 # Session worktree
 
 Wrap the `EnterWorktree` entry path with name derivation so the user does not pick a name by hand.
+
+The Guards and Steps gate entry alone. A session loading this skill for a main-root write reads `## Main-root writes`, enters nothing, and runs no guard, which is what keeps a session already inside a linked worktree off the first guard's stop.
 
 ## Guards
 
@@ -156,3 +158,7 @@ The helper refuses a folder left behind after its worktree was removed, which St
 The offset is what `role-orchestrator` sends a reader here to read rather than assign, and what an operator overrides through `WORKTREE_PORT_OFFSET` when two worktrees derive the same value. Deriving it correctly and printing it nowhere leaves both instructions naming a number no surface emits.
 
 Do not invoke `ExitWorktree` from this skill. Exit is the user's call.
+
+## Main-root writes
+
+Route a main-root write by what it does to the file: a whole-file create goes out as a heredoc, a change inside an existing file goes through a `canon` verb, and a delete or a move runs as a plain `rm` or `mv`. Read `${CLAUDE_SKILL_DIR}/references/main-root-writes.md` for which tools the refusal covers, the mechanics of each route, and the index cost a shell write carries.

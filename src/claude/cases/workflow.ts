@@ -165,6 +165,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'My Write to the plan file at the main root got refused for session isolation. How do I land it there?',
+    expect: 'session-worktree',
+  },
+  {
+    prompt:
       'Relay this over to the session that dispatched me. It gave me a sessionId rather than a name, so work out who that is and send it.',
     expect: 'session-relay',
   },

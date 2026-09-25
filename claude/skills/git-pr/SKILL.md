@@ -219,7 +219,7 @@ gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<
 
 Run the cleanup below only once the call that carried the checklist reports success, whichever of the two steps that was. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
 
-From a linked worktree the file-editing tools refuse a main-root path, so the cleanup goes out through `Bash` as two plain commands, the file and then the folder, rather than joined by `&&`, which is refused as compound:
+The cleanup is a main-root delete, so it goes out as a plain `rm` and then a plain `rmdir`, the file and then the folder, routed the way `session-worktree` states:
 
 ```bash
 rm <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
@@ -266,7 +266,7 @@ canon tasks pull-request <number> --plan feature-<slug> --json
 
 The slug is a guess at which plan this branch carries rather than a fact about the task, which is why the verb re-checks it against the board and refuses instead of writing on a near miss. A branch whose slug names no plan file falls to the silent skip below, the same as one whose plan no task cites.
 
-The verb resolves the board at the main worktree root in-process, adds `Pull request: #NNN` under the `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` lines the task already carries, and corrects the number in place when the line exists. This is the route because the write is an edit inside an existing file, which the file-editing tools refuse from a linked worktree and which no shell stream editor may make. That root is the one `session-worktree` resolves on entry.
+The verb resolves the board at the main worktree root in-process, adds `Pull request: #NNN` under the `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` lines the task already carries, and corrects the number in place when the line exists. This is the route because the write is an edit inside an existing main-root file, which `session-worktree` routes through a verb. That root is the one `session-worktree` resolves on entry.
 
 Skip this silently when the record is `ok: false` and `reason` is `no-board`, `no-match`, or `ambiguous`. Those are the three cases a guessed write would compound: no board, no task naming the plan, or more than one. One task, one pull request, and a wrong match archives the wrong task unattended once the branch merges. Report any other refusal rather than swallowing it.
 

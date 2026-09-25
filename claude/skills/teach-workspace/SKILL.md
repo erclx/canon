@@ -32,10 +32,10 @@ canon teach list --json
 
 It reports every workspace with its path, its counts, and the ordinal a new one would take. A `no-teach` refusal means the project has opened none yet, which is the new-workspace path in Step 1 rather than a reason to stop. The open verb creates the folder.
 
-From a linked worktree the file-editing tools refuse every path under the main root and offer a worktree copy instead, which is a second file no later session reads. Never take that redirect. The route splits by what the write does to the file:
+Every path under the main root is a main-root write, routed the way `session-worktree` states. The route splits by what the write does to the file:
 
-- Creating a whole file that does not exist yet, which is a lesson, a reference page, and a learning record, goes out as one plain shell command carrying a heredoc
-- Changing a line inside a file that already exists goes through the verb that owns it, since the stream editors are banned and no other shell route reaches it
+- Creating a whole file that does not exist yet, which is a lesson, a reference page, and a learning record, goes out as a heredoc
+- Changing a line inside a file that already exists goes through the verb that owns it
 
 ## Step 1: open or resume
 
@@ -239,7 +239,7 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to 
 
 The handoff is its own file rather than a shared one. The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work goes with it, and a sibling path costs the folding skill one more read and removes the interaction.
 
-An append is a whole-file operation, so send it as a plain single `Bash` command carrying a heredoc, per Step 0. Then tell the operator that `/docs-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+An append is a whole-file operation, so send it as a heredoc, per Step 0. Then tell the operator that `/docs-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
 
 ## Output
 

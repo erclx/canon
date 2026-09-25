@@ -28,7 +28,7 @@ Without this skill, a session holding finished files that hands them to a worker
 - Copy each finished file whole to its destination path inside the folder, and carry nothing else into it.
 - Write the plan and the task through `canon tasks plan-link`, `canon records validate plans`, and `canon markdown audit` rather than by restating what those verbs check.
 - Place the task's row by the three branches `task-board` Step 4 states, so a solo project never ends with a task file on no surface.
-- Route a write at the main root from a linked worktree through `Bash`, per `085-worktrees.md`.
+- Route a write at the main root from a linked worktree through `Bash`, the way `session-worktree` routes it.
 - Name the archive move in the closing report, since the skill writes a folder that stays live until someone moves it.
 
 ## Must not
