@@ -209,10 +209,10 @@ export const STAGES: readonly Stage[] = [
     success: 'Hero clean',
   },
   {
-    // `canon/DESIGN.md`, the base stylesheet, the web stylesheet, and the
-    // tab icon are all written from `src/design/tokens.ts` and none is edited
-    // by hand. Four artifacts from one source is the cost of the token move,
-    // and a render step that has to run is only safe while something fails
+    // `canon/DESIGN.md`, the web stylesheet, and the tab icon are written
+    // from `src/design/tokens.ts`, the base stylesheet from
+    // `src/design/neutral.ts`, and none is edited by hand. Four artifacts
+    // from two token sources is the cost of the token move, and a render step that has to run is only safe while something fails
     // when it did not, which is this.
     id: 'design',
     label: 'Design',

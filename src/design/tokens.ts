@@ -386,8 +386,11 @@ export const TOKENS: DesignTokens = {
 }
 
 /** A role's value, or `undefined` where the record declares no such role. */
-export function colorValue(role: string): string | undefined {
-  return TOKENS.color.find((token) => token.role === role)?.value
+export function colorValue(
+  role: string,
+  tokens: DesignTokens = TOKENS,
+): string | undefined {
+  return tokens.color.find((token) => token.role === role)?.value
 }
 
 /**
