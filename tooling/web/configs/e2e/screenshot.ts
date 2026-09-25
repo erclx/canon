@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { chromium } from '@playwright/test'
 import { mkdir } from 'fs/promises'
 import path from 'path'
@@ -37,6 +37,8 @@ interface CaptureCase {
   /** Names of viewports this case skips, for a route that reflows rather than breaks at that width. */
   excludeViewports?: readonly string[]
   evidence?: boolean
+  /** Selectors painted over in every frame the case writes, for a value that moves between runs with no code change. */
+  mask?: readonly string[]
   sections?: CaptureSection[]
   setup?: (page: Page) => Promise<void>
 }
@@ -72,12 +74,14 @@ const CASES: CaptureCase[] = [
     theme: 'default',
     route: '/',
     evidence: true,
+    mask: ['.version'],
     sections: HOME_SECTIONS,
   },
   {
     section: 'home',
     theme: 'dark',
     route: '/',
+    mask: ['.version'],
     sections: HOME_SECTIONS,
     setup: (page) => page.emulateMedia({ colorScheme: 'dark' }),
   },
@@ -234,16 +238,47 @@ async function markFloatingChrome(page: Page) {
   }, FLOATING_ATTRIBUTE)
 }
 
-async function shoot(page: Page, dir: string, file: string, selector?: string) {
+/**
+ * Turns a case's mask selectors into the locators every frame paints over. A
+ * selector matching nothing is reported and kept out rather than raised, for
+ * the same template reason `settle` gives for a missing section.
+ */
+async function resolveMask(
+  page: Page,
+  label: string,
+  selectors: readonly string[],
+): Promise<Locator[]> {
+  const mask: Locator[] = []
+  for (const selector of selectors) {
+    const element = page.locator(selector)
+    if ((await element.count()) === 0) {
+      console.warn(
+        `${label}: no element matches ${selector}, named as a mask. Skipped.`,
+      )
+      continue
+    }
+    mask.push(element)
+  }
+  return mask
+}
+
+async function shoot(
+  page: Page,
+  dir: string,
+  file: string,
+  mask: Locator[],
+  selector?: string,
+) {
   await mkdir(dir, { recursive: true })
   const target = path.join(dir, file)
   if (selector === undefined) {
-    await page.screenshot({ path: target, fullPage: true })
+    await page.screenshot({ path: target, fullPage: true, mask })
   } else {
     // Floating chrome keeps the space it already occupies, so dropping it out
     // of its own layer moves nothing and leaves every box the size it was.
     await page.locator(selector).screenshot({
       path: target,
+      mask,
       style: `[${FLOATING_ATTRIBUTE}] { position: static !important; }`,
     })
   }
@@ -281,21 +316,22 @@ for (const { captureCase, viewport, label } of RUNS) {
   await page.waitForLoadState('networkidle')
 
   const sections = await settle(page, label, captureCase.sections ?? [])
+  const mask = await resolveMask(page, label, captureCase.mask ?? [])
 
   const sweepDir = path.join(OUT_DIR, captureCase.section)
   const evidenceDir = path.join('evidence', captureCase.section)
   const file = `${viewport.name}--${captureCase.theme}.png`
   const writesEvidence = captureCase.evidence && viewport.evidence
 
-  await shoot(page, sweepDir, file)
-  if (writesEvidence) await shoot(page, evidenceDir, file)
+  await shoot(page, sweepDir, file, mask)
+  if (writesEvidence) await shoot(page, evidenceDir, file, mask)
 
   if (sections.length > 0) await markFloatingChrome(page)
 
   for (const { name, selector } of sections) {
-    await shoot(page, path.join(sweepDir, name), file, selector)
+    await shoot(page, path.join(sweepDir, name), file, mask, selector)
     if (writesEvidence) {
-      await shoot(page, path.join(evidenceDir, name), file, selector)
+      await shoot(page, path.join(evidenceDir, name), file, mask, selector)
     }
   }
 

@@ -79,6 +79,37 @@ async function measurePng(file: string): Promise<Size> {
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
+/** Playwright's default `maskColor`, which the harness leaves in place so a masked region reads as deliberate. */
+const MASK_FILL = [255, 0, 255] as const
+
+/**
+ * Reads one pixel's RGB out of a PNG by decoding it in the page's own canvas,
+ * which keeps an image decoder out of the dependencies for one assertion.
+ */
+async function readPixel(
+  page: Page,
+  file: string,
+  x: number,
+  y: number,
+): Promise<number[]> {
+  const source = `data:image/png;base64,${(await readFile(file)).toString('base64')}`
+  return page.evaluate(
+    async ({ source, x, y }) => {
+      const image = new Image()
+      image.src = source
+      await image.decode()
+      const canvas = document.createElement('canvas')
+      canvas.width = image.naturalWidth
+      canvas.height = image.naturalHeight
+      const context = canvas.getContext('2d')
+      if (context === null) throw new Error('no 2d context to decode into')
+      context.drawImage(image, 0, 0)
+      return [...context.getImageData(x, y, 1, 1).data.slice(0, 3)]
+    },
+    { source, x, y },
+  )
+}
+
 async function measureSection(page: Page, name: string): Promise<Size> {
   const box = await page.locator(`#${name}`).boundingBox()
   if (box === null) {
@@ -175,6 +206,19 @@ test.describe('the section capture', () => {
     const whole = await measurePng(path.join(home, '1280--dark.png'))
     expect(whole.width).toBe(VIEWPORT.width)
     expect(whole.height).toBeGreaterThan(VIEWPORT.height)
+
+    // The version moves on every release with no code change, so the case
+    // masks it. The settle leaves the page at the top, so the footer badge's
+    // box reads in the same coordinates the whole-page frame is laid out in.
+    const badge = await page.locator('footer .version').boundingBox()
+    if (badge === null) throw new Error('footer .version renders no box')
+    const pixel = await readPixel(
+      page,
+      path.join(home, '1280--dark.png'),
+      Math.round(badge.x + badge.width / 2),
+      Math.round(badge.y + badge.height / 2),
+    )
+    expect(pixel).toEqual([...MASK_FILL])
   })
 
   test('shoots a figure that builds on arrival at its end state', async ({
