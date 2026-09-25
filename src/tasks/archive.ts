@@ -46,6 +46,7 @@ export const ARCHIVE_REFUSALS = [
   'ambiguous',
   'no-outcomes',
   'open-outcomes',
+  'earlier-slice',
   'bad-input',
 ] as const
 
@@ -756,6 +757,17 @@ export async function archiveTask(
   const stem = resolved
   const from = join(dir, `${stem}.md`)
   const text = await readFile(from, 'utf8')
+
+  // `docs-fold` ticks outcomes at ship time, before the merge, so an earlier
+  // slice merging after the last slice shipped would find every box ticked
+  // while the last slice is still open. Only the last number closes the task.
+  const last = readPullRequest(text).at(-1)
+  if (selector.kind === 'pull-request' && last !== selector.number) {
+    return refuse(
+      'earlier-slice',
+      `${stem} lists #${last} after #${selector.number}, so the task closes when #${last} merges.`,
+    )
+  }
 
   const { open, closed, cut } = readOutcomes(text)
 

@@ -623,12 +623,21 @@ describe('archiveTask', () => {
     ).toMatchObject({ ok: true, stem })
   })
 
-  it('should resolve a task by a number that is not the first on its line', async () => {
+  it('should resolve a task by the last number on its line', async () => {
     const stem = await seedTask({ pullRequest: [12, 673] })
 
     expect(
       await archiveTask(ROOT, { kind: 'pull-request', number: 673 }),
     ).toMatchObject({ ok: true, stem })
+  })
+
+  it('should refuse an earlier slice even when every outcome is ticked', async () => {
+    const stem = await seedTask({ pullRequest: [12, 673] })
+
+    expect(
+      await archiveTask(ROOT, { kind: 'pull-request', number: 12 }),
+    ).toMatchObject({ ok: false, reason: 'earlier-slice' })
+    expect(existsSync(join(tasksDir(ROOT), `${stem}.md`))).toBe(true)
   })
 
   it('should refuse when no task names the pull request', async () => {

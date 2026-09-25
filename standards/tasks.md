@@ -237,7 +237,7 @@ One plan per task. A plan cited by two tasks is a misfile rather than a shape to
 
 `Pull request:` records which pull requests carry the task's work, each as a bare `#NNN` the way `Issue:` does. It lists every pull request that shipped part of the task, oldest first and separated by commas, as in `Pull request: #NNN, #NNN`, and a task shipped whole lists one. It is not an origin, so a task without one is well-formed. `git-pr` writes it when a pull request opens, which is the one step that always runs whether the chain drives it or a person does, and appends to the line rather than replacing it.
 
-The line is what lets a merge close its own task. Every merge on `main` is a squash carrying the number in its subject, so the number survives where a branch name does not, and `canon tasks archive --pull-request <n>` resolves the task from any number the line lists. Without the line the board can only be swept blind, and a blind sweep cannot tell a shipped task from an abandoned one. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving.
+The line is what lets a merge close its own task. Every merge on `main` is a squash carrying the number in its subject, so the number survives where a branch name does not, and `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last, since outcomes are ticked at ship time and an earlier slice can merge after the last one shipped. Without the line the board can only be swept blind, and a blind sweep cannot tell a shipped task from an abandoned one. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving.
 
 ## What goes in
 

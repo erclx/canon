@@ -50,7 +50,7 @@ canon tasks archive --pull-request 673 --json
 | `--json`             | Emit a machine-readable record on stdout                     |
 | `--root <path>`      | Board root, defaulting to the main worktree                  |
 
-Exit codes: `0` archived, `1` refused. Every gate is a refusal rather than a warning, because `.husky/post-merge` calls this with nobody watching. The `reason` field carries which gate fired: `no-board`, `no-match`, `ambiguous`, `no-outcomes`, `open-outcomes`, or `bad-input`.
+Exit codes: `0` archived, `1` refused. Every gate is a refusal rather than a warning, because `.husky/post-merge` calls this with nobody watching. The `reason` field carries which gate fired: `no-board`, `no-match`, `ambiguous`, `no-outcomes`, `open-outcomes`, `earlier-slice`, or `bad-input`. `earlier-slice` fires when `--pull-request` names a number that is not the last on the task's `Pull request:` line, since outcomes are ticked at ship time and only the last slice's merge closes the task.
 
 An outcome whose body is struck reads as cut rather than open or closed, whatever its checkbox holds: `- ~~<outcome>~~ <why>`. A task carrying only cut outcomes archives, since the gate refuses `no-outcomes` only when both the closed and the cut counts are zero. The success record carries `closed` and `cut` as counts, so a reader tells a shipped task from an abandoned one without opening the file.
 
