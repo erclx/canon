@@ -110,52 +110,9 @@ Every status but `aligned` and `stale` leaves the row with no scenario. The four
 
 Build the distinct scenario list from Step 2 results. Keep their original input order so re-runs are deterministic. The first entry is the `Provisioning:` target. Any remainder is the `Queued:` list.
 
-Resolve the arm and the gate for the `Provisioning:` scenario here, following the arm rule and the gate list in Step 6. Both outcomes are read before Step 6 runs: this step prints them on the `Headless verification:` line, and Step 5 skips on them. Collecting either one later would print a command against an unresolved arm and skip provisioning on an answer nobody has given yet.
+Resolve the arm and the gate for the `Provisioning:` scenario here, following the arm rule in `.claude/skills/internal-sandbox-check/references/headless.md` and the skip conditions in Step 6. Both outcomes are read before Step 6 runs: this step prints them on the `Headless verification:` line, and Step 5 skips on them.
 
-Print one block to chat:
-
-```plaintext
-Sandbox check
-
-Provisioning:
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
-
-Queued (run manually after testing the current scenario):
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
-
-Headless verification (this session runs it):
-  scripts/sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
-
-Interactive re-test (copied to clipboard):
-cd <current-root>/.sandbox && claude --plugin-dir <current-root>/claude --model sonnet
-
-Findings:
-  <status>  <item-path>  →  <scenario-path or "none">     # <invocation-hint>
-
-Scenarios changed but not paired:
-  <path>                                                 # unchanged items in the same scenario may still apply
-```
-
-Rules for the block:
-
-- List every changed item on its own line under `Findings:`. Sort `stale` and `unmapped` first, then `aligned`, then the census verdicts, then `none`.
-- Use these status labels exactly: `STALE`, `ALIGNED`, `NONE`, `UNMAPPED`, `EXEMPT`, `SHOULD-BE-ASSERTED`, `OUTSIDE-CENSUS`.
-- An `EXEMPT` row prints its census `reason` as the hint, which is the whole value of reading the file. Print the reason verbatim rather than summarizing it, since a reader overturns an exemption by disagreeing with its stated grounds.
-- A row carrying a census verdict or `OUTSIDE-CENSUS` shows `none` in the scenario column. Five statuses now resolve to no scenario, so the label is what distinguishes them and the column no longer does.
-- For plugin skills, use `<skill-name>` as the item path and append `# /<skill-name>` as the invocation hint. For scripts under `scripts/`, use the path relative to the repo root (`scripts/core/regen-hero.sh`) and omit the hint. For `src/**` items, append `# Closest e2e: bun run check:install` as the hint.
-- `Provisioning:` shows exactly one scenario, the next to provision. Always invoke the local script, never `canon sandbox`. `canon` is globally installed and resolves to the main repo's scripts, so from a worktree it would run stale scenarios and provision the sandbox outside the worktree.
-- `.sandbox/` is a single directory per repo root. Provisioning a second scenario overwrites the first, so the skill provisions one at a time and queues the rest.
-- `Queued:` lists every remaining distinct scenario as a full `manage-sandbox.sh` command, one per line, so the user can copy directly. Omit the section when there is only one scenario.
-- Omit `Provisioning:` and `Queued:` when no pairing carries a scenario, since there is nothing to provision.
-- `Headless verification:` shows the Step 6 command for the `Provisioning:` scenario alone, carrying the arm when the scenario is multi-arm. Replace the command with `gate: <label>` when a Step 6 skip condition holds, so the report says why before the run is missing rather than after.
-- Print the interactive re-test command flush-left as a single chained line (`cd … && claude --plugin-dir … --model sonnet`) so the user can paste it into any terminal
-  - The `--plugin-dir` points at `<current-root>/claude` so unchanged sub-skills (those not dev-injected) stay available to chained skills like `auto-ship`. Dev-injected skills under the sandbox's `.claude/skills/` still take priority.
-- Pipe the same chained command to the clipboard using the first available tool: `wl-copy`, `xclip -selection clipboard`, `pbcopy`, then `clip.exe`. If none are present, drop the `(copied to clipboard)` suffix from the heading and continue silently.
-- After the `Interactive re-test:` block, print one line: `Note: in the interactive session, invoke skills as /<skill-name>, not /canon:<skill-name>. The project-scoped copy takes priority.` The headless prompt in Step 6 uses the qualified form for the opposite reason, so keep the two lines distinct.
-- `Scenarios changed but not paired:` lists any scenario in the changed-scenarios list that no Step 2 mapping pointed to. Omit the section when empty.
-
-If every pairing is `ALIGNED` or carries no scenario, prefix the block with `✅ All changed items have paired scenario edits.`. Still print the full block so the re-test command is available.
+Then read `.claude/skills/internal-sandbox-check/references/report.md` for the block to print and the rules each of its sections follows. Always invoke the local `scripts/manage-sandbox.sh`, never `canon sandbox`, which from a worktree runs the main repo's stale scenarios.
 
 ## Step 5: execute re-provision
 
@@ -169,37 +126,7 @@ Also skip it when the gate resolved in Step 4 leaves Step 6 free to run. `run.sh
 
 ## Step 6: run the headless verification
 
-Verify the `Provisioning:` scenario through `scripts/sandbox/run.sh`, which drives the skill under `claude -p` and returns without holding a terminal. One arm per invocation. Never sweep the `Queued:` list, which is what keeps the spend inside the $0.10 to $0.25 a run costs.
-
-Derive the arguments from the Step 2 mapping:
-
-- Target: `<category>:<rest>` from the scenario path `scripts/sandbox/<category>/<rest>.sh`
-- Prompt: `/canon:<skill-name>` with no arguments. The qualified form resolves through `--plugin-dir` whether or not the branch changed the skill, and a bare `/<skill-name>` resolves only for the ones the sandbox injects.
-- Arm: required for a multi-arm scenario, omitted for a single-arm one
-
-```bash
-scripts/sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
-```
-
-Resolve the arm at Step 4, before the report prints. Grep the scenario file for `select_or_route_scenario`, which is what a multi-arm scenario calls. Roughly half the catalog declares it, so treat the multi-arm case as ordinary rather than exceptional.
-
-A multi-arm scenario run with no arm never reaches the skill session. `run.sh` forwards the arm to `manage-sandbox.sh`, which sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives one, so an empty arm leaves both unset and `select_or_route_scenario` falls through to the picker. The picker aborts on a missing TTY, which is every agent-driven run, and it blocks on input when a TTY is attached. Passing `CANON_NON_INTERACTIVE=1` to dodge that is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose.
-
-Do not guess the arm from the scenario file. Ask the user: `Arm for <category>:<rest>? (arm name, or "none" to skip verification)`. Accept `none` as the `no-mechanism` gate. This mirrors the question Step 2a already asks when a skill maps to no scenario.
-
-Print the target, prompt, and arm before running, since a wrong pairing is invisible in the verdict alone. A scenario that needs prompt arguments is a case to report, not to guess at.
-
-Report the verdict. Do not assert it. `run.sh` merges a `verdict` object into the JSON envelope on stdout carrying `state`, `asserted`, `failed`, and `unchecked`. Print `state` as it came back, and say so when it is `unchecked`, which means the arm declared no expectations and the run asserted nothing.
-
-Do not read `unchecked` as a pass or convert it into a failure. `--strict` covers a caller that has finished arming.
-
-Do not fix a failing verdict. The skill surfaces the result and the user decides.
-
-Print one line after the run:
-
-```plaintext
-Verification: <state>  <category>:<rest>  →  <asserted> asserted, <failed> failed, <unchecked> unchecked
-```
+Verify the `Provisioning:` scenario, one arm, through `scripts/sandbox/run.sh`. Read `.claude/skills/internal-sandbox-check/references/headless.md` on reaching this step for the arguments, the verdict report, and the gate vocabulary. Never sweep the `Queued:` list, and do not fix a failing verdict.
 
 Skip the run and print `Verification: skipped  <category>:<rest>  →  gate: <label>` when either condition holds:
 
@@ -207,18 +134,6 @@ Skip the run and print `Verification: skipped  <category>:<rest>  →  gate: <la
 - `credentials`: the scenario file declares a `use_anchor` function and `gh auth status` fails. Those scenarios push to a private remote, so the failure is the credential rather than the skill. Check both before running, since no precondition catches this and a missing credential otherwise surfaces as a push error naming the host.
 
 Skip this step when no pairing carries a scenario, the same condition Step 5 names. There is no scenario to verify.
-
-### Gate vocabulary
-
-An item shipping without live verification names exactly one gate. Cost, credentials, and no-mechanism are different facts with different fixes, and a report that collapses them lets an affordable run and an impossible one read the same.
-
-| Gate           | What it blocks                                                  | Who clears it                                |
-| -------------- | --------------------------------------------------------------- | -------------------------------------------- |
-| `no-mechanism` | An arm with no scenario, or a claim no assertion kind carries   | A task that writes the scenario or assertion |
-| `credentials`  | The `use_anchor` scenarios, off an authenticated machine        | The operator, once                           |
-| `cost`         | Nothing at this scale. One arm sits inside the documented range | Nobody, it is already affordable             |
-
-Use `cost` only for a sweep across the catalog the user asked for. A single arm never earns it.
 
 ## Do not
 
