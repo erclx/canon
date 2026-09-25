@@ -346,7 +346,7 @@ A catalog entry is a description under a link, written as several short sentence
 
 A roll-call enumeration is the same shape inside a paragraph, where each sentence names one item and disposes of it. Converting to a bullet list is the fix where the surrounding file already carries lists, and the exemption holds where the file is a record nothing should restructure.
 
-A skill's `## Gap` section is the one place that list conversion is wrong even though the file carries lists. `standards/skill.md` fixes `## Gap` as prose and `## Must` as the list beneath it, so bulleting the gaps makes the two sections structurally identical and drops the distinction the template exists to draw. A paragraph split at the seam is what those take instead.
+A skill's `## Gap` section is the one place that list conversion is wrong even though the file carries lists. `standards/skill-requirement.md` fixes `## Gap` as prose and `## Must` as the list beneath it, so bulleting the gaps makes the two sections structurally identical and drops the distinction the template exists to draw. A paragraph split at the seam is what those take instead.
 
 A frozen record under `scripts/eval/` is evidence rather than prose, and its own banner sets the scope. `result-context.md` and `result-wireframes.md` refuse every edit. `result-seed.md` refuses edits to its quoted and machine-derived blocks while stating that the operator-written judgment sections do follow prose standards, which puts those sections inside a sweep rather than outside it. Read the banner per file rather than taking the folder as one class, since a plan naming the folder exempts prose the banner governs.
 

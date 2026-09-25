@@ -5,7 +5,7 @@ description: Measuring both skill corpora against standards/skill.md, the checks
 
 # Skill audit
 
-`canon claude skills audit [path]` reports both skill corpora against the rules `standards/skill.md` states mechanically. It reads and reports. Fixing what it finds is separate work.
+`canon claude skills audit [path]` reports both skill corpora against the rules `standards/skill.md` and `standards/skill-requirement.md` state mechanically. It reads and reports. Fixing what it finds is separate work.
 
 ```bash
 canon claude skills audit
@@ -45,7 +45,7 @@ Each finding names the file and the line, such as `claude/skills/<name>/referenc
 
 ## What it leaves alone
 
-The report names its own blind spots on every run, including the run where everything passed. Whether each `Must` traces to a stated gap is the rule in that standard worth the most and no parser reads it. Whether a gap states an observed failure rather than an intent, and whether a description routes, are the same kind of judgment. The 150-line body checkpoint is the one mechanical rule still absent here, and adding it would print a count rather than a defect, since the standard makes it a prompt to look with nothing enforcing it.
+The report names its own blind spots on every run, including the run where everything passed. Whether each `Must` traces to a stated gap is the rule in the requirement standard worth the most and no parser reads it. Whether a gap states an observed failure rather than an intent, and whether a description routes, are the same kind of judgment. The 150-line body checkpoint is the one mechanical rule still absent here, and adding it would print a count rather than a defect, since the standard makes it a prompt to look with nothing enforcing it.
 
 The date check reads ISO dates alone. A date written in words, a month with no day, and provenance carrying no date at all pass it.
 

@@ -74,7 +74,7 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 - `governance/rules/claude/502-mermaid.md` → `canon standards mermaid`, opening on the condition its glob cannot express, since a path match cannot read whether the file holds a fence.
 - `governance/rules/claude/562-session.md` → `canon standards session`, without restating the own-file, worktree-root, compaction-only, or citation rules, and keeps the routing bullet pointing at `555-tasks.md`.
 - `governance/rules/claude/563-ready.md` → `canon standards ready`, without restating the folder-name, overview-frontmatter, mirrored-tree, or thin-plan rules. Not moot: no plugin skill creates the folder, so a governance-only target reaches it by hand-authoring against the standard.
-- `governance/rules/claude/570-skill.md` → `canon standards skill`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
+- `governance/rules/claude/570-skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
 - `governance/rules/claude/580-readme.md` → `canon standards readme`, without restating the audience-and-voice rules.
 - `governance/rules/claude/590-rule-authoring.md` → `canon standards rule`, without restating the numbering or body rules.
 - `governance/rules/claude/591-standard-authoring.md` → `canon standards standard`, without restating the scope-statement rules.

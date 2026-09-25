@@ -30,6 +30,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Requirements reference](requirements.md): Shape and content rules for canon/REQUIREMENTS.md
 - [Governance rule reference](rule.md): Rule frontmatter, body shape, and voice for .claude/rules files
 - [Session map reference](session.md): Filename and location, the sections a handoff carries, the write and read procedures, and how a role extends it
+- [Skill requirement reference](skill-requirement.md): Shape and content rules for the REQUIREMENT.md beside a skill
 - [Claude skill reference](skill.md): Claude skill structure and authoring rules
 - [Slug reference](slug.md): Transform from a git branch name to a slug, and the three responses to an empty result
 - [Snippet reference](snippets.md): Snippet reference and authoring conventions
