@@ -9,7 +9,7 @@ description: DESIGN.md token shape, extract skill and its two paths, render comm
 
 `canon/DESIGN.md` holds visual intent as prose and token tables. The toolkit treats it as the tool-agnostic source of truth for any project's design system. Two surfaces sit around it: a Claude Code skill drafts the file from existing project signals, and a CLI command renders a token preview for human inspection.
 
-This repository's own record is the one that is generated rather than authored. `src/design/tokens.ts` holds the values and `canon design regen` renders both the record and `src/design/base.css` from it, which the `design` gate stage asserts for drift. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
+This repository's own record is the one that is generated rather than authored. `src/design/tokens.ts` holds the values and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
 
 ## Layout
 
@@ -18,6 +18,7 @@ This repository's own record is the one that is generated rather than authored. 
 - `src/design/document.ts` renders the record, `css.ts` renders the stylesheet, and `regen.ts` writes both through `canon design regen`
 - `src/design/parse.ts` and `render.ts` own the markdown parser and the preview renderer, which serve a target's hand-authored record
 - `src/design/adapter.ts` owns the sync adapter, and `src/design/base.css` is the generated file it installs
+- `src/design/neutral.ts` owns the neutral token set `base.css` renders from, sharing every non-color token with `TOKENS` by spread and held to the same color roles by `neutral.test.ts`
 - `src/design/contrast.ts` owns the WCAG reading, asserted over the record in `contrast.test.ts`
 - `claude/skills/design-extract/` owns the skill that drafts the file, from an existing codebase or from a greenfield project
 - `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/460-design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it. Building an already-decided surface stays outside the glob, so a project styling entirely in utility classes is not reached
@@ -31,6 +32,7 @@ This repository's own record is the one that is generated rather than authored. 
 - Switching paths later is a rewrite of `DESIGN.md`, not a migration.
 - Output is one-way. DESIGN.md is source, the preview is a derived artifact. The renderer does not mutate target-project stylesheets. It regenerates on demand, not on save.
 - The toolkit's own record is rendered from `src/design/tokens.ts` rather than authored. Leaving the document as the source was the alternative, and it costs more: a table a person edits is one a parser has to be taught to read back, where a module is checked by the compiler. The cost of the module approach is two artifacts from one source, and the `design` gate stage is the only thing that catches them disagreeing.
+- A target inherits a neutral base rather than this repository's palette. `canon design install` ships greys at chroma 0 and a monochrome accent, keeping only the two success greens, since a state color is a meaning rather than a palette. Changing the wording of the seed and the extract skill's examples alone was the alternative, and it leaves every installed target rendering this repository's red. The cost is a second color list the `design` gate stage cannot compare against `TOKENS`, which the role parity test in `neutral.test.ts` stands in for.
 - Three surfaces consume that module. The slide theme takes bare hex through `bareHex`, since `PptxGenJS` receives `{ color: theme.background }` and PowerPoint has no concept of a custom property. The token preview's own chrome and a teach workspace stylesheet take custom properties through `@/design/css`. The hero and the terminal framing carry their own copies still, so the record is the source for three surfaces and a description of two.
 - The consolidated dark set is the palette the hero already draws, so no capture needs to move. It also clears one of the two contrast failures: the hero's rust reads 5.77 and 5.36 against the two dark grounds, while the slide theme's reads 4.36 and 3.99.
 - The component layer lives in `src/design/components.ts` rather than in the record, because `standards/design.md` keeps CSS class names out of that document and says they live in code. `TEACH_COMPONENTS`, the six-entry teach chrome (masthead, article, quiz, glossary, outline, references), sits beside the generic default rather than inside it, a caller opts into by passing an explicit list to `buildDesignCss`'s `components` option, which keeps a masthead and a quiz out of a project that never asked for teach.
