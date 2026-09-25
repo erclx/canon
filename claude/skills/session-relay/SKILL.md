@@ -14,9 +14,9 @@ own `## The channel` section where the session holds a role.
 
 It fires for a session holding a role and for one holding none. A roleless
 session reaches this body directly and finds everything it owes stated here,
-rather than reading a ladder written for a role it does not have. No rule and
-no other skill carries the send mechanics or the timing of a block against a
-prompt, so this body is the only place either is stated.
+rather than reading a ladder written for a role it does not have. This body
+alone holds the send mechanics and the reason a block goes out before a prompt.
+A calling role or dispatch states only that the message is owed.
 
 ## Step 1: name the sender
 

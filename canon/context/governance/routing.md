@@ -69,7 +69,7 @@ A rule with no `paths:` key arrives unconditionally, so the argument runs harder
 
 #### Rules that always load
 
-No rule carries the channel between sessions. `session-relay` owns the send and the timing of a block against a prompt, and each role body and each dispatch states only which message it owes. A core rule once stated the addressing and the timing for a session holding neither worker nor planner role, loading into every session in every governed target since no glob exists for a session's own role. It pointed that session at two role ladders it did not hold and never named the relay, and the operator retired it in intake 118.
+No rule carries the channel between sessions. `session-relay` owns the send mechanics and the reason a block goes out before a prompt, and each role body and each dispatch states only which message it owes and that it goes out first. A rule for a session holding neither worker nor planner role would load into every session in every governed target, since no glob exists for a session's own role, and the relay already serves that session directly.
 
 The retirement is a stated exception to the cut test under "What an always-loaded bullet has to carry alone" below. A project installing governance without the plugin receives no surface carrying block-before-prompt, so a roleless session there goes without it. The operator accepted that cost over a rule paying its bytes in every session of every governed target.
 
