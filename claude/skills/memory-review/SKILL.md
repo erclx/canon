@@ -176,7 +176,7 @@ As each item resolves, update its status in the review file: flip the H2 emoji f
 
 ### Sweep the receipt
 
-Count the items still pending once the parse above has run. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot reads neither `apply` nor `skip`, since a receipt written by hand or by an older binary may lack the marker. Apply leaves one pending on `defer`, on empty, and on any unrecognized verb, so a receipt reaching this point may still be holding decisions.
+Count the items still pending once the parse above has run. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot holds nothing the parse above would act on or skip, since a receipt written by hand or by an older binary may lack the marker. Apply leaves one pending on `defer`, on empty, and on any unrecognized verb, so a receipt reaching this point may still be holding decisions.
 
 Leave the receipt in place when any remain. When none do, collect it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, which owns what a fold writes and which entry types take one.
 

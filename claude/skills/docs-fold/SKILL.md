@@ -232,7 +232,7 @@ What that removes is a local-only review on a branch deleted before it opened a 
 
 Memory receipts sweep board-wide rather than by slug. Scan every `.canon/memory/review/memory-review-*.md`, not only the one matching this slug. `memory-review` writes its receipt after this skill has run in every ship chain, so a sweep keyed on the current slug looks for a file that does not exist yet, and no later branch looks for it either because a slug is unique per feature. Scanning the folder is what makes the sweep fire at all.
 
-For each receipt, count the H2 items still pending. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot reads neither `apply` nor `skip`, since a receipt written by hand or by an older binary may lack the marker, and `memory-review` Apply leaves every other slot value undecided:
+For each receipt, count the H2 items still pending. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot holds nothing `memory-review` Apply would act on or skip, since a receipt written by hand or by an older binary may lack the marker, and Apply's parse leaves every other slot value undecided:
 
 - No pending item: fold it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, then delete the receipt.
 - Any pending item: leave it and report the count. Pending items are decision state, and a branch shipping is not an operator deciding them.
