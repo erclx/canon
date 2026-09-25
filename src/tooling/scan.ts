@@ -2,7 +2,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections } from '@/tooling/gitignore'
-import { ancestorsFirst, listFiles, type Manifest } from '@/tooling/manifest'
+import {
+  ancestorsFirst,
+  configPaths,
+  listFiles,
+  type Manifest,
+} from '@/tooling/manifest'
 import {
   collectDeps,
   collectScripts,
@@ -63,10 +68,13 @@ function isIdentical(a: string, b: string): boolean {
  * stack first, while dependencies and gitignore entries resolve from the
  * furthest ancestor inward.
  *
- * A target below its git toplevel is scanned as a subfolder: a path GitHub
- * reads only at the root moves to `withheld` and counts as no change, and the
- * nested spell config joins the seeds. The scope is read here so every caller
- * of `scan` agrees without passing a flag.
+ * A seed at a path the chain also ships as a config is left to the config,
+ * so the path is reported once.
+ *
+ * A target below its git toplevel is scanned as a subfolder: a config or seed
+ * GitHub reads only at the root moves to `withheld` and counts as no change,
+ * and the nested spell config joins the seeds. The scope is read here so every
+ * caller of `scan` agrees without passing a flag.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)
@@ -98,12 +106,21 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   }
 
   const seeds: SeedState[] = []
-  const seenSeeds = new Set<string>()
+  const seenSeeds = configPaths(chain)
 
   for (const manifest of chain) {
     for (const rel of listFiles(manifest.seedsDir)) {
       if (seenSeeds.has(rel)) continue
       seenSeeds.add(rel)
+
+      if (isSubfolder && isWithheldInSubfolder(rel)) {
+        withheld.push({
+          rel,
+          stack: manifest.name,
+          present: existsSync(join(target, rel)),
+        })
+        continue
+      }
 
       seeds.push({
         rel,

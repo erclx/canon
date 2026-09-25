@@ -15,8 +15,6 @@ Golden config files live in `tooling/base/configs/` and are copied into the targ
 - `.editorconfig`: `root = true`, with an `[*.sh]` block setting `indent_style = space` and `indent_size = 2`.
 - `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, and `subject-case` disabled.
 - `.husky/`: `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, `post-rewrite`.
-- `.github/workflows/verify.yml`: runs on pull requests targeting `main` and on `workflow_dispatch`.
-- `.github/pull_request_template.md`: `## Summary`, `## Key Changes`, `## Technical Context`, `## Testing`.
 - `.vscode/extensions.json` and `.vscode/settings.json`: editor wiring for Prettier, cspell, shfmt, and shellcheck.
 - `scripts/verify.sh`: the maintenance entry point behind `check`.
 
@@ -28,6 +26,8 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.cspell/project-terms.txt` and `.cspell/tech-stack.txt`: one word per line, sorted alphabetically.
 - `.lintstagedrc`: the glob map below.
 - `.prettierignore`: created empty. Projects add their own entries.
+- `.github/workflows/verify.yml`: runs on pull requests targeting `main` and on `workflow_dispatch`. A project with more than one language root adds its own jobs here.
+- `.github/pull_request_template.md`: `## Summary`, `## Key Changes`, `## Technical Context`, `## Testing`. A project adds the checklist lines its own review needs.
 - `canon/context/`: extend the `ci` and `development` entries with project-specific commands, workflows, or deploy steps. Canonical rationale stays in this reference.
 
 ## Tool pairing

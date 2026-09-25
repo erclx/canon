@@ -60,7 +60,8 @@ check_capability "Hooks" "$PROJECT_ROOT/.claude/hooks" \
   "$PROJECT_ROOT"/tooling/claude/seeds/.claude/hooks/*
 
 check_capability "Workflows" "$PROJECT_ROOT/.github/workflows" \
-  "$PROJECT_ROOT"/tooling/*/configs/.github/workflows/*
+  "$PROJECT_ROOT"/tooling/*/configs/.github/workflows/* \
+  "$PROJECT_ROOT"/tooling/*/seeds/.github/workflows/*
 
 check_capability "Husky" "$PROJECT_ROOT/.husky" \
   "$PROJECT_ROOT"/tooling/base/configs/.husky/*
@@ -90,7 +91,8 @@ check_orphans() {
 check_orphans "Hooks" "$PROJECT_ROOT/.claude/hooks" \
   "$PROJECT_ROOT/tooling/claude/seeds/.claude/hooks"
 
-for dir in "$PROJECT_ROOT"/tooling/*/configs/.github/workflows; do
+for dir in "$PROJECT_ROOT"/tooling/*/configs/.github/workflows \
+  "$PROJECT_ROOT"/tooling/*/seeds/.github/workflows; do
   check_orphans "Workflows" "$PROJECT_ROOT/.github/workflows" "$dir"
 done
 

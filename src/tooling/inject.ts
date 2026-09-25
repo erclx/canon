@@ -6,7 +6,12 @@ import { copyPreservingMode } from '@/copy'
 import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
 import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
-import { ancestorsFirst, listFiles, type Manifest } from '@/tooling/manifest'
+import {
+  ancestorsFirst,
+  configPaths,
+  listFiles,
+  type Manifest,
+} from '@/tooling/manifest'
 import {
   applyScripts,
   collectDeps,
@@ -97,9 +102,14 @@ export async function injectSeeds(
   target: string,
 ): Promise<string[]> {
   const applied: string[] = []
+  const isSubfolder = isSubfolderTarget(target)
+  const shadowed = configPaths(chain)
 
   for (const manifest of ancestorsFirst(chain)) {
-    const files = listFiles(manifest.seedsDir)
+    const files = listFiles(manifest.seedsDir).filter(
+      (rel) =>
+        !shadowed.has(rel) && !(isSubfolder && isWithheldInSubfolder(rel)),
+    )
     if (files.length === 0) continue
 
     logStep(`Applying ${manifest.name} seeds`)
@@ -111,9 +121,7 @@ export async function injectSeeds(
     }
   }
 
-  const spellConfig = isSubfolderTarget(target)
-    ? subfolderSpellConfig(chain)
-    : undefined
+  const spellConfig = isSubfolder ? subfolderSpellConfig(chain) : undefined
   if (spellConfig !== undefined && !hasSpellConfig(target)) {
     logStep('Applying subfolder spell config')
     await writeFile(join(target, SUBFOLDER_SPELL_CONFIG), spellConfig)
