@@ -10,7 +10,7 @@ Drafts one brand-new wiki reference page end to end: read the standard, settle p
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/wiki.md`: the two placement tests, the frontmatter contract, the naming convention, the sourcing rule, and the page template
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 
 The standard's `## Placement` section names the folder a page lands in and the vendor subfolder under it. Resolve both from the project root and call them `<wiki-root>` and `<vendor>` below, so the body states the rule once and the standard stays the one owner of the path.

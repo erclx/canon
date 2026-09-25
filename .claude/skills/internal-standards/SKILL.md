@@ -9,7 +9,7 @@ Read `canon/context/standards/overview.md` for the system overview and `canon/co
 
 ## Prose rules
 
-Read `standards/markdown.md` and load the `write-human` skill before writing or editing any prose in `standards/` or `docs/`. The first is the canonical reference for banned words, spellings, formatting, and punctuation. The second carries voice, rhythm, and sentence construction, which no check settles.
+Read `standards/markdown.md` and load the `write-human` skill before writing or editing any prose in `standards/` or `docs/`. The first is the canonical reference for formatting and the banned characters. The second carries voice, word choice, rhythm, and sentence construction, which no check settles.
 
 ## Cross-references
 
@@ -27,6 +27,6 @@ When adding a standard:
 ## Reference
 
 - `canon/context/standards/index.md`: the domain catalog, with the overview, the scope model, authoring, and resolution as sub-areas
-- `standards/markdown.md`: heading, list, code, punctuation, file-reference, banned-word, and frontmatter wording rules
+- `standards/markdown.md`: heading, list, code, punctuation, file-reference, banned-character, and frontmatter wording rules
 - The `write-human` skill: voice, rhythm, sentence construction, and information density
 - `standards/standard.md`: the meta-standard for a standard's shape, scope, and frontmatter

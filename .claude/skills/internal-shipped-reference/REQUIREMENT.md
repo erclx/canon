@@ -31,4 +31,4 @@ Without this skill, a `canon/context/<name>.md` token in a shipped-corpus edit s
 
 - The four mechanically-gated forms, which `src/shipped/references.ts` and `canon gate run` own
 - Where toolkit content is authored and which copy a rule or skill cites, which the rest of `598-authoring-layout.md` states and this skill does not re-derive
-- Voice, rhythm, and banned words in the same diff, which `write-human` and `markdown.md` own
+- Voice, rhythm, word choice, and banned characters in the same diff, which `write-human` and `markdown.md` own

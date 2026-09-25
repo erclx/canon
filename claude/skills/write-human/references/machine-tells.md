@@ -5,7 +5,7 @@ description: Patterns that survive a clean ban scan, why each is invisible to a 
 
 # Machine tells
 
-Each pattern below is a shape rather than a token, so no closed word set matches it and `canon markdown audit` reports a clean exit over a passage carrying every one. Read this when revising text a model drafted, or when a passage passes the scan and still reads wrong.
+Each pattern below is a shape rather than a token, so no closed word set matches it and the character scan `canon markdown audit` runs reports a clean exit over a passage carrying every one. Read this when revising text a model drafted, or when a passage passes the scan and still reads wrong.
 
 Work top down. The first three account for most of what a reader calls machine-written.
 

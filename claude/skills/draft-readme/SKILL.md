@@ -10,7 +10,7 @@ Drafts a project's `README.md` end to end: read the standard, detect the project
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/readme.md`: voice, structure, required and optional sections, badge selection, and what to link out to rather than carry. Voice is claimed here for a repository-root README, and `write-human` yields it there while keeping rhythm, density, and the machine-tell catalog everywhere, root README included.
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: rhythm, density, and sentence construction for all generated text
 
 ## Guards

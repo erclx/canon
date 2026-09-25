@@ -27,7 +27,7 @@ Read in parallel, skipping any that do not exist:
 - `CLAUDE.md`: the project's write location and any rule it states over the folder
 - `.canon/memory/index.md`: existing index, to avoid duplicates
 - `canon/context/index.md`: the domain catalog Step 3 routes against, read under `.claude/` instead in a project the surface move has not reached
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting applied to memory file bodies
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting applied to memory file bodies
 - The `write-human` skill: voice, rhythm, and sentence construction applied to memory file bodies
 
 ## Step 2: classify candidates

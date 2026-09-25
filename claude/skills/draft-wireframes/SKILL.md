@@ -12,7 +12,7 @@ A project the surface move has not reached keeps its wireframes folder under `.c
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md`: the four questions a wireframe must answer, its frontmatter, the regions list and states table, the exclusions section, the Transcription-wireframes branch, and what moves to a context entry instead
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for the prose around the fences
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for the prose around the fences
 - The `write-human` skill: voice, rhythm, and sentence construction for the prose around the fences
 
 This skill stays fully independent of `docs-fold`'s wireframe coverage sweep, which only ever writes a bare `TODO` stub for a surface a diff touched and reports drift against one a wireframe already covers. Neither the stub nor the drift check is a draft, and this skill never reads or writes through that mechanism.

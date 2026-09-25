@@ -12,7 +12,7 @@ A project the surface move has not reached keeps its context folder under `.clau
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/context.md`: the three questions an entry must answer, its frontmatter, required and expected sections, and what stays out of it
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 
 ## Guards

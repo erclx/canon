@@ -41,7 +41,7 @@ confident merge order off a partial picture. Which rows collide, what merges
 before what, and whether a row should run at all stay with the controlling
 session, and no body states that boundary for the planning side.
 
-Nothing scans a plan for banned words either. `.gitignore` ignores
+Nothing scans a plan for ban hits either. `.gitignore` ignores
 `.canon/plans/`, and the audit's default path set is what git lists, so no gate
 ever opens one. Six ban hits landed across the four trial plans and three of the
 four carried at least one, caught only because the planner ran

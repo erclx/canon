@@ -75,7 +75,7 @@ For each changed file, audit against every rule:
 - **Pattern rules**: grep the file for every token the standard bans. Grep is authoritative. Reading alone misses occurrences.
 - **Judgment rules**: check each rule in context against the standard that states it.
 
-Every changed markdown file gets the pattern pass, since `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` applies to all of them. Take the banned tokens from that standard at read time rather than from a list held here. It carries the banned words, the banned spellings, and the banned characters together, so one read covers every token this pass greps for.
+Every changed markdown file gets the pattern pass, since `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` applies to all of them. Take the banned tokens from that standard at read time rather than from a list held here. It carries the banned characters, so one read covers every token this pass greps for.
 
 ## Step 4: report
 

@@ -13,7 +13,7 @@ Derive both segments from Step 1. Never pick a suffix by hand, and never reuse a
 
 When `<prior-oid>` from Step 2 equals `headRefOid`, the head repeats and the folder already holds `body-<number>-<short-sha>.md`. Add a third segment taking the id of the reply Step 2 resolved, giving `body-<number>-<short-sha>-r<comment-id>.md`, which is `<body-file>` on that path. That satisfies both prohibitions above rather than carving an exception into either. Step 2 already stopped the pass when that resolution came back empty, so reaching this line means the comment id is in hand.
 
-The comment is a rendered-for-human GitHub surface, so load the `write-human` skill for voice and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for the banned words: cut editorializing, and keep every sentence load-bearing. Match this shape on a first pass:
+The comment is a rendered-for-human GitHub surface, so load the `write-human` skill for voice and word choice and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation: cut editorializing, and keep every sentence load-bearing. Match this shape on a first pass:
 
 ```markdown
 ## Review

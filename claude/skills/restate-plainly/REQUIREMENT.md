@@ -38,4 +38,4 @@ A restatement also fails in a way a rewrite does not. A run that compresses by d
 - Drafting or revising a passage, which is `write-human` on a markdown edit
 - Measuring cadence in finished output, which `canon markdown audit` reports from package data
 - Rewriting a document into a file, which is a proposal against the source rather than a restatement of it
-- The banned words, characters, and spellings, which `markdown.md` states and the audit gates
+- The banned characters, which `markdown.md` states and the audit gates

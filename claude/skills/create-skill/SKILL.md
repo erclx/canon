@@ -9,7 +9,7 @@ Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/skill.md`: skill structure, skill types, frontmatter fields, invocation rules
 - `${CLAUDE_SKILL_DIR}/../../standards/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for skill body text
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for skill body text
 - The `write-human` skill: voice, rhythm, and sentence construction for skill body text
 
 ## Guards

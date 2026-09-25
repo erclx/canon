@@ -1,6 +1,6 @@
 ---
 name: write-human
-description: Carries the voice, rhythm, sentence construction, and information density rules a banned-word list cannot express, plus the catalog of machine tells that survive a clean ban scan. Use when writing or revising prose a person will read, when a passage reads flat or uniform, or when asked to "make this read like a person", "fix the cadence", "this reads like AI wrote it", "vary the sentences", or "tighten this without gutting it". Do NOT use for banned words, characters, or spellings, which `markdown.md` states and `canon markdown audit` gates, and do NOT use to restate text that already exists in plainer words, which is `restate-plainly`, whose body loads these rules from here.
+description: Carries the voice, word choice, rhythm, sentence construction, and information density rules a banned-character scan cannot express, plus the catalog of machine tells that survive a clean ban scan. Use when writing or revising prose a person will read, when a passage reads flat or uniform, or when asked to "make this read like a person", "fix the cadence", "this reads like AI wrote it", "vary the sentences", or "tighten this without gutting it". Do NOT use for banned characters, which `markdown.md` states and `canon markdown audit` gates, and do NOT use to restate text that already exists in plainer words, which is `restate-plainly`, whose body loads these rules from here.
 ---
 
 # Write human
@@ -9,7 +9,7 @@ Write prose that reads as though a person wrote it. A ban list subtracts words a
 
 Load this before drafting a passage rather than after. A revision pass recovers the words and never recovers the structure the draft already settled.
 
-The banned words, characters, and spellings sit in `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`. They stay in force here. This skill adds to them and never restates them, since `canon markdown audit` reads them from the package and a second copy would drift.
+The banned characters sit in `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`. They stay in force here. This skill adds to them and never restates them, since `canon markdown audit` reads them from the package and a second copy would drift. The word guidance under `## Voice` is the one copy of that list, and no command reads it.
 
 ## What yields and what does not
 
@@ -23,6 +23,8 @@ The banned words, characters, and spellings sit in `${CLAUDE_SKILL_DIR}/../../st
 - Use active voice, and present tense unless past or future is factually correct.
 - Name the actor in a sentence that has one. Passive voice with an unnamed actor hides who acts and reads as evasion.
 - Prefer direct verbs and plain words. Write `use` over `utilize`, `help` over `facilitate`, `is` over `serves as`.
+- Drop marketing words: `seamless`, `robust`, `powerful`, `revolutionary`, `enhanced`, `allows`, and `leverage`. Each claims a quality without showing it, so state what the thing does and let the reader judge it.
+- Drop vague qualifiers: `simply`, `just`, `easily`, `quickly`, `very`, and `really`. Cut the word where the sentence stands without it, and give the measurement where the degree matters.
 - Be direct on an established fact. Hedge on a genuinely uncertain claim and say which it is.
 - Assume developer-level knowledge. Skip the explanation the reader already carries.
 - Front-load the key information in a paragraph, and give every sentence something the reader did not have.
