@@ -9,7 +9,7 @@ Does not govern:
 - Pull request title and body: the pull request standard
 - Whether a phase label may appear in issue text: the versioning standard
 - Voice, rhythm, and sentence construction in issue prose: the `write-human` skill
-- Punctuation, formatting, and banned words in issue prose: the markdown standard
+- Punctuation and formatting in issue prose: the markdown standard
 
 ## Title
 

@@ -5,7 +5,7 @@ description: Readme voice, structure, and content conventions
 
 # Readme reference
 
-Applies to every `README.md`. The `## Voice` section states the voice for a repository's root README, so the `write-human` skill yields to it there. The yield covers voice alone. The rhythm and density rules that skill carries stay in force, as do the spelling rules, banned words, punctuation, and formatting in `markdown.md`, so the warmer register ships with the same hygiene: no em dashes, no semicolons, no buzzwords.
+Applies to every `README.md`. The `## Voice` section states the voice for a repository's root README, so the `write-human` skill yields to it there. The yield covers voice alone. The rhythm and density rules that skill carries stay in force, as does the word-choice guidance that travels with them, and so do the punctuation and formatting in `markdown.md`, so the warmer register ships with the same hygiene: no em dashes, no semicolons, no marketing words.
 
 The reader is what changes. Reference prose serves someone who already committed to the project and is scanning for a fact. A root README meets someone deciding whether to commit at all, and it is often the only file they read.
 
@@ -16,7 +16,7 @@ Governs every `README.md`: voice, heading structure, required and optional secti
 Does not govern:
 
 - Rhythm and sentence construction in README prose: the `write-human` skill, which yields the voice and keeps the rest
-- Spelling, banned words, punctuation, and formatting in README prose: `markdown.md`, which yields nothing
+- Punctuation and formatting in README prose: `markdown.md`, which yields nothing
 - Product scope and goals: `requirements.md`
 - The consumer-facing reference under `docs/`, whose reader has already committed and is operating the project: `docs.md`
 

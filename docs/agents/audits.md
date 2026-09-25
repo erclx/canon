@@ -36,7 +36,7 @@ Each is invoked as the CLI the caller is running rather than as a global `canon`
 
 ## What gates and what reports
 
-Five findings fail the run: an unresolved context citation, a banned character, word, or spelling, a relative link resolving to nothing on disk, a skill folder carrying no `REQUIREMENT.md`, and a credential-shaped value in the tree the package ships. Each is a fact with no false-positive class behind it.
+Five findings fail the run: an unresolved context citation, a banned character, a relative link resolving to nothing on disk, a skill folder carrying no `REQUIREMENT.md`, and a credential-shaped value in the tree the package ships. Each is a fact with no false-positive class behind it.
 
 Four of the five are the ones `canon gate run` already fails a push on. The secret scan is the one entry gating without a stage behind it, added on that same fact-or-judgment test rather than as a side effect of registering a measure, and the toolkit already ranks content leaving the repository above content that stays.
 

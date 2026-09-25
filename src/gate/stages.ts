@@ -97,7 +97,6 @@ export const TEST_CORPORA_PATTERNS = [
   '^standards/markdown\\.md$',
   '^tooling/base/reference\\.md$',
   '^tooling/web/configs/scripts/worktree-port\\.sh$',
-  '^\\.cspell/banned-spellings\\.txt$',
   '^scripts/lib/worktree\\.sh$',
   '^scripts/core/check-ignore-parity\\.sh$',
 ]

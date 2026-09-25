@@ -28,12 +28,11 @@ esac
 
 [ -f "$file" ] || exit 0
 
-# The audit verb owns the ban sets, so this hook carries no copy of them. The
-# awk this replaces parsed the word bans out of the project's own standards,
-# hardcoded the em-dash and semicolon, and reached none of the spellings, so a
-# British spelling passed at edit time and a corpus check caught it later with
-# nothing in between explaining the difference. A ban class added to the verb
-# now reaches this hook without an edit here.
+# The audit verb owns the ban set, so this hook carries no copy of it. The awk
+# this replaces parsed its bans out of the project's own standards and
+# hardcoded the rest, so edit time and a later corpus check could disagree with
+# nothing in between explaining the difference. A ban added to the verb now
+# reaches this hook without an edit here.
 #
 # The verb resolves its own paths under the cwd, so the project root is named
 # rather than inherited. The payload carries an absolute file path, which is

@@ -3,90 +3,44 @@ import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
 import { bodyLines, scanBans } from '@/markdown/scan'
 
 /**
- * The sets as they shipped when they moved out of the standards.
- *
- * These are asserted rather than snapshotted so a widening or a narrowing of
- * any set fails here and names which one moved. The move was a relocation
- * rather than a loosening, and this is what holds it to that: the same 21
- * terms the parsed sets carried at `60fc97bf`.
+ * The one set the audit measures, asserted rather than snapshotted so a
+ * widening or a narrowing fails here and names what moved.
  */
 const CHARACTERS = ['—', ';']
 
-const WORDS = [
-  'seamless',
-  'robust',
-  'powerful',
-  'revolutionary',
-  'enhanced',
-  'allows',
-  'leverage',
-  'simply',
-  'just',
-  'easily',
-  'quickly',
-  'very',
-  'really',
-]
-
-const SPELLINGS = [
-  'organise',
-  'summarise',
-  'recognise',
-  'behaviour',
-  'colour',
-  'centre',
-]
-
 describe('BAN_SETS', () => {
-  it('should ship the characters the punctuation rule states', () => {
-    expect(BAN_SETS.characters).toEqual(CHARACTERS)
+  it('should ship the characters the punctuation rule states and nothing else', () => {
+    expect(BAN_SETS).toEqual({ characters: CHARACTERS })
   })
 
-  it('should ship the words the language rule states', () => {
-    expect(BAN_SETS.words).toEqual(WORDS)
-  })
-
-  it('should ship the spellings the language rule reaches', () => {
-    expect(BAN_SETS.spellings).toEqual(SPELLINGS)
-  })
-
-  it('should report one hit for each term the audit measures', () => {
-    const terms = [...CHARACTERS, ...WORDS, ...SPELLINGS]
-    const lines = bodyLines(terms.map((term) => `A ${term} line.`).join('\n'))
+  it('should report one hit for each character the audit measures', () => {
+    const lines = bodyLines(
+      CHARACTERS.map((term) => `A ${term} line.`).join('\n'),
+    )
 
     const found = scanBans(lines, BAN_SETS)
 
-    // One line per term and one term per line, so a count matching the set is
-    // the whole set reaching the scan rather than a subset reaching it twice.
-    expect(found).toHaveLength(terms.length)
-    expect(new Set(found.map((hit) => hit.term))).toEqual(new Set(terms))
+    expect(found.map((hit) => hit.term)).toEqual(CHARACTERS)
   })
-})
 
-describe('.cspell/banned-spellings.txt', () => {
-  it('should list every shipped spelling plus the one only a comment names', async () => {
-    const text = await Bun.file('.cspell/banned-spellings.txt').text()
-    const listed = text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0 && !line.startsWith('#'))
+  it('should report nothing for a word or spelling the audit used to ban', () => {
+    // The words moved to `write-human` as guidance and spelling went to cspell,
+    // so a line carrying both must come back clean rather than half-reported.
+    // cspell:disable-next-line
+    const lines = bodyLines('We leverage it and just check the behaviour.')
 
-    // `analyse` is in no set. A comment in `bans.ts` explains why the old
-    // derivation never reached it, and the word has to spell correctly there.
-    expect(listed).toEqual([...SPELLINGS, 'analyse'].sort())
+    expect(scanBans(lines, BAN_SETS)).toEqual([])
   })
 })
 
 describe('emptyBanSets', () => {
-  it('should name no set when every one carries a term', () => {
+  it('should name no set when the characters carry a term', () => {
     expect(emptyBanSets()).toEqual([])
   })
 
-  it('should name each set that arrived empty', () => {
+  it('should name the characters when they arrived empty', () => {
     // Absent is not empty. A scan with no terms finds nothing, and reporting
     // that as a clean file claims the prose passed when nothing was looked for.
-    const found = emptyBanSets({ characters: [], words: WORDS, spellings: [] })
-
-    expect(found).toEqual(['characters', 'spellings'])
+    expect(emptyBanSets({ characters: [] })).toEqual(['characters'])
   })
 })

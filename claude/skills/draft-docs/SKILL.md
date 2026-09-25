@@ -10,7 +10,7 @@ Drafts one brand-new `docs/*.md` page end to end: read the standard, decide wher
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/docs.md`: the reader a page serves, its frontmatter, structure, and what it links out to rather than restates
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words, punctuation, and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 
 ## Guards

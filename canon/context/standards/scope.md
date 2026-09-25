@@ -29,7 +29,7 @@ A standard states its rule and never what enforces it here. These files install 
 
 That prohibition runs one direction only. A path-scoped rule may carry the operative directives of the standard it points at, since the rule arrives attached to the edit while a pointer reaches a session only if that session opens the file. The standard keeps the full specification and the rule keeps what a session must have on arrival, so a drift is a rule falling behind rather than two files disagreeing. Nothing checks it.
 
-The rule pointing at `markdown.md` may carry operative directives like any other, since the three ban sets it enforces ship as package data `canon markdown audit` reads rather than as prose a rule would otherwise restate.
+The rule pointing at `markdown.md` may carry operative directives like any other, since the character bans it enforces ship as package data `canon markdown audit` reads rather than as prose a rule would otherwise restate.
 
 `500-prose` stays pointer-only on a different argument. What it routes to is the `write-human` skill rather than a standard, and the guidance there is judgment stated across a body and three references, so a rule reproducing part of it would ship the compressible half and leave the half that does the work behind. The rule loads on the glob and carries an explicit instruction to load the skill, so the instruction arrives with certainty and what follows is an instruction being followed rather than a description being matched.
 

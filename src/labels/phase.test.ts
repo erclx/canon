@@ -376,11 +376,7 @@ describe('scanPhaseLabels', () => {
   it('should find no board identifier in the markdown ban sets, which are scanned inside the repository', () => {
     const result = scanPhaseLabels({
       title: 'fix: restate the ban sets',
-      body: [
-        ...BAN_SETS.characters,
-        ...BAN_SETS.words,
-        ...BAN_SETS.spellings,
-      ].join(' '),
+      body: [...BAN_SETS.characters].join(' '),
       headRefName: FEATURE_HEAD,
     })
 

@@ -210,7 +210,7 @@ beforeAll(() => {
   const narrowed = join(fixture, 'bin-empty-set/canon')
   writeFileSync(
     narrowed,
-    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[],"bans":{"emptySets":["words"]}}'\n`,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[],"bans":{"emptySets":["characters"]}}'\n`,
   )
   chmodSync(narrowed, 0o755)
 
@@ -697,7 +697,7 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
         join(fixture, 'no-source'),
       )
 
-      expect(result.stdout).toContain('words')
+      expect(result.stdout).toContain('characters')
       expect(result.stdout).toContain('narrowed set')
       expect(result.code).toBe(0)
     },
@@ -779,7 +779,7 @@ describe('seeds standards-audit.sh runner', () => {
       const result = await run(hook, payload(), path)
 
       expect(result.stdout).toContain('shipped ban set is empty')
-      expect(result.stdout).toContain('words')
+      expect(result.stdout).toContain('characters')
       expect(result.code).toBe(0)
     },
   )

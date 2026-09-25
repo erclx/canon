@@ -34,4 +34,4 @@ All `.sh` files live under `scripts/`. Do not place shell scripts outside `scrip
 
 - `pre-commit` runs `lint-staged` (prettier, cspell, shfmt, shellcheck on staged files).
 - `commit-msg` runs `commitlint` against the conventional commit format.
-- `pre-push` runs `bun run check`. When a markdown-bans audit tool is on PATH, it also gates on banned characters, words, and spellings across every tracked markdown file except `CHANGELOG.md`. After pushing, run `git status`. If files changed, commit the diff as `style(<scope>):` and push again.
+- `pre-push` runs `bun run check`. When a markdown-bans audit tool is on PATH, it also gates on banned characters across every tracked markdown file except `CHANGELOG.md`. After pushing, run `git status`. If files changed, commit the diff as `style(<scope>):` and push again.

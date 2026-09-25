@@ -61,7 +61,7 @@ Widening the gate by location was the alternative, and it would silence a real s
 
 The Types and Tests stages are scoped to changed files, and several `src/` test files assert over a corpus outside `src/`. Tests runs on a change to a corpus the census names and skips every other markdown-only push, so a corpus the census has not named breaks a test nothing in that push runs. `canon/context/development/tests.md` holds the census and the command to run beside each corpus.
 
-The markdown checkpoints are not one of them. `CHECKPOINTS` and the three ban sets ship as literals in `src/markdown/`, and `src/markdown/structure.test.ts` asserts those numbers against itself rather than reading them back off `standards/markdown.md`. Editing a standard that states one of those numbers therefore fails nothing, and the drift between the prose and the shipped value is caught by whoever edits or not at all. `.cspell/banned-spellings.txt` is the file on this surface that a `src/` test does still assert over, through `src/markdown/bans.test.ts`.
+The markdown checkpoints are not one of them. `CHECKPOINTS` and the ban set ship as literals in `src/markdown/`, and `src/markdown/structure.test.ts` asserts those numbers against itself rather than reading them back off `standards/markdown.md`. Editing a standard that states one of those numbers therefore fails nothing, and the drift between the prose and the shipped value is caught by whoever edits or not at all.
 
 ### The consumed-copies stage fails on its own regeneration
 

@@ -58,22 +58,6 @@ describe('isGating', () => {
     expect(isGating(input)).toBe(true)
   })
 
-  it('should fail a banned word', () => {
-    const input = makeInput({
-      bans: [makeBan({ kind: 'word', term: 'leverage' })],
-    })
-
-    expect(isGating(input)).toBe(true)
-  })
-
-  it('should fail a banned spelling', () => {
-    const input = makeInput({
-      bans: [makeBan({ kind: 'spelling', term: 'behaviour' })],
-    })
-
-    expect(isGating(input)).toBe(true)
-  })
-
   it('should leave a heavy bullet advisory', () => {
     const input = makeInput({
       structure: [

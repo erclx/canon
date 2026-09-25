@@ -18,7 +18,7 @@ Read these in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/figures.md`: when a figure earns its place, the render-first policy, wrapping and captioning, and the color and accessibility rules
 - `${CLAUDE_SKILL_DIR}/../../standards/mermaid.md`: direction and layout, node and edge budgets, the accessibility fields, and how a render is verified, for the Mermaid path
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: banned words and formatting for the caption prose
+- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: formatting for the caption prose
 - The `write-human` skill: voice and rhythm for the caption prose
 
 ## Step 2: does it earn its place

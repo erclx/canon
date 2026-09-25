@@ -65,10 +65,6 @@ The pathspec matches by name rather than by how a file changed, so an unstaged h
 
 ### Spelling exemptions
 
-`.cspell/banned-spellings.txt` is a third dictionary holding the British spellings `canon markdown audit` reports, and an `overrides` entry in `cspell.json` scopes it to the files that carry, assert, or explain the set rather than loading it repo-wide. Both gate a push, the spell check over the whole tree and the audit over its ban half, so a repo-wide load would spell-approve everywhere the words the ban gate still fails on. A file that needs one of them is added to the override list, never to `project-terms.txt`, which reads as vocabulary this repository writes.
-
-Its membership is the shipped `SPELLINGS` plus `analyse`, a word no set carries and a comment in `src/markdown/bans.ts` explains the absence of. The two are therefore not the same list and neither derives from the other, which is what `bans.test.ts` asserts.
-
 cspell has no way to recognize a base64 payload as non-prose, so a generated TypeScript module holding one as a string literal, such as `src/design/fonts.ts` embedding WOFF2 font data, floods `check:spell` with an unknown-word finding for nearly every substring. Add the file's path to `cspell.json`'s `ignorePaths` rather than growing `project-terms.txt` with meaningless fragments, the way `tooling/**` is exempted wholesale.
 
 A path-level entry exempts a whole file, which is too wide for a percent-encoded data URI sitting in one line of ordinary prose, such as an inline SVG favicon in a shipped skill body. Each percent-encoded angle bracket glued to the tag name after it reads as one unknown word. `cspell.json`'s `ignoreRegExpList` closes this at the substring instead: a pattern matching from `data:image/svg+xml,` to the next `"` skips the encoded segment without exempting the prose around it.

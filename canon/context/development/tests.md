@@ -18,7 +18,6 @@ The array and the list below are two copies of one set with nothing comparing th
 - `governance/rules/` category folders: `bun --bun vitest run src/gov/adapter.test.ts`
 - `standards/markdown.md`: `bun --bun vitest run src/standards/read.test.ts`
 - `tooling/base/reference.md`: `bun --bun vitest run src/tooling/read.test.ts`
-- `.cspell/banned-spellings.txt`: `bun --bun vitest run src/markdown/bans.test.ts`
 - `.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/`: `bun --bun vitest run src/hooks-guard.test.ts`
 - `claude/skills/role-orchestrator/scripts/poll.sh`: `bun --bun vitest run src/orchestrate-poll.test.ts`
 - `tooling/web/configs/scripts/worktree-port.sh`: `bun --bun vitest run src/worktree-port.test.ts`
@@ -33,7 +32,7 @@ The census reads every file under `src/**/*.test.ts` that resolves a path outsid
 
 A temp root is not the repository root, which is the clause that decides three more. `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts` each resolve against an `mkdtempSync` directory, so a sweep reading for the resolution form alone counts too many.
 
-A file reaches the root two ways and a sweep reading for one of them undercounts. Most name a root constant, being `PROJECT_ROOT`, `import.meta.dirname`, or `process.cwd()`, and `src/markdown/bans.test.ts` names none: it passes `.cspell/banned-spellings.txt` to `Bun.file` as a bare relative path that resolves against the runner's working directory. Grep for the implicit form as well as the explicit one.
+A file can reach the root two ways and a sweep reading for one of them undercounts. Every file in the census names a root constant, being `PROJECT_ROOT`, `import.meta.dirname`, or `process.cwd()`, and none passes a bare relative path to a file read, which would resolve against the runner's working directory and name no constant at all. Grep for the implicit form as well as the explicit one, since a test added in that shape joins the census without reading as a member.
 
 ### Why Tests widened and Types did not
 

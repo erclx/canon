@@ -26,7 +26,7 @@ Scope every check below by destination. Text published to a remote takes all of 
 
 ## Banned characters
 
-`markdown.md` holds the character bans and the banned words alike. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
+`markdown.md` holds the character bans. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
 
 Restructure the sentence rather than substituting the character. A semicolon swapped for a period leaves both clauses in the order the semicolon chose, which is the shape the ban exists to remove.
 

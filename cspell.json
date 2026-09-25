@@ -13,11 +13,6 @@
       "name": "tech-stack",
       "path": "./.cspell/tech-stack.txt",
       "addWords": true
-    },
-    {
-      "name": "banned-spellings",
-      "path": "./.cspell/banned-spellings.txt",
-      "addWords": false
     }
   ],
   "dictionaries": ["project-terms", "tech-stack"],
@@ -36,19 +31,6 @@
     {
       "filename": ["**/*.html.tmpl"],
       "languageId": "html"
-    },
-    {
-      "filename": [
-        "src/markdown/bans.ts",
-        "src/markdown/bans.test.ts",
-        "src/markdown/gate.test.ts",
-        "src/markdown/scan.test.ts",
-        "src/markdown/scan.ts",
-        "canon/context/cli/audits.md",
-        "canon/context/development/verification.md",
-        "docs/agents/markdown-audit.md"
-      ],
-      "dictionaries": ["banned-spellings"]
     }
   ]
 }
