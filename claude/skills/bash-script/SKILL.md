@@ -7,7 +7,7 @@ description: Generates production Bash scripts with a visual timeline UI, state-
 
 Generate production-ready Bash scripts for DevOps and CLI workflows. Enforce strict formatting with a visual timeline UI and state-based interactivity.
 
-Load `${CLAUDE_SKILL_DIR}/references/patterns.md` for the timeline lifecycle, logging, interactive prompt, help-screen, and full-script code templates. `${CLAUDE_SKILL_DIR}` expands to this skill's own directory, so the path resolves from any project. Copy those definitions verbatim, keeping only the colors and functions the script actually uses.
+Load `${CLAUDE_SKILL_DIR}/references/patterns.md` for the timeline lifecycle, logging, help-screen, and full-script code templates, and `${CLAUDE_SKILL_DIR}/references/prompts.md` for the `ask()` and `select_option()` templates when the script prompts. `${CLAUDE_SKILL_DIR}` expands to this skill's own directory, so the path resolves from any project. Copy those definitions verbatim, keeping only the colors and functions the script actually uses.
 
 ## Guards
 
