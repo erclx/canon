@@ -21,6 +21,7 @@ import {
   SANDBOX_UNDECLARED_CEILING,
   sandboxCoverage,
   shippedReferences,
+  skillProvenance,
   visualPathGlobs,
 } from '@/gate/measures'
 import { REFERENCE_MARKER } from '@/shipped/references'
@@ -977,6 +978,72 @@ describe('architectureRecord', () => {
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toBeUndefined()
+  })
+})
+
+describe('skillProvenance', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('skillProvenance reads the corpus and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const writeSkill = (body: string): void => {
+    const dir = join(root, 'claude', 'skills', 'git-commit')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `---\nname: git-commit\ndescription: Commits.\n---\n\n# Git commit\n\n${body}`,
+    )
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-skill-provenance-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a corpus carrying no date', async () => {
+    writeSkill('State the current rule.\n')
+
+    const report = await skillProvenance(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('fails a body carrying a date in prose, naming the path and line', async () => {
+    writeSkill('A worker lost its branch on 2026-08-27.\n')
+
+    const report = await skillProvenance(context())
+
+    expect(report.failure).toContain(
+      `${join('claude', 'skills', 'git-commit', 'SKILL.md')} line 8: 2026-08-27`,
+    )
+  })
+
+  it('passes a date inside a fenced block', async () => {
+    writeSkill('```yaml\ncreated: 2026-08-27\n```\n')
+
+    const report = await skillProvenance(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('reports a project carrying no skill corpus as unmeasured', async () => {
+    const report = await skillProvenance(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toContain('no skill corpus')
   })
 })
 

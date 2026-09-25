@@ -13,6 +13,7 @@ import {
   seedStandards,
   rawFieldFileReference,
   shippedReferences,
+  skillProvenance,
   standardCriteria,
   unreferencedRules,
   visualPathGlobs,
@@ -467,6 +468,14 @@ export const STAGES: readonly Stage[] = [
       },
     ],
     success: 'Skill requirements present',
+  },
+  {
+    // The audit verb only reports a dated line, so a target is told without
+    // failing. This stage makes the same finding fail here, where the corpus is
+    // held at zero. Unscoped, since any branch can add a line to any body.
+    id: 'skill-provenance',
+    label: 'Skill provenance',
+    checks: [{ kind: 'measure', measure: skillProvenance }],
   },
   {
     id: 'standard-criteria',

@@ -12,6 +12,7 @@ import {
   isOverLength,
   measureArchitecture,
 } from '@/context/architecture'
+import { auditSkills } from '@/claude/skills-audit'
 import { listRepositoryFiles } from '@/git-files'
 import { ceilingFindings } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
@@ -274,6 +275,42 @@ export const architectureRecord: Measure = async (ctx) => {
       : `a cap of ${report.entryCap}`
   return {
     emissions: [info(`${decisions} decisions against ${cap}`)],
+  }
+}
+
+/**
+ * Every skill body and reference against the no-dated-provenance rule, across
+ * both corpora `auditSkills` reads.
+ *
+ * Read in-process rather than through `claude skills audit`, whose exit code
+ * stays a missing requirement only, so a target running the verb is told about
+ * a date without failing on one. This repository holds the corpus at zero,
+ * which is what lets the same finding fail here.
+ */
+export const skillProvenance: Measure = async (ctx) => {
+  const report = await auditSkills(ctx.root)
+  if (report.corpora.length === 0) {
+    return {
+      emissions: [],
+      unmeasured: 'no skill corpus resolved, so no body was read.',
+    }
+  }
+
+  const found = report.datedProvenance
+  if (found.length > 0) {
+    const where = found
+      .map((finding) => `${finding.rel} ${finding.detail}`)
+      .join(', ')
+    return {
+      emissions: [],
+      failure: `${plural(found.length, 'date')} in skill prose: ${where}. Move the incident to REQUIREMENT.md under Gap or leave it to git, or fence the date or put it in a code span when it is an example.`,
+    }
+  }
+
+  return {
+    emissions: [
+      info(`No dated provenance across ${plural(report.skills, 'skill')}`),
+    ],
   }
 }
 
