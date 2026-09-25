@@ -19,6 +19,8 @@ A submodule checkout is the state the entry path reads wrong while reporting not
 
 A stack that derives its ports from the working directory has the same shape. The number is correct and invisible, and `role-orchestrator` sends a reader here to read it rather than assign one, so the entry that knows the working directory is the surface that owes it.
 
+A session writing to the main root meets a refusal from inside a linked worktree, and from a background session that entered none. The refusal points at a worktree copy that reports success and that no later session reads, and every skill body writing there carried its own copy of the route around it, which had begun to disagree. The skill that resolves the main root is the one surface every one of those bodies can name, so it owes the routing once.
+
 ## Must
 
 - Derive the name from the plan matched to the current branch, falling through the ordered sources rather than picking
@@ -33,6 +35,7 @@ A stack that derives its ports from the working directory has the same shape. Th
 - Report the same way when the project declares no package manifest, since silence there reads as a passing check
 - Report the port offset this worktree derives, and say so when the project installs no derivation
 - Name `git-worktree` where the description declines a list, cleanup, or rotation request, matching the pointer that skill already carries back
+- State the route each kind of main-root write takes, being a heredoc for a whole-file create, a `canon` verb for a change inside an existing file, and a plain `rm` or `mv` for a delete or a move, along with the index cost a shell write carries
 
 ## Must not
 
@@ -42,6 +45,7 @@ A stack that derives its ports from the working directory has the same shape. Th
 - Delete or overwrite a branch or a worktree directory that already carries the target name
 - Rename when the worktree was entered by path, since that branch already has its own identity
 - Invoke the exit path, which is the user's call
+- Enter a worktree or run a guard for a session that loaded the skill to route a main-root write
 
 ## Guards
 
@@ -55,4 +59,4 @@ A stack that derives its ports from the working directory has the same shape. Th
 
 - Listing, cleaning up, or rotating worktrees, which `git-worktree` owns and the description names, since this file routes no session
 - Leaving a worktree, which the user decides
-- What runs inside the worktree once entered, which the caller drives
+- What runs inside the worktree once entered, which the caller drives, apart from the route a main-root write takes
