@@ -43,7 +43,7 @@ One attribute standard lands on the CLI: `markdown.md`, whose ban sets and struc
 - `internal/standards/tooling-reference.md` is outside this census. It never installs into a target, so it has no corpus to leave, and `595-tooling-reference.md` already carries it.
 - A destination is not an install channel. The corpus has no install channel, so recording a home for a standard is the only route its guidance reaches a project through.
 
-The `consumers` field and the fan-out it drove do not exist. A flat standard has no copy to orphan, and the readership a `consumers` field once recorded now lives as prose under `## Destinations` below.
+A flat standard has no copy to orphan, so readership lives as prose under `## Destinations` below rather than in a frontmatter field.
 
 Shipping a dependency beside its consumer connects them only when the consumer's cited path resolves against the root that now holds it. The marketplace symlinks put `standards/` and `snippets/` into the plugin cache, so a citation resolving against a project root rather than the skill's own root finds nothing there even though the file ships. Name the root each cited path resolves against before calling reach met, and test in a target that lacks the file rather than one already holding its own copy. `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` is the fallback form that resolves against the skill's own root rather than the project's.
 

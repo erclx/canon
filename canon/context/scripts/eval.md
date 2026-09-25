@@ -9,7 +9,7 @@ description: Arms and what each measures, the ablation strip, the two records a 
 
 That stays true by decision, and the decision covers the spend rather than the driving. A run spends real money and authorizing that is the operator's, while performing the run is not: `run.sh` spawns its own headless `claude -p` session against a fixture extracted outside this repository, so any session holding a shell drives an arm once the spend is authorized. The one thing that still sends a run back to a person is a permission classifier in the calling session refusing the nested spawn, which an agent hands back rather than routes around.
 
-A research harness lives beside the domain it measures only while it measures one. This one sat at `scripts/standards/authoring-test/` because standards were all it tested, and the seed arm made that placement wrong, since a seed is a tooling artifact rather than a standard. It moved to `scripts/eval/` while three files referenced it rather than waiting for the next arm to make the move expensive.
+A research harness lives beside the domain it measures only while it measures one. This one measures standards and seeds, and a seed is a tooling artifact rather than a standard, so it sits at `scripts/eval/` rather than under either domain. Move a harness while few files reference it, since each new arm makes the move more expensive.
 
 ## What an arm measures
 
@@ -55,7 +55,7 @@ The row is appended with `>>` and anchors on no existing line, so its table has 
 
 ## Limits
 
-- Nothing prunes `.canon/tmp/runs/eval/` automatically, which was evaluated and rejected. It is the second uncapped scratch folder after `runs/sandbox/`, and `canon records prune-tmp` is the manual route, reading each as one unit. Clearing either loses every `Output` path the ledger points at, the intended trade rather than a bug.
+- Nothing prunes `.canon/tmp/runs/eval/` automatically, by decision. It is the second uncapped scratch folder after `runs/sandbox/`, and `canon records prune-tmp` is the manual route, reading each as one unit. Clearing either loses every `Output` path the ledger points at, the intended trade rather than a bug.
 - `run.sh` is safe serially and not concurrently. Two arms starting in the same second race on the `while [ -e "$run_dir" ]` existence check, and parallel `>>` appends to the ledger can interleave. Parallelism is the obvious fix for wall clock, which is the harness's real cost. Fix both hazards before taking it, since a corrupted ledger is the one record a re-run cannot rebuild.
 
 ### The snapshot blind spot
@@ -66,7 +66,7 @@ The sandbox picked a boundary, watching the four shared-scratch directories unde
 
 ### A fixture under the project root inherits its instructions
 
-A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. A fixture path under `.canon/tmp/runs/groundwork-fixtures/<slug>/` would put a headless arm run there measuring this repository rather than the arm, which is why `scripts/standards/authoring-test/run.sh` extracts to `mktemp -d` instead and states the reason in a comment. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
+A fixture a headless or subagent run is pointed at has to live outside the repository under `mktemp -d`, because a session started anywhere beneath the project root loads that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain. A fixture path under `.canon/tmp/runs/groundwork-fixtures/<slug>/` would put a headless arm run there measuring this repository rather than the arm, which is why `scripts/eval/run.sh` extracts to `mktemp -d` instead. Split fixture paths by who reads them: one the current session provisions and reads itself can sit in-repo, and anything an independent agent run is pointed at goes outside.
 
 ### A format spec is not an instruction
 

@@ -45,13 +45,13 @@ A standard then changes on a failure rather than on a finding. A finding is that
 
 ## The sibling section a new rule falsifies
 
-Adding a section to a standard can make a claim in a sibling section of that same file false. `publish.md` scoped its phase-label rule by destination and closed on the words `takes the character checks alone`, which was accurate while phase labels were the only destination-scoped rule and stopped being accurate the moment a second one landed beside it. A reader arriving at the older section first concludes the file has nothing further to say about text entering the repository, which is the reading the new section depends on being wrong.
+Adding a section to a standard can make a claim in a sibling section of that same file false. A section closing on words such as `takes the character checks alone` is accurate while it holds the only rule of its kind and false the moment a second one lands beside it. A reader arriving at the older section first concludes the file has nothing further to say about text entering the repository, which is the reading the new section depends on being wrong.
 
 The change checkpoint does not prompt for it. Its collision question asks which sibling standard, rule, or template the change contradicts, so a sibling section inside the file being edited falls outside what the four questions reach. Read the destination-scoped sections of that file for words such as `alone` and `only` before adding a section beside them, and rewrite the one that now claims too much rather than leaving the new section to contradict it.
 
 The failure is invisible to every check the repository runs. Both sentences are well-formed prose citing nothing, so the drift stages, the markdown audit, and the spell check all pass over a file that now states two incompatible things.
 
-## The parser that read a standard as input
+## Parsers reading a standard as input
 
 `markdown.md` has a code reader behind it, which no other standard in the corpus does. `src/markdown/bans.ts` anchors on `## Language` and `## Punctuation`, then harvests the single lowercase backticked words and the single non-alphanumeric backticked characters out of every `- Do not use ` bullet under them. The sets ship as data in that file, and both `canon markdown audit` and the seeded audit hook read them from there, so a wording edit changes what a reader is told and nothing else.
 

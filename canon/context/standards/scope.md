@@ -47,7 +47,7 @@ A standard splits when one half is machine-checkable and the other is a read a s
 
 Scoping the audit tighter inside one file is the alternative, and it leaves the enforceable rules reading as advice, which is the defect the split avoids.
 
-`standards/prose.md` is the case that set the rule. It held both halves, so a session was graded on the words it avoided and never on how the prose read. The bans, the spellings, and the frontmatter wording joined `markdown.md`, which `canon markdown audit` measures from package data, and the rest went to `write-human`, which `500-prose` routes a markdown edit to. Folding the bans into the skill instead was declined, since it would put the enforced list behind a glob-matched pointer, and a thinner `prose.md` would have left an advisory file under a name that already reached nobody. The split cost a 90-file citation sweep and a standard citing a skill, and nothing measures whether output follows the rhythm rules. Measured at `57ee7467` on 2026-08-20.
+A single standard holding both halves grades a session on the words it avoided and never on how the prose reads. Folding the bans into the skill lost, since it would put the enforced list behind a glob-matched pointer. The split costs a standard citing a skill, and nothing measures whether output follows the rhythm rules.
 
 ## The scope statement
 
