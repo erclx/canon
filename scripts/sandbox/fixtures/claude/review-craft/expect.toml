@@ -1,0 +1,42 @@
+# What a correct `/canon:review-branch` run leaves behind once `review-craft`
+# carries the axes. Read by `canon sandbox check`. Patterns use TOML literal
+# strings so a regex needs no backslash escaping.
+#
+# The declaration sits at the command root, which is the unnamed arm. The
+# scenario offers no arm list, so a named folder here would declare an arm
+# nothing can select.
+#
+# Two runs against the body before `review-craft` existed, on 2026-09-25, both
+# failed on the Safety entry: each found the removed guard in the script and
+# left the README clean. Both also caught the security defect, the first an
+# `eval` over the arguments and the second the unpinned package below, so the
+# security entry is a floor the craft skill must not lose rather than the part
+# of the arm that discriminates. The stale claim outside the hunk is that part.
+
+# The glob covers both slugs a run derives from `feat/release-tag`, with and
+# without the type segment, since the first red run wrote
+# `branch-feat-release-tag.md` and the second `branch-release-tag.md`.
+paths = [".canon/review/branch-*release-tag.md"]
+
+write_scope = [".claude/**", ".canon/review/**"]
+
+manual = [
+  "The report names the unused `dry_run` as something built that nobody calls, and states the cost rather than a taste. Semantic: a design finding can be worded many ways.",
+  "The unpinned package is graded critical or should-fix rather than minor. Semantic: severity belongs to the procedure body's ladder and a substring cannot tell a correct grade from a word that happens to appear.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# The package fetched at `@latest` and run on every release.
+[[content]]
+path = ".canon/review/branch-*release-tag.md"
+pattern = 'unpinned|Unpinned|supply chain|Supply chain|supply-chain|Supply-chain|@latest[^\n]*(pin|Pin|version|Version)'
+
+# The Safety claim the diff made false sits outside every hunk. Either a graded
+# finding names the section, or the README block opens with a graded finding
+# rather than the clean note the red run left there.
+[[content]]
+path = ".canon/review/branch-*release-tag.md"
+pattern = '^- \*\*[a-z-]+\*\*:[^\n]*Safety|README\.md\n+- \*\*(critical|should-fix|minor)\*\*'

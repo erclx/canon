@@ -1,0 +1,39 @@
+# What a correct `/canon:review-pr` run leaves behind on the evidence-mismatch
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The pull request carries the `## Evidence` comment `canon pr evidence`
+# renders, with a checklist whose first box claims the navigation collapses
+# into the Menu button below 600px. The narrow head capture shows the row
+# running off the edge instead, and the markup alone does not say so plainly:
+# a reader has to notice the removed media query. The images under `render/`
+# were captured from the HTML and CSS beside them with `canon capture
+# --selector body --width <px>`, so an edit to either regenerates them.
+
+# The short-sha segment is derived from the PR's head commit, so only the
+# prefix is fixed. The evidence path is what proves the pass wrote an image out
+# through `git show` rather than reading the markup and guessing.
+paths = [
+  ".canon/tmp/pr/review/body-*.md",
+  ".canon/tmp/pr/review/evidence/*/**",
+]
+
+write_scope = [".canon/tmp/pr/review/**"]
+
+manual = [
+  "The pass checked the header against `canon/wireframes/header.md` as well as the checklist. Semantic: whether the finding cites the wireframe line or the box alone is a reading.",
+  "The pass opened the image it wrote out rather than only writing it. Unwired: the checker reads the tree, not the session's tool calls.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '^## Review[ \t]*$'
+
+# The ticked box, quoted or named by what it claims.
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = 'collapse|Collapse'
