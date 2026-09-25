@@ -19,7 +19,7 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 ## Decisions
 
-**A workspace is named `<nn>-<topic>` rather than by a bare slug**, so a listing sorts by when each opened. It is the first record folder to take that shape, which was free because the surface was greenfield. `canon/context/standards/per-standard.md` carries the decision and the groundwork and intake folders' shared sequence beside it.
+**A workspace is named `<nn>-<topic>` rather than by a bare slug**, so a listing sorts by when each opened. It is the first record folder to take that shape, which was free because the surface was greenfield. `canon/context/standards/per-standard/surfaces.md` carries the decision and the groundwork and intake folders' shared sequence beside it.
 
 **Quiz option order is drawn by `canon teach lesson` rather than chosen by the author.** An author told to vary a position still varies it by judgment, and a verb is a check where an instruction is a hope. What the split cannot close is that the body remains free to reorder what the verb reports, since nothing downstream compares the two, which is recorded rather than fixed.
 

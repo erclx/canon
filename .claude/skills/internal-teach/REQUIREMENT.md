@@ -29,7 +29,7 @@ Without this skill, a session editing the teach implementation:
 
 - Restate what `canon standards teach` or `canon standards glossary` fixes. Each is the single source for the artifact it governs and a second copy here drifts on its own cadence.
 - Restate `canon/context/teach.md`'s structure or gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry, and a skill paraphrasing its own entry is the duplication that table exists to prevent.
-- Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it, and `canon/context/standards/per-standard.md` records the split.
+- Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it, and `canon/context/standards/per-standard/surfaces.md` records the split.
 - Fire on a `.canon/teach/**` edit. `561-teach.md` already reaches that path and ships to targets, where this skill is toolkit-internal and does not.
 
 ## Guards

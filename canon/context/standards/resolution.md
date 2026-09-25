@@ -1,11 +1,11 @@
 ---
 title: Resolution
-description: The two roots a standard resolves against, why the install channel and the generated mirror both closed, the retired fan-out and its consumers field, and the reading gotchas
+description: The two roots a standard resolves against, how each surface cites a standard, why the install channel closed, why skill-local copies lost to the flat root, and the reading gotchas
 ---
 
 # Resolution
 
-No standard installs into a project. A reader resolves one instead, and everything below follows from that: which roots answer, which route a shipped body actually takes, and what the retired fan-out used to reach that the flat corpus reaches on its own now.
+No standard installs into a project. A reader resolves one instead, and everything below follows from that: which roots answer, which route a shipped body actually takes, and why a narrow-readership standard still sits in the flat corpus.
 
 ## The two roots
 
@@ -27,7 +27,7 @@ The `paths:` glob on `591-standard-authoring` matches `standards/` alone, so a t
 
 The domain has no install and no sync verb, and writes no copy into a target. `canon init` carries no `Standards` step and no `--standards` flag, and the domain sits outside `SCANNED_DOMAINS`, `SYNC_DOMAINS`, `STAMP_DOMAINS`, and the root layouts `detectUnmigrated` walks.
 
-A reader who needs a concern a `Does not govern:` entry hands off runs `canon standards <name>` again for that name, rather than resolving a transitive closure the way an install selection once did.
+A reader who needs a concern a `Does not govern:` entry hands off runs `canon standards <name>` again for that name.
 
 `NonInteractivePolicy` in `src/sync/engine.ts` carries a `refuse` branch that standards was the only adapter to declare, so it is now unreachable, and `hasUnattributedDrift` is read only from inside it. The type stays because it is an extension point a later adapter may declare, and removing it would delete that option along with the code.
 
@@ -41,9 +41,9 @@ A machine-parsed standard is exempt from any design inlining a standard into the
 
 ## Skill-local references
 
-`standards/bundled/` and the `consumers:` frontmatter field it read do not exist. A standard several surfaces cite, however narrow its readership, sits in the flat root like every other standard and resolves through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` at zero copies.
+A standard several surfaces cite, however narrow its readership, sits in the flat root like every other standard and resolves through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` at zero copies.
 
-The folder held six sources copying out eleven times, and growing it to cover the flat corpus was declined on a duplication measurement: the most-cited standard, named by 21 skill bodies across the two catalogs, would have landed a copy in each. The fallback citation form 39 bodies already carried serves a root standard to any number of readers at zero copies, so the six sources moved to the flat root and the eleven copies came out with them. Measured at `16a80339` on 2026-08-25.
+A generated folder copying each narrow-readership standard into its consumers' `references/` is the alternative that lost, on a duplication measurement: the most-cited standard, named by 21 skill bodies across the two catalogs, would have landed a copy in each, while the fallback citation form 39 bodies already carried serves a root standard to any number of readers at zero copies. Measured at `16a80339` on 2026-08-25.
 
 A file under a skill's own `references/` is always hand-authored and skill-local. Nothing generates a copy into `references/`, so a reference living only there is written for that one skill and carries no `consumers:` field to read.
 
