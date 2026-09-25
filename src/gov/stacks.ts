@@ -7,6 +7,7 @@ import {
   type RuleSource,
   rulesSourceDir,
 } from '@/gov/install'
+import { successorResolver } from '@/gov/renames'
 
 export interface GovStack {
   readonly name: string
@@ -163,6 +164,9 @@ export function unreferencedRules(root: string): string[] {
  * so reading its leaf entry is enough; no second walk resolves the chain
  * itself. A stack the toolkit no longer ships resolves to nothing rather than
  * throwing, the same way `readNewRules`'s band fallback already treats it.
+ *
+ * A held rule's declared successor counts as held, since the sync that
+ * renames the old file installs it.
  */
 export function resolveMissingRules(
   root: string,
@@ -176,7 +180,7 @@ export function resolveMissingRules(
   if (!resolution.ok) return []
 
   const { found } = lookupRules(root, resolution.rules)
-  const held = installedRuleNames(target)
+  const held = installedRuleNames(target, successorResolver(root))
 
   return found
     .filter((source) => !held.has(source.rule))

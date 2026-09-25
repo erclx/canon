@@ -38,8 +38,14 @@ export function installedInternalRulesDir(target: string): string {
  * Rule names a target already holds, read off the installed `canon/` tree by
  * basename rather than off a recorded stack, since a target may hold rules
  * `--add` layered on that no stack lists.
+ *
+ * `successorOf` adds the name a held rule was renamed to, since the next sync
+ * installs it and a reader treating it as missing would name it twice.
  */
-export function installedRuleNames(target: string): Set<string> {
+export function installedRuleNames(
+  target: string,
+  successorOf?: (name: string) => string | undefined,
+): Set<string> {
   const dir = canonRulesDir(target)
   const names = new Set<string>()
   if (!existsSync(dir)) return names
@@ -49,7 +55,11 @@ export function installedRuleNames(target: string): Set<string> {
     onlyFiles: true,
     dot: true,
   })) {
-    names.add(basename(rel, '.md'))
+    const name = basename(rel, '.md')
+    names.add(name)
+
+    const successor = successorOf?.(name)
+    if (successor !== undefined) names.add(successor)
   }
 
   return names
@@ -84,7 +94,7 @@ export function listRuleSourcePaths(root: string): string[] {
  * in two subdirectories resolves deterministically rather than by whichever
  * entry the filesystem yielded first.
  */
-function indexRuleSources(root: string): Map<string, string> {
+export function indexRuleSources(root: string): Map<string, string> {
   const rulesRoot = rulesSourceDir(root)
   const byName = new Map<string, string>()
 
