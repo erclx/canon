@@ -7,21 +7,21 @@ description: The internal canon skills loaded before editing a toolkit domain, t
 
 Internal skills live in `.claude/skills/` and are toolkit-only. They are not installed into target projects.
 
-| Skill                        | Description                                                                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `internal-ask`               | Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`   |
-| `internal-claude`            | Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries                                |
-| `internal-governance`        | Load before editing Cursor rules or stack definitions                                                               |
-| `internal-scripts`           | Load before editing scripts or sandbox scenarios                                                                    |
-| `internal-snippets`          | Load before editing snippets                                                                                        |
-| `internal-standards`         | Load before editing standards or docs                                                                               |
-| `internal-tooling`           | Load before editing tooling stacks or golden configs                                                                |
-| `internal-sandbox-check`     | Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`     |
-| `internal-shipped-reference` | Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `598-authoring-layout.md` |
+- `internal-ask`: Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`
+- `internal-claude`: Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries
+- `internal-governance`: Load before editing governance rules or stack definitions
+- `internal-scripts`: Load before editing scripts or sandbox scenarios
+- `internal-snippets`: Load before editing snippets
+- `internal-standards`: Load before editing standards or docs
+- `internal-teach`: Load before editing the learning workspace, its committed fixture, or the teach standards
+- `internal-tooling`: Load before editing tooling stacks or golden configs
+- `internal-web`: Load before editing the landing page or this repository's own rendered images
+- `internal-sandbox-check`: Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`
+- `internal-shipped-reference`: Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `598-authoring-layout.md`
 
 ## Requirement coverage
 
-All nine internal skills carry a `REQUIREMENT.md`. Coverage is universal rather than selective, because the operator reads the corpus to decide whether a skill should exist at all, and a file present for some skills and absent for others cannot be scanned for that. An absence reads as a gap in the authoring rather than as a verdict that the body is already its own specification.
+Every internal skill carries a `REQUIREMENT.md`. Coverage is universal rather than selective, because the operator reads the corpus to decide whether a skill should exist at all, and a file present for some skills and absent for others cannot be scanned for that. An absence reads as a gap in the authoring rather than as a verdict that the body is already its own specification.
 
 A working requirement lets a reader recover from the body alone both the failures the skill prevents and the nearest thing it deliberately does not do. Length does not decide which skills need one.
 
