@@ -45,7 +45,7 @@ The table stays a table against the catalog rule beside it, which sends a surfac
 
 ### Why the entry is a folder
 
-The entry is a folder on the sub-area condition rather than on length. `standards/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and setup with the run commands, the scoping of `bun run check`, the stages that regenerate, the stages that gate, the hook families, and session scratch are six that do not. Length is what raised the question and answers nothing by itself.
+The entry is a folder on the sub-area condition rather than on length. `standards/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and setup with the run commands, the scoping of `bun run check`, test scoping, the stages that regenerate, the stages that gate, the hook families, session scratch, and the record folders do not. The stages that gate and the hook families each span enough sub-areas to be folders of their own, `canon/context/development/gates/` and `canon/context/development/hooks/`.
 
 ### Why most citations kept the flat path
 
@@ -59,7 +59,7 @@ Widening the gate by location was the alternative, and it would silence a real s
 
 ### A prose edit can break a test no stage in that push runs
 
-The Types and Tests stages are scoped to changed files and skip when no TypeScript changed, so a markdown-only push runs neither, and eleven `src/` test files assert over a corpus outside `src/`. `canon/context/development/verification.md` holds the census, the bound it was taken under, and the command to run beside each corpus.
+The Types and Tests stages are scoped to changed files, and several `src/` test files assert over a corpus outside `src/`. Tests runs on a change to a corpus the census names and skips every other markdown-only push, so a corpus the census has not named breaks a test nothing in that push runs. `canon/context/development/tests.md` holds the census and the command to run beside each corpus.
 
 The markdown checkpoints are not one of them. `CHECKPOINTS` and the three ban sets ship as literals in `src/markdown/`, and `src/markdown/structure.test.ts` asserts those numbers against itself rather than reading them back off `standards/markdown.md`. Editing a standard that states one of those numbers therefore fails nothing, and the drift between the prose and the shipped value is caught by whoever edits or not at all. `.cspell/banned-spellings.txt` is the file on this surface that a `src/` test does still assert over, through `src/markdown/bans.test.ts`.
 

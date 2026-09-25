@@ -14,7 +14,7 @@ Per-domain narrative loaded on demand
 - [Context model](context-model.md): Three-tier context loading, which tier holds what, and how context entries get populated at ship time
 - [Demo](demo.md): Beats compiler and browser driver behind canon demo, why the plan is a second committed artifact, and the gotchas in painting a pointer inside the page
 - [Design](design.md): DESIGN.md token shape, extract skill and its two paths, render command
-- [Development](development/index.md): Local dev loop and the run command table, how bun run check scopes its work, what each stage regenerates and gates on, the hook families, and session scratch. Start with overview.
+- [Development](development/index.md): Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
 - [Governance](governance/index.md): Path-scoped Claude rules with their numbering and frontmatter contract, the stacks that group them, and the install and sync path with its CLI. Start with overview.
 - [Indexes](indexes.md): Folder index.md system, frontmatter contract, when to adopt
 - [Inventory](inventory.md): The route walk behind canon inventory, why it reports a listing rather than a verdict, and the focus reader's dependence on keyboard modality

@@ -285,8 +285,8 @@ export function sweepSections(
   // An H3 sitting before the document's first H2, or in a document that
   // carries no H2 at all, has no enclosing section for the main loop below
   // to attribute it to. Sweep it as a section of its own instead of
-  // dropping it, which is the shape `canon/context/development/scratch.md`
-  // takes: an H1 followed directly by eight H3s and no H2 anywhere.
+  // dropping it, which is the shape of an entry whose H1 is followed
+  // directly by H3s with no H2 anywhere.
   const firstH2 = headings.findIndex((h) => h.level === 2)
   const leadingBound = firstH2 === -1 ? headings.length : firstH2
 

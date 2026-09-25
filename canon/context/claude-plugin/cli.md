@@ -26,7 +26,7 @@ The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` ins
 
 ### PostToolUse hooks
 
-The seed `settings.json` ships eight hook scripts across five blocks on three events. `pr-create-log.sh` and `silent-turn.sh` are covered in `canon/context/development/hooks.md`, and the rest below. All eight open with the bounded stdin read covered in that same entry, so a hook run by hand refuses instead of blocking, and seven stay byte-identical to their counterparts under `.claude/hooks/`.
+The seed `settings.json` ships eight hook scripts across five blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All eight open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and seven stay byte-identical to their counterparts under `.claude/hooks/`.
 
 A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `canon markdown audit` against the edited file, reads the hits out of the `--json` record, and emits `additionalContext` so the agent self-corrects on the next turn. A checkout's own `src/cli.ts` wins over an installed binary, so the hook and the push stage read one build. Scratch dirs `.canon/tmp/`, `.canon/memory/`, `.canon/review/`, and `.canon/plans/` are skipped.
 
@@ -38,7 +38,7 @@ The hook derives the walk-up boundary from the file path rather than the session
 
 `.claude/hooks/memory-index.sh` sits beside it and does the same job for `.canon/memory/index.md`, which is gitignored for the same reason and reached the same way. The two hooks differ only in the path they guard on, so a change to one is owed to the other.
 
-`.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in full in `canon/context/development/hooks.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the two index hooks above it.
+`.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in full in `canon/context/development/hooks/guards.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the two index hooks above it.
 
 ### PreToolUse hooks
 

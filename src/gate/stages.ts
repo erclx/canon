@@ -83,7 +83,7 @@ export interface Stage {
 
 /**
  * Corpora a `src/` test asserts over from outside `src/`, censused in
- * `canon/context/development/verification.md`. This list and that census are
+ * `canon/context/development/tests.md`. This list and that census are
  * two copies of one set with nothing comparing them, so a corpus joining the
  * census joins this list in the same change. The first four are directory
  * prefixes because their tests walk the tree whole, which is what reaches a

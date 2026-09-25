@@ -129,7 +129,7 @@ const QUANTIFIERS = ['all']
  * of the number.
  *
  * Found on this module's own first review, against a live instance the verb
- * gate alone reported clean: `canon/context/development/gates.md` stated
+ * gate alone reported clean: the development gating-stages entry stated
  * `the twelve audits` while the tree held 20, sitting inside the plausibility
  * bound this design already carries, so nothing but the missing shape kept it
  * from reporting.
