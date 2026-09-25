@@ -47,7 +47,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
 - `canon/ARCHITECTURE.md`: technical design decisions
 - `.canon/tasks/priority.md`: where this feature sits on the board and what each neighboring row waits on. Resolve this one at the main worktree root the way `session-worktree` does, since the board is gitignored and a linked worktree holds no copy of it
-- `.canon/plans/feature-<slug>.md` for the branch, when present: the intent the PR should satisfy
+- `.canon/plans/feature-<slug>.md` for the branch, when present: the intent the PR should satisfy, and its `**Review focus:**` section as the inputs this pass must confirm the diff handles
 
 Coding standards from `.claude/rules/` are auto-loaded by Claude Code.
 
@@ -156,6 +156,8 @@ Ask rather than grade. Whether a human is genuinely required is a reading the br
 Read `## For the reviewer` the same way, bounded to the bullets under that heading rather than the Summary or the Technical Context around it. Those two carry the author's argument for the change, and reading them while judging it is most of what an independent pass exists to avoid, so the read stops at the section itself.
 
 Answer each bullet in the body, on the same terms as a Testing question: no severity, no count. A request nobody can answer stays owed under the heading and dispatch Step 4 states, keeping the thread open exactly as an unanswered Testing box does. One the pass does answer carries no further weight, since the answer is discharged in the same comment that carries it.
+
+On a first pass, confirm each `**Review focus:**` item the plan names against the diff, since the planning session named the inputs that would break the change before any code existed and no other reader holds that list. Report the items in a `**Review focus**` block after the `**For the reviewer**` block, one bullet per item naming what confirmed it, such as a test, a guard, or a branch in the code. The block carries no severity and enters no count. An item the pass cannot confirm becomes a `should-fix` finding under the file that should have handled it, so a reader can tell an item checked from one skipped. A plan whose section reads `None identified.`, or a branch with no plan, takes no block. The section binds the first pass only: a later pass checks whether the finding an unconfirmed item became has landed, like any other prior finding, and never re-raises a confirmed item against a delta that did not touch it.
 
 Apply the high-signal filter: flag only what will cause incorrect behavior, break a documented rule, or mislead a downstream feature. If uncertain, do not flag.
 

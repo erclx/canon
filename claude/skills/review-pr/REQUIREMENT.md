@@ -28,6 +28,7 @@ Scoping a later pass off GitHub's review stamp skipped real work. On 2026-09-07 
 - Key the body file on the pull request number and the head commit, and on the response it answers once the head repeats, so no two passes overwrite each other
 - Scan the comment for banned characters and internal phase labels before posting, since a finding phrased against a phase label reaches a reader with no task board
 - Answer a `## For the reviewer` bullet in the body, bounded to the section itself rather than the Summary or the Technical Context around it, so the independent vantage stays clear of the author's framing
+- Confirm each `**Review focus:**` item the plan names on a first pass, and turn one the pass cannot confirm into a finding, since the planning session named the breaking inputs before the diff existed and no other reader holds that list
 
 ## Must not
 
