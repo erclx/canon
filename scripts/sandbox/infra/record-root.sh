@@ -29,9 +29,17 @@ One paragraph of intro so the plan carries a body.
 
 - `src/thing.ts`: the surface this would edit.
 
+**Verification:**
+
+- The surface still builds: `bun run check`
+
 **Risks:**
 
 - One risk, stated.
+
+**Review focus:**
+
+None identified.
 
 **Questions:**
 

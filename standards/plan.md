@@ -31,6 +31,7 @@ A plan works when a session holding none of the conversation that produced it ca
 - Which decisions are already settled, and which are still open?
 - For each open decision, what happens when nobody answers it?
 - What is likely to go wrong, and where does the work collide with something already in flight?
+- How is each outcome proven, and which input would break it?
 
 A plan failing these is non-conforming even when it satisfies every shape rule below.
 
@@ -53,10 +54,12 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Summary`          | three to five one-line bullets: the goal, the deliverables, the trade-off | Always        |
 | `**Constraints:**`    | durable rules the work must respect                                       | When supplied |
 | `**Files to touch:**` | each file with a one-line reason                                          | Always        |
+| `**Verification:**`   | the test or command that proves each outcome                              | Always        |
 | `**Risks:**`          | conflicts, coupling, and the tricky spots                                 | Always        |
+| `**Review focus:**`   | the inputs or states that would break the change, for the reviewer        | Always        |
 | `**Questions:**`      | numbered open decisions, each with a suggestion and an answer slot        | Always        |
 
-- Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the four that follow are labels over lists rather than sections of prose.
+- Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the six that follow are labels over lists rather than sections of prose.
 - A section written in the other spelling is still that section. `## Risks` and `**Risks:**` name one thing, and a plan carrying either has stated its risks, so neither reads as an omission. Write the table's form in a new plan and leave an existing plan's spelling alone.
 - Both spellings break a depth run, so `canon markdown audit` reads either as the seam it is and reports a plan for a section that genuinely runs long rather than for its whole body. The markdown standard states the rule.
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
@@ -87,10 +90,22 @@ A dead constraint fails silently in the expensive direction. A session honoring 
 
 A constraint naming a `.canon/ready/` folder is a third shape beside the two above. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
 
+### Verification
+
+- Name, for each outcome, the test or the command that proves it, as one bullet leading with the outcome and ending on the command in backticks.
+- Write a command a later session can run as given, from the project root. A description of what would be checked leaves the executing session to invent the check.
+- Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
+
 ### Risks
 
 - Name the collision rather than the category. A risk a reader cannot act on is padding.
 - Where the work establishes a resource with more than one consumer, list the consumers and mark each one read or write. A policy stated over that resource has to hold for the writers and not only for the consumer that prompted it.
+
+### Review focus
+
+- Name each input or state that would break the change if the implementation got it wrong, one bullet each, with what the change must do there.
+- Write it for the reviewer rather than the builder. The session writing the plan understood the risk before any diff existed, and this section is where that understanding reaches the review pass.
+- Keep it apart from `**Risks:**`. A risk is something the work might collide with, and a focus item is something the finished diff must be shown to handle, so a reviewer confirms the second and the executing session plans around the first.
 
 ## The suggested-and-answer contract
 
@@ -165,9 +180,17 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 
 - `<path/to/file>`: <reason>
 
+**Verification:**
+
+- <outcome>: `<test or command that proves it>`
+
 **Risks:**
 
 - <conflict, coupling, or tricky spot>
+
+**Review focus:**
+
+- <input or state that would break the change>: <what the change must do there>
 
 **Questions:**
 

@@ -271,7 +271,9 @@ const PLAN_SECTIONS = [
   'Summary',
   'Constraints',
   'Files to touch',
+  'Verification',
   'Risks',
+  'Review focus',
   'Questions',
 ] as const
 
@@ -280,7 +282,9 @@ type PlanSection = (typeof PLAN_SECTIONS)[number]
 const PLAN_REQUIRED: readonly PlanSection[] = [
   'Summary',
   'Files to touch',
+  'Verification',
   'Risks',
+  'Review focus',
   'Questions',
 ]
 
@@ -293,7 +297,7 @@ const MARKER_LINE = /^(?:##[ \t]+(.+?)|\*\*(.+?):\*\*)[ \t]*$/
 
 /**
  * A section opens as a bold label or as an H2 and both count. The corpus writes
- * `Summary` as a heading and the other four as bold labels, and roughly a fifth
+ * `Summary` as a heading and the others as bold labels, and roughly a fifth
  * of it swaps one for the other. Reporting the variant would fail nearly every
  * plan present on the rule a reader is least served by, which is what teaches
  * them to skip the output.

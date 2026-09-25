@@ -46,6 +46,7 @@ What this skill adds on top of the standard:
 - Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
 - Suggest a real default when best practice, the codebase, or prior context points to one.
 - Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
+- Write `**Verification:**` as one bullet per outcome naming the test or command that proves it, and `**Review focus:**` as the inputs or states that would break the change. You understood the risk before any diff existed, and these two sections carry it to the executing session and to the reviewer.
 - Prefer `None identified.` over low-signal fillers. A small feature should produce a short plan, not a padded one.
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
 
@@ -76,7 +77,13 @@ Output the plan to chat. Do not write a plan file. The markers match the standar
 **Files to touch:**
 
 - `path/to/file`: reason
+
+**Verification:**
+
+- <outcome>: `<test or command that proves it>`
 ```
+
+Small mode carries no `**Review focus:**`, since it already requires Risks to come out `None identified.` and a change with no risk leaves the reviewer no breaking input to name.
 
 If real questions exist, include a numbered `**Questions:**` section below, each with a `- Suggested:` line and an `- Answer:` slot:
 

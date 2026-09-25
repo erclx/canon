@@ -37,3 +37,13 @@ pattern = 'src/[\w-]+/[\w-]+/[\w.-]+\.tsx'
 [[content]]
 path = ".canon/plans/feature-*.md"
 pattern = 'e2e/[\w-]+/[\w-]+\.ts\b'
+
+# The plan carries the two sections the plan standard requires below the file
+# list and the risks. Either spelling the validator accepts satisfies each.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Verification:\*\*|## Verification)[ \t]*$'
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Review focus:\*\*|## Review focus)[ \t]*$'

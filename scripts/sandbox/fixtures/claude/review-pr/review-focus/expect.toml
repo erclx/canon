@@ -1,0 +1,37 @@
+# What a correct `/canon:review-pr` run leaves behind on the review-focus arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# The plan names two inputs under `**Review focus:**`. The diff rejects an
+# empty title and places no cap on length, so a conforming first pass confirms
+# the first item in a `**Review focus**` block and files the second as a
+# `should-fix` finding, which keeps the review open.
+
+# The short-sha segment is derived from the PR's head commit, so only the
+# prefix is fixed.
+paths = [".canon/tmp/pr/review/body-*.md"]
+
+# The only file this arm's diff has any business touching.
+write_scope = [".canon/tmp/pr/review/**"]
+
+manual = [
+  "The block names the empty-title guard in `handleCreate` as what confirmed the first item. Semantic: whether the named evidence is the right one is a judgment no substring can carry.",
+  "The should-fix finding sits under the `src/tasks.ts` block and names the missing length cap. Semantic: a finding can word the cap many ways.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# The unconfirmed item is an open should-fix, so the pass cannot close.
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '^## Review[ \t]*$'
+
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '^\*\*Review focus\*\*'
+
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '\*\*should-fix\*\*'

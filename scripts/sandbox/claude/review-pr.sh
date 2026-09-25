@@ -166,8 +166,107 @@ EOF
     gh pr view feat/reviewer-request --json url -q .url 2>/dev/null)
 }
 
+# Seeds a diff that handles one input the plan's Review focus names and not the
+# other, so the pass has one item to confirm and one to file as a finding. The
+# plan is gitignored, so it lands after the commits rather than inside them.
+seed_review_focus_pr() {
+  configure_sandbox_anchor_remote
+
+  find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+
+  cat <<'EOF' >package.json
+{
+  "name": "sandbox-pr-review",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "echo 'lint ok' && echo 'typecheck ok'"
+  }
+}
+EOF
+
+  cat <<'EOF' >CLAUDE.md
+# My App
+
+Task API. Route handlers live in `src/`.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+EOF
+
+  mkdir -p src
+  cat <<'EOF' >src/tasks.ts
+export function createTask(title: string) {
+  return { id: crypto.randomUUID(), title };
+}
+EOF
+
+  git add . && git commit --allow-empty -m "feat(api): task list endpoint" --no-verify -q
+  git push --force origin HEAD:main
+
+  git push origin --delete feat/review-focus -q 2>/dev/null || true
+  git checkout -b feat/review-focus -q
+
+  cat <<'EOF' >src/tasks.ts
+export function createTask(title: string) {
+  return { id: crypto.randomUUID(), title };
+}
+
+export function handleCreate(body: { title: string }) {
+  const title = body.title.trim();
+  if (!title) {
+    throw new Error("title is required");
+  }
+  return createTask(title);
+}
+EOF
+
+  git add . && git commit -m "feat(api): add create handler" --no-verify -q
+  git push --force origin HEAD -q
+
+  mkdir -p .canon/plans
+  cat <<'EOF' >.canon/plans/feature-review-focus.md
+# Feature: Create handler
+
+Adds the POST /tasks handler.
+
+## Summary
+
+- A handler that validates the title before creating a task
+
+**Files to touch:**
+
+- `src/tasks.ts`: add `handleCreate`
+
+**Verification:**
+
+- The handler rejects a bad title: `bun run check`
+
+**Risks:**
+
+None identified.
+
+**Review focus:**
+
+- An empty or whitespace-only title: `handleCreate` must reject it before `createTask` runs
+- A title longer than 200 characters: `handleCreate` must reject it before `createTask` runs
+
+**Questions:**
+
+None identified.
+EOF
+
+  PR_URL=$(gh pr create --draft --title "feat(api): add create handler" \
+    --body "Adds the POST /tasks handler for v0.1." --head feat/review-focus --base main 2>/dev/null ||
+    gh pr view feat/review-focus --json url -q .url 2>/dev/null)
+}
+
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "first-pass" "close-out" "unchanged-head" "answered-head" "reviewer-request" "late-finding" "repeat-close-out" "marker-race"
+  select_or_route_scenario "Which scenario?" "first-pass" "close-out" "unchanged-head" "answered-head" "reviewer-request" "late-finding" "repeat-close-out" "marker-race" "review-focus"
 
   case "$SELECTED_OPTION" in
   "first-pass")
@@ -481,6 +580,20 @@ EOF
     log_info "         writes a body carrying its own commit= read-at= marker on the last line"
     log_info "         a pass reading commit.oid instead stops with 'The head is unchanged' and posts nothing"
     log_info "Assert:  declared in fixtures/claude/review-pr/marker-race/expect.toml"
+    ;;
+
+  "review-focus")
+    log_step "Configuring pr-review review-focus environment ($ANCHOR_REPO)"
+    seed_review_focus_pr
+
+    log_step "Scenario ready: a first pass against a plan carrying **Review focus:**"
+    log_info "Context: open draft PR on feat/review-focus, .canon/plans/feature-review-focus.md names two inputs"
+    log_info "Action:  /review-pr"
+    log_info "Expect:  reads the plan's **Review focus:** and checks each item against the diff"
+    log_info "         confirms the empty-title item in a **Review focus** block, naming the guard"
+    log_info "         files the unbounded-length item as a should-fix under src/tasks.ts"
+    log_info "         posts under ## Review, since the should-fix is open, does NOT merge"
+    log_info "Assert:  declared in fixtures/claude/review-pr/review-focus/expect.toml"
     ;;
 
   *)

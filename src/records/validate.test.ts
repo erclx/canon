@@ -52,7 +52,15 @@ function conformingPlan(): string {
     '',
     '- `standards/plan.md`: the sections and the answer contract',
     '',
+    '**Verification:**',
+    '',
+    '- The validator reports both sections: `bun test src/records`',
+    '',
     '**Risks:**',
+    '',
+    'None identified.',
+    '',
+    '**Review focus:**',
     '',
     'None identified.',
     '',
@@ -345,8 +353,20 @@ describe('splitPlanSections', () => {
     expect([...sections.keys()]).toEqual([
       'Summary',
       'Files to touch',
+      'Verification',
       'Risks',
+      'Review focus',
       'Questions',
+    ])
+  })
+
+  it('should close Files to touch at the Verification label', () => {
+    const sections = splitPlanSections(conformingPlan())
+
+    expect(sections.get('Files to touch')).toEqual([
+      '',
+      '- `standards/plan.md`: the sections and the answer contract',
+      '',
     ])
   })
 
@@ -473,6 +493,36 @@ describe('checkPlan', () => {
 
     expect(kinds(findings)).toEqual(['section-missing'])
     expect(findings[0].subject).toBe('**Risks:**')
+  })
+
+  it('should report a missing Verification section', () => {
+    const body = conformingPlan().replace(
+      '**Verification:**\n\n- The validator reports both sections: `bun test src/records`\n\n',
+      '',
+    )
+    const findings = checkPlan('feature-a-b.md', body)
+
+    expect(kinds(findings)).toEqual(['section-missing'])
+    expect(findings[0].subject).toBe('**Verification:**')
+  })
+
+  it('should report a missing Review focus section', () => {
+    const body = conformingPlan().replace(
+      '**Review focus:**\n\nNone identified.\n\n',
+      '',
+    )
+    const findings = checkPlan('feature-a-b.md', body)
+
+    expect(kinds(findings)).toEqual(['section-missing'])
+    expect(findings[0].subject).toBe('**Review focus:**')
+  })
+
+  it('should accept both new sections written as headings', () => {
+    const body = conformingPlan()
+      .replace('**Verification:**', '## Verification')
+      .replace('**Review focus:**', '## Review focus')
+
+    expect(checkPlan('feature-a-b.md', body)).toEqual([])
   })
 
   it('should report a missing Feature heading', () => {

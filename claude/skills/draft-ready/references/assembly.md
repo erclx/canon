@@ -47,9 +47,17 @@ destinations:
 
 - `<path/to/file>`: copy from the ready folder, <one clause on what it changes>
 
+**Verification:**
+
+- <the command that proves the copy landed, or "None identified.">
+
 **Risks:**
 
 - <what could go wrong, or "None identified.">
+
+**Review focus:**
+
+- <an input the copied files must handle, or "None identified.">
 
 **Questions:**
 
