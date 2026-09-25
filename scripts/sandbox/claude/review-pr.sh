@@ -265,8 +265,142 @@ EOF
     gh pr view feat/review-focus --json url -q .url 2>/dev/null)
 }
 
+EVIDENCE_RENDER="$PROJECT_ROOT/scripts/sandbox/fixtures/claude/review-pr/evidence-mismatch/render"
+
+# The trunk both evidence arms branch from: a header on a static page and the
+# project's evidence convention, one committed capture per width named for it.
+# `evidence/` is the segment `canon pr evidence` keys on, so a trunk holding one
+# is what makes a painting change without a new capture a finding rather than a
+# question. `CLAUDE.md` stays silent on the convention on purpose. A first draft
+# stated it there, and the review body from before `review-craft` caught the
+# missing capture off that sentence alone, so the arm proved nothing about
+# reading the convention from the tree.
+seed_header_trunk() {
+  configure_sandbox_anchor_remote
+
+  find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+
+  cat <<'EOF' >package.json
+{
+  "name": "sandbox-pr-review",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "echo 'lint ok'"
+  }
+}
+EOF
+
+  cat <<'EOF' >CLAUDE.md
+# Harbor site
+
+Static marketing site. Markup and styles live in `src/`.
+
+## Commands
+
+- `bun run check`: lint
+EOF
+
+  mkdir -p src evidence/header
+  cp "$EVIDENCE_RENDER/base/header.html" "$EVIDENCE_RENDER/base/header.css" src/
+  cp "$EVIDENCE_RENDER/base/390.png" "$EVIDENCE_RENDER/base/1280.png" evidence/header/
+
+  git add . && git commit --allow-empty -m "feat(site): header" --no-verify -q
+  git push --force origin HEAD:main
+}
+
+# A styling change carrying no capture, on a project whose trunk already keeps
+# them. Nothing is posted beyond the pull request itself.
+seed_missing_evidence_pr() {
+  seed_header_trunk
+
+  git push origin --delete feat/header-spacing -q 2>/dev/null || true
+  git checkout -b feat/header-spacing -q
+
+  cp "$EVIDENCE_RENDER/head/header.html" "$EVIDENCE_RENDER/head/header.css" src/
+
+  git add . && git commit -m "feat(site): widen header spacing and add pricing link" --no-verify -q
+  git push --force origin HEAD -q
+
+  PR_URL=$(gh pr create --draft --title "feat(site): widen header spacing and add pricing link" \
+    --body "Adds a Pricing link to the header and loosens its spacing." \
+    --head feat/header-spacing --base main 2>/dev/null ||
+    gh pr view feat/header-spacing --json url -q .url 2>/dev/null)
+}
+
+# The same change with captures and a wireframe stating the narrow layout. The
+# narrow head capture shows the nav row running off the edge, while the ticked
+# box claims it collapses into the menu button. The comment is the one the real
+# verb renders from this checkout, which sits on the branch, so the arm reads
+# the body `git-pr` would have posted.
+seed_evidence_mismatch_pr() {
+  seed_header_trunk
+
+  git push origin --delete feat/header-pricing -q 2>/dev/null || true
+  git checkout -b feat/header-pricing -q
+
+  cp "$EVIDENCE_RENDER/head/header.html" "$EVIDENCE_RENDER/head/header.css" src/
+  cp "$EVIDENCE_RENDER/head/390.png" "$EVIDENCE_RENDER/head/1280.png" evidence/header/
+
+  mkdir -p canon/wireframes
+  cat <<'EOF' >canon/wireframes/index.md
+# Wireframes
+
+- [Header](header.md): the site header on every page
+EOF
+
+  cat <<'EOF' >canon/wireframes/header.md
+# Header
+
+## Regions
+
+1. Brand, pinned left
+2. Navigation links, pinned right
+
+## Narrow widths
+
+Below 600px the navigation links collapse into a single Menu button pinned
+right. The header never scrolls or overflows sideways at any width.
+EOF
+
+  git add . && git commit -m "feat(site): add pricing link to the header" --no-verify -q
+  git push --force origin HEAD -q
+
+  PR_URL=$(gh pr create --draft --title "feat(site): add pricing link to the header" \
+    --body "Adds a Pricing link to the header and loosens its spacing." \
+    --head feat/header-pricing --base main 2>/dev/null ||
+    gh pr view feat/header-pricing --json url -q .url 2>/dev/null)
+
+  local number="${PR_URL##*/}"
+  local handoff=".canon/tmp/handoff/ui-checklist/header-pricing.md"
+  mkdir -p "$(dirname "$handoff")"
+  cat <<'EOF' >"$handoff"
+**Widths:**
+
+Seen at: 390, 1280
+Not seen at: none
+
+**What to verify visually:**
+
+**Header**
+
+- [x] Narrow the window below 600px → the navigation links collapse into the Menu button
+- [x] Widen the window to 1280px → Pricing sits between Changelog and About
+EOF
+
+  local body_file=".canon/tmp/pr/evidence/body-$number.md"
+  mkdir -p "$(dirname "$body_file")"
+  canon pr evidence "$number" --checklist "$handoff" --json |
+    bun -e 'const record = JSON.parse(await Bun.stdin.text()); if (record.reason !== "ok") { console.error(`canon pr evidence: ${record.reason}`); process.exit(1) } process.stdout.write(record.body)' >"$body_file"
+  gh pr comment "$number" --body-file "$body_file" >/dev/null
+  rm -rf .canon/tmp/pr/evidence .canon/tmp/handoff
+}
+
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "first-pass" "close-out" "unchanged-head" "answered-head" "reviewer-request" "late-finding" "repeat-close-out" "marker-race" "review-focus"
+  select_or_route_scenario "Which scenario?" "first-pass" "close-out" "unchanged-head" "answered-head" "reviewer-request" "late-finding" "repeat-close-out" "marker-race" "missing-evidence" "evidence-mismatch" "review-focus"
 
   case "$SELECTED_OPTION" in
   "first-pass")
@@ -580,6 +714,34 @@ EOF
     log_info "         writes a body carrying its own commit= read-at= marker on the last line"
     log_info "         a pass reading commit.oid instead stops with 'The head is unchanged' and posts nothing"
     log_info "Assert:  declared in fixtures/claude/review-pr/marker-race/expect.toml"
+    ;;
+
+  "missing-evidence")
+    log_step "Configuring pr-review missing-evidence environment ($ANCHOR_REPO)"
+    seed_missing_evidence_pr
+
+    log_step "Scenario ready: a painting change with no capture"
+    log_info "Context: open draft PR on feat/header-spacing changing src/header.html and src/header.css"
+    log_info "         the trunk keeps captures under evidence/header/, and the PR carries no evidence comment"
+    log_info "Action:  /review-pr"
+    log_info "Expect:  flags the change as shipping no screenshot, as a finding rather than a question"
+    log_info "         posts under ## Review, does NOT merge"
+    log_info "Assert:  declared in fixtures/claude/review-pr/missing-evidence/expect.toml"
+    ;;
+
+  "evidence-mismatch")
+    log_step "Configuring pr-review evidence-mismatch environment ($ANCHOR_REPO)"
+    seed_evidence_mismatch_pr
+
+    log_step "Scenario ready: a ticked box the narrow capture contradicts"
+    log_info "Context: open draft PR on feat/header-pricing with an ## Evidence comment from canon pr evidence"
+    log_info "         canon/wireframes/header.md says the nav collapses into a Menu button below 600px"
+    log_info "         the head capture at 390 shows the nav row running off the edge, and the box claiming"
+    log_info "         the collapse is ticked"
+    log_info "Action:  /review-pr"
+    log_info "Expect:  opens the head capture through git show, files a finding quoting the ticked box"
+    log_info "         posts under ## Review, does NOT merge"
+    log_info "Assert:  declared in fixtures/claude/review-pr/evidence-mismatch/expect.toml"
     ;;
 
   "review-focus")

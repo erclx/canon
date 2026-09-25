@@ -1,0 +1,32 @@
+# What a correct `/canon:review-pr` run leaves behind on the missing-evidence
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The branch changes the header's markup and style and posts no evidence
+# comment, on a trunk that already keeps captures under `evidence/header/`.
+# The project holds the convention, so the absent capture is a finding the
+# pass grades rather than a question it asks.
+
+# The short-sha segment is derived from the PR's head commit, so only the
+# prefix is fixed.
+paths = [".canon/tmp/pr/review/body-*.md"]
+
+# The only file this arm's diff has any business touching.
+write_scope = [".canon/tmp/pr/review/**"]
+
+manual = [
+  "The finding is graded rather than asked as a question with no severity. Semantic: the grade sits on a line a pattern can find, and whether it attaches to the missing-capture finding rather than a neighbor is a reading.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# A graded finding is open, so the pass cannot close.
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '^## Review[ \t]*$'
+
+[[content]]
+path = ".canon/tmp/pr/review/body-*.md"
+pattern = '(no|No|missing|Missing|absent|Absent|stale|Stale|outdated|Outdated|without|Without)( an?)? ([a-z]+ )?(screenshots?|captures?|evidence)|re-capture|Re-capture|recapture|Recapture'
