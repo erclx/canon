@@ -5,7 +5,7 @@ description: The landing page and this repository's own rendered images. Use for
 
 # Web
 
-Read `canon/context/web.md` for structure, the Astro build, and the gotchas before editing.
+Read `canon/context/web/index.md` for structure, the Astro build, and the gotchas before editing, then the file it names for the change at hand.
 
 `internal/rules/claude/593-landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after: a draft that never read it reproduces what it forbids, and a five-round drafting pass did exactly that.
 
@@ -23,7 +23,7 @@ Read `canon/context/web.md` for structure, the Astro build, and the gotchas befo
 
 - Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote, and `bun run check` fails when either moves.
 - Never hand-edit a generated frame. The next regeneration overwrites it and the gate reports nothing until the digests disagree.
-- A design-token change can move the capture markup and the stamps while leaving the PNGs byte-identical. `canon/context/web.md` records why, and the Hero stage failing until regenerated frames are committed is that stage working rather than a defect.
+- A design-token change can move the capture markup and the stamps while leaving the PNGs byte-identical. `canon/context/web/assets.md` records why, and the Hero stage failing until regenerated frames are committed is that stage working rather than a defect.
 
 ## Sync checklist
 
@@ -36,9 +36,9 @@ Before shipping any change under `web/`:
 
 ## Reference
 
-- `canon/context/web.md`: structure, the Astro build, decisions, and the CI and layout gaps
+- `canon/context/web/index.md`: structure, the Astro build, decisions, and the CI and layout gaps
 - `internal/rules/claude/593-landing-page.md`: the page's conventions, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
-- `canon/context/design.md`: the token values this surface reads and does not own
+- `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/*.png`
-- `canon/context/web.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses
+- `canon/context/web/assets.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses

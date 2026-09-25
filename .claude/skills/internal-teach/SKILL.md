@@ -20,7 +20,7 @@ Read `canon/context/teach.md` for structure, the render pipeline, and the decisi
 - Develop against `examples/teach/00-fixture/`. Real workspaces hold real learning and sit outside this repository.
 - Pass `--root examples/teach` to reach the fixture. A bare `canon teach list` reads the operator's live workspaces instead, so a claim about "the workspace" made without the flag is a claim about the wrong tree.
 - `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach` below it. A path ending in `teach` therefore behaves differently from one that does not.
-- Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. Do not add a staleness gate there without deciding it first, which is the split `canon/context/web.md` draws between `assets/` and `examples/`.
+- Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. Do not add a staleness gate there without deciding it first, which is the split `canon/context/web/assets.md` draws between `assets/` and `examples/`.
 
 ## Sync checklist
 
@@ -42,4 +42,4 @@ After changing what a workspace's files must contain:
 - `canon standards teach`: folder layout, ordinal naming, frontmatter, mission and learning-record formats
 - `canon standards glossary`: the entry shape, ordering, and which terms a workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy deciding what to teach next, which is the shipped skill's own concern rather than this one's
-- `canon/context/design.md`: the token values this surface reads and does not own
+- `canon/context/design/tokens.md`: the token values this surface reads and does not own

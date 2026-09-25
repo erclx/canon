@@ -19,7 +19,7 @@ Without this skill, a session editing the landing page or this repository's imag
 
 ## Must
 
-- Point at `canon/context/web.md` and at the path-scoped rule rather than restating either, so a rule rewrite moves what a reader sees without touching this skill.
+- Point at `canon/context/web/index.md` and at the path-scoped rule rather than restating either, so a rule rewrite moves what a reader sees without touching this skill.
 - Say to open the rule before drafting rather than after, since the failure this addresses is a draft produced without it.
 - Carry the citation contract in a reference the session opens when editing `copy.ts` rather than in the body every session loads.
 - Name the `web/gallery-src` separation, which no rule states and which the guard script enforces only at build time.
@@ -28,9 +28,9 @@ Without this skill, a session editing the landing page or this repository's imag
 ## Must not
 
 - Restate the five conventions. `593-landing-page.md` is the single source, `v101.0` is rewriting two of them, and a copy here would be stale the day that lands.
-- Restate `canon/context/web.md`'s gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry.
-- Own the design tokens. `canon/context/design.md` owns them and four surfaces read them, which makes them canonical rather than per-domain.
-- Absorb `examples/`. `canon/context/web.md` separates it from `assets/` on who each folder addresses, and a skill covering both would erase the line that decision draws.
+- Restate the gotchas under `canon/context/web/`. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry.
+- Own the design tokens. `canon/context/design/tokens.md` owns them and four surfaces read them, which makes them canonical rather than per-domain.
+- Absorb `examples/`. `canon/context/web/assets.md` separates it from `assets/` on who each folder addresses, and a skill covering both would erase the line that decision draws.
 
 ## Guards
 

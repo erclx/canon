@@ -43,9 +43,9 @@ A `layout:` value outside the catalog falls back to the bullets layout rather th
 
 A `toc` slide renders a clickable contents list. The render builds the navigation in a pre-pass that numbers every slide, so the contents links jump to each `section` slide by position with no hand-written slide numbers. Every slide except the cover and the contents slide carries a footer with the deck title and a `Contents` link back to the `toc` slide. A deck without a `toc` slide gets the deck-title footer with no link.
 
-## Design tokens
+## Theme
 
-`src/slides/styles.ts` holds the design system: one warm palette of `background`, `surface`, `ink`, `muted`, and `accent` tokens, the Geist face read from the design module, the deck-owned point scale, and the light and dark variant mapping. A deck selects the light or dark variant through its frontmatter or a render flag.
+`canon/DESIGN.md` owns the palette and the face, and `src/slides/styles.ts` maps them onto the deck, adding the point scale and the light and dark variant mapping. A deck selects its variant through its frontmatter or a render flag.
 
 ## Render command
 
@@ -61,4 +61,4 @@ After the first render it runs a one-pass quality check: convert the deck to ima
 
 ## Reference deck
 
-`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `evidence/` holds a screenshot of both variants, set in Geist through the design module's face and rendered from the deck as `c5079cea` left it, by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass. It sits under the segment `canon pr evidence` compares, so a later deck change shows a before and after in review. Nothing regenerates it when the source changes, and no command renders it. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web.md`, since nothing outside this folder depends on the screenshot staying current, and the folder carries no stamps for the same reason.
+`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `evidence/` holds a screenshot of both variants, set in Geist through the design module's face and rendered from the deck as `c5079cea` left it, by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass. It sits under the segment `canon pr evidence` compares, so a later deck change shows a before and after in review. Nothing regenerates it when the source changes, and no command renders it. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web/assets.md`, since nothing outside this folder depends on the screenshot staying current, and the folder carries no stamps for the same reason.
