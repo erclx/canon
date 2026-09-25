@@ -231,6 +231,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 | `canon:project-commands`     | When the project's own command needs running                                                               |
 | `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor                            |
 | `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts                            |
+| `canon:review-craft`         | When reviewing a change, for what to look for and how much evidence a finding needs                        |
 | `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                                             |
 | `canon:ui-checklist`         | After a UI change, to write what to look at and name what ships untested                                   |
 

@@ -22,6 +22,7 @@ Scoping a later pass off GitHub's review stamp skipped real work. On 2026-09-07 
 - Detect the pass from the thread rather than taking it from the caller, matching the heading for equality so a neighboring comment cannot be read as a prior pass
 - Scope a later pass to the commits added since the prior one, once that commit is confirmed to still reach the head
 - Apply the integration, contract, and consumer lenses a self-review structurally cannot
+- Apply `canon:review-craft`'s axes and evidence bar, rendered output included, rather than carrying an axis list of its own
 - Read each test the branch added or changed against `canon:test-craft`'s final filter, scoped to those files and never the suite
 - Post the closing pass even with nothing to report, since a review left unanswered reads as one nobody closed
 - State a withdrawal or a regrade on the thread with the fact that settled it, since a finding dropped in silence reads the same as one nobody answered

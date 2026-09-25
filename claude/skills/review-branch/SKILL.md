@@ -59,14 +59,13 @@ Read each file from the changed file list. Skip deleted files. Run reads in para
 
 ## Step 4: review and persist
 
+Invoke `canon:review-craft` before reading the diff for findings, whatever the diff's size. It carries what to look for and the evidence bar, rendered output included, and this step carries no axis list of its own to fall back on. Report it rather than proceeding silently when the skill does not resolve.
+
 Review the full diff and changed file contents for:
 
-1. Bugs and edge cases
-2. Error handling gaps
-3. Logic flaws that will cause problems when the code is extended
-4. Security issues relevant to the project context
-5. Violations of rules from `.claude/rules/` that apply to the changed files
-6. When the diff touches a file this project ships to a target holding none of its own history: a repository-relative path, a phase label naming a gitignored board, a same-repository pull request or commit reference, or a layout, stack, or config-path claim true of this checkout but stated as if it were general
+1. Every axis `canon:review-craft` states, held to its evidence bar
+2. Violations of rules from `.claude/rules/` that apply to the changed files
+3. When the diff touches a file this project ships to a target holding none of its own history: a repository-relative path, a phase label naming a gitignored board, a same-repository pull request or commit reference, or a layout, stack, or config-path claim true of this checkout but stated as if it were general
 
 Use `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`, and the auto-loaded `.claude/rules/` as project context to inform what is intentional vs problematic. Do not fix, rewrite, or suggest refactors outside the scope of a finding.
 

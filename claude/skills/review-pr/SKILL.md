@@ -63,7 +63,7 @@ Read `${CLAUDE_SKILL_DIR}/references/scope.md` for finding the commit and verdic
 
 ## Step 3: review
 
-Review the diff and files for the same axes as `review-branch` (bugs, edge cases, error handling, logic flaws, security, rule violations, checkout assumptions in a shipped file), then add the three lenses a self-review structurally cannot apply:
+Invoke `canon:review-craft` with the skill tool now, and read nothing for findings until it has loaded, whatever the diff's size. It carries what to look for and how much evidence a finding needs, rendered output included, and this step carries no axis list of its own to fall back on. Read the diff and files against its axes. Add the two that stay here: rule violations, and checkout assumptions in a shipped file. Report it rather than proceeding silently when the skill does not resolve. Then add the three lenses a self-review structurally cannot apply:
 
 - Integration: does this fit the board's order, the shared wiring seam, and any sibling PR in flight?
 - Contract: does a contract downstream features depend on land correctly, and should the plan itself be questioned?

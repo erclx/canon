@@ -15,6 +15,7 @@ Without this skill, a branch ships on the confidence of the session that wrote i
 - Resolve the base ref once, preferring the remote over local `main`, and reuse it in the guard and the read
 - Say when the baseline is unusable and name the narrowed scope, rather than letting a clean summary read as a clean branch
 - Flag only what will cause incorrect behavior or break a documented rule
+- Apply `canon:review-craft`'s axes and evidence bar, rendered output included, rather than carrying an axis list of its own
 - Grade every finding, since the caller gates on the counts rather than on the prose
 - Write the report to disk under a branch-derived slug, so what the ship step reads outlives the session
 

@@ -100,6 +100,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'review-branch',
   },
   {
+    prompt:
+      'What should a review of a change look for beyond bugs, and how much evidence does a finding need?',
+    expect: 'review-craft',
+  },
+  {
     prompt: 'Draft me a script with beats for a screencast recording.',
     expect: 'draft-screencast',
   },
