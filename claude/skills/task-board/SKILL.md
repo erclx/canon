@@ -98,7 +98,7 @@ git fetch origin main --quiet && git log origin/main --oneline -20
 
 Match the shipped outcomes against that log, widening to `gh pr list --state merged --limit 20` when a remote is configured and the log does not settle it. When the work is not on `main`, name the task and stop: `❌ Work not on main. Archiving now loses the task if the pull request is abandoned.`
 
-The board is gitignored, so an archived task has no history behind it and nothing restores one archived early. Skip this check when the task carries a `Pull request:` line and that pull request is merged, since the number already proves what the log is being read for.
+The board is gitignored, so an archived task has no history behind it and nothing restores one archived early. Skip this check when the task carries a `Pull request:` line and the last number it lists is merged, since the number already proves what the log is being read for.
 
 ### Step 2: run the archive
 
@@ -118,6 +118,7 @@ Each reason has one resolution and none of them is to archive around it:
 
 - `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `docs-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
 - `ambiguous`: two tasks name one pull request, which is the misfile `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
+- `earlier-slice`: the number is listed on the task but is not the last, so a later slice is still to merge. Leave the task on the board. Its last slice's merge archives it.
 - `no-match`: the stem or number names nothing on the board. Check the name against the listed stems.
 - `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
 

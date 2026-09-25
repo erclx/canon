@@ -106,14 +106,22 @@ describe('writePullRequestLine', () => {
     expect(written).toContain('Issue: #12\nPull request: #673\n')
   })
 
-  it('should correct the number when the line already exists', () => {
+  it('should append the number when the line already names another', () => {
     const text = '# A task\n\nPlan: [p](../plans/p.md)\nPull request: #12\n'
 
     const { text: written, action } = writePullRequestLine(text, 673)
 
-    expect(action).toBe('corrected')
-    expect(written).toContain('Pull request: #673')
-    expect(written).not.toContain('#12')
+    expect(action).toBe('appended')
+    expect(written).toContain('Pull request: #12, #673\n')
+  })
+
+  it('should append to a line already listing three numbers', () => {
+    const text = '# A task\n\nPull request: #1, #2, #3\n'
+
+    const { text: written, action } = writePullRequestLine(text, 4)
+
+    expect(action).toBe('appended')
+    expect(written).toBe('# A task\n\nPull request: #1, #2, #3, #4\n')
   })
 
   it('should report no change when the number already matches', () => {
@@ -123,6 +131,24 @@ describe('writePullRequestLine', () => {
       text,
       action: 'unchanged',
     })
+  })
+
+  it('should report no change when a list already carries the number', () => {
+    const text = '# A task\n\nPull request: #12, #673, #700\n'
+
+    expect(writePullRequestLine(text, 673)).toEqual({
+      text,
+      action: 'unchanged',
+    })
+  })
+
+  it('should correct a line it cannot read as a list of numbers', () => {
+    const text = '# A task\n\nPull request: #12 (closed)\n'
+
+    const { text: written, action } = writePullRequestLine(text, 673)
+
+    expect(action).toBe('corrected')
+    expect(written).toBe('# A task\n\nPull request: #673\n')
   })
 
   it('should fall back to the heading when the task carries no origin line', () => {

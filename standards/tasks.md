@@ -173,6 +173,8 @@ Add no third heading. Status stays inline on an outcome rather than becoming an 
 
 Size the outcomes so one pull request closes all of them. A task whose outcomes span two pull requests ships the first half and leaves the rest open, with nothing recording which outcomes the merged work covered, so the board reads as in-progress work that no branch is carrying. Split the task before handing it off rather than after. This is what `## Archiving` below depends on, since a task closes whole or not at all.
 
+A sliced task is the one allowed exception: a task the operator decided to ship across several pull requests on purpose, one slice each. Its `Pull request:` line lists every slice, so the board records which merged work covered which outcomes, and it closes whole when the last slice's merge finds every outcome ticked.
+
 Prefix the H1 with the `vX.Y:` phase label, then a short title whose form depends on the task type:
 
 - Feature: an outcome describing what the user can now do
@@ -227,15 +229,15 @@ A project that archived plans before the folder nested under `.canon/plans/` hol
 
 One plan per task. A plan cited by two tasks is a misfile rather than a shape to design for, which is why the sweep counts citations before archiving: the count is a guard against the misfile stranding a pointer, not support for the shape.
 
-`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, mirroring how `canon tasks pull-request` writes its own. `plan-feature` calls it right after the plan file lands, when an existing task names the feature, so the line is a mechanical write rather than hand-edited markdown.
+`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line. `plan-feature` calls it right after the plan file lands, when an existing task names the feature, so the line is a mechanical write rather than hand-edited markdown.
 
 `Groundwork:` points at `../groundwork/<slug>/`, the folder `plan-groundwork` fills. It names the surface it points at the way `Plan:` does. Use this key alone. `Research record` and `Decision record` are earlier spellings of the same thing and both convert to it.
 
 `Intake:` points at `../intake/<slug>/`, the folder an intake pass fills. Use it rather than `Groundwork:`, because a groundwork track measures one question in depth while an intake dispositions many across a tree, and one key covering both loses which kind of pass produced the task. The line names the folder rather than an item inside it. A task routinely promotes several items at once, so an anchored line would name one and drop the rest, and the item numbers belong in that task's `## Findings`.
 
-`Pull request:` records which pull request carries the task's work, as a bare `#NNN` the way `Issue:` does. It is not an origin, so a task without one is well-formed. `git-pr` writes it when a pull request opens, which is the one step that always runs whether the chain drives it or a person does.
+`Pull request:` records which pull requests carry the task's work, each as a bare `#NNN` the way `Issue:` does. It lists every pull request that shipped part of the task, oldest first and separated by commas, as in `Pull request: #NNN, #NNN`, and a task shipped whole lists one. It is not an origin, so a task without one is well-formed. `git-pr` writes it when a pull request opens, which is the one step that always runs whether the chain drives it or a person does, and appends to the line rather than replacing it.
 
-The line is what lets a merge close its own task. Every merge on `main` is a squash carrying the number in its subject, so the number survives where a branch name does not, and `canon tasks archive --pull-request <n>` resolves the task from it. Without the line the board can only be swept blind, and a blind sweep cannot tell a shipped task from an abandoned one. One task, one pull request: two tasks naming the same number refuse to archive rather than both moving.
+The line is what lets a merge close its own task. Every merge on `main` is a squash carrying the number in its subject, so the number survives where a branch name does not, and `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last, since outcomes are ticked at ship time and an earlier slice can merge after the last one shipped. Without the line the board can only be swept blind, and a blind sweep cannot tell a shipped task from an abandoned one. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving.
 
 ## What goes in
 

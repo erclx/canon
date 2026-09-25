@@ -50,7 +50,7 @@ canon tasks archive --pull-request 673 --json
 | `--json`             | Emit a machine-readable record on stdout                     |
 | `--root <path>`      | Board root, defaulting to the main worktree                  |
 
-Exit codes: `0` archived, `1` refused. Every gate is a refusal rather than a warning, because `.husky/post-merge` calls this with nobody watching. The `reason` field carries which gate fired: `no-board`, `no-match`, `ambiguous`, `no-outcomes`, `open-outcomes`, or `bad-input`.
+Exit codes: `0` archived, `1` refused. Every gate is a refusal rather than a warning, because `.husky/post-merge` calls this with nobody watching. The `reason` field carries which gate fired: `no-board`, `no-match`, `ambiguous`, `no-outcomes`, `open-outcomes`, `earlier-slice`, or `bad-input`. `earlier-slice` fires when `--pull-request` names a number that is not the last on the task's `Pull request:` line, since outcomes are ticked at ship time and only the last slice's merge closes the task.
 
 An outcome whose body is struck reads as cut rather than open or closed, whatever its checkbox holds: `- ~~<outcome>~~ <why>`. A task carrying only cut outcomes archives, since the gate refuses `no-outcomes` only when both the closed and the cut counts are zero. The success record carries `closed` and `cut` as counts, so a reader tells a shipped task from an abandoned one without opening the file.
 
@@ -245,13 +245,13 @@ canon tasks plan-link v28.1-trigger-escalation .canon/plans/feature-dispatch-ans
 
 The plan resolves the same way `canon tasks plan-answers` resolves one, against the project root first and `.canon/tasks/` second, so a bare slug and a board-relative path both work. A reference resolving to no file refuses as `no-plan`, naming every base it looked under.
 
-The write mirrors `canon tasks pull-request`'s add/correct/unchanged shape, anchored on the H1 rather than on the last origin line, since `Plan:` is the first origin line a task carries rather than the last. The `action` field reports `added`, `corrected`, or `unchanged`, which makes a rerun against the same plan safe.
+The write adds the line when it is absent and corrects the target in place when it exists, anchored on the H1 rather than on the last origin line, since `Plan:` is the first origin line a task carries rather than the last. The `action` field reports `added`, `corrected`, or `unchanged`, which makes a rerun against the same plan safe.
 
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, `no-plan`, or `bad-input`.
 
 ## Pull request
 
-`canon tasks pull-request` records the number a branch's pull request carries onto the task that branch closes. It adds `Pull request: #NNN` under the `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` lines the task already holds, and corrects the number in place when the line exists.
+`canon tasks pull-request` records the number a branch's pull request carries onto the task that branch closes. It adds `Pull request: #NNN` under the `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` lines the task already holds. When the line exists it appends `, #NNN` rather than replacing it, so a task shipped in slices lists every pull request oldest first, and a number already listed leaves the line alone. A line that does not read as a comma-separated list of `#NNN` entries is replaced whole.
 
 Name the task by its filename stem, or by the plan its `Plan:` line points at:
 
@@ -266,7 +266,7 @@ canon tasks pull-request 673 --plan worktree-scratch-routing --json
 | `--json`        | Emit a machine-readable record on stdout           |
 | `--root <path>` | Board root, defaulting to the main worktree        |
 
-A plan is matched on the token both spellings share, so `worktree-scratch-routing`, `feature-worktree-scratch-routing`, and `.canon/plans/feature-worktree-scratch-routing.md` all select the same task. The `action` field reports `added`, `corrected`, or `unchanged`, which makes a rerun against the same number safe.
+A plan is matched on the token both spellings share, so `worktree-scratch-routing`, `feature-worktree-scratch-routing`, and `.canon/plans/feature-worktree-scratch-routing.md` all select the same task. The `action` field reports `added`, `appended`, `corrected`, or `unchanged`, which makes a rerun against the same number safe.
 
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, or `ambiguous`. `git-pr` skips silently on those three, because each is a case where a guessed write would archive the wrong task once the branch merges.
 

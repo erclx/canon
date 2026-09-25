@@ -10,6 +10,7 @@ import {
   OUTCOME_PATTERN,
   planLine,
   readPlanTarget,
+  readPullRequest,
   tasksDir,
 } from '@/tasks/archive'
 
@@ -49,7 +50,7 @@ export type RecordSelector =
   | { readonly kind: 'stem'; readonly stem: string }
   | { readonly kind: 'plan'; readonly plan: string }
 
-export type LineAction = 'added' | 'corrected' | 'unchanged'
+export type LineAction = 'added' | 'appended' | 'corrected' | 'unchanged'
 
 export interface PullRequestRecorded {
   readonly ok: true
@@ -101,9 +102,10 @@ function planKey(reference: string): string {
 
 /**
  * Places the `Pull request:` line under the origin lines the task already
- * carries, and corrects the number in place when the line exists. A task with
- * no origin line takes it under the H1, which is the only other anchor the
- * board format guarantees.
+ * carries. A task shipped in slices lists every pull request, so a new number
+ * appends to an existing line rather than replacing it, and a line that does
+ * not read as a list is replaced whole. A task with no origin line takes it
+ * under the H1, which is the only other anchor the board format guarantees.
  */
 export function writePullRequestLine(
   text: string,
@@ -114,9 +116,14 @@ export function writePullRequestLine(
   const existing = lines.findIndex((entry) => entry.startsWith('Pull request:'))
 
   if (existing !== -1) {
-    if (lines[existing] === line) return { text, action: 'unchanged' }
-    lines[existing] = line
-    return { text: lines.join('\n'), action: 'corrected' }
+    const listed = readPullRequest(lines[existing])
+    if (listed.includes(number)) return { text, action: 'unchanged' }
+    if (listed.length === 0) {
+      lines[existing] = line
+      return { text: lines.join('\n'), action: 'corrected' }
+    }
+    lines[existing] = `${lines[existing].trimEnd()}, #${number}`
+    return { text: lines.join('\n'), action: 'appended' }
   }
 
   const origin = lastOriginLine(lines)
@@ -143,8 +150,8 @@ function lastOriginLine(lines: readonly string[]): number | undefined {
 }
 
 /**
- * Places the `Plan:` line right after the H1, mirroring
- * `writePullRequestLine`'s add/correct/unchanged shape. `Plan:` is the first
+ * Places the `Plan:` line right after the H1, and corrects the target in place
+ * when the line exists, since a task runs under one plan. `Plan:` is the first
  * origin line a task carries, so it anchors on the heading itself rather than
  * on the last origin line above it.
  */
