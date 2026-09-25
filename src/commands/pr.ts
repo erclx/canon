@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile, readlink, realpath } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
@@ -28,11 +28,21 @@ import {
 import {
   findEvidenceChecklist,
   findEvidenceCommentId,
+  findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
   renderEvidenceBody,
 } from '@/pr/evidence'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
+import {
+  findLocalServer,
+  type Listener,
+  type LocalRefusal,
+  type LocalRunner,
+  parseLsofListeners,
+  parseProcNetTcp,
+  stripLocalLine,
+} from '@/pr/local'
 import { KEY_CHANGES } from '@/pr/paths'
 import {
   findDeployWorkflow,
@@ -76,6 +86,28 @@ interface ReadOptions {
 interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
   readonly checklist?: string
+  readonly local?: string
+}
+
+interface LocalOptions extends ReadOptions {
+  readonly remove?: boolean
+  readonly note?: string
+}
+
+/** What replaces the local address line once the pull request closes. */
+const LOCAL_REMOVED_NOTE =
+  '_Local preview removed when the pull request closed._'
+
+/** How long the probe waits on a listener before reading it as not a server. */
+const LOCAL_PROBE_TIMEOUT_MS = 2_000
+
+const LOCAL_REFUSALS: Record<LocalRefusal | 'gh-failed', string> = {
+  'no-server':
+    'Nothing listening inside this worktree served an HTML page. Start the dev server here and re-run to get a link.',
+  'no-listener-reader':
+    'This machine offers neither lsof nor /proc, so no listening socket could be read. Nothing is posted.',
+  'gh-failed':
+    'gh could not read or edit the marked comment on this pull request.',
 }
 
 interface PreviewOptions extends ReadOptions {
@@ -387,6 +419,10 @@ export function register(program: Command): void {
       '--checklist <path>',
       'Close the body with this visual checklist file, from canon:ui-checklist',
     )
+    .option(
+      '--local <url>',
+      "Add this worktree's running server under any preview line, from canon pr local",
+    )
     .addHelpText(
       'after',
       [
@@ -419,6 +455,13 @@ export function register(program: Command): void {
         'image still reports no-evidence, and the caller posts the checklist',
         'on its own.',
         '',
+        '--local adds a **Local preview:** line under the hosted preview line,',
+        'or opens the body with it when there is none, and is carried forward',
+        'the same way. It does not by itself turn no-evidence into ok, so a',
+        'branch with a server running and nothing to show posts no link-only',
+        'comment. Together with --checklist it does, so the checklist and the',
+        'link land in one comment.',
+        '',
         'Exit codes:',
         '  0  read, whether it produced a body or reported no-evidence',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -428,6 +471,7 @@ export function register(program: Command): void {
         '  canon pr evidence 1341 --json',
         '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
         '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
+        '  canon pr evidence 1341 --local http://localhost:5173 --json',
         '',
       ].join('\n'),
     )
@@ -483,6 +527,66 @@ export function register(program: Command): void {
     )
     .action(async (number: string | undefined, opts: PreviewOptions) => {
       process.exitCode = await runPreview(number, opts)
+    })
+
+  pr.command('local')
+    .description(
+      "Find the server this worktree is running and report its localhost address, or remove it from the pull request's evidence comment",
+    )
+    .argument('[number]', 'Pull request to edit on --remove')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Worktree to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--remove',
+      "Replace the evidence comment's local preview line with a note",
+    )
+    .option(
+      '--note <text>',
+      'What replaces the line on --remove',
+      LOCAL_REMOVED_NOTE,
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Reads every TCP socket in LISTEN, keeps those whose owning process runs',
+        "inside this worktree's toplevel, and requests / on each. The lowest",
+        'port serving an HTML page is reported, which skips a test runner or a',
+        'reload socket answering in the same tree.',
+        '',
+        'A process in a sibling worktree, in the main checkout seen from a',
+        'linked worktree, or in a linked worktree seen from the main checkout',
+        'is never reported, since its server shows another branch. Sockets are',
+        'read through lsof, or through /proc on a Linux machine without it.',
+        '',
+        '--remove reads the pull request comment carrying the pr-evidence',
+        'marker and replaces its **Local preview:** line with --note, editing',
+        'the comment itself so a close workflow with no session can call it.',
+        '',
+        'Read `reason` on the JSON record:',
+        '  ok                  a page answered, with its address in `url`',
+        '  no-server           nothing inside this worktree served a page',
+        '  no-listener-reader  neither lsof nor /proc is available',
+        '  removed             --remove replaced the line',
+        '  no-comment          --remove found no marked comment, a no-op',
+        '  no-line             --remove found no local line, a no-op',
+        '',
+        'Exit codes:',
+        '  0  a server was found, or --remove finished, including a no-op',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr local --json',
+        '  canon pr local 1341 --remove --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: LocalOptions) => {
+      process.exitCode =
+        opts.remove === true
+          ? await runLocalRemove(number, opts)
+          : await runLocal(opts)
     })
 }
 
@@ -1319,7 +1423,15 @@ async function runEvidence(
     baseTree.has(path),
   )
 
-  if (grouped.kind === 'refused' && opts.preview === undefined) {
+  // A local address rides on a checklist or a hosted preview and never opens
+  // a comment alone, so a docs-only branch with a server up posts nothing.
+  const hasChecklistAndLocal =
+    suppliedChecklist !== undefined && opts.local !== undefined
+  if (
+    grouped.kind === 'refused' &&
+    opts.preview === undefined &&
+    !hasChecklistAndLocal
+  ) {
     logStep('Skipped')
     logInfo(
       'No changed path carries an evidence/ segment, so there is nothing to post.',
@@ -1355,6 +1467,7 @@ async function runEvidence(
   let commentId: number | undefined
   let carriedPreview: string | undefined
   let carriedChecklist: string | undefined
+  let carriedLocal: string | undefined
   if (identity.number !== undefined) {
     const commentsRow = await gh(root, [
       'pr',
@@ -1389,9 +1502,11 @@ async function runEvidence(
     commentId = findEvidenceCommentId(comments)
     carriedPreview = findEvidencePreview(comments)
     carriedChecklist = findEvidenceChecklist(comments)
+    carriedLocal = findEvidenceLocal(comments)
   }
 
   const preview = opts.preview ?? carriedPreview
+  const local = opts.local ?? carriedLocal
   const checklist = suppliedChecklist ?? carriedChecklist
   const states = grouped.kind === 'read' ? grouped.states : []
   const body = renderEvidenceBody(
@@ -1401,6 +1516,7 @@ async function runEvidence(
     identity.head,
     preview,
     checklist,
+    local,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
@@ -1410,6 +1526,7 @@ async function runEvidence(
     `${plural(caseCount, 'case')} across ${plural(states.length, 'state')}`,
   )
   if (preview !== undefined) logInfo(`preview ${preview}`)
+  if (local !== undefined) logInfo(`local preview ${local}`)
   if (checklist !== undefined) {
     logInfo(
       suppliedChecklist === undefined
@@ -1601,6 +1718,211 @@ async function runPreview(
   }
 
   return 0
+}
+
+async function readText(path: string): Promise<string | undefined> {
+  return readFile(path, 'utf8').catch(() => undefined)
+}
+
+/**
+ * Every listening socket's owning pid, read from `/proc`. Only a process this
+ * user owns exposes its `fd` table, which is also the only process whose
+ * server this user's worktree could have started.
+ */
+async function readProcListeners(): Promise<Listener[] | undefined> {
+  const tables = await Promise.all(
+    ['/proc/net/tcp', '/proc/net/tcp6'].map(readText),
+  )
+  if (tables.every((text) => text === undefined)) return undefined
+  const byInode = new Map(
+    tables.flatMap((text) =>
+      text === undefined
+        ? []
+        : parseProcNetTcp(text).map((s) => [s.inode, s.port] as const),
+    ),
+  )
+
+  const processIds = (await readdir('/proc').catch(() => [])).filter((name) =>
+    /^\d+$/.test(name),
+  )
+  const listeners: Listener[] = []
+  for (const pid of processIds) {
+    const fds = await readdir(`/proc/${pid}/fd`).catch(() => [])
+    for (const fd of fds) {
+      const target = await readlink(`/proc/${pid}/fd/${fd}`).catch(() => '')
+      const inode = /^socket:\[(\d+)\]$/.exec(target)?.[1]
+      const port = inode === undefined ? undefined : byInode.get(inode)
+      if (port !== undefined) listeners.push({ pid: Number(pid), port })
+    }
+  }
+  return listeners
+}
+
+/**
+ * The machine half of a detection: lsof where it is installed, `/proc` on a
+ * Linux machine without it, and no reader anywhere else.
+ */
+function machineLocalRunner(): LocalRunner {
+  const hasLsof = Bun.which('lsof') !== null
+  return {
+    async listListeners() {
+      if (hasLsof) {
+        const result = await $`lsof -nP -iTCP -sTCP:LISTEN -Fpn`
+          .quiet()
+          .nothrow()
+        // lsof exits 1 both when it matched nothing and when it could not
+        // read some process, and the rows it did print are real either way.
+        if (result.exitCode <= 1) return parseLsofListeners(result.text())
+      }
+      if (existsSync('/proc/net/tcp')) return readProcListeners()
+      return undefined
+    },
+    async cwdOf(pid) {
+      if (existsSync(`/proc/${pid}/cwd`)) {
+        return readlink(`/proc/${pid}/cwd`).catch(() => undefined)
+      }
+      if (!hasLsof) return undefined
+      const result = await $`lsof -a -p ${pid} -d cwd -Fn`.quiet().nothrow()
+      const line = result
+        .text()
+        .split('\n')
+        .find((row) => row.startsWith('n'))
+      return line?.slice(1)
+    },
+    // An HTML page rather than any answer, since a test runner's server or a
+    // reload socket in the same tree answers too, and a reviewer opening one
+    // gets a bare 404 instead of the branch.
+    async probe(port) {
+      try {
+        const response = await fetch(`http://localhost:${port}/`, {
+          signal: AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+        })
+        await response.body?.cancel()
+        return (response.headers.get('content-type') ?? '').includes(
+          'text/html',
+        )
+      } catch {
+        return false
+      }
+    },
+  }
+}
+
+/** The worktree's toplevel with symlinks resolved, since a process cwd is read back resolved. */
+async function resolveWorktreeRoot(root: string): Promise<string> {
+  const result = await $`git -C ${root} rev-parse --show-toplevel`
+    .env(gitEnv())
+    .quiet()
+    .nothrow()
+  const toplevel = result.exitCode === 0 ? result.text().trim() : root
+  return realpath(toplevel).catch(() => toplevel)
+}
+
+async function runLocal(opts: LocalOptions): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  intro('canon pr local')
+
+  const worktree = await resolveWorktreeRoot(root)
+  const result = await findLocalServer(worktree, machineLocalRunner())
+  if (result.kind === 'refused') {
+    return refuseWith(
+      result.reason,
+      LOCAL_REFUSALS[result.reason],
+      emitJson,
+      root,
+    )
+  }
+
+  logStep('Local preview')
+  logInfo(result.url)
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ root, reason: 'ok', url: result.url, port: result.port })}\n`,
+    )
+  }
+  return 0
+}
+
+/**
+ * Replaces the local line on the marked comment. The verb writes here rather
+ * than handing a body back, because its caller is a close workflow with no
+ * session to post one.
+ */
+async function runLocalRemove(
+  number: string | undefined,
+  opts: LocalOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+  const note = opts.note ?? LOCAL_REMOVED_NOTE
+
+  intro('canon pr local --remove')
+
+  if (Bun.which('gh') === null) {
+    return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
+  }
+
+  const args = ['pr', 'view']
+  if (number !== undefined) args.push(number)
+  args.push('--json', 'comments')
+  const row = await gh(root, args)
+  let comments: readonly { url?: string; body: string }[] | undefined
+  try {
+    comments =
+      row === null
+        ? undefined
+        : (
+            JSON.parse(row) as {
+              comments?: readonly { url?: string; body: string }[]
+            }
+          ).comments
+  } catch {
+    comments = undefined
+  }
+  if (comments === undefined) {
+    return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
+  }
+
+  const finish = (reason: string, message: string): number => {
+    logStep(reason === 'removed' ? 'Removed' : 'Skipped')
+    logInfo(message)
+    outro()
+    if (emitJson) {
+      process.stdout.write(`${JSON.stringify({ root, reason })}\n`)
+    }
+    return 0
+  }
+
+  const commentId = findEvidenceCommentId(comments)
+  const marked = comments.find((comment) =>
+    comment.url?.endsWith(`#issuecomment-${commentId}`),
+  )
+  if (commentId === undefined || marked === undefined) {
+    return finish('no-comment', 'No comment carries the evidence marker.')
+  }
+
+  const stripped = stripLocalLine(marked.body, note)
+  if (stripped === undefined) {
+    return finish('no-line', 'The evidence comment carries no local line.')
+  }
+
+  const patched = await gh(root, [
+    'api',
+    '-X',
+    'PATCH',
+    `repos/{owner}/{repo}/issues/comments/${commentId}`,
+    '-f',
+    `body=${stripped}`,
+  ])
+  if (patched === null) {
+    return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
+  }
+
+  return finish('removed', `comment ${commentId}`)
 }
 
 /**

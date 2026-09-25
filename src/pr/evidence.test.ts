@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   findEvidenceChecklist,
   findEvidenceCommentId,
+  findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
   renderEvidenceBody,
@@ -192,6 +193,45 @@ describe('renderEvidenceBody', () => {
     )
   })
 
+  it('should put the local address under the hosted preview when both are given', () => {
+    const body = renderEvidenceBody(
+      [],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      'https://feat-thing.annex.pages.dev',
+      undefined,
+      'http://localhost:5173',
+    )
+
+    expect(body).toBe(
+      [
+        '**Preview:** https://feat-thing.annex.pages.dev',
+        '**Local preview:** http://localhost:5173',
+        '',
+        '<!-- pr-evidence: head=bbbb111 -->',
+      ].join('\n'),
+    )
+  })
+
+  it('should open the body with the local address when no hosted preview is given', () => {
+    const body = renderEvidenceBody(
+      [],
+      'erclx/annex',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] the hero settles',
+      'http://localhost:5173',
+    )
+
+    expect(body.split('\n').slice(0, 3)).toEqual([
+      '**Local preview:** http://localhost:5173',
+      '',
+      '## What to look at',
+    ])
+  })
+
   it('should render the checklist below the comparison and above the marker', () => {
     const body = renderEvidenceBody(
       [
@@ -327,6 +367,63 @@ describe('findEvidencePreview', () => {
     ])
 
     expect(preview).toBeUndefined()
+  })
+
+  it('should not read a local first line as a hosted preview', () => {
+    const preview = findEvidencePreview([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(preview).toBeUndefined()
+  })
+})
+
+describe('findEvidenceLocal', () => {
+  it('should read the local address under a hosted preview', () => {
+    const local = findEvidenceLocal([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '**Preview:** https://feat-x.site.pages.dev\n**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(local).toBe('http://localhost:5173')
+  })
+
+  it('should read the local address when it opens the body alone', () => {
+    const local = findEvidenceLocal([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '**Local preview:** http://localhost:5173\n\n## Evidence\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(local).toBe('http://localhost:5173')
+  })
+
+  it('should return undefined when the marked comment carries only a hosted preview', () => {
+    const local = findEvidenceLocal([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '**Preview:** https://feat-x.site.pages.dev\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(local).toBeUndefined()
+  })
+
+  it('should ignore a local line below the opening block', () => {
+    const local = findEvidenceLocal([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## What to look at\n\n**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(local).toBeUndefined()
   })
 })
 

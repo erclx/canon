@@ -30,6 +30,7 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Report a refused label, since a warning nothing surfaces leaves the run indistinguishable from one that labelled
 - Put a preview address on a pull request that changes a rendered surface when the project's deploy can mint one, since screenshots and a checklist leave a reviewer nothing to click into before merging
 - Bound the wait on that preview and finish the chain without the link on a timeout, since a slow deploy must not hold the ship
+- Put the branch's running local server on the same pull request when this worktree is serving one, and remove it when the pull request closes, since a reviewer on the operator's machine can interact with the branch and a link that outlives it points at whatever runs there next
 
 ## Must not
 

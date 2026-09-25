@@ -7,6 +7,9 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 /** How the first line of a body names the branch's preview deployment. */
 const PREVIEW_PREFIX = '**Preview:**'
 
+/** How the opening block names the branch's server on the operator's own machine, under any hosted preview line. */
+export const LOCAL_PREFIX = '**Local preview:**'
+
 /** The heading the checklist sits under, printed outside the delimiters so a carried checklist never doubles it. */
 const CHECKLIST_HEADING = '## What to look at'
 
@@ -128,6 +131,9 @@ export function evidenceMarker(head: string): string {
  *
  * A checklist closes the body, below the comparison it annotates, so one
  * comment carries the preview address, the screenshots, and what to look at.
+ *
+ * A local address sits under the hosted one, never above it, so the hosted
+ * line keeps the first-line position `findEvidencePreview` reads.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -136,9 +142,13 @@ export function renderEvidenceBody(
   head: string,
   preview?: string,
   checklist?: string,
+  local?: string,
 ): string {
-  const opening =
-    preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`, '']
+  const addresses = [
+    ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
+    ...(local === undefined ? [] : [`${LOCAL_PREFIX} ${local}`]),
+  ]
+  const opening = addresses.length === 0 ? [] : [...addresses, '']
   const closing =
     checklist === undefined
       ? []
@@ -221,6 +231,36 @@ export function findEvidencePreview(
   const first = marked?.body.split('\n')[0]?.trim() ?? ''
   if (!first.startsWith(PREVIEW_PREFIX)) return undefined
   return first.slice(PREVIEW_PREFIX.length).trim() || undefined
+}
+
+/**
+ * Where the local address line sits in a body, searched only through the
+ * opening block above the first blank line, so a line quoted further down in
+ * a checklist is never taken for it. -1 when the block carries none.
+ */
+export function findLocalLineIndex(body: string): number {
+  const lines = body.split('\n')
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = (lines[index] ?? '').trim()
+    if (line === '') return -1
+    if (line.startsWith(LOCAL_PREFIX)) return index
+  }
+  return -1
+}
+
+/**
+ * The local address the marked comment already carries, carried forward on a
+ * re-render the way the hosted preview is.
+ */
+export function findEvidenceLocal(
+  comments: readonly EvidenceComment[],
+): string | undefined {
+  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
+  if (marked === undefined) return undefined
+  const index = findLocalLineIndex(marked.body)
+  if (index === -1) return undefined
+  const line = marked.body.split('\n')[index]?.trim() ?? ''
+  return line.slice(LOCAL_PREFIX.length).trim() || undefined
 }
 
 /**

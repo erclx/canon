@@ -7,10 +7,10 @@
 # agent driving it, so no envelope is produced and a ceiling here would sit
 # permanently skipped.
 
-# The seeded workflow landed at the same relative path a target's own
+# Each seeded workflow landed at the same relative path a target's own
 # `.github/workflows/` resolves, alongside the `verify.yml` every base inject
 # already carried.
-paths = [".github/workflows/phase-label-gate.yml", ".github/workflows/verify.yml"]
+paths = [".github/workflows/phase-label-gate.yml", ".github/workflows/pr-local-preview.yml", ".github/workflows/verify.yml"]
 
 manual = [
   "The seeded copy's triggers, `if:`, and job name match the checkout-root original, and it deliberately carries no Install Dependencies step, since `bunx` needs no local dependency tree and the step would fail outright on a target with no lockfile of its own. Semantic: a content pin can confirm the scan step invokes the published CLI, but cannot confirm the rest of the job shape was copied rather than reinvented",

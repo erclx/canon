@@ -178,15 +178,35 @@ When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md`
 
 Where it lands is decided by the evidence step below rather than here, since a checklist reads next to the screenshots it annotates and posting it on its own is the fallback for a branch that changed no screenshot.
 
-### Post the evidence comparison
+### Find the local server
 
-Run the verb once against the number the pull request step above resolved, passing `--checklist` when the step above found a file and leaving it off when it did not:
+A reviewer on the operator's machine can open the branch's running dev server, which screenshots and a checklist cannot stand in for. Ask the verb for the server this worktree is running before the evidence step, so the first evidence comment already carries the link:
 
 ```bash
-canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --json
+canon pr local --json
 ```
 
-One call answers both questions because a checklist does not decide `no-evidence`. The verb reports `no-evidence` on a diff carrying no evidence image whether or not a checklist came with it, so the branch below reads the same `reason` it would have read without the flag, and the checklist is folded in only on the path that has a comparison to fold it into.
+The verb reads the listening sockets on this machine, keeps those whose process runs inside this worktree, and reports the lowest port serving an HTML page. A server in another worktree or in the main checkout is never reported, since it shows a different branch. `canon docs pr-local` states the contract. Read `reason` on the record rather than the exit code.
+
+- `ok`: hold the record's `url` for the evidence step below.
+- `no-server` or `no-listener-reader`: hold the reason for the closing report, pass no link, and move on. Do not start a server here, since one started inside the ship chain has no owner to stop it.
+- Anything else, including no record at all: move on silently. An installed binary older than the verb answers with an unknown-subcommand error, which is a skip rather than a stop.
+
+Pass `--local` to the evidence step only on an `ok` here. The binary answering `ok` is the one carrying the flag, so a binary lacking the verb never meets a flag it would reject.
+
+With both `--checklist` and `--local`, a diff carrying no evidence image still renders `ok`, with the link opening a comment the checklist closes, so a reviewer gets both in one place. A local link with neither an evidence image nor a checklist still reports `no-evidence`, which keeps a branch that changed no rendered surface from getting a comment holding a link and nothing else.
+
+A seeded workflow replaces the line with a note once the pull request closes, so the link does not outlive the branch it points at.
+
+### Post the evidence comparison
+
+Run the verb once against the number the pull request step above resolved. Pass `--checklist` when the checklist step found a file, and `--local` when the step above returned `ok`. Leave each flag off otherwise:
+
+```bash
+canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --json
+```
+
+One call answers both questions because a checklist does not decide `no-evidence`. The verb reports `no-evidence` on a diff carrying no evidence image whether or not a checklist came with it, so the branch below reads the same `reason` it would have read without the flag, and the checklist is folded in only on the path that has a comparison to fold it into. The local link is the one exception, stated in the step above.
 
 Pass `--checklist` only for a file that exists. The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
 
@@ -211,7 +231,7 @@ Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed
 
 ### Post the UI checklist alone
 
-Run this step only when the evidence step above did not carry the checklist, meaning it reported `no-evidence` or one of the git refusals, and a checklist file exists. Post it as its own comment on `<number>`:
+Run this step only when the evidence step above did not carry the checklist, meaning it reported `no-evidence` or one of the git refusals, and a checklist file exists. A local link sends the checklist through the evidence step instead, so this step runs on a branch with no evidence image only when the local step found no server. Post it as its own comment on `<number>`:
 
 ```bash
 gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
@@ -250,6 +270,8 @@ The verb dispatches the project's Pages deploy on the pull request's branch and 
 ```bash
 canon pr evidence <number> --preview <url> --json
 ```
+
+The hosted address takes the first line and a local link already on the comment moves to the second, carried forward with no flag.
 
 - `no-deploy`: the project deploys nothing a dispatch can start. Say nothing and move on.
 - Any other `reason`, being `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report it with the record's `message` and move on without stopping the chain. A missing link costs the reviewer a click, and a held ship costs the whole chain.
@@ -297,5 +319,13 @@ Add a line when a checklist was posted, naming the pull request it landed on and
 Add a line when the preview step returned an address:
 
 `🔗 Preview: <url>`
+
+Add a line when the evidence step posted the local link:
+
+`🖥️ Local preview: <url>`
+
+Add a line instead when the local step refused as `no-server` or `no-listener-reader` and the evidence or checklist step posted something, since that pull request changes a rendered surface and a reviewer could have used the link. To add it later, start the server, run `canon pr local --json`, then run `canon pr evidence <number> --local <url> --json`, adding `--checklist` when one is still owed, and post the body the way the evidence step does. `git-followup` only carries a line forward, so it cannot add one the comment never had:
+
+`🖥️ No local preview: <reason>`
 
 Do not add any other text.
