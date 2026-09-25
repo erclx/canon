@@ -5,8 +5,9 @@ import { renderDesignDocument } from '@/design/document'
 import { NEUTRAL_TOKENS } from '@/design/neutral'
 
 /**
- * The two artifacts the token source produces, written by `canon design regen`
- * and asserted for drift by the `design` stage of `bun run check`.
+ * The two artifacts the token sources produce, written by `canon design regen`
+ * and asserted for drift by the `design` stage of `bun run check`. The
+ * document renders from `TOKENS` and the stylesheet from `NEUTRAL_TOKENS`.
  *
  * The document is what a person reads and the stylesheet is what a target
  * installs, and neither is edited by hand. That is the cost the operator took
