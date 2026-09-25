@@ -13,6 +13,7 @@ import {
   auditsBaselineRel,
   captureStamps,
   clientCommandCitations,
+  documentCeiling,
   readmeCitations,
   rawFieldFileReference,
   recordIdempotence,
@@ -976,6 +977,99 @@ describe('architectureRecord', () => {
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toBeUndefined()
+  })
+})
+
+describe('documentCeiling', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('documentCeiling reads the corpus and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const git = (...args: string[]): string =>
+    execaSync('git', ['-C', root, ...args], {
+      env: gitEnv(),
+      extendEnv: false,
+    }).stdout
+
+  const write = (path: string, lineCount: number, head = ''): void => {
+    const full = join(root, path)
+    mkdirSync(join(full, '..'), { recursive: true })
+    const body = Array.from(
+      { length: lineCount },
+      (_, index) => `Line ${index + 1}.`,
+    ).join('\n')
+    writeFileSync(full, `${head}${body}\n`)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-document-ceiling-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  describe('in a repository', () => {
+    beforeEach(() => {
+      git('init', '--initial-branch=main')
+    })
+
+    it('reports only the count where every document sits under the ceiling', async () => {
+      write('docs/guide.md', 300)
+
+      const report = await documentCeiling(context())
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions).toEqual([
+        {
+          kind: 'info',
+          text: 'No document past the 300-line ceiling across 1 markdown file',
+        },
+      ])
+    })
+
+    it('warns on a document past the ceiling and never fails', async () => {
+      write('docs/guide.md', 301)
+
+      const report = await documentCeiling(context())
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions).toContainEqual({
+        kind: 'warn',
+        text: 'docs/guide.md  301 rendered lines',
+      })
+    })
+
+    it('leaves an exempt document unwarned', async () => {
+      write(
+        'scripts/record.md',
+        400,
+        '<!-- canon-length-exempt: a verbatim run record -->\n\n',
+      )
+
+      const report = await documentCeiling(context())
+
+      expect(
+        report.emissions.filter((emission) => emission.kind === 'warn'),
+      ).toEqual([])
+    })
+  })
+
+  it('reads a tree git cannot list as unmeasured', async () => {
+    write('docs/guide.md', 400)
+
+    const report = await documentCeiling(context())
+
+    expect(report.unmeasured).toBeDefined()
   })
 })
 

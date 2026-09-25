@@ -13,6 +13,9 @@ import {
   measureArchitecture,
 } from '@/context/architecture'
 import { listRepositoryFiles } from '@/git-files'
+import { ceilingFindings } from '@/markdown/ceiling'
+import { resolveMarkdown } from '@/markdown/files'
+import { CHECKPOINTS } from '@/markdown/structure'
 import {
   isShippedCorpus,
   REFERENCE_MARKER,
@@ -21,6 +24,7 @@ import {
   type ShippedReference,
 } from '@/shipped/references'
 import { surfaceDir } from '@/surface-root'
+import { plural } from '@/ui'
 import {
   README_PARAPHRASE_MARKER,
   readmeCitationsIn,
@@ -270,6 +274,62 @@ export const architectureRecord: Measure = async (ctx) => {
       : `a cap of ${report.entryCap}`
   return {
     emissions: [info(`${decisions} decisions against ${cap}`)],
+  }
+}
+
+/**
+ * Every tracked markdown document against the whole-document ceiling.
+ *
+ * Report-only for now: a document past the ceiling warns and the stage still
+ * passes, since the corpus carried dozens past it when the stage landed. The
+ * flip to a failure is a separate change once the count reads zero, and it
+ * replaces the warn path rather than sitting beside it.
+ *
+ * Read in-process rather than through `canon markdown audit`, whose exit code
+ * stays bans and dead links only. The plan and groundwork skills run that audit
+ * on a gitignored record, and a gating length there would fail every long plan.
+ */
+export const documentCeiling: Measure = async (ctx) => {
+  const scope = await resolveMarkdown(ctx.root, [])
+  if (scope.kind === 'unavailable') {
+    return {
+      emissions: [],
+      unmeasured: 'git could not list the tree, so no document was measured.',
+    }
+  }
+
+  const documents = scope.files.flatMap((rel) => {
+    try {
+      return [{ rel, source: readFileSync(join(ctx.root, rel), 'utf8') }]
+    } catch {
+      return []
+    }
+  })
+  const findings = ceilingFindings(documents)
+  const over = findings.filter((finding) => finding.exempt === null)
+  const exempt = findings.length - over.length
+  const ceiling = CHECKPOINTS.ceiling
+
+  if (over.length === 0) {
+    const exemptNote = exempt > 0 ? `, ${exempt} exempt` : ''
+    return {
+      emissions: [
+        info(
+          `No document past the ${ceiling}-line ceiling across ${plural(documents.length, 'markdown file')}${exemptNote}`,
+        ),
+      ],
+    }
+  }
+
+  return {
+    emissions: [
+      ...over.map((finding) =>
+        warn(`${finding.rel}  ${finding.renderedLines} rendered lines`),
+      ),
+      info(
+        `${plural(over.length, 'document')} past the ${ceiling}-line ceiling, ${exempt} exempt. Reported only, so the push is not held.`,
+      ),
+    ],
   }
 }
 
