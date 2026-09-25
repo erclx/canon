@@ -3,6 +3,7 @@ import {
   auditSet,
   captureStamps,
   clientCommandCitations,
+  documentCeiling,
   markdownBans,
   type Measure,
   pluginManifests,
@@ -333,9 +334,11 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: unreferencedRules }],
   },
   {
-    // Only the citation half of the audit gates. Length, depth, table, and
+    // Only the citation half of the audit gates. Its length, depth, table, and
     // index findings are judgment thresholds, and failing a push on one would
-    // make the stage something to route around.
+    // make the stage something to route around. The one length reading that
+    // will gate is the whole-document ceiling, which the Document ceiling stage
+    // below owns rather than this audit.
     id: 'context-citations',
     label: 'Context citations',
     checks: [
@@ -354,6 +357,13 @@ export const STAGES: readonly Stage[] = [
     id: 'architecture-record',
     label: 'Architecture record',
     checks: [{ kind: 'measure', measure: architectureRecord }],
+  },
+  {
+    // Unscoped, since any branch can grow any document. It warns and passes
+    // until the corpus sits under the ceiling, then flips to a failure.
+    id: 'document-ceiling',
+    label: 'Document ceiling',
+    checks: [{ kind: 'measure', measure: documentCeiling }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift

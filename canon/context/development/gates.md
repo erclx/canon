@@ -15,7 +15,7 @@ An eleventh reads a measure and reports it. `## Audit set` at the end of this en
 
 Three properties are load bearing and each has a case in `src/gate/sequencer.test.ts`. Stages run in table order. A stage that finds a fact halts the run, which is what makes a regenerate-then-assert round reveal one surface at a time. A scoped stage that the changed set carries nothing for says so rather than printing a clean line.
 
-A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Architecture record, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
+A stage is a list of checks, and a check is one of four kinds. A `command` is any binary. A `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running. A `drift` regenerates nothing and asserts a pathspec against the index and the untracked set. A `measure` is a reading whose verdict is a comparison rather than an exit code, which covers Sandbox coverage, Manifest validation, Hero provenance, Architecture record, Document ceiling, Standard success criteria, and Audit set below. Skill paths and Seed independence stay `command` checks, since a script that exits non-zero on a finding needs no comparison around it.
 
 Every check is an argument vector rather than a shell string, so no stage runs through `eval` and no check is a quoting question. What that closes is stated under `## Quoting a pathspec changes what it matches` in `canon/context/scripts/core.md`.
 
@@ -103,11 +103,19 @@ Three outcomes separate a clean walk from one that measured nothing, matching `c
 
 The same finding fails a push against `tooling/*/seeds/` and only reports against `canon/context/`. The corpus moves it rather than the measure: a seed is authored once and installed into every scaffolded project, so a defect there propagates, while a context entry is edited by the people who own it and a threshold failing their push teaches them to route around the stage. Widening the `paths` globs on the claude rules was the alternative, and it is only a nudge, since a rule loads only when a session opens the file. Gating a measure with a known false-positive class forces an escape hatch, so `stub: true` exempts a seed and both install paths strip it before a target sees it.
 
+The 150-line length checkpoint stays on the context side of that split and never gates. The whole-document ceiling is a different reading, a fact about any corpus rather than a threshold on one, so the Document ceiling stage below reads it across seeds and context entries alike.
+
 ## Architecture record
 
 The Architecture record stage calls `measureArchitecture` in-process and fails when `canon/ARCHITECTURE.md` holds more decisions than the entry cap it states or runs past the line ceiling its own allowances derive. Both limits are the record's own clauses, so a project whose record states neither passes, and a project with no record passes and says so.
 
 It exists because the Context citations stage runs `--citations-only`, which never opens the record, so the line ceiling `canon context audit` already gated on went unenforced by `bun run check` until this stage read it directly. The count is by `###` heading outside a fence, so a heading carrying two decisions counts once, which is the undercount a writer at the cap is asked not to exploit by merging rather than packing.
+
+## Document ceiling
+
+The Document ceiling stage reads every markdown file git lists, sums `documentHeight` over the whole source, and names each one past `CHECKPOINTS.ceiling`, 300 rendered lines. Frontmatter and fenced blocks count, since a session pays for every line it loads. A file named `CHANGELOG.md` is exempt by name, because the release tool rewrites it and would drop a marker, and any other file is exempt only through a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence. A committed list of exempt paths was the alternative, and every rename would have made it a second edit with nothing checking it.
+
+It merged report-only: each document past the ceiling is a `warn` and the stage passes, since about fifty hand-authored documents sat past 300 when it landed. The flip changes the measure to return a `failure` and deletes the `warn` path, once the count reads zero. `canon markdown audit` prints the same list under its Length step and never exits 2 on it, because the plan and groundwork skills run that audit on a gitignored record where a long plan is not a defect. The stage owns the verdict for the same reason the Architecture record stage owns its record's cap while `canon context audit` only reports.
 
 ## Standard success criteria
 

@@ -4,7 +4,7 @@ import { BARE_NAME, IGNORE_MARKER } from '@/context/citations'
 import type { AuditedFolder } from '@/context/folders'
 import type { NarrationTerms } from '@/context/narration'
 import { type BodyLine, bodyLines, maskDisplayed } from '@/markdown/scan'
-import { renderedHeight } from '@/markdown/structure'
+import { documentHeight } from '@/markdown/structure'
 import { isStubSeed } from '@/seed-marker'
 
 /**
@@ -214,9 +214,10 @@ export interface EntryReport {
   readonly rel: string
   /**
    * Rendered lines across the whole file, counting frontmatter and fenced
-   * blocks. It shares `renderedHeight` with the depth checkpoint in
-   * `src/markdown/structure.ts`, since the two sit in one section of the
-   * standard and a reader compares them.
+   * blocks. It counts through `documentHeight` in `src/markdown/structure.ts`,
+   * which shares `renderedHeight` with the depth checkpoint and with the
+   * document ceiling, since all three sit beside each other in the standard
+   * and a reader compares them.
    *
    * Fences are counted here and excluded there. The depth measure skips one so
    * an example cannot break the run around it, and a file measure has no run to
@@ -646,10 +647,7 @@ export function measureEntry(
 
   return {
     rel,
-    lines: source
-      .replace(/\n$/, '')
-      .split('\n')
-      .reduce((sum, text) => sum + renderedHeight(text), 0),
+    lines: documentHeight(source),
     catalogTables: catalogTables(lines),
     provenance: governsContent ? provenance(lines) : [],
     narration: governsContent && terms ? narration(lines, terms) : [],

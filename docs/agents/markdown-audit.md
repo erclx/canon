@@ -27,9 +27,9 @@ A bare run measures every markdown file git lists, tracked plus untracked-and-no
 
 ## Where the rules come from
 
-The three ban sets and all nine checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same sets whether or not it installed any standards, and no file has to resolve for a run to mean something.
+The three ban sets and all ten checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same sets whether or not it installed any standards, and no file has to resolve for a run to mean something.
 
-Six of the nine are stated in `markdown.md` and the three cadence numbers are stated in the `write-human` skill. That split is the content boundary rather than an accident: `markdown.md` carries the enforced rules a scan can decide, and the skill carries the rhythm rules a ban list cannot express. A cadence number moved in the skill and left in the code drifts the same way, so move both.
+Seven of the ten are stated in `markdown.md` and the three cadence numbers are stated in the `write-human` skill. That split is the content boundary rather than an accident: `markdown.md` carries the enforced rules a scan can decide, and the skill carries the rhythm rules a ban list cannot express. A cadence number moved in the skill and left in the code drifts the same way, so move both.
 
 Reading them out of the standards per run was the original design. It put a parser contract on a document authored for people, and the standard had to carry a paragraph of its own warning an author that a one-word backticked example in a `- Do not use ` bullet would be lifted into a literal ban set and ban that word everywhere. A rule existing to protect a parser from the prose it parses is the argument for separating them.
 
@@ -128,9 +128,13 @@ Two of the rules `write-human` states are deliberately not implemented. A senten
 
 The condition on that was something identifying a finite verb rather than guessing at one, and two parsers have now been run against it over 11,389 paragraph sentences. They disagree by a factor of four. `compromise` reports 2 percent and reads a fronted past participle as a finite verb, so `Measured at <sha> on <date>.` counts as carrying one. `wink-pos-tagger` reports 9 percent, fixes that class, and is still wrong on roughly three in four, because an imperative's verb tags as a proper noun and a noun-ambiguous predicate tags as a noun, which makes `Each maps to a skill.` read verbless. Separating those needs to know which token is the predicate, and that is syntax rather than a tag. The measure stays unimplemented, now against a mechanism rather than against the idea of one.
 
+### Length
+
+The Length step sums rendered lines over the whole source, frontmatter and fenced blocks included, and lists each document past the 300-line ceiling, longest first. A changelog and a document carrying a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence are counted in one line rather than listed. Each `--json` entry carries `renderedLines` and `exempt`, the stated reason or `null`, and `checkpoints` carries `ceiling`.
+
 ## Exit codes
 
-Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character, word, or spelling and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code.
+Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character, word, or spelling and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
 
 `3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown bans` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
 

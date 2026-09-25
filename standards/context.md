@@ -105,8 +105,8 @@ Only the `development` entry carries this section. It is not a general-purpose h
 
 ## Length
 
-- Aim for one entry per domain. There is no hard cap. Length is a symptom, not the defect.
-- Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. Rendered lines count as `markdown.md` defines them.
+- Aim for one entry per domain. Length is a symptom, not the defect, and the one hard cap is the whole-document ceiling `markdown.md` states.
+- Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. The 150 is a diagnostic checkpoint and never gates. Rendered lines count as `markdown.md` defines them.
 - Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` or `## CLI` section instead.
 - Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than leaving the narration of what it replaced beside it. A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age. The rule above protects content whose subject is live, and this one releases content whose subject is not.
 - Rewrite a decision a later one replaced rather than appending the replacement beside it. The subject is still live, so the rule above does not reach it, and two bullets on one subject leave a reader to work out which of them is current. State the design that stands and keep the superseded reasoning only where it is the alternative that lost.
