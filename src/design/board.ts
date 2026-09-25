@@ -10,6 +10,7 @@ import {
 import { join, relative, sep } from 'node:path'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { renderDesignDoc } from '@/design/render'
+import { NEUTRAL_TOKENS } from '@/design/neutral'
 import { colorValue } from '@/design/tokens'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { recordDir } from '@/record-root'
@@ -132,6 +133,16 @@ const SCROLLSPY_SCRIPT = [
 ].join('')
 
 /**
+ * A role's toolkit value, falling back to the neutral install base's where the
+ * toolkit record drops the role, so the board never restates a hex of its own.
+ */
+function roleColor(role: string): string {
+  const value = colorValue(role) ?? colorValue(role, NEUTRAL_TOKENS)
+  if (value === undefined) throw new Error(`No design token declares ${role}`)
+  return value
+}
+
+/**
  * The same brand mark `src/design/render.ts` embeds in its own preview,
  * colored with the dark accent since the board's default chrome is dark
  * where that preview's is light. Duplicated here rather than imported,
@@ -139,7 +150,7 @@ const SCROLLSPY_SCRIPT = [
  * copies rather than a shared icon helper for the first second caller.
  */
 function faviconLink(): string {
-  const color = colorValue('accent') ?? '#e0724b'
+  const color = roleColor('accent')
   const href = `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80"><path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" fill="${color}" /><rect x="44" y="15" width="12" height="70" rx="2" fill="${color}" /></svg>`,
   )}`
@@ -232,12 +243,12 @@ ${SCROLLSPY_SCRIPT}
 }
 
 function panelPage(title: string, body: string): string {
-  const accent = colorValue('light-accent') ?? '#a4471c'
-  const surface = colorValue('light-surface') ?? '#f4efe6'
-  const border = colorValue('light-border') ?? '#e4dcd0'
-  const muted = colorValue('light-muted') ?? '#726b62'
-  const text = colorValue('light-text') ?? '#1a1815'
-  const background = colorValue('light-background') ?? '#faf7f2'
+  const accent = roleColor('light-accent')
+  const surface = roleColor('light-surface')
+  const border = roleColor('light-border')
+  const muted = roleColor('light-muted')
+  const text = roleColor('light-text')
+  const background = roleColor('light-background')
 
   return `<!doctype html>
 <html lang="en">
