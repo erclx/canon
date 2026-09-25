@@ -85,6 +85,18 @@ The rule forbids reopening a question a written artifact already answered rather
 
 They govern different moments. The constitution ranks options a session is already choosing between, and the planning bullet fires before there are options, when the open question is whether the code already exists. `standards/rule.md` bans reasoning in a rule body, so this entry carries the distinction instead.
 
+### What an always-loaded bullet has to carry alone
+
+An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `015-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source.
+
+Three always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
+
+- `005-behavior.md` keeps "answer from the artifact rather than re-asking". `558-plan.md` carries the plan answer contract, but it loads only for a plan, and the sentence also covers intake and groundwork `- Suggested:` lines. It is the fix the question-surface decision above records.
+- `087-git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
+- `035-tasks.md` keeps the act of writing the plan in the same session and linking it. `standards/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
+
+`070-planning.md` requires a confirmed plan only for a change whose diff cannot be described in one sentence, in a single bullet, so `035`'s "handle small edits immediately" holds against it.
+
 ## Gotchas
 
 - The degradation sweep matches on comment text, so a comment naming a term as an example reads as a hit. The matcher's own doc comment in `src/comments/scan.ts` is the standing case. Read a hit before treating it as a defect.

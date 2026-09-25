@@ -53,7 +53,7 @@ Sixteen skills write `.canon/tmp/`. Eight write throwaway working state a single
 
 Six write material a later run or a different worktree reads back. `memory-capture` states the main worktree root for `.canon/tmp/handoff/memory-routing/<slug>.md`, and `memory-review`'s append to that file relies on the location capture already put it at rather than restating the root. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline (`role-orchestrator/scripts/poll.sh`, `STATE_DIR="$MAIN_ROOT/.canon/tmp/pr/poll"`) each state their own root directly.
 
-`085-worktrees.md` states the mixed default alone and names none of the six, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead.
+`055-scratch.md` states the mixed default alone and names none of the six, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead.
 
 `draft-and-pick`'s `.canon/tmp/<slug>/candidates.html` reads like a seventh material case, since an operator drives the pick across more than one turn, but nothing outside the same skill run ever opens the scratch folder itself: `canon capture` and `canon serve` are its only readers there. The skill's own close step batch-captures the final round's arms out to `.canon/picks/<slug>/`, resolved at the main root, before it deletes the scratch folder. The scratch folder itself still fails the read-by-a-later-consumer test the six above pass, so the census records it staying worktree-local rather than joining them.
 
