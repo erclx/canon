@@ -36,4 +36,4 @@ paths:
 
 Do not write a comment carrying any of these terms.
 
-- `FIXED`, `BUGFIX`, `HACK`, `XXX`, `NOTE:`, `TODO`, `FIXME`, `don't remove`, `previously`, `used to`, `workaround`
+- `TODO`, `FIXME`, `HACK`, `XXX`
