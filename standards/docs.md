@@ -19,7 +19,7 @@ Does not govern:
 - Per-domain internal narrative written for a reader with the source open: `context.md`
 - The drawing inside a Mermaid fence: `mermaid.md`
 - Voice, rhythm, and sentence construction: the `write-human` skill
-- Spelling, banned words, punctuation, and formatting: `markdown.md`
+- Punctuation and formatting: `markdown.md`
 
 ## What a working docs page looks like
 

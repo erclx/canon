@@ -1,6 +1,6 @@
 ---
 title: Markdown reference
-description: Headings, paragraph and list structure, code spans, the date form, punctuation, emphasis, file references, banned words, and frontmatter wording
+description: Headings, paragraph and list structure, code spans, the date form, punctuation, emphasis, file references, American spelling, and frontmatter wording
 ---
 
 # Markdown reference
@@ -9,11 +9,11 @@ Applies to markdown reference docs, READMEs, and inline documentation in repos. 
 
 ## Scope
 
-Governs what a check can decide about a markdown file: headings, paragraph and list structure, code spans and fences, the form a date takes, punctuation, emphasis, file references, the closed-set word and spelling bans, what prose may claim about its sources, and the wording of a catalog title and description. It is an attribute standard rather than a document-type one, so it applies over documents whose shape another standard sets, and it carries no template because these rules are written across every document and have no shape of their own.
+Governs what a check can decide about a markdown file: headings, paragraph and list structure, code spans and fences, the form a date takes, punctuation, emphasis, file references, the spelling convention, what prose may claim about its sources, and the wording of a catalog title and description. It is an attribute standard rather than a document-type one, so it applies over documents whose shape another standard sets, and it carries no template because these rules are written across every document and have no shape of their own.
 
 The two frontmatter fields it reaches are `title` and `description`. They are named here rather than in the statement above, since a backticked token in a scope statement's first sentence is published as the standard's jurisdiction.
 
-The split with the voice guidance is what reads the rule rather than what the rule covers. Every ban below ships as data `canon markdown audit` and the installed audit hook both read, so a violation is measured on every run. Cadence, rhythm, and information density are judgments a reader settles, and those travel in the `canon:write-human` skill, which a markdown edit routes to.
+The split with the voice guidance is what reads the rule rather than what the rule covers. The character bans ship as data `canon markdown audit` and the installed audit hook both read, so a violation is measured on every run. Word choice, cadence, rhythm, and information density are judgments a reader settles, and those travel in the `canon:write-human` skill, which a markdown edit routes to.
 
 Does not govern:
 
@@ -71,9 +71,7 @@ Does not govern:
 
 ## Language
 
-- Use American English spelling. Prefer `-ize` over `-ise`, `-or` over `-our`, `-er` over `-re` (`organize`, `analyze`, `summarize`, `recognize`, `behavior`, `color`, `center`)
-- Do not use marketing buzzwords (`seamless`, `robust`, `powerful`, `revolutionary`, `enhanced`, `allows`, `leverage`)
-- Do not use vague qualifiers (`simply`, `just`, `easily`, `quickly`, `very`, `really`)
+- Use American English spelling
 - Open a sentence with its subject and action, not filler (`Note that`, `Basically`), a hollow connective (`That being said`, `It's worth noting`), or a gerund windup (`Leveraging the API...`). Substantive transitions that carry a real relationship are fine.
 - Do not use the negative parallelism pattern (`It's not X, it's Y`, `not because X, but because Y`)
 - Do not pad verb phrases or delay the action. Write the shortest form (`in order to` → `to`, `ensure that X is set` → `set X`, `By doing X, you can Y` → state Y directly).
@@ -84,7 +82,7 @@ Does not govern:
 - Do not attribute a claim to an unnamed authority (`experts say`, `studies show`, `it is widely believed`). Name the source or cut the claim.
 - Do not introduce a fact, name, date, or citation the source does not carry when rewriting existing text. A rewrite changes wording and never claims.
 
-The word bans and the character bans sit under one file because one command reads both. `canon markdown audit` ships them as package data, so a project that installed no standards is measured the same as one that did, and this section states them for a reader rather than for the parser.
+One command reads the character bans under `## Punctuation`. `canon markdown audit` ships them as package data, so a project that installed no standards is measured the same as one that did, and this file states them for a reader rather than for the parser. The spelling line above states a convention and ships no set, so a project's spell checker is what enforces it.
 
 ## Frontmatter descriptions
 

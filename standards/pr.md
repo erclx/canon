@@ -16,7 +16,7 @@ Does not govern:
 - Whether a phase label or a semver tag may appear in a title or body: `versioning.md`
 - Whether a quoted label, a gitignored record path, or a link to one Claude Code session may appear in a title or body, which `canon labels scan` fails on: `publish.md`
 - Voice, rhythm, and sentence construction in pull request prose: the `write-human` skill
-- Punctuation, formatting, and banned words in pull request prose: `markdown.md`
+- Punctuation and formatting in pull request prose: `markdown.md`
 
 ## Title
 
