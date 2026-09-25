@@ -1,6 +1,6 @@
 ---
 title: Records
-description: The two roots a record folder resolves at, validating the session records and the standards corpus, the per-kind checks, the refusal reasons, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, backing the folders to a private remote, and which root each kind defaults to
+description: The two roots a record folder resolves at, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, pruning stale scratch, and where validation and the private-remote backup are described
 ---
 
 # Records
@@ -17,70 +17,7 @@ A refusal names every root it looked at, so a message reading `no-folder` says w
 
 ## Validate
 
-`canon records validate <kind>` reports where a file and the standard governing it disagree. Five kinds are gitignored folders under the record root, resolved at `.canon/` first: `plans`, `groundwork`, `intake`, `memory`, and `teach`. The sixth is `standards`, the authoring corpus, which is tracked and installed rather than scratch.
-
-```bash
-canon records validate plans
-canon records validate memory
-canon records validate standards
-canon records validate intake --json
-```
-
-| Option          | Behavior                                                            |
-| --------------- | ------------------------------------------------------------------- |
-| `--json`        | Add a machine-readable record on stdout                             |
-| `--root <path>` | Project root, defaulting to the main worktree except on `standards` |
-
-It reads and never writes, and the reason splits by kind. A session record is per-machine scratch with no history behind it, so a repair that guessed wrong could not be undone. A standard installs into every target and is cited by bare filename, so a rename the verb performed would reach further than the file it moved, which is why a finding naming one says so.
-
-`standards` reads the authoring root at `standards/` where it exists and a copy at `.claude/standards/` otherwise. The authoring root wins because it is the only tree anyone authors in and the only one the resolver answers from, so a finding fixed anywhere else is fixed where nothing reads it. No repository generates the second candidate any more, which leaves it as a floor under a target holding a copy an older toolkit installed. The walk stays flat, matching the catalog.
-
-Nothing fires it automatically. The five record folders are gitignored, so the standards-audit hook exits early on them and any check reading changed files from git never lists one. The corpus is tracked and still unreached, since the markdown audit reads content across the files git lists and rules on no filename. The verb runs at the moment a session claims the record is finished, which is the same placement `canon tasks validate` takes over the board.
-
-### What each kind checks
-
-| Kind         | What it reports                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plans`      | A filename that is not `feature-<slug>.md`, a missing `# Feature:` heading, a missing required section, a files-to-touch entry naming no file or saying nothing about one, a question carrying no suggestion or no answer slot, and a batch still staged with a `**Batch N**` sub-heading inside the one file rather than split into its own plan |
-| `groundwork` | A track with no `README.md` or no `01-current-state.md`, a file missing `title` or `description`, a `README.md` with no `date` as `YYYY-MM-DD`, an unnumbered file, and a track holding a decision without its handoff or the reverse                                                                                                             |
-| `intake`     | A dump with no `00-overview.md`, the same frontmatter and numbering checks, an item missing any of `Problem`, `Fix`, `Worth it`, or `You`, and an item carrying `Open` with no `Suggested`                                                                                                                                                        |
-| `memory`     | A filename whose prefix names none of the four types, an entry missing `title`, `description`, or `category`, a `category` disagreeing with that prefix, a title repeating the filename, and a rule-bearing body missing a part                                                                                                                   |
-| `standards`  | A standard missing `title` or `description`, an absent `## Scope` section, a scope section carrying no `Does not govern:` list, a statement anchoring nothing, and a filename naming no part of the path the statement governs                                                                                                                    |
-| `teach`      | A workspace folder carrying no two-digit ordinal, an absent `MISSION.md`, `RESOURCES.md`, or `GLOSSARY.md`, a file missing `title` or `description`, a mission with no `date` as `YYYY-MM-DD` or no `## Success looks like` section, an unnumbered learning record, and a reference page opening with an ordinal                                  |
-
-The half-closed track is the groundwork check a reader cannot run by eye. A folder holding `06` without `07` reads as closed to anyone scanning filenames while the file a returning session actually opens is absent.
-
-The item check skips `00-overview.md` and `99-next-session.md`, since neither holds items and running it over the handoff would report every heading it carries. The memory walk skips `index.md` for the same reason, since the catalog is generated from its siblings rather than authored as an entry.
-
-A memory `category` is compared against the sentence-case form of the filename prefix rather than checked field by field, so one finding covers a prefix outside the four types, a field disagreeing with the prefix, and a casing drift that would open a second group in the catalog. The body check runs on `feedback` and `project` entries alone, because a `user` or `reference` entry is a single sentence by design and has no rule to apply.
-
-The standards filename check derives a word from the governed path rather than counting words in the name. Every member of the corpus is named for the artifact its scope statement governs, and one word is what that produces rather than the rule itself, so a check keyed on word count would pass a conforming single word naming the wrong artifact. Each path segment offers its own word, a dotted container segment offers none, a hyphenated segment offers its parts, and the singular and the plural both match.
-
-The scope statement is read exactly as `scripts/standards/list.sh` reads it for the catalog's `appliesTo` field: backticked spans in the first sentence alone, with an attribute standard resolving where that sentence backticks nothing and the statement says it governs an attribute. One sentence read two ways would let a standard pass the check while publishing a different jurisdiction to every consumer of the catalog. An attribute standard is exempt from the filename derivation because it governs no path to derive from, and a statement that anchors nothing and claims no attribute is reported as `scope-unanchored` rather than passed, since silence there would let the backticks be removed to disable the check.
-
-An absent `## Scope` section suppresses the filename finding. The name derives from the statement, so a missing section leaves nothing to derive against, and reporting both would name one defect twice and point the fix at the wrong file. The walk skips `index.md`, which is generated from its siblings rather than authored.
-
-A plan section opens as a bold label or as an H2 and the check counts both, naming the standard's spelling when it reports one missing. The corpus splits roughly four to one between the two forms, so failing the variant would report nearly every plan on a rule that costs a reader nothing.
-
-A section runs to the next marker-shaped line whatever it names, so a plan carrying a label of its own closes the section above it rather than collecting into it. Fenced blocks are dropped before any of this, since a plan showing the shape it writes puts real-looking bullets and headings inside a fence.
-
-### Exit codes and refusals
-
-Exit codes: `0` every check passed, `1` refused, `2` at least one record carries a finding. A `reason` field carries which gate fired: `no-folder` when none of the kind's directories exist, and `unknown-kind` when the argument names no published kind. A `no-folder` message names every candidate, so a record kind's refusal names both record roots and the `standards` refusal names the authoring root and the installed copy.
-
-An exit code says nothing about a call made from a session, since a shell profile may wrap the binary in a function taking its status from a later command. Read the record's `findings` array and its `reason` rather than the exit when a skill consumes this.
-
-The four record folders are shared scratch at the main worktree root, so `--root` defaults to the first entry of `git worktree list` rather than the working directory. A linked worktree validates the same records every other session reads.
-
-`standards` takes the other default, the root of the checkout the caller stands in. The corpus is tracked, so a linked worktree holds its own edited copy, and resolving the main root there would report on a tree the session never touched while saying nothing about which one it read. A session that adds or renames a standard inside a worktree is the case, and it is the one the check exists for.
-
-Skills branch on the findings rather than on the exit code:
-
-```bash
-canon records validate plans --json | jq -r '.findings[] | "\(.kind): \(.subject)"'
-```
-
-For the shapes each check enforces, see `standards/plan.md`, `standards/groundwork.md`, `standards/intake.md`, `standards/memory.md`, and `standards/standard.md`.
+`canon records validate <kind>` reports where a record folder or the standards corpus disagrees with the standard governing it. Its flags, the per-kind checks, and the refusals are in `records-validate.md`.
 
 ## Migrate
 
@@ -181,57 +118,4 @@ Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refu
 
 ## Push and pull
 
-`canon records push` commits the backed record folders to a private remote and pushes them. `canon records pull` fetches the other direction and writes them back. Both take `--json` and `--root` the way `validate` does, and both exit `0` on agreement and `1` on a refusal.
-
-```bash
-canon records push
-canon records push --json
-canon records pull
-```
-
-At the `.canon` root, the backed folders are every top-level directory less three: `tmp`, which is deletable without loss, `ordinal-locks`, whose entries are transient per claim and would race the claim they guard, and `.records.git`, which is the history the rest are pushed into. Nothing bounds the set from outside, since the claude manifest ships one `.canon/` root entry and names no folder, so a record folder added later enters the payload on its own rather than waiting on a name written here. A push names each folder in scope that the records index has never tracked before, so a folder that picked up a name by mistake, such as a misrouted scratch write, is visible in the report rather than entering the payload silently. The report also lists every file new to the history under `added`, since a stray file inside a folder already tracked is visible only by name.
-
-The three excluded names bound the records index as well as the disk. A name an older binary committed, such as `tmp`, is removed from the history once and reported under `dropped`, and no later push stages it again. That removes it from the tip going forward and purges nothing from earlier commits the remote already holds. A project's own drafts folder needs no config to be backed: moved to `.canon/<name>/`, it is a top-level directory like any other and enters the payload on the next push. The legacy `.claude` root keeps a fixed allowlist instead, since that root also holds tracked `skills/`, `rules/`, and `hooks/` a push must never carry, and an exclusion set there would stage all three. Each name is a top-level record folder and every archive sits inside the one it archives, so the set stays at one entry per surface however many archives appear, and it deliberately does not match the six record kinds `validate` hardcodes.
-
-Records are gitignored by design, so the history lives in a second git directory at `.records.git` inside the record root, with that root as its work tree. Both resolve off the root together rather than folder by folder, since a history opened at one root beside a work tree at the other would stage the deletion of every folder a move relocated. Every path stays where it is, which is what a separate checkout could not do. The verbs stage the backed folders by explicit pathspec with `--force`, so nothing outside them can enter the index however the ignore rules read, and the project working tree and its index are never touched. Each pathspec is a bare folder name and git reads it against the current directory rather than against the work tree the same call names, so the invocation carries `-C` at the work tree beside the other two flags. That is what lets either verb run from a linked worktree under `.claude/worktrees/`, which sits inside the records work tree and would otherwise prefix every name with its own path.
-
-### Setup
-
-A person creates the records repository once per machine, and the verbs refuse with the commands when it is absent:
-
-```bash
-git --git-dir=.canon/.records.git init
-git --git-dir=.canon/.records.git remote add origin <private-repo-url>
-printf '.canon/\n' >> .gitignore
-```
-
-The ignore line is repeated here rather than left to the install, because the person running these commands is the one who creates the directory and the rule is worth reading beside the command that needs it. The claude manifest ships `.canon/` too, so a project that ran `canon tooling sync` already carries it and this line is a no-op there. One root entry covers the history and every record beside it, which is what makes the rule worth stating once rather than per folder.
-
-Point it at a private repository, and at one that is not a remote of the project. Records carry the memory pen, the review reports, and the groundwork trails, so a public project publishes all of it to anyone who fetches all refs. `push` compares the configured origin against every remote of the project and refuses on a match. A read of that list which fails refuses as well, since an empty list clears the comparison for every origin and a gate that passes on its own failure is no gate.
-
-### Refusals
-
-| Reason              | What fired                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| `split-roots`       | Record folders sit under both roots, so the resolved work tree is not the whole set    |
-| `no-repository`     | No `.canon/.records.git`, answered with the two setup commands                         |
-| `no-remote`         | The records history has no `origin`                                                    |
-| `remote-unreadable` | The project's own remotes could not be read, so the shared-origin gate could not run   |
-| `remote-shared`     | The records origin is also a remote of the project                                     |
-| `no-remote-records` | `pull` found no branch on the records origin                                           |
-| `local-changes`     | `pull` found records on disk that the history does not carry                           |
-| `local-ahead`       | `pull` found local commits that never reached the origin                               |
-| `unsafe-payload`    | `push` found a pending file over 25 MB or carrying a credential, named under `blocked` |
-| `git-failed`        | A git call failed, with its stderr in the message                                      |
-
-`split-roots` runs ahead of every gate below it and fires on a half-migrated tree, which is what a `canon migrate records` run that failed partway leaves. `recordRoot` answers for the whole tree on the first root that exists, so a folder left at the old root is absent from the work tree while the records index still names it, and an unguarded `add -A` would stage its deletion and drop it from the remote on the next push. Finish the move, or put the stranded folders back beside the others.
-
-`unsafe-payload` runs before anything is staged, so a refusal leaves the index, the log, and the object store as it found them. It reads every new or changed file the push would stage and blocks one over 25 MB, which is read off the file's size without opening it, or one carrying a value `canon secrets scan` would report, through the same patterns and the same `canon-allow-secret` marker. It refuses the whole push rather than skipping the file, and `--json` lists each path with its cause and a detail that names the credential's kind and line, never its value. Move the file out of the record folders, such as into `.canon/tmp/`, or remove the credential, then push again. The guard reads only what this push would add, so a credential committed before it existed stays in the history unreported.
-
-A push the remote rejects undoes the commit that run made and leaves the records on disk, so the next run does not send a payload the remote already refused. A history an older binary committed and left unpushed is outside that undo, and the guard never reads it either, so every push sends the same blob again. Reset it by hand from the project root to the last commit the origin holds, `git --git-dir=.canon/.records.git --work-tree=.canon reset <commit>`, and push again. The `--work-tree` is required, since the setup `init` marks the history bare and git refuses that reset on a bare repository.
-
-The two `pull` refusals exist because the directions are not symmetric. A push only adds, while a pull onto a machine holding work that never left it would discard that work. Resolve either by running `push` first, or by moving the local folders aside. A machine holding no backed folders has nothing to lose, so a restore onto a fresh checkout runs straight through.
-
-### When it runs
-
-`.husky/post-merge` runs `push` after the task archiving loop, on every merge rather than only on one that archived a task. A review report and a memory entry both land on runs that close nothing. The call sits inside an `if` and last in the file, so an unreachable remote neither aborts the hook nor delays the archiving above it, and a checkout that never ran the setup reports nothing. Anything the hook misses is covered by running the verb by hand.
+`canon records push` backs the record folders to a private remote and `canon records pull` restores them. The payload, the setup, and the refusals are in `records-push.md`.
