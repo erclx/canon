@@ -558,7 +558,8 @@ export function register(program: Command): void {
         'A process in a sibling worktree, in the main checkout seen from a',
         'linked worktree, or in a linked worktree seen from the main checkout',
         'is never reported, since its server shows another branch. Sockets are',
-        'read through lsof, or through /proc on a Linux machine without it.',
+        'read through /proc where it exists, or through lsof on a machine',
+        'without it.',
         '',
         '--remove reads the pull request comment carrying the pr-evidence',
         'marker and replaces its **Local preview:** line with --note, editing',
@@ -1759,13 +1760,20 @@ async function readProcListeners(): Promise<Listener[] | undefined> {
 }
 
 /**
- * The machine half of a detection: lsof where it is installed, `/proc` on a
- * Linux machine without it, and no reader anywhere else.
+ * The machine half of a detection: `/proc` wherever it exists, lsof on a
+ * machine without it, and no reader anywhere else.
  */
 function machineLocalRunner(): LocalRunner {
   const hasLsof = Bun.which('lsof') !== null
   return {
     async listListeners() {
+      // lsof 4.95 drops every process whose kernel-truncated name holds an
+      // unmatched `(`, which Next's `next-server (vX.Y.Z)` title cuts down to,
+      // so `/proc` goes first despite costing several times what lsof does.
+      if (existsSync('/proc/net/tcp')) {
+        const listeners = await readProcListeners()
+        if (listeners !== undefined) return listeners
+      }
       if (hasLsof) {
         const result = await $`lsof -nP -iTCP -sTCP:LISTEN -Fpn`
           .quiet()
@@ -1774,7 +1782,6 @@ function machineLocalRunner(): LocalRunner {
         // read some process, and the rows it did print are real either way.
         if (result.exitCode <= 1) return parseLsofListeners(result.text())
       }
-      if (existsSync('/proc/net/tcp')) return readProcListeners()
       return undefined
     },
     async cwdOf(pid) {

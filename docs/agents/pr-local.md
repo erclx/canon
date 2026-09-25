@@ -29,9 +29,12 @@ The HTML test is there because a working tree often holds more than one
 listener. A test runner's own server, or a dev server's reload socket, answers
 HTTP too, and a reviewer opening either gets a bare 404 rather than the branch.
 
-Sockets are read through `lsof` where it is installed. A Linux machine without
-it falls back to `/proc/net/tcp` and `/proc/net/tcp6`, matched against each
-process's `fd` table. A machine with neither refuses as `no-listener-reader`.
+Sockets are read from `/proc/net/tcp` and `/proc/net/tcp6` wherever they exist,
+matched against each process's `fd` table, and through `lsof` on a machine
+without them. Linux reads `/proc` even with `lsof` installed, since `lsof` 4.95
+drops a process whose truncated name holds an unmatched `(`, which is what
+Next's `next-server (vX.Y.Z)` title is cut down to. A machine with neither
+refuses as `no-listener-reader`.
 
 The port is never derived from the worktree. A port helper needs a per-stack
 base port the toolkit cannot know, and a server started by hand or by an
