@@ -5,33 +5,38 @@ description: The masthead, breadcrumb, jump menu, theme toggle, collapse control
 
 # Teach chrome
 
-Every teach page shares one header and one course sidebar. At 3.5rem tall (`--teach-mast-h`), the bar's row spans the window rather than the reading measure, so the collapse control and the theme control sit at the same inset on every page. The footer nav shares the article's measure rather than the page width, and an anchor jump lands below the bar rather than behind it. The three page wireframes each point back here rather than redrawing it.
+Every teach page shares one header and one course sidebar. Transcribed from `renderHeader` and `renderSidebar` in `src/teach/nav.ts` and the chrome rules in `examples/teach/course.css`. The four page wireframes each point back here rather than redrawing it.
 
-## Header
+At 3.5rem tall (`--teach-mast-h`), the bar's row spans the window rather than the reading measure, so the collapse control and the theme control sit at the same inset on every page. The footer nav shares the article's measure rather than the page width, and an anchor jump lands below the bar rather than behind it.
 
-```plaintext
-┌────────────────┬─────────────────────────────────────────────────────┐
-│  Fixture    ⌄   │  ☰  Workspaces ⌄ / Fixture ⌄ / Lesson 2 of 3   ☀/☾   │← .mast, 3.5rem tall,
-│                │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│  sticky. The strip on
-├────────────────┼─────────────────────────────────────────────────────┤  its bottom edge is
-│  3 lessons     │                                                     │  .bar::after
-│                │                                                     │
-│  01 Alpha      │  <main>                                             │
-│  02 Beta       │                                                     │
-│     First      │                                                     │
-│     Second     │                                                     │
-│  03 Gamma      │                                                     │
-└────────────────┴─────────────────────────────────────────────────────┘
-   .sb              .pane
-```
+## Regions
 
-The crumb grows with depth: one segment (`Workspaces`) on the root page, two (`Workspaces / <workspace>`) on a contents page, three (`Workspaces / <workspace> / Lesson N of M`) on a lesson. Only that trailing segment drops its jump menu. Every other one, current page or not, still opens one.
+- Sidebar (`.sb`): the left column, holding the workspace switcher at its top, a meta line, the page list, and a foot line. Above 1100px it sits beside the pane. At 1100px and below it overlays the page, per `lesson.md`
+- Masthead (`.mast`): across the top of the pane, sticky, holding the collapse control and the breadcrumb on the left and the theme toggle on the right
+- Reading bar: a strip along the masthead's bottom edge (`.bar::after`), filling left to right with position in the page
+- Jump menu: a panel under whichever crumb caret opened it, over the page content
+- Pane (`.pane`): right of the sidebar and under the masthead, holding the page's own `<main>`
+
+### Breadcrumb
+
+The crumb grows with depth: one segment (`Workspaces`) on the root page, two (`Workspaces / <workspace>`) on a contents page, three (`Workspaces / <workspace> / Lesson N of M`) on a lesson, with the page's title in the third place on a reference page. Only that trailing segment drops its jump menu. Every other one, current page or not, still opens one.
 
 A crumb and its caret form one chip: the label goes to the page, the caret opens the menu, and the whole chip fills with the chrome hover ground while the pointer is over it or its menu is open. Crumb links are neutral rather than accented, since the accent marks where you are rather than where you can go. The caret stays drawn and muted in every state.
 
 The `☰` control left of the crumb collapses the sidebar. It is the panel's only trigger on any window width, and below 1100px it opens the panel over the lesson rather than beside it.
 
-## Jump menu open
+## States
+
+| State          | Reached when                                      | Shows                                             | Evidence                                         |
+| -------------- | ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------ |
+| sidebar-open   | A lesson or reference page loads                  | The sidebar beside the pane                       | `examples/teach/evidence/lesson.png`             |
+| sidebar-shut   | The root or a contents page loads                 | The pane across the full width under the masthead | `examples/teach/evidence/workspace-index.png`    |
+| light          | The visitor picks light, or the system prefers it | The chrome on the light ground                    | `examples/teach/evidence/root-listing-light.png` |
+| jump-menu-open | The visitor hovers or clicks a crumb caret        | The menu panel under its trigger                  | not captured                                     |
+
+The captures are flat files, one per page, rather than per-state folders, because the teach capture writes one image per page.
+
+### Jump menu open
 
 ```plaintext
 │  ☰  Workspaces ⌄ / Fixture ⌄ / Lesson 2 of 3   ☀/☾   │← trigger stays in place
@@ -63,3 +68,9 @@ The panel opens beneath its trigger, overlapping the page content below it rathe
 - The trailing crumb segment reads `Lesson N of M` until the lesson's own title scrolls off, and carries that title afterwards.
 
 See `lesson.md` for what the sidebar lists, how it collapses and resizes, and what it does below 1100px.
+
+## Not on this surface
+
+- No search across workspaces or lessons. The sidebar filter narrows one workspace's lesson list only
+- No account, sign-in, or sync control. Every page is a local file
+- No progress state saved per visitor beyond the theme and the sidebar's width and open state

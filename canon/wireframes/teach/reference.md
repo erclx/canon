@@ -5,7 +5,7 @@ description: A workspace reference page rendered from its markdown, with the sha
 
 # Teach reference
 
-One page per reference page, at `<workspace>/reference/<slug>.html`, beside the `<slug>.md` it is rendered from. `renderReferencePage` in `src/teach/nav.ts:1177-1250` rewrites it wholesale on every `canon teach nav` run: it drops the frontmatter, renders the body through `Bun.markdown.html` with raw HTML escaped, and wraps it in `<main class="ref">`. Source: `examples/teach/00-fixture/reference/element-table.html`, regenerated from `element-table.md` for this plan.
+One page per reference page, at `<workspace>/reference/<slug>.html`, beside the `<slug>.md` it is rendered from. `renderReferencePage` in `src/teach/nav.ts` rewrites it wholesale on every `canon teach nav` run: it drops the frontmatter, renders the body through `Bun.markdown.html` with raw HTML escaped, and wraps it in `<main class="ref">`. Source: `examples/teach/00-fixture/reference/element-table.html`, rendered from `element-table.md` beside it.
 
 ## Regions
 
@@ -18,6 +18,8 @@ One page per reference page, at `<workspace>/reference/<slug>.html`, beside the 
 | State    | Reached when                             | Shows                                                      | Evidence                                |
 | -------- | ---------------------------------------- | ---------------------------------------------------------- | --------------------------------------- |
 | rendered | Following a Reference pages contents row | The chrome, the page title as the last crumb, and the body | `examples/teach/evidence/reference.png` |
+
+The capture is a flat file rather than a per-state folder, per `chrome.md` `## States`.
 
 ## Copy
 

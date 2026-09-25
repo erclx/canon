@@ -45,7 +45,7 @@ Read the ratio mechanically out of bytes 16 to 24 of a PNG header after renderin
 
 ## Wireframe transcription
 
-The wireframe standard sends class or token names and pixel-exact spacing out of a wireframe, and its `## Layout` prefers a role label over a class name. A wireframe regenerated from an already-built surface needs the opposite: `canon/wireframes/slides.md` names `src/slides/layouts.ts`'s `MX` and `BODY_Y` constants, and the `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height.
+The wireframe standard sends class or token names and pixel-exact spacing out of a wireframe, and its `## Regions` prefers a role label over a class name. A wireframe regenerated from an already-built surface needs the opposite: `canon/wireframes/slides/canvas.md` names `src/slides/layouts.ts`'s `MX` and `BODY_Y` constants, and the `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height.
 
 `## Transcription wireframes` states the mode rather than repealing the rule. It permits a source citation, class or token names, and exact geometry only where the wireframe is regenerated from a built surface's own render code, and it requires the file to open by naming that source. A wireframe drafted ahead of any build keeps the original rule, since there is no source yet to check it against.
 

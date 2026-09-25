@@ -26,30 +26,6 @@ Eleven sections in reading order, then the footer. A skip link and a sticky nav 
 - Close: the closing headline and two actions
 - Footer: the brand line, three link columns, and a note on what is read and what is authored
 
-```plaintext
-[skip]  [ bar: mark  version  ask rules plan skills workers evidence merge  theme  install ]
-
-  headline                          ← fold
-  lede + two actions
-  [ before ] --canon init--> [ after ]   never copies: skills, standards
-
-  one claim, alone                  ← proof band
-
-  operator turn                     ← ask and rules
-  [ edited path | matched rules ]
-
-  skill flow band + planner turn    ← tinted
-  controller band, workers band     ← dispatch and workers, heads left over a rule
-  gate band, memory band            ← gate and memory, tinted
-  reviewer turn, capture pair, review exchange, merge fan, token preview   ← tinted
-
-  [ heading | provenance ledger ]
-  [ card ] [ card ] [ card ]        ← install, tinted
-  command field / skill field
-  closing headline + two actions    ← tinted to the footer
-  footer: brand | Reference | Surfaces | Project
-```
-
 ## States
 
 | State | Reached when                                          | Shows                                                              | Evidence                               |
@@ -58,7 +34,7 @@ Eleven sections in reading order, then the footer. A skip link and a sticky nav 
 | dark  | The reader's system prefers dark, or they pick it     | The same page on its own dark ground, derived and not inverted     | `assets/evidence/home/1280--dark.png`  |
 | still | The reader asks for reduced motion, or opens `?still` | Every figure at its end state, with no build and no control motion | every committed frame                  |
 
-Every frame above is also a still, because the capture creates its context with reduced motion and scrolls each section into view before shooting. The two whole-page frames sit beside a folder per section, seventeen of them at `assets/evidence/home/<section>/<width>--<theme>.png`, being `top` and `proof`, the eleven beats, `provenance`, `start`, `field` and `close`, so a change to one part of the page reaches review as a diff on that part.
+Every frame above is also a still, because the capture creates its context with reduced motion and scrolls each section into view before shooting. The two whole-page frames sit beside a folder per section, seventeen of them at `assets/evidence/home/<section>/<width>--<theme>.png`, being `top` and `proof`, the eleven beats, `provenance`, `start`, `field` and `close`, so a change to one part of the page reaches review as a diff on that part. The evidence cells cite flat files rather than per-state folders because the capture writes one image per width and theme.
 
 ## Copy
 
