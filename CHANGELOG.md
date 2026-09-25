@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.120.0](https://github.com/erclx/canon/compare/v4.119.0...v4.120.0) (2026-09-25)
+
+
+### Features
+
+* **pr:** link the worktree's running server from the evidence comment ([#1907](https://github.com/erclx/canon/issues/1907)) ([f73d5c8](https://github.com/erclx/canon/commit/f73d5c89b634bcc527296a5cbad7b778845375f7))
+
+
+### Bug Fixes
+
+* **sandbox:** create canon/ before scenarios write into it ([#1915](https://github.com/erclx/canon/issues/1915)) ([d10384b](https://github.com/erclx/canon/commit/d10384bb878b9c85dbb46431bf163c4900de265c))
+
 ## [4.119.0](https://github.com/erclx/canon/compare/v4.118.0...v4.119.0) (2026-09-25)
 
 
