@@ -63,7 +63,7 @@ An `infra` arm invoking the CLI directly declares the same way, minus `max_turns
 ### Patterns
 
 - Patterns use TOML literal strings (`'^- \[x\] done'`) so a regex needs no backslash escaping. A literal string cannot carry an apostrophe, so a pin over prose spells that character `.`, costing one character of precision. A basic string would reintroduce the backslash doubling the literal form avoids, and shell-style `'"'"'` quoting produces a file that does not parse while reading as plausible.
-- Every pattern compiles with `m` and nothing else. An inline `(?i)` fails to compile and the result names it invalid rather than unmatched. Spell case variants as an alternation such as `(?:loading|Loading)`.
+- Every pattern compiles with `m` and nothing else. An inline `(?i)` fails to compile and the result names it invalid rather than unmatched. Spell case variants as an alternation such as `(?:loading|Loading)`, never as a character class over the first letter, since the spell check reads the fragment the class splits off as an unknown word and fails the gate.
 - Prefer a case-stable substring where the fold is not load-bearing. A bracket class in the middle of a word reads as a fragment to cspell, which fails the spell stage of `bun run check` on the remainder, so the whole word in each branch is what passes both.
 - `content` matches positively, so pinning a block from its first line to its last asserts that nothing inside it changed. Anchor the block below any frontmatter a run may append to, or the append pushes the closing line and fails a correct run.
 

@@ -12,12 +12,14 @@ How a change is reviewed once it exists: the pull request review `review-pr` pos
 ## Layout
 
 - `claude/skills/review-pr/` owns the pull request review and the heading set every other surface cites
+- `claude/skills/review-craft/` owns what a review looks for and the evidence bar, which both review procedures load
 - `claude/skills/review-address/` owns the worker's return leg, including the rebase stage
 - `claude/skills/role-orchestrator/scripts/` owns `poll.sh` and `watch.sh`, which route on the headings
 - `src/pr/` owns the `canon pr` verbs a pass reads the head, the marker, and the key changes through
 
 Each file covers one part of the review loop:
 
+- `canon/context/claude-plugin/skill-review/criteria.md`: why the criteria split from the procedures, and why security and rendered output are references
 - `canon/context/claude-plugin/skill-review/two-pass.md`: the first pass and the close-out, the name a body file takes, where the unchanged-head stop sits, and the commit a pass records
 - `canon/context/claude-plugin/skill-review/headings.md`: the heading contract, the full set the poll routes on, and the one threshold under the heading and the dispatch
 - `canon/context/claude-plugin/skill-review/lenses.md`: the lenses that read the pull request body rather than the diff

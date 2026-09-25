@@ -19,7 +19,7 @@ A finding withdrawn on a reply's argument leaves that count too, so a pass withd
 
 Five headings route through `poll.sh`: `## Review`, `## Review closed`, `## Review response`, `## Rebase`, and `## Post-review findings`. `## Post-review findings` gets the same routing `## Review response` does, since a worker with something to report after a close-out needs a heading of its own: `poll.sh` reports it as a reply and sends a fresh pass.
 
-`## Evidence`, written by `canon pr evidence`, is a sixth known heading routed nowhere. It answers no comment, so counting it as a reply would send the poll back for a re-review nothing asked for, and the poll excludes it from the unmatched filter on its own instead.
+`## Evidence`, written by `canon pr evidence`, is a sixth known heading routed nowhere. It answers no comment, so counting it as a reply would send the poll back for a re-review nothing asked for, and the poll excludes it from the unmatched filter on its own instead. `review-craft`'s rendered-output reference reads it, opening its images and testing its checklist, so routed nowhere describes the poll alone.
 
 Which headings exist, which family each belongs to, and who posts each is stated once in `review-pr`, beside the threshold that skill already states once, so `review-address` and the poll cite it rather than carry their own copy.
 
