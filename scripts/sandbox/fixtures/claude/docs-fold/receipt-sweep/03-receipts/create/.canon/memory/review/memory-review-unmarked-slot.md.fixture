@@ -1,0 +1,19 @@
+# Memory review: unmarked-slot
+
+How to respond: fill in `Decision:` per item (`apply`, `skip`, `defer`, or a question with `?`), then re-ping the skill. Say "discuss" for question rounds, "apply" to commit. Chat shortcut: `all`, `none`, or a list of numbers.
+
+## 1. Promote → `CLAUDE.md`
+
+`feedback-confirm-before-editing.md`
+
+Why: proposed for `CLAUDE.md`, and the operator declined it in an earlier round.
+
+Decision: skip
+
+## 2. Retire
+
+`reference-transport-dashboard.md`
+
+Reason: the dashboard may have moved with the transport vendor, and nobody has checked.
+
+Decision:
