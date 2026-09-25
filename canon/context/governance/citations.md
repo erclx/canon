@@ -87,7 +87,7 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 
 Each rule and standard below cites its skill with the `canon:` prefix plus a report-if-missing line.
 
-- `governance/rules/core/045-memory.md` cites `canon:memory-capture` and `canon:docs-fold`, and points at its standard through `canon standards memory`.
+- `governance/rules/core/045-memory.md` cites `canon:memory-capture` and `canon:docs-fold`, and leaves the pointer at its standard to `559-memory.md`.
 - `governance/rules/lang/120-bash.md` cites `canon:bash-script` and `canon:bash-cli-script`.
 - `governance/rules/claude/561-teach.md` and `standards/teach.md` both cite `canon:teach-workspace`, the standard's fallback reading "say so and stop".
 - `governance/rules/claude/570-skill.md` cites `canon:create-skill` twice.
