@@ -1,3 +1,5 @@
+<!-- canon-length-exempt: a verbatim run record whose header forbids rewriting it -->
+
 > Verbatim run record, 2026-08-01, `tooling/claude/seeds/`. Machine-derived sections below are the runner's own
 > output and the first-person text is the run's own final message. Do not edit or rewrite either. This file is
 > the evidence the change-control rule cites, so a prose pass over it destroys what it is for. Prose standards
