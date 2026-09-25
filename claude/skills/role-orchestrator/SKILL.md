@@ -129,7 +129,7 @@ What the worker owes on its own side is stated in the `role-worker` skill that s
 
 What arrives there does not become a record by being read, so place it by what it changes. An answer that settles a finding goes onto the pull request through the next pass, which withdraws or regrades that finding and names the fact behind it, per `review-pr`. An answer that changes what this session believes about the world instead, which is a mapping correction or a constraint on what a worker can do, settles no finding and reaches no thread, so route it the way Boundaries below routes a change found while orchestrating, which lands it on the task owning the surface it describes. Writing a tracked file to hold either is forbidden here, which leaves the pull request and the board as the two surfaces this session writes.
 
-Step 1 splits a rule that used to hold every plan in this session, and the evidence narrows it rather than retiring it. Two trials on 2026-08-31 put a cold planner on four rows, and it reported ten things the task files got wrong, corrected this session's own premise twice, and overturned one row's closing conclusion. What that measures is finding quality. The rule's own claim is that a warm plan front-loads reasoning a cold worker would otherwise re-derive, which is a statement about a plan's downstream value, and no plan from either trial has been built. So the per-row measurement goes cold on the evidence and the cross-feature call stays here on the boundary the same trials confirmed, which is that a planner reading the board sees blockers and file sets and can write a confident merge order off a partial picture.
+Step 1 splits a rule that used to hold every plan in this session, and the evidence narrows it rather than retiring it. Two trials put a cold planner on four rows, and it reported ten things the task files got wrong, corrected this session's own premise twice, and overturned one row's closing conclusion. What that measures is finding quality. The rule's own claim is that a warm plan front-loads reasoning a cold worker would otherwise re-derive, which is a statement about a plan's downstream value, and no plan from either trial has been built. So the per-row measurement goes cold on the evidence and the cross-feature call stays here on the boundary the same trials confirmed, which is that a planner reading the board sees blockers and file sets and can write a confident merge order off a partial picture.
 
 A plan written here is written against a tree several branches are already changing, so it names the file set of every track in flight as a constraint, one set per track, read from the Touches column of that track's row. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. A bare path list leaves the worker guessing, which is how a plan ends up forbidding the repair of a citation the change broke.
 
@@ -259,7 +259,7 @@ or more open pull requests awaiting a first pass. Either one makes review the
 bottleneck every track is waiting on, and both answer the same way: dispatch the
 narrow re-review and keep the first pass here.
 
-Three is the operator's number, set by hand on 2026-08-31 and marked as such so a
+Three is the operator's number, set by hand and marked as such so a
 measurement replaces it rather than argues with it. It is calibrated against a
 session that ran five workers across two waves and reviewed five pull requests in
 one stretch, several of them twice, where a sixth track was declined on judgment

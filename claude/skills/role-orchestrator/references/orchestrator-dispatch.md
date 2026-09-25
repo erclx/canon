@@ -16,9 +16,9 @@ Run `canon tasks plan-branch <plan> --json` against the row's plan file and read
 
 Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
-The worker calls the same verb on the same plan at `auto-ship` Step 0, so the branch this gate checks and the branch that session takes are one string by construction rather than two readings of one paragraph. They were two readings until 2026-09-06. One run checked `docs/remaining-skill-verdicts` against a worker that took `docs/skill-verdicts-decide`, another checked `fix/path-form-hook` against a worker that took `feat/path-form-hook`, and four dispatches on 2026-09-05 produced three strings for one plan. A check against a branch nobody uses verifies nothing.
+The worker calls the same verb on the same plan at `auto-ship` Step 0, so the branch this gate checks and the branch that session takes are one string by construction rather than two readings of one paragraph. Two readings of one plan part on the slug and on the type alike, and a check against a branch nobody uses verifies nothing.
 
-The type the verb reports is fixed at `feat` whatever the row does, which is the half of the derivation that disagreed most. What makes that safe is that a branch type is cosmetic: `git-stage` reads a commit's type off the staged diff and `git-pr` reads a title off the diff, so nothing a release reads passes through the branch name. What it costs is a worktree listing where every dispatched branch reads `feat/`, which a person scanning one loses. Nothing renames it later, and this paragraph said `git-branch` did until 2026-09-06, when its conventions guard turned out to fire on a conforming `feat/` before reaching any type judgment.
+The type the verb reports is fixed at `feat` whatever the row does, which is the half of the derivation that disagreed most. What makes that safe is that a branch type is cosmetic: `git-stage` reads a commit's type off the staged diff and `git-pr` reads a title off the diff, so nothing a release reads passes through the branch name. What it costs is a worktree listing where every dispatched branch reads `feat/`, which a person scanning one loses. Nothing renames it later, since `git-branch`'s conventions guard fires on a conforming `feat/` before reaching any type judgment.
 
 ## Check the plan waits on nobody
 
@@ -34,7 +34,7 @@ Branch on `launchable` rather than on the exit code, which a shell function wrap
 
 This gate runs ahead of the two collision checks because it is the cheapest reading of the three, needing no roster and no ref, and because it is the only one asking about the row itself rather than about what else is in flight. A row nobody can launch does not need testing against the tracks already out.
 
-It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The disjointness gate compares the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a file clears a check the tree would fail. That happened on 2026-08-31, when two rows were cleared against each other with one constraints block leaving out the context entry both were about to write, and what caught it was a worker sending a message rather than any check.
+It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The disjointness gate compares the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a file clears a check the tree would fail, and what catches it then is a worker's message rather than any check.
 
 A blank `- Answer:` is not an unanswered question. `${CLAUDE_SKILL_DIR}/../../standards/plan.md` fixes an empty slot as accepting the `- Suggested:` line above it, which is what makes a plan decision-ready in one pass. The narrow case this reads is `- Suggested: needs your call, <why>` and its two demonstrated paraphrases, `needs operator's call` and `needs the operator's call`, over an empty slot, the form that same standard writes where the answer turns on preference rather than on a technical default. A gate reading every blank slot as open would refuse every plan in the folder.
 
@@ -66,19 +66,19 @@ No count binds this. List the files the candidate's plan touches, from its `**Fi
 
 The board is not the whole set. A track a person launched by hand carries no row, so that column cannot see it, which is the ordinary shape whenever the operator is launching rather than dispatching. Read `canon sessions list --json` for the branches in flight, and take the file set of any branch no row names from the plan that branch is building. A candidate cleared against the board alone is cleared against a partial reading.
 
-Take the comparison at the file path rather than at a folder above it. `canon tasks validate` compares the paths each row wrote, so a collision it reports on a folder means a row's Touches cell claimed that folder rather than the verb widening anything. On 2026-08-28 it called two rows colliding on `src` because one cell named the bare folder while the other wrote `src/markdown/structure.ts`, which this paragraph once misread as the verb comparing path segments too coarsely.
+Take the comparison at the file path rather than at a folder above it. `canon tasks validate` compares the paths each row wrote, so a collision it reports on a folder means a row's Touches cell claimed that folder rather than the verb widening anything. A cell naming a bare folder collides with every row writing a file under it, which reads as the verb comparing path segments too coarsely and is not.
 
 The finding names which row contributed the containing path, and a bare-folder cell reports as a claim of its own beside the findings. Read that output as a candidate list, settle each pair by file, and narrow the cell that over-claimed rather than discounting the collision it caused.
 
-A declared set is what a branch sets out to write rather than a bound on it, so this gate clears against a prediction and the branch outgrows it hours later. Three tracks crossed a set they had cleared against in the wave of 2026-09-08 and every one merged clean, which is a gate reporting disjoint while a real overlap stood. Two classes account for nearly all of it. The ship chain's own steps write past every plan, since `canon:docs-fold` refreshes whichever context entry a change reaches and `canon:docs-sync` reaches the public docs, and neither surface is one a planner can name before the change exists. The drift stages `bun run check` regenerates and asserts are the second, together with the test and sandbox siblings a source change drags in. Nothing here prevents either, because the files at issue are written long after this gate clears. What reads the other end is `canon tasks plan-reach`, which `canon:git-ship` runs at step 5 against the branch's own diff, so a crossing this gate could not see is named before the pull request opens rather than after it merges.
+A declared set is what a branch sets out to write rather than a bound on it, so this gate clears against a prediction and the branch outgrows it hours later. A track can cross the set it cleared against and still merge clean, which is a gate reporting disjoint while a real overlap stood. Two classes account for nearly all of the crossing. The ship chain's own steps write past every plan, since `canon:docs-fold` refreshes whichever context entry a change reaches and `canon:docs-sync` reaches the public docs, and neither surface is one a planner can name before the change exists. The drift stages `bun run check` regenerates and asserts are the second, together with the test and sandbox siblings a source change drags in. Nothing here prevents either, because the files at issue are written long after this gate clears. What reads the other end is `canon tasks plan-reach`, which `canon:git-ship` runs at step 5 against the branch's own diff, so a crossing this gate could not see is named before the pull request opens rather than after it merges.
 
-Disjointness is necessary and not sufficient, so hold a candidate whose sets do not touch when a stated reason serializes it, and write the reason on the hold. One row creating a skill and another auditing that catalog and counting it write nothing in common, measured 2026-08-27, and dispatching both still leaves the audit counting a denominator that moves underneath it. Nothing verifies that a reason was written, so the rule holds only while the dispatcher applies it.
+Disjointness is necessary and not sufficient, so hold a candidate whose sets do not touch when a stated reason serializes it, and write the reason on the hold. One row creating a skill and another auditing that catalog and counting it write nothing in common, and dispatching both still leaves the audit counting a denominator that moves underneath it. Nothing verifies that a reason was written, so the rule holds only while the dispatcher applies it.
 
 What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review fallback's count of three in `## Parallelism`, which moves a review rather than binding a track, and this runbook carries none.
 
 ## Pick the model
 
-A `claude --bg` session inherits the model of whatever launched it rather than reading the machine's configured default. That was measured on 2026-08-27, with `~/.claude/settings.json` set to `sonnet` while both dispatched workers ran `claude-opus-5`. An orchestrator on the larger model therefore spends it on every worker it launches, and the operator who set the default never sees the override.
+A `claude --bg` session inherits the model of whatever launched it rather than reading the machine's configured default. An orchestrator on the larger model therefore spends it on every worker it launches, and the operator who set the default never sees the override.
 
 Name `<model>` on the launch, and pick it against the task rather than copying whatever this session happens to run. Sizing the model to the row is the dispatcher's call, the same call it already makes on the branch. A mechanical row moving files under a written plan is not the row that needs the largest model, and one whose plan carries an open judgment is.
 
@@ -89,9 +89,9 @@ claude --bg --model <model> -n "worker-<project>-<slug>" "/canon:auto-ship <plan
 Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pull request opens, carrying the number, the branch, the head sha, the CI state, and every point you departed from the plan on, and message it again if you stop on a question."
 ```
 
-`--bg, --background` starts the session as a background agent and returns immediately, `-n, --name` sets the display name that tells a self-dispatched worker from an operator's own launch in `canon sessions list`, and `--model` overrides the inheritance the section above measured. Pass `-n` on every dispatch rather than letting the client derive one. A launch that omits it leaves the session named for a fragment of its own identifier, which is both its address on the send channel and the whole of what the operator sees for it in agent view.
+`--bg, --background` starts the session as a background agent and returns immediately, `-n, --name` sets the display name that tells a self-dispatched worker from an operator's own launch in `canon sessions list`, and `--model` overrides the inheritance the section above states. Pass `-n` on every dispatch rather than letting the client derive one. A launch that omits it leaves the session named for a fragment of its own identifier, which is both its address on the send channel and the whole of what the operator sees for it in agent view.
 
-The prefix reads `worker-` because that is the role it marks. It read `orchestrator-` until 2026-08-31, and no controlling session ever carried it, so a worker filtering the roster for that string found a sibling or itself on every row. Nothing matches the prefix programmatically, which is what kept the rename down to three strings.
+The prefix reads `worker-` because that is the role it marks. A prefix naming a role the session does not hold sends a worker filtering the roster for that string to a sibling or itself on every row. Nothing matches the prefix programmatically, which keeps a rename down to three strings.
 
 `<project>` is the basename of the main worktree root, not of wherever the dispatcher happens to be running. Resolve the main root first, the way `session-worktree` Step 1 does, since a bare `git rev-parse --show-toplevel` inside a linked worktree returns the worktree path rather than the project's.
 
@@ -118,7 +118,7 @@ model, which invokes it through the `Skill` tool, and that route answers a
 flagged skill inconsistently. `auto-ship` has carried the flag since early in its life, and seven other
 shipped skills carry it too.
 
-Three launches on 2026-08-31 and 2026-09-02 bound what makes a command take
+Three launches bound what makes a command take
 that route. Observation A is the first refused worker, launched as `Run
 /canon:session-worktree ..., then /canon:auto-ship ...`, which expanded
 nothing. Observation B is a re-dispatch launched as `/canon:auto-ship
@@ -138,8 +138,8 @@ at no extra cost. Until it fails, the operational rule is the conjunction the
 three observations support: put the flagged command at position zero, followed
 by a space and its argument, with nothing before it.
 
-Four sessions made the same tool call against the same plugin cache on
-2026-08-31. Two were answered with the body and shipped, and two were refused
+Four sessions made the same tool call against the same plugin cache on one
+day. Two were answered with the body and shipped, and two were refused
 with `Skill canon:auto-ship cannot be used with Skill tool due to
 disable-model-invocation`. Prefixing separated nothing, since three of the
 four carried the namespace and those three landed on both answers, so nothing
@@ -168,7 +168,7 @@ The same collapse reaches a human relay rather than a `claude --bg` string. A
 controller that hands an operator two chained blocks to paste as separate
 messages risks both landing as one, where everything after the first
 command's name is read as that command's own argument and the second command
-never fires, measured four times out of four on 2026-09-02.
+never fires, measured four times out of four.
 A slash command expands as a user invocation only at position zero of a
 prompt, and a later one in the same text reaches the session as prose instead.
 The fix is what the template above already takes: one message, one command,
@@ -232,7 +232,7 @@ nothing the check can see.
 
 `plan-feature` is a procedure rather than a role, so a launch naming it alone
 reaches no `role-planner` and takes no role, which owes no message either.
-Both trials on 2026-08-31 ran on prose the controller retyped into each launch,
+Both trials of this shape ran on prose the controller retyped into each launch,
 which held every obligation those sessions took and is where the first one's
 in-flight read went wrong. Reach the role directly on this launch, the way the
 build shape above reaches `role-worker`.
