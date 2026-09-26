@@ -48,6 +48,32 @@ describe('checkTitleFormat', () => {
     expect(result.conforms).toBe(false)
   })
 
+  it('should report clean for a title carrying the breaking-change marker', () => {
+    const result = checkTitleFormat('feat(labels)!: accept the marker')
+
+    expect(result).toEqual({ conforms: true, issues: [] })
+  })
+
+  it('should report structure alone for a marker before the scope', () => {
+    const result = checkTitleFormat('feat!(labels): accept the marker')
+
+    expect(result).toEqual({ conforms: false, issues: ['structure'] })
+  })
+
+  it('should report structure alone for a marker with no space before the subject', () => {
+    const result = checkTitleFormat('feat(labels)!:accept the marker')
+
+    expect(result).toEqual({ conforms: false, issues: ['structure'] })
+  })
+
+  it('should report length alone for a marked title over 72 characters', () => {
+    const result = checkTitleFormat(
+      'feat(labels)!: add a title-format check that pushes this well past the cap',
+    )
+
+    expect(result).toEqual({ conforms: false, issues: ['length'] })
+  })
+
   it('should report every casing rule together when all three break', () => {
     const result = checkTitleFormat('Feat(Labels): Add a check')
 
