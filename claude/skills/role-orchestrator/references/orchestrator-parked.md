@@ -17,7 +17,7 @@ The sweep's own question stays distinct from this one. It asks which parked row 
 
 Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`. A `## Run now` row carries no blocker by definition, so the pass skips it. On the idle trigger, also every row in `.canon/tasks/backlog.md` when the file exists, per the trigger split above. Resolve the board, the backlog, and each task file at the main worktree root, the way `session-worktree` does.
 
-Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row collides with, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
+Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row collides with, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/board.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
 
 ## Re-testing a row
 
