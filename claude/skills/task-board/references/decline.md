@@ -25,7 +25,7 @@ canon tasks decline <stem> --reason "<text>" [--by <name>] --json
 
 The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit, the same wrapper hazard `canon tasks archive` carries. Branch on `ok`, then on `reason`.
 
-On success the record carries `from`, `to`, `priorityRowRemoved`, `backlogRowRemoved`, and `indexRegenerated`, where `backlogRowRemoved` is decline's own field since a task can be declined straight off `backlog.md` and archive never checks that file. It also carries `plan` when the task was the last live citation of a live plan, holding the `from` and `to` of the plan moved alongside it, the same shape `canon tasks archive` uses for its own `plan` field.
+On success the record carries `from`, `to`, `priorityRowRemoved`, `backlogRowRemoved`, and `indexRegenerated`, where `backlogRowRemoved` is decline's own field since a task can be declined straight off `backlog.md` and archive never checks that file. It also carries `plans`, one `from` and `to` for each live plan the task was the last live citation of, empty when nothing moved, the same shape `canon tasks archive` uses for its own `plans` field.
 
 ## Step 3: route on a refusal
 
