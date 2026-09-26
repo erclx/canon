@@ -74,7 +74,7 @@ It gates rather than reports, since a report leaves a citation for a person to n
 
 The docs-path pattern gates on resolution rather than on shape, because shape alone cannot tell a citation of this repository's own reference corpus from an illustration naming a target's own tree: `docs/agents/tasks.md` and `docs/retry.md` are the same token to a pattern with no filesystem behind it. `root` is a required argument on `referencesIn` rather than a defaulted one, since a caller that dropped it would silently report zero docs-path findings rather than fail to typecheck.
 
-`canon/context/` takes no equivalent pattern, since resolution cannot separate `canon/context/index.md`, which every scaffolded project holds, from `canon/context/indexes.md`, this repository's own domain entry. Both resolve and only the second is a defect, which is a semantic read the rule and the review checklist carry instead.
+`canon/context/` takes no equivalent pattern, since resolution cannot separate `canon/context/index.md`, which every scaffolded project holds, from `canon/context/context-model/indexes.md`, this repository's own domain entry. Both resolve and only the second is a defect, which is a semantic read the rule and the review checklist carry instead.
 
 ### The two skill-body patterns
 

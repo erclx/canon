@@ -25,7 +25,7 @@ It reports and never sets the failing exit. Targets run this verb, and a date in
 
 ## The citation reach check
 
-`canon claude skills reach` asks whether a path a shipped body names is a path its reader can open. A plugin skill installs into a target and this repository's own tree is not there, so a body citing `canon/context/transcripts.md` sends a reader to nothing.
+`canon claude skills reach` asks whether a path a shipped body names is a path its reader can open. A plugin skill installs into a target and this repository's own tree is not there, so a body citing `canon/context/features/transcripts.md` sends a reader to nothing.
 
 The measure keys on ownership rather than on existence. A cited path counts when it sits under an authoring root no install channel delivers, which `src/claude/skills-reach.ts` lists as eight prefixes covering standards, governance, the wiki, the internal tree, the tooling tree, the plugin tree, the CLI contract pages, and this narrative folder. Everything else a body might name is the reader's own tree, so `src/`, `scripts/`, and bare `docs/` are deliberately outside the list: including them would report every correct citation of the reader's own files as a defect alongside the real ones.
 

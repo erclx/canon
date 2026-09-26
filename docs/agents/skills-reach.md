@@ -23,7 +23,7 @@ canon claude skills reach ~/repos/my-project
 
 ## The defect it reads for
 
-A plugin skill installs into a project and the toolkit's own tree is not there. A body naming `canon/context/transcripts.md` resolves for a session running in this repository and sends every other reader to nothing, and no stage asked the question until this one. The shape is wider than one folder: a seed naming a standard with no route and a machine-readable field naming a toolkit-only path are the same claim, true here and false in a target.
+A plugin skill installs into a project and the toolkit's own tree is not there. A body naming `canon/context/features/transcripts.md` resolves for a session running in this repository and sends every other reader to nothing, and no stage asked the question until this one. The shape is wider than one folder: a seed naming a standard with no route and a machine-readable field naming a toolkit-only path are the same claim, true here and false in a target.
 
 ## What counts as a citation
 
@@ -52,7 +52,7 @@ A path a seed installs is disowned twice, under its own name and under the folde
 A correct citation and a defective one are the same string, and the sentence around it is the difference. A citation counts as decided when its line names the toolkit as the owner, matching the bodies that already spell it that way. The repair for a finding is to say whose copy the path is, never to delete the citation, since the paths name real documents a reader wants.
 
 ```markdown
-Read `canon/context/indexes.md` from the toolkit if context on the system is needed.
+Read `canon/context/context-model/indexes.md` from the toolkit if context on the system is needed.
 ```
 
 A line mentioning the toolkit for an unrelated reason exempts a citation on it. That is the accepted cost of a word over a notation every future body would have to learn.

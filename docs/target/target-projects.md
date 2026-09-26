@@ -136,5 +136,5 @@ When the toolkit updates, a target pulls changes per domain. A project scaffolde
 - [agents](../agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [target migrations](target-migrations.md), [target sync](target-sync.md), [target scenarios](target-scenarios.md): the one-time moves, the recurring sync, and worked setups
 - [AI workflow](../workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
-- [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/indexes.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
+- [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/context-model/indexes.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
 - [sandbox](../../canon/context/sandbox/index.md): scenario catalog for verifying domain flows

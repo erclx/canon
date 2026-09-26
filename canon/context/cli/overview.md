@@ -13,8 +13,8 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 
 - `src/` owns the entry point (`cli.ts`), the package root every other module resolves against (`project-root.ts`), the exec helper that spawns bash (`exec.ts`), the shared terminal UI matching `lib/ui.sh` style (`ui.ts`), and the cross-domain file and GitHub helpers
 - `src/commands/` owns one file per `canon` subcommand, each one not yet migrated a thin pass-through to a `manage-*.sh` script
-- `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/slides.md`, and `canon/context/transcripts.md`
-- `src/indexes/` owns the index engine, documented in `canon/context/indexes.md`
+- `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/features/slides.md`, and `canon/context/features/transcripts.md`
+- `src/indexes/` owns the index engine, documented in `canon/context/context-model/indexes.md`
 - `src/tooling/` owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`
 - `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, and the drift report, with governance's per-domain adapter in `src/gov/`. `src/standards/` carries none, since nothing installs that corpus into a project and there is no copy to reconcile
 - `src/init/` owns the `canon init` option surface, the preview and count, the domain step list, and the partial-failure runner

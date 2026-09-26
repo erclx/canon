@@ -119,11 +119,23 @@ describe('resolveTopic', () => {
     expect(resolveTopic(ROOT, 'overview')).toBeUndefined()
   })
 
-  it('should return undefined for a leaf name carried across both roots', () => {
+  it('should prefer a docs leaf over a same-named leaf in a context folder', () => {
     writeDoc('docs/agents/index.md', '# Agents\n')
-    writeDoc('docs/agents/overview.md', '# Agents overview\n')
+    writeDoc('docs/agents/indexes.md', '# From the docs leaf\n')
+    writeDoc('canon/context/context-model/index.md', '# Context model\n')
+    writeDoc('canon/context/context-model/indexes.md', '# From the context\n')
+
+    expect(resolveTopic(ROOT, 'indexes')?.rel).toBe(
+      join('docs', 'agents', 'indexes.md'),
+    )
+  })
+
+  it('should return undefined for a leaf carried twice in the first root holding it', () => {
+    writeDoc('docs/agents/index.md', '# Agents\n')
     writeDoc('canon/context/cli/index.md', '# CLI\n')
     writeDoc('canon/context/cli/overview.md', '# CLI overview\n')
+    writeDoc('canon/context/sandbox/index.md', '# Sandbox\n')
+    writeDoc('canon/context/sandbox/overview.md', '# Sandbox overview\n')
 
     expect(resolveTopic(ROOT, 'overview')).toBeUndefined()
   })
@@ -217,6 +229,15 @@ describe('listTopics', () => {
     writeDoc('docs/agents/indexes.md', 'c')
 
     expect(listTopics(ROOT)).toEqual(['agents', 'indexes'])
+  })
+
+  it('should list a leaf under the first root holding it and not the later one', () => {
+    writeDoc('docs/agents/index.md', 'a')
+    writeDoc('docs/agents/indexes.md', 'b')
+    writeDoc('canon/context/features/index.md', 'c')
+    writeDoc('canon/context/features/indexes.md', 'd')
+
+    expect(listTopics(ROOT)).toEqual(['agents', 'indexes', 'features'])
   })
 
   it('should omit a leaf name carried by two folders', () => {
