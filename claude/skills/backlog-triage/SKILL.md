@@ -25,7 +25,7 @@ Run `canon intake list --json` and take the folders whose slug ends in `-backlog
 - **Malformed above zero.** Stop: `❌ <n> items in <slug> carry no answer slot. Repair them in the cluster files before applying.`
 - **Every item answered, some not yet applied.** Run the apply phase.
 
-An item is applied once its task no longer sits directly in `.canon/tasks/`, having moved under `declined/` or `archive/` or gone entirely, or once its live task file carries a `## Findings` line naming the folder slug. Test that per item rather than trusting a count, since a run can stop partway. An item apply skipped for an unreadable answer stays unapplied, so the folder stays in the apply phase until the operator rewrites that answer.
+An item is applied once its task has moved under `.canon/tasks/declined/` or `.canon/tasks/archive/`, or once its live task file carries a `## Findings` line naming the folder slug. A task whose file sits in none of the three folders counts as applied only once `backlog.md` no longer names it, since its dangling line is the one thing apply has left to remove. Test that per item rather than trusting a count, since a run can stop partway. An item apply skipped for an unreadable answer stays unapplied, so the folder stays in the apply phase until the operator rewrites that answer.
 
 ## File phase
 
@@ -92,11 +92,12 @@ Run `canon intake list <slug> --json` and read each item's `answer` and `suggest
 Take the task stem from the item heading. Every verdict leaves the folder slug on its task, which is how Step 1 and `task-board`'s unlinked-origin scan both see the folder as acted on.
 
 - **decline**: `canon tasks decline <stem> --reason "<reason>, backlog triage <slug> item <cluster>#<n>" --json`. The verb clears the backlog line.
+- **decline on a missing file**: when the stem resolves to no file in `.canon/tasks/`, `declined/`, or `archive/`, the verb would refuse as `no-match`, so skip it. Drop the dangling line from `backlog.md` directly and report it as removed with no task behind it. Any other verdict on such an item is reported and skipped, since there is no file to keep, archive, or promote.
 - **archive**: `canon tasks outcome <stem> --close <p> ... --json` for the named positions, then `canon tasks archive <stem> --json`. Outcomes already closed report as closed rather than refusing, so archive still runs. Archive leaves `backlog.md` alone, so drop the task's backlog line once it succeeds, then append the `## Findings` line naming the evidence to the archived file.
 - **keep**: append the `## Findings` line naming what reproduced. The backlog line stays.
 - **promote**: move the backlog line to the bottom of `## Needs a plan` in `.canon/tasks/priority.md`, with a `Waiting on` cell stating what cleared and ending in `last`, then append the `## Findings` line.
 
-Write the `## Findings` line as `- <YYYY-MM-DD>, backlog triage <slug>: <verdict>, <evidence>`. It is the last write on every verdict, since Step 1 reads it as applied and a line written ahead of a refused move would mark a row done that never moved.
+Write the `## Findings` line as `- <YYYY-MM-DD>, backlog triage <slug>: <verdict>, <evidence>`. It is the last write on every verdict with a task file behind it, since Step 1 reads it as applied and a line written ahead of a refused move would mark a row done that never moved.
 
 Before any promote, check the roster the way `task-board` step 4 does: a live session in this repository whose name starts with `orchestrator-` and whose `sessionId` is not this one. When one is found, write the `## Findings` line but not `priority.md` or `backlog.md`, and message that session with the row and its cell so it places the row itself.
 
@@ -104,7 +105,7 @@ Before any promote, check the roster the way `task-board` step 4 does: a live se
 
 Report every refusal on its item and continue with the rest, since one row's refusal says nothing about another's.
 
-- `decline` refusing with `no-match`: the task already moved elsewhere. Report and skip.
+- `decline` refusing with `no-match`: the task already moved elsewhere. Report and skip. A missing-file item never reaches the verb, per Step 8.
 - `outcome` refusing, or `archive` refusing with `open-outcomes`: the verdict named too few positions. Report the positions still open and leave the row on the backlog. Never retry with guessed positions.
 - A promote whose row already sits in `priority.md`: report it, skip the move, and still write the `## Findings` line.
 
