@@ -1,0 +1,18 @@
+---
+title: 'v05.0: A dark theme'
+description: Someone mentioned a dark theme would be nice
+---
+
+# v05.0: A dark theme
+
+Someone mentioned in passing that a dark theme would be nice.
+
+## Outcomes
+
+- [ ] Outcome: the interface follows the system color scheme
+
+## Findings
+
+- Filed from a passing comment.
+
+> Test strategy: manual, toggle the system theme and look.

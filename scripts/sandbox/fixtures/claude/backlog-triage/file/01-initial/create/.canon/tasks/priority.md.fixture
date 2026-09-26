@@ -1,0 +1,12 @@
+---
+title: Priority
+description: What is ready to hand a worker, what is planned behind it, and what still needs planning
+---
+
+# Priority
+
+## Needs a plan
+
+| Task                                        | Waiting on                   |
+| ------------------------------------------- | ---------------------------- |
+| [v07.0 auth tokens](v07.0-auth-tokens.md)   | no plan yet, leads the group |

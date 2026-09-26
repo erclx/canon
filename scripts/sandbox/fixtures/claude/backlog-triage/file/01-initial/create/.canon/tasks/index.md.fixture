@@ -1,0 +1,16 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Request logs write to stdout](v01.0-request-logs-write-to-stdout.md): The list route logs every request with console.log, mixing logs into piped output
+- [v02.0: Export the task list as CSV](v02.0-csv-export.md): Download the current task list as a CSV file
+- [v03.0: Nothing rate limits the task endpoints](v03.0-rate-limit.md): A single client can call the task routes without bound
+- [v04.0: Search the task list](v04.0-search.md): Filter the task list by a substring of the title
+- [v05.0: A dark theme](v05.0-dark-theme.md): Someone mentioned a dark theme would be nice
+- [v06.0: Retry failed webhooks](v06.0-retry-webhooks.md): A webhook delivery that fails is dropped rather than retried
+- [v07.0: Auth tokens](v07.0-auth-tokens.md): Require a bearer token on every task route

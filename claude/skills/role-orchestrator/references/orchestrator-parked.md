@@ -41,6 +41,8 @@ Clearing a row answers yes to that question. It is not a count of how long the r
 
 A row this test clears moves out of `backlog.md` and onto the bottom of `## Needs a plan`, carrying a `Waiting on` cell that states what changed and ends with the word `last`. `canon tasks validate`'s ordering check reads `last` as the ordinal bottom placement already claims, and a cell stating only what changed matches neither that check's ordinal reading nor its rank reading, which raises the finding this pass would then have written against its own row. The next refill sweep's promotion step still orders the row against the rest of that heading the way it orders every other row there, per step 5 under `## Refilling the ready queue` in `role-orchestrator`.
 
+This pass only clears a row upward. Declining or archiving a backlog row is `backlog-triage`, which files a verdict for every row and applies the ones the operator approved.
+
 ## Two ways a re-test goes wrong
 
 Both return a confident wrong answer rather than an error, which is why each gets a step of its own.

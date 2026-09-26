@@ -1,0 +1,21 @@
+---
+title: 'v04.0: Search the task list'
+description: Filter the task list by a substring of the title
+---
+
+# v04.0: Search the task list
+
+Issue: #45
+
+Clients filter the whole list on their side because the route takes no query.
+
+## Outcomes
+
+- [ ] Outcome: a list request accepts a title query and returns only matches
+
+## Findings
+
+- Waiting on pagination. A search over an unbounded list returns an unbounded
+  response, so this cannot start until `listTasks` takes a limit and an offset.
+
+> Test strategy: unit, search a three-task list and assert one match comes back.

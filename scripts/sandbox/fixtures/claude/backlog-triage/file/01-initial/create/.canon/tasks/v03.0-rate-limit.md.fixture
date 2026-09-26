@@ -1,0 +1,21 @@
+---
+title: 'v03.0: Nothing rate limits the task endpoints'
+description: A single client can call the task routes without bound
+---
+
+# v03.0: Nothing rate limits the task endpoints
+
+Issue: #33
+
+No route under `src/routes/` counts requests per client, so one client can
+exhaust the process for everyone else.
+
+## Outcomes
+
+- [ ] Outcome: a client past 100 requests a minute receives a 429
+
+## Findings
+
+- No limiter, middleware, or request counter anywhere under `src/`.
+
+> Test strategy: unit, send 101 requests from one client and assert the last is refused.

@@ -1,0 +1,11 @@
+import { allTasks } from '../store'
+
+export interface Task {
+  readonly id: string
+  readonly title: string
+  readonly done: boolean
+}
+
+export function listTasks(): Task[] {
+  return allTasks()
+}

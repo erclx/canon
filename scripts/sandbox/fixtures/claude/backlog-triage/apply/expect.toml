@@ -1,0 +1,67 @@
+# What a correct `/backlog-triage` run leaves behind on the apply arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one belongs to that table in TOML.
+
+max_turns = 40
+
+# Each verdict's destination. The kept and promoted tasks stay live, and the
+# free-text row stays exactly where it was.
+paths = [
+  ".canon/tasks/declined/v01.0-request-logs-write-to-stdout.md",
+  ".canon/tasks/archive/v02.0-csv-export.md",
+  ".canon/tasks/v03.0-rate-limit.md",
+  ".canon/tasks/v04.0-search.md",
+  ".canon/tasks/v05.0-dark-theme.md",
+  ".canon/tasks/v06.0-retry-webhooks.md",
+]
+
+# The override kept v05.0 off the declined folder, and the free-text answer
+# kept v06.0 off it too.
+absent = [
+  ".canon/tasks/v01.0-request-logs-write-to-stdout.md",
+  ".canon/tasks/v02.0-csv-export.md",
+  ".canon/tasks/declined/v05.0-dark-theme.md",
+  ".canon/tasks/declined/v06.0-retry-webhooks.md",
+]
+
+write_scope = [".canon/tasks/**"]
+
+reply = ["v06.0"]
+
+manual = [
+  "The run reached declined/ and archive/ through `canon tasks decline` and `canon tasks archive` rather than by moving files. Semantic: both leave the same tree.",
+  "The reply names v06.0 as skipped for an unreadable answer. Semantic: the stem alone appears whether it was skipped or reported for another reason.",
+]
+
+# The decline reason names the triage folder, so the declined task cites it.
+[[content]]
+path = ".canon/tasks/declined/v01.0-request-logs-write-to-stdout.md"
+pattern = '^Declined: .*backlog triage 01-backlog-triage'
+
+# Archive closed both named positions before moving the task.
+[[content]]
+path = ".canon/tasks/archive/v02.0-csv-export.md"
+pattern = '^- \[x\] Outcome: the download is served at'
+
+# Keep and the override both leave the folder slug on their task.
+[[content]]
+path = ".canon/tasks/v03.0-rate-limit.md"
+pattern = 'backlog triage 01-backlog-triage: keep'
+
+[[content]]
+path = ".canon/tasks/v05.0-dark-theme.md"
+pattern = 'backlog triage 01-backlog-triage: keep'
+
+# The promoted row lands under the control row with a cell ending in `last`.
+[[content]]
+path = ".canon/tasks/priority.md"
+pattern = '^\| \[v07\.0 auth tokens\]\(v07\.0-auth-tokens\.md\) +\|.*\|\n\| \[v04\.0[^\]]*\]\(v04\.0-search\.md\) +\|.*last +\|'
+
+# The free-text row keeps its backlog line and ends the list, since the three
+# rows that left it sat between it and the kept ones.
+[[content]]
+path = ".canon/tasks/backlog.md"
+pattern = '^- \[v03\.0[^\n]*\n- \[v05\.0[^\n]*\n- \[v06\.0 retry failed webhooks\]\(v06\.0-retry-webhooks\.md\)\n*$'

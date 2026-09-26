@@ -1,0 +1,15 @@
+---
+title: Backlog
+description: Tasks nobody is scheduling, unordered, each pointing at its own file
+---
+
+# Backlog
+
+Unordered. Nothing here is scheduled, and a task rises to `priority.md` when it becomes near-term.
+
+- [v01.0 request logs write to stdout](v01.0-request-logs-write-to-stdout.md)
+- [v02.0 export the task list as CSV](v02.0-csv-export.md)
+- [v03.0 nothing rate limits the task endpoints](v03.0-rate-limit.md)
+- [v04.0 search the task list](v04.0-search.md)
+- [v05.0 a dark theme](v05.0-dark-theme.md)
+- [v06.0 retry failed webhooks](v06.0-retry-webhooks.md)

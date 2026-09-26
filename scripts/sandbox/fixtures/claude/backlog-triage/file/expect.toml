@@ -1,0 +1,41 @@
+# What a correct `/backlog-triage` run leaves behind on the file arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one belongs to that table in TOML.
+
+max_turns = 40
+
+# The seeded tree opens with neither `.canon/intake/` nor `.canon/groundwork/`,
+# so the claimed ordinal can only be `01` and the slug is fixed by the skill.
+paths = [".canon/intake/01-backlog-triage/00-overview.md"]
+
+# The file phase writes nothing outside the folder, so no task moves.
+absent = [".canon/tasks/declined", ".canon/tasks/archive"]
+
+write_scope = [".canon/intake/**"]
+
+reply = [".canon/intake/01-backlog-triage/"]
+
+manual = [
+  "v03.0 is suggested keep and v05.0 is suggested decline. Semantic: which cluster file holds each item is the run's call, so a pattern cannot anchor the verdict to its row.",
+  "v02.0 is suggested archive naming positions 1 and 2 and #58, and v04.0 is suggested promote naming the pagination in #61. Semantic: same reason.",
+  "Every problem line carries a count, a path, or a commit measured this pass. Semantic: any digit in the file would satisfy a pattern.",
+  "No `You:` slot is filled. Unwired: `canon intake list 01-backlog-triage --unread --json` reports six unread items when it holds.",
+]
+
+[[content]]
+path = ".canon/intake/01-backlog-triage/00-overview.md"
+pattern = '^date: \d{4}-\d{2}-\d{2}$'
+
+# The index links a numbered cluster file, which proves the numbering and the
+# domain half of each filename together.
+[[content]]
+path = ".canon/intake/01-backlog-triage/00-overview.md"
+pattern = '\]\((?!00-)\d\d-[a-z][a-z0-9-]*\.md'
+
+# The control row sits on the board, so the pass leaves it where it was.
+[[content]]
+path = ".canon/tasks/priority.md"
+pattern = '^\| \[v07\.0 auth tokens\]\(v07\.0-auth-tokens\.md\)'
