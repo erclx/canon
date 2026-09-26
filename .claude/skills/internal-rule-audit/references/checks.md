@@ -25,7 +25,7 @@ Each check names the source that answers it, so the audit reads rather than re-d
 ## 3. Restated elsewhere
 
 - **Source:** `gov restated --json`. Keep each entry in `restatements` whose `subject.file` ends in the rule's filename, and read its `surfaces`, where `kind` is `rule`, `skill`, or `seed`.
-- **Test:** two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`.
+- **Test:** two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`. A surface under `.claude/skills/` does not count against a `governance/rules/` subject either, since no target receives this repository's own skills, and does count against an `internal/rules/` subject, whose audience is this repository alone.
 - **Fails toward:** retire when every bullet is restated, merge when the other surface is a rule for the same audience, keep with bullets to cut otherwise.
 
 ## 4. Owned by a standard
