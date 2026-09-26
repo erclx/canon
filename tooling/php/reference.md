@@ -71,4 +71,4 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `phpstan analyse` passes ``. Add a Lint row whose assertion reads: `` `php-cs-fixer check` passes ``. Add a Tests row whose assertion reads: `` `phpunit` exits 0 ``.
+In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `phpstan analyse` passes ``. Add a Lint row whose assertion reads: `` `php-cs-fixer check` passes ``. Add a Tests row whose assertion reads: `` `phpunit` exits 0 ``. <!-- audit-ignore-citations: canon/context/ci.md -->

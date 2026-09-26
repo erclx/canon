@@ -13,9 +13,9 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 ## Layout
 
-- `src/teach/`: the implementation. `workspace.ts` resolves roots and reads a workspace, `nav.ts` splices lesson chrome, `lesson.ts` resolves what a lesson needs and draws its quiz order, `render.ts` and `html/` turn a body block list into HTML, `components/` and `fonts.ts` carry the chrome's own pieces.
-- `examples/teach/`: the committed fixture, rooted at `00-fixture/`, which is what development renders against.
-- `.canon/teach/`: the operator's live workspaces, gitignored and backed through `canon records push`.
+- `src/teach/` owns the workspace reader, the chrome splice, lesson resolution, and the body renderer
+- `examples/teach/` owns the committed fixture, rooted at `00-fixture/`, which development renders against
+- `.canon/teach/` owns the operator's live workspaces, gitignored and backed through `canon records push`
 
 ## Decisions
 
@@ -41,9 +41,7 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
-## Departures from the nav-04 prototype
-
-The chrome matches the nav-04 prototype, measured as computed styles on both sides at three widths in both themes and compared frame by frame across rest, hover and open states. Where it does not match, the reason is below, and nothing else departs.
+**The chrome matches the nav-04 prototype except in six places.** Both sides were compared as computed styles at three widths in both themes, frame by frame across rest, hover and open states, and nothing departs beyond these.
 
 - The jump menu is one component in both mounts. The prototype drew the breadcrumb menu as a grid at `0.38rem` row padding and the sidebar switcher as a flex row at `0.34rem` with a 12px numeral. Both now take the breadcrumb recipe, so the switcher opens 4px taller than drawn and its numeral is a pixel smaller.
 - The current row's numeral takes the accent in both menus. The prototype muted it in the breadcrumb menu and kept the accent in the switcher, so one of its mounts had to give way, and the accent is what marks where you are.
@@ -52,13 +50,9 @@ The chrome matches the nav-04 prototype, measured as computed styles on both sid
 - `.track` and `.outline` are gone from the markup. The prototype kept both elements and hid them with `display: none`.
 - The trailing count column keeps `text-align: right`, where the prototype's flex switcher row read `start`. The column is sized to its content, so the value moves nothing.
 
-## The reading rules sit on the declared type scale
+**Reading rules sit on the declared type scale**, `--t1` through `--t6`, and the body carries no phone override, since the steps are the same at every width. The mapping is the nav-04 prototype's `data-scale` block landed as the default, with two changes. `h3` reads `--t3` but the glossary group label keeps its own `--t5`, because the prototype's `main h3` selector would have painted that label at 18px and it never rendered a glossary page. `th`, `.nav .lbl`, the panel labels, the glossary group label and the two quiz tags drop their uppercase and tracking, matching the sentence case the landing page already uses. The quiz tags write their own text in `content`, so the strings are capitalized in the rule.
 
-Every reading rule takes its size from `--t1` through `--t6`, and the body carries no phone override, since the steps are the same at every width. The mapping is the nav-04 prototype's `data-scale` block landed as the default, with two changes. `h3` reads `--t3` but the glossary group label keeps its own `--t5`, because the prototype's `main h3` selector would have painted that label at 18px and it never rendered a glossary page. `th`, `.nav .lbl`, the panel labels, the glossary group label and the two quiz tags drop their uppercase and tracking, matching the sentence case the landing page already uses. The quiz tags write their own text in `content`, so the strings are capitalized in the rule.
-
-## The listing body carries no accent and no status dot
-
-The chrome pass narrowed the accent to marking state, and the listing body follows it: `.toc .num` is muted because no listing row is a position you occupy, and the repeated status dot is gone because a mark reading the same on every live row reports nothing. The workspace row keeps its state word, which is the only one that can differ (`Stub`), and a lesson row carries none, since every listed lesson is written. The glossary filter is an input with no border on the page ground with the term count beside it, `N terms` narrowing to `M of N terms` while a filter is typed. The jump menus are a separate component and keep their own state marks.
+**The listing body carries no accent and no status dot.** The accent marks state alone, and the listing body follows it: `.toc .num` is muted because no listing row is a position you occupy, and the repeated status dot is gone because a mark reading the same on every live row reports nothing. The workspace row keeps its state word, which is the only one that can differ (`Stub`), and a lesson row carries none, since every listed lesson is written. The glossary filter is an input with no border on the page ground with the term count beside it, `N terms` narrowing to `M of N terms` while a filter is typed. The jump menus are a separate component and keep their own state marks.
 
 Each step carries one leading across reading text: 1.1 on `--t1`, 1.3 on `--t2`, 1.55 on `--t3` and `--t4`, and 1.6 on `--t5`. `h3` takes 1.55 where the prototype drew 1.4, so a step holds one value. Controls keep their own tuning, such as the option rows at 1.45 and the jump menu rows, since a one-line control is not reading text.
 

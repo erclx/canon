@@ -5,7 +5,7 @@ description: What the development domain owns, the toolchain setup, the run comm
 
 # Overview
 
-Owns the local development loop: toolchain setup, the run commands, and the git hooks that gate commits and pushes. CI runs the same stages through `bun run check:ci`, covered in `canon/context/ci.md`. Domain behavior for what each script does lives in the entry for that domain. `CONTRIBUTING.md` at the repository root states the contributor-facing subset of this domain and points back here for the rest.
+Owns the local development loop: toolchain setup, the run commands, and the git hooks that gate commits and pushes. CI runs the same stages through `bun run check:ci`, covered in `canon/context/ci/overview.md`. Domain behavior for what each script does lives in the entry for that domain. `CONTRIBUTING.md` at the repository root states the contributor-facing subset of this domain and points back here for the rest.
 
 ## Layout
 

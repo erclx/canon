@@ -122,7 +122,7 @@ ESCAPE_SCRATCH_DIRS=(.canon/plans .canon/review .canon/memory .canon/tasks)
 # writing outside these eight destinations, and nothing separates this run's
 # writes from a sibling's within them, so a scoped pass says the declared
 # destinations held and nothing more. Read `canon/context/sandbox/isolation.md`
-# and `canon/context/sandbox/coverage/arms.md` before writing a claim past that.
+# and `canon/context/sandbox/coverage/workflow-arms.md` before writing a claim past that.
 
 # Set whenever any watched root holds at least one of the four directories,
 # across every call this run makes. A root with none of them contributes no

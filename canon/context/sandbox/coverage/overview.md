@@ -15,7 +15,7 @@ description: The coverage report and what its two percentages measure, and the b
 - `scripts/sandbox/fixtures/` owns each arm's `expect.toml`, which the report counts
 - `scripts/sandbox/` owns the scenario scripts the report enumerates, and `exempt.toml` beside them
 
-`canon/context/sandbox/coverage/arms.md` records what individual arms prove, and `canon/context/sandbox/coverage/census.md` covers the per-skill census, pairing, and exemptions.
+`canon/context/sandbox/coverage/arms.md` and `canon/context/sandbox/coverage/workflow-arms.md` record what individual arms prove, and `canon/context/sandbox/coverage/census.md` covers the per-skill census, pairing, and exemptions.
 
 ## Decisions
 

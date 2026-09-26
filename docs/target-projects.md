@@ -57,7 +57,7 @@ The chain is:
 
 - `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/` in the same pass
 - `canon tooling sync <stack> --write` adds stack-specific deps, scripts, and gitignore entries
-- The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate eslint, vitest, playwright configs and the stack's setup script, and extends `canon/context/ci.md` and `canon/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: canon/context/development.md -->
+- The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate eslint, vitest, playwright configs and the stack's setup script, and extends `canon/context/ci.md` and `canon/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: canon/context/ci.md, canon/context/development.md -->
 - The `verify` phase runs the installed `package.json` scripts (lint, typecheck, check, test, build) and reports pass or fail
 - The `indexes` phase bootstraps the `index.md` system over the project's own documentation folders, confirming candidate folders with the operator rather than running unattended
 
