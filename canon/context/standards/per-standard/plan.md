@@ -51,6 +51,8 @@ The block opens with a stamp bullet reading Measured against `<commit>` on <YYYY
 
 A date alone lost, since two constraints written on the same day can sit on opposite sides of a merge. Naming the tracks in the stamp beside the commit lost too, since the block already names each track directly below it.
 
+A dead constraint fails silently in the expensive direction, which is why the stamp is worth its bullet. A session honoring one ships the dangling citation the change created and reports success, where a session crossing a live constraint collides visibly and is caught.
+
 An unstamped constraint reads as unverified rather than as live. Restamping the queue is a sweep over files a worker may already hold, and confirming an unstamped one costs that worker the open pull request list.
 
 The rule sits in `standards/plan.md` with `role-orchestrator` naming the stamp alone, because a worker running the planning skill in its own branch writes constraints too. No check parses the block, so the rule holds by being read.
