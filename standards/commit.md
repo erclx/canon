@@ -17,7 +17,7 @@ Does not govern:
 
 ## Format
 
-- Structure: `<type>(<scope>): <subject>`
+- Structure: `<type>(<scope>): <subject>`, with `!` before the colon for a breaking change
 - Casing: lowercase for `<type>`, `<scope>`, and first word of `<subject>`
 - Subject: 72 characters maximum, no trailing period
 

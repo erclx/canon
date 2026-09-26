@@ -25,7 +25,7 @@ interface ScanOptions {
 
 /** What a reader does about each way `checkTitleFormat` graded a title as broken. */
 const TITLE_FORMAT_MESSAGES: Record<TitleFormatIssue, string> = {
-  structure: 'does not match <type>(<scope>): <subject>',
+  structure: 'does not match <type>(<scope>)[!]: <subject>',
   'casing-type': 'the type is not lowercase',
   'casing-scope': 'the scope is not lowercase',
   'casing-subject': 'the first word of the subject is not lowercase',
@@ -153,7 +153,7 @@ export function register(program: Command): void {
         'forcing a new dependency.',
         '',
         "It also grades the title alone against standards/pr.md's ## Title",
-        'section: the `<type>(<scope>): <subject>` structure, lowercase casing',
+        'section: the `<type>(<scope>)[!]: <subject>` structure, lowercase casing',
         'for the type, the scope, and the first subject word, and a 72-',
         'character length cap. A scan given no title, whether from a review',
         'or from a bare --body or --body-file invocation, skips this check',
@@ -374,7 +374,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
     logInfo('the scan carries no title, so there is no format to grade')
   } else if (titleFormat.conforms) {
     logInfo(
-      'the title matches <type>(<scope>): <subject> and its casing and length rules',
+      'the title matches <type>(<scope>)[!]: <subject> and its casing and length rules',
     )
   } else {
     logWarn(
