@@ -38,9 +38,10 @@ When adding a stack:
 
 ## Rule audit
 
-After writing or revising a rule, audit each bullet against the checklist. Trigger phrases: "audit this rule", "review the governance rule", "is this rule worth keeping".
+After writing or revising a rule, audit each bullet against the checklist. Trigger phrases: "audit this rule", "review the governance rule".
 
 - Read `.claude/skills/internal-governance/references/rule-audit.md` for the criteria and output shape.
+- A verdict on whether a whole rule earns its place, where it loads, and whom it reaches is `internal-rule-audit`.
 
 ## Reference
 

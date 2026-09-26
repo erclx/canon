@@ -10,6 +10,7 @@ Internal skills live in `.claude/skills/` and are toolkit-only. They are not ins
 - `internal-ask`: Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`
 - `internal-claude`: Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries
 - `internal-governance`: Load before editing governance rules or stack definitions
+- `internal-rule-audit`: Audit the governance rule set, returning one keep, move, retire, or merge verdict per rule with the check that decided it
 - `internal-scripts`: Load before editing scripts or sandbox scenarios
 - `internal-snippets`: Load before editing snippets
 - `internal-standards`: Load before editing standards or docs
