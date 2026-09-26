@@ -14,7 +14,7 @@ description: The five verbs that read or write a task's plan, being where it sit
 | `--json`        | Emit a machine-readable record on stdout    |
 | `--root <path>` | Board root, defaulting to the main worktree |
 
-The record carries `location`, one of `unstated`, `live`, `archived`, or `outside`, and `citedBy`, the other live tasks whose `Plan:` line lands on the same file. Exit codes: `0` read, `1` refused with `no-board` or `no-match`.
+The record carries `location`, one of `unstated`, `several`, `live`, `archived`, or `outside`, `targets`, every target the line carries in line order, and `citedBy`, the other live tasks whose `Plan:` line lands on the same file through any of its links. `several` is a line linking more than one plan, which answers no single location, so `target` is absent there and `targets` names each link. Exit codes: `0` read, `1` refused with `no-board` or `no-match`.
 
 The target resolves against the board folder and against the project root both, so `../plans/x.md` and `.canon/plans/x.md` land on the same file and one plan two tasks spelled differently counts once. Containment is tested at both record roots rather than at the one this tree resolves at, since a line somebody wrote against a root the tree has since left is still a path into the plans folder, and reading it as outside would report a shipped plan as still live. `docs/agents/records.md` states the read order.
 
@@ -142,6 +142,8 @@ canon tasks plan-link v28.1-trigger-escalation .canon/plans/feature-dispatch-ans
 
 The plan resolves the same way `canon tasks plan-answers` resolves one, against the project root first and `.canon/tasks/` second, so a bare slug and a board-relative path both work. A reference resolving to no file refuses as `no-plan`, naming every base it looked under.
 
-The write adds the line when it is absent and corrects the target in place when it exists, anchored on the H1 rather than on the last origin line, since `Plan:` is the first origin line a task carries rather than the last. The `action` field reports `added`, `corrected`, or `unchanged`, which makes a rerun against the same plan safe.
+The write adds the line when it is absent and corrects the target in place when it exists, anchored on the H1 rather than on the last origin line, since `Plan:` is the first origin line a task carries rather than the last. A `Plan:` line inside a fenced sample is skipped. The `action` field reports `added`, `corrected`, or `unchanged`, which makes a rerun against the same plan safe, and `replaced` names the target the line carried before when it differed.
 
-Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, `no-plan`, or `bad-input`.
+A line already linking several plans is refused as `several-plans` and left unchanged, with `detail` listing each link, even when one of them is the plan named. The verb cannot tell which link to drop, and reporting `unchanged` would hide a line that breaks the one-plan rule.
+
+Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, `no-plan`, `several-plans`, or `bad-input`.
