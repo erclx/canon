@@ -36,11 +36,9 @@ runs warm inside the orchestrator's own session or cold in a dispatched one, and
 the boundary between them is the cross-feature call: which rows collide, what
 merges before what, and whether a row should run at all stay with the
 orchestrator, because a session reading the board sees blockers and file sets
-and can write a confident merge order off a partial picture. Two trials on
-2026-08-31 measured a cold planner against four rows and it reported ten things
-the task files got wrong, which is why the per-row measurement is free to go
-cold. No plan from either trial has been built, so a cold plan's value to the
-worker reading it is still unmeasured.
+and can write a confident merge order off a partial picture. The per-row
+measurement is free to go cold, since a cold planner reads the tree rather than
+trusting what the task file claims.
 
 A dispatched planner owes two messages: the plan's path as the file lands, with
 what the task file got wrong beside it, and a block before that block becomes an
@@ -48,16 +46,10 @@ interactive prompt. The plan file is its only write. A stale count, a moved line
 or a path that no longer resolves is reported rather than repaired, since the
 task file and the board stay the orchestrator's to write.
 
-Refusing is part of the worker's job rather than a failure of it. A worker that
-halts on a plan question it may not answer, or argues back against an
-instruction the tree contradicts, is working correctly. The four measured halts
-to date each cost the dispatcher one reply and each was right.
-
-What the worker may not do is write `.canon/tasks/priority.md` or the backlog
-beside it. Those are gitignored, so an overwrite drops a row with no history to
-recover it from, and a worker cannot pick a free task label without reading
-every task file and every archive entry. It reports the row it needs and lets
-the orchestrator write it.
+A worker that halts on a plan question it may not answer, or argues back against
+an instruction the tree contradicts, is working correctly. It never writes
+`.canon/tasks/priority.md` or the backlog beside it, and reports the row it
+needs for the orchestrator to write. `role-worker` carries the reason for each.
 
 The orchestrator's cell reads every tracked file rather than every feature, and
 it offers no exception for a small one. A correction found while orchestrating
@@ -123,43 +115,24 @@ delta against, and `canon pr checks` reports the runs belonging to that tip, so 
 follow-up push cannot be read as green off the predecessor's completed run. See
 [Head-sensitive pull request reads](../agents/pr-reads.md).
 
+Three messages travel from the worker to its controller, and `role-worker`
+states each with its reason: the worker's pull request as it opens, the end of
+each address-review pass with the new CI state, and a block before it becomes an
+interactive prompt. Nothing is sent on progress. An open pull request is what
+starts the controller's review poll, with a dispatch still silent after thirty
+minutes kept as a fallback.
+
 What the session channel carries is the handback instruction and the worker's
 reply to it, which is a notification layer over a record that stays on the PR. A
 reply that changes an outcome, such as a worker naming the plan question that
 already declined a finding, still belongs back on the PR, since the session
 holding it ends and the thread is what a later reader opens.
 
-Three messages travel the other way and the worker owes all three. It announces
-its own pull request as the ship chain opens one, naming the number, the
-branch, and the task it closes. That is the one transition only that session
-can observe, since a worker that finishes goes idle rather than exiting, and
-one sat unnoticed for eighteen minutes before the announcement existed.
-
-It announces again when an address-review pass finishes, naming what it
-addressed and the pull request's new CI state. That transition is the other
-one only the worker can observe, and it replaces the same idle-poll gap on the
-review's return leg, after a worker once addressed a posted review by
-answering on the thread alone and telling its controller nothing.
-
-The third reports a block before that block becomes an interactive prompt. A
-queued message drains at the next tool round and a session already waiting on
-input never reaches one, so an answer relayed to an open prompt renders beneath
-the question and changes nothing. Nothing is sent on progress, which would
-rebuild the poll on the sender's side of the channel.
-
-The announcement is what let the review poll narrow. It used to start on a
-dispatch as well as on an open pull request, and the script reads pull requests
-while a building worker has none, so five consecutive runs reported no movement
-across roughly fifteen minutes while one worker built. An open pull request is
-now the whole trigger, with a dispatch still out after thirty minutes and silent
-kept as a fallback.
-
 Two rules put it there rather than leaving that to whoever remembers. A finding
 the worker declines carries the fact that settled it in the same reply body that
 already maps every finding, and a pass accepting that argument states the
 withdrawal or the regrade with what produced it instead of dropping the finding
-from its next comment. Both fire on a line the body already writes, so neither
-asks a session to judge mid-reply whether its own message mattered.
+from its next comment.
 
 A reply that corrects the reviewing session rather than a finding stays off the
 thread. Which session holds which branch, or what gate a worker's edits pass
@@ -199,10 +172,8 @@ may hold a reason for, and it still opens the heading and sends the dispatch,
 because the author is the only party who can answer it.
 
 A minor the worker declines goes to the findings of the task the
-branch closes, since a thread does not survive the merge. The feedback
-becomes a durable artifact both sessions read, survives a session ending, and
-anchors to the change. That removes the copy-paste that otherwise routes review
-through the human between two sessions.
+branch closes, since a thread does not survive the merge. Feedback kept on the
+PR outlives both sessions, so no human copies review between them.
 
 ## Feature sizing
 

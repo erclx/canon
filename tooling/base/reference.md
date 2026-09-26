@@ -4,7 +4,7 @@
 
 The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, spelling, shell linting, conventional commits, git hooks, CI, and one maintenance script. Every other stack extends it, so a decision made here is one every stack inherits.
 
-A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs target-projects` carries the recipe.
+A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs target-scenarios` carries the recipe.
 
 ## What ships as golden configs
 
