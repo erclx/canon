@@ -24,7 +24,7 @@ The parent-to-subagent channel is the prompt string alone. Any file paths, error
 Three paths reach a subagent from inside Claude Code:
 
 - `Agent` tool: the built-in interface. Pass `description`, `prompt`, and `subagent_type`. Built-in types include `general-purpose`, `Explore`, and `Plan`. The tool was named `Task` before v2.1.63. Pass `isolation: worktree` to run the subagent in its own temporary git worktree so its edits stay out of the parent's working directory.
-- Skill frontmatter: set `context: fork` and `agent: <type>` in a `SKILL.md` to run the skill body itself inside a forked subagent. See [Claude Code skills](claude-skills.md) for the full frontmatter reference.
+- Skill frontmatter: set `context: fork` and `agent: <type>` in a `SKILL.md` to run the skill body itself inside a forked subagent. See [Claude Code skills](skills.md) for the full frontmatter reference.
 - Filesystem agents: drop a markdown file with YAML frontmatter under `.claude/agents/` for project scope or `~/.claude/agents/` for personal scope. These load at startup and do not hot-reload during a session.
 
 Subagents cannot spawn their own subagents. Do not list `Agent` in a subagent's allowed tools.
@@ -53,7 +53,7 @@ A foreground subagent blocks the main conversation until it returns, and this is
 
 Run subagents sequentially when a later one needs output from an earlier one, or when ordering matters for user-visible state, such as review before ship. The cost is wall time.
 
-Fan out only when the work earns it. Each spawned subagent pays its own startup and context cost, so inline the work when it is small. For sustained independent work rather than a single delegated task, a background session is the better tool. See the [background sessions](claude-worktrees.md#background-sessions) section for the worktree-isolated variant.
+Fan out only when the work earns it. Each spawned subagent pays its own startup and context cost, so inline the work when it is small. For sustained independent work rather than a single delegated task, a background session is the better tool. See the [background sessions](worktrees.md#background-sessions) section for the worktree-isolated variant.
 
 ## Pitfalls
 
@@ -66,5 +66,5 @@ Fan out only when the work earns it. Each spawned subagent pays its own startup 
 
 ## Related
 
-- [Claude Code skills](claude-skills.md) for the `context: fork` frontmatter fields
-- [Claude Code hooks](claude-hooks.md) for `SubagentStart` and `SubagentStop` events
+- [Claude Code skills](skills.md) for the `context: fork` frontmatter fields
+- [Claude Code hooks](hooks.md) for `SubagentStart` and `SubagentStop` events

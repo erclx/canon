@@ -58,7 +58,7 @@ describe('the shipped-references stage scope', () => {
     expect(scope.test('internal/rules/claude/598-authoring-layout.md')).toBe(
       false,
     )
-    expect(scope.test('wiki/claude/claude-worktrees.md')).toBe(false)
+    expect(scope.test('wiki/claude/worktrees.md')).toBe(false)
   })
 
   it('should anchor each corpus, so a longer name sharing its prefix does not fire', () => {

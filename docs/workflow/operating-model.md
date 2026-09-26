@@ -12,7 +12,7 @@ cross-feature call and reviews. Planning runs there or in a session of its own.
 Cold worker sessions build. The human launches workers and merges.
 
 This page covers the roles and the loop. For the worktree mechanism (isolation, merge
-order, port collisions), see [Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md).
+order, port collisions), see [Claude Code and git worktrees](../../wiki/claude/worktrees.md).
 
 ## Four roles
 
@@ -226,11 +226,11 @@ A dev server, an end-to-end run, and a screenshot run alongside each other on a
 web stack, since every worktree derives its own port. Singleton resources (one
 local model server, one GPU) still serialize, as does any port a stack fixes by
 hand. See
-[Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md) for merge order and the
+[Claude Code and git worktrees](../../wiki/claude/worktrees.md) for merge order and the
 port-collision detail.
 
 ## Related
 
-- [Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md) for the isolation and fan-out mechanics
-- [Claude Code subagents](../../wiki/claude/claude-subagents.md) for in-session parallelism without worktrees
+- [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the isolation and fan-out mechanics
+- [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism without worktrees
 - `canon/context/claude-plugin/skill-strategy/overview.md` for how the skills in the loop are categorized

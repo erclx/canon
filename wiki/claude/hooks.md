@@ -26,7 +26,7 @@ Session and turn lifecycle:
 - `Stop` / `StopFailure`: fires when Claude finishes a response, or when a turn ends due to API error. `Stop` can block completion to keep Claude working
 - `PreCompact` / `PostCompact`: fires around context compaction
 
-Subagents and tasks (see [Claude Code subagents](claude-subagents.md) for when a skill should spawn one):
+Subagents and tasks (see [Claude Code subagents](subagents.md) for when a skill should spawn one):
 
 - `SubagentStart` / `SubagentStop`: fires when a subagent spawns and finishes
 - `TaskCreated` / `TaskCompleted`: fires around `TaskCreate` calls

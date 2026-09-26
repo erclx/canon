@@ -189,10 +189,10 @@ describe('renamePath under the skill preset', () => {
     ).toBe('scripts/sandbox/claude/feature.sh')
   })
 
-  it('should leave the wiki page whose filename only opens with a skill name', () => {
-    expect(
-      renamePath('wiki/claude/claude-worktrees.md', SKILL_NAME_RULES),
-    ).toBe('wiki/claude/claude-worktrees.md')
+  it('should leave a filename that only opens with a skill name', () => {
+    expect(renamePath('docs/claude-worktrees.md', SKILL_NAME_RULES)).toBe(
+      'docs/claude-worktrees.md',
+    )
   })
 
   it('should move the sandbox arm script named for the skill it drives', () => {

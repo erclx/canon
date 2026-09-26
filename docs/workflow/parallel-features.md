@@ -32,7 +32,7 @@ A constraint naming a track in flight carries the same problem past the handoff,
 
 ## Records at the main root
 
-`.canon/plans/`, `.canon/review/`, and `.canon/memory/` all resolve at the main worktree root, so artifacts created in any session are visible from any sibling worktree. A session inside a worktree reads them directly, since the file-editing tools refuse a main-root path but `Read` resolves normally. It writes a whole file through the shell and makes a change inside an existing file through a `canon` verb, which resolves the main root in-process. See [Claude Code and git worktrees](../../wiki/claude/claude-worktrees.md) for the full rule and the domain-level fan-out guidance.
+`.canon/plans/`, `.canon/review/`, and `.canon/memory/` all resolve at the main worktree root, so artifacts created in any session are visible from any sibling worktree. A session inside a worktree reads them directly, since the file-editing tools refuse a main-root path but `Read` resolves normally. It writes a whole file through the shell and makes a change inside an existing file through a `canon` verb, which resolves the main root in-process. See [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the full rule and the domain-level fan-out guidance.
 
 The plan's shape is fixed by `standards/plan.md`: the section list, the filename, the lifecycle, and the contract its questions keep. Every question carries a `- Suggested:` line and an empty `- Answer:` slot, and a blank answer accepts the suggestion at execution time. That default is what makes a plan decision-ready in one pass, and it is the opposite of the contract an intake folder keeps, where an empty slot means nobody reached the item.
 

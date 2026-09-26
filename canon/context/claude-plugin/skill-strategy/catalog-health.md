@@ -70,4 +70,4 @@ Every other pair that reads as overlap is a declared boundary or a wording colli
 - `test-first` and the `canon gov test-order` step in `auto-ship` do not overlap: the body carries the red-green loop and the autoship step carries a history read. The boundary that matters is against `systematic-debugging`, since both write a test before a change and only one starts from a failure nobody has explained.
 - `record-screencast` and `draft-screencast` stay separate, since a second skill re-reading a draft it did not write is the risk the split declines.
 
-`wiki/claude/claude-skills.md` covers the Claude Code skill feature itself, and `docs/workflow/visual-design-workflow.md` is the worked example of per-workflow skill recommendations.
+`wiki/claude/skills.md` covers the Claude Code skill feature itself, and `docs/workflow/visual-design-workflow.md` is the worked example of per-workflow skill recommendations.

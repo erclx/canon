@@ -13,7 +13,7 @@ Set the active mode with `--permission-mode <mode>` or `permissions.defaultMode`
 
 - `default`: prompts before writes and shell commands. Reads are approved on first encounter per session
 - `acceptEdits`: auto-approves file edits and common filesystem commands (`mkdir`, `touch`, `rm`, `mv`, `cp`, `sed`) within the working directory or `additionalDirectories`. Still prompts for other bash, network requests, and protected paths
-- `plan`: reads and explores only. Proposes changes without executing them. See [plan mode](claude-plan-mode.md)
+- `plan`: reads and explores only. Proposes changes without executing them. See [plan mode](plan-mode.md)
 - `auto`: auto-executes with a background safety classifier. Requires Team, Enterprise, or API plan, Sonnet 4.6 or Opus 4.6 on the Anthropic API, and admin opt-in on Team or Enterprise
 - `dontAsk`: auto-denies anything not explicitly allowed. Fully non-interactive. Useful for locked-down CI pipelines
 - `bypassPermissions`: all operations execute immediately except writes to protected paths. Use only in isolated containers
@@ -93,4 +93,4 @@ Common read-only shell commands never need an allowlist entry. Claude Code auto-
 
 ## Hook-based extensions
 
-[`PreToolUse` and `PermissionRequest` hooks](claude-hooks.md) can grant, deny, or rewrite permission decisions programmatically. Use them when rule patterns alone are not expressive enough.
+[`PreToolUse` and `PermissionRequest` hooks](hooks.md) can grant, deny, or rewrite permission decisions programmatically. Use them when rule patterns alone are not expressive enough.

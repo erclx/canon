@@ -37,7 +37,7 @@ A routine runs as your individual claude.ai account. Commits, pull requests, and
 
 ## Distinction from related features
 
-- `/loop` (see [commands](claude-commands.md)) repeats a prompt within an open CLI session. Local, ephemeral
+- `/loop` (see [commands](commands.md)) repeats a prompt within an open CLI session. Local, ephemeral
 - Desktop scheduled tasks run locally on your machine with access to local files. Not routines
 - [GitHub Actions](https://code.claude.com/docs/en/github-actions) runs Claude in your CI pipeline on repo events. Lives in your repo, not your account
 

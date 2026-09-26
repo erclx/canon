@@ -574,7 +574,7 @@ describe('isShippedCorpus', () => {
     expect(
       isShippedCorpus('internal/rules/claude/598-authoring-layout.md'),
     ).toBe(false)
-    expect(isShippedCorpus('wiki/claude/claude-worktrees.md')).toBe(false)
+    expect(isShippedCorpus('wiki/claude/worktrees.md')).toBe(false)
     expect(isShippedCorpus('src/design/base.css')).toBe(false)
   })
 

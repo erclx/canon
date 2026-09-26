@@ -53,5 +53,5 @@ Resolve a target from a fresh listing at the moment of sending, never from a map
 
 ## Related
 
-- [Claude Code subagents](claude-subagents.md) for the spawned-session channel, which starts cold and ends when the parent collects its result
-- [Claude Code and git worktrees](claude-worktrees.md#background-sessions) for the isolated parallel sessions this messaging addresses
+- [Claude Code subagents](subagents.md) for the spawned-session channel, which starts cold and ends when the parent collects its result
+- [Claude Code and git worktrees](worktrees.md#background-sessions) for the isolated parallel sessions this messaging addresses

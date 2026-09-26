@@ -5,7 +5,7 @@ description: Skills, plugins, invocation, and installation
 
 # Claude Code skills
 
-A skill is a reusable instruction set that extends Claude's behavior, defined in a `SKILL.md` file with YAML frontmatter and markdown content. Unlike built-in commands which execute fixed logic, skills let Claude orchestrate work with its tools: reading files, running commands, and adapting to context. A skill you define in `.claude/skills/` becomes a `/command` invoked the same way as any built-in, and [Claude Code commands](claude-commands.md) lists the full set that ships built-in. Source: Anthropic, in the [Claude Code docs](https://code.claude.com/docs).
+A skill is a reusable instruction set that extends Claude's behavior, defined in a `SKILL.md` file with YAML frontmatter and markdown content. Unlike built-in commands which execute fixed logic, skills let Claude orchestrate work with its tools: reading files, running commands, and adapting to context. A skill you define in `.claude/skills/` becomes a `/command` invoked the same way as any built-in, and [Claude Code commands](commands.md) lists the full set that ships built-in. Source: Anthropic, in the [Claude Code docs](https://code.claude.com/docs).
 
 ## Invocation
 
@@ -43,7 +43,7 @@ user-invocable: false # only Claude can invoke
 allowed-tools: Read Grep Glob # pre-approve tools while skill is active
 model: claude-opus-4-6 # override session model
 effort: high # override session effort level
-context: fork # run as a forked subagent, see claude-subagents.md
+context: fork # run as a forked subagent, see subagents.md
 agent: Explore # subagent type when context: fork
 hooks: ... # skill-scoped hooks
 paths: 'src/api/**/*.ts' # auto-load only when matching files are in scope

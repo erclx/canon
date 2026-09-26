@@ -61,7 +61,7 @@ Two calls over one baseline replay a thread, since the classifier reaches its el
 
 ## The handback dispatch
 
-A posted finding reaches the worker as a message from the reviewing session, which is the one step in the loop where that session already knows what a specific live session should do next. `ListAgents` and `SendMessage` carry it and `wiki/claude/claude-sessions.md` holds the transport, with the relay through a person as the alternative that lost.
+A posted finding reaches the worker as a message from the reviewing session, which is the one step in the loop where that session already knows what a specific live session should do next. `ListAgents` and `SendMessage` carry it and `wiki/claude/sessions.md` holds the transport, with the relay through a person as the alternative that lost.
 
 Three findings shape the rule. Any posted finding is the gate, which is the threshold `review-pr` states and posts its open heading under, so the heading and the counts beneath it answer the dispatch question alike. A session resolves at the moment of sending and never from a stored map, because names rotate and one written down earlier in a session goes stale inside the hour. A message carries plain text, so the step names a skill for the reader to run rather than embedding an invocation that would arrive as text.
 

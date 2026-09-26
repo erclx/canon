@@ -94,10 +94,9 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  *
  * It matches whole tokens. A skill name is a complete name rather than a word
  * stem, and the corpus holds one word that opens with a name and means
- * something else: `wiki/claude/claude-worktrees.md` documents the harness
- * feature, not the skill, and every sibling in that folder is named
- * `claude-<topic>.md` for a Claude Code concept. Sixteen occurrences of it
- * would have moved to a name the folder's own convention contradicts.
+ * something else: a filename such as `claude-worktrees.md` names the harness
+ * feature, not the skill, and a stem matching by prefix would move it to a
+ * name that no longer describes what the file documents.
  *
  * No article fixup travels with it. `auto-ship` is the one destination opening
  * on a vowel sound, and the corpus spells an article before it once, which is

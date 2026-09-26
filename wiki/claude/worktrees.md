@@ -66,7 +66,7 @@ Tracked upstream as `anthropics/claude-code#58345`, closed as not planned after 
 
 ## Background sessions
 
-A background session is a full independent Claude Code session that runs without an attached terminal. Start one with `claude --bg "<task>"`, or send the current session to the background with `/bg`. Unlike a subagent, which runs inside the parent's context, a background session has its own conversation, transcript, and quota. See [Claude Code agent view](claude-agent-view.md) for the surface that manages one once it starts.
+A background session is a full independent Claude Code session that runs without an attached terminal. Start one with `claude --bg "<task>"`, or send the current session to the background with `/bg`. Unlike a subagent, which runs inside the parent's context, a background session has its own conversation, transcript, and quota. See [Claude Code agent view](agent-view.md) for the surface that manages one once it starts.
 
 Each background session moves itself into its own worktree under `.claude/worktrees/` before editing files, so parallel sessions never collide. Disable this with `worktree.bgIsolation: "none"`.
 
@@ -147,6 +147,6 @@ The toolkit domains have different collision profiles. A worktree-based fan-out 
 ## Related
 
 - [Operating model](../../docs/workflow/operating-model.md) for the orchestrator and worker roles that run in these worktrees
-- [Claude Code permissions](claude-permissions.md) for settings resolution details
-- [Claude Code subagents](claude-subagents.md) for in-session parallelism without worktrees
+- [Claude Code permissions](permissions.md) for settings resolution details
+- [Claude Code subagents](subagents.md) for in-session parallelism without worktrees
 - [Zshrc aliases for Claude Code](../../docs/workflow/zshrc-aliases.md) for `clw` and friends to shorten worktree spawn

@@ -110,4 +110,4 @@ A server can return `_meta["anthropic/maxResultSizeChars"]` on a tool result to 
 
 ## Elicitation
 
-Servers can request structured input from the user mid-task using the MCP elicitation protocol. The `Elicitation` and `ElicitationResult` [hooks](claude-hooks.md) fire around these prompts.
+Servers can request structured input from the user mid-task using the MCP elicitation protocol. The `Elicitation` and `ElicitationResult` [hooks](hooks.md) fire around these prompts.
