@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.124.0](https://github.com/erclx/canon/compare/v4.123.0...v4.124.0) (2026-09-26)
+
+
+### Features
+
+* **governance:** regroup the rules by audience with code as a stack ([#1945](https://github.com/erclx/canon/issues/1945)) ([bb8765a](https://github.com/erclx/canon/commit/bb8765a69becdafe7fe0aceee1fa1cd1ba1f5387))
+
 ## [4.123.0](https://github.com/erclx/canon/compare/v4.122.0...v4.123.0) (2026-09-26)
 
 
