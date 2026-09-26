@@ -16,9 +16,11 @@ Do not include a `Take:` slot in the template. Discuss inserts one directly unde
 ````plaintext
 # Memory review: <slug>
 
+**Batch:** <n> of <due> due entries, in `canon records stale memory` order. <due minus n> stay due after this batch.
+
 **Pending:** <all numbers>
 
-Legend: ✅ applied · ⏭ skipped · 📦 retired · 🤝 handed off · 📝 pending
+Legend: ✅ applied · ⏭ skipped · 📦 retired · 📌 kept · 🤝 handed off · 📝 pending
 
 How to respond: fill in `Decision:` per item (`apply`, `skip`, `defer`, or a question with `?`), then re-ping the skill. Say "discuss" for question rounds, "apply" to commit. Chat shortcut: `all`, `none`, or a list of numbers.
 
@@ -27,6 +29,8 @@ How to respond: fill in `Decision:` per item (`apply`, `skip`, `defer`, or a que
 `<memory-file>`
 
 Why: <one-line pulled from the memory's Why>
+
+Searched: <the targets the grep hit and read>
 
 ```diff
 + <rewritten rule text>
@@ -38,11 +42,23 @@ Decision:
 
 `<memory-file>`
 
-Reason: <one-line reason>
+Reason: <one-line reason, naming any unresolved path the stale record listed>
+
+Searched: <the targets the grep hit and read>
+
+Decision:
+
+## 3. 📝 Keep
+
+`<memory-file>`
+
+Reason: <one-line reason no surface owns the rule>
+
+Searched: <the targets the grep hit and read>
 
 Decision:
 ````
 
 ## Variation by action
 
-For Hand off items, the body is a pointer to the governance target instead of a rewritten rule: `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md` in the toolkit repo, or the `create-rule` skill in a target project. For a Promote to an always-loaded rule item, the H2 target names the rule file path the rule lands in, `<target>` in the template above, being an existing path under `internal/rules/core/` or `governance/rules/core/` in the toolkit repo, or under `.claude/rules/project/` in a target project, or the `create-rule` pointer when no existing file fits. For Retire items, skip the rewrite block. Every item gets a `Decision:` slot regardless of action. `Take:` is added only when a question response is needed.
+For Hand off items, the body is a pointer to the governance target instead of a rewritten rule: `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md` in the toolkit repo, or the `create-rule` skill in a target project. For a Promote to an always-loaded rule item, the H2 target names the rule file path the rule lands in, `<target>` in the template above, being an existing path under `internal/rules/core/` or `governance/rules/core/` in the toolkit repo, or under `.claude/rules/project/` in a target project, or the `create-rule` pointer when no existing file fits. For Retire and Keep items, skip the rewrite block. A batch holding fewer than 25 entries says so in the `**Batch:**` line, and a scope the user named replaces that line with `**Batch:** named by the user, <n> entries`. Every item gets a `Decision:` slot regardless of action. `Take:` is added only when a question response is needed.

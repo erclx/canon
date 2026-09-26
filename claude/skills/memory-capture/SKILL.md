@@ -16,7 +16,7 @@ The filename and its type prefix, the frontmatter, the body shape each type carr
 - All `.canon/memory/` reads and writes resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
 - Every path below sits at the main root, so each write in this skill goes out as a heredoc, routed the way `session-worktree` states. A memory entry holds one fact and this session has read it, so an update rewrites the whole file with a heredoc rather than editing a line inside it.
 - If `.canon/memory/` does not exist at the main worktree root, create it, along with an `index.md` carrying `title` and `subtitle` frontmatter. `canon claude init` seeds both, and a project predating that seed has neither. Regeneration errors without the index, so the first write into a bare folder would report a frontmatter failure against a file that is fine.
-- If the session produced no user corrections, confirmations, or context disclosures worth persisting, stop: `✅ Nothing worth capturing.`
+- If the session produced no user corrections, confirmations, or context disclosures worth persisting, run Step 6 and stop: `✅ Nothing worth capturing.`, followed by the review line when Step 6 counted one batch due.
 - Routing edits a tracked file, so it runs only where the caller commits. When the session is in the main worktree, or the caller states it does not commit, skip Step 3 and write every candidate as a memory file. `role-orchestrator` is the caller this covers.
 
 ## Step 1: read context
@@ -68,7 +68,7 @@ The handoff is a file rather than a spoken result so the routed fact survives a 
 
 ## Step 4: dedupe
 
-For each remaining candidate, grep the top-level `*.md` files in `.canon/memory/` for an existing file on the same topic, never its `review/` or `archive/` subfolders, since a hit there is a receipt or a retired entry rather than a live one to update. If one exists, update it in place rather than create a new file. Read it first and write the whole file back, since the guard above rules out editing a line inside it.
+For each remaining candidate, grep the top-level `*.md` files in `.canon/memory/` for an existing file on the same topic, never its `review/` or `archive/` subfolders, since a hit there is a receipt or a retired entry rather than a live one to update. If one exists, update it in place rather than create a new file. Read it first and write the whole file back, since the guard above rules out editing a line inside it. Carry a `reviewed` field through the rewrite untouched, since dropping it sends a kept entry back to the front of the review queue.
 
 ## Step 5: write the residue
 
@@ -86,6 +86,14 @@ canon indexes regen --no-stage --root <main-root> <main-root>/.canon/memory/inde
 
 Run `canon records validate memory` when the writes are done and fix what it names. It reads the whole pen rather than this session's writes, so treat a finding on a carried entry as one to fix in place rather than as a reason to stop.
 
+## Step 6: count what review owes
+
+Run `canon records stale memory --json` and count the entries whose `due` is true, and among them the ones carrying a non-empty `unresolved` list. Branch on the record rather than on the exit, which a shell function wrapping `canon` can flatten to zero. When the count reaches 25, one `memory-review` batch, the Output below adds the review line. Below that, add nothing.
+
+Stay silent when the record refuses or the installed binary carries no `records stale` subcommand. This step reports and never stops the capture.
+
+The line fires on a count rather than on every run. An unconditional prompt after each ship was tried and removed, since a review per ship costs more than it drains, and a hook would reach every session including workers that cannot act on it.
+
 ## Output
 
 Respond with one line per fact routed, written, or updated:
@@ -100,6 +108,8 @@ When anything routed, add a line naming the handoff so the caller knows a `conte
 
 Omit that line when the caller runs `context-fold` itself later in its own chain.
 
-If nothing was captured, output:
+When Step 6 counted at least one batch due, add the review line last:
 
-`✅ Nothing worth capturing.`
+`→ <n> memory entries due for review, <m> citing a moved path. Run /canon:memory-review.`
+
+If nothing was captured, output `✅ Nothing worth capturing.`, followed by the review line when Step 6 counted one batch due.

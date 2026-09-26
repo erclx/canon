@@ -34,18 +34,23 @@ Propose is the entry point for a standalone run. The ship skills stop at capture
 
 ### Scope
 
-- **Full sweep:** classify every entry in the pen, including entries carried from earlier sessions, so cross-session duplicates merge into one rule.
+- **Batch:** run `canon records stale memory --json` and take the first 25 entries whose `due` is true, in the order the record lists them. When fewer than 25 are due, take all of them and say so. Never pad a batch with an entry that is not due.
+- **Named set:** when the user names entries, a list, or a slug, that set is the scope and overrides the verb's order. Propose nothing outside it.
+
+A whole pen does not fit one pass. Every entry plus every promotion target reads as several hundred thousand tokens on a grown project, so a full sweep fails before it classifies anything. The batch is bounded by the receipt the operator approves, which stays short enough for one pass at 25 items.
+
+Branch on the record rather than on the exit, which a shell function wrapping `canon` can flatten to zero. When the installed binary carries no `records stale` subcommand, or the record comes back with `ok: false`, stop: `❌ canon records stale is missing or refused. Update the canon CLI, since a review without it falls back to a full sweep that cannot run.` Never fall back to reading the whole pen.
 
 ### Step 1: read the memory folder
 
 Read in parallel from the project root:
 
-- `.canon/memory/index.md`: the generated index
-- every other top-level `*.md` file in `.canon/memory/`, never its `review/` or `archive/` subfolders: individual entries with frontmatter (`title`, `description`, `category`)
+- `.canon/memory/index.md`: the generated index, which is what lets a batch entry find a duplicate outside the batch
+- each entry in the batch, by name, never its `review/` or `archive/` subfolders: individual entries with frontmatter (`title`, `description`, `category`, and `reviewed` when a past pass kept it)
 
-### Step 2: read promotion targets
+### Step 2: search promotion targets per entry
 
-Read in parallel from the project root. Skip any file or folder that does not exist.
+Do not read every target up front. For each entry in the batch, grep the target set below for the entry's subject, taking two or three keywords from its title and rule, and read the files that hit. Read `canon/context/index.md` once for the **Promote to a context entry** route. Skip any file or folder that does not exist.
 
 - `CLAUDE.md`: project behavior rules and Content ownership section, still a read target for the absorbed-already check even though it takes no new promotion
 - every `SKILL.md` under `.claude/skills/`: domain-scoped internal skill bodies
@@ -54,9 +59,13 @@ Read in parallel from the project root. Skip any file or folder that does not ex
 - every `*.md` under `governance/rules/` in the toolkit repo, or `.claude/rules/` in a target project: coding-standards rules
 - every `*.md` under `internal/rules/` in the toolkit repo, or `.claude/rules/project/` in a target project: always-loaded rules a promote lands in
 
+A target the grep missed turns a promote into a retire, and only the operator's pass catches that. Name the targets each item searched in its receipt entry so the miss is visible there.
+
 ### Step 3: classify each entry
 
-`.canon/memory/` is a holding pen. Default every entry to promote or retire on review. Skip is the rare exception, reserved for active task overlap or user-type memories with no in-repo target.
+`.canon/memory/` is a holding pen. Default every entry to promote or retire on review. Keep is the exception, reserved for an entry still true that no surface owns, such as active task overlap or a user-type memory with no in-repo target.
+
+An entry's `unresolved` list in the stale record names paths it cites that the tree no longer holds. Weigh it as evidence for **Retire**, or for a rewrite when the rule survives the move, and never read it as the verdict alone. A rule can outlive the file it happened to name.
 
 `memory-capture` routes a project fact naming a domain with a context entry to that entry, so a pen filled since routing shipped is mostly feedback: rules about how to work, which no context entry owns. Propose against what the pen holds rather than expecting the older mix. An entry carried from before routing may still name a domain that has a context entry, and that entry's action is **Promote to a context entry**, which hands it to `context-fold` the same way capture does rather than editing the entry here.
 
@@ -72,6 +81,7 @@ For each in-scope entry (see Scope), pick one action:
   - In the toolkit repo, point the user at `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own the source-of-truth rules under `governance/rules/`.
   - In a target project, point the user at the `create-rule` skill, which scaffolds a project-local rule under `.claude/rules/`.
 - **Retire**: the rule is stale, already absorbed into a durable surface, too vague to phrase as a rule, or a one-time incident narrative. Apply moves the file to `.canon/memory/archive/` rather than deleting it.
+- **Keep**: the rule is still true and no durable surface owns it. The entry stays in the pen, and Apply stamps `reviewed` so the verb does not queue it again until the window lapses.
 
 Retire is an archive, not a deletion, which `${CLAUDE_SKILL_DIR}/../../standards/memory.md` states as the rule and this skill executes. The archive is worth less than a plan's, since a promoted entry survives in its destination and a stale one is discarded on purpose, which is why the move is cheap rather than free.
 
@@ -111,6 +121,7 @@ Output one line per action taken in the most recent phase:
 - `✅ Handed off: .canon/memory/<memory-file> → governance`
 - `📦 Retired: .canon/memory/<memory-file> → .canon/memory/archive/`
 - `🗑  Swept: .canon/review/<review-file>, folded <n> skips`
+- `📌 Kept: .canon/memory/<memory-file>, reviewed <date>`
 - `⏭ Kept: .canon/review/<review-file>, <n> items pending`
 
 If the user accepted nothing, output: `✅ No changes applied.`

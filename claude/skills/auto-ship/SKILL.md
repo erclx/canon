@@ -149,18 +149,19 @@ One thing this chain adds. Mark the pull request as a draft as soon as `git-ship
 
 ## Output
 
-Respond with up to four lines:
+Respond with up to five lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
 <N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
+<the review line memory-capture returned>
 ```
 
 `<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the undo asked for.
 
-Omit the second line if there were no minor findings, and the third if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session.
+Omit the second line if there were no minor findings, and the third if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session, and the fifth if it returned no review line. Pass that line through verbatim, since a dispatched worker's controller relays it to the operator.
 
 This block replaces the one `git-ship` closes on rather than following it, since emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 
