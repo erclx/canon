@@ -27,7 +27,7 @@ paths = [".canon/memory/review/memory-review-memory-sweep.md"]
 # Those targets are ordinary project files and land inside the snapshot, and the
 # proposal itself now does too, so the scope has a write to check on a correct
 # run rather than only on a wrong one.
-write_scope = [".canon/review/**"]
+write_scope = [".canon/memory/review/**"]
 
 # No max_turns. One clean run cost 23 turns on 2026-08-02 against the default cap
 # of 30. A single observation sets a ceiling too tight to trust, so the arm waits
@@ -35,6 +35,7 @@ write_scope = [".canon/review/**"]
 
 manual = [
   "`no-obvious-comments` and `comments-explain-why` are fused into one promote rather than proposed separately. Semantic: consolidation is the skill's judgment and both filenames appear in the proposal either way",
+  "`feedback-zz-pad-19.md`, `feedback-zz-pad-20.md`, and `feedback-small-pull-requests.md` appear nowhere in the proposal. The first two sort past the batch of 25 and the third was reviewed today. Manual: the checker declares positives only",
   "`zod-in-src-routes` targets the path-scoped skill body and `confirm-destructive-commands` targets an always-loaded rule, either an existing file under `.claude/rules/project/` or a handoff to `create-rule` since the fixture seeds no project rule folder. Semantic: the routing rule is the point of the arm, and a pattern matching a target name cannot tell a correct route from a coincidence",
 ]
 
@@ -65,3 +66,19 @@ pattern = 'feedback-be-careful\.md'
 [[content]]
 path = ".canon/memory/review/memory-review-memory-sweep.md"
 pattern = 'feedback-memory-location\.md'
+
+# The batch is the verb's first 25 due entries. The one citing a missing path
+# opens it, the last padding entry inside it closes it, and the header states
+# the batch against the 27 due, so a pass that swept the whole pen or reordered
+# it by hand goes red on one of the three.
+[[content]]
+path = ".canon/memory/review/memory-review-memory-sweep.md"
+pattern = 'feedback-legacy-handlers-own-auth\.md'
+
+[[content]]
+path = ".canon/memory/review/memory-review-memory-sweep.md"
+pattern = 'feedback-zz-pad-18\.md'
+
+[[content]]
+path = ".canon/memory/review/memory-review-memory-sweep.md"
+pattern = '^\*\*Batch:\*\* 25 of 27'

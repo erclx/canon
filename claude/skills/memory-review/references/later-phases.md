@@ -51,7 +51,7 @@ Promotions are a separate concern from any feature in flight. Keep the promoted 
 For each item, parse the `Decision:` line:
 
 - `apply` (or affirmative): run the proposed action, flip emoji to ✅.
-- `skip`: leave the memory in place, flip emoji to ⏭.
+- `skip`: leave the memory in place, stamp it reviewed as below, flip emoji to ⏭.
 - `defer` or empty: leave 📝 pending, take no action.
 - Contains `?` or unrecognized verb: leave 📝 pending, take no action. Do not respond. Discussion is the Discuss phase's job.
 
@@ -63,10 +63,13 @@ Action by action type:
 - **Promote to a context entry**: append the fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root, then archive the memory file. `context-fold` folds it in on its next run from a branch, which is what keeps one skill writing context entries.
 - **Hand off**: do not edit governance. Archive the memory file only if the user confirmed the handoff explicitly. Otherwise leave it in place.
 - **Retire**: archive the memory file.
+- **Keep**: stamp the memory file reviewed as below, and flip the emoji to 📌.
+
+Stamping means writing `reviewed: <today>` as a `YYYY-MM-DD` date into the entry's frontmatter, replacing any earlier value, and changing nothing else in the file. The entry is main-root scratch, so the stamp goes out as the same whole-file heredoc rewrite the Guards state. Stamp only an entry that stays in the pen, being a keep or a skip. A promote or a retire takes no stamp, since the entry leaves for the archive. The stamp is what takes a kept entry off the front of `canon records stale memory`'s queue, so an entry kept without one returns in the next batch.
 
 Archiving means creating `.canon/memory/archive/` at the main worktree root and moving the file there under its original name, overwriting any file already at that name. Send the `mkdir -p` and a plain `mv`, routed the way `session-worktree` states for a main-root move. Never delete a memory entry. Nothing recovers one from a gitignored folder.
 
-Do not hand-edit `.canon/memory/index.md`. Once every archive move is done, regenerate it instead:
+Do not hand-edit `.canon/memory/index.md`. Once every archive move and stamp is done, regenerate it instead:
 
 ```bash
 canon indexes regen --no-stage --root <main-root> <main-root>/.canon/memory/index.md
@@ -78,7 +81,7 @@ Apply promotion edits one at a time via `Edit`. Claude Code's tool permission di
 
 This governs the tracked surfaces a promote lands in, which sit at `pwd` and take `Edit` from anywhere. The receipt and the memory entries are main-root scratch and follow the skill's heredoc guard instead.
 
-As each item resolves, update its status in the review file: flip the H2 emoji from 📝 to ✅ for applied, ⏭ for skipped, 📦 for retired, or 🤝 for handed off. Refresh the summary block counts at the top. Do not delete the file here. The sweep below decides whether it goes.
+As each item resolves, update its status in the review file: flip the H2 emoji from 📝 to ✅ for applied, ⏭ for skipped, 📦 for retired, 📌 for kept, or 🤝 for handed off. Refresh the summary block counts at the top. Do not delete the file here. The sweep below decides whether it goes.
 
 **Chat shortcut:** the user replies with `all`, `none`, a comma-separated list of numbers, or `skip <nums>`. Write the matching verb into the `Decision:` slot of every item the reply names, `apply` for `all` or a bare list and `skip` for a `skip` reply, then run the parse above against the file. A reply of `none` writes nothing. A slot the reply does not name keeps its own value, so the receipt stays the source of truth and an empty slot still means take no action.
 

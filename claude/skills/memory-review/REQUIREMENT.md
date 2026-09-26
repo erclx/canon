@@ -9,11 +9,13 @@ description: What memory review is for, the gaps it closes, and why every action
 
 Without this skill, the memory folder grows and never drains. Entries pile up restating rules a durable surface already carries, nothing decides which memory has earned a place in one, and a rule that does get promoted arrives verbatim in a file whose voice it does not match. The folder then reads as a second source of truth that no surface points at.
 
-A pen the caller cannot face is the same gap wearing a different shape. Routing at capture takes the domain facts and whatever the ownership test leaves stays, in whatever mix of types that is, so the folder still reaches a size nobody reads in one sitting. The full sweep is what an operator asks for when the cross-session duplicates are the point. An entry leaving the pen is archived rather than deleted, because a folder git does not hold gives a wrong bulk call no undo.
+A pen too large to review whole is the same gap wearing a different shape. Routing at capture takes the domain facts and whatever the ownership test leaves stays, in whatever mix of types that is, so the folder reaches a size no single pass can read: every entry plus every promotion target runs to hundreds of thousands of tokens before one entry is classified. A review that cannot run drains nothing however often someone asks for it, so the pass takes a bounded batch in the order the stale verb reports and reads targets per entry. An entry leaving the pen is archived rather than deleted, because a folder git does not hold gives a wrong bulk call no undo.
 
 ## Must
 
-- Treat the folder as a holding pen, so every entry in scope leaves it as a promotion, a handoff, or an archive rather than surviving by default
+- Treat the folder as a holding pen, so every entry in scope leaves it as a promotion, a handoff, or an archive, or stays only as a kept entry stamped with the date it was reviewed
+- Take one bounded batch per pass in the order `canon records stale memory` reports, and stop rather than falling back to a full sweep when that verb is absent
+- Stamp `reviewed` on every entry a pass keeps or skips, so the next batch moves on to entries nobody has read
 - Archive an entry out of the pen rather than deleting it, since nothing recovers a file from a gitignored folder
 - Hand a fact a context entry owns to `context-fold` through the routing file, rather than editing the entry here
 - Verify the rule is not already stated or implied in the target before proposing a promotion, by reading the target rather than trusting the memory's claim about it
