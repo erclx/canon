@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.122.0](https://github.com/erclx/canon/compare/v4.121.0...v4.122.0) (2026-09-26)
+
+
+### Features
+
+* **records:** report memory entries due for review and missing paths ([#1933](https://github.com/erclx/canon/issues/1933)) ([9588dc8](https://github.com/erclx/canon/commit/9588dc83cd098a9d447d8bd3eccc27d5d968aefb))
+* **skills:** add backlog-triage to file and apply row verdicts ([#1929](https://github.com/erclx/canon/issues/1929)) ([12b2d33](https://github.com/erclx/canon/commit/12b2d338e09638cd034628ec24337e80df071a86))
+* **skills:** rename docs-fold to context-fold ([#1932](https://github.com/erclx/canon/issues/1932)) ([dfe5d37](https://github.com/erclx/canon/commit/dfe5d37f658ed6ac6613f6fe53f6a7179628a3f9))
+
+
+### Bug Fixes
+
+* **tasks:** report a Plan line linking several plans ([#1928](https://github.com/erclx/canon/issues/1928)) ([a1b2eeb](https://github.com/erclx/canon/commit/a1b2eeb698f77803874bb3adaf4aae1a5aeccb5e))
+
 ## [4.121.0](https://github.com/erclx/canon/compare/v4.120.0...v4.121.0) (2026-09-25)
 
 
