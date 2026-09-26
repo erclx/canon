@@ -1,6 +1,6 @@
 ---
 title: Releases
-description: The release pull request, the publish job and its credential preflight, manual dispatch, and the capture-frame refresh that runs after a merge
+description: The release pull request, the publish job and its credential preflight, the check that the newest release reached npm, manual dispatch, and the capture-frame refresh that runs after a merge
 ---
 
 # Releases
@@ -9,7 +9,9 @@ description: The release pull request, the publish job and its credential prefli
 
 `release-please.yml` runs on every push to `main` and keeps a release pull request open, rewriting it as commits land. Merging that pull request is what cuts a tag and writes `CHANGELOG.md`, so a release is a merge rather than a hand-run command. `standards/versioning.md` specifies both surfaces.
 
-The `release-please` job carries its own `concurrency` group, scoped to that job rather than to the workflow, and cancels an in-progress instance when a newer push arrives rather than queuing behind it. A queued run still computes against the commit that triggered it, and two pushes landing close together let that commit stop being the branch head before the run finishes. Only the newest commit on the branch is worth releasing, so the older instance cancels rather than writes a pull request, a branch, or a version computed against a commit main has already moved past.
+The `release-please` job carries its own `concurrency` group, scoped to that job rather than to the workflow, and a newer push queues behind a started instance rather than cancelling it. The group cancelled in-progress instances until run 36246158157, whose job created the v5.0.0 GitHub release and was then cancelled by the run a capture-refresh auto-merge started nine seconds after it. The action sets `release_created` and `tag_name` only after its label and comment calls, so the cancel landed in the second between the release existing and the outputs being written, publish skipped, and 5.0.0 never reached the registry. Six of the 223 release merges since the cancel was added had the job cancelled, and 5.0.0 was the one where it landed inside that gap.
+
+Queuing costs a pending run the ten seconds or so the one ahead of it takes. GitHub still replaces a pending run with a newer one, so a burst of pushes computes against the newest commit rather than against each in turn, which was what the cancel had been added for.
 
 Two files configure it. `release-please-config.json` holds the release type and the extra-files wiring, and `.release-please-manifest.json` holds the current version and is the file the tool rewrites. Tags read `v<major>.<minor>.<patch>` because `include-component-in-tag` is false, which matches what the versioning standard specifies. The default would prefix the package name.
 
@@ -25,7 +27,7 @@ The tool writes four files, and prettier disagrees with its serialization of two
 
 A `publish` job on the same workflow ships the package to the registry as `@erclx/canon`. It is gated on the `release_created` output rather than on the push, so it fires once per release rather than on every commit that lands on `main`, and it checks out `tag_name` so the tarball matches the tag rather than whatever `main` moved to afterward. It publishes with `--ignore-scripts`, because `npm publish` runs `prepare` before packing and `prepare` is `husky`, which a job that installs nothing cannot resolve. The registry credential is an `NPM_TOKEN` repository secret, the one piece of the release path that is not in version control.
 
-This job carries no `concurrency` group of its own. A push landing while it is mid-`npm publish` must never cancel it, since a cancelled publish leaves a tag and a GitHub release with no package behind them, so the cancel above stops at `release-please` and never reaches here.
+This job sits outside every `concurrency` group. A push landing while it is mid-`npm publish` must never cancel it, since a cancelled publish leaves a tag and a GitHub release with no package behind them. Sharing the `release-please` group would not queue it safely either, since a newer run's pending job can take its place in the queue and GitHub cancels the pending job it replaces. Keeping publish out of the group is not enough on its own, because a cancel inside `release-please` after the release exists and before its outputs are set skips publish just as surely, which is why that group queues.
 
 `--ignore-scripts` is honored by npm 11 and ignored by npm 10, measured against a clean clone. Under `npm@10.9.9` the flag does nothing and `prepare` runs anyway, which is `husky`, absent in a job that installs nothing, so publish exits 127. `npm@11.7.0` honors it.
 
@@ -45,7 +47,11 @@ Both gates name the event rather than testing the input alone. On a push the `in
 
 Naming `github.event_name` writes the intent instead, which matters more here than elsewhere because the publish job cannot be exercised before it merges, so a wrong reading would surface as releases quietly stopping rather than as a failing check.
 
-The dispatch path also skips the credential preflight, which sits in the skipped job, and that is acceptable because the tag already exists by then, so the ordering the preflight protects no longer applies and a bad token fails the publish step directly. This is the recovery path for the tag and the registry disagreeing, not a guard against them disagreeing. Nothing guards that, because the publish job runs after the release step by construction, and closing the gap means restructuring the workflow rather than repairing it.
+The dispatch path also skips the credential preflight, which sits in the skipped job, and that is acceptable because the tag already exists by then, so the ordering the preflight protects no longer applies and a bad token fails the publish step directly. This is the recovery path for the tag and the registry disagreeing, not a guard against them disagreeing.
+
+The `publish-check` job is what reports the disagreement. It runs on every push, needs no other job, and reads the newest GitHub release. It passes while that release is under 15 minutes old, since the publish job beside it may still be running, and otherwise fails with an `::error` naming the tag and the `gh workflow run release-please.yml -f tag=<tag>` command that repairs it when npm does not serve that version. It reads the package's whole version list rather than the one version, because npm answers a missing version with an E404 and a nonzero exit, which a single-version read cannot tell from an outage. A release it cannot read, or a registry it cannot reach, fails the run rather than passing. It never runs on a dispatch, so the recovery path stays open while the gap it repairs exists.
+
+It reads only the newest release, so a lost release followed by a successful one goes unreported, which is where 5.0.0 sits. That version stays a GitHub-only release by the operator's decision, since nobody could have installed it and 5.1.0 carries its change.
 
 ## The capture-frame refresh
 

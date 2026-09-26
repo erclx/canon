@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     # A dispatch naming a tag republishes it, so no release is cut
     if: github.event_name == 'push' || inputs.tag == ''
-    # Scoped to this job alone, since publish must run to completion once started
+    # Queues rather than cancels, since a cancel can land after the release exists and before its outputs do
     concurrency:
       group: release-please
-      cancel-in-progress: true
+      cancel-in-progress: false
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -85,3 +85,37 @@ jobs:
         run: npm publish --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-check:
+    name: 🔎 Publish Check
+    # A tag dispatch is the repair for the gap this reports, so it never runs there
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Verify the newest release reached npm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! release=$(gh release view --json tagName,publishedAt --jq '"\(.tagName) \(.publishedAt)"') || [ -z "$release" ]; then
+            echo "::error::Could not read the newest GitHub release, so whether it reached npm is unknown."
+            exit 1
+          fi
+          read -r tag published <<<"$release"
+          age=$(($(date +%s) - $(date -d "$published" +%s)))
+          if [ "$age" -lt 900 ]; then
+            echo "$tag is ${age}s old, inside the 15-minute window its publish job runs in."
+            exit 0
+          fi
+          # A missing version is an E404, so read the whole list to tell it from an outage
+          if ! versions=$(npm view @erclx/canon versions --json); then
+            echo "::error::Could not read @erclx/canon from npm, so whether $tag reached it is unknown."
+            exit 1
+          fi
+          if ! jq -e --arg v "${tag#v}" '[.] | flatten | index($v) != null' <<<"$versions" >/dev/null; then
+            echo "::error::$tag has a GitHub release but npm does not serve it. Publish it with: gh workflow run release-please.yml -f tag=$tag"
+            exit 1
+          fi
+          echo "$tag is on npm."

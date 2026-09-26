@@ -9,4 +9,4 @@ GitHub Actions workflow triggers, the gate stages CI runs, and the release and c
 
 - [Checks](checks.md): The gate stage table CI runs, the regeneration stages, the phase-label gate, the plugin CLI install, and the install check outside the gate
 - [Overview](overview.md): What the CI domain owns, the single gate entry point, the triggers and the ruleset gap, and running CI locally
-- [Releases](releases.md): The release pull request, the publish job and its credential preflight, manual dispatch, and the capture-frame refresh that runs after a merge
+- [Releases](releases.md): The release pull request, the publish job and its credential preflight, the check that the newest release reached npm, manual dispatch, and the capture-frame refresh that runs after a merge
