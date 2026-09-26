@@ -64,6 +64,8 @@ const EXIT_FINDINGS = 2
 /** Matches `trunk.ts`'s bound on a git subprocess this verb also shells out to. */
 const GIT_TIMEOUT_MS = 10_000
 
+const TRUNK_BRANCHES: readonly string[] = ['main', 'master']
+
 interface ArchiveCommandOptions {
   readonly json?: boolean
   readonly pullRequest?: string
@@ -163,6 +165,10 @@ export function register(program: Command): void {
         'plan, and the Ready: line and the plan path to it are retargeted. A',
         'folder that does not resolve, or a destination already taken, moves',
         'nothing and refuses nothing.',
+        '',
+        'With --pull-request, it refuses earlier-slice when a later number is',
+        'listed, and pending-branch while a Pending branch: line names a branch',
+        'whose own pull request is not recorded yet. A stem skips both.',
         '',
         'Exit codes:',
         '  0  the task was archived',
@@ -420,6 +426,10 @@ export function register(program: Command): void {
         'list is replaced. The board is shared scratch, so a linked worktree',
         'records against the same board.',
         '',
+        'It also drops the current branch, and each name it was renamed from,',
+        'from the Pending branch: line, even when the number was already',
+        'listed, and removes the line once empty.',
+        '',
         'Examples:',
         '  canon tasks pull-request 673 v28.1-trigger-escalation',
         '  canon tasks pull-request 673 --plan worktree-scratch-routing --json',
@@ -496,6 +506,11 @@ export function register(program: Command): void {
         'Positions count every outcome checkbox in file order, starting at 1.',
         'An outcome already closed is reported rather than refused, so a rerun',
         'against the same positions is safe.',
+        '',
+        'Run from a branch other than main or master, a close that ticks a new',
+        'box names that branch on a Pending branch: line, which holds the task',
+        'against a merge-time archive until canon tasks pull-request records',
+        "the branch's own number.",
         '',
         'Examples:',
         '  canon tasks outcome v28.1-trigger-escalation --close 1 --close 3',
@@ -644,9 +659,61 @@ async function runPullRequest(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await recordPullRequest(root, selector, Number(number))
+  const branch = await workingBranch()
+  const outcome = await recordPullRequest(
+    root,
+    selector,
+    Number(number),
+    branch ? [branch, ...(await formerNames(branch))] : [],
+  )
 
   return reportPullRequest(outcome, emitJson, root)
+}
+
+const RENAME_PATTERN = /^Branch: renamed refs\/heads\/(.+) to refs\/heads\//
+
+/**
+ * Names the branch carried before each `git branch -m`, read off its reflog,
+ * which moves with a rename and records every earlier one. A marker written
+ * under an old name is otherwise one nothing ever clears.
+ */
+async function formerNames(branch: string): Promise<readonly string[]> {
+  const result = await execa(
+    'git',
+    [
+      '-C',
+      process.cwd(),
+      'reflog',
+      'show',
+      '--format=%gs',
+      `refs/heads/${branch}`,
+    ],
+    { reject: false, timeout: GIT_TIMEOUT_MS, env: gitEnv(), extendEnv: false },
+  )
+  if (result.exitCode !== 0) return []
+
+  return result.stdout
+    .split('\n')
+    .map((line) => RENAME_PATTERN.exec(line)?.[1])
+    .filter((name): name is string => name !== undefined)
+}
+
+/**
+ * The branch checked out where the command runs, which is where the work is,
+ * rather than the board root's. Undefined on trunk, a detached HEAD, or a
+ * failed read, where no slice is in flight to hold the task open.
+ */
+async function workingBranch(): Promise<string | undefined> {
+  const result = await execa(
+    'git',
+    ['-C', process.cwd(), 'branch', '--show-current'],
+    { reject: false, timeout: GIT_TIMEOUT_MS, env: gitEnv(), extendEnv: false },
+  )
+
+  const branch = result.exitCode === 0 ? result.stdout.trim() : ''
+  if (branch.length === 0 || TRUNK_BRANCHES.includes(branch)) return undefined
+
+  return branch
 }
 
 async function runPlanLink(
@@ -710,7 +777,12 @@ async function runOutcome(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await closeOutcomes(root, selector, raw.map(Number))
+  const outcome = await closeOutcomes(
+    root,
+    selector,
+    raw.map(Number),
+    await workingBranch(),
+  )
 
   return reportOutcome(outcome, emitJson, root)
 }
@@ -765,6 +837,7 @@ function reportPullRequest(
         path: relative(root, outcome.path),
         pullRequest: outcome.number,
         action: outcome.action,
+        pending: outcome.pending,
       })}\n`,
     )
     return 0
@@ -773,6 +846,9 @@ function reportPullRequest(
   intro('canon tasks pull-request')
   logStep(outcome.action === 'unchanged' ? 'Already recorded' : 'Recorded')
   logInfo(`${outcome.stem} names pull request #${outcome.number}`)
+  if (outcome.pending.length > 0) {
+    logInfo(`still pending on ${outcome.pending.join(', ')}`)
+  }
   if (outcome.action !== 'unchanged') logAdd(relative(root, outcome.path))
   outro()
 
@@ -831,6 +907,7 @@ function reportOutcome(
         path: relative(root, outcome.path),
         closed: outcome.closed,
         alreadyClosed: outcome.alreadyClosed,
+        pending: outcome.pending,
       })}\n`,
     )
     return 0
@@ -841,6 +918,9 @@ function reportOutcome(
 
   for (const closed of outcome.closed) logAdd(closed)
   for (const already of outcome.alreadyClosed) logInfo(`${already} (already)`)
+  if (outcome.pending.length > 0) {
+    logInfo(`pending on ${outcome.pending.join(', ')}`)
+  }
 
   if (outcome.closed.length > 0) logInfo(relative(root, outcome.path))
   outro()

@@ -41,6 +41,7 @@ interface TaskFixture {
   readonly planLine?: string
   readonly ready?: string
   readonly outcomes?: string
+  readonly pending?: readonly string[]
 }
 
 function taskBody({
@@ -49,6 +50,7 @@ function taskBody({
   planLine,
   ready,
   outcomes = '- [x] Outcome: it shipped',
+  pending,
 }: TaskFixture): string {
   const lines = [
     '---',
@@ -70,6 +72,7 @@ function taskBody({
       `Pull request: ${numbers.map((number) => `#${number}`).join(', ')}`,
     )
   }
+  if (pending) lines.push(`Pending branch: ${pending.join(', ')}`)
 
   lines.push(
     '',
@@ -893,6 +896,34 @@ describe('archiveTask', () => {
       await archiveTask(ROOT, { kind: 'pull-request', number: 12 }),
     ).toMatchObject({ ok: false, reason: 'earlier-slice' })
     expect(existsSync(join(tasksDir(ROOT), `${stem}.md`))).toBe(true)
+  })
+
+  it('should refuse the last number while a branch is still pending', async () => {
+    const stem = await seedTask({
+      pullRequest: [12, 673],
+      pending: ['feat/final-slice'],
+    })
+
+    expect(
+      await archiveTask(ROOT, { kind: 'pull-request', number: 673 }),
+    ).toMatchObject({
+      ok: false,
+      reason: 'pending-branch',
+      detail: ['feat/final-slice'],
+    })
+    expect(existsSync(join(tasksDir(ROOT), `${stem}.md`))).toBe(true)
+  })
+
+  it('should archive a task by stem while a branch is still pending', async () => {
+    const stem = await seedTask({
+      pullRequest: 673,
+      pending: ['feat/abandoned'],
+    })
+
+    expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
+      ok: true,
+      stem,
+    })
   })
 
   it('should refuse when no task names the pull request', async () => {
