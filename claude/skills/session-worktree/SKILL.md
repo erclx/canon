@@ -47,21 +47,17 @@ Try each source in order. Stop at the first match.
    4b. **Session context.** When on `main` or `master` with no matching plan, read the current conversation to infer a kebab slug from the topic being discussed. Propose it: `Infer: <slug>. Confirm or rename?` Do not enter the worktree until the user confirms or provides a corrected name.
 5. **Ask.** None of the above applies. Ask the user for a name. Do not invent one.
 
-Tier 0 sits ahead of the inference because every tier below it answers from state the caller cannot set, and a caller that already knows the name has no way to say so. That gap is what a dispatched worker meets. It starts on `main`, so tier 1 cannot match, and a board carrying more than one plan puts tier 2 out of reach too, which lands the run on tier 3 and its instruction to ask somebody who is not there. A prompt naming the branch does not reach any of them, since no tier reads the prompt.
+Tier 0 sits ahead of the inference because every tier below it answers from state the caller cannot set. A dispatched worker starts on `main` beside several plans, so without it the run lands on tier 3 and asks somebody who is not there.
 
 Validate the result: letters, digits, dots, underscores, dashes only, max 64 chars (`/` separators are also allowed). If the derived name violates the rule, sanitize by replacing invalid chars with `-` and truncating. Show the sanitized name in the preview before invoking.
 
 Resolve `<type>` here as well, since Step 3 previews it and Step 5 renames onto it, drawing the value from the type vocabulary in `${CLAUDE_SKILL_DIR}/../../standards/branch.md`. A type the caller spelled in tier 0 wins outright and no reading overrides it. A name that came from a plan, through tier 1 or tier 2, takes its type from `canon tasks plan-branch <plan> --json`, read off the record's `type` field. Every other case takes `feat`, which covers a name from a branch, a bare name from the user, and a plan the verb could not answer for.
 
-The verb is the reading rather than this body, because a type read off a plan's `## Summary` and `**Files to touch:**` lines is a judgment, and it has disagreed with itself in production. One dispatch checked `fix/path-form-hook` and the worker took `feat/path-form-hook`, both sides reading the same plan and grading it differently. The verb answers `feat` for every plan, so two sides calling it cannot part.
-
-The caller's type still wins over the verb's, because tier 0 is the one source that knows something no file states. The ordinary caller is `auto-ship` Step 0, which ran the verb itself and is handing over the answer it got, so nothing is overridden in that case either.
+The verb is the reading rather than this body, because a type read off a plan's sections is a judgment that two sessions reading one plan can grade differently, and the verb answers the same for both. The caller's type still wins over the verb's, because tier 0 is the one source that knows something no file states.
 
 Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Take `feat` and say the verb did not answer where it refuses, where the record carries no `type` key, or where the installed binary carries no `plan-branch` subcommand.
 
-A wrong type is cheap because the branch type is cosmetic rather than because anything corrects it. `git-stage` reads a commit's type off the staged diff and `git-pr` reads a title off the diff too, so the semantics a release reads never pass through the branch name at all. Nothing downstream is wrong when a `feat/` sits over a fix, and a person scanning a worktree listing loses a signal.
-
-`git-branch` does not correct it, which three surfaces used to say it did. Its second guard reads `If branch name already follows conventions, stop`, and `${CLAUDE_SKILL_DIR}/../../standards/branch.md` makes the type vocabulary an axis without making the choice within that vocabulary one, so `feat/` over a fix conforms and the guard fires ahead of the Analysis line that would have re-derived the type.
+A wrong type is cosmetic, since `git-stage` and `git-pr` read their types off the diff rather than the branch name. Nothing corrects it later either: `git-branch` stops on any name that already conforms, and `feat/` over a fix conforms.
 
 Then test both names the entry is about to claim. Neither read needs a worktree, and a stop after Step 4 leaves one built with the session sitting inside it, so both belong here rather than beside the rename:
 
@@ -74,7 +70,7 @@ The two tests catch different collisions. The branch test misses the one `${CLAU
 
 The branch test fires on the tier 1 and tier 4 sources whenever the branch the session started on is already conventional, since a name derived from that branch resolves back onto it. Stopping is the answer there. The concern already has a branch, git refuses a second under the same name, and the bare-name rename this replaces only carried the collision forward to the `git-branch` step. It fires on tier 0 as well, where a caller handed a name something already holds.
 
-It reads both ref spaces rather than the local head alone, and it reads them the way `checkClaim` does, so a name this skill clears and a branch a dispatcher cleared are one answer. `git show-ref --verify` is what that replaces. It sees no remote-tracking ref, so a branch pushed from elsewhere passed the test and collided at the first push, and its exit code cannot separate an absent ref from a tree it could not read, which reports a failed read as a free name.
+It reads both ref spaces rather than the local head alone, the way `checkClaim` does, so a name this skill clears and a branch a dispatcher cleared are one answer, and a branch pushed from elsewhere is caught before the first push rather than at it.
 
 ## Step 3: preview
 
@@ -152,8 +148,6 @@ Then report the port this worktree derives, on a second line:
 - Absent: `No port derivation installed, so every served port is the stack default.`
 
 Branch on the exit rather than on the output, since the helper prints nothing to stdout when it refuses and reading that as a number reports an offset of zero, which is the main checkout's.
-
-The helper refuses a folder left behind after its worktree was removed, which Step 4 cannot land on, since it registers whatever it creates. The branch is here so a refusal is never read back as an offset of zero, which is the main checkout's port and the collision the helper exists to prevent.
 
 The offset is what `role-orchestrator` sends a reader here to read rather than assign, and what an operator overrides through `WORKTREE_PORT_OFFSET` when two worktrees derive the same value. Deriving it correctly and printing it nowhere leaves both instructions naming a number no surface emits.
 

@@ -84,85 +84,11 @@ Say the origins were read even when nothing comes back, which is the ordinary re
 
 ## Archive
 
-The `post-merge` git hook archives the task a merge closed, so a request arriving here is usually one the hook could not resolve on its own. Run the steps below against whatever the hook left in place.
-
-Do not move the file, edit `priority.md`, or regenerate the index by hand. `canon tasks archive` owns all three as one unit and the hook calls the same command, so a hand-rolled move here drifts from the unattended path.
-
-### Step 1: confirm the work reached main
-
-`docs-fold` marks outcomes on the branch as step 1 of the ship chain, so an all-`[x]` task routinely describes a pull request that is still open. The command gates on the outcomes and cannot tell those two apart, which is what puts this check here:
-
-```bash
-git fetch origin main --quiet && git log origin/main --oneline -20
-```
-
-Match the shipped outcomes against that log, widening to `gh pr list --state merged --limit 20` when a remote is configured and the log does not settle it. When the work is not on `main`, name the task and stop: `❌ Work not on main. Archiving now loses the task if the pull request is abandoned.`
-
-The board is gitignored, so an archived task has no history behind it and nothing restores one archived early. Skip this check when the task carries a `Pull request:` line and the last number it lists is merged, since the number already proves what the log is being read for.
-
-### Step 2: run the archive
-
-Pass the task's filename stem, or the pull request number when the request names one:
-
-```bash
-canon tasks archive <stem> --json
-```
-
-The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit. Branch on `ok`, then on `reason`. An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command and takes the second status, which masks every non-zero exit rather than only an absent verb. The binary exits 1 for an unknown subcommand and 1 for an ordinary refusal alike, so the record is the only signal that survives the wrapper.
-
-On success the record carries `from`, `to`, `priorityRowRemoved`, and `indexRegenerated`, which is what moved, what row it cleared, and whether the index changed. It also carries `plan` when the task was the last live citation of a live plan, holding the `from` and `to` of the plan moved alongside it. A `plan` of `null` means the task cited no live plan, or that a sibling still holds it.
-
-### Step 3: route on a refusal
-
-Each reason has one resolution and none of them is to archive around it:
-
-- `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `docs-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
-- `ambiguous`: two tasks name one pull request, which is the misfile `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
-- `earlier-slice`: the number is listed on the task but is not the last, so a later slice is still to merge. Leave the task on the board. Its last slice's merge archives it.
-- `no-match`: the stem or number names nothing on the board. Check the name against the listed stems.
-- `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
-
-Do not move a plan by hand from this skill. The command carries the plan with the task when no other live task cites it, and retargets the archived task's `Plan:` line at the new path. A second mover drifts into relocating the same file differently.
-
-Leave `TASK-ARCHIVE.md` alone when it is present in the archive folder. It records the single-file era in the shape that era used, and splitting it would fabricate per-task files nobody wrote.
-
-### Step 4: clear prose naming the task
-
-The command drops the task's row from `.canon/tasks/priority.md` and leaves prose alone. Remove any sentence that still names the archived task or counts the rows that changed, since a stale count reads as board state.
+Read `${CLAUDE_SKILL_DIR}/references/archive.md` when the request names a shipped task to archive. It carries the check that the work reached `main`, the `canon tasks archive` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md`, or regenerate the index by hand, since the command owns all three.
 
 ## Decline
 
-A task decided against carries no `post-merge` hook of its own, so every decline request arrives here directly rather than through work the hook already did.
-
-Do not move the file, edit `priority.md` or `backlog.md`, or regenerate the index by hand. `canon tasks decline` owns all three as one unit.
-
-### Step 1: gather the reason
-
-Ask for the reason when the request does not carry one, and stop rather than guessing: `❌ No reason. Say why the task is being declined.` The command takes it as `--reason <text>` and refuses without it, so gathering it here saves a round trip through that refusal.
-
-### Step 2: run the decline
-
-Pass the task's filename stem:
-
-```bash
-canon tasks decline <stem> --reason "<text>" [--by <name>] --json
-```
-
-The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit, the same wrapper hazard `canon tasks archive` carries. Branch on `ok`, then on `reason`.
-
-On success the record carries `from`, `to`, `priorityRowRemoved`, `backlogRowRemoved`, and `indexRegenerated`, where `backlogRowRemoved` is decline's own field since a task can be declined straight off `backlog.md` and archive never checks that file. It also carries `plan` when the task was the last live citation of a live plan, holding the `from` and `to` of the plan moved alongside it, the same shape `canon tasks archive` uses for its own `plan` field.
-
-### Step 3: route on a refusal
-
-- `no-match`: the stem does not name exactly one task. Either none matches, or exactly one starts with it and the full name is needed. Check the name against the listed stems.
-- `ambiguous`: the stem is a prefix more than one task starts with, unlike archive's own `ambiguous`, which fires on a shared pull request. Decline takes no pull-request selector, so this is the only route to it. Pass the full stem.
-- `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
-
-Do not move a plan by hand from this skill. The command carries the plan with the task when no other live task cites it, and retargets the declined task's `Plan:` line at the new path. A second mover drifts into relocating the same file differently.
-
-### Step 4: clear prose naming the task
-
-The command drops the task's row from `.canon/tasks/priority.md` or `.canon/tasks/backlog.md` and leaves prose alone. Remove any sentence that still names the declined task or counts the rows that changed, since a stale count reads as board state.
+Read `${CLAUDE_SKILL_DIR}/references/decline.md` when the request names a task decided against. It carries gathering the reason, the `canon tasks decline` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md` or `backlog.md`, or regenerate the index by hand, since the command owns all three.
 
 ## Output
 
@@ -198,4 +124,4 @@ Archive, reporting the paths the command returned:
 <ordering and index disposition in one line>
 ```
 
-A refusal reports the reason and the resolution Step 3 routes it to, on one line each.
+A refusal reports the reason and the resolution the mode's reference routes it to under its Step 3, on one line each.

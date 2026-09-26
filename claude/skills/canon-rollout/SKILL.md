@@ -17,7 +17,7 @@ One wave takes one toolkit change to every target and ends with a pull request p
 - The invocation or the launch prompt names the worker role, a target path, or both: worker. Skip to `## The worker role` and run no phase above it.
 - Neither is named: orchestrator. Run the three phases in order.
 
-The role is read off the prompt because nothing else carries it. A dispatched worker starts in the target's own checkout, which is a repository like any other from the session's side, so a test on the working directory answers the same for a worker in a target and an operator who invoked this from one. Reading the role wrong in that direction starts a second wave from inside a consuming project, which is why the dispatch below names the role and the path both rather than relying on either alone.
+The role is read off the prompt because nothing else carries it. A test on the working directory answers the same for a worker in a target and an operator who invoked this from one, and reading the role wrong starts a second wave from inside a consuming project.
 
 Do not invoke `canon:role-worker` from either role. That body states the role for a session building one branch under one plan in this repository, and it resolves session scratch against a main worktree root a target does not carry, so a rollout worker reading it hunts for a plan nobody wrote.
 
@@ -30,7 +30,7 @@ Do not invoke `canon:role-worker` from either role. That body states the role fo
 
 ## The fixed shape every target receives
 
-Every target in every wave takes the same branch and the same title, written from here rather than chosen per session. Four hand-driven repairs produced four titles across two scopes, neither of them this one, and three named the toolkit in the half of the shape that withholds it.
+Every target in every wave takes the same branch and the same title, written from here rather than chosen per session.
 
 - Branch: `chore/agents`, in every target and every wave.
 - Title: `chore(agents): <what changed in that target>`.
@@ -48,7 +48,7 @@ One branch name across every target is also what lets the return leg resolve. `c
 
 1. Pin the wave. Record the commit of this repository that the wave carries and name it in this session's own reports. Name it in no target's body.
 2. Enumerate. Run `canon targets list --json` under `CANON_NON_INTERACTIVE=1`, adding `--sweep <root...>` to reach targets installed before the index existed. Read the `bound` object back before treating any count as the population, since it names the roots walked, the depth, where the walk stopped, and what it could not read. The bound a sweep can never state is the machine, so a target on another one sits outside every answer it gives.
-3. Pick the clone that is current. A row carries every checkout of that project under `paths` and leads with the one a sync ran in, which records where an install happened rather than what the checkout holds today. Fetch each candidate, compare it against the origin's default branch, and dispatch into one that is level. Refuse one that is behind rather than branching from a stale base, since three clones read as still owing the repair in one census and every one of them was behind its remote and nothing else.
+3. Pick the clone that is current. A row carries every checkout of that project under `paths` and leads with the one a sync ran in, which records where an install happened rather than what the checkout holds today. Fetch each candidate, compare it against the origin's default branch, and dispatch into one that is level. Refuse one that is behind rather than branching from a stale base, since a stale clone reads as still owing a repair its remote already carries.
 
 ### Check, then dispatch
 
@@ -88,10 +88,10 @@ Report each dispatch by naming the target, the clone, the branch, the model, and
 
 1. Address every finding whatever its severity. A minor is a finding, and a reviewer calling one non-blocking does not close the pass that raised it.
 2. Resolve who holds the branch before dispatching anybody. Run `canon sessions list --branch chore/agents --repository <clone> --json` and read the count rather than the first row.
-   - A live session holds it: send that session the findings and name `canon:review-address` for it to run, which is step 7 of `## The worker role` and the step that session already stands at. Never name this skill in that message. This body carries `disable-model-invocation: true`, which blocks the `Skill` tool rather than only suppressing an auto-trigger, and a session acting on an inbound message reaches a skill that way and no other, so a message naming this one halts the address leg with the branch built and the findings unread. A launch prompt is the one route to a flagged body, which is why the dispatch above names this skill and this message must not. Assuming the worker was gone is what one hand-driven pass got wrong. All four sessions that opened those pull requests were still alive holding their worktrees hours later, and of two fresh addressers sent over them, one refused on the worktree lock and one cut a second worktree on the same branch, which would have put two sessions pushing to one ref.
+   - A live session holds it: send that session the findings and name `canon:review-address` for it to run, which is step 7 of `## The worker role` and the step that session already stands at. Never name this skill in that message. This body carries `disable-model-invocation: true`, which blocks the `Skill` tool rather than only suppressing an auto-trigger, and a session acting on an inbound message reaches a skill that way and no other, so a message naming this one halts the address leg with the branch built and the findings unread. A launch prompt is the one route to a flagged body, which is why the dispatch above names this skill and this message must not. Never assume the worker is gone, since a fresh addresser sent over a live one either refuses on the worktree lock or cuts a second worktree on the same branch.
    - No live session holds it: dispatch a fresh worker into that clone and brief it with the findings, since it holds none of the reasoning behind the diff.
    - More than one row: report the ambiguity and stop rather than picking among candidates.
-3. Re-review when the answer lands, scoped to the commits added since. A worker's reply never closes a target. One fix for two minor findings closed both and introduced four more, every one of them in prose that fix added, and a loop trusting the reply merges that.
+3. Re-review when the answer lands, scoped to the commits added since. A worker's reply never closes a target, since a fix can introduce findings of its own in the prose it adds.
 4. A target leaves the wave when a pass posts `## Review closed` and not before.
 5. Run until every target closes. No count bounds the loop. What guards it is this session reviewing every round itself, so it holds what each pass found and can see a target failing to converge, where a dispatched reviewer reads one pass and knows nothing of the one before it. A worker introducing a finding per fix has nothing mechanical stopping it, which is accepted rather than overlooked.
 
@@ -101,7 +101,7 @@ One session, one target, from the worktree entry to the merge of the branch it o
 
 1. Confirm the clone is current. Fetch, then compare against the origin's default branch. Report a checkout that is behind and stop, rather than branching from a stale base.
 2. Enter a worktree. Invoke `canon:session-worktree chore/agents`, which takes the branch as its tier 0 argument and enters a linked worktree inside this target. Branching in the checkout itself is what this avoids, since the operator may be working in it.
-3. Check what this target holds. Invoke `canon:target-check`, which reports per domain what the target carries against what the toolkit ships and repairs nothing. It runs before any repair so the wave reads one stated set of domains per target rather than whatever each session decided to examine.
+3. Check what this target holds. Invoke `canon:target-check`, which reports per domain what the target carries against what the toolkit ships and repairs nothing, so the wave reads one stated set of domains per target.
 4. Diagnose and repair. Invoke `canon:canon-operator`, which reads `canon sync --check . --json` and routes each finding to the command or the skill that owns it. Do not restate that routing here and do not edit a managed file by hand.
 5. Commit and open the pull request through `canon:git-commit` and `canon:git-pr`, handing each the fixed shape above rather than taking the title the generator derives from the diff.
 6. Announce as the pull request opens, carrying its URL, its number, and the branch, to whoever dispatched this session, sending it through `canon:session-relay`. That transition is the one moment only this session can observe.

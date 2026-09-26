@@ -32,11 +32,7 @@ Then run these commands in parallel to gather git context:
 
 ## Diff baseline
 
-Prefer `origin/main` over local `main`. Both reads resolve against `<base>`, so the commits listed and the changes described come from one scope.
-
-`git diff main..HEAD` is the form the diff replaces. A two-dot range compares tips and resolves no merge base, so once local `main` advances past the branch point it reports main's newer commits as reversed changes and the description describes work the branch never did. On `main` itself the local ref resolves to HEAD and every committed change drops out instead.
-
-`git log main..HEAD` is the matching defect on the commit side. It excludes what local `main` reaches, so a local `main` trailing `origin/main` leaves commits in the range that are already on the remote and are not this branch's work. The diff resolved from `<base>` excludes those same commits, and the description then lists commits whose changes appear nowhere in it. Reading both against `<base>` is what keeps the two halves describing one branch.
+Prefer `origin/main` over local `main`. Both reads resolve against `<base>`, so the commits listed and the changes described come from one scope. Never read a two-dot range against local `main` for either half: it resolves no merge base, so once local `main` moves, the diff reports its newer commits as reversed changes and the log lists commits already on the remote.
 
 The baseline is unusable in two cases:
 
@@ -87,17 +83,17 @@ Then run:
 canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --json
 ```
 
-Branch on the JSON record rather than the exit code. An operator's shell can wrap `canon` in a function whose status comes from a trailing command, flattening a non-zero exit to 0, the same reason `### Labels` below branches on its own record rather than the exit.
+Branch on the JSON record rather than the exit code. An operator's shell can wrap `canon` in a function whose status comes from a trailing command, flattening a non-zero exit to 0, the same reason the labels step below branches on its own record rather than the exit.
 
 Stop and fix the title or body on a non-empty `phaseLabels`, `boardReferences`, `sessionLinks`, `unspelledWords`, or `titleFormatIssues`. Do not proceed to `### Final command` until a re-run comes back clean on all five. `titleFormatIssues` names which `## Title` rule in `${CLAUDE_SKILL_DIR}/../../standards/pr.md` the title breaks, structure, casing, or length, so fix the named rule rather than guessing. Leave `cutsRelease` and `semverTags` alone, since a release-please pull request legitimately carries version references its own fixed shape explains.
 
-A `pull_request` workflow job now backs the phase-label half for this repository, running `canon labels scan` against the opened title and body. A project holding an older `canon` carries no such job, and one predating this plan carries no `titleFormatIssues` key at all, so the scan above stays required rather than optional.
+The scan stays required even where a `pull_request` workflow job runs the same verb, since a project holding an older `canon` carries no such job and no `titleFormatIssues` key.
 
 ### Resolving the pull request
 
 The run resolves the pull request once, in the final command below, and every later step reads what that command printed. Nothing else looks the number up again.
 
-`gh pr view` is the form this replaces. It resolves by head branch and ignores state, so a branch name reused after an earlier pull request merged returns the closed one. The detection then takes the edit path and rewrites a merged pull request's title and body, and the run reports that pull request's URL as the one it opened, so nothing surfaces the write landing on the wrong object. Scoping the lookup with `--state open` returns empty there and sends the run down the create path.
+Never detect with `gh pr view`. It resolves by head branch and ignores state, so a branch name reused after an earlier pull request merged returns the closed one and the run rewrites it. Scoping the lookup with `--state open` returns empty there and sends the run down the create path.
 
 The lookup scopes to the base as well as the head. One head can carry open pull requests against two bases, and a lookup reading the first result would pick between them by list order. Resolving the base from the repository's default branch is what makes the detection and `gh pr create` agree on which pull request the run is about.
 
@@ -105,23 +101,7 @@ A detached HEAD gives `git branch --show-current` an empty result, which would r
 
 ### Labels
 
-Ask the CLI first:
-
-```bash
-canon labels audit --base <base> --json
-```
-
-The record carries `labels`, the set this branch earns, and `uncovered`, the changed paths no row of the map reaches. Join `labels` with commas into `pr_labels` below. Report each `uncovered` path beside the result line, naming the map so the reader knows where a row would go, since a surface nobody covered merges bare and nothing else says so.
-
-Branch on the record rather than on the exit. An operator's shell profile may wrap `canon` in a function whose status comes from a trailing command, and the binary exits 1 for an unknown subcommand and 1 for an ordinary refusal alike.
-
-A `reason` of `no-map` is the answer that the project declared no map, which earns no labels and no warning: a label set this skill supplied would be a guess about that project's surfaces. Stop there and label nothing.
-
-Every other `reason` is a map or a range the verb could not read, which is `unreadable-map`, `no-domains`, `no-base`, and `unreadable-changes`, plus `bad-base` for a ref this skill resolved wrongly. Take the fallback below and warn beside the result line, naming the reason. A map with a typo in it still has rows a prefix match can reach, and reading the refusal as an absence would open the pull request with no labels and nothing said, which is the surface merging bare that the verb exists to name.
-
-The fallback is reading `canon/config/pr-labels.toml`, or `.claude/canon/pr-labels.toml` when the project has not moved, and matching it against the name-only diff per `${CLAUDE_SKILL_DIR}/references/labels.md`. It also covers no record coming back at all, which is an installed `canon` predating the verb, since a skill reaches a target the moment it merges while the CLI reaches one only when a release publishes. Naming both spellings matters exactly here: the binary old enough to need this fallback is the same binary that may predate the move, so the project's map can still sit at the older path. The fallback labels correctly and reports no uncovered path, which is the half only the verb carries.
-
-Leave `pr_labels` empty when no map resolves or no prefix matches, which skips the labelling command rather than running it against nothing.
+Read `${CLAUDE_SKILL_DIR}/references/labels.md` on reaching this step, starting at its `## Labels at run time` section, for the verb to ask, the record to branch on, the fallback, and when `pr_labels` stays empty. The final command below takes the set it resolves as `pr_labels`.
 
 ### Final command
 
@@ -170,131 +150,13 @@ The check compares a number against a branch and never derives a number from one
 
 The last output line carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison in the shell first, reading `gh pr view <number> --json headRefName,state` and refusing unless it matches `head` and `OPEN`.
 
-### Find the UI checklist
+### Post the rendered-surface evidence
 
-`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
-
-When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md` before either step posts it, the same as the pull request body above.
-
-Where it lands is decided by the evidence step below rather than here, since a checklist reads next to the screenshots it annotates and posting it on its own is the fallback for a branch that changed no screenshot.
-
-### Find the local server
-
-A reviewer on the operator's machine can open the branch's running dev server, which screenshots and a checklist cannot stand in for. Ask the verb for the server this worktree is running before the evidence step, so the first evidence comment already carries the link:
-
-```bash
-canon pr local --json
-```
-
-The verb reads the listening sockets on this machine, keeps those whose process runs inside this worktree, and reports the lowest port serving an HTML page. A server in another worktree or in the main checkout is never reported, since it shows a different branch. `canon docs pr-local` states the contract. Read `reason` on the record rather than the exit code.
-
-- `ok`: hold the record's `url` for the evidence step below.
-- `no-server` or `no-listener-reader`: hold the reason for the closing report, pass no link, and move on. Do not start a server here, since one started inside the ship chain has no owner to stop it.
-- Anything else, including no record at all: move on silently. An installed binary older than the verb answers with an unknown-subcommand error, which is a skip rather than a stop.
-
-Pass `--local` to the evidence step only on an `ok` here. The binary answering `ok` is the one carrying the flag, so a binary lacking the verb never meets a flag it would reject.
-
-With both `--checklist` and `--local`, a diff carrying no evidence image still renders `ok`, with the link opening a comment the checklist closes, so a reviewer gets both in one place. A local link with neither an evidence image nor a checklist still reports `no-evidence`, which keeps a branch that changed no rendered surface from getting a comment holding a link and nothing else.
-
-A seeded workflow replaces the line with a note once the pull request closes, so the link does not outlive the branch it points at.
-
-### Post the evidence comparison
-
-Run the verb once against the number the pull request step above resolved. Pass `--checklist` when the checklist step found a file, and `--local` when the step above returned `ok`. Leave each flag off otherwise:
-
-```bash
-canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --json
-```
-
-One call answers both questions because a checklist does not decide `no-evidence`. The verb reports `no-evidence` on a diff carrying no evidence image whether or not a checklist came with it, so the branch below reads the same `reason` it would have read without the flag, and the checklist is folded in only on the path that has a comparison to fold it into. The local link is the one exception, stated in the step above.
-
-Pass `--checklist` only for a file that exists. The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
-
-Read `reason` on the record rather than the exit code.
-
-- `no-evidence`: nothing changed under an `evidence/` segment, so there is no comparison to post and no body was rendered. Say nothing about the evidence and fall through to the checklist step below.
-- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
-
-```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
-```
-
-When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`, which needs the typed-field flag `-F` because the raw-string flag `-f` posts the path itself as the body:
-
-```bash
-gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
-```
-
-Delete the handoff file once that call reports success, per the cleanup below, since the checklist now lives on the pull request. Clean up the tmp body file the same way.
-
-Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-tree`, `unreadable-changes`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read. Fall through to the checklist step, which posts the checklist alone rather than losing it to a transient read.
-
-### Post the UI checklist alone
-
-Run this step only when the evidence step above did not carry the checklist, meaning it reported `no-evidence` or one of the git refusals, and a checklist file exists. A local link sends the checklist through the evidence step instead, so this step runs on a branch with no evidence image only when the local step found no server. Post it as its own comment on `<number>`:
-
-```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
-```
-
-Run the cleanup below only once the call that carried the checklist reports success, whichever of the two steps that was. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
-
-The cleanup is a main-root delete, so it goes out as a plain `rm` and then a plain `rmdir`, the file and then the folder, routed the way `session-worktree` states:
-
-```bash
-rm <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
-```
-
-```bash
-rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
-```
-
-The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
-
-Deleting the file is what makes the later re-render safe. `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it is editing, so the boxes a reviewer already ticked survive the push.
-
-### Post the preview address
-
-Run this step only when the evidence step above returned `ok` or a checklist was posted, by either step. Either one means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. Otherwise skip it silently.
-
-The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs. Mint the preview against the same `<number>`:
-
-```bash
-canon pr preview <number> --json
-```
-
-The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production. `canon docs pr-preview` states the contract. Read `reason` on the record rather than the exit code.
-
-- `ok`: re-render the evidence body with the address on its first line, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
-
-```bash
-canon pr evidence <number> --preview <url> --json
-```
-
-The hosted address takes the first line and a local link already on the comment moves to the second, carried forward with no flag.
-
-- `no-deploy`: the project deploys nothing a dispatch can start. Say nothing and move on.
-- Any other `reason`, being `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report it with the record's `message` and move on without stopping the chain. A missing link costs the reviewer a click, and a held ship costs the whole chain.
+Skip this step silently when no UI checklist sits at `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root and the diff changes nothing under an `evidence/` segment, since neither half then has anything to post. Otherwise read `${CLAUDE_SKILL_DIR}/references/evidence.md` for finding the checklist and the local server, posting the evidence comparison, posting the checklist alone, and posting the preview address, each against the `<number>` the final command printed.
 
 ### Record the number on the task
 
-Write the `number` the final command printed onto the task the branch is closing. Do not resolve it again. A final command that refused on a head mismatch printed no number, so this step writes nothing on that run. `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
-
-The task is the one whose `Plan:` line names the plan this branch implemented. Name that plan by its file, which is `.canon/plans/feature-<slug>.md` at the main worktree root with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. `plan-feature` writes the plan under the branch slug, so the two correspond on any branch that came through the plan-to-execute path. When the session already knows which plan it implemented, because a caller read it earlier in the chain, use that filename instead of re-deriving.
-
-```bash
-canon tasks pull-request <number> --plan feature-<slug> --json
-```
-
-The slug is a guess at which plan this branch carries rather than a fact about the task, which is why the verb re-checks it against the board and refuses instead of writing on a near miss. A branch whose slug names no plan file falls to the silent skip below, the same as one whose plan no task cites.
-
-The verb resolves the board at the main worktree root in-process, adds `Pull request: #NNN` under the `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` lines the task already carries, and corrects the number in place when the line exists. This is the route because the write is an edit inside an existing main-root file, which `session-worktree` routes through a verb. That root is the one `session-worktree` resolves on entry.
-
-The correction reaches only a line that does not read as a list of `#NNN` entries. A line that does takes the new number appended rather than replaced, reported as `appended`, so a task shipped in slices keeps every pull request.
-
-Skip this silently when the record is `ok: false` and `reason` is `no-board`, `no-match`, or `ambiguous`. Those are the three cases a guessed write would compound: no board, no task naming the plan, or more than one. One pull request names one task, and a wrong match archives the wrong task unattended once the branch merges. Report any other refusal rather than swallowing it.
-
-The number is what lets the merge close the task. Every merge on `main` is a squash carrying it in the subject, so the number survives where a branch name does not, and `post-merge` reads it back to call `canon tasks archive`. Writing it here rather than at worktree time is what makes it a pull request number rather than a branch the squash discards.
+Write the `number` the final command printed onto the task the branch is closing, through `canon tasks pull-request`, and never resolve it again. Read `${CLAUDE_SKILL_DIR}/references/task-number.md` on reaching this step for which task it names, the invocation, the refusals it skips silently, and why the number lands here. Skip it when the final command refused on a head mismatch and printed no number.
 
 ## After execution
 
