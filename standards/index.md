@@ -8,6 +8,7 @@ subtitle: Reference docs for consistent authoring across the toolkit and target 
 Reference docs for consistent authoring across the toolkit and target projects.
 
 - [Architecture reference](architecture.md): Shape and content rules for canon/ARCHITECTURE.md
+- [Board reference](board.md): Readiness groups, row cells, and ordering for priority.md, the unordered backlog.md beside it, and the generated index under .canon/tasks/
 - [Branch reference](branch.md): Branch naming format and type conventions
 - [Commit reference](commit.md): Commit message format and type conventions
 - [Context entry reference](context.md): Shape and content rules for canon/context/<domain>.md entries
@@ -35,7 +36,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Slug reference](slug.md): Transform from a git branch name to a slug, and the three responses to an empty result
 - [Snippet reference](snippets.md): Snippet reference and authoring conventions
 - [Standard reference](standard.md): Shape and content rules for authoring a standard
-- [Tasks reference](tasks.md): Folder layout, filename convention, readiness groups, and content rules for .canon/tasks/
+- [Tasks reference](tasks.md): Folder layout, filename convention, file format, origin lines, and archiving for task files under .canon/tasks/
 - [Teach reference](teach.md): Workspace layout, ordinal naming, frontmatter, and the mission and learning-record formats for a learning workspace
 - [Versioning reference](versioning.md): Phase label vs semver discipline across tasks, PRs, reviews, issues, commits, and tags
 - [Wiki reference](wiki.md): Folder split, frontmatter, naming convention, and sourcing for a wiki reference page

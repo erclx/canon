@@ -64,6 +64,7 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 ### To an existing governance rule
 
 - `architecture.md` fixes what a cross-domain decision record holds. `540-architecture.md`.
+- `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `555-tasks.md`, which already globs the whole folder.
 - `context.md` fixes the per-domain narrative entry. `510-context.md`.
 - `design.md` fixes visual intent and the token tables. `550-design.md`.
 - `diagrams.md` fixes the per-kind Mermaid entry. `560-diagrams.md`.
@@ -79,7 +80,7 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 - `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `570-skill.md`.
 - `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `570-skill.md`, which already globs the requirement file beside the body.
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `591-standard-authoring.md`.
-- `tasks.md` fixes the board, its filenames, and its readiness groups. `555-tasks.md`.
+- `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `555-tasks.md`.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `561-teach.md`, whose frontmatter states that most targets open no workspace for it to fire on. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
 - `wireframes.md` fixes layout and interaction intent before any UI exists. `520-wireframes.md`.
 

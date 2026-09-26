@@ -116,4 +116,4 @@ canon tasks list --json | jq -r '.tasks[] | select(.readiness == "backlog") | .s
 
 `canon tasks validate` reports what each row of `priority.md` and each line of `backlog.md` claims against what the tree holds. Its seven checks, the three arrays that move no exit code, and the refusals are in `tasks-validate.md`.
 
-For the board format, the `Pull request:` line, and the archive rules, see `standards/tasks.md`.
+For the board format, see `standards/board.md`. For the `Pull request:` line and the archive rules, see `standards/tasks.md`.
