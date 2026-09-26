@@ -1104,19 +1104,27 @@ describe('documentCeiling', () => {
       ])
     })
 
-    it('warns on a document past the ceiling and never fails', async () => {
+    it('fails on a document past the ceiling, naming it and its height', async () => {
       write('docs/guide.md', 301)
 
       const report = await documentCeiling(context())
 
-      expect(report.failure).toBeUndefined()
-      expect(report.emissions).toContainEqual({
-        kind: 'warn',
-        text: 'docs/guide.md  301 rendered lines',
-      })
+      expect(report.failure).toContain('docs/guide.md 301 rendered lines')
     })
 
-    it('leaves an exempt document unwarned', async () => {
+    it('names every document past the ceiling, longest first', async () => {
+      write('docs/a.md', 310)
+      write('docs/b.md', 340)
+
+      const report = await documentCeiling(context())
+
+      expect(report.failure).toMatch(
+        /docs\/b\.md 340 rendered lines.*docs\/a\.md 310 rendered lines/,
+      )
+    })
+
+    it('fails on the document past the ceiling and leaves the exempt one unnamed', async () => {
+      write('docs/guide.md', 301)
       write(
         'scripts/record.md',
         400,
@@ -1125,9 +1133,34 @@ describe('documentCeiling', () => {
 
       const report = await documentCeiling(context())
 
-      expect(
-        report.emissions.filter((emission) => emission.kind === 'warn'),
-      ).toEqual([])
+      expect(report.failure).not.toContain('scripts/record.md')
+    })
+
+    it('leaves no warning beside the failure', async () => {
+      write('docs/guide.md', 301)
+
+      const report = await documentCeiling(context())
+
+      expect(report.emissions).toEqual([])
+    })
+
+    it('passes a tree whose only long document is exempt, counting it', async () => {
+      write(
+        'scripts/record.md',
+        400,
+        '<!-- canon-length-exempt: a verbatim run record -->\n\n',
+      )
+
+      const report = await documentCeiling(context())
+
+      expect(report).toEqual({
+        emissions: [
+          {
+            kind: 'info',
+            text: 'No document past the 300-line ceiling across 1 markdown file, 1 exempt',
+          },
+        ],
+      })
     })
   })
 
