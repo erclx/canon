@@ -171,9 +171,9 @@ The list stays written in the skill body as the fallback for a target whose inst
 
 Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
 
-The chain ends at capture, and review is run on its own.
+The chain ends at capture, and review is run on its own. Capture closes with a line naming `/canon:memory-review` once `canon records stale memory` counts 25 or more entries due, and says nothing below that.
 
-Run `memory-review` standalone to curate the whole pen. An entry it retires moves to `.canon/memory/archive/` rather than being deleted, since a bulk pass has no undo.
+Run `memory-review` standalone to curate the pen a batch at a time. Each pass takes the first 25 due entries in the order the stale verb reports, opening on those citing a path the tree no longer holds, and a named list overrides that order. An entry it retires moves to `.canon/memory/archive/` rather than being deleted, since a bulk pass has no undo. An entry it keeps is stamped with a `reviewed` date, which takes it out of the queue for 30 days.
 
 The receipt is collected once every item on it has been decided, and it survives untouched while any item is still pending. Whichever runs first takes it: Apply collects the receipt it has resolved, and `context-fold` scans the folder on every shipped branch for one an earlier session left behind. Before the file goes, each declined item is folded into the entry it was about, since a promotion survives in its target and in git while a decline is recorded nowhere else. `canon standards memory` states what a fold writes and which entry types take one.
 

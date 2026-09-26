@@ -59,6 +59,10 @@ A `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, is applied
 
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
+### The memory review nudge fires on a count
+
+`memory-capture` closes with a line naming `/canon:memory-review` only once `canon records stale memory` counts one batch of 25 entries due, and `git-ship` and `auto-ship` pass that line through their closing blocks. An unconditional line after every ship was removed earlier because a review per ship costs more than it drains, and a SessionStart hook would reach every session including workers that cannot act on it, so the count is what separates a pen worth reviewing from one that is not. A dispatched worker's line reaches the operator only when its controller relays it.
+
 ## Pull request writes
 
 ### Pull request detection hits a merged namesake

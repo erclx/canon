@@ -49,14 +49,15 @@ Capture leads the sequence because a routed fact lands in a context entry, which
 
 ## After completion
 
-Output up to three lines:
+Output up to four lines:
 
 ```plaintext
 ✅ Shipped
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
+<the review line memory-capture returned>
 ```
 
-Omit the second line if nothing routed and the third if `memory-capture` wrote no memory file this session.
+Omit the second line if nothing routed, the third if `memory-capture` wrote no memory file this session, and the fourth if `memory-capture` returned no review line. Pass that line through verbatim rather than restating it.
 
-Emit nothing here when a wrapping caller states it closes on its own block. `auto-ship` is that caller and its block carries these same two trailing lines above a first line naming the draft state, so emitting both reports one run twice. A caller that states no such thing gets this block, which is every direct invocation.
+Emit nothing here when a wrapping caller states it closes on its own block. `auto-ship` is that caller and its block carries these same three trailing lines below a first line naming the draft state, so emitting both reports one run twice. A caller that states no such thing gets this block, which is every direct invocation.
