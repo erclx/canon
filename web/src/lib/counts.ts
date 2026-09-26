@@ -4,7 +4,6 @@ interface CatalogCounts {
   skills: number
   rules: number
   standards: number
-  snippets: number
   commands: number
   audits: number
 }

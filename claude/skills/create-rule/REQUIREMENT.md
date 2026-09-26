@@ -42,4 +42,4 @@ The subdir gets picked by feel, so a UI copy rule lands in the always-on folder 
 - Editing a rule that already exists
 - Toolkit source rules, which are authored in the toolkit rather than in a target
 - Installing the rules the toolkit ships, which the governance setup path owns
-- A standard, which `create-standard` owns, and a snippet, which `create-snippet` owns
+- A standard, which `create-standard` owns

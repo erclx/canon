@@ -33,7 +33,7 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 
 ## Couplings
 
-Before shipping any change to the seed, a plugin skill, a snippet, or a `.claude/` state doc, grep for the identifier you are changing. Check plugin skills for quoted seed section headings, workflows for snippet paths, and the Claude context entries for skill descriptions.
+Before shipping any change to the seed, a plugin skill, or a `.claude/` state doc, grep for the identifier you are changing. Check plugin skills for quoted seed section headings and the Claude context entries for skill descriptions.
 
 When editing any file under `.claude/` in this repo, also check `tooling/claude/seeds/` for a mirror path and `tooling/claude/reference.md` for a description that needs updating.
 
@@ -66,7 +66,6 @@ When modifying either CLAUDE.md:
 - `canon/context/claude-plugin/`: skill strategy, requirements, lifecycle, review paths and shared procedures, plus distribution and release, canon claude CLI, built-in feature overlap
 - `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
 - `canon/context/context-model.md`: three-tier context model and how entries get populated
-- `canon/context/snippets.md`: snippets catalog and invocation
 - `canon/context/indexes.md`: index.md system rationale and contracts
 - `tooling/claude/reference.md`: seed layout and design notes
 - `standards/skill.md`: skill structure, frontmatter, and authoring rules

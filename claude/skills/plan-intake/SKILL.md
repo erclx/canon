@@ -73,7 +73,7 @@ Two heading levels is the right depth. A third means the cluster should have bee
 
 Write every item in the standard's item format, in the cluster file its fix belongs to. Close each item with a verdict and an empty operator slot, and never fill that slot or read an empty one as agreement.
 
-Where an item's call is the operator's, pair it with a suggestion rather than a bare question. The toolkit's `decision-help` snippet writes the same shape for chat use, and the standard's item format is the whole spec.
+Where an item's call is the operator's, pair it with a suggestion rather than a bare question. The standard's item format is the whole spec.
 
 ## Step 6: write the index
 

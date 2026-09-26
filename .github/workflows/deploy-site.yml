@@ -14,7 +14,6 @@ on:
       - 'src/design/**'
       - 'governance/rules/**'
       - 'standards/**'
-      - 'snippets/**'
       - 'claude/skills/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:

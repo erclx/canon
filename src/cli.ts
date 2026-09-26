@@ -6,7 +6,6 @@ import { register as sandbox } from '@/commands/sandbox'
 import { register as sync } from '@/commands/sync'
 import { register as gov } from '@/commands/gov'
 import { register as standards } from '@/commands/standards'
-import { register as snippets } from '@/commands/snippets'
 import { register as tooling } from '@/commands/tooling'
 import { register as claude } from '@/commands/claude'
 import { register as wiki } from '@/commands/wiki'
@@ -67,7 +66,6 @@ sandbox(program)
 sync(program)
 gov(program)
 standards(program)
-snippets(program)
 tooling(program)
 claude(program)
 wiki(program)

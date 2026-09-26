@@ -16,7 +16,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 - `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/slides.md`, and `canon/context/transcripts.md`
 - `src/indexes/` owns the index engine, documented in `canon/context/indexes.md`
 - `src/tooling/` owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`
-- `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, and the drift report, with governance's per-domain adapter in `src/gov/`. Neither `src/standards/` nor `src/snippets/` carries one, since nothing installs either corpus into a project and there is no copy to reconcile
+- `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, and the drift report, with governance's per-domain adapter in `src/gov/`. `src/standards/` carries none, since nothing installs that corpus into a project and there is no copy to reconcile
 - `src/init/` owns the `canon init` option surface, the preview and count, the domain step list, and the partial-failure runner
 - `src/docs/` and `src/wiki/` own the two read-only domains, which reach for no shared engine because neither syncs into a target
 - `src/claude/` owns seed planning, the gitignore preview, and the user settings merge

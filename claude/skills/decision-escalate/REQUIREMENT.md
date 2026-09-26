@@ -15,7 +15,7 @@ A body written around a named tool fails a third way. A session on a surface car
 
 The opposite failure is the one that ships silently. A session that takes a preference decision itself produces work the operator did not ask for and never learns a choice was made, because nothing in the output says a fork was passed.
 
-`CLAUDE.md` states both branches of the rule, sending an ordinary judgment call to a pick with the tradeoff in one sentence and a preference-deciding call to the operator. The first branch has the toolkit's `snippets/decision-help.md` behind it, which installs into a project that took snippets as `.claude/snippets/decision-help.md`. The second branch now states how a question is shaped and where it is put, so this skill inherits both and adds only what a batch needs on top of one question.
+`CLAUDE.md` states both branches of the rule, sending an ordinary judgment call to a pick with the tradeoff in one sentence and a preference-deciding call to the operator. The second branch now states how a question is shaped and where it is put, so this skill inherits both and adds only what a batch needs on top of one question.
 
 ## Must
 
@@ -40,6 +40,5 @@ The opposite failure is the one that ships silently. A session that takes a pref
 ## Out of scope
 
 - Making the ordinary judgment call, which is a pick plus a one-sentence tradeoff and needs no surface
-- The chat-side pick with no repository behind it, which the toolkit's `snippets/decision-help.md` covers and reaches a different reader
 - Writing the decision into a plan, task, or architecture record, which each owning standard governs and this skill only routes to
 - Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so escalating is the operator's call rather than a description match.

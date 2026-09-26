@@ -75,10 +75,6 @@ describe('checkout-mismatch warning at each directly wired verb', () => {
     expectWarns(['docs', 'agents/output-shape'])
   })
 
-  it('should warn on canon snippets list', () => {
-    expectWarns(['snippets', 'list'])
-  })
-
   it('should warn on canon gov list', () => {
     expectWarns(['gov', 'list'])
   })

@@ -17,7 +17,6 @@ const MODULES: Registration[] = await Promise.all(
 const FORWARDS_HELP_TO_SCRIPT = new Set([
   'canon docs list',
   'canon sandbox',
-  'canon snippets create',
   'canon standards list',
   'canon tooling create',
   'canon tooling verify',

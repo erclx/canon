@@ -13,9 +13,9 @@
 # comes down to sit above the widest observation once one does.
 max_turns = 30
 
-# One path per domain the chain installs. `buildSteps` orders six of them and a
-# run that reported success while skipping one leaves the other five in place, so
-# a single path proves nothing about the chain.
+# One path per domain the chain installs. A run that reported success while
+# skipping one leaves the others in place, so a single path proves nothing about
+# the chain.
 #
 # `.claude/GOV.md` is not among them. The `fresh` arm's own stage prose claimed
 # `canon init` builds it until 2026-08-03, and `src/gov/adapter.ts` names it
@@ -24,7 +24,6 @@ max_turns = 30
 paths = [
   "CLAUDE.md",
   ".claude/rules/canon/claude/565-behavior.md",
-  ".claude/snippets/meta-prompt.md",
   ".claude/rules/canon/canon/604-scratch.md",
   ".claude/wiki/index.md",
   "commitlint.config.js",
@@ -56,10 +55,10 @@ manual = [
   "The run reaches nothing outside the sandbox tree. Semantic: the install legitimately writes the whole tree, so no `write_scope` glob distinguishes a correct run from a wrong one and the claim has no mechanical form here",
 ]
 
-# Both domains stamped their manifest. A run that installed governance and
+# Both stamped domains wrote their manifest. A run that installed governance and
 # stopped leaves a well-formed `config.json` carrying one entry, which every path
 # above still passes. Standards is not among them and `.claude/standards` is
 # asserted absent above, since the corpus installs into no target.
 [[content]]
 path = "canon/config/config.json"
-pattern = '"covers": \["snippets", "governance"\]'
+pattern = '"covers": \[\s*"governance",\s*"tooling"\s*\]'

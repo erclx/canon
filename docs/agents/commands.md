@@ -20,7 +20,6 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon targets <verb>`      | Report the projects this toolkit installed into                                 |
 | `canon gov <verb>`          | Install and sync governance rules, and audit the tree against them              |
 | `canon standards <verb>`    | List, audit, or print a standard by name                                        |
-| `canon snippets <verb>`     | List or scaffold prompt snippets                                                |
 | `canon tooling <verb>`      | Sync, diff, and verify tooling stacks                                           |
 | `canon claude <verb>`       | Install the Claude workflow and audit both skill corpora                        |
 | `canon wiki <verb>`         | Scaffold the wiki pages                                                         |
@@ -61,7 +60,7 @@ A port already in use is the ordinary case rather than a refusal, so it walks fo
 
 A request naming a directory is redirected to its trailing-slash form rather than answered in place. A browser resolves a relative asset against the last slash of the URL it is on, so answering `/lesson` directly leaves the page asking for `/course.css` instead of `/lesson/course.css`, and it renders unstyled through the server that exists to prevent exactly that.
 
-Containment is tested after symlinks are followed rather than on the path as written, and the test sits immediately before the read rather than beside the request that produced it. Resolving a request lexically clears a link pointing outside the served root, and this repository is a live instance of that shape, since `claude/standards` and `claude/snippets` are links out of `claude/`. Position is what makes the property hold: a directory request appends its index after the request path has been checked, so a check placed earlier leaves that index untested. `--index` answers a directory holding no `index.html` with a listing read per request, where the default stays a 404. Every entry the listing names takes the same containment test a request for it would, so a link out of the root is absent rather than greyed, and dotfiles are hidden. With no `--entry` and no root `index.html`, the printed link is `/` and `entryExists` reads true. An `--entry` that escapes the root refuses with `no-entry` before a port is taken, because `url` is the field a caller hands to a reader.
+Containment is tested after symlinks are followed rather than on the path as written, and the test sits immediately before the read rather than beside the request that produced it. Resolving a request lexically clears a link pointing outside the served root, and this repository is a live instance of that shape, since `claude/standards` is a link out of `claude/`. Position is what makes the property hold: a directory request appends its index after the request path has been checked, so a check placed earlier leaves that index untested. `--index` answers a directory holding no `index.html` with a listing read per request, where the default stays a 404. Every entry the listing names takes the same containment test a request for it would, so a link out of the root is absent rather than greyed, and dotfiles are hidden. With no `--entry` and no root `index.html`, the printed link is `/` and `entryExists` reads true. An `--entry` that escapes the root refuses with `no-entry` before a port is taken, because `url` is the field a caller hands to a reader.
 
 `canon demo` is the second browser command and the one that ships, since its purpose is running in a target rather than regenerating what this repository commits. It needs a browser binary the package does not carry, installed once with `bunx playwright install chromium`.
 
@@ -85,7 +84,6 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `targets`, in `targets.md`: `list`, `pulls`
 - `gov`, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `test-order`, `counts`, `superseded`, `citations`, `restated`
 - `standards`, in `standards-audit.md`: `list`, `audit`, `<name>`
-- `snippets`, in `install-and-sync.md`: `list`, `create`
 - `tooling`, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `create`, `verify`, `inject`, `prune-gitignore`
 - `claude`, in `skills-audit.md`: `init`, `sync`, `setup`, `routing`, `plugin-update`, `seeds list`, `skills list`, `skills audit`, `skills drift`, `skills reach`, `skills rank`
 - `wiki`, in `scripting.md`: `init`

@@ -9,7 +9,7 @@ description: The marketplace entry, the install-shape traps it avoids, and the r
 
 Sourcing the repository root instead is the trap this shape exists to avoid, and it was measured rather than reasoned about. Skills are discovered at `<plugin-root>/skills/` unless the entry names them explicitly, and this repository keeps them a level down, so a root-sourced entry carrying no `skills` array exposes zero skills. It also costs 312M, because Claude Code runs a dependency install on any plugin carrying a package manifest and copies `.claude/` and the internal skills into the cache. The closest comparable project sources its root, which works only because its skills sit there.
 
-`claude/standards` and `claude/snippets` are symlinks to the root authoring sources. A symlink inside a plugin that resolves elsewhere within the marketplace is dereferenced at install and its content copied, so the files arrive as real directories in the cache. The measured install is 964K with 55 skills, against 760K for the same shape without the symlinks.
+`claude/standards` is a symlink to the root authoring source. A symlink inside a plugin that resolves elsewhere within the marketplace is dereferenced at install and its content copied, so the files arrive as real directories in the cache. The measured install is 964K with 55 skills, against 760K for the same shape without the symlinks.
 
 The entry carries no version on purpose. `plugin.json` overrides the enclosing entry for both name and version, so a version on the entry would drift on every release with nothing reporting it, and the release config writes only the plugin manifest.
 
@@ -43,11 +43,11 @@ The verb also needs a fallback rather than only a guard, since these scripts shi
 
 ### What a symlink costs
 
-A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and `claude/snippets` and copies whatever sits behind them into every plugin cache with no code in the path to stop it. A filterable subfolder such as `standards/canon/` still leaks through the symlink ahead of it.
+A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and copies whatever sits behind it into every plugin cache with no code in the path to stop it. A filterable subfolder such as `standards/canon/` still leaks through the symlink ahead of it.
 
 Internal content lives at `internal/` instead, which nothing under `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
 
-A native Windows checkout without symlink support materializes both links as plain text files holding the paths `../standards` and `../snippets`. The plugin then ships two junk files and no standards, and no stage notices, because every catalog command reads the real directories at the repository root. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
+A native Windows checkout without symlink support materializes the link as a plain text file holding the path `../standards`. The plugin then ships a junk file and no standards, and no stage notices, because every catalog command reads the real directories at the repository root. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 
 A marketplace name is one global slot per user. Adding a second marketplace under the same name replaces the first, and a local-path marketplace pointing at a worktree breaks when that worktree is removed.
 

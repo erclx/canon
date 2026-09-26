@@ -26,7 +26,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
     rows: [
       ['gov [cmd]', 'Governance rules (install, sync, list)'],
       ['standards [cmd]', 'Standards (install, sync, list, <name>)'],
-      ['snippets [cmd]', 'Prompt snippets (create, list)'],
       ['tooling [cmd]', 'Tooling stacks (sync, ref, create)'],
       ['claude [cmd]', 'Claude workflow (init, sync, setup)'],
       ['wiki [cmd]', 'Wiki pages (init)'],
@@ -93,7 +92,6 @@ const EXAMPLES = [
   'canon gov sync ../my-app',
   'canon gov restated --json',
   'canon standards markdown',
-  'canon snippets list',
   'canon init ../my-app',
   'canon tooling sync base',
   'canon tooling create',

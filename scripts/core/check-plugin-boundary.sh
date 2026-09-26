@@ -24,7 +24,7 @@ if ! command -v realpath >/dev/null 2>&1; then
   exit 1
 fi
 
-# The plugin reaches `standards/` and `snippets/` through symlinks, which an
+# The plugin reaches `standards/` through a symlink, which an
 # installer dereferences with no code in the path to filter. Walking the plugin
 # tree with symlinks followed is what an install actually copies, so resolving
 # each file and rejecting anything under `internal/` asserts the boundary at the

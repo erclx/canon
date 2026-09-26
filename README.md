@@ -64,7 +64,6 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                | Loaded live from the plugin, never copied                       |
 | Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                | Installed per project by `canon gov install`, refreshed by sync |
 | Standards      | Authoring conventions for commits, branches, plans, tasks, and markdown                                                  | Opened by name, read by name with `canon standards <name>`      |
-| Snippets       | Reusable prompts fired by `@` reference                                                                                  | Resolved live from the plugin                                   |
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
 | Slides         | A `SLIDES.md` source format with a layout catalog                                                                        | `canon slides render` writes PowerPoint                         |
@@ -150,7 +149,7 @@ canon init
 
 `canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the coding and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project.
 
-Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. A snippet resolves the same way, reached at its `@` reference through the plugin's live `claude/snippets` symlink rather than a copy. Run `canon tooling list --json` to see the catalog.
+Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. Run `canon tooling list --json` to see the catalog.
 
 For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target/target-projects.md).
 
@@ -161,7 +160,6 @@ Each domain carries an entry written for someone maintaining the toolkit rather 
 - [Claude Code plugin](canon/context/claude-plugin/index.md)
 - [Governance rules](canon/context/governance/index.md)
 - [Standards](canon/context/standards/index.md)
-- [Snippets](canon/context/snippets.md)
 - [Tooling stacks](canon/context/tooling/index.md)
 - [Design system](canon/context/design/index.md)
 - [Slides](canon/context/slides.md)

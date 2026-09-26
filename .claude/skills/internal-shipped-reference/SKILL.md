@@ -1,6 +1,6 @@
 ---
 name: internal-shipped-reference
-description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern. Use before shipping a change under claude/, docs/, governance/, scripts/, snippets/, standards/, or tooling/, routed here by `598-authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, a phase label, or a numbered rule path, which `canon gate run`'s shipped-references stage already classifies by pattern.
+description: Reviews a shipped-corpus edit for a reference that resolves only in this checkout and reads as portable, the one form the reference gate cannot classify by pattern. Use before shipping a change under claude/, docs/, governance/, scripts/, standards/, or tooling/, routed here by `598-authoring-layout.md`. Do NOT use for a pull request number, a commit sha, a resolvable `docs/<name>.md` path, a phase label, or a numbered rule path, which `canon gate run`'s shipped-references stage already classifies by pattern.
 ---
 
 # Internal shipped reference
@@ -9,7 +9,7 @@ description: Reviews a shipped-corpus edit for a reference that resolves only in
 
 ## Discriminator
 
-Read every added or changed line in the diff under this rule's eight corpora: `internal/`, `standards/`, `snippets/`, `claude/`, `governance/`, `docs/`, `scripts/`, `tooling/`.
+Read every added or changed line in the diff under this rule's seven corpora: `internal/`, `standards/`, `claude/`, `governance/`, `docs/`, `scripts/`, `tooling/`.
 
 For each `canon/context/<name>.md` token:
 

@@ -14,7 +14,7 @@ Owns everything the toolkit ships outward under the Claude domain: the plugin sk
 - `claude/skills/<skill>/REQUIREMENT.md`: required sibling of `SKILL.md` holding the skill's gap statement, inert at load time
 - `claude/.claude-plugin/` owns `plugin.json`, the plugin manifest. Its `name` field is `canon`, which is what namespaces every invocation as `/canon:<skill>`, and its `version` is written by the release automation rather than by hand
 - `.claude-plugin/` at the repository root owns `marketplace.json`, the catalog an installer adds
-- `claude/standards` and `claude/snippets` are symlinks to the root authoring sources, present so the files ship with an install
+- `claude/standards` is a symlink to the root authoring source, present so the files ship with an install
 
 ## Why this domain is a folder
 

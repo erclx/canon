@@ -22,12 +22,11 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 ## The catalogs it reads
 
-A closed set of six, each with a filesystem reader behind it rather than every list command this CLI ships:
+A closed set of five, each with a filesystem reader behind it rather than every list command this CLI ships:
 
 - `skills`: shipped plugin skills, a folder per `claude/skills/*/SKILL.md`
 - `rules`: authored governance rules, a file per `governance/rules/**/*.md`
 - `standards`: the authoring corpus at `standards/`
-- `snippets`: distinct entries across every `snippets/` category, matching what `regen-hero.sh` counts
 - `commands`: top-level `canon` commands, read off `src/cli.ts`'s registration imports
 - `audits`: the registered set in `src/audits/catalog.ts`, this entry included
 

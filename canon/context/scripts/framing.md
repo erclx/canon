@@ -14,12 +14,11 @@ No domain has a dispatcher.
 - `src/commands/tooling.ts` handles `sync`, `inject`, `prune-gitignore`, and `list` in TypeScript and shells out for `ref`, `create`, and `verify`
 - `src/commands/gov.ts` handles `install`, `sync`, and `build`, and shells out for `list` alone
 - `src/commands/standards.ts` handles `install` and `sync`, and shells out for `list` alone
-- `src/commands/snippets.ts` handles `install`, `sync`, and `list`, and shells out for `create` alone
 - `src/commands/claude.ts` is TypeScript end to end, as are `sync` and `init`, which reach no verb script at all
 
 `scripts/standards/list.sh` sets its own EXIT trap and emits section headers via `log_step` without ever emitting `┌`, which is what lets the command layer above it own the frame.
 
-A migrated list verb has to open that frame itself, and the gap is easy to miss because it only shows through the CLI. The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly while `canon snippets list` loses the header a pass-through dispatch would otherwise print. Capture equivalence baselines at the boundary the user invokes, not at the script.
+A migrated list verb has to open that frame itself, and the gap is easy to miss because it only shows through the CLI. The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly while a migrated list verb loses the header a pass-through dispatch would otherwise print. Capture equivalence baselines at the boundary the user invokes, not at the script.
 
 `claude seeds list` is a real Commander subcommand rather than hand-rolled routing, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape `registerPassThroughVerbs` builds. The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit, since Commander falls through to the parent when no subcommand name matches.
 

@@ -66,7 +66,6 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 | Modifying `tooling/`, manifests, golden configs, seeds                            | `internal-tooling`    |
 | Modifying `standards/`, `docs/`, `canon/context/`                                 | `internal-standards`  |
 | Modifying `governance/rules/`, `governance/stacks/`                               | `internal-governance` |
-| Modifying `snippets/`                                                             | `internal-snippets`   |
 | Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
 | Modifying `web/`, `assets/`, the landing page                                     | `internal-web`        |
 | Modifying `src/teach/`, `examples/teach/`, `standards/teach.md`                   | `internal-teach`      |
@@ -77,11 +76,10 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 ## Key paths
 
 - `governance/rules/`: governance rules
-- `internal/`: toolkit-internal standards, snippets, and rules, plus the record of which governance stack this repo consumes, all outside every installable surface
+- `internal/`: toolkit-internal standards and rules, plus the record of which governance stack this repo consumes, all outside every installable surface
 - `standards/`: authoring conventions, read through `canon standards <name>` rather than installed
 - `tooling/`: golden configs (base), references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
-- `snippets/`: reusable prompt snippets, invoked by `@` reference in a Claude Code session
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
 - `scripts/`: bash domain scripts, core maintenance, sandbox, and prompt generation
 - `wiki/`: reference pages for Anthropic-owned subjects, under `wiki/claude/`

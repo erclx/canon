@@ -95,7 +95,7 @@ For features on a mature stack, chain the post-plan pipeline in one session. App
 
 Review findings split by origin before severity is read. One the branch inherited stops the chain, and one the run itself caused is repaired in place at any severity, bounded at a single pass. Origin is causation rather than authorship, so staleness the run induced in a file it never opened counts as its own and the plan's file list bounds what it builds rather than what it may repair.
 
-Review is skipped when the diff is prose that only informs: every changed file matches `*.md` or `*.txt`, and none sits under a behavior path. Behavior paths cover skills and rules in both the authoring and the installed spelling, so the list matches whether a repository authors those surfaces or consumed them from the toolkit. Standards, snippets, `internal/`, and `tooling/` carry the authoring spelling alone, since none of the four reaches a session through a `.claude/` copy, and root `CLAUDE.md` is named as a file because a path prefix reaches nothing sitting in no folder.
+Review is skipped when the diff is prose that only informs: every changed file matches `*.md` or `*.txt`, and none sits under a behavior path. Behavior paths cover skills and rules in both the authoring and the installed spelling, so the list matches whether a repository authors those surfaces or consumed them from the toolkit. Standards, `internal/`, and `tooling/` carry the authoring spelling alone, since none of the three reaches a session through a `.claude/` copy, and root `CLAUDE.md` is named as a file because a path prefix reaches nothing sitting in no folder.
 
 Markdown under one states what an agent does, so a branch touching it reaches review while `docs/` and `wiki/` still skip and stay gated by `docs-sync`, `standards-audit`, and pre-push hooks.
 
@@ -146,7 +146,3 @@ verify fails  → Session 1 (it has implementation context)
 design fails  → new Claude chat session (planning problem)
 review finds  → Session 2 (fix alongside review, before ship)
 ```
-
-## Snippets
-
-For the full list of snippets that complement this workflow, see `canon/context/snippets.md`.

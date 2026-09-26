@@ -24,7 +24,7 @@ canon secrets scan ../my-app
 
 The corpus is the package's own `files` field rather than a list the check keeps. That field is the single statement of which trees leave this repository, so a second list beside it would answer the same question and drift. It also carries the negations the publish already makes, which is what puts the sandbox tree, the eval tree, and every test file out of scope by the rule that keeps them out of the tarball rather than by an exclusion this check invented.
 
-The plugin reaches a target by a different route, loading live from `claude/` rather than from a tarball. That folder is a `files` entry too, and its `standards` and `snippets` symlinks resolve into trees the field lists in their own right, so both routes land inside the same corpus.
+The plugin reaches a target by a different route, loading live from `claude/` rather than from a tarball. That folder is a `files` entry too, and its `standards` symlink resolves into a tree the field lists in its own right, so both routes land inside the same corpus.
 
 Three root files are read whether or not the field names them, being `package.json`, the readme, and the license, since npm packs those on every publish. A negation still removes one, because a field that excludes a file outranks the default that included it.
 

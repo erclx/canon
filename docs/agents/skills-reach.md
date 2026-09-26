@@ -39,7 +39,7 @@ A path the toolkit does not hold is dropped rather than reported. The measure as
 
 ## The ownership key
 
-A cited path counts when it sits under an authoring root no install channel delivers. Standards and snippets install nowhere and are read through the plugin corpus, governance rules install under `.claude/rules/`, and the rest is this repository's own source, catalogs, and contract pages.
+A cited path counts when it sits under an authoring root no install channel delivers. Standards install nowhere and are read through the plugin corpus, governance rules install under `.claude/rules/`, and the rest is this repository's own source, catalogs, and contract pages.
 
 `src/`, `scripts/`, and bare `docs/` are deliberately outside the list. A body naming one of those is describing the reader's own tree, so listing them reports a correct citation on every run and buries the finding under the pass.
 

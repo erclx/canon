@@ -3,7 +3,6 @@ import { join } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
 import { listSkills } from '@/claude/skills-list'
 import { buildGovCatalog } from '@/gov/list'
-import { buildSnippetsCatalog } from '@/snippets/list'
 import { listStandards } from '@/standards/read'
 
 export interface Catalog {
@@ -40,16 +39,6 @@ function countCommands(root: string): number | undefined {
 }
 
 /**
- * The distinct entries across every category, matching what `regen-hero.sh`
- * counts. A snippet reachable from two categories is one snippet, not two.
- */
-function countSnippets(root: string): number {
-  const catalog = buildSnippetsCatalog(root)
-  return new Set(catalog.categories.flatMap((category) => category.entries))
-    .size
-}
-
-/**
  * The closed set of catalogs this sweep counts a document against.
  *
  * Closed rather than derived from every list command this CLI ships, on the
@@ -74,11 +63,6 @@ export const CATALOGS: readonly Catalog[] = [
     id: 'standards',
     nouns: ['standard', 'standards'],
     count: (root) => listStandards(root).length,
-  },
-  {
-    id: 'snippets',
-    nouns: ['snippet', 'snippets'],
-    count: countSnippets,
   },
   {
     id: 'commands',

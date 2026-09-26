@@ -186,8 +186,7 @@ export function resolveWithin(
  * Re-tests containment after following symlinks. `resolveWithin` is lexical
  * and `resolve` does not follow a link, so a link inside the root clears that
  * test while the file it points at sits outside. This repository is a live
- * instance, since `claude/standards` and `claude/snippets` are links out of
- * `claude/`.
+ * instance, since `claude/standards` is a link out of `claude/`.
  *
  * Only a path that exists is checked, because a link can be followed only once
  * there is something on the other end, and a path that resolves to nothing is

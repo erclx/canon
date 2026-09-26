@@ -31,9 +31,9 @@ Committing the consumed copy lets a citation spell one path that resolves here a
 
 ### Only governance keeps a consumed copy
 
-`standards/`, `snippets/`, and `internal/` carry no mirror, since nothing installs any of the three into a project. A `standards/` mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
+`standards/` and `internal/` carry no mirror, since nothing installs either into a project. A `standards/` mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
 
-`snippets/` needs no mirror because the `claude/snippets` symlink already serves every plugin cache, and `internal/` has no install channel to mirror. `scripts/core/regen-claude-copies.sh` is one delegation to `canon gov regen`.
+`internal/` has no install channel to mirror. `scripts/core/regen-claude-copies.sh` is one delegation to `canon gov regen`.
 
 ## Gotchas
 

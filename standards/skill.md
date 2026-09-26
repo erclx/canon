@@ -17,7 +17,6 @@ Does not govern:
 
 - What a `REQUIREMENT.md` must answer, its sections, and its template: `skill-requirement.md`
 - Path-scoped coding rules, which load on a file match rather than on a request match: `rule.md`
-- Single-purpose chat prompts carrying no frontmatter, references, or scripts: `snippets.md`
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
 - The transform from a branch name to a slug a skill carries in a filename: `slug.md`
@@ -128,7 +127,7 @@ allowed-tools: <tools required>
 
 - Avoid flags that dispatch between alternate flows. The model misreads them and runs the vanilla path. Dry-run-style toggles are fine. For alternate flows, prefer a separate skill or manual invocation of two skills in sequence.
 - When a skill should fire from multiple callers, rely on description matching with strong trigger phrases. Do not hardcode `Skill` calls in sibling skills that could trigger it naturally.
-- Before collapsing a manual multi-step flow into a skill, ask what the manual pauses do. Where a pause carries external timing, error-surfacing, or judgment weight, prefer a snippet or explicit per-step confirmation.
+- Before collapsing a manual multi-step flow into a skill, ask what the manual pauses do. Where a pause carries external timing, error-surfacing, or judgment weight, prefer explicit per-step confirmation.
 
 ### Output and tuning
 

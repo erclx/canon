@@ -63,8 +63,6 @@ Citing every kind of on-screen text lost. A label is authored in the wireframe i
 
 A standard with one reader lives in that reader's skill. `claude/skills/git-issue/references/issue.md` sits there because `git-issue` is the only thing that reads it. It carries no frontmatter, because a reference answers to its skill rather than to the standards template, so `canon standards issue` does not resolve it.
 
-`standards/snippets.md` stays in the flat root on two readers: `create-snippet`, and the toolkit-internal `internal-snippets` skill, which sends a session to its cadence and audience tests before it admits a snippet. A skill reading a file to do its job is a reader, where a context entry pointing at it is not. `skill.md` also names it as the sibling standard for chat prompts. Measured at `c175ec5d`.
-
 The count is the test, and it decays: a count that predates a later citation moves a file a second reader still needs, so re-count before every move.
 
 A standard with zero readers is the other case. `standards/wiki.md` was cited by nothing, so every page conformed from the author's memory rather than from a read. Adding `draft-wiki` as its reader is what closes that, where moving the standard into a skill would bury a rule nothing enforces inside the only thing that reads it. Drafting the skill forced the first check against the tree, and all fourteen pages passed, including the sourcing rule a session working from recall breaks silently.

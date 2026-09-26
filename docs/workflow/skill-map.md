@@ -115,7 +115,6 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                  |
 | `canon:create-skill`      | For a new `SKILL.md`                                                                                              |
-| `canon:create-snippet`    | For a reusable prompt                                                                                             |
 | `canon:create-standard`   | For a new authoring convention                                                                                    |
 | `canon:draft-docs`        | For a brand-new `docs/*.md` page, drafted against `standards/docs.md`                                             |
 | `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task         |

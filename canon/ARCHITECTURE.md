@@ -6,7 +6,7 @@ Authoring guidance: `standards/architecture.md`.
 
 The toolkit is a CLI plus a Claude Code plugin, built so an agent can drive every surface a human can. Content is authored once at a project-root folder, consumed here through a generated copy under `.claude/`, and reaches a target project either by a `canon` install command or by loading live from the plugin root.
 
-Six domains carry the weight: governance rules, standards, snippets, tooling stacks, plugin skills, and the CLI that installs them. This file holds only the decisions that fill one of five slots: stack and runtime, delivery, enforced boundaries, layout, and build principles. Every other decision lives in the `canon/context/<domain>.md` entry for the domain it constrains, which is also where a reader goes for how rather than why.
+Five domains carry the weight: governance rules, standards, tooling stacks, plugin skills, and the CLI that installs them. This file holds only the decisions that fill one of five slots: stack and runtime, delivery, enforced boundaries, layout, and build principles. Every other decision lives in the `canon/context/<domain>.md` entry for the domain it constrains, which is also where a reader goes for how rather than why.
 
 This record holds at most 12 decisions, and the Architecture record stage in `bun run check` fails a push past that cap.
 
@@ -26,17 +26,17 @@ What the split costs is a citation crossing it, since a skill body naming an ins
 
 ### Something other than the model resolving a file by path decides whether it installs
 
-A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a governance rule and expands a snippet the moment an `@` reference fires, and a target's own build tooling reads a tooling config or `.claude/design/base.css` straight off its path, so none needs a command in the loop. A standard is the one domain the model opens on purpose, which is why `canon standards` carries no install and no sync. Deciding per domain case by case lost to writing the criterion down, and nothing checks that a new domain answers it the same way. `canon/context/standards/resolution.md` carries the closed install channel for standards and tooling references.
+A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a governance rule, and a target's own build tooling reads a tooling config or `.claude/design/base.css` straight off its path, so none needs a command in the loop. A standard is the one domain the model opens on purpose, which is why `canon standards` carries no install and no sync. Deciding per domain case by case lost to writing the criterion down, and nothing checks that a new domain answers it the same way. `canon/context/standards/resolution.md` carries the closed install channel for standards and tooling references.
 
 ### Skills call the CLI and never reimplement it
 
-A plugin skill reads a catalog through `canon <domain> list --json`, matches it against project context, then executes the CLI under `CANON_NON_INTERACTIVE=1`. Every domain owes a `list` verb with `--json` and no skill hardcodes a rule, stack, or snippet name, which keeps one behavior in one place rather than restated in a skill body that could drift from the CLI on its own cadence.
+A plugin skill reads a catalog through `canon <domain> list --json`, matches it against project context, then executes the CLI under `CANON_NON_INTERACTIVE=1`. Every domain owes a `list` verb with `--json` and no skill hardcodes a rule or stack name, which keeps one behavior in one place rather than restated in a skill body that could drift from the CLI on its own cadence.
 
 The rule covers a catalog and stops at a document, so a skill reads a standard by path off the `claude/standards` symlink, while a rule, which a glob match loads with no skill context, names `canon standards <name>` instead.
 
 ### Location enforces the plugin boundary
 
-Toolkit-internal content lives under `internal/`, a tree nothing inside `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the shipped tree with symlinks followed and fails on any file resolving under `internal/`. A filter at each CLI entry point was the alternative and it failed in production, since `claude/standards` and `claude/snippets` are symlinks an installer dereferences with nothing left in the path to filter, which let five internal files reach every plugin cache. `SyncAdapter.projectSubdir` answers the same question inside the sync engine, recorded in `canon/context/cli/sync.md`.
+Toolkit-internal content lives under `internal/`, a tree nothing inside `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the shipped tree with symlinks followed and fails on any file resolving under `internal/`. A filter at each CLI entry point was the alternative and it failed in production, since `claude/standards` and a since-retired `claude/snippets` were symlinks an installer dereferences with nothing left in the path to filter, which let five internal files reach every plugin cache. `SyncAdapter.projectSubdir` answers the same question inside the sync engine, recorded in `canon/context/cli/sync.md`.
 
 ### Three tiers of context, bounded by slots
 
@@ -74,5 +74,5 @@ Four principles decide how a behavior is built, and each domain entry carries it
 - Verification anchors here have a writer and a sweeper, and the sweeper reaches only what a diff can point at, so an anchor on a decision no branch touches is checked only by a person re-reading it.
 - A decision moved to a context entry leaves a pointer with no check behind it, since nothing compares a slot entry against the entry it defers to.
 - Two classes of claim stay unflagged: one counting over a tree the branch never opened, and one citing nothing narrower than a single path segment, which is deliberate since a prefix match on `src/` fires on nearly every branch.
-- A native Windows checkout without symlink support materializes `claude/standards` and `claude/snippets` as plain files holding a path, so the plugin ships no standards and no stage notices.
+- A native Windows checkout without symlink support materializes `claude/standards` as a plain file holding a path, so the plugin ships no standards and no stage notices.
 - The cap counts decisions by heading, so a writer at the cap can pack two decisions under one heading and pass. `standards/architecture.md` asks for a merge or a retirement instead, and nothing enforces the difference.
