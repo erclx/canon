@@ -14,6 +14,8 @@ import {
   captureStamps,
   clientCommandCitations,
   documentCeiling,
+  folderEchoedNames,
+  isFolderEchoedName,
   readmeCitations,
   rawFieldFileReference,
   recordIdempotence,
@@ -1168,6 +1170,114 @@ describe('documentCeiling', () => {
     write('docs/guide.md', 400)
 
     const report = await documentCeiling(context())
+
+    expect(report.unmeasured).toBeDefined()
+  })
+})
+
+describe('isFolderEchoedName', () => {
+  it('should flag a stem opening with its folder and a dash', () => {
+    expect(isFolderEchoedName('docs/target/target-sync.md')).toBe(true)
+  })
+
+  it('should flag a stem equal to its folder', () => {
+    expect(isFolderEchoedName('a/b/b.md')).toBe(true)
+  })
+
+  it('should read the stem up to the first dot, flagging a test file', () => {
+    expect(isFolderEchoedName('x/foo/foo.test.ts')).toBe(true)
+  })
+
+  it('should flag a config file named for its folder', () => {
+    expect(isFolderEchoedName('x/foo/foo.config.json')).toBe(true)
+  })
+
+  it('should pass a stem that only shares a prefix with its folder', () => {
+    expect(isFolderEchoedName('x/foo/food.md')).toBe(false)
+  })
+
+  it('should pass a page named for what it covers', () => {
+    expect(isFolderEchoedName('docs/target/sync.md')).toBe(false)
+  })
+
+  it('should pass a root file, which has no folder to echo', () => {
+    expect(isFolderEchoedName('index.md')).toBe(false)
+  })
+
+  it('should pass a singular stem under a plural folder', () => {
+    expect(isFolderEchoedName('standards/standard.md')).toBe(false)
+  })
+
+  it('should read the immediate parent only', () => {
+    expect(isFolderEchoedName('rules/canon/canon/605-worktrees.md')).toBe(false)
+  })
+})
+
+describe('folderEchoedNames', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('folderEchoedNames reads the file list and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const git = (...args: string[]): string =>
+    execaSync('git', ['-C', root, ...args], {
+      env: gitEnv(),
+      extendEnv: false,
+    }).stdout
+
+  const commit = (path: string): void => {
+    const full = join(root, path)
+    mkdirSync(join(full, '..'), { recursive: true })
+    writeFileSync(full, 'seed\n')
+    git('add', '--all')
+    git('commit', '-m', `add ${path}`)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-folder-echo-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  describe('in a repository', () => {
+    beforeEach(() => {
+      git('init', '--initial-branch=main')
+      git('config', 'user.email', 'test@example.com')
+      git('config', 'user.name', 'Test')
+    })
+
+    it('should pass a tree with no folder-echoed name, counting the files', async () => {
+      commit('docs/target/sync.md')
+
+      const report = await folderEchoedNames(context())
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions[0]?.text).toContain('1 tracked file')
+    })
+
+    it('should fail on a folder-echoed name and name the path', async () => {
+      commit('docs/target/target-sync.md')
+
+      const report = await folderEchoedNames(context())
+
+      expect(report.failure).toContain('docs/target/target-sync.md')
+    })
+  })
+
+  it('should read a tree git cannot list as unmeasured', async () => {
+    writeFileSync(join(root, 'stray.md'), 'seed\n')
+
+    const report = await folderEchoedNames(context())
 
     expect(report.unmeasured).toBeDefined()
   })

@@ -4,6 +4,7 @@ import {
   captureStamps,
   clientCommandCitations,
   documentCeiling,
+  folderEchoedNames,
   markdownBans,
   type Measure,
   pluginManifests,
@@ -365,6 +366,14 @@ export const STAGES: readonly Stage[] = [
     id: 'document-ceiling',
     label: 'Document ceiling',
     checks: [{ kind: 'measure', measure: documentCeiling }],
+  },
+  {
+    // Unscoped, since any branch can add a file anywhere and one git ls-files
+    // costs nothing. Reads paths rather than markdown, so it sits here rather
+    // than in the markdown audit that also runs inside every target.
+    id: 'folder-echoed-names',
+    label: 'Folder-echoed filenames',
+    checks: [{ kind: 'measure', measure: folderEchoedNames }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift

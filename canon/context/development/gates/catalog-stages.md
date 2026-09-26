@@ -47,6 +47,14 @@ The stage fails a push on any non-exempt document past the ceiling, naming every
 
 A table counts at the width the formatter pads it to, so one wide cell raises every row to that width. A lookup table carrying long cells costs close to twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file sitting near the ceiling.
 
+## Folder-echoed filenames
+
+The Folder-echoed filenames stage reads every path `git ls-files` lists and fails on each one whose stem, the basename up to its first dot, equals its immediate parent folder's name or opens with `<folder>-`. The failure names every path in one pass. A tree git cannot list reports as unmeasured rather than passing. It reads the parent folder only, so the governance install layout under `.claude/rules/canon/canon/`, where a folder repeats a folder, stays out of reach.
+
+It is a gate stage rather than a `canon markdown audit` finding for two reasons. It reads paths rather than markdown, so it covers code and config files the audit never opens. The audit also runs inside every target through the tooling base stack, where a folder-named file may be a convention the target chose, and a finding there would fail a push on that choice. The rule itself sits in the `codebase-layout` skill and reaches targets as guidance, and this stage is this repository's only enforcement.
+
+Matching is exact rather than singular-aware, so `standards/standard.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
+
 ## Skill provenance
 
 The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or a `references/` file, outside a fence or a code span, across both `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git. A tree holding neither corpus reports as unmeasured.
