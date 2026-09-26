@@ -100,4 +100,10 @@ The toolkit retired snippets, deleting the catalog, the `canon snippets` verb, a
 canon sync --check . --json | jq '.reverse'
 ```
 
-An entry at `.claude/snippets` marked `dropped` is the toolkit's copy, and deleting the folder is safe. Leave a root `snippets/` folder alone when the walk marks it `project`, since that is content the project wrote under the same name and the retirement does not reach it. The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` by hand there.
+The walk checks both `.claude/snippets` and a root `snippets/`, since a toolkit old enough installed at the project root. Act on each entry by its verdict, whichever path it sits at:
+
+- `dropped` is the toolkit's copy, unchanged, and deleting the folder is safe
+- `unattributed` holds files the toolkit shipped under those names with content it never published, which is usually a copy the project edited, so read what changed before deleting anything
+- `project` is content the project wrote under the same name, which the retirement does not reach, so leave it alone
+
+The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` and a root `snippets/` by hand there, and treat what you find as `unattributed`.
