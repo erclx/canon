@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/erclx/canon/compare/v5.1.0...v5.2.0) (2026-09-26)
+
+
+### Features
+
+* **cli:** report a release npm does not serve yet ([#1975](https://github.com/erclx/canon/issues/1975)) ([e7bae21](https://github.com/erclx/canon/commit/e7bae21d5056006bb1d7607b8671a58bf643e64e))
+
 ## [5.1.0](https://github.com/erclx/canon/compare/v5.0.0...v5.1.0) (2026-09-26)
 
 
