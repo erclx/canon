@@ -5,7 +5,7 @@ description: Learning workspace implementation, the committed fixture, and the t
 
 # Teach
 
-Read `canon/context/teach.md` for structure, the render pipeline, and the decisions behind the surface before editing.
+Read `canon/context/features/teach.md` for structure, the render pipeline, and the decisions behind the surface before editing.
 
 `governance/rules/canon/661-teach.md` already routes a `.canon/teach/**` edit to both standards, and it ships to targets. This skill covers the implementation and the fixture, which that rule does not reach.
 
@@ -37,7 +37,7 @@ After changing what a workspace's files must contain:
 
 ## Reference
 
-- `canon/context/teach.md`: structure, the render pipeline, decisions and gotchas
+- `canon/context/features/teach.md`: structure, the render pipeline, decisions and gotchas
 - `references/lesson-chrome.md`: the four markers, what `canon teach nav` rewrites, and the authored-versus-generated boundary
 - `canon standards teach`: folder layout, ordinal naming, frontmatter, mission and learning-record formats
 - `canon standards glossary`: the entry shape, ordering, and which terms a workspace carries

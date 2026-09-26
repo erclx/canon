@@ -141,7 +141,7 @@ const SAME_REPOSITORY =
  * `canon/context/` carries no equivalent pattern. The same resolution test
  * cannot separate a path every scaffolded project holds, such as
  * `canon/context/index.md`, from this repository's own domain entry, such
- * as `canon/context/indexes.md`, since both resolve here and only the
+ * as `canon/context/context-model/indexes.md`, since both resolve here and only the
  * second is a defect. That is a semantic read no pattern makes, so it stays
  * with the rule and the review checklist rather than joining this reader.
  */

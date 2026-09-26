@@ -30,7 +30,7 @@ File inspection was the alternative and it is refused. Every other section answe
 
 ## Why there is no verdict over the six
 
-Five sections answering from verbs and one answering from nothing cannot roll into a number without that number lying about the sixth. `canon inventory` reports a listing rather than a verdict for the same reason, recorded in `canon/context/inventory.md`, and it is absent from the six because its subject is a target's own routes rather than what the toolkit ships.
+Five sections answering from verbs and one answering from nothing cannot roll into a number without that number lying about the sixth. `canon inventory` reports a listing rather than a verdict for the same reason, recorded in `canon/context/features/inventory.md`, and it is absent from the six because its subject is a target's own routes rather than what the toolkit ships.
 
 The same asymmetry is why an unread domain is a third state beside current and behind. A refused command, an absent report key, and a subcommand the target's binary does not carry all leave a section unread, and the version domain is reported first because a target a release behind explains every unread section under it. `canon/ARCHITECTURE.md` records that skills and the CLI ship at two speeds, which is what makes a missing subcommand an ordinary reading rather than a failure.
 

@@ -48,4 +48,4 @@ Exit codes: `0` no errors, `1` root not a directory, or a folder failed frontmat
 
 A git-ignored indexed folder, such as `.canon/tasks/` or `.canon/memory/`, never appears in the output. `listIndexes` filters candidates through `git check-ignore` the same way `regen`'s whole-repo walk does, which is the right default for a documentation lookup since those rows are session scratch, but it is a gap against `regen`'s positional-path mode, which bypasses that filter for those two folders.
 
-For the system rationale, frontmatter contract, when to adopt, and bootstrap path, see `canon/context/indexes.md`.
+For the system rationale, frontmatter contract, when to adopt, and bootstrap path, see `canon/context/context-model/indexes.md`.

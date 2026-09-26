@@ -59,13 +59,13 @@ When modifying a skill:
 When modifying either CLAUDE.md:
 
 - The root file and its seed are paired by `internal/rules/claude/596-claude-md.md`, which globs both and fires on an edit to either without this skill being loaded. It holds the mirroring split alone. The edit protocol and the routing criterion sit in `governance/rules/claude/592-claude-md.md`, which globs the root file and ships to a target that installed governance.
-- The seed's "Context" section defines the three-tier context model (always-loaded / path-scoped lazy / on-demand lookup at `canon/context/`). Keep the section coherent with the same model in `canon/context/context-model.md`.
+- The seed's "Context" section defines the three-tier context model (always-loaded / path-scoped lazy / on-demand lookup at `canon/context/`). Keep the section coherent with the same model in `canon/context/context-model/overview.md`.
 
 ## Reference
 
 - `canon/context/claude-plugin/`: skill strategy, requirements, lifecycle, review paths and shared procedures, plus distribution and release, canon claude CLI, built-in feature overlap
 - `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
-- `canon/context/context-model.md`: three-tier context model and how entries get populated
-- `canon/context/indexes.md`: index.md system rationale and contracts
+- `canon/context/context-model/overview.md`: three-tier context model and how entries get populated
+- `canon/context/context-model/indexes.md`: index.md system rationale and contracts
 - `tooling/claude/reference.md`: seed layout and design notes
 - `standards/skill.md`: skill structure, frontmatter, and authoring rules

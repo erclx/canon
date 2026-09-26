@@ -19,7 +19,7 @@ Without this skill, a session editing the teach implementation:
 
 ## Must
 
-- Point at `canon/context/teach.md` for structure and decisions rather than restating them, so one edit to the entry moves what every reader sees.
+- Point at `canon/context/features/teach.md` for structure and decisions rather than restating them, so one edit to the entry moves what every reader sees.
 - Name the chrome splice as the domain's first trap, and carry the marker contract in a reference the session opens when authoring rather than in the body every session loads.
 - State which `canon teach` invocation reaches the fixture and which reaches the operator's live workspaces.
 - Route a change in a workspace's required shape to `standards/teach.md` or `standards/glossary.md` rather than absorbing it.
@@ -28,7 +28,7 @@ Without this skill, a session editing the teach implementation:
 ## Must not
 
 - Restate what `canon standards teach` or `canon standards glossary` fixes. Each is the single source for the artifact it governs and a second copy here drifts on its own cadence.
-- Restate `canon/context/teach.md`'s structure or gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry, and a skill paraphrasing its own entry is the duplication that table exists to prevent.
+- Restate `canon/context/features/teach.md`'s structure or gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry, and a skill paraphrasing its own entry is the duplication that table exists to prevent.
 - Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it, and `canon/context/standards/per-standard/surfaces.md` records the split.
 - Fire on a `.canon/teach/**` edit. `661-teach.md` already reaches that path and ships to targets, where this skill is toolkit-internal and does not.
 

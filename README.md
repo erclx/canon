@@ -162,8 +162,8 @@ Each domain carries an entry written for someone maintaining the toolkit rather 
 - [Standards](canon/context/standards/index.md)
 - [Tooling stacks](canon/context/tooling/index.md)
 - [Design system](canon/context/design/index.md)
-- [Slides](canon/context/slides.md)
-- [Transcripts](canon/context/transcripts.md)
+- [Slides](canon/context/features/slides.md)
+- [Transcripts](canon/context/features/transcripts.md)
 - [Sandbox](canon/context/sandbox/index.md)
 
 ## Contributing

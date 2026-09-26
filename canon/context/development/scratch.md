@@ -9,7 +9,7 @@ description: Why shared scratch lives at the main worktree root, what worktree i
 
 `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/` are gitignored and live at the main worktree root. A linked worktree resolves them there rather than writing its own copy. How each folder archives, and how the set is backed off the disk, sits in `canon/context/development/records.md`.
 
-`.claude/.tmp/` carries its own `.gitignore` entry and manifest array member, so the scratch rule's fallback spelling is covered wherever it is written, worktree or main root alike. It stays an ignore entry rather than a second scratch root, since only whether git sees the folder changed. `canon/context/context-model.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
+`.claude/.tmp/` carries its own `.gitignore` entry and manifest array member, so the scratch rule's fallback spelling is covered wherever it is written, worktree or main root alike. It stays an ignore entry rather than a second scratch root, since only whether git sees the folder changed. `canon/context/context-model/overview.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
 
 ## What worktree isolation refuses
 
