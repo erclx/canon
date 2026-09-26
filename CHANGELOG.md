@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/erclx/canon/compare/v4.127.0...v5.0.0) (2026-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **snippets:** retire the domain, its verb, and its skills ([#1959](https://github.com/erclx/canon/issues/1959))
+
+### Features
+
+* **snippets:** retire the domain, its verb, and its skills ([#1959](https://github.com/erclx/canon/issues/1959)) ([e576698](https://github.com/erclx/canon/commit/e5766988f09384b8bb99946774ac61b161b50f9c))
+
 ## [4.127.0](https://github.com/erclx/canon/compare/v4.126.0...v4.127.0) (2026-09-26)
 
 
