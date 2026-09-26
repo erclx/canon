@@ -9,7 +9,7 @@
 # to infer on every response and hands the answer back instead.
 #
 # The entrypoint branch (bare vs. `file://` link) stays prose in
-# governance/rules/core/015-output.md. CLAUDE_CODE_ENTRYPOINT is not among
+# governance/rules/claude/566-output.md. CLAUDE_CODE_ENTRYPOINT is not among
 # the environment variables Claude Code documents as passed to a hook
 # subprocess, unlike CLAUDE_PROJECT_DIR, so a hook cannot read it reliably.
 #

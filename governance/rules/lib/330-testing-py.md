@@ -8,10 +8,6 @@ paths:
 
 # Python testing tooling
 
-## Layer
-
-- Load the `canon:test-craft` skill to pick the layer a test belongs at before choosing the tooling below, and report it rather than proceeding silently when the skill does not resolve.
-
 ## Framework
 
 - Use `pytest` for all tests. Do not use `unittest.TestCase`.

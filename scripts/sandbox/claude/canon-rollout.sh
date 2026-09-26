@@ -36,18 +36,18 @@ EOF
   git -C targets/seed config user.email "sandbox@example.com"
   git -C targets/seed config user.name "Sandbox"
 
-  mkdir -p targets/seed/canon/config targets/seed/.claude/rules/canon/core
+  mkdir -p targets/seed/canon/config targets/seed/.claude/rules/canon/claude
   cat <<'EOF' >targets/seed/canon/config/config.json
 {
   "syncedAt": "2026-08-01T00:00:00.000Z",
   "domains": {
     "governance": {
-      ".claude/rules/canon/core/000-constitution.md": "0000000000000000000000000000000000000000000000000000000000000000"
+      ".claude/rules/canon/claude/565-behavior.md": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   }
 }
 EOF
-  echo "# Role persona" >targets/seed/.claude/rules/canon/core/000-constitution.md
+  echo "# Behavior standards" >targets/seed/.claude/rules/canon/claude/565-behavior.md
   echo "# Kestrel" >targets/seed/README.md
 
   git -C targets/seed add .

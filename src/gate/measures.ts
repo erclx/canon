@@ -101,12 +101,7 @@ const output = (text: string): Emission => ({ kind: 'output', text })
 /**
  * Rules no stack reaches, sorted the way `canon gov list` emits them.
  * `260-shadcn` and `320-tanstack-query` are opt-in libraries a project may not
- * want. `600-at-references` used to sit here too, shipping with no stack on
- * purpose since a rule under `claude/` would reach every base consumer through
- * the folder-whole entry there. Its own install channel, `canon snippets
- * install`, retired with nothing left to deliver it, so `base` now carries
- * `snippets` as a folder-whole entry of its own and the rule reaches every base
- * consumer through that instead.
+ * want.
  *
  * `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in by
  * `--add` until a Go or PHP stack ships, which `target-setup` reaches by

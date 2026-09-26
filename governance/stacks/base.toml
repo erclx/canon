@@ -1,8 +1,9 @@
 extends = ""
-# All four folders whole. Every rule authored under them ships to a base
+# Four audience groups whole. Every rule authored under them ships to a base
 # consumer, so adding one is a single edit rather than a file and a name here.
-# `snippets` carries the `@`-reference convention rule, which lost its only
-# other delivery path when `canon snippets install` retired. `ci` carries the
-# workflow rule, whose glob is the only inbound route to the `ci-workflow`
-# skill.
-rules = ["core", "claude", "snippets", "ci", "120-bash"]
+# `canon` carries the toolkit workflow and canonical-doc rules, `claude` the
+# session conduct and `.claude/` authoring rules, `tooling` the dev setup and
+# CI workflow rules, and `writing` the prose and document-shape rules. The
+# `code` group is left to the stacks that write code, so a docs or writing
+# project loads no rule it can never apply.
+rules = ["canon", "claude", "tooling", "writing", "120-bash"]

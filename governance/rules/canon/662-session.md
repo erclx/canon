@@ -8,7 +8,7 @@ paths:
 
 ## What a handoff carries
 
-- Follow this rule rather than `555-tasks.md` for a `session-` file. A handoff is not a task and carries neither `## Outcomes` nor `## Findings`.
+- Follow this rule rather than `655-tasks.md` for a `session-` file. A handoff is not a task and carries neither `## Outcomes` nor `## Findings`.
 
 ## Authority
 

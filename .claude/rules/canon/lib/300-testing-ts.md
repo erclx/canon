@@ -9,10 +9,6 @@ paths:
 
 # TypeScript/JavaScript testing tooling
 
-## Layer
-
-- Load the `canon:test-craft` skill to pick the layer a test belongs at before choosing the tooling below, and report it rather than proceeding silently when the skill does not resolve.
-
 ## Unit and integration
 
 - Use Vitest for unit and integration tests.

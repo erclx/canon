@@ -90,9 +90,9 @@ Eleven bullets across four sections, addressed by their text rather than by thei
 A candidate the `base` stack already delivers path-scoped cannot show a difference, because the cut half still carries the rule through another file. Auditing this first is what separates a null meaning the section is dead from a null meaning governance carried it. Both are nulls and only one is evidence about the seed.
 
 - **Memory**: no rule and no installed standard mentions `.canon/memory/`. The cut half loses the rule outright.
-- **Indexes**: `standards/context.md` tells a session to skip `index.md` because `canon indexes regen` rewrites it, and `555-tasks.md` forbids hand-editing the task index. Neither covers the `auto: false` escape. Coverage is partial and lands on the first candidate bullet.
+- **Indexes**: `standards/context.md` tells a session to skip `index.md` because `canon indexes regen` rewrites it, and `655-tasks.md` forbids hand-editing the task index. Neither covers the `auto: false` escape. Coverage is partial and lands on the first candidate bullet.
 - **Output**: no rule and no installed standard mentions the `**Created:**` grouping. The cut half loses the rule outright.
-- **Tasks**: `standards/tasks.md` covers the `Plan:` link, the `../plans/` path, and the `../.tmp/plans-archive/` destination in full, and `555-tasks.md` names that file the single source. Coverage is complete.
+- **Tasks**: `standards/tasks.md` covers the `Plan:` link, the `../plans/` path, and the `../.tmp/plans-archive/` destination in full, and `655-tasks.md` names that file the single source. Coverage is complete.
 
 One hook bears on the Indexes pair. `index-reminder.sh` fires on `Grep` and `Glob` and tells the session an `index.md` exists and should be read. That reinforces the Indexes bullet this pair keeps rather than either bullet it cuts, so it is a confound on attention rather than on the rule under test. Record whether it fired.
 
