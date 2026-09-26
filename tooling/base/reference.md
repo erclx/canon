@@ -13,7 +13,7 @@ Golden config files live in `tooling/base/configs/` and are copied into the targ
 - `.prettierrc`: `semi: false`, `singleQuote: true`, plus a parser override per non-standard extension (`.mdx` to `markdown`).
 - `.shellcheckrc`: `external-sources=true`. Required for shellcheck to follow `source` directives.
 - `.editorconfig`: `root = true`, with an `[*.sh]` block setting `indent_style = space` and `indent_size = 2`.
-- `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, and `subject-case` disabled.
+- `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, `subject-case` disabled, and a local `no-claude-co-author` rule refusing a `Co-authored-by` trailer that names Claude or Anthropic.
 - `.husky/`: `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, `post-rewrite`.
 - `.vscode/extensions.json` and `.vscode/settings.json`: editor wiring for Prettier, cspell, shfmt, and shellcheck.
 - `scripts/verify.sh`: the maintenance entry point behind `check`.

@@ -54,6 +54,11 @@ Does not govern:
 - No backslash escaping or internal double quotes
 - No conversational filler or introductory phrases
 
+## Trailers
+
+- Do not add a `Co-authored-by` trailer crediting Claude or Anthropic, by name or by address
+- The `commit-msg` hook refuses a commit carrying one, so remove the line and commit again
+
 ## Examples
 
 ### Correct
