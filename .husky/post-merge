@@ -33,10 +33,12 @@
 # what is published, so PATH runs the same contract this repository ships.
 # CANON_SKIP_UPGRADE=1 turns that step off.
 #
-# The hook also updates the marketplace plugin cache once it drifts behind
-# what the binary above just reinstalled, so the skill catalog, and the standards
-# corpus move together rather than waiting on an operator
-# to run `claude plugin update` by hand.
+# The hook also updates the marketplace plugin cache once it drifts behind the
+# marketplace head, so the skill catalog and the standards corpus move together
+# rather than waiting on an operator to run `claude plugin update` by hand. The
+# plugin tracks the marketplace, not the binary above, so it can lead the binary
+# by a whole publish: a release lands on the marketplace at merge and on npm only
+# once the publish job finishes.
 # CANON_SKIP_PLUGIN_UPDATE=1 turns that step off.
 
 root=$(git worktree list --porcelain 2>/dev/null | grep -m 1 '^worktree ' | cut -d' ' -f2-) || root=''
@@ -219,13 +221,14 @@ if [ -z "$CANON_SKIP_UPGRADE" ]; then
     # does until a release lands.
     message=$(printf '%s' "$upgrade" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
     if [ -n "$message" ]; then
-      printf '\n⬆️  Not upgraded: %s\n\n' "$message"
+      printf '\n⬆️  CLI not upgraded: %s\n\n' "$message"
     fi
   fi
 fi
 
-# Updates the marketplace plugin cache once it drifts behind the binary the
-# block above just reinstalled, so a dispatched session stops resolving a
+# Updates the marketplace plugin cache once it drifts behind the marketplace
+# head, which can lead the binary the block above reinstalled by the minutes a
+# publish takes, so a dispatched session stops resolving a
 # retired skill body while waiting on an operator to run `claude plugin
 # update` by hand.
 #
