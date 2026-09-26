@@ -4,7 +4,7 @@
 
 The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, spelling, shell linting, conventional commits, git hooks, CI, and one maintenance script. Every other stack extends it, so a decision made here is one every stack inherits.
 
-A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs target-scenarios` carries the recipe.
+A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs scenarios` carries the recipe.
 
 ## What ships as golden configs
 
@@ -97,4 +97,4 @@ Sticky negative knowledge. Do not relearn.
 
 `bun run check` repairs a checkout rather than gating one. It runs `format` first to auto-fix drifted code, then asserts only what the formatters could not fix. The pull request workflow calls `check:format`, `check:spell`, and `check:shell` directly, and those three are the gate.
 
-`scripts/verify.sh`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs target-projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the three checks above.
+`scripts/verify.sh`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the three checks above.

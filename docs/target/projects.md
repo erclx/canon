@@ -119,22 +119,22 @@ When a new need appears after scaffold, install the one domain without re-runnin
 - Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
 - Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
 
-Standards are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, so a session reads one with `canon standards <name>`, resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](target-migrations.md) covers the `.claude/snippets/` folder an older one left behind.
+Standards are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, so a session reads one with `canon standards <name>`, resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](migrations.md) covers the `.claude/snippets/` folder an older one left behind.
 
 Per-domain mechanics live in the corresponding `docs/<domain>.md`. The skill body in `claude/skills/<skill>/SKILL.md` covers detection and preview.
 
 ## Sync upstream drift
 
-When the toolkit updates, a target pulls changes per domain. A project scaffolded before a layout move runs the one-time moves in [target migrations](target-migrations.md) first. [Target sync](target-sync.md) then covers reading what drifted, the catch-all and targeted entry points, verifying a sync in the sandbox, and running one from an agent session.
+When the toolkit updates, a target pulls changes per domain. A project scaffolded before a layout move runs the one-time moves in [target migrations](migrations.md) first. [Target sync](sync.md) then covers reading what drifted, the catch-all and targeted entry points, verifying a sync in the sandbox, and running one from an agent session.
 
 ## Scenarios
 
-[Target scenarios](target-scenarios.md) walks a markdown-heavy project, a web application, and a monorepo with several language roots from the first session through ongoing maintenance.
+[Target scenarios](scenarios.md) walks a markdown-heavy project, a web application, and a monorepo with several language roots from the first session through ongoing maintenance.
 
 ## Related
 
 - [agents](../agents/index.md): CLI flags, exit codes, and JSON output shapes
-- [target migrations](target-migrations.md), [target sync](target-sync.md), [target scenarios](target-scenarios.md): the one-time moves, the recurring sync, and worked setups
+- [target migrations](migrations.md), [target sync](sync.md), [target scenarios](scenarios.md): the one-time moves, the recurring sync, and worked setups
 - [AI workflow](../workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
 - [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/context-model/indexes.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
 - [sandbox](../../canon/context/sandbox/index.md): scenario catalog for verifying domain flows

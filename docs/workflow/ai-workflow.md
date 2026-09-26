@@ -44,7 +44,7 @@ Run `canon init` to seed the `.claude/` directory, a root `CLAUDE.md` file, and 
 
 ### Bootstrap a new project
 
-See [target projects](../target/target-projects.md) for the scaffold decision, core domains and skips, and the full lifecycle across scaffold, add-a-domain-later, and upstream sync.
+See [target projects](../target/projects.md) for the scaffold decision, core domains and skips, and the full lifecycle across scaffold, add-a-domain-later, and upstream sync.
 
 ### New feature
 

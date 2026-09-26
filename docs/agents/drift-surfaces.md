@@ -66,7 +66,7 @@ and snippets retired outright, so a project still holding a root `standards/`
 folder is carrying its own authoring surface rather than an unfinished install.
 Nothing proposes moving it, and no command relocates the content. Move it
 yourself. A leftover `snippets/` folder reports under the reverse walk instead,
-where `docs/target/target-sync.md` says what to do with it.
+where `docs/target/sync.md` says what to do with it.
 
 ## Rules the target never received
 

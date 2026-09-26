@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target migrations
 
-Each section below is a move a project runs once, when it was scaffolded before the change the section names. Run `canon upgrade` first, so the verb doing the move is the current one. For the recurring sync that follows, see [target sync](target-sync.md).
+Each section below is a move a project runs once, when it was scaffolded before the change the section names. Run `canon upgrade` first, so the verb doing the move is the current one. For the recurring sync that follows, see [target sync](sync.md).
 
 ## Move the records first, once
 

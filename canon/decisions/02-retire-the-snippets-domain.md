@@ -17,7 +17,7 @@ Delete the content, the verb, and every surface that authored, listed, installed
 
 The release carries a breaking-change marker, since removing `canon snippets` is breaking by semver and the marker puts the retirement in the release notes a target reads.
 
-A target is told rather than migrated. A project that installed snippets under an older toolkit may hold a `.claude/snippets/` folder, and the reverse walk in `canon sync --check` reports it as `dropped` once `snippets/` is gone from the toolkit's tree, with no new detection code. `docs/target/target-migrations.md` names the folder and warns against deleting a root `snippets/` the project wrote itself.
+A target is told rather than migrated. A project that installed snippets under an older toolkit may hold a `.claude/snippets/` folder, and the reverse walk in `canon sync --check` reports it as `dropped` once `snippets/` is gone from the toolkit's tree, with no new detection code. `docs/target/migrations.md` names the folder and warns against deleting a root `snippets/` the project wrote itself.
 
 ## Alternatives
 

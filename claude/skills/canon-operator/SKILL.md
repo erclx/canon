@@ -14,7 +14,7 @@ Run these from the target project root, in parallel, before acting:
 
 - `canon docs list`: the index of toolkit reference docs
 - `canon docs agents`: the CLI command catalog and invocation contract
-- `canon docs target-projects`: the scaffold, add-a-domain, and sync lifecycle
+- `canon docs projects`: the scaffold, add-a-domain, and sync lifecycle
 
 Load a domain doc with `canon docs <topic>` only when the intent touches that domain. Read the live catalog for any domain you act on with `canon <domain> list --json`. Never hardcode stack, rule, or standards names.
 
