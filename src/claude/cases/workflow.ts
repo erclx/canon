@@ -97,6 +97,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'I was launched to review one pull request another session built. What may I write, and who do I answer to when the pass posts?',
+    expect: 'role-reviewer',
+  },
+  {
+    prompt:
       'The screencast draft is finished. Turn it into an actual video now.',
     expect: 'record-screencast',
   },
