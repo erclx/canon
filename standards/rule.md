@@ -32,7 +32,7 @@ Write both when both apply. A rule stating the directive and a skill stating how
 ## Location
 
 - A toolkit-shipped rule lives at `.claude/rules/canon/<subdirectory>/<n>-<slug>.md`. The wrapper marks the file as toolkit-owned and replaced on sync, so a reader unfamiliar with the numbering convention still knows not to edit it.
-- Subdirectories group by domain: `core/`, `lang/`, `framework/`, `lib/`, `ui/`, `claude/`, `snippets/`, `ci/`
+- Subdirectories group by domain or audience: `code/`, `lang/`, `framework/`, `lib/`, `ui/`, `claude/`, `canon/`, `tooling/`, `writing/`
 - `<n>` is a number from the band reserved for the rule's source and `<slug>` is a one-to-three-word kebab topic
 - A rule the project authored itself lives at `.claude/rules/project/<subdirectory>/<n>-<slug>.md`, a sibling of `canon/` rather than nested inside it, keeping the same subdirectory names
 - This repository's own toolkit-only rules, which never ship to a target, live at `.claude/rules/internal/<subdirectory>/<n>-<slug>.md`, a second sibling of `canon/`. See "Two sources numbering into one folder" below.
@@ -40,11 +40,9 @@ Write both when both apply. A rule stating the directive and a skill stating how
 
 ## Reserved numbers
 
-`000-899` is reserved for a rule set that ships to targets. `000-599` is what the first six subdirectories above already divide, at 100 per subdirectory. `ci/` was the first to draw from the headroom past that, taking `700-799`.
+`000-899` is reserved for a rule set that ships to targets, and the nine subdirectories above divide it at 100 per subdirectory, in the order listed. No band is left over, so a subdirectory a shipped set adds later joins an existing band or takes one a retired subdirectory freed.
 
-`snippets/` holds one rule rather than a subdirectory's worth of them, and draws a single number, `600`, from the nearer overflow band rather than claiming a hundred for one file. The rest of `600-699`, along with `800-899`, is what remains for a subdirectory a shipped set has not added yet.
-
-A project-authored rule takes `900-999`, one sequence across every subdirectory under `.claude/rules/project/`. Scanning for a free number instead is what fails, because a shipped set fills its own band release by release, so what reads as free today is what a later release lands on. One target authored `claude/561-self-check.md` on a day nothing shipped at 561, met `claude/561-teach.md` on its next install, and now reads two numbers differently from everywhere else.
+A project-authored rule takes `900-999`, one sequence across every subdirectory under `.claude/rules/project/`. Scanning for a free number instead is what fails, because a shipped set fills its own band release by release, so what reads as free today is what a later release lands on. One target authored `claude/561-self-check.md` on a day nothing shipped at 561, met the shipped teach rule, then numbered 561, on its next install, and now reads two numbers differently from everywhere else.
 
 The cost is that a project-authored rule's leading digit stops naming its domain. Its subdirectory names it instead, and install preserves that either way. What a shared band costs is worse: a session that loads two rules reading as one number, with nothing in the folder to say which is which.
 
@@ -54,7 +52,7 @@ The cost is that a project-authored rule's leading digit stops naming its domain
 
 The reservation above divides one pair, being a shipped set against the rules a project wrote for itself. A third source, a rule set held back from targets and installed only where it was authored, needs its own division too. This repository is the one place all three sources exist at once, and it divides the third pair two ways at once rather than one: `canon/` and `internal/` separate a shipped rule from an internal one by location, the same way `project/` separates a project-authored one, and within each subdirectory the numbering still divides by source as well, one source taking the top of the band and the other the gaps between the tens.
 
-The numbering half stays because location alone does not carry to a reader who only sees the number, such as one comparing `core/070-planning.md` against a citation written before the rules moved into `canon/`.
+The numbering half stays because location alone does not carry to a reader who only sees the number, such as one comparing `claude/567-planning.md` against a citation written before the rules moved into `canon/`.
 
 The collision this prevents is silent. Two rules that resolve to the same `<n>-<slug>` path leave one file in the installed folder, and neither the install nor the session that reads it reports which source lost. Nothing checks a division outside the reserved bands, so it holds only while both sources follow it. Separating `canon/` from `internal/` by folder removes the filename-collision case specifically, since the two no longer install to the same directory, but the number still carries the source signal for a reader who has only the number in view.
 

@@ -16,7 +16,7 @@ description: The canon claude command surface and what each verb writes into a t
 
 `canon claude seeds list` names every file `init` writes and where it comes from, so this entry does not restate the set. `init` also merges `.gitignore` entries, skips a file already present, and runs once per project.
 
-Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `500-prose.md`, `501-markdown.md`, `510-context.md`, and `520-wireframes.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
+Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `800-prose.md`, `801-markdown.md`, `610-context.md`, and `620-wireframes.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
 
 ### Seeded folders
 

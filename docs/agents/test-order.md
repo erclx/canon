@@ -5,7 +5,7 @@ description: Reading where an implementation reached history ahead of its test, 
 
 # Test order
 
-`canon gov test-order` reports where an implementation reached a commit ahead of the test covering the same behavior. It answers the rule in `.claude/rules/canon/core/070-planning.md` that asks for the test first, which until this verb existed was prose loaded on a glob match with nothing measuring it.
+`canon gov test-order` reports where an implementation reached a commit ahead of the test covering the same behavior. It answers the rule in `.claude/rules/canon/claude/567-planning.md` that asks for the test first, which until this verb existed was prose loaded on a glob match with nothing measuring it.
 
 ```bash
 canon gov test-order

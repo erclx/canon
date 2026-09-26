@@ -53,5 +53,5 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 - Which layer a test belongs at: `test-craft`. This skill decides where the test file sits once its layer is chosen.
 - Where a new path gets written into a plan, and the plan's shape: `plan-feature` and the plan standard
-- The directory principle every session loads: `000-constitution`
+- The pointer here that every session of a code stack loads: `000-code`
 - Runner, suffix, and top-level test folder conventions per language: `300-testing-ts`, `330-testing-py`, `335-testing-go`, and `336-testing-php`

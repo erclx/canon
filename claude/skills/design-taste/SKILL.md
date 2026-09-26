@@ -44,7 +44,7 @@ Two worked examples:
 
 The read fixes the kind, which decides which rules apply, and names the layer, which decides what may vary. A round that cannot state its read has not decided what it is doing.
 
-Put the read to the operator through the structured question surface where it genuinely forks, per `005-behavior`. Where context settles it, declare and proceed rather than asking.
+Put the read to the operator through the structured question surface where it genuinely forks, per `565-behavior`. Where context settles it, declare and proceed rather than asking.
 
 ## The layers, and the order they settle
 

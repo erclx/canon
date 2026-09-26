@@ -22,7 +22,7 @@ Owns the small reusable prompts stored as plain markdown, invoked directly in Cl
 - The retrieval half is the cost that choice carries. A standard is read by `canon standards <name>`, which resolves against the package from anywhere. A snippet is reached by a path a person types after `@`, and a plugin cache path can be typed but not discovered, so `canon snippets list` is the catalog a reader without a memorized path falls back to.
 - Presets are virtual curated subsets defined in `snippets.toml`, while categories are auto-derived from folders. Adding a folder adds a category with no registration step. Neither resolves against an install argument, and both exist to help a reader find the `@` path a snippet resolves at.
 - Every folder under `snippets/` is publishable, so nothing filters. The ones no entry point reads live in `internal/snippets/`.
-- `governance/rules/snippets/600-at-references.md`, the `@`-reference convention rule, reaches every base consumer through `canon gov install` and `sync`, since `base` carries `snippets` as a folder-whole entry, per `canon/context/governance/rules.md`.
+- No rule governs an `@` reference any longer. `600-at-references`, which told a session to execute a referenced snippet immediately, retired in the audience regroup, so each snippet carries its own execute-now instruction, and no snippet was measured for depending on the rule. A target syncing past the retirement deletes its copy.
 
 ### Where a snippet lives
 

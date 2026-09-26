@@ -45,7 +45,7 @@ Server readiness stays in `scripts/screenshot.sh` rather than the seed. The wrap
 
 ### The README frame workflow
 
-The web stack ships `readme-screenshot.yml`, which commits a refreshed frame back to the pull request branch, and this repository does not run it. `pr-visual-checks.yml` reports the landing page capture and never commits, because that page reads catalog counts at build time and a merge touching no `web/` file moves its bytes. A target's README frame moves only when the branch's own files do, which is the test `governance/rules/ci/700-ci-workflow.md` states for committing. The cost is a shipped template whose commit-back half the first adopting target verifies, not this repository.
+The web stack ships `readme-screenshot.yml`, which commits a refreshed frame back to the pull request branch, and this repository does not run it. `pr-visual-checks.yml` reports the landing page capture and never commits, because that page reads catalog counts at build time and a merge touching no `web/` file moves its bytes. A target's README frame moves only when the branch's own files do, which is the test `governance/rules/tooling/700-ci-workflow.md` states for committing. The cost is a shipped template whose commit-back half the first adopting target verifies, not this repository.
 
 ### The surface-capture rule reaches every component
 

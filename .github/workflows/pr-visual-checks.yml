@@ -133,7 +133,7 @@ jobs:
         run: bun run web:card:check
 
       # Uploaded on success rather than on failure alone, against the artifact
-      # rule in governance/rules/ci/700-ci-workflow.md. The frames are this
+      # rule in governance/rules/tooling/700-ci-workflow.md. The frames are this
       # job's product now that it no longer commits them, so a failure-only
       # upload would leave a passing run with nothing to review.
       - name: Upload the captured frames

@@ -22,7 +22,7 @@ A pass that amends a decision's reasoning without re-reading its numbers dates t
 `standards/teach.md` fixes the layout, the ordinal naming, the frontmatter, and the mission and learning-record formats of a learning workspace, while the pedagogy that decides what to teach next sits in `teach-workspace/references/`.
 
 - An attribute standard beside `markdown.md` lost on the second-reader test, since a standard nothing else cites has no owner to correct it.
-- Folding the pedagogy into `teach.md` lost to `591-standard-authoring`, since a standard governs one document type or one attribute rather than both.
+- Folding the pedagogy into `teach.md` lost to `891-standard-authoring`, since a standard governs one document type or one attribute rather than both.
 - `teach.md` names the skill's reference in prose rather than as a path a check could resolve, since `canon gov citations` never opens `standards/`. Measured at `285723bc` on 2026-09-06.
 
 ## Workspace ordinals
@@ -33,7 +33,7 @@ A workspace is named `<nn>-<topic>` rather than by a bare slug, so a listing sor
 
 `standards/glossary.md` governs a glossary wherever it sits, which is why the format is a standard of its own rather than a section of `teach.md`. A workspace glossary is promotable, and a promotion lands the file at a path no glob covers, so the shape has to travel with the file. `teach.md` keeps the requirement that the file exists and yields the entry shape, which declares the boundary from both sides.
 
-It sits at the flat root and resolves to `teach-workspace`, the one surface driving every promotion. Both readers name the skill rather than a path: `teach.md` because a promoted file has no fixed address, and `561-teach.md` because it ships with the CLI while the reference ships with the plugin, so it carries the report-the-gap instruction `500-prose` uses across that split.
+It sits at the flat root and resolves to `teach-workspace`, the one surface driving every promotion. Both readers name the skill rather than a path: `teach.md` because a promoted file has no fixed address, and `661-teach.md` because it ships with the CLI while the reference ships with the plugin, so it carries the report-the-gap instruction `800-prose` uses across that split.
 
 The format comes from the external source the teaching surface was built against, the more specified of the two candidates: it adds a term only once the material has used it, picks one word per concept and lists the rejected synonyms as aliases to avoid, and requires the glossary's own terms inside other definitions. `internal/vocabulary.md` departs on one rule and states the departure in its own intro, since a bank drawn from every session has no first appearance to name. Recording the exception on the page rather than in the standard follows `standards/standard.md`, since a standard citing a real file goes stale when that file moves.
 

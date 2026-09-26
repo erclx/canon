@@ -44,7 +44,7 @@ Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the r
 
 `canon labels scan`'s unspelled-word check on a pull request title carries no `publish.md` section. The destination-scoped checks name text a reader outside this checkout cannot resolve, and a misspelled word carries no such dependency, so it fits neither that paragraph nor the namespace split `versioning.md` states for phase labels against semver tags. It is a fact about one field feeding one sink: release-please copies a pull request title straight into `CHANGELOG.md` with nothing having spell-checked it first. This entry and `docs/agents/commands.md` state it about the verb.
 
-`cspell` is a devDependency of this repository alone, per `075-dependencies.md`'s ban on importing a transitive-only package, so `src/labels/spelling.ts` resolves `node_modules/.bin/cspell` by walking from the caller's working directory up to the filesystem root rather than spawning a bare `cspell`.
+`cspell` is a devDependency of this repository alone, per `775-dependencies.md`'s ban on importing a transitive-only package, so `src/labels/spelling.ts` resolves `node_modules/.bin/cspell` by walking from the caller's working directory up to the filesystem root rather than spawning a bare `cspell`.
 
 - `bun src/cli.ts labels scan`, the invocation `phase-label-gate.yml` runs, sits outside `bun run` and carries no `node_modules/.bin` on `PATH`, so a bare spawn throws `ENOENT` even inside this repository.
 - The resolved path rules out a `bunx` fallback, which could reach the network from inside an otherwise offline, regex-based command.

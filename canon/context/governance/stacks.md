@@ -7,16 +7,16 @@ description: How a stack resolves its rule set, why an entry may name a whole fo
 
 Each stack declares an optional `extends` chain and a `rules` list. An entry names a rule or a whole rule folder. The chain resolves recursively, so `react` resolves through `node` to `base` and the full deduplicated set installs.
 
-| Stack            | Extends | Adds                                                                |
-| ---------------- | ------- | ------------------------------------------------------------------- |
-| `base`           | -       | the `core`, `claude`, `snippets`, and `ci` folders whole, plus bash |
-| `node`           | base    | TypeScript                                                          |
-| `node-server`    | node    | the server pair: server security and database                       |
-| `react`          | node    | React, Tailwind, TypeScript testing, Zod, web security, the UI band |
-| `nextjs`         | react   | Next.js                                                             |
-| `astro`          | node    | Astro, TypeScript testing, web security, the UI band                |
-| `python`         | base    | Python, Python testing, Pydantic, the server pair                   |
-| `python-fastapi` | python  | FastAPI                                                             |
+| Stack            | Extends | Adds                                                                       |
+| ---------------- | ------- | -------------------------------------------------------------------------- |
+| `base`           | -       | the `canon`, `claude`, `tooling`, and `writing` folders whole, plus bash   |
+| `node`           | base    | the `code` folder whole, TypeScript                                        |
+| `node-server`    | node    | the server pair: server security and database                              |
+| `react`          | node    | React, Tailwind, TypeScript testing, Zod, web security, the UI band        |
+| `nextjs`         | react   | Next.js                                                                    |
+| `astro`          | node    | Astro, TypeScript testing, web security, the UI band                       |
+| `python`         | base    | the `code` folder whole, Python, Python testing, Pydantic, the server pair |
+| `python-fastapi` | python  | FastAPI                                                                    |
 
 The table stays a table because it grows a row per stack rather than per rule. Each row names what the stack adds rather than listing rule names, and `canon gov list --json` reports the resolved set.
 
@@ -26,9 +26,9 @@ The table stays a table because it grows a row per stack rather than per rule. E
 
 `expandStackEntry` in `src/gov/stacks.ts` resolves one entry. A name matching a directory under `governance/rules/` yields every rule inside it, and anything else yields itself, so a folder and a slug leave the resolver as one shape. Dedupe runs on the expanded names, which lets a stack name a folder while an ancestor names a rule inside it without installing that rule twice.
 
-`base` takes its four folders whole because its list was always exactly those folders, and enumerating them made adding a rule a second edit nothing prompted. Every other stack stays enumerated, since taking some rules from a folder is a selection a folder entry cannot express.
+`base` takes its four folders whole because its list was always exactly those folders, and enumerating them made adding a rule a second edit nothing prompted. `node` and `python` take `code` whole for the same reason, since every stack that writes code extends one of them. Every other stack stays enumerated, since taking some rules from a folder is a selection a folder entry cannot express.
 
-The consequence is that those four folders are opt-out. A rule authored into `governance/rules/claude/` ships to every `base` consumer by existing, so the decision sits in whether the file belongs in that folder rather than in the stack file. `runInstall` expands before printing, so the operator still reads every rule name.
+The consequence is that those five folders are opt-out. A rule authored into `governance/rules/claude/` ships to every `base` consumer by existing, so the decision sits in whether the file belongs in that folder rather than in the stack file. `runInstall` expands before printing, so the operator still reads every rule name.
 
 ### A Node backend takes a sibling stack where Python takes none
 
@@ -52,13 +52,13 @@ Moving a rule between stacks changes what a new install writes and nothing on a 
 
 ### The extras flag layers rather than defines
 
-`--add` takes rule names alone and does not expand a folder, since the flag layers onto a resolved stack rather than defining one. An unknown name warns rather than aborting, so `--add core` is loud rather than silent. Extras are deduped against the stack's resolved rules, so a rule already in the stack is a no-op.
+`--add` takes rule names alone and does not expand a folder, since the flag layers onto a resolved stack rather than defining one. An unknown name warns rather than aborting, so `--add code` is loud rather than silent. A Go or PHP target reaching `335-testing-go` or `336-testing-php` through `--add` therefore gets no `code/` rule, which is why those two keep their `canon:test-craft` pointer where `300-testing-ts` and `330-testing-py` dropped it. Extras are deduped against the stack's resolved rules, so a rule already in the stack is a no-op.
 
 ## Gotchas
 
 ### A rule in an unnamed folder installs for nobody
 
-A rule authored in a folder no stack names reaches no target. The four folders `base` takes whole close that, and every other folder needs the rule's name in a stack file.
+A rule authored in a folder no stack names reaches no target. The five folders `base`, `node`, and `python` take whole close that, and every other folder needs the rule's name in a stack file.
 
 ### The unreferenced stage stays advisory
 
@@ -79,7 +79,7 @@ Take a folder whole only when the stack wants every rule in it now and every rul
 
 ```toml
 extends = ""
-rules = ["core", "claude"]
+rules = ["canon", "claude"]
 ```
 
 The branch adding a stack owes no hero render. The Hero stage runs `regen-hero.sh --check`, which discards what it fills, so a changed stack count does not fail it. `refresh-capture-frames.yml` lists `governance/stacks/**` in its path filter and regenerates the frames in its own pull request after the merge.

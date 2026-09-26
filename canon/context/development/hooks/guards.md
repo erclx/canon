@@ -17,7 +17,7 @@ The two index hooks run with `canon` dropped from `PATH`, which pins them to the
 
 ## The path form hook
 
-`path-form.sh` shares the `Edit|Write|MultiEdit` matcher and hands back the absolute form of a path written from a linked worktree, so a session prefers that form over computing it. `governance/rules/core/015-output.md` keeps the instruction as a self-sufficient fallback rather than a branch the hook replaced. The hook reaches a project only through `tooling/claude/seeds/` at scaffold time while the rule reaches one through `canon gov sync`, and a target that synced governance without ever scaffolding through the seed would otherwise read a line naming a source it does not have.
+`path-form.sh` shares the `Edit|Write|MultiEdit` matcher and hands back the absolute form of a path written from a linked worktree, so a session prefers that form over computing it. `governance/rules/claude/566-output.md` keeps the instruction as a self-sufficient fallback rather than a branch the hook replaced. The hook reaches a project only through `tooling/claude/seeds/` at scaffold time while the rule reaches one through `canon gov sync`, and a target that synced governance without ever scaffolding through the seed would otherwise read a line naming a source it does not have.
 
 It reads the worktree branch off `file_path` itself, a `*/.claude/worktrees/*` segment, rather than shelling out to `git rev-parse`, since that call would answer for whatever directory the hook's own process happens to run in rather than the worktree the write came from. `tasks-index.sh` and `memory-index.sh` derive their main root the same way, off a path suffix rather than the session. It exits quietly on a path with no such segment and resolves `realpath` on one that has it.
 
