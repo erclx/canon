@@ -23,6 +23,12 @@ Skip it when every path the work names already exists.
 - Name a folder for what it holds for a reader, being a feature, a route, or a role, over its technical kind alone. `checkout/` tells a reader what is inside where `helpers/` does not.
 - Never create a bucket named `misc`, `common`, `utils`, or `helpers` on its own. Qualify it by what it serves, or place the file with its consumer.
 
+## Name a file for what it covers inside its folder
+
+- Never repeat the folder's name as a file's whole stem or as its prefix. `billing/invoice.md` says what `billing/billing-invoice.md` says with one word fewer in every path that cites it.
+- Drop the prefix when a file moves into a subfolder that now states it, and retarget every citation of the old path in the same change.
+- Read the stem as the basename up to its first dot, so `checkout/checkout.test.ts` repeats its folder as much as `checkout/checkout.md` does.
+
 ## Split before the file lands
 
 - Split a folder when the new file brings a second role into it, before the file lands rather than in a later refactor. The split that touched 98 files would have touched a handful when the folder held eleven.
