@@ -353,7 +353,7 @@ export async function recordPlan(
 }
 
 /**
- * Marks the named outcomes `[x]` in place. `docs-fold` runs this against a
+ * Marks the named outcomes `[x]` in place. `context-fold` runs this against a
  * board it can read and cannot edit from a linked worktree, and the positions
  * come from the read it already made.
  */

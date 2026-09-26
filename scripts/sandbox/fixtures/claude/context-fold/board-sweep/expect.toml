@@ -1,8 +1,8 @@
-# What a correct `/docs-fold` run leaves behind on the board-sweep arm.
+# What a correct `/context-fold` run leaves behind on the board-sweep arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# The arm asserts that outcome state alone moves no plan. `docs-fold` marks
+# The arm asserts that outcome state alone moves no plan. `context-fold` marks
 # outcomes and nothing else, and a plan is settled by the merge through
 # `canon tasks archive`, so a run here leaves all three plans exactly where it
 # found them however many tasks it closes.

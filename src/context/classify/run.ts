@@ -165,7 +165,7 @@ interface ModelLayerPlan {
  * Decides whether the model layer runs, probing reachability before any real
  * call. A configured-but-unreachable backend is a plan the caller reports and
  * falls back from, never a refusal: the groundwork decision reads "warn and
- * continue," and a refused run here would fail `docs-fold` for a reason that
+ * continue," and a refused run here would fail `context-fold` for a reason that
  * has nothing to do with the branch it is checking.
  */
 async function planModelLayer(

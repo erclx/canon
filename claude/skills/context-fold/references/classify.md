@@ -5,7 +5,7 @@ description: The classify diff invocation, the record fields to read, applying a
 
 # Classify the fold's diff baseline
 
-Mechanics for Step 10 of `docs-fold`. The body owns the skip condition and the shared baseline, and this file owns the invocation, what the record carries, and what applying a finding does.
+Mechanics for Step 10 of `context-fold`. The body owns the skip condition and the shared baseline, and this file owns the invocation, what the record carries, and what applying a finding does.
 
 ## Invocation
 

@@ -46,7 +46,7 @@ Do not push a red follow-up.
 
 ## Step 4: refresh stale docs
 
-The fixes may have changed or added behavior that `.claude/` context entries, docs, or wireframes describe. Refresh them with the `docs-fold` skill, which maps the changed files to the entries that reference them and rewrites the stale sections. Do not reimplement that mapping here. When a fix adds a new capability with no existing entry, `docs-fold` flags it rather than creating one.
+The fixes may have changed or added behavior that `.claude/` context entries, docs, or wireframes describe. Refresh them with the `context-fold` skill, which maps the changed files to the entries that reference them and rewrites the stale sections. Do not reimplement that mapping here. When a fix adds a new capability with no existing entry, `context-fold` flags it rather than creating one.
 
 ## Step 5: rebase a stale branch
 

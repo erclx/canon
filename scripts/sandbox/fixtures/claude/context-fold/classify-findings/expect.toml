@@ -1,4 +1,4 @@
-# What a correct `/docs-fold` run leaves behind on the classify-findings arm.
+# What a correct `/context-fold` run leaves behind on the classify-findings arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 

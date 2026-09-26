@@ -35,7 +35,7 @@ The numbered questions are presented as independent and are not: a later answer 
 
 ### A narrowed answer leaves its outcome open
 
-A question answered by narrowing scope leaves the board outcome it dropped still `[ ]`, so the task stays live and `docs-fold` archives no plan, since a narrowed answer can settle only part of what an outcome asked for. Where an outcome instead names a count that does not reproduce against the tree, deliver the substance, cut the outcome, and record the measurement in Findings, rather than leaving the box open or checking it against a number that was never there: a re-measurement can legitimately disagree with the count the outcome was written against.
+A question answered by narrowing scope leaves the board outcome it dropped still `[ ]`, so the task stays live and `context-fold` archives no plan, since a narrowed answer can settle only part of what an outcome asked for. Where an outcome instead names a count that does not reproduce against the tree, deliver the substance, cut the outcome, and record the measurement in Findings, rather than leaving the box open or checking it against a number that was never there: a re-measurement can legitimately disagree with the count the outcome was written against.
 
 ### A plan's file list decays the way a board finding does
 

@@ -5,7 +5,7 @@ description: The merge-base block six skills share, the read against write asymm
 
 # Skill diff baseline
 
-The diff baseline is a block six skills share, `docs-fold` and five ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
+The diff baseline is a block six skills share, `context-fold` and five ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
 
 ## An unresolvable baseline
 
@@ -17,7 +17,7 @@ The anchor sweep only reports, and the whole tree costs it a different way: ever
 
 ## The shared-resource rule
 
-That baseline is the worked case behind a rule split across two skills. One step in `docs-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the steps that write stub a wireframe for every uncovered surface and rewrite every context entry.
+That baseline is the worked case behind a rule split across two skills. One step in `context-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the steps that write stub a wireframe for every uncovered surface and rewrite every context entry.
 
 So `plan-feature` obliges a plan that establishes a resource with more than one consumer to list them and mark each read or write, and `review-pr` carries the matching lens beside Integration and Contract. Both skills ship to target projects, where a consumer is a call site, a module, or a component rather than a skill step, so the clause names the unit generically. The review half is what catches the miss, since an author who never noticed the resource was shared will not notice the authoring clause either. `review-branch` stays out of it, because an author reviewing their own change cannot catch a consumer they never enumerated.
 
@@ -29,7 +29,7 @@ Root `CLAUDE.md` and the `CLAUDE.md` seed each own the policy statement, and the
 
 `git-pr` reads both its diff and its commit log against `<base>`. A two-dot range such as `git diff main..HEAD` compares tips rather than resolving a merge base, so it reads reversed or incomplete whenever local `main` trails `origin/main`. Reading `<base>` on both sides is what keeps the commits and the changes describing one branch.
 
-A skill reading the committed half alone treats a baseline as unusable when it equals HEAD, whichever ref resolved it, rather than only when the ref came from local `main`. The narrower test misses a feature branch before its first commit, where `origin/main` resolves a merge base that also equals HEAD, so it would go blind on the sessions these skills run in. `docs-fold` needs neither test: it unions the committed, working, and untracked sets, so the committed half going empty costs it nothing.
+A skill reading the committed half alone treats a baseline as unusable when it equals HEAD, whichever ref resolved it, rather than only when the ref came from local `main`. The narrower test misses a feature branch before its first commit, where `origin/main` resolves a merge base that also equals HEAD, so it would go blind on the sessions these skills run in. `context-fold` needs neither test: it unions the committed, working, and untracked sets, so the committed half going empty costs it nothing.
 
 ## What the review selection reads past the baseline
 

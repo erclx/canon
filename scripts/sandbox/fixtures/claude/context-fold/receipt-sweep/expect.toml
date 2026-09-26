@@ -1,4 +1,4 @@
-# What a correct `/docs-fold` run leaves behind on the receipt-sweep arm.
+# What a correct `/context-fold` run leaves behind on the receipt-sweep arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
@@ -6,7 +6,7 @@
 # plans half. No receipt here carries the branch's slug, so a sweep keyed on
 # the current slug finds nothing and leaves the resolved one in place, which is
 # the first assertion below. That is the whole point: the skill that writes these
-# receipts runs after `docs-fold` in every ship chain, so a slug-keyed sweep
+# receipts runs after `context-fold` in every ship chain, so a slug-keyed sweep
 # looks for a file six steps ahead of itself.
 #
 # `board-sweep` cannot stand in for it. That arm proves the plans half reaches

@@ -81,13 +81,13 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to 
 
 The handoff is its own file rather than a shared one. The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work goes with it, and a sibling path costs the folding skill one more read and removes the interaction.
 
-An append is a whole-file operation, so send it as a heredoc, per the skill's Step 0. Then tell the operator that `/docs-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+An append is a whole-file operation, so send it as a heredoc, per the skill's Step 0. Then tell the operator that `/context-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
 
 A promotion pass reports this shape in place of the skill's Output block, one line per page the operator confirmed and one naming the handoff:
 
 ```plaintext
 ➡️ Promoting: .canon/teach/<nn>-<topic>/reference/<slug>.md → <destination path>
-→ Confirmed pages wait at .canon/tmp/handoff/teach-promotion/<slug>.md. Run /docs-fold from a branch to fold them in.
+→ Confirmed pages wait at .canon/tmp/handoff/teach-promotion/<slug>.md. Run /context-fold from a branch to fold them in.
 ```
 
 A pass where the operator confirmed nothing writes no handoff file and reports that alone.

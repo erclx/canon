@@ -39,7 +39,7 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **`canon teach list` prints the `canon serve` line with the teach folder it read, rather than a literal `.canon/teach`.** `canon serve` resolves its directory against the cwd while the list verb reads the main worktree root, so the literal serves an absent folder from a linked worktree. The folder prints relative to the cwd when it sits under it and absolute otherwise, since a `../` path climbing out of a worktree reads as a mistake. The static `--help` footer keeps the literal and points at `list <topic>` for the exact line, and the JSON record carries no serve field.
 
-**A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `docs-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
+**A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `context-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
 **The chrome matches the nav-04 prototype except in six places.** Both sides were compared as computed styles at three widths in both themes, frame by frame across rest, hover and open states, and nothing departs beyond these.
 

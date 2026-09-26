@@ -44,7 +44,7 @@ For each project candidate, match its subject against `canon/context/index.md`. 
 
 Fail closed. A project candidate matching no entry stays a memory file, and so does one matching two entries where neither is clearly the owner. The residue is what the folder is for, and a fact filed under the wrong entry is worse than one in memory because a context entry is a surface sessions trust.
 
-Do not edit a context entry here. `docs-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `docs-fold`'s routed-facts fold which file to open. An append is a whole-file operation, so send it as a heredoc:
+Do not edit a context entry here. `context-fold` owns those edits and folds the routed facts in on its own pass, or two skills write one file at the same step. Write each routed fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root instead, appending when the file exists. Name the heading with the entry's own path from `canon/context/index.md`, flat or the nested `index.md`, since that heading is what tells `context-fold`'s routed-facts fold which file to open. An append is a whole-file operation, so send it as a heredoc:
 
 A flat domain takes:
 
@@ -64,7 +64,7 @@ A domain split into a folder takes its own generated index instead:
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
 
-The handoff is a file rather than a spoken result so the routed fact survives a compaction between this step and the `docs-fold` pass, and so the standalone caller leaves something behind for a later `/docs-fold` to consume.
+The handoff is a file rather than a spoken result so the routed fact survives a compaction between this step and the `context-fold` pass, and so the standalone caller leaves something behind for a later `/context-fold` to consume.
 
 ## Step 4: dedupe
 
@@ -94,11 +94,11 @@ Respond with one line per fact routed, written, or updated:
 - `✅ Wrote: .canon/memory/<file> (<type>)`
 - `✏️ Updated: .canon/memory/<file> (<type>)`
 
-When anything routed, add a line naming the handoff so the caller knows a `docs-fold` pass is owed:
+When anything routed, add a line naming the handoff so the caller knows a `context-fold` pass is owed:
 
-`→ Routed facts wait at .canon/tmp/handoff/memory-routing/<slug>.md. Run /docs-fold to fold them in.`
+`→ Routed facts wait at .canon/tmp/handoff/memory-routing/<slug>.md. Run /context-fold to fold them in.`
 
-Omit that line when the caller runs `docs-fold` itself later in its own chain.
+Omit that line when the caller runs `context-fold` itself later in its own chain.
 
 If nothing was captured, output:
 

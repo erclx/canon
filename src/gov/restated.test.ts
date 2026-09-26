@@ -210,16 +210,16 @@ describe('readRestated', () => {
   it('assigns a skill body the authority when the subject names that skill', () => {
     write(
       'CLAUDE.md',
-      '- The `docs-fold` skill archives a shipped plan into the plans archive folder.',
+      '- The `context-fold` skill archives a shipped plan into the plans archive folder.',
     )
     write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
     write(
-      'claude/skills/docs-fold/SKILL.md',
+      'claude/skills/context-fold/SKILL.md',
       '# Claude docs\n\nThis skill archives a shipped plan into the plans archive folder.',
     )
 
     const report = measured(readRestated(ROOT))
-    const entry = entryFor(report, 'docs-fold')
+    const entry = entryFor(report, 'context-fold')
 
     expect(entry.surfaces[0].authority).toBe('skill-body')
   })

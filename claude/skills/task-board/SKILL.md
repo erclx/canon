@@ -1,18 +1,18 @@
 ---
 name: task-board
-description: Creates a task file in `.canon/tasks/` with the filename, phase label, and frontmatter the standard requires, and archives a shipped one out of the folder. Use when asked to "add a task", "create a task", "queue this", "put this on the board", "archive that task", or "close out a shipped task". Do NOT use to mark an outcome `[x]`. That is `docs-fold`.
+description: Creates a task file in `.canon/tasks/` with the filename, phase label, and frontmatter the standard requires, and archives a shipped one out of the folder. Use when asked to "add a task", "create a task", "queue this", "put this on the board", "archive that task", or "close out a shipped task". Do NOT use to mark an outcome `[x]`. That is `context-fold`.
 ---
 
 # Task board
 
-Owns the two operations that bring a task file into existence and take it out of the folder. `docs-fold` edits the contents of a task that already exists, marking outcomes `[x]`. Do not mark outcomes here, and do not move a plan by hand: the archive carries it.
+Owns the two operations that bring a task file into existence and take it out of the folder. `context-fold` edits the contents of a task that already exists, marking outcomes `[x]`. Do not mark outcomes here, and do not move a plan by hand: the archive carries it.
 
 Read `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` before writing any file. It holds the filename convention, the frontmatter contract, and the file format. Do not work them from memory.
 
 ## Guards
 
 - Resolve the board at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo. Every read and write below resolves against that root. The board is gitignored scratch shared across worktrees, so a linked worktree writing to its own `pwd` creates a second board nothing else reads.
-- A new task file is a main-root write, so it goes out as a heredoc. Archiving already runs through `canon tasks archive`, which resolves the root in-process. Marking an outcome shipped is `docs-fold` and runs through `canon tasks outcome`. Resolve that root and route the write the way `session-worktree` states.
+- A new task file is a main-root write, so it goes out as a heredoc. Archiving already runs through `canon tasks archive`, which resolves the root in-process. Marking an outcome shipped is `context-fold` and runs through `canon tasks outcome`. Resolve that root and route the write the way `session-worktree` states.
 - If `.canon/tasks/` does not exist at that root, stop: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
 - Route on the request rather than on a flag. Creating names work that does not exist yet, archiving names a task file already shipped, and declining names one decided against. If the request fits none of the three, stop: `❌ Ambiguous. Say whether to create a task, archive one, or decline one.`
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter after a write. Do not run the regen command directly, except after a shell write from a linked worktree: the hook matches `Write|Edit|MultiEdit` and nothing fires on `Bash`, so that one case regenerates explicitly with `canon indexes regen --no-stage --root <main-root> <main-root>/.canon/tasks/index.md`.

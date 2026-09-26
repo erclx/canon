@@ -30,8 +30,8 @@ manual = [
 # review-branch never ran despite the behavior path this arm stages. That
 # defect was fixed on `auto-ship` itself rather than here, and a second
 # defect sat behind it: the chain wrote this receipt at Step 5 and its own
-# `docs-fold` sweep deleted it at Step 7, so the assertion could only pass on
-# a run the chain stopped early. `claude/skills/docs-fold/SKILL.md:248` fixed
+# `context-fold` sweep deleted it at Step 7, so the assertion could only pass on
+# a run the chain stopped early. `claude/skills/context-fold/SKILL.md:248` fixed
 # that half, leaving the current branch's receipt in place for the sweep that
 # runs one branch later.
 #

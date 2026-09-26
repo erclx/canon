@@ -1,11 +1,11 @@
 ---
 title: Fold promoted pages
-description: How docs-fold Step 8 lands each page a teach promotion handoff carries, deletes the handoff, and reports what it landed or left unfolded
+description: How context-fold Step 8 lands each page a teach promotion handoff carries, deletes the handoff, and reports what it landed or left unfolded
 ---
 
 # Fold promoted pages
 
-Step 8 of `docs-fold`. The session reads this file when a teach promotion handoff exists.
+Step 8 of `context-fold`. The session reads this file when a teach promotion handoff exists.
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root. `teach-workspace` writes it, one H2 per destination naming the path, with a source line under the heading and the page body in a fenced block below that. Read the body out of the fence rather than off the heading level, since a reference page carries headings of its own and only the fence separates them from the next destination. Skip this step silently when the file is absent, which is every run where nothing was promoted.
 

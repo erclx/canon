@@ -7,7 +7,7 @@ description: What the plan standard fixes and why its section markers are mixed,
 
 ## Sections
 
-`standards/plan.md` fixes the section list, the suggested-and-answer contract, and the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. `plan-feature`, `auto-ship`, and `docs-fold` each cite the half they read rather than restating it.
+`standards/plan.md` fixes the section list, the suggested-and-answer contract, and the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. `plan-feature`, `auto-ship`, and `context-fold` each cite the half they read rather than restating it.
 
 The section markers are mixed on purpose, `## Summary` as a heading and the other six as bold labels, because that is what the corpus writes. Across the plan archive, `Summary` is nearly always a heading and never a label, while `Files to touch` and the sections the archive already carried mostly take the bold-label form.
 

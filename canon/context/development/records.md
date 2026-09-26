@@ -13,7 +13,7 @@ The task board is a folder of one file per task, which is what keeps two concurr
 
 `.canon/review/` carries a subfolder per producer: `branch/` for `review-branch`, `feedback/` for `canon feedback`, `memory/` for `memory-review`, `design/` for the `canon design render` preview, and `board/` for the `canon design board` page set. The filename prefix does the folder's job for a producer with no subfolder, since the ignore entry and the backed-folder entry already cover everything under `review/`, so `ux-audit-*`, `ux-measure-*`, and `seed-audit-*` land at the folder root.
 
-A branch report is the one thing here that gets swept rather than archived. It is read once by the session addressing it, and the durable record of what a review found is the comment `review-pr` posts, so `docs-fold` deletes any report whose branch is gone. What that loses is a local-only review on a branch that never opened a pull request, which `review-branch` says where a reader meets the report.
+A branch report is the one thing here that gets swept rather than archived. It is read once by the session addressing it, and the durable record of what a review found is the comment `review-pr` posts, so `context-fold` deletes any report whose branch is gone. What that loses is a local-only review on a branch that never opened a pull request, which `review-branch` says where a reader meets the report.
 
 ## A durable record is named for what it is
 
@@ -30,7 +30,7 @@ Prefixing the remaining record surfaces with a dot to collapse the ignore file i
 An archive sits inside the folder it archives, so a record folder holds its own lifecycle subfolders and a listing of the root shows records rather than records paired with their history. A folder earns root position only when nothing else contains it. Splitting a retired entry to a scratch archive and a review receipt to a review archive was the declined alternative: the deletable test separates the two correctly, but the split names two surfaces for one record.
 
 - A retired memory entry moves to `.canon/memory/archive/`, and a memory-review receipt a triage takes out of `.canon/memory/review/` moves to `archive/` beside it. A receipt whose items have all resolved needs no archive, since the collection rule folds its declines into the entries and deletes the file.
-- A shipped plan moves to `.canon/plans/archive/` under its original name, swept there by `docs-fold`. A re-shipped slug overwrites the earlier file.
+- A shipped plan moves to `.canon/plans/archive/` under its original name, swept there by `context-fold`. A re-shipped slug overwrites the earlier file.
 - A shipped task moves to `.canon/tasks/archive/` through `canon tasks archive`, which owns the move, the `priority.md` row removal, and the index regen as one unit, so the hook and `task-board` cannot archive differently.
 
 Citation is not what decides whether a folder is backed. Nothing cites a retired memory the way a task cites a plan, but `memory/` is not one of the names `EXCLUDED_ENTRIES` withholds from `canon records push`, so a wrong call over the folder recovers through `canon records pull` the same as any other retired record.
