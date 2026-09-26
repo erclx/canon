@@ -13,6 +13,7 @@ import {
   planCitations,
   readOutcomes,
   readPlanTarget,
+  readPlanTargets,
   readPullRequest,
   rebaseRelativeLinks,
   removeBacklogRow,
@@ -230,6 +231,59 @@ describe('readPlanTarget', () => {
 
   it('should return undefined when there is no plan line', () => {
     expect(readPlanTarget('Issue: #12\n')).toBeUndefined()
+  })
+})
+
+describe('readPlanTargets', () => {
+  it('should read the one target out of a single link', () => {
+    expect(
+      readPlanTargets('Plan: [feature-x](../plans/feature-x.md)\n'),
+    ).toEqual(['../plans/feature-x.md'])
+  })
+
+  it('should read every target out of comma-separated links', () => {
+    expect(
+      readPlanTargets(
+        'Plan: [feature-x](../plans/feature-x.md), [feature-y](../plans/feature-y.md)\n',
+      ),
+    ).toEqual(['../plans/feature-x.md', '../plans/feature-y.md'])
+  })
+
+  it('should read every target out of space-separated links', () => {
+    expect(
+      readPlanTargets(
+        'Plan: [feature-x](../plans/feature-x.md) [feature-y](../plans/feature-y.md)\n',
+      ),
+    ).toEqual(['../plans/feature-x.md', '../plans/feature-y.md'])
+  })
+
+  it('should read one target out of a link followed by prose', () => {
+    expect(
+      readPlanTargets(
+        'Plan: [feature-x](../plans/feature-x.md) (superseded)\n',
+      ),
+    ).toEqual(['../plans/feature-x.md'])
+  })
+
+  it('should read the older bare path form', () => {
+    expect(readPlanTargets('Plan: ../plans/feature-x.md\n')).toEqual([
+      '../plans/feature-x.md',
+    ])
+  })
+
+  it('should return no targets when there is no plan line', () => {
+    expect(readPlanTargets('Issue: #12\n')).toEqual([])
+  })
+
+  it('should skip a plan line displayed inside a fenced sample', () => {
+    const text = [
+      '```markdown',
+      'Plan: [a](../plans/a.md), [b](../plans/b.md)',
+      '```',
+      '',
+    ].join('\n')
+
+    expect(readPlanTargets(text)).toEqual([])
   })
 })
 

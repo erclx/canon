@@ -7,6 +7,7 @@ import {
   isReservedStem,
   readOutcomes,
   readPlanTarget,
+  readPlanTargets,
   readPullRequest,
   resolveLivePlan,
   tasksDir,
@@ -41,6 +42,7 @@ export const FINDING_KINDS = [
   'plan-mismatched',
   'plan-parked',
   'plan-absent',
+  'plan-several',
   'task-unresolved',
   'row-duplicated',
   'row-misshapen',
@@ -728,8 +730,12 @@ async function planDisagreement(
   const file = join(dir, `${row.stem}.md`)
   if (!existsSync(file)) return undefined
 
-  const target = readPlanTarget(await readFile(file, 'utf8'))
+  const text = await readFile(file, 'utf8')
+  const target = readPlanTarget(text)
   if (!target) {
+    const several = severalPlans(text, 'Run now', subject)
+    if (several) return several
+
     return {
       kind: 'plan-uncited',
       group: 'Run now',
@@ -787,7 +793,13 @@ async function groupClaimFinding(
   const file = join(dir, `${row.stem}.md`)
   if (!existsSync(file)) return undefined
 
-  const target = readPlanTarget(await readFile(file, 'utf8'))
+  const text = await readFile(file, 'utf8')
+  const target = readPlanTarget(text)
+  if (!target) {
+    const several = severalPlans(text, row.group, row.stem)
+    if (several) return several
+  }
+
   const live = target ? resolveLivePlan(target, dir, root) : undefined
   const hasLivePlan = live !== undefined && existsSync(live)
 
@@ -812,6 +824,27 @@ async function groupClaimFinding(
   }
 
   return undefined
+}
+
+/**
+ * Reports a `Plan:` line linking more than one plan. `readPlanTarget` reads
+ * such a line as naming nothing, so without this a caller would report the
+ * line as absent when it is there and breaks the one-plan rule instead.
+ */
+function severalPlans(
+  text: string,
+  group: Finding['group'],
+  subject: string,
+): Finding | undefined {
+  const targets = readPlanTargets(text)
+  if (targets.length < 2) return undefined
+
+  return {
+    kind: 'plan-several',
+    group,
+    subject,
+    message: `cites ${targets.length} plans on its Plan: line (${targets.join(', ')}). One task names one plan, so split the task or drop the extra links.`,
+  }
 }
 
 /**
