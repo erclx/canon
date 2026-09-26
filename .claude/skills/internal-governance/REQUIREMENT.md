@@ -34,3 +34,4 @@ The registration failure is the one that passes every gate. A rule sitting in `g
 - The frontmatter, headings, and bullet conventions a rule file carries, which `standards/rule.md` states
 - Creating a project-local rule inside a target, which the shipped `create-rule` skill does against that project's own numbering
 - Authoring the standard a rule routes to, and the catalog row it owes: `internal-standards`
+- The per-rule verdict on whether a rule earns its place, its load mode, and its reach: `internal-rule-audit`
