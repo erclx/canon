@@ -47,7 +47,7 @@ When the invocation argument is a plan path or a bare slug, name the worktree fr
 
 Resolve `<plan>` in this order, stopping at the first match:
 
-1. **Caller-supplied task.** The invocation carried a path under `.canon/tasks/`. If it does not resolve to a file, stop: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.` Read that task's first `Plan:` line and take what it names as `<plan>`, per `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`, reading `${CLAUDE_SKILL_DIR}/references/tier-failures.md` first for how the pointer resolves and the three stops it can take.
+1. **Caller-supplied task.** The invocation carried a path under `.canon/tasks/`. If it does not resolve to a file, stop: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.` Read that task's first `Plan:` line and take what it names as `<plan>`, per `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`, reading `${CLAUDE_SKILL_DIR}/references/tier-failures.md` first for how the pointer resolves and the four stops it can take.
 2. **Caller-supplied plan.** The invocation carried something else. Accept it as a plan path or a bare slug, in the same position `session-worktree` tier 0 accepts its name. A bare slug resolves to `.canon/plans/feature-<slug>.md`, and a path is taken as given from the main worktree root. If it does not resolve to a file, stop: `❌ No plan at <path>. Path was supplied, not derived, so check it and re-run.`
 3. **Derived.** `.canon/plans/feature-<slug>.md`, from the `<slug>` the Guards derived. If it does not exist, stop: `❌ No approved plan at .canon/plans/feature-<slug>.md, where <slug> was derived from the current branch, <branch>. The invocation carried no argument, so pass a plan or a task path, or run /plan-feature first.`
 
@@ -55,7 +55,7 @@ Only a path reaches tier 1, and a bare slug is read as a plan's throughout, sinc
 
 ### When a tier fails
 
-Tier 1 stops when the task carries no `Plan:` line, when its pointer resolves into a plans archive, or when its pointer resolves to no file. `${CLAUDE_SKILL_DIR}/references/tier-failures.md` carries the stop each one takes and the order the archive and existence tests run in.
+Tier 1 stops on a `Plan:` line linking several plans, on a task carrying none, and on a pointer into a plans archive or to no file. `${CLAUDE_SKILL_DIR}/references/tier-failures.md` carries the stop each one takes and the order the archive and existence tests run in.
 
 Test the shape of whatever `<plan>` resolved to before reading it as one, after all three tiers, since a file resolving under any tier can still be the wrong document.
 
