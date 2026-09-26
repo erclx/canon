@@ -147,85 +147,16 @@ See the [contributing guidelines](CONTRIBUTING.md).
 
 ### Correct
 
-````markdown
-# Auth SDK
-
-Lightweight authentication library for Node.js with OAuth2 and JWT support.
-
-## Features
-
-- OAuth2 provider integration (Google, GitHub, Azure)
-- JWT token generation and validation
-- Session management with Redis support
-- TypeScript support with full type definitions
-
-## Installation
-
-```bash
-npm install auth-sdk
+```plaintext
+Lightweight authentication library for Node.js with OAuth2 and JWT support.  # one line naming what it is
+## Quick start                                                               # sentence case, a runnable snippet follows
+[MIT](LICENSE)                                                               # links the license file
 ```
-
-## Quick start
-
-```javascript
-import { AuthClient } from 'auth-sdk'
-
-const client = new AuthClient({
-  provider: 'google',
-  clientId: process.env.CLIENT_ID,
-})
-
-const user = await client.authenticate(code)
-```
-
-## Documentation
-
-Visit [docs.auth-sdk.dev](https://docs.auth-sdk.dev) for full API reference.
-
-## Support
-
-- Report bugs via [GitHub Issues](../../issues)
-- Community support on [Discord](https://discord.gg/example)
-
-## License
-
-[MIT](LICENSE)
-````
 
 ### Incorrect
 
-````markdown
-# Auth SDK
-
-This is a seamless and powerful authentication library that allows developers to easily integrate robust OAuth2 functionality.
-
-## Why Use This?
-
-Basically, this library is just amazing and will revolutionize how you handle auth.
-
-## Installation
-
-Simply run the following command to install:
-
-```bash
-npm install auth-sdk
+```plaintext
+## Why Use This?                                 # title case, and a pitch rather than a feature list
+Simply run the following command to install:     # filler qualifier before the command
+Copyright (c) 2026 Example Corp                  # license text inline rather than linked
 ```
-
-## API Documentation
-
-### AuthClient Class
-
-#### Constructor
-
-constructor(options: AuthOptions)
-
-[...full API docs inline, should link to external docs...]
-
-## License
-
-MIT License
-
-Copyright (c) 2026 Example Corp
-
-[...full license text, should reference LICENSE file...]
-````

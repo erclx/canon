@@ -5,9 +5,9 @@ description: Folder layout, ordinal naming, reserved numbering, frontmatter and 
 
 # Groundwork reference
 
-Applies to a groundwork track at `.canon/groundwork/<nn>-<slug>/`. A track measures one question that has to be settled before anyone can plan against it. The numbering inside the folder is the table of contents, so a reader opens the folder and knows where to start and what follows without an index maintained inside each file.
+Applies to a groundwork track at `.canon/groundwork/<nn>-<slug>/`. A track measures one question that has to be settled before anyone can plan against it. The numbering inside the folder is its table of contents.
 
-The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refusing with `no-remote` where no remote is set, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule here holds only while a session reads it, and the handoff file has to be self-contained.
+The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs it against a compaction dropping a session's reasoning before a push, so the handoff file has to be self-contained.
 
 ## Scope
 
@@ -26,8 +26,8 @@ Does not govern:
 
 - Name the folder `<nn>-<slug>`, a two-digit zero-padded ordinal followed by a kebab-case slug.
 - The ordinal marks a folder per track, opened once and worked over time, distinct from a file addressed by name, one already carrying its own sorting prefix, or one deliberately overwritten.
-- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one already present across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in the same atomic act, closing the race a read-then-create sequence leaves open between two sessions opening at once. A listing then sorts by when each folder opened rather than alphabetically, and the count includes both kinds because the two share one creation-order line.
-- With neither folder holding an entry, the first one opened takes `01`. Do not read this off the numbering inside a track, which starts at `00` on a large one and disagrees with intake's own first file.
+- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in one atomic act, so two sessions opening at once never share a number. The two kinds share one creation-order line.
+- With neither folder holding an entry, the first one opened takes `01`, whatever number a track's own files start at.
 - Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
 
 ## What a working track looks like
@@ -43,19 +43,15 @@ A track failing these is non-conforming even when it satisfies every shape rule 
 
 ## Frontmatter and dating
 
-Every file carries `title` and `description`. `README.md` carries one field the others do not.
-
 - `title` (required): the track subject in sentence case
 - `description` (required): one line naming what the track measures
 - `date` (required, `README.md` only): the day the folder opened, as `YYYY-MM-DD`
 
-Carry the opening date as a frontmatter field rather than a sentence in the body. A date written into prose is readable by a person and by nothing that walks the folder, and the two spellings drift once both are permitted. State it once and remove the body sentence rather than leaving the pair in place.
-
-Date the folder once rather than every file. A per-file date leaves every other file stale the first time one is edited, while the opening date never rots. The checkable half is the commit each measurement was taken against, which the file holding that measurement names.
+Carry the opening date as a frontmatter field rather than a sentence in the body, since nothing that walks the folder reads prose. Date the folder once rather than every file, because a per-file date goes stale on the first edit. The checkable half is the commit each measurement was taken against, which the file holding that measurement names.
 
 ## Reserved numbers
 
-Five slots carry a fixed meaning. The rest are free, which is what lets the middle of a folder follow its subject.
+Five slots carry a fixed meaning, and the rest are free.
 
 | Number       | Holds                                           | Required                    |
 | ------------ | ----------------------------------------------- | --------------------------- |
@@ -66,9 +62,9 @@ Five slots carry a fixed meaning. The rest are free, which is what lets the midd
 | `07`         | Handoff, self-contained                         | To close                    |
 | `08`         | Spikes: method, result, and cost per experiment | Tracks that run experiments |
 
-A folder missing `06` and `07` is live. That is the only status marker, and no separate tracking is needed.
+A folder missing `06` and `07` is live, and that is its only status marker.
 
-`08` sits after the closing files because it is an appendix. It holds evidence rather than a topic, so folding it into the `02` to `05` range buries it, and a track closes with or without one.
+`08` sits after the closing files because it is an appendix of evidence rather than a topic, and a track closes with or without one.
 
 ## README.md
 
@@ -82,11 +78,7 @@ Orients. Holds no findings.
 - A `## Source citation` section stating the rule below, so a returning session picks it up from the folder
 - The phase stated out loud in the first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
 
-The file map is how a returning reader re-enters. After the decision, it is the highest-value thing in the folder.
-
-Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder. A sentence asserting that a vendor documents something reads the same whether it came from a fetched page or from recall, and a later reader can neither check it nor tell the two apart.
-
-A source found and not read is listed as a lead and is never cited. That half is what keeps the rule from producing citation theater, because a link attached to a page nobody opened is worse than no link. Listing it still pays, since it stops a later pass re-searching for what this one already surfaced.
+Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder. Without one, a later reader cannot tell a fetched page from recall. A source found and not read is listed as a lead and is never cited, since a link to a page nobody opened is worse than no link. Listing it stops a later pass re-searching for it.
 
 Where the track supersedes an earlier plan or an earlier folder, name it and say not to go looking for it. Without that, the old reasoning keeps circulating.
 
@@ -94,13 +86,13 @@ Where the track supersedes an earlier plan or an earlier folder, name it and say
 
 Facts before opinion. Verified measurement only, taken during this pass.
 
-- Never carry a figure from a previous session without re-measuring. Stale ratios survive a sunset that invalidates them, and every number built on one is quietly wrong.
+- Never carry a figure from a previous session without re-measuring, since every number built on a stale one is quietly wrong.
 - Mark an inference as an inference where one is unavoidable.
 - Measure only what an open question needs. A number with no question attached is the mechanism by which the groundwork becomes the work.
 
 ## 00-scope.md
 
-Written when the subject is large enough to run away. Holds constraints, risks, the open question list, and the downstream surfaces a decision would touch. A small track skips it and carries its questions inside the topic files.
+Written when the subject is large enough to run away. Holds constraints, risks, the open question list, and the downstream surfaces a decision would touch. A small track skips it.
 
 ## 06-decision.md
 
@@ -111,7 +103,7 @@ Closes the folder. Everything above it is input.
 - The items to do
 - What was considered and dropped
 
-The dropped list pays off later. It is what stops a future session re-proposing something already rejected.
+The dropped list is what stops a future session re-proposing something already rejected.
 
 ## 07-next-session.md
 
@@ -119,30 +111,28 @@ Written to survive a compaction that loses the conversation. It repeats facts he
 
 ## 08-spikes.md
 
-Evidence by experiment, sitting beside the evidence by measurement that `01-current-state.md` holds. Optional, and most tracks never open it, because measuring what is already there settles most questions.
+Evidence by experiment, beside the evidence by measurement `01-current-state.md` holds. Optional, since measuring what is already there settles most questions.
 
 Each spike carries four things:
 
-- The open question it answers, named by file and number. A spike attached to no question is the same runaway the current-state file is capped against.
-- The method, stated fully enough for a later reader to re-run it. Name the fixture and where it lived, the exact command, and how many repetitions were run. An arm pointed at a fixture inside the project measured the project, so the fixture location is part of whether the result stands.
-- The result, and which question it closes. A spike that settles nothing is still recorded, so a later pass does not pay to learn the same thing twice.
-- The measured cost, and the caveats bounding what the result proves.
+- The open question it answers, named by file and number. A spike attached to no question is a runaway.
+- The method, stated fully enough for a later reader to re-run it. Name the fixture and where it lived, since an arm pointed at a fixture inside the project measured the project, plus the exact command and the repetition count.
+- The result, and which question it closes. Record a spike that settles nothing too, so a later pass does not pay for it twice.
+- The measured cost, even for a single read, and the caveats bounding what the result proves. Cost is a report rather than a limit, and it makes the next spike estimable.
 
-Cost is a report rather than a limit, and it is what makes the next spike estimable before anyone commits to it. Record it even when it comes to a single read.
+Start a spike against a sample bounded on input size, duration, and spend, and scale up only once it shows the method works. Record the sample's bounds beside the figure for the full input.
 
-Start a spike against a sample and scale up only once the sample shows the method works. Bound the sample on all three of input size, duration, and spend, since fifty minutes of audio is a runtime and a bill before it is a file size, and three minutes of it usually shows whether the pipeline runs at all. The same holds for a dataset, an image set, or a batch of queries. Record the sample's bounds and the figure for the full input in the spike, so a reader can tell what the result was measured on and what the scale-up costs. The rule reaches only a track, since that is the surface that reads this standard, and nothing checks that a spike ran small first, so it holds only while a session reads it.
-
-A spike also leaves files behind, and they split on whether a later reader needs the file to check a claim rather than on whether it is markdown or re-runnable. A file a reader opens to verify how a result was produced or what it showed lives inside the track. A file that is only bulk input, such as a large fixture or a copied asset, stays outside it wherever the surface driving the spike puts it. Three subfolders inside the track carry the first kind, and none takes a number, since numbering is the read order over the files a reader opens in sequence and these are reached from the claim that cites them instead:
+A file a reader opens to verify how a result was produced or what it showed lives inside the track, and bulk input such as a large fixture stays outside it. Three unnumbered subfolders carry the first kind, since a reader reaches them from the citing claim rather than in read order:
 
 - `evidence/`: what a run produced and the record cites, being a recording, a render, or a frame pulled from one, beside the file citing it.
-- `scripts/`: the arm scripts and harnesses a spike ran. An arm script is re-runnable, and it is also what a reader opens to check the method, so this refines the earlier split, which sorted on re-runnable alone, and does not contradict it.
+- `scripts/`: the arm scripts and harnesses a spike ran, which a reader opens to check the method.
 - `clones/`: checkouts and copies of outside material a claim rests on, kept small enough to hold in the folder. A checkout too large to keep is cited by its address and commit instead.
 
-`spikes/`, `web/`, and `research/` were considered and folded into these, so do not reopen them. A spike's files sit under the three above, and a fetched page belongs in `clones/`. The `web/` case is the arguable one, since a screenshot of a reference site could sit apart, and it folds into `evidence/` because that is where a cited artifact already lives.
+Open no other subfolder: `spikes/`, `web/`, and `research/` fold into these three, with a fetched page in `clones/` and a reference-site screenshot in `evidence/`.
 
-Reach for a test harness the project already carries before building one. A track needing an experiment no existing harness can express has found a finding, and it belongs in the folder rather than in a new abstraction.
+Reach for a test harness the project already carries before building one. An experiment no existing harness can express is a finding for the folder, not a new abstraction.
 
-One method error is worth naming, because it is made rather than imagined. Counting matches in a transcript overstates whether a file was read, since an instruction naming a path puts that path in the transcript whether or not anything opened it. The check is the tool call.
+Never count transcript matches to show a file was read. An instruction naming a path puts it in the transcript whether or not anything opened it, so the check is the tool call.
 
 ## Open questions
 
@@ -158,7 +148,7 @@ Every open question carries a lean, wherever it appears. A bare numbered list ha
 - On a measurement rather than a judgment, write `- Leaning: none, needs measuring` and drop the overturn line. A guess at a number is worse than an admission.
 - Mark each question open or answered, and repeat the open ones at the end of the file they belong to. That gives the decision file its agenda for free.
 
-A lean is weaker than the suggestion a plan file carries. It records the current read on a question still open by definition, not a decision to accept by default at execution time.
+A lean is weaker than a plan's suggestion: it records the current read on an open question, not a decision to accept at execution time.
 
 ## Conventions
 
@@ -170,9 +160,8 @@ A lean is weaker than the suggestion a plan file carries. It records the current
 
 - **The groundwork becomes the work.** Gathering expands until the measuring costs more than the change it justifies. Cap it, and drop any thread with no question attached.
 - **Deciding by omission.** Closing a track while an unresolved question quietly fails an outcome. Resolve it or record it as knowingly accepted.
-- **Recording a constraint discovered while defending a decision.** Check a constraint against the alternative design before writing it down, or a fact about the current shape gets written up as inherent to the problem.
+- **Recording a constraint discovered while defending a decision.** Check it against the alternative design first, or a fact about the current shape reads as inherent to the problem.
 - **A plan written before the groundwork.** Every track that has done this had to supersede the plan it wrote.
-- **The date left in the body.** A frontmatter field and a sentence both claiming the opening date resolve to whichever a reader happens to hit, and only one of them is readable by a walker.
 
 ## Template
 

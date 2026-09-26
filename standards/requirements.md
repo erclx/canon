@@ -14,7 +14,7 @@ Governs the product-scope document at `canon/REQUIREMENTS.md`: problem, goals, n
 Does not govern:
 
 - Rationale for a technical choice: `architecture.md`
-- Execution order across the work the scope generates: `tasks.md`
+- Execution order across the work the scope generates: `board.md`
 - Per-domain structure and narrative: `context.md`
 
 ## What goes in
@@ -40,7 +40,7 @@ Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, `## Tech stack`
 
 The MVP list is a historical record of the original scope. Once those features ship it stays as written. Do not renumber it, do not append to it, and do not annotate entries with status. A reader telling the original scope apart from what followed depends on the first one staying legible.
 
-Later scope arrives as a new section rather than as an extension of the MVP list. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Nothing sequences either list into versions. Work reaches the board as discrete tasks under `tasks.md`, which orders them by readiness, so a section here states what is wanted and never when it lands.
+Later scope arrives as a new section rather than as an extension of the MVP list. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Nothing sequences either list into versions. Work reaches the board as discrete tasks under `tasks.md`, and `board.md` orders them by readiness, so a section here states what is wanted and never when it lands.
 
 ## Distribution
 

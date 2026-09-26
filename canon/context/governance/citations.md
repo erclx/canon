@@ -68,7 +68,7 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 - `governance/rules/claude/530-requirements.md` → `canon standards requirements`, without restating the goal-as-outcome, non-goal, MVP-lifecycle, later-scope, or `## Distribution` rules.
 - `governance/rules/claude/540-architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
 - `governance/rules/claude/550-design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
-- `governance/rules/claude/555-tasks.md` → `canon standards tasks`, without restating the origin-line, outcome-sizing, heading, no-implementation-detail, or archiving rules.
+- `governance/rules/claude/555-tasks.md` → `canon standards tasks` and `canon standards board`, without restating the origin-line, outcome-sizing, heading, no-implementation-detail, or archiving rules.
 - `governance/rules/claude/559-memory.md` → `canon standards memory`, without restating the routing or pen rules.
 - `governance/rules/claude/560-diagrams.md` → `canon standards diagrams`, without restating the refresh-only-changed-entries rule, and keeps the `DIAGRAMS.md` migration bullets the standard does not state. It routes at `502-mermaid` rather than citing `mermaid.md`, since that rule's own glob already reaches an entry under `.canon/diagrams/`.
 - `governance/rules/claude/502-mermaid.md` → `canon standards mermaid`, opening on the condition its glob cannot express, since a path match cannot read whether the file holds a fence.

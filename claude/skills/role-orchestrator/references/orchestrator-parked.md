@@ -17,7 +17,7 @@ The sweep's own question stays distinct from this one. It asks which parked row 
 
 Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`. A `## Run now` row carries no blocker by definition, so the pass skips it. On the idle trigger, also every row in `.canon/tasks/backlog.md` when the file exists, per the trigger split above. Resolve the board, the backlog, and each task file at the main worktree root, the way `session-worktree` does.
 
-Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row collides with, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
+Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row collides with, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/board.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
 
 ## Re-testing a row
 
@@ -35,7 +35,7 @@ Write the result into the row. A re-test reported in chat is lost at the next co
 
 ## Re-testing a backlog row
 
-A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` fixes `backlog.md` as a flat list of links with no state of its own. The five kinds above test what a blocker names, and a backlog row names none, so this pass asks the board-or-backlog question the standard already states instead: has the work in front of the row landed, or has the world changed under it. Read the answer from the task file's own `## Findings` and its origin line (`Plan:`, `Groundwork:`, `Intake:`, or `Issue:`), which name what the row was filed against and whether the fact behind it still holds.
+A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../../standards/board.md` fixes `backlog.md` as a flat list of links with no state of its own. The five kinds above test what a blocker names, and a backlog row names none, so this pass asks the board-or-backlog question the standard already states instead: has the work in front of the row landed, or has the world changed under it. Read the answer from the task file's own `## Findings` and its origin line (`Plan:`, `Groundwork:`, `Intake:`, or `Issue:`), which name what the row was filed against and whether the fact behind it still holds.
 
 Clearing a row answers yes to that question. It is not a count of how long the row has waited: `## Two results that are not a re-test` below refuses age as evidence for a board row, and it refuses it here on the same ground, since a row untouched for weeks is not more clearable than one added yesterday.
 

@@ -14,7 +14,7 @@ Governs the two version namespaces, phase labels and semver tags, and which surf
 Does not govern:
 
 - The format of a phase label, which is project-specific by the rule below
-- Task filenames and board layout: `tasks.md`
+- Task filenames and folder layout: `tasks.md`
 - Commit subject, branch name, and pull request title format: `commit.md`, `branch.md`, and `pr.md`
 - Voice, rhythm, and sentence construction in any text carrying a label: the `write-human` skill
 - Punctuation, formatting, and word choice in any text carrying a label: `markdown.md`

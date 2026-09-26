@@ -47,7 +47,7 @@ Write it immediately. Claude Code's tool permission dialog is the confirmation g
 
 A task file with no row is a dropped task, so name the surface it lands on in the same pass that creates it. A task that would plausibly be planned within the next few waves takes a row under `## Needs a plan` in `.canon/tasks/priority.md`, positioned by where it sits against the rows already there, with the reason for that position in its `Waiting on` cell. Anything else takes a line in `.canon/tasks/backlog.md`, which is unordered and where in the file it goes means nothing.
 
-The test and both file shapes are in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`.
+The test and both file shapes are in `${CLAUDE_SKILL_DIR}/../../standards/board.md`.
 
 Check the roster for a live orchestrator before writing either file. Read `canon sessions list --self --json` for this session's own `sessionId` and `name`, then read `canon sessions list --json` and match a row whose `repository` matches this session's own, whose `sessionId` differs from it, and whose `name` starts with `orchestrator-`. That is the convention every hand-launched controller on this machine currently uses, and it excludes every `worker-` and `planner-` session cleanly. Treat a refusal from either call the same as a roster read that failed.
 

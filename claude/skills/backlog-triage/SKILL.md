@@ -7,7 +7,7 @@ description: Files a measured verdict for every backlog row into an intake folde
 
 A backlog only grows while nothing can decline a row. This pass reads every row against the current tree, files one verdict per row for the operator, and later applies what they approved.
 
-The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`. Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by. Read `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` before applying, since it holds the backlog, the ordering file, and the `Declined:` line.
+The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`. Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by. Read `${CLAUDE_SKILL_DIR}/../../standards/board.md` and `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` before applying, since the first holds the backlog and the ordering file and the second holds the `Declined:` line.
 
 ## Guards
 

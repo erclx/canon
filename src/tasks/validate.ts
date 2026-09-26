@@ -18,7 +18,7 @@ const ORDERING_FILE = 'priority.md'
 const BACKLOG_FILE = 'backlog.md'
 
 /**
- * The readiness headings `standards/tasks.md` fixes. The names are the
+ * The readiness headings `standards/board.md` fixes. The names are the
  * contract rather than a suggestion, so a board grouping under names of its own
  * reads as carrying no group at all and the run refuses instead of reporting a
  * clean board it never parsed.

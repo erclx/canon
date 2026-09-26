@@ -11,7 +11,7 @@ const PLANS = 'plans'
 const MARKDOWN = '.md'
 const NONE_IDENTIFIED = 'None identified.'
 
-/** The one group a dispatch reads, per `standards/tasks.md`. */
+/** The one group a dispatch reads, per `standards/board.md`. */
 const DISPATCH_GROUP = 'Run now'
 
 export const REACH_REFUSALS = [

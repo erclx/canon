@@ -128,4 +128,4 @@ Skills branch on the findings rather than on the exit code:
 canon tasks validate --json | jq -r '.findings[] | "\(.kind): \(.subject)"'
 ```
 
-For the board format, the `Pull request:` line, and the archive rules, see `standards/tasks.md`.
+For the board format, see `standards/board.md`. For the `Pull request:` line and the archive rules, see `standards/tasks.md`.
