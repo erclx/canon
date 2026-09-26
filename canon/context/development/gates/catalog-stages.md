@@ -45,6 +45,8 @@ The Document ceiling stage reads every markdown file git lists, sums `documentHe
 
 The stage is report-only while documents past the ceiling remain: each is a `warn` and the stage passes. Flipping it changes the measure to return a `failure` and deletes the `warn` path, once the count reads zero. `canon markdown audit` prints the same list under its Length step and never exits 2 on it, because the plan and groundwork skills run that audit on a gitignored record where a long plan is not a defect. The stage owns the verdict for the same reason the Architecture record stage owns its record's cap while `canon context audit` only reports.
 
+A table counts at the width the formatter pads it to, so one wide cell raises every row to that width. A lookup table carrying long cells costs close to twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file sitting near the ceiling.
+
 ## Skill provenance
 
 The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or a `references/` file, outside a fence or a code span, across both `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git. A tree holding neither corpus reports as unmeasured.
