@@ -31,6 +31,15 @@ describe('the shell stage scope', () => {
   })
 })
 
+describe('the tests stage scope', () => {
+  it('should fire on the root commitlint config and its test', () => {
+    const scope = scopeOf('tests')
+
+    expect(scope.test('commitlint.config.js')).toBe(true)
+    expect(scope.test('commitlint.config.test.ts')).toBe(true)
+  })
+})
+
 describe('the shipped-references stage scope', () => {
   it('should fire on every corpus a target reader reaches', () => {
     const scope = scopeOf('shipped-references')

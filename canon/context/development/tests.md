@@ -59,9 +59,9 @@ Re-run the same file through `bun --bun` before opening the source, since the te
 
 A shell script under `claude/skills/*/scripts/` gates only the Shell stage unless its corpus is in the census, even where a `src/*.test.ts` file covers it. A branch touching only such a script can report clean on `bun run check` and on `bash -n` alike while the test that covers its behavior never runs. Run the test file by hand for a corpus the census never named.
 
-### A root-level test file needs its own vitest include entry
+### A root-level test file needs its path in the Tests stage scope
 
-`vitest.config.ts`'s `test.include` reads `src/**/*.test.ts` alone, so a test file sitting beside a root config it exercises, such as `commitlint.config.test.ts` beside `commitlint.config.js`, never runs under `bun run test` or the Tests stage. Neither reports a failure, since vitest finds no matching file to run there, so the gap surfaces only as a suite that passed without asserting anything for the new file. A plan calling for that shape of test widens `include` with a bare `*.test.ts` entry alongside the existing one.
+`vitest.config.ts`'s `test.include` carries a bare `*.test.ts` entry, so a test file sitting beside a root config it exercises, such as `commitlint.config.test.ts` beside `commitlint.config.js`, runs under `bun run test`. The gate's Tests stage runs only when a changed path matches `TESTS_SCOPE` in `src/gate/stages.ts`, so a branch touching only such a pair reports `Skipped` rather than a failure. The two commitlint files are in that scope. A new root-level pair needs its own pattern there, asserted in `src/gate/stages.test.ts`.
 
 ### No stage reports an unused import
 

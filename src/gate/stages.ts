@@ -107,6 +107,7 @@ const TESTS_SCOPE = new RegExp(
     '^vitest\\.config\\.ts$',
     '^tsconfig\\.json$',
     '^package\\.json$',
+    '^commitlint\\.config\\.(js|test\\.ts)$',
     ...TEST_CORPORA_PATTERNS,
   ].join('|'),
 )
