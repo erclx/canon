@@ -21,7 +21,7 @@ before scanning.
 ## Scan
 
 Walk the project root for folders containing three or more sibling `*.md` files.
-Prune `.git`, `node_modules`, `.claude`, `snippets`, anything matched by
+Prune `.git`, `node_modules`, `.claude`, anything matched by
 `.gitignore`, and any folder that already contains an `index.md`.
 
 For each candidate, capture:

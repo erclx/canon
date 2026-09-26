@@ -19,7 +19,7 @@ body:
     id: surface
     attributes:
       label: Surface
-      description: Toolkit surface and its type, such as plugin skill, snippet, CLI, or seed
+      description: Toolkit surface and its type, such as plugin skill, CLI, or seed
     validations:
       required: true
   - type: textarea

@@ -82,7 +82,7 @@ The first entry covers the whole record root, so a record folder added later nee
 ## CLAUDE.md
 
 - Ships as a seed with placeholder project name, description, and key paths. Fill these in after init.
-- Section layout: `Context`, `Indexes`, `Markdown`, `Key paths`, `Spelling`, `Snippets`, `Tasks`, `Memory`. Each section groups rules that share a surface so skills can detect, extend, or skip by heading.
+- Section layout: `Context`, `Indexes`, `Markdown`, `Key paths`, `Spelling`, `Tasks`, `Memory`. Each section groups rules that share a surface so skills can detect, extend, or skip by heading.
 - The memory rules favor signal over volume. Saving only after a second occurrence or an explicit user correction keeps entries focused on patterns worth preventing, not first-occurrence slips. The 3-line cap stops the built-in auto-memory from drifting into narrative writeups that bury the rule underneath the recovery story.
 - The `Context` section points at `.claude/` state docs one line. `plan-feature` does the parallel read when invoked. The seed intentionally does not re-list every file.
 

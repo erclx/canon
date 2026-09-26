@@ -10,7 +10,7 @@ arguments, previews the chain, runs `canon init`, then verifies what landed and
 bootstraps the `index.md` system over the project's own documentation folders.
 
 The CLI holds the install logic. This skill resolves, previews, and routes. It
-reimplements no verb and hardcodes no stack, rule, or snippet name.
+reimplements no verb and hardcodes no stack or rule name.
 
 ## Phases
 

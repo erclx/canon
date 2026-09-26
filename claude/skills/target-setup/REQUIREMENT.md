@@ -27,7 +27,7 @@ two copies could disagree with nothing comparing them.
 
 ## Must
 
-- Read the toolkit catalogs before resolving, and hardcode no stack, rule, or snippet name
+- Read the toolkit catalogs before resolving, and hardcode no stack or rule name
 - Preview the resolved arguments and the exact commands before the first write
 - Mark a fallback resolution as a fallback in the preview, where it can still be declined
 - Run every phase without a TTY, and carry an argument for each prompt a phase would otherwise open

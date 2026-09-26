@@ -37,6 +37,6 @@ A branch that pushes again after opening can merge under-labelled if the new com
 
 The map has a second consumer and it is a person. Nothing detects a top-level directory the table fails to cover, so a surface added later labels nothing until someone adds a row, which is the manifest-to-reference symmetry this repository already records as a gotcha, arriving in a new folder.
 
-`.claude/` carries no row of its own, since the tree spans context entries, two sets of generated mirrors, and internal skills rather than one domain, and a single row would label unrelated work alike. Each subtree instead carries its prefix on the row owning its subject: `.claude/rules/` joins `governance` and `.claude/internal/snippets/` joins `snippets`, rather than the map doubling with a row per subtree.
+`.claude/` carries no row of its own, since the tree spans context entries, two sets of generated mirrors, and internal skills rather than one domain, and a single row would label unrelated work alike. Each subtree instead carries its prefix on the row owning its subject: `.claude/rules/` joins `governance` and `.claude/internal/standards/` joins `standards`, rather than the map doubling with a row per subtree.
 
-The row count is the measure worth watching here. A map with a row per subtree would rebuild the unreadable map this design avoids, which is why extending an existing row is the default and a new row waits for a subject no label carries. `snippets` and `repo` are the two that earned one.
+The row count is the measure worth watching here. A map with a row per subtree would rebuild the unreadable map this design avoids, which is why extending an existing row is the default and a new row waits for a subject no label carries. `repo` is the one that did.

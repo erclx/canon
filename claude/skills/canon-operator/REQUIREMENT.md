@@ -9,7 +9,7 @@ description: Why the toolkit has one front door, what orienting on live catalogs
 
 Without this skill, using the toolkit means knowing which skill to pick, and the user who most needs it is the one who cannot. A plain-language intent has no obvious owner among a dozen setup and sync skills, so the session guesses a command instead of resolving one, and a wrong guess installs into a project rather than reporting a mismatch.
 
-Two failures come from acting on memory. A session that names a stack, rule, or snippet from what it remembers rather than from the live catalog runs against an entry that has been renamed or removed. And a session that edits a managed file by hand produces a change the next sync overwrites, which reads as the toolkit undoing work rather than as the edit having been made in the wrong place.
+Two failures come from acting on memory. A session that names a stack or rule from what it remembers rather than from the live catalog runs against an entry that has been renamed or removed. And a session that edits a managed file by hand produces a change the next sync overwrites, which reads as the toolkit undoing work rather than as the edit having been made in the wrong place.
 
 The third failure is duplication. A front door that answers everything itself reimplements first-time detection and seed diffing inline, badly, beside the skills that already do both. The value of a router is that it stops at the handoff.
 
@@ -23,7 +23,7 @@ The last failure is a section no route reaches. `## Route` maps an intent or a d
 
 - Orient on the toolkit's own docs and the live catalogs before acting
 - Map the stated intent to one lifecycle phase, then either run the simplest command that satisfies it or hand off
-- Resolve every stack, rule, snippet, and standard name from a catalog at runtime
+- Resolve every stack, rule, and standard name from a catalog at runtime
 - Run the CLI non-interactively and report the command run, what changed, and the full path of anything written
 - Read the overwrite contract from the body before any install or sync, and name each surface it lists as overwritten before running one
 - Read the reverse walk beside the forward sections, so a folder the toolkit stopped shipping reaches the user

@@ -16,7 +16,7 @@ Run these from the target project root, in parallel, before acting:
 - `canon docs agents`: the CLI command catalog and invocation contract
 - `canon docs target-projects`: the scaffold, add-a-domain, and sync lifecycle
 
-Load a domain doc with `canon docs <topic>` only when the intent touches that domain. Read the live catalog for any domain you act on with `canon <domain> list --json`. Never hardcode stack, rule, snippet, or standards names.
+Load a domain doc with `canon docs <topic>` only when the intent touches that domain. Read the live catalog for any domain you act on with `canon <domain> list --json`. Never hardcode stack, rule, or standards names.
 
 ## Diagnose
 
@@ -50,7 +50,7 @@ The two can name different rows, and a reply answers both rather than picking on
 - Governance rules for the project stack: hand off to `target-setup`, which installs them alone on its `gov` phase
 - Bootstrap the `index.md` system: hand off to `target-setup`, which bootstraps it on its `indexes` phase
 - Seed or standards drift in `CLAUDE.md` or `.claude/` preambles: hand off to `seed-sync`
-- Install one snippet, standard, or rule: run the domain `install` command
+- Install one rule: run the domain `install` command
 - Sync one domain or every installed domain: run `canon <domain> sync` or `canon sync`
 - Fix only the ignore entries of the installed stack: run `canon tooling inject --gitignore <stack>`
 - Measure a surface without changing it: offer the audits under `### Audits`

@@ -153,7 +153,7 @@ const ARTICLES = ['the', 'a', 'an']
  * either number.
  *
  * The optional word between the number and the noun is what reaches a form
- * like `installs 11 shipped snippets` without also reaching past an
+ * like `installs 11 shipped rules` without also reaching past an
  * intervening clause, since a wider gap would start pairing a number in one
  * clause with a noun in the next. Requiring the noun's own plural form to
  * double as its match narrows the corpus this reads without hand-listing

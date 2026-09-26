@@ -9,8 +9,8 @@ REPORT="drift-report.json"
 use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"
   export SANDBOX_INJECT_SEEDS="true"
-  # Governance is the scanned domain the arms stage against. Standards and
-  # snippets install into no target, so neither leaves a copy to make stale.
+  # Governance is the scanned domain the arms stage against. Standards
+  # installs into no target, so it leaves no copy to make stale.
   export SANDBOX_INJECT_GOV="true"
 }
 
