@@ -37,7 +37,7 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 
 ### What reads the table
 
-`standards/context.md` scopes the `## Scripts` heading to this domain by name, and this file is where it lands. Three surfaces read the table, so a command added anywhere else is a command they cannot see: `project-commands` resolves a request against it, every stack reference extends it, and `docs/target-projects.md` tells a target to keep its own copy current.
+`standards/context.md` scopes the `## Scripts` heading to this domain by name, and this file is where it lands. Three surfaces read the table, so a command added anywhere else is a command they cannot see: `project-commands` resolves a request against it, every stack reference extends it, and `docs/target/target-projects.md` tells a target to keep its own copy current.
 
 The table stays a table against the catalog rule beside it, which sends a surface that grows a row per shipped thing to a bullet list. That rule answers reflow conflicts between sibling branches, and the same standard names this section a table in the sentence that scopes it here. `canon context audit` reports the row count under Tables on every run, so the finding is expected rather than outstanding.
 
@@ -53,7 +53,7 @@ Fifteen files name the flat path and ten of them instruct a target project about
 
 Those sites keep the flat spelling, and the citation gate is what that costs. It resolves every `canon/context/*.md` string in the repository against this root, so a citation naming the pre-split flat path passes only because it describes a target's own layout rather than this repository's.
 
-Two repairs follow, and which one applies turns on whether the surface installs. A line in a file that reaches a target drops the path, since a marker there is toolkit bookkeeping landing in someone else's tree. That covers the seeded `CLAUDE.md` and the `project-commands` guard and the row describing it. A line that stays in this repository carries `<!-- audit-ignore-citations -->` instead, which is `docs/target-projects.md` alone.
+Two repairs follow, and which one applies turns on whether the surface installs. A line in a file that reaches a target drops the path, since a marker there is toolkit bookkeeping landing in someone else's tree. That covers the seeded `CLAUDE.md` and the `project-commands` guard and the row describing it. A line that stays in this repository carries `<!-- audit-ignore-citations -->` instead, which is `docs/target/target-projects.md` alone.
 
 Widening the gate by location was the alternative, and it would silence a real stale reference in the same trees. Where a stop message has to spell the flat path, a fenced block carries it rather than a marker, since the gate skips fences in markdown.
 

@@ -23,6 +23,7 @@ stage_setup() {
     log_info "Expect keys: category, description, name, target"
     log_info "Expect docs topics: agents, ai-workflow, target-projects"
     log_info "Expect ai-workflow at target docs/workflow/ai-workflow.md, listed from one level down"
+    log_info "Expect target-projects at target docs/target/target-projects.md, listed from one level down"
     log_info "Expect no workflow topic: the folder index declares no target-facing category"
     log_info "Expect agents by folder name, described by its index subtitle"
     log_info "Expect domain context topics: tooling, governance, standards"

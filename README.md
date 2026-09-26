@@ -96,7 +96,7 @@ Working with an agent rather than reading this yourself? It loads `CLAUDE.md` at
 - [AI workflow](docs/workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
 - [Operating model](docs/workflow/operating-model.md): orchestrator, planner, and worker roles for building across parallel sessions
 - [Visual design workflow](docs/workflow/visual-design-workflow.md): tiered guide for design and wireframe authoring
-- [Target projects](docs/target-projects.md): scaffold, add a domain later, sync upstream drift
+- [Target projects](docs/target/target-projects.md): scaffold, add a domain later, sync upstream drift
 - [Agents](docs/agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [Docs index](docs/index.md): every reference doc in this repo
 
@@ -152,7 +152,7 @@ canon init
 
 Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. A snippet resolves the same way, reached at its `@` reference through the plugin's live `claude/snippets` symlink rather than a copy. Run `canon tooling list --json` to see the catalog.
 
-For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target-projects.md).
+For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target/target-projects.md).
 
 ### Internal narrative
 

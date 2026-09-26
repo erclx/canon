@@ -8,7 +8,7 @@ category: Agent surface
 
 How a project outside this repo consumes the toolkit across its lifecycle. Three phases: scaffold once, add a domain later when a new need appears, and sync when the upstream toolkit moves.
 
-This doc stays at the narrative layer. For command flags and JSON shapes, see [agents](agents/index.md). For per-domain mechanics, see each `canon/context/<domain>.md`.
+This doc stays at the narrative layer. For command flags and JSON shapes, see [agents](../agents/index.md). For per-domain mechanics, see each `canon/context/<domain>.md`.
 
 ## Getting the skills
 
@@ -74,7 +74,7 @@ Scaffold installs tooling and seeds. It does not fill the planning docs or the d
 1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write.
 2. For a UI project, invoke `canon:design-extract` to draft `canon/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
 3. Optionally invoke `canon:draft-diagram` to draft entries under `.canon/diagrams/` from the architecture and the requirements. One file per diagram kind, so a later refresh of one kind leaves the others untouched. It renders each diagram it writes to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
-4. Start the feature loop. See [AI workflow](workflow/ai-workflow.md) for the per-feature sequence.
+4. Start the feature loop. See [AI workflow](../workflow/ai-workflow.md) for the per-feature sequence.
 
 A machine without a renderer still gets the diagrams and is told which check was skipped.
 
@@ -135,8 +135,8 @@ When the toolkit updates, a target pulls changes per domain. A project scaffolde
 
 ## Related
 
-- [agents](agents/index.md): CLI flags, exit codes, and JSON output shapes
+- [agents](../agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [target migrations](target-migrations.md), [target sync](target-sync.md), [target scenarios](target-scenarios.md): the one-time moves, the recurring sync, and worked setups
-- [AI workflow](workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
-- [tooling](../canon/context/tooling/index.md), [governance](../canon/context/governance/index.md), [claude plugin](../canon/context/claude-plugin/index.md), [indexes](../canon/context/indexes.md), [snippets](../canon/context/snippets.md), [standards](../canon/context/standards/index.md): per-domain mechanics
-- [sandbox](../canon/context/sandbox/index.md): scenario catalog for verifying domain flows
+- [AI workflow](../workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
+- [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/indexes.md), [snippets](../../canon/context/snippets.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
+- [sandbox](../../canon/context/sandbox/index.md): scenario catalog for verifying domain flows
