@@ -50,3 +50,44 @@ Each destination gates prose the workspace does not, so name what the page still
 - **The page promoted into a new context entry.** Entries are created deliberately, so a promotion proposing one is proposing a domain rather than moving a page.
 - **The glossary split across destinations.** Terms drawn from one subject move together or not at all, since an entry defining a term the other half uses strands both.
 - **The workspace emptied on promotion.** Promotion copies rather than moves. The workspace stays readable to the learner who built it, and the page's later life belongs to its destination.
+
+## Proposing and handing off
+
+Step 6 of `teach-workspace` reads this section once the routing above has placed each page. Propose and wait. A promoted page is public prose that needs a line naming who owns its subject, which is a judgment about ownership rather than a move a session makes on its own reading. Present one block per candidate page:
+
+```plaintext
+reference/<slug>.md → <destination path>
+Subject owner: <who owns it, in a few words>
+Still owed:    <what the destination expects that the page does not carry yet>
+```
+
+Then stop and let the operator strike, redirect, or confirm each block.
+
+Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against. Record each confirmed block in `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists, with one H2 per destination naming its path, the source page beneath it, and the page body fenced:
+
+````markdown
+## <destination path>
+
+Source: .canon/teach/<nn>-<topic>/reference/<slug>.md
+
+```markdown
+<the page body as it should land, with the source line the destination expects>
+```
+````
+
+The body is fenced rather than written bare because a reference page carries headings of its own, and the reader splits this file on its H2 lines. An unfenced body turns every section heading in the page into a destination naming no path. Open the body fence with four backticks so a page carrying a fenced code block of its own still closes where it should, and widen both fences together if it carries a four-backtick fence.
+
+Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
+
+The handoff is its own file rather than a shared one. The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work goes with it, and a sibling path costs the folding skill one more read and removes the interaction.
+
+An append is a whole-file operation, so send it as a heredoc, per the skill's Step 0. Then tell the operator that `/docs-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+
+A promotion pass reports this shape in place of the skill's Output block, one line per page the operator confirmed and one naming the handoff:
+
+```plaintext
+➡️ Promoting: .canon/teach/<nn>-<topic>/reference/<slug>.md → <destination path>
+→ Confirmed pages wait at .canon/tmp/handoff/teach-promotion/<slug>.md. Run /docs-fold from a branch to fold them in.
+```
+
+A pass where the operator confirmed nothing writes no handoff file and reports that alone.

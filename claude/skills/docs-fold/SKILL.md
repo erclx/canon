@@ -23,22 +23,7 @@ Take the union of `git diff --name-only <base> HEAD`, `git diff --name-only HEAD
 
 Prefer `origin/main` over local `main`. On `main` itself the local ref resolves to HEAD, so every committed change drops out of the set and the skill goes blind to the work it is meant to read.
 
-The baseline is unusable in two cases:
-
-- No merge base resolves against either ref.
-- The base came from local `main` and equals HEAD. Nothing is pushed to compare against, so a narrow read reports no changes rather than admitting it cannot see them.
-
-An unusable baseline costs only the committed half. `git diff <base> HEAD` is empty by definition once the base equals HEAD, while `git diff HEAD` and `git ls-files --others --exclude-standard` still report uncommitted and untracked work at correct scope.
-
-**Step 2 recovers the committed half.** Read `git log -p -1`, widening to `git log -p -<n>` when the session spans several commits, and read the candidate task files against the working tree. That yields names and content both, which is what lets Step 2 decide on behavior rather than on filenames. A fresh `git init` on `main` with no remote is the ordinary shape of a scaffolded project, so this path carries the evidence rather than covering an edge case.
-
-**Steps 4, 5, and 7 keep the scoped set.** Run them on the working tree and untracked files alone, and skip only when that set comes out empty, each reporting the warning its own step names.
-
-Never substitute the whole tree for a missing baseline, and do not reuse Step 2's commit read in these three for consistency. On a fresh `git init` project the last commit is the scaffold commit, so `git log -p -1` is the whole tree by another route. Step 2 tolerates that because it only reads, and it matches conservatively against outcomes already on the board. Steps 4 and 7 write, so the same set stubs a wireframe for every uncovered surface in the repository and rewrites every context entry that tree touches.
-
-Step 5 only reports, and the whole tree costs it a different way. Every anchored decision cites a path the scaffold commit carries, so the sweep flags the entire record and the reader learns nothing about which number moved.
-
-Widening what a step reads is safe. Widening what a step writes is not, and widening what a step flags spends the reader's attention on entries nothing put in doubt.
+The baseline is unusable when no merge base resolves against either ref, or when the base came from local `main` and equals HEAD. On an unusable baseline, read `${CLAUDE_SKILL_DIR}/references/unusable-baseline.md` before Step 2 for what each step reads instead.
 
 ## Step 1: read current docs
 
@@ -80,14 +65,7 @@ Skip Step 3 when the session shows no divergence **and** the diff matches no que
 
 Then run Steps 4 through 9. Step 3 is the only one this skips, because it is the only one driven by the session rather than by the diff or the board. A project with an empty task board making a mechanical change satisfies both conditions above, and stopping here would put an uncovered surface out of reach in every such project.
 
-The steps that follow reach past the session, so each earns the reach separately:
-
-- Step 4 stubs against the diff. That is why the skip is not a stop. A session that changed no docs is exactly when an uncovered surface goes unnoticed.
-- Step 5 reads the architecture record against the diff. A run that amended no decision is the one where an anchored number moves under a reasoning nobody reread, which is the case the marker exists to surface.
-- Step 7 rewrites context entries against the diff and against the facts `memory-capture` routed. The Diff baseline section above groups its diff half with Steps 4 and 5 as a scoped-set step, so a quiet session is no different from any other for it. The routed half reads a named file and runs whatever the diff shows.
-- The scratch sweep reads the board rather than the session. Its board-wide scan exists to clear a plan an earlier run stranded, and a run that stops at Step 2 can never reach one.
-
-This changes which steps the skill reaches. It does not widen what any of them reads. Steps 4, 5, and 7 still take the same scoped set the Diff baseline section defines, and that section's rule is about the input a step is handed rather than about which steps run.
+This changes which steps the skill reaches and never widens what any of them reads. Steps 4, 5, and 7 still take the same scoped set the Diff baseline section defines.
 
 ## Step 3: update
 
@@ -149,121 +127,21 @@ Do not edit `CLAUDE.md` inline. Every `CLAUDE.md` change goes through the show-d
 
 Read `canon/context/index.md` at `pwd` to see which domain entries exist. Skip this step silently if the directory does not exist or has no entries.
 
-Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
-
-**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `canon/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
-
-This half is not diff-scoped and must not be. A gotcha a session hit while working is exactly the fact the diff never shows, and scoping it to changed files would drop the entries worth keeping. The handoff is a named input rather than a scan, so the reach stays bounded to what capture decided.
-
-Skip this half silently when the file is absent, which is every run where nothing routed.
-
-**The diff.** When the baseline is unusable, scope this half to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the context refresh.` The routed half still runs, since it reads a file rather than a diff.
-
-Reuse the diff from the baseline above, names and content both. For each domain listed in `canon/context/index.md`, read its own entry: a flat `canon/context/<domain>.md`, or, for a domain split into a folder, its `canon/context/<domain>/index.md` and every sibling file that index links. Follow the index rather than globbing the folder, since a folder can hold a file the index does not list yet.
-
-- Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
-- For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
-- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule Step 3 applies to the other four canonical doc types.
-- Write a reference to another entry as the path that entry sits at, rather than as its bare filename. `${CLAUDE_SKILL_DIR}/../../standards/context.md` states the form, and a bare name strands the reference once a domain splits into subfolders.
-
-### When the diff removes a capability
-
-The mapping above is scoped by file, and a removal invalidates claims that mapping cannot reach. Run this only when the diff deletes a command, a flag, a constant, or a folder. Ordinary feature work takes the narrow rule alone, since widening it on every ship churns prose nothing put in doubt.
-
-Grep the tree for the name that went, rather than for the paths the diff carries. A capability removed by name is cited by that name, which reaches a file the diff never touched.
-
-- An entry this run already rewrote is read whole before it is left. A refresh that updates the top and leaves a contradicting claim below reads worse than an untouched entry, because the current opening lends authority to the stale remainder. This is the one case that overrides "do not touch unrelated sections", and it overrides it only inside an entry the run edited anyway.
-- A claim comparing two surfaces is checked even where its file is outside the diff. Such a claim holds only while both surfaces do, so moving one inverts it with nobody editing the file it sits in.
-
-Report each hit as an ordinary rewrite.
-
-Create a new entry only for a domain `canon/context/index.md` already lists but carries no file for, following `${CLAUDE_SKILL_DIR}/../../standards/context.md` for its shape. Before treating a domain as carrying no file, confirm it holds no entry under either spelling, `canon/context/<domain>.md` or `canon/context/<domain>/index.md`, since a domain already split into a folder still passes a check that only looked for the flat file. A row in the catalog is the deliberate decision, taken by whoever added it. This step only fills in what that decision left open, and only until the next `canon indexes regen` pass, which rebuilds the catalog from each entry's own frontmatter plus every sibling's and drops a row whose file still does not exist. Create the file before that regen runs, or the row this bar exists to fill in is gone. A domain the catalog does not list at all is a different case: report it and stop, rather than creating an entry or a catalog row for it.
-
-Write each updated entry immediately. Output one line per file, naming the path this run actually wrote rather than always the flat template:
-
-`✅ Context: canon/context/<domain>.md` for a flat entry, or `✅ Context: canon/context/<domain>/<sub-area>.md` for the sibling file a nested edit landed in
-
-Add a line naming the handoff when one was consumed:
-
-`🧹 Folded: .canon/tmp/handoff/memory-routing/<slug>.md`
-
-The base lint-staged config runs `canon indexes regen` on every committed `*.md`, so `canon/context/index.md` refreshes automatically on commit. No manual step needed.
+Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for its two sources, the routed facts and the diff, the widening a removed capability takes, when a new entry is created, and the output lines.
 
 ## Step 8: fold promoted pages
 
-Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root. `teach-workspace` writes it, one H2 per destination naming the path, with a source line under the heading and the page body in a fenced block below that. Read the body out of the fence rather than off the heading level, since a reference page carries headings of its own and only the fence separates them from the next destination. Skip this step silently when the file is absent, which is every run where nothing was promoted.
-
-Each block is a page an operator already confirmed a destination for, so this step lands it rather than judging it again. Write to the destination the heading names, at `pwd` rather than at the main root, since every destination here is a tracked file that commits with the branch:
-
-- A wiki page and a public doc arrive as a whole file. Write it as the block gives it, and stop with the block unfolded when the destination path already holds a file, since overwriting a page someone else wrote is not a fold.
-- A context entry is merged into rather than created. Fold the body into the sections it belongs under, the same way the routed facts above are folded, and never add an entry the catalog does not already carry.
-
-Then delete the handoff file so a later run does not fold it twice, and regenerate the index of any folder that carries one.
-
-Output one line per page landed:
-
-`✅ Promoted: <destination path>`
-
-Add a line naming the handoff when one was consumed:
-
-`🧹 Folded: .canon/tmp/handoff/teach-promotion/<slug>.md`
-
-Report a block left unfolded rather than dropping it:
-
-`⚠ Skipped: <destination path> already exists. Merge by hand.`
+Skip this step silently when no teach promotion handoff exists at `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root, deriving `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md` with the `latest` fallback. Otherwise read `${CLAUDE_SKILL_DIR}/references/promoted-pages.md` for how each block lands, the handoff delete, and the output lines.
 
 ## Step 9: sweep consumed receipts
 
-Sweep the review and memory receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
-
-Every delete below is a plain `rm`, one per call, routed the way `session-worktree` states.
-
-Plans are not swept here. A plan is settled by the merge rather than by an outcome this run marked, and `canon tasks archive` moves it with the task the `post-merge` hook archives. Sweeping it from this step read a closure Step 3 had written moments earlier and moved a plan the branch was still building from.
-
-### Reviews
-
-Leave the current branch's review receipt where it is. `auto-ship` Step 6 keeps minor findings in `.canon/review/branch-<slug>.md` and its closing block hands the reader that path, so deleting it here removes the file the chain that invoked this skill is still citing. Seven runs recorded that collision across two days before a sandbox fixture asserted the receipt and could pass only on a run the chain stopped early.
-
-The body that writes a receipt owns its lifetime. This skill sweeps on behalf of whatever called it and has no way to read whether a file is still in use, where the chain that wrote this one cites it in its own output and knows. What reaps it is the branch sweep below, one branch later, once the branch it names is gone.
-
-Sweep the branch reports this session never opened. List `.canon/review/branch-*.md`, run the slug transform in `${CLAUDE_SKILL_DIR}/../../standards/slug.md` over every name `git branch --format='%(refname:short)'` prints, and delete a report whose slug matches none of them. Take the names from that format rather than from `git branch --list`, which marks the current branch with `* ` and a branch checked out in another worktree with `+ `, so a transform reading the marked lines as written turns a live branch into a slug nothing matches and sweeps a report a sibling worktree is still working from. A branch report is read once, by the session addressing it, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so a report outliving its branch is holding nothing. Skipping this leaves them accumulating for the life of the checkout, since a slug is unique per feature and no later branch ever looks for one.
-
-What that removes is a local-only review on a branch deleted before it opened a pull request. `review-branch` says so where a reader meets the report, and the sweep runs anyway rather than keeping every report against the one case, since nothing else ever clears them.
-
-Memory receipts sweep board-wide rather than by slug. Scan every `.canon/memory/review/memory-review-*.md`, not only the one matching this slug. `memory-review` writes its receipt after this skill has run in every ship chain, so a sweep keyed on the current slug looks for a file that does not exist yet, and no later branch looks for it either because a slug is unique per feature. Scanning the folder is what makes the sweep fire at all.
-
-For each receipt, count the H2 items still pending. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot holds nothing `memory-review` Apply would act on or skip, since a receipt written by hand or by an older binary may lack the marker, and Apply's parse leaves every other slot value undecided:
-
-- No pending item: fold it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, then delete the receipt.
-- Any pending item: leave it and report the count. Pending items are decision state, and a branch shipping is not an operator deciding them.
-
-That standard owns what a fold writes and which entry types take one. `memory-review` collects a receipt on the same rule, so neither body restates it.
-
-Do not sweep `ux-audit-*.md` or `ux-measure-*.md` (standalone deliverables). Those sit at `.canon/review/` itself rather than under a producer folder, so the two globs above never reach them.
-
-Output one line per file swept:
-
-- `🧹 Deleted: <path>, branch gone` for a branch report whose branch no longer exists
-- `🧹 Deleted: <path>, folded <n> skips` for a swept memory receipt
-- `⏭ Kept: <path>, <n> items pending` for a memory receipt still holding decisions
-
-If nothing qualifies, skip this step silently.
+Read `${CLAUDE_SKILL_DIR}/references/receipt-sweep.md` for which review and memory receipts this session sweeps, which it keeps, and the output lines. Skip this step silently when nothing qualifies.
 
 ## Step 10: classify the fold's diff baseline
 
 Skip this step silently only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
 
-Otherwise resolve `<base>` the way the Diff baseline section already does for Steps 2, 4, 5, and 7, and reuse it rather than resolving a second time. Run the check over the fold's whole baseline rather than scoping it to what Steps 3 and 7 wrote this run: earlier commits on the branch carry doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none.
-
-The invocation is:
-
-```bash
-canon context classify diff --base <base> --json
-```
-
-Never substitute a different verb for it, such as `canon autoship classify` (a different check, over a different scope) or `canon docs <name>` (a documentation lookup, not a classification). Read `${CLAUDE_SKILL_DIR}/references/classify.md` for the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape. `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, several steps before this one. If Step 10's memory of that path is uncertain, read the reference by that resolved path rather than guessing a `.claude/skills/docs-fold/references/classify.md` path from the toolkit's install-time layout, which is a different root than the one this skill's own files live under. The invocation above runs either way, whether or not that reference resolves.
-
-Findings never stop the fold. A refusal or a missing subcommand on an older installed binary reports one line, per that reference, and the fold continues either way.
+Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, its scope, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape. `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, several steps before this one. Read the reference by that resolved path rather than guessing a `.claude/skills/docs-fold/references/classify.md` path from the toolkit's install-time layout, which is a different root than the one this skill's own files live under. The invocation is `canon context classify diff --base <base> --json`, and it runs whether or not that reference resolves. Findings never stop the fold.
 
 ## After completion
 

@@ -9,7 +9,7 @@ argument-hint: <subject to learn, or the topic of a workspace to resume or promo
 
 Run a learning workspace on one subject across sessions. The workspace holds what the learner has been through, so a session weeks later resumes from the folder rather than from the conversation.
 
-The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md`, whose shape governs a glossary wherever it lands, since a promoted glossary keeps its shape at whatever path it reaches and no project folder covers all of them. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
+The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
 
 ## Guards
 
@@ -77,9 +77,7 @@ A claim nothing was read for is the failure this step exists against. Where no s
 
 Pick the next lesson from the learning records rather than from the subject's own order. The target is the band immediately past what the learner can already do unaided, which `${CLAUDE_SKILL_DIR}/references/pedagogy.md` states in full.
 
-Open on what `due` reports as overdue, oldest date first, before anything new. Where nothing is overdue, open on retrieval of what the last session got wrong. A learner who cannot retrieve the previous lesson is not ready for the next one, and moving on anyway buys fluency that decays.
-
-Reading the last record alone is what the schedule replaces. A topic missed three sessions ago and never revisited is invisible to that read and sits in `due` with a date already past, which is the whole reason the field exists.
+Open on what `due` reports as overdue, oldest date first, before anything new. Where nothing is overdue, open on retrieval of what the last session got wrong. A learner who cannot retrieve the previous lesson is not ready for the next one, and moving on anyway buys fluency that decays. Never place from the last record alone, since a topic missed three sessions ago is invisible to that read and sits in `due` with a date already past.
 
 ## Step 4: write the lesson and the reference
 
@@ -103,69 +101,11 @@ It writes nothing and reports three things:
 - `success`, the mission's success lines, carried here so Step 5 needs no second read.
 - `quiz`, one entry per question, carrying `order` and `answer`.
 
-Write the correct option first, then present the options in the order `order` reports, reading it as authored indices where `0` is the correct one. Take the order as given. Position drawn here rather than chosen is the whole reason the verb exists, and a lesson that reorders on its own judgment puts the answer back in the first slot.
+Write the correct option first, then present the options in the order `order` reports, reading it as authored indices where `0` is the correct one. Take the order as given, since a lesson that reorders on its own judgment puts the answer back in the first slot.
 
-### The quiz and the teach-back block
+### The quiz, the teach-back block, and the lesson body
 
-The quiz markup is a contract rather than a convention. `canon teach nav` splices a stepper into the lesson that gates on exactly the class names and nesting `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` states under `## Quiz construction`, so a quiz in any other shape shows every question at once and nothing reports it. That is the leak this shape closes: a later stem naming what an earlier question asked for answers it while both sit on screen.
-
-Write each option as a `<label class="opt" data-k="<letter>">` holding a radio `<input>` and a `<span>`, every option in one question sharing a `name` and each question taking a different one, the correct option carrying `data-a="1"`, and one `.fb` block as the last child of the `.q`. Never write a `<button class="opt">` in a new lesson. That is the shape written before the stepper, kept working by an injected script the button itself still triggers, and a lesson mixing the two gets both mechanisms.
-
-Then carry a teach-back block beside the quiz. A quiz is recognition and the pedagogy prefers production, so a lesson offering only a quiz tests the weak form. Ask for an explanation to a named audience, and carry a `<details>` listing what a complete explanation covers, closed by default, so a learner reading with no session in the room can grade themselves. The reference states both shapes in full.
-
-Compose the quiz and the teach-back block as one string. Below, that string is the block list's last `raw` entry, followed only by `refs`, rather than markup written into the file by hand.
-
-### Building the lesson body
-
-Write the chrome as four empty marker pairs rather than composing it by hand: `<!-- canon:teach:style -->`/`<!-- /canon:teach:style -->` inside `<head>`, and `<!-- canon:teach:header -->`, `<!-- canon:teach:footnav -->`, and `<!-- canon:teach:scripts -->` each with its own close marker, in that order in `<body>`.
-
-Build the authored `<h1>`, lede, body, and quiz as a JSON array of blocks rather than composing markup by hand, and render it through the verb rather than through a component import:
-
-```bash
-echo '[
-  {"type":"heading","level":1,"text":"<title>"},
-  {"type":"paragraph","lede":true,"text":"<the dek>"},
-  {"type":"paragraph","text":"<a body paragraph>"},
-  {"type":"paragraph","text":"<a claim resting on a source>","cites":[1]},
-  {"type":"list","ordered":true,"items":["<step one>","<step two>"]},
-  {"type":"raw","html":"<the quiz and teach-back block composed above>"},
-  {"type":"refs","items":[{"title":"<source name>","url":"<https URL>"}]}
-]' | canon teach render --json
-```
-
-A `heading`, a `paragraph` (`lede: true` for the dek, `cites` for a claim resting on a source), a `list`, and the one `refs` block the cites number into cover the structural body. Reach for `raw` only where none of those can carry the content, never as a shortcut around composing one, and give the quiz and teach-back block the array's last `raw` entry every time, followed only by `refs`, since their fixed contract is not a components concern. Take the call's `html` field and write it between the header's close marker and the footnav's open marker, and nothing else anywhere in the file.
-
-Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it, and never compose the lesson body by hand as a fallback. That is the state this section exists to end, and a target holds this skill body before it holds the verb, since a plugin skill reaches a target the moment it merges while the CLI reaches one only when a release publishes.
-
-Then run:
-
-```bash
-canon teach nav <topic> --json
-```
-
-It fills every marker pair from what the workspace holds on disk: the embedded stylesheet, the header with its breadcrumb and jump menus, the prev/next footer nav, and the behavior scripts, and it rewrites the workspace's contents page and the teach-root listing in the same run. It refuses a lesson missing one of the four marker pairs by name rather than guessing at the boundary, so a marker dropped while writing the lesson is caught here rather than read back later as a lesson nothing links to. Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it, and never compose the chrome by hand as a fallback.
-
-Seed the stylesheet through the verb rather than authoring a palette, on the first lesson in a workspace:
-
-```bash
-canon teach stylesheet <topic> --json
-```
-
-It writes the design tokens as custom properties and the components built on them, from the one source every other rendered surface reads. Add lesson rules under the seed and reach a value through its property rather than restating the hex, which is what let each workspace fork the palette from every other. It refuses to overwrite, so running it again on a workspace that has grown its own rules is safe and reports `written` as false.
-
-Report it rather than proceeding silently when the verb does not resolve, which is an installed CLI predating it. Do not fall back to writing a palette by hand.
-
-Add every term the lesson defines to `GLOSSARY.md` through the verb, which places the entries alphabetically in the shape the standard fixes:
-
-```bash
-canon teach glossary <topic> --json \
-  --term "<term>=<definition, written without using the term>" \
-  --first-seen <the lesson or reference page this batch comes from>
-```
-
-`--term` repeats and one call writes the file once, which is what keeps a batch of terms from racing on it. A term already defined is refused, since a definition the subject has moved under is a revision of the entry rather than a second one.
-
-Follow `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` for what makes a lesson worth returning to. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct.
+Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. `## Building the lesson body` carries the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against composing any of them by hand when a verb does not resolve. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct.
 
 ### Hand over a link, never a path
 
@@ -209,37 +149,7 @@ Then restate the mission's success lines with what is now met, reading them from
 
 Run this when the invocation asks for it, or offer it in one line when a mission finishes, since that is when the workspace stops growing and its reference pages stop changing. Never run it unasked mid-course.
 
-Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be promoted, the routing test, both spellings of the wiki folder, the refusal when a project has none, and what each destination expects a page to carry.
-
-Propose and wait. A promoted page is public prose that needs a line naming who owns its subject, which is a judgment about ownership rather than a move a session makes on its own reading. Present one block per candidate page:
-
-```plaintext
-reference/<slug>.md → <destination path>
-Subject owner: <who owns it, in a few words>
-Still owed:    <what the destination expects that the page does not carry yet>
-```
-
-Then stop and let the operator strike, redirect, or confirm each block.
-
-Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against. Record each confirmed block in `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists, with one H2 per destination naming its path, the source page beneath it, and the page body fenced:
-
-````markdown
-## <destination path>
-
-Source: .canon/teach/<nn>-<topic>/reference/<slug>.md
-
-```markdown
-<the page body as it should land, with the source line the destination expects>
-```
-````
-
-The body is fenced rather than written bare because a reference page carries headings of its own, and the reader splits this file on its H2 lines. An unfenced body turns every section heading in the page into a destination naming no path. Open the body fence with four backticks so a page carrying a fenced code block of its own still closes where it should, and widen both fences together if it carries a four-backtick fence.
-
-Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
-
-The handoff is its own file rather than a shared one. The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work goes with it, and a sibling path costs the folding skill one more read and removes the interaction.
-
-An append is a whole-file operation, so send it as a heredoc, per Step 0. Then tell the operator that `/docs-fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be promoted, the routing test, both spellings of the wiki folder, the refusal when a project has none, what each destination expects a page to carry, and under `## Proposing and handing off` the proposal block, the handoff file this step writes in place of any destination, and how the operator is told to fold it. Propose and wait, and write nothing to a destination here.
 
 ## Output
 
@@ -254,15 +164,8 @@ Open:      [<the url the serve verb reported>](<the same url>)
 
 Omit the reference line where the lesson produced no durable page. The open line is the one line that is never omitted, since it is the only route the learner has into the page, and it carries what `canon serve` reported rather than a URL composed here. Where the verb refused, that line names the refusal instead of a link.
 
-Write that line as a markdown link carrying the URL as both its text and its target, rather than as a bare URL and never inside backticks. A code span renders as text the reader has to select and copy, which is the one thing the line exists to save them, and the path rule the project states governs a file path rather than a URL.
+Write that line as a markdown link carrying the URL as both its text and its target, rather than as a bare URL and never inside backticks, since a code span is text the reader has to copy.
 
 Emit every path from the project root, in the form the project's instruction file sets.
 
-A promotion pass reports its own shape instead, one line per page the operator confirmed and one naming the handoff:
-
-```plaintext
-➡️ Promoting: .canon/teach/<nn>-<topic>/reference/<slug>.md → <destination path>
-→ Confirmed pages wait at .canon/tmp/handoff/teach-promotion/<slug>.md. Run /docs-fold from a branch to fold them in.
-```
-
-A pass where the operator confirmed nothing writes no handoff file and reports that alone.
+A promotion pass reports the shape `${CLAUDE_SKILL_DIR}/references/promotion.md` gives at the end of `## Proposing and handing off` instead.

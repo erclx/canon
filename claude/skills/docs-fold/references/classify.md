@@ -15,7 +15,9 @@ Call the verb rather than reimplementing its pattern or prompt in this skill:
 canon context classify diff --base <base> --json
 ```
 
-Reuse the base the Diff baseline section already resolved. Never pick or configure a backend here. The project setting decides it, and this step reports `modelLayer` as the record returns it.
+Never substitute a different verb for it, such as `canon autoship classify` (a different check, over a different scope) or `canon docs <name>` (a documentation lookup, not a classification).
+
+Reuse the base the Diff baseline section already resolved for Steps 2, 4, 5, and 7 rather than resolving a second time. Never pick or configure a backend here. The project setting decides it, and this step reports `modelLayer` as the record returns it.
 
 ## Reading the record
 

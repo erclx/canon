@@ -93,3 +93,23 @@ The refusal names the label it rejected and applies none of the set, so a warnin
 ## Release pull requests
 
 Release automation opens its own pull requests without this skill and applies its own labels, so nothing here needs a skip condition for them.
+
+## Labels at run time
+
+The labels step of `git-pr` reads from here. Ask the CLI first:
+
+```bash
+canon labels audit --base <base> --json
+```
+
+The record carries `labels`, the set this branch earns, and `uncovered`, the changed paths no row of the map reaches. Join `labels` with commas into `pr_labels`, which the skill's final command takes. Report each `uncovered` path beside the result line, naming the map so the reader knows where a row would go, since a surface nobody covered merges bare and nothing else says so.
+
+Branch on the record rather than on the exit. An operator's shell profile may wrap `canon` in a function whose status comes from a trailing command, and the binary exits 1 for an unknown subcommand and 1 for an ordinary refusal alike.
+
+A `reason` of `no-map` is the answer that the project declared no map, which earns no labels and no warning: a label set this skill supplied would be a guess about that project's surfaces. Stop there and label nothing.
+
+Every other `reason` is a map or a range the verb could not read, which is `unreadable-map`, `no-domains`, `no-base`, and `unreadable-changes`, plus `bad-base` for a ref this skill resolved wrongly. Take the fallback below and warn beside the result line, naming the reason. A map with a typo in it still has rows a prefix match can reach, and reading the refusal as an absence would open the pull request with no labels and nothing said, which is the surface merging bare that the verb exists to name.
+
+The fallback is reading `canon/config/pr-labels.toml`, or `.claude/canon/pr-labels.toml` when the project has not moved, and matching it against the name-only diff per `## Matching` above. It also covers no record coming back at all, which is an installed `canon` predating the verb, since a skill reaches a target the moment it merges while the CLI reaches one only when a release publishes. Naming both spellings matters exactly here: the binary old enough to need this fallback is the same binary that may predate the move, so the project's map can still sit at the older path. The fallback labels correctly and reports no uncovered path, which is the half only the verb carries.
+
+Leave `pr_labels` empty when no map resolves or no prefix matches, which skips the labelling command rather than running it against nothing.
