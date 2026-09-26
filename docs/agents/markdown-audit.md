@@ -57,72 +57,9 @@ A relative link's destination resolves against the filesystem, over the same cor
 
 The placeholder exemption is the one live case the corpus needs. Every current instance is a genuine illustration rather than a literal path, and a marker-based override is available for the day a real one needs an exception instead.
 
-### Bullets, paragraphs, and depth
+### Weight, cadence, and length
 
-Bullet weight and depth are the checks that moved off `canon context audit`, carrying what they measured at the time. A top-level bullet reports past roughly 400 characters with continuation lines folded in and nested items left out. A run reports past roughly 40 rendered lines, measured at 80 columns, where a heading breaks one and so does a bold section marker taking the whole line at column zero, either ending in a colon, or holding one whole code span at any width, or running to 20 characters or fewer, skipping fenced blocks and exempting a flat peer list averaging under 130 characters a bullet and a run that is entirely table rows. Each file reports its longest run alone, so a second run past the checkpoint in the same file is never named.
-
-Every weight and depth measure counts the text a reader is shown. A link reduces to its anchor text and an autolink drops whole, since no reader is shown either destination. A backticked path stays counted, which is where these measures part from the ban scan above: that one blanks a code span so a standard quoting its own banned character does not report itself, and discounting the same span here would under-report a paragraph carrying several. One file holds both span sets and each answers its own question.
-
-A code span is walked around rather than through, so a path quoting link or angle-bracket syntax keeps the width the page gives it. Masking inside one takes back the decision to count it, and the placeholders this toolkit writes are where that shows.
-
-The paragraph check measures both halves of one rule. `markdown.md` caps a paragraph at four sentences, and a sentence cap on its own is satisfied by writing fewer and longer ones: 15 paragraphs in this corpus sit inside four sentences and past the weight checkpoint, and the heaviest of those runs 886 characters. The standard therefore states a weight beside the sentence cap, and the verb reads it as its own checkpoint.
-
-A sentence boundary closes on terminal punctuation ahead of a capital or a code span. The capital is what keeps a version pin and a decimal from each reading as two sentences, and the code span is admitted beside it because a command name opening a sentence carries no capital to find.
-
-The paragraph weight sits at 700 and the bullet weight at 400. Both shipped at 400, because the paragraph number was borrowed from the bullet rule when the two checks landed together, and each has since been read against a sample of its own. They are separate checkpoints in the standard and separate patterns in the parser, so a read that moves one leaves the other where it is.
-
-#### The sample behind the paragraph number
-
-The checkpoint shipped at 400 as a borrowed number and was decided against a read of the prose it reports. Thirty-six findings were sampled, six from each of six weight bands, drawn at even spacing through each band ordered by path and line, and each was classed as prose a reader wants split or prose the checkpoint should not have reported.
-
-Every band below was measured before the scan stopped counting link syntax as prose, so a paragraph sitting in one of these bands is heavier than a paragraph reported at the same number today. The re-sample in the section below re-reads the same range against the corrected measure and reaches the opposite verdict on it, which is the measure moving rather than the reader.
-
-| Band      | Wants the split | Reads as written |
-| --------- | --------------- | ---------------- |
-| 400 - 425 | 1               | 5                |
-| 425 - 450 | 2               | 4                |
-| 450 - 500 | 2               | 4                |
-| 500 - 600 | 2               | 4                |
-| 600 - 750 | 6               | 0                |
-| Past 750  | 6               | 0                |
-
-Precision is what moved the number rather than the finding count. Below 600 the checkpoint was right about seven of twenty-four sampled paragraphs, and past 600 it was right about all twelve. A checkpoint is a prompt to look, and a prompt wrong three times in four teaches a reader to stop looking. The distribution offers no seam to place the number against, with a median of 487 and a seventy-fifth percentile of 563, so the read is the whole of the evidence.
-
-Nothing inside the 500 to 600 band separated the two classes by length, which is the reason the number did not land there. The two paragraphs wanting a split ran 543 and 590 characters against four reading well at 515, 532, 555, and 569.
-
-The sample is thirty-six paragraphs against a reported population in the hundreds, and one reader classed all of them. Treat a band's rate as the order of magnitude it is rather than as a measured precision, and re-sample before moving the number again.
-
-#### The re-sample that moved the number to 700
-
-That re-sample ran once the scan stopped counting link syntax as prose. Findings at 604, 633, and 677 characters each read as an ordinary four-sentence paragraph on one topic, density arrived around 760 and was plain by 860, and the move cut the weight half of the report roughly in half while leaving the sentence cap untouched.
-
-A bullet, a heading, a table row, a blockquote, a blank line, and a fence each end a paragraph, so a heavy bullet is reported by the bullet check alone and never counted twice.
-
-### Cadence
-
-Uniform cadence is the failure a ban list cannot express. A ban set states negatives, and fragments, verbless clauses, and sentences that all run one length are each the absence of something, so no word added to a ban list reaches any of them. The shape layer already measured a bullet, a paragraph, and a run, and stopped one level above where that failure lives.
-
-Cadence measures a paragraph on two numbers. The spread is the words between its longest and shortest sentence, and the opener count is the times one word opens a sentence in it. A spread of five words or under reads as one cadence, and a word opening more than two sentences is a pattern rather than a coincidence. Both come from `## Rhythm` in the `write-human` skill, which states them about prose a person reads, and this measures against that statement rather than setting a threshold of its own.
-
-Words are counted off the text a reader is shown. A link contributes its anchor text, an autolink contributes nothing, and the sentence boundaries do not move under that masking, since the boundary pattern requires whitespace after the terminal punctuation and no destination carries any. An opening word is lowercased and stripped of punctuation, so a sentence opening on a backticked command name reports the command.
-
-A paragraph carrying fewer than three sentences is skipped rather than scored. A two-sentence configuration note has no spread worth reading, and the opener rule is written about a third sentence turning a coincidence into a pattern, so neither number says anything before the floor. That is the cheap form of a wider exemption: a shape-aware one, exempting a short reference block by what it is rather than by how many sentences it holds, waits on a second case.
-
-The unit is the paragraph and each file names its worst on each measure, which follows the depth check rather than setting a precedent. A file's flattest paragraph and its most repetitive one are named only when each crosses its checkpoint, so a file reading healthy names nothing rather than offering its least healthy paragraph as a finding.
-
-Neither number gates and neither names a file wrong. This is a weaker claim than the one the weight checkpoints make, because a healthy range differs by surface: a catalog entry is several short sentences carrying one fact each, and a page arguing a decision is not, so one range applied across the corpus would report the surfaces that are correct. The run therefore states where the numbers came from beside them, and the counts are what a reader compares against.
-
-A reading of that spread across the whole corpus is what backs the range above, taken once against this repository's own tracked markdown rather than against a target project's.
-
-That reading travels with the command rather than staying here. `BASELINE` in `src/markdown/structure.ts` carries the overall share, the per-file range, and the ten-paragraph floor beneath which a file's own rate says nothing, and the run prints all four in the legend beside the rate it measured. A count with no range beside it reads as a finding, and naming that a healthy range differs by surface states that a range exists rather than what it looks like. This page is toolkit-internal, so a reader running the command in a project that installed no standards would otherwise have two counts and nothing to place them against.
-
-Two of the rules `write-human` states are deliberately not implemented. A sentence's grammatical shape and whether it carries a finite verb each need a parse rather than a match, and an imperative would read as a defect under a pattern that approximated either. The verbless share is the measure closest to the reported symptom, which is exactly why shipping it wrong would discredit the two that hold.
-
-The condition on that was something identifying a finite verb rather than guessing at one, and two parsers have now been run against it over 11,389 paragraph sentences. They disagree by a factor of four. `compromise` reports 2 percent and reads a fronted past participle as a finite verb, so `Measured at <sha> on <date>.` counts as carrying one. `wink-pos-tagger` reports 9 percent, fixes that class, and is still wrong on roughly three in four, because an imperative's verb tags as a proper noun and a noun-ambiguous predicate tags as a noun, which makes `Each maps to a skill.` read verbless. Separating those needs to know which token is the predicate, and that is syntax rather than a tag. The measure stays unimplemented, now against a mechanism rather than against the idea of one.
-
-### Length
-
-The Length step sums rendered lines over the whole source, frontmatter and fenced blocks included, and lists each document past the 300-line ceiling, longest first. A changelog and a document carrying a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence are counted in one line rather than listed. Each `--json` entry carries `renderedLines` and `exempt`, the stated reason or `null`, and `checkpoints` carries `ceiling`.
+Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
 
 ## Exit codes
 
@@ -146,7 +83,7 @@ Rewrite the sentence rather than swapping the banned token for a near-synonym. T
 
 A code span clears the report too, since the ban scan walks around one, and it is the answer only where the token is genuinely an identifier under discussion. `## Code and identifiers` in `markdown.md` reserves the span for commands, API names, file paths, and identifiers, so backticking a quoted utterance spends one rule to satisfy another and leaves the corpus no cleaner.
 
-A hit the closed set could not separate from correct prose was the case with no third option while the set still carried words. The temporal `just` reported as the vague qualifier it happened to spell, and rewriting the sentence is what the toolkit settled on over building an exemption path, for the reasons below. That class is part of why the words left the gate.
+A hit the closed set could not separate from correct prose was the case with no third option while the set still carried words. The temporal `just` reported as the vague qualifier it happened to spell, and rewriting the sentence is what the toolkit settled on over building an exemption path, since an exemption landing in the verb and not the edit hook leaves the line failing where an author actually meets it. That class is part of why the words left the gate.
 
 ### Where the rules are enforced
 
@@ -169,30 +106,6 @@ Both hooks answer an absent record as well. A completed run always writes the re
 A machine with neither runner still blocks no edit, and it says so rather than exiting clean. The push stage holds either way. An edit nobody checked and an edit carrying no violation are one silence to a reader, so the enforcement a machine lacks is reported rather than inferred.
 
 The stage measures the whole corpus rather than the changed files. A `Do not use` bullet added to a standard bans a token retroactively, and no file in the push that adds the bullet was edited.
-
-### Why a recorded count goes stale
-
-A count written into prose goes stale against the corpus it describes, and nothing compares the two. The paragraph figure recorded when the masking fix shipped was already wrong by twelve one release later, which is why the standard states the rule and this page carries the numbers.
-
-A standard sits inside the corpus this verb measures, so rewriting a rule can breach the rule beside it. A rewrite of the paragraph weight bullet landed at 539 characters against the bullet checkpoint stated two lines below it, in the authoring copy and the consumed one alike. Neither the drift stage nor the test suite reads that, so run the verb over a standard after editing one.
-
-Masking took 7 of the weight-only paragraphs the checkpoint reported at 400 and 4 of the 44 files under their checkpoints, and no bullet at all. The first corpus triage put those at 31 paragraphs and 2 bullets, and neither reproduces: a code span is walked around, so a backticked path holding an angle-bracket placeholder keeps the width the page gives it, and both bullets the triage counted were that shape.
-
-### How the ban count reached zero
-
-The set still carried words and spellings when the gate turned on, so this section and the next are history rather than a description of the current scan.
-
-Eight word hits stood between the baseline and a gate, and only three carried the sense the standard bans. `leverage` sat in the requirements worldview, `allows` in the claude stack reference, and one `just` was the vague qualifier in a skill body. Those three lost the qualifier rather than the word.
-
-The other five were correct prose the closed set cannot separate from a violation. Four were the temporal `just`, meaning a moment ago, in phrases like the implementation `just` completed and the field the user `just` edited. The fifth quoted an anti-pattern a skill exists to forbid. `markdown.md` banned vague qualifiers and listed the tokens those qualifiers happen to spell, so the rule as written reached none of the five while the scan reached all of them.
-
-### Why they were rewritten rather than exempted
-
-Rewriting all five is what settled them, over building an exemption path. An exemption has three consumers, `src/markdown/scan.ts` for the patterns, `src/markdown/bans.ts` for the sets, and `.claude/hooks/standards-audit.sh`, which held its own copy of the word bans in awk at that point. A mechanism landing in the verb and not the hook leaves an exempted line still failing on edit, which is the surface an author actually meets. Five sentences lost a small amount of naturalness and the count now means what it says.
-
-A code span was the first answer for the quoted anti-pattern and it was the wrong one. The ban scan walks around a code span, so backticking a quotation clears the report, and `## Code and identifiers` reserves the span for commands, API names, file paths, and identifiers, which a quoted utterance is none of. Spending one rule to satisfy another leaves the corpus no cleaner than dropping the qualifier does.
-
-The collision is structural rather than a property of five legacy sentences. Writing the task and the plan behind this change each reproduced it, because a fresh file discussing the ban quotes the tokens it discusses. A later author writing about vague qualifiers meets the same thing, and the answer is to name the token in a code span where it is genuinely an identifier being discussed, and to rewrite the sentence where it is not.
 
 ## What it does not cover
 

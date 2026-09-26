@@ -8,18 +8,20 @@ category: Agent surface
 
 CLI catalog and invocation rules for agents, split by command domain. Start with overview.
 
+- [Architecture record](architecture-record.md): The four findings canon context audit reads off the architecture record, being the entry cap and length gates the record states for itself, the claim coverage report, and the word counts
 - [Audits](audits.md): Running every health check as one set, what the single verdict means, the exit code each outcome takes, the retained baseline and the delta it reports, and which corpora are kept out of the record
 - [Capture](capture.md): Rendering HTML sources to PNG, what the command asserts about fonts, and why the selector has no default
 - [Census](census.md): Tracked-plus-untracked file count, a breakdown by extension, and a line total that skips whatever reads as binary
-- [Command catalog](commands.md): Every project-level command and every domain subcommand, plus the shape each domain exposes
+- [Command catalog](commands.md): Every top-level command with its purpose, each domain's subcommands and the page describing them, the browser commands, and the version skew report
 - [Comments](comments.md): Comment density by language and kind, the two structural exclusions, and how the degradation sweep finds its vocabulary
-- [Context audit checks](context-audit-checks.md): What each non-gating check reports, the unit each checkpoint is measured in, the architecture record's length and entry cap gates and claim coverage, which folders each check reaches, and what moved to the attribute tier
+- [Context audit checks](context-audit-checks.md): What each non-gating check reports, the unit each checkpoint is measured in, where the architecture record's findings are described, which folders each check reaches, and what moved to the attribute tier
 - [Context audit](context-audit.md): Running the audit, its flags and folder scope, the exit codes, the citation gate, and the widened gate the seed stage runs
 - [Doc classifier](context-classify.md): Classifying canonical-doc content as keep, replace/rewrite, history, or move in diff and sweep mode, the classifier setting pair, the record shape, and the exit codes
 - [Self-stated counts](counts.md): Reading a sentence that asserts a closed catalog's size, how a match is decided, the plausibility filter that keeps a generic word from matching a subset, and why the sweep reports rather than gates
 - [Demo](demo.md): Compiling a screencast draft into a runnable plan, driving a served application to a recording and a still, reading numbered frames back out of a recording, the pointer the recording paints, and what each refusal reports
 - [Design board](design-board.md): Generating a static index over a project's design surfaces, what each panel reads, and which two stay toolkit-checkout-only
 - [Docs](docs.md): How canon docs resolves the toolkit's own reference surface from an install root, and how a split domain is named
+- [Drift surfaces](drift-surfaces.md): The six sections canon sync --check reports beside the per-domain scan, being seeds, superseded artifacts, unmigrated domains, new rules and skills, and the reverse walk, with the managed-target gate and what counts toward the exit code
 - [Driver](driver.md): Walking a page through named interactions, the probe catalog and the false finding each one carries, why viewport heights are never defaulted, and what each refusal reports
 - [Merge gate](gate.md): Running the gate this repository verifies a branch with, what the stage table holds and what stays a script, how the changed set scopes three stages, and why a stage that cannot read its input reports rather than passing
 - [Indexes](indexes.md): Flags, exit codes, and JSON shape for canon indexes regen and canon indexes list, plus when regen auto-stages what it rewrote
@@ -27,7 +29,9 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Intake](intake.md): Reading intake folder counts and items, the three read states an item can be in, landing a batch of selections in one cluster, the refusal reasons, and why a call is scoped to one file
 - [Key Changes bijection](key-changes.md): Comparing the files a pull request body's Key Changes names against its own diff, the two directions and the split inside each that decides what is worth raising, the span rules the extractor was measured into, and the three refusals that separate a clean pass from a read that produced nothing
 - [Label coverage](label-coverage.md): Reading a changed set against the pull request label map, the two tables it matches, how a gap is separated from a decision, and why an absent map is an answer
+- [Markdown audit weight](markdown-audit-weight.md): The structural half of the markdown audit, being bullet and paragraph weight, run depth, the two cadence numbers, and the length ceiling, with the samples behind each checkpoint and why none of them gates
 - [Markdown audit](markdown-audit.md): Running the audit over any markdown path, where its bans and checkpoints are read from, what each check reports, and why the ban half gates while the structural half reports
+- [Migrate](migrate.md): What each canon migrate verb moves and rewrites, what it refuses, the markers that keep an old spelling, and the idempotence check a second run gives
 - [Output shape](output-shape.md): Two framed shapes every command renders into, how JSON and --names modes keep stdout clean, and the exit discipline that lets piped output drain
 - [Overview](overview.md): What this folder covers, the invocation rules every command inherits, and where domain behavior is documented instead
 - [The pull request evidence comparison](pr-evidence.md): What canon pr evidence compares, the marker that lets it edit its own comment rather than duplicate it, the refusal reasons it names, and why the comparison anchors at the merge base rather than the previous push
@@ -51,7 +55,10 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [State-scoped risk](state-scoped-risk.md): Reading committed state rather than an arriving change, the shipped-tree corpus the secret scan reads, what it keys on and how a deliberate value is exempted, the advisory check and its network failure mode, and why one gates while the other reports
 - [Superseded values](superseded.md): Reading where the tree still asserts a value a changed convention no longer produces, why the sweep keys on the value rather than the file, the family stem behind a templated citation, the exemption marker, the blind spots it cannot reach, and why it reports rather than gates
 - [Targets](targets.md): The projects this toolkit installed into, the record the install writes against the sweep that backs it, what bounds each answer, and the cross-target pull request read
-- [Tasks](tasks.md): Selecting a shipped task by stem or pull request, recording a number and closing an outcome, deriving the branch a dispatch and a worker both take, the refusal reasons, the board and backlog checks validate runs, and why the board root defaults to the main worktree
+- [Tasks archive](tasks-archive.md): Archiving a shipped task by stem or pull request, declining one decided against, the refusal reasons each carries, and how the plan and ready folder move with the task
+- [Tasks plans](tasks-plans.md): The five verbs that read or write a task's plan, being where it sits and who cites it, whether it waits on the operator, the branch it derives, what a branch reached against what it declared, and writing its Plan line
+- [Tasks validate](tasks-validate.md): Validating the board against the tree, the seven checks, the untested, claims, and unplaced arrays, the exit codes, and the refusal reasons
+- [Tasks](tasks.md): Claiming the next phase label, recording a pull request number and closing an outcome, listing each task's readiness, and where archiving, the plan verbs, and board validation are described
 - [Teach authoring](teach-authoring.md): Resolving what the next lesson needs before it is written, rendering a lesson body's blocks to HTML, and rewriting the root listing, a contents page, and each lesson's chrome and quiz stepper from its marker regions
 - [Teach](teach.md): Listing learning workspaces with what their records schedule next, opening one with its required files, recording sources and glossary terms, where the lesson authoring verbs are described, the refusal reasons, and why every write here runs through a verb
 - [Test order](test-order.md): Reading where an implementation reached history ahead of its test, how a pair is decided, the three verdicts, the coverage the pairing cannot reach, and why the check reports rather than gates

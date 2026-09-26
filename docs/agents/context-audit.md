@@ -5,7 +5,7 @@ description: Running the audit, its flags and folder scope, the exit codes, the 
 
 # Context audit
 
-`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`.
+`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`, and what the architecture record's four findings mean is in `architecture-record.md`.
 
 Findings stated over every markdown file rather than over a context entry are measured by `canon markdown audit`, described in `markdown-audit.md`. That command resolves no folder, so it reaches trees this one refuses.
 
