@@ -14,13 +14,13 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "drift")
-    stage_fixtures claude docs-fold drift 01-initial
+    stage_fixtures claude context-fold drift 01-initial
     git add . && git commit -m "feat(api): initial task endpoints" --no-verify -q
 
-    stage_fixtures claude docs-fold drift 02-postgres
+    stage_fixtures claude context-fold drift 02-postgres
     git add . && git commit -m "feat(api): migrate storage to Postgres and scope tasks to users" --no-verify -q
 
-    stage_fixtures claude docs-fold drift 03-plans
+    stage_fixtures claude context-fold drift 03-plans
 
     log_step "Scenario ready: docs drift after a session pivot"
     log_info "Context: planning docs are stale relative to HEAD"
@@ -37,25 +37,25 @@ stage_setup() {
     log_info "The narration drives the ARCHITECTURE.md and REQUIREMENTS.md rewrites only."
     log_info "Task marking reads the diff, so it must land whether or not you narrate."
     log_info ""
-    log_info "Action:  /docs-fold"
-    log_info "Expect:  declared in fixtures/claude/docs-fold/drift/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:docs-fold drift"
+    log_info "Action:  /context-fold"
+    log_info "Expect:  declared in fixtures/claude/context-fold/drift/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:context-fold drift"
     log_info "         Two prose expectations need a reader and report as unchecked."
     ;;
   "context-entries")
-    stage_fixtures claude docs-fold context-entries 01-initial
+    stage_fixtures claude context-fold context-entries 01-initial
     git add . && git commit -m "feat(web): initial chat shell" --no-verify -q
 
     git checkout -b feat/provider-switch -q
-    stage_fixtures claude docs-fold context-entries 02-provider-switch
+    stage_fixtures claude context-fold context-entries 02-provider-switch
     git add . && git commit -m "feat(web): provider switch at the gate" --no-verify -q
 
-    stage_fixtures claude docs-fold context-entries 03-plan
+    stage_fixtures claude context-fold context-entries 03-plan
 
     log_step "Scenario ready: docs refreshes context entry from diff"
     log_info "Context: feat/provider-switch branch with diff in src/features/chat/"
     log_info "         canon/context/web.md already exists. Its Layer responsibilities section names src/features/chat/."
-    log_info "Action:  /docs-fold"
+    log_info "Action:  /context-fold"
     log_info "Expect:  Step 3 updates planning docs (none diverged here)"
     log_info "         Step 4 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
     log_info "         Rewrites the relevant section of canon/context/web.md from the diff content"
@@ -64,11 +64,11 @@ stage_setup() {
     ;;
   "wireframe-coverage")
     rm -f canon/wireframes/feature-name.md
-    stage_fixtures claude docs-fold wireframe-coverage 01-initial
+    stage_fixtures claude context-fold wireframe-coverage 01-initial
     git add . && git commit -m "feat(web): initial BYOK gate" --no-verify -q
 
     git checkout -b feat/widen-and-mock -q
-    stage_fixtures claude docs-fold wireframe-coverage 02-widen
+    stage_fixtures claude context-fold wireframe-coverage 02-widen
     git add . && git commit -m "feat(web): widen BYOK to three providers and add mock demo strip" --no-verify -q
 
     log_step "Scenario ready: docs wireframe coverage sweep"
@@ -76,7 +76,7 @@ stage_setup() {
     log_info "  canon/wireframes/byok-gate.md still says Anthropic-only"
     log_info "  src/features/mock/MockDemoStrip.tsx has no matching wireframe surface"
     log_info ""
-    log_info "Action:  /docs-fold"
+    log_info "Action:  /context-fold"
     log_info "Expect:  Step 4 reports drift in canon/wireframes/byok-gate.md (Anthropic-only contradicted)"
     log_info "         Step 4 stubs canon/wireframes/mock-demo-strip.md with a TODO"
     log_info "         Operator resolves drift manually; auto-rewrite of prose is out of scope"
@@ -85,7 +85,7 @@ stage_setup() {
     # The fixture record overwrites the seeded canon/ARCHITECTURE.md in place.
     # No delete first, unlike an arm keying on a path entering the tree: nothing here keys on the file
     # being added, so the branch diff is the same either way.
-    stage_fixtures claude docs-fold anchor-sweep 01-initial
+    stage_fixtures claude context-fold anchor-sweep 01-initial
     # `git init` runs without `-b`, so the baseline branch follows the machine's
     # init.defaultBranch. The sweep resolves its diff against `main` by name, and
     # on a machine naming it otherwise the baseline comes out unusable, the
@@ -94,7 +94,7 @@ stage_setup() {
     git add -A && git commit -m "feat(gov): install rules into a target project" --no-verify -q
 
     git checkout -b feat/widen-the-catalog -q
-    stage_fixtures claude docs-fold anchor-sweep 02-widen
+    stage_fixtures claude context-fold anchor-sweep 02-widen
     git add . && git commit -m "feat(gov): widen the bundled catalog and scope sync to a stack" --no-verify -q
 
     log_step "Scenario ready: docs architecture anchor sweep"
@@ -108,21 +108,21 @@ stage_setup() {
     log_info "reaches an entry the prompt named, and it fails the other way if it"
     log_info "flags the unanchored entry or the entry no signal points at."
     log_info ""
-    log_info "Action:  /docs-fold"
-    log_info "Expect:  declared in fixtures/claude/docs-fold/anchor-sweep/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:docs-fold anchor-sweep"
+    log_info "Action:  /context-fold"
+    log_info "Expect:  declared in fixtures/claude/context-fold/anchor-sweep/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:context-fold anchor-sweep"
     log_info "         Two reported entries, and canon/ARCHITECTURE.md unwritten:"
     log_info "         no anchor refreshed, none added, no claim edited beside one"
     log_info "         Two expectations need a reader and report as unchecked."
     ;;
   "board-sweep")
-    stage_fixtures claude docs-fold board-sweep 01-initial
+    stage_fixtures claude context-fold board-sweep 01-initial
     git add . && git commit -m "feat(api): rate limit the task endpoints" --no-verify -q
 
-    stage_fixtures claude docs-fold board-sweep 02-pagination
+    stage_fixtures claude context-fold board-sweep 02-pagination
     git add . && git commit -m "feat(api): paginate the task list" --no-verify -q
 
-    stage_fixtures claude docs-fold board-sweep 03-plans
+    stage_fixtures claude context-fold board-sweep 03-plans
 
     log_step "Scenario ready: closing an outcome settles no plan"
     log_info "Context: three tasks on the board, each citing a plan in .canon/plans/"
@@ -134,19 +134,19 @@ stage_setup() {
     log_info "archive carries it. Narrate nothing about rate limiting. The arm fails"
     log_info "if the run moves any plan, whichever task put it in front of the run."
     log_info ""
-    log_info "Action:  /docs-fold"
-    log_info "Expect:  declared in fixtures/claude/docs-fold/board-sweep/expect.toml"
+    log_info "Action:  /context-fold"
+    log_info "Expect:  declared in fixtures/claude/context-fold/board-sweep/expect.toml"
     log_info "         One outcome marked, all three plans live, no plans archive created"
     log_info "         Runs under the default turn cap. A clean run cost 28 on 2026-07-31."
     ;;
   "receipt-sweep")
-    stage_fixtures claude docs-fold receipt-sweep 01-initial
+    stage_fixtures claude context-fold receipt-sweep 01-initial
     git add . && git commit -m "feat(notify): send a notification to one recipient" --no-verify -q
 
-    stage_fixtures claude docs-fold receipt-sweep 02-notify
+    stage_fixtures claude context-fold receipt-sweep 02-notify
     git add . && git commit -m "feat(notify): retry a delivery until the budget is spent" --no-verify -q
 
-    stage_fixtures claude docs-fold receipt-sweep 03-receipts
+    stage_fixtures claude context-fold receipt-sweep 03-receipts
 
     log_step "Scenario ready: review sweep collects a resolved memory receipt"
     log_info "Context: three memory-review receipts in .canon/memory/review/, none named for this branch"
@@ -160,19 +160,19 @@ stage_setup() {
     log_info "reaches a receipt named for the current branch, and it fails the other"
     log_info "way if it deletes the control or writes a decline onto the reference entry."
     log_info ""
-    log_info "Action:  /docs-fold"
-    log_info "Expect:  declared in fixtures/claude/docs-fold/receipt-sweep/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:docs-fold receipt-sweep"
+    log_info "Action:  /context-fold"
+    log_info "Expect:  declared in fixtures/claude/context-fold/receipt-sweep/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:context-fold receipt-sweep"
     log_info "         One receipt deleted, one decline folded into a **Why:** line, both controls untouched"
     log_info "         One expectation needs a reader and reports as unchecked."
     ;;
   "classify-findings")
-    stage_fixtures claude docs-fold classify-findings 01-initial
+    stage_fixtures claude context-fold classify-findings 01-initial
     git add . && git commit -m "feat(retrieval): document the chunk size decision" --no-verify -q
 
-    stage_fixtures claude docs-fold classify-findings 02-remeasure
+    stage_fixtures claude context-fold classify-findings 02-remeasure
 
-    log_step "Scenario ready: docs-fold classifies what it writes"
+    log_step "Scenario ready: context-fold classifies what it writes"
     log_info "Context: two uncommitted edits stage two shapes Step 10 exists to catch"
     log_info "  canon/context/retrieval.md appended a branch-narrated re-measurement"
     log_info "  below the count it restates, instead of rewriting it in place"
@@ -183,9 +183,9 @@ stage_setup() {
     log_info "Narrate nothing about either edit. The arm fails if the classify step only"
     log_info "reaches a file the prompt named."
     log_info ""
-    log_info "Action:  /docs-fold"
-    log_info "Expect:  declared in fixtures/claude/docs-fold/classify-findings/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:docs-fold classify-findings"
+    log_info "Action:  /context-fold"
+    log_info "Expect:  declared in fixtures/claude/context-fold/classify-findings/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:context-fold classify-findings"
     log_info "         retrieval.md holds 58,500 once, the narration and 42,000 are gone"
     log_info "         search-panel.md keeps its behavior bullets, the source-file mention gone"
     log_info "         Three expectations need a reader and report as unchecked."

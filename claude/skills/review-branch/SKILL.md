@@ -121,7 +121,7 @@ If there are no findings, write `✅ No findings.` to the file with a timestamp.
 
 The `.canon/review/` directory is gitignored. Do not stage or commit the file.
 
-The report is disposable. It outlives the ship chain that reads it, and `docs-fold` sweeps it once the branch it names is gone, because the durable record of what a review found is the comment `review-pr` posts on the pull request. A review run on a branch that never opens one leaves nothing behind once that branch is gone, so fold anything worth keeping into the pull request body or a task finding while the report is still on disk.
+The report is disposable. It outlives the ship chain that reads it, and `context-fold` sweeps it once the branch it names is gone, because the durable record of what a review found is the comment `review-pr` posts on the pull request. A review run on a branch that never opens one leaves nothing behind once that branch is gone, so fold anything worth keeping into the pull request body or a task finding while the report is still on disk.
 
 ### Chat output
 

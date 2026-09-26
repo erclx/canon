@@ -61,7 +61,7 @@ Placement reads the catalog rather than assuming a folder. A `category` value al
 
 ## The context and wireframe draft surfaces
 
-`draft-context` and `draft-wireframes` close the same gap `draft-docs` closes, for the two surfaces `docs-fold` refreshes but never originates. That skill declines outright to create a new `canon/context/` entry, and its wireframe sweep only writes a bare `TODO` stub for a surface a diff touched. Neither is a draft, so a domain or a surface with no file yet is reached by nothing that reads the owning standard, checks the catalog for a name collision, or confirms a placement judgment before writing.
+`draft-context` and `draft-wireframes` close the same gap `draft-docs` closes, for the two surfaces `context-fold` refreshes but never originates. That skill declines outright to create a new `canon/context/` entry, and its wireframe sweep only writes a bare `TODO` stub for a surface a diff touched. Neither is a draft, so a domain or a surface with no file yet is reached by nothing that reads the owning standard, checks the catalog for a name collision, or confirms a placement judgment before writing.
 
 Both skills take `draft-docs`'s shape whole rather than inventing a second one: read the owning standard, check for a name-or-topic collision, decide placement, draft against the template, confirm, write. `draft-context` defaults every new domain to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder. `draft-wireframes` walks the whole `canon/wireframes/` tree rather than its top level alone, since a collision can sit nested inside a grouped surface's own subfolder.
 

@@ -32,7 +32,7 @@ An entry leaves `manual` only once it is verified against a real run's output ra
 ### Negatives
 
 - Never invert a demoted assertion into `absent`. Where a claim cannot be read, the filenames a wrong run would have chosen stay undeclared, because an `absent` entry passes for the file being elsewhere rather than for the run being correct. That is the vacuous pass `manual` is excluded from the count to prevent.
-- An arm over a step that reports rather than writes needs `reply`, because every tree assertion it can make is a negative, and a declaration of only negatives passes hardest on the skip it exists to detect. `claude:docs-fold/anchor-sweep` pins a record that has to survive the run byte-identical, which a run where the step never fired satisfies, and two `reply` substrings separate the two.
+- An arm over a step that reports rather than writes needs `reply`, because every tree assertion it can make is a negative, and a declaration of only negatives passes hardest on the skip it exists to detect. `claude:context-fold/anchor-sweep` pins a record that has to survive the run byte-identical, which a run where the step never fired satisfies, and two `reply` substrings separate the two.
 
 ## Gotchas
 
@@ -54,7 +54,7 @@ An entry leaves `manual` only once it is verified against a real run's output ra
 - `manual`: prose the checker cannot assert, reported as unchecked
 - `max_turns`: turn ceiling, above which the run fails
 
-The split between mechanical and human-judged is per expectation, not per skill. The `claude:docs-fold` `drift` arm produces both kinds in one run.
+The split between mechanical and human-judged is per expectation, not per skill. The `claude:context-fold` `drift` arm produces both kinds in one run.
 
 An `infra` arm invoking the CLI directly declares the same way, minus `max_turns`. No agent drives it, so no envelope is produced and a ceiling would sit permanently skipped. `infra/wiki` carries one declaration per arm and is the pattern to copy for a CLI scenario.
 

@@ -14,7 +14,7 @@ It counts unclaimed plans against workers rather than reading the reserve in ste
 1. Run `gh pr list --state open` and `git log --oneline -8`. Report any pull request whose review has not been posted and stop for that one first.
 2. For each pull request merged since the last sweep, place every finding it produced. Route a finding that changes a rule to the standard or rule that states it, one that changes another task to that task's Findings, and one that overturns a groundwork lean to that folder marked answered. Never leave a finding in a pull request thread alone.
 3. Archive what closed.
-   - A task whose outcomes are all `[x]` runs `docs-fold` for the plan sweep, then `task-board` to archive
+   - A task whose outcomes are all `[x]` runs `context-fold` for the plan sweep, then `task-board` to archive
    - A task whose outcomes describe standing policy rather than a deliverable never closes on its own, so hand it to a worker to encode the policy where it is enforced, then cut the outcomes with the reason recorded and archive once that branch merges. Encoding it from this session would write a tracked file, which `## Boundaries` in the skill body forbids.
 4. Read `.canon/tasks/priority.md` and count entries under its `## Run now` heading that carry a written plan. Keep one in reserve beyond what is running.
 5. Promote from the top of `## Needs a plan`, which is where the last sweep recorded what to plan next. Depart from that order when something has changed under it and say what changed, since a position nobody honors is the ordering going stale on the surface built to hold it. What sets the order in the first place is whether a task establishes functionality rather than how old it is, so prefer a task that adds or proves a mechanism over one that trims, tidies, or audits an existing surface.
@@ -53,4 +53,4 @@ Promoting, demoting, and archiving a row all write `.canon/tasks/priority.md`, a
 - Re-resolve every Plan pointer after anything archives a plan
 - Read the file back after writing it, since the row that lands is the row a worker acts on
 
-A Plan pointer goes stale from a branch this board never sees. `docs-fold` moves a plan to `.canon/plans/archive/` and rewrites the citation in the task file alone, so a row for a task still on the board keeps pointing into `.canon/plans/` at a file that has moved. Workers running the ship chain on their own branches archive plans this board still cites, and the board reads as correct until a pointer is followed.
+A Plan pointer goes stale from a branch this board never sees. `context-fold` moves a plan to `.canon/plans/archive/` and rewrites the citation in the task file alone, so a row for a task still on the board keeps pointing into `.canon/plans/` at a file that has moved. Workers running the ship chain on their own branches archive plans this board still cites, and the board reads as correct until a pointer is followed.

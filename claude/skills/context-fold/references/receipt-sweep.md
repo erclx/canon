@@ -1,11 +1,11 @@
 ---
 title: Sweep consumed receipts
-description: How docs-fold Step 9 sweeps branch review reports whose branch is gone and fully decided memory receipts, and what it keeps and reports
+description: How context-fold Step 9 sweeps branch review reports whose branch is gone and fully decided memory receipts, and what it keeps and reports
 ---
 
 # Sweep consumed receipts
 
-Step 9 of `docs-fold`, reached in order on every run.
+Step 9 of `context-fold`, reached in order on every run.
 
 Sweep the review and memory receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 

@@ -42,6 +42,6 @@ Placing a row without checking for another writer collides the same way. Two ses
 
 ## Out of scope
 
-- Editing the contents of a task that already exists, which `docs-fold` owns along with marking outcomes and sweeping plans
+- Editing the contents of a task that already exists, which `context-fold` owns along with marking outcomes and sweeping plans
 - Deciding what the task should argue. This owns the file's existence and its shape, not its content.
 - Relocating a plan, which one skill owns so two do not relocate it differently

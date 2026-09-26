@@ -13,7 +13,7 @@ Do not move the file, edit `priority.md`, or regenerate the index by hand. `cano
 
 ## Step 1: confirm the work reached main
 
-`docs-fold` marks outcomes on the branch as step 1 of the ship chain, so an all-`[x]` task routinely describes a pull request that is still open. The command gates on the outcomes and cannot tell those two apart, which is what puts this check here:
+`context-fold` marks outcomes on the branch as step 1 of the ship chain, so an all-`[x]` task routinely describes a pull request that is still open. The command gates on the outcomes and cannot tell those two apart, which is what puts this check here:
 
 ```bash
 git fetch origin main --quiet && git log origin/main --oneline -20
@@ -39,7 +39,7 @@ On success the record carries `from`, `to`, `priorityRowRemoved`, and `indexRege
 
 Each reason has one resolution and none of them is to archive around it:
 
-- `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `docs-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
+- `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `context-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
 - `ambiguous`: two tasks name one pull request, which is the misfile `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
 - `earlier-slice`: the number is listed on the task but is not the last, so a later slice is still to merge. Leave the task on the board. Its last slice's merge archives it.
 - `no-match`: the stem or number names nothing on the board. Check the name against the listed stems.

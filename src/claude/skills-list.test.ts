@@ -52,11 +52,11 @@ describe('listSkills', () => {
   it('should sort entries by folder name', () => {
     skillFile('git-pr', frontmatter('git-pr', 'Opens a pull request'))
     skillFile('bash-script', frontmatter('bash-script', 'Writes a script'))
-    skillFile('docs-fold', frontmatter('docs-fold', 'Syncs docs'))
+    skillFile('context-fold', frontmatter('context-fold', 'Syncs docs'))
 
     expect(listSkills(root).map((entry) => entry.name)).toEqual([
       'bash-script',
-      'docs-fold',
+      'context-fold',
       'git-pr',
     ])
   })

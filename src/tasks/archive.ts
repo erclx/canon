@@ -455,7 +455,7 @@ function isBulletFor(line: string, target: string): boolean {
 
 /**
  * Resolves the `Plan:` target against the board and against the project root
- * both, which is how `docs-fold` reads the same line. It accepts `../plans/x.md`
+ * both, which is how `context-fold` reads the same line. It accepts `../plans/x.md`
  * and `.canon/plans/x.md` as one file, so a gate reading only the first form
  * would pass the second and strand the plan this exists to protect.
  *
@@ -509,7 +509,7 @@ function atOneRoot(path: string, plans: string[], root: string): string {
 
 /**
  * Names the other live tasks whose `Plan:` line lands on the same file. This is
- * the rule `docs-fold` applies before it archives a plan, held here so one
+ * the rule `context-fold` applies before it archives a plan, held here so one
  * question has one implementation: a plan another live task still cites is a
  * plan the sweep is correct to leave, and a guard that read the folder instead
  * refused every task sharing one plan and deadlocked the board against the
@@ -566,7 +566,7 @@ export type CitationOutcome = PlanCitations | ArchiveRefused
 
 /**
  * Answers where one task's plan sits and who else holds it, which is the whole
- * of the last-live-citation rule. `docs-fold` reads this rather than scanning
+ * of the last-live-citation rule. `context-fold` reads this rather than scanning
  * the board itself, so the sweep that moves a plan and the gate that refuses a
  * task archive cannot drift into disagreeing about which plan is free.
  *
@@ -782,7 +782,7 @@ export async function archiveTask(
   const from = join(dir, `${stem}.md`)
   const text = await readFile(from, 'utf8')
 
-  // `docs-fold` ticks outcomes at ship time, before the merge, so an earlier
+  // `context-fold` ticks outcomes at ship time, before the merge, so an earlier
   // slice merging after the last slice shipped would find every box ticked
   // while the last slice is still open. Only the last number closes the task.
   const last = readPullRequest(text).at(-1)

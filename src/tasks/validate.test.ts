@@ -187,7 +187,7 @@ describe('readPaths', () => {
   })
 
   it('should drop a backticked span that names no file', () => {
-    expect(readPaths('`memory-capture` and `docs-fold`')).toEqual([])
+    expect(readPaths('`memory-capture` and `context-fold`')).toEqual([])
   })
 
   it('should strip a leading dot slash and a trailing slash', () => {

@@ -35,7 +35,7 @@ The quiet one is the baseline. A diff resolved against a bare local ref equals H
 
 ## Out of scope
 
-- `.claude/` planning docs, tasks, plans, and context entries: `docs-fold`, which runs immediately before this skill in the ship chain and resolves the same baseline. The split is by audience, so a file's location decides which skill owns it rather than its subject.
+- The context entries, requirements, architecture, wireframes, and task board: `context-fold`, which runs immediately before this skill in the ship chain and resolves the same baseline. The split is by audience, so a file's location decides which skill owns it rather than its subject.
 - `CLAUDE.md` and the installed seed docs: `seed-sync`, which reconciles them per section against the toolkit source
 - Changelog entries, which release tooling generates from commit messages
 - Whether the prose conforms to its standards. `standards-audit` reports violations and fixes none, and this skill writes prose it does not audit.

@@ -14,7 +14,7 @@ export const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434'
  * 600s ceiling meant for a batch research run, not a per-call budget for an
  * interactive verb. 30s is chosen here as a deviation, wide enough that a
  * shared GPU under another local session's load (measured coexisting at 12GB)
- * still has room, while short enough that a `docs-fold` run does not hang
+ * still has room, while short enough that a `context-fold` run does not hang
  * indefinitely on a backend that stopped responding mid-call.
  */
 export const OLLAMA_TIMEOUT_MS = 30_000

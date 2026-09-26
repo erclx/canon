@@ -60,7 +60,7 @@ Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full fi
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
 - For UI changes, invoke `canon:ui-checklist` to write what a reviewer has to look at and name any behavior shipping without a test
-  End the session once the feature works and tests pass. Invoke `canon:docs-fold` to capture any decisions made during implementation before closing.
+  End the session once the feature works and tests pass. Invoke `canon:context-fold` to capture any decisions made during implementation before closing.
 
 The routing test is whether the repository can answer an item today. A session grepping handles the yes, and a groundwork track handles the no.
 
@@ -116,11 +116,13 @@ A person points it at a private repository once and both verbs refuse until they
 
 `canon records prune-tmp` reports scratch under `.canon/tmp` nobody has touched inside an age window, and deletes it only with `--write`. A `tmp/handoff/` folder and the live `tmp/pr/poll/` baseline are never offered, since a reader deletes a handoff once it is read and a poll baseline is state a session still needs. See [records](../agents/records.md) for the candidate shapes and the exit codes.
 
+`canon records stale memory` reads the memory pen as a review queue. It names each entry due for review, meaning one carrying no `reviewed` date or one older than 30 days, and every backticked path an entry cites that the tree no longer holds. Due entries come first, with the ones citing a missing path ahead of the rest, so a review takes the first batch rather than the whole pen. It writes nothing. See [records stale](../agents/records-stale.md) for how a path is read and the refusals.
+
 A plan that ships is archived, never deleted. `canon tasks archive` moves it to `.canon/plans/archive/` alongside the task it belonged to and retargets that task's `Plan:` line at the new location, so a completed task still leads to the reasoning behind it. An archive sits inside the record folder it archives rather than beside it, so one ignore entry and one backed-folder entry cover a record and everything it has retired. The folder is gitignored, which is why a deleted plan had no recovery path. A plan cited by more than one task stays put until the last of them closes, since moving it early would strand every other pointer.
 
-A branch review report takes the other route and is swept rather than archived. `review-branch` writes it flat into `.canon/review/` as `branch-<slug>.md`, the session addressing it reads it once, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so `docs-fold` deletes any report whose branch is gone. The body that writes a report owns how long it lives, which leaves the shipping branch's own report on disk through the run that cites it and collects it a branch later. What that loses is a local-only review on a branch that never opened a pull request, which is why the report says so where a reader meets it.
+A branch review report takes the other route and is swept rather than archived. `review-branch` writes it flat into `.canon/review/` as `branch-<slug>.md`, the session addressing it reads it once, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so `context-fold` deletes any report whose branch is gone. The body that writes a report owns how long it lives, which leaves the shipping branch's own report on disk through the run that cites it and collects it a branch later. What that loses is a local-only review on a branch that never opened a pull request, which is why the report says so where a reader meets it.
 
-`canon:docs-fold` decides which task closed by reading the diff rather than the conversation. It resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. A task that shipped without ever being discussed still gets marked. Requirements, architecture, and design stay session-sourced, because a diff cannot carry a judgment.
+`canon:context-fold` decides which task closed by reading the diff rather than the conversation. It resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. A task that shipped without ever being discussed still gets marked. Requirements, architecture, and design stay session-sourced, because a diff cannot carry a judgment.
 
 `.canon/tasks/` is gitignored and resolves at the main worktree root, so every session shares one board. One file per task is what keeps concurrent sessions from overwriting each other, since a gitignored board has no history to recover a lost write from. Its `index.md` is generated by a hook rather than by `bun run check`, because the whole-repo index walk skips gitignored folders.
 
@@ -165,7 +167,7 @@ The list stays written in the skill body as the fallback for a target whose inst
 
 #### Memory in the chain
 
-`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 8 rather than restating the order. A fact about a domain carrying an entry in `canon/context/index.md` is routed to that entry, and `docs-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
+`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 8 rather than restating the order. A fact about a domain carrying an entry in `canon/context/index.md` is routed to that entry, and `context-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
 
 Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
 
@@ -173,7 +175,7 @@ The chain ends at capture, and review is run on its own.
 
 Run `memory-review` standalone to curate the whole pen. An entry it retires moves to `.canon/memory/archive/` rather than being deleted, since a bulk pass has no undo.
 
-The receipt is collected once every item on it has been decided, and it survives untouched while any item is still pending. Whichever runs first takes it: Apply collects the receipt it has resolved, and `docs-fold` scans the folder on every shipped branch for one an earlier session left behind. Before the file goes, each declined item is folded into the entry it was about, since a promotion survives in its target and in git while a decline is recorded nowhere else. `canon standards memory` states what a fold writes and which entry types take one.
+The receipt is collected once every item on it has been decided, and it survives untouched while any item is still pending. Whichever runs first takes it: Apply collects the receipt it has resolved, and `context-fold` scans the folder on every shipped branch for one an earlier session left behind. Before the file goes, each declined item is folded into the entry it was about, since a promotion survives in its target and in git while a decline is recorded nowhere else. `canon standards memory` states what a fold writes and which entry types take one.
 
 ### UI polish
 
@@ -251,17 +253,18 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Ship it
 
-| Skill                  | When to use                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| `canon:git-ship`       | To run the whole post-feature chain from the verify gate through open PR              |
-| `canon:memory-capture` | First skill in that chain, to route what the session learned to the surface owning it |
-| `canon:docs-fold`      | When decisions diverged from the plan, or a shipped task needs its outcomes marked    |
-| `canon:docs-sync`      | When a change since main left `README.md` or `docs/` stale                            |
-| `canon:git-stage`      | When the staged set spans several concerns and wants one commit each                  |
-| `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                        |
-| `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                  |
-| `canon:git-pr`         | When a pull request needs a title and body written from the diff                      |
-| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                           |
+| Skill                  | When to use                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `canon:git-ship`       | To run the whole post-feature chain from the verify gate through open PR                          |
+| `canon:memory-capture` | First skill in that chain, to route what the session learned to the surface owning it             |
+| `canon:context-fold`   | When decisions diverged from the plan, or a shipped task needs its outcomes marked                |
+| `canon:docs-fold`      | Never on purpose. A pointer at the old name that names `context-fold` <!-- canon-keep-retired --> |
+| `canon:docs-sync`      | When a change since main left `README.md` or `docs/` stale                                        |
+| `canon:git-stage`      | When the staged set spans several concerns and wants one commit each                              |
+| `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                                    |
+| `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                              |
+| `canon:git-pr`         | When a pull request needs a title and body written from the diff                                  |
+| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                                       |
 
 ### After the pull request opens
 
@@ -333,7 +336,7 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 Every row answers a question rather than marking a point in a project's life, so a phase above would send a reader to the wrong group.
 
-A learning workspace produces two halves and only one of them leaves. A lesson is worked through once and stays in the workspace, and a reference page or a glossary carries no learner, so it belongs wherever the project already keeps prose on that subject. Asking `canon:teach-workspace` to promote sorts each durable page by who owns its subject, sending an Anthropic-owned subject to the wiki, an internal one to the matching context entry, and everything else, subject-neutral material included, to the public docs. It proposes and waits, because a promoted page is public prose that needs a line naming who owns the subject, and it writes nothing to a destination: each page the operator confirms goes to a handoff file that `canon:docs-fold` folds in from a branch. A project with no wiki folder gets a refusal naming `canon wiki init` rather than a folder it never asked for.
+A learning workspace produces two halves and only one of them leaves. A lesson is worked through once and stays in the workspace, and a reference page or a glossary carries no learner, so it belongs wherever the project already keeps prose on that subject. Asking `canon:teach-workspace` to promote sorts each durable page by who owns its subject, sending an Anthropic-owned subject to the wiki, an internal one to the matching context entry, and everything else, subject-neutral material included, to the public docs. It proposes and waits, because a promoted page is public prose that needs a line naming who owns the subject, and it writes nothing to a destination: each page the operator confirms goes to a handoff file that `canon:context-fold` folds in from a branch. A project with no wiki folder gets a refusal naming `canon wiki init` rather than a folder it never asked for.
 
 ## Feedback routing
 

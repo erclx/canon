@@ -34,7 +34,7 @@ Owns the small reusable prompts stored as plain markdown, invoked directly in Cl
 ### What earns a place
 
 - A snippet overlapping a shipped skill keeps its place when the two are reached differently and produce different things:
-  - `claude/feature-recap` emits a verification block to chat and writes nothing, where `docs-fold` mutates tracked planning docs
+  - `claude/feature-recap` emits a verification block to chat and writes nothing, where `context-fold` mutates tracked planning docs
   - `claude/decision-memo` answers a should-we question, where `plan-feature` plans a build
   - `session-notes` emits a paste-anywhere block usable in a chat with no repository behind it
 - An overlap without such a reason loses to the skill, which is why no `create-snippet` snippet exists beside the skill of that name.

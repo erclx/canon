@@ -1,6 +1,6 @@
 ---
 name: draft-context
-description: Why a brand-new canon/context/<domain>.md entry needs a catalog collision check and a confirm step, not the refresh path docs-fold already owns
+description: Why a brand-new canon/context/<domain>.md entry needs a catalog collision check and a confirm step, not the refresh path context-fold already owns
 ---
 
 # Context draft requirement
@@ -31,7 +31,7 @@ Without this skill, a session documenting a domain that has no context entry yet
 
 ## Out of scope
 
-- Refreshing an existing `canon/context/<domain>.md` entry against a diff: `docs-fold`
+- Refreshing an existing `canon/context/<domain>.md` entry against a diff: `context-fold`
 - Drafting a `canon/wireframes/<surface>.md` file: `draft-wireframes`
 - Drafting a `docs/*.md` page: `draft-docs`
 - Drafting a standard, a snippet, or a governance rule: `create-standard`, `create-snippet`, `create-rule`

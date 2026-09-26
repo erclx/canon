@@ -31,7 +31,7 @@ Without this skill, a session drafting a wireframe for a surface with no file ye
 
 ## Out of scope
 
-- Stubbing a surface a diff touched, or reporting drift in an existing wireframe against a diff: `claude/skills/docs-fold/references/wireframe-sweep.md`
+- Stubbing a surface a diff touched, or reporting drift in an existing wireframe against a diff: `claude/skills/context-fold/references/wireframe-sweep.md`
 - Drafting a `canon/context/<domain>.md` entry: `draft-context`
 - Drafting a `docs/*.md` page: `draft-docs`
 - Drafting a standard, a snippet, or a governance rule: `create-standard`, `create-snippet`, `create-rule`

@@ -5,7 +5,7 @@ description: Slug derivation from a UI-affecting path, the contradicted and unco
 
 # Wireframe coverage sweep
 
-Mechanics for Step 4 of `docs-fold`. The body owns the skip conditions and the UI-path filter, and this file owns what the sweep does once a UI-affecting path survives that filter.
+Mechanics for Step 4 of `context-fold`. The body owns the skip conditions and the UI-path filter, and this file owns what the sweep does once a UI-affecting path survives that filter.
 
 ## Deriving a candidate slug
 

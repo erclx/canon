@@ -56,19 +56,21 @@ Write no entry for a fact another surface already owns. A fact about a domain be
 
 ## Frontmatter
 
-Every entry carries all three fields.
+Every entry carries the three required fields, and a reviewed entry carries a fourth.
 
 ```yaml
 ---
 title: A scope glob wide enough for a correct run can be wide enough for every wrong one
 description: Omit a declaration key whose only passing value admits the whole tree
 category: Project
+reviewed: 2026-09-26
 ---
 ```
 
 - `title` (required): the rule stated as a line a reader can act on, in sentence case.
 - `description` (required): one line naming what the entry settles, so a reader scanning the catalog decides whether to open it.
 - `category` (required): the type in sentence case, which is what groups the catalog.
+- `reviewed` (optional): the `YYYY-MM-DD` date a review last read the entry and kept it. A review writes it and capture never does, so an entry without the field has never been reviewed. A rewrite of the entry carries the field through untouched, since dropping it sends a kept entry back to the front of the queue.
 
 Never write the filename stem as the `title`. The stem is a slug, and an entry titled with it reads as an unwritten file in every catalog that renders the field.
 
@@ -102,6 +104,16 @@ Link a related entry as `[[name]]`, where `name` is the target's filename stem w
 - Treat the folder as a holding pen rather than a destination. An entry whose rule belongs on a durable surface is promoted there and retired here, and the rest is what the pen is for.
 
 The catalog is generated from sibling frontmatter rather than authored. Never hand-edit it, since the next regeneration discards whatever was added by hand.
+
+## Reading
+
+Nothing loads the pen into every session, and that is the design. An entry reaches a reader through one of three paths:
+
+- A review reads the pen in batches, taking entries in the order `canon records stale memory` reports: due entries first, those citing a path the tree no longer holds ahead of the rest, then the longest unreviewed.
+- A resuming session reads the entries matching the task it picks up.
+- Capture reads the catalog to find an existing entry on the same topic before writing a new one.
+
+An entry none of the three reaches is one the pen holds for a review to promote or retire.
 
 ## Collecting a review receipt
 

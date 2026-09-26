@@ -5,7 +5,7 @@ description: How an anchored decision's cited paths are collected, the finding t
 
 # Architecture anchor staleness sweep
 
-Mechanics for Step 5 of `docs-fold`. The body owns the skip conditions, the report-only constraint, and the standard citation, and this file owns what the sweep does once the diff touches a path an anchored decision cites.
+Mechanics for Step 5 of `context-fold`. The body owns the skip conditions, the report-only constraint, and the standard citation, and this file owns what the sweep does once the diff touches a path an anchored decision cites.
 
 ## Anchored entries
 

@@ -1,6 +1,6 @@
 ---
 title: Memory and tasks
-description: Where the memory standard's delete prohibition lives and why, the shape rules measured against the pen, and the tasks readiness test widened to admit a row waiting on an external condition
+description: Where the memory standard's delete prohibition lives and why, the shape rules measured against the pen, why the review queue is its own verb reading cited paths, and the tasks readiness test widened to admit a row waiting on an external condition
 ---
 
 # Memory and tasks
@@ -24,6 +24,14 @@ Blank lines between the three parts vary across the pen, so the standard states 
 No dangling-link check ships. A `[[name]]` link that resolves to nothing usually names an entry not yet written, which the format treats as a marker worth keeping, and some apparent dangles are backticked TOML `[[table]]` syntax.
 
 The two classes the verb catches are an entry titled with its own filename stem, which renders a slug in the catalog where the rule belongs, and a filename prefix belonging to none of the four types.
+
+## Review queue
+
+Staleness is its own verb, `canon records stale memory`, rather than a class on `validate`. `memory-capture` runs `validate memory` on every ship and fixes every finding it names, so a class reporting every never-reviewed entry would turn each capture into a partial review of the whole pen. The two also answer different questions, one whether a file matches its standard and the other what a review should look at next, and a flag switching `validate` between them would make its exit code mean two things.
+
+Path resolution is the proxy for an entry the tree has moved under. A backticked path resolving to nothing is a cheap signal that the fact was written about a layout since renamed, and the first reading at `12b2d338` found 42 of 361 entries citing one, most of them the retired `.claude/context/` and `.claude/*.md` roots. It misses an entry whose rule the tree now contradicts in prose, which stays the review's judgment, and it flags a toolkit path cited from a target's pen, which is correct for that target and still a thing for the review to judge rather than retire on.
+
+The optional `reviewed` date is what makes review state durable. An entry without it reads as never reviewed, which is every entry at introduction, so the field adds no finding to `validate` and costs the pen nothing until a review writes it.
 
 ## Tasks readiness test
 

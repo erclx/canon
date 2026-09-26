@@ -15,7 +15,7 @@ A pen the caller cannot face is the same gap wearing a different shape. Routing 
 
 - Treat the folder as a holding pen, so every entry in scope leaves it as a promotion, a handoff, or an archive rather than surviving by default
 - Archive an entry out of the pen rather than deleting it, since nothing recovers a file from a gitignored folder
-- Hand a fact a context entry owns to `docs-fold` through the routing file, rather than editing the entry here
+- Hand a fact a context entry owns to `context-fold` through the routing file, rather than editing the entry here
 - Verify the rule is not already stated or implied in the target before proposing a promotion, by reading the target rather than trusting the memory's claim about it
 - Rewrite a rule into the destination's voice instead of moving it unchanged
 - Write the proposal to a receipt on disk and take no action until the user decides per item

@@ -80,7 +80,7 @@ A machine without a renderer still gets the diagrams and is told which check was
 
 Each diagram entry records the commit and date it was last verified against, and nothing maintains that record for you. The folder is redrawn on demand rather than swept on every ship, so `verified` carries the whole signal: an entry whose date sits far behind your branch is due a read, and no pass will name which one. Run `canon:draft-diagram` again when the code a kind is drawn from moves.
 
-`canon/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:docs-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
+`canon/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:context-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
 
 ### Stack decision
 
@@ -181,7 +181,7 @@ The first line reports the plan and the second applies it, relocating each rule 
 
 ### Rename the skill citations, once
 
-Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so `canon:docs-fold` answers as `canon:docs-fold` and `canon:task-board` as `canon:task-board`. A project that installed governance or tooling before that release holds files naming the old ones, and the plugin answers to none of them.
+Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. A project that installed governance or tooling before that release holds files naming the old ones, and the plugin answers to none of them. A later release renamed `docs-fold` to `context-fold`, since the skill folds a session into the context entries and the task board rather than into `docs/`, and the same sweep carries a project across that rename too. <!-- canon-keep-retired -->
 
 Two of those files run rather than sit there. `.husky/post-merge` prints a command for a person to type, and `.claude/hooks/pr-create-log.sh` hands a session a message naming a skill, so a stale copy tells someone to invoke something that no longer exists. A rule under `.claude/rules/canon/core/` names skills too, though a rule is read rather than run.
 

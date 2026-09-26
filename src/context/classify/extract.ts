@@ -182,7 +182,7 @@ export function sectionAround(
  * requested canonical doc types.
  *
  * Reads the working tree rather than `HEAD`, matching `listChangedFiles`: a
- * `docs-fold` run checking a session's own edits sees them before they are
+ * `context-fold` run checking a session's own edits sees them before they are
  * committed. A file the range deleted contributes nothing, since there is no
  * current section left to read a hunk's chunk against.
  */

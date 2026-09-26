@@ -1,11 +1,11 @@
 ---
 title: An unusable diff baseline
-description: When docs-fold's diff baseline is unusable, what Step 2 reads to recover the committed half, and why Steps 4, 5, and 7 keep the scoped set rather than the whole tree
+description: When context-fold's diff baseline is unusable, what Step 2 reads to recover the committed half, and why Steps 4, 5, and 7 keep the scoped set rather than the whole tree
 ---
 
 # An unusable diff baseline
 
-The Diff baseline section of `docs-fold`. The session reads this file when no merge base resolves or the base came from local `main` and equals HEAD.
+The Diff baseline section of `context-fold`. The session reads this file when no merge base resolves or the base came from local `main` and equals HEAD.
 
 The baseline is unusable in two cases:
 

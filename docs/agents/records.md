@@ -1,6 +1,6 @@
 ---
 title: Records
-description: The two roots a record folder resolves at, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, pruning stale scratch, and where validation and the private-remote backup are described
+description: The two roots a record folder resolves at, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, pruning stale scratch, and where validation, the memory review queue, and the private-remote backup are described
 ---
 
 # Records
@@ -115,6 +115,10 @@ A scratch-root name `canon migrate record-layout` or `canon migrate scratch-evid
 It writes nothing until `--write` is passed, matching `canon records migrate`: a session record has no history to undo a wrong delete from. It reads `mtime` the way `canon records size` does, so a machine restored by `canon records pull` reads its whole tree as new and fails safe by offering nothing.
 
 Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refused, sharing `no-folder` with `size`, or a delete failed. `2` candidates exist and `--write` was not passed.
+
+## Stale
+
+`canon records stale memory` reports which memory entries are due for review and which cite a path the tree no longer holds, ordered so a review takes the first N as a batch. What makes an entry due, how a cited path resolves, and the refusals are in `records-stale.md`.
 
 ## Push and pull
 

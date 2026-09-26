@@ -21,12 +21,17 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * reading in sequence with `draft-screencast` as one three-step pipeline with
  * no prefix forcing that reading.
  *
- * One row renames a skill rather than retiring a prefix. `ui-test` became
+ * Two rows rename a skill rather than retiring a prefix. `ui-test` became
  * `ui-checklist` when the skill stopped writing tests and shrank to the
  * checklist a reviewer reads, so the old name described a job it no longer
  * does. `claude-ui-test` is retargeted onto the same destination rather than
  * left pointing at the retired name, which lands a target on the oldest
  * spelling in one pass instead of two.
+ *
+ * `docs-fold` became `context-fold` because the skill folds a session into the
+ * context entries, the canonical records, and the task board, while "docs" in
+ * its name collided with `docs-sync`, which owns `docs/`. `claude-docs` is
+ * retargeted onto `context-fold` for the same reason `claude-ui-test` was.
  *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
@@ -47,7 +52,8 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-autoship': 'auto-ship',
   'claude-design-extract': 'design-extract',
   'claude-diagram': 'draft-diagram',
-  'claude-docs': 'docs-fold',
+  'claude-docs': 'context-fold',
+  'docs-fold': 'context-fold',
   'claude-feature': 'plan-feature',
   'claude-groundwork': 'plan-groundwork',
   'claude-intake': 'plan-intake',
@@ -105,6 +111,11 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  * what shipped or what a session ran under whatever name was current then, so
  * rewriting one makes it testify to a release or a run that never happened.
  *
+ * The pointer left at `docs-fold` is excluded because it exists to answer under
+ * the old name, so a later run would move it onto the skill it points at. The
+ * exclusion is only safe once the real body has moved, since excluding the path
+ * ahead of the first sweep leaves that body behind.
+ *
  * The record archives need no entry here. They are gitignored, so the tracked
  * listing every sweep reads never reaches them.
  */
@@ -117,5 +128,7 @@ export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
     'CHANGELOG.md',
     'src/migrate/skill-names.ts',
     'src/migrate/skill-names.test.ts',
+    'claude/skills/docs-fold/SKILL.md',
+    'claude/skills/docs-fold/REQUIREMENT.md',
   ],
 })

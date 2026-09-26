@@ -19,7 +19,7 @@ The thresholds that measure distance stay advisory under both corpora, since no 
 
 The reference-form check reports, which is the stated split applied to one more measure. A cited path resolving or not is a fact and the form a reference is written in is a judgment carrying a measured false-positive rate. What the rule buys is that a reference spelling its path lands inside the gating check, so the judgment is enforced by the fact rather than beside it.
 
-The rule has a writer as well as a check. `docs-fold` instructs the path form at its context-refresh step, so a documentation run stops producing the bare names the check reports. Pointing that step at the standard instead puts the rule one file away from where the reference is written, and a reporting check stops no drift on its own.
+The rule has a writer as well as a check. `context-fold` instructs the path form at its context-refresh step, so a documentation run stops producing the bare names the check reports. Pointing that step at the standard instead puts the rule one file away from where the reference is written, and a reporting check stops no drift on its own.
 
 The gate invokes the CLI as this checkout's own `src/cli.ts`, never as `canon`. A globally installed `canon` resolves to the main checkout no matter which worktree is running, so the gate would measure the wrong tree and pass a branch whose own citations are broken. `cliRunner` in `src/gate/sequencer.ts` is what holds that, so the rule is one function rather than a habit each stage has to keep.
 

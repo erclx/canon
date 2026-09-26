@@ -99,7 +99,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `sandbox`, in `sandbox.md`: `reset`, `clean`, `check`, `coverage`
 - `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
 - `intake`, in `intake.md`: `list`, `answer`
-- `records`, in `records.md`: `validate`, `migrate`, `ordinal`, `size`, `prune-tmp`, `push`, `pull`
+- `records`, in `records.md`: `validate`, `migrate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
 - `sessions`, in `sessions.md`: `list`, `export`, `import`
 - `worktrees`, in `worktrees.md`: `list`, `reclaim`
 - `autoship`, in `review-classification.md`: `classify`

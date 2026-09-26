@@ -52,6 +52,6 @@ A declined finding fails on a third axis, which is where its reason ends up. A w
 
 - Writing the review, which `review-pr` owns. The split is by side of the channel: that one posts findings from an independent session and this one is the worker's return leg.
 - Staging, committing, and pushing the follow-up, which `git-followup` owns under this skill's direction
-- Refreshing the `.claude/` docs the fixes made stale, which `docs-fold` owns
+- Refreshing the `.claude/` docs the fixes made stale, which `context-fold` owns
 - Re-reviewing its own fixes, which hands back to the orchestrator
 - Re-reading a rewritten branch, which `review-pr` absorbs by testing whether the prior reviewed commit still reaches the head and paying for a full pass when it does not

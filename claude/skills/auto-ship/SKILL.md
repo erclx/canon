@@ -137,7 +137,7 @@ Read origin as causation rather than authorship, so staleness this run induced i
 
 Bound the repair at one pass, the way Step 3 bounds verify. When that re-read shows the finding still standing, stop: `❌ A self-introduced finding survived one fix pass. See .canon/review/branch-<slug>.md. Fix and run /git-ship.`
 
-This chain owns the receipt's lifetime, which is what makes the Output block's citation resolve on a run that reaches it. The `docs-fold` sweep under Step 8 reaches only reports whose branch is gone, which collects this one a branch later rather than during the run that wrote it.
+This chain owns the receipt's lifetime, which is what makes the Output block's citation resolve on a run that reaches it. The `context-fold` sweep under Step 8 reaches only reports whose branch is gone, which collects this one a branch later rather than during the run that wrote it.
 
 ## Step 8: ship
 
