@@ -11,7 +11,7 @@ they install rather than in how they read the project.
 
 ## Read the catalogs
 
-Run in parallel. Never hardcode stack, rule, snippet, or standards names. The
+Run in parallel. Never hardcode stack, rule, or standards names. The
 catalog is the source of truth.
 
 Run from the target project's current directory. Do not cd into the toolkit

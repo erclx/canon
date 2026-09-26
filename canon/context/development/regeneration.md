@@ -1,6 +1,6 @@
 ---
 title: Regeneration stages
-description: The regenerate-then-assert stages, covering the consumed copies of standards, snippets, internal content, and rules, the tooling path contract, and the hero image with its single-writer rule
+description: The regenerate-then-assert stages, covering the consumed copies of standards, internal content, and rules, the tooling path contract, and the hero image with its single-writer rule
 ---
 
 # Regeneration stages
@@ -9,7 +9,7 @@ Three stages regenerate a tracked artifact and then assert it did not move. Rege
 
 ## Consumed copies
 
-The Consumed copies stage runs `scripts/core/regen-claude-copies.sh` and then asserts no drift across `.claude/rules`. It is the only mirror this stage regenerates: standards and snippets ship with no mirror, since nothing installs their corpus into a project, and `internal/` carries no mirror either, since nothing installs it and both readers of the one standard under it sit at the root beside the source.
+The Consumed copies stage runs `scripts/core/regen-claude-copies.sh` and then asserts no drift across `.claude/rules`. It is the only mirror this stage regenerates: standards ship with no mirror, since nothing installs their corpus into a project, and `internal/` carries no mirror either, since nothing installs it and both readers of the one standard under it sit at the root beside the source.
 
 The assert reads the unstaged diff, so the first `bun run check` after an edit under `governance/rules/` reports its own regeneration as drift and exits red. Stage the rewritten copy and run again.
 

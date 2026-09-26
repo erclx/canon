@@ -10,7 +10,7 @@ description: Where a shared helper lifts to, the tests a new verb passes from a 
 - A helper lifts to the `src/` root once a second domain needs it. `stripFrontmatter` moved out of `src/gov/payload.ts` into `src/frontmatter.ts` when `docs` arrived, rather than having `docs` import from `gov` and carry a dependency it has no reason to. `copyPreservingMode`, `resolveTarget`, and `cliRun` were lifted the same way.
 - `listIgnored` lifted from `src/indexes/walk.ts` to `src/git-ignore.ts` when the comment scan became its second caller, following the same rule.
 - A lift lands in a named folder rather than a root file when what moves is a subject rather than a function. `INSTALL_BROWSER`, `isBrowserMissing`, and `isEngineMissing` came out of `src/demo/` into `src/browser/engine.ts` when `canon inventory` became the second command driving a browser, because the three answer one question together, which is what a command needs to know before it can report a failure honestly. A root file per predicate would have spread that question across three.
-- Behavior shared across domains lands in `src/sync/` rather than in the first domain that needs it. Gov is the first consumer of the sync engine, and burying it under `src/gov/` would force a move as soon as snippets arrives.
+- Behavior shared across domains lands in `src/sync/` rather than in the first domain that needs it. Gov is the first consumer of the sync engine, and burying it under `src/gov/` would force a move as soon as a second consumer arrives.
 - Feature entries stay separate from this domain. They document a user-facing artifact such as the `SLIDES.md` source shape or the design token schema, which is worth reading without the CLI plumbing.
 
 ## What earns a command

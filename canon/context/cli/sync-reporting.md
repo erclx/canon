@@ -47,7 +47,7 @@ The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because
 
 ### Unmigrated domains
 
-`detectUnmigrated` covers a state the drift walk alone reads as clean: `installedStampDomains` lists only domains whose install marker exists, so a project holding `standards/` at its root would otherwise report zero entries for a real problem. It counts toward `--exit-code` because the relocation closes it, while superseded artifacts and seed drift are excluded for the reason `orphaned` already is. `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty, since standards and snippets have both closed the install channel that put either at risk of sitting unmigrated at a project root, so the section currently names no domain. The section stays rather than being cut, since the next domain to retire an install channel this way reoccupies it.
+`detectUnmigrated` covers a state the drift walk alone reads as clean: `installedStampDomains` lists only domains whose install marker exists, so a project holding `standards/` at its root would otherwise report zero entries for a real problem. It counts toward `--exit-code` because the relocation closes it, while superseded artifacts and seed drift are excluded for the reason `orphaned` already is. `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty, since standards closed the install channel that put it at risk of sitting unmigrated at a project root, so the section currently names no domain. The section stays rather than being cut, since the next domain to retire an install channel this way reoccupies it.
 
 ### Rules the target never received
 

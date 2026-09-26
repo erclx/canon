@@ -56,7 +56,7 @@ Every stack-name lookup in `src/commands/tooling.ts`, being `prepare`, `promptFo
 
 ### What ships as code
 
-The non-goal against shipping application code turns on the word application, and its carve-out in `canon/REQUIREMENTS.md` already reads configs, seeds, snippets, and rules. It turns on proof rather than on a project boundary: code ships when it is proven to leave the production build, either stripped by a build-time flag such as `import.meta.env.DEV` and confirmed absent from the built output, or never reached from any production entry point.
+The non-goal against shipping application code turns on the word application, and its carve-out in `canon/REQUIREMENTS.md` already reads configs, seeds, and rules. It turns on proof rather than on a project boundary: code ships when it is proven to leave the production build, either stripped by a build-time flag such as `import.meta.env.DEV` and confirmed absent from the built output, or never reached from any production entry point.
 
 Test files, an e2e spec, the screenshot template, and six shell scripts land executable source in a target under that proof, such as `tooling/web/configs/e2e/home.spec.ts` and `tooling/python/seeds/tests/test_smoke.py`, and `injectManifest` in `src/tooling/inject.ts` runs `bun add -D` against it. `canon/context/tooling/stacks.md` records the astro scenario switcher, which ships under the same proof.
 
@@ -86,7 +86,7 @@ Flags and arguments live in `docs/agents/index.md`.
 
 ## Workflow
 
-Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. Neither standards nor snippets installs into a project, so neither carries a flag. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
+Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. Standards installs nothing into a project, so it carries no flag. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
 
 Set up a multi-language monorepo by letting the repository root own the `base` layer and giving each language its own subfolder:
 

@@ -65,7 +65,7 @@ The rules this argument produces fire when a skill is being written, so they liv
 
 `plan-intake`, `plan-groundwork`, and `plan-feature` are the front doors, and one question routes between them. Can the item be answered by reading the repository today? Yes goes to intake at the cost of a session grepping, no goes to groundwork at the cost of runs and days, and already-decided goes to the planning skill. The test runs per item, since a dump of forty findings typically holds one that needs measuring and routing the whole dump on its worst item buys a folder nobody can close.
 
-Intake is a skill rather than a mode inside either neighbor. A mode gives one skill two purposes and its `REQUIREMENT.md` two subjects, which is the collision the requirement file exists to prevent. A snippet was the other candidate and carries no read contract, so it cannot orient against the board or measure against the tree, and those two steps are what an intake pass turns on. Groundwork's qualifying guard refuses a breadth pass outright and names intake as the destination rather than sending a refused dump to the planning skill.
+Intake is a skill rather than a mode inside either neighbor. A mode gives one skill two purposes and its `REQUIREMENT.md` two subjects, which is the collision the requirement file exists to prevent. A bare prompt was the other candidate and carries no read contract, so it cannot orient against the board or measure against the tree, and those two steps are what an intake pass turns on. Groundwork's qualifying guard refuses a breadth pass outright and names intake as the destination rather than sending a refused dump to the planning skill.
 
 Answering what a pass filed is a second skill rather than a mode on the first, on the same argument that made intake its own front door. `plan-intake-answer` walks the unread slots in batches and lands each selection through `canon intake answer`, and it carries `disable-model-invocation` so routing never reaches for it mid-flow. A pass that files a dump and answers it in one run decides items on silence, which is the contract inversion the folder exists to hold.
 
@@ -87,7 +87,7 @@ Its record is an ordinary intake folder, with the verdict riding in `Suggested:`
 
 ### A citation travels on the skill's own channel
 
-A file a skill body cites has to arrive by the channel the skill itself travels on. Skills load live from the plugin root while standards, snippets, and governance rules are copied by a `canon` command, so a body naming an installed path is a dependency crossing that boundary and resolves only for a project that ran the matching install. Nothing reports the break, because an unresolved path produces no error until a session opens it.
+A file a skill body cites has to arrive by the channel the skill itself travels on. Skills load live from the plugin root while governance rules are copied by a `canon` command, so a body naming an installed path is a dependency crossing that boundary and resolves only for a project that ran the matching install. Nothing reports the break, because an unresolved path produces no error until a session opens it.
 
 The three orchestrator runbooks settle the rule: they sit in `role-orchestrator`'s own `references/`, cited with `${CLAUDE_SKILL_DIR}`, which resolves from any working directory in any target. What this narrows to is a test on readership rather than on topic: a file one skill reads ships inside it, and a file several surfaces reach stays in the catalog that publishes it.
 
@@ -97,7 +97,7 @@ The sharpest failure of the same test is a citation naming no toolkit file at al
 
 ### The typed entry point
 
-The cost is the typed entry point, which is the part worth knowing before moving anything else. A person fires a snippet by typing its path and cannot type a reference, so a runbook whose moment the loop cannot detect has to be reachable some other way. An invocation word looks like the answer and is banned by `standards/skill.md`, which turns down a flag that selects an alternate flow because the model misreads it and runs the vanilla path, and a handoff that silently does not happen is lost at the next compaction.
+The cost is the typed entry point, which is the part worth knowing before moving anything else. A person fires a prompt file by typing its path and cannot type a reference, so a runbook whose moment the loop cannot detect has to be reachable some other way. An invocation word looks like the answer and is banned by `standards/skill.md`, which turns down a flag that selects an alternate flow because the model misreads it and runs the vanilla path, and a handoff that silently does not happen is lost at the next compaction.
 
 What replaces it is a body that routes a plain request to the runbook serving it, leaving one flow with no flag in it. `role-orchestrator` does this for both compaction sides, while the sweep needs nothing because the loop already reaches it.
 

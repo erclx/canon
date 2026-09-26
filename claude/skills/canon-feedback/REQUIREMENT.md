@@ -9,7 +9,7 @@ description: Why a toolkit defect is reported from session context alone, and wh
 
 Without this skill, a toolkit defect noticed inside a target project dies with the session. The user is told to mention it in the toolkit repository later, which means retyping a report they no longer have the context to write, so the defect is either reported badly or not at all.
 
-The report itself fails two ways. A block printed in chat needs a copy-paste into another repository, and a step that manual is skipped under any time pressure. A report that names no surface cannot be routed, because the toolkit acts on a plugin skill, a snippet, a CLI command, and a seed through different paths, and the difference is not recoverable from the symptom.
+The report itself fails two ways. A block printed in chat needs a copy-paste into another repository, and a step that manual is skipped under any time pressure. A report that names no surface cannot be routed, because the toolkit acts on a plugin skill, a CLI command, and a seed through different paths, and the difference is not recoverable from the symptom.
 
 The last failure is the session's own effort. Asked to report, a session starts diagnosing instead, searching the toolkit and reading its surfaces to find the cause. That spends the context the report was meant to capture cheaply, and it produces a diagnosis from a project that cannot see the toolkit's current source.
 

@@ -10,7 +10,7 @@ Format a `## Toolkit feedback` block from the current session, then open it as a
 ## Guards
 
 - If nothing in session context points to a toolkit issue, stop: `❌ No toolkit issue in session context. Describe what broke, then re-invoke.`
-- If the surface type is ambiguous (snippet vs. plugin skill vs. CLI vs. seed), ask one line before formatting.
+- If the surface type is ambiguous (plugin skill vs. CLI vs. seed), ask one line before formatting.
 - Do not probe the project, list files, grep, or read toolkit surfaces. Use only what the session already contains.
 
 ## Step 1: build the block
@@ -18,7 +18,7 @@ Format a `## Toolkit feedback` block from the current session, then open it as a
 From the conversation so far, identify:
 
 - Target project name or kind, never its full path. The path names a folder on one machine and says nothing a triage session can route on, where the project's own name does. Name a private project by its kind instead, such as `a Next.js app`, since the report leaves the machine.
-- Toolkit surface and its type (plugin skill, snippet, tooling config, governance rule, seed, or CLI). The type leads the `### Surface` field, ahead of the first comma, because the CLI picks the issue's domain labels from that text alone.
+- Toolkit surface and its type (plugin skill, tooling config, governance rule, seed, or CLI). The type leads the `### Surface` field, ahead of the first comma, because the CLI picks the issue's domain labels from that text alone.
 - Specific toolkit file or name when the session cites one
 - Observed behavior
 - Expected behavior, or `unclear`

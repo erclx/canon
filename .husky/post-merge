@@ -34,8 +34,8 @@
 # CANON_SKIP_UPGRADE=1 turns that step off.
 #
 # The hook also updates the marketplace plugin cache once it drifts behind
-# what the binary above just reinstalled, so the skill catalog, the standards
-# corpus, and the snippets move together rather than waiting on an operator
+# what the binary above just reinstalled, so the skill catalog, and the standards
+# corpus move together rather than waiting on an operator
 # to run `claude plugin update` by hand.
 # CANON_SKIP_PLUGIN_UPDATE=1 turns that step off.
 

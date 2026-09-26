@@ -129,11 +129,11 @@ export type NonInteractivePolicy =
 /**
  * The two holes every domain sync leaves open: where a destination file's
  * source lives, and what counts as a change beyond a plain content diff.
- * Everything else in a sync is identical across gov, snippets, and standards,
+ * Everything else in a sync is identical across domains,
  * so it lives in the engine.
  *
  * The optional members exist because one adapter needed each of them. Leaving
- * all three unset reproduces the behavior gov and snippets already had.
+ * all three unset reproduces the behavior gov already had.
  */
 export interface SyncAdapter {
   readonly banner: string
