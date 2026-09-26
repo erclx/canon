@@ -47,6 +47,7 @@ export const ARCHIVE_REFUSALS = [
   'no-outcomes',
   'open-outcomes',
   'earlier-slice',
+  'pending-branch',
   'bad-input',
 ] as const
 
@@ -249,6 +250,22 @@ export function readPullRequest(text: string): readonly number[] {
   if (!match) return []
 
   return match[1].split(',').map((entry) => Number(entry.trim().slice(1)))
+}
+
+/**
+ * Reads the `Pending branch:` line `canon tasks outcome` writes when a branch
+ * ticks an outcome ahead of its own pull request number reaching the task.
+ * `canon tasks pull-request` clears each branch as it records, so a name left
+ * here is a slice whose number the `Pull request:` line cannot list yet.
+ */
+export function readPendingBranches(text: string): readonly string[] {
+  const match = /^Pending branch:(.*)$/m.exec(text)
+  if (!match) return []
+
+  return match[1]
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
 }
 
 /** A markdown link on a `Plan:` line, its target captured. */
@@ -857,6 +874,19 @@ export async function archiveTask(
     return refuse(
       'earlier-slice',
       `${stem} lists #${last} after #${selector.number}, so the task closes when #${last} merges.`,
+    )
+  }
+
+  // A branch ticks its outcome before `git-pr` appends its number, so in that
+  // window the number above reads as last while it is not. The stem selector
+  // skips this check the way it skips the one above, since a hand archive is
+  // the route out of a pending branch that was abandoned.
+  const pending = readPendingBranches(text)
+  if (selector.kind === 'pull-request' && pending.length > 0) {
+    return refuse(
+      'pending-branch',
+      `${stem} still waits on ${pending.join(', ')}, which closed an outcome before its own pull request was recorded, so the task closes when that pull request merges.`,
+      pending,
     )
   }
 

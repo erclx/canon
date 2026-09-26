@@ -123,6 +123,7 @@ readarray
 readlink
 realpath
 rects
+reflog
 repr
 rerank
 reranker

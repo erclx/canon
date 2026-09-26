@@ -10,6 +10,7 @@ import {
   OUTCOME_PATTERN,
   planLine,
   planLineIndex,
+  readPendingBranches,
   readPlanTargets,
   readPullRequest,
   tasksDir,
@@ -63,6 +64,8 @@ export interface PullRequestRecorded {
   readonly path: string
   readonly number: number
   readonly action: LineAction
+  /** Branches still on the `Pending branch:` line after this write. */
+  readonly pending: readonly string[]
 }
 
 export type PullRequestOutcome = PullRequestRecorded | RecordRefused
@@ -85,6 +88,8 @@ export interface OutcomesClosed {
   readonly path: string
   readonly closed: readonly string[]
   readonly alreadyClosed: readonly string[]
+  /** Branches on the `Pending branch:` line after this write. */
+  readonly pending: readonly string[]
 }
 
 export type CloseOutcome = OutcomesClosed | RecordRefused
@@ -146,14 +151,75 @@ export function writePullRequestLine(
   return { text: lines.join('\n'), action: 'added' }
 }
 
-function lastOriginLine(lines: readonly string[]): number | undefined {
+function lastOriginLine(
+  lines: readonly string[],
+  prefixes: readonly string[] = ORIGIN_PREFIXES,
+): number | undefined {
   let found: number | undefined
 
   for (const [index, line] of lines.entries()) {
-    if (ORIGIN_PREFIXES.some((prefix) => line.startsWith(prefix))) found = index
+    if (prefixes.some((prefix) => line.startsWith(prefix))) found = index
   }
 
   return found
+}
+
+const PENDING_PREFIX = 'Pending branch:'
+
+/**
+ * Names a branch on the `Pending branch:` line, which holds the task open
+ * against a merge-time archive until that branch's own number is recorded. The
+ * line sits under `Pull request:` when one exists, since a later slice ticks
+ * after an earlier slice's number is already listed.
+ */
+export function writePendingBranch(
+  text: string,
+  branch: string,
+): { readonly text: string; readonly changed: boolean } {
+  const lines = text.split('\n')
+  const existing = lines.findIndex((entry) => entry.startsWith(PENDING_PREFIX))
+
+  if (existing !== -1) {
+    const pending = readPendingBranches(lines[existing])
+    if (pending.includes(branch)) return { text, changed: false }
+    lines[existing] = `${PENDING_PREFIX} ${[...pending, branch].join(', ')}`
+    return { text: lines.join('\n'), changed: true }
+  }
+
+  const line = `${PENDING_PREFIX} ${branch}`
+  const anchor = lastOriginLine(lines, [...ORIGIN_PREFIXES, 'Pull request:'])
+  if (anchor !== undefined) {
+    lines.splice(anchor + 1, 0, line)
+    return { text: lines.join('\n'), changed: true }
+  }
+
+  const heading = lines.findIndex((entry) => entry.startsWith('# '))
+  if (heading === -1) return { text: `${line}\n${text}`, changed: true }
+
+  lines.splice(heading + 1, 0, '', line)
+  return { text: lines.join('\n'), changed: true }
+}
+
+/** Drops a branch from the `Pending branch:` line, and the line once it is empty. */
+export function clearPendingBranch(
+  text: string,
+  branch: string,
+): { readonly text: string; readonly changed: boolean } {
+  const lines = text.split('\n')
+  const existing = lines.findIndex((entry) => entry.startsWith(PENDING_PREFIX))
+  if (existing === -1) return { text, changed: false }
+
+  const pending = readPendingBranches(lines[existing])
+  if (!pending.includes(branch)) return { text, changed: false }
+
+  const rest = pending.filter((entry) => entry !== branch)
+  if (rest.length > 0) {
+    lines[existing] = `${PENDING_PREFIX} ${rest.join(', ')}`
+  } else {
+    lines.splice(existing, 1)
+  }
+
+  return { text: lines.join('\n'), changed: true }
 }
 
 export type PlanLineWrite =
@@ -330,24 +396,43 @@ async function openTask(
  * this from a linked worktree, where an in-place edit through the file-editing
  * tools is refused and a shell stream editor is banned, so the write has to
  * resolve the board root in-process.
+ *
+ * `branches` names the recording branch and every name it carried before a
+ * rename, since `git-ship` renames a branch after `context-fold` has already
+ * written the marker under the old name. Each comes off the `Pending branch:`
+ * line even when the number was already listed, so a rerun repairs a stale
+ * marker.
  */
 export async function recordPullRequest(
   root: string,
   selector: RecordSelector,
   number: number,
+  branches: readonly string[] = [],
 ): Promise<PullRequestOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
 
   const { stem, path } = opened
-  const { text, action } = writePullRequestLine(
-    await readFile(path, 'utf8'),
+  const numbered = writePullRequestLine(await readFile(path, 'utf8'), number)
+  let text = numbered.text
+  let isCleared = false
+
+  for (const branch of branches) {
+    const cleared = clearPendingBranch(text, branch)
+    text = cleared.text
+    isCleared ||= cleared.changed
+  }
+
+  if (numbered.action !== 'unchanged' || isCleared) await writeFile(path, text)
+
+  return {
+    ok: true,
+    stem,
+    path,
     number,
-  )
-
-  if (action !== 'unchanged') await writeFile(path, text)
-
-  return { ok: true, stem, path, number, action }
+    action: numbered.action,
+    pending: readPendingBranches(text),
+  }
 }
 
 /**
@@ -399,11 +484,17 @@ export async function recordPlan(
  * Marks the named outcomes `[x]` in place. `context-fold` runs this against a
  * board it can read and cannot edit from a linked worktree, and the positions
  * come from the read it already made.
+ *
+ * A `branch` that ticks at least one new box goes on the `Pending branch:`
+ * line, so the merge of an earlier slice cannot archive the task in the window
+ * before this branch's own number is recorded. A rerun that ticks nothing adds
+ * no marker, since its branch has already recorded or is already listed.
  */
 export async function closeOutcomes(
   root: string,
   selector: RecordSelector,
   positions: readonly number[],
+  branch?: string,
 ): Promise<CloseOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
@@ -427,7 +518,12 @@ export async function closeOutcomes(
     )
   }
 
-  if (result.closed.length > 0) await writeFile(path, result.text)
+  const text =
+    result.closed.length > 0 && branch
+      ? writePendingBranch(result.text, branch).text
+      : result.text
+
+  if (result.closed.length > 0) await writeFile(path, text)
 
   return {
     ok: true,
@@ -435,5 +531,6 @@ export async function closeOutcomes(
     path,
     closed: result.closed,
     alreadyClosed: result.alreadyClosed,
+    pending: readPendingBranches(text),
   }
 }

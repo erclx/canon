@@ -60,6 +60,8 @@ canon tasks pull-request 673 --plan worktree-scratch-routing --json
 
 A plan is matched on the token both spellings share, so `worktree-scratch-routing`, `feature-worktree-scratch-routing`, and `.canon/plans/feature-worktree-scratch-routing.md` all select the same task. The `action` field reports `added`, `appended`, `corrected`, or `unchanged`, which makes a rerun against the same number safe.
 
+Run from a branch other than `main` or `master`, the verb also drops that branch from the task's `Pending branch:` line, along with every name its reflog says it was renamed from, and removes the line once it is empty. The renamed names matter because `git-ship` renames a nonconforming branch after `context-fold` wrote the marker. It does so on an `unchanged` run too, so a rerun repairs a marker left behind. The `pending` field lists the branches still on the line after the write.
+
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, or `ambiguous`. `git-pr` skips silently on those three, because each is a case where a guessed write would archive the wrong task once the branch merges.
 
 A malformed argument refuses as `bad-input` instead, which sits outside that set on purpose. `git-pr` derives the number by slicing whatever `gh pr create` printed, so a non-numeric value is reachable, and folding it into the swallowed set would lose the number with nothing reporting it.
@@ -81,6 +83,8 @@ canon tasks outcome --plan worktree-scratch-routing --close 2 --json
 | `--root <path>`      | Board root, defaulting to the main worktree        |
 
 An outcome already closed comes back under `alreadyClosed` rather than refusing, so a rerun against the same positions changes nothing. A position past the end of the list refuses as `out-of-range`, since a caller counting wrong should hear about it rather than mark a neighbor.
+
+A close that ticks at least one box from a branch other than `main` or `master` names that branch on a `Pending branch:` line, read from `git branch --show-current` in the working directory. The line holds the task against `canon tasks archive --pull-request` until `canon tasks pull-request` records that branch's own number. A detached HEAD, a trunk checkout, or a failed git read writes no line and refuses nothing. The `pending` field lists the branches on the line after the write.
 
 Positions skip fenced blocks. A checkbox inside a sample a task displays is not an outcome the task claims, and counting one would shift every position after it. `canon tasks archive` reads the list through the same walker, so the two verbs cannot disagree about which checkboxes are outcomes.
 

@@ -9,7 +9,9 @@ import {
   closeOutcomeLines,
   closeOutcomes,
   recordPlan,
+  clearPendingBranch,
   recordPullRequest,
+  writePendingBranch,
   writePlanLine,
   writePullRequestLine,
 } from '@/tasks/record'
@@ -31,12 +33,14 @@ interface TaskFixture {
   readonly plan?: string
   readonly pullRequest?: number
   readonly outcomes?: readonly string[]
+  readonly pending?: readonly string[]
 }
 
 function taskBody({
   plan,
   pullRequest,
   outcomes = ['- [ ] Outcome: it ships'],
+  pending,
 }: TaskFixture): string {
   const lines = [
     '---',
@@ -50,6 +54,7 @@ function taskBody({
 
   if (plan) lines.push(`Plan: [${plan}](../plans/${plan}.md)`)
   if (pullRequest) lines.push(`Pull request: #${pullRequest}`)
+  if (pending) lines.push(`Pending branch: ${pending.join(', ')}`)
 
   lines.push(
     '',
@@ -155,6 +160,74 @@ describe('writePullRequestLine', () => {
     const { text } = writePullRequestLine('# A task\n\n## Outcomes\n', 673)
 
     expect(text).toBe('# A task\n\nPull request: #673\n\n## Outcomes\n')
+  })
+})
+
+describe('writePendingBranch', () => {
+  it('should add the line under the Pull request line', () => {
+    const text =
+      '# A task\n\nPlan: [p](../plans/p.md)\nPull request: #12\n\n## Outcomes\n'
+
+    const { text: written, changed } = writePendingBranch(text, 'feat/b')
+
+    expect(changed).toBe(true)
+    expect(written).toContain('Pull request: #12\nPending branch: feat/b\n')
+  })
+
+  it('should add the line under the last origin line when no number is recorded', () => {
+    const text = '# A task\n\nPlan: [p](../plans/p.md)\n\n## Outcomes\n'
+
+    const { text: written } = writePendingBranch(text, 'feat/b')
+
+    expect(written).toContain(
+      'Plan: [p](../plans/p.md)\nPending branch: feat/b\n',
+    )
+  })
+
+  it('should append a second branch to the existing line', () => {
+    const text = '# A task\n\nPending branch: feat/a\n'
+
+    const { text: written } = writePendingBranch(text, 'feat/b')
+
+    expect(written).toBe('# A task\n\nPending branch: feat/a, feat/b\n')
+  })
+
+  it('should report no change when the branch is already listed', () => {
+    const text = '# A task\n\nPending branch: feat/a, feat/b\n'
+
+    expect(writePendingBranch(text, 'feat/b')).toEqual({
+      text,
+      changed: false,
+    })
+  })
+})
+
+describe('clearPendingBranch', () => {
+  it('should drop only the named branch from the line', () => {
+    const text = '# A task\n\nPending branch: feat/a, feat/b\n'
+
+    const { text: written } = clearPendingBranch(text, 'feat/a')
+
+    expect(written).toBe('# A task\n\nPending branch: feat/b\n')
+  })
+
+  it('should remove the line once no branch remains', () => {
+    const text =
+      '# A task\n\nPull request: #12\nPending branch: feat/a\n\n## Outcomes\n'
+
+    const { text: written, changed } = clearPendingBranch(text, 'feat/a')
+
+    expect(changed).toBe(true)
+    expect(written).toBe('# A task\n\nPull request: #12\n\n## Outcomes\n')
+  })
+
+  it('should report no change when the branch is not listed', () => {
+    const text = '# A task\n\nPending branch: feat/a\n'
+
+    expect(clearPendingBranch(text, 'feat/b')).toEqual({
+      text,
+      changed: false,
+    })
   })
 })
 
@@ -385,6 +458,57 @@ describe('recordPullRequest', () => {
 
     expect(outcome).toMatchObject({ ok: false, reason: 'no-board' })
   })
+
+  it('should clear the recording branch from the pending marker', async () => {
+    const stem = await seedTask({
+      plan: 'feature-x',
+      pending: ['feat/a', 'feat/b'],
+    })
+
+    const outcome = await recordPullRequest(ROOT, { kind: 'stem', stem }, 673, [
+      'feat/a',
+    ])
+
+    expect(outcome).toMatchObject({ ok: true, pending: ['feat/b'] })
+    await expect(readTask(stem)).resolves.toContain('Pending branch: feat/b\n')
+  })
+
+  it('should remove the marker once its last branch records', async () => {
+    const stem = await seedTask({ plan: 'feature-x', pending: ['feat/a'] })
+
+    await recordPullRequest(ROOT, { kind: 'stem', stem }, 673, ['feat/a'])
+
+    await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
+  })
+
+  it('should clear a name the recording branch was renamed from', async () => {
+    const stem = await seedTask({
+      plan: 'feature-x',
+      pending: ['worktree-a', 'feat/b'],
+    })
+
+    await recordPullRequest(ROOT, { kind: 'stem', stem }, 673, [
+      'feat/a',
+      'worktree-a',
+    ])
+
+    await expect(readTask(stem)).resolves.toContain('Pending branch: feat/b\n')
+  })
+
+  it('should clear the marker when the number is already listed', async () => {
+    const stem = await seedTask({ pullRequest: 673, pending: ['feat/a'] })
+
+    const outcome = await recordPullRequest(ROOT, { kind: 'stem', stem }, 673, [
+      'feat/a',
+    ])
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      action: 'unchanged',
+      pending: [],
+    })
+    await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
+  })
 })
 
 describe('recordPlan', () => {
@@ -493,5 +617,48 @@ describe('closeOutcomes', () => {
       closed: [],
       alreadyClosed: ['Outcome: one'],
     })
+  })
+
+  it('should mark the task pending on the closing branch', async () => {
+    const stem = await seedTask({ outcomes: ['- [ ] Outcome: one'] })
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [1],
+      'feat/a',
+    )
+
+    expect(outcome).toMatchObject({ ok: true, pending: ['feat/a'] })
+    await expect(readTask(stem)).resolves.toContain('Pending branch: feat/a\n')
+  })
+
+  it('should leave the marker off when no branch is given', async () => {
+    const stem = await seedTask({ outcomes: ['- [ ] Outcome: one'] })
+
+    await closeOutcomes(ROOT, { kind: 'stem', stem }, [1])
+
+    await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
+  })
+
+  it('should leave the marker off when every named outcome was already closed', async () => {
+    const stem = await seedTask({ outcomes: ['- [x] Outcome: one'] })
+
+    await closeOutcomes(ROOT, { kind: 'stem', stem }, [1], 'feat/a')
+
+    await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
+  })
+
+  it('should add a second closing branch beside the first', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [ ] Outcome: one', '- [ ] Outcome: two'],
+      pending: ['feat/a'],
+    })
+
+    await closeOutcomes(ROOT, { kind: 'stem', stem }, [2], 'feat/b')
+
+    await expect(readTask(stem)).resolves.toContain(
+      'Pending branch: feat/a, feat/b\n',
+    )
   })
 })
