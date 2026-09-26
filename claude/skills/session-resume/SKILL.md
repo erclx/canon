@@ -14,13 +14,14 @@ Read these in parallel, skipping any that do not exist:
 - the newest `.canon/compact/*.md`, then the newest `.canon/tasks/session-*.md`: the handoff a previous session wrote before a compaction. The first is the note `session-compact` writes, and the second is the board-side map per `${CLAUDE_SKILL_DIR}/../../standards/session.md`, which stays readable. Whichever exists leads the report rather than the reads, and both lead it when both exist.
 - `.canon/tasks/index.md`: the folder catalog. Read this before any individual task file, and take the task list from it by dropping the `index`, `priority`, `backlog`, and `session-` rows, which are siblings rather than tasks.
 - `.canon/plans/*.md`: execution detail for in-progress tasks
-- `.canon/memory/index.md` and any memory files relevant to the top backlog item
 
 Then read only the task files the summary needs, typically the top one. Do not read the whole folder.
 
+Once the top task is known, grep `.canon/memory/index.md` for two or three terms from its title and read at most three of the entries whose rows match. Never read the index whole, since a grown pen's index runs to hundreds of rows and the report shows three at most. With no top task, or no row matching, read no memory entry and say nothing about it.
+
 Most projects carry no handoff. Say nothing about its absence, since a line reporting it every run trains a reader to skip the line on the run where a handoff exists.
 
-If all four surfaces are absent or empty, stop: `✅ No tracked work found. Start a new task.`
+If the handoff, task, and plan surfaces are all absent or empty, stop: `✅ No tracked work found. Start a new task.`
 
 ## Step 2: summarize
 
@@ -32,7 +33,7 @@ Output these sections, omitting the first when no handoff was found:
 
 **Active plans:** one line per file in `.canon/plans/`, linking each to its task file in `.canon/tasks/`. Say "None" if empty.
 
-**Relevant context:** two or three memory entries that inform the top backlog item. Skip if none apply.
+**Relevant context:** the memory entries Step 1 matched to the top backlog item, three at most. Skip if none matched.
 
 ## Step 3: recommend
 
