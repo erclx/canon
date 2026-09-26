@@ -5,14 +5,14 @@ description: Running the audit over any markdown path, where its bans and checkp
 
 # Markdown audit
 
-`canon markdown audit [path...]` reports any markdown file against the attribute standard `markdown.md`. An attribute standard governs a file rather than a folder, so this resolves no folder and requires no `index.md`, which is what puts `.claude/rules/`, `governance/`, and `snippets/` in reach. Folder-shaped findings stay in `canon context audit`, described in `context-audit.md`.
+`canon markdown audit [path...]` reports any markdown file against the attribute standard `markdown.md`. An attribute standard governs a file rather than a folder, so this resolves no folder and requires no `index.md`, which is what puts `.claude/rules/` and `governance/` in reach. Folder-shaped findings stay in `canon context audit`, described in `context-audit.md`.
 
 ```bash
 canon markdown audit
 canon markdown audit --json
 canon markdown audit .claude/rules governance
 canon markdown audit docs/agents/commands.md
-canon markdown audit 'snippets/**/*.md'
+canon markdown audit 'standards/**/*.md'
 ```
 
 | Option   | Behavior                                                   |

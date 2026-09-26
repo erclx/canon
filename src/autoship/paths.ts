@@ -16,10 +16,9 @@
  *
  * Most carry two spellings, the one a surface authors at and the one it reaches
  * a session at, so the rule reads the same in this toolkit and in a project
- * that consumed one. `standards/` and `snippets/` carry one apiece: neither
- * installs into a project, reaching a reader by resolution and through the
- * `claude/snippets` symlink respectively, so no `.claude/` spelling exists to
- * name.
+ * that consumed one. `standards/` carries one: it never installs into a
+ * project, reaching a reader by resolution, so no `.claude/` spelling exists
+ * to name.
  */
 export const BEHAVIOR_PREFIXES = [
   'claude/skills/',
@@ -27,7 +26,6 @@ export const BEHAVIOR_PREFIXES = [
   'governance/rules/',
   '.claude/rules/',
   'standards/',
-  'snippets/',
   'internal/',
   'tooling/',
 ] as const

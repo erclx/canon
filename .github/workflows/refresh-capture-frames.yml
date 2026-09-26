@@ -19,7 +19,6 @@ on:
       - 'src/commands/**'
       - 'governance/rules/**'
       - 'standards/**'
-      - 'snippets/**'
       - 'claude/skills/**'
       - 'tooling/**'
       - 'assets/brand/mark.svg'

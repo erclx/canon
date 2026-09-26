@@ -104,8 +104,6 @@ Run `canon tooling list --json` and `canon gov list --json` to see the current c
 
 No standard is written into the project. Each governance rule's authority line names `canon standards <name>`, which answers from the corpus inside the CLI's own package, and every toolkit skill names the copy in its own plugin root. `canon markdown audit` needs no standard at all, its ban set and checkpoints shipping with the package as data.
 
-No snippet is written into the project either. `claude/snippets` in the plugin cache symlinks to the toolkit's own `snippets/`, so a session reaches one at its `@` reference with no install step, the same live resolution `claude/standards` gives a rule's authority line.
-
 `governance` and `wiki` are skippable:
 
 - `--skip governance`: leave `.claude/rules/` empty, so no coding standard loads on a file match. The preview names any `--add` rules the skip drops, and the run prints the `canon gov install <stack> <path>` command to add rules afterward, carrying those extras so one paste restores what the skip declined.
@@ -121,7 +119,7 @@ When a new need appears after scaffold, install the one domain without re-runnin
 - Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
 - Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
 
-Standards and snippets are not on that list, and there is nothing to add for either. Neither installs into a project, by default or by flag, so a session reads a standard with `canon standards <name>` and a snippet through its `@` reference off the live plugin symlink, both resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` or `.claude/snippets/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe.
+Standards are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, so a session reads one with `canon standards <name>`, resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](target-migrations.md) covers the `.claude/snippets/` folder an older one left behind.
 
 Per-domain mechanics live in the corresponding `docs/<domain>.md`. The skill body in `claude/skills/<skill>/SKILL.md` covers detection and preview.
 
@@ -138,5 +136,5 @@ When the toolkit updates, a target pulls changes per domain. A project scaffolde
 - [agents](../agents/index.md): CLI flags, exit codes, and JSON output shapes
 - [target migrations](target-migrations.md), [target sync](target-sync.md), [target scenarios](target-scenarios.md): the one-time moves, the recurring sync, and worked setups
 - [AI workflow](../workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
-- [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/indexes.md), [snippets](../../canon/context/snippets.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
+- [tooling](../../canon/context/tooling/index.md), [governance](../../canon/context/governance/index.md), [claude plugin](../../canon/context/claude-plugin/index.md), [indexes](../../canon/context/indexes.md), [standards](../../canon/context/standards/index.md): per-domain mechanics
 - [sandbox](../../canon/context/sandbox/index.md): scenario catalog for verifying domain flows

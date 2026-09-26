@@ -98,7 +98,6 @@ const DOMAIN_LABELS: readonly { pattern: RegExp; label: string }[] = [
   { pattern: /\b(?:cli)s?\b/, label: 'cli' },
   { pattern: /\b(?:tooling|seeds?)\b/, label: 'tooling' },
   { pattern: /\b(?:governance)s?\b/, label: 'governance' },
-  { pattern: /\bsnippets?\b/, label: 'snippets' },
 ]
 
 /**

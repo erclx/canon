@@ -40,11 +40,10 @@ Most carry two spellings, the one a surface authors at and the one it reaches a 
 | Plugin skills     | `claude/skills/`, `.claude/skills/`   |
 | Governance rules  | `governance/rules/`, `.claude/rules/` |
 | Standards         | `standards/`                          |
-| Snippets          | `snippets/`                           |
 | Internal and seed | `internal/`, `tooling/`               |
 | Root instructions | `CLAUDE.md`                           |
 
-`standards/` and `snippets/` carry one spelling apiece. Neither installs into a project, reaching a reader by resolution and through the `claude/snippets` symlink respectively, so there is no consumed copy to name.
+`standards/` carries one spelling. It never installs into a project, reaching a reader by resolution, so there is no consumed copy to name.
 
 `CLAUDE.md` is matched as a whole path rather than as a prefix, because a prefix reaches nothing that sits in no folder. A nested `docs/CLAUDE.md` stays informational.
 

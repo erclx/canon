@@ -22,7 +22,7 @@ The [development notes](canon/context/development/index.md) carry the full scrip
 
 ## Where to author
 
-Standards and snippets author at `standards/` and `snippets/` in the repository root. Neither installs into a target project. A session reads a standard with `canon standards <name>` and fires a snippet through its `@` reference off the live plugin symlink.
+Standards author at `standards/` in the repository root. They do not install into a target project. A session reads a standard with `canon standards <name>`.
 
 Neither carries a consumed copy under `.claude/`, so the file at its authoring root is the only one to edit and the only one to cite from a file staying in this repository.
 

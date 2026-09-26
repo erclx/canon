@@ -13,8 +13,8 @@ import { join } from 'node:path'
  *
  * What it does not cover is the plugin, which a marketplace install reads live
  * from `claude/` rather than from a tarball. That folder is a `files` entry
- * too, and its `standards` and `snippets` symlinks resolve into trees the field
- * lists in their own right, so both routes land inside the same corpus.
+ * too, and its `standards` symlink resolves into a tree the field lists in its
+ * own right, so both routes land inside the same corpus.
  */
 export type ShipEntries =
   /** The field declares a corpus, which is what this check reads. */

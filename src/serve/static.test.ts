@@ -262,8 +262,8 @@ describe('startServer', () => {
   /**
    * `resolve` is lexical and does not follow links, so a containment test
    * built on it clears a path that `Bun.file` then reads straight out of the
-   * root. This repository is a live instance, since `claude/standards` and
-   * `claude/snippets` are symlinks out of `claude/`.
+   * root. This repository is a live instance, since `claude/standards` is a
+   * symlink out of `claude/`.
    */
   it('should refuse a file reached through a symlink out of the root', async () => {
     const outside = mkdtempSync(join(tmpdir(), 'canon-serve-outside-'))

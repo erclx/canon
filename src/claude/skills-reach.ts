@@ -7,7 +7,7 @@ import { SURFACE_ROOTS } from '@/surface-root'
  * The authoring roots this repository owns and no install channel delivers.
  *
  * Every entry is a folder a target never holds under that spelling. Standards
- * and snippets install nowhere and are reached through the plugin corpus,
+ * install nowhere and are reached through the plugin corpus,
  * rules install under `.claude/rules/`, and the rest are this repository's
  * own source, docs, and catalogs.
  *
@@ -28,7 +28,6 @@ const AUTHORING_ROOTS = [
   'docs/agents/',
   'governance/',
   'internal/',
-  'snippets/',
   'standards/',
   'tooling/',
   'wiki/',

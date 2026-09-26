@@ -94,10 +94,9 @@ COUNTS_JSON="$(catalog gov counts || true)"
 SKILLS_JSON="$(catalog claude skills list)"
 GOV_JSON="$(catalog gov list)"
 STANDARDS_JSON="$(catalog standards list)"
-SNIPPETS_JSON="$(catalog snippets list)"
 TOOLING_JSON="$(catalog tooling list)"
 
-for payload in "$COUNTS_JSON" "$SKILLS_JSON" "$GOV_JSON" "$STANDARDS_JSON" "$SNIPPETS_JSON" "$TOOLING_JSON"; do
+for payload in "$COUNTS_JSON" "$SKILLS_JSON" "$GOV_JSON" "$STANDARDS_JSON" "$TOOLING_JSON"; do
   if [ -z "$payload" ]; then
     echo "regen-hero: a catalog returned nothing, refusing to write a zeroed hero" >&2
     exit 1
@@ -115,7 +114,6 @@ printf '%s' "$COUNTS_JSON" >"$PAYLOAD_DIR/counts.json"
 printf '%s' "$SKILLS_JSON" >"$PAYLOAD_DIR/skills.json"
 printf '%s' "$GOV_JSON" >"$PAYLOAD_DIR/gov.json"
 printf '%s' "$STANDARDS_JSON" >"$PAYLOAD_DIR/standards.json"
-printf '%s' "$SNIPPETS_JSON" >"$PAYLOAD_DIR/snippets.json"
 printf '%s' "$TOOLING_JSON" >"$PAYLOAD_DIR/tooling.json"
 printf '%s' "$TOKEN_CSS" >"$PAYLOAD_DIR/tokens.css"
 
@@ -141,7 +139,6 @@ const COUNTS_JSON = payload("counts")
 const SKILLS_JSON = payload("skills")
 const GOV_JSON = payload("gov")
 const STANDARDS_JSON = payload("standards")
-const SNIPPETS_JSON = payload("snippets")
 const TOOLING_JSON = payload("tooling")
 
 const listed = Number(LISTED)
@@ -157,9 +154,6 @@ const rules = gov.rules.map(slug)
 const stacked = new Set(gov.stacks.flatMap((stack) => stack.rules))
 const deliveredRules = gov.rules.filter((entry) => stacked.has(entry.name)).map(slug)
 const standards = JSON.parse(STANDARDS_JSON).standards.map((entry) => entry.name)
-const snippets = new Set(
-  JSON.parse(SNIPPETS_JSON).categories.flatMap((category) => category.entries),
-)
 const toolingStacks = JSON.parse(TOOLING_JSON).stacks
 const commandCount = JSON.parse(COUNTS_JSON).catalogs.commands
 if (!commandCount) {
@@ -247,7 +241,7 @@ const remaining = (names) => String(Math.max(0, names.length - listed))
 // frame claiming the domain has nothing in it.
 for (const [label, list] of [
   ["skills", skills], ["rules", rules], ["standards", standards],
-  ["snippets", [...snippets]], ["tooling stacks", toolingStacks], ["gov stacks", gov.stacks],
+  ["tooling stacks", toolingStacks], ["gov stacks", gov.stacks],
   ["stack-delivered rules", deliveredRules],
 ]) {
   if (list.length === 0) {
@@ -354,7 +348,6 @@ const values = {
   SKILL_COUNT: String(skills.length),
   RULE_COUNT: String(rules.length),
   STANDARD_COUNT: String(standards.length),
-  SNIPPET_COUNT: String(snippets.size),
   GOV_STACK_COUNT: String(gov.stacks.length),
   TOOLING_STACK_COUNT: String(toolingStacks.length),
   COMMAND_COUNT: String(commandCount),

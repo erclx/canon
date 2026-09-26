@@ -45,7 +45,7 @@ One attribute standard lands on the CLI: `markdown.md`, whose character bans and
 
 A flat standard has no copy to orphan, so readership lives as prose under `## Destinations` below rather than in a frontmatter field.
 
-Shipping a dependency beside its consumer connects them only when the consumer's cited path resolves against the root that now holds it. The marketplace symlinks put `standards/` and `snippets/` into the plugin cache, so a citation resolving against a project root rather than the skill's own root finds nothing there even though the file ships. Name the root each cited path resolves against before calling reach met, and test in a target that lacks the file rather than one already holding its own copy. `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` is the fallback form that resolves against the skill's own root rather than the project's.
+Shipping a dependency beside its consumer connects them only when the consumer's cited path resolves against the root that now holds it. The marketplace symlink puts `standards/` into the plugin cache, so a citation resolving against a project root rather than the skill's own root finds nothing there even though the file ships. Name the root each cited path resolves against before calling reach met, and test in a target that lacks the file rather than one already holding its own copy. `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` is the fallback form that resolves against the skill's own root rather than the project's.
 
 ## Destinations
 
@@ -86,12 +86,11 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 
 ### To a skill, cited from the flat root
 
-Five standards route to a narrow readership rather than to a governance rule. All five sit at the flat root and reach their skills through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, the fallback citation form.
+Four standards route to a narrow readership rather than to a governance rule. All four sit at the flat root and reach their skills through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, the fallback citation form.
 
 - `branch.md` fixes the branch name and its type vocabulary. `git-branch`, `git-split`, `git-pr`, and `session-worktree`, arrived.
 - `commit.md` fixes the commit subject. `git-commit` and `git-stage`, arrived.
 - `pr.md` fixes a pull request title and body. `git-split` and `git-pr`, arrived.
-- `snippets.md` fixes a snippet file. `create-snippet`, arrived.
 - `glossary.md` fixes the file holding one entry per term a body of material defines. `teach-workspace`, arrived. Its path is fixed by whichever surface holds a glossary rather than by the standard, so no glob covers it while one skill reads it.
 
 ### Withdrawn

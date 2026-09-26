@@ -30,7 +30,7 @@ A project that has never synced under a toolkit new enough to write a stamp fall
 
 Further causes sit outside the per-domain scan, each naming something that walk cannot see. A seed the project edited is reported under `seeds` and reconciled with `canon:seed-sync`, since no sync command touches a seed. A file a newer seed folder replaced is reported under `superseded`, such as `.claude/TASKS.md` against the `.canon/tasks/` that now ships, and nothing moves it because the content is the project's own. A domain sitting at the root layout with nothing under `.claude/` is reported under `unmigrated`, and no command moves it either. The project moves the content itself.
 
-`unmigrated` currently names no domain, since standards and snippets are the two the toolkit ever installed at the project root and both closed their install channel. A target still holding a root `standards/` or `snippets/` folder from an older toolkit is carrying its own authoring surface now, not an unfinished install, and nothing proposes moving either.
+`unmigrated` currently names no domain, since standards and snippets are the two the toolkit ever installed at the project root, standards closed its install channel, and snippets retired outright. A target still holding a root `standards/` folder from an older toolkit is carrying its own authoring surface now, not an unfinished install, and nothing proposes moving it. A leftover `.claude/snippets/` reports under `reverse` below instead.
 
 ### Rules you never received
 
@@ -55,6 +55,8 @@ Each entry carries a verdict, since a dropped folder and one the project wrote a
 - `dropped` names the commit that published the content
 - `unattributed` means the toolkit shipped that path and the content matches no version it published
 - `project` means the folder only shares a retired name
+
+A `.claude/snippets/` folder an older toolkit installed is the case this walk exists for, since the toolkit retired the domain and deleted its `snippets/` root. It reports as `dropped`, and [target migrations](target-migrations.md) says what to do with it.
 
 Nothing acts on any of them, and the verdict is what makes the list safe to read.
 

@@ -16,15 +16,15 @@ afterEach(() => {
 
 describe('runCli', () => {
   it('should exit 0 for a verb that is registered', () => {
-    const run = runCli(['snippets', 'list', '--json'], { cwd })
+    const run = runCli(['standards', 'list', '--json'], { cwd })
 
     expect(run.status).toBe(0)
   })
 
   it('should parse the --json record off stdout for a registered verb', () => {
-    const run = runCli(['snippets', 'list', '--json'], { cwd })
+    const run = runCli(['standards', 'list', '--json'], { cwd })
 
-    expect(run.json).toMatchObject({ categories: expect.any(Array) })
+    expect(run.json).toMatchObject({ standards: expect.any(Array) })
   })
 
   it('should exit non-zero for a subcommand nothing registers', () => {

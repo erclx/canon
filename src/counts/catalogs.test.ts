@@ -28,12 +28,11 @@ afterEach(() => {
 })
 
 describe('the closed catalog set', () => {
-  it('should register exactly the six catalogs the plan named', () => {
+  it('should register exactly the five catalogs the plan named', () => {
     expect(CATALOGS.map((catalog) => catalog.id)).toEqual([
       'skills',
       'rules',
       'standards',
-      'snippets',
       'commands',
       'audits',
     ])
@@ -62,22 +61,6 @@ describe('the rules catalog', () => {
     write('governance/stacks/core.md', '- 010-one\n')
 
     expect(catalogFor('rules').count(ROOT)).toBe(2)
-  })
-})
-
-describe('the snippets catalog', () => {
-  it('should count an entry once per category it sits in', () => {
-    write('snippets/claude/one.md', '# One\n')
-    write('snippets/gemini/two.md', '# Two\n')
-
-    expect(catalogFor('snippets').count(ROOT)).toBe(2)
-  })
-
-  it('should dedupe a slug reachable from two categories', () => {
-    write('snippets/claude/shared.md', '# Shared\n')
-    write('snippets/gemini/shared.md', '# Shared\n')
-
-    expect(catalogFor('snippets').count(ROOT)).toBe(1)
   })
 })
 

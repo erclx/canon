@@ -76,12 +76,6 @@ installs into no project, so the domain has nothing in a target to reconcile.
 and then the corpus inside the package, and `canon standards list --json` carries
 the catalog.
 
-There is no `canon snippets sync` and no `canon snippets install` either, on the
-same ground: `claude/snippets` in the plugin cache symlinks live to the
-toolkit's own `snippets/`, so a session reaches one at its `@` reference with
-no copy to reconcile. `canon snippets list --json` carries the catalog and
-`canon snippets create` is the one verb left that still writes a file.
-
 ## Tooling diff and sync
 
 `canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout with `ok: true`, and the frame goes to stderr. A refusal such as an unknown stack, an excluded stack, or a toolkit-root target still exits 1 and answers `{ ok: false, reason, message }`, so a caller branches on the record and reads a typo'd stack name as a refusal rather than as drift.
@@ -244,8 +238,7 @@ still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns
 without aborting on any other value. Records has nothing to run non-interactively,
 since the private backup repository does not exist yet at scaffold time, so its
 step only prints the one-time setup reminder and `--skip records` silences it.
-There is no `--standards` and no `--snippets`, since no run writes either corpus
-into the target.
+There is no `--standards`, since no run writes that corpus into the target.
 
 ## Unguarded tooling primitives
 

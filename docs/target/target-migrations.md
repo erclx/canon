@@ -91,3 +91,13 @@ canon migrate surface-roots --write --json
 The first line reports the plan and the second applies it, moving each surface with `git mv` so its history follows and repointing every tracked citation of one in the same run. See `canon docs agents` for the full file list rather than reading it here.
 
 Neither `canon sync --check` nor any other command notices a surface still sitting at `.claude/`, so running this is on you rather than on a prompt from the toolkit.
+
+## Delete the retired snippets, once
+
+The toolkit retired snippets, deleting the catalog, the `canon snippets` verb, and the `create-snippet` skill. A project scaffolded while the domain still installed may hold a `.claude/snippets/` folder, which nothing reads any more. Find it with the reverse walk:
+
+```bash
+canon sync --check . --json | jq '.reverse'
+```
+
+An entry at `.claude/snippets` marked `dropped` is the toolkit's copy, and deleting the folder is safe. Leave a root `snippets/` folder alone when the walk marks it `project`, since that is content the project wrote under the same name and the retirement does not reach it. The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` by hand there.

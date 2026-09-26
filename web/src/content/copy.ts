@@ -516,7 +516,6 @@ export const footer = {
           href: `${REPO}/tree/main/governance/rules`,
         },
         { label: 'Tooling stacks', href: `${REPO}/tree/main/tooling` },
-        { label: 'Snippets', href: `${REPO}/tree/main/snippets` },
       ],
     },
     {

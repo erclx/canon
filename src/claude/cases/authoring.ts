@@ -1,7 +1,7 @@
 import type { SkillCase } from '@/claude/skills-rank'
 
 /**
- * Script, skill, snippet, standard, and doc authoring, plus the two prose
+ * Script, skill, standard, and doc authoring, plus the two prose
  * skills that revise rather than generate.
  */
 export const AUTHORING_CASES: readonly SkillCase[] = [
@@ -23,10 +23,6 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   {
     prompt: 'Scaffold a brand-new SKILL.md for this capability.',
     expect: 'create-skill',
-  },
-  {
-    prompt: 'I need a new reusable prompt snippet added to the corpus.',
-    expect: 'create-snippet',
   },
   {
     prompt: 'Write a fresh authoring convention as a new standard file.',

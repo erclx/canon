@@ -34,7 +34,6 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Skill requirement reference](skill-requirement.md): Shape and content rules for the REQUIREMENT.md beside a skill
 - [Claude skill reference](skill.md): Claude skill structure and authoring rules
 - [Slug reference](slug.md): Transform from a git branch name to a slug, and the three responses to an empty result
-- [Snippet reference](snippets.md): Snippet reference and authoring conventions
 - [Standard reference](standard.md): Shape and content rules for authoring a standard
 - [Tasks reference](tasks.md): Folder layout, filename convention, file format, origin lines, and archiving for task files under .canon/tasks/
 - [Teach reference](teach.md): Workspace layout, ordinal naming, frontmatter, and the mission and learning-record formats for a learning workspace

@@ -10,8 +10,8 @@ import { isMarked } from '@/exempt-marker'
  * on purpose rather than by omission. What decides membership here is whether
  * anything serves the file to a reader who does not hold this repository: a
  * skill body loads into a session, a docs page is read through `canon docs`, a
- * standard through `canon standards`, a rule through a glob match, a snippet
- * through an `@` expansion, and a seed through an install. A `src/` doc comment
+ * standard through `canon standards`, a rule through a glob match, and a seed
+ * through an install. A `src/` doc comment
  * is read by someone working on the toolkit, in this checkout, where every
  * number resolves.
  *
@@ -20,17 +20,16 @@ import { isMarked } from '@/exempt-marker'
  * `#191512`, which no width or boundary rule separates from a pull request
  * number, so telling them apart would need the line's syntactic position.
  *
- * `claude/standards` and `claude/snippets` are symlinks into two of the roots
- * below, and a walk that followed them would read those two corpora twice and
- * report every finding in them under two paths. Nothing is lost by not
- * following, since both are corpora here in their own right.
+ * `claude/standards` is a symlink into one of the roots below, and a walk that
+ * followed it would read that corpus twice and report every finding in it
+ * under two paths. Nothing is lost by not following, since it is a corpus here
+ * in its own right.
  */
 export const SHIPPED_CORPORA = [
   'claude',
   'docs',
   'governance',
   'scripts',
-  'snippets',
   'standards',
   'tooling',
 ] as const

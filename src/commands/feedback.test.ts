@@ -180,12 +180,6 @@ describe('deriveDomainLabels', () => {
     expect(deriveDomainLabels(body)).toEqual(['cli'])
   })
 
-  it('should map a snippet surface to the snippets label', () => {
-    const body = report({ Surface: 'snippet, review' })
-
-    expect(deriveDomainLabels(body)).toEqual(['snippets'])
-  })
-
   it('should return no labels for a surface type the table does not name', () => {
     const body = report({ Surface: 'standard, markdown.md' })
 

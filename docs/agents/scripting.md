@@ -14,7 +14,6 @@ Use these to discover what's available instead of hardcoding names.
 | Command                           | Returns                                                          |
 | --------------------------------- | ---------------------------------------------------------------- |
 | `canon tooling list --json`       | Stacks, extends chain, dep and script counts                     |
-| `canon snippets list --json`      | Presets and categories with their slugs                          |
 | `canon standards list --json`     | Standards docs and the paths each governs                        |
 | `canon gov list --json`           | Governance stacks, rule sets, and unreferenced rules             |
 | `canon claude seeds list --json`  | Seed doc sources with content                                    |
@@ -25,8 +24,8 @@ Use these to discover what's available instead of hardcoding names.
 ### Catalog fields
 
 Every catalog serializes through `JSON.stringify`, so a name carrying a quote
-emits valid JSON. `canon tooling list` and `canon snippets list` previously built
-their output with `printf` and no escaping.
+emits valid JSON. `canon tooling list` previously built
+its output with `printf` and no escaping.
 
 `canon standards list` carries `appliesTo` per standard, the paths that standard's
 `## Scope` statement declares. It holds the backticked paths from the first

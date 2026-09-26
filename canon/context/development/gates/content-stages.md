@@ -92,7 +92,7 @@ Both number patterns exclude the repair form by construction rather than by exem
 
 The corpus stops short of `src/` on the reader rather than on the shipping. A `src/` doc comment lands on a target's disk and nothing serves it to a target reader, so its every number resolves for the person reading it. That boundary is also what keeps the check a prose pattern instead of a parser, since `src/design/` writes values shaped `#191512` and no width or boundary rule separates an all-digit hex color from a pull request number.
 
-The walk passes `dot: true`, which is what reaches the seeds. `Bun.Glob` skips any path carrying a dotted segment by default, and every seeded `.claude/` tree, `.cspell/` list, and `.husky/` hook under `tooling/` sits behind one. It does not follow `claude/standards` and `claude/snippets`, since both trees are corpora here in their own right, and following the symlinks would report every finding in them under two paths.
+The walk passes `dot: true`, which is what reaches the seeds. `Bun.Glob` skips any path carrying a dotted segment by default, and every seeded `.claude/` tree, `.cspell/` list, and `.husky/` hook under `tooling/` sits behind one. It does not follow `claude/standards`, since that tree is a corpus here in its own right, and following the symlink would report every finding in it under two paths.
 
 ### Gotchas
 

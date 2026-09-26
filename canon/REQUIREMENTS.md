@@ -75,7 +75,7 @@ The scope that followed the MVP. What the toolkit has to achieve for a user who 
 
 - Bun for CLI runtime, scripts, and the test runner
 - TypeScript with Commander for the CLI entry point, every domain command surface, and the sync engine
-- Bash 4+ for sandbox provisioning, repo maintenance under `scripts/core/`, shared lib functions, hooks, and three toolkit-internal authoring helpers (`tooling verify`, `tooling create`, `snippets create`) plus three list verbs that read frontmatter per file. Each remaining area carries a written verdict in `canon/context/scripts/overview.md`
+- Bash 4+ for sandbox provisioning, repo maintenance under `scripts/core/`, shared lib functions, hooks, and two toolkit-internal authoring helpers (`tooling verify`, `tooling create`) plus three list verbs that read frontmatter per file. Each remaining area carries a written verdict in `canon/context/scripts/overview.md`
 - Markdown for all authored content
 - Git and GitHub CLI for ship workflows
 
