@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.125.0](https://github.com/erclx/canon/compare/v4.124.0...v4.125.0) (2026-09-26)
+
+
+### Features
+
+* **skills:** add a reviewer role and dispatch first-pass reviews to it ([#1950](https://github.com/erclx/canon/issues/1950)) ([87ff438](https://github.com/erclx/canon/commit/87ff43850ed8081ee3f4d413f6c79d8517713692))
+
 ## [4.124.0](https://github.com/erclx/canon/compare/v4.123.0...v4.124.0) (2026-09-26)
 
 
