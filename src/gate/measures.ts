@@ -312,10 +312,9 @@ export const skillProvenance: Measure = async (ctx) => {
 /**
  * Every tracked markdown document against the whole-document ceiling.
  *
- * Report-only for now: a document past the ceiling warns and the stage still
- * passes, since the corpus carried dozens past it when the stage landed. The
- * flip to a failure is a separate change once the count reads zero, and it
- * replaces the warn path rather than sitting beside it.
+ * A document past the ceiling fails the stage. The failure names every one with
+ * its height rather than the first, so a contributor sees the whole set in one
+ * pass, and an exempt document is counted and never named.
  *
  * Read in-process rather than through `canon markdown audit`, whose exit code
  * stays bans and dead links only. The plan and groundwork skills run that audit
@@ -353,15 +352,12 @@ export const documentCeiling: Measure = async (ctx) => {
     }
   }
 
+  const where = over
+    .map((finding) => `${finding.rel} ${finding.renderedLines} rendered lines`)
+    .join(', ')
   return {
-    emissions: [
-      ...over.map((finding) =>
-        warn(`${finding.rel}  ${finding.renderedLines} rendered lines`),
-      ),
-      info(
-        `${plural(over.length, 'document')} past the ${ceiling}-line ceiling, ${exempt} exempt. Reported only, so the push is not held.`,
-      ),
-    ],
+    emissions: [],
+    failure: `${plural(over.length, 'document')} past the ${ceiling}-line ceiling: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
   }
 }
 
