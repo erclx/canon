@@ -5,7 +5,7 @@ description: The post-merge hook that closes a shipped task, how a pull request 
 
 # Skill archiving on merge
 
-Which task closes is decided from the diff, not the session. `docs-fold` resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. Completion is a fact about the repository, so a session that shipped a queued task without ever discussing it still leaves the board correct.
+Which task closes is decided from the diff, not the session. `context-fold` resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. Completion is a fact about the repository, so a session that shipped a queued task without ever discussing it still leaves the board correct.
 
 Requirements, architecture, and design stay session-sourced, because those are judgments a diff cannot carry. The same baseline feeds the wireframe sweep and the context refresh, so neither reads nothing when run on `main` itself. See `canon/context/claude-plugin/skill-baseline.md` for how that baseline resolves and which skills share it.
 

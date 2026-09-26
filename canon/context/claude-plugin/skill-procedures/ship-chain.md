@@ -15,13 +15,13 @@ Nothing reports it, since the review runs, writes a receipt, and reads clean. `r
 
 ### The body that writes a receipt owns its lifetime
 
-`auto-ship` owns the receipt's lifetime, because it writes the file, cites it in its own output, and is the one body that can read whether a later step still needs it, where `docs-fold` sweeps for whatever called it and cannot.
+`auto-ship` owns the receipt's lifetime, because it writes the file, cites it in its own output, and is the one body that can read whether a later step still needs it, where `context-fold` sweeps for whatever called it and cannot.
 
-Pinning the slug once at chain entry is the alternative, and it makes the deletion reliable rather than stopping it. What reaps the receipt instead is a second sweep, over reports whose branch no longer exists, bounded by the branch count. The cost is one receipt per live branch, and the durable record stays the pull request's `## Technical Context`, folded before `docs-fold` runs.
+Pinning the slug once at chain entry is the alternative, and it makes the deletion reliable rather than stopping it. What reaps the receipt instead is a second sweep, over reports whose branch no longer exists, bounded by the branch count. The cost is one receipt per live branch, and the durable record stays the pull request's `## Technical Context`, folded before `context-fold` runs.
 
 ### A slug-keyed sweep cannot reach what a later chain step writes
 
-A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. A memory receipt is written by a standalone `memory-review` run, after the ship chain and its `docs-fold` sweep have finished. A sweep keyed on the current slug looks for a name that does not exist yet, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
+A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. A memory receipt is written by a standalone `memory-review` run, after the ship chain and its `context-fold` sweep have finished. A sweep keyed on the current slug looks for a name that does not exist yet, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
 
 Scanning the folder rather than keying on the slug is what survives this. The memory receipt sweep reads every `.canon/memory/review/memory-review-*.md` and tests each for pending items rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
 
@@ -35,23 +35,23 @@ Sweeping every task on the board rather than the session's own can archive a pla
 
 ### A cross-cutting entry never refreshes from the diff
 
-An entry describing a cross-cutting rule never refreshes from the diff. `docs-fold` picks entries whose prose references files the diff touched, so an entry referencing no path at all is skipped by construction. Sort entries into the kind a diff refreshes and the kind the enforcing change is what invalidates, and edit the second by hand.
+An entry describing a cross-cutting rule never refreshes from the diff. `context-fold` picks entries whose prose references files the diff touched, so an entry referencing no path at all is skipped by construction. Sort entries into the kind a diff refreshes and the kind the enforcing change is what invalidates, and edit the second by hand.
 
 ### A trigger keyed on a signal entering the tree
 
-`docs-fold` carries no diagram sweep: `.canon/diagrams/` is redrawn on demand by `draft-diagram` rather than watched on every ship. The shape is worth recording for any later trigger of that kind. An uncovered-kinds trigger fires only when a diff adds a signal and no entry covers that kind, so an entry already drawn from something weaker is never told its real source now exists. A components diagram drawn from a code scan before `canon/ARCHITECTURE.md` existed would go untold the day that file entered the tree, which is the source `standards/diagrams.md` specifies.
+`context-fold` carries no diagram sweep: `.canon/diagrams/` is redrawn on demand by `draft-diagram` rather than watched on every ship. The shape is worth recording for any later trigger of that kind. An uncovered-kinds trigger fires only when a diff adds a signal and no entry covers that kind, so an entry already drawn from something weaker is never told its real source now exists. A components diagram drawn from a code scan before `canon/ARCHITECTURE.md` existed would go untold the day that file entered the tree, which is the source `standards/diagrams.md` specifies.
 
 ### A format change strands the predicates routing on it
 
-When a format a skill parses changes shape, every predicate routing on the old shape has to move with it. The task `Plan:` line is the worked case: it carries a markdown link, so `docs-fold` and `task-board` both read the target out of the parentheses, and a routing bullet still naming the bare-path form matches nothing for a link-form task, which falls to the final warn-and-skip and archives nothing.
+When a format a skill parses changes shape, every predicate routing on the old shape has to move with it. The task `Plan:` line is the worked case: it carries a markdown link, so `context-fold` and `task-board` both read the target out of the parentheses, and a routing bullet still naming the bare-path form matches nothing for a link-form task, which falls to the final warn-and-skip and archives nothing.
 
 ### A ported condition keeps the test its source could afford
 
-Lifting a conditional from another skill copies the clause rather than what it tests. `docs-fold` calls a diff baseline unusable when it came from local `main` and equals HEAD, which misses `origin/main` resolving a merge base equal to HEAD, the shape of every feature branch before its first commit. It never pays for the gap because it unions the committed, working, and untracked sets, and ported verbatim into a skill reading the committed half alone it would blind that skill.
+Lifting a conditional from another skill copies the clause rather than what it tests. `context-fold` calls a diff baseline unusable when it came from local `main` and equals HEAD, which misses `origin/main` resolving a merge base equal to HEAD, the shape of every feature branch before its first commit. It never pays for the gap because it unions the committed, working, and untracked sets, and ported verbatim into a skill reading the committed half alone it would blind that skill.
 
 ### A deterministic check backstops the session judgment writing the doc
 
-`docs-fold` Step 3 and Step 7 rewrite canonical docs on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 10 closes that gap by running `canon context classify diff` over the fold's whole diff baseline, after Step 3 and Step 7 have already run, and answering every non-`KEEP` finding rather than only the files those two steps wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
+`context-fold` Step 3 and Step 7 rewrite canonical docs on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 10 closes that gap by running `canon context classify diff` over the fold's whole diff baseline, after Step 3 and Step 7 have already run, and answering every non-`KEEP` finding rather than only the files those two steps wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
 
 The verb's own extraction scopes to canonical doc types and reports nothing when the range carries none, and it reuses the Diff baseline section's own base rather than resolving a second one.
 

@@ -482,7 +482,7 @@ export const field = {
     'git-pr',
     'git-followup',
     'memory-capture',
-    'docs-fold',
+    'context-fold',
   ],
 }
 

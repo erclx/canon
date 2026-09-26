@@ -60,7 +60,7 @@ Free-form text after the verb is a reason. Capture it in the receipt but do not 
 Action by action type:
 
 - **Promote**: use `Edit` to insert the rewritten rule into the target surface, then archive the memory file. A promote to an always-loaded rule in the toolkit repo never reaches this line: it stops as a handoff to `internal-governance`, the same as **Hand off** below, and archives only on the user's explicit confirmation.
-- **Promote to a context entry**: append the fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root, then archive the memory file. `docs-fold` folds it in on its next run from a branch, which is what keeps one skill writing context entries.
+- **Promote to a context entry**: append the fact to `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root, then archive the memory file. `context-fold` folds it in on its next run from a branch, which is what keeps one skill writing context entries.
 - **Hand off**: do not edit governance. Archive the memory file only if the user confirmed the handoff explicitly. Otherwise leave it in place.
 - **Retire**: archive the memory file.
 
@@ -88,7 +88,7 @@ Count the items still pending once the parse above has run. An item is pending w
 
 Leave the receipt in place when any remain. When none do, collect it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, which owns what a fold writes and which entry types take one.
 
-`docs-fold` Step 9 sweeps the same folder on the same rule once per shipped branch, and either may reach a receipt first. Whichever does, the other finds no file and moves on.
+`context-fold` Step 9 sweeps the same folder on the same rule once per shipped branch, and either may reach a receipt first. Whichever does, the other finds no file and moves on.
 
 End with: `✅ Applied: <nums> | ⏭ Skipped: <nums> | 📝 Pending: <nums>`. Omit empty buckets. If anything is pending, remind the user they can refine `Decision:` lines and re-ping, run "discuss" for question items, or commit a skip with `skip <nums>` in chat.
 
@@ -96,7 +96,7 @@ End with: `✅ Applied: <nums> | ⏭ Skipped: <nums> | 📝 Pending: <nums>`. Om
 
 Trigger: user says "cleanup" or "delete the receipt" after Apply has run.
 
-Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `docs-fold` Step 9 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/memory/archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
+Cleanup folds one receipt's skips and removes that receipt, and does nothing else. It is the fallback route now that Apply and `context-fold` Step 9 each collect a resolved receipt on their own, so it reaches a file those two left behind rather than being the only collector. Apply is still the only phase that moves a memory entry out of the pen, and it does so per approved item into `.canon/memory/archive/`. A user asking to sweep stale memories wants Propose, which classifies entries and writes a decision slot per entry.
 
 If no `.canon/memory/review/memory-review-*.md` exists at the main root, stop: `✅ No review receipt to clean up.` Every other refusal in this skill carries a message, and the phase reads a receipt before it does anything else.
 

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { planRename } from '@/migrate/plan'
 import { isExcludedPath, renamePath, renameText } from '@/migrate/rename'
 import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(30)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(31)
   })
 
   it('should retire the prefix on every row', () => {
@@ -31,25 +32,18 @@ describe('SKILL_NAME_MAP', () => {
     expect(chained).toEqual([])
   })
 
-  it('should let two keys share a name only when one is an older spelling of the other', () => {
+  it('should let two keys share a name only where a retired name was retargeted past its first rename', () => {
     const byName = new Map<string, string[]>()
     for (const [key, name] of Object.entries(SKILL_NAME_MAP)) {
       byName.set(name, [...(byName.get(name) ?? []), key])
     }
 
-    const unrelated = [...byName.values()]
-      .filter((keys) => keys.length > 1)
-      .filter(
-        (keys) =>
-          !keys.every(
-            (key) =>
-              key === keys[0] ||
-              key.endsWith(`-${keys[0]}`) ||
-              (keys[0] ?? '').endsWith(`-${key}`),
-          ),
-      )
+    const shared = [...byName.values()].filter((keys) => keys.length > 1)
 
-    expect(unrelated).toEqual([])
+    expect(shared).toEqual([
+      ['claude-docs', 'docs-fold'],
+      ['claude-ui-test', 'ui-test'],
+    ])
   })
 
   it('should carry no single-word key, which wholeToken would rewrite everywhere it appears as an ordinary word', () => {
@@ -89,7 +83,13 @@ describe('SKILL_NAME_RULES ordering', () => {
 describe('renameText under the skill preset', () => {
   it('should rewrite a plugin-namespaced invocation', () => {
     expect(renameText('run canon:claude-docs now', SKILL_NAME_RULES)).toBe(
-      'run canon:docs-fold now',
+      'run canon:context-fold now',
+    )
+  })
+
+  it('should rename the fold skill onto the name that states what it edits', () => {
+    expect(renameText('run canon:docs-fold now', SKILL_NAME_RULES)).toBe(
+      'run canon:context-fold now',
     )
   })
 
@@ -229,6 +229,21 @@ describe('isExcludedPath under the skill preset', () => {
     expect(
       isExcludedPath('claude/skills/claude-docs/SKILL.md', SKILL_NAME_RULES),
     ).toBe(false)
+  })
+
+  it('should leave the pointer at the old fold name unplanned, so a later run never moves it onto the survivor', () => {
+    const plan = planRename(
+      [
+        { path: 'claude/skills/docs-fold/SKILL.md', text: 'name: docs-fold' },
+        {
+          path: 'claude/skills/docs-fold/REQUIREMENT.md',
+          text: '# docs-fold',
+        },
+      ],
+      SKILL_NAME_RULES,
+    )
+
+    expect(plan.entries).toEqual([])
   })
 
   it('should not exclude the aitk token map, which carries no skill name', () => {

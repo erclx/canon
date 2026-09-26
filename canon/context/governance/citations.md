@@ -87,7 +87,7 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 
 Each rule and standard below cites its skill with the `canon:` prefix plus a report-if-missing line.
 
-- `governance/rules/core/045-memory.md` cites `canon:memory-capture` and `canon:docs-fold`, and leaves the pointer at its standard to `559-memory.md`.
+- `governance/rules/core/045-memory.md` cites `canon:memory-capture` and `canon:context-fold`, and leaves the pointer at its standard to `559-memory.md`.
 - `governance/rules/lang/120-bash.md` cites `canon:bash-script` and `canon:bash-cli-script`.
 - `governance/rules/claude/561-teach.md` and `standards/teach.md` both cite `canon:teach-workspace`, the standard's fallback reading "say so and stop".
 - `governance/rules/claude/570-skill.md` cites `canon:create-skill` twice.
@@ -97,7 +97,7 @@ Each rule and standard below cites its skill with the `canon:` prefix plus a rep
 
 A rule scoped to a folder only a plugin skill creates is inert rather than broken for a target holding governance alone. The folder never exists there, so the glob never matches and the citation never fires. No repair applies, and the row keeps a later pass from misreading inertness as a defect.
 
-- `governance/rules/claude/510-context.md`, scoped to `canon/context/**`. Only `docs-fold` and `memory-capture` write an entry there.
+- `governance/rules/claude/510-context.md`, scoped to `canon/context/**`. Only `context-fold` and `memory-capture` write an entry there.
 - `governance/rules/claude/556-groundwork.md`, scoped to `.canon/groundwork/**`. Only `plan-groundwork` creates a track folder.
 - `governance/rules/claude/557-intake.md`, scoped to `.canon/intake/**`. Only `plan-intake` creates a dump folder.
 - `governance/rules/claude/561-teach.md`, scoped to `.canon/teach/**`. Only `teach-workspace` creates a workspace.

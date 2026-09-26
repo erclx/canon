@@ -24,7 +24,7 @@ Run `git diff --cached --name-only 2>/dev/null` to check for staged files. If ou
 ## Sequence
 
 1. Invoke `canon:memory-capture` to route what this session learned to the context entries that own it and write the residue to `.canon/memory/`
-2. Invoke `canon:docs-fold` to sync internal planning docs against session decisions, folding in the routed facts
+2. Invoke `canon:context-fold` to sync internal planning docs against session decisions, folding in the routed facts
 3. Invoke `canon:docs-sync` to sync public docs against changes since main
 4. Run `git add -A` to stage any files the sync skills wrote
 5. Run `canon tasks plan-reach <plan> --json` and report both lists it carries. Name the plan this branch built under, by path or by slug. Read `claimed` first and say who holds each path, since that is the half a reader acts on, then say how many of the changed paths `undeclared` names. Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. This step reports and never stops the sequence.

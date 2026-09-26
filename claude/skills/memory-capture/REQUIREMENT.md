@@ -27,7 +27,7 @@ The threshold is what the remaining folder lives or dies on. A first-occurrence 
 
 ## Must not
 
-- Edit a context entry, which `docs-fold` owns
+- Edit a context entry, which `context-fold` owns
 - Route a feedback, user, or reference candidate, since no context entry owns how to work or who to ask
 - Route anything when the caller does not commit, because a context entry is a tracked file
 - Hand-append a row to the memory index, which is generated from sibling frontmatter
@@ -45,6 +45,6 @@ The threshold is what the remaining folder lives or dies on. A first-occurrence 
 
 ## Out of scope
 
-- Editing the context entries themselves, which `docs-fold` owns on its own pass
+- Editing the context entries themselves, which `context-fold` owns on its own pass
 - Curating what is already in the folder, which `memory-review` owns
 - Promoting an entry into an instruction file or a skill body, which mutates how the agent operates and ships as its own change

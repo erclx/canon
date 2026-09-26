@@ -66,7 +66,7 @@ A phase label absent from the live board can already belong to an archived or a 
 
 ### The plan pointer's form gates the sweep
 
-A task's plan pointer decides whether the sweep can see it at all. A plan carried as an intro-paragraph link rather than a `Plan:` line under the title is skipped silently by `docs-fold` Step 8 and by `git-pr`'s task-number write, so the plan never archives and `Pull request: #NNN` never lands. Neither skill errors, since skipping is the documented behavior when no line matches.
+A task's plan pointer decides whether the sweep can see it at all. A plan carried as an intro-paragraph link rather than a `Plan:` line under the title is skipped silently by `context-fold` Step 8 and by `git-pr`'s task-number write, so the plan never archives and `Pull request: #NNN` never lands. Neither skill errors, since skipping is the documented behavior when no line matches.
 
 A task carrying no pointer in any form fails the same way and is harder to see, since a plan matched to it only by slug is stranded with no record it existed. It also reaches upstream of the archive: `auto-ship` pointed at that task stops on the plan-shape test in its own Step 1, since a task carries `## Outcomes` and `## Findings` rather than `**Files to touch:**`, and the operator has to hand the plan's own path to the skill instead.
 
@@ -74,4 +74,4 @@ Two task files sharing one `Plan:` line fail at the other end, tripping `git-pr`
 
 ### Archiving a plan strands the priority link
 
-Archiving a plan at ship time leaves `.canon/tasks/priority.md` pointing at a path the file has left. `docs-fold` Step 8 retargets the closing task's `Plan:` line and reads `priority.md` not at all, and `canon tasks archive` drops the row only when the hook calls it on merge, so every task sits with a dead plan link between its ship run and its merge. A board can carry several at once, from sessions other than the one reading it. Resolve the task file's own `Plan:` line, which the archive keeps current, and read a dead link in `priority.md` as the ordinary post-ship state.
+Archiving a plan at ship time leaves `.canon/tasks/priority.md` pointing at a path the file has left. `context-fold` Step 8 retargets the closing task's `Plan:` line and reads `priority.md` not at all, and `canon tasks archive` drops the row only when the hook calls it on merge, so every task sits with a dead plan link between its ship run and its merge. A board can carry several at once, from sessions other than the one reading it. Resolve the task file's own `Plan:` line, which the archive keeps current, and read a dead link in `priority.md` as the ordinary post-ship state.

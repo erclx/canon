@@ -35,7 +35,7 @@ Worktree entry bases the new branch on the local `origin/main` tracking ref rath
 
 ### A skill edited on the branch serves its pre-edit body
 
-A session that edits a plugin skill and then invokes it receives the pre-edit body, because `--plugin-dir` resolves against the main worktree rather than the branch. Autoship Step 7 invoked `docs-fold` while the branch was replacing its Step 8, and the loaded body still instructed deleting the shipped plan, which would have destroyed the plan the branch existed to preserve. A probe meets the same trap sideways: asking a session to load a skill carrying `disable-model-invocation: true` makes it search the filesystem and find the main worktree's stale copy, so invoke by slash command and forbid the search.
+A session that edits a plugin skill and then invokes it receives the pre-edit body, because `--plugin-dir` resolves against the main worktree rather than the branch. Autoship Step 7 invoked `context-fold` while the branch was replacing its Step 8, and the loaded body still instructed deleting the shipped plan, which would have destroyed the plan the branch existed to preserve. A probe meets the same trap sideways: asking a session to load a skill carrying `disable-model-invocation: true` makes it search the filesystem and find the main worktree's stale copy, so invoke by slash command and forbid the search.
 
 ### The isolation guard reads a command as text
 

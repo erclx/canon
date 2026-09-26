@@ -51,7 +51,7 @@ The handoff takes one file per session for the reason a task does. A single shar
 
 The catalog is the one reader that filters nothing, so it carries a row per sibling alongside the tasks. That is what a folder catalog is for, and the handoffs are what make it worth stating: a board accumulates one row per session that ever wrote one, with nothing pruning them. Anything reading the catalog as the backlog therefore does its own filtering, and a reader that takes every row as a task reports the handoffs as queued work.
 
-The `task-board` skill creates and archives task files, and the archive carries the task's plan with it. `docs-fold` marks outcomes `[x]` in an existing file. Neither does the other's job.
+The `task-board` skill creates and archives task files, and the archive carries the task's plan with it. `context-fold` marks outcomes `[x]` in an existing file. Neither does the other's job.
 
 ## Ordering
 

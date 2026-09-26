@@ -22,7 +22,7 @@ Scenario categories: `infra:*` (domain flows), `git:*`, `scaffold:*`. `create` s
 `canon sandbox check <category>:<command> [arm]` scores a provisioned sandbox against the arm's `expect.toml`, printing a verdict on stderr and, with `--json`, the same verdict as a record on stdout.
 
 ```bash
-canon sandbox check claude:docs-fold drift --json
+canon sandbox check claude:context-fold drift --json
 ```
 
 | Flag                           | Effect                                                                                                            |

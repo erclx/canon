@@ -36,3 +36,7 @@ reason = "Reads tracked work and context and writes nothing. A run leaves the tr
 
 [canon-feedback]
 reason = "Opens an issue on the toolkit repository, or writes into the toolkit's own .canon/feedback/ on a failed call, rather than touching the project it runs in. run.sh reports that as an escape and cannot assert its content, since the path is outside the tree the snapshot covers."
+
+# The old name is the point of this entry, so a skill-names sweep keeps it. canon-keep-retired
+[docs-fold]
+reason = "A pointer left at the fold skill's old name. It prints one line naming context-fold and writes nothing, so there is no artifact to assert over."

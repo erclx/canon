@@ -1,6 +1,6 @@
 ---
 name: draft-wireframes
-description: Drafts a brand-new `canon/wireframes/<surface>.md` file against the wireframes standard, walks the tree for a name collision, detects an existing higher visual-design tier without building one, confirms with the user, then writes. Use when asked to "draft a wireframe for X", "write the wireframe for this surface", "add a canon/wireframes entry for X", or "wireframe this screen" where no surface file covers it yet. Do NOT use to fix a stale TODO stub or report wireframe drift against a diff, which is `docs-fold`'s wireframe-sweep step.
+description: Drafts a brand-new `canon/wireframes/<surface>.md` file against the wireframes standard, walks the tree for a name collision, detects an existing higher visual-design tier without building one, confirms with the user, then writes. Use when asked to "draft a wireframe for X", "write the wireframe for this surface", "add a canon/wireframes entry for X", or "wireframe this screen" where no surface file covers it yet. Do NOT use to fix a stale TODO stub or report wireframe drift against a diff, which is `context-fold`'s wireframe-sweep step.
 ---
 
 # Wireframe draft
@@ -15,7 +15,7 @@ Read these files in parallel:
 - `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for the prose around the fences
 - The `write-human` skill: voice, rhythm, and sentence construction for the prose around the fences
 
-This skill stays fully independent of `docs-fold`'s wireframe coverage sweep, which only ever writes a bare `TODO` stub for a surface a diff touched and reports drift against one a wireframe already covers. Neither the stub nor the drift check is a draft, and this skill never reads or writes through that mechanism.
+This skill stays fully independent of `context-fold`'s wireframe coverage sweep, which only ever writes a bare `TODO` stub for a surface a diff touched and reports drift against one a wireframe already covers. Neither the stub nor the drift check is a draft, and this skill never reads or writes through that mechanism.
 
 ## Guards
 

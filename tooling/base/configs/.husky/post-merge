@@ -7,7 +7,7 @@
 # to hand a worker. This is the only event that lands after a merge.
 #
 # Candidates rather than closed tasks, because an all-`[x]` board entry does not
-# mean the work merged. `docs-fold` marks outcomes on the branch as step 1 of
+# mean the work merged. `context-fold` marks outcomes on the branch as step 1 of
 # the ship chain, so a task can read closed while its pull request is still open
 # or already abandoned. The board is gitignored and an archived task has nothing
 # to recover it, so `task-board` confirms the work is on `main` before moving

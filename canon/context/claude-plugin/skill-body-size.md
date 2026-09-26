@@ -21,7 +21,7 @@ A catalog, a table of cases, or a format spec running past roughly fifteen lines
 
 Below the ceiling, each move owes a named branch that skips it. Body lines are paid on every invocation and a reference only when the body sends the session to it, so a block every run dereferences costs a read and saves nothing, and the asymmetry is the entire argument for moving anything. The body keeps the trigger, the skip condition, and the guard, because a run that never reaches the block has to decide that without opening the reference.
 
-That test is what bounds the rule. In `docs-fold`, a project with no wireframe folder skips the wireframe-sweep reference outright, and an architecture record carrying no anchored entry skips the architecture-sweep reference the same way. The rebase machinery in `review-address` sits in a reference because a branch that still merges never reaches it, while the reply format that same skill writes on every run stays in the body, having failed the test.
+That test is what bounds the rule. In `context-fold`, a project with no wireframe folder skips the wireframe-sweep reference outright, and an architecture record carrying no anchored entry skips the architecture-sweep reference the same way. The rebase machinery in `review-address` sits in a reference because a branch that still merges never reaches it, while the reply format that same skill writes on every run stays in the body, having failed the test.
 
 ## Applying it is maintenance, not a sweep
 
