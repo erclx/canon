@@ -107,10 +107,10 @@ export function readSession(): SessionReads {
 
   // The memory figure states that the pen keeps only the residue. It is read
   // here so the page stops claiming it the moment the rule stops saying it.
-  const memoryRule = readRepoFile(root, 'governance/rules/core/045-memory.md')
+  const memoryRule = readRepoFile(root, 'governance/rules/canon/603-memory.md')
   if (!memoryRule.includes('no context entry owns')) {
     throw new Error(
-      '045-memory no longer limits the memory folder to what no context entry owns',
+      '603-memory no longer limits the memory folder to what no context entry owns',
     )
   }
 
@@ -127,7 +127,7 @@ export function readSession(): SessionReads {
       worker: readRole(skills, 'role-worker'),
     },
     testFirst: ruleBullet(
-      readRepoFile(root, 'governance/rules/core/070-planning.md'),
+      readRepoFile(root, 'governance/rules/claude/567-planning.md'),
       'Write the test for a behavior',
     ),
     mergeActions: hookActions(

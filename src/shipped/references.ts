@@ -212,7 +212,7 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
  * number, such as `create-rule`, `memory-review`, and `target-setup` already
  * write correctly, from matching. The segment group between `rules/` and the
  * numbered file admits both a governance-namespace path
- * (`canon/core/055-scratch.md`) and a project-namespace one
+ * (`canon/canon/604-scratch.md`) and a project-namespace one
  * (`project/<subdir>/<n>-<slug>.md`) without distinguishing them, since
  * either shape is the same broken citation.
  */

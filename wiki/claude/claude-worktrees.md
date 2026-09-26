@@ -94,7 +94,7 @@ The cost is disk per tree plus one install wait. A package manager with a conten
 
 ## Shared session scratch
 
-`.canon/plans/`, `.canon/review/`, and `.canon/memory/` are gitignored and live at the main worktree root, not inside a linked worktree. Agents running inside a worktree resolve these paths against the main root via `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` when not in a git repo. The canonical rule is `governance/rules/core/085-worktrees.md`, which a target reads back at `.claude/rules/canon/core/085-worktrees.md` once it has run `canon gov sync`.
+`.canon/plans/`, `.canon/review/`, and `.canon/memory/` are gitignored and live at the main worktree root, not inside a linked worktree. Agents running inside a worktree resolve these paths against the main root via `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` when not in a git repo. The canonical rule is `governance/rules/canon/605-worktrees.md`, which a target reads back at `.claude/rules/canon/canon/605-worktrees.md` once it has run `canon gov sync`.
 
 Resolving the path is not enough to write it. Claude Code's session isolation refuses an editing-tool write to any path outside the worktree and offers the worktree copy instead, while reads resolve normally, so the boundary is tool-scoped rather than filesystem-scoped. An agent that accepts the offered redirect reports success and leaves the file where no later session looks.
 

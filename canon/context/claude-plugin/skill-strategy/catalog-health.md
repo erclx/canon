@@ -38,7 +38,7 @@ Every folder under `claude/skills/` currently ships. Each read against `create-s
 
 A few load-bearing patterns come out of running the three questions across the whole catalog:
 
-- Four skills, `git-commit`, `git-branch`, `git-pr`, and `git-stage`, each partly overlap a Claude Code built-in, decided by `governance/rules/core/087-git.md`. A project without governance has no such rule, and no seed fallback, since one scaffolded without the plugin carries no `canon:git-*` skills at all.
+- Four skills, `git-commit`, `git-branch`, `git-pr`, and `git-stage`, each partly overlap a Claude Code built-in, decided by `governance/rules/canon/606-git.md`. A project without governance has no such rule, and no seed fallback, since one scaffolded without the plugin carries no `canon:git-*` skills at all.
 - `auto-ship`'s ship step invokes `git-ship` directly and states the sequence once, in the body a reader also meets on its own, rather than restating it. The one thing the wrapping chain adds is marking the pull request as a draft, placed ahead of the CI watch rather than after it.
 - A skill reached almost entirely through a chain, such as `memory-capture` or most of the `git-ship` sequence, is not adopted by an operator typing its name. The chain is the denominator its call count measures, not demand, so read such a skill's reach against the typed count of whichever skill heads the chain.
 - The most-called skill in the catalog can carry no sandbox arm at all when its reach is already proven by how many chain steps route to it, and a skill with a real sandbox arm and a real citation can still score zero on every usage record. Neither instrument substitutes for the other.

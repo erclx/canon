@@ -1,2 +1,2 @@
 extends = "base"
-rules = ["110-python", "340-pydantic", "330-testing-py", "360-security-server", "370-database"]
+rules = ["code", "110-python", "340-pydantic", "330-testing-py", "360-security-server", "370-database"]

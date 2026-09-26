@@ -196,7 +196,7 @@ function frontmatter(text: string): string {
  *
  * A glob opening `**` reaches every folder in the tree, so it answers that a
  * file type is governed and never that a named path is. Counting one would
- * report every markdown path covered by `501-markdown` and leave the column
+ * report every markdown path covered by `801-markdown` and leave the column
  * saying nothing a reader could act on.
  */
 function isAnchored(glob: string): boolean {

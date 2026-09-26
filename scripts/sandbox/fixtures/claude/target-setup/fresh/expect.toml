@@ -23,9 +23,9 @@ max_turns = 30
 # expectation the declaration exists to catch.
 paths = [
   "CLAUDE.md",
-  ".claude/rules/canon/core/000-constitution.md",
+  ".claude/rules/canon/claude/565-behavior.md",
   ".claude/snippets/meta-prompt.md",
-  ".claude/rules/canon/snippets/600-at-references.md",
+  ".claude/rules/canon/canon/604-scratch.md",
   ".claude/wiki/index.md",
   "commitlint.config.js",
 ]

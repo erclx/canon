@@ -50,4 +50,4 @@ Without this skill, a session holding finished files that hands them to a worker
 - `role-worker` copies the folder into a worktree and ships it. This stops once the three artifacts exist.
 - `task-board` creates a task file for a row with no ready folder. This writes the row it needs beside the folder and calls the same verbs.
 - `git-ship` ships a branch, and a ready folder never reaches one.
-- `standards/ready.md` owns the folder's shape and lifecycle, and this skill owns the procedure that produces it, the way `write-human` and `500-prose` split.
+- `standards/ready.md` owns the folder's shape and lifecycle, and this skill owns the procedure that produces it, the way `write-human` and `800-prose` split.

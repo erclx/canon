@@ -30,7 +30,7 @@ The same token reaches a script handed to an interpreter inline, so a Python her
 
 ## The two write routes
 
-`session-worktree` states these routes to a session, in its `references/main-root-writes.md`, and `085-worktrees` points there. This section keeps the reasons behind them.
+`session-worktree` states these routes to a session, in its `references/main-root-writes.md`, and `605-worktrees` points there. This section keeps the reasons behind them.
 
 Two write kinds take two routes. Creating a whole file is a heredoc through `Bash`, which is why a plan, a review report, and a memory entry need no code behind them. A body the verification refuses falls back to `Write` into the worktree followed by a two-argument `cp` out to the main root, which carries no syntax to inspect and needs no verb.
 
@@ -52,7 +52,7 @@ A plan write is a no-op for every one of the five: `standards-audit.sh` exits on
 
 ## Which `.canon/tmp/` writers state a root
 
-`055-scratch.md` states the mixed default alone and names no writer, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead. Read the current writer set with `git grep -l '.canon/tmp/' claude/skills .claude/skills` before trusting the split below.
+`604-scratch.md` states the mixed default alone and names no writer, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead. Read the current writer set with `git grep -l '.canon/tmp/' claude/skills .claude/skills` before trusting the split below.
 
 Most writers hold throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite, such as `git-pr`'s pull request body, `review-address`'s reply body, and `draft-diagram`'s verification renders. None of those needs a root, since nothing outside the run that wrote it ever opens the file.
 

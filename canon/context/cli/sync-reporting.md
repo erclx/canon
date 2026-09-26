@@ -51,7 +51,7 @@ The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because
 
 ### Rules the target never received
 
-`readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `500-prose` citing `501-markdown`, which needs a hand repair once discovered.
+`readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `800-prose` citing `801-markdown`, which needs a hand repair once discovered.
 
 Reporting was chosen over installing. A sync that adds rules silently changes what a project is governed by, and nobody chose that, so the install stays a separate command an operator runs. The cost is that a target can read the section and act on none of it, which is the same contract `newSkills` already sets.
 
@@ -67,7 +67,7 @@ An unresolvable anchor is a gap the fallback still carries. `read` returns an em
 
 `bands` and the chain-based read's entitlement check share a source that looks unrelated: `INSTALL_MARKERS.governance` in `src/sync/check.ts`. `installedStampDomains` reads it as a presence check, and `readInstalledRules`'s `bands` derivation walks the same directory and takes each installed file's top-level segment as its domain band.
 
-`bands` and `INSTALL_MARKERS.governance` must move together: leaving `INSTALL_MARKERS.governance` at a stale root would have `bands` reporting the root's own top segment (such as `["canon"]`) in place of real domain names like `["core", "ui"]`, silently breaking the entitlement filter above for any target still on this fallback path. A change to one adapter's `installedRoot` is a change to `INSTALL_MARKERS` for the same domain too, since nothing else keeps the two in step.
+`bands` and `INSTALL_MARKERS.governance` must move together: leaving `INSTALL_MARKERS.governance` at a stale root would have `bands` reporting the root's own top segment (such as `["canon"]`) in place of real domain names like `["claude", "ui"]`, silently breaking the entitlement filter above for any target still on this fallback path. A change to one adapter's `installedRoot` is a change to `INSTALL_MARKERS` for the same domain too, since nothing else keeps the two in step.
 
 Nothing here reaches `hasDrift`. `unmigrated` counts because running the relocation closes it, and a command closes this too, so the exclusion rests on consent rather than on the absence of a remedy: gating CI on the count would pressure a target into adopting rules nobody picked.
 

@@ -8,7 +8,7 @@ import { execa } from 'execa'
  *
  * `no-binary` is the binary being absent anywhere from the root upward.
  * `cspell` is a devDependency of this repository alone, per
- * `075-dependencies.md`'s ban on importing a transitive-only package, so a
+ * `775-dependencies.md`'s ban on importing a transitive-only package, so a
  * target project that never adopted it gets no coverage from this check
  * rather than a network fetch or a forced new dependency.
  *

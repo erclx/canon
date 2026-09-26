@@ -21,7 +21,7 @@ No single citation form answers everywhere, since nothing mirrors the corpus und
 
 A reader has to know which surface they are on, and nothing checks that they got it right. `DEFAULT_FOLDERS` in `src/context/folders.ts` covers `context`, `decisions`, `diagrams`, and `wireframes`, so the citation gate never resolves a `standards/` path either way and reports nothing on a wrong form.
 
-The `paths:` glob on `591-standard-authoring` matches `standards/` alone, so a target holding a stale installed copy elsewhere never matches that rule, which governs authoring rather than an installed artifact.
+The `paths:` glob on `891-standard-authoring` matches `standards/` alone, so a target holding a stale installed copy elsewhere never matches that rule, which governs authoring rather than an installed artifact.
 
 ## No install verb
 

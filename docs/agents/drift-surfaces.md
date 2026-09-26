@@ -114,8 +114,8 @@ that is not a full clone as unmeasured rather than clean. This gap does not
 reach the chain-based read above, since it consults no anchor at all.
 
 In the fallback, entitlement is filtered, because a stack does not receive
-every rule. The base stack takes the `core` and `claude` folders whole and
-every other stack extends it with individually named rules, so an unfiltered
+every rule. The base stack takes four folders whole, the code stacks add `code`, and
+every other stack extends them with individually named rules, so an unfiltered
 list would tell a base consumer about rules it can never receive and train the
 reader to skip the section.
 

@@ -257,7 +257,7 @@ export const workers = {
 export const gate = {
   head: 'No behavior reaches history ahead of its test',
   cap: 'What a worker does inside its own branch, before anything is shown to anyone.',
-  cite: 'governance/rules/core/070-planning.md',
+  cite: 'governance/rules/claude/567-planning.md',
   citeNote: 'installed into every project that syncs governance',
   pair: [
     { what: 'the test', how: 'written first, and failing' },
@@ -271,7 +271,7 @@ export const gate = {
   },
 }
 
-// README.md: canon-allow-readme-paraphrase: states the routing governance/rules/core/045-memory.md carries, which the build checks the rule still says.
+// README.md: canon-allow-readme-paraphrase: states the routing governance/rules/canon/603-memory.md carries, which the build checks the rule still says.
 export const memory = {
   head: 'What the session learned outlives the session',
   cap: 'The last thing a session does is decide what it learned and where that belongs.',

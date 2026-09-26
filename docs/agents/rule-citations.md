@@ -24,7 +24,7 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 ## What the drift check cannot see
 
-`bun run check` asserts that an authored rule and its consumed copy agree, and a dead citation passes that assertion because both copies carry it. `governance/rules/claude/561-teach.md` told its reader to open a `references/glossary.md` inside the teach skill that had never existed at that path. The rule shipped, survived a release, and fired during a real teach run before anyone noticed.
+`bun run check` asserts that an authored rule and its consumed copy agree, and a dead citation passes that assertion because both copies carry it. `governance/rules/canon/661-teach.md` told its reader to open a `references/glossary.md` inside the teach skill that had never existed at that path. The rule shipped, survived a release, and fired during a real teach run before anyone noticed.
 
 Two files agreeing is what a drift check measures. Whether either one is right about the tree is a different question, and this is the stage that asks it.
 
@@ -49,7 +49,7 @@ A `path` is anchored on the whole backticked span rather than on a trailing patt
 A rule body is full of backticked spans carrying a slash, and almost none of them names a file in this tree. The stage declines four shapes outright.
 
 - A placeholder or glob segment describes a shape rather than naming a file: `canon/context/<domain>.md`, `standards/<name>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`.
-- A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`. A bare name is read as a citation only when it matches a rule filename, which is how `562-session.md` points at `555-tasks.md`.
+- A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`. A bare name is read as a citation only when it matches a rule filename, which is how `662-session.md` points at `655-tasks.md`.
 - A span carrying no file extension is a folder or a module specifier: `src/pages/`, `next/font`, `try/except`, `react-hooks/set-state-in-effect`, `oven-sh/setup-bun@v2`, `@/lib/utils`.
 - A fenced block displays a path rather than pointing at one.
 
@@ -59,11 +59,11 @@ The extension test is what carries most of the separation, and it costs one real
 
 Two classes resolve to nothing and are right to. Both are reported by name rather than dropped, so a reader can see what the verdict declined to judge.
 
-**Governed.** A rule spelling a path in its own frontmatter `paths:` is naming an artifact a target holds rather than a file here. `governance/rules/claude/560-diagrams.md` declares `.claude/DIAGRAMS.md` and then tells its reader to convert one an older install left behind, so the file is correctly absent from this tree and correctly named in the rule.
+**Governed.** A rule spelling a path in its own frontmatter `paths:` is naming an artifact a target holds rather than a file here. `governance/rules/canon/660-diagrams.md` declares `.claude/DIAGRAMS.md` and then tells its reader to convert one an older install left behind, so the file is correctly absent from this tree and correctly named in the rule.
 
 Only an exact declaration exempts, never a glob match against one. A glob declares a shape, so a body path sitting inside it is still a citation and a stale one is still a defect. A rule scoped at `docs/**` citing a `docs/agents/renamed.md` that moved is exactly the class this stage exists to catch, and matching the glob would excuse it.
 
-**Ignored.** A path git ignores is session scratch no clone is expected to hold. `governance/rules/claude/555-tasks.md` cites `.canon/tasks/index.md`, which is real in a live project and absent from a fresh clone and from every linked worktree. Resolving against the filesystem alone would make the verdict depend on which tree the stage ran in, so the unresolved paths go to one batched `git check-ignore` and an ignored one is excused. A read git cannot answer refuses rather than reporting those paths dead.
+**Ignored.** A path git ignores is session scratch no clone is expected to hold. `governance/rules/canon/655-tasks.md` cites `.canon/tasks/index.md`, which is real in a live project and absent from a fresh clone and from every linked worktree. Resolving against the filesystem alone would make the verdict depend on which tree the stage ran in, so the unresolved paths go to one batched `git check-ignore` and an ignored one is excused. A read git cannot answer refuses rather than reporting those paths dead.
 
 ## Why the glob half reads one corpus
 

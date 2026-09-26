@@ -15,44 +15,53 @@ What earns a rule in the first place, and which standard each one routes to, is 
 
 A rule's number states its domain without opening it.
 
-| Range     | Domain                                                     |
-| --------- | ---------------------------------------------------------- |
-| `000–099` | core (persona, testing, error handling, planning)          |
-| `100–199` | lang (one rule per language)                               |
-| `200–299` | framework (one rule per framework)                         |
-| `300–399` | lib (testing libraries, validation, security, persistence) |
-| `400–499` | ui (copy, accessibility, forms, motion, capture)           |
-| `500–599` | claude (authoring rules for `.claude/` and canonical docs) |
-| `700–799` | ci (GitHub Actions workflow files)                         |
+| Range     | Domain                                                                   |
+| --------- | ------------------------------------------------------------------------ |
+| `000–099` | code (placement, errors, naming, testing), code stacks only              |
+| `100–199` | lang (one rule per language)                                             |
+| `200–299` | framework (one rule per framework)                                       |
+| `300–399` | lib (testing libraries, validation, security, persistence)               |
+| `400–499` | ui (copy, accessibility, forms, motion, capture)                         |
+| `500–599` | claude (session conduct and authoring rules for `.claude/`)              |
+| `600–699` | canon (toolkit workflow, canonical docs, and record folders)             |
+| `700–799` | tooling (CI workflows, spelling, dependencies, config and code comments) |
+| `800–899` | writing (prose, markdown, diagrams, READMEs, and standards)              |
 
 The table stays a table because it grows a row per band rather than per rule, and a band opens rarely. Each row names a category rather than listing its rules, which `canon gov list` reports.
 
-`snippets/` draws a single number from the headroom rather than holding a band, so its one rule numbers at 600 rather than claiming a hundred for one file. `ci` opens `700` at a band boundary for the same reason. The rest of `600-699` and `800-899` is headroom held for a category that has no band yet, and `900-999` is reserved for rules a target authors itself, which no shipped rule takes.
+Every band from `000` to `899` now holds a group, so a new group has no free band and joins an existing one or retires one. `900-999` is reserved for rules a target authors itself, which no shipped rule takes.
+
+`claude/` kept the `500` band rather than `canon/`, since its resident rules kept their numbers and `internal/rules/claude/593` to `599` stay inside their own group's band. The moved session-conduct rules took `565` to `567`, below `570-skill`, so no number a moved rule held is reused in the band. The workflow rules opened `canon/` at `601`, and the canonical-doc rules kept their last two digits, so `561-teach` became `661-teach`.
 
 The leading digit restates the folder, so what the number uniquely supplies is read order rather than routing. Nothing precedence-orders rules at load, and renumbering would reach every installed target and buy nothing.
 
 ### Three sources numbering into one tree
 
-- `governance/rules/` ships to targets and takes the gaps between the tens, such as `core/087-git.md`.
-- `internal/rules/` governs this repository alone and takes the top of a band, a division stated in `standards/rule.md`. The core band is full at every ten, which is what forces the split rather than leaving it to convention.
-- A target's own rules take `900-999`, since the two bands the toolkit crowds most, `core/` and `claude/`, have almost no top-of-band room left for a target to claim.
+- `governance/rules/` ships to targets and takes the gaps between the tens, such as `canon/606-git.md`.
+- `internal/rules/` governs this repository alone and takes the top of a band, a division stated in `standards/rule.md`. The shipped `000` band was full at every ten when the split was set, which is what forced it rather than leaving it to convention. `internal/rules/core/095` to `097` sit under a `core/` folder the shipped tree does not carry, numbered inside the `code` band.
+- A target's own rules take `900-999`, since the two bands the toolkit crowds most, `claude/` and `canon/`, have little top-of-band room left for a target to claim.
 
 Each source also installs into its own folder: `.claude/rules/canon/`, `.claude/rules/internal/`, and `.claude/rules/project/`. The folder stops a colliding `<n>-<slug>` between two sources from overwriting one file with the other, and the number still resolves a citation against either corpus for a reader who has only the citation in hand. `internal/` exists only in this repository. Nothing checks any of the three divisions.
 
-### An always-loaded rule belongs in `core/`
+### Rules group by the audience they serve
 
-An always-loaded rule sits in `core/` even though nothing about `paths:` requires the band. What decides it is whether a target can update the rule: `governance/stacks/base.toml` takes `core` whole, so a bullet moved there from a seeded root file reaches a target through `canon gov sync` rather than through a one-time copy nothing refreshes. A `CLAUDE.md` bullet carries the same session-start priority, so the band is the only thing the move changes.
+A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, `tooling/` for dev setup, and `writing/` for prose and document shape. `base` takes the last four whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
+
+Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, was the alternative, and it left two groups with no honest home: the generic code rules are not tooling, and the prose rules are not about Claude.
+
+An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` keeps only the bullets a model does not follow by default.
 
 ## Gotchas
 
 - A widened source rule fails `bun run check` until its consumed copy is committed. The Consumed copies stage regenerates `.claude/rules/` and turns the resulting diff into a failure. A glob matching nothing still does not error, so the gate catches a stale copy rather than a dead glob.
 - Moving the files a rule governs breaks the rule twice. The `paths:` glob stops matching, so the rule stops loading for its surface, and the body still describes the old layout, so a session that does load it is instructed against the change. No stage reports either half, so grep `governance/rules/` and `internal/rules/` whenever a branch moves a governed path.
 - A rule in a folder no stack names installs for nobody. `canon/context/governance/stacks.md` covers which folders `base` takes whole and the stage that reports the gap.
+- Sync never retracts a rule a target's stack stopped naming, since `locateSource` matches a held basename in any folder. A `base` target installed before the audience regroup keeps `010-testing` under `core/` and `700-ci-workflow` under `ci/`, updated in place beside the new folders, so moving a rule between stacks reaches new installs only. Loading is recursive, so the stray folders cost orientation and nothing at load.
 - Adding a rule stales every hardcoded rule count in the context entries and `docs/`. Run `canon gov counts` after the rule lands, fix each figure it names, and re-run it until clean. Three figures move independently: the authored total under `governance/rules/`, the consumed total under `.claude/rules/`, and what `base` resolves to, which `canon gov list --json` reports.
-- `core/070-planning.md` names a `canon` verb, which puts it on the slow side of the two-speed gap `canon/ARCHITECTURE.md` records. The rule reaches a target when an install copies it, while the verb reaches that target only once a release publishes, so a rule citing a verb owes the same release wait a skill body does. Nothing detects the skew.
+- `claude/567-planning.md` names a `canon` verb, which puts it on the slow side of the two-speed gap `canon/ARCHITECTURE.md` records. The rule reaches a target when an install copies it, while the verb reaches that target only once a release publishes, so a rule citing a verb owes the same release wait a skill body does. Nothing detects the skew.
 - A rule publishing a heading some command parses is program input. `src/comments/vocabulary.ts` reads its terms from whichever rule publishes `## Degradation vocabulary`, so adding that heading elsewhere changes what `canon comments scan` sweeps for. Grep for a reader of the heading or filename before writing the rule.
 - A `description` holding a bare word, a colon, and a space breaks `Bun.YAML.parse`, which reads the shape as a nested key. `parseFrontmatter` treats the unparsable block as absent, so `canon gov list` and the citation check list the rule as unscoped rather than naming the colon. Rephrase the description rather than quoting it, since every other frontmatter example here is unquoted.
-- A glob can reach well past one named folder. `claude/511-indexes.md` globs `**/index.md` and reaches every folder in the tree, and `core/065-spelling.md` globs `.cspell/**`, a folder outside `.claude/` and outside a project's own source.
+- A glob can reach well past one named folder. `canon/611-indexes.md` globs `**/index.md` and reaches every folder in the tree, and `tooling/765-spelling.md` globs `.cspell/**`, a folder outside `.claude/` and outside a project's own source.
 
 ## Frontmatter contract
 
@@ -79,7 +88,7 @@ Create a `.md` file under `governance/rules/` using the numbering bands above. D
 - A rename or renumber adds an entry to `governance/renames.toml` in the same change, mapping the old basename to the new one, so `canon gov sync` moves a target across rather than only deleting the old file. A fold of several rules into one takes no entry, since the ledger declares one-to-one identity only.
 - The branch owes no hero render. The Hero stage runs `regen-hero.sh --check`, which discards what it fills, and `refresh-capture-frames.yml` lists `governance/rules/**` in its path filter, so the frames refresh in their own pull request after the merge.
 
-A rule added to `core/`, `claude/`, `snippets/`, or `ci/` reaches every `base` consumer with no stack edit, since `base` names each of those folders whole. A rule in any other folder needs its name in the relevant `governance/stacks/*.toml`.
+A rule added to `canon/`, `claude/`, `tooling/`, or `writing/` reaches every `base` consumer with no stack edit, since `base` names each of those folders whole. A rule added to `code/` reaches every `node` and `python` consumer the same way. A rule in any other folder needs its name in the relevant `governance/stacks/*.toml`.
 
 Glob the rule against every ecosystem it governs rather than only the one its stack serves, since `--add` layers a rule onto a stack that never names it. `360-security-server` and `370-database` sit on `python` and `node-server` and glob `**/*.go` and `**/*.php` beside `**/*.py`, `**/*.ts`, and `**/*.js`, so a Go or PHP backend that takes either through `--add` already matches. A glob narrowed to the naming stack's language installs a rule that matches nothing there.
 

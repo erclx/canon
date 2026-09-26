@@ -30,5 +30,4 @@ add = [
   "430-ux-completeness",
   "440-surface-capture",
   "450-link-behavior",
-  "600-at-references",
 ]

@@ -9,7 +9,7 @@ description: The hazards a ship chain meets, from a drift gate that mis-scopes t
 
 ### The drift gate stages a file that mis-scopes the review
 
-Two documented behaviors meet on any branch editing an authoring surface, and the result is a review of the wrong file set. The Consumed copies stage clears only on a staged regeneration, so a branch that edits `governance/rules/core/X.md` has to stage `.claude/rules/canon/core/X.md` before `bun run check` passes. <!-- audit-ignore-citations: .claude/rules/canon/core/X.md --> A review reading a non-empty `git diff --staged` as its scope would then take the generated mirror alone and none of the files carrying the change.
+Two documented behaviors meet on any branch editing an authoring surface, and the result is a review of the wrong file set. The Consumed copies stage clears only on a staged regeneration, so a branch that edits `governance/rules/canon/X.md` has to stage `.claude/rules/canon/canon/X.md` before `bun run check` passes. <!-- audit-ignore-citations: .claude/rules/canon/canon/X.md --> A review reading a non-empty `git diff --staged` as its scope would then take the generated mirror alone and none of the files carrying the change.
 
 Nothing reports it, since the review runs, writes a receipt, and reads clean. `review-branch` Step 2 avoids it by reading one range against the working tree, covered in `canon/context/claude-plugin/skill-baseline.md`.
 

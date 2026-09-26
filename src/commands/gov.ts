@@ -234,7 +234,7 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Measures the rule in .claude/rules/canon/core/070-planning.md that asks for',
+        'Measures the rule in .claude/rules/canon/claude/567-planning.md that asks for',
         'the test before the code. It reports and never gates, because pairing',
         'a test to an implementation is a judgment.',
         '',

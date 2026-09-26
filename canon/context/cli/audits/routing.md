@@ -27,7 +27,7 @@ The resolver sits beside `listSkills` rather than inside it. `src/counts/catalog
 
 Two readings decide what it says, and both are narrower than they sound. A bullet counts as path-scoped when it names a path, which is evidence for the tier judgment rather than the judgment itself, so a bullet naming a folder can still apply every session and one firing on a path it never spells is invisible here. `src/claude/routing.ts` states that where a reader meets the function, since a count phrased as a verdict is the shape this measure is easiest to misread as.
 
-A rule counts as covering a path only when its glob anchors to a location. A glob opening `**` reaches every folder in the tree, so it answers that a file type is governed and never that a named path is: admitting one would collapse the column to every markdown path, which `501-markdown` does. Excluding it is what lets the column separate a folder somebody scoped a rule to from one nobody has.
+A rule counts as covering a path only when its glob anchors to a location. A glob opening `**` reaches every folder in the tree, so it answers that a file type is governed and never that a named path is: admitting one would collapse the column to every markdown path, which `801-markdown` does. Excluding it is what lets the column separate a folder somebody scoped a rule to from one nobody has.
 
 A shape such as `canon/context/<domain>.md` reads as the folder above its placeholder rather than as nothing, which is what keeps the scratch and memory sections from reporting as naming no path at all. A placeholder opening the first segment has no openable prefix and is dropped.
 

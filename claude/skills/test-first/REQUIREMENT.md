@@ -32,5 +32,5 @@ Without this skill, a session implementing a planned change writes the test afte
 
 - Choosing the layer a test belongs at and judging whether it is a good test: `canon:test-craft`, loaded at step 1 rather than restated here
 - Finding the cause of an unexplained failure: `canon:systematic-debugging`
-- Confirming visual output after a change lands: `070-planning.md` states the order and `ui-checklist` writes the list to confirm against
+- Confirming visual output after a change lands: `567-planning.md` states the order and `ui-checklist` writes the list to confirm against
 - The mechanical audit of whether an implementation reached history ahead of its test: `canon gov test-order`, invoked from `auto-ship`

@@ -31,7 +31,7 @@ export interface GovCatalog {
 /**
  * Reports each stack's own entries expanded, so a folder entry reaches a
  * consumer as the rules it stands for. the `setup` skill dedupes `--add` extras
- * against this list, and a stack answering `core` there would re-add every
+ * against this list, and a stack answering `canon` there would re-add every
  * rule that folder already carries.
  *
  * The `extends` chain is deliberately not resolved, which is what the bash
