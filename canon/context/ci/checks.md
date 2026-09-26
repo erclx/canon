@@ -7,7 +7,7 @@ description: The gate stage table CI runs, the regeneration stages, the phase-la
 
 ## Stages
 
-Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Three rows report rather than gate, and the table marks each.
+Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Two rows report rather than gate, and the table marks each.
 
 | Stage                     | Command                                                                  | What it asserts                                                                                          |
 | ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -23,7 +23,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Unreferenced rules        | `bun src/cli.ts gov list --json`                                         | reports rules no stack reaches, and fails on none of them                                                |
 | Context citations         | `bun src/cli.ts context audit --citations-only`                          | every cited context path resolves                                                                        |
 | Architecture record       | `measureArchitecture` in-process                                         | the record holds no more decisions than its stated cap and sits under its own line ceiling               |
-| Document ceiling          | `documentHeight` in-process over every listed markdown file              | reports each non-exempt document past 300 rendered lines, and fails on none of them yet                  |
+| Document ceiling          | `documentHeight` in-process over every listed markdown file              | no non-exempt document runs past 300 rendered lines                                                      |
 | Rule citations            | `bun src/cli.ts gov citations`                                           | every path a rule cites and every internal frontmatter glob resolves                                     |
 | Markdown bans             | `bun src/cli.ts markdown audit --json`                                   | no markdown carries a banned character                                                                   |
 | Seed standards            | `bun src/cli.ts context audit --gate` per root                           | no seed breaks the standard governing the folder it seeds                                                |
@@ -38,7 +38,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Types                     | `bun run check:types`                                                    | `tsc --noEmit` passes against `src/`                                                                     |
 | Tests                     | `bun run test`                                                           | the vitest suite passes                                                                                  |
 
-Unreferenced rules and Audit set report rather than gate because every finding they carry is a judgment call, and a push failing on one would teach a contributor to route around the stage. Document ceiling reports for a different reason: its finding is a fact, and it stays report-only until the documents past the ceiling are brought under it. All three still print what they found.
+Unreferenced rules and Audit set report rather than gate because every finding they carry is a judgment call, and a push failing on one would teach a contributor to route around the stage. Both still print what they found.
 
 One more qualification is a stage that could not read its input at all, which is a state any row can reach. Under `check:ci` that fails the run, since an absent tool on a runner is a broken workflow step. On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass. Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys.
 
