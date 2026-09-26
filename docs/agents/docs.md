@@ -16,7 +16,7 @@ A domain too large for one file splits into `<domain>/` with a generated `index.
 
 A sub-area file resolves by its bare name too, so `canon docs operating-model` reaches `docs/workflow/operating-model.md`. Three spellings are tried in order, being a sibling file, a folder of that name, then a sub-area file one level down, and each spelling is tried across both roots before the next one runs. A sibling file therefore wins over a folder of the same name, and both win over a sub-area file. Reading the folder last is what keeps the sub-area spelling from changing any name that resolved before it existed.
 
-A bare name carried by two folders resolves to neither. Eight context folders hold an `overview.md`, so `canon docs overview` names the available topics and exits 1 rather than answering with whichever folder sorts first.
+The sub-area spelling keeps the root order too. The first root whose folders carry the name answers, so `canon docs indexes` reaches `docs/agents/indexes.md` even though a context folder holds an entry of the same name. A bare name carried by two folders of that one root resolves to neither, which names the available topics and exits 1 rather than answering with whichever folder sorts first.
 
 `canon docs list` stops at the folder where `canon docs <topic>` goes on to name each file inside it. The listing is the downstream catalog rather than the index of what a name reaches, so a sub-area file appears there only where it declares a target-facing `category` of its own, and no sub-area file of the context root appears at all. A name that resolves and does not list is the divergence the toolkit-internal topics already carry.
 

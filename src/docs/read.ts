@@ -56,22 +56,22 @@ export function resolveTopic(
 }
 
 /**
- * Names every sub-area file called `<topic>.md`, across both roots. A name
- * carried by more than one folder resolves to none of them, since answering a
- * bare `overview` with whichever folder sorts first is a confident wrong answer
- * where the miss is a listing of what the caller could have typed.
+ * Names every sub-area file called `<topic>.md` in the first root whose folders
+ * carry one, so the root precedence above holds one folder down as well. A name
+ * carried by more than one folder of that root resolves to none of them, since
+ * answering a bare `overview` with whichever folder sorts first is a confident
+ * wrong answer where the miss is a listing of what the caller could have typed.
  */
 function findLeaves(root: string, topic: string): string[] {
-  const matches: string[] = []
-
   for (const dir of ROOTS) {
-    for (const folder of catalogedFolders(join(root, dir))) {
-      const rel = join(dir, folder, `${topic}.md`)
-      if (existsSync(join(root, rel))) matches.push(rel)
-    }
+    const matches = catalogedFolders(join(root, dir))
+      .map((folder) => join(dir, folder, `${topic}.md`))
+      .filter((rel) => existsSync(join(root, rel)))
+
+    if (matches.length > 0) return matches
   }
 
-  return matches
+  return []
 }
 
 /**
@@ -100,20 +100,20 @@ export function listTopics(root: string): string[] {
   const leaves = ROOTS.map((dir) => collectLeaves(root, dir))
 
   const taken = new Set(named.flat())
-  const counts = new Map<string, number>()
-  for (const name of leaves.flat()) {
-    counts.set(name, (counts.get(name) ?? 0) + 1)
-  }
+  const claimed = new Set<string>()
 
-  const reachable = (name: string): boolean =>
-    !taken.has(name) && counts.get(name) === 1
+  return ROOTS.flatMap((_, position) => {
+    const here = leaves[position] as string[]
+    const reachable = [...new Set(here)].filter(
+      (name) =>
+        !taken.has(name) &&
+        !claimed.has(name) &&
+        here.indexOf(name) === here.lastIndexOf(name),
+    )
+    for (const name of here) claimed.add(name)
 
-  return ROOTS.flatMap((_, position) =>
-    [
-      ...(named[position] as string[]),
-      ...(leaves[position] as string[]).filter(reachable),
-    ].sort(),
-  )
+    return [...(named[position] as string[]), ...reachable].sort()
+  })
 }
 
 /** The sibling files and split folders of one root, which shadow every leaf. */
