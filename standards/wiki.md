@@ -38,6 +38,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Naming
 
 - Name a page by its kebab subject alone. The vendor folder it sits in already names the vendor, so a prefix repeats the folder.
+- The `codebase-layout` skill carries the same rule for every folder in a project, beyond the wiki.
 
 ## Sourcing
 

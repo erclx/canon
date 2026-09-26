@@ -362,6 +362,58 @@ export const documentCeiling: Measure = async (ctx) => {
 }
 
 /**
+ * Whether a path's stem, its basename up to the first `.`, repeats its
+ * immediate parent folder, either whole or as a `<folder>-` prefix.
+ *
+ * Exact rather than singular-aware, so `standards/standard.md` passes. A false
+ * positive on a gate stage teaches a contributor to route around it, and a
+ * widened match is cheap to add once a real echo slips through.
+ */
+export function isFolderEchoedName(path: string): boolean {
+  const segments = path.split('/')
+  if (segments.length < 2) return false
+  const folder = segments[segments.length - 2] ?? ''
+  const stem = (segments[segments.length - 1] ?? '').split('.')[0] ?? ''
+  if (folder === '' || stem === '') return false
+  return stem === folder || stem.startsWith(`${folder}-`)
+}
+
+/**
+ * Every tracked file whose name repeats the folder it sits in, which says the
+ * folder's name twice in every path that cites it.
+ *
+ * Reads paths only, so it runs over the whole tree rather than the markdown
+ * corpus. It stays out of `canon markdown audit`, which runs inside every
+ * target, where a folder-named file may be a convention the target chose.
+ */
+export const folderEchoedNames: Measure = async (ctx) => {
+  const files = await listRepositoryFiles(ctx.root)
+  if (files === undefined) {
+    return {
+      emissions: [],
+      unmeasured:
+        'The tracked file list could not be read, so no filename was checked.',
+    }
+  }
+
+  const echoed = files.filter(isFolderEchoedName)
+  if (echoed.length === 0) {
+    return {
+      emissions: [
+        info(
+          `No filename repeats its folder across ${plural(files.length, 'tracked file')}`,
+        ),
+      ],
+    }
+  }
+
+  return {
+    emissions: echoed.map((path) => warn(`${path} repeats its folder's name`)),
+    failure: `${echoed.length === 1 ? 'One tracked file repeats its' : `${echoed.length} tracked files repeat their`} folder's name: ${echoed.join(', ')}. Rename each for what it covers inside the folder, dropping the prefix the folder already states.`,
+  }
+}
+
+/**
  * A second run of the records move should rewrite nothing, and the count is
  * only knowable once the folders themselves have landed.
  *

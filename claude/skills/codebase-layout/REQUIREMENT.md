@@ -20,6 +20,7 @@ Sharpening the rules does not reach the decision. Both were loaded and neither w
 - State the split trigger as a second role entering a folder, with a file count only as a prompt to look
 - State colocation with the one consumer and promotion on the second, and imports flowing from shared toward features toward the app entry
 - Require a one-clause placement reason on every new path the plan names
+- State that a file is named for what it covers inside its folder, never repeating the folder's name as its stem or its prefix, since a name placed beside its neighbor copies the neighbor's prefix along with its folder
 - Hold the stack-neutral core in the body and defer category specifics to a reference loaded only when a new path falls in that category
 - Record the external layouts adopted and declined with the reason for each, so a later session extends the position instead of re-deriving it
 - Fire on a direct question about placement as well, such as where a file goes or whether a flat folder should split, since a session outside any plan still places files

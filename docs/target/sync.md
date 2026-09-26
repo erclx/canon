@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target sync
 
-When the toolkit updates, a target project pulls changes per domain. There is one catch-all and several targeted entry points. A project scaffolded before a layout move runs the one-time moves in [target migrations](target-migrations.md) first.
+When the toolkit updates, a target project pulls changes per domain. There is one catch-all and several targeted entry points. A project scaffolded before a layout move runs the one-time moves in [target migrations](migrations.md) first.
 
 ## Check first
 
@@ -56,7 +56,7 @@ Each entry carries a verdict, since a dropped folder and one the project wrote a
 - `unattributed` means the toolkit shipped that path and the content matches no version it published
 - `project` means the folder only shares a retired name
 
-A `.claude/snippets/` folder an older toolkit installed is the case this walk exists for, since the toolkit retired the domain and deleted its `snippets/` root. It reports as `dropped`, and [target migrations](target-migrations.md) says what to do with it.
+A `.claude/snippets/` folder an older toolkit installed is the case this walk exists for, since the toolkit retired the domain and deleted its `snippets/` root. It reports as `dropped`, and [target migrations](migrations.md) says what to do with it.
 
 Nothing acts on any of them, and the verdict is what makes the list safe to read.
 

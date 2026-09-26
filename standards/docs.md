@@ -72,6 +72,7 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 - Move every page carrying that value. A shelf split across two depths is harder to scan than either arrangement taken whole.
 - Give the subfolder a catalog page of its own, so the parent lists one entry where it listed several. The parent lists a subfolder as a folder rather than as a member of the shelf it replaced, so nothing on that page restores the grouping.
 - Retarget every link into a moved page in the same change. A link resolving nowhere is what the move costs, and nothing else reports it.
+- Name a moved page per the `codebase-layout` skill, which drops the prefix the subfolder now states.
 
 ## Template
 

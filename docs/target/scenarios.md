@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target scenarios
 
-Three worked setups, each from the first session through ongoing maintenance. [Target projects](target-projects.md) carries the lifecycle they walk.
+Three worked setups, each from the first session through ongoing maintenance. [Target projects](projects.md) carries the lifecycle they walk.
 
 ## Markdown-heavy project
 
