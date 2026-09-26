@@ -72,7 +72,7 @@ Add no third heading. Status stays inline on an outcome rather than becoming an 
 
 Size the outcomes so one pull request closes all of them, and split the task before handing it off rather than after. A task closes whole or not at all, so outcomes spanning two pull requests leave the board showing in-progress work no branch carries.
 
-A sliced task is the one allowed exception: a task the operator decided to ship across several pull requests on purpose, one slice each. Its `Pull request:` line lists every slice, so the board records which merged work covered which outcomes, and it closes whole when the last slice's merge finds every outcome ticked.
+A sliced task is the one allowed exception: a task the operator decided to ship across several pull requests on purpose, one slice each. Its `Pull request:` line lists every slice, so the board records which merged work covered which outcomes, and it closes whole when the last slice's merge finds every outcome ticked and no slice left pending.
 
 Prefix the H1 with the `vX.Y:` phase label, then a short title whose form depends on the task type:
 
@@ -134,7 +134,7 @@ One plan per task. A plan cited by two tasks is a misfile rather than a shape to
 
 `Pull request:` records which pull requests carry the task's work, each as a bare `#NNN` the way `Issue:` does. It lists every pull request that shipped part of the task, oldest first and separated by commas, as in `Pull request: #NNN, #NNN`, and a task shipped whole lists one. It is not an origin, so a task without one is well-formed. `git-pr` appends to it when a pull request opens.
 
-The line is what lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving.
+The line is what lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving. `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number, since `canon tasks outcome` writes it and `canon tasks pull-request` clears it.
 
 ## What goes in
 

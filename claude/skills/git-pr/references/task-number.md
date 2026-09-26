@@ -21,6 +21,8 @@ The verb resolves the board at the main worktree root in-process, adds `Pull req
 
 The correction reaches only a line that does not read as a list of `#NNN` entries. A line that does takes the new number appended rather than replaced, reported as `appended`, so a task shipped in slices keeps every pull request.
 
+The same write drops this branch from the task's `Pending branch:` line, which `canon tasks outcome` wrote when the branch ticked an outcome, so this step is what lets the merge-time archive close the task.
+
 Skip this silently when the record is `ok: false` and `reason` is `no-board`, `no-match`, or `ambiguous`. Those are the three cases a guessed write would compound: no board, no task naming the plan, or more than one. One pull request names one task, and a wrong match archives the wrong task unattended once the branch merges. Report any other refusal rather than swallowing it.
 
 The number is what lets the merge close the task. Every merge on `main` is a squash carrying it in the subject, so the number survives where a branch name does not, and `post-merge` reads it back to call `canon tasks archive`. Writing it here rather than at worktree time is what makes it a pull request number rather than a branch the squash discards.

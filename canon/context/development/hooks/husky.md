@@ -19,7 +19,7 @@ Ordering is the one coupling between the steps and nothing enforces it. Each ste
 
 ### Archiving the merged task
 
-The first step archives the task each merged pull request closed and stays silent otherwise. It is the only trigger that fires after a merge, covered in `canon/context/claude-plugin/skill-archiving.md`. It reads `ORIG_HEAD..HEAD` rather than the tip, since one pull routinely fast-forwards over several merges and reading `git log -1` would strand every task but the last.
+The first step archives the task each merged pull request closed and stays silent otherwise, printing its one line when the task still waits on a pending branch. It is the only trigger that fires after a merge, covered in `canon/context/claude-plugin/skill-archiving.md`. It reads `ORIG_HEAD..HEAD` rather than the tip, since one pull routinely fast-forwards over several merges and reading `git log -1` would strand every task but the last.
 
 ### Pushing the records
 

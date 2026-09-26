@@ -42,6 +42,7 @@ Each reason has one resolution and none of them is to archive around it:
 - `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `context-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
 - `ambiguous`: two tasks name one pull request, which is the misfile `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
 - `earlier-slice`: the number is listed on the task but is not the last, so a later slice is still to merge. Leave the task on the board. Its last slice's merge archives it.
+- `pending-branch`: a branch named in `detail` ticked an outcome before its own pull request number was recorded. Leave the task live, since that branch's merge archives it once `git-pr` records the number. When the operator decides a named branch was abandoned, archive by stem, which is the one case for it.
 - `no-match`: the stem or number names nothing on the board. Check the name against the listed stems.
 - `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
 
