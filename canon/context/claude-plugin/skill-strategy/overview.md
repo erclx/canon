@@ -33,11 +33,11 @@ The `migration-*` prefix names a skill performing a one-time structural move of 
 
 ## The consumer map
 
-`docs/workflow/ai-workflow.md` carries the when-to-use map, and the `## Skills` table under it is what a coverage claim is measured against. Groups run in the order a project meets them, from setup through building, checking, and shipping to the pull request and the toolkit-sync relationship. The last two hold what serves no single moment: one for artifacts generated on request, one for skills answering a question at any point.
+`docs/workflow/skill-map.md` carries the when-to-use map, and its tables are what a coverage claim is measured against. Groups run in the order a project meets them, from setup through building, checking, and shipping to the pull request and the toolkit-sync relationship. The last two hold what serves no single moment: one for artifacts generated on request, one for skills answering a question at any point.
 
 Naming the map rather than the table leaves the claim open, since mentions elsewhere in the file reach further than the table does, and a passing prose mention is not the same claim as a row. The table is the block, and coverage claimed anywhere else does not count toward it.
 
-The groups derive from the scenarios above the map reconciled against the lifecycle `docs/target-projects.md` describes, rather than a third vocabulary beside those two. Each skill takes exactly one row, so a reader scanning a group reads a set rather than a sample, and a skill honestly serving two moments sits at the earlier one. The map carries no total, because the count moves whenever a skill lands.
+The groups derive from the scenarios in `docs/workflow/ai-workflow.md` reconciled against the lifecycle `docs/target-projects.md` describes, rather than a third vocabulary beside those two. Each skill takes exactly one row, so a reader scanning a group reads a set rather than a sample, and a skill honestly serving two moments sits at the earlier one. The map carries no total, because the count moves whenever a skill lands.
 
 Nothing checks that the table still covers the corpus. `canon claude skills list --names` reports the set and the comparison is a person's to run, so a skill added later opens a gap with nothing reporting it. That check belongs beside the other catalog commands rather than inside a doc rewrite.
 
