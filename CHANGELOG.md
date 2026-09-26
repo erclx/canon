@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.127.0](https://github.com/erclx/canon/compare/v4.126.0...v4.127.0) (2026-09-26)
+
+
+### Features
+
+* **tasks:** hold a task open while a branch awaits its pull request ([#1961](https://github.com/erclx/canon/issues/1961)) ([2d913e2](https://github.com/erclx/canon/commit/2d913e2646e83269abc8b11d4701a1c3f125e913))
+
+
+### Bug Fixes
+
+* **labels:** accept the breaking-change marker in the title check ([#1960](https://github.com/erclx/canon/issues/1960)) ([305dd50](https://github.com/erclx/canon/commit/305dd50e03b3bb9ea0961f3f649f065c206383e2))
+
 ## [4.126.0](https://github.com/erclx/canon/compare/v4.125.0...v4.126.0) (2026-09-26)
 
 
