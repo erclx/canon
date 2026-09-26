@@ -30,11 +30,6 @@ Read audience from which stacks select a rule, never from the folder a rule sits
 
 Read `references/checks.md` for the nine checks, the source each one reads, and what each does when its source is silent. Run all nine on every rule, even after one has already decided the verdict, since the row reports the deciding check and a reader acting on it needs to know nothing else stands in the way.
 
-Two gaps in `gov restated` are declared in that file rather than fixed here:
-
-- It takes no `internal/rules/` file as a subject and searches no `.claude/skills/` body as a surface, so restatements for that folder are a grep the reference spells out.
-- It reads a bullet saying `Never` plus a pinned-version token as a prohibition and a skill line saying `no` plus the same token as a description, so the CI workflow rule's `@latest` bullet reports as a contradiction against the `ci-workflow` skill. Discount that pair. It decides no verdict.
-
 ## Step 3: assign the verdict
 
 The verdict set is closed at four:

@@ -15,16 +15,15 @@ The bullet checklist does not close this. It judges whether a freshly written bu
 
 - Emit one row per rule in the corpus, covering `governance/rules/` and `internal/rules/`, with a rule no stack selects reported as opt-in or as reaching nothing rather than skipped
 - Read audience from stack membership and load mode from `paths`, each through the verb or frontmatter that answers it
-- Read an `internal/rules/` rule's load mode from its frontmatter and its restatements by grep, since the verbs neither list it nor take it as a subject
+- Read an `internal/rules/` rule's load mode from its frontmatter, since `gov list` does not list it
 - Name the deciding check on every row, and keep the verdict set closed at keep, move, retire, and merge
 - Attach the parsing file to a retire or merge verdict on a rule some verb reads by heading, and hold the row when an open branch edits the rule
-- Discount the declared false contradiction the restatement matcher reports on the CI workflow rule rather than letting it decide a verdict
 
 ## Must not
 
 - Write a rule, a stack, or a task file. The skill reports verdicts, and a plan acts on them.
 - Name a governance folder, a band, or a rule number in the body or its reference. A regroup renames most of the set, and each hardcoded name is one stale line per rename.
-- Fix the restatement matcher here. The two gaps it leaves are declared in the checks reference until a verb change ships on its own.
+- Work around the restatement matcher here. A gap it leaves is fixed in `canon gov restated` rather than read by hand in this skill.
 
 ## Guards
 
