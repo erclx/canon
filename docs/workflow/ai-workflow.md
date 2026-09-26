@@ -55,6 +55,7 @@ One session works for most features. Prefer splitting across two sessions only w
 Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full file access, no pasting needed.
 
 - When the input is a pile of findings rather than one feature, invoke `canon:plan-intake` first. It files the dump into `.canon/intake/<nn>-<slug>/`, one item per finding carrying a problem measured against the tree, a proposed fix, and a verdict, then names which items are plan-ready, which need measuring, and which are already settled.
+- When the backlog has grown past what anyone rereads, invoke `canon:backlog-triage`. It files one item per backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, and once `canon:plan-intake-answer` has taken your answers, a second run applies the approved verdicts through the task verbs.
 - When the current state is unmeasured and more than one approach is live, invoke `canon:plan-groundwork` first. It opens a track folder under `.canon/groundwork/<nn>-<slug>/` and ends in a decision, which may be to do nothing. Skip it when the approach is already settled.
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
@@ -211,16 +212,17 @@ This section is the corpus the coverage claim is measured against: every name `c
 
 ### Decide what to build
 
-| Skill                      | When to use                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| `canon:plan-intake`        | When the input is a pile of findings rather than one feature                    |
-| `canon:plan-intake-answer` | When an intake folder holds unread slots waiting on your decision               |
-| `canon:plan-groundwork`    | When the state is unmeasured and more than one approach is live                 |
-| `canon:decision-escalate`  | When open decisions turn on your preference and want batching into one set      |
-| `canon:draft-and-pick`     | When the call is taste and wants several candidates rendered side by side       |
-| `canon:task-board`         | When a decided item needs a file on the board, or a shipped one needs archiving |
-| `canon:plan-feature`       | When the approach is settled and the next step is a plan                        |
-| `canon:codebase-layout`    | When a plan or change adds a file and you need to decide which folder holds it  |
+| Skill                      | When to use                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `canon:plan-intake`        | When the input is a pile of findings rather than one feature                      |
+| `canon:plan-intake-answer` | When an intake folder holds unread slots waiting on your decision                 |
+| `canon:backlog-triage`     | When the backlog needs pruning, to file a verdict per row and apply approved ones |
+| `canon:plan-groundwork`    | When the state is unmeasured and more than one approach is live                   |
+| `canon:decision-escalate`  | When open decisions turn on your preference and want batching into one set        |
+| `canon:draft-and-pick`     | When the call is taste and wants several candidates rendered side by side         |
+| `canon:task-board`         | When a decided item needs a file on the board, or a shipped one needs archiving   |
+| `canon:plan-feature`       | When the approach is settled and the next step is a plan                          |
+| `canon:codebase-layout`    | When a plan or change adds a file and you need to decide which folder holds it    |
 
 ### Build the feature
 
