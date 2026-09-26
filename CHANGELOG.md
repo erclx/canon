@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.123.0](https://github.com/erclx/canon/compare/v4.122.0...v4.123.0) (2026-09-26)
+
+
+### Features
+
+* **commitlint:** refuse a co-author trailer crediting claude ([#1937](https://github.com/erclx/canon/issues/1937)) ([7310e4a](https://github.com/erclx/canon/commit/7310e4a2470454d0a8a694d0cb2bd1e75b6907fd))
+* **skills:** review memory in batches and nudge when a batch is due ([#1939](https://github.com/erclx/canon/issues/1939)) ([fd07664](https://github.com/erclx/canon/commit/fd0766450b36bb886572ed91ad6738a5133baa2e))
+
+
+### Bug Fixes
+
+* **tasks:** read every link on a Plan line across the plan verbs ([#1938](https://github.com/erclx/canon/issues/1938)) ([9c28ae8](https://github.com/erclx/canon/commit/9c28ae8f1cd5b00973daaa47736216ef40069758))
+
 ## [4.122.0](https://github.com/erclx/canon/compare/v4.121.0...v4.122.0) (2026-09-26)
 
 
