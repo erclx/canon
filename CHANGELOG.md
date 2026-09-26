@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.1.0](https://github.com/erclx/canon/compare/v5.0.0...v5.1.0) (2026-09-26)
+
+
+### Features
+
+* **gate:** fail a push on a filename that repeats its folder ([#1973](https://github.com/erclx/canon/issues/1973)) ([5457d05](https://github.com/erclx/canon/commit/5457d0533d172ea35b631073a7107436e4e35ce7))
+* **gov:** read internal rules and project skills in restated ([#1968](https://github.com/erclx/canon/issues/1968)) ([7943ac1](https://github.com/erclx/canon/commit/7943ac134a929381fbb9d3c5b0da17bc63029526))
+
 ## [5.0.0](https://github.com/erclx/canon/compare/v4.127.0...v5.0.0) (2026-09-26)
 
 
