@@ -34,8 +34,8 @@
 # authoring root: `standards/` never matches `.claude/standards/`. Every surface
 # living only under a dotted folder carries its own prefix on the row that owns
 # its subject. `internal/` splits across two rows for the same reason, holding
-# rules and standards rather than a subject of its own, and its
-# consumed copy under `.claude/internal/` splits the same way.
+# rules and standards rather than a subject of its own, and only the
+# `standards` row carries its consumed copy under `.claude/internal/`.
 
 [domains]
 # The plugin surface: shipped skills, toolkit-internal skills, and the
