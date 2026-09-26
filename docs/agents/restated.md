@@ -1,6 +1,6 @@
 ---
 title: Restated instructions
-description: Counting the instructions the always-loaded file and every path-scoped rule share with the seed, the shipped skill bodies, and each other, how a match is decided, the three classes, which surface a later edit starts from, and why the sweep reports rather than gates
+description: Counting the instructions the always-loaded file and every path-scoped rule share with the seed, the skill bodies, and each other, how a match is decided, the three classes, which surface a later edit starts from, and why the sweep reports rather than gates
 ---
 
 # Restated instructions
@@ -25,10 +25,10 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 Four surfaces, and they are not read symmetrically. Every top-level bullet in `CLAUDE.md` and in every path-scoped rule is a subject, and every surface below is searched, rules included a second time:
 
 - `tooling/claude/seeds/CLAUDE.md`, read as bullets, since the seed carries the same shape as the file it is authored from
-- `claude/skills/*/SKILL.md`, read as every prose line and bullet, since the motivating case was stated in a body as a paragraph rather than a list item
-- `governance/rules/**/*.md`, the authoring root rather than the consumed copy under `.claude/rules/`, read as bullets the same way the seed is
+- `claude/skills/*/SKILL.md` and `.claude/skills/*/SKILL.md`, read as every prose line and bullet, since the motivating case was stated in a body as a paragraph rather than a list item. The second root holds the project's own skills, which are equally a place a rule gets restated
+- `governance/rules/**/*.md` and `internal/rules/**/*.md`, the authoring roots rather than the consumed copy under `.claude/rules/`, read as bullets the same way the seed is. Each record's `file` carries the root it was read from
 
-A rule reads as both a subject and a candidate, unlike the seed and the shipped bodies. A stack ships a whole rule folder, so a bullet duplicated between two rules reaches a target exactly as a bullet duplicated between the always-loaded file and a rule does, and neither shape is visible from one side alone. A candidate sharing its subject's file is skipped, since two bullets inside one rule sharing anchors are adjacent instructions on one topic rather than the same rule shipped twice, and a pair found from one direction is not reported again from the other.
+A rule reads as both a subject and a candidate, unlike the seed and the skill bodies. A stack ships a whole rule folder, so a bullet duplicated between two rules reaches a target exactly as a bullet duplicated between the always-loaded file and a rule does, and neither shape is visible from one side alone. A candidate sharing its subject's file is skipped, since two bullets inside one rule sharing anchors are adjacent instructions on one topic rather than the same rule shipped twice, and a pair found from one direction is not reported again from the other.
 
 Frontmatter, headings, tables, and fenced blocks are read past. A heading names a section instead of stating a rule, a fenced block is an example whose words belong to the prose around it, and a body's `description` restates that skill's own purpose, so sweeping it would match every subject naming its domain.
 
@@ -58,6 +58,8 @@ Polarity is read off the clause the anchors landed in, and off the densest such 
 
 The marker also has to open its clause, because an instruction leads with its verb. `Never delete a task file` prohibits where `a fallback never fires` reports, and no test reading the marker anywhere in the clause tells those apart. What that costs is a prohibition written mid-clause, which now reads as description and lands the pair in the repetition class, so both surfaces still reach the report and only the label is weaker.
 
+One mid-clause shape still counts. A `no` opening a clause or a comma-set phrase directly on a code span prohibits, as in `pinned to major tags, no` followed by the pinned tag, since sitting on an identifier it names what is ruled out. The phrase boundary keeps description out: `returns no` then a code span puts the marker after a verb and reports what happens. `not` and `never` in the same position are left out, because admitting them turned agreeing pairs into false contradictions.
+
 A mirror that disagrees stays a finding. The exclusion reaches a repetition alone, because the two files on a declared pair are meant to agree.
 
 ## Which surface is authoritative
@@ -76,6 +78,6 @@ Exit codes are `0` when no instruction is restated outside a declared mirror, `1
 
 Nothing wires this into `bun run check` or into a hook. A restatement is legitimate more often than not, and gating a measure whose ordinary result is a finding is what teaches contributors to route around the stage. `canon gov test-order` and `canon labels audit` are the siblings.
 
-Both refusals are absences rather than breaks. A target holds none of the seed, a shipped skills tree, or a rules tree, so `canon audits run` reads `no-instructions` and `no-surfaces` as a corpus that is not there rather than a verb that failed.
+Both refusals are absences rather than breaks. A target may hold none of the seed, a skills tree, or a rules tree, so `canon audits run` reads `no-instructions` and `no-surfaces` as a corpus that is not there rather than a verb that failed.
 
 An exit code says nothing about a call made from a session, since a shell profile may wrap the binary in a function taking its status from a later command. Read the record's `counts` rather than the exit when a skill consumes this.

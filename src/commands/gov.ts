@@ -27,7 +27,7 @@ import {
   type RestatedRefusal,
   type RestatedReport,
   readRestated,
-  RULES_REL as RESTATED_RULES_REL,
+  PROJECT_SKILLS_REL,
   SEED_REL,
   SHIPPED_SKILLS_REL,
 } from '@/gov/restated'
@@ -123,7 +123,7 @@ interface CountsOptions {
 /** What a reader does about each way the sweep produced no reading. */
 const RESTATED_REFUSALS: Record<RestatedRefusal, string> = {
   'no-instructions': `No ${INSTRUCTIONS_REL} here, or it carries no bullet, so there is no instruction corpus to sweep.`,
-  'no-surfaces': `None of ${SEED_REL}, ${SHIPPED_SKILLS_REL}/, or ${RESTATED_RULES_REL}/ is here, so no further surface exists to match against.`,
+  'no-surfaces': `None of ${SEED_REL}, ${SHIPPED_SKILLS_REL}/, ${PROJECT_SKILLS_REL}/, ${RULE_DIRS.join('/, or ')}/ is here, so no further surface exists to match against.`,
 }
 
 const COUNTS_REFUSALS: Record<CountsRefusal, string> = {
@@ -469,8 +469,9 @@ export function register(program: Command): void {
       [
         '',
         `Matches every bullet in ${INSTRUCTIONS_REL} and every rule under`,
-        `${RESTATED_RULES_REL}/ against ${SEED_REL}, every`,
-        `${SHIPPED_SKILLS_REL}/*/SKILL.md body, and every other rule. Matching is`,
+        `${RULE_DIRS.join('/ and ')}/ against ${SEED_REL},`,
+        `every ${SHIPPED_SKILLS_REL}/*/SKILL.md and ${PROJECT_SKILLS_REL}/*/SKILL.md body,`,
+        'and every other rule. Matching is',
         'recall-first, keyed on distinctive tokens two statements share rather',
         'than on a phrase they spell the same way, because the case this exists',
         'for was one rule written three different ways.',
@@ -564,7 +565,7 @@ function reportRestated(
   // also says how wide the corpus behind it was.
   logStep('Corpus')
   logInfo(
-    `${report.corpus.instructions} always-loaded instruction(s) and ${report.corpus.rules} rule file(s) against ${report.corpus.candidates} statement(s) from the seed, ${report.corpus.bodies} shipped body/bodies, and every rule again, in ${root}`,
+    `${report.corpus.instructions} always-loaded instruction(s) and ${report.corpus.rules} rule file(s) against ${report.corpus.candidates} statement(s) from the seed, ${report.corpus.bodies} skill body/bodies, and every rule again, in ${root}`,
   )
   logInfo(
     `matched on ${report.matcher.anchors} weighted anchor(s), dropping any token in more than ${report.matcher.common} statements`,

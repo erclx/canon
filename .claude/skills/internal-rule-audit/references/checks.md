@@ -25,10 +25,8 @@ Each check names the source that answers it, so the audit reads rather than re-d
 ## 3. Restated elsewhere
 
 - **Source:** `gov restated --json`. Keep each entry in `restatements` whose `subject.file` ends in the rule's filename, and read its `surfaces`, where `kind` is `rule`, `skill`, or `seed`.
-- **Internal:** `restated` takes no `internal/rules/` file as a subject and searches no `.claude/skills/` body. For those rules, grep each bullet's distinctive tokens, being a command, a path, a flag, or a quoted term, across `.claude/skills/*/SKILL.md`, `claude/skills/*/SKILL.md`, and `CLAUDE.md`. This hand read is the second repeat the verb-lift decision waits on, so say in the report that it ran by hand.
-- **Test:** two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`.
+- **Test:** two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`. A surface under `.claude/skills/` does not count against a `governance/rules/` subject either, since no target receives this repository's own skills, and does count against an `internal/rules/` subject, whose audience is this repository alone.
 - **Fails toward:** retire when every bullet is restated, merge when the other surface is a rule for the same audience, keep with bullets to cut otherwise.
-- **Declared false contradiction:** `restated` reads a bullet saying `Never` plus a pinned-version token as a prohibition and a line saying `no` plus the same token as a description. The CI workflow rule's `@latest` bullet therefore reports as a contradiction against `claude/skills/ci-workflow/SKILL.md`. The two agree. Discount the pair and let it decide nothing.
 
 ## 4. Owned by a standard
 

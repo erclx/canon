@@ -376,6 +376,113 @@ describe('readRestated', () => {
     expect(report.restatements).toHaveLength(0)
   })
 
+  it('reads an internal rule as a subject under its own root', () => {
+    write('CLAUDE.md', '- Unrelated top-level guidance.')
+    write(
+      'internal/rules/core/095-output.md',
+      '# Output\n\n## Streams\n\n- Write every diagnostic to `stderr` under `--json` as well.',
+    )
+    write(
+      'claude/skills/alpha/SKILL.md',
+      '# Alpha\n\nDiagnostics go to `stderr` even under `--json`, in every mode.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Write every diagnostic')
+
+    expect(entry.subject.file).toBe('internal/rules/core/095-output.md')
+    expect(entry.surfaces[0].file).toBe('claude/skills/alpha/SKILL.md')
+  })
+
+  it('compares same-named rules across the two rule roots as two files', () => {
+    write('CLAUDE.md', '- Unrelated top-level guidance.')
+    write(
+      'internal/rules/core/095-output.md',
+      '# Output\n\n## Streams\n\n- Write every diagnostic to `stderr` under `--json` as well.',
+    )
+    write(
+      'governance/rules/core/095-output.md',
+      '# Output\n\n## Streams\n\n- Diagnostics go to `stderr` even under `--json`, in every mode.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Diagnostics go to')
+
+    expect(entry.subject.file).toBe('governance/rules/core/095-output.md')
+    expect(entry.surfaces).toHaveLength(1)
+    expect(entry.surfaces[0].file).toBe('internal/rules/core/095-output.md')
+    expect(entry.surfaces[0].kind).toBe('rule')
+    expect(report.corpus.rules).toBe(2)
+  })
+
+  it('reads an internal skill body as a candidate against the always-loaded file', () => {
+    write(
+      'CLAUDE.md',
+      '- Write temporary files to `.claude/.tmp/<slug>/<file>.md` in the project root.',
+    )
+    write(
+      '.claude/skills/internal-alpha/SKILL.md',
+      '# Alpha\n\nWrite scratch output to `.claude/.tmp/<slug>/<file>.md` under the project root.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Write temporary files')
+
+    expect(entry.surfaces).toHaveLength(1)
+    expect(entry.surfaces[0].file).toBe(
+      '.claude/skills/internal-alpha/SKILL.md',
+    )
+    expect(entry.surfaces[0].kind).toBe('skill')
+    expect(report.corpus.bodies).toBe(1)
+  })
+
+  it('measures a tree whose only further surface is an internal rule', () => {
+    write('CLAUDE.md', '- Unrelated top-level guidance.')
+    write(
+      'internal/rules/core/010-example.md',
+      '# Example\n\n## Section\n\n- One rule bullet here.',
+    )
+
+    const report = readRestated(ROOT)
+
+    expect(report.kind).toBe('measured')
+  })
+
+  it('reads a negation opening a clause on a code span as the prohibition it restates', () => {
+    write('CLAUDE.md', '- Unrelated top-level guidance.')
+    write(
+      'governance/rules/tooling/700-ci.md',
+      '# CI\n\n## Actions\n\n- Pin every action to a major release tag. Never `@latest` or `@main`.',
+    )
+    write(
+      'claude/skills/ci/SKILL.md',
+      '# CI\n\nAll actions pinned to major version tags, no `@latest` or `@main`.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Pin every action')
+
+    expect(entry.surfaces[0].restatement).toBe('repetition')
+    expect(report.counts.contradictions).toBe(0)
+  })
+
+  it('reads a negated code span inside a descriptive clause as description', () => {
+    write('CLAUDE.md', '- Unrelated top-level guidance.')
+    write(
+      'governance/rules/core/300-probe.md',
+      '# Probe\n\n## Output\n\n- Never pipe the `canon probe` record through `jq` when the probe returns early.',
+    )
+    write(
+      'claude/skills/probe/SKILL.md',
+      '# Probe\n\nThe `canon probe` record returns no `jq` output when the probe returns early.',
+    )
+
+    const report = measured(readRestated(ROOT))
+    const entry = entryFor(report, 'Never pipe')
+
+    expect(entry.surfaces[0].restatement).toBe('contradiction')
+  })
+
   it('publishes the matcher settings the reading was taken under', () => {
     write('CLAUDE.md', '- One instruction.')
     write('tooling/claude/seeds/CLAUDE.md', '- One seed bullet.')

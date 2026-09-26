@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { RULE_DIRS } from '@/gov/citations'
 
 /** The always-loaded file whose bullets are the subjects this sweep matches. */
 export const INSTRUCTIONS_REL = 'CLAUDE.md'
@@ -11,15 +12,26 @@ export const SEED_REL = join('tooling', 'claude', 'seeds', 'CLAUDE.md')
 export const SHIPPED_SKILLS_REL = join('claude', 'skills')
 
 /**
- * Path-scoped rules, read from the authoring root rather than the consumed
- * copy under `.claude/rules/`. A stack takes a whole rule folder, so a bullet
- * landing anywhere under here ships to every target the stack reaches, the
- * same way a bullet in the always-loaded file or the seed does. That is what
- * makes a rule an instruction surface rather than a place a rule is merely
- * quoted, and it is why a bullet moved here from the seed still belongs to
- * the corpus this sweep reads rather than leaving it.
+ * The project's own skill bodies. Here that is the toolkit's internal skills,
+ * and in a target it is that project's own, which is equally a place a rule
+ * gets restated in prose.
  */
-export const RULES_REL = join('governance', 'rules')
+export const PROJECT_SKILLS_REL = join('.claude', 'skills')
+
+/** Every root a candidate body is read from, each reported under its own path. */
+const SKILL_ROOTS: readonly string[] = [SHIPPED_SKILLS_REL, PROJECT_SKILLS_REL]
+
+/*
+ * Path-scoped rules are read from every root in `RULE_DIRS`, the authoring
+ * roots rather than the consumed copy under `.claude/rules/`. A stack takes a
+ * whole rule folder, so a bullet landing anywhere under `governance/rules/`
+ * ships to every target the stack reaches, the same way a bullet in the
+ * always-loaded file or the seed does, and `internal/rules/` loads the same
+ * way for every session in this repository. That is what makes a rule an
+ * instruction surface rather than a place a rule is merely quoted, and it is
+ * why a bullet moved into either root from the seed still belongs to the
+ * corpus this sweep reads rather than leaving it.
+ */
 
 /**
  * Path pairs whose duplication is deliberate and already recorded.
@@ -174,6 +186,22 @@ const STOPWORDS = new Set([
  */
 const PROHIBITIONS = ['never', 'do not', "don't", 'avoid', 'refuse']
 
+/**
+ * A `no` opening a clause or a comma-set phrase directly on a code span, as in
+ * `pinned to major tags, no `@latest``.
+ *
+ * `no` is admitted here and only here, since sitting on a backticked
+ * identifier it names the thing ruled out rather than qualifying a verb. The
+ * phrase boundary is what keeps description out: `returns no `jq` output` puts
+ * the marker after a verb and reports what happens.
+ *
+ * `not` and `never` stay out. Admitting them turned two agreeing pairs into
+ * contradictions, `, not `pwd`` and `, never `@latest``, because the subject
+ * each matched spelled its own negation on plain words or in a clause the
+ * anchors tied against, so the reading flipped on one side alone.
+ */
+const NEGATED_SPAN = /(?:^|[,;:(])\s*no\s+`/
+
 export type RestatedRefusal = 'no-instructions' | 'no-surfaces'
 
 export type Restatement = 'mirror' | 'repetition' | 'contradiction'
@@ -315,7 +343,10 @@ function prohibits(text: string): boolean {
     .replace(/^[^a-z]*/, '')
     .replace(/^(and|but|so|then|also|however)[\s,]+/, '')
 
-  return PROHIBITIONS.some((marker) => opening.startsWith(marker))
+  return (
+    PROHIBITIONS.some((marker) => opening.startsWith(marker)) ||
+    NEGATED_SPAN.test(opening)
+  )
 }
 
 /**
@@ -465,7 +496,10 @@ function readBullets(root: string, relative: string): Statement[] {
  * is reused per file rather than rebuilt for prose, and frontmatter is read
  * past for the same reason it is: no line there starts with `- `.
  */
-function readRuleFiles(root: string, rulesRoot: string): Statement[] {
+function readRuleFiles(root: string, rulesRel: string): Statement[] {
+  const rulesRoot = join(root, rulesRel)
+  if (!existsSync(rulesRoot)) return []
+
   const files = [
     ...new Bun.Glob('**/*.md').scanSync({ cwd: rulesRoot, onlyFiles: true }),
   ].sort()
@@ -473,13 +507,13 @@ function readRuleFiles(root: string, rulesRoot: string): Statement[] {
   return files.flatMap((file) =>
     readBullets(
       root,
-      `${RULES_REL.replaceAll('\\', '/')}/${file.replaceAll('\\', '/')}`,
+      `${rulesRel.replaceAll('\\', '/')}/${file.replaceAll('\\', '/')}`,
     ),
   )
 }
 
 /**
- * Every prose line and bullet in a shipped body.
+ * Every prose line and bullet in a skill body under one skills root.
  *
  * Wider than the bullet rule above because the motivating case was stated in a
  * body as a paragraph, so a bullet-only read would miss the one instance this
@@ -487,7 +521,10 @@ function readRuleFiles(root: string, rulesRoot: string): Statement[] {
  * heading names a section rather than stating a rule, and a fenced block is an
  * example whose words are the surrounding prose's by construction.
  */
-function readBodyLines(root: string, skillsRoot: string): Candidate[] {
+function readBodyLines(root: string, skillsRel: string): Candidate[] {
+  const skillsRoot = join(root, skillsRel)
+  if (!existsSync(skillsRoot)) return []
+
   const candidates: Candidate[] = []
 
   const files = [
@@ -500,7 +537,7 @@ function readBodyLines(root: string, skillsRoot: string): Candidate[] {
   for (const file of files) {
     const posix = file.replaceAll('\\', '/')
     const skill = posix.split('/')[0]
-    const relative = `${SHIPPED_SKILLS_REL.replaceAll('\\', '/')}/${posix}`
+    const relative = `${skillsRel.replaceAll('\\', '/')}/${posix}`
 
     const lines = readFileSync(join(root, relative), 'utf8').split('\n')
     let fenced = false
@@ -639,8 +676,9 @@ function classify(
  * defect the sweep exists for, and a recall-first reading can be narrowed from
  * real output where the reverse cannot.
  *
- * The always-loaded file and every rule each open the search as a subject, and
- * the seed, the shipped bodies, and every rule again close it as a candidate.
+ * The always-loaded file and every rule under either rule root each open the
+ * search as a subject, and the seed, the skill bodies under both skill roots,
+ * and every rule again close it as a candidate.
  * A rule sits on both sides because a stack ships a whole rule folder, so a
  * bullet duplicated between two rules reaches a target exactly as a bullet
  * duplicated between the always-loaded file and a rule does, and neither shape
@@ -660,14 +698,14 @@ export function readRestated(root: string): RestatedReport {
     kind: 'seed' as const,
   }))
 
-  const skillsRoot = join(root, SHIPPED_SKILLS_REL)
-  const bodies = existsSync(skillsRoot) ? readBodyLines(root, skillsRoot) : []
+  const bodies = SKILL_ROOTS.flatMap((skillsRel) =>
+    readBodyLines(root, skillsRel),
+  )
   const bodyFiles = new Set(bodies.map((candidate) => candidate.file)).size
 
-  const rulesRoot = join(root, RULES_REL)
-  const ruleStatements = existsSync(rulesRoot)
-    ? readRuleFiles(root, rulesRoot)
-    : []
+  const ruleStatements = RULE_DIRS.flatMap((rulesRel) =>
+    readRuleFiles(root, rulesRel),
+  )
   const rules: Candidate[] = ruleStatements.map((statement) => ({
     ...statement,
     kind: 'rule' as const,
