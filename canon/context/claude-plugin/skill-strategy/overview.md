@@ -75,6 +75,12 @@ A pass that splits a finding after the fact labels the halves `3a` and `3b` rath
 
 An empty operator slot in an intake folder means unread, where a plan file's blank answer means accept. A plan is read in one sitting and an intake folder is read over weeks, so silence there is far more likely to mean nobody reached the item than that they accepted it.
 
+## Triaging the backlog reuses the intake record
+
+`backlog-triage` judges the backlog as a whole and is a skill rather than a launch shape for a dispatched planner. A launch shape exists only where an orchestrator composes the dispatch, while the operator calls a triage on their own schedule, and a planner launch can still name the skill.
+
+Its record is an ordinary intake folder, with the verdict riding in `Suggested:` and the task stem in the item heading. `canon intake list`, `canon intake answer`, and `plan-intake-answer` read and write it with no change, so the approval between filing and applying is the intake answer contract rather than a second one. Filing writes only inside that folder and applying writes the board, which is why the two are phases detected from folder state rather than one pass.
+
 ## What a skill carries
 
 `canon-cli` is the instance of the rule against restating a catalog. Its body keeps what no verb answers: the overwrite table, the sync rules, and the copy-once note on `CLAUDE.md`. A generated listing of every golden config path is what it declines, since that listing ran 70 of 122 lines and `canon tooling diff` resolves the same paths against a real target, or `canon tooling sync --check` on a binary older than that verb. The skill survives because `canon --help` names top-level commands with partial hints and enumerates no subcommands, so nothing in help says whether a sync overwrites.

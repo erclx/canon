@@ -105,6 +105,16 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'review-craft',
   },
   {
+    prompt:
+      'Go through every task sitting in the backlog and tell me which ones are still worth doing.',
+    expect: 'backlog-triage',
+  },
+  {
+    prompt:
+      'Our backlog only ever grows, measure each row and suggest which to decline.',
+    expect: 'backlog-triage',
+  },
+  {
     prompt: 'Draft me a script with beats for a screencast recording.',
     expect: 'draft-screencast',
   },
@@ -192,6 +202,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Sort through this brain dump and write it up as findings.',
+    expect: 'plan-intake',
+  },
+  {
+    prompt:
+      'Here are my scattered notes from this week, file each one against the codebase with a verdict.',
     expect: 'plan-intake',
   },
   {
