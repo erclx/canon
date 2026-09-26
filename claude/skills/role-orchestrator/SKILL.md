@@ -61,9 +61,9 @@ Report the state of play in the invocation block, and open every later sweep rep
 2. Decide parallelism and merge order. Note which plans touch a shared wiring seam so their PRs merge in sequence, not at once.
 3. Verify the plan against the tree. Reading it is not enough, since a plan goes stale from whatever merged after it was written. Grep for each construct it names and count the sites against the count it claims. Check that every phase label it cites is still open. Open each file it describes rather than trusting its account of the contents. Correct the plan before handing it over.
 4. Hand off. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` and follow it: check the branch is unclaimed, check the row's file set against every track in flight, then dispatch a background worker with `claude --bg`. Fall back to the human-launch line it replaces when the check refuses, the sets overlap, or a stated reason serializes the row behind something already out.
-5. Review the PR. When a worker opens a PR, run `review-pr` to post findings to it. This is the deep, independent pass. The worker's autoship self-review was only the green gate.
+5. Review the PR. When a worker opens a PR, its first pass runs through `review-pr` in a reviewer dispatched under `role-reviewer` when `### The review dispatch` below fires, and in this session otherwise. Either is the deep, independent pass. The worker's autoship self-review was only the green gate.
    - Learning that a PR moved is the mechanical half, so read `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` and run the poll under the condition it states rather than checking the board by hand. That runbook holds the routing and the trigger, and a summary of it here is a second source that drifts from it.
-6. Dispatch the handback. A pass posting anything owed, a finding at any severity or a testing question, tells the session holding that branch to run `review-address`, rather than waiting for a person to relay it. Re-review when the worker's own message says the address pass finished, per the channel `role-worker` states, rather than polling for an answer nothing else marks as landed. Once a pass posts `## Review closed`, lift the pull request's draft mark yourself, per Boundaries below. Then the human merges. Tell the trailing worker to rebase when its branch shares a seam with the merged one.
+6. Dispatch the handback. A pass posting anything owed, a finding at any severity or a testing question, tells the session holding that branch to run `review-address`, rather than waiting for a person to relay it. Re-review when the worker's own message says the address pass finished, per the channel `role-worker` states, rather than polling for an answer nothing else marks as landed, and send the re-review back to the dispatched reviewer when one took the first pass. Once a pass posts `## Review closed`, lift the pull request's draft mark yourself, per Boundaries below. Then the human merges. Tell the trailing worker to rebase when its branch shares a seam with the merged one.
    - Read `${CLAUDE_SKILL_DIR}/references/orchestrator-handback.md` on reaching this step. It holds how the message is addressed and worded, what to do when no live session holds the branch, and where a worker's reply goes.
 
 A plan written here is written against a tree several branches are already changing, so it names the file set of every track in flight as a constraint, one set per track, read from the Touches column of that track's row. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. A bare path list leaves the worker guessing, which is how a plan ends up forbidding the repair of a citation the change broke.
@@ -75,7 +75,7 @@ Stamp the block with the commit this session read the tree at, which the same se
 - Run one orchestrator at a time. The board is gitignored, so a second session sees none of this one's writes: two task files land minutes apart under different labels for the same work, one session archives a task mid-sweep in the other, and each archives a plan the other had retargeted. An Owner column does not fix this, since neither session can read the other's rows.
 - Do not implement features in this session. Hand the plan to a worker.
 - Do not merge. Recommend merge or changes. The human merges.
-- Lift a pull request's draft mark once this session's own review of it closes, acting directly on the pull request rather than dispatching a worker to do it. `role-worker` states the mirroring refusal: a worker cannot verify who is asking or whether review actually closed, so the act stays with whoever closed the review.
+- Lift a pull request's draft mark once its review closes, whether this session or a reviewer it dispatched closed it, acting directly on the pull request rather than dispatching a worker to do it. `role-worker` and `role-reviewer` state the mirroring refusal: neither can verify who is asking or whether review actually closed, so the act stays with this session.
 - Do not spawn a worker with the Agent tool. An in-process subagent shares this session's context and cannot be steered or reached independently, which breaks the property this boundary protects rather than the mechanism it names. The launch in `orchestrator-launch.md` is a separate `claude --bg` process with its own worktree and its own PR, so it preserves that property instead.
 - Dispatch a background worker only once the collision check in `orchestrator-dispatch.md` clears and the row's file set is disjoint from every track in flight. Colliding with an existing worktree or session is what the check exists to catch rather than a judgment call this session makes case by case. No fixed count binds how many tracks run at once, and Parallelism below states what does.
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
@@ -138,10 +138,12 @@ stack derives it from the worktree it runs in through `scripts/worktree-port.sh`
 Read that value rather than assigning one, and set `WORKTREE_PORT_OFFSET` by
 hand only when two worktrees derive the same offset.
 
-### The review fallback
+### The review dispatch
 
-Two conditions move the review itself out of this session rather than binding the
-track count. One is a diff too large for this session to hold. The other is three
-or more open pull requests awaiting a first pass. Read
-`${CLAUDE_SKILL_DIR}/references/orchestrator-review-fallback.md` when either one
-trips.
+Review splits by what each side can see. A reviewer dispatched under
+`role-reviewer` takes the per-pull-request read, first pass included, when the
+load is past what this session can hold or the change touches executable or
+security surface. Below both, this session reviews in place. It keeps one
+cross-branch pass per wave either way, over file sets, the board, and merge
+order. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-review-dispatch.md` on
+every first pass for the trigger and how that pass reaches each brief.

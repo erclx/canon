@@ -83,6 +83,7 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Carry the dispatcher's `sessionId` in the launch prompt, since a worker owed two messages has no property on the roster that resolves a controller and a name goes stale inside the window it builds in
 - Report each self-dispatch and the row it fired against loudly enough to follow, since a person no longer watches the launch step happen
 - Stop dispatching once `## Run now` is empty or every row in it reads claimed, rather than waking again to fire on a board nobody is clearing
+- Dispatch a pull request's review, first pass included, to `role-reviewer` on load or on executable content, a skill body included, and keep one cross-branch pass per wave here, since a warm pass holding a wave skims what a cold one reads
 
 ## Must not
 
@@ -112,7 +113,7 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 ## Out of scope
 
 - Writing the plan itself, which `plan-feature` owns and this session runs rather than reimplements
-- Reviewing a worker's pull request, which `review-pr` owns
+- Reviewing a worker's pull request, which `review-pr` owns, and the bounds of a reviewer dispatched to run it, which `role-reviewer` owns
 - Entering the worktree a build runs in, which the worker opens for itself whether a human launched it or this session dispatched it
 - The worker's half of the channel and the boundaries a building session holds, which `role-worker` states where that session reads them
 - The operating model this enacts, which the toolkit's own docs hold

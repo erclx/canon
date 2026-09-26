@@ -35,8 +35,8 @@ Resolve `${CLAUDE_SKILL_DIR}/scripts/poll.sh` to an absolute path and paste that
 Poll GitHub for pull request movement by running <POLL_SCRIPT>, then act on what it reports.
 
 - A release pull request, whatever state follows it: report it and stop. Its sweep carries no findings, so no pass is owed. Test this before any rule below, since a release pull request is reported OPENED like any other and would otherwise match that rule first.
-- MOVED or RESPONSE on a pull request I have already reviewed: run the canon:review-pr skill on it immediately, narrow pass. Re-reviews read prior..head and gain nothing from waiting.
-- OPENED, or a pull request with no prior review pass: run the canon:review-pr skill on it. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
+- MOVED or RESPONSE on a pull request I have already reviewed: run the canon:review-pr skill on it immediately, narrow pass, or message the live reviewer that took its first pass to run it. Re-reviews read prior..head and gain nothing from waiting.
+- OPENED, or a pull request with no prior review pass: take its first pass where the review dispatch runbook of the canon:role-orchestrator skill places it, running the canon:review-pr skill here or launching a reviewer. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
 - SEEN: report it and stop. A pass already covers that head, whether it arrived out of band or before the poll first saw the pull request, so no review follows.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
 - CONFLICT: report it and stop. The branch owner rebases, not this session.
@@ -66,9 +66,9 @@ The five review headings the script matches are written by `review-pr` and `revi
 
 The state reaches every stalled dispatch, since one threshold governs the heading and the dispatch alike and a pass carrying anything posts the open heading. A minors-only pass therefore reports here on the same terms as a blocking one, which widens the state from what it caught while the two were split. It stays a heading test rather than a count test, so nothing here pins the summary line, which is a second string this script does not own.
 
-### The count behind the review fallback
+### The count behind the review dispatch
 
-The report is also where the count in `orchestrator-review-fallback.md` is legible. That threshold trips on open pull requests awaiting a first pass, which is what `OPENED` and a pull request with no prior pass name here and what `SEEN` excludes, so read the count off these lines rather than off `gh pr list`, which counts a branch closed out and waiting on a merge the same as one nobody has read. It is a separate condition from the poll-start fallback above, which decides when this loop runs rather than where a review runs.
+The report is also where the load count in `orchestrator-review-dispatch.md` is legible, and that count decides where a first pass runs, here or in a dispatched reviewer. That threshold trips on open pull requests awaiting a first pass, which is what `OPENED` and a pull request with no prior pass name here and what `SEEN` excludes, so read the count off these lines rather than off `gh pr list`, which counts a branch closed out and waiting on a merge the same as one nobody has read. It is a separate condition from the poll-start fallback above, which decides when this loop runs rather than where a review runs.
 
 The count used to read low, and it erred in the direction that breaks the trigger. A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so an author pushing between the diff read and the post left the pass recorded against a commit it never saw, and `SEEN` then fired on a head still awaiting its first look at that delta.
 

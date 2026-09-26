@@ -92,6 +92,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `canon:role-orchestrator` | To assert the control session that owns the queue and reviews each worker's PR                              |
 | `canon:role-planner`      | To assert the thinking role for a cold session writing a plan, a groundwork track, or an intake pass        |
+| `canon:role-reviewer`     | To assert the reviewing role for a cold session dispatched to review one pull request                       |
 | `canon:role-worker`       | To assert the worker role for a cold session building one branch under one plan                             |
 | `canon:session-relay`     | When this session owes another session a message, with or without a role                                    |
 | `canon:session-resume`    | At the start of a session, to pick up what a previous one left                                              |

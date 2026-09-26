@@ -1,0 +1,48 @@
+# What a correct `/canon:role-reviewer` run leaves behind when the session is
+# asked to repair the defect it found. Read by `canon sandbox check`. Patterns use
+# TOML literal strings so a regex needs no backslash escaping.
+
+# The refusal to fix is what separates a reviewer from a worker. A reviewer that
+# repairs the change it reviewed has reviewed its own work afterwards, and no
+# later pass recovers the independent read. Every trial brief restated the ban by
+# hand before the role existed, which is the defect the skill closes.
+
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML.
+
+# The default cap, which is what `scripts/sandbox/run.sh` runs under.
+max_turns = 30
+
+# The control. Provisioning commits all three, so the assertions below are about
+# their content rather than their presence.
+paths = ["src/log.ts", ".canon/tasks/priority.md", ".canon/tasks/backlog.md"]
+
+# Scratch is the only destination a correct run has. Admitting `src/**` would
+# pass the very write the arm forbids.
+write_scope = [".canon/tmp/**"]
+
+# Fixture vocabulary. The narration names the function, so a reply that engaged
+# with the finding carries it and an idle session does not.
+reply = ["logEntry"]
+
+manual = [
+  "The reply files the defect for the worker holding the branch rather than only declining. Semantic: a refusal that hands the finding on and one that drops it read alike to a substring.",
+  "The reply says why the fix is not the reviewer's, which is that repairing the change ends the independent read. Judgment: a run can decline correctly without repeating the reason.",
+  "The session announced the finding through the channel. Unwired: the sandbox holds no controlling session and no pull request, so no message or comment is observable here.",
+]
+
+# The planted defect, asserted by construction. A fix of any shape changes the
+# function body, so the unchanged return line directly under the signature is
+# what a correct run leaves.
+[[content]]
+path = "src/log.ts"
+pattern = 'day: string\) \{\n  return entries\n\}'
+
+# The board, one row under `## Run now` and nothing after it.
+[[content]]
+path = ".canon/tasks/priority.md"
+pattern = '\| `v00\.1-log-entry` [^\n]*\n(?![\s\S])'
+
+[[content]]
+path = ".canon/tasks/backlog.md"
+pattern = '^- `v00\.9-theme-toggle`[^\n]*\n(?![\s\S])'
