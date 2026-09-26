@@ -1,6 +1,6 @@
 import type { Command } from 'commander'
 import { execa } from 'execa'
-import { PROJECT_ROOT } from '@/project-root'
+import { findCheckoutMismatch, PROJECT_ROOT } from '@/project-root'
 import {
   frameError,
   intro,
@@ -10,6 +10,7 @@ import {
   outro,
   select,
 } from '@/ui'
+import { compareVersions, parseVersion } from '@/version/compare'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { detectManager, installCommand, type Manager } from '@/version/manager'
 import {
@@ -30,7 +31,9 @@ interface UpgradeRecord {
   readonly before: string
   readonly after?: string
   readonly latest?: string
-  readonly state: 'upgraded' | 'current' | 'cancelled' | 'refused'
+  /** The version of the checkout at cwd, present only on `pending`. */
+  readonly checkout?: string
+  readonly state: 'upgraded' | 'current' | 'pending' | 'cancelled' | 'refused'
   readonly reason?: string
   /**
    * One rendered line for a caller that reports the outcome without parsing
@@ -117,7 +120,24 @@ async function runUpgrade(opts: UpgradeOptions): Promise<number> {
   logStep('Published')
   logInfo(describeSkew(skew))
 
+  const checkout = readCheckoutVersion()
+  const latest = latestOf(skew)
+
   if (skew.state === 'current') {
+    const note = pendingNote(latest, checkout)
+    if (note !== undefined && checkout !== undefined) {
+      logWarn(note)
+      outro()
+      emit(opts, {
+        ...base(before, manager, command, skew),
+        after: before,
+        checkout,
+        state: 'pending',
+        message: `CLI stays at ${before}. ${note}`,
+      })
+      return 0
+    }
+
     outro()
     emit(opts, {
       ...base(before, manager, command, skew),
@@ -128,7 +148,7 @@ async function runUpgrade(opts: UpgradeOptions): Promise<number> {
     return 0
   }
 
-  return await applyUpgrade(opts, before, skew, manager, command)
+  return await applyUpgrade(opts, before, skew, manager, command, checkout)
 }
 
 /**
@@ -147,6 +167,7 @@ async function applyUpgrade(
   skew: SkewReport,
   manager: Manager,
   command: readonly string[],
+  checkout: string | undefined,
 ): Promise<number> {
   const proceed = await select({
     message: `Run \`${command.join(' ')}\`?`,
@@ -199,15 +220,50 @@ async function applyUpgrade(
     ...base(before, manager, command, skew),
     after,
     state: 'upgraded',
-    message: upgradedMessage(before, after),
+    message: [upgradedMessage(before, after), pendingNote(after, checkout)]
+      .filter((part) => part !== undefined)
+      .join(' '),
   })
   return 0
 }
 
+/**
+ * The version of the checkout the caller stands in, read off cwd rather than
+ * off `PROJECT_ROOT`, which is the installed package a bare `canon` resolves
+ * to. A target project sits in no canon checkout, so this reads nothing there
+ * and the verb behaves as it did.
+ */
+function readCheckoutVersion(): string | undefined {
+  const dir = findCheckoutMismatch(process.cwd())
+  return dir === undefined ? undefined : readInstalled(dir).version
+}
+
+/**
+ * The clause a caller appends when the checkout carries a release npm does not
+ * serve yet. A pull lands the release commit before the publish job finishes,
+ * so for a few minutes the checkout leads the registry, and a release that
+ * never publishes keeps it leading. The wording names the served version
+ * rather than promising a publish for that reason. `undefined` covers every
+ * case with nothing to say, including a version that does not parse.
+ */
+export function pendingNote(
+  served: string | undefined,
+  checkout: string | undefined,
+): string | undefined {
+  if (served === undefined || checkout === undefined) return undefined
+
+  const local = parseVersion(checkout)
+  const published = parseVersion(served)
+  if (local === undefined || published === undefined) return undefined
+  if (compareVersions(local, published) <= 0) return undefined
+
+  return `The checkout is at ${checkout} and npm serves ${served}.`
+}
+
 export function upgradedMessage(before: string, after: string): string {
   return after === before
-    ? `Reinstalled ${after}, unchanged.`
-    : `Upgraded ${before} to ${after}.`
+    ? `CLI reinstalled ${after}, unchanged.`
+    : `CLI upgraded ${before} to ${after}.`
 }
 
 function base(
