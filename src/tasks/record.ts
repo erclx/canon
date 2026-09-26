@@ -9,7 +9,8 @@ import {
   listTaskStems,
   OUTCOME_PATTERN,
   planLine,
-  readPlanTarget,
+  planLineIndex,
+  readPlanTargets,
   readPullRequest,
   tasksDir,
 } from '@/tasks/archive'
@@ -26,6 +27,9 @@ const ORIGIN_PREFIXES = ['Plan:', 'Groundwork:', 'Intake:', 'Issue:'] as const
  * a guessed write would archive the wrong task. A caller that passed a
  * malformed argument has a defect nobody would otherwise hear about, so it
  * reports rather than joining the swallowed set.
+ *
+ * `several-plans` answers a `Plan:` line that already links more than one plan.
+ * `plan-link` cannot know which link to drop, so it writes nothing.
  */
 export const RECORD_REFUSALS = [
   'no-board',
@@ -34,6 +38,7 @@ export const RECORD_REFUSALS = [
   'no-outcomes',
   'out-of-range',
   'no-plan',
+  'several-plans',
   'bad-input',
 ] as const
 
@@ -68,6 +73,8 @@ export interface PlanRecorded {
   readonly path: string
   readonly plan: string
   readonly action: LineAction
+  /** The target the line named before a correction. Undefined unless it differed. */
+  readonly replaced: string | undefined
 }
 
 export type PlanOutcome = PlanRecorded | RecordRefused
@@ -149,31 +156,60 @@ function lastOriginLine(lines: readonly string[]): number | undefined {
   return found
 }
 
+export type PlanLineWrite =
+  | {
+      readonly ok: true
+      readonly text: string
+      readonly action: LineAction
+      readonly replaced: string | undefined
+    }
+  | { readonly ok: false; readonly targets: readonly string[] }
+
 /**
  * Places the `Plan:` line right after the H1, and corrects the target in place
  * when the line exists, since a task runs under one plan. `Plan:` is the first
  * origin line a task carries, so it anchors on the heading itself rather than
  * on the last origin line above it.
+ *
+ * A line already linking several plans is refused whole, even when one of them
+ * is the target, since overwriting it drops links the caller never named and
+ * reporting it unchanged hides a line that breaks the one-plan rule.
  */
-export function writePlanLine(
-  text: string,
-  target: string,
-): { readonly text: string; readonly action: LineAction } {
+export function writePlanLine(text: string, target: string): PlanLineWrite {
   const line = planLine(target)
   const lines = text.split('\n')
-  const existing = lines.findIndex((entry) => entry.startsWith('Plan:'))
+  const existing = planLineIndex(lines)
 
   if (existing !== -1) {
-    if (lines[existing] === line) return { text, action: 'unchanged' }
+    const targets = readPlanTargets(lines[existing])
+    if (targets.length > 1) return { ok: false, targets }
+
+    const [previous] = targets
+    const replaced = previous !== target ? previous : undefined
+    if (lines[existing] === line) {
+      return { ok: true, text, action: 'unchanged', replaced }
+    }
     lines[existing] = line
-    return { text: lines.join('\n'), action: 'corrected' }
+    return { ok: true, text: lines.join('\n'), action: 'corrected', replaced }
   }
 
   const heading = lines.findIndex((entry) => entry.startsWith('# '))
-  if (heading === -1) return { text: `${line}\n${text}`, action: 'added' }
+  if (heading === -1) {
+    return {
+      ok: true,
+      text: `${line}\n${text}`,
+      action: 'added',
+      replaced: undefined,
+    }
+  }
 
   lines.splice(heading + 1, 0, '', line)
-  return { text: lines.join('\n'), action: 'added' }
+  return {
+    ok: true,
+    text: lines.join('\n'),
+    action: 'added',
+    replaced: undefined,
+  }
 }
 
 /**
@@ -230,14 +266,12 @@ async function matchByPlan(
   const read = await Promise.all(
     stems.map(async (stem) => ({
       stem,
-      target: readPlanTarget(await readFile(join(dir, `${stem}.md`), 'utf8')),
+      targets: readPlanTargets(await readFile(join(dir, `${stem}.md`), 'utf8')),
     })),
   )
 
   return read
-    .filter(
-      (entry) => entry.target !== undefined && planKey(entry.target) === key,
-    )
+    .filter((entry) => entry.targets.some((target) => planKey(target) === key))
     .map(({ stem }) => stem)
 }
 
@@ -345,11 +379,20 @@ export async function recordPlan(
   }
 
   const target = linkTo(dir, plan)
-  const { text, action } = writePlanLine(await readFile(path, 'utf8'), target)
+  const written = writePlanLine(await readFile(path, 'utf8'), target)
 
+  if (!written.ok) {
+    return refuse(
+      'several-plans',
+      `${opened.stem} already links ${written.targets.length} plans on its Plan: line, so plan-link cannot tell which one to replace. Edit the line by hand to name one plan.`,
+      written.targets,
+    )
+  }
+
+  const { text, action, replaced } = written
   if (action !== 'unchanged') await writeFile(path, text)
 
-  return { ok: true, stem: opened.stem, path, plan: target, action }
+  return { ok: true, stem: opened.stem, path, plan: target, action, replaced }
 }
 
 /**

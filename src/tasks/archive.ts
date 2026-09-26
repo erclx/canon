@@ -90,9 +90,9 @@ export interface ArchiveSuccess {
   readonly to: string
   readonly priorityRowRemoved: boolean
   readonly indexRegenerated: boolean
-  /** Undefined when the task cited no live plan, or when another task still holds it. */
-  readonly plan: PlanMove | undefined
-  /** Undefined when the plan stays, or when no ready folder resolves and can move. */
+  /** Every live plan the task cited that no other live task still holds, in line order. */
+  readonly plans: readonly PlanMove[]
+  /** Undefined when no plan moves, or when no ready folder resolves and can move. */
   readonly ready: ReadyMove | undefined
   readonly closed: number
   readonly cut: number
@@ -115,8 +115,8 @@ export interface DeclineSuccess {
   readonly priorityRowRemoved: boolean
   readonly backlogRowRemoved: boolean
   readonly indexRegenerated: boolean
-  /** Undefined when the task cited no live plan, or when another task still holds it. */
-  readonly plan: PlanMove | undefined
+  /** Every live plan the task cited that no other live task still holds, in line order. */
+  readonly plans: readonly PlanMove[]
 }
 
 export interface DeclineRefused {
@@ -251,46 +251,78 @@ export function readPullRequest(text: string): readonly number[] {
   return match[1].split(',').map((entry) => Number(entry.trim().slice(1)))
 }
 
-/**
- * The `Plan:` line in either form, the link's target captured ahead of the bare
- * path. Padding is spaces and tabs rather than `\s`, which spans a newline, so
- * the match ends at the line and the retarget below cannot swallow the blank
- * line that follows it.
- */
-const PLAN_PATTERN = /^Plan:[ \t]*(?:\[[^\]]*\]\(([^)]+)\)|(\S+))[ \t]*$/m
+/** A markdown link on a `Plan:` line, its target captured. */
+const PLAN_LINK_PATTERN = /\[[^\]]*\]\(([^)]+)\)/g
 
 /**
- * Reads the `Plan:` target out of a markdown link, falling back to the older
- * bare-path form. The path is returned as written, relative to the board.
+ * Finds the first `Plan:` line outside a fenced sample. Every reader and both
+ * writers locate the line through this, so none of them can act on a sample a
+ * task displays while another reads the real line below it.
  */
-export function readPlanTarget(text: string): string | undefined {
-  const match = PLAN_PATTERN.exec(text)
-  if (!match) return undefined
-  return match[1] ?? match[2]
+export function planLineIndex(lines: readonly string[]): number {
+  const fenced = fenceMask(lines)
+
+  return lines.findIndex(
+    (line, index) => !fenced[index] && line.startsWith('Plan:'),
+  )
+}
+
+interface PlanToken {
+  readonly target: string
+  readonly start: number
+  readonly end: number
 }
 
 /**
- * Reads every target the first `Plan:` line outside a fenced sample carries,
- * falling back to the bare-path form. `readPlanTarget` answers only a line
- * holding exactly one pointer, so this is how a caller tells a line linking
- * several plans apart from no line at all.
+ * The targets a located `Plan:` line carries, each with its span on the line.
+ * Links win over the bare form. A bare remainder yields its leading run of
+ * tokens reading as a path, one carrying `/` or ending in `.md`, and stops at
+ * the first that does not, so a path inside trailing prose never reads as a
+ * second plan. It falls back to the first token when that one is not a path.
+ */
+function planTokens(line: string): readonly PlanToken[] {
+  const links = [...line.matchAll(PLAN_LINK_PATTERN)].map((match) => ({
+    target: match[1],
+    start: match.index,
+    end: match.index + match[0].length,
+  }))
+  if (links.length > 0) return links
+
+  const bare = [...line.slice('Plan:'.length).matchAll(/[^\s,]+/g)].map(
+    (match) => ({
+      target: match[0],
+      start: 'Plan:'.length + match.index,
+      end: 'Plan:'.length + match.index + match[0].length,
+    }),
+  )
+  const prose = bare.findIndex(
+    ({ target }) => !target.includes('/') && !target.endsWith('.md'),
+  )
+  const paths = prose === -1 ? bare : bare.slice(0, prose)
+
+  return paths.length > 0 ? paths : bare.slice(0, 1)
+}
+
+/**
+ * Reads every target the first `Plan:` line outside a fenced sample carries.
+ * The path is returned as written, relative to the board.
  */
 export function readPlanTargets(text: string): readonly string[] {
   const lines = text.split('\n')
-  const fenced = fenceMask(lines)
-  const line = lines.find(
-    (candidate, index) => !fenced[index] && candidate.startsWith('Plan:'),
-  )
-  if (line === undefined) return []
+  const index = planLineIndex(lines)
+  if (index === -1) return []
 
-  const rest = line.slice('Plan:'.length)
-  const links = [...rest.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].map(
-    (match) => match[1],
-  )
-  if (links.length > 0) return links
+  return planTokens(lines[index]).map(({ target }) => target)
+}
 
-  const bare = /^[ \t]*(\S+)/.exec(rest)
-  return bare ? [bare[1]] : []
+/**
+ * The single target a task's `Plan:` line carries, or `undefined` for no line
+ * and for a line linking several plans alike. A caller that must tell those two
+ * apart reads `readPlanTargets` instead.
+ */
+export function readPlanTarget(text: string): string | undefined {
+  const targets = readPlanTargets(text)
+  return targets.length === 1 ? targets[0] : undefined
 }
 
 /**
@@ -300,28 +332,50 @@ export function readPlanTargets(text: string): readonly string[] {
  * one line shape rather than two.
  */
 export function planLine(target: string): string {
+  return `Plan: ${planLink(target)}`
+}
+
+function planLink(target: string): string {
   const name = basename(target)
   const label = name.endsWith('.md') ? name.slice(0, -'.md'.length) : name
 
-  return `Plan: [${label}](${target})`
+  return `[${label}](${target})`
 }
 
 /**
- * Points the task's `Plan:` line at the plan's new home. The line is matched
- * with the pattern the read above uses, so the archive rewrites exactly the
- * line it parsed and never a second `Plan:` a task displays inside a fenced
- * sample.
+ * Points each moved link on the task's `Plan:` line at the plan's new home,
+ * keyed by the target as the line wrote it. A link the map does not name keeps
+ * its path, since a plan another task still cites stays live. A moved bare
+ * path is written back as a link, the shape `planLine` gives a single one.
  *
- * The replacement is built by a function rather than passed as a string,
- * because `$&` and its siblings are substitution sequences inside a replacement
- * string. A plan filename carrying one would write a path nobody typed, and
- * `.canon/plans/` is gitignored, so nothing recovers the pointer it replaced.
+ * The line is rebuilt by concatenation rather than a replacement string,
+ * because `$&` and its siblings are substitution sequences inside one. A plan
+ * filename carrying one would write a path nobody typed, and `.canon/plans/` is
+ * gitignored, so nothing recovers the pointer it replaced.
  */
-export function retargetPlanLine(text: string, target: string): string {
-  return text.replace(PLAN_PATTERN, () => planLine(target))
+export function retargetPlanLine(
+  text: string,
+  moves: ReadonlyMap<string, string>,
+): string {
+  const lines = text.split('\n')
+  const index = planLineIndex(lines)
+  if (index === -1) return text
+
+  const line = lines[index]
+  let rewritten = ''
+  let at = 0
+  for (const token of planTokens(line)) {
+    const to = moves.get(token.target)
+    if (to === undefined) continue
+    rewritten += line.slice(at, token.start) + planLink(to)
+    at = token.end
+  }
+  lines[index] = rewritten + line.slice(at)
+
+  return lines.join('\n')
 }
 
-/** The `Ready:` line in either form, matched the way `PLAN_PATTERN` matches `Plan:`. */
+/** The `Ready:` line in either form, the link's target captured ahead of the bare path. */
 const READY_PATTERN = /^Ready:[ \t]*(?:\[[^\]]*\]\(([^)]+)\)|(\S+))[ \t]*$/m
 
 /** A ready folder path as a plan's constraints write it, the folder name captured. */
@@ -508,7 +562,8 @@ function atOneRoot(path: string, plans: string[], root: string): string {
 }
 
 /**
- * Names the other live tasks whose `Plan:` line lands on the same file. This is
+ * Names the other live tasks whose `Plan:` line lands on the same file through
+ * any of its links. This is
  * the rule `context-fold` applies before it archives a plan, held here so one
  * question has one implementation: a plan another live task still cites is a
  * plan the sweep is correct to leave, and a guard that read the folder instead
@@ -528,11 +583,13 @@ export async function otherTasksCitingPlan(
 
   const read = await Promise.all(
     stems.map(async (stem) => {
-      const target = readPlanTarget(
+      const targets = readPlanTargets(
         await readFile(join(dir, `${stem}.md`), 'utf8'),
       )
-      const resolved = target && resolveLivePlan(target, dir, root)
-      return resolved === plan ? stem : undefined
+      const cites = targets.some(
+        (target) => resolveLivePlan(target, dir, root) === plan,
+      )
+      return cites ? stem : undefined
     }),
   )
 
@@ -542,10 +599,12 @@ export async function otherTasksCitingPlan(
 /**
  * Where a task's `Plan:` target resolves, which is what decides whether the
  * plan is the sweep's to move. `unstated` is a task carrying no line at all,
- * and it is distinct from a line resolving somewhere unexpected.
+ * and it is distinct from a line resolving somewhere unexpected. `several` is a
+ * line linking more than one plan, which answers no single location.
  */
 export const CITATION_LOCATIONS = [
   'unstated',
+  'several',
   'live',
   'archived',
   'outside',
@@ -556,7 +615,10 @@ export type CitationLocation = (typeof CITATION_LOCATIONS)[number]
 export interface PlanCitations {
   readonly ok: true
   readonly stem: string
+  /** The one target the line carries. Undefined when it carries none or several. */
   readonly target: string | undefined
+  /** Every target the line carries, in line order. */
+  readonly targets: readonly string[]
   readonly location: CitationLocation
   /** Other live tasks landing on the same file. Empty unless `location` is `live`. */
   readonly citedBy: readonly string[]
@@ -590,13 +652,17 @@ export async function planCitations(
     return refuse(unmatched.reason, unmatched.message, unmatched.detail)
   }
 
-  const target = readPlanTarget(await readFile(join(dir, `${stem}.md`), 'utf8'))
-  if (!target) {
+  const targets = readPlanTargets(
+    await readFile(join(dir, `${stem}.md`), 'utf8'),
+  )
+  const [target] = targets
+  if (target === undefined || targets.length > 1) {
     return {
       ok: true,
       stem,
       target: undefined,
-      location: 'unstated',
+      targets,
+      location: target === undefined ? 'unstated' : 'several',
       citedBy: [],
     }
   }
@@ -611,13 +677,14 @@ export async function planCitations(
     )
       ? 'archived'
       : 'outside'
-    return { ok: true, stem, target, location, citedBy: [] }
+    return { ok: true, stem, target, targets, location, citedBy: [] }
   }
 
   return {
     ok: true,
     stem,
     target,
+    targets,
     location: 'live',
     citedBy: await otherTasksCitingPlan(dir, root, live, stem),
   }
@@ -810,37 +877,34 @@ export async function archiveTask(
     )
   }
 
-  const plan = await planToArchive(dir, root, stem, text)
-  const ready = plan && (await readyToArchive(dir, root, text, plan))
+  const plans = await plansToArchive(dir, root, stem, text)
+  const ready =
+    plans.moves.length > 0 &&
+    (await readyToArchive(dir, root, text, plans.moves))
   const destination = archiveDir(root)
   const to = join(destination, `${stem}.md`)
 
-  // The plan moves first so the line written below describes a file already at
-  // its new path. Writing the retarget first and failing the move would leave a
-  // pointer at a folder holding nothing, and `.canon/plans/` is gitignored, so
-  // no history recovers the target it named. The folder follows the plan and
-  // both precede the task, so a failed rename never leaves the task archived
+  // The plans move first so the line written below describes files already at
+  // their new paths. Writing the retarget first and failing a move would leave
+  // a pointer at a folder holding nothing, and `.canon/plans/` is gitignored, so
+  // no history recovers the target it named. The folder follows the plans and
+  // all precede the task, so a failed rename never leaves the task archived
   // with its folder live, which the unattended post-merge hook cannot repair.
-  if (plan) {
-    await mkdir(dirname(plan.to), { recursive: true })
-    await rename(plan.from, plan.to)
-  }
+  await movePlans(plans.moves)
 
   if (ready) {
     await mkdir(dirname(ready.to), { recursive: true })
     await rename(ready.from, ready.to)
-    await writeFile(
-      plan.to,
-      retargetReadyPaths(await readFile(plan.to, 'utf8'), basename(ready.from)),
-    )
+    await retargetReadyInPlans(plans.moves, basename(ready.from))
   }
 
   await mkdir(destination, { recursive: true })
   await rename(from, to)
-  const rebased = rebaseRelativeLinks(text, dir, destination)
-  const retargeted = plan
-    ? retargetPlanLine(rebased, linkTo(destination, plan.to))
-    : rebased
+  const retargeted = rebaseRelativeLinks(
+    retargetPlanLine(text, plans.links(dir)),
+    dir,
+    destination,
+  )
   await writeFile(
     to,
     ready
@@ -858,43 +922,71 @@ export async function archiveTask(
     to,
     priorityRowRemoved,
     indexRegenerated: regen.action === 'written',
-    plan,
+    plans: plans.moves,
     ready: ready || undefined,
     closed: closed.length,
     cut: cut.length,
   }
 }
 
+interface PlansToArchive {
+  readonly moves: readonly PlanMove[]
+  /** Each moved target as the line wrote it, mapped to its link from `taskDir`. */
+  readonly links: (taskDir: string) => ReadonlyMap<string, string>
+}
+
 /**
- * The plan this task carries into the archive with it, or nothing. The merge is
- * what settles a plan, and the hook reaches this with nobody watching, so the
- * move sits inside the archive rather than in a second call that could leave
- * the task archived and the plan live.
+ * The plans this task carries into the archive with it, one per live target on
+ * its `Plan:` line. The merge is what settles a plan, and the hook reaches this
+ * with nobody watching, so the move sits inside the archive rather than in a
+ * second call that could leave the task archived and a plan live.
  *
  * A plan another live task still cites stays where it is. Moving it on the
  * first task to close strands every other pointer at a path that has gone, and
  * the sibling has no history behind it to repair the line from.
  *
- * A target resolving to no file yields nothing too. A pointer somebody typed
+ * A target resolving to no file moves nothing too. A pointer somebody typed
  * wrong is not a plan to move, and refusing the whole archive over it would
  * park the board behind a repair the merge cannot make.
  */
-async function planToArchive(
+async function plansToArchive(
   dir: string,
   root: string,
   stem: string,
   text: string,
-): Promise<PlanMove | undefined> {
-  const target = readPlanTarget(text)
-  const live = target && resolveLivePlan(target, dir, root)
-  if (!live || !existsSync(live)) return undefined
+): Promise<PlansToArchive> {
+  const read = await Promise.all(
+    readPlanTargets(text).map(async (target) => {
+      const live = resolveLivePlan(target, dir, root)
+      if (!live || !existsSync(live)) return undefined
 
-  const shared = await otherTasksCitingPlan(dir, root, live, stem)
-  if (shared.length > 0) return undefined
+      const shared = await otherTasksCitingPlan(dir, root, live, stem)
+      return shared.length > 0 ? undefined : { target, live }
+    }),
+  )
+
+  const moves = new Map<string, PlanMove>()
+  const targets = new Map<string, string>()
+  for (const entry of read) {
+    if (!entry) continue
+    const to = join(recordDir(root, PLANS, ARCHIVE), basename(entry.live))
+    moves.set(entry.live, { from: entry.live, to })
+    targets.set(entry.target, to)
+  }
 
   return {
-    from: live,
-    to: join(recordDir(root, PLANS, ARCHIVE), basename(live)),
+    moves: [...moves.values()],
+    links: (taskDir) =>
+      new Map(
+        [...targets].map(([target, to]) => [target, linkTo(taskDir, to)]),
+      ),
+  }
+}
+
+async function movePlans(moves: readonly PlanMove[]): Promise<void> {
+  for (const move of moves) {
+    await mkdir(dirname(move.to), { recursive: true })
+    await rename(move.from, move.to)
   }
 }
 
@@ -903,7 +995,8 @@ async function planToArchive(
  * task's `Ready:` line, falling back to a folder path in the plan's own text for
  * a task written before the line was defined. It moves only with its plan,
  * since the folder is the plan's verbatim source and a plan another task still
- * cites still needs it, so the caller passes the plan `planToArchive` settled.
+ * cites still needs it, so the caller passes the plans `plansToArchive`
+ * settled. Their texts are searched in line order and the first folder wins.
  *
  * A target naming no folder, one already archived, or a destination taken
  * yields nothing and refuses nothing, the way a mistyped `Plan:` does.
@@ -912,11 +1005,14 @@ async function readyToArchive(
   dir: string,
   root: string,
   text: string,
-  plan: PlanMove,
+  plans: readonly PlanMove[],
 ): Promise<ReadyMove | undefined> {
-  const live =
-    readyFolder(dir, root, text) ??
-    readyFolder(dir, root, await readFile(plan.from, 'utf8'))
+  const planTexts = await Promise.all(
+    plans.map((plan) => readFile(plan.from, 'utf8')),
+  )
+  const live = [text, ...planTexts]
+    .map((candidate) => readyFolder(dir, root, candidate))
+    .find((folder) => folder !== undefined)
   if (!live) return undefined
 
   const to = join(recordDir(root, READY, ARCHIVE), basename(live))
@@ -943,6 +1039,19 @@ function readyFolder(
       basename(path) !== ARCHIVE &&
       !archives.some((base) => isUnder(path, base)) &&
       existsSync(path),
+  )
+}
+
+async function retargetReadyInPlans(
+  plans: readonly PlanMove[],
+  folder: string,
+): Promise<void> {
+  await Promise.all(
+    plans.map(async (plan) => {
+      const text = await readFile(plan.to, 'utf8')
+      const retargeted = retargetReadyPaths(text, folder)
+      if (retargeted !== text) await writeFile(plan.to, retargeted)
+    }),
   )
 }
 
@@ -1078,29 +1187,27 @@ export async function declineTask(
   const from = join(dir, `${stem}.md`)
   const text = await readFile(from, 'utf8')
 
-  const plan = await planToArchive(dir, root, stem, text)
+  const plans = await plansToArchive(dir, root, stem, text)
   const destination = declinedDir(root)
   const to = join(destination, `${stem}.md`)
 
-  // The plan moves first, the same order archiveTask uses, so the retarget
-  // written below describes a file already at its new path.
-  if (plan) {
-    await mkdir(dirname(plan.to), { recursive: true })
-    await rename(plan.from, plan.to)
-  }
+  // The plans move first, the same order archiveTask uses, so the retarget
+  // written below describes files already at their new paths.
+  await movePlans(plans.moves)
 
   await mkdir(destination, { recursive: true })
   await rename(from, to)
 
   const date = new Date().toISOString().slice(0, 10)
   const declined = insertDeclinedLine(
-    rebaseRelativeLinks(text, dir, destination),
+    rebaseRelativeLinks(
+      retargetPlanLine(text, plans.links(dir)),
+      dir,
+      destination,
+    ),
     declineLine(reason, by, date),
   )
-  const final = plan
-    ? retargetPlanLine(declined, linkTo(destination, plan.to))
-    : declined
-  await writeFile(to, final)
+  await writeFile(to, declined)
 
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
   const backlogRowRemoved = await clearBacklogRow(dir, stem)
@@ -1114,6 +1221,6 @@ export async function declineTask(
     priorityRowRemoved,
     backlogRowRemoved,
     indexRegenerated: regen.action === 'written',
-    plan,
+    plans: plans.moves,
   }
 }

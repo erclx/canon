@@ -160,36 +160,88 @@ describe('writePullRequestLine', () => {
 
 describe('writePlanLine', () => {
   it('should add the line right after the H1', () => {
-    const { text, action } = writePlanLine(
-      '# A task\n\n## Outcomes\n',
-      '../plans/feature-x.md',
-    )
-
-    expect(action).toBe('added')
-    expect(text).toBe(
-      '# A task\n\nPlan: [feature-x](../plans/feature-x.md)\n\n## Outcomes\n',
-    )
+    expect(
+      writePlanLine('# A task\n\n## Outcomes\n', '../plans/feature-x.md'),
+    ).toEqual({
+      ok: true,
+      text: '# A task\n\nPlan: [feature-x](../plans/feature-x.md)\n\n## Outcomes\n',
+      action: 'added',
+      replaced: undefined,
+    })
   })
 
-  it('should correct the target when the line already exists', () => {
+  it('should correct the target and name the link it replaced', () => {
     const text = '# A task\n\nPlan: [feature-old](../plans/feature-old.md)\n'
 
-    const { text: written, action } = writePlanLine(
-      text,
-      '../plans/feature-new.md',
-    )
-
-    expect(action).toBe('corrected')
-    expect(written).toContain('Plan: [feature-new](../plans/feature-new.md)')
-    expect(written).not.toContain('feature-old')
+    expect(writePlanLine(text, '../plans/feature-new.md')).toEqual({
+      ok: true,
+      text: '# A task\n\nPlan: [feature-new](../plans/feature-new.md)\n',
+      action: 'corrected',
+      replaced: '../plans/feature-old.md',
+    })
   })
 
   it('should report no change when the target already matches', () => {
     const text = '# A task\n\nPlan: [feature-x](../plans/feature-x.md)\n'
 
     expect(writePlanLine(text, '../plans/feature-x.md')).toEqual({
+      ok: true,
       text,
       action: 'unchanged',
+      replaced: undefined,
+    })
+  })
+
+  it('should refuse a line linking several plans and leave it unchanged', () => {
+    const text = '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n'
+
+    expect(writePlanLine(text, '../plans/a.md')).toEqual({
+      ok: false,
+      targets: ['../plans/a.md', '../plans/b.md'],
+    })
+  })
+
+  it('should leave a plan line inside a fenced sample alone', () => {
+    const text = [
+      '# A task',
+      '',
+      'Plan: [feature-old](../plans/feature-old.md)',
+      '',
+      '```markdown',
+      'Plan: [sample](../plans/sample.md)',
+      '```',
+      '',
+    ].join('\n')
+    const fenced = [
+      '# A task',
+      '',
+      '```markdown',
+      'Plan: [sample](../plans/sample.md)',
+      '```',
+      '',
+    ].join('\n')
+
+    expect(writePlanLine(fenced, '../plans/feature-new.md')).toMatchObject({
+      ok: true,
+      action: 'added',
+      text: [
+        '# A task',
+        '',
+        'Plan: [feature-new](../plans/feature-new.md)',
+        '',
+        '```markdown',
+        'Plan: [sample](../plans/sample.md)',
+        '```',
+        '',
+      ].join('\n'),
+    })
+    expect(writePlanLine(text, '../plans/feature-new.md')).toMatchObject({
+      ok: true,
+      action: 'corrected',
+      text: text.replace(
+        'Plan: [feature-old](../plans/feature-old.md)',
+        'Plan: [feature-new](../plans/feature-new.md)',
+      ),
     })
   })
 })
@@ -279,6 +331,26 @@ describe('recordPullRequest', () => {
     expect(outcome.ok).toBe(true)
   })
 
+  it('should select a task whose Plan line links several plans', async () => {
+    const stem = await seedTask({ stem: 'v1-one' })
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    await writeFile(
+      path,
+      (await readTask(stem)).replace(
+        '# v28.1: A task\n',
+        '# v28.1: A task\n\nPlan: [feature-a](../plans/feature-a.md), [feature-b](../plans/feature-b.md)\n',
+      ),
+    )
+
+    const outcome = await recordPullRequest(
+      ROOT,
+      { kind: 'plan', plan: 'b' },
+      673,
+    )
+
+    expect(outcome).toMatchObject({ ok: true, stem, action: 'added' })
+  })
+
   it('should refuse when no task names the plan', async () => {
     await seedTask({ plan: 'feature-other' })
 
@@ -326,6 +398,26 @@ describe('recordPlan', () => {
     await expect(readTask(stem)).resolves.toContain(
       'Plan: [feature-worktree-scratch-routing](../plans/feature-worktree-scratch-routing.md)',
     )
+  })
+
+  it('should refuse a task whose Plan line links several plans', async () => {
+    const stem = await seedTask()
+    await seedPlan('worktree-scratch-routing')
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    const text = (await readTask(stem)).replace(
+      '# v28.1: A task\n',
+      '# v28.1: A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n',
+    )
+    await writeFile(path, text)
+
+    const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'several-plans',
+      detail: ['../plans/a.md', '../plans/b.md'],
+    })
+    await expect(readTask(stem)).resolves.toBe(text)
   })
 
   it('should refuse when the task does not exist', async () => {
