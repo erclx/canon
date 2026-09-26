@@ -17,19 +17,19 @@ Run each prompt in a fresh session. Invoke with `/internal-ask <question>`. Judg
 ## 3. wiki/ hit, Claude Code concept
 
 - **Prompt:** `/internal-ask what are Claude Code hooks?`
-- **Expected source:** `wiki/claude/claude-hooks.md`
+- **Expected source:** `wiki/claude/hooks.md`
 - **Shape:** one-line concept answer, cites wiki page.
 
 ## 4. wiki/ hit, workflow
 
 - **Prompt:** `/internal-ask how do I run parallel Claude sessions on separate branches?`
-- **Expected source:** `wiki/claude/claude-worktrees.md`
+- **Expected source:** `wiki/claude/worktrees.md`
 - **Shape:** points at worktrees wiki page.
 
 ## 5. two-file ambiguity
 
 - **Prompt:** `/internal-ask how do skills get installed from the toolkit into a project?`
-- **Expected source:** `canon/context/claude-plugin/distribution.md` and `wiki/claude/claude-skills.md` both plausible. Either one alone is acceptable. Two-file `Source:` line is also acceptable.
+- **Expected source:** `canon/context/claude-plugin/distribution.md` and `wiki/claude/skills.md` both plausible. Either one alone is acceptable. Two-file `Source:` line is also acceptable.
 - **Shape:** tests the "read at most two" rule.
 
 ## 6. escalation to CLAUDE.md / REQUIREMENTS.md

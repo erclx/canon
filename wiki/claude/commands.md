@@ -62,7 +62,7 @@ Built-in slash commands available in every Claude Code session. Some commands de
 - `/reload-plugins`: reload all active plugins to apply pending changes
 - `/agents`: manage agent configurations
 - `/remote-control`: make the current session available for remote control from claude.ai
-- `/schedule [description]`: create, update, list, or run cloud [routines](claude-routines.md)
+- `/schedule [description]`: create, update, list, or run cloud [routines](routines.md)
 
 ## Information
 
@@ -72,7 +72,7 @@ Built-in slash commands available in every Claude Code session. Some commands de
 - `/stats`: show daily usage, session history, and model preferences
 - `/status`: show version, model, account, and connectivity
 - `/usage`: show plan usage limits and rate limit status
-- `/skills`: list available skills (see [skills](claude-skills.md))
+- `/skills`: list available skills (see [skills](skills.md))
 - `/debug`: enable debug logging for the session
 - `/doctor`: diagnose the Claude Code installation and settings
 - `/release-notes`: view the changelog

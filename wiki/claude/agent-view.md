@@ -13,7 +13,7 @@ Source: Anthropic, in the [agent view docs](https://code.claude.com/docs/en/agen
 
 Agent view covers background sessions exclusively. A subagent spawned through the `Agent` tool has no equivalent view: it runs inside its parent's context and shows up only in that parent's own transcript, sharing the parent's quota rather than drawing its own.
 
-Trading a background session for an `Agent` tool call does not gain a pane. It loses the one background dispatch already has, in exchange for the independence a subagent does not carry. See [Claude Code subagents](claude-subagents.md) for what that channel looks like instead.
+Trading a background session for an `Agent` tool call does not gain a pane. It loses the one background dispatch already has, in exchange for the independence a subagent does not carry. See [Claude Code subagents](subagents.md) for what that channel looks like instead.
 
 ## Groups a row falls into
 
@@ -94,6 +94,6 @@ Each background session draws subscription quota independently of the account's 
 
 ## Related
 
-- [Claude Code subagents](claude-subagents.md) for the in-process channel this view does not cover
-- [Claude Code and git worktrees](claude-worktrees.md#background-sessions) for how a background session's working directory relates to a worktree
-- [Claude Code sessions](claude-sessions.md) for discovering and messaging a peer session from inside another one
+- [Claude Code subagents](subagents.md) for the in-process channel this view does not cover
+- [Claude Code and git worktrees](worktrees.md#background-sessions) for how a background session's working directory relates to a worktree
+- [Claude Code sessions](sessions.md) for discovering and messaging a peer session from inside another one

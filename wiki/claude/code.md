@@ -27,7 +27,7 @@ Model and effort:
 
 Permissions and access:
 
-- `--permission-mode <mode>`: start in a specific [permission mode](claude-permissions.md)
+- `--permission-mode <mode>`: start in a specific [permission mode](permissions.md)
 - `--add-dir <path>`: extend file access to another directory
 - `--dangerously-skip-permissions`: alias for `bypassPermissions` mode
 
@@ -44,20 +44,20 @@ Automation:
 - `--max-budget-usd <n>`: cap spend (print mode only)
 - `--json-schema <path>`: enforce structured JSON output (print mode only)
 - `--worktree [name]`: run in an isolated git worktree under `<repo>/.claude/worktrees/`. Pass `#<pr>` or a PR URL to branch from that PR
-- `--bg` or `--background`: start as a background agent, returning immediately with a session ID managed from [agent view](claude-agent-view.md)
+- `--bg` or `--background`: start as a background agent, returning immediately with a session ID managed from [agent view](agent-view.md)
 - `--bare`: minimal startup, skips auto-discovery of hooks, skills, plugins, MCP servers, auto-memory, and CLAUDE.md
 - `--safe-mode`: disable all customizations to troubleshoot broken config
 - `--teleport`: pull a web session into the terminal
 - `--remote <task>`: kick off a new web session on claude.ai
 
-`--allowedTools` and `--disallowedTools` accept [permission rule patterns](claude-permissions.md), not bare tool names. Example: `--allowedTools "Bash(git log *)"`.
+`--allowedTools` and `--disallowedTools` accept [permission rule patterns](permissions.md), not bare tool names. Example: `--allowedTools "Bash(git log *)"`.
 
 ## Further reading
 
-- [Commands](claude-commands.md): full built-in slash command reference
-- [MCP](claude-mcp.md): server configuration, scopes, authentication, and tool naming
-- [Hooks](claude-hooks.md): event hooks, configuration, and behavior control
-- [Memory](claude-memory.md): `CLAUDE.md` hierarchy, auto-memory, and rules files
-- [Skills](claude-skills.md): skills, plugins, invocation, and installation
-- [Plan mode](claude-plan-mode.md): read-only exploration and plan approval flow
-- [Permissions](claude-permissions.md): modes, allow/ask/deny rules, and rule syntax
+- [Commands](commands.md): full built-in slash command reference
+- [MCP](mcp.md): server configuration, scopes, authentication, and tool naming
+- [Hooks](hooks.md): event hooks, configuration, and behavior control
+- [Memory](memory.md): `CLAUDE.md` hierarchy, auto-memory, and rules files
+- [Skills](skills.md): skills, plugins, invocation, and installation
+- [Plan mode](plan-mode.md): read-only exploration and plan approval flow
+- [Permissions](permissions.md): modes, allow/ask/deny rules, and rule syntax
