@@ -5,7 +5,7 @@ Run each prompt in a fresh session. Invoke with `/internal-ask <question>`. Judg
 ## 1. docs/ hit
 
 - **Prompt:** `/internal-ask how do I set up a target project?`
-- **Expected source:** `docs/target-projects.md`
+- **Expected source:** `docs/target/target-projects.md`
 - **Shape:** short answer explaining `canon init`, cites the doc.
 
 ## 2. docs/ hit, CLI surface

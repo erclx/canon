@@ -84,7 +84,7 @@ Use a targeted entry point when only one surface moved upstream. Use the catch-a
 
 ## Verify a sync
 
-Before running a sync against a real project, run the relevant sandbox scenario. The sandbox provisions a representative project state and routes `SANDBOX_SCENARIO=sync` through the domain flow. See [sandbox](../canon/context/sandbox/index.md) for the scenario catalog and routing patterns.
+Before running a sync against a real project, run the relevant sandbox scenario. The sandbox provisions a representative project state and routes `SANDBOX_SCENARIO=sync` through the domain flow. See [sandbox](../../canon/context/sandbox/index.md) for the scenario catalog and routing patterns.
 
 ## Running sync from an agent session
 

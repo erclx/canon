@@ -6,7 +6,7 @@ category: Workflow
 
 # Skill map
 
-Groups run in the order a project meets them, so a reader at a known point scans to that group and reads across. The set reconciles the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target-projects.md) describes, rather than inventing a third vocabulary beside those two, so a group name matches neither source exactly and every moment either one names has a group. Each row says when to reach for the skill. What it does is the skill's own description.
+Groups run in the order a project meets them, so a reader at a known point scans to that group and reads across. The set reconciles the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target/target-projects.md) describes, rather than inventing a third vocabulary beside those two, so a group name matches neither source exactly and every moment either one names has a group. Each row says when to reach for the skill. What it does is the skill's own description.
 
 This page is the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row here. A skill serving two moments sits at the earlier one, and a mention on any other page is prose rather than routing.
 

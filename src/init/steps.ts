@@ -5,7 +5,7 @@ import type { DomainStep } from '@/init/run'
 export type RunFactory = (args: readonly string[]) => () => Promise<boolean>
 
 /**
- * States the same fact as `docs/target-migrations.md`'s backup section in its
+ * States the same fact as `docs/target/target-migrations.md`'s backup section in its
  * own words. Keep the two in step by hand; nothing compares them.
  */
 const RECORDS_SETUP_NOTICE =
