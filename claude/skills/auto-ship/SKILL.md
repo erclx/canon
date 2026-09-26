@@ -99,8 +99,6 @@ If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`),
 
 If `ui-checklist` produces a checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
 
-The stop is the only thing that makes the operator look before `git-ship`.
-
 If there is nothing to verify visually and nothing shipping untested, continue.
 
 ## Step 6: review
@@ -137,7 +135,7 @@ Read origin as causation rather than authorship, so staleness this run induced i
 
 Bound the repair at one pass, the way Step 3 bounds verify. When that re-read shows the finding still standing, stop: `❌ A self-introduced finding survived one fix pass. See .canon/review/branch-<slug>.md. Fix and run /git-ship.`
 
-This chain owns the receipt's lifetime, which is what makes the Output block's citation resolve on a run that reaches it. The `context-fold` sweep under Step 8 reaches only reports whose branch is gone, which collects this one a branch later rather than during the run that wrote it.
+This chain owns the receipt's lifetime. The `context-fold` sweep under Step 8 reaches only reports whose branch is gone, so it collects this one a branch later.
 
 ## Step 8: ship
 
@@ -145,7 +143,7 @@ Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, mem
 
 One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, naming the number that step returned rather than one resolved by branch. Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back. A `false` read stops the chain, and never re-issue the mark on it.
 
-`git-ship` verifies again at its own gate, which repeats this chain's Step 3 on the run where nothing stopped. That cost is deliberate, since most stop points hand the run straight back to that body, and a gate the chain skips for being redundant is a gate no resumed run ever meets.
+`git-ship` verifies again at its own gate, repeating Step 3 on a clean run. Keep that repeat, since a resumed run enters at that gate.
 
 ## Output
 
