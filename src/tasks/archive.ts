@@ -270,6 +270,30 @@ export function readPlanTarget(text: string): string | undefined {
 }
 
 /**
+ * Reads every target the first `Plan:` line outside a fenced sample carries,
+ * falling back to the bare-path form. `readPlanTarget` answers only a line
+ * holding exactly one pointer, so this is how a caller tells a line linking
+ * several plans apart from no line at all.
+ */
+export function readPlanTargets(text: string): readonly string[] {
+  const lines = text.split('\n')
+  const fenced = fenceMask(lines)
+  const line = lines.find(
+    (candidate, index) => !fenced[index] && candidate.startsWith('Plan:'),
+  )
+  if (line === undefined) return []
+
+  const rest = line.slice('Plan:'.length)
+  const links = [...rest.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].map(
+    (match) => match[1],
+  )
+  if (links.length > 0) return links
+
+  const bare = /^[ \t]*(\S+)/.exec(rest)
+  return bare ? [bare[1]] : []
+}
+
+/**
  * Builds a `Plan:` line as a markdown link whose text and target stay in step,
  * the label taken from the target's filename with its extension dropped.
  * `record.ts` reuses this so a plan-link write and an archive retarget produce

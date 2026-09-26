@@ -154,6 +154,19 @@ async function seedPlan(stem: string): Promise<void> {
   await writeFile(join(plans, `feature-${stem}.md`), `# ${stem}\n`)
 }
 
+/** A `Plan:` line linking the stem's own plan and a second one. */
+const SEVERAL_PLANS = (stem: string): string =>
+  `Plan: [feature-${stem}](../plans/feature-${stem}.md), [feature-other](../plans/feature-other.md)`
+
+/** Writes a task whose `Plan:` line is given verbatim, for shapes `seedTask` cannot build. */
+async function seedPlanLine(stem: string, line: string): Promise<void> {
+  mkdirSync(tasksDir(ROOT), { recursive: true })
+  await writeFile(
+    join(tasksDir(ROOT), `${stem}.md`),
+    `# ${stem}\n\n${line}\n\n## Outcomes\n\n`,
+  )
+}
+
 function kinds(findings: readonly Finding[]): FindingKind[] {
   return findings.map((finding) => finding.kind)
 }
@@ -489,6 +502,25 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-uncited'])
   })
 
+  it('should report a run now row whose task links several plans, the first matching the row', async () => {
+    await seedTask('v1.0-first', '', undefined, NO_PLAN)
+    await seedPlanLine('v1.0-first', SEVERAL_PLANS('v1.0-first'))
+    await seedPlan('v1.0-first')
+    await seedPlan('other')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
+    expect(outcome.ok && outcome.findings[0]).toMatchObject({
+      group: 'Run now',
+      subject: 'v1.0-first',
+      message: expect.stringContaining(
+        '../plans/feature-v1.0-first.md, ../plans/feature-other.md',
+      ),
+    })
+  })
+
   it('should report a row and a task naming two different plans', async () => {
     await seedTask('v1.0-first', '', undefined, '../plans/feature-other.md')
     await seedPlan('v1.0-first')
@@ -598,6 +630,33 @@ describe('validateBoard', () => {
       ])
       expect(outcome.ok && outcome.findings[0]).toMatchObject({
         group: 'Up next',
+        subject: 'v3.0-third',
+      })
+    })
+
+    it('should report an up next row whose task links several plans', async () => {
+      await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
+      await seedPlan('v3.0-third')
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
+      expect(outcome.ok && outcome.findings[0]).toMatchObject({
+        group: 'Up next',
+        subject: 'v3.0-third',
+      })
+    })
+
+    it('should report a needs a plan row whose task links several plans', async () => {
+      await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
+      expect(outcome.ok && outcome.findings[0]).toMatchObject({
+        group: 'Needs a plan',
         subject: 'v3.0-third',
       })
     })
