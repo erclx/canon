@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.126.0](https://github.com/erclx/canon/compare/v4.125.0...v4.126.0) (2026-09-26)
+
+
+### Features
+
+* **gate:** fail a push on a document past the 300-line ceiling ([#1957](https://github.com/erclx/canon/issues/1957)) ([1c3c39c](https://github.com/erclx/canon/commit/1c3c39c4ef4731f66b38d0f108fcc335f90e0869))
+* **governance:** add an internal skill that audits the rule set ([#1955](https://github.com/erclx/canon/issues/1955)) ([8f80a70](https://github.com/erclx/canon/commit/8f80a7045b50a1e4bf457c80c8f8585cb43f5801))
+
 ## [4.125.0](https://github.com/erclx/canon/compare/v4.124.0...v4.125.0) (2026-09-26)
 
 
