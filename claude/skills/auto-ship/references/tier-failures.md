@@ -1,6 +1,6 @@
 ---
 title: Tier 1 task reads
-description: How auto-ship Step 1 resolves a caller-supplied task's Plan line to a plan, and the three stops it takes when that pointer is missing, archived, or resolves to no file
+description: How auto-ship Step 1 resolves a caller-supplied task's Plan line to a plan, and the four stops it takes when that line links several plans or its pointer is missing, archived, or resolves to no file
 ---
 
 # Reading a task's plan pointer
@@ -9,14 +9,17 @@ Step 1 of `auto-ship`, tier 1. The session reads this file when the invocation c
 
 ## Reading the pointer
 
-One plan per task is what makes the tier 1 read unambiguous, so it takes the first `Plan:` line and never scans for a second. A caller who means the task holds its path already, having read it off the board, which is why a bare slug never reaches this tier.
+One plan per task is what makes the tier 1 read unambiguous, so it takes the first `Plan:` line outside a fenced sample and never scans for a second line or reads past a second link on that one. A caller who means the task holds its path already, having read it off the board, which is why a bare slug never reaches this tier.
 
-Read the target out of the link's parentheses, and take the rest of the line when the line carries no link, since an older task writes the target as a plain path with nothing around it. Resolve a relative target against the directory holding the task file rather than against `.canon/tasks/`, and take a project-root target from the root. The archived task is what makes that base matter, since the standard points its line at `../../plans/archive/feature-<slug>.md` once the task sits a folder deeper, and reading that from `.canon/tasks/` lands on a repository-root `plans/archive/` that never exists.
+Read the target out of the link's parentheses, and take the rest of the line when the line carries no link, since an older task writes the target as a plain path with nothing around it. A bare line counts its leading run of tokens carrying `/` or ending in `.md` as targets and stops at the first word that is neither, so trailing prose after one path still names a single plan.
+
+Resolve a relative target against the directory holding the task file rather than against `.canon/tasks/`, and take a project-root target from the root. The archived task is what makes that base matter, since the standard points its line at `../../plans/archive/feature-<slug>.md` once the task sits a folder deeper, and reading that from `.canon/tasks/` lands on a repository-root `plans/archive/` that never exists.
 
 ## When a tier fails
 
-Tier 1 stops on three failures, and each names a different repair:
+Tier 1 stops on four failures, and each names a different repair:
 
+- The line links more than one plan. Stop: `❌ <path> links <N> plans on its Plan: line (<every target>), so the task does not say which one this run builds. Pass one plan path directly.` Test this ahead of the three below, since taking the first link runs whichever plan leads the line and reports success.
 - No `Plan:` line at all. Stop: `❌ <path> carries no Plan: line, so nothing there names a plan to run. Write the plan and point the task at it, or pass the plan path directly.` A row still awaiting a plan is the ordinary case, so the message names the missing pointer rather than the missing plan sections a reader would then go hunting for.
 - The pointer resolves into a plans archive. Stop: `❌ <path> points at an archived plan, which describes work that already shipped. Reopen the task against a live plan, or pass that plan directly.` Test the resolved path rather than the task's outcomes or its `Pull request:` line, since a stale board gets its ticks wrong and the standard fixes where a shipped pointer lands.
 - The pointer resolves to no file. Stop: `❌ <path> points at <target>, which does not exist. The citation is stale, so repoint the task or pass the plan path directly.`

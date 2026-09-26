@@ -11,6 +11,7 @@ import {
   type DeclineOutcome,
   declineTask,
   type PlanCitations,
+  type PlanMove,
   planCitations,
 } from '@/tasks/archive'
 import {
@@ -154,9 +155,9 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'The task carries its plan with it when no other live task cites that',
-        'plan, and the archived task keeps a working Plan: pointer at the new',
-        'path. A plan several tasks share stays where it is.',
+        'The task carries each plan its Plan: line links when no other live',
+        'task cites that plan, and the archived task keeps a working pointer',
+        'at each new path. A plan several tasks share stays where it is.',
         '',
         'The ready folder the task names moves to .canon/ready/archive/ with its',
         'plan, and the Ready: line and the plan path to it are retargeted. A',
@@ -260,6 +261,7 @@ export function register(program: Command): void {
         '',
         'Locations:',
         '  unstated  the task carries no Plan: line',
+        '  several   the Plan: line links more than one plan, named in targets',
         '  live      the target resolves inside .canon/plans/',
         '  archived  the target resolves inside .canon/plans/archive/',
         '  outside   the target resolves somewhere else',
@@ -448,12 +450,14 @@ export function register(program: Command): void {
         '',
         'Exit codes:',
         '  0  the line was added, corrected, or already correct',
-        '  1  refused, with the reason on stderr or in the JSON record',
+        '  1  refused, including several-plans for a line linking more than one',
+        '     plan, with the reason on stderr or in the JSON record',
         '',
         'It writes Plan: [<label>](<target>) right after the H1, corrects the',
-        'target in place when the line exists, and resolves both a bare slug',
-        'and a board-relative path the way canon tasks plan-answers does. Safe',
-        'from a linked worktree, since it resolves the board root in-process.',
+        'target in place when the line exists and names the one it replaced,',
+        'and resolves both a bare slug and a board-relative path the way canon',
+        'tasks plan-answers does. Safe from a linked worktree, since it',
+        'resolves the board root in-process.',
         '',
         'Examples:',
         '  canon tasks plan-link v28.1-trigger-escalation dispatch-answer-gate',
@@ -793,6 +797,7 @@ function reportPlanLink(
         path: relative(root, outcome.path),
         plan: outcome.plan,
         action: outcome.action,
+        replaced: outcome.replaced,
       })}\n`,
     )
     return 0
@@ -801,6 +806,7 @@ function reportPlanLink(
   intro('canon tasks plan-link')
   logStep(outcome.action === 'unchanged' ? 'Already recorded' : 'Recorded')
   logInfo(`${outcome.stem} names plan ${outcome.plan}`)
+  if (outcome.replaced) logInfo(`replaced ${outcome.replaced}`)
   if (outcome.action !== 'unchanged') logAdd(relative(root, outcome.path))
   outro()
 
@@ -974,6 +980,10 @@ function reportCitations(
 
 function describeCitations(outcome: PlanCitations): string {
   if (outcome.location === 'unstated') return 'carries no Plan: line.'
+
+  if (outcome.location === 'several') {
+    return `links ${outcome.targets.length} plans (${outcome.targets.join(', ')}), so no single plan is the sweep's to settle.`
+  }
 
   if (outcome.location === 'archived') {
     return `points at ${outcome.target}, which an earlier sweep already archived.`
@@ -1396,11 +1406,7 @@ function report(
   logStep('Archived')
   logRemove(relative(root, outcome.from))
   logAdd(relative(root, outcome.to))
-  if (outcome.plan) {
-    logRemove(relative(root, outcome.plan.from))
-    logAdd(relative(root, outcome.plan.to))
-    logInfo('retargeted the Plan: line')
-  }
+  logPlanMoves(outcome.plans, root)
   if (outcome.ready) {
     logRemove(relative(root, outcome.ready.from))
     logAdd(relative(root, outcome.ready.to))
@@ -1412,6 +1418,24 @@ function report(
   outro()
 
   return 0
+}
+
+function logPlanMoves(plans: readonly PlanMove[], root: string): void {
+  for (const plan of plans) {
+    logRemove(relative(root, plan.from))
+    logAdd(relative(root, plan.to))
+  }
+  if (plans.length > 0) logInfo('retargeted the Plan: line')
+}
+
+function planMovesFor(
+  plans: readonly PlanMove[],
+  root: string,
+): readonly { readonly from: string; readonly to: string }[] {
+  return plans.map((plan) => ({
+    from: relative(root, plan.from),
+    to: relative(root, plan.to),
+  }))
 }
 
 function recordFor(
@@ -1434,12 +1458,7 @@ function recordFor(
     to: relative(root, outcome.to),
     priorityRowRemoved: outcome.priorityRowRemoved,
     indexRegenerated: outcome.indexRegenerated,
-    plan: outcome.plan
-      ? {
-          from: relative(root, outcome.plan.from),
-          to: relative(root, outcome.plan.to),
-        }
-      : null,
+    plans: planMovesFor(outcome.plans, root),
     ready: outcome.ready
       ? {
           from: relative(root, outcome.ready.from),
@@ -1537,11 +1556,7 @@ function reportDecline(
   logStep('Declined')
   logRemove(relative(root, outcome.from))
   logAdd(relative(root, outcome.to))
-  if (outcome.plan) {
-    logRemove(relative(root, outcome.plan.from))
-    logAdd(relative(root, outcome.plan.to))
-    logInfo('retargeted the Plan: line')
-  }
+  logPlanMoves(outcome.plans, root)
   if (outcome.priorityRowRemoved) logInfo('cleared the ordering row')
   if (outcome.backlogRowRemoved) logInfo('cleared the backlog row')
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
@@ -1571,11 +1586,6 @@ function declineRecordFor(
     priorityRowRemoved: outcome.priorityRowRemoved,
     backlogRowRemoved: outcome.backlogRowRemoved,
     indexRegenerated: outcome.indexRegenerated,
-    plan: outcome.plan
-      ? {
-          from: relative(root, outcome.plan.from),
-          to: relative(root, outcome.plan.to),
-        }
-      : null,
+    plans: planMovesFor(outcome.plans, root),
   }
 }

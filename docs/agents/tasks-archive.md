@@ -26,9 +26,9 @@ Exit codes: `0` archived, `1` refused. Every gate is a refusal rather than a war
 
 An outcome whose body is struck reads as cut rather than open or closed, whatever its checkbox holds: `- ~~<outcome>~~ <why>`. A task carrying only cut outcomes archives, since the gate refuses `no-outcomes` only when both the closed and the cut counts are zero. The success record carries `closed` and `cut` as counts, so a reader tells a shipped task from an abandoned one without opening the file.
 
-The task carries its plan with it. When the closing task is the last live one whose `Plan:` line resolves onto that file, the plan moves to `.canon/plans/archive/` under its own name and the archived task's line is rewritten as `Plan: [feature-<slug>](../../plans/archive/feature-<slug>.md)`, a folder deeper than the live task wrote it. The `plan` field on the success record carries that `from` and `to`, and is `null` when nothing moved.
+The task carries its plan with it. When the closing task is the last live one whose `Plan:` line resolves onto that file, the plan moves to `.canon/plans/archive/` under its own name and the archived task's link is rewritten as `[feature-<slug>](../../plans/archive/feature-<slug>.md)`, a folder deeper than the live task wrote it. A line linking several plans moves each one no other live task cites and rewrites only those links. The `plans` array on the success record carries a `from` and `to` per moved plan in line order, and is empty when nothing moved.
 
-Every other relative link in the task is re-resolved for the deeper folder too, whether its target moved or not: `Groundwork:`, `Intake:`, a `Plan:` or `Ready:` line whose target stayed put, and a link in the body. Fenced blocks, inline code spans, absolute URLs, `#` anchors, and rooted paths are left alone. `canon tasks decline` applies the same rebase, since `declined/` sits at the same depth. The rebase runs before the plan and ready retargets, so a moved plan keeps its own line.
+Every other relative link in the task is re-resolved for the deeper folder too, whether its target moved or not: `Groundwork:`, `Intake:`, a `Plan:` or `Ready:` line whose target stayed put, and a link in the body. Fenced blocks, inline code spans, absolute URLs, `#` anchors, and rooted paths are left alone. `canon tasks decline` applies the same rebase, since `declined/` sits at the same depth. The plan retarget runs before the rebase and writes each moved link relative to the live board, so the rebase carries it into the deeper folder like every other link, while the ready retarget runs after it.
 
 The ready folder the task's `Ready:` line names moves with the plan to `.canon/ready/archive/`, falling back to a `.canon/ready/<nn>-<slug>/` path in the plan when the line is absent. The `Ready:` line and the plan's literal path to the folder are retargeted, and the `ready` field on the success record carries `from` and `to`, or `null` when nothing moved. A folder that resolves to nothing, sits already archived, or meets a taken destination moves nothing and refuses nothing.
 
@@ -72,7 +72,7 @@ Exit codes: `0` declined, `1` refused. The `reason` field carries which gate fir
 
 The decision is written onto the task as a `Declined: <reason>, <who> on <YYYY-MM-DD>` line, anchored the same way `Pull request:` is, after the last origin line the task carries.
 
-The task carries its plan with it the same way archive does, when the declining task is the last live citation. A declined task's plan lands in `.canon/plans/archive/`, indistinguishable from a shipped one by folder alone. The task file under `.canon/tasks/declined/` is what records which it was.
+The task carries its plans with it the same way archive does, each one the declining task is the last live citation of, and the success record carries the same `plans` array. A declined task's plan lands in `.canon/plans/archive/`, indistinguishable from a shipped one by folder alone. The task file under `.canon/tasks/declined/` is what records which it was.
 
 Skills branch on the reason rather than on the exit code, the same rule `canon tasks archive` states:
 

@@ -33,7 +33,7 @@ canon tasks archive <stem> --json
 
 The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit. Branch on `ok`, then on `reason`. An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command and takes the second status, which masks every non-zero exit rather than only an absent verb. The binary exits 1 for an unknown subcommand and 1 for an ordinary refusal alike, so the record is the only signal that survives the wrapper.
 
-On success the record carries `from`, `to`, `priorityRowRemoved`, and `indexRegenerated`, which is what moved, what row it cleared, and whether the index changed. It also carries `plan` when the task was the last live citation of a live plan, holding the `from` and `to` of the plan moved alongside it. A `plan` of `null` means the task cited no live plan, or that a sibling still holds it.
+On success the record carries `from`, `to`, `priorityRowRemoved`, and `indexRegenerated`, which is what moved, what row it cleared, and whether the index changed. It also carries `plans`, one `from` and `to` for each live plan the task was the last live citation of, in the order its `Plan:` line links them. An empty `plans` means the task cited no live plan, or that a sibling still holds every one it cited.
 
 ## Step 3: route on a refusal
 

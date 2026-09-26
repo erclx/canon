@@ -38,6 +38,7 @@ interface TaskFixture {
   readonly stem?: string
   readonly pullRequest?: number | readonly number[]
   readonly plan?: string
+  readonly planLine?: string
   readonly ready?: string
   readonly outcomes?: string
 }
@@ -45,6 +46,7 @@ interface TaskFixture {
 function taskBody({
   pullRequest,
   plan,
+  planLine,
   ready,
   outcomes = '- [x] Outcome: it shipped',
 }: TaskFixture): string {
@@ -59,6 +61,7 @@ function taskBody({
   ]
 
   if (plan) lines.push(`Plan: [${plan}](${plan})`)
+  if (planLine) lines.push(planLine)
   if (ready) lines.push(`Ready: [${ready}](../ready/${ready}/)`)
   if (pullRequest) {
     const numbers =
@@ -232,6 +235,25 @@ describe('readPlanTarget', () => {
   it('should return undefined when there is no plan line', () => {
     expect(readPlanTarget('Issue: #12\n')).toBeUndefined()
   })
+
+  it('should return undefined when the line links several plans', () => {
+    expect(
+      readPlanTarget('Plan: [a](../plans/a.md), [b](../plans/b.md)\n'),
+    ).toBeUndefined()
+  })
+
+  it('should skip a plan line inside a fenced sample above the real one', () => {
+    const text = [
+      '```markdown',
+      'Plan: [sample](../plans/sample.md)',
+      '```',
+      '',
+      'Plan: [real](../plans/real.md)',
+      '',
+    ].join('\n')
+
+    expect(readPlanTarget(text)).toBe('../plans/real.md')
+  })
 })
 
 describe('readPlanTargets', () => {
@@ -271,6 +293,48 @@ describe('readPlanTargets', () => {
     ])
   })
 
+  it('should read every path out of a bare line listing several', () => {
+    expect(
+      readPlanTargets('Plan: ../plans/feature-x.md ../plans/feature-y.md\n'),
+    ).toEqual(['../plans/feature-x.md', '../plans/feature-y.md'])
+  })
+
+  it('should read every path out of a comma-separated bare line', () => {
+    expect(readPlanTargets('Plan: feature-x.md, feature-y.md\n')).toEqual([
+      'feature-x.md',
+      'feature-y.md',
+    ])
+  })
+
+  it('should not read trailing prose on a bare line as further plans', () => {
+    expect(
+      readPlanTargets('Plan: ../plans/feature-x.md see the notes\n'),
+    ).toEqual(['../plans/feature-x.md'])
+  })
+
+  it('should not read a path inside trailing prose on a bare line as a plan', () => {
+    expect(
+      readPlanTargets('Plan: ../plans/feature-x.md (see ../notes/y.md)\n'),
+    ).toEqual(['../plans/feature-x.md'])
+  })
+
+  it('should fall back to the first token when no bare token reads as a path', () => {
+    expect(readPlanTargets('Plan: pending review\n')).toEqual(['pending'])
+  })
+
+  it('should read the real line below a fenced sample', () => {
+    const text = [
+      '```markdown',
+      'Plan: [a](../plans/a.md), [b](../plans/b.md)',
+      '```',
+      '',
+      'Plan: [c](../plans/c.md)',
+      '',
+    ].join('\n')
+
+    expect(readPlanTargets(text)).toEqual(['../plans/c.md'])
+  })
+
   it('should return no targets when there is no plan line', () => {
     expect(readPlanTargets('Issue: #12\n')).toEqual([])
   })
@@ -288,33 +352,97 @@ describe('readPlanTargets', () => {
 })
 
 describe('retargetPlanLine', () => {
+  function moving(from: string, to: string): ReadonlyMap<string, string> {
+    return new Map([[from, to]])
+  }
+
   it('should rewrite the link text and the target together', () => {
     const text = 'Plan: [feature-x](../plans/feature-x.md)\n'
 
-    expect(retargetPlanLine(text, '../../plans/archive/feature-x.md')).toBe(
-      'Plan: [feature-x](../../plans/archive/feature-x.md)\n',
-    )
+    expect(
+      retargetPlanLine(
+        text,
+        moving('../plans/feature-x.md', '../../plans/archive/feature-x.md'),
+      ),
+    ).toBe('Plan: [feature-x](../../plans/archive/feature-x.md)\n')
   })
 
   it('should rewrite the older bare path form as a link', () => {
     const text = 'Plan: ../plans/feature-x.md\n'
 
-    expect(retargetPlanLine(text, '../../plans/archive/feature-x.md')).toBe(
-      'Plan: [feature-x](../../plans/archive/feature-x.md)\n',
-    )
+    expect(
+      retargetPlanLine(
+        text,
+        moving('../plans/feature-x.md', '../../plans/archive/feature-x.md'),
+      ),
+    ).toBe('Plan: [feature-x](../../plans/archive/feature-x.md)\n')
   })
 
   it('should write a target carrying a substitution sequence literally', () => {
     const text = 'Plan: [feature-x](../plans/feature-x.md)\n'
 
-    expect(retargetPlanLine(text, "../../plans/archive/f$&$'-x.md")).toContain(
-      "(../../plans/archive/f$&$'-x.md)",
-    )
+    expect(
+      retargetPlanLine(
+        text,
+        moving('../plans/feature-x.md', "../../plans/archive/f$&$'-x.md"),
+      ),
+    ).toContain("(../../plans/archive/f$&$'-x.md)")
   })
 
   it('should leave text carrying no plan line untouched', () => {
-    expect(retargetPlanLine('Issue: #12\n', '../plans/x.md')).toBe(
-      'Issue: #12\n',
+    expect(
+      retargetPlanLine('Issue: #12\n', moving('../plans/x.md', '../y.md')),
+    ).toBe('Issue: #12\n')
+  })
+
+  it('should rewrite only the mapped link on a line linking two plans', () => {
+    const text = 'Plan: [a](../plans/a.md), [b](../plans/b.md)\n'
+
+    expect(
+      retargetPlanLine(text, moving('../plans/b.md', '../plans/archive/b.md')),
+    ).toBe('Plan: [a](../plans/a.md), [b](../plans/archive/b.md)\n')
+  })
+
+  it('should write a substitution sequence literally on a line linking two plans', () => {
+    const text = 'Plan: [a](../plans/a.md), [b](../plans/b.md)\n'
+
+    expect(
+      retargetPlanLine(
+        text,
+        moving('../plans/b.md', '../plans/archive/b$&$1.md'),
+      ),
+    ).toBe('Plan: [a](../plans/a.md), [b$&$1](../plans/archive/b$&$1.md)\n')
+  })
+
+  it('should rewrite the mapped paths on a bare line listing two plans', () => {
+    const text = 'Plan: ../plans/a.md ../plans/b.md\n'
+
+    expect(
+      retargetPlanLine(text, moving('../plans/a.md', '../plans/archive/a.md')),
+    ).toBe('Plan: [a](../plans/archive/a.md) ../plans/b.md\n')
+  })
+
+  it('should leave a plan line inside a fenced sample alone', () => {
+    const text = [
+      '```markdown',
+      'Plan: [x](../plans/x.md)',
+      '```',
+      '',
+      'Plan: [x](../plans/x.md)',
+      '',
+    ].join('\n')
+
+    expect(
+      retargetPlanLine(text, moving('../plans/x.md', '../plans/archive/x.md')),
+    ).toBe(
+      [
+        '```markdown',
+        'Plan: [x](../plans/x.md)',
+        '```',
+        '',
+        'Plan: [x](../plans/archive/x.md)',
+        '',
+      ].join('\n'),
     )
   })
 })
@@ -568,7 +696,7 @@ describe('archiveTask', () => {
 
     expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
       ok: true,
-      plan: { from: plan, to: archivedPlan() },
+      plans: [{ from: plan, to: archivedPlan() }],
     })
     expect(existsSync(plan)).toBe(false)
     expect(existsSync(archivedPlan())).toBe(true)
@@ -598,7 +726,7 @@ describe('archiveTask', () => {
     const result = await archiveTask(ROOT, { kind: 'stem', stem })
 
     expect(result).toMatchObject({ ok: true })
-    expect(result.ok && result.plan).toBeUndefined()
+    expect(result.ok && result.plans).toEqual([])
     expect(existsSync(plan)).toBe(true)
   })
 
@@ -626,7 +754,7 @@ describe('archiveTask', () => {
 
     expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
       ok: true,
-      plan: { from: plan, to: archivedPlan() },
+      plans: [{ from: plan, to: archivedPlan() }],
     })
   })
 
@@ -636,7 +764,7 @@ describe('archiveTask', () => {
     const result = await archiveTask(ROOT, { kind: 'stem', stem })
 
     expect(result).toMatchObject({ ok: true })
-    expect(result.ok && result.plan).toBeUndefined()
+    expect(result.ok && result.plans).toEqual([])
     expect(existsSync(archivedPlan())).toBe(false)
   })
 
@@ -658,13 +786,86 @@ describe('archiveTask', () => {
     })
   })
 
+  it('should leave a plan a multi-link sibling still cites', async () => {
+    const plan = await seedPlan()
+    await seedPlan('feature-other.md')
+    const stem = await seedTask({ plan: '../plans/feature-trigger.md' })
+    await seedTask({
+      stem: 'v28.2-sibling',
+      planLine:
+        'Plan: [feature-other](../plans/feature-other.md), [feature-trigger](../plans/feature-trigger.md)',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result.ok && result.plans).toEqual([])
+    expect(existsSync(plan)).toBe(true)
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain(
+      'Plan: [../plans/feature-trigger.md](../../plans/feature-trigger.md)',
+    )
+  })
+
+  it('should carry every uncited plan a multi-link task names', async () => {
+    const trigger = await seedPlan()
+    const other = await seedPlan('feature-other.md')
+    const stem = await seedTask({
+      planLine:
+        'Plan: [feature-trigger](../plans/feature-trigger.md), [feature-other](../plans/feature-other.md)',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({
+      ok: true,
+      plans: [
+        { from: trigger, to: archivedPlan() },
+        { from: other, to: archivedPlan('feature-other.md') },
+      ],
+    })
+    expect(existsSync(trigger)).toBe(false)
+    expect(existsSync(other)).toBe(false)
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain(
+      'Plan: [feature-trigger](../../plans/archive/feature-trigger.md), [feature-other](../../plans/archive/feature-other.md)\n',
+    )
+  })
+
+  it('should carry only the unshared plan of a multi-link task', async () => {
+    const trigger = await seedPlan()
+    const other = await seedPlan('feature-other.md')
+    const stem = await seedTask({
+      planLine:
+        'Plan: [feature-trigger](../plans/feature-trigger.md), [feature-other](../plans/feature-other.md)',
+    })
+    await seedTask({
+      stem: 'v28.2-sibling',
+      plan: '../plans/feature-other.md',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({
+      ok: true,
+      plans: [{ from: trigger, to: archivedPlan() }],
+    })
+    expect(existsSync(other)).toBe(true)
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain(
+      'Plan: [feature-trigger](../../plans/archive/feature-trigger.md), [feature-other](../../plans/feature-other.md)\n',
+    )
+  })
+
   it('should carry a live plan written from the project root', async () => {
     const plan = await seedPlan()
     const stem = await seedTask({ plan: '.canon/plans/feature-trigger.md' })
 
     expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
       ok: true,
-      plan: { from: plan, to: archivedPlan() },
+      plans: [{ from: plan, to: archivedPlan() }],
     })
     expect(existsSync(plan)).toBe(false)
   })
@@ -1064,7 +1265,7 @@ describe('declineTask', () => {
 
     expect(result).toMatchObject({
       ok: true,
-      plan: { from: plan, to: archivedPlan() },
+      plans: [{ from: plan, to: archivedPlan() }],
     })
     expect(existsSync(plan)).toBe(false)
     expect(existsSync(archivedPlan())).toBe(true)
@@ -1081,8 +1282,32 @@ describe('declineTask', () => {
     const result = await declineTask(ROOT, stem, 'no longer needed', 'Alex')
 
     expect(result).toMatchObject({ ok: true })
-    expect(result.ok && result.plan).toBeUndefined()
+    expect(result.ok && result.plans).toEqual([])
     expect(existsSync(plan)).toBe(true)
+  })
+
+  it('should carry every uncited plan a multi-link task names', async () => {
+    const trigger = await seedPlan()
+    const other = await seedPlan('feature-other.md')
+    const stem = await seedTask({
+      planLine:
+        'Plan: [feature-trigger](../plans/feature-trigger.md), [feature-other](../plans/feature-other.md)',
+    })
+
+    const result = await declineTask(ROOT, stem, 'no longer needed', 'Alex')
+
+    expect(result).toMatchObject({
+      ok: true,
+      plans: [
+        { from: trigger, to: archivedPlan() },
+        { from: other, to: archivedPlan('feature-other.md') },
+      ],
+    })
+    expect(
+      await readFile(join(declinedDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain(
+      'Plan: [feature-trigger](../../plans/archive/feature-trigger.md), [feature-other](../../plans/archive/feature-other.md)\n',
+    )
   })
 
   it('should point the declined task at the archived plan', async () => {
@@ -1179,6 +1404,20 @@ describe('planCitations', () => {
     expect(await planCitations(ROOT, stem)).toMatchObject({
       ok: true,
       location: 'outside',
+    })
+  })
+
+  it('should report every target of a line linking several plans', async () => {
+    const stem = await seedTask({
+      planLine: 'Plan: [a](../plans/a.md), [b](../plans/b.md)',
+    })
+
+    expect(await planCitations(ROOT, stem)).toMatchObject({
+      ok: true,
+      location: 'several',
+      target: undefined,
+      targets: ['../plans/a.md', '../plans/b.md'],
+      citedBy: [],
     })
   })
 
