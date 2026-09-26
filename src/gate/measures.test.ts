@@ -1113,13 +1113,13 @@ describe('documentCeiling', () => {
     })
 
     it('names every document past the ceiling, longest first', async () => {
-      write('docs/short.md', 310)
-      write('docs/long.md', 340)
+      write('docs/a.md', 310)
+      write('docs/b.md', 340)
 
       const report = await documentCeiling(context())
 
       expect(report.failure).toMatch(
-        /docs\/long\.md 340 rendered lines.*docs\/short\.md 310 rendered lines/,
+        /docs\/b\.md 340 rendered lines.*docs\/a\.md 310 rendered lines/,
       )
     })
 
