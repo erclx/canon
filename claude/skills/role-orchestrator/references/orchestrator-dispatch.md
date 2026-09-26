@@ -74,7 +74,7 @@ A declared set is what a branch sets out to write rather than a bound on it, so 
 
 Disjointness is necessary and not sufficient, so hold a candidate whose sets do not touch when a stated reason serializes it, and write the reason on the hold. One row creating a skill and another auditing that catalog and counting it write nothing in common, and dispatching both still leaves the audit counting a denominator that moves underneath it. Nothing verifies that a reason was written, so the rule holds only while the dispatcher applies it.
 
-What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review fallback's count of three in `orchestrator-review-fallback.md`, which moves a review rather than binding a track, and this runbook carries none.
+What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review dispatch's count of three in `orchestrator-review-dispatch.md`, which moves a review rather than binding a track, and this runbook carries none.
 
 ## Pick the model
 
