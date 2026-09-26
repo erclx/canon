@@ -41,7 +41,7 @@ The verdict set is closed at four:
 
 - **keep.** The rule loads where its subject lives, reaches only projects that have that subject, and states something no other surface a target receives carries. A rule that stays but carries cuttable bullets is a keep, and the row names the bullets to cut.
 - **move.** The rule is worth its text and loads in the wrong place: always-on where a path scope would do, path-scoped where its subject has no glob, or selected by a stack whose projects lack its subject. Report a path-scope change as a move of the load mode. A change of folder that leaves the selecting stacks and the load mode as they were is a regroup rather than a move, and reads as keep here.
-- **retire.** Every bullet is restated on a surface a target receives, enforced by a hook or a gate stage, owned by a standard the rule already points at, or a harness default.
+- **retire.** Every bullet is restated on a surface a target receives, enforced by a hook or a gate stage, owned by a standard the rule already points at, or a harness default. Two whole-rule routes retire as well: an always-on rule whose removal causes no mistake even where its subject exists, and a governance rule no stack selects and no opt-in list names.
 - **merge.** Another rule states the same instruction for the same audience, so one file absorbs the other.
 
 Hold two overrides above the verdict:
