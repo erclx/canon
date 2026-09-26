@@ -20,7 +20,7 @@ Does not govern:
 
 ## Title
 
-- Format: `<type>(<scope>): <subject>`
+- Format: `<type>(<scope>): <subject>`, with `!` before the colon for a breaking change
 - Casing: lowercase for `<type>`, `<scope>`, and first word of `<subject>`
 - Length: 72 characters maximum
 

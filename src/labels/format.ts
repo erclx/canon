@@ -22,8 +22,8 @@ const TITLE_MAX_LENGTH = 72
 
 // Casing-agnostic on purpose. Casing is graded separately once the shape
 // matches, so `type` and `scope` accept either case here and `structure`
-// reports only a title with no `<type>(<scope>): <subject>` shape at all.
-const TITLE_SHAPE = /^([A-Za-z]+)\(([A-Za-z0-9][\w.-]*)\): (.+)$/
+// reports only a title with no `<type>(<scope>)[!]: <subject>` shape at all.
+const TITLE_SHAPE = /^([A-Za-z]+)\(([A-Za-z0-9][\w.-]*)\)!?: (.+)$/
 const LEADING_LETTERS = /^[A-Za-z]+/
 
 /**
