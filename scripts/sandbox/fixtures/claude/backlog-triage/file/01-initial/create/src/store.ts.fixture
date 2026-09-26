@@ -1,0 +1,7 @@
+import type { Task } from './routes/tasks'
+
+const tasks: Task[] = []
+
+export function allTasks(): Task[] {
+  return tasks
+}

@@ -1,0 +1,21 @@
+---
+title: 'v07.0: Auth tokens'
+description: Require a bearer token on every task route
+---
+
+# v07.0: Auth tokens
+
+Issue: #50
+
+Every task route is open to anyone who can reach the process.
+
+## Outcomes
+
+- [ ] Outcome: a request without a valid bearer token receives a 401
+
+## Findings
+
+- The control row. It sits on the board rather than the backlog, so a triage
+  never files it.
+
+> Test strategy: unit, call a route with no token and with a valid one.

@@ -1,0 +1,15 @@
+---
+title: Interface rows
+description: Backlog rows whose work touches a user interface
+---
+
+# Interface rows
+
+### 1. v05.0-dark-theme
+
+- **Problem:** the project ships no interface, only the routes under `src/routes/`, so there is nothing to theme
+- **Fix:** decline the task and clear its backlog line
+- **Worth it:** no, filed from a passing comment with no interface behind it
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** decline, zero stylesheets or components exist and the task's only finding is the comment it was filed from
+- **You:** keep, the demo next month adds a dashboard that will need it

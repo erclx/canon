@@ -1,0 +1,19 @@
+---
+title: 'v06.0: Retry failed webhooks'
+description: A webhook delivery that fails is dropped rather than retried
+---
+
+# v06.0: Retry failed webhooks
+
+A webhook delivery that fails is dropped, so a subscriber that was briefly down
+misses the event for good.
+
+## Outcomes
+
+- [ ] Outcome: a failed delivery retries three times with backoff
+
+## Findings
+
+- Filed while sketching an integration nobody has built.
+
+> Test strategy: unit, fail the first two deliveries and assert the third lands.

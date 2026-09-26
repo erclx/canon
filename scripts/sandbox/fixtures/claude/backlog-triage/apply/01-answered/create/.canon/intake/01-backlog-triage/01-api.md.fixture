@@ -1,0 +1,51 @@
+---
+title: API rows
+description: Backlog rows whose work touches the task routes
+---
+
+# API rows
+
+### 1. v01.0-request-logs-write-to-stdout
+
+- **Problem:** zero `console.log` calls under `src/`, so the defect the task names no longer reproduces
+- **Fix:** decline the task and clear its backlog line
+- **Worth it:** no, the tree no longer holds the defect
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** decline, no `console.log` remains in `src/routes/tasks.ts` or anywhere under `src/`
+- **You:** ok
+
+### 2. v02.0-csv-export
+
+- **Problem:** `src/routes/export.ts` serves `/tasks.csv` with a title and status per row, shipped in #58 under the weekly report work
+- **Fix:** close both outcomes, record the evidence, and archive the task
+- **Worth it:** no, it already shipped
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** archive 1, 2: both shipped in #58, `exportTasksCsv` writes title and status and `EXPORT_PATH` is `/tasks.csv`
+- **You:** ok
+
+### 3. v03.0-rate-limit
+
+- **Problem:** zero limiter, middleware, or request counter under `src/`, so one client still calls every route without bound
+- **Fix:** keep the row and record that it reproduced
+- **Worth it:** yes, the gap reproduces
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** keep, no request counter exists in any of the 3 files under `src/`
+- **You:** ok
+
+### 4. v04.0-search
+
+- **Problem:** `listTasks` takes no query, and the pagination this row waited on landed in #61
+- **Fix:** promote the row to the bottom of `## Needs a plan`
+- **Worth it:** yes, its blocker cleared
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** promote, `listTasks(limit, offset)` shipped in #61 and the route still takes no title query
+- **You:** ok
+
+### 5. v06.0-retry-webhooks
+
+- **Problem:** zero webhook deliveries under `src/`, so there is nothing to retry
+- **Fix:** decline the task and clear its backlog line
+- **Worth it:** no, the integration it names was never built
+- **Open:** decline, archive, keep, or promote?
+- **Suggested:** decline, no file under `src/` sends a webhook
+- **You:** not sure yet, ask me again next week

@@ -1,0 +1,21 @@
+---
+title: 'v01.0: Request logs write to stdout'
+description: The list route logs every request with console.log, mixing logs into piped output
+---
+
+# v01.0: Request logs write to stdout
+
+Issue: #12
+
+`src/routes/tasks.ts` calls `console.log` on every request, so a caller piping
+the output receives log lines mixed into the data.
+
+## Outcomes
+
+- [ ] Outcome: no route writes a log line to stdout
+
+## Findings
+
+- Three `console.log` calls in `src/routes/tasks.ts` at filing time.
+
+> Test strategy: unit, capture stdout around a list call and assert it is empty.

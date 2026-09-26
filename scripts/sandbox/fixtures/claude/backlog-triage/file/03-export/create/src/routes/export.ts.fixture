@@ -1,0 +1,8 @@
+import { allTasks } from '../store'
+
+export const EXPORT_PATH = '/tasks.csv'
+
+export function exportTasksCsv(): string {
+  const rows = allTasks().map((task) => `${task.title},${task.done ? 'done' : 'open'}`)
+  return ['title,status', ...rows].join('\n')
+}

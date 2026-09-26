@@ -1,0 +1,17 @@
+import { allTasks } from '../store'
+
+export interface Task {
+  readonly id: string
+  readonly title: string
+  readonly done: boolean
+}
+
+export interface Page {
+  readonly tasks: Task[]
+  readonly total: number
+}
+
+export function listTasks(limit = 50, offset = 0): Page {
+  const tasks = allTasks()
+  return { tasks: tasks.slice(offset, offset + limit), total: tasks.length }
+}

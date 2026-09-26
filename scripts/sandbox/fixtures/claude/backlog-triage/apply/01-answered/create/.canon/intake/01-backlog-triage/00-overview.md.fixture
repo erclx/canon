@@ -1,0 +1,38 @@
+---
+title: Backlog triage
+description: One verdict per backlog row, measured against the tree
+date: 2026-09-20
+---
+
+# Backlog triage
+
+Six backlog rows, measured against the commit that added the CSV export.
+
+## The answer contract
+
+`You:` ships empty and empty means unread. Accepting a verdict is typed as
+`- **You:** ok`. Nothing here is decided by silence.
+
+## Clusters
+
+| File        | Holds                       | Items | Open |
+| ----------- | --------------------------- | ----- | ---- |
+| `01-api.md` | Rows touching the API       | 5     | 5    |
+| `02-ui.md`  | Rows touching the interface | 1     | 1    |
+
+## Verdicts
+
+3 decline, 1 archive, 1 keep, 1 promote
+
+## Ready
+
+- `v04.0-search` promotes, since pagination landed
+
+## Open questions
+
+1. [v01.0-request-logs-write-to-stdout](01-api.md#1-v010-request-logs-write-to-stdout)
+2. [v02.0-csv-export](01-api.md#2-v020-csv-export)
+3. [v03.0-rate-limit](01-api.md#3-v030-rate-limit)
+4. [v04.0-search](01-api.md#4-v040-search)
+5. [v06.0-retry-webhooks](01-api.md#5-v060-retry-webhooks)
+6. [v05.0-dark-theme](02-ui.md#1-v050-dark-theme)
