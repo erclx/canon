@@ -177,7 +177,7 @@ export const skills = {
     act: { who: 'CLI', what: 'does the work', how: 'canon gov sync' },
   },
   loaded: (total: number) => `1 of ${total}`,
-  foot: 'The skill body names no rule, no stack and no snippet. It asks, matches, and delegates.',
+  foot: 'The skill body names no rule and no stack. It asks, matches, and delegates.',
 }
 
 // README.md: canon-allow-readme-paraphrase: the roles and their launches are what docs/workflow/operating-model.md covers, which the README only links.
