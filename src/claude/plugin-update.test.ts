@@ -52,12 +52,14 @@ describe('matchInstall', () => {
 
 describe('updatedMessage', () => {
   it('should report the version move when the update changed it', () => {
-    expect(updatedMessage('4.67.0', '4.68.0')).toBe('Updated 4.67.0 to 4.68.0.')
+    expect(updatedMessage('4.67.0', '4.68.0')).toBe(
+      'Plugin updated 4.67.0 to 4.68.0.',
+    )
   })
 
   it('should report no change when the update left the version the same', () => {
     expect(updatedMessage('4.68.0', '4.68.0')).toBe(
-      'Reinstalled 4.68.0, unchanged.',
+      'Plugin reinstalled 4.68.0, unchanged.',
     )
   })
 })

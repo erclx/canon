@@ -43,6 +43,6 @@ export function matchInstall(
 
 export function updatedMessage(before: string, after: string): string {
   return after === before
-    ? `Reinstalled ${after}, unchanged.`
-    : `Updated ${before} to ${after}.`
+    ? `Plugin reinstalled ${after}, unchanged.`
+    : `Plugin updated ${before} to ${after}.`
 }
