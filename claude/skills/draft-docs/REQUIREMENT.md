@@ -31,5 +31,5 @@ Without this skill, a session drafting documentation for a surface that has no p
 ## Out of scope
 
 - Rewriting or syncing an existing `docs/*.md` section against a diff since main: `docs-sync`
-- The `.claude/` planning surface: `context-fold`
+- The context entries, requirements, architecture, wireframes, and task board: `context-fold`
 - Drafting a standard, a snippet, or a governance rule: `create-standard`, `create-snippet`, `create-rule`
