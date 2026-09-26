@@ -25,6 +25,12 @@ import {
   sizeRecords,
 } from '@/records/size'
 import {
+  DEFAULT_REVIEW_DAYS,
+  type StaleEntry,
+  type StaleReport,
+  staleMemory,
+} from '@/records/stale'
+import {
   type Finding,
   type FindingRemedy,
   isRecordKind,
@@ -74,6 +80,13 @@ interface PruneCommandOptions extends ValidateCommandOptions {
   readonly write?: boolean
   readonly olderThan?: string
 }
+
+interface StaleCommandOptions extends ValidateCommandOptions {
+  readonly days?: string
+}
+
+/** The one kind `stale` reads, since only a memory entry carries a review date. */
+const STALE_KINDS = ['memory'] as const
 
 interface OrdinalCommandOptions extends ValidateCommandOptions {
   readonly claim?: boolean
@@ -245,6 +258,52 @@ export function register(program: Command): void {
     )
     .action(async (opts: BackupCommandOptions) => {
       process.exitCode = await runSize(opts)
+    })
+
+  records
+    .command('stale')
+    .description(
+      'Report which entries are due for review and which cite paths the tree no longer holds',
+    )
+    .argument('<kind>', `Record folder: ${STALE_KINDS.join(', ')}`)
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--days <n>',
+      `Days after a review before an entry is due again (default ${DEFAULT_REVIEW_DAYS})`,
+    )
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Reads the top-level entries of the memory folder, never review/, archive/,',
+        'or index.md. An entry is due when it carries no reviewed date, a reviewed',
+        'value that is not a date, or one older than --days. A path is a backticked',
+        'token holding a / and a file extension, resolved against the project root',
+        'after any :line or #heading anchor is stripped. Tokens under .canon/,',
+        'scratch, or worktrees, and any holding a placeholder, glob, variable, or',
+        'elided ... segment, are never reported.',
+        '',
+        'Entries are ordered due first, then those citing a missing path, then the',
+        'longest unreviewed, then by name, so a review takes the first N as a batch.',
+        '',
+        'Exit codes:',
+        '  0  the reading completed, whatever it found',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'It gates nothing and writes nothing. A due entry is a queue position rather',
+        'than a failure, and a missing path is a prompt for the review to judge.',
+        '',
+        'Examples:',
+        '  canon records stale memory',
+        '  canon records stale memory --json',
+        '  canon records stale memory --days 60 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (kind: string, opts: StaleCommandOptions) => {
+      process.exitCode = await runStale(kind, opts)
     })
 
   records
@@ -482,6 +541,93 @@ async function runPruneTmp(opts: PruneCommandOptions): Promise<number> {
     return reportRefusal('canon records prune-tmp', outcome, emitJson)
 
   return reportPrune(outcome, emitJson)
+}
+
+async function runStale(
+  kind: string,
+  opts: StaleCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+
+  if (!(STALE_KINDS as readonly string[]).includes(kind)) {
+    return reportRefusal(
+      'canon records stale',
+      {
+        reason: 'unknown-kind',
+        message: `Not a kind stale reads: ${kind}. Expected one of: ${STALE_KINDS.join(', ')}.`,
+      },
+      emitJson,
+    )
+  }
+
+  const days = Number(opts.days ?? DEFAULT_REVIEW_DAYS)
+
+  if (!Number.isInteger(days) || days <= 0) {
+    return reportRefusal(
+      'canon records stale',
+      {
+        reason: 'bad-days',
+        message: `--days must be a positive whole number of days, got ${opts.days}.`,
+      },
+      emitJson,
+    )
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const outcome = await staleMemory(root, days)
+
+  if (!outcome.ok)
+    return reportRefusal('canon records stale', outcome, emitJson)
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify(outcome)}\n`)
+    return 0
+  }
+
+  reportStale(outcome)
+  return 0
+}
+
+function staleRow(entry: StaleEntry): string[] {
+  return [
+    entry.name,
+    entry.reviewed ?? (entry.invalidReviewed ? 'invalid' : 'never'),
+    entry.unresolved.join(', '),
+  ]
+}
+
+function reportStale(outcome: StaleReport): void {
+  const due = outcome.entries.filter((entry) => entry.due)
+  const moved = outcome.entries.filter((entry) => entry.unresolved.length > 0)
+
+  intro('canon records stale')
+  logStep('Due')
+
+  if (due.length === 0) {
+    logInfo(`none, every entry reviewed within ${plural(outcome.days, 'day')}`)
+  } else {
+    const headers = ['entry', 'reviewed', 'unresolved']
+    const rows = due.map(staleRow)
+    const widths = headers.map((header, column) =>
+      columnWidth(
+        header,
+        rows.map((row) => row[column]),
+      ),
+    )
+    const render = (cells: readonly string[]): string =>
+      cells
+        .map((cell, column) => cell.padEnd(widths[column]))
+        .join('  ')
+        .trimEnd()
+
+    pipeOutput([render(headers), ...rows.map(render)].join('\n'))
+  }
+
+  logStep('Total')
+  logInfo(
+    `${outcome.due} of ${outcome.total} due, ${moved.length} citing a missing path, in ${outcome.folder}`,
+  )
+  outro()
 }
 
 function pruneRow(entry: PruneUnit): string[] {
