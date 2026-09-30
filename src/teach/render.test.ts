@@ -125,6 +125,63 @@ describe('renderLessonBody', () => {
   })
 })
 
+describe('renderLessonBody code blocks', () => {
+  it('should render a code block highlighted under its language class', () => {
+    const outcome = renderLessonBody([
+      { type: 'code', lang: 'ts', text: 'const a = 1' },
+    ])
+    expect(outcome).toEqual({
+      ok: true,
+      html:
+        '<pre><code class="hljs language-ts">' +
+        '<span class="hljs-keyword">const</span> a = ' +
+        '<span class="hljs-number">1</span></code></pre>',
+    })
+  })
+
+  it('should render a code block with no lang as escaped plain code', () => {
+    const outcome = renderLessonBody([
+      { type: 'code', text: '</code><script>x</script>' },
+    ])
+    expect(outcome).toEqual({
+      ok: true,
+      html: '<pre><code class="hljs">&lt;/code&gt;&lt;script&gt;x&lt;/script&gt;</code></pre>',
+    })
+  })
+
+  it('should refuse a code block whose text is not a string', () => {
+    const outcome = renderLessonBody([{ type: 'code', lang: 'ts', text: 1 }])
+    expect(outcome).toEqual({
+      ok: false,
+      reason: 'bad-input',
+      message: 'Block 0: code needs a string text',
+      detail: [],
+    })
+  })
+
+  it('should refuse a code block whose lang is not a string', () => {
+    const outcome = renderLessonBody([{ type: 'code', lang: 7, text: 'x' }])
+    expect(outcome).toEqual({
+      ok: false,
+      reason: 'bad-input',
+      message: 'Block 0: code lang must match ^[a-z0-9+#-]+$',
+      detail: [],
+    })
+  })
+
+  it('should refuse a code lang carrying a quote or space', () => {
+    const outcome = renderLessonBody([
+      { type: 'code', lang: 'ts" onclick="x', text: 'x' },
+    ])
+    expect(outcome).toEqual({
+      ok: false,
+      reason: 'bad-input',
+      message: 'Block 0: code lang must match ^[a-z0-9+#-]+$',
+      detail: [],
+    })
+  })
+})
+
 describe('renderLessonBody citations', () => {
   const REFS_BLOCK = {
     type: 'refs',
