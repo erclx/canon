@@ -274,6 +274,19 @@
             </tr>
           </tbody>
         </table>
+        <h2>Source samples</h2>
+        <p>
+          Fenced blocks render highlighted on this page. A placeholder config:
+        </p>
+        <pre><code class="hljs language-yaml"><span class="hljs-attr">elements:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">alpha</span> <span class="hljs-comment"># the first lesson</span>
+    <span class="hljs-attr">quiz:</span> <span class="hljs-number">3</span>
+</code></pre>
+        <p>And a placeholder image:</p>
+        <pre><code class="hljs language-dockerfile"><span class="hljs-keyword">FROM</span> oven/bun:<span class="hljs-number">1</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> . /app</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bun install</span>
+</code></pre>
         <h2>Reading order</h2>
         <p>
           Read the lessons in their ordinal order, then return here to look an
