@@ -7,7 +7,9 @@ description: Scope boundary for learning a subject across sessions, and the spli
 
 ## Gap
 
-Without this skill, a session asked to teach a subject answers in the conversation, so everything it produced dies with the session and the next one starts from nothing. It teaches from recall rather than from a source, so the learner is handed claims nothing was read for and cannot tell which ones. It picks the next topic from the subject's own order rather than from what the learner got wrong, so it teaches past a gap it never measured. It asks nothing about what the learner already knows, so difficulty has no floor and the session lands either below or far above them.
+Without this skill, a session asked to teach a subject answers in the conversation, so everything it produced dies with the session and the next one starts from nothing. It teaches from recall rather than from a source, so the learner is handed claims nothing was read for and cannot tell which ones. When it does read, it takes whatever a search returned first, so a course rests on a few thin sources, and it cites the learner's own projects or an employer's material as proof of a general concept.
+
+It picks the next topic from the subject's own order rather than from what the learner got wrong, so it teaches past a gap it never measured. It asks nothing about what the learner already knows, so difficulty has no floor and the session lands either below or far above them.
 
 It also produces one output where two are needed. A page written to be worked through once and a page written to be looked up later have different lifetimes and different readers, and merging them yields material that is disposable and gets kept, or durable and carries a quiz nobody can promote. Writing the durable half in a format the authoring gates do not read costs a conversion at the moment it matters most, which is the moment someone tries to promote it.
 
@@ -25,7 +27,7 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 - Name the write route for a main-root path from a linked worktree, since a body naming only the destination reports a success that did not happen
 - Route every edit inside a workspace file that already exists through a verb resolving the root in-process, since a heredoc reaches a whole-file create alone and the stream editors that would reach the rest are banned
 - Settle the learner's starting point by asking, so difficulty sits above a measured floor
-- Research the subject from sources before teaching it, and record what was read and what was found and not opened
+- Research the subject from sources before teaching it, choosing them by the teach standard's ladder, and record what was read and what was found and not opened
 - Place each lesson from the learning records rather than from the subject's order, and open with retrieval on the last wrong answer
 - Split the output by lifetime, sending the worked-through half to lessons and the looked-up half to reference pages in the format the authoring gates read
 - Record the wrong answer itself rather than the count, since that is what the next session places the learner from
