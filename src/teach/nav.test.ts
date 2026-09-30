@@ -1354,6 +1354,69 @@ description: Every token the lessons use, in one table
     expect(main).toContain('<td>The start of the subject</td>')
   })
 
+  it('should highlight a fenced block carrying a registered language', async () => {
+    await seedReference('code.md', '# Code\n\n```ts\nconst a = 1\n```\n')
+
+    await generateNav(ROOT)
+
+    expect(await renderedMain('code.html')).toContain(
+      '<pre><code class="hljs language-ts"><span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>\n</code></pre>',
+    )
+  })
+
+  it('should decode the escaped fence once rather than double-escaping it', async () => {
+    await seedReference(
+      'code.md',
+      '# Code\n\n```ts\nconst s = "</code><script>" && "&amp;"\n```\n',
+    )
+
+    await generateNav(ROOT)
+
+    const main = await renderedMain('code.html')
+    expect(main).toContain('&lt;/code&gt;&lt;script&gt;')
+    expect(main).toContain('&amp;amp;')
+    expect(main).not.toContain('&amp;lt;')
+    expect(main).not.toContain('<script>')
+  })
+
+  it('should leave a fence in an unregistered language as the markdown rendered it', async () => {
+    await seedReference('code.md', '# Code\n\n```cobol\nA < B\n```\n')
+
+    await generateNav(ROOT)
+
+    expect(await renderedMain('code.html')).toContain(
+      '<pre><code class="language-cobol">A &lt; B\n</code></pre>',
+    )
+  })
+
+  it('should render a highlighted reference page byte-identical on a second run', async () => {
+    await seedReference('code.md', '# Code\n\n```yaml\nkey: value\n```\n')
+
+    await generateNav(ROOT)
+    const first = await readFile(referencePath('code.html'), 'utf8')
+    await generateNav(ROOT)
+
+    expect(await readFile(referencePath('code.html'), 'utf8')).toBe(first)
+  })
+
+  it('should leave a hand-written code block in a lesson body as written', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    const block = '<pre><code class="language-ts">const a = 1</code></pre>'
+    const path = await seedLesson(
+      WORKSPACE,
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+      block,
+    )
+
+    await generateNav(ROOT)
+
+    const lesson = await readFile(path, 'utf8')
+    expect(lesson).toContain(block)
+    expect(lesson).not.toContain('hljs')
+  })
+
   it('should leave the markdown source byte-identical', async () => {
     const path = await seedReference('summary.md', SUMMARY)
 
