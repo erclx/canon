@@ -1,3 +1,4 @@
+import { Code } from '@/teach/components/code'
 import { Heading } from '@/teach/components/heading'
 import { List } from '@/teach/components/list'
 import { Paragraph } from '@/teach/components/paragraph'
@@ -19,6 +20,7 @@ export type LessonBlock =
       readonly ordered?: boolean
     }
   | { readonly type: 'refs'; readonly items: readonly Reference[] }
+  | { readonly type: 'code'; readonly text: string; readonly lang?: string }
   | { readonly type: 'raw'; readonly html: string }
 
 export interface RenderRendered {
@@ -28,7 +30,17 @@ export interface RenderRendered {
 
 export type RenderOutcome = RenderRendered | TeachRefused
 
-const BLOCK_TYPES = ['heading', 'paragraph', 'list', 'refs', 'raw'] as const
+const BLOCK_TYPES = [
+  'heading',
+  'paragraph',
+  'list',
+  'refs',
+  'code',
+  'raw',
+] as const
+
+/** Bounds a lang to what a class name can carry, so it never injects. */
+const CODE_LANG = /^[a-z0-9+#-]+$/
 
 const LINK_PROTOCOLS = new Set(['http:', 'https:'])
 
@@ -168,6 +180,20 @@ function renderBlock(
       return {
         html: render(Refs({ items })),
         referenceCount: items.length,
+      }
+    }
+    case 'code': {
+      if (!isString(fields.text)) {
+        return badBlock(index, 'code needs a string text')
+      }
+      if (
+        fields.lang !== undefined &&
+        !(isString(fields.lang) && CODE_LANG.test(fields.lang))
+      ) {
+        return badBlock(index, `code lang must match ${CODE_LANG.source}`)
+      }
+      return {
+        html: render(Code({ lang: fields.lang, text: fields.text })),
       }
     }
     case 'raw': {

@@ -210,6 +210,39 @@ export const COMPONENTS: readonly Component[] = [
  */
 export const TEACH_SIDEBAR_BREAKPOINT = 1100
 
+/**
+ * The colors highlighted code renders in, one per token class the teach
+ * article maps highlight.js spans onto. Hex rather than `color-mix` so the
+ * contrast test can measure each against the code surface, and dark by default
+ * with a light override, following the same `data-theme` switch as the ground
+ * they sit on. Teach-local until a second surface renders highlighted code.
+ * `keyword`, `comment` and `meta` repeat the accent, muted and secondary
+ * values, so code reads in the page's own palette.
+ */
+export const TEACH_SYNTAX: readonly {
+  readonly name: string
+  readonly dark: string
+  readonly light: string
+}[] = [
+  { name: 'keyword', dark: '#c76b5f', light: '#ad4a4b' },
+  { name: 'string', dark: '#8dbb6c', light: '#2d6b22' },
+  { name: 'number', dark: '#d4a15a', light: '#8a5300' },
+  { name: 'title', dark: '#b99ad8', light: '#72489a' },
+  { name: 'attr', dark: '#6fb3c4', light: '#1e6478' },
+  { name: 'comment', dark: '#7f7f7c', light: '#6e6d6c' },
+  { name: 'meta', dark: '#8c8b86', light: '#666561' },
+]
+
+const syntaxProperty = (name: string): string => `--teach-syntax-${name}`
+
+const TEACH_SYNTAX_DARK = TEACH_SYNTAX.map(
+  ({ name, dark }) => `  ${syntaxProperty(name)}: ${dark};`,
+).join('\n')
+
+const TEACH_SYNTAX_LIGHT = TEACH_SYNTAX.map(
+  ({ name, light }) => `  ${syntaxProperty(name)}: ${light};`,
+).join('\n')
+
 const TEACH_CHROME: Component = {
   name: 'teach-chrome',
   note: [
@@ -263,6 +296,12 @@ const TEACH_CHROME: Component = {
   --ink-faint: var(--color-muted);
   --accent: var(--color-accent);
   --accent-bg: var(--color-teach-accent-bg);
+
+${TEACH_SYNTAX_DARK}
+}
+
+[data-theme='light'] {
+${TEACH_SYNTAX_LIGHT}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1007,6 +1046,7 @@ const TEACH_ARTICLE: Component = {
     '--color-accent',
     '--teach-hand',
     '--teach-mono',
+    ...TEACH_SYNTAX.map(({ name }) => syntaxProperty(name)),
     '--t1',
     '--t2',
     '--t3',
@@ -1091,6 +1131,18 @@ pre {
 }
 
 pre code { background: none; padding: 0; font-size: 1em; }
+
+/* Build-time highlight.js spans. Every class reads a --teach-syntax-* token,
+   so the dark and light values switch with the ground rather than per rule. */
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-built_in, .hljs-doctag { color: var(--teach-syntax-keyword); }
+.hljs-string, .hljs-regexp, .hljs-addition, .hljs-template-tag, .hljs-symbol { color: var(--teach-syntax-string); }
+.hljs-number, .hljs-type, .hljs-selector-class, .hljs-selector-id { color: var(--teach-syntax-number); }
+.hljs-title, .hljs-section, .hljs-name, .hljs-bullet { color: var(--teach-syntax-title); }
+.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable, .hljs-property { color: var(--teach-syntax-attr); }
+.hljs-comment, .hljs-quote { color: var(--teach-syntax-comment); font-style: italic; }
+.hljs-meta, .hljs-deletion, .hljs-subst { color: var(--teach-syntax-meta); }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
 
 /* ---- Callout ---- */
 

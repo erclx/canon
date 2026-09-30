@@ -1,5 +1,6 @@
 /** @jsxImportSource ../html */
 import { describe, expect, it } from 'vitest'
+import { Code } from '@/teach/components/code'
 import { Heading } from '@/teach/components/heading'
 import { List } from '@/teach/components/list'
 import { Paragraph } from '@/teach/components/paragraph'
@@ -24,6 +25,24 @@ describe('lesson components composed as JSX', () => {
         '<p class="lede">A bearing is a direction.</p>' +
         '<p>Hold the compass level.</p>' +
         '<ol><li>Point.</li><li>Rotate.</li></ol>',
+    )
+  })
+
+  it('should render a highlighted code block beside a paragraph', () => {
+    const body = (
+      <>
+        <Paragraph>Declare it once.</Paragraph>
+        <Code lang="ts" text="let n = 2" />
+      </>
+    )
+
+    const html = render(body)
+
+    expect(html).toBe(
+      '<p>Declare it once.</p>' +
+        '<pre><code class="hljs language-ts">' +
+        '<span class="hljs-keyword">let</span> n = ' +
+        '<span class="hljs-number">2</span></code></pre>',
     )
   })
 

@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { COMPONENTS, TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
+import {
+  COMPONENTS,
+  TEACH_STYLESHEET_COMPONENTS,
+  TEACH_SYNTAX,
+} from '@/design/components'
 import { buildDesignCss, slug, unmappedOnLight } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import type { DesignTokens } from '@/design/tokens'
@@ -184,6 +188,22 @@ describe('buildDesignCss', () => {
         expect(css).toContain(`${property}:`)
       }
     }
+  })
+
+  it('gives every teach syntax color a light value beside its dark default', () => {
+    const css = buildDesignCss(undefined, {
+      components: TEACH_STYLESHEET_COMPONENTS,
+    })
+    const light = /\[data-theme='light'\] \{([^}]*--teach-syntax-[^}]*)\}/.exec(
+      css,
+    )?.[1]
+
+    expect(
+      TEACH_SYNTAX.filter(
+        ({ name, light: value }) =>
+          !light?.includes(`--teach-syntax-${name}: ${value};`),
+      ).map(({ name }) => name),
+    ).toEqual([])
   })
 
   describe('teach footer and anchor chrome', () => {

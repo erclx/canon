@@ -26,6 +26,7 @@ cspell
 dataclass
 dataclasses
 dedupe
+doctag
 domcontentloaded
 dotglob
 dunder
@@ -53,6 +54,7 @@ glama
 golangci
 gsub
 heredoc
+hljs
 httptest
 httpx
 ibeam
@@ -136,6 +138,7 @@ scrollend
 semgrep
 setattr
 setsid
+shiki
 sidepanel
 sigpipe
 soffice

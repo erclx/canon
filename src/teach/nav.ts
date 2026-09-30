@@ -1170,6 +1170,35 @@ function retargetReferenceLinks(
   )
 }
 
+const FENCED_CODE =
+  /<pre><code class="language-([^"]+)">([\s\S]*?)<\/code><\/pre>/g
+
+function decodeHtml(html: string): string {
+  return html
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&amp;', '&')
+}
+
+/**
+ * Highlights the fenced blocks `Bun.markdown` emitted, decoding each once
+ * since the renderer already escaped it. A fence in a language the highlighter
+ * does not register is left exactly as the markdown rendered it. The module is
+ * imported here rather than at the top so a verb that never reaches a
+ * reference page does not load its grammars.
+ */
+async function highlightFences(html: string): Promise<string> {
+  if (!html.includes('<pre><code class="language-')) return html
+  const { highlight } = await import('@/teach/highlight')
+  return html.replace(FENCED_CODE, (match, lang: string, escaped: string) => {
+    const result = highlight(decodeHtml(escaped), lang)
+    if (result.language === undefined) return match
+    return `<pre><code class="hljs language-${lang}">${result.html}</code></pre>`
+  })
+}
+
 /**
  * One reference page as a styled page carrying the workspace chrome. The
  * markdown beside it stays the durable, promotable half, and this file is
@@ -1191,10 +1220,12 @@ async function renderReferencePage(
     readField(parseFrontmatter(source), 'title') ?? referenceFallbackTitle(file)
 
   const rendered = retargetReferenceLinks(
-    Bun.markdown.html(stripFrontmatter(source), {
-      noHtmlBlocks: true,
-      noHtmlSpans: true,
-    }),
+    await highlightFences(
+      Bun.markdown.html(stripFrontmatter(source), {
+        noHtmlBlocks: true,
+        noHtmlSpans: true,
+      }),
+    ),
     new Set(detail.referenceFiles),
   )
   const body = /<h1[\s>]/.test(rendered)

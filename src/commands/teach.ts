@@ -2,7 +2,7 @@ import { isAbsolute, relative, resolve, sep } from 'node:path'
 import type { Command } from 'commander'
 import { type LessonOutcome, planLesson } from '@/teach/lesson'
 import { type NavOutcome, generateNav } from '@/teach/nav'
-import { type RenderOutcome, renderLessonBody } from '@/teach/render'
+import type { RenderOutcome } from '@/teach/render'
 import {
   defineTerms,
   type ListOutcome,
@@ -393,10 +393,14 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'Reads a JSON array of blocks from stdin, each a heading, paragraph,',
-        'list, refs, or raw block, and renders it through the same components',
-        'the fixture lesson is generated from. Content the structured blocks',
-        'cannot express takes type raw, carrying its own html verbatim,',
-        'unescaped.',
+        'list, refs, code, or raw block, and renders it through the same',
+        'components the fixture lesson is generated from. Content the',
+        'structured blocks cannot express takes type raw, carrying its own',
+        'html verbatim, unescaped.',
+        '',
+        'A code block takes text and an optional lang, a highlight.js name or',
+        'alias matching ^[a-z0-9+#-]+$, and renders highlighted at build time',
+        'with no script. An unregistered lang renders as plain escaped code.',
         '',
         'A paragraph takes an optional cites array of reference numbers,',
         'rendered as footnote markers after its text. The one refs block',
@@ -752,6 +756,9 @@ async function runRender(opts: RenderCommandOptions): Promise<number> {
     )
   }
 
+  // Loaded here rather than at the top, since the renderer pulls in the
+  // highlighter and every other verb would pay for its grammars at startup.
+  const { renderLessonBody } = await import('@/teach/render')
   return reportRender(renderLessonBody(parsed), emitJson)
 }
 
