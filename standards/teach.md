@@ -128,6 +128,20 @@ Splits what was read from what was found.
 
 A source found and not read is listed as a lead because a link attached to a page nobody opened is worse than no link. Listing it still pays, since it stops a later session searching for what this one already surfaced.
 
+### Choosing sources
+
+Rest each general claim on the highest rung that covers it:
+
+1. Documentation or a specification published by whoever owns the subject
+2. A canonical work on the subject, such as the standard text, a reference book, or a primary paper
+3. Other material, such as a tutorial, a course, or a post, and only for a claim the first two rungs do not cover
+
+A subject nobody owns, such as a mathematical topic or a craft, has no first rung, so its list starts at the second and is not missing anything. Record a third-rung source with the claim it covers and why no higher rung does, since that reason is what a later session checks the choice against.
+
+The learner's own projects and material specific to one employer or organization are never a source for a general claim. Either may appear in the workspace as a worked application labeled with whose it is, and neither stands in `RESOURCES.md` as proof of what the subject says.
+
+A source reachable only through a paywall or a summary stays a lead until it is opened. A review or summary of a book is a different source from the book, so list the summary as read on its own rung and the book as a lead.
+
 ## Conventions
 
 - Write the markdown half in the format the authoring gates read, so a page promoted later needs no conversion.
@@ -141,6 +155,7 @@ A source found and not read is listed as a lead because a link attached to a pag
 - **The record that counts errors.** A tally of how many were missed carries none of the misconception, which is the only part a later session can act on.
 - **The revisit note with no date.** A line naming what to come back to and not when is read by nothing and schedules nothing, so the next session picks from the last record alone, which is the state the section exists to end.
 - **The date left in the body.** A frontmatter field and a sentence both claiming the opening date resolve to whichever a reader happens to hit, and only one of them is readable by a walker.
+- **The first search result as the source list.** A workspace resting on whatever a search returned first teaches the weakest account of the subject, and nothing in the folder says a stronger one was never looked for.
 - **The renumbered folder.** Closing a gap in the ordinals moves every name a reader or a record already cited.
 
 ## Template
