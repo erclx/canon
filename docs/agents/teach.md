@@ -81,7 +81,7 @@ canon teach resource regular-expressions \
 | `--json`             | Emit a machine-readable record on stdout           |
 | `--root <path>`      | Teach root, defaulting to the main worktree        |
 
-The pair splits on the first `=`, so a URL carrying its own separator survives intact. Say in the title which claims rest on the source, since the entry is the only place a later session reads that from.
+The pair splits on the first `=`, so a URL carrying its own separator survives intact. Say in the title which claims rest on the source, since the entry is the only place a later session reads that from. Which sources qualify is the source ladder in `canon standards teach`, and a source below its first two rungs also names why no higher one covers the claim.
 
 A URL either heading already lists is refused rather than written twice. Two entries for one source split what rests on it across two lines, and a reader checking a claim then finds half of the answer.
 

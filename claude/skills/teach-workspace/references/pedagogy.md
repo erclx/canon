@@ -75,3 +75,4 @@ Parametric recall is confident where it is wrong, and a learner cannot audit it.
 - Read the subject from sources before teaching, and record each one with its link
 - Mark any claim resting on recall as resting on recall, in the lesson itself
 - List a source found and not opened as a lead, and never cite it
+- Choose which sources to read by the ladder under `### Choosing sources` in the teach standard, which also rules out the learner's own work as proof of a general claim

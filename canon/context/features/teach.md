@@ -43,6 +43,10 @@ Two standards fix the artifact and one skill drives the pedagogy. `standards/tea
 
 **`canon teach list` prints the `canon serve` line with the teach folder it read, rather than a literal `.canon/teach`.** `canon serve` resolves its directory against the cwd while the list verb reads the main worktree root, so the literal serves an absent folder from a linked worktree. The folder prints relative to the cwd when it sits under it and absolute otherwise, since a `../` path climbing out of a worktree reads as a mistake. The static `--help` footer keeps the literal and points at `list <topic>` for the exact line, and the JSON record carries no serve field.
 
+**Which sources qualify is stated over `RESOURCES.md` rather than over lesson content.** The standard's `### Choosing sources` ladder says what may stand behind the material, and the `teach-workspace` skill enforces the lesson half, choosing by the ladder in its research step and checking a lesson's `refs` in its writing step. Stating what stays out of a lesson was the alternative, and it contradicts the standard's own `## Layout` and `## Scope`, which leave lesson content to the driving surface.
+
+Recording a source's rung as a field was rejected too, since a `canon teach resource` schema change buys a check only a reader can make, so a third-rung source carries its reason in the free-text title.
+
 **A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `context-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
 
 **The chrome matches the nav-04 prototype except in six places.** Both sides were compared as computed styles at three widths in both themes, frame by frame across rest, hover and open states, and nothing departs beyond these.
@@ -77,6 +81,7 @@ Two literals stay on purpose. `code` sets `0.85em` and `pre code` sets `1em`, be
 - A bare `canon teach list` reads the operator's live workspaces. Reaching the committed fixture takes `--root examples/teach`, and a claim about the fixture made without the flag describes a different tree.
 - `governance/rules/canon/661-teach.md` is scoped to `.canon/teach/**`, which is workspace content. It reaches neither `src/teach/` nor `examples/teach/`, so an implementation or fixture edit is routed by the `internal-teach` skill rather than by that rule. Widening the rule is wrong, since it ships to targets through governance sync and a target has no `src/teach/`.
 - The captures under `examples/teach/evidence/` are taken with `canon capture <url> -o <png> --selector body` against `canon serve examples/teach --port 8766`, since a URL source refuses without `--selector`. The capture rewrites the `.stamp` beside each image, and two runs with no change between them come back byte-identical.
+- The shipped `claude/skills/teach-workspace/SKILL.md` sat at 300 rendered lines on 2026-09-30, exactly the Document ceiling stage's limit, which fails a push past it. An addition there has to displace text or fold into a line with wrap slack, and a rule needing more room goes to the standard or a reference the body points at.
 - Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. `canon/context/web/assets.md` draws that line between `assets/` and `examples/` on who each folder addresses.
 
 ## Related
