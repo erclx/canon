@@ -61,7 +61,7 @@ Repeat `--success` and `--out-of-scope` per line. The verb refuses a topic anoth
 
 ## Step 2: research before teaching
 
-Read the subject from sources rather than from recall. Record what was read and what was only found through the verb that owns the file:
+Read the subject from sources rather than from recall, chosen by the standard's `### Choosing sources` ladder, with a third-rung source's reason in its title. Record what was read and what was only found through the verb that owns the file:
 
 ```bash
 canon teach resource <topic> --json \
@@ -83,7 +83,7 @@ Open on what `due` reports as overdue, oldest date first, before anything new. W
 
 Two outputs with two lifetimes, and the split decides the format.
 
-- A lesson is a self-contained page carrying its own quiz, a teach-back block, and the feedback for each question. It embeds one shared stylesheet rather than restating styles, and it is disposable and never promoted.
+- A lesson is a self-contained page carrying its own quiz, a teach-back block, and the feedback for each question. It embeds one shared stylesheet rather than restating styles, and it is disposable and never promoted. Its `refs` pass the source ladder, and a learner's or organization's file goes in the body, labeled.
 - A reference page goes to `reference/<slug>.md`, written for a reader with no learner in it. This is the half that survives the workspace, so it is written in markdown to pass the authoring gates a promotion would put it through. `canon teach nav` renders it to a `reference/<slug>.html` sibling, and a lesson links that sibling, since a served `.md` opens as plain text.
 
 Resolve the lesson before writing it, rather than composing its name or its quiz order by hand:
