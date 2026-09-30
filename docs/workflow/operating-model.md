@@ -232,5 +232,5 @@ port-collision detail.
 ## Related
 
 - [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the isolation and fan-out mechanics
-- [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism without worktrees
+- [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism without worktrees, and [blocking subagents](../../wiki/claude/permissions.md#blocking-subagents) for the `permissions.deny` rule that stops every spawn
 - `canon/context/claude-plugin/skill-strategy/overview.md` for how the skills in the loop are categorized

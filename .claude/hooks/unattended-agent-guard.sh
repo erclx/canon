@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: unproven. Held local until the task's outcomes confirm the
-# denial condition holds beyond this branch. See v97.3's Findings.
+# canon-no-seed: unproven. Held local until an interactive terminal session
+# reads CLAUDE_CODE_SESSION_ATTENDED as anything but 0, since a target reading
+# 0 there would block every attended session. See v97.3's Findings and the
+# guards context entry.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {

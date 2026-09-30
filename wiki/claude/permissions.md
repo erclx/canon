@@ -61,6 +61,24 @@ Rules follow the format `Tool` or `Tool(specifier)`. Omit the specifier to match
 
 `additionalDirectories` (in settings) extends file-access scoping for `acceptEdits` auto-approval.
 
+## Blocking subagents
+
+Deny the `Agent` tool itself to stop Claude from delegating to any subagent:
+
+```json
+{
+  "permissions": {
+    "deny": ["Agent"]
+  }
+}
+```
+
+The bare rule blocks every spawn in every session, attended, unattended, terminal, and desktop alike, because a deny rule does not look at how the session started. A deny in settings also wins over any hook that would allow the call. `claude --disallowedTools "Agent"` does the same for one launch.
+
+The tool was called `Task` before version 2.1.63, and `Task` still works as an alias. Add `"Task"` beside `"Agent"` for a build that may still emit the old name.
+
+Commit the rule in `.claude/settings.json` to block subagents for everyone working in the project. Put it in `.claude/settings.local.json` to block them for yourself only, since that file stays out of version control. `Agent(AgentName)` blocks one subagent type and leaves the rest available.
+
 ## Protected paths
 
 Writes to these paths are never auto-approved. In `default`, `acceptEdits`, `plan`, and `bypassPermissions` they still prompt. In `auto` they route to the classifier. In `dontAsk` they are denied.
