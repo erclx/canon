@@ -74,13 +74,16 @@ The stepper hides and shows and sets nothing else, so how a selected option look
 
 ## The block list
 
-`canon teach render` takes a JSON array of blocks and renders it through the same components a lesson body composes. Five types, and every structural body composes from them:
+`canon teach render` takes a JSON array of blocks and renders it through the same components a lesson body composes. Six types, and every structural body composes from them:
 
 - `{"type":"heading","level":1|2,"text":"<text>"}`: an `<h1>` or `<h2>`.
 - `{"type":"paragraph","text":"<text>","lede":true,"cites":[1]}`: a `<p>`, marked `lede` for the dek that opens the lesson. `cites` adds a footnote marker per reference number after the text, and a lede takes none.
 - `{"type":"list","items":["<text>", ...],"ordered":true}`: a `<ul>` or, with `ordered`, an `<ol>`.
 - `{"type":"refs","items":[{"title":"<name>","url":"<https URL>","note":"<text>"}, ...]}`: the lesson's one reference list, numbered from 1 in item order. `url` and `note` are optional, and a `url` must be http or https.
+- `{"type":"code","lang":"ts","text":"<source>"}`: a code sample, highlighted at render time with no script. `lang` is optional and takes a highlight.js name or alias. One the renderer does not register renders as plain escaped code.
 - `{"type":"raw","html":"<markup>"}`: the escape hatch, passed through unescaped.
+
+Code never travels through `raw`. A hand-written `<pre><code>` renders with no color, and `nav` never highlights markup already in a lesson body, so a sample written that way stays plain for good. A fenced block in a reference page's markdown is highlighted by `nav` on its own.
 
 The quiz and the teach-back block above are the one case `raw` is always needed for, since their fixed contract is not a components concern. Give them the array's last `raw` entry, followed only by `refs`, rather than reaching for `raw` anywhere the other types could carry the content instead.
 

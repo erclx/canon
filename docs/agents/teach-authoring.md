@@ -38,7 +38,7 @@ The order is drawn here rather than instructed, and that is the point of the ver
 
 ## Render
 
-`canon teach render` renders a lesson body's structural blocks to HTML, through the four lesson components. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
+`canon teach render` renders a lesson body's structural blocks to HTML, through the five lesson components. It takes no topic and no `--root`, since the verb is a stateless transform reading nothing off a workspace on disk.
 
 ```bash
 echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach render --json
@@ -48,7 +48,13 @@ echo '[{"type":"heading","level":1,"text":"Compass bearings"}]' | canon teach re
 | -------- | ---------------------------------------- |
 | `--json` | Emit a machine-readable record on stdout |
 
-It reads a JSON array of blocks from stdin, each a `heading`, `paragraph`, `list`, `refs`, or `raw` block, and reports `{ ok: true, html }` on `--json` or the bare rendered HTML on stdout otherwise. Content none of the components can express takes a `raw` block, carrying its own HTML verbatim and unescaped, which is the shape the quiz and the teach-back block travel in.
+It reads a JSON array of blocks from stdin, each a `heading`, `paragraph`, `list`, `refs`, `code`, or `raw` block, and reports `{ ok: true, html }` on `--json` or the bare rendered HTML on stdout otherwise. Content none of the components can express takes a `raw` block, carrying its own HTML verbatim and unescaped, which is the shape the quiz and the teach-back block travel in.
+
+A `code` block carries `text` and an optional `lang`, a highlight.js name or alias. The source is highlighted at render time into `hljs-*` class spans the workspace stylesheet colors in both themes, so the page carries no script. A `lang` the renderer does not register renders as plain escaped code, and one that does not match `^[a-z0-9+#-]+$` is refused. A workspace seeded before the syntax colors existed shows the spans uncolored until `canon teach stylesheet <topic>` rewrites its base stylesheet.
+
+```json
+[{ "type": "code", "lang": "ts", "text": "const a: number = 1" }]
+```
 
 A citation takes two shapes. A `paragraph` carries an optional `cites` array of reference numbers, rendered as `sup.cite` markers after its text. The one `refs` block carries `items` of `{ title, url?, note? }`, rendered as `ol.refs` and numbered from 1, so cite `1` links to the first item.
 
@@ -107,6 +113,6 @@ Splicing the stepper into a lesson of either shape was measured against a browse
 
 ### Reference pages
 
-Each reference page is rendered to a `reference/<slug>.html` sibling carrying the same chrome, and the contents page links that sibling rather than the markdown, which `canon serve` hands over as plain text. The render drops the frontmatter, turns tables into `<table>` markup, and escapes raw HTML written in the markdown rather than passing it through. A body with no H1 gets one from the frontmatter `title`. A relative link to another reference page's markdown points at that page's `.html` sibling, and one to the workspace `GLOSSARY.md` points at the glossary on the contents page, `../index.html#gloss`. Every other link, such as `../RESOURCES.md`, stays as written. The markdown file is never touched.
+Each reference page is rendered to a `reference/<slug>.html` sibling carrying the same chrome, and the contents page links that sibling rather than the markdown, which `canon serve` hands over as plain text. The render drops the frontmatter, turns tables into `<table>` markup, and escapes raw HTML written in the markdown rather than passing it through. A fenced code block in a language the highlighter registers is highlighted the same way a `code` block is, and one in any other language stays plain. A hand-written code block in a lesson body is never highlighted. A body with no H1 gets one from the frontmatter `title`. A relative link to another reference page's markdown points at that page's `.html` sibling, and one to the workspace `GLOSSARY.md` points at the glossary on the contents page, `../index.html#gloss`. Every other link, such as `../RESOURCES.md`, stays as written. The markdown file is never touched.
 
 Every rendered page carries a `<meta name="generator" content="canon teach nav">` tag. A `.html` file under `reference/` whose markdown is gone is deleted when it carries that tag, and a hand-written HTML file there, carrying none, is left alone. The record's `reference` field counts the pages rendered. On a Bun with no `Bun.markdown`, each reference page lands in `skipped` with `Bun.markdown` as what is missing, and the rest of the run goes on.
