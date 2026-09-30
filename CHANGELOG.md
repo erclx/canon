@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.3.0](https://github.com/erclx/canon/compare/v5.2.0...v5.3.0) (2026-09-30)
+
+
+### Features
+
+* **teach:** add a source-selection ladder to the teach standard ([#1984](https://github.com/erclx/canon/issues/1984)) ([9328126](https://github.com/erclx/canon/commit/9328126e69b6bb643b1d1c678fa91eb54d14ced2))
+* **teach:** highlight code blocks at build time ([#1985](https://github.com/erclx/canon/issues/1985)) ([6ede69c](https://github.com/erclx/canon/commit/6ede69c4ac1ce538951e36804ca70b9e18f567d2))
+
 ## [5.2.0](https://github.com/erclx/canon/compare/v5.1.0...v5.2.0) (2026-09-26)
 
 
