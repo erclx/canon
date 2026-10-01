@@ -34,12 +34,14 @@ What does not belong:
 
 ## Problem
 
-Every repository accumulates the same boilerplate: governance rules, prose standards, Claude Code skills, seed docs, sync scripts. Re-authoring these per project wastes time and drifts over time. Without a central source, rules diverge and agents cannot rely on consistent signals across projects.
+A developer handing real work to an agent has no way to run it from plan to merge. Planning, building, review, and shipping each get improvised per session, and nothing holds the agent to the practices that make code worth keeping. Both depend on setup that every repository accumulates the same way: governance rules, prose standards, Claude Code skills, seed docs, sync scripts. Re-authoring that setup per project wastes time and drifts over time, so rules diverge and agents cannot rely on consistent signals across projects. One setup shared across repositories is what the other two run on.
 
 ## Goals
 
+- An agent's work runs from plan to merge with each step handed to a session that owns it and leaves a record the next one reads.
+- The code an agent writes is held to practices that make it worth keeping, enforced by a check rather than a reminder.
 - Agent-first CLI surface with non-interactive paths, JSON catalogs, and composable flags on every command.
-- One authoritative source for governance rules, prose standards, Claude seeds, and workflow skills.
+- One authoritative source for governance rules, prose standards, Claude seeds, and workflow skills, which is the shared floor the two outcomes above run on.
 - Installable Claude Code plugin that brings a curated skill set to any project scaffolded through `canon`.
 - Behavior and conventions captured as text that both humans and agents can read and enforce.
 - Low-friction install and sync so target projects pull updates without hand-patching.

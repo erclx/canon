@@ -11,7 +11,7 @@
 [![CI status](https://img.shields.io/github/actions/workflow/status/erclx/canon/verify.yml?branch=main)](https://github.com/erclx/canon/actions/workflows/verify.yml)
 [![License MIT](https://img.shields.io/npm/l/@erclx/canon)](LICENSE)
 
-canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories. It keeps one authoritative copy and installs it into each project on demand.
+canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to the practices that make code worth keeping, and installs the same setup in every repository.
 
 **[See it run at canon.erclx.dev](https://canon.erclx.dev)**
 
@@ -21,7 +21,9 @@ That page is one real session the toolkit ran on itself, and every count on it i
 
 ## Why
 
-If you work across more than one repository and your AI setup has started to drift between them, this is for you. Every AI coding setup accumulates the same assets. Prompts to reuse, rules agents should follow, slash commands, skills, seed docs, sync scripts. Once you have enough projects, your copies drift and your agents stop getting consistent signals.
+If an agent writes code for you in more than one repository, this is for you. canon runs that work from plan to merge. A planner writes the plan, a worker builds it on its own branch, and a separate session reviews the pull request. It holds the work to a practice, with rules that load when a matching path is edited and checks that fail when a rule is ignored. Both run on one setup, installed the same way in every repository you keep.
+
+That shared setup is what the rest of this page describes, and it is the part that drifts without a source. Every AI coding setup accumulates the same assets. Prompts to reuse, rules agents should follow, slash commands, skills, seed docs, sync scripts. Once you have enough projects, your copies drift and your agents stop getting consistent signals.
 
 Three design choices shape the toolkit.
 
