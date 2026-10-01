@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.4.0](https://github.com/erclx/canon/compare/v5.3.0...v5.4.0) (2026-10-01)
+
+
+### Features
+
+* **pr:** report the evidence comment's addresses and checklist ([#1991](https://github.com/erclx/canon/issues/1991)) ([4b754f7](https://github.com/erclx/canon/commit/4b754f77444a7e88040c4dde8590b2874b8c95eb))
+* **standards:** offer a revisit sentence for outside-behavior decisions ([#1992](https://github.com/erclx/canon/issues/1992)) ([695696d](https://github.com/erclx/canon/commit/695696d9f395924e7eaba7163e35484038b64b7b))
+
+
+### Bug Fixes
+
+* **tooling:** run markdown bans in every stack verify script ([#1990](https://github.com/erclx/canon/issues/1990)) ([9590ffc](https://github.com/erclx/canon/commit/9590ffc868ff394f57f928e23b0581546dbff717))
+
 ## [5.3.0](https://github.com/erclx/canon/compare/v5.2.0...v5.3.0) (2026-09-30)
 
 
