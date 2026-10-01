@@ -19,7 +19,7 @@ Golden config files live in `tooling/web/configs/` and are copied into the targe
 - `.github/workflows/readme-screenshot.yml`: refreshes that frame on a pull request and commits it back to the branch. The path list ships as `REPLACE_WITH_PROJECT_PATHS`, and the job's first step after checkout exits 1 while it stays, since a job that never fires leaves no run and no diff to notice. The workflow's own path is in the list so the installing pull request reaches that step. When a commit-back is right and when a report is, `governance/rules/tooling/700-ci-workflow.md` states the test.
 - `.vscode/extensions.json` and `.vscode/settings.json`: editor wiring for ESLint, Tailwind, Playwright, Vitest.
 - `.github/workflows/verify.yml`: `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests` jobs.
-- `scripts/verify.sh`: extends base verify with typecheck, lint, unit tests, and build in the full order. Its last stage runs `scripts/check-card-exclusion.sh` whenever that file is installed, which puts the social card route's build exclusion on the default path rather than behind a flag nobody passes. The stage tests for the script rather than for a framework, so this layer owns when the check runs and the stack shipping a card route owns what it reads. The astro reference carries the route itself.
+- `scripts/verify.json`: the phases base's verify runner requires here, being typecheck, lint, unit tests, and build. `## Verify script` covers the order and the card exclusion stage.
 - `scripts/worktree-port.sh`: prints a base port plus this working directory's offset. Called with no argument it prints the offset alone. It refuses a folder left under the worktrees directory after its worktree was removed, rather than printing a port for it.
 
 ## What stays in per-stack adapters
@@ -128,6 +128,6 @@ The sweep under `screenshots/` is ignored again, and only a flagged case's `evid
 
 ## Verify script
 
-The web layer's `scripts/verify.sh` replaces the base version. Order: typecheck, lint, format, spelling, shell, unit tests, build, markdown bans, then the card exclusion check where one is installed. Stack adapters may override if their typecheck or build differs.
+The web layer's `scripts/verify.json` requires `typecheck`, `lint`, `test:run`, and `build`, and base's `scripts/verify.ts` runs them in its fixed order: typecheck, lint, format, spelling, shell, unit tests, build, markdown bans, then the card exclusion check where one is installed. astro, vite-react, and nextjs inherit the list, since the nearest stack's copy wins. An adapter whose phases differ ships its own `verify.json` rather than a script.
 
-The card stage is conditional on `scripts/check-card-exclusion.sh` existing rather than on the stack, so a project with no card route runs one less stage and needs no override to skip it. A stack that ships a card route ships that script, and the check reads the build the stage before it produced.
+The card stage runs `scripts/check-card-exclusion.sh` whenever that file is installed, which keeps the social card route's build exclusion on the default path rather than behind a flag. It tests for the script rather than the stack, so a project with no card route runs one less stage with no override, and the stack shipping a card route owns what the check reads, being the build the stage before it produced. The astro reference carries the route itself.

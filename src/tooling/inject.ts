@@ -8,9 +8,10 @@ import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
+  configFiles,
   configPaths,
-  listFiles,
   type Manifest,
+  seedFiles,
 } from '@/tooling/manifest'
 import {
   applyScripts,
@@ -36,7 +37,7 @@ export async function injectConfigs(
   const isSubfolder = isSubfolderTarget(target)
 
   for (const manifest of ancestorsFirst(chain)) {
-    const files = listFiles(manifest.configsDir).filter(
+    const files = configFiles(manifest).filter(
       (rel) => !(isSubfolder && isWithheldInSubfolder(rel)),
     )
     if (files.length === 0) continue
@@ -106,7 +107,7 @@ export async function injectSeeds(
   const shadowed = configPaths(chain)
 
   for (const manifest of ancestorsFirst(chain)) {
-    const files = listFiles(manifest.seedsDir).filter(
+    const files = seedFiles(manifest).filter(
       (rel) =>
         !shadowed.has(rel) && !(isSubfolder && isWithheldInSubfolder(rel)),
     )

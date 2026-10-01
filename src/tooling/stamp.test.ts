@@ -98,4 +98,12 @@ describe('recordToolingChain', () => {
     expect(recorded).toBe(false)
     expect(readStamp(TARGET)).toBeUndefined()
   })
+
+  it('should leave out a skipped stack kept for its per-root configs', async () => {
+    const kept = { ...manifest('base'), onlyConfigs: ['scripts/verify.sh'] }
+
+    await recordToolingChain('/nowhere', TARGET, [manifest('web'), kept], NOW)
+
+    expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual(['web'])
+  })
 })

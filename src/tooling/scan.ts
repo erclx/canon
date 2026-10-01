@@ -4,9 +4,10 @@ import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
+  configFiles,
   configPaths,
-  listFiles,
   type Manifest,
+  seedFiles,
 } from '@/tooling/manifest'
 import {
   collectDeps,
@@ -83,7 +84,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const seenConfigs = new Set<string>()
 
   for (const manifest of chain) {
-    for (const rel of listFiles(manifest.configsDir)) {
+    for (const rel of configFiles(manifest)) {
       if (seenConfigs.has(rel)) continue
       seenConfigs.add(rel)
 
@@ -109,7 +110,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const seenSeeds = configPaths(chain)
 
   for (const manifest of chain) {
-    for (const rel of listFiles(manifest.seedsDir)) {
+    for (const rel of seedFiles(manifest)) {
       if (seenSeeds.has(rel)) continue
       seenSeeds.add(rel)
 

@@ -16,7 +16,9 @@ Golden config files live in `tooling/base/configs/` and are copied into the targ
 - `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, `subject-case` disabled, and a local `no-claude-co-author` rule refusing a `Co-authored-by` trailer that names Claude or Anthropic.
 - `.husky/`: `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, `post-rewrite`.
 - `.vscode/extensions.json` and `.vscode/settings.json`: editor wiring for Prettier, cspell, shfmt, and shellcheck.
-- `scripts/verify.sh`: the maintenance entry point behind `check`.
+- `scripts/verify.sh`: the maintenance entry point behind `check`, a wrapper that hands off to `scripts/verify.ts`.
+- `scripts/verify.ts`: the one verify runner every stack shares. It runs typecheck, lint, format, format check, spelling, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out. Node modules only, since a target's own lint and typecheck read it.
+- `scripts/verify.json`: the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins. A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script. Base requires its four phases, so a base-only target still fails on a missing one. These three files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
 
 ## What ships as user-owned seeds
 
@@ -88,7 +90,7 @@ Sticky negative knowledge. Do not relearn.
 
 | Script                 | What it does                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`        | Repairs a checkout via `scripts/verify.sh`. Honors `VERIFY_NESTED=true` to suppress timeline boundaries when another script calls it. |
+| `bun run check`        | Repairs a checkout via `scripts/verify.ts`. Honors `VERIFY_NESTED=true` to suppress timeline boundaries when another script calls it. |
 | `bun run check:format` | Asserts prettier and shfmt formatting without writing                                                                                 |
 | `bun run check:spell`  | Runs cspell across every file, with context on failures                                                                               |
 | `bun run check:shell`  | Runs shellcheck at warning severity                                                                                                   |
@@ -97,4 +99,4 @@ Sticky negative knowledge. Do not relearn.
 
 `bun run check` repairs a checkout rather than gating one. It runs `format` first to auto-fix drifted code, then asserts only what the formatters could not fix. The pull request workflow calls `check:format`, `check:spell`, and `check:shell` directly, and those three are the gate.
 
-`scripts/verify.sh`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the three checks above.
+`scripts/verify.ts`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the three checks above.

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS Fixer, analysed by PHPStan, and tested by PHPUnit. It ships the three tools' configs, a PHP-aware `verify.sh`, and a copy-once smoke test.
+The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS Fixer, analysed by PHPStan, and tested by PHPUnit. It ships the three tools' configs, a php phase list for base's verify runner, and a copy-once smoke test.
 
 ## Scaffold checklist
 
@@ -39,10 +39,11 @@ The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run 
 - Set `colors`, `failOnWarning`, and `failOnRisky`.
 - Run one `unit` suite over `tests`, with `src` as the source.
 
-## verify.sh
+## verify.json
 
-- Stop and name `composer install` when `vendor/bin/phpunit` is missing.
-- Run Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`), plus the four base phases wherever the folder declares their scripts, then the markdown bans stage base ships.
+- Probe `php` and `composer` first.
+- Hold a precondition on `vendor/bin/phpunit`, so the run stops and names `composer install` when it is missing.
+- Require Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`). Base's runner adds the four base phases wherever the folder declares their scripts, then the markdown bans stage.
 
 ## Gitignore
 

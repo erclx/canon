@@ -94,7 +94,7 @@ export function expandStackEntry(root: string, entry: string): string[] {
 /**
  * Walks `extends` ancestors first, then the stack's own rules, deduped by
  * first appearance. Tooling's `resolveChain` returns full manifests nearest
- * first and carries `skipStack` truncation, so the two walks stay separate
+ * first and carries `skipStack` restriction, so the two walks stay separate
  * rather than fitting one shape to both.
  *
  * Dedupe runs on expanded names rather than on the entries, so a stack naming

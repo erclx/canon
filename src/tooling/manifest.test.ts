@@ -96,6 +96,53 @@ describe('resolveChain', () => {
     expect(names).toEqual(['web'])
   })
 
+  it('should keep a skipped stack that declares per-root paths', () => {
+    seedStack(
+      'base',
+      '[stack]\nname = "base"\nextends = ""\n\n[sync]\nper_root = ["scripts/verify.sh"]\n',
+    )
+    seedStack('web', '[stack]\nname = "web"\nextends = "base"\n')
+
+    const names = resolveChain(root, 'web', { skipStack: 'base' }).map(
+      (entry) => entry.name,
+    )
+
+    expect(names).toEqual(['web', 'base'])
+  })
+
+  it('should restrict a kept skipped stack to its per-root configs', () => {
+    seedStack(
+      'base',
+      '[stack]\nname = "base"\nextends = ""\n\n[sync]\nper_root = ["scripts/verify.sh"]\n',
+    )
+    seedStack('web', '[stack]\nname = "web"\nextends = "base"\n')
+
+    const kept = resolveChain(root, 'web', { skipStack: 'base' })[1]
+
+    expect(kept.onlyConfigs).toEqual(['scripts/verify.sh'])
+  })
+
+  it('should drop the scripts and dependencies of a kept skipped stack', () => {
+    seedStack(
+      'base',
+      '[stack]\nname = "base"\nextends = ""\n\n[sync]\nper_root = ["scripts/verify.sh"]\n\n[scripts]\n"check" = "./scripts/verify.sh"\n\n[dependencies.dev]\npackages = ["prettier"]\n',
+    )
+    seedStack('web', '[stack]\nname = "web"\nextends = "base"\n')
+
+    const kept = resolveChain(root, 'web', { skipStack: 'base' })[1]
+
+    expect([kept.scripts, kept.devPackages]).toEqual([{}, []])
+  })
+
+  it('should leave a chain with no skip unrestricted', () => {
+    seedStack(
+      'base',
+      '[stack]\nname = "base"\nextends = ""\n\n[sync]\nper_root = ["scripts/verify.sh"]\n',
+    )
+
+    expect(resolveChain(root, 'base')[0].onlyConfigs).toBeUndefined()
+  })
+
   it('should stop instead of looping when extends forms a cycle', () => {
     seedStack('a', '[stack]\nname = "a"\nextends = "b"\n')
     seedStack('b', '[stack]\nname = "b"\nextends = "a"\n')

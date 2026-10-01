@@ -18,6 +18,18 @@ export interface Manifest {
   readonly scriptOverrides: Readonly<Record<string, string>>
   readonly gitignore: readonly GitignoreSection[]
   readonly devPackages: readonly string[]
+  /**
+   * Config paths this stack still ships into a folder that skips it, read
+   * from `[sync] per_root`. Each is a per-root entry point a subfolder needs
+   * as much as the repository root does.
+   */
+  readonly perRoot?: readonly string[]
+  /**
+   * Set only on a stack kept in a chain that skips it. The stack then ships
+   * these configs and nothing else: no seeds, scripts, dependencies, or
+   * gitignore entries.
+   */
+  readonly onlyConfigs?: readonly string[]
 }
 
 export interface ChainOptions {
@@ -50,7 +62,28 @@ export function listFiles(dir: string): string[] {
  * `injectSeeds` both read this, so the report and the write cannot disagree.
  */
 export function configPaths(chain: readonly Manifest[]): Set<string> {
-  return new Set(chain.flatMap((manifest) => listFiles(manifest.configsDir)))
+  return new Set(chain.flatMap(configFiles))
+}
+
+/**
+ * The config paths a manifest ships, narrowed to `onlyConfigs` on a stack the
+ * chain skipped. `scan` and `injectConfigs` both read this, so the diff and
+ * the write cannot disagree on what a skipped stack still carries.
+ */
+export function configFiles(manifest: Manifest): string[] {
+  const files = listFiles(manifest.configsDir)
+  const only = manifest.onlyConfigs
+  return only === undefined ? files : files.filter((rel) => only.includes(rel))
+}
+
+/** The seed paths a manifest ships. A skipped stack ships none. */
+export function seedFiles(manifest: Manifest): string[] {
+  return manifest.onlyConfigs === undefined ? listFiles(manifest.seedsDir) : []
+}
+
+/** Whether the chain carries this stack whole rather than skipped. */
+export function isWholeStack(manifest: Manifest): boolean {
+  return manifest.onlyConfigs === undefined
 }
 
 /**
@@ -100,6 +133,7 @@ export function loadManifest(
   const parent =
     typeof stackTable.extends === 'string' ? stackTable.extends : ''
   const scriptsTable = asTable(parsed.scripts)
+  const perRoot = readStrings(asTable(parsed.sync).per_root)
   const dir = join(toolingDir(root), stack)
 
   return {
@@ -112,6 +146,7 @@ export function loadManifest(
     scriptOverrides: pickStrings(asTable(scriptsTable.override)),
     gitignore: readGitignoreSections(asTable(parsed.gitignore)),
     devPackages: readDevPackages(parsed.dependencies),
+    ...(perRoot.length > 0 ? { perRoot } : {}),
   }
 }
 
@@ -120,8 +155,11 @@ export function loadManifest(
  * values before child values reverse the result. Replaces the seventeen
  * copies of `grep '^extends' | cut -d'"' -f2` the bash carried.
  *
- * A stack matching `skipStack` truncates the chain at that point, mirroring
- * the `[ "$stack" = "${SKIP_STACK:-}" ] && return` guard.
+ * A stack matching `skipStack` drops from the chain along with every
+ * ancestor past it, except that one declaring `[sync] per_root` stays as a
+ * restricted manifest shipping those configs alone. A `--skip base` subfolder
+ * keeps its own verify entry point that way, while husky, prettier, and the
+ * rest stay single at the repository root.
  */
 export function resolveChain(
   root: string,
@@ -131,20 +169,33 @@ export function resolveChain(
   const chain: Manifest[] = []
   const seen = new Set<string>()
   let current: string | undefined = stack
+  let isSkipping = false
 
   while (current !== undefined) {
-    if (current === options.skipStack) break
+    if (current === options.skipStack) isSkipping = true
     if (seen.has(current)) break
     seen.add(current)
 
     const manifest: Manifest | undefined = loadManifest(root, current)
     if (!manifest) break
 
-    chain.push(manifest)
+    if (!isSkipping) chain.push(manifest)
+    else if (manifest.perRoot !== undefined) chain.push(restrict(manifest))
     current = manifest.parent
   }
 
   return chain
+}
+
+function restrict(manifest: Manifest): Manifest {
+  return {
+    ...manifest,
+    onlyConfigs: manifest.perRoot,
+    scripts: {},
+    scriptOverrides: {},
+    gitignore: [],
+    devPackages: [],
+  }
 }
 
 function asTable(value: unknown): Record<string, unknown> {
@@ -177,9 +228,12 @@ function readGitignoreSections(
 }
 
 function readDevPackages(dependencies: unknown): string[] {
-  const dev = asTable(asTable(dependencies).dev)
-  if (!Array.isArray(dev.packages)) return []
-  return dev.packages.filter(
+  return readStrings(asTable(asTable(dependencies).dev).packages)
+}
+
+function readStrings(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter(
     (entry): entry is string => typeof entry === 'string' && entry !== '',
   )
 }

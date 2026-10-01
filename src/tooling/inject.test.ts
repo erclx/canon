@@ -12,7 +12,12 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gitEnv } from '@/git-env'
 import { PROJECT_ROOT } from '@/project-root'
-import { injectGitignore, injectManifest, injectSeeds } from '@/tooling/inject'
+import {
+  injectConfigs,
+  injectGitignore,
+  injectManifest,
+  injectSeeds,
+} from '@/tooling/inject'
 import { resolveChain } from '@/tooling/manifest'
 
 let target: string
@@ -125,6 +130,71 @@ describe('injectSeeds with a config at the same path', () => {
     const applied = await injectSeeds(resolveChain(PROJECT_ROOT, 'web'), target)
 
     expect(applied).not.toContain('.github/workflows/verify.yml')
+  })
+})
+
+describe('injectConfigs over a derived verify.sh', () => {
+  const WRAPPER = join(PROJECT_ROOT, 'tooling/base/configs/scripts/verify.sh')
+  const STALE = '#!/bin/bash\necho "derived web copy"\n'
+
+  const seedStale = (dir: string): void => {
+    mkdirSync(join(dir, 'scripts'), { recursive: true })
+    writeFileSync(join(dir, 'scripts/verify.sh'), STALE)
+  }
+
+  it('should overwrite it with the base wrapper at a root', async () => {
+    captureStderr()
+    seedStale(target)
+
+    await injectConfigs(resolveChain(PROJECT_ROOT, 'web'), target)
+
+    expect(readFileSync(join(target, 'scripts/verify.sh'), 'utf8')).toBe(
+      readFileSync(WRAPPER, 'utf8'),
+    )
+  })
+
+  it('should overwrite it with the base wrapper in a --skip base subfolder', async () => {
+    captureStderr()
+    const sub = subfolder()
+    seedStale(sub)
+
+    await injectConfigs(
+      resolveChain(PROJECT_ROOT, 'vite-react', { skipStack: 'base' }),
+      sub,
+    )
+
+    expect(readFileSync(join(sub, 'scripts/verify.sh'), 'utf8')).toBe(
+      readFileSync(WRAPPER, 'utf8'),
+    )
+  })
+
+  it('should write no other base config into a --skip base subfolder', async () => {
+    captureStderr()
+    const sub = subfolder()
+
+    await injectConfigs(
+      resolveChain(PROJECT_ROOT, 'vite-react', { skipStack: 'base' }),
+      sub,
+    )
+
+    expect(existsSync(join(sub, 'commitlint.config.js'))).toBe(false)
+  })
+
+  it('should give a --skip base subfolder the stack phase list', async () => {
+    captureStderr()
+    const sub = subfolder()
+
+    await injectConfigs(
+      resolveChain(PROJECT_ROOT, 'vite-react', { skipStack: 'base' }),
+      sub,
+    )
+
+    expect(readFileSync(join(sub, 'scripts/verify.json'), 'utf8')).toBe(
+      readFileSync(
+        join(PROJECT_ROOT, 'tooling/web/configs/scripts/verify.json'),
+        'utf8',
+      ),
+    )
   })
 })
 

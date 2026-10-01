@@ -6,6 +6,7 @@ scaffold = ""
 
 [sync]
 source = "configs"
+per_root = ["scripts/verify.sh", "scripts/verify.ts", "scripts/verify.json"]
 
 [dependencies.dev]
 packages = [
