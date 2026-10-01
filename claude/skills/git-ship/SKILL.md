@@ -54,9 +54,9 @@ On the wake, branch on the final record's fields rather than on the exit:
 - `conflicted: true`: stop the sequence and report that the branch conflicts with its base, since no run will start for it. A rebase is the repair.
 - A `reason` and no `state`: the read was refused, such as `no-remote-branch` for a branch deleted on the remote. Stop and report that `reason`. A missing `state` is never a pass.
 - The command hit its timeout and printed no final record: report CI unsettled after 60 minutes, and emit no `✅ Shipped`.
-- The `gh pr checks --watch` fallback ran, which prints a check table rather than a record: every check passing continues to After completion, and any failing check stops the sequence naming it with its URL.
+- The `gh pr checks --watch` fallback ran, which prints a check table rather than a record. Only a printed table carrying at least one check, every one passing, continues to After completion. Any failing check stops the sequence naming it with its URL. Empty or errored output stops the sequence and reports the message, since `no checks reported on the '<branch>' branch` is what a conflicted branch prints, and that fallback has no `conflicted` field to separate it from lag.
 
-Do not auto-fix any of these. The watch line and the failure report are the two exceptions to the no-text-between-steps rule.
+Do not auto-fix any of these. The watch line and a stop report from any branch above are the two exceptions to the no-text-between-steps rule.
 
 ### Why the reach reads at step 5
 

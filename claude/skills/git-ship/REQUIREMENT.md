@@ -35,7 +35,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 ## Guards
 
 - A failing verify stops the run before the sync skills write, so the tree is left as the user left it
-- A failing check stops the sequence. The failure report and the line announcing the background watch are the two places text is allowed between steps.
+- A failing check stops the sequence. A stop report and the line announcing the background watch are the two places text is allowed between steps.
 
 ## Out of scope
 
