@@ -12,15 +12,39 @@ export const DESCRIPTION_LIMIT = 1024
 /** The two headings the requirement template declares, matched at any level. */
 export const REQUIREMENT_SECTIONS: readonly string[] = ['Gap', 'Must']
 
+/** The one tree that ships to a target, and the only one the practice list names. */
+export const SHIPPED_CORPUS = join('claude', 'skills')
+
 /**
  * Both trees the standard governs. `claude/skills/` ships to a target and
  * `.claude/skills/` stays here, and every rule measured below applies to each,
  * so a corpus reading one of them reports a pass over half the subject.
  */
 export const CORPORA: readonly string[] = [
-  join('claude', 'skills'),
+  SHIPPED_CORPUS,
   join('.claude', 'skills'),
 ]
+
+/**
+ * The practice skills `standards/skill-practice.md` describes, keyed by corpus-relative
+ * folder rather than by name, so a target's own `.claude/skills/` folder that
+ * shares a name is never swept in. The list lives here rather than in a skill's
+ * frontmatter because a skill declaring its own kind could exempt itself.
+ */
+export const PRACTICE_SKILLS: readonly string[] = [
+  join(SHIPPED_CORPUS, 'codebase-layout'),
+  join(SHIPPED_CORPUS, 'test-craft'),
+]
+
+/** The closing H2s a practice skill carries, matched exactly outside fences. */
+export const PRACTICE_SECTIONS: readonly string[] = [
+  'Excuses and rebuttals',
+  'Red flags',
+  'Before handing over',
+]
+
+/** The source ledger every practice skill carries beside its body. */
+export const PRACTICE_LEDGER = join('references', 'adopted.md')
 
 /**
  * The one reason this audit refuses. A project carrying neither corpus is the
@@ -33,6 +57,8 @@ export type SkillsAuditRefusal = 'no-corpus'
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const HEADING = /^#{1,6}\s+(.+?)\s*$/
+
+const SECTION = /^##\s+(.+?)\s*$/
 
 /**
  * An ISO date, read as provenance wherever a reader is told it. The context
@@ -69,6 +95,7 @@ export interface SkillsAudit {
   readonly longDescription: readonly SkillFinding[]
   readonly requirementSections: readonly SkillFinding[]
   readonly datedProvenance: readonly SkillFinding[]
+  readonly practiceShape: readonly SkillFinding[]
 }
 
 interface SkillSource {
@@ -79,6 +106,9 @@ interface SkillSource {
   readonly description: string | undefined
   /** Undefined when the folder carries no `REQUIREMENT.md` at all. */
   readonly requirementHeadings: readonly string[] | undefined
+  /** Every H2 in `SKILL.md` outside a fence, for the practice shape. */
+  readonly sections: readonly string[]
+  readonly hasLedger: boolean
   /**
    * `SKILL.md` and every reference below the folder, keyed by the path a
    * finding names. `REQUIREMENT.md` and `EVAL.md` are left out, since the
@@ -134,6 +164,13 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     datedProvenance: sources.flatMap((source) =>
       source.bodies.flatMap(dateFindings),
     ),
+    practiceShape: [
+      ...missingPracticeSkills(
+        present.some((corpus) => corpus.rel === SHIPPED_CORPUS),
+        sources,
+      ),
+      ...sources.flatMap(practiceFindings),
+    ],
   }
 }
 
@@ -190,6 +227,11 @@ async function readSkill(
     description: declared(readField(fields, 'description')),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
+    sections: bodyLines(body)
+      .filter((line) => !line.fenced)
+      .map((line) => SECTION.exec(line.text)?.[1])
+      .filter((text): text is string => text !== undefined),
+    hasLedger: existsSync(join(skillDir, PRACTICE_LEDGER)),
     bodies: [
       { rel: join(skillRel, 'SKILL.md'), text: body },
       ...references.map((path, index) => ({
@@ -250,6 +292,44 @@ function sectionFindings(source: SkillSource): SkillFinding[] {
       detail: `missing: ${missing.join(', ')}`,
     },
   ]
+}
+
+/**
+ * A listed folder the shipped corpus does not hold, such as a renamed skill or
+ * a misspelled append, would otherwise read as a pass. Silent where the
+ * shipped corpus is absent, since a target carries none of the listed skills.
+ */
+function missingPracticeSkills(
+  hasShippedCorpus: boolean,
+  sources: readonly SkillSource[],
+): SkillFinding[] {
+  if (!hasShippedCorpus) return []
+  const found = new Set(sources.map((source) => source.rel))
+  return PRACTICE_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
+    rel,
+    detail: 'missing skill: no folder under the shipped corpus',
+  }))
+}
+
+/**
+ * Matches each section as an exact H2, so a heading carrying trailing text or
+ * sitting at another level reads as missing rather than as a near match the
+ * standard never names.
+ */
+function practiceFindings(source: SkillSource): SkillFinding[] {
+  if (!PRACTICE_SKILLS.includes(source.rel)) return []
+
+  const sections = PRACTICE_SECTIONS.filter(
+    (section) => !source.sections.includes(section),
+  ).map((section) => ({
+    rel: source.rel,
+    detail: `missing section: ${section}`,
+  }))
+  const ledger = source.hasLedger
+    ? []
+    : [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
+
+  return [...sections, ...ledger]
 }
 
 /**

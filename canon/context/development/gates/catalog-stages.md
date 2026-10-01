@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the architecture record, the document ceiling, skill provenance, and standard success criteria
+description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the architecture record, the document ceiling, skill provenance, skill practice shape, and standard success criteria
 ---
 
 # Catalog stages
@@ -60,6 +60,12 @@ Matching is exact rather than singular-aware, so `standards/standard.md` passes.
 The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or a `references/` file, outside a fence or a code span, across both `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git. A tree holding neither corpus reports as unmeasured.
 
 It fails outright rather than reporting, because the corpus sits at zero and a report-only phase would have nothing to wait for. `canon claude skills audit` prints the same finding under its Provenance step and keeps its exit code on a missing requirement alone, so a target running the verb is told about a date and never fails on one. The stage is what makes the finding fail here, where the corpus is held at zero, and it reads the report in-process rather than through the verb's exit for that reason.
+
+## Skill practice shape
+
+The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or the ledger it lacks, or the listed skill itself when no folder under `claude/skills/` matches it. It reads the same report the Skill provenance stage does and fails for the same reason: the verb keeps its exit on a missing requirement alone, so a target is told and never fails, while the two listed skills here are held at zero.
+
+It reports unmeasured when `claude/skills/` is absent rather than when both corpora are, since the list names shipped folders alone and a tree carrying only `.claude/skills/` would otherwise pass without reading a practice skill.
 
 ## Standard success criteria
 

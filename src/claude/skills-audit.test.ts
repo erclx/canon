@@ -7,6 +7,7 @@ import {
   auditSkills,
   DESCRIPTION_LIMIT,
   EXIT_MISSING_REQUIREMENT,
+  PRACTICE_SECTIONS,
 } from '@/claude/skills-audit'
 
 let root: string
@@ -361,6 +362,135 @@ describe('auditSkills dated provenance', () => {
   })
 })
 
+const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
+
+function practiceSkill(
+  sections: readonly string[],
+  { name = 'test-craft', corpus = 'claude', hasLedger = true } = {},
+): string {
+  const dir = conformingSkill(name, corpus)
+  writeFileSync(
+    join(dir, 'SKILL.md'),
+    `${frontmatter(name, 'Applies a practice')}\n${sections.join('\n')}`,
+  )
+  if (hasLedger) {
+    mkdirSync(join(dir, 'references'), { recursive: true })
+    writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
+  }
+  return dir
+}
+
+describe('auditSkills practice list', () => {
+  it('should report a listed skill whose folder the shipped corpus lacks', async () => {
+    practiceSkill(CLOSING)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('claude', 'skills', 'codebase-layout'),
+        detail: 'missing skill: no folder under the shipped corpus',
+      },
+    ])
+  })
+
+  it('should stay silent on a same-named skill outside the shipped corpus', async () => {
+    practiceSkill([], { corpus: '.claude', hasLedger: false })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+})
+
+describe('auditSkills practice shape', () => {
+  const [excuses = '', redFlags = '', handover = ''] = CLOSING
+
+  beforeEach(() => {
+    practiceSkill(CLOSING, { name: 'codebase-layout' })
+  })
+
+  const skillRel = join('claude', 'skills', 'test-craft')
+
+  it('should report nothing on a listed skill carrying every section and a ledger', async () => {
+    practiceSkill(CLOSING)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it.each([
+    ['Excuses and rebuttals', [redFlags, handover]],
+    ['Red flags', [excuses, handover]],
+    ['Before handing over', [excuses, redFlags]],
+  ])('should name the missing %s section', async (section, present) => {
+    practiceSkill(present)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: skillRel, detail: `missing section: ${section}` },
+    ])
+  })
+
+  it('should report a listed skill carrying no ledger', async () => {
+    practiceSkill(CLOSING, { hasLedger: false })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: skillRel,
+        detail: `missing ledger: ${join('references', 'adopted.md')}`,
+      },
+    ])
+  })
+
+  it('should read a section under H3 as missing', async () => {
+    practiceSkill([excuses, redFlags, '### Before handing over\n'])
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: skillRel, detail: 'missing section: Before handing over' },
+    ])
+  })
+
+  it('should read a heading carrying trailing text as missing', async () => {
+    practiceSkill([excuses, '## Red flags that mean start over\n', handover])
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: skillRel, detail: 'missing section: Red flags' },
+    ])
+  })
+
+  it('should read a heading inside a fenced block as missing', async () => {
+    practiceSkill([
+      excuses,
+      redFlags,
+      '```markdown\n## Before handing over\n```\n',
+    ])
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: skillRel, detail: 'missing section: Before handing over' },
+    ])
+  })
+
+  it('should stay silent on an unlisted skill missing every section', async () => {
+    practiceSkill(CLOSING)
+    conformingSkill('git-commit')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+})
+
 describe('auditExitCode', () => {
   it('should fail on a missing requirement', async () => {
     const dir = skillDir('git-commit')
@@ -393,6 +523,15 @@ describe('auditExitCode', () => {
     const report = await auditSkills(root)
 
     expect(report.datedProvenance).toHaveLength(1)
+    expect(auditExitCode(report)).toBe(0)
+  })
+
+  it('should pass when only practice shape is reported', async () => {
+    conformingSkill('test-craft')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toHaveLength(5)
     expect(auditExitCode(report)).toBe(0)
   })
 

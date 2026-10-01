@@ -14,6 +14,7 @@ import {
   seedStandards,
   rawFieldFileReference,
   shippedReferences,
+  skillPracticeShape,
   skillProvenance,
   standardCriteria,
   unreferencedRules,
@@ -485,6 +486,14 @@ export const STAGES: readonly Stage[] = [
     id: 'skill-provenance',
     label: 'Skill provenance',
     checks: [{ kind: 'measure', measure: skillProvenance }],
+  },
+  {
+    // The audit verb only reports a listed practice skill missing a closing
+    // section or its ledger, so a target is told without failing. The list
+    // names this repository's shipped skills, so the stage fails here alone.
+    id: 'skill-practice-shape',
+    label: 'Skill practice shape',
+    checks: [{ kind: 'measure', measure: skillPracticeShape }],
   },
   {
     id: 'standard-criteria',

@@ -25,6 +25,8 @@ External sources were read and filtered rather than imported. This file is the r
 
 **Kent Beck's desiderata as background.** The twelve properties at [testdesiderata.com](https://testdesiderata.com/) trade against each other. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.
 
+**Excuses, red flags, and a closing checklist.** From `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md): Common Rationalizations, Red Flags, and Verification. Adopted as the three closing sections every practice skill carries, with the final filter as the closing checklist. This reverses an earlier decline of the excuses table. That decline objected to arguments against imagined objections, so each row here rebuts an excuse this skill's requirement records a session acting on, such as extending the open end to end spec or adding a pause for a run that flakes under load.
+
 ### Per layer
 
 **Component query and wait rules.** Role queries first, user events over synthetic ones, one assertion per wait, no side effects inside a wait ([Common mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)). Adopted in `component.md` with the library names removed from the rules.
@@ -37,7 +39,7 @@ External sources were read and filtered rather than imported. This file is the r
 
 **Delete the code written before its test.** `superpowers`'s test-driven skill tells a session to delete implementation written ahead of a failing test. Declined: this toolkit audits the order after the fact with its test-order verb and reports rather than destroys, since deleting working code punishes the session without restoring the evidence the red run would have given.
 
-**Rationalization tables and an iron law.** Both external test-driven skills carry an "Iron Law" and a table of excuses with rebuttals. Declined for tone: this toolkit states a rule once with its reason, and a table of arguments against imagined objections costs a read on every load and adds no constraint.
+**An iron law.** Both external test-driven skills carry an "Iron Law" stated as absolute. Declined for tone: this toolkit states a rule once with its reason.
 
 **One skill per layer.** A unit skill, a component skill, and an end to end skill each loaded on its own trigger. Declined because the layer has to be chosen before the right skill can load, so the choice ends up restated in all three or in a fourth skill that is this one.
 

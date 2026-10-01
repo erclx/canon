@@ -13,7 +13,12 @@ import {
   measureArchitecture,
   missingRevisit,
 } from '@/context/architecture'
-import { auditSkills } from '@/claude/skills-audit'
+import {
+  auditSkills,
+  PRACTICE_LEDGER,
+  PRACTICE_SKILLS,
+  SHIPPED_CORPUS,
+} from '@/claude/skills-audit'
 import { listRepositoryFiles } from '@/git-files'
 import { ceilingFindings } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
@@ -310,6 +315,43 @@ export const skillProvenance: Measure = async (ctx) => {
   return {
     emissions: [
       info(`No dated provenance across ${plural(report.skills, 'skill')}`),
+    ],
+  }
+}
+
+/**
+ * Every listed practice skill against the closing sections and the ledger
+ * `standards/skill-practice.md` requires of one.
+ *
+ * Read in-process for the reason `skillProvenance` is, so the verb keeps its
+ * missing-requirement-only exit. The list names shipped folders alone, so a
+ * tree without `claude/skills/` reports unmeasured rather than a vacuous pass.
+ */
+export const skillPracticeShape: Measure = async (ctx) => {
+  const report = await auditSkills(ctx.root)
+  if (!report.corpora.some((corpus) => corpus.rel === SHIPPED_CORPUS)) {
+    return {
+      emissions: [],
+      unmeasured: `no skill corpus at ${SHIPPED_CORPUS} resolved, so no practice skill was read.`,
+    }
+  }
+
+  const found = report.practiceShape
+  if (found.length > 0) {
+    const where = found
+      .map((finding) => `${finding.rel} ${finding.detail}`)
+      .join(', ')
+    return {
+      emissions: [],
+      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named, or the ledger at ${PRACTICE_LEDGER}.`,
+    }
+  }
+
+  return {
+    emissions: [
+      info(
+        `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section and a ledger`,
+      ),
     ],
   }
 }
