@@ -180,6 +180,7 @@ unconfigured
 undercount
 undercounted
 undercounts
+underspecified
 ungated
 unlayered
 unmatch

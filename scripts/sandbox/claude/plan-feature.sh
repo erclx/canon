@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint" "layout"
+  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint" "layout" "vague" "underspecified"
 
   case "$SELECTED_OPTION" in
   "full")
@@ -470,6 +470,106 @@ EOF
     log_info "Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-feature, since the injected copies carry no references/ or standards/ and shadow the plugin"
     log_info "Action:  /canon:plan-feature plan the wishlist task in .canon/tasks/v01.0-wishlist.md"
     log_info "Expect:  plan names its new components under a subfolder rather than flat in src/components/, its new e2e helper outside the specs' folder, and a placement reason on each new path"
+    ;;
+  "vague")
+    cat <<'EOF' >package.json
+{
+  "name": "sandbox-tasks",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}
+EOF
+
+    cat <<'EOF' >>CLAUDE.md
+
+# Tasks
+
+Task list API with SQLite storage.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+- `bun run test`: run tests
+- `bun run bench`: time the list endpoint against the seeded data set
+EOF
+
+    # The ask names no number, so the only measurable criterion in reach is
+    # the budget this file states. The arm scores whether the plan carries it.
+    mkdir -p canon
+    cat <<'EOF' >canon/REQUIREMENTS.md
+# Requirements
+
+## Goals
+
+- A user with 10,000 tasks sees the task list without waiting
+
+## Budgets
+
+- GET /tasks responds in under 200 ms at the 95th percentile with 10,000 rows, as measured by `bun run bench`
+EOF
+
+    mkdir -p src/routes
+    cat <<'EOF' >src/db.ts
+import Database from "better-sqlite3";
+
+const db = new Database("tasks.db");
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    owner TEXT NOT NULL,
+    done INTEGER DEFAULT 0
+  )
+`);
+
+export function getTasks(owner: string) {
+  return db
+    .prepare("SELECT * FROM tasks")
+    .all()
+    .filter((task: any) => task.owner === owner);
+}
+EOF
+
+    cat <<'EOF' >src/routes/tasks.ts
+import { Router } from "express";
+import { getTasks } from "../db";
+
+const router = Router();
+
+router.get("/", (req, res) => {
+  res.json(getTasks(String(req.query.owner)));
+});
+
+export default router;
+EOF
+
+    git add . && git commit -m "feat(api): initial task list" --no-verify -q
+
+    log_step "Scenario ready: feature planning (vague)"
+    log_info "Context: task list API that filters in memory, canon/REQUIREMENTS.md states a 200 ms p95 budget for GET /tasks"
+    log_info "Action:  /canon:plan-feature make the task list faster"
+    log_info "Expect:  plan written whose Verification carries the stated budget as a number with a unit, with the success criteria settled before the file list"
+    ;;
+  "underspecified")
+    cat <<'EOF' >CLAUDE.md
+# My App
+EOF
+
+    mkdir -p src
+    cat <<'EOF' >src/index.ts
+export function main() {
+  console.log("hello");
+}
+EOF
+
+    git add . && git commit -m "chore(app): initial app" --no-verify -q
+
+    log_step "Scenario ready: feature planning (underspecified)"
+    log_info "Context: one-line CLAUDE.md and one source file, no requirements, no tasks"
+    log_info "Action:  /canon:plan-feature improve the app"
+    log_info "Expect:  NO .canon/plans/ file written, and the session asks what the improvement must achieve before planning"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

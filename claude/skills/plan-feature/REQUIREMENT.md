@@ -12,6 +12,9 @@ Without this skill, implementation starts before anyone knows what it touches. A
 ## Must
 
 - Read the project's own Claude setup before scanning source, so the plan inherits decisions already made instead of reopening them
+- Reframe a vague ask as observable, checkable success criteria before listing any file, and carry each criterion into the plan's verification, so a plan never ships a check with nothing measurable to prove
+- Slice batches by a user-visible path rather than by layer, and sequence the riskiest batch first while a sweep stays last, so the batch most likely to change the plan lands while later ones can still move
+- Predict the operator's answers to the next three questions about the ask's success criteria, proceed on the ones it can predict, and ask when it can predict none, since a plan built on a guessed goal proves the wrong thing
 - Name every file the work touches with the reason it is touched
 - Place each new path against the layout guidance with a one-clause reason, loading that guidance only when the plan creates a file or folder, since the planner decides placement and the worker copies whatever path it is given
 - Name how each outcome is proven and which input or state would break the change, so the executing session has a check to run and the reviewer has a place to look
@@ -30,6 +33,7 @@ Without this skill, implementation starts before anyone knows what it touches. A
 ## Guards
 
 - No feature description: stop and ask for one
+- No predictable success criterion: ask before planning rather than guessing the goal
 
 ## Out of scope
 
