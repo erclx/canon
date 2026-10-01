@@ -1,0 +1,36 @@
+# What a correct `/canon:plan-feature make the task list faster` run leaves
+# behind on the seeded task API. Read by `canon sandbox check`. Patterns use
+# TOML literal strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is the reframe: the ask names no number, and the plan
+# carries the budget `canon/REQUIREMENTS.md` states as a measurable criterion.
+# Plans are gitignored, and the checker scans the tree rather than what git
+# lists, so the glob reaches the plan the run wrote.
+
+# Declared at the cap, with no observed run yet to correct it from.
+max_turns = 30
+
+paths = [".canon/plans/feature-*.md"]
+
+write_scope = [".canon/plans/**", ".canon/tasks/**", ".canon/tmp/**"]
+
+manual = [
+  "The success criteria were settled before `**Files to touch:**` was written. Unwired: order of reasoning is a claim about the session, and the plan's section order is fixed by the standard either way.",
+  "The number with a unit sits on a `**Verification:**` bullet rather than elsewhere in the plan. Semantic: the pattern below matches the number anywhere, since a section-scoped match would need a multi-line regex the checker does not anchor.",
+]
+
+# The plan carries the verification section the plan standard requires. Either
+# spelling the validator accepts satisfies it.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Verification:\*\*|## Verification)[ \t]*$'
+
+# A latency criterion as a number with a unit, such as `200 ms` or `200ms`.
+# The seeded budget is the only source of one, so a plan that never read it or
+# never reframed the ask carries no match.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '\b\d+\s?ms\b'

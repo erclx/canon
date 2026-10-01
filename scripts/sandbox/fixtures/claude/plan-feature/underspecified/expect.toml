@@ -1,0 +1,19 @@
+# What a correct `/canon:plan-feature improve the app` run leaves behind on a
+# thin repository: nothing under `.canon/plans/`. Read by `canon sandbox check`.
+#
+# The claim under test is the stop: nothing in the ask or the tree predicts what
+# the improvement must achieve, so the run asks rather than plans. A negative
+# passes for the wrong reason when the run writes its plan under a name the glob
+# missed, so the glob covers every markdown file in the folder rather than the
+# `feature-` prefix alone.
+
+# Declared at the cap, with no observed run yet to correct it from.
+max_turns = 30
+
+absent = [".canon/plans/*.md"]
+
+write_scope = [".canon/tmp/**"]
+
+manual = [
+  "The reply asks what the improvement must achieve before planning. Semantic: a question can be worded many ways, and the absent plan above carries the mechanical half.",
+]
