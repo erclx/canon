@@ -28,8 +28,9 @@ export const site = {
   // README.md: canon-allow-readme-paraphrase: describes the page's own shape, which the README never states.
   description:
     'One real session, from the ask to the merge. What happened, and which part of canon caused it.',
-  // README.md: canon-allow-readme-paraphrase: the plugin's slogan, stated in `.claude-plugin/marketplace.json`'s description rather than the README.
-  tagline: "One source for your repos' AI conventions.",
+  // README.md: canon-allow-readme-paraphrase: the short variant of the README's opening sentence, which is also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`.
+  tagline:
+    "Runs your agent's work and keeps its code good, on one setup for every repo.",
   /** The copyright holder `LICENSE` names, which the social card signs with. */
   author: 'Eric Le',
 }
@@ -59,8 +60,8 @@ export const nav = {
 
 export const fold = {
   headline: ['Watch it run.', 'That is the documentation'],
-  // README.md: canon-allow-readme-paraphrase: "canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories" "runs on itself"
-  lead: 'canon is a CLI and Claude Code plugin that stops your AI conventions drifting apart across repositories. Below is one real session it ran on itself.',
+  // README.md: canon-allow-readme-paraphrase: "canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge" "runs on itself"
+  lead: "canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to the practices that make code worth keeping, and installs the same setup in every repository. Below is one real session it ran on itself.",
   primary: { label: 'Install canon', href: `${REPO}#install` },
   secondary: { label: 'Read the session', href: '#ask' },
   // README.md: canon-allow-readme-paraphrase: "Every AI coding setup accumulates the same assets" condensed to what a project holds before an install.
@@ -495,8 +496,8 @@ export const close = {
 }
 
 export const footer = {
-  // README.md: canon-allow-readme-paraphrase: condenses the opening paragraph's "keeps one authoritative copy and installs it into each project on demand"
-  line: 'A CLI and a Claude Code plugin. One authoritative copy, installed into each project on demand.',
+  // README.md: canon-allow-readme-paraphrase: the short variant of the README's opening sentence, behind a first sentence naming the two surfaces.
+  line: "A CLI and a Claude Code plugin. Runs your agent's work and keeps its code good, on one setup for every repo.",
   columns: [
     {
       title: 'Reference',
