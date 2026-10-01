@@ -24,6 +24,7 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Drift surfaces](drift-surfaces.md): The six sections canon sync --check reports beside the per-domain scan, being seeds, superseded artifacts, unmigrated domains, new rules and skills, and the reverse walk, with the managed-target gate and what counts toward the exit code
 - [Driver](driver.md): Walking a page through named interactions, the probe catalog and the false finding each one carries, why viewport heights are never defaulted, and what each refusal reports
 - [Merge gate](gate.md): Running the gate this repository verifies a branch with, what the stage table holds and what stays a script, how the changed set scopes three stages, and why a stage that cannot read its input reports rather than passing
+- [Hooks](hooks.md): Running the post-merge steps through one verb, the order and the child call behind each, the root and working directory each step reads, the skip switches, and the line each record maps to
 - [Indexes](indexes.md): Flags, exit codes, and JSON shape for canon indexes regen and canon indexes list, plus when regen auto-stages what it rewrote
 - [Install and sync](install-and-sync.md): What each install and sync verb writes, refuses, or leaves alone, and how drift is attributed in a target project
 - [Intake](intake.md): Reading intake folder counts and items, the three read states an item can be in, landing a batch of selections in one cluster, the refusal reasons, and why a call is scoped to one file

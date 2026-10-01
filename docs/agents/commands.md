@@ -40,6 +40,7 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon records <verb>`      | Validate, size, prune, and back up the session records                          |
 | `canon sessions <verb>`     | Resolve live sessions to worktree and branch, and move one between machines     |
 | `canon worktrees <verb>`    | Report and remove worktrees whose pull request merged                           |
+| `canon hooks <verb>`        | Run the steps a git hook drives                                                 |
 | `canon autoship <verb>`     | Decide whether a changed set needs the review pass                              |
 | `canon pr <verb>`           | Read a pull request's diff, head, checks, and review, and post its evidence     |
 | `canon feedback`            | Write toolkit feedback from stdin, or open an issue with `--github`             |
@@ -100,6 +101,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `records`, in `records.md`: `validate`, `migrate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
 - `sessions`, in `sessions.md`: `list`, `export`, `import`
 - `worktrees`, in `worktrees.md`: `list`, `reclaim`
+- `hooks`, in `hooks.md`: `post-merge`
 - `autoship`, in `review-classification.md`: `classify`
 - `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`
 - `audits`, in `audits.md`: `run`, `list`
