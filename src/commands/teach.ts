@@ -1,7 +1,14 @@
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import type { Command } from 'commander'
+import {
+  logServing,
+  parsePort,
+  serveFields,
+  waitForInterrupt,
+} from '@/serve/report'
+import { DEFAULT_PORT, startServer } from '@/serve/static'
 import { type LessonOutcome, planLesson } from '@/teach/lesson'
-import { type NavOutcome, generateNav } from '@/teach/nav'
+import { type NavGenerated, type NavOutcome, generateNav } from '@/teach/nav'
 import type { RenderOutcome } from '@/teach/render'
 import {
   defineTerms,
@@ -83,6 +90,12 @@ interface NavCommandOptions {
   readonly root?: string
 }
 
+interface UpCommandOptions {
+  readonly json?: boolean
+  readonly port?: string
+  readonly root?: string
+}
+
 interface RenderCommandOptions {
   readonly json?: boolean
 }
@@ -96,11 +109,12 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Opening a workspace:',
-        '  canon serve .canon/teach --entry <nn>-<topic>/index.html',
+        'Viewing a workspace:',
+        '  canon teach up <topic>',
         '',
-        'canon teach list <topic> prints the exact line, with the teach folder',
-        'written from where you stand rather than as this literal.',
+        'It refreshes the chrome and serves the workspace. To serve without',
+        'rewriting anything, canon teach list <topic> prints the canon serve',
+        'line, with the teach folder written from where you stand.',
         '',
       ].join('\n'),
     )
@@ -178,6 +192,7 @@ export function register(program: Command): void {
         'It derives the ordinal from the highest already present and writes',
         'MISSION.md, RESOURCES.md, and GLOSSARY.md. A topic another workspace',
         'already covers is refused, since a second one forks the records.',
+        'It creates a workspace and serves nothing: canon teach up views one.',
         '',
         'Examples:',
         '  canon teach open regular-expressions --subject "Reading and writing regular expressions" \\',
@@ -365,6 +380,10 @@ export function register(program: Command): void {
         'the prev/next footer nav, and the behavior scripts. The authored',
         '<h1>, lede, body, and quiz are left untouched.',
         '',
+        "A workspace's generated assets/base.css is rewritten on every run, so",
+        'a CLI upgrade reaches it. Its course.css is never rewritten, and a',
+        'workspace holding only a course.css is not given a base.css.',
+        '',
         'A lesson missing one of the four chrome markers is refused rather',
         "than rewritten, reported by name in the JSON record's skipped list",
         'and on stderr, while every other lesson still rewrites.',
@@ -377,6 +396,45 @@ export function register(program: Command): void {
     )
     .action(async (topic: string | undefined, opts: NavCommandOptions) => {
       process.exitCode = await runNav(topic, opts)
+    })
+
+  teach
+    .command('up')
+    .description('Refresh the chrome with nav, then serve the teach folder')
+    .argument('[topic]', 'Workspace folder or topic the printed link opens')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--port <number>', `Port to try first, default ${DEFAULT_PORT}`)
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Teach root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the server stopped after running',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Runs the nav pass for the topic, or for every workspace when none is',
+        'named, then serves the teach folder through the same server as',
+        'canon serve. The link opens the topic contents page, or the root',
+        'listing with no topic. A lesson nav skips is reported and the server',
+        'still starts, while a nav refusal starts no server.',
+        '',
+        'Viewing writes: every page and generated stylesheet nav owns is',
+        'rewritten first. canon teach list <topic> prints a canon serve line',
+        'that serves without rewriting.',
+        '',
+        'It runs until interrupted. A session wanting the link without waiting',
+        'starts it in the background and reads the record off stdout.',
+        '',
+        'Examples:',
+        '  canon teach up regular-expressions',
+        '  canon teach up --port 4000 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (topic: string | undefined, opts: UpCommandOptions) => {
+      process.exitCode = await runUp(topic, opts)
     })
 
   teach
@@ -805,21 +863,29 @@ function reportNav(
     return reportRefusal('canon teach nav', outcome, emitJson, root)
 
   if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        ok: true,
-        root: outcome.root,
-        contents: outcome.contents,
-        lessons: outcome.lessons,
-        reference: outcome.reference,
-        skipped: outcome.skipped,
-        unresolved: outcome.unresolved,
-      })}\n`,
-    )
+    process.stdout.write(`${JSON.stringify(navFields(outcome))}\n`)
     return 0
   }
 
   intro('canon teach nav')
+  logNav(outcome)
+  outro()
+  return 0
+}
+
+function navFields(outcome: NavGenerated): Record<string, unknown> {
+  return {
+    ok: true,
+    root: outcome.root,
+    contents: outcome.contents,
+    lessons: outcome.lessons,
+    reference: outcome.reference,
+    skipped: outcome.skipped,
+    unresolved: outcome.unresolved,
+  }
+}
+
+function logNav(outcome: NavGenerated): void {
   logStep('Root')
   logInfo(outcome.root)
   logStep('Contents')
@@ -842,8 +908,67 @@ function reportNav(
       logWarn(`${reference.file}: lesson ${reference.lesson}`)
     }
   }
+}
 
-  outro()
+async function runUp(
+  topic: string | undefined,
+  opts: UpCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const root = await rootFor(opts.root)
+
+  const port = parsePort(opts.port)
+  if (port === undefined) {
+    return reportRefusal(
+      'canon teach up',
+      badInput(`${opts.port} is not a port`),
+      emitJson,
+      root,
+    )
+  }
+
+  const nav = await generateNav(root, topic)
+  if (!nav.ok) return reportRefusal('canon teach up', nav, emitJson, root)
+
+  // The server resolves its folder against the cwd, and the teach folder sits
+  // at the main worktree root, so it takes the absolute path a linked
+  // worktree can still reach.
+  const dir = resolve(teachDir(root))
+  const contents = nav.contents[0]
+  const entry =
+    topic === undefined || contents === undefined
+      ? 'index.html'
+      : relative(dir, resolve(root, contents)).split(sep).join('/')
+
+  const served = startServer(dir, { port, entry })
+  if (!served.ok) {
+    // A serve refusal carries a reason the teach refusals do not list, so it
+    // is written here in the teach record's shape rather than through one.
+    if (emitJson) {
+      process.stderr.write(`${served.detail}\n`)
+      process.stdout.write(
+        `${JSON.stringify({ ok: false, root, reason: served.reason, message: served.detail, detail: [] })}\n`,
+      )
+      return 1
+    }
+    intro('canon teach up')
+    logStep('Refused')
+    logError(served.detail)
+    outro()
+    return 1
+  }
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ ...navFields(nav), served: served.root, ...serveFields(served) })}\n`,
+    )
+  } else {
+    intro('canon teach up')
+    logNav(nav)
+    logServing(served)
+  }
+
+  await waitForInterrupt(served.stop)
   return 0
 }
 
