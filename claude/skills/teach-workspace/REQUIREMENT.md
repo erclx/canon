@@ -13,6 +13,8 @@ It picks the next topic from the subject's own order rather than from what the l
 
 It also produces one output where two are needed. A page written to be worked through once and a page written to be looked up later have different lifetimes and different readers, and merging them yields material that is disposable and gets kept, or durable and carries a quiz nobody can promote. Writing the durable half in a format the authoring gates do not read costs a conversion at the moment it matters most, which is the moment someone tries to promote it.
 
+A lesson on a structure can also point at one and draw none. Nothing asks the author whether the subject is a relationship, boundary, path, or before-and-after, so a lesson on layers and ports tells the learner to draw arrows and ships none, and nothing records whether prose was a choice or an omission.
+
 A session that does record something records the wrong thing. It writes what was taught rather than what the learner retrieved, and a tally of errors carries none of the misconception a later session would work against.
 
 The lesson then reaches nobody. It is a page carrying a stylesheet and a script, and the only thing a session hands over is a file path, which an editor preview opens with neither. The learner reads unstyled markup and takes it for the lesson, or opens nothing at all, and either way the session reports the lesson as delivered. A path is also the wrong unit once a workspace holds several pages, since the learner wants the one they are on rather than the folder it sits in.
@@ -31,6 +33,7 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 - Place each lesson from the learning records rather than from the subject's order, and open with retrieval on the last wrong answer
 - Split the output by lifetime, sending the worked-through half to lessons and the looked-up half to reference pages in the format the authoring gates read
 - Record the wrong answer itself rather than the count, since that is what the next session places the learner from
+- Decide each lesson's figure before writing its body, drawing it or recording in the reply the one-line reason prose carries it, so a structure lesson never ships with neither
 - Report progress against the mission's success lines, so a mission can be called finished
 - Hand the learner a link that opens the workspace in a real browser on every run, reading it back from the verb that served it rather than composing one, since the port a preview lands on is not the port it asked for
 - Propose a destination for each durable page by who owns its subject, and wait for the operator rather than routing on the session's own reading

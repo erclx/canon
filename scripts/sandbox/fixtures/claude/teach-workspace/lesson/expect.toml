@@ -59,9 +59,10 @@ write_scope = [".canon/teach/01-regex/**"]
 # The reply names the workspace, the ordinal the lesson landed on, and the
 # progress against the mission. `0002` is the load-bearing token, since a run
 # that wrote a lesson and overwrote `0001` reports the same workspace.
-reply = [".canon/teach/01-regex/", "0002"]
+reply = [".canon/teach/01-regex/", "0002", "Figure"]
 
 manual = [
+  "The `Figure:` reply line matches the lesson's subject. Semantic: whether the lesson carries a `<figure>` depends on what it teaches, so no `[[content]]` assertion can pin it. A lesson whose subject is a structure either draws it or the line gives the one-line reason prose carries it, and a lesson that is not about a structure states why without drawing to satisfy the step.",
   "The lesson restates no styles of its own beside the spliced marker pair. Semantic: an assertion can say the marker is there and cannot say a second style block is not, since a regex asserting absence over a whole file has no anchor to sit at. A run that leaves the marker pair for the verb to fill and also writes styles of its own passes every assertion above.",
   "The stylesheet carries the values the lesson needs rather than a host project's tokens. Unwired: the seeded project carries no design record at all, so there is nothing here for a lesson to inherit and the inheriting path cannot be reached by this arm.",
   "The quiz option order came from `canon teach lesson` rather than from the run's own judgment. Unwired: the claim is about which commands were invoked, which the envelope does not carry, and the order the verb draws is uniform, so no single run's output separates a taken order from a chosen one. Position bias is a property over many runs and this arm sees one.",
