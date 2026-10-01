@@ -8,7 +8,7 @@ category: Agent surface
 
 CLI catalog and invocation rules for agents, split by command domain. Start with overview.
 
-- [Architecture record](architecture-record.md): The four findings canon context audit reads off the architecture record, being the entry cap and length gates the record states for itself, the claim coverage report, and the word counts
+- [Architecture record](architecture-record.md): The five findings canon context audit reads off the architecture record, being the entry cap, revisit sentence, and length gates the record states for itself, the claim coverage report, and the word counts
 - [Audits](audits.md): Running every health check as one set, what the single verdict means, the exit code each outcome takes, the retained baseline and the delta it reports, and which corpora are kept out of the record
 - [Capture](capture.md): Rendering HTML sources to PNG, what the command asserts about fonts, and why the selector has no default
 - [Census](census.md): Tracked-plus-untracked file count, a breakdown by extension, and a line total that skips whatever reads as binary

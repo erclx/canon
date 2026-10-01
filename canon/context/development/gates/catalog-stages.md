@@ -35,7 +35,7 @@ The banned pattern is a bare `wiki/` with no exemption for a body that has a rea
 
 ## Architecture record
 
-The Architecture record stage calls `measureArchitecture` in-process and fails when `canon/ARCHITECTURE.md` holds more decisions than the entry cap it states or runs past the line ceiling its own allowances derive. Both limits are the record's own clauses, so a project whose record states neither passes, and a project with no record passes and says so.
+The Architecture record stage calls `measureArchitecture` in-process and fails when `canon/ARCHITECTURE.md` holds more decisions than the entry cap it states or runs past the line ceiling its own allowances derive, and when a decision lacks a sentence opening `Revisit when` while the record states that every decision closes with one. All three are the record's own clauses, so a project whose record states none passes, and a project with no record passes and says so.
 
 It reads the record directly because the Context citations stage runs `--citations-only`, which never opens it. The count is by `###` heading outside a fence, so a heading carrying two decisions counts once, which is the undercount a writer at the cap is asked not to exploit.
 
