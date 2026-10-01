@@ -64,6 +64,23 @@ carries no evidence path, such as `base` or `python`, hits this reason on
 every pull request and posts nothing, which is the correct behavior rather
 than a gap.
 
+Both `ok` and `no-evidence` also report what the marked comment already
+shows a reviewer, each field present only when that comment holds it:
+
+| Field       | What it carries                                                   |
+| ----------- | ----------------------------------------------------------------- |
+| `preview`   | The hosted `**Preview:**` address the comment opens with.         |
+| `local`     | The `**Local preview:**` address under it.                        |
+| `checklist` | The checklist between its delimiters, with any ticked boxes kept. |
+
+These come from the comment already posted, never from the flags the call
+passed, so a skill driving a review reads which address and which checklist a
+reviewer has without parsing the comment itself. A checklist posted on its own
+carries no marker, so the record reports none of the three for it. Reading
+them means the thread is read before the `no-evidence` answer too, so an
+unreadable thread refuses as `gh-failed` on both reasons rather than
+reporting the fields absent.
+
 ## What `[number]` selects, and what it does not
 
 Naming a number picks which pull request the rendered body claims to

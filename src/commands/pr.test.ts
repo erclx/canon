@@ -352,6 +352,106 @@ describe('canon pr evidence --local', () => {
   })
 })
 
+/** A marked comment body carrying every field the record reports, in the shape `renderEvidenceBody` writes. */
+function markedCommentBody(): string {
+  return [
+    '**Preview:** https://feat-x.site.pages.dev',
+    '**Local preview:** http://localhost:5173',
+    '',
+    '## What to look at',
+    '',
+    '<!-- pr-checklist:start -->',
+    '- [x] the hero settles',
+    '- [ ] the footer wraps',
+    '<!-- pr-checklist:end -->',
+    '',
+    '<!-- pr-evidence: head=abc123 -->',
+  ].join('\n')
+}
+
+describe('canon pr evidence reports the marked comment', () => {
+  let tempDir: string
+  let repoRoot: string
+  let bin: string
+  let commentsFile: string
+
+  async function runEvidenceRecord(
+    files: Record<string, string>,
+  ): Promise<Record<string, unknown>> {
+    initBranchRepo(repoRoot, files)
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${bin}:${process.env.PATH}` },
+      },
+    )
+    return JSON.parse(result.stdout)
+  }
+
+  function writeComments(bodies: readonly string[]): void {
+    const comments = bodies.map((body, index) => ({
+      url: `https://github.com/o/r/pull/7#issuecomment-${100 + index}`,
+      body,
+    }))
+    writeFileSync(commentsFile, JSON.stringify({ comments }))
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-evidence-record-'))
+    repoRoot = join(tempDir, 'repo')
+    bin = join(tempDir, 'bin')
+    commentsFile = join(tempDir, 'comments.json')
+    mkdirSync(repoRoot)
+    writeFakeGh(bin, commentsFile, join(tempDir, 'api.log'))
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should carry the marked fields on a no-evidence record', async () => {
+    writeComments([markedCommentBody()])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record).toMatchObject({
+      reason: 'no-evidence',
+      preview: 'https://feat-x.site.pages.dev',
+      local: 'http://localhost:5173',
+      checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+    })
+  })
+
+  it('should carry the marked fields on an ok record', async () => {
+    writeComments([markedCommentBody()])
+
+    const record = await runEvidenceRecord({
+      'evidence/hero.png': 'png',
+    })
+
+    expect(record).toMatchObject({
+      reason: 'ok',
+      preview: 'https://feat-x.site.pages.dev',
+      local: 'http://localhost:5173',
+      checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+    })
+  })
+
+  it('should omit every field when no comment carries the marker', async () => {
+    writeComments(['- [ ] a checklist posted on its own'])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record).not.toHaveProperty('preview')
+    expect(record).not.toHaveProperty('local')
+    expect(record).not.toHaveProperty('checklist')
+  })
+})
+
 describe('canon pr local', () => {
   let tempDir: string
   let repoRoot: string
