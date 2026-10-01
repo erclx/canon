@@ -21,7 +21,7 @@ Does not govern:
 
 - The problem being solved and for whom
 - User-facing goals stated as outcomes, not implementation
-- Explicit non-goals that prevent feature creep. Mark deferred items "(deferred)" so they read as paused, not excluded.
+- Explicit non-goals that prevent feature creep. Mark deferred items "(deferred)" so they read as paused, not excluded. A non-goal resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence, and a non-goal resting on scope alone takes none.
 - MVP features as a numbered list: feature name and one-line description
 - Tech stack as a plain list of tools
 - Hard constraints that shape every decision

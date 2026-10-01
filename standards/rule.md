@@ -79,6 +79,7 @@ paths:
 - Use imperative voice for every rule (`Prefix booleans with is`, not `Booleans should be prefixed`)
 - State one rule per bullet as a single directive line
 - State what to do and what not to do. Do not explain the reasoning behind a rule.
+- End the directive line of a ban asserting how the model or a tool behaves with one `Revisit when <finding>.` sentence, which states a condition rather than the reasoning. A style, safety, or consistency ban takes none.
 - Phrase a rule as a ban on the forbidden shape when it could otherwise enumerate allowed options, so it stays stable as categories grow
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - Keep the file to one topic. A second topic is a second rule file.

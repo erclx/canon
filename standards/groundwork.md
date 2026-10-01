@@ -102,6 +102,7 @@ Closes the folder. Everything above it is input.
 - The goal
 - The items to do
 - What was considered and dropped
+- `## Revisit when`: the "Overturned by" line of each lean that became the decision, carried over as written. A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section.
 
 The dropped list is what stops a future session re-proposing something already rejected.
 

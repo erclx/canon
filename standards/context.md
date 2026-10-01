@@ -56,7 +56,7 @@ Both fields feed `canon/context/index.md` when regenerated.
 
 Include whenever the domain has content for them. Never pad an entry with an empty heading.
 
-- `## Decisions`: non-obvious choices and the reasoning behind them. The highest-value section in the folder and the one most often missing.
+- `## Decisions`: non-obvious choices and the reasoning behind them. The highest-value section in the folder and the one most often missing. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm the decision prevents, and a decision resting on the project's own code takes none.
 - `## Gotchas`: workarounds, things tried and rejected, scar tissue worth preserving.
 
 ## Optional sections
