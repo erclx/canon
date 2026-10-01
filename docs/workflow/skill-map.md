@@ -79,14 +79,15 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## After the pull request opens
 
-| Skill                  | When to use                                                          |
-| ---------------------- | -------------------------------------------------------------------- |
-| `canon:review-pr`      | From an independent session, to post findings on the PR itself       |
-| `canon:review-address` | On the worker's side, to fix posted findings and push a follow-up    |
-| `canon:git-followup`   | For a small self-review edit on a branch whose PR is already open    |
-| `canon:git-split`      | When a branch turns out to carry unrelated commits                   |
-| `canon:git-issue`      | When something surfaced that belongs on the tracker rather than here |
-| `canon:git-worktree`   | After a PR merges, to list worktrees and reclaim the slot            |
+| Skill                  | When to use                                                            |
+| ---------------------- | ---------------------------------------------------------------------- |
+| `canon:review-pr`      | From an independent session, to post findings on the PR itself         |
+| `canon:review-ui`      | Beside the code review, to drive the PR's checklist in the running app |
+| `canon:review-address` | On the worker's side, to fix posted findings and push a follow-up      |
+| `canon:git-followup`   | For a small self-review edit on a branch whose PR is already open      |
+| `canon:git-split`      | When a branch turns out to carry unrelated commits                     |
+| `canon:git-issue`      | When something surfaced that belongs on the tracker rather than here   |
+| `canon:git-worktree`   | After a PR merges, to list worktrees and reclaim the slot              |
 
 ## Run several tracks at once
 

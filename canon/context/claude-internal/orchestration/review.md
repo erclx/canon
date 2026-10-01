@@ -47,9 +47,11 @@ The review family reaches the script through `canon pr review-state` rather than
 
 The age and the pass instant split rather than sharing a stamp. `age` and `STALLED` read `submittedAt`, which measures how long a posted comment has waited on a human, and `pass_at` reads `readAt // submittedAt`, which bounds what that pass had read. Both stamps ride at the end of the snapshot line and never enter the baseline. That keeps `cut -d' ' -f2,4,5,6` reading a baseline an older version wrote, and it leaves a carried line supplying neither, where the count test in front of them short-circuits before either is read as a number.
 
-`UNMATCHED` adds a field with no count in front of it to short-circuit behind, since the field is itself a count: how many comments this run carry a heading outside the five `review-pr` states. `unmatched_count`, unlike `pass_at` and `reply_at`, rides in the baseline rather than only at the end of the snapshot line, because the next run has to know whether a heading already reported is still the newest one.
+`UNMATCHED` adds a field with no count in front of it to short-circuit behind, since the field is itself a count: how many comments this run carry a heading outside the six the comment filters know. `unmatched_count`, unlike `pass_at` and `reply_at`, rides in the baseline rather than only at the end of the snapshot line, because the next run has to know whether a heading already reported is still the newest one.
 
 A carried line supplies neither an eighth nor a tenth field, so the comparison reading it defaults both sides explicitly, `${unmatched_count:-0}` against `${old_unmatched:-0}`, rather than leaning on an equality test the way `RESPONSE` does. `bun run check` skips `src/orchestrate-poll.test.ts` on a run touching no TypeScript file, so a change to `poll.sh` alone needs that suite run directly.
+
+The UI family is one token, `none` or `<open|closed>-<head|behind>-<short-sha>`, read off `.reviews` by `JQ_UI_STATE` and compared against the head as a prefix, since the `review-ui` marker may carry a short sha. It sits ahead of the unmatched heading on the snapshot line, because that heading carries spaces and has to stay last, and it rides in the baseline as the eighth field so the next run can report a transition. Carrying the covered sha in the token is what makes a second UI pass at a new head read as a change even when its heading repeats. A carried line reaches the UI read with nothing in that position, so no `UI-` state fires on it and the baseline keeps the previous token.
 
 ### The poll's tests
 
