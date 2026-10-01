@@ -45,17 +45,19 @@ Write every arm side by side on one self-contained HTML page at `<dest>/candidat
 
 ## Step 3: render and hand off
 
-Render the page, then look at what came back:
+Serve the page first, then render it and look at what came back. Every run serves, whatever the decision's layer, since a pick asked about a page the operator cannot open is a question nobody can answer.
 
 ```bash
+canon serve <dest> --entry candidates.html --json
 canon capture <dest>/candidates.html --selector <element>
 ```
 
+- Start `canon serve` in the background and read the link off its record, never assuming a port, since the printed link opens `index.html` without `--entry` and `<dest>` holds no such file. Keep each server up through the loop and note its process, since Step 5 re-enters this step and Step 6 stops them all. Serving needs no browser, so the link exists the moment the page is written.
+- Where Step 2 wrote a frame, hand over the frame's link instead, served from the parent folder as Step 2 says, and let no earlier round's `<dest>`-only link stand as the address a later round cites.
 - `--selector` has no default and the command refuses without it. Name the element wrapping the arms rather than `body`, which crops to whatever the page's own margins leave.
-- `canon capture` and `canon drive` both need a browser binary the toolkit does not install. When either refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, then stop rather than describing an arm nobody has seen.
-- Serve the page instead of capturing it when the operator has to drive the decision, such as a hover response, a scroll-linked position, or a pace. Start `canon serve <dest> --entry candidates.html` in the background and read the link off its record, since the printed link opens `index.html` without that flag and `<dest>` holds no such file. A still answers how a thing looks and answers none of those.
+- `canon capture` and `canon drive` both need a browser binary the toolkit does not install. When either refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, stop every server Step 3 started, then stop rather than describing an arm nobody has seen.
 - Write the render inside the record that cites it wherever one exists, by pointing `--out` at `<dest>/renders/` rather than at a session scratch path. A pick taken from an image the record does not hold is a judgment nobody but this session can check, and the archival capture in Step 6 covers the final round alone.
-- Hand over the address rather than a description. Emit the PNG path on its own line, and the link beside it where the page is served.
+- Hand over the address rather than a description. Emit the link first on its own line, then the PNG path on its own line. A still answers how a thing looks and answers none of a hover response, a scroll-linked position, or a pace, which the served page does.
 - Never report a visual result you have not looked at. A claim about appearance with no render behind it is a guess.
 - Look to judge rather than to confirm. Reading the image back to check it rendered satisfies the rule above and still hands over weak work, so name the weakest thing on the page in a sentence. Where that sentence would embarrass the work, fix it and hand over the second version. Say the remaining weakness out loud either way, so the operator is not hunting for what you already know.
 
@@ -63,6 +65,7 @@ canon capture <dest>/candidates.html --selector <element>
 
 Put the choice to the operator through the structured question surface, since a call the operator's preference decides always routes through it rather than through prose.
 
+- Emit the link in the response text ahead of the question call, and name it again in the question's own text, since some surfaces render the question card alone. A question that goes out with no address is one the operator cannot answer by looking.
 - One option per arm, labeled with the arm's id and carrying its cost as the description.
 - Rank the recommendation first and mark it `(Recommended)`.
 - Author the real arms only. The surface appends its own escapes for a free-text answer and for reopening the question, so writing either as an option ships a duplicate the tool rejects.
@@ -82,8 +85,8 @@ Put the choice to the operator through the structured question surface, since a 
 2. Close out whatever document stated the decision as open, in the same change, naming the arm that won and the ones that stayed defensible. A pick that changes a surface and records nothing about why leaves the next reader to re-derive it from a diff. Skip this where nothing stated the decision.
 3. Batch-capture the final round's arm files, when `<dest>` is the scratch path: `canon capture <dest>/arms --selector <wrapper-class> --out <archive-dir>`, naming Step 2's chosen class. This is the directory-batch convention `draft-identity` Step 6 already uses.
 4. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than against a linked worktree this run happens to be building in. The capture is what keeps every arm past the pick, the losing ones included, as a durable revert record distinct from the live comparison page.
-5. Delete `<dest>` and every file inside it, when `<dest>` is the scratch path, now that every arm sits at the durable path above. A variant left behind there is a second design nobody maintains.
-6. Leave `<dest>` in place when it is a live track's `evidence/<slug>/`: `plan-groundwork`'s write scope treats evidence as durable rather than as scratch a session may delete, and the arms already sit at a durable path there.
+5. Stop every background server Step 3 started, one per round where the loop re-entered it, then delete `<dest>` and every file inside it, when `<dest>` is the scratch path, now that every arm sits at the durable path above. A variant left behind there is a second design nobody maintains, and a server left running would serve a folder that no longer exists.
+6. Leave `<dest>` in place when it is a live track's `evidence/<slug>/`: `plan-groundwork`'s write scope treats evidence as durable rather than as scratch a session may delete, and the arms already sit at a durable path there. Stop every server there too.
 7. Report `<dest>` as still standing when the scratch-path delete is refused, naming the path for the operator to remove, rather than closing on a report the tree contradicts. The pick is applied either way, so the run has done its work and the folder is what outlives it.
 8. Report every surface that changed, each on its own line, name the arm that won by its id and its cost, and report the archival path from Step 3 where it ran.
 

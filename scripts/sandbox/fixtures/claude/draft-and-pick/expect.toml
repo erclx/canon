@@ -71,6 +71,7 @@ manual = [
   "The applied treatment is the arm the prompt picked rather than another. Semantic: which arm is second is a property of the order the run authored, so no pattern can tie the pick to the treatment without fixing the arms the run is meant to invent.",
   "The pick was put through the structured question surface with the recommendation ranked first and marked. Unwired: the harness captures no tool calls, and a headless session has no operator to put a question to, so this arm cannot reach it at all.",
   "The loop narrowed to the picked arm and handed off before closing. Unwired: the loop stops on a person saying the pick is right and no fixture supplies one, so a headless run closes on the pick and a green verdict here is not coverage of the loop.",
+  "The candidates page was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 stops the server and deletes the page before anything reads the tree.",
   "The design note names the arm that won and the ones that stayed defensible, rather than merely being touched. Judgment: step 6 now directs the write and write_scope admits it, so what nothing asserts is whether the record says anything useful, and any pattern over it would match wording the run chooses.",
 ]
 

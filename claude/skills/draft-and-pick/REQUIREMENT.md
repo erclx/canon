@@ -29,6 +29,7 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Judges a lower layer through a finished higher one, so an operator asked about composition looks at the palette instead and answers about that.
 - Hands over the combined page alone for a decision about layout, where every arm sits in a column while the media queries answer to the whole window, so no arm is ever seen at its own viewport and a fault that appears only narrower survives the pick.
 - Rebuilds a navigation harness by hand on a run with several rounds, since each round writes its own folder and nothing reaches all of them from one address. Two design tracks hand-wrote the same page picker and theme toggle.
+- Puts the pick question with no address in its output, after capturing the page and reading the image back. The operator then has to ask for a served page before they can look, so the question goes unanswered or gets answered blind.
 - Sets the theme on an arm that persists its own and reads it back on load, so the control reports one theme while the arm renders the other and the set is compared across two.
 
 ## Must
@@ -49,7 +50,7 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Apply the winning arm in one change.
 - Capture every arm from the final round as an image before deleting the run's scratch folder, rather than discarding the losing arms with it.
 - Resolve the archival capture's destination against the main worktree root, never against a linked worktree the run happens to be building in.
-- Serve the candidates live where the decision is one the operator has to drive, since a still cannot answer how a gesture feels or how a pace reads.
+- Serve the candidates on every run, whatever the decision's layer, and emit the local link ahead of the first pick question, so the operator can open the page the question is about and a still is never the only address.
 
 ## Must not
 
