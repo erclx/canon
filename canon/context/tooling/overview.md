@@ -96,7 +96,7 @@ canon tooling sync vite-react ./frontend --skip base --write
 canon tooling sync python ./backend --skip base --write
 ```
 
-`--skip <stack>` removes the named layer and its parents across configs, seeds, deps, scripts, and gitignore. Each subtree still gets its own language configs.
+`--skip <stack>` removes the named layer and its parents across configs, seeds, deps, scripts, and gitignore, except for any config a skipped stack names under `[sync] per_root`, which `canon/context/tooling/manifests.md` covers. Each subtree still gets its own language configs.
 
 ### Adding a stack
 
