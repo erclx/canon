@@ -61,7 +61,7 @@ The types stage runs in CI rather than only in the pre-push hook because a missi
 
 ## Gotchas
 
-Read `no checks reported on the '<branch>' branch` as a possible merge conflict rather than as CI lag. A `pull_request` workflow runs against a merge ref GitHub computes from the head and the base, and a conflicting branch has no such ref, so the run is never queued and nothing reports why. Check `gh pr view --json mergeable,mergeStateStatus`: `CONFLICTING` and `DIRTY` mean the branch needs a rebase, and force-pushing queues the run within a minute. Autoship's CI watch has no timeout distinguishing the two, so a conflicting branch polls until the operator intervenes.
+Read `no checks reported on the '<branch>' branch` as a possible merge conflict rather than as CI lag. A `pull_request` workflow runs against a merge ref GitHub computes from the head and the base, and a conflicting branch has no such ref, so the run is never queued and nothing reports why. Check `gh pr view --json mergeable,mergeStateStatus`: `CONFLICTING` and `DIRTY` mean the branch needs a rebase, and force-pushing queues the run within a minute. Autoship's CI watch runs in the background and exits on `conflicted: true`, and a 60-minute timeout bounds it otherwise, so a branch with no run at all reports CI unsettled rather than shipped.
 
 A shields.io badge URL returns HTTP 200 whether or not the query resolves, so verifying a badge by status code alone passes one that renders `no status`. A badge filtered to a branch the workflow never triggers on renders `no status` behind that 200. Curl the URL and grep the rendered `<title>` for the value it reports.
 

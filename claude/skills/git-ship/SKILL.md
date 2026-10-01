@@ -7,7 +7,7 @@ description: Runs the full post-feature workflow by syncing docs, staging commit
 
 Run the full post-feature workflow by invoking each skill in sequence using the Skill tool. After each skill returns, invoke the next step immediately in the same response.
 
-Do not output any text between steps and do not wait for user input. Tool permission dialogs are the only interrupts allowed. The final output is `✅ Shipped`, unless a wrapping caller states it closes on its own block, which `auto-ship` does.
+Do not output any text between steps and do not wait for user input. Tool permission dialogs are the only interrupts allowed. The final output is `✅ Shipped`, emitted on the wake after the step 9 watch exits on `passing` rather than when the turn ends on the watch line, unless a wrapping caller states it closes on its own block, which `auto-ship` does.
 
 ## Verify
 
@@ -31,9 +31,32 @@ Run `git diff --cached --name-only 2>/dev/null` to check for staged files. If ou
 6. Invoke `canon:git-stage` to group staged changes and commit by concern
 7. Invoke `canon:git-branch` to rename branch to match conventional format
 8. Invoke `canon:git-pr` to push branch and open pull request
-9. After the PR opens, watch CI. Poll `canon pr checks <number> --json` until the record's `state` leaves `pending` or the record carries `conflicted: true`, branching on those fields rather than on the exit, and fall back to `gh pr checks <number>` when no record comes back at all, which is a target whose CLI predates the verb. On `passing`, continue. On `failing`, stop the sequence and report the failing check with its URL. On `conflicted`, stop the sequence and report that the branch conflicts with its base, since no run will start for it and polling on never ends. A rebase is the repair. Do not auto-fix. This step may output on failure, the one exception to the no-text-between-steps rule.
+9. After the PR opens, watch CI in the background, so the session stays reachable while CI runs. Read `### Watching CI` below for the commands and the wake.
 
 A caller wrapping this sequence may act between step 8 and step 9, which is the one gap the order leaves open, since the pull request exists there and nothing has read its checks yet. `auto-ship` marks the pull request draft in it. Nothing else may go there, and a caller that needs a step anywhere else in the sequence is asking for a change to this body rather than for a place to stand.
+
+### Watching CI
+
+Run `canon pr checks <number> --json` once in the foreground. When no record comes back at all, the target's CLI predates the verb, and the watch command is `gh pr checks <number> --watch`. The loop below would never exit on such a target, since an empty read never satisfies its test.
+
+Otherwise start this loop through the Bash tool with `run_in_background` and a 60-minute timeout:
+
+```bash
+until canon pr checks <number> --json | jq -e '.state != "pending" or .conflicted == true' >/dev/null; do sleep 30; done; canon pr checks <number> --json
+```
+
+Emit `⏳ Watching CI on #<number> in the background` and end the turn. Print nothing more while the watch runs. The session wakes when the command exits, and the wake resumes this step rather than restarting the sequence at step 1. A wake that lands while the session is inside another skill, such as a `review-address` pass a message started during the watch, goes to whichever step is waiting on CI.
+
+On the wake, branch on the final record's fields rather than on the exit:
+
+- `state: passing`: continue to After completion.
+- `state: failing`: stop the sequence and report the failing check with its URL.
+- `conflicted: true`: stop the sequence and report that the branch conflicts with its base, since no run will start for it. A rebase is the repair.
+- A `reason` and no `state`: the read was refused, such as `no-remote-branch` for a branch deleted on the remote. Stop and report that `reason`. A missing `state` is never a pass.
+- The command hit its timeout and printed no final record: report CI unsettled after 60 minutes, and emit no `✅ Shipped`.
+- The `gh pr checks --watch` fallback ran, which prints a check table rather than a record. Only a printed table carrying at least one check, every one passing, continues to After completion. Any failing check stops the sequence naming it with its URL. Empty or errored output stops the sequence and reports the message, since `no checks reported on the '<branch>' branch` is what a conflicted branch prints, and that fallback has no `conflicted` field to separate it from lag.
+
+Do not auto-fix any of these. The watch line and a stop report from any branch above are the two exceptions to the no-text-between-steps rule.
 
 ### Why the reach reads at step 5
 
