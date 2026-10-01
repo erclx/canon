@@ -28,7 +28,7 @@ The go stack also ships `smoke_test.go` at the module root as a copy-once seed. 
 
 ## verify.sh
 
-- Run Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`), plus the four base phases wherever the folder declares their scripts.
+- Run Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`), plus the four base phases wherever the folder declares their scripts, then the markdown bans stage base ships.
 - Keep `build` out of `verify.sh`. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file, and a seeded `main.go` would assume every module is a binary rather than a library.
 - Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than in a local `bun run check`.
 

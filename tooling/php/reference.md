@@ -42,7 +42,7 @@ The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run 
 ## verify.sh
 
 - Stop and name `composer install` when `vendor/bin/phpunit` is missing.
-- Run Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`), plus the four base phases wherever the folder declares their scripts.
+- Run Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`), plus the four base phases wherever the folder declares their scripts, then the markdown bans stage base ships.
 
 ## Gitignore
 

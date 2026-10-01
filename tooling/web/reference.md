@@ -128,6 +128,6 @@ The sweep under `screenshots/` is ignored again, and only a flagged case's `evid
 
 ## Verify script
 
-The web layer's `scripts/verify.sh` replaces the base version. Order: typecheck, lint, format, spelling, shell, unit tests, build, then the card exclusion check where one is installed. Stack adapters may override if their typecheck or build differs.
+The web layer's `scripts/verify.sh` replaces the base version. Order: typecheck, lint, format, spelling, shell, unit tests, build, markdown bans, then the card exclusion check where one is installed. Stack adapters may override if their typecheck or build differs.
 
 The card stage is conditional on `scripts/check-card-exclusion.sh` existing rather than on the stack, so a project with no card route runs one less stage and needs no override to skip it. A stack that ships a card route ships that script, and the check reads the build the stage before it produced.

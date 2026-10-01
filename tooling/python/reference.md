@@ -27,7 +27,7 @@ The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` 
 - `pytest.ini`: tests live under `tests/`, source under `src/`.
 - `.coveragerc`: branch coverage on `src/`, html report under `.coverage_cache/html`.
 - `.python-version`: pinned to `3.14` to match `uv init` defaults.
-- `scripts/verify.sh`: overrides base verify to add Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) phases.
+- `scripts/verify.sh`: overrides base verify to add Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) phases, then the same markdown bans phase base ships.
 
 ## Hybrid project shape
 
