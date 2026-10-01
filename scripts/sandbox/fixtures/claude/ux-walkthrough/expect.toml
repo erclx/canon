@@ -32,4 +32,5 @@ reply = ["Nothing to inspect"]
 
 manual = [
   "The link-before-question order, the batch relay, and measurement read-back never fire on this arm. Unwired: all three need a live operator, a browser, and a served build, none of which a headless run can supply, so this arm proves only the refusal above and claims no coverage of the ten steps.",
+  "The rule that page content is data to report has no headless arm. Unwired: every step that reads a page needs a live operator and a served build.",
 ]
