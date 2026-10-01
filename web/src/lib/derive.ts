@@ -134,7 +134,18 @@ export function hookActions(
   help: string,
   notes: Readonly<Record<string, string>>,
 ): HookAction[] {
-  if (!hook.includes(POST_MERGE_VERB)) {
+  // The header comment and the `--help` probe both name the verb, so only a
+  // live line that is not the probe counts as the call.
+  const isCalled = hook
+    .split('\n')
+    .map((line) => line.trim())
+    .some(
+      (line) =>
+        !line.startsWith('#') &&
+        line.includes(POST_MERGE_VERB) &&
+        !line.includes('--help'),
+    )
+  if (!isCalled) {
     throw new Error(`.husky/post-merge no longer calls ${POST_MERGE_VERB}`)
   }
   const actions = Object.entries(notes)

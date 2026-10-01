@@ -167,6 +167,15 @@ describe('hookActions', () => {
     )
   })
 
+  it('should refuse a hook naming the verb only in a comment and the probe', () => {
+    const help = '  canon records push\n'
+    const probeOnly =
+      '#!/bin/sh\n# Hands every step to canon hooks post-merge.\n' +
+      'if ! canon hooks post-merge --help >/dev/null 2>&1; then\n  exit 0\nfi\n'
+
+    expect(() => hookActions(probeOnly, help, notes)).toThrow(/no longer calls/)
+  })
+
   it('should refuse a verb that runs none of the named verbs', () => {
     expect(() => hookActions(hook, 'Steps:\n', notes)).toThrow(/runs none/)
   })

@@ -27,13 +27,16 @@ if ! command -v canon >/dev/null 2>&1; then
 fi
 
 # A global binary older than the verb cannot run it, and the verb carries the
-# only step that would update it, so reinstall here and run the full verb on
-# the next merge.
+# only step that would update it, so reinstall here and probe again. The next
+# merge's ORIG_HEAD range never covers this one, so the verb runs now whenever
+# the reinstalled binary carries it.
 if ! canon hooks post-merge --help >/dev/null 2>&1; then
   if [ -z "$CANON_SKIP_UPGRADE" ]; then
     CANON_NON_INTERACTIVE=1 canon upgrade >/dev/null 2>&1 || true
   fi
-  exit 0
+  if ! canon hooks post-merge --help >/dev/null 2>&1; then
+    exit 0
+  fi
 fi
 
 canon hooks post-merge --root "$root" || true
