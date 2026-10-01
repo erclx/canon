@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -1157,6 +1157,66 @@ describe('archiveTask inbound links', () => {
     const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
 
     expect(result).toMatchObject({ ok: true, relinked: [] })
+  })
+})
+
+describe('archiveTask a failed repoint', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should still clear the ordering row and report the file it could not write', async () => {
+    await seedTask()
+    const priority = join(tasksDir(ROOT), 'priority.md')
+    await writeFile(priority, `| [it](${STEM}.md) | \`src/\` |\n`)
+    const locked = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-locked',
+      `[a](${STEM}.md)`,
+    )
+    const open = await seedSibling(
+      tasksDir(ROOT),
+      'v28.3-open',
+      `[a](${STEM}.md)`,
+    )
+    await chmod(locked, 0o444)
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    await chmod(locked, 0o644)
+    expect(result).toMatchObject({
+      ok: true,
+      priorityRowRemoved: true,
+      relinked: [{ file: open, links: 1 }],
+      relinkFailed: [{ file: locked }],
+    })
+    expect(await readFile(priority, 'utf8')).not.toContain(`${STEM}.md`)
+  })
+
+  it('should report an empty relinkFailed when every write lands', async () => {
+    await seedTask()
+
+    expect(await archiveTask(ROOT, { kind: 'stem', stem: STEM })).toMatchObject(
+      { ok: true, relinkFailed: [] },
+    )
+  })
+})
+
+describe('archiveTask reference-style links', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should repoint a reference definition and leave another one alone', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `See [it][a] and [o][b].\n\n[a]: ${STEM}.md#findings\n[b]: v28.3-other.md`,
+    )
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[a]: archive/${STEM}.md#findings\n[b]: v28.3-other.md`,
+    )
+    expect(result).toMatchObject({ relinked: [{ file: sibling, links: 1 }] })
   })
 })
 
