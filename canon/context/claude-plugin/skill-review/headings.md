@@ -23,7 +23,11 @@ Five headings route through `poll.sh`: `## Review`, `## Review closed`, `## Revi
 
 Which headings exist, which family each belongs to, and who posts each is stated once in `review-pr`, beside the threshold that skill already states once, so `review-address` and the poll cite it rather than carry their own copy.
 
-A comment posted under a heading outside the six is reported as unmatched rather than passed over. Silence and a match read alike otherwise, so the poll surfaces an invented heading as a state a person reads rather than absorbing it silently.
+`## UI review` and `## UI review closed` are the seventh and eighth, posted by `review-ui` as a pull request review beside the code pass. The poll reads them off `.reviews` with its own jq filter rather than through `canon pr review-state`, since no read-time scoping is needed for a pass that re-drives every box, and reports `UI-OPEN`, `UI-CLOSED`, or `UI-STALE` on a transition. The head a UI verdict covers comes from the `<!-- review-ui: head=<sha> -->` marker on the body's last line, because the submission stamp follows the head. The draft mark lifts only once both families are closed, the UI one at the current head. `canon targets` still reads `## Review closed` alone and stays blind to the UI family.
+
+A comment posted under a heading outside the six the comment filters know is reported as unmatched rather than passed over, a UI heading posted as a comment included. Silence and a match read alike otherwise, so the poll surfaces an invented heading as a state a person reads rather than absorbing it silently.
+
+`review-ui` reads the checklist and its address off `canon pr evidence --json`, which carries `checklist`, `preview`, and `local` only on the `ok` and `no-evidence` reasons. Every other reason refuses before the comment is read, so the pass reports it rather than reading the missing fields as an absent checklist.
 
 ### The closing comment folds into the reply
 

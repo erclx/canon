@@ -61,8 +61,12 @@ const sh = (script: string): string =>
 
 interface Review {
   heading: string
+  // The head a UI pass names in its own marker, which can trail the stamp.
+  marker?: string
   submittedAt: string
 }
+
+const CODE_HEADINGS = new Set(['## Review', '## Review closed'])
 
 interface Comment {
   createdAt: string
@@ -92,14 +96,21 @@ const writeThread = (
       })),
       headRefOid: head,
       reviews: reviews.map((review) => ({
-        body: `${review.heading}\n\nbody`,
+        body:
+          review.marker === undefined
+            ? `${review.heading}\n\nbody`
+            : `${review.heading}\n\nbody\n\n<!-- review-ui: head=${review.marker} -->`,
         commit: { oid: head },
         submittedAt: review.submittedAt,
       })),
     }),
   )
 
-  const last = reviews.at(-1)
+  // The verb reads the code family alone, so a UI pass posted after the code
+  // pass leaves the scope where the code pass put it.
+  const last = reviews
+    .filter((review) => CODE_HEADINGS.has(review.heading))
+    .at(-1)
   writeScope(
     last === undefined
       ? { source: 'none', state: 'none' }
@@ -337,6 +348,84 @@ describe('poll', () => {
       [{ createdAt: RESPONSE_AT, heading: '## Post-review findings' }],
     )
     expect(poll().stdout).toContain('RESPONSE  #7')
+  })
+
+  describe('UI review state', () => {
+    const UI_AT = '2026-08-20T02:05:00Z'
+
+    it('should report nothing about a UI pass when none was posted', () => {
+      writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+
+      expect(poll().stdout).not.toContain('UI-')
+    })
+
+    it('should report an open UI pass at the head', () => {
+      writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeThread(
+        [
+          { heading: '## Review', submittedAt: FIRST_PASS },
+          { heading: '## UI review', marker: HEAD, submittedAt: UI_AT },
+        ],
+        [],
+      )
+
+      expect(poll().stdout).toContain('UI-OPEN   #7 open at 1111111')
+    })
+
+    it('should report a closed UI pass at the head', () => {
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          { heading: '## UI review closed', marker: HEAD, submittedAt: UI_AT },
+        ],
+        [],
+      )
+
+      expect(poll().stdout).toContain('UI-CLOSED #7 closed at 1111111')
+    })
+
+    it('should report a closed UI pass a later push left behind the head', () => {
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          {
+            heading: '## UI review closed',
+            marker: READ_HEAD,
+            submittedAt: UI_AT,
+          },
+        ],
+        [],
+        READ_HEAD,
+      )
+      expect(poll().stdout).toContain('SEEN')
+
+      // The push. The stamp follows the head and the marker does not, so only
+      // the marker says the verdict is about the older commit.
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          {
+            heading: '## UI review closed',
+            marker: READ_HEAD,
+            submittedAt: UI_AT,
+          },
+        ],
+        [],
+        HEAD,
+      )
+
+      expect(poll().stdout).toContain(
+        'UI-STALE  #7 closed at 2222222, behind 1111111',
+      )
+    })
   })
 
   // A carried line's shorter shape misreads the same way for the unmatched

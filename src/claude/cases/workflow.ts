@@ -102,6 +102,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Open the preview for that pull request and click through each box on its visual checklist, then post what happened.',
+    expect: 'review-ui',
+  },
+  {
+    prompt:
       'The screencast draft is finished. Turn it into an actual video now.',
     expect: 'record-screencast',
   },

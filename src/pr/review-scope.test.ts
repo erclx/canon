@@ -112,6 +112,22 @@ describe('resolveReviewScope', () => {
     expect(scope.commit).toBe(READ)
   })
 
+  // The UI pass posts its own family as a pull request review too, after the
+  // code pass, and the code family's state must read through it unchanged.
+  it('should ignore a review posted under a UI-family heading', () => {
+    const scope = resolveReviewScope({
+      reviews: [
+        review(`${OPEN}\n${marker(READ)}`),
+        review(
+          `## UI review closed\n\nEvery box passed.\n\n🤖 Reviewed by Claude Code`,
+        ),
+      ],
+    })
+
+    expect(scope.state).toBe('open')
+    expect(scope.commit).toBe(READ)
+  })
+
   it('should read a heading a web-composed body stored with CRLF', () => {
     const scope = resolveReviewScope({
       reviews: [review(`## Review closed\r\n\r\n✅ Nothing owed.`)],

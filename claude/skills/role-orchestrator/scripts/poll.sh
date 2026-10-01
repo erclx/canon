@@ -32,17 +32,17 @@ if [ -z "$BASE_REF" ]; then
 fi
 BASE_BRANCH="${BASE_REF#origin/}"
 
-# These six strings are owned elsewhere and pinned here. `review-pr`
-# writes `## Review` and `## Review closed`, and states the full six-heading
+# These eight strings are owned elsewhere and pinned here. `review-pr`
+# writes `## Review` and `## Review closed`, and states the full eight-heading
 # set once, beside the threshold it already states once. `review-address`
 # writes `## Review response`, `## Rebase`, and `## Post-review findings`, the
 # last for a finding a worker produces after a close-out rather than in answer
 # to one already on the thread. `canon pr evidence`, run through `git-pr` and
-# `git-followup`, writes `## Evidence`. All these surfaces ship separately, so
-# a heading added in any of them breaks a test here that no check reaches
-# across.
+# `git-followup`, writes `## Evidence`. `review-ui` writes `## UI review` and
+# `## UI review closed`. All these surfaces ship separately, so a heading added
+# in any of them breaks a test here that no check reaches across.
 #
-# All three families match on the first line alone so the tests stay
+# All four families match on the first line alone so the tests stay
 # symmetric. The reply family carries `## Rebase` and `## Post-review
 # findings` beside `## Review response` because neither answers a comment
 # already on the thread, which is why both were kept outside the `## Review`
@@ -167,6 +167,28 @@ JQ_SCOPE_FALLBACK='
     end
 '
 
+# The UI family is posted as a pull request review the way the code family is,
+# so it is read off `.reviews` rather than `.comments`. No verb parses it, so
+# the filter here is its only reader. The newest UI heading decides the state,
+# and the head it covered comes from the `review-ui` marker on the body's last
+# line, since the submission stamp moves onto a commit pushed while the pass
+# drove. A body carrying no marker falls back to that stamp.
+JQ_UI_STATE='
+  [ .reviews[]
+    | select((.body // "") | split("\n")[0] | rtrimstr("\r")
+             | . == "## UI review" or . == "## UI review closed")
+  ] | last
+  | if . == null then "none none"
+    else (.body | split("\n")[0] | rtrimstr("\r")
+          | if . == "## UI review" then "open" else "closed" end) as $state
+      | ([ .body | split("\n")[] | rtrimstr("\r") | select(. != "") ]
+         | last // ""
+         | (capture("^<!-- review-ui: head=(?<sha>[0-9a-f]{7,40}) -->$").sha)
+           // null) as $marked
+      | $state + " " + ($marked // .commit.oid // "none")
+    end
+'
+
 # An open pass this old has nobody on it. The cycle it has to clear is a review
 # landing and a worker pushing a follow-up, measured between ten and thirty
 # minutes across a day of runs on 2026-08-14, so two hours sits about four times
@@ -278,6 +300,19 @@ snapshot() {
     unmatched_count=${unmatched_state%% *}
     unmatched_heading=${unmatched_state#* }
 
+    # One token, so the heading above stays the line's last field and keeps its
+    # spaces. A marker may name a short sha, so coverage is a prefix match.
+    ui_read=$(jq -r "$JQ_UI_STATE" <<<"$payload")
+    ui_heading=${ui_read%% *}
+    ui_commit=${ui_read#* }
+    if [ "$ui_heading" = none ]; then
+      ui_state=none
+    elif [ "$ui_commit" != none ] && [[ "$head" == "$ui_commit"* ]]; then
+      ui_state="$ui_heading-head-${ui_commit:0:7}"
+    else
+      ui_state="$ui_heading-behind-${ui_commit:0:7}"
+    fi
+
     # `gh pr view --json mergeable` reports UNKNOWN until GitHub finishes
     # computing it, which is exactly when a poll asks. merge-tree answers
     # locally against the base this machine has, so it never returns UNKNOWN.
@@ -295,7 +330,7 @@ snapshot() {
       merges=conflict
     fi
 
-    echo "$n $head ${prior:-none} $resp $merges $review_state $reply_at $unmatched_count $unmatched_heading"
+    echo "$n $head ${prior:-none} $resp $merges $review_state $reply_at $unmatched_count $ui_state $unmatched_heading"
   done
 }
 
@@ -312,7 +347,7 @@ CHANGED=0
 # would fire on every later run and the board would never read "No movement."
 FINAL=""
 
-while read -r n head prior resp merges heading age pass_at reply_at unmatched_count unmatched_heading; do
+while read -r n head prior resp merges heading age pass_at reply_at unmatched_count ui unmatched_heading; do
   [ -z "$n" ] && continue
   state=$heading
   old=$(grep "^$n " "$STATE" || true)
@@ -330,7 +365,7 @@ while read -r n head prior resp merges heading age pass_at reply_at unmatched_co
       echo "OPENED    #$n at ${head:0:7}, $merges against $BASE_BRANCH"
     fi
     CHANGED=1
-    FINAL+="$n $head $prior $resp $merges $state $unmatched_count"$'\n'
+    FINAL+="$n $head $prior $resp $merges $state $unmatched_count $ui"$'\n'
     continue
   fi
   old_head=$(echo "$old" | cut -d' ' -f2)
@@ -342,6 +377,9 @@ while read -r n head prior resp merges heading age pass_at reply_at unmatched_co
   # classifies a thread already past the threshold rather than waiting a run.
   old_heading=$(echo "$old" | cut -d' ' -f6)
   old_unmatched=$(echo "$old" | cut -d' ' -f7)
+  # Written from the first run that read a UI pass, so an older baseline yields
+  # empty and the first UI state this script sees is reported as new.
+  old_ui=$(echo "$old" | cut -d' ' -f8)
 
   # A conflict arrives from the base moving, not from the branch, so it is
   # reported on the transition rather than only when the head changes.
@@ -360,6 +398,30 @@ while read -r n head prior resp merges heading age pass_at reply_at unmatched_co
   # already does.
   if [ "${unmatched_count:-0}" -gt "${old_unmatched:-0}" ]; then
     echo "UNMATCHED #$n posted under '$unmatched_heading'"
+    CHANGED=1
+  fi
+
+  # The UI pass reports on its transition, the way CONFLICT does, since its
+  # state moves on a post or on a push and either one is the moment it is owed
+  # an action. A carried line supplies no state, so nothing fires on it. A
+  # verdict a push left behind reports separately from MOVED above, since it
+  # owes a fresh UI pass rather than a code re-review. The state carries the
+  # covered commit, so a second UI pass at a new head reads as a transition even
+  # when its heading repeats.
+  if [ -n "$ui" ] && [ "$ui" != none ] && [ "$ui" != "$old_ui" ]; then
+    ui_heading=${ui%%-*}
+    ui_commit=${ui##*-}
+    case "$ui" in
+    open-head-*)
+      echo "UI-OPEN   #$n open at $ui_commit"
+      ;;
+    closed-head-*)
+      echo "UI-CLOSED #$n closed at $ui_commit"
+      ;;
+    *)
+      echo "UI-STALE  #$n $ui_heading at $ui_commit, behind ${head:0:7}"
+      ;;
+    esac
     CHANGED=1
   fi
 
@@ -427,7 +489,7 @@ while read -r n head prior resp merges heading age pass_at reply_at unmatched_co
     # re-enters next run and STALLED oscillates instead of reporting once.
     state=reported
   fi
-  FINAL+="$n $head $prior $resp $merges $state $unmatched_count"$'\n'
+  FINAL+="$n $head $prior $resp $merges $state $unmatched_count ${ui:-$old_ui}"$'\n'
 done <<<"$NEW"
 
 while read -r n _rest; do

@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, review-address, planning, and reviewer templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, review-address, planning, reviewer, and UI reviewer templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning, review-address, or reviewer shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
@@ -98,3 +98,17 @@ claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-re
 `<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves the head itself and stamps the range it covered in its marker. `<dispatcher-id>`, `<model>`, and `<project>` resolve the same way they do above. Append the cross-branch facts after the controller clause, per `### What the brief may carry`.
 
 Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message that session instead when one holds the pull request.
+
+## Dispatch to drive a pull request's checklist
+
+`review-ui` is the second pass `role-reviewer` may run, so this shape reaches the role first the way the code reviewer's does. `orchestrator-review-dispatch.md` decides whether a pull request takes it, and it runs beside the code reviewer rather than after it.
+
+```bash
+claude --bg --model sonnet -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pass posts, carrying the heading and the count line, and message it again if you stop on a question."
+```
+
+The model is fixed at Sonnet rather than taken from `## Pick the model`. A cheaper tier was measured on the same checklist and passed real defects as clean while judging the taste boxes it was told to leave, at a higher cost per run.
+
+Name an address in the brief only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record already holds is the one the pass reads first, and a second in the brief is a second source for one fact. Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise. Carry nothing else: the UI reviewer reads no diff and no code verdict, so the cross-branch facts the code brief carries stay out of this one.
+
+`<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do above. The prefix reads `reviewer-ui-` so a roster read for `reviewer-<project>-<number>` never matches the UI reviewer, and the two passes on one pull request stay two sessions.

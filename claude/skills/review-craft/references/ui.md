@@ -2,6 +2,8 @@
 
 A screenshot is the one artifact that shows what a change paints. Reading the markup and the styles tells you what the author meant, and the image tells you what happened. Open the images rather than inferring them from the diff.
 
+Stills are this pass's evidence. Driving the running app through the checklist belongs to `review-ui`, a separate pass, so a code review opens the captures and never starts a browser.
+
 ## When it applies
 
 The diff touches a file that paints: markup, a stylesheet, a component or template, a design token file, a rendered document source, or a path a `canon/wireframes/` surface file names. Or the pull request carries an evidence comment, whatever the diff touches.
