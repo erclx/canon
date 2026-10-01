@@ -1,13 +1,13 @@
 ---
 title: Skill audit and reach
-description: The skill audit and its dated-provenance check, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
+description: The skill audit with its dated-provenance and practice shape checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
 ---
 
 # Skill audit and reach
 
 ## The skill audit
 
-`canon claude skills audit` measures both skill corpora against `standards/skill.md`, gating on one check and reporting seven, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
+`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `standards/skill-practice.md`, gating on one check and reporting eight, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 
@@ -21,7 +21,15 @@ The seventh check reads `SKILL.md` and every `references/**/*.md` under a skill 
 
 The skill rule drops the carve-out the context standard keeps for a date after "measured" or "verified". A context entry is a record of what the tree held when someone read it, where a skill body is an instruction a session follows today, and a measurement stamp in one is the exact shape the reporting target found. So the check does not call the context audit's private `provenance()` detector, which clears those stamps and would have passed 5 of the 26 dates the shipped corpus carried when the check landed. It runs its own date pattern over `bodyLines` and `maskDisplayed` from `src/markdown/scan.ts`, which is all the two detectors share.
 
-It reports and never sets the failing exit. Targets run this verb, and a date in prose is a judgment a reader settles, the same reason the frontmatter measures report. Holding this repository's own count at zero is a gate stage's job rather than this verb's, and that stage is a separate row not yet built. The check reads ISO dates only, so a date in words, a month with no day, and undated provenance pass, and the Unmeasured step says so on every run.
+It reports and never sets the failing exit. Targets run this verb, and a date in prose is a judgment a reader settles, the same reason the frontmatter measures report. Holding this repository's own count at zero is the Skill provenance gate stage's job rather than this verb's. The check reads ISO dates only, so a date in words, a month with no day, and undated provenance pass, and the Unmeasured step says so on every run.
+
+### Practice shape
+
+The eighth check reads each skill on `PRACTICE_SKILLS` in `src/claude/skills-audit.ts` for the three closing H2s `standards/skill-practice.md` names and for `references/adopted.md`, reporting each missing part as `practiceShape`. A heading matches only as an exact H2 outside a fence, so an H3 or a heading carrying trailing words reads as missing, and a skill renaming toward the shape owes the exact spelling.
+
+The list lives in the audit rather than in a skill's frontmatter, because a skill declaring its own kind could exempt itself by leaving the key off. It is keyed by corpus-relative folder, `claude/skills/<name>`, so a target's own `.claude/skills/` folder sharing a name is never swept in. The cost is that a target cannot list its own practice skills, and the shipped standard says the shape carries no check there. Each later practice skill appends one entry, which makes the array a shared append point across the rows that add one.
+
+It reports and never sets the failing exit, for the reason provenance does. The Skill practice shape gate stage fails the same finding here.
 
 ## The citation reach check
 

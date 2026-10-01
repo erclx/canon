@@ -49,7 +49,7 @@ Shipping a dependency beside its consumer connects them only when the consumer's
 
 ## Destinations
 
-Twenty-seven standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
+Twenty-eight standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
 
 The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a session through `802-mermaid.md`, which globs a fence rather than a document type. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `597-wiki.md` globs `wiki/**/*.md` and points at it.
 
@@ -79,6 +79,7 @@ The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a 
 - `session.md` fixes the pre-compaction handoff. `662-session.md`, which globs the `session-` file alone because `655-tasks.md` globs the board around it and one rule over both shapes would carry two.
 - `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `570-skill.md`.
 - `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `570-skill.md`, which already globs the requirement file beside the body.
+- `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `570-skill.md` points at, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `891-standard-authoring.md`.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `655-tasks.md`.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `661-teach.md`, whose frontmatter states that most targets open no workspace for it to fire on. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
