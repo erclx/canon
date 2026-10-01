@@ -33,18 +33,24 @@ fi
 #
 # The probe reads the verb's own usage line rather than the exit, since an
 # older binary answers an unknown command's `--help` with its root help and
-# exits zero.
+# exits zero. Its arguments are the command to probe, never the hook's own.
 has_verb() {
-  canon hooks post-merge --help 2>/dev/null | grep -q '^Usage: canon hooks post-merge'
+  "$@" hooks post-merge --help 2>/dev/null | grep -q '^Usage: canon hooks post-merge'
 }
 
-if ! has_verb; then
+if ! has_verb canon; then
   if [ -z "$CANON_SKIP_UPGRADE" ]; then
     CANON_NON_INTERACTIVE=1 canon upgrade >/dev/null 2>&1 || true
   fi
-  if ! has_verb; then
-    exit 0
-  fi
 fi
 
-canon hooks post-merge --root "$root" || true
+# A registry that has not published the verb yet leaves the reinstalled binary
+# without it, so a checkout carrying the source runs the verb from there. The
+# probe runs against that source too, since a pull inside a linked worktree
+# can leave the main checkout without the verb.
+source_cli="$root/src/cli.ts"
+if has_verb canon; then
+  canon hooks post-merge --root "$root" || true
+elif [ -f "$source_cli" ] && command -v bun >/dev/null 2>&1 && has_verb bun "$source_cli"; then
+  bun "$source_cli" hooks post-merge --root "$root" || true
+fi
