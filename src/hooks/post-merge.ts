@@ -151,7 +151,7 @@ function archiveLines(
       : []
     const relink =
       failed.length > 0
-        ? `Links still point at its old path in ${failed.join(', ')}.\n`
+        ? `🔗 Links not repointed in: ${failed.join(',')}\n`
         : ''
     return `\n📦 Archived ${task}, closed by #${number}.\n${relink}\n`
   }

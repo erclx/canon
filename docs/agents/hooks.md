@@ -50,7 +50,7 @@ Any non-empty value skips the step, and each switch skips its own step only.
 
 Each line is decided from the child's parsed record. A child producing no parseable record is an older binary carrying no such subcommand, and that step stays quiet.
 
-- Archive: the archived task and its number, plus the files named in a non-empty `relinkFailed` whose links still point at the old path, or the refusal's `message` with a pointer to the task board. A record carrying no `relinkFailed` reads as empty. `no-match` and `no-board` stay quiet.
+- Archive: the archived task and its number, plus a `Links not repointed in:` line naming the files in a non-empty `relinkFailed`, or the refusal's `message` with a pointer to the task board. A record carrying no `relinkFailed` reads as empty. `no-match` and `no-board` stay quiet.
 - Records push: the count of changed paths when above zero, or the refusal reason. `no-repository` stays quiet.
 - Reclaim: the removal count and the failure count, both read from the fields whatever the exit, or an unreadable reason. `gh-missing` stays quiet.
 - Upgrade and plugin update: the record's `message` on any state but `current`, or on a failure. The plugin update stays quiet on `no-claude` and `no-plugin`.

@@ -201,7 +201,7 @@ describe('runPostMerge archive lines', () => {
 
     expect(h.output()).toBe(
       '\n📦 Archived v1.0-thing, closed by #7.\n' +
-        'Links still point at its old path in .canon/tasks/a.md, .canon/tasks/b.md.\n\n',
+        '🔗 Links not repointed in: .canon/tasks/a.md,.canon/tasks/b.md\n\n',
     )
   })
 
