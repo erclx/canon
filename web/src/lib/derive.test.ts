@@ -149,16 +149,26 @@ describe('hookActions', () => {
     'canon records push': 'every record folder',
   }
 
-  it('should keep only the verbs the hook actually runs, in note order', () => {
-    const hook = '#!/bin/sh\ncanon records push --json\n'
+  const hook = '#!/bin/sh\ncanon hooks post-merge --root "$root"\n'
 
-    expect(hookActions(hook, notes)).toEqual([
+  it('should keep only the verbs the post-merge verb runs, in note order', () => {
+    const help = 'Steps:\n  canon records push\n  canon upgrade\n'
+
+    expect(hookActions(hook, help, notes)).toEqual([
       { verb: 'canon records push', effect: 'every record folder' },
     ])
   })
 
-  it('should refuse a hook that runs none of the named verbs', () => {
-    expect(() => hookActions('#!/bin/sh\n', notes)).toThrow(/post-merge/)
+  it('should refuse a hook that no longer calls the post-merge verb', () => {
+    const help = '  canon records push\n'
+
+    expect(() => hookActions('#!/bin/sh\n', help, notes)).toThrow(
+      /no longer calls/,
+    )
+  })
+
+  it('should refuse a verb that runs none of the named verbs', () => {
+    expect(() => hookActions(hook, 'Steps:\n', notes)).toThrow(/runs none/)
   })
 })
 

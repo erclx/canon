@@ -131,7 +131,8 @@ export function readSession(): SessionReads {
       'Write the test for a behavior',
     ),
     mergeActions: hookActions(
-      readRepoFile(root, '.husky/post-merge'),
+      readRepoFile(root, merge.hook),
+      readCanonText(['hooks', 'post-merge', '--help']),
       merge.effects,
     ),
     version: readCanonText(['--version']).trim(),
