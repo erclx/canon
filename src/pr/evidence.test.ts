@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  countEvidenceCases,
   findEvidenceChecklist,
   findEvidenceCommentId,
   findEvidenceLocal,
@@ -459,5 +460,49 @@ describe('findEvidenceChecklist', () => {
     ])
 
     expect(checklist).toBeUndefined()
+  })
+})
+
+describe('countEvidenceCases', () => {
+  it('should count one per case row across several states', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/a.png', stem: 'a', added: true },
+            { path: 'evidence/dark/b.png', stem: 'b', added: false },
+          ],
+        },
+        {
+          state: 'light',
+          items: [{ path: 'evidence/light/a.png', stem: 'a', added: false }],
+        },
+      ],
+      'o/r',
+      'base',
+      'head',
+    )
+
+    expect(countEvidenceCases(body)).toBe(3)
+  })
+
+  it('should count zero for a preview-only body', () => {
+    const body = renderEvidenceBody([], 'o/r', 'base', 'head', 'https://x.dev')
+
+    expect(countEvidenceCases(body)).toBe(0)
+  })
+
+  it('should count zero for a checklist-only body', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'base',
+      'head',
+      undefined,
+      '| a | b |\n- [ ] look',
+    )
+
+    expect(countEvidenceCases(body)).toBe(0)
   })
 })

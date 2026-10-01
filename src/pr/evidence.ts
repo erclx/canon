@@ -189,6 +189,19 @@ export function renderEvidenceBody(
   ].join('\n')
 }
 
+/**
+ * How many case rows a rendered body carries, read off the same row shape
+ * `renderEvidenceBody` writes. A row always ends in a head image, which a
+ * checklist line or a preview address never does.
+ */
+export function countEvidenceCases(body: string): number {
+  return (
+    body.match(
+      /^\| .+ \| (?:\*\(new\)\*|!\[\]\([^)]*\)) \| !\[\]\([^)]*\) \|$/gm,
+    )?.length ?? 0
+  )
+}
+
 export interface EvidenceComment {
   readonly url?: string
   readonly body: string
@@ -217,6 +230,14 @@ export function findEvidenceCommentId(
     if (match?.[1] !== undefined) return Number(match[1])
   }
   return undefined
+}
+
+/** How many cases the marked comment already shows, zero when none is marked. */
+export function findEvidenceCaseCount(
+  comments: readonly EvidenceComment[],
+): number {
+  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
+  return marked === undefined ? 0 : countEvidenceCases(marked.body)
 }
 
 /**
