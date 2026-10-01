@@ -21,6 +21,10 @@ The two procedures grade on different ladders. `review-pr` routes a dispatch on 
 
 The design axis has to survive the filter both bodies carry against subjective suggestions, which is why the body states a design finding as a concrete cost.
 
+## Why the design walk and the two new axes sit in the body
+
+Guard the bar and performance sit after tests and ahead of the conditional axes. Guard the bar reads the same files the tests axis just read, and performance is correctness at scale, so neither waits on a condition the way security and rendered output do. The nine-step design walk stays in the body rather than in a reference, since every review reads the design axis and a reference would cost a read on every run. The body is a practice skill as well, so it closes on the excuses, red flags, and checklist sections and records its sources in `references/adopted.md`.
+
 ## Why the rendered read uses the posted comment
 
 `canon pr evidence` reads the local checkout's diff and names a pull request's head, so a reviewing session not on the branch compares the wrong change. The posted comment is what the author and the reviewer both see. The reference reads the comment, fetches the pull request head, and writes each image out with `git show` at the sha its row names, since the embedded address serves nothing to a session from a private repository.
@@ -29,7 +33,7 @@ The design axis has to survive the filter both bodies carry against subjective s
 
 Each sandbox arm ran once against the bodies before this skill existed.
 
-- `claude:review-craft`: both runs caught the planted security defect under the one-word axis, first an `eval` over the arguments and then an unpinned package, and both called the README clean while its Safety section promised a guard the diff deleted. The stale claim outside the hunk is what the arm discriminates on.
+- `claude:review-craft`: both runs caught the planted security defect under the one-word axis, first an `eval` over the arguments and then an unpinned package, and both called the README clean while its Safety section promised a guard the diff deleted. The stale claim outside the hunk is what the arm discriminates on. A third plant, a branch leaving the changed script out of its lint run, was added with the guard-the-bar axis and caught by the body before it, so it holds a floor rather than discriminating.
 - `claude:review-pr missing-evidence`: with the capture convention stated in the fixture's `CLAUDE.md`, the pass caught the missing screenshot off that sentence alone. With the sentence removed and only the trunk's `evidence/` folder left, it did not mention the absence.
 - `claude:review-pr evidence-mismatch`: the pass filed the collapse finding off the stylesheet diff and said it had not rendered the page. No image landed on disk.
 
