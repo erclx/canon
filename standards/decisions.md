@@ -45,11 +45,12 @@ A record failing these is non-conforming even when it satisfies every shape rule
 
 ## Sections
 
-Use `## Context`, `## Decision`, `## Alternatives`, and `## Measurements`.
+Use `## Context`, `## Decision`, `## Alternatives`, `## Revisit when`, and `## Measurements`.
 
 - `## Context`: the problem as it stood, stated so a reader needs nothing else open. Restate a fact rather than pointing at where it was found.
 - `## Decision`: what was chosen, and why, in enough detail that a reader can tell it apart from an alternative that sounds similar.
 - `## Alternatives`: each one considered and dropped, with the reason it lost. An alternative with no stated reason reads as a claim nobody checked.
+- `## Revisit when`: one bullet per finding that would reopen the decision. Required when the record came from a groundwork track whose deciding leans carried "Overturned by" lines, which carry over as written. It is optional otherwise, for a decision resting on how an outside tool, an installer, or the model behaves. Skip it for a decision resting on the project's own code.
 - `## Measurements`: skip when the decision cites no number. When it does, state the number and close with the commit it was read against, per Verification anchors below.
 
 ## Verification anchors
@@ -93,6 +94,10 @@ description: <one line naming what was decided>
 
 - **<Alternative>.** <Why it lost.>
 - **<Alternative>.** <Why it lost.>
+
+## Revisit when
+
+- <The finding that would reopen the decision.>
 
 ## Measurements
 

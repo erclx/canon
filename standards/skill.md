@@ -105,7 +105,7 @@ allowed-tools: <tools required>
 - Group bullets under H2 headings by domain concern. Keep dos and don'ts together under the topic they belong to rather than splitting them into flat rules and constraints sections.
 - One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
 - Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer.
-- Do not duplicate general knowledge the model already has. Focus on project-specific conventions and preferences.
+- Do not duplicate general knowledge the model already has. Focus on project-specific conventions and preferences. Revisit when removing a line of general knowledge from a skill is shown to change what the agent does.
 
 ### Progressive disclosure
 

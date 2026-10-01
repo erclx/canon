@@ -79,6 +79,7 @@ A standard failing these questions is non-conforming even when it satisfies ever
 - State the forbidden shape rather than enumerating allowed options, so a rule survives new categories
 - Cut any rule that resists a crisp one-line phrasing
 - Do not pad with filler prose. Every line earns its place as a usable reference entry.
+- Close a ban asserting how the model or a tool behaves with one `Revisit when <finding>.` sentence, since that claim can stop holding while the ban reads the same. A style, safety, or consistency ban takes none, and filling one with a condition is padding.
 
 ## Success criterion
 
