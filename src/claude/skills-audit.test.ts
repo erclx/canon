@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   auditExitCode,
@@ -8,6 +8,7 @@ import {
   DESCRIPTION_LIMIT,
   EXIT_MISSING_REQUIREMENT,
   PRACTICE_SECTIONS,
+  PRACTICE_SKILLS,
 } from '@/claude/skills-audit'
 
 let root: string
@@ -364,9 +365,11 @@ describe('auditSkills dated provenance', () => {
 
 const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
 
+const [varied = ''] = PRACTICE_SKILLS
+
 function practiceSkill(
   sections: readonly string[],
-  { name = 'test-craft', corpus = 'claude', hasLedger = true } = {},
+  { name = basename(varied), corpus = 'claude', hasLedger = true } = {},
 ): string {
   const dir = conformingSkill(name, corpus)
   writeFileSync(
@@ -380,15 +383,26 @@ function practiceSkill(
   return dir
 }
 
+/**
+ * Writes a conforming fixture for every listed skill but the one a test
+ * varies, so an append to the list needs no edit here.
+ */
+function listedPracticeSkillsExcept(omitted: string): void {
+  for (const rel of PRACTICE_SKILLS.filter((rel) => rel !== omitted)) {
+    practiceSkill(CLOSING, { name: basename(rel) })
+  }
+}
+
 describe('auditSkills practice list', () => {
   it('should report a listed skill whose folder the shipped corpus lacks', async () => {
-    practiceSkill(CLOSING)
+    conformingSkill('git-commit')
+    listedPracticeSkillsExcept(varied)
 
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([
       {
-        rel: join('claude', 'skills', 'codebase-layout'),
+        rel: varied,
         detail: 'missing skill: no folder under the shipped corpus',
       },
     ])
@@ -407,10 +421,10 @@ describe('auditSkills practice shape', () => {
   const [excuses = '', redFlags = '', handover = ''] = CLOSING
 
   beforeEach(() => {
-    practiceSkill(CLOSING, { name: 'codebase-layout' })
+    listedPracticeSkillsExcept(varied)
   })
 
-  const skillRel = join('claude', 'skills', 'test-craft')
+  const skillRel = varied
 
   it('should report nothing on a listed skill carrying every section and a ledger', async () => {
     practiceSkill(CLOSING)
@@ -527,11 +541,12 @@ describe('auditExitCode', () => {
   })
 
   it('should pass when only practice shape is reported', async () => {
-    conformingSkill('test-craft')
+    listedPracticeSkillsExcept(varied)
+    conformingSkill(basename(varied))
 
     const report = await auditSkills(root)
 
-    expect(report.practiceShape).toHaveLength(5)
+    expect(report.practiceShape).toHaveLength(PRACTICE_SECTIONS.length + 1)
     expect(auditExitCode(report)).toBe(0)
   })
 
