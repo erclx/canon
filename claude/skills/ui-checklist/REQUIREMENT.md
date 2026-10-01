@@ -21,6 +21,7 @@ The automatable half has its own gap, and it is no longer this skill's to close 
 
 - Split every change into visual-only and automatable before writing anything
 - Write the checklist for the visual-only half, each item an action and the result a person is looking for
+- Give each item what a driver needs to run it without guessing: the route, the width where the change can differ by width, an action verb to open on, a `(taste)` marker on a judgment of look or feel, and the setup or a `(local only)` marker for a state the page does not open in
 - Name every automatable change shipping with no test, with the layer `test-craft` would place it at, as a section of the same file
 - Write the file to the `.canon/tmp/handoff/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting
 - Report that there is nothing to verify rather than manufacturing a checklist to show work
