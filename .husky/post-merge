@@ -30,11 +30,19 @@ fi
 # only step that would update it, so reinstall here and probe again. The next
 # merge's ORIG_HEAD range never covers this one, so the verb runs now whenever
 # the reinstalled binary carries it.
-if ! canon hooks post-merge --help >/dev/null 2>&1; then
+#
+# The probe reads the verb's own usage line rather than the exit, since an
+# older binary answers an unknown command's `--help` with its root help and
+# exits zero.
+has_verb() {
+  canon hooks post-merge --help 2>/dev/null | grep -q '^Usage: canon hooks post-merge'
+}
+
+if ! has_verb; then
   if [ -z "$CANON_SKIP_UPGRADE" ]; then
     CANON_NON_INTERACTIVE=1 canon upgrade >/dev/null 2>&1 || true
   fi
-  if ! canon hooks post-merge --help >/dev/null 2>&1; then
+  if ! has_verb; then
     exit 0
   fi
 fi
