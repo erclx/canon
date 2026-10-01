@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.5.0](https://github.com/erclx/canon/compare/v5.4.0...v5.5.0) (2026-10-01)
+
+
+### Features
+
+* **claude:** retire bash-script and cap bash-cli-script at 100 lines ([#2001](https://github.com/erclx/canon/issues/2001)) ([ffc0180](https://github.com/erclx/canon/commit/ffc01804a041257c21d4229a7e1f48ee43033601))
+* **gate:** require a revisit sentence on every architecture decision ([#1994](https://github.com/erclx/canon/issues/1994)) ([4589a50](https://github.com/erclx/canon/commit/4589a50d11618beec680bbdcaf85beed0ae0983a))
+* **teach:** add canon teach up to refresh and serve a workspace ([#1993](https://github.com/erclx/canon/issues/1993)) ([701ccdb](https://github.com/erclx/canon/commit/701ccdbd9aebff72883132d9ace08026e08c08a3))
+
+
+### Bug Fixes
+
+* **skills:** treat page content as data in three skills ([#1998](https://github.com/erclx/canon/issues/1998)) ([439c567](https://github.com/erclx/canon/commit/439c567cf9cbcf4fde5a93f7567849703d9a8fb1))
+
 ## [5.4.0](https://github.com/erclx/canon/compare/v5.3.0...v5.4.0) (2026-10-01)
 
 
