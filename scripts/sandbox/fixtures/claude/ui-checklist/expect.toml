@@ -46,6 +46,7 @@ max_turns = 12
 manual = [
   "The spacing, padding, and color changes land on the visual list and the filter input does not. Semantic: the split between visual-only and automatable is the skill's judgment, and a pattern matching one item cannot tell a correct classification from a lucky one",
   "Each missing-test line names the layer `test-craft` would place it at, with the route change at end to end and the loading and empty states at the component layer. Semantic: the layer is the same judgment, read one line lower",
+  "A box whose result is a judgment of look or feel ends in `(taste)`, and a box stating an observable fact does not. Semantic: whether the muted empty-state color reads as a judgment or as a measured value is the skill's call, and a pattern requiring the marker fails a run that classified it as a fact",
   "The chat output names the checklist path alone and does not repeat the checklist body. Unwired: the claim is about what the reply omits, and a negative substring passes on every reply that phrases it differently",
   "No test is proposed as a diff in chat either. Unwired: the write scope catches a test written to disk, and a body pasted into the reply reaches no file for the scope to see",
 ]
@@ -79,17 +80,11 @@ pattern = 'archive'
 # action follows the route and opens on neither "read" nor "look at".
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
-pattern = '^- \[ \] [^\n]*(/archive|/ |from the page the app opens on)'
+pattern = '^- \[ \] (`?/[^\s:,`]*`?|from the page the app opens on)[,:]'
 
 [[content]]
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = '^- \[ \] [^:\n]+: (?!(?:[Rr]ead|[Ll]ook)\b)[A-Za-z]+'
-
-# The muted empty-state color is the seeded change a taste judgment decides, so
-# the box carrying it ends in the marker the review pass keys on.
-[[content]]
-path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
-pattern = '\(taste\)'
 
 # The seeded spec survives untouched. It is outside the write scope, so a run
 # that edits it fails there too, and this reads the file itself rather than the
