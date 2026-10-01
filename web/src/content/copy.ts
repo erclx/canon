@@ -359,7 +359,7 @@ export const loop = {
   foot: 'A finding posted on the pull request outlives both sessions, which is what an orchestrator and a worker need when neither is still running at merge.',
 } as const
 
-// README.md: canon-allow-readme-paraphrase: narrates the post-merge hook, whose verbs are read from .husky/post-merge at build time.
+// README.md: canon-allow-readme-paraphrase: narrates the post-merge hook, whose verbs are read from canon hooks post-merge --help at build time.
 export const merge = {
   hook: '.husky/post-merge',
   fires:

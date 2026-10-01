@@ -35,10 +35,11 @@ interface ReclaimCommandOptions {
 /**
  * What a caller reads instead of the frame.
  *
- * `.husky/post-merge` is the first caller that is not a person, and it branches
+ * The post-merge hooks are the callers that are not a person, and they branch
  * on a parsed field rather than on the exit code, since a shell profile
- * wrapping `canon` in a function flattens every status to zero. It reads the
- * record with a pattern rather than a parser, so every field it branches on is
+ * wrapping `canon` in a function flattens every status to zero. The base
+ * stack's hook, and any hook installed before `canon hooks post-merge`, reads
+ * the record with a pattern rather than a parser, so every field it branches on is
  * a number or a fixed word, and `outcomes` sits last so a greedy pattern
  * anchored on a scalar never reaches into it.
  */

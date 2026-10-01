@@ -30,6 +30,7 @@ import { register as migrate } from '@/commands/migrate'
 import { register as records } from '@/commands/records'
 import { register as sessions } from '@/commands/sessions'
 import { register as worktrees } from '@/commands/worktrees'
+import { register as hooks } from '@/commands/hooks'
 import { register as audits } from '@/commands/audits'
 import { register as gate } from '@/commands/gate'
 import { register as secrets } from '@/commands/secrets'
@@ -91,6 +92,7 @@ migrate(program)
 sessions(program)
 targets(program)
 worktrees(program)
+hooks(program)
 secrets(program)
 deps(program)
 labels(program)

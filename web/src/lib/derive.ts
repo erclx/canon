@@ -120,17 +120,40 @@ export interface HookAction {
   readonly effect: string
 }
 
-/** The verbs the post-merge hook actually runs, each with what it does. */
+/** The verb the post-merge hook hands every step to. */
+export const POST_MERGE_VERB = 'canon hooks post-merge'
+
+/**
+ * The verbs the post-merge hook actually runs, each with what it does. The
+ * hook calls one verb, and that verb's help lists the steps it runs from the
+ * same table it runs them from, so the figure reads the help rather than the
+ * hook.
+ */
 export function hookActions(
   hook: string,
+  help: string,
   notes: Readonly<Record<string, string>>,
 ): HookAction[] {
+  // The header comment and the `--help` probe both name the verb, so only a
+  // live line that is not the probe counts as the call.
+  const isCalled = hook
+    .split('\n')
+    .map((line) => line.trim())
+    .some(
+      (line) =>
+        !line.startsWith('#') &&
+        line.includes(POST_MERGE_VERB) &&
+        !line.includes('--help'),
+    )
+  if (!isCalled) {
+    throw new Error(`.husky/post-merge no longer calls ${POST_MERGE_VERB}`)
+  }
   const actions = Object.entries(notes)
-    .filter(([verb]) => hook.includes(verb))
+    .filter(([verb]) => help.includes(verb))
     .map(([verb, effect]) => ({ verb, effect }))
   if (actions.length === 0) {
     throw new Error(
-      '.husky/post-merge runs none of the verbs the merge figure names',
+      `${POST_MERGE_VERB} runs none of the verbs the merge figure names`,
     )
   }
   return actions

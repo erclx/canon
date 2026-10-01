@@ -111,7 +111,7 @@ interface PluginUpdateOptions {
 /**
  * `no-claude` and `no-plugin` name permanent conditions on a machine that
  * never carries the marketplace plugin at all, matching the `gh-missing` and
- * `no-repository` reasons `.husky/post-merge`'s other two steps already stay
+ * `no-repository` reasons the post-merge hook's other two steps already stay
  * quiet on forever rather than nagging a project that will never fix them.
  * Every other reason is a real defect and prints.
  */

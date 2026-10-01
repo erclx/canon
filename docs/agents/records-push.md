@@ -58,4 +58,4 @@ The two `pull` refusals exist because the directions are not symmetric. A push o
 
 ## When it runs
 
-`.husky/post-merge` runs `push` after the task archiving loop, on every merge rather than only on one that archived a task. A review report and a memory entry both land on runs that close nothing. The call sits inside an `if` and last in the file, so an unreachable remote neither aborts the hook nor delays the archiving above it, and a checkout that never ran the setup reports nothing. Anything the hook misses is covered by running the verb by hand.
+`canon hooks post-merge`, which `.husky/post-merge` calls, runs `push` after the task archiving, on every merge rather than only on one that archived a task. A review report and a memory entry both land on runs that close nothing. The verb exits zero whatever the push answers, so an unreachable remote neither aborts the hook nor delays the archiving before it, and a checkout that never ran the setup reports nothing. `hooks.md` covers the verb. Anything the hook misses is covered by running the verb by hand.
