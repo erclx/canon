@@ -63,6 +63,12 @@ export interface DecisionReport {
    * it. Never gates, per `standards/architecture.md`'s `## Length` section.
    */
   readonly words: number
+  /**
+   * Whether a sentence outside code opens with `Revisit when`. Read on every
+   * record and required only by one stating the clause, so a project that
+   * never adopted it sees the reading without failing on it.
+   */
+  readonly revisit: boolean
 }
 
 export interface ArchitectureReport {
@@ -86,6 +92,12 @@ export interface ArchitectureReport {
    * project that never adopted a cap is measured and never gated.
    */
   readonly entryCap?: number
+  /**
+   * Whether the record states that every decision closes with a revisit
+   * sentence. Declared by the record for the reason the cap is, so a record
+   * that never wrote the clause is reported and never gated.
+   */
+  readonly revisitRequired: boolean
   readonly decisions: readonly DecisionReport[]
 }
 
@@ -214,6 +226,8 @@ interface RawDecision {
   readonly heading: string
   readonly line: number
   readonly body: string
+  /** The body with its fenced lines dropped, which is where prose is read. */
+  readonly prose: string
 }
 
 /**
@@ -230,7 +244,19 @@ interface RawDecision {
 export function splitDecisions(source: string): RawDecision[] {
   const lines = bodyLines(source)
   const decisions: RawDecision[] = []
-  let open: { heading: string; line: number; body: string[] } | undefined
+  let open:
+    | { heading: string; line: number; body: string[]; prose: string[] }
+    | undefined
+
+  const close = (): void => {
+    if (!open) return
+    decisions.push({
+      heading: open.heading,
+      line: open.line,
+      body: open.body.join('\n'),
+      prose: open.prose.join('\n'),
+    })
+  }
 
   for (const line of lines) {
     if (line.fenced) {
@@ -240,23 +266,24 @@ export function splitDecisions(source: string): RawDecision[] {
 
     const heading = line.text.match(DECISION_HEADING)?.[1]
     if (heading !== undefined) {
-      if (open) decisions.push({ ...open, body: open.body.join('\n') })
-      open = { heading, line: line.number, body: [] }
+      close()
+      open = { heading, line: line.number, body: [], prose: [] }
       continue
     }
 
     // A decision runs to the next `###` or to the section that follows the
     // decision list, so the risks below never read as the last entry's body.
     if (SECTION_HEADING.test(line.text)) {
-      if (open) decisions.push({ ...open, body: open.body.join('\n') })
+      close()
       open = undefined
       continue
     }
 
     open?.body.push(line.text)
+    open?.prose.push(line.text)
   }
 
-  if (open) decisions.push({ ...open, body: open.body.join('\n') })
+  close()
   return decisions
 }
 
@@ -383,6 +410,41 @@ export function readEntryCap(source: string): number | undefined {
   return readCardinal(source.match(ENTRY_CAP_CLAUSE)?.[1])
 }
 
+const REVISIT_CLAUSE =
+  /\bevery\s+decision\s+closes\s+with\s+a\s+revisit\s+sentence\b/i
+/**
+ * `Revisit when` opening a sentence: at the start of the text, after a line
+ * break, or after a sentence's closing stop. Mid-sentence it is not the
+ * sentence the standard asks for.
+ */
+const REVISIT_SENTENCE = /(?:^|\n|[.!?]\s+)\s*(?:[-*]\s+)?Revisit when\b/
+
+/**
+ * Whether the record states the revisit clause for itself, read off its prose
+ * alone so a template quoting the clause inside a fence does not adopt it.
+ *
+ * The clause is the record's own, like the cap, so wording that drifts past it
+ * falls back to reporting rather than to a requirement held here.
+ */
+export function readRevisitRule(source: string): boolean {
+  const prose = bodyLines(source)
+    .filter((line) => !line.fenced)
+    .map((line) => line.text)
+    .join('\n')
+    .replace(CODE_SPAN, ' ')
+  return REVISIT_CLAUSE.test(prose)
+}
+
+/**
+ * Whether a decision's prose carries a sentence opening `Revisit when`.
+ *
+ * Presence only, never content, so a vacuous sentence passes. A code span is
+ * dropped first, since a standard quoting the form is not stating one.
+ */
+export function hasRevisitSentence(prose: string): boolean {
+  return REVISIT_SENTENCE.test(prose.replace(CODE_SPAN, ' '))
+}
+
 /** Whether a read failed because nothing sits at the path. */
 function isMissing(error: unknown): boolean {
   const code = (error as { code?: unknown }).code
@@ -421,6 +483,7 @@ export async function measureArchitecture(
 
   const allowances = readAllowances(source)
   const entryCap = readEntryCap(source)
+  const revisitRequired = readRevisitRule(source)
   const raw = splitDecisions(source)
   const decisions = await Promise.all(
     raw.map(async (entry) => {
@@ -433,6 +496,7 @@ export async function measureArchitecture(
         ...(quantified !== undefined && { quantified }),
         checks: await namedChecks(root, entry.body),
         words: wordCount(entry.body),
+        revisit: hasRevisitSentence(entry.prose),
       }
     }),
   )
@@ -453,6 +517,7 @@ export async function measureArchitecture(
       ceiling: ceilingFor(allowances, raw.length),
     }),
     ...(entryCap !== undefined && { entryCap }),
+    revisitRequired,
     decisions,
   }
 }
@@ -468,6 +533,18 @@ export function isOverCount(report: ArchitectureReport): boolean {
   return (
     report.entryCap !== undefined && report.decisions.length > report.entryCap
   )
+}
+
+/**
+ * The headings of decisions lacking a revisit sentence the record requires.
+ *
+ * Empty for a record stating no clause, for the reason `isOverCount` gives.
+ */
+export function missingRevisit(report: ArchitectureReport): string[] {
+  if (!report.revisitRequired) return []
+  return report.decisions
+    .filter((entry) => !entry.revisit)
+    .map((entry) => entry.heading)
 }
 
 /**

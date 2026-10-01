@@ -11,6 +11,7 @@ import {
   isOverCount,
   isOverLength,
   measureArchitecture,
+  missingRevisit,
 } from '@/context/architecture'
 import { auditSkills } from '@/claude/skills-audit'
 import { listRepositoryFiles } from '@/git-files'
@@ -239,14 +240,15 @@ function citedPaths(record: { paths?: unknown } | undefined): string[] {
 }
 
 /**
- * The architecture record against the two limits it states for itself: the
- * line ceiling its allowances derive and the entry cap.
+ * The architecture record against the three rules it states for itself: the
+ * line ceiling its allowances derive, the entry cap, and the revisit sentence
+ * closing each decision.
  *
  * Read in-process rather than through `context audit`, whose one gating stage
  * here runs `--citations-only` and never opens the record, which is why the
  * line ceiling went unenforced by `bun run check` until this stage. A project
- * carrying no record, or a record stating neither limit, passes, since both
- * limits belong to the record rather than to the toolkit.
+ * carrying no record, or a record stating none of the three, passes, since
+ * each rule belongs to the record rather than to the toolkit.
  */
 export const architectureRecord: Measure = async (ctx) => {
   const report = await measureArchitecture(ctx.root)
@@ -255,11 +257,14 @@ export const architectureRecord: Measure = async (ctx) => {
   }
 
   const decisions = report.decisions.length
+  const lackingRevisit = missingRevisit(report)
   const failures = [
     isOverCount(report) &&
       `${decisions} decisions against a cap of ${report.entryCap}. Merge two or retire one in ${report.rel}, never compress.`,
     isOverLength(report) &&
       `${report.lines} lines against a ceiling of ${report.ceiling} in ${report.rel}.`,
+    lackingRevisit.length > 0 &&
+      `No revisit sentence in ${lackingRevisit.map((heading) => `"${heading}"`).join(', ')}. Close each with one opening "Revisit when" in ${report.rel}.`,
   ].filter((failure): failure is string => typeof failure === 'string')
 
   if (failures.length > 0) return { emissions: [], failure: failures.join(' ') }

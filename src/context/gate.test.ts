@@ -40,6 +40,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     unresolvedCitations: 0,
     recordOverLength: false,
     recordOverCount: false,
+    recordMissingRevisit: false,
     sections: [],
     drift: [],
     wireframes: [],
@@ -105,6 +106,10 @@ describe('isGating', () => {
     const input = makeInput({ recordOverCount: true, widened: true })
 
     expect(isGating(input)).toBe(true)
+  })
+
+  it('should fail a record missing a revisit sentence it requires under the narrow gate', () => {
+    expect(isGating(makeInput({ recordMissingRevisit: true }))).toBe(true)
   })
 
   it('should leave a missing required section advisory under the narrow gate', () => {

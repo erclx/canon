@@ -140,7 +140,7 @@ function allOf(
 }
 
 /**
- * Reads the architecture record's three measures, or nothing when the project
+ * Reads the architecture record's measures, or nothing when the project
  * carries no record.
  *
  * Three states rather than two, matching what the verb publishes. The key
@@ -172,8 +172,11 @@ function architectureCounts(
   const entryCap =
     typeof record.entryCap === 'number' ? record.entryCap : undefined
 
+  const revisitRequired = record.revisitRequired === true
+
   let unverifiable = 0
   let unchecked = 0
+  let lackingRevisit = 0
   for (const raw of decisions) {
     const entry = asObject(raw)
     const claim = entry?.claim
@@ -182,6 +185,7 @@ function architectureCounts(
 
     if (claim === 'neither') unverifiable += 1
     else if (checks === 0) unchecked += 1
+    if (revisitRequired && entry?.revisit !== true) lackingRevisit += 1
   }
 
   return {
@@ -195,6 +199,8 @@ function architectureCounts(
     ...(entryCap !== undefined && {
       recordOverCount: decisions.length > entryCap ? 1 : 0,
     }),
+    // Absent on a record stating no revisit clause, for the same reason.
+    ...(revisitRequired && { recordMissingRevisit: lackingRevisit }),
     recordUnverifiable: unverifiable,
     recordUnchecked: unchecked,
   }

@@ -65,6 +65,17 @@ A decision's reasoning stays correct while the numbers it cites move. The anchor
 - Do not edit a claim in the pass that first anchors it. The anchor states what the claim was measured against, so changing both at once leaves nothing to check the anchor against.
 - Refresh the anchor whenever the number is re-read, whether or not it moved. A confirmed number and an unread one are the same text without the date.
 
+## Revisit condition
+
+A decision says why it won and rarely says when that reason stops holding, so an entry can go stale while every word in it stays true. The revisit sentence names the finding that would show the harm the decision prevents has gone or moved.
+
+- Close each decision with one sentence of the form `Revisit when <finding>.` Name something a reader could notice, such as a platform release, a measured count crossing a line, or a dependency dropping a behavior.
+- Draft it from the harm the decision prevents, never from the mechanism it uses. A mechanism can keep working long after the reason for choosing it is gone, so re-checking it confirms the wrong fact.
+- Place the sentence after the reasoning and before any verification anchor, so the anchor stays the entry's last sentence.
+- Give a heading holding several principles one sentence, for the premise they share, rather than one per principle.
+- Adopt the requirement by stating the clause `Every decision closes with a revisit sentence.` in the record itself. The clause is the record's own, like the cap, so a checker reads it from the file and gates only a record that states it. A record stating none is reported and never gated.
+- A checker reads presence alone. A vacuous sentence passes it, so the sentence is only as useful as the finding it names.
+
 ## Entry cap
 
 Every session pays for this file before any work starts, so a heavy read is a real cost. A file that reads heavy is carrying too many decisions, not decisions written too long, so the bound is a count of decisions rather than of words.
@@ -78,20 +89,20 @@ Every session pays for this file before any work starts, so a heavy read is a re
 
 ## Template
 
-The anchor sentence closes a decision whose reasoning cites a measured number and is absent from one that cites none. Each heading below names a slot, so a record starts with one decision per slot and renames each heading to the choice it records.
+The revisit sentence closes the reasoning of every decision. The anchor sentence follows it on a decision whose reasoning cites a measured number and is absent from one that cites none. Each heading below names a slot, so a record starts with one decision per slot and renames each heading to the choice it records.
 
 ```markdown
 # Architecture
 
 ## Overview
 
-This record holds at most 12 decisions.
+This record holds at most 12 decisions. Every decision closes with a revisit sentence.
 
 ## Key technical decisions
 
 ### Stack and runtime
 
-What was chosen, the alternative that lost, and why. Measured at <short-sha> on <YYYY-MM-DD>.
+What was chosen, the alternative that lost, and why. Revisit when <finding>. Measured at <short-sha> on <YYYY-MM-DD>.
 
 ### Delivery
 

@@ -1,13 +1,15 @@
 ---
 title: Architecture record
-description: The four findings canon context audit reads off the architecture record, being the entry cap and length gates the record states for itself, the claim coverage report, and the word counts
+description: The five findings canon context audit reads off the architecture record, being the entry cap, revisit sentence, and length gates the record states for itself, the claim coverage report, and the word counts
 ---
 
 # Architecture record
 
-Four findings from `canon context audit` read `canon/ARCHITECTURE.md` rather than a folder, and only the first two are facts. The other checks the audit runs are in `context-audit-checks.md`.
+Five findings from `canon context audit` read `canon/ARCHITECTURE.md` rather than a folder, and only the first three are facts. The other checks the audit runs are in `context-audit-checks.md`.
 
 The entry cap check counts the record's decisions against the cap it states for itself, in a clause of the form `This record holds at most 12 decisions.` Like the length check, the cap belongs to the record rather than to the toolkit, so a record stating none is measured and never gated. A decision is a `###` heading outside a fenced block, so the template a standard shows does not count, and a heading carrying two decisions counts once. The JSON record carries what it read as `architecture.entryCap`, absent where the record states no cap, and the audit catalog counts a record past it as `recordOverCount`.
+
+The revisit check reads each decision for a sentence opening `Revisit when`, and it gates only a record stating the clause `Every decision closes with a revisit sentence.` for itself, for the reason the cap does. The sentence has to open a sentence outside a code span and outside a fenced block, so a standard quoting the form is not read as stating one. The check reads presence alone, so a vacuous sentence passes. The JSON record carries the clause reading as `architecture.revisitRequired` and each decision's reading as `architecture.decisions[].revisit`, and the audit catalog counts the decisions missing one as `recordMissingRevisit`, absent where the record states no clause. The gate stage names each heading missing the sentence.
 
 The length check compares the record against the ceiling it derives for itself, and only a record that states its own allowances has one. No standard sets a length rule for this document, so the numbers belong to whichever record declares them. The check reads a frame allowance and an allowance per decision out of the record's own prose and puts the ceiling at the frame plus the allowance times the decision count. The JSON record carries what it read as `architecture.allowances` and the reading as `architecture.lines` against `architecture.ceiling`.
 
@@ -21,6 +23,6 @@ Three limits are stated on every run rather than hidden. The countable signal re
 
 The report gates nothing. Deciding whether a sentence states a claim is a judgment no parser settles, so the output names candidates for a reader. This answers a different question from the verification anchors `standards/architecture.md` describes, which record that one cited number was re-read. That mechanism says whether a marked figure held, and this one says how much of the record could be checked at all.
 
-The third finding is a word count, measured in words rather than lines: one figure for the whole record and one per decision. `standards/architecture.md` asks a session to judge the file's weight by reading it rather than by counting it, and reads the word figure alongside that judgment when one is available. A paragraph written one source line to a paragraph passes the rendered-line measure other checks use while still reading heavy, which is the gap a word count closes without turning into a second cap.
+The fifth finding is a word count, measured in words rather than lines: one figure for the whole record and one per decision. `standards/architecture.md` asks a session to judge the file's weight by reading it rather than by counting it, and reads the word figure alongside that judgment when one is available. A paragraph written one source line to a paragraph passes the rendered-line measure other checks use while still reading heavy, which is the gap a word count closes without turning into a second cap.
 
 The `## Risks / open questions` section is weighed the same way, reported apart from the whole-record figure since the standard singles it out for holding only what is still open. This finding gates nothing under any mode. The JSON record carries the whole-record figure as `architecture.words`, the section figure as `architecture.risksWords` where the record carries the heading, and the per-decision figure as `architecture.decisions[].words`.

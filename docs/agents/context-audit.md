@@ -5,7 +5,7 @@ description: Running the audit, its flags and folder scope, the exit codes, the 
 
 # Context audit
 
-`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`, and what the architecture record's four findings mean is in `architecture-record.md`.
+`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/ARCHITECTURE.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`, and what the architecture record's five findings mean is in `architecture-record.md`.
 
 Findings stated over every markdown file rather than over a context entry are measured by `canon markdown audit`, described in `markdown-audit.md`. That command resolves no folder, so it reaches trees this one refuses.
 
@@ -37,9 +37,9 @@ A run where no requested name resolves refuses, whichever list it read. Naming t
 
 ## Exit codes
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. An architecture record that states its own line allowances gates when it is past the ceiling those derive, on any run that measures it, which is every mode except `--citations-only`. A record that states an entry cap gates the same way when it holds more decisions than the cap, and a record stating neither limit is reported and never gated.
+Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. An architecture record that states its own line allowances gates when it is past the ceiling those derive, on any run that measures it, which is every mode except `--citations-only`. A record that states an entry cap gates the same way when it holds more decisions than the cap, and one stating that every decision closes with a revisit sentence gates when a decision lacks it. A record stating none of the three is reported and never gated.
 
-`bun run check` in the toolkit repository reads both limits through its own Architecture record stage rather than through this verb, since the verb's only gating stage there runs `--citations-only` and never opens the record.
+`bun run check` in the toolkit repository reads all three of the record's rules through its own Architecture record stage rather than through this verb, since the verb's only gating stage there runs `--citations-only` and never opens the record.
 
 Entry length, reference form, table, provenance, the record's claim classification, and every word figure print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around.
 
