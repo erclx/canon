@@ -1,0 +1,54 @@
+# What a correct `/canon:plan-feature add due dates and priority to tasks per
+# the task` run leaves behind on the seeded task API. Read by `canon sandbox
+# check`. Patterns use TOML literal strings so a regex needs no backslash
+# escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is Full mode: the plan file exists with the sections the
+# plan standard requires, names the two seeded files the task's outcomes touch,
+# and the task's `Plan:` line points at it. Plans are gitignored, and the
+# checker scans the tree rather than what git lists, so the glob reaches the
+# plan the run wrote.
+
+# Declared at the cap. The first headless run passed in 7 turns, one run being
+# too few to tighten the ceiling against.
+max_turns = 30
+
+paths = [".canon/plans/feature-*.md"]
+
+write_scope = [".canon/plans/**", ".canon/tasks/**", ".canon/tmp/**"]
+
+manual = [
+  "Each question carries a `- Suggested:` line and an `- Answer:` slot. Semantic: a run can ask none, and a pattern that requires one fails a correct run.",
+  "The plan names the Zod schema change. Semantic: wording.",
+]
+
+# The plan carries the sections the plan standard requires. Either spelling the
+# validator accepts satisfies each.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Files to touch:\*\*|## Files to touch)[ \t]*$'
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Verification:\*\*|## Verification)[ \t]*$'
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Review focus:\*\*|## Review focus)[ \t]*$'
+
+# The two seeded files the task's outcomes name.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = 'src/db\.ts'
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = 'src/routes/tasks\.ts'
+
+# The task's `Plan:` line points at the written plan.
+[[content]]
+path = ".canon/tasks/v01.0-due-dates.md"
+pattern = '^Plan:.*feature-[\w.-]+\.md'
