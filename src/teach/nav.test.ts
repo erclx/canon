@@ -385,6 +385,42 @@ describe('generateNav', () => {
     expect(await readFile(cssPath, 'utf8')).toBe('.mine { color: red; }\n')
   })
 
+  it('should rewrite a stale base.css the workspace already holds', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    const assets = join(workspaceDir('01-regular-expressions'), 'assets')
+    const basePath = join(assets, 'base.css')
+    const current = await readFile(basePath, 'utf8')
+    await writeFile(basePath, '.stale { color: red; }\n')
+
+    await generateNav(ROOT)
+
+    expect(await readFile(basePath, 'utf8')).toBe(current)
+  })
+
+  it('should give a legacy workspace holding only course.css no base.css', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    const assets = join(workspaceDir('01-regular-expressions'), 'assets')
+    mkdirSync(assets, { recursive: true })
+    await writeFile(join(assets, 'course.css'), '.legacy { color: red; }\n')
+
+    await generateNav(ROOT)
+
+    expect(existsSync(join(assets, 'base.css'))).toBe(false)
+  })
+
+  it('should leave a legacy course.css untouched', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    const assets = join(workspaceDir('01-regular-expressions'), 'assets')
+    mkdirSync(assets, { recursive: true })
+    const cssPath = join(assets, 'course.css')
+    await writeFile(cssPath, '.legacy { color: red; }\n')
+
+    await generateNav(ROOT)
+
+    expect(await readFile(cssPath, 'utf8')).toBe('.legacy { color: red; }\n')
+  })
+
   it('should place the quiz stepper after the embedded stylesheet', async () => {
     await openWorkspace(ROOT, REQUEST)
     await writeStylesheet(ROOT, 'regular-expressions')

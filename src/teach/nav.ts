@@ -1613,8 +1613,19 @@ export async function generateNav(
     const detail = found.workspace
     const metas = await readLessonMetas(root, detail)
 
+    // The generated base sheet is rewritten on every run so a CLI upgrade
+    // reaches it, while a legacy workspace holding only a hand-authored
+    // course.css is never handed a base sheet its lessons do not link.
     const cssPath = join(root, detail.path, TEACH_ASSETS, TEACH_STYLESHEET)
-    if (!existsSync(cssPath)) await writeStylesheet(root, detail.slug)
+    const basePath = join(
+      root,
+      detail.path,
+      TEACH_ASSETS,
+      TEACH_STYLESHEET_BASE,
+    )
+    if (existsSync(basePath) || !existsSync(cssPath)) {
+      await writeStylesheet(root, detail.slug)
+    }
 
     const contentsPath = join(root, detail.path, 'index.html')
     await writeFile(
