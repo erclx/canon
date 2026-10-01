@@ -1,0 +1,29 @@
+# What a correct `/canon:plan-feature tighten the README intro per the task` run
+# leaves behind on the seeded notes repo: nothing under `.canon/plans/`, and the
+# plan printed to chat. Read by `canon sandbox check`. Patterns use TOML literal
+# strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is Small mode: a specified prose-only ask is planned in
+# chat and writes no file. The `absent` glob covers every markdown file in the
+# folder rather than the `feature-` prefix alone, so a plan written under any
+# name fails it. A run that stops to ask a question writes no file either, so
+# the `reply` pins carry the assertion: they are the tokens Small mode's chat
+# template carries and a run that wrote a file or stopped to ask does not.
+
+# Declared at the cap. The first headless run passed in 3 turns, one run being
+# too few to tighten the ceiling against.
+max_turns = 30
+
+absent = [".canon/plans/*.md"]
+
+write_scope = [".canon/tmp/**"]
+
+reply = ["**Files to touch:**", "**Verification:**", "README.md"]
+
+manual = [
+  "The decoy `DESIGN.md` and `wireframes/` sentinels are not surfaced in the reply. Semantic: a negative over the reply passes on every spelling the pattern did not anticipate.",
+  "The reply carries no `**Review focus:**`. Semantic: same reason, a negative over the reply.",
+]
