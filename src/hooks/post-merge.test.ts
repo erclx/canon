@@ -182,6 +182,29 @@ describe('runPostMerge archive lines', () => {
     expect(h.output()).toBe('\n📦 Archived v1.0-thing, closed by #7.\n\n')
   })
 
+  it('should name the files whose links to the archived task failed to repoint', async () => {
+    const h = harness(
+      {
+        'archive:7': record({
+          ok: true,
+          task: 'v1.0-thing',
+          relinkFailed: [
+            { file: '.canon/tasks/a.md', message: 'EACCES' },
+            { file: '.canon/tasks/b.md', message: 'EACCES' },
+          ],
+        }),
+      },
+      { subjects: ['x (#7)'] },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n📦 Archived v1.0-thing, closed by #7.\n' +
+        'Links still point at its old path in .canon/tasks/a.md, .canon/tasks/b.md.\n\n',
+    )
+  })
+
   it('should stay quiet on a pull request no task names', async () => {
     const h = harness(
       { 'archive:7': record({ ok: false, reason: 'no-match' }, 1) },

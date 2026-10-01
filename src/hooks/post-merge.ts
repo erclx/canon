@@ -136,9 +136,24 @@ function archiveLines(
 ): string | undefined {
   if (result.exitCode === 0) {
     const task = text(fields, 'task')
-    return task === undefined
-      ? undefined
-      : `\n📦 Archived ${task}, closed by #${number}.\n\n`
+    if (task === undefined) return undefined
+
+    // A binary predating the relink pass carries no `relinkFailed`, which
+    // reads as empty.
+    const failed = Array.isArray(fields.relinkFailed)
+      ? fields.relinkFailed.flatMap((entry: unknown) =>
+          entry !== null &&
+          typeof entry === 'object' &&
+          typeof (entry as Fields).file === 'string'
+            ? [(entry as Fields).file as string]
+            : [],
+        )
+      : []
+    const relink =
+      failed.length > 0
+        ? `Links still point at its old path in ${failed.join(', ')}.\n`
+        : ''
+    return `\n📦 Archived ${task}, closed by #${number}.\n${relink}\n`
   }
 
   // A refusal is ordinary here, since most merges close no task.
