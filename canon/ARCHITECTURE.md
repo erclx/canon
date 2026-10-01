@@ -12,11 +12,11 @@ This record holds at most 12 decisions, and the Architecture record stage in `bu
 
 ## Key technical decisions
 
-### TypeScript on Bun, with a bash exec boundary
+### TypeScript on Bun, with shell only as a small wrapper
 
-`src/` parses arguments and owns every migrated domain, and `scripts/` holds what has not moved, with domains migrating one verb at a time rather than in a single rewrite. Bash keeps only what it is good at, such as `read_frontmatter_field` called once per field inside a list loop, where routing through the CLI would cost a process per read. Coarse operations called once per invocation shell into `canon` instead.
+TypeScript on Bun is the language for every surface, and shell stays only as a small wrapper. A shell file over 100 lines is rewritten, the line the [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) draws. `src/` owns every migrated domain and `scripts/` holds what has not moved, with domains migrating one verb at a time. The rule that lost kept bash for whatever suited it, so every leftover file argued its own case. Of 152 tracked `.sh` files, 64 sit over the line, and no gate checks it yet. A folder is named for its role rather than its language, so `scripts/` holds a project's chores in the project's own language, here and in every stack the toolkit ships.
 
-`bin` points at `src/cli.ts` and its `#!/usr/bin/env bun` shebang runs the source directly, so the package ships TypeScript and nothing compiles. Node with a build step was the alternative, and it costs a publish pipeline plus a `dist/` that can drift from the source a contributor reads. The trade is that the CLI does not run under Node at all, since `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` stand in for globbing and parser dependencies, so a target needs Bun on the machine rather than only a package manager. Revisit when a target the toolkit serves cannot install Bun, or Node runs the shipped TypeScript with no build step and no `dist/` to drift.
+`bin` points at `src/cli.ts` and its `#!/usr/bin/env bun` shebang runs the source directly, so the package ships TypeScript and nothing compiles. Node with a build step was the alternative, and it costs a publish pipeline plus a `dist/` that can drift from the source a contributor reads. The trade is that the CLI does not run under Node at all, since `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` stand in for globbing and parser dependencies, so a target needs Bun on the machine rather than only a package manager. Revisit when a target canon installs into cannot run Bun, or a caller requires a shell command a one-line wrapper cannot serve. Measured at `4589a50d` on 2026-10-01.
 
 ### Two delivery paths rather than one
 
