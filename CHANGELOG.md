@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.8.0](https://github.com/erclx/canon/compare/v5.7.0...v5.8.0) (2026-10-01)
+
+
+### Features
+
+* **skills:** watch CI in the background in the ship chain ([#2022](https://github.com/erclx/canon/issues/2022)) ([2dc5c5f](https://github.com/erclx/canon/commit/2dc5c5f9ec49ebc0d8cce50a32ead62335925a04))
+* **web:** put one description of canon on every public surface ([#2019](https://github.com/erclx/canon/issues/2019)) ([0448572](https://github.com/erclx/canon/commit/0448572e6ef36ad5bd5f3685e60c6fc44c4e62be))
+
+
+### Bug Fixes
+
+* **skills:** serve draft-and-pick candidates before the pick ([#2018](https://github.com/erclx/canon/issues/2018)) ([8bb338b](https://github.com/erclx/canon/commit/8bb338bbfe0bac513e8bff0d10434e1581138671))
+
 ## [5.7.0](https://github.com/erclx/canon/compare/v5.6.0...v5.7.0) (2026-10-01)
 
 
