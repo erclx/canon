@@ -28,7 +28,12 @@ import {
   type StampDomain,
 } from '@/sync/stamp'
 import { isDirectory } from '@/target'
-import { loadManifest } from '@/tooling/manifest'
+import {
+  isWholeStack,
+  loadManifest,
+  type Manifest,
+  resolveChain,
+} from '@/tooling/manifest'
 import { scan } from '@/tooling/scan'
 import { readSkew, type SkewReport } from '@/version/skew'
 
@@ -253,9 +258,7 @@ export function buildToolingReport(
   stamp: Stamp | undefined,
 ): ToolingReport {
   const chain = stampedChain(stamp, 'tooling')
-  const manifests = chain
-    .map((name) => loadManifest(toolkitRoot, name))
-    .filter((manifest) => manifest !== undefined)
+  const manifests = resolveRecorded(toolkitRoot, chain)
 
   if (manifests.length === 0) return { ...UNMEASURED_TOOLING, chain }
 
@@ -279,6 +282,37 @@ export function buildToolingReport(
     },
     changes: result.totalChanges,
   }
+}
+
+/**
+ * Loads each recorded stack whole. When the recorded chain stops short of its
+ * last stack's parent, the install skipped that parent, so the chain is
+ * re-resolved with it as the skip to bring back any per-root configs the
+ * skipped stack still shipped. The re-resolution is kept only when its whole
+ * stacks are exactly the recorded ones.
+ */
+function resolveRecorded(
+  toolkitRoot: string,
+  recorded: readonly string[],
+): Manifest[] {
+  const loaded = recorded
+    .map((name) => loadManifest(toolkitRoot, name))
+    .filter((manifest) => manifest !== undefined)
+
+  const parent = loaded.at(-1)?.parent
+  if (
+    loaded.length !== recorded.length ||
+    parent === undefined ||
+    recorded.includes(parent)
+  ) {
+    return loaded
+  }
+
+  const resolved = resolveChain(toolkitRoot, recorded[0], {
+    skipStack: parent,
+  })
+  const whole = resolved.filter(isWholeStack).map((manifest) => manifest.name)
+  return whole.join('\0') === recorded.join('\0') ? resolved : loaded
 }
 
 /**

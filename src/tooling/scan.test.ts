@@ -182,6 +182,32 @@ describe('scan', () => {
   })
 })
 
+describe('scan with a restricted manifest', () => {
+  function restrictedBase(): Manifest {
+    const manifest = makeManifest('base', {
+      onlyConfigs: ['scripts/verify.sh'],
+    })
+    seedFile(join(manifest.configsDir, 'scripts/verify.sh'), 'exec bun\n')
+    seedFile(join(manifest.configsDir, '.prettierrc'), '{}\n')
+    seedFile(join(manifest.seedsDir, '.cspell/tech-stack.txt'), 'bun\n')
+    return manifest
+  }
+
+  it('should report only the configs it is restricted to', () => {
+    const result = scan([restrictedBase()], target())
+
+    expect(result.configs.map((entry) => entry.rel)).toEqual([
+      'scripts/verify.sh',
+    ])
+  })
+
+  it('should report none of its seeds', () => {
+    const result = scan([restrictedBase()], target())
+
+    expect(result.seeds).toEqual([])
+  })
+})
+
 describe('scan in a subfolder', () => {
   const WORKFLOW = '.github/workflows/verify.yml'
 

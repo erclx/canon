@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { writeChainStamp } from '@/sync/stamp'
-import type { Manifest } from '@/tooling/manifest'
+import { isWholeStack, type Manifest } from '@/tooling/manifest'
 import { readPackage } from '@/tooling/package'
 
 /**
@@ -33,10 +33,19 @@ export async function recordToolingChain(
   await writeChainStamp(
     target,
     { domain: 'tooling', toolkitRoot },
-    chain.map((manifest) => manifest.name),
+    recordedStacks(chain),
     now,
   )
   return true
+}
+
+/**
+ * The stack names a chain stamp records. A skipped stack kept for its
+ * per-root configs stays out, since the report re-resolves each recorded name
+ * as a whole manifest and would then measure every config the skip withheld.
+ */
+export function recordedStacks(chain: readonly Manifest[]): string[] {
+  return chain.filter(isWholeStack).map((manifest) => manifest.name)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

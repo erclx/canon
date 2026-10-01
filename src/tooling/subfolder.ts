@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, realpathSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
 import { gitEnv } from '@/git-env'
-import { listFiles, type Manifest } from '@/tooling/manifest'
+import { isWholeStack, type Manifest, seedFiles } from '@/tooling/manifest'
 
 /**
  * The path the generated subfolder spell config is written to. Written
@@ -83,11 +83,15 @@ export function hasSpellConfig(target: string): boolean {
 export function subfolderSpellConfig(
   chain: readonly Manifest[],
 ): string | undefined {
-  if (chain.some((manifest) => manifest.name === 'base')) return undefined
+  if (
+    chain.some((manifest) => manifest.name === 'base' && isWholeStack(manifest))
+  ) {
+    return undefined
+  }
 
   const lists = new Set<string>()
   for (const manifest of chain) {
-    for (const rel of listFiles(manifest.seedsDir)) {
+    for (const rel of seedFiles(manifest)) {
       if (rel.startsWith('.cspell/') && rel.endsWith('.txt')) lists.add(rel)
     }
   }

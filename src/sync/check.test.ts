@@ -209,6 +209,24 @@ describe('buildToolingReport', () => {
     expect(report.chain).toEqual(['vite-react'])
     expect(report.counts.configs).toBe(0)
   })
+
+  it('should measure the per-root configs a skipped stack still ships', () => {
+    writeStack('base')
+    writeFileSync(
+      join(TOOLKIT, 'tooling/base/manifest.toml'),
+      '[stack]\n\n[sync]\nper_root = ["base.config.json"]\n',
+    )
+    writeStack('vite-react', 'base')
+    writeFileSync(join(TARGET, 'vite-react.config.json'), 'vite-react\n')
+
+    const report = buildToolingReport(
+      TOOLKIT,
+      TARGET,
+      stampChain(['vite-react']),
+    )
+
+    expect(report.counts.configs).toBe(1)
+  })
 })
 
 describe('installedStampDomains', () => {
