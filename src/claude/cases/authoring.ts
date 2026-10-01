@@ -7,11 +7,6 @@ import type { SkillCase } from '@/claude/skills-rank'
 export const AUTHORING_CASES: readonly SkillCase[] = [
   {
     prompt:
-      'I need a shell tool with prompts and a nice terminal UI for people to run by hand.',
-    expect: 'bash-script',
-  },
-  {
-    prompt:
       'Wire up a GitHub Actions pipeline with parallel jobs for this repo.',
     expect: 'ci-workflow',
   },

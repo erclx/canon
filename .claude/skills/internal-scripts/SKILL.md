@@ -57,4 +57,4 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 - `canon/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
 - `canon/context/sandbox/index.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
-- `claude/skills/bash-script/`: bash style rules and the interactive-script authoring contract
+- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside. A new domain script is written in TypeScript on Bun, and an existing shell file over 100 lines is edited in place without growing it and flagged for a rewrite. Sandbox scenarios and existing domain scripts stay bash on `scripts/lib/ui.sh`, frame and picker included, until the harness itself moves, so the `bash-cli-script` guards against a framed timeline and prompts do not apply to them

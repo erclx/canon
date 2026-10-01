@@ -1,6 +1,6 @@
-# Functional script template
+# Wrapper template
 
-Copy this skeleton for a non-interactive automation script. Keep only the parts the task needs.
+Copy this skeleton for a small non-interactive wrapper. Keep only the parts the task needs, and stop at 100 lines.
 
 ```bash
 #!/usr/bin/env bash
@@ -13,31 +13,7 @@ die() {
   exit 1
 }
 
-usage() {
-  cat >&2 <<'EOF'
-Usage: script.sh [options] <arg>
-  -h, --help   Show this help
-EOF
-}
+[ $# -ge 1 ] || die "usage: script.sh <arg>"
 
-parse_args() {
-  while [ $# -gt 0 ]; do
-    case "$1" in
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    -*) die "unknown option: $1" ;;
-    *) break ;;
-    esac
-    shift
-  done
-}
-
-main() {
-  parse_args "$@"
-  log "starting"
-}
-
-main "$@"
+log "starting"
 ```

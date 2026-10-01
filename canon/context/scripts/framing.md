@@ -5,7 +5,7 @@ description: Which domains still shell out, who opens the timeline frame once a 
 
 # UI framing
 
-Every `canon` command prints inside one timeline frame, and the frame has to survive a call crossing from TypeScript into bash and back. This file holds where that boundary sits today and which side owns the frame at each crossing. The output shape itself is in `docs/agents/output-shape.md`, and the authoring contract for a new domain script is in the `bash-script` plugin skill.
+Every `canon` command prints inside one timeline frame, and the frame has to survive a call crossing from TypeScript into bash and back. This file holds where that boundary sits today and which side owns the frame at each crossing. The output shape itself is in `docs/agents/output-shape.md`, and the frame described below is the one a new domain script prints inside.
 
 ## The exec boundary
 

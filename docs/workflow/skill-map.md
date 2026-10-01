@@ -125,8 +125,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:draft-wiki`        | For a brand-new wiki reference page on a subject owned outside the project, drafted against `standards/wiki.md`   |
 | `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` in Mermaid or freehand SVG |
 | `canon:draft-readme`      | For a project's `README.md`, drafted against `standards/readme.md`                                                |
-| `canon:bash-script`       | For an interactive, human-facing shell tool                                                                       |
-| `canon:bash-cli-script`   | For a non-interactive automation, CI, or pipeline script                                                          |
+| `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                    |
 | `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                |
 | `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                             |
 | `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                     |
