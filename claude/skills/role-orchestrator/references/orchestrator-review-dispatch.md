@@ -1,18 +1,24 @@
 ---
 title: Orchestrator review dispatch runbook
-description: When a pull request's review leaves this session for a reviewer dispatched under role-reviewer, what stays in place below both triggers, and how the cross-branch pass per wave reaches each brief
+description: When a pull request's review leaves this session for a reviewer dispatched under role-reviewer, when a UI reviewer goes beside it, what stays in place below both code triggers, and how the cross-branch pass per wave reaches each brief
 ---
 
 Run this on every first pass, from `### The review dispatch` in the skill body. Review splits by what each side can see rather than by pass number. A dispatched reviewer holds one pull request and reads it deeper than this session can while holding a wave, and this session holds the wave and reads what no single pull request shows.
 
-## The two triggers
+## The two code triggers
 
 Either one dispatches the pull request's review to a reviewer under `role-reviewer`, first pass included.
 
 - Load. Three or more open pull requests awaiting a first pass, or one diff too large for this session to hold. Three is the operator's number, set by hand and marked as such so a measurement replaces it rather than argues with it. What counts toward it is a pull request awaiting a first pass rather than every open one, since a branch already closed out and waiting on a merge costs this session nothing. `orchestrator-poll.md` states where the count is legible.
 - Content. The change touches `src/`, `scripts/`, a workflow, a hook, a skill or rule body, or a security surface, meaning anything that writes files, runs commands, pushes records, or handles transcripts. A skill or rule body counts as executable whatever its extension, since a model runs it. A pull request carrying an `## Evidence` comment with screenshots counts as well, since a reviewer holding one pull request opens every capture and a long-lived context rarely pays for that.
 
-Nothing counts either trigger. This is prose this session applies to itself, on the same standing as the poll's own start condition, so a wave reviewed in place past both is a rule that went unread rather than a check that failed.
+## The UI trigger
+
+A third trigger sends a second reviewer rather than moving the first. A pull request whose evidence record carries a checklist takes a UI reviewer under `review-ui`, dispatched beside the code review whichever way the two triggers above decide it, so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `checklist` field rather than on the exit code. A record carrying none dispatches no UI reviewer, since the pass would stop on arrival.
+
+The UI reviewer reads no diff and never hears the code reviewer's verdict, so neither brief carries the other's result. Each posts its own family, and the draft mark waits on both, per the draft-lift boundary in the skill body.
+
+Nothing counts any of the three triggers. This is prose this session applies to itself, on the same standing as the poll's own start condition, so a wave reviewed in place past both is a rule that went unread rather than a check that failed.
 
 ## What stays in place
 
@@ -26,4 +32,4 @@ Hand what it finds to each reviewer as facts in the brief, per `### What the bri
 
 ## Launching the reviewer
 
-Take the reviewer shape in `orchestrator-launch.md`. Check `canon sessions list --json` for a live `reviewer-<project>-<number>` first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
+Take the reviewer shape in `orchestrator-launch.md`, or its UI reviewer shape for the UI trigger. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
