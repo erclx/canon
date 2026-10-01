@@ -1,6 +1,6 @@
 ---
 title: Teach
-description: Listing learning workspaces with what their records schedule next, opening one with its required files, recording sources and glossary terms, where the lesson authoring verbs are described, the refusal reasons, and why every write here runs through a verb
+description: Listing learning workspaces with what their records schedule next, opening one with its required files, recording sources and glossary terms, viewing one with its chrome refreshed, where the lesson authoring verbs are described, the refusal reasons, and why every write here runs through a verb
 ---
 
 # Teach
@@ -116,15 +116,19 @@ The entry lands as the standard's shape, leading with the term as a bolded span.
 
 ## Opening a workspace
 
-No `canon teach` verb serves the workspace. `canon serve` does, taking the teach root as its directory and the workspace contents page as its entry:
+`canon teach up` runs the `nav` pass and then serves the teach root, so the page a reader opens carries the chrome the installed CLI generates:
 
 ```bash
-canon serve .canon/teach --entry 03-fde-system-design/index.html --json
+canon teach up 03-fde-system-design --json
 ```
 
-`canon teach list <topic>` ends its human output with this line for that workspace, with the teach folder written relative to the cwd, or absolute when it sits outside it, since `canon serve` resolves its directory against the cwd while the list verb reads the main worktree root. The JSON record carries no such field.
+The link opens the named workspace's contents page, or the root listing when no topic is named. The verb serves the teach folder at its absolute path, so a run from a linked worktree still reaches the main worktree root. `--port` sets the first port tried and `--root` the teach root, as on every other verb. It runs until interrupted, so a session starts it in the background and reads the record off stdout.
 
-It stays general rather than becoming `canon teach serve`, because nothing about serving a directory is specific to a learning workspace, and the same verb carries a slide render and a design preview.
+The JSON record is one line carrying the `nav` fields, then `served`, the absolute folder, and the server's `host`, `port`, `entry`, `url`, and `entryExists`. A lesson `nav` skips lands in `skipped` and the server still starts, since a partial refresh is still worth viewing. A `nav` refusal starts no server.
+
+Viewing writes. Every page and generated stylesheet `nav` owns is rewritten first, which on a committed fixture shows as a diff. To serve without rewriting anything, `canon teach list <topic>` ends its human output with a `canon serve` line for that workspace, with the teach folder written relative to the cwd, or absolute when it sits outside it. The JSON record of `list` carries no such field.
+
+`canon serve` itself stays general, since nothing about serving a directory is specific to a learning workspace and the same verb carries a slide render and a design preview. What `up` adds in front of it is the refresh, which is teach-specific, and it serves through the same server rather than a second one.
 
 Read `url` off the record rather than building one from the port that was asked for. The verb walks forward past a port already in use, which is routine when a second workspace is already open, and the port it took is the one thing a composed URL gets wrong.
 
@@ -141,5 +145,7 @@ Read `url` off the record rather than building one from the port that was asked 
 | `listed`       | A URL is already listed under either heading                    |
 | `defined`      | A term already carries a glossary entry                         |
 | `bad-input`    | The command line is malformed, before any folder is read        |
+
+`up` also passes through the refusals `canon serve` raises once `nav` has run, `no-port` when every port in reach is taken and `bind-failed` for any other bind error, such as a privileged port, in the same record shape with the server's detail as `message`.
 
 A `bad-input` refusal reports the working directory as its root rather than the resolved one, since the command line is rejected before the root is worth resolving. `lesson` raises it for a slug that is not kebab-case, for a quiz carrying no question, and for a question carrying fewer than two options, since a question with one option has nothing to confuse the right answer with.

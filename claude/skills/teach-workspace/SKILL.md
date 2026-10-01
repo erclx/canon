@@ -109,13 +109,13 @@ Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson.
 
 ### Hand over a link, never a path
 
-A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link they can click. Take the serve line from the `Open` step of `canon teach list <topic>`, which resolves the teach folder against the directory the session runs in:
+A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link they can click. One verb refreshes every page's chrome and serves the folder from the main worktree root:
 
 ```bash
-canon teach list <topic>
+canon teach up <topic> --json
 ```
 
-Run the line it prints with `--json` appended, rather than writing `canon serve .canon/teach` by hand. `canon serve` resolves its folder against the cwd, so that literal serves an absent folder from a linked worktree, where the list verb reads the main worktree root.
+Where the installed CLI predates `up`, run the line the `Open` step of `canon teach list <topic>` prints with `--json` appended instead, never `canon serve .canon/teach` written by hand, which serves an absent folder from a linked worktree.
 
 Start it in the background so the session keeps going, and read `url` off the record rather than composing one. The verb walks past a port already in use, so the port it took is exactly the half a guessed URL gets wrong. Report the refusal and its `reason` when `ok` is false, and report it rather than proceeding silently when the verb does not resolve at all, which is an installed CLI predating it.
 
@@ -162,7 +162,7 @@ Progress:  <n> of <m> success lines met
 Open:      [<the url the serve verb reported>](<the same url>)
 ```
 
-Omit the reference line where the lesson produced no durable page. The open line is the one line that is never omitted, since it is the only route the learner has into the page, and it carries what `canon serve` reported rather than a URL composed here. Where the verb refused, that line names the refusal instead of a link.
+Omit the reference line where the lesson produced no durable page. The open line is the one line that is never omitted, since it is the only route the learner has into the page, and it carries what the serving verb reported rather than a URL composed here. Where the verb refused, that line names the refusal instead of a link.
 
 Write that line as a markdown link carrying the URL as both its text and its target, rather than as a bare URL and never inside backticks, since a code span is text the reader has to copy.
 
