@@ -57,9 +57,27 @@ Read the one reference matching the layer the table picked, before writing the f
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external patterns were adopted, which declined, and why.
 
-## Run the final filter before handing tests over
+## Excuses and rebuttals
 
-Check every test written this session against each line. A test that fails one is rewritten or cut, never kept with a note.
+| Excuse                                                     | Rebuttal                                                                                                         |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| The end to end spec is already open, so add the case there | An open file is not a layer. Read the row off the behavior, and a loading, empty, or error state is a component. |
+| The test is small, so its layer does not matter            | A small test at the wrong layer is run by every later pass, and moving it costs a second test.                   |
+| The copy is what the user sees, so assert it in a browser  | Copy asserted in a browser run fails every engine on one wording change. Assert copy at unit.                    |
+| It only flakes under CI load, so add a pause               | A pause hides the condition the run is waiting on. Settle on the condition, or move the assertion down a layer.  |
+| A mock is quicker to set up than the real collaborator     | A mock proves how the code is built. Take a real collaborator or a fake first.                                   |
+
+## Red flags
+
+- You are opening an end to end spec to add a state rather than a journey.
+- The expected value comes from calling the function under test.
+- A sleep, a timeout, or a retry count is going in to make a run pass.
+- The only assertion is that a double was called.
+- You picked the layer before naming what production change makes the test fail.
+
+## Before handing over
+
+Run the final filter over every test written this session, checking each line. A test that fails one is rewritten or cut, never kept with a note.
 
 - **Mirror assertion.** The expected value is computed by the code under test. Write the literal the behavior should produce.
 - **Change detector.** The assertion pins a constant, a message's wording, or a markup shape no caller depends on.

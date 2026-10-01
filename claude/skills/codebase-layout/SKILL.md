@@ -55,6 +55,34 @@ Read the reference matching what the new paths hold, and skip the rest.
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external layouts were adopted, which were declined, and why.
 
+## Excuses and rebuttals
+
+| Excuse                                                    | Rebuttal                                                                                                   |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| The neighbors are flat, so one more flat file fits        | The neighbors are how the folder got to 46. Ask whether this file brings a second role.                    |
+| The folder is under ten files, so it does not need a look | Ten is a prompt, not a gate. A second role splits a folder at six.                                         |
+| Splitting now is a refactor outside this plan's scope     | Splitting before the file lands touches a handful of paths. Splitting later touched 98.                    |
+| A `utils` folder is where shared code goes                | Shared code needs a second consumer. Until then the file sits with the one it serves.                      |
+| The worker can decide where the file goes                 | The worker copies the path the plan gives it. A path left loose in the plan is placed beside its neighbor. |
+
+## Red flags
+
+- A new path's only reason is that a similar file sits in the same folder.
+- A new file's name repeats its folder as its stem or its prefix.
+- A new folder is named for a technical kind alone, such as `helpers/` or `common/`.
+- A shared module is about to import from a feature.
+- The plan writes a file into a folder that does not exist without naming the folder.
+
+## Before handing over
+
+Check every new path the plan or the change names against each line, and fix the path rather than noting it.
+
+- It follows the strategy the project already uses, or the plan proposes the change as its own decision.
+- It carries a one-clause reason naming its role, its consumer, or the strategy it follows.
+- Its folder holds one role after it lands.
+- Its stem names what it covers without repeating its folder.
+- A file with one consumer sits beside it, and a file with two sits in shared code.
+
 ## What this delegates
 
 - Which layer a test belongs at: `test-craft`. This skill decides where the test file sits once its layer is chosen.

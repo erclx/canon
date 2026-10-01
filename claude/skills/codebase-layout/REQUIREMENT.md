@@ -13,6 +13,8 @@ The failure is measured on a real target. Two source folders grew from 11 files 
 
 Sharpening the rules does not reach the decision. Both were loaded and neither was applied, since an always-loaded line competes with everything else a session holds and a path-scoped rule fires on a read of an existing file rather than on a path written into a plan.
 
+A placement rule in front of the session is also one it can argue past. Each flat file in that target landed for a reason that sounded fine in the moment, such as the neighbors already being flat or a split reading as scope creep, and nothing answered the reason before the path was written.
+
 ## Must
 
 - Be loaded by `plan-feature` whenever a plan names a path that does not exist yet, so the guidance is in front of the planner at the moment it writes the path
@@ -23,6 +25,7 @@ Sharpening the rules does not reach the decision. Both were loaded and neither w
 - State that a file is named for what it covers inside its folder, never repeating the folder's name as its stem or its prefix, since a name placed beside its neighbor copies the neighbor's prefix along with its folder
 - Hold the stack-neutral core in the body and defer category specifics to a reference loaded only when a new path falls in that category
 - Record the external layouts adopted and declined with the reason for each, so a later session extends the position instead of re-deriving it
+- Close with a table of the excuses a session gives for placing a file beside its neighbor, each with its rebuttal, the red flags a session can see while writing a path, and a checklist each new path passes before the plan is handed over
 - Fire on a direct question about placement as well, such as where a file goes or whether a flat folder should split, since a session outside any plan still places files
 
 ## Must not

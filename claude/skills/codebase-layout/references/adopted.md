@@ -9,6 +9,8 @@ External sources were read and filtered rather than imported. This file is the r
 
 ## Adopted
 
+### Placing files
+
 **Group what changes together.** Robert Martin's restatement of the single responsibility principle: "Gather together the things that change for the same reasons. Separate those things that change for different reasons" ([The Single Responsibility Principle](https://blog.cleancoder.com/uncle-bob/2014/05/08/SingleReponsibilityPrinciple.html)). It gives "split by role" a test a planner can apply to a folder: would these files change together?
 
 **Name folders for the domain rather than the framework.** Martin's Screaming Architecture argues the top level should tell readers "about the system, not about the frameworks you used in your system" ([Screaming Architecture](https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.html)). It is the root of naming a folder for what it holds rather than its technical kind.
@@ -20,6 +22,10 @@ External sources were read and filtered rather than imported. This file is the r
 **Consistency over any one strategy.** The Next.js docs call the framework unopinionated about organization, list three strategies, and ask a project to "choose a strategy that works for you and your team and be consistent across the project" ([project structure](https://nextjs.org/docs/app/getting-started/project-structure)). Adopted as the body's first section, reading and keeping the project's own strategy.
 
 **Fixtures in modules, page objects on their own.** Playwright defines fixtures in dedicated modules that extend the base test, merges them into one module the specs import, and keeps page objects as their own modules ([fixtures](https://playwright.dev/docs/test-fixtures)). Adopted in `tests.md` as the split between specs and support.
+
+### Closing the body
+
+**Excuses, red flags, and a closing checklist.** From `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md): Common Rationalizations, Red Flags, and Verification. Adopted as the three closing sections every practice skill carries. Each excuse row rebuts a reason a flat folder stayed flat in the target this skill's requirement measures, rather than an objection nobody raised.
 
 ## Declined
 
