@@ -1,5 +1,12 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -100,6 +107,95 @@ describe.each(['go', 'php', 'python', 'web'] as const)(
       writePackage(BASE_SCRIPTS)
 
       expect(runVerify(stack).status).not.toBe(0)
+    })
+  },
+)
+
+const BASE_SCRIPT = join(
+  import.meta.dirname,
+  '../tooling/base/configs/scripts/verify.sh',
+)
+
+const readBansBody = (path: string): string => {
+  const lines = readFileSync(path, 'utf8').split('\n')
+  const start = lines.indexOf('check_markdown_bans() {')
+  const end = lines.indexOf('}', start)
+  return lines.slice(start, end + 1).join('\n')
+}
+
+const writeCanonStub = (exitCode: number): void => {
+  writeFileSync(
+    join(bin, 'canon'),
+    `#!/usr/bin/env bash\necho "banned character"\nexit ${exitCode}\n`,
+    { mode: 0o755 },
+  )
+}
+
+const initRepoWithMarkdown = (): void => {
+  spawnSync('git', ['init', '-q'], { cwd: fixture })
+  writeFileSync(join(fixture, 'note.md'), '# Note\n')
+}
+
+// The directory holding bun can hold a global canon too, so the skip case
+// links only the tools the script probes into the fixture bin and puts nothing
+// else on PATH.
+const linkTool = (name: string): void => {
+  const found = spawnSync('bash', ['-c', `command -v ${name}`], {
+    encoding: 'utf8',
+  }).stdout.trim()
+  symlinkSync(found, join(bin, name))
+}
+
+const runVerifyWithPath = (
+  stack: Stack,
+  path: string,
+): SpawnSyncReturns<string> =>
+  spawnSync('/bin/bash', [SCRIPTS[stack]], {
+    cwd: fixture,
+    encoding: 'utf8',
+    env: { ...process.env, PATH: path },
+    timeout: 20_000,
+  })
+
+describe.each(['go', 'php', 'python', 'web'] as const)(
+  '%s verify.sh markdown bans',
+  (stack) => {
+    it('should fail and print the findings when the audit reports a ban', () => {
+      writePackage(STACK_SCRIPTS[stack])
+      initRepoWithMarkdown()
+      writeCanonStub(2)
+
+      const result = runVerify(stack)
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('banned character')
+    })
+
+    it('should pass when the audit finds nothing', () => {
+      writePackage(STACK_SCRIPTS[stack])
+      initRepoWithMarkdown()
+      writeCanonStub(0)
+
+      const result = runVerify(stack)
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('No banned character')
+    })
+
+    it('should skip when no canon binary is on PATH', () => {
+      writePackage(STACK_SCRIPTS[stack])
+      initRepoWithMarkdown()
+      linkTool('bun')
+      linkTool('git')
+
+      const result = runVerifyWithPath(stack, bin)
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Skipped: no canon binary on PATH')
+    })
+
+    it('should carry the same check_markdown_bans body as base', () => {
+      expect(readBansBody(SCRIPTS[stack])).toBe(readBansBody(BASE_SCRIPT))
     })
   },
 )
