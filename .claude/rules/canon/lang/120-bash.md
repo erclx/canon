@@ -1,5 +1,5 @@
 ---
-description: Route bash script authoring to the interactive or non-interactive skill, and name the lint gate
+description: Route bash script authoring to the wrapper skill, and name the lint gate
 paths:
   - '**/*.sh'
 ---
@@ -8,10 +8,9 @@ paths:
 
 ## Skill routing
 
-- Use `canon:bash-script` for an interactive or human-facing script: prompts, a visual timeline UI, framed terminal output.
-- Use `canon:bash-cli-script` for a non-interactive script: automation, CI, cron, a pipeline helper, or anything run by an agent rather than watched by a person.
-- Load the matched skill's own reference templates rather than hand-rolling interactivity or logging patterns outside them.
-- Report it rather than proceeding silently when the matched skill does not resolve. Both ship with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have them.
+- Use `canon:bash-cli-script` before writing a script, and follow its guards on what a shell script may be.
+- Load the skill's own reference template rather than hand-rolling logging patterns outside it.
+- Report it rather than proceeding silently when the skill does not resolve. It ships with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have it.
 
 ## Lint gate
 
