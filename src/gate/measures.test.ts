@@ -23,6 +23,7 @@ import {
   SANDBOX_UNDECLARED_CEILING,
   sandboxCoverage,
   shippedReferences,
+  skillPracticeShape,
   skillProvenance,
   visualPathGlobs,
 } from '@/gate/measures'
@@ -1073,6 +1074,67 @@ describe('skillProvenance', () => {
 
   it('reports a project carrying no skill corpus as unmeasured', async () => {
     const report = await skillProvenance(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toContain('no skill corpus')
+  })
+})
+
+describe('skillPracticeShape', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('skillPracticeShape reads the corpus and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const writePracticeSkill = (body: string): void => {
+    const dir = join(root, 'claude', 'skills', 'test-craft')
+    mkdirSync(join(dir, 'references'), { recursive: true })
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `---\nname: test-craft\ndescription: Tests.\n---\n\n# Test craft\n\n${body}`,
+    )
+    writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-skill-practice-shape-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a listed skill carrying every closing section', async () => {
+    writePracticeSkill(
+      '## Excuses and rebuttals\n\n## Red flags\n\n## Before handing over\n',
+    )
+
+    const report = await skillPracticeShape(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('fails a listed skill missing a section, naming the skill and section', async () => {
+    writePracticeSkill('## Excuses and rebuttals\n\n## Red flags\n')
+
+    const report = await skillPracticeShape(context())
+
+    expect(report.failure).toContain(
+      `${join('claude', 'skills', 'test-craft')} missing section: Before handing over`,
+    )
+  })
+
+  it('reports a project carrying no skill corpus as unmeasured', async () => {
+    const report = await skillPracticeShape(context())
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toContain('no skill corpus')

@@ -26,7 +26,11 @@ import {
   auditSkills,
   CORPORA,
   DESCRIPTION_LIMIT,
+  PRACTICE_LEDGER,
+  PRACTICE_SECTIONS,
+  PRACTICE_SKILLS,
   REQUIREMENT_SECTIONS,
+  SHIPPED_CORPUS,
   type SkillFinding,
   type SkillsAudit,
   type SkillsAuditRefusal,
@@ -1398,6 +1402,7 @@ async function runSkillsAudit(
     reportFolder(report)
     reportRequirementShape(report)
     reportProvenance(report)
+    reportPracticeShape(report)
     reportUnmeasured()
     outro()
   }
@@ -1420,11 +1425,14 @@ async function runSkillsAudit(
           folderName: report.folderName,
           requirementSections: report.requirementSections,
           datedProvenance: report.datedProvenance,
+          practiceShape: report.practiceShape,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
           requirementSections: REQUIREMENT_SECTIONS,
           corpora: CORPORA,
+          practiceSkills: PRACTICE_SKILLS,
+          practiceSections: PRACTICE_SECTIONS,
         },
       })}\n`,
     )
@@ -1613,6 +1621,31 @@ function reportProvenance(report: SkillsAudit): void {
     `${plural(report.datedProvenance.length, 'date')} in a body or reference`,
   )
   reportFindings(report.datedProvenance)
+}
+
+/**
+ * Reports without failing the run for the reason provenance does. The list
+ * names shipped folders alone, which the step says so a target reading a pass
+ * knows its own skills were never in scope.
+ */
+function reportPracticeShape(report: SkillsAudit): void {
+  logStep('Practice shape')
+  logInfo(
+    `A listed practice skill closes with ${PRACTICE_SECTIONS.map((section) => `## ${section}`).join(', ')}, and carries ${PRACTICE_LEDGER}.`,
+  )
+  logInfo(
+    `The list is kept here and names ${plural(PRACTICE_SKILLS.length, 'shipped skill')}, so a skill outside ${SHIPPED_CORPUS} is never read.`,
+  )
+
+  if (report.practiceShape.length === 0) {
+    logInfo('Every listed practice skill carries its shape.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.practiceShape.length, 'missing part')} across the listed practice skills`,
+  )
+  reportFindings(report.practiceShape)
 }
 
 /**
