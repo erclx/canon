@@ -10,6 +10,7 @@ description: Plans a feature by reading the project's Claude setup and scanning 
 - If no feature description is provided, stop: `❌ No feature description. Describe what you want to add.`
 - Do not implement anything. Output the plan and stop.
 - When the feature description spans two or more independent concerns, write one plan file per concern. Do not bundle them under a single slug.
+- Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each from the ask and the project context. Each answer you can predict becomes a `- Suggested:` line, and the plan proceeds on those. When you can predict none of the three, so no checkable success criterion can be stated, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session. The test reads the ask's success criteria, never the plan's open questions, which a `- Suggested:` line answers.
 
 ## Step 1: read the Claude setup
 
@@ -43,6 +44,7 @@ The section list, what each section holds, the suggested-and-answer contract, an
 
 What this skill adds on top of the standard:
 
+- Reframe a vague ask as success criteria before writing `**Files to touch:**`. Each criterion names something observable and a check that decides it, such as a measure and the threshold it must stay under, drawn from the ask or the project context. "Make it faster" names no criterion, while a stated budget for one path does. Each criterion becomes one `**Verification:**` bullet.
 - Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
 - Suggest a real default when best practice, the codebase, or prior context points to one.
 - Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
@@ -57,6 +59,8 @@ A plan sequencing its work into batches declares where one pull request ends, he
 - One batch is one pull request, and one pull request is one plan file, named for its own concern rather than a numeric suffix. `canon tasks plan-branch` derives one branch from one plan filename, so a `**Batch N**` sub-heading inside one file's `**Files to touch:**` shares that one branch across every batch, and the batch that merges first strands every batch behind it with nothing left to open a pull request against. Write a plan opening five batches as five files before the first line of any of them.
 - State a dependent batch's dependency on the ones before it in its own `**Constraints:**`, naming the earlier batch's slug and stacking rather than merging into it. The batches are built in order and depend on each other in that order, which is what a stack expresses, so the dependency argues for stacking and never for collapsing two batches into one file or one review.
 - Mark each batch dependent or independent by comparing the file sets rather than the descriptions. A batch sharing no file with another is independent and earns its own branch even where both arrived in one request. One run measured at 68 files carried three such batches into a single review because nothing drew the boundary.
+- Slice a batch by one user-visible path end to end rather than by layer, so each batch ships something a person can exercise. The slice decides what a batch contains, and the file-set comparison above still decides whether two batches depend on each other, so two slices sharing a file stay marked dependent and stacked.
+- Sequence the riskiest batch first, so the batch most likely to change the plan is built while every later batch can still move. A sweep is the one exception and stays last even when it is the riskiest, per the next bullet.
 - Sequence a sweep last. A batch deliberately rewriting files earlier batches touched is coherent as the final one and forces every batch behind it into one review anywhere else.
 - Keep each batch's commits contiguous once the work starts. A later fix to an earlier batch belongs on that batch's own commits, since a batch interrupted by another cannot be lifted onto its own branch afterward.
 
