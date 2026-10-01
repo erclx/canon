@@ -190,11 +190,12 @@ describe('phase order', () => {
       Object.fromEntries(ALL_PHASES.map((key) => [key, `echo phase-${key}`])),
     )
 
-    // bun run also echoes each command it runs, so only a line the script
-    // printed ends on the phase name.
-    const ran = [...runVerify().stdout.matchAll(/phase-([a-z:]+)$/gm)].map(
-      (match) => match[1],
-    )
+    // bun run also echoes each command it runs, colored on a terminal and
+    // plain under CI, so a match preceded by the echo is the command line
+    // rather than what the script printed.
+    const ran = [
+      ...runVerify().stdout.matchAll(/(?<!echo )phase-([a-z:]+)$/gm),
+    ].map((match) => match[1])
 
     expect(ran).toEqual([...ALL_PHASES])
   })
