@@ -462,6 +462,16 @@ export function register(program: Command): void {
         'comment. Together with --checklist it does, so the checklist and the',
         'link land in one comment.',
         '',
+        'Both reasons carry what the marked comment already posted, each field',
+        'present only when that comment holds it:',
+        '  preview    the hosted **Preview:** address the comment opens with',
+        '  local      the **Local preview:** address under it',
+        '  checklist  the checklist between its delimiters, ticks included',
+        'These come from the comment already posted, never from the flags this',
+        'call passed. A checklist posted on its own carries no marker, so the',
+        'record reports none of the three for it. An unread thread refuses as',
+        'gh-failed on both reasons rather than reporting the fields absent.',
+        '',
         'Exit codes:',
         '  0  read, whether it produced a body or reported no-evidence',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -1424,47 +1434,6 @@ async function runEvidence(
     baseTree.has(path),
   )
 
-  // A local address rides on a checklist or a hosted preview and never opens
-  // a comment alone, so a docs-only branch with a server up posts nothing.
-  const hasChecklistAndLocal =
-    suppliedChecklist !== undefined && opts.local !== undefined
-  if (
-    grouped.kind === 'refused' &&
-    opts.preview === undefined &&
-    !hasChecklistAndLocal
-  ) {
-    logStep('Skipped')
-    logInfo(
-      'No changed path carries an evidence/ segment, so there is nothing to post.',
-    )
-    outro()
-    if (emitJson) {
-      process.stdout.write(
-        `${JSON.stringify({
-          root,
-          ...(identity.number !== undefined && { number: identity.number }),
-          reason: 'no-evidence',
-        })}\n`,
-      )
-    }
-    return 0
-  }
-
-  const repoRow = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
-  const repo =
-    repoRow === null
-      ? undefined
-      : (JSON.parse(repoRow) as { nameWithOwner?: string }).nameWithOwner
-
-  if (repo === undefined) {
-    return refuseWith(
-      'gh-failed',
-      EVIDENCE_REFUSALS['gh-failed'],
-      emitJson,
-      root,
-    )
-  }
-
   let commentId: number | undefined
   let carriedPreview: string | undefined
   let carriedChecklist: string | undefined
@@ -1480,6 +1449,8 @@ async function runEvidence(
     // An unread thread refuses rather than rendering, since a body built
     // without it knows neither the comment to edit nor the preview address
     // to carry, and posting it would duplicate the comment and drop the link.
+    // It refuses ahead of no-evidence too, so that record never reports an
+    // absent field it did not read.
     let comments: readonly { url?: string; body: string }[] | undefined
     if (commentsRow !== null) {
       try {
@@ -1504,6 +1475,56 @@ async function runEvidence(
     carriedPreview = findEvidencePreview(comments)
     carriedChecklist = findEvidenceChecklist(comments)
     carriedLocal = findEvidenceLocal(comments)
+  }
+
+  // What the marked comment already shows a reviewer, kept apart from the
+  // flags this call passed so a reader learns what is posted.
+  const carried = {
+    ...(carriedPreview !== undefined && { preview: carriedPreview }),
+    ...(carriedLocal !== undefined && { local: carriedLocal }),
+    ...(carriedChecklist !== undefined && { checklist: carriedChecklist }),
+  }
+
+  // A local address rides on a checklist or a hosted preview and never opens
+  // a comment alone, so a docs-only branch with a server up posts nothing.
+  const hasChecklistAndLocal =
+    suppliedChecklist !== undefined && opts.local !== undefined
+  if (
+    grouped.kind === 'refused' &&
+    opts.preview === undefined &&
+    !hasChecklistAndLocal
+  ) {
+    logStep('Skipped')
+    logInfo(
+      'No changed path carries an evidence/ segment, so there is nothing to post.',
+    )
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          ...(identity.number !== undefined && { number: identity.number }),
+          reason: 'no-evidence',
+          ...carried,
+        })}\n`,
+      )
+    }
+    return 0
+  }
+
+  const repoRow = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
+  const repo =
+    repoRow === null
+      ? undefined
+      : (JSON.parse(repoRow) as { nameWithOwner?: string }).nameWithOwner
+
+  if (repo === undefined) {
+    return refuseWith(
+      'gh-failed',
+      EVIDENCE_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+    )
   }
 
   const preview = opts.preview ?? carriedPreview
@@ -1548,6 +1569,7 @@ async function runEvidence(
         head: identity.head,
         body,
         ...(commentId !== undefined && { commentId }),
+        ...carried,
       })}\n`,
     )
   }
