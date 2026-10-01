@@ -1,6 +1,6 @@
 {
   "name": "canon",
-  "description": "One source for your repos' AI conventions. Install once, sync everywhere.",
+  "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
   "owner": {
     "name": "Eric Le",
     "url": "https://github.com/erclx"
@@ -9,7 +9,7 @@
     {
       "name": "canon",
       "source": "./claude",
-      "description": "Automated governance, versioning, and discovery tools for Claude Code."
+      "description": "Runs your agent's work and keeps its code good, on one setup for every repo."
     }
   ]
 }

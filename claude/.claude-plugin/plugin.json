@@ -1,6 +1,6 @@
 {
   "name": "canon",
-  "description": "Automated governance, versioning, and discovery tools for Claude Code.",
+  "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
   "version": "5.7.0",
   "author": {
     "name": "Eric Le",

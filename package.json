@@ -2,7 +2,7 @@
   "name": "@erclx/canon",
   "type": "module",
   "version": "5.7.0",
-  "description": "Infrastructure and quality tooling for developer workflows",
+  "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
   "license": "MIT",
   "bin": {
     "canon": "./src/cli.ts"
