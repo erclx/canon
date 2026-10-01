@@ -10,7 +10,7 @@ description: Plans a feature by reading the project's Claude setup and scanning 
 - If no feature description is provided, stop: `❌ No feature description. Describe what you want to add.`
 - Do not implement anything. Output the plan and stop.
 - When the feature description spans two or more independent concerns, write one plan file per concern. Do not bundle them under a single slug.
-- Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each from the ask and the project context. Each answer you can predict becomes a `- Suggested:` line, and the plan proceeds on those. When you can predict none of the three, so no checkable success criterion can be stated, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session. The test reads the ask's success criteria, never the plan's open questions, which a `- Suggested:` line answers.
+- Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each from the ask and the project context. An answer you can predict settles its criterion, which Step 3 writes as a `**Verification:**` bullet rather than a question. Only a prediction still open goes under `**Questions:**` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable. When you can predict none of the three, so no checkable success criterion can be stated, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session. The test reads the ask's success criteria, never the plan's open questions, which a `- Suggested:` line answers.
 
 ## Step 1: read the Claude setup
 
