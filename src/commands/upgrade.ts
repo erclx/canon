@@ -37,7 +37,7 @@ interface UpgradeRecord {
   readonly reason?: string
   /**
    * One rendered line for a caller that reports the outcome without parsing
-   * the rest of the record, such as `.husky/post-merge`. `current` reuses
+   * the rest of the record, such as the base stack's post-merge hook. `current` reuses
    * `describeSkew` verbatim so its wording never drifts from the line `canon
    * sync --check` and `canon claude skills drift` already report.
    */
@@ -312,7 +312,8 @@ function emit(opts: UpgradeOptions, record: UpgradeRecord): void {
 /**
  * `message` is the one field carrying arbitrary text: `describeSkew`'s
  * `unknown` branch embeds a registry error verbatim, and a registry answering
- * with HTML produces one already carrying a double quote. `.husky/post-merge`
+ * with HTML produces one already carrying a double quote. The base stack's
+ * post-merge hook, and any hook installed before `canon hooks post-merge`,
  * reads this field with a pattern rather than a parser, so a quote makes it
  * through `JSON.stringify` as an escaped `\"` that the pattern stops at,
  * truncating the line it prints. Collapsing whitespace and swapping the quote

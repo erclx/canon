@@ -53,9 +53,9 @@ Field order is part of the contract. A shell reads this record with a pattern ra
 
 ## What calls it
 
-`.husky/post-merge` runs `canon worktrees reclaim --json` on every merge, between the records push and the upgrade block, so a merged branch's worktree goes without a person remembering. `CANON_SKIP_RECLAIM=1` turns that step off.
+`canon hooks post-merge`, which `.husky/post-merge` calls, runs `canon worktrees reclaim --json` on every merge, between the records push and the upgrade, so a merged branch's worktree goes without a person remembering. `CANON_SKIP_RECLAIM=1` turns that step off. `hooks.md` covers the verb.
 
-The hook's call carries no `--root` and no `cd`, unlike the two steps above it. Git runs a hook from the top level of the worktree the pull happened in, and the verb reads its own working directory to refuse that worktree as `current-worktree`, so a root argument would turn the running worktree into an ordinary candidate and let a pull inside a linked worktree delete the ground under itself.
+That call carries no `--root` and runs from the hook's own working directory, unlike the two steps before it. Git runs a hook from the top level of the worktree the pull happened in, and the verb reads its own working directory to refuse that worktree as `current-worktree`, so a root argument would turn the running worktree into an ordinary candidate and let a pull inside a linked worktree delete the ground under itself.
 
 ## What makes a worktree reclaimable
 
