@@ -47,6 +47,6 @@ What the card route does change for the favicon is where it lands, since `draft-
 
 The route, its second config, and the exclusion check ship as golden configs in the `astro` tooling stack rather than the `web` layer, because all three are Astro-format files and that layer's own rule puts framework glue in the per-stack adapter. The stack's own precedent agrees, a dev-only scenario switcher shipped as an `.astro` golden config.
 
-What the `web` layer does own is when the check runs. Its `scripts/verify.sh` runs the card exclusion check after its build stage whenever that script is installed, testing for the script rather than for a framework. That keeps the exclusion on the default path rather than behind a flag, and it leaves a project with no card route one stage shorter with no override to write.
+What the shared verify runner owns is when the check runs. Base's `scripts/verify.ts` runs the card exclusion check after the build stage whenever that script is installed, testing for the script rather than for a framework. That keeps the exclusion on the default path rather than behind a flag, and it leaves a project with no card route one stage shorter with no override to write.
 
 The capture needed nothing added to it. `canon capture` already reads an `http(s)://` source, where `--out` names the destination PNG rather than a directory. Its 2x device scale factor is fixed with no flag, which is why the route declares its card element at 600x315 to land a 1200x630 capture, and why the route carries that halving as a comment rather than as a surprise.

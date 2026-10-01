@@ -4,7 +4,7 @@
 
 ## Overview
 
-The python stack covers Python 3.13+ projects managed with `uv`. It ships golden sidecar configs for `ruff`, `mypy`, `pytest`, and `coverage`, plus a `.python-version` pin and a python-aware `verify.sh`. Framework adapters layer on top with their own deps and configs.
+The python stack covers Python 3.13+ projects managed with `uv`. It ships golden sidecar configs for `ruff`, `mypy`, `pytest`, and `coverage`, plus a `.python-version` pin and a python phase list for base's verify runner. Framework adapters layer on top with their own deps and configs.
 
 Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coveragerc`) rather than `[tool.*]` sections in `pyproject.toml`. Sync overwrites configs on every run, so keeping them sidecar avoids stomping the user-owned `[project]` block in `pyproject.toml`.
 
@@ -27,7 +27,7 @@ The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` 
 - `pytest.ini`: tests live under `tests/`, source under `src/`.
 - `.coveragerc`: branch coverage on `src/`, html report under `.coverage_cache/html`.
 - `.python-version`: pinned to `3.14` to match `uv init` defaults.
-- `scripts/verify.sh`: overrides base verify to add Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) phases, then the same markdown bans phase base ships.
+- `scripts/verify.json`: requires Typecheck (`mypy`), Lint (`ruff check && ruff format --check`), and Tests (`pytest -v`) on top of base's runner, and stops naming `uv` when it is not on PATH. The markdown bans phase runs as it does everywhere.
 
 ## Hybrid project shape
 
@@ -39,7 +39,7 @@ The manifest declares no `[dependencies.dev]`. Manifest injection currently call
 
 ## Verify command
 
-`canon tooling verify <stack>` currently runs `bun run lint:fix` and `bun run check` against any stack with a `package.json`. Since base ships a `package.json`, those run for python too. Python's verify.sh wraps the package.json `lint`/`typecheck`/`test:run` scripts that delegate to `uv run`, so the verify path works end-to-end as long as `uv` is installed in the verify environment. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they cleanly skip.
+`canon tooling verify <stack>` currently runs `bun run lint:fix` and `bun run check` against any stack with a `package.json`. Since base ships a `package.json`, those run for python too. Python's `verify.json` requires the package.json `lint`/`typecheck`/`test:run` scripts that delegate to `uv run`, so the verify path works end-to-end as long as `uv` is installed in the verify environment. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they cleanly skip.
 
 ## Anti-patterns
 

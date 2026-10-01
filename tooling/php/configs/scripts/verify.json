@@ -1,0 +1,7 @@
+{
+  "require": ["typecheck", "lint", "test:run"],
+  "tools": [{ "name": "php" }, { "name": "composer" }],
+  "preconditions": [
+    { "path": "vendor/bin/phpunit", "hint": "Run 'composer install'" }
+  ]
+}

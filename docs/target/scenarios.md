@@ -46,11 +46,11 @@ canon tooling sync vite-react ./frontend --skip base --write
 canon tooling sync python ./backend --skip base --write
 ```
 
-`--skip base` drops the `base` layer from each subtree sync, so husky, prettier, cspell, commitlint, and CI stay single at the repo root. Without it, every subtree re-drops husky, and since git honors only one `core.hooksPath` the extra hook dirs silently break. Each subtree still gets its own framework configs (eslint, vitest, tsconfig, vite), and its own stack reference reads through `canon tooling reference <stack>`.
+`--skip base` drops the `base` layer from each subtree sync, so husky, prettier, cspell, commitlint, and CI stay single at the repo root. The one exception is base's verify runner, `scripts/verify.sh`, `scripts/verify.ts`, and `scripts/verify.json`, which every subtree still receives so it can verify on its own. Without it, every subtree re-drops husky, and since git honors only one `core.hooksPath` the extra hook dirs silently break. Each subtree still gets its own framework configs (eslint, vitest, tsconfig, vite), and its own stack reference reads through `canon tooling reference <stack>`.
 
 A sync whose target sits below the git root knows it is writing into a subfolder:
 
 - It withholds `.github/`, since GitHub reads workflows only at the repository root, and names each withheld file. Run the subtree from a job in the root workflow instead, with `working-directory` set to the subtree path the sync prints, such as `working-directory: frontend`.
 - It writes a nested `cspell.json` that registers the subtree's word lists, so a root `cspell '**'` reads them for files under that folder. It leaves a spell config the subtree already has alone.
 - It installs no dependencies and adds no scripts to a subtree without a `package.json`. It names what it skipped and ends on `run 'bun init' in <path>, then sync again`.
-- The subtree's `scripts/verify.sh` skips the format, spell, and shell phases a subtree does not declare, since the root runs them, and still fails on a missing lint, typecheck, or test script.
+- The subtree's `bun run check` skips the format, spell, and shell phases a subtree does not declare, since the root runs them, and still fails on a missing lint, typecheck, or test script, the phases its stack's `scripts/verify.json` requires.

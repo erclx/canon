@@ -1,0 +1,4 @@
+{
+  "require": ["typecheck", "lint", "test:run"],
+  "tools": [{ "name": "uv" }]
+}

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-checked by `go vet`, and tested by `go test`. It ships a golden `.golangci.yml`, a Go-aware `verify.sh`, and a copy-once smoke test.
+The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-checked by `go vet`, and tested by `go test`. It ships a golden `.golangci.yml`, a go phase list for base's verify runner, and a copy-once smoke test.
 
 ## Scaffold checklist
 
@@ -26,10 +26,11 @@ The go stack also ships `smoke_test.go` at the module root as a copy-once seed. 
 - Enable formatters `gofmt` and `goimports`. `lint:fix` runs `golangci-lint fmt` ahead of `golangci-lint run --fix`.
 - Exclude `node_modules` from both linters and formatters. The `go.mod` `ignore` directive in the checklist covers every Go tool, but `go.mod` belongs to the project and sync cannot write it, so the config keeps `golangci-lint run` from reporting and `golangci-lint fmt` from rewriting a vendored `.go` file in a module that never added the directive.
 
-## verify.sh
+## verify.json
 
-- Run Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`), plus the four base phases wherever the folder declares their scripts, then the markdown bans stage base ships.
-- Keep `build` out of `verify.sh`. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file, and a seeded `main.go` would assume every module is a binary rather than a library.
+- Require Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`). Base's runner adds the four base phases wherever the folder declares their scripts, then the markdown bans stage.
+- Probe `go` and `golangci-lint` first, and name the `go install` command when `golangci-lint` is missing.
+- Keep `build` out of `verify.json`, even though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file, and a seeded `main.go` would assume every module is a binary rather than a library.
 - Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than in a local `bun run check`.
 
 ## CI

@@ -69,7 +69,7 @@ The social card is a route the project keeps rather than a page a render writes 
 - `card.config.mjs`: a second Astro config whose `srcDir` points at `./card-src`, which the main config's page router never reads. That is what excludes the card from the published build structurally rather than by a filename convention, the same mechanism `scenarios.astro` reaches for with `import.meta.env.DEV`. Its base port is `4421` plus `WORKTREE_PORT_OFFSET`, outside the band `astro.config.mjs` serves from, so a card server and a dev server of one worktree never contend.
 - `card-src/pages/og-card.astro`: the route, shipped as a working placeholder so it serves before any pick has been taken. It imports the project's own global stylesheet, which is what lets the composition read real tokens and real fonts instead of typed copies. It reads `--color-background` and `--color-text`, the names `canon design css` emits, and sets no `font-family` at all so the card inherits the project's body font rather than reading a font token the design system does not emit.
 - `scripts/check-card-exclusion.sh`: fails when the route's `<meta name="og-card-marker">` tag reaches `dist/`, and fails when the route dropped that tag, since the marker is what the leak test reads for.
-- `bun run card:dev` serves the route. `bun run card:check` runs the exclusion check, which the web layer's `scripts/verify.sh` also runs after its build stage whenever the script is installed.
+- `bun run card:dev` serves the route. `bun run card:check` runs the exclusion check, which base's verify runner, `scripts/verify.ts`, also runs after its build stage whenever the script is installed.
 
 ### Why each piece is shaped that way
 
