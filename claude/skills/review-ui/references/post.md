@@ -9,12 +9,12 @@ Step 7 of `review-ui`.
 
 ## The heading
 
-The heading reports whether anything is owed, the way the code review's does.
+The heading reports whether the branch owes anything, the way the code review's does.
 
-- `## UI review` when any box failed or was not driven, or the sweep found a console error or an overflow.
-- `## UI review closed` when every box passed or needs eyes and the sweep found neither.
+- `## UI review` when a box failed, the sweep found a console error or an overflow, or a box was not driven for a cause on the page, such as a target the snapshot does not hold.
+- `## UI review closed` otherwise.
 
-A needs-eyes box leaves the review closed. It is owed to the person who merges rather than to the branch, and holding the draft mark on a judgment no fix can settle would hold it forever. Do not append the pull request number, which GitHub already renders.
+A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page: an address that did not answer, or a `(local only)` box on a hosted preview. Each is owed to the person who merges rather than to the branch, and no commit on the branch can settle it, so opening the heading would hold the draft mark at every head. Name each such box in the summary line's not-driven count and in its row's evidence. Do not append the pull request number, which GitHub already renders.
 
 ## The body
 

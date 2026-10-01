@@ -20,7 +20,7 @@ rather than inside it, so the two passes finish on their own clocks.
 - The evidence record carries no `checklist`: stop and post nothing, `No checklist on PR #<number>, so there is nothing to drive.`
 - No address resolves under Step 3: stop and post nothing, `❌ No address to drive. PR #<number> carries no preview and no local preview, and the launch named none.`
 - The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
-- The newest UI verdict on the thread already names the current head: stop, `The UI review already covers <short-sha>.`
+- The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.` An open verdict at the head stops the same way only when nothing has arrived since it: drive again when a `## Review response` or `## Post-review findings` comment is newer than the verdict, or the launch names an address.
 - Post and stop. Never merge, never tick a box on the evidence comment, and never lift the draft mark.
 
 ## Step 1: resolve the pull request
@@ -30,10 +30,10 @@ Resolve the number with `gh pr view --json number,headRefName,headRefOid`, or ta
 Read the newest UI verdict for the head guard:
 
 ```bash
-gh pr view <number> --json reviews --jq '[.reviews[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | startswith("## UI review"))] | last | .body // ""'
+gh pr view <number> --json reviews,comments --jq '([.reviews[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | startswith("## UI review"))] | last) as $v | [($v.body // ""), ($v.submittedAt // ""), ([.comments[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review response" or . == "## Post-review findings") | .createdAt] | max // "")]'
 ```
 
-Take the sha off its last line's `<!-- review-ui: head=<sha> -->` marker. A body carrying none covers no head this pass can trust, so drive.
+The three values are the verdict's body, when it was posted, and when the newest reply was. Take the sha off the body's last-line `<!-- review-ui: head=<sha> -->` marker. A body carrying none covers no head this pass can trust, so drive.
 
 Read nothing else about the change. The diff, the plan, the task, and the description's Summary and Technical Context all carry the author's argument for it, and a pass that has heard it drives towards what it expects.
 

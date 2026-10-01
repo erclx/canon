@@ -47,4 +47,4 @@ Each box takes exactly one.
 
 A frame cannot be attached to a review comment and the reviewer writes no tracked file, so a frame verdict names its local path and the value or region it judged. The path resolves only on this machine.
 
-A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong.
+A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong. Its reason says whether the cause sits on the page or off it, since only a cause on the page opens the heading Step 7 picks.

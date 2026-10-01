@@ -19,7 +19,7 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 - Drive a box written before the drivable format all the same, naming the route or width it guessed, so no box is skipped silently
 - Read the checklist and the address from the evidence record rather than from the diff, the plan, or the author's description
 - Take the hosted preview, then the local preview, then an address the launch names, and refuse when none exists
-- Report an address that does not answer as not driven rather than as a fail
+- Report an address that does not answer as not driven rather than as a fail, and leave the review closed on a box no commit on the branch can settle, so an absent preview never holds the draft mark at every head
 - Sweep console errors, sideways overflow at each named width, and the focus and details probes over the states reached, and nothing beyond them
 - Post its own comment as a pull request review under `## UI review` while anything is owed and `## UI review closed` once nothing is, ending on a marker naming the head it drove
 - Name the renderer the browser reported, and render on the GPU only when the launch names a config for it
@@ -42,7 +42,7 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 - The evidence record carries no checklist: stop and post nothing
 - No address at all: stop with `❌ No address to drive` and post nothing
 - The pinned browser revision is absent: stop and pass on the install command
-- The newest UI verdict already names the current head: stop
+- The newest UI verdict is closed at the current head, or is open there with no reply and no new address since: stop
 
 ## Out of scope
 
