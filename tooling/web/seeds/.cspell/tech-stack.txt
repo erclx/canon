@@ -16,5 +16,6 @@ serviceworker
 sidepanel
 tabindex
 toplevel
+viewports
 vitest
 xlink
