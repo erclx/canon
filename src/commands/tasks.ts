@@ -10,6 +10,7 @@ import {
   type CitationOutcome,
   type DeclineOutcome,
   declineTask,
+  type InboundRelink,
   type PlanCitations,
   type PlanMove,
   planCitations,
@@ -1493,6 +1494,7 @@ function report(
     logInfo('retargeted the Ready: line')
   }
   if (outcome.priorityRowRemoved) logInfo('cleared the ordering row')
+  logRelinked(outcome.relinked)
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
   if (outcome.cut > 0) logInfo(`${outcome.cut} outcome(s) cut`)
   outro()
@@ -1506,6 +1508,23 @@ function logPlanMoves(plans: readonly PlanMove[], root: string): void {
     logAdd(relative(root, plan.to))
   }
   if (plans.length > 0) logInfo('retargeted the Plan: line')
+}
+
+function logRelinked(relinked: readonly InboundRelink[]): void {
+  if (relinked.length === 0) return
+
+  const links = relinked.reduce((sum, entry) => sum + entry.links, 0)
+  logInfo(`repointed ${links} link(s) in ${relinked.length} file(s)`)
+}
+
+function relinkedFor(
+  relinked: readonly InboundRelink[],
+  root: string,
+): readonly { readonly file: string; readonly links: number }[] {
+  return relinked.map((entry) => ({
+    file: relative(root, entry.file),
+    links: entry.links,
+  }))
 }
 
 function planMovesFor(
@@ -1547,6 +1566,7 @@ function recordFor(
       : null,
     closed: outcome.closed,
     cut: outcome.cut,
+    relinked: relinkedFor(outcome.relinked, root),
   }
 }
 
@@ -1639,6 +1659,7 @@ function reportDecline(
   logPlanMoves(outcome.plans, root)
   if (outcome.priorityRowRemoved) logInfo('cleared the ordering row')
   if (outcome.backlogRowRemoved) logInfo('cleared the backlog row')
+  logRelinked(outcome.relinked)
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
   outro()
 
@@ -1667,5 +1688,6 @@ function declineRecordFor(
     backlogRowRemoved: outcome.backlogRowRemoved,
     indexRegenerated: outcome.indexRegenerated,
     plans: planMovesFor(outcome.plans, root),
+    relinked: relinkedFor(outcome.relinked, root),
   }
 }
