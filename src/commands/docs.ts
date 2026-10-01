@@ -1,7 +1,6 @@
 import type { Command } from 'commander'
-import { registerPassThroughVerbs } from '@/commands/pass-through'
+import { type DocEntry, listDocs } from '@/docs/list'
 import { listTopics, readTopic, resolveTopic } from '@/docs/read'
-import { execScript } from '@/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/ui'
 
@@ -22,18 +21,59 @@ export function register(program: Command): void {
         '',
       ].join('\n'),
     )
-    .action(async (topic: string | undefined) => {
-      if (topic === undefined) {
-        intro('canon docs')
-        await execScript('docs/list.sh', [])
-        return
-      }
-
-      process.exitCode = get(topic)
+    .action((topic: string | undefined) => {
+      process.exitCode = topic === undefined ? list({}) : get(topic)
     })
 
-  registerPassThroughVerbs(docs, 'docs', ['list'])
+  docs
+    .command('list')
+    .description('List the docs and domain context with their descriptions')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit machine-readable JSON')
+    .action((opts: ListOptions) => {
+      process.exitCode = list(opts)
+    })
 }
+
+interface ListOptions {
+  readonly json?: boolean
+}
+
+/**
+ * The text listing is frame lines on stderr and the `--json` record is the one
+ * thing on stdout, so a caller piping it through a wrapper reads JSON alone.
+ * The frame opens after the `--json` branch and never wraps it.
+ */
+function list(opts: ListOptions): number {
+  const catalog = listDocs(PROJECT_ROOT)
+  const mismatch = checkoutMismatchWarning(process.cwd())
+
+  if (opts.json) {
+    if (mismatch !== undefined) logWarn(mismatch)
+    const docs: DocEntry[] = catalog.hasContext
+      ? [...catalog.docs, ...catalog.context]
+      : catalog.docs
+    process.stdout.write(`${JSON.stringify({ docs })}\n`)
+    return 0
+  }
+
+  intro('canon docs')
+  if (mismatch !== undefined) logWarn(mismatch)
+
+  logStep('Docs')
+  for (const entry of catalog.docs) logInfo(describeEntry(entry))
+
+  if (catalog.hasContext) {
+    logStep('Domain context')
+    for (const entry of catalog.context) logInfo(describeEntry(entry))
+  }
+
+  outro()
+  return 0
+}
+
+const describeEntry = (entry: DocEntry): string =>
+  `${entry.name} : ${entry.description}`
 
 /**
  * Writes the document body to stdout and every frame line to stderr, so a

@@ -1,11 +1,11 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { registerPassThroughVerbs } from '@/commands/pass-through'
 import {
   auditExitCode,
   auditStandards,
   type StandardsAudit,
 } from '@/standards/audit'
+import { listStandardEntries } from '@/standards/list'
 import { listStandards, readStandard, resolveStandard } from '@/standards/read'
 import {
   frameError,
@@ -18,6 +18,10 @@ import {
   pipeOutput,
   plural,
 } from '@/ui'
+
+interface StandardsListOptions {
+  readonly json?: boolean
+}
 
 interface StandardsAuditOptions {
   readonly json?: boolean
@@ -57,7 +61,14 @@ export function register(program: Command): void {
       process.exitCode = print(name)
     })
 
-  registerPassThroughVerbs(standards, 'standards', ['list'])
+  standards
+    .command('list')
+    .description('List the standards with their descriptions and jurisdiction')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit machine-readable JSON')
+    .action((opts: StandardsListOptions) => {
+      process.exitCode = runStandardsList(opts)
+    })
 
   standards
     .command('audit')
@@ -93,6 +104,26 @@ export function register(program: Command): void {
     .action(async (path: string | undefined, opts: StandardsAuditOptions) => {
       process.exitCode = await runStandardsAudit(path, opts)
     })
+}
+
+/**
+ * Reads the working root first, the way `canon standards <name>` does, so a
+ * project's own standards list beside the package corpus. The `--json` record
+ * is the one thing on stdout and the frame opens only on the text path.
+ */
+function runStandardsList(opts: StandardsListOptions): number {
+  const standards = listStandardEntries(process.cwd())
+
+  if (opts.json) {
+    process.stdout.write(`${JSON.stringify({ standards })}\n`)
+    return 0
+  }
+
+  intro('canon standards')
+  logStep('Standards')
+  for (const each of standards) logInfo(`${each.name} : ${each.description}`)
+  outro()
+  return 0
 }
 
 /**

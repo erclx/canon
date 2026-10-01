@@ -60,13 +60,13 @@ describe('checkout-mismatch warning at each chokepoint', () => {
   it('should warn from prepare on canon tooling sync', () => {
     expectWarns(['tooling', 'sync', 'base', plain, '--check'])
   })
-
-  it('should warn from execScript on canon docs list', () => {
-    expectWarns(['docs', 'list'])
-  })
 })
 
 describe('checkout-mismatch warning at each directly wired verb', () => {
+  it('should warn on canon docs list', () => {
+    expectWarns(['docs', 'list'])
+  })
+
   it('should warn on canon tooling list', () => {
     expectWarns(['tooling', 'list'])
   })

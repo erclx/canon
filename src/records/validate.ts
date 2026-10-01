@@ -7,6 +7,7 @@ import {
   recordDir as resolveRecordDir,
   recordDirs as resolveRecordDirs,
 } from '@/record-root'
+import { ATTRIBUTE_MARKER, governedPaths, readScope } from '@/standards/scope'
 import {
   TEACH_GLOSSARY,
   TEACH_MISSION,
@@ -1044,45 +1045,7 @@ function checkMemoryBody(
 const STANDARD_INDEX = 'index.md'
 const STANDARD_FIELDS = ['title', 'description'] as const
 
-const SCOPE_HEADING = /^##[ \t]+Scope[ \t]*$/
-const ANY_HEADING = /^#{1,6}[ \t]+\S/
 const DOES_NOT_GOVERN = 'Does not govern:'
-const ATTRIBUTE_MARKER = 'attribute standard'
-const CODE_SPAN = /`([^`]+)`/g
-
-interface Scope {
-  /** The first non-blank line under the heading, which is the statement. */
-  readonly statement: string
-  readonly lines: readonly string[]
-}
-
-export function readScope(text: string): Scope | undefined {
-  const lines = linesOutsideFences(text)
-  const opened = lines.findIndex((line) => SCOPE_HEADING.test(line.trim()))
-  if (opened === -1) return undefined
-
-  const body: string[] = []
-
-  for (const line of lines.slice(opened + 1)) {
-    if (ANY_HEADING.test(line.trim())) break
-    body.push(line)
-  }
-
-  const statement = body.find((line) => line.trim().length > 0)
-
-  return { statement: statement?.trim() ?? '', lines: body }
-}
-
-/**
- * The paths a scope statement declares, read the way `scripts/standards/list.sh`
- * reads them for the catalog's `appliesTo` field: backticked spans in the first
- * sentence alone. One sentence read two ways would let a standard pass here
- * while publishing a different jurisdiction to every consumer of the catalog.
- */
-export function governedPaths(statement: string): string[] {
-  const [sentence] = statement.split('. ')
-  return [...sentence.matchAll(CODE_SPAN)].map((match) => match[1])
-}
 
 /**
  * The words a governed path offers a filename. Each segment gives its own word
