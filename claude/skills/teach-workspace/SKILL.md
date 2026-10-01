@@ -105,7 +105,7 @@ Write the correct option first, then present the options in the order `order` re
 
 ### The quiz, the teach-back block, and the lesson body
 
-Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. `## Building the lesson body` carries the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against composing any of them by hand when a verb does not resolve. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct.
+Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. `## Building the lesson body` carries the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against composing any of them by hand when a verb does not resolve. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct. Decide the figure first, by `## Diagrams` there.
 
 ### Hand over a link, never a path
 
@@ -158,6 +158,7 @@ Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be
 Lesson:    .canon/teach/<nn>-<topic>/lessons/<nnnn>-<slug>.html
 Reference: .canon/teach/<nn>-<topic>/reference/<slug>.md
 Record:    .canon/teach/<nn>-<topic>/learning-records/<nnnn>-<slug>.md
+Figure:    <drawn through draft-figure, or the one-line reason prose carries it>
 Progress:  <n> of <m> success lines met
 Open:      [<the url the serve verb reported>](<the same url>)
 ```
