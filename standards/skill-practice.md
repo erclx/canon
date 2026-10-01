@@ -31,7 +31,7 @@ A practice skill failing any of these is non-conforming even when every heading 
 
 ## Closing sections
 
-- Close the body with three H2s, after every concern group and in this order: `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`.
+- Follow every concern group with three H2s in this order: `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`. A section naming what the skill delegates comes after the three, and nothing else does.
 - Spell each heading exactly. An H3, or a heading carrying more words such as `## Red flags that mean start over`, reads as missing.
 - Write `## Excuses and rebuttals` as a two-column table pairing a reason a session gives to skip or shortcut the practice with the answer to it. Never write a row rebutting an objection nobody raised, since that row is ceremony. Revisit when a practice skill's table is observed failing to stop an excuse it names.
 - Write `## Red flags` as bullets naming signs a session can observe in its own work mid-task, never a restatement of a rule above.

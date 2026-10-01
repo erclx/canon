@@ -63,7 +63,7 @@ It fails outright rather than reporting, because the corpus sits at zero and a r
 
 ## Skill practice shape
 
-The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or the ledger it lacks. It reads the same report the Skill provenance stage does and fails for the same reason: the verb keeps its exit on a missing requirement alone, so a target is told and never fails, while the two listed skills here are held at zero.
+The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or the ledger it lacks, or the listed skill itself when no folder under `claude/skills/` matches it. It reads the same report the Skill provenance stage does and fails for the same reason: the verb keeps its exit on a missing requirement alone, so a target is told and never fails, while the two listed skills here are held at zero.
 
 It reports unmeasured when `claude/skills/` is absent rather than when both corpora are, since the list names shipped folders alone and a tree carrying only `.claude/skills/` would otherwise pass without reading a practice skill.
 

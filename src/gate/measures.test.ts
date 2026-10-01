@@ -1094,12 +1094,15 @@ describe('skillPracticeShape', () => {
     cli: refuse,
   })
 
-  const writePracticeSkill = (body: string): void => {
-    const dir = join(root, 'claude', 'skills', 'test-craft')
+  const CLOSED =
+    '## Excuses and rebuttals\n\n## Red flags\n\n## Before handing over\n'
+
+  const writePracticeSkill = (body: string, name = 'test-craft'): void => {
+    const dir = join(root, 'claude', 'skills', name)
     mkdirSync(join(dir, 'references'), { recursive: true })
     writeFileSync(
       join(dir, 'SKILL.md'),
-      `---\nname: test-craft\ndescription: Tests.\n---\n\n# Test craft\n\n${body}`,
+      `---\nname: ${name}\ndescription: Applies a practice.\n---\n\n# Practice\n\n${body}`,
     )
     writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
   }
@@ -1112,10 +1115,9 @@ describe('skillPracticeShape', () => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  it('passes a listed skill carrying every closing section', async () => {
-    writePracticeSkill(
-      '## Excuses and rebuttals\n\n## Red flags\n\n## Before handing over\n',
-    )
+  it('passes every listed skill carrying every closing section', async () => {
+    writePracticeSkill(CLOSED)
+    writePracticeSkill(CLOSED, 'codebase-layout')
 
     const report = await skillPracticeShape(context())
 
@@ -1123,7 +1125,18 @@ describe('skillPracticeShape', () => {
     expect(report.unmeasured).toBeUndefined()
   })
 
+  it('fails a listed skill the shipped corpus lacks, naming it', async () => {
+    writePracticeSkill(CLOSED)
+
+    const report = await skillPracticeShape(context())
+
+    expect(report.failure).toContain(
+      `${join('claude', 'skills', 'codebase-layout')} missing skill`,
+    )
+  })
+
   it('fails a listed skill missing a section, naming the skill and section', async () => {
+    writePracticeSkill(CLOSED, 'codebase-layout')
     writePracticeSkill('## Excuses and rebuttals\n\n## Red flags\n')
 
     const report = await skillPracticeShape(context())

@@ -25,7 +25,7 @@ It reports and never sets the failing exit. Targets run this verb, and a date in
 
 ### Practice shape
 
-The eighth check reads each skill on `PRACTICE_SKILLS` in `src/claude/skills-audit.ts` for the three closing H2s `standards/skill-practice.md` names and for `references/adopted.md`, reporting each missing part as `practiceShape`. A heading matches only as an exact H2 outside a fence, so an H3 or a heading carrying trailing words reads as missing, and a skill renaming toward the shape owes the exact spelling.
+The eighth check reads each skill on `PRACTICE_SKILLS` in `src/claude/skills-audit.ts` for the three closing H2s `standards/skill-practice.md` names and for `references/adopted.md`, reporting each missing part as `practiceShape`. A listed folder the shipped corpus does not hold reports as a missing skill, since the walk only reaches folders that exist and a renamed or misspelled entry would otherwise pass unread. That half stays silent where `claude/skills/` is absent, which is every target. A heading matches only as an exact H2 outside a fence, so an H3 or a heading carrying trailing words reads as missing, and a skill renaming toward the shape owes the exact spelling.
 
 The list lives in the audit rather than in a skill's frontmatter, because a skill declaring its own kind could exempt itself by leaving the key off. It is keyed by corpus-relative folder, `claude/skills/<name>`, so a target's own `.claude/skills/` folder sharing a name is never swept in. The cost is that a target cannot list its own practice skills, and the shipped standard says the shape carries no check there. Each later practice skill appends one entry, which makes the array a shared append point across the rows that add one.
 

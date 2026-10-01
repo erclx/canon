@@ -164,7 +164,13 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     datedProvenance: sources.flatMap((source) =>
       source.bodies.flatMap(dateFindings),
     ),
-    practiceShape: sources.flatMap(practiceFindings),
+    practiceShape: [
+      ...missingPracticeSkills(
+        present.some((corpus) => corpus.rel === SHIPPED_CORPUS),
+        sources,
+      ),
+      ...sources.flatMap(practiceFindings),
+    ],
   }
 }
 
@@ -286,6 +292,23 @@ function sectionFindings(source: SkillSource): SkillFinding[] {
       detail: `missing: ${missing.join(', ')}`,
     },
   ]
+}
+
+/**
+ * A listed folder the shipped corpus does not hold, such as a renamed skill or
+ * a misspelled append, would otherwise read as a pass. Silent where the
+ * shipped corpus is absent, since a target carries none of the listed skills.
+ */
+function missingPracticeSkills(
+  hasShippedCorpus: boolean,
+  sources: readonly SkillSource[],
+): SkillFinding[] {
+  if (!hasShippedCorpus) return []
+  const found = new Set(sources.map((source) => source.rel))
+  return PRACTICE_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
+    rel,
+    detail: 'missing skill: no folder under the shipped corpus',
+  }))
 }
 
 /**

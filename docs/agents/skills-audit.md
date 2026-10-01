@@ -44,7 +44,7 @@ The date check reads prose alone. A date inside a fence or a code span is exampl
 
 Each finding names the file and the line, such as `claude/skills/<name>/references/<file>.md  line 12: <date>`. A date after "measured" or "verified" reports like any other, unlike the context audit, because a skill body states the rule a session follows today rather than a reading of the tree.
 
-The practice check reads only the skills the audit lists, which the JSON record carries as `checkpoints.practiceSkills`. The list names folders under the toolkit's shipped `claude/skills/` corpus alone, so a project's own skill is never read as a practice skill and a same-named folder under `.claude/skills/` produces no finding. Each closing section matches only as an exact H2 outside a fence, so an H3 or a heading carrying more words reports as missing.
+The practice check reads only the skills the audit lists, which the JSON record carries as `checkpoints.practiceSkills`. The list names folders under the toolkit's shipped `claude/skills/` corpus alone, so a project's own skill is never read as a practice skill and a same-named folder under `.claude/skills/` produces no finding. Where `claude/skills/` resolves, a listed folder it does not hold reports as a missing skill, so a renamed or misspelled entry cannot pass unread. Each closing section matches only as an exact H2 outside a fence, so an H3 or a heading carrying more words reports as missing.
 
 ## What it leaves alone
 
@@ -56,7 +56,7 @@ A check with no rule behind it prints an opinion as a defect, which is where the
 
 ## Exit codes
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, requirement-section, dated-provenance, and practice shape findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around.
+Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, requirement-section, dated-provenance, and practice shape findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around. In the toolkit, two `bun run check` stages read the same report in-process and fail a push on dated provenance and on practice shape, since its own corpus is held at zero on both.
 
 ## The requirement gate
 

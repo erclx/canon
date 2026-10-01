@@ -56,7 +56,6 @@ describe('auditSkills', () => {
       longDescription: [],
       requirementSections: [],
       datedProvenance: [],
-      practiceShape: [],
     })
   })
 
@@ -363,25 +362,53 @@ describe('auditSkills dated provenance', () => {
   })
 })
 
+const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
+
+function practiceSkill(
+  sections: readonly string[],
+  { name = 'test-craft', corpus = 'claude', hasLedger = true } = {},
+): string {
+  const dir = conformingSkill(name, corpus)
+  writeFileSync(
+    join(dir, 'SKILL.md'),
+    `${frontmatter(name, 'Applies a practice')}\n${sections.join('\n')}`,
+  )
+  if (hasLedger) {
+    mkdirSync(join(dir, 'references'), { recursive: true })
+    writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
+  }
+  return dir
+}
+
+describe('auditSkills practice list', () => {
+  it('should report a listed skill whose folder the shipped corpus lacks', async () => {
+    practiceSkill(CLOSING)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('claude', 'skills', 'codebase-layout'),
+        detail: 'missing skill: no folder under the shipped corpus',
+      },
+    ])
+  })
+
+  it('should stay silent on a same-named skill outside the shipped corpus', async () => {
+    practiceSkill([], { corpus: '.claude', hasLedger: false })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+})
+
 describe('auditSkills practice shape', () => {
-  const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
   const [excuses = '', redFlags = '', handover = ''] = CLOSING
 
-  function practiceSkill(
-    sections: readonly string[],
-    { corpus = 'claude', hasLedger = true } = {},
-  ): string {
-    const dir = conformingSkill('test-craft', corpus)
-    writeFileSync(
-      join(dir, 'SKILL.md'),
-      `${frontmatter('test-craft', 'Tests')}\n${sections.join('\n')}`,
-    )
-    if (hasLedger) {
-      mkdirSync(join(dir, 'references'), { recursive: true })
-      writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
-    }
-    return dir
-  }
+  beforeEach(() => {
+    practiceSkill(CLOSING, { name: 'codebase-layout' })
+  })
 
   const skillRel = join('claude', 'skills', 'test-craft')
 
@@ -455,15 +482,8 @@ describe('auditSkills practice shape', () => {
   })
 
   it('should stay silent on an unlisted skill missing every section', async () => {
+    practiceSkill(CLOSING)
     conformingSkill('git-commit')
-
-    const report = await auditSkills(root)
-
-    expect(report.practiceShape).toEqual([])
-  })
-
-  it('should stay silent on a same-named skill outside the shipped corpus', async () => {
-    practiceSkill([], { corpus: '.claude', hasLedger: false })
 
     const report = await auditSkills(root)
 
@@ -511,7 +531,7 @@ describe('auditExitCode', () => {
 
     const report = await auditSkills(root)
 
-    expect(report.practiceShape).toHaveLength(4)
+    expect(report.practiceShape).toHaveLength(5)
     expect(auditExitCode(report)).toBe(0)
   })
 
