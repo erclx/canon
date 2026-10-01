@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.9.0](https://github.com/erclx/canon/compare/v5.8.0...v5.9.0) (2026-10-01)
+
+
+### Features
+
+* **cli:** rebuild docs and standards list verbs in typescript ([#2025](https://github.com/erclx/canon/issues/2025)) ([ab591be](https://github.com/erclx/canon/commit/ab591be9dc001e9cdbd0d0706b8116d0ec9200bc))
+* **cli:** run the post-merge steps through one verb ([#2027](https://github.com/erclx/canon/issues/2027)) ([d81e79f](https://github.com/erclx/canon/commit/d81e79f1e630cb66fb1ddc82361799bd8cca63b3))
+* **skills:** add guard-the-bar and performance axes to review-craft ([#2031](https://github.com/erclx/canon/issues/2031)) ([af7648c](https://github.com/erclx/canon/commit/af7648c9e25008e5b8cb3ff25ab75d46dba48fac))
+* **tasks:** repoint inbound links when a task archives or declines ([#2026](https://github.com/erclx/canon/issues/2026)) ([698dfb9](https://github.com/erclx/canon/commit/698dfb926ce8abe4d03f4e2b66bf28525539e1e5))
+* **tooling:** run every stack's check through one verify runner ([#2030](https://github.com/erclx/canon/issues/2030)) ([2a64b29](https://github.com/erclx/canon/commit/2a64b299860bf9999c4d1ccdba6ab7ad29b0b619))
+
+
+### Bug Fixes
+
+* **pr:** read the evidence comparison from the pull request ([#2023](https://github.com/erclx/canon/issues/2023)) ([ed31337](https://github.com/erclx/canon/commit/ed31337d79b63f81667b1fb9d846552d340b8ee2))
+
 ## [5.8.0](https://github.com/erclx/canon/compare/v5.7.0...v5.8.0) (2026-10-01)
 
 
