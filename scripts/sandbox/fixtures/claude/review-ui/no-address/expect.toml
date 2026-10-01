@@ -1,0 +1,27 @@
+# What a correct `/canon:review-ui <number>` run leaves behind on the no-address
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The pull request's evidence comment carries a checklist and neither a hosted
+# nor a local preview, and the prompt names no address. The pass reads the
+# three fields off `canon pr evidence --json` and refuses ahead of opening a
+# browser, so it needs no browser installed and bills one short session.
+#
+# The read depends on the record's `checklist`, `preview`, and `local` fields,
+# which ship with the CLI from 5.4.0. An older binary on PATH reports none of
+# the three, and a correct run then stops on the version check rather than on
+# the refusal below. Confirm `canon --version` before reading a failure here as
+# the skill's.
+
+# The refusal writes nothing, so an empty scope is the claim. Declared rather
+# than left absent, since an undeclared scope skips the check entirely.
+write_scope = []
+
+absent = [".canon/tmp/pr/review-ui/**"]
+
+# The guard's fixed string, which no run rewords.
+reply = ["No address to drive"]
+
+manual = [
+  "No `## UI review` comment reached the pull request. The thread is remote state, and no assertion kind reads it.",
+]
