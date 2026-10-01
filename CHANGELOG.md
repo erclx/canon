@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.7.0](https://github.com/erclx/canon/compare/v5.6.0...v5.7.0) (2026-10-01)
+
+
+### Features
+
+* **skills:** add a UI review pass that drives the PR checklist ([#2010](https://github.com/erclx/canon/issues/2010)) ([ea49174](https://github.com/erclx/canon/commit/ea49174b6cd43df2b466b086b0d8b6a8ce565fb0))
+
+
+### Bug Fixes
+
+* **tooling:** add viewports to web seed and test web spelling ([#2014](https://github.com/erclx/canon/issues/2014)) ([4e3205d](https://github.com/erclx/canon/commit/4e3205dd1b11c518e92859ca71f2af2034331461))
+
 ## [5.6.0](https://github.com/erclx/canon/compare/v5.5.0...v5.6.0) (2026-10-01)
 
 
