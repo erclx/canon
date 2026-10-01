@@ -450,6 +450,12 @@ describe('canon pr evidence reports the marked comment', () => {
     expect(record).not.toHaveProperty('local')
     expect(record).not.toHaveProperty('checklist')
   })
+
+  it('should refuse as gh-failed on a no-evidence branch when the thread is unreadable', async () => {
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record.reason).toBe('gh-failed')
+  })
 })
 
 describe('canon pr local', () => {
