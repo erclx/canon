@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.6.0](https://github.com/erclx/canon/compare/v5.5.0...v5.6.0) (2026-10-01)
+
+
+### Features
+
+* **skills:** decide a lesson figure per lesson in teach-workspace ([#2007](https://github.com/erclx/canon/issues/2007)) ([705a368](https://github.com/erclx/canon/commit/705a3688d5cae97ba54e1703f49c7e28a64b07e7))
+* **skills:** give practice skills a closing shape and a source ledger ([#2005](https://github.com/erclx/canon/issues/2005)) ([7ca76e9](https://github.com/erclx/canon/commit/7ca76e9bee9020f672c545a3389628c26ea47269))
+* **skills:** make ui-checklist boxes drivable ([#1999](https://github.com/erclx/canon/issues/1999)) ([99e3805](https://github.com/erclx/canon/commit/99e38056aacf8638c134b467564723160bb0ded9))
+* **skills:** reframe vague asks as success criteria in plan-feature ([#2002](https://github.com/erclx/canon/issues/2002)) ([f768bb7](https://github.com/erclx/canon/commit/f768bb7c5980f67abe7f354e4ceb75949e773ce7))
+
 ## [5.5.0](https://github.com/erclx/canon/compare/v5.4.0...v5.5.0) (2026-10-01)
 
 
