@@ -74,6 +74,23 @@ pattern = 'Shipping without a test'
 path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
 pattern = 'archive'
 
+# A written box names its route and opens on a verb a driver performs. The
+# first pattern reads a box line carrying a route, and the second reads one whose
+# action follows the route and opens on neither "read" nor "look at".
+[[content]]
+path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
+pattern = '^- \[ \] [^\n]*(/archive|/ |from the page the app opens on)'
+
+[[content]]
+path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
+pattern = '^- \[ \] [^:\n]+: (?!(?:[Rr]ead|[Ll]ook)\b)[A-Za-z]+'
+
+# The muted empty-state color is the seeded change a taste judgment decides, so
+# the box carrying it ends in the marker the review pass keys on.
+[[content]]
+path = ".canon/tmp/handoff/ui-checklist/task-filter.md"
+pattern = '\(taste\)'
+
 # The seeded spec survives untouched. It is outside the write scope, so a run
 # that edits it fails there too, and this reads the file itself rather than the
 # scope report so a deletion is caught as well as a rewrite.
