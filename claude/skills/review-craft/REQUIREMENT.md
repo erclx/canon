@@ -13,10 +13,16 @@ The miss is measured. On a seeded branch that deleted a dirty-tree guard while t
 
 Rendered output is the larger hole. `git-pr` posts an `## Evidence` comment through `canon pr evidence`, carrying base and head screenshots and a checklist a reviewer ticks. The pull request review named that heading only in its heading set, and no step opened an image. On a seeded pull request whose narrow head screenshot shows the navigation running off the edge while a ticked box claims it collapses, the review filed the finding off the stylesheet diff and said it had not rendered the page. On a styling change with no screenshot at all, on a project whose trunk keeps them, it did not mention the absence.
 
+The axes also said nothing about a change that passes by lowering the bar it has to clear, such as a test skipped, a threshold moved, or a path excluded from a checker, nothing about performance, and one sentence about design with no procedure behind it. A refactor that only moved complexity read as a design gain, and a removal could call code dead without reading why it was added. The body carried no excuses, red flags, or closing checklist, so a session about to stop at the hunk met no answer first.
+
 ## Must
 
 - Open with the one fact the change's safety rests on, read on a ladder of asserted, pointed at, walked through, tested, and reproduced
-- State the axes in reading order: design and scope, correctness and edge cases, what breaks outside the diff, tests, security, rendered output, developer experience and operations, and executable prose
+- State the axes in reading order: design and scope, correctness and edge cases, what breaks outside the diff, tests, guard the bar, performance, security, rendered output, developer experience and operations, and executable prose
+- Carry the design review as an ordered procedure in the body, stack-neutral, plus the scope checks for a change carrying two concerns, complexity moved rather than reduced, and a removal that has not read why the code existed
+- Name a lowered bar as a finding unless the diff states why, and accept a suppression whose stated reason holds
+- Ask a claimed speedup for repeated measurements on both sides, and read a result inside the noise as an argument to revert
+- Close with the practice skill's excuses, red flags, and closing checklist, and record every external source in `references/adopted.md`
 - Require every consumer of a changed contract to be listed and checked, and every doc the diff touches to be read whole for a claim the change made false
 - State a design finding as a concrete cost, so it survives the procedure's filter against subjective suggestions
 - Carry the evidence bar: confirm against the file at the reviewed head, quote a cited rule, name the breaking input, and drop what a gate owns or what rests on unread state

@@ -12,6 +12,12 @@
 # `eval` over the arguments and the second the unpinned package below, so the
 # security entry is a floor the craft skill must not lose rather than the part
 # of the arm that discriminates. The stale claim outside the hunk is that part.
+#
+# The weakened check in `scripts/check.sh` was added on 2026-10-01 and run once
+# against the body before the guard-the-bar axis. That run filed it as
+# should-fix, reading the exclusion against the `CLAUDE.md` line promising every
+# script is linted, so it is a floor like the security entry rather than a
+# discriminating case.
 
 # The glob covers both slugs a run derives from `feat/release-tag`, with and
 # without the type segment, since the first red run wrote
@@ -40,3 +46,10 @@ pattern = 'unpinned|Unpinned|supply chain|Supply chain|supply-chain|Supply-chain
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = '^- \*\*[a-z-]+\*\*:[^\n]*Safety|README\.md\n+- \*\*(critical|should-fix|minor)\*\*'
+
+# The branch leaves the changed script out of the `shellcheck` run in
+# `scripts/check.sh` and says why nowhere. Either a graded finding names the
+# weakened check, or the block for that file opens with a graded finding.
+[[content]]
+path = ".canon/review/branch-*release-tag.md"
+pattern = '^- \*\*[a-z-]+\*\*:[^\n]*(check\.sh|shellcheck|ShellCheck)|check\.sh\n+- \*\*(critical|should-fix|minor)\*\*'

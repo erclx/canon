@@ -1,9 +1,10 @@
 import { execaSync } from 'execa'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BASELINE_REL } from '@/audits/baseline'
+import { PRACTICE_SKILLS } from '@/claude/skills-audit'
 import { CLIENT_COMMAND_MARKER } from '@/client-commands'
 import { gitEnv } from '@/git-env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
@@ -1097,15 +1098,27 @@ describe('skillPracticeShape', () => {
   const CLOSED =
     '## Excuses and rebuttals\n\n## Red flags\n\n## Before handing over\n'
 
-  const writePracticeSkill = (body: string, name = 'test-craft'): void => {
-    const dir = join(root, 'claude', 'skills', name)
+  const writePracticeSkill = (body: string, rel: string): void => {
+    const dir = join(root, rel)
     mkdirSync(join(dir, 'references'), { recursive: true })
     writeFileSync(
       join(dir, 'SKILL.md'),
-      `---\nname: ${name}\ndescription: Applies a practice.\n---\n\n# Practice\n\n${body}`,
+      `---\nname: ${basename(rel)}\ndescription: Applies a practice.\n---\n\n# Practice\n\n${body}`,
     )
     writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
   }
+
+  /**
+   * Writes a conforming fixture for every listed skill but the one a test
+   * varies, so an append to the list needs no edit here.
+   */
+  const writeListedExcept = (omitted?: string): void => {
+    for (const rel of PRACTICE_SKILLS.filter((rel) => rel !== omitted)) {
+      writePracticeSkill(CLOSED, rel)
+    }
+  }
+
+  const [varied = ''] = PRACTICE_SKILLS
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'canon-skill-practice-shape-'))
@@ -1116,8 +1129,7 @@ describe('skillPracticeShape', () => {
   })
 
   it('passes every listed skill carrying every closing section', async () => {
-    writePracticeSkill(CLOSED)
-    writePracticeSkill(CLOSED, 'codebase-layout')
+    writeListedExcept()
 
     const report = await skillPracticeShape(context())
 
@@ -1126,23 +1138,21 @@ describe('skillPracticeShape', () => {
   })
 
   it('fails a listed skill the shipped corpus lacks, naming it', async () => {
-    writePracticeSkill(CLOSED)
+    writeListedExcept(varied)
 
     const report = await skillPracticeShape(context())
 
-    expect(report.failure).toContain(
-      `${join('claude', 'skills', 'codebase-layout')} missing skill`,
-    )
+    expect(report.failure).toContain(`${varied} missing skill`)
   })
 
   it('fails a listed skill missing a section, naming the skill and section', async () => {
-    writePracticeSkill(CLOSED, 'codebase-layout')
-    writePracticeSkill('## Excuses and rebuttals\n\n## Red flags\n')
+    writeListedExcept(varied)
+    writePracticeSkill('## Excuses and rebuttals\n\n## Red flags\n', varied)
 
     const report = await skillPracticeShape(context())
 
     expect(report.failure).toContain(
-      `${join('claude', 'skills', 'test-craft')} missing section: Before handing over`,
+      `${varied} missing section: Before handing over`,
     )
   })
 
