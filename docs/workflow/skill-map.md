@@ -12,14 +12,15 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## Set up a project
 
-| Skill                  | When to use                                                                                            |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `canon:target-setup`   | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone  |
-| `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                  |
-| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs   |
-| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                |
-| `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                   |
-| `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README |
+| Skill                     | When to use                                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `canon:target-setup`      | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone       |
+| `canon:canon-operator`    | On a project that already exists, to read what it carries before an install is picked                       |
+| `canon:sketch-design`     | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
+| `canon:design-extract`    | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
+| `canon:draft-diagram`     | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                        |
+| `canon:deploy-cloudflare` | Once a project is ready to publish, to set up its Cloudflare Pages deploy and stop for the token and domain |
+| `canon:repo-metadata`     | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
 
 ## Decide what to build
 
@@ -46,6 +47,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts                            |
 | `canon:review-craft`         | When reviewing a change, for what to look for and how much evidence a finding needs                        |
 | `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                                             |
+| `canon:design-taste`         | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |
 | `canon:ui-checklist`         | After a UI change, to write what to look at and name what ships untested                                   |
 
 ## Check the work before it leaves the branch
