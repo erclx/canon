@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -973,6 +973,301 @@ describe('archiveTask', () => {
       ok: true,
       priorityRowRemoved: false,
     })
+  })
+})
+
+async function seedSibling(
+  dir: string,
+  name: string,
+  body: string,
+): Promise<string> {
+  mkdirSync(dir, { recursive: true })
+  const path = join(dir, `${name}.md`)
+  await writeFile(path, `# ${name}\n\n${body}\n`)
+  return path
+}
+
+describe('archiveTask inbound links', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should repoint a live sibling body link at the archived path', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `See [it](${STEM}.md) first.`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `See [it](archive/${STEM}.md) first.`,
+    )
+  })
+
+  it('should repoint an archived sibling link from ../<stem>.md to <stem>.md', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      archiveDir(ROOT),
+      'v27.1-older',
+      `Follows [it](../${STEM}.md).`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(`[it](${STEM}.md)`)
+  })
+
+  it('should repoint a declined sibling link into the archive folder', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      declinedDir(ROOT),
+      'v27.2-dropped',
+      `Follows [it](../${STEM}.md).`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[it](../archive/${STEM}.md)`,
+    )
+  })
+
+  it('should keep an anchor suffix and resolve a ./ prefix', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `See [it](./${STEM}.md#findings).`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[it](archive/${STEM}.md#findings)`,
+    )
+  })
+
+  it('should change only the moved link when a line carries two', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `[a](${STEM}.md) and [b](v28.3-other.md)`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[a](archive/${STEM}.md) and [b](v28.3-other.md)`,
+    )
+  })
+
+  it('should report each file written with its link count', async () => {
+    await seedTask()
+    await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `[a](${STEM}.md) and [b](${STEM}.md)`,
+    )
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(result).toMatchObject({
+      ok: true,
+      relinked: [{ file: join(tasksDir(ROOT), 'v28.2-next.md'), links: 2 }],
+    })
+  })
+
+  it('should leave a fenced sample and an inline code span alone', async () => {
+    await seedTask()
+    const body = `\`[x](${STEM}.md)\`\n\n\`\`\`\n[x](${STEM}.md)\n\`\`\``
+    const sibling = await seedSibling(tasksDir(ROOT), 'v28.2-next', body)
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toBe(`# v28.2-next\n\n${body}\n`)
+    expect(result).toMatchObject({ relinked: [] })
+  })
+
+  it('should leave an unrelated task link alone', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      '[o](v28.3-other.md)',
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toBe(
+      '# v28.2-next\n\n[o](v28.3-other.md)\n',
+    )
+  })
+
+  it('should leave a link already naming the archive alone', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `[a](archive/${STEM}.md)`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toBe(
+      `# v28.2-next\n\n[a](archive/${STEM}.md)\n`,
+    )
+  })
+
+  it('should not expand a replacement token in the moved filename', async () => {
+    const stem = 'v28.1-a$&b'
+    await seedTask({ stem })
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `[a](${stem}.md)`,
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(await readFile(sibling, 'utf8')).toContain(`[a](archive/${stem}.md)`)
+  })
+
+  it('should leave priority.md and backlog.md untouched apart from the row removal', async () => {
+    await seedTask()
+    const priority = join(tasksDir(ROOT), 'priority.md')
+    const backlog = join(tasksDir(ROOT), 'backlog.md')
+    await writeFile(priority, `# Priority\n\nBlocked by [x](${STEM}.md)\n`)
+    await writeFile(backlog, `# Backlog\n\nSee [x](${STEM}.md)\n`)
+
+    await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(priority, 'utf8')).toBe(
+      `# Priority\n\nBlocked by [x](${STEM}.md)\n`,
+    )
+    expect(await readFile(backlog, 'utf8')).toBe(
+      `# Backlog\n\nSee [x](${STEM}.md)\n`,
+    )
+  })
+
+  it('should report no relinked files when nothing cites the task', async () => {
+    await seedTask()
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(result).toMatchObject({ ok: true, relinked: [] })
+  })
+})
+
+describe('archiveTask a failed repoint', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should still clear the ordering row and report the file it could not write', async () => {
+    await seedTask()
+    const priority = join(tasksDir(ROOT), 'priority.md')
+    await writeFile(priority, `| [it](${STEM}.md) | \`src/\` |\n`)
+    const locked = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-locked',
+      `[a](${STEM}.md)`,
+    )
+    const open = await seedSibling(
+      tasksDir(ROOT),
+      'v28.3-open',
+      `[a](${STEM}.md)`,
+    )
+    await chmod(locked, 0o444)
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    await chmod(locked, 0o644)
+    expect(result).toMatchObject({
+      ok: true,
+      priorityRowRemoved: true,
+      relinked: [{ file: open, links: 1 }],
+      relinkFailed: [{ file: locked }],
+    })
+    expect(await readFile(priority, 'utf8')).not.toContain(`${STEM}.md`)
+  })
+
+  it('should report an empty relinkFailed when every write lands', async () => {
+    await seedTask()
+
+    expect(await archiveTask(ROOT, { kind: 'stem', stem: STEM })).toMatchObject(
+      { ok: true, relinkFailed: [] },
+    )
+  })
+})
+
+describe('archiveTask reference-style links', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should repoint a reference definition and leave another one alone', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `See [it][a] and [o][b].\n\n[a]: ${STEM}.md#findings\n[b]: v28.3-other.md`,
+    )
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem: STEM })
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[a]: archive/${STEM}.md#findings\n[b]: v28.3-other.md`,
+    )
+    expect(result).toMatchObject({ relinked: [{ file: sibling, links: 1 }] })
+  })
+})
+
+describe('declineTask inbound links', () => {
+  const STEM = 'v28.1-trigger-escalation'
+
+  it('should repoint a live sibling link at the declined path', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      tasksDir(ROOT),
+      'v28.2-next',
+      `See [it](${STEM}.md).`,
+    )
+
+    const result = await declineTask(ROOT, STEM, 'not needed', 'Alex')
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[it](declined/${STEM}.md)`,
+    )
+    expect(result).toMatchObject({
+      ok: true,
+      relinked: [{ file: sibling, links: 1 }],
+    })
+  })
+
+  it('should repoint an archived sibling link into the declined folder', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      archiveDir(ROOT),
+      'v27.1-older',
+      `Follows [it](../${STEM}.md).`,
+    )
+
+    await declineTask(ROOT, STEM, 'not needed', 'Alex')
+
+    expect(await readFile(sibling, 'utf8')).toContain(
+      `[it](../declined/${STEM}.md)`,
+    )
+  })
+
+  it('should repoint a declined sibling link to <stem>.md', async () => {
+    await seedTask()
+    const sibling = await seedSibling(
+      declinedDir(ROOT),
+      'v27.2-dropped',
+      `Follows [it](../${STEM}.md).`,
+    )
+
+    await declineTask(ROOT, STEM, 'not needed', 'Alex')
+
+    expect(await readFile(sibling, 'utf8')).toContain(`[it](${STEM}.md)`)
   })
 })
 

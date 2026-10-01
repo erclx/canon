@@ -84,6 +84,23 @@ export interface ReadyMove {
   readonly to: string
 }
 
+/** A task file rewritten because it linked the task that moved. */
+export interface InboundRelink {
+  readonly file: string
+  readonly links: number
+}
+
+/** A task file the pass could not read or write, left as it was. */
+export interface RelinkFailure {
+  readonly file: string
+  readonly message: string
+}
+
+export interface RepointOutcome {
+  readonly relinked: readonly InboundRelink[]
+  readonly failed: readonly RelinkFailure[]
+}
+
 export interface ArchiveSuccess {
   readonly ok: true
   readonly stem: string
@@ -97,6 +114,10 @@ export interface ArchiveSuccess {
   readonly ready: ReadyMove | undefined
   readonly closed: number
   readonly cut: number
+  /** Every task file whose links to the moved task were rewritten. */
+  readonly relinked: readonly InboundRelink[]
+  /** Every task file the pass could not read or write, left as it was. */
+  readonly relinkFailed: readonly RelinkFailure[]
 }
 
 export interface ArchiveRefused {
@@ -118,6 +139,10 @@ export interface DeclineSuccess {
   readonly indexRegenerated: boolean
   /** Every live plan the task cited that no other live task still holds, in line order. */
   readonly plans: readonly PlanMove[]
+  /** Every task file whose links to the moved task were rewritten. */
+  readonly relinked: readonly InboundRelink[]
+  /** Every task file the pass could not read or write, left as it was. */
+  readonly relinkFailed: readonly RelinkFailure[]
 }
 
 export interface DeclineRefused {
@@ -942,6 +967,7 @@ export async function archiveTask(
       : retargeted,
   )
 
+  const { relinked, failed } = await repointInboundLinks(root, from, to)
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
   const regen = await regenOne(dir, { dryRun: false })
 
@@ -956,6 +982,8 @@ export async function archiveTask(
     ready: ready || undefined,
     closed: closed.length,
     cut: cut.length,
+    relinked,
+    relinkFailed: failed,
   }
 }
 
@@ -1106,6 +1134,8 @@ export function linkTo(taskDir: string, plan: string): string {
 const MARKDOWN_LINK_PATTERN = /(\]\()([^)\s]+)/g
 /** The capture group makes `split` keep each code span, at the odd positions. */
 const INLINE_CODE_PATTERN = /(`+[^`]*`+)/
+/** A reference-style definition, whose target is the whole line past the label. */
+const REFERENCE_DEFINITION_PATTERN = /^(\s{0,3}\[[^\]]+\]:[ \t]*)(\S+)[ \t]*$/
 const BARE_ORIGIN_PATTERN =
   /^((?:Plan|Ready|Groundwork|Intake):[ \t]*)([^\s[\]()]+)[ \t]*$/
 
@@ -1113,12 +1143,18 @@ function isRelativeTarget(target: string): boolean {
   return !/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(target)
 }
 
+function splitSuffix(target: string): { path: string; suffix: string } {
+  const suffixAt = target.search(/[#?]/)
+
+  return suffixAt === -1
+    ? { path: target, suffix: '' }
+    : { path: target.slice(0, suffixAt), suffix: target.slice(suffixAt) }
+}
+
 function rebaseTarget(target: string, fromDir: string, toDir: string): string {
   if (!isRelativeTarget(target)) return target
 
-  const suffixAt = target.search(/[#?]/)
-  const path = suffixAt === -1 ? target : target.slice(0, suffixAt)
-  const suffix = suffixAt === -1 ? '' : target.slice(suffixAt)
+  const { path, suffix } = splitSuffix(target)
   if (path === '') return target
 
   const rebased = relative(toDir, resolve(fromDir, path)).split(sep).join('/')
@@ -1164,6 +1200,132 @@ export function rebaseRelativeLinks(
         .join('')
     })
     .join('\n')
+}
+
+/**
+ * A link resolving to `from`, rewritten to read `to` from the citing file's own
+ * folder. Resolution decides the match, so a link naming the same stem in
+ * another folder is left as written.
+ */
+function repointTarget(
+  target: string,
+  fileDir: string,
+  from: string,
+  to: string,
+): string | undefined {
+  if (!isRelativeTarget(target)) return undefined
+
+  const { path, suffix } = splitSuffix(target)
+  if (path === '' || resolve(fileDir, path) !== from) return undefined
+
+  return `${relative(fileDir, to).split(sep).join('/')}${suffix}`
+}
+
+function repointLinks(
+  text: string,
+  fileDir: string,
+  from: string,
+  to: string,
+): { text: string; links: number } {
+  const lines = text.split('\n')
+  const fenced = fenceMask(lines)
+  let links = 0
+
+  const repointed = lines.map((line, index) => {
+    if (fenced[index]) return line
+
+    const definition = REFERENCE_DEFINITION_PATTERN.exec(line)
+    if (definition) {
+      const next = repointTarget(definition[2], fileDir, from, to)
+      if (next === undefined) return line
+
+      links += 1
+      return `${definition[1]}${next}`
+    }
+
+    return line
+      .split(INLINE_CODE_PATTERN)
+      .map((part, position) =>
+        position % 2 === 1
+          ? part
+          : part.replace(
+              MARKDOWN_LINK_PATTERN,
+              (whole: string, open: string, target: string) => {
+                const next = repointTarget(target, fileDir, from, to)
+                if (next === undefined) return whole
+
+                links += 1
+                return `${open}${next}`
+              },
+            ),
+      )
+      .join('')
+  })
+
+  return { text: repointed.join('\n'), links }
+}
+
+/**
+ * Rewrites every link in the task folders that resolves to the moved task, so
+ * a citation follows the file. The moved file and the reserved siblings are
+ * skipped: the first was rebased on its own, and `citedStem` reads a blocker in
+ * `priority.md` only while its target carries no `/`. Fenced samples and code
+ * spans stay verbatim, the way `rebaseRelativeLinks` leaves them.
+ *
+ * It runs after the rename and ahead of the ordering-row removal and the index
+ * regen, which the unattended post-merge hook cannot redo once the task has
+ * moved. A read or write that fails is therefore reported in `failed` and never
+ * thrown, so the steps after it always run.
+ */
+export async function repointInboundLinks(
+  root: string,
+  from: string,
+  to: string,
+): Promise<RepointOutcome> {
+  const moved = resolve(from)
+  const destination = resolve(to)
+  const relinked: InboundRelink[] = []
+  const failed: RelinkFailure[] = []
+
+  for (const dir of [tasksDir(root), archiveDir(root), declinedDir(root)]) {
+    if (!existsSync(dir)) continue
+
+    let names: string[]
+    try {
+      names = (await readdir(dir)).filter((name) => name.endsWith('.md'))
+    } catch (error) {
+      failed.push({ file: dir, message: describeError(error) })
+      continue
+    }
+    names.sort()
+
+    for (const name of names) {
+      const file = join(dir, name)
+      if (isReservedStem(name.slice(0, -'.md'.length))) continue
+      if (resolve(file) === destination) continue
+
+      try {
+        const repointed = repointLinks(
+          await readFile(file, 'utf8'),
+          dir,
+          moved,
+          destination,
+        )
+        if (repointed.links === 0) continue
+
+        await writeFile(file, repointed.text)
+        relinked.push({ file, links: repointed.links })
+      } catch (error) {
+        failed.push({ file, message: describeError(error) })
+      }
+    }
+  }
+
+  return { relinked, failed }
+}
+
+function describeError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
 }
 
 async function clearPriorityRow(dir: string, stem: string): Promise<boolean> {
@@ -1239,6 +1401,7 @@ export async function declineTask(
   )
   await writeFile(to, declined)
 
+  const { relinked, failed } = await repointInboundLinks(root, from, to)
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
   const backlogRowRemoved = await clearBacklogRow(dir, stem)
   const regen = await regenOne(dir, { dryRun: false })
@@ -1252,5 +1415,7 @@ export async function declineTask(
     backlogRowRemoved,
     indexRegenerated: regen.action === 'written',
     plans: plans.moves,
+    relinked,
+    relinkFailed: failed,
   }
 }

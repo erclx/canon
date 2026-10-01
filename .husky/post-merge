@@ -78,7 +78,17 @@ if [ -n "$numbers" ]; then
     # with it. A refusal is ordinary here, since most merges close no task.
     if record=$(canon tasks archive --pull-request "$number" --root "$root" --json 2>/dev/null); then
       task=$(printf '%s' "$record" | sed -n 's/.*"task":"\([^"]*\)".*/\1/p')
-      printf '\n📦 Archived %s, closed by #%s.\n\n' "$task" "$number"
+      printf '\n📦 Archived %s, closed by #%s.\n' "$task" "$number"
+
+      # The archive reports a citing file it could not rewrite and still exits
+      # zero, since the move landed. Nothing else on this unattended path reads
+      # the field, so the hook names the files or the links stay stale unseen.
+      relink_failed=$(printf '%s' "$record" | sed -n 's/.*"relinkFailed":\[\([^]]*\)\].*/\1/p')
+      if [ -n "$relink_failed" ]; then
+        files=$(printf '%s' "$relink_failed" | grep -o '"file":"[^"]*"' | sed 's/^"file":"//; s/"$//' | paste -sd ',' -) || files=''
+        printf '🔗 Links not repointed in: %s\n' "${files:-unknown}"
+      fi
+      printf '\n'
       continue
     fi
 

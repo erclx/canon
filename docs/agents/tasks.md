@@ -35,7 +35,7 @@ canon tasks next-label --json | jq -r '.label'
 
 ## Archive and decline
 
-`canon tasks archive` moves a shipped task into `.canon/tasks/archive/`, selected by its stem or by the pull request it carries, and `canon tasks decline` moves one decided against into `.canon/tasks/declined/`. Both carry the plan and the ready folder along when the task is their last citation. The selectors, the gates, and the refusal reasons are in `tasks-archive.md`.
+`canon tasks archive` moves a shipped task into `.canon/tasks/archive/`, selected by its stem or by the pull request it carries, and `canon tasks decline` moves one decided against into `.canon/tasks/declined/`. Both carry the plan and the ready folder along when the task is their last citation, and both repoint every link to the moved task from another task file. The selectors, the gates, and the refusal reasons are in `tasks-archive.md`.
 
 ## Plan verbs
 
