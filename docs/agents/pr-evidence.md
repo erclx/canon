@@ -6,9 +6,10 @@ description: What canon pr evidence compares, the marker that lets it edit its o
 # The pull request evidence comparison
 
 `canon pr evidence` renders one comment naming every changed image under an
-`evidence/` path segment, comparing each against the pull request's merge base. `git-pr` posts it when a pull request opens or is edited, and
-`git-followup` posts it again after every later push, so a reviewer never has
-to open Files Changed to see what a case looked like before and after.
+`evidence/` path segment, comparing each against the pull request's merge base. `git-pr` posts it when a
+pull request opens or is edited, and `git-followup` posts it again after every
+later push, so a reviewer never has to open Files Changed to see what a case
+looked like before and after.
 
 ```bash
 canon pr evidence
@@ -92,7 +93,10 @@ comparison.
 
 The trade is that the verb no longer sees evidence that is uncommitted or
 unpushed, which the comment's head-pinned image links could not show anyway.
-A failed files read refuses as `unreadable-changes` rather than rendering a
+A path the pull request renamed or copied counts as added, since the new path
+has no counterpart at the merge base, so a rename loses its before image and
+renders `*(new)*`. A path the pull request removed is dropped, since it has no
+head image to show. A failed files read refuses as `unreadable-changes` rather than rendering a
 short set, and a missing merge base refuses as `no-base`.
 
 ## A render never empties a comment that carries cases

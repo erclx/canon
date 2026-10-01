@@ -582,6 +582,33 @@ describe('canon pr evidence reads the pull request', () => {
     )
   })
 
+  it('should drop a path the pull request removed', async () => {
+    writeFixture(
+      'files.tsv',
+      'removed\tevidence/dark/gone.png\nmodified\tevidence/dark/nav.png\n',
+    )
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(countEvidenceCases(String(record.body))).toBe(1)
+  })
+
+  it('should render a renamed path as new', async () => {
+    writeFixture('files.tsv', 'renamed\tevidence/dark/moved.png\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain('| moved | *(new)* |')
+  })
+
+  it('should render a copied path as new', async () => {
+    writeFixture('files.tsv', 'copied\tevidence/dark/dup.png\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain('| dup | *(new)* |')
+  })
+
   it('should refuse would-empty and print no body when a render holds no cases over a comment that does', async () => {
     writeComment(bodyWithCases())
     writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
