@@ -16,6 +16,7 @@ Governs a skill folder under `skills/` as one artifact: `SKILL.md`, its siblings
 Does not govern:
 
 - What a `REQUIREMENT.md` must answer, its sections, and its template: `skill-requirement.md`
+- A practice skill's closing sections and ledger: `skill-practice.md`
 - Path-scoped coding rules, which load on a file match rather than on a request match: `rule.md`
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
@@ -45,6 +46,7 @@ Pick the type before writing. It decides the body shape.
 
 - Reference: conventions, patterns, and domain knowledge Claude applies inline. The body is rule bullets grouped by concern.
 - Task: step-by-step workflows Claude executes as actions. The body is numbered steps plus the rules constraining them.
+- Practice: judgment a session may skip, shaped by `skill-practice.md`.
 
 A task skill takes the template below. A reference skill takes the same frontmatter and replaces `## Steps` and `## Rules` with one H2 per concern group, each holding constraint bullets.
 
@@ -105,7 +107,7 @@ allowed-tools: <tools required>
 - Group bullets under H2 headings by domain concern. Keep dos and don'ts together under the topic they belong to rather than splitting them into flat rules and constraints sections.
 - One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
 - Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer.
-- Do not duplicate general knowledge the model already has. Focus on project-specific conventions and preferences. Revisit when removing a line of general knowledge from a skill is shown to change what the agent does.
+- Keep a statement only when removing it would change what the agent does, naming a principle as a few-word handle rather than explaining it. Revisit when a run shows the model ignoring a principle named only as a handle.
 
 ### Progressive disclosure
 
