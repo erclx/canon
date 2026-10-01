@@ -35,6 +35,12 @@ declares nothing a parser can read. A consumer mapping a file to its governing
 standards reads this rather than holding a table of its own, and reports an empty
 array rather than skipping the standard behind it.
 
+Each standard also carries `source`, the labeled path of the copy `canon standards
+<name>` would read: `standards/<name>.md` for the working root and
+`<canon>/standards/<name>.md` for the package corpus. A project's own standard
+lists beside the package's, and one sharing a package name lists once, as the
+project's copy.
+
 `canon claude seeds list` reads the same plan `canon claude init` applies, so the
 listing and the install cannot disagree. It now reports
 `canon/context/index.md`, which `init` has always installed and the listing

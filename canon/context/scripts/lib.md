@@ -41,12 +41,6 @@ Consumed by `scripts/tooling/{ref,verify,create}.sh` for discovery and name vali
 
 `collect_seed_roots` serves the two stages that measure seed content, Seed standards and Seed independence. Both discover through it rather than naming a stack, so one glob decides what a seed stage covers and a stack seeding `.claude/` later arrives covered with no edit to either caller.
 
-## `frontmatter.sh`
-
-Sourced by `scripts/docs/list.sh` and `scripts/standards/list.sh`. The index engine lives in `src/indexes/`, TypeScript rather than bash.
-
-- `read_frontmatter_field`: read a YAML field from a markdown file's frontmatter. Strips wrapping quotes
-
 ## Gotchas
 
 ### Sweep callers by path, not by function name

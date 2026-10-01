@@ -12,10 +12,11 @@ const INDEX_TOPIC = 'index'
  * The context folder is read at every surface root, so a checkout the surface
  * move has not reached still resolves its own entries.
  */
-const ROOTS: readonly string[] = [
-  'docs',
-  ...SURFACE_ROOTS.map((root) => join(root, 'context')),
-]
+export const DOCS_ROOT = 'docs'
+export const CONTEXT_ROOTS: readonly string[] = SURFACE_ROOTS.map((root) =>
+  join(root, 'context'),
+)
+const ROOTS: readonly string[] = [DOCS_ROOT, ...CONTEXT_ROOTS]
 
 export interface ResolvedTopic {
   readonly path: string
@@ -96,14 +97,22 @@ function catalogedFolders(dir: string): string[] {
  * `resolveTopic` answers for and nothing else.
  */
 export function listTopics(root: string): string[] {
-  const named = ROOTS.map((dir) => collectNamed(root, dir))
-  const leaves = ROOTS.map((dir) => collectLeaves(root, dir))
+  const walked = ROOTS.map((dir) => walkEntries(root, dir))
 
-  const taken = new Set(named.flat())
+  const taken = new Set(
+    walked.flatMap((entries) =>
+      entries.filter((entry) => entry.kind !== 'leaf').map((e) => e.name),
+    ),
+  )
   const claimed = new Set<string>()
 
-  return ROOTS.flatMap((_, position) => {
-    const here = leaves[position] as string[]
+  return walked.flatMap((entries) => {
+    const named = entries
+      .filter((entry) => entry.kind !== 'leaf')
+      .map((entry) => entry.name)
+    const here = entries
+      .filter((entry) => entry.kind === 'leaf')
+      .map((entry) => entry.name)
     const reachable = [...new Set(here)].filter(
       (name) =>
         !taken.has(name) &&
@@ -112,25 +121,60 @@ export function listTopics(root: string): string[] {
     )
     for (const name of here) claimed.add(name)
 
-    return [...(named[position] as string[]), ...reachable].sort()
+    return [...named, ...reachable].sort()
   })
 }
 
-/** The sibling files and split folders of one root, which shadow every leaf. */
-function collectNamed(root: string, dir: string): string[] {
+/**
+ * How an entry is named. A `file` is a sibling `<name>.md`, a `folder` is a
+ * split domain named by its folder and carried by its `index.md`, and a `leaf`
+ * is a sub-area file one level down, named by its bare filename.
+ */
+export type EntryKind = 'file' | 'folder' | 'leaf'
+
+export interface WalkedEntry {
+  readonly name: string
+  readonly kind: EntryKind
+  /** The path under the project root, which is the catalog's `target`. */
+  readonly rel: string
+}
+
+/**
+ * Every entry one root offers, in the three kinds above, with a leaf counted
+ * once per occurrence so a name a folder pair both carry stays visible as a
+ * collision. A root that is absent offers nothing. This is the one reading of
+ * the tree, so `listTopics` and the docs catalog cannot disagree on membership.
+ */
+export function walkEntries(root: string, dir: string): WalkedEntry[] {
   const cwd = join(root, dir)
   if (!existsSync(cwd)) return []
 
-  return [...markdownNames(cwd), ...catalogedFolders(cwd)]
-}
-
-/** One entry per occurrence, so a name carried twice is counted twice. */
-function collectLeaves(root: string, dir: string): string[] {
-  const cwd = join(root, dir)
-
-  return catalogedFolders(cwd).flatMap((folder) =>
-    markdownNames(join(cwd, folder)),
+  const files = markdownNames(cwd).map(
+    (name): WalkedEntry => ({
+      name,
+      kind: 'file',
+      rel: join(dir, `${name}.md`),
+    }),
   )
+  const folders = catalogedFolders(cwd)
+  const split = folders.map(
+    (folder): WalkedEntry => ({
+      name: folder,
+      kind: 'folder',
+      rel: join(dir, folder, `${INDEX_TOPIC}.md`),
+    }),
+  )
+  const leaves = folders.flatMap((folder) =>
+    markdownNames(join(cwd, folder)).map(
+      (name): WalkedEntry => ({
+        name,
+        kind: 'leaf',
+        rel: join(dir, folder, `${name}.md`),
+      }),
+    ),
+  )
+
+  return [...files, ...split, ...leaves]
 }
 
 function markdownNames(dir: string): string[] {

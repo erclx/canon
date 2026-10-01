@@ -57,10 +57,10 @@ stage_setup() {
     ;;
   "list")
     log_step "Running: canon standards list"
-    "$PROJECT_ROOT/scripts/standards/list.sh"
+    bun "$PROJECT_ROOT/src/cli.ts" standards list
     log_step "Running: canon standards list --json | jq '.standards[0] | keys'"
-    "$PROJECT_ROOT/scripts/standards/list.sh" --json | jq '.standards[0] | keys'
-    log_info "Expect keys: appliesTo, content, description, name"
+    bun "$PROJECT_ROOT/src/cli.ts" standards list --json | jq '.standards[0] | keys'
+    log_info "Expect keys: appliesTo, content, description, name, source"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

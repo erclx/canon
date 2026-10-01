@@ -95,6 +95,19 @@ export function listStandards(root: string): string[] {
   return [...names].sort()
 }
 
+/**
+ * Pairs each listed name with the copy a resolve would read, so a catalog shows
+ * what `canon standards <name>` prints rather than every file a root holds.
+ */
+export function resolveAllStandards(
+  root: string,
+): Array<ResolvedStandard & { readonly name: string }> {
+  return listStandards(root).flatMap((name) => {
+    const resolved = resolveStandard(root, name)
+    return resolved ? [{ name, ...resolved }] : []
+  })
+}
+
 export function readStandard(standard: ResolvedStandard): string {
   return stripFrontmatter(readFileSync(standard.path, 'utf8'))
 }

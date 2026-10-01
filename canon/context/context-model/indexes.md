@@ -96,4 +96,3 @@ The system pays off only when sessions consult the catalogs instead of searching
 
 - `docs/agents/indexes.md`: CLI flags, exit codes, and JSON output
 - `canon/context/cli/commands/overview.md`: the TypeScript layer and the migration boundary
-- `canon/context/scripts/lib.md`: `lib/frontmatter.sh`, the one bash reader that stayed

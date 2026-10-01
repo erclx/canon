@@ -228,7 +228,7 @@ export function register(program: Command): void {
  *
  * The frame opens after the `--json` return. The bash emitted a closing `└`
  * from its EXIT trap with no `┌` above it, because the hand-rolled
- * pass-through loop below skips the `intro` the shared helper carries.
+ * pass-through loop below opens no frame before it runs the script.
  */
 function runList(opts: ListOptions): number {
   // The warning is a frame-interior line, so it goes out after `intro` on the

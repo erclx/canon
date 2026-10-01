@@ -11,7 +11,7 @@ Records where each standard's guidance lives once the corpus stops being a folde
 
 ### The test routes on what the standard governs, not on how many surfaces cite it
 
-A standard already declares which branch it takes, in the first sentence of its own `## Scope`. A document-type standard names the backticked paths it governs, and an attribute standard says so and resolves to `*`. `read_applies_to` in `scripts/standards/list.sh` already parses that sentence for `appliesTo`, so the routing signal is measured rather than assigned.
+A standard already declares which branch it takes, in the first sentence of its own `## Scope`. A document-type standard names the backticked paths it governs, and an attribute standard says so and resolves to `*`. `appliesTo` in `src/standards/scope.ts` already parses that sentence for `appliesTo`, so the routing signal is measured rather than assigned.
 
 - **A document type a project authors** goes to the governance rule that globs that document. The rule reaches the author while the file is open, which is the moment the guidance has to arrive. Seventeen have one.
 - **An attribute with no document** cannot be globbed, so it goes to the CLI when a verb can compute or check it, and to the skills that run it otherwise.

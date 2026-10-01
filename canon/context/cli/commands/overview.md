@@ -32,7 +32,7 @@ Every `canon` verb is registered in commander and either handled in TypeScript o
 ### Migrating a domain off bash
 
 - A domain migrates one verb at a time. `tooling` and `gov` register their migrated verbs natively and name each remaining verb as an explicit pass-through, which is what let each dispatcher be deleted before every verb had moved. Naming them, rather than falling back to `allowUnknownOption()` on the whole domain, keeps `--help` honest for the verbs that did move.
-- The pass-through registration lives in `src/commands/pass-through.ts` and takes the domain name, since the loop is identical for every domain and only the banner and script path vary. Gov and standards both call it. A verb whose script sits somewhere other than `scripts/<domain>/<verb>.sh` registers by hand instead.
+- A verb still in bash registers by hand and calls `execScript` on its script. The shared pass-through helper went when its last two callers, `docs list` and `standards list`, moved to TypeScript.
 - Whichever layer runs first opens the timeline frame, or the bash verb emits a closing `└` with nothing above it. Each pass-through calls `intro` before it execs for exactly this reason, which is the obligation a deleted dispatcher hands upward.
 - A pass-through verb sets `helpOption(false)`. Commander resolves `--help` before the action runs, so leaving the built-in option on prints a one-line stub and hides the flag surface the bash script documents. Disabling it lets the flag reach the script, which owns that surface until the verb migrates.
 - A step list takes its child-process factory as an argument. `src/init/steps.ts` does, so a test reads the list for its labels and argv without spawning anything.
