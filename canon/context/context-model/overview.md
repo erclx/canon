@@ -85,7 +85,7 @@ Projecting a split child's size from the source entry's section weights undercou
 
 ### What a split strands
 
-A reader enumerating a flat surface pins depth somewhere, so converting an entry to a folder can drop it from that reader's output rather than erroring. `listTopics` pins it through `new Bun.Glob('*.md')` in `src/docs/read.ts`, and `list_text` through `find -maxdepth 1` in `scripts/docs/list.sh`. `bun run check` passes regardless, since every stage tests the files that exist rather than the names a command can reach. `internal/rules/claude/598-authoring-layout.md` carries the depth rule for four installable roots, and `canon/context/` and `docs/` sit outside it, so count the roots inside each reader before splitting either.
+A reader enumerating a flat surface pins depth somewhere, so converting an entry to a folder can drop it from that reader's output rather than erroring. `walkEntries` pins it through `new Bun.Glob('*.md')` in `src/docs/read.ts`, and both `listTopics` and the `docs list` catalog read that one walk. `bun run check` passes regardless, since every stage tests the files that exist rather than the names a command can reach. `internal/rules/claude/598-authoring-layout.md` carries the depth rule for four installable roots, and `canon/context/` and `docs/` sit outside it, so count the roots inside each reader before splitting either.
 
 A sub-area file resolves by its bare name once every root has been tried for a sibling file and for a folder. The first root whose folders carry that name answers, and only where a single folder in that root carries it. Reading depth last is what keeps a widened reader additive.
 

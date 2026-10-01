@@ -63,7 +63,7 @@ No checker ships for the content bans under `## Language`, covering inflated sig
 
 The constraint is stated twice on purpose: `markdown.md` carries a one-line note under `## Language` so an author meets it while editing, and it is restated here because it is a fact about a code reader rather than about prose.
 
-A second reader takes prose rather than a list. `read_applies_to` in `scripts/standards/list.sh` reads a standard's `## Scope` line, bounded to the first sentence, per the shape rules in `standards/standard.md` that require the governed path there. Ship the parser's span rule as a shape rule in the standard governing the prose, in the same change, since a silently unparsed entry is indistinguishable from a conforming one downstream.
+A second reader takes prose rather than a list. `appliesTo` in `src/standards/scope.ts` reads a standard's `## Scope` line, bounded to the first sentence, per the shape rules in `standards/standard.md` that require the governed path there. Ship the parser's span rule as a shape rule in the standard governing the prose, in the same change, since a silently unparsed entry is indistinguishable from a conforming one downstream.
 
 ## Authoring a new standard
 

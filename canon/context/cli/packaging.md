@@ -41,7 +41,7 @@ Nothing on the frame comes from `package.json`, since a pull request builds agai
 
 ### What `.claude/` costs by being absent
 
-`.claude/` never ships, which has three consequences worth knowing before touching any of these surfaces. The second root `canon docs <topic>` resolves against is absent in an installed package, so `scripts/docs/list.sh` guards its context walk on the directory existing rather than letting `find` write a raw error to stderr.
+`.claude/` never ships, which has three consequences worth knowing before touching any of these surfaces. The second root `canon docs <topic>` resolves against is absent in an installed package, so `listDocs` in `src/docs/list.ts` reports no context section when no context root exists rather than listing an empty one.
 
 `canon feedback` writes local scratch to `PROJECT_ROOT/.canon/review/`, which from a registry install would land inside `node_modules/` under a path the success line reports as project-relative, so `isToolkitSource()` gates both the bare write and the `--github` fallback and points the operator at the issue tracker instead. The `claude/standards` symlink is dropped by the pack, which costs nothing, since the CLI reads the root copies and the plugin ships from the repository rather than from the registry.
 

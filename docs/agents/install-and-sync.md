@@ -74,7 +74,7 @@ There is no `canon standards sync` and no `canon standards install`. The corpus
 installs into no project, so the domain has nothing in a target to reconcile.
 `canon standards <name>` prints one, resolving `standards/` at the working root
 and then the corpus inside the package, and `canon standards list --json` carries
-the catalog.
+the catalog, each entry labeled by the root it was read from.
 
 ## Tooling diff and sync
 

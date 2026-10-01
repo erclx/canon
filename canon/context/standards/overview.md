@@ -34,11 +34,11 @@ Run `canon standards list` for the catalog of installable standards and their de
 
 Run `canon standards --help` for the verbs and what each one does. Flags and arguments live in `docs/agents/scripting.md`.
 
-`--json` emits `{standards: [{name, description, appliesTo, content}]}`. `content` carries the document itself, and `appliesTo` is the paths a standard's `## Scope` statement declares, parsed by `read_applies_to` in `scripts/standards/list.sh`. It reads the backticked paths in the first sentence of the statement, resolves an attribute standard to `*`, and emits an empty array for a statement it cannot read.
+`--json` emits `{standards: [{name, description, appliesTo, content, source}]}`. `content` carries the document itself, `source` is the root-labeled path `canon standards <name>` would read, and `appliesTo` is the paths a standard's `## Scope` statement declares, parsed by `appliesTo` in `src/standards/scope.ts`, which the records gate shares. It reads the backticked paths in the first sentence of the statement, resolves an attribute standard to `*`, and emits an empty array for a statement it cannot read.
 
 The first sentence is the bound rather than the whole statement, since a later sentence names sibling standards and excluded paths that would otherwise land in the same list. Every standard is walked from the flat root. Five return an empty `appliesTo`, not from any exclusion but because their `## Scope` sentence names no backticked path and never says it governs an attribute: they fix a commit message, a branch name, a pull request body, and an issue, none of which is a file in a diff. `glossary.md` is the exception, whose scope sentence names `.canon/teach/<nn>-<topic>/GLOSSARY.md`.
 
-The domain has no write verb. `<name>` prints one standard from `src/commands/standards.ts` and `list` forwards to `scripts/standards/list.sh`, and both read rather than copy. `canon/context/standards/resolution.md` carries the roots each reads.
+The domain has no write verb. `<name>` prints one standard and `list` catalogs them, both from `src/commands/standards.ts`, and both read rather than copy. `canon/context/standards/resolution.md` carries the roots each reads.
 
 ## Workflow
 
