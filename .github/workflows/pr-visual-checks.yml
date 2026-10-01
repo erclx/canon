@@ -42,7 +42,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright System Dependencies
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: bunx playwright install-deps chromium firefox webkit
 
       - name: Cache Playwright Browsers
@@ -97,7 +97,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright System Dependencies
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: bunx playwright install-deps chromium
 
       - name: Cache Playwright Browsers
