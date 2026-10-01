@@ -20,7 +20,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 - Emit no text between steps. The sequence is the unit and prose inside it reopens settled decisions.
 - Name the one point a wrapping caller may act at, so a chain built on this one is not left to pick a gap of its own
 - Name the condition under which the closing block is not emitted, since a caller that closes on its own block leaves two instructions about the last line and nothing deciding between them
-- Watch continuous integration to a terminal state, and stop on a failure naming the check
+- Watch continuous integration to a terminal state in the background, so the session stays reachable while CI runs, and stop on a failure naming the check
 - Stop memory work at the Propose phase
 
 ## Must not
@@ -30,11 +30,12 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 - Run the memory Apply phase. Promoting an entry changes how the agent operates and ships as its own change.
 - Attempt a fix for a failing verify. The user is already making one, which is what brought the run back here.
 - Implement or review. This chain starts from work already believed done.
+- Report the chain done before the CI watch exits. A turn ending on the watch line leaves a pull request still waiting on CI, and a `✅ Shipped` there claims a result nothing has read.
 
 ## Guards
 
 - A failing verify stops the run before the sync skills write, so the tree is left as the user left it
-- A failing check stops the sequence. This is the one place text is allowed between steps.
+- A failing check stops the sequence. The failure report and the line announcing the background watch are the two places text is allowed between steps.
 
 ## Out of scope
 

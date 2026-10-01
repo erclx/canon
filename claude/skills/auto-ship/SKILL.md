@@ -143,6 +143,8 @@ Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, mem
 
 One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, naming the number that step returned rather than one resolved by branch. Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back. A `false` read stops the chain, and never re-issue the mark on it.
 
+Emit the Output block on the wake after `git-ship`'s background CI watch exits on `passing`, not when the turn ends on its watch line.
+
 `git-ship` verifies again at its own gate, repeating Step 3 on a clean run. Keep that repeat, since a resumed run enters at that gate.
 
 ## Output

@@ -170,10 +170,12 @@ echo "${comment_url##*issuecomment-}" > .canon/tmp/pr/reply/reply-<number>.id
 
 ## Step 7: confirm resolution
 
-After the follow-up push, watch CI on the PR. Poll
-`canon pr checks <number> --json` until the record's `state` leaves `pending`
-or it carries `conflicted: true`, then read it. On `conflicted`, stop and report
-that a rebase is the repair rather than polling on. When every finding is addressed and the state is `passing`, append
+After the push, read Watching CI in `${CLAUDE_SKILL_DIR}/../git-ship/SKILL.md`
+without invoking that skill, start its background watch, end the turn on its
+line, and run the rest of this step and Step 8 on the wake. Reuse a watch
+already running on this PR, since it reads the new tip. On the wake, stop on `conflicted` naming a rebase, on a `reason` naming it,
+and on a timeout reporting CI unsettled. When every finding is addressed and
+the state is `passing`, append
 the closing confirmation to the reply file Step 6 already posted, so the thread
 carries one terminal state rather than a second comment under no heading:
 
