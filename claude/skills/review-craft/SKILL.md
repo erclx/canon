@@ -57,7 +57,7 @@ Walk the design axis in this order, and skip a step the change gives nothing to 
 
 Three scope checks follow the walk:
 
-- When a change carries two concerns that could merge apart, name the split. Size is no finding on its own, since one concern can run long.
+- When a change carries two concerns that could land as two changes, name the split. Size is no finding on its own, since one concern can run long.
 - On a refactor, count the concepts a reader must hold before and after. Complexity moved into a new file or function is moved, not reduced, so report it as such rather than as a design gain.
 - Before calling removed code dead, state why it existed. Read `git blame` and the commit that added it, since a guard nobody remembers is often still guarding something.
 

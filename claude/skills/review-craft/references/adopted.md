@@ -20,7 +20,7 @@ External sources were read and filtered rather than imported. This file is the r
 
 The procedure stays in the body rather than a reference, since every review reads the design axis and a reference would cost a read on every run.
 
-**Change sizing as a split.** Google's [small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html) asks for one self-contained change. Adopted as the scope check that names a split when two concerns could merge apart, and from `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md`, alongside it.
+**Change sizing as a split.** Google's [small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html) asks for one self-contained change. Adopted as the scope check that names a split when two concerns could land as two changes. From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md`, the same check.
 
 **Relocate versus reduce.** From the same `code-review-and-quality` skill: a refactor counts the concepts a reader must hold before and after. Adopted as the scope check that reports moved complexity as moved.
 
