@@ -146,6 +146,6 @@ Read `url` off the record rather than building one from the port that was asked 
 | `defined`      | A term already carries a glossary entry                         |
 | `bad-input`    | The command line is malformed, before any folder is read        |
 
-`up` also passes through the refusals `canon serve` raises once `nav` has run, such as `bind-failed` when no port in reach is free, in the same record shape with the server's detail as `message`.
+`up` also passes through the refusals `canon serve` raises once `nav` has run, `no-port` when every port in reach is taken and `bind-failed` for any other bind error, such as a privileged port, in the same record shape with the server's detail as `message`.
 
 A `bad-input` refusal reports the working directory as its root rather than the resolved one, since the command line is rejected before the root is worth resolving. `lesson` raises it for a slug that is not kebab-case, for a quiz carrying no question, and for a question carrying fewer than two options, since a question with one option has nothing to confuse the right answer with.
