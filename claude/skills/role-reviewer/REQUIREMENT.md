@@ -40,7 +40,7 @@ a tree the pull request never changed.
 ## Must
 
 - Assert what a reviewing session is, what it may write, and how long the role lasts, since `review-pr` carries the pass and no body carries the role that runs it when dispatched
-- Bound the writes to the comment `review-pr` posts and the body file it names, and name the tracked file, branch, worktree, board, and commit as outside them
+- Bound the writes to the comment `review-pr` posts and the body file it names, or for a UI reviewer to what `review-ui` posts and drives from, and name the tracked file, branch, worktree, board, and commit as outside them
 - Send every file read a finding rests on to `git show <head>:<path>` at the head `review-pr` resolved, since the main worktree holds the trunk
 - Name what the pass reads, the diff, the plan, the task's outcomes, the rules, and `review-craft`, and what it leaves, the author's argument and the worker's session, since the independence is what the trials measured
 - Read the cross-branch facts a launch carries as inputs rather than findings, since the controller's wave-level read reaches this session only through the brief
@@ -56,7 +56,7 @@ a tree the pull request never changed.
 - Restate `review-craft`'s criteria, which apply to every reviewer alike rather than varying by role
 - Restate a boundary `role-orchestrator`, `role-worker`, or `role-planner` states about itself
 - Report progress through the channel, which rebuilds on the sender's side the poll the announcement exists to retire
-- Post outside `review-pr`, since every reader of the review headings breaks at once when one pass invents its own
+- Post outside `review-pr` and `review-ui`, since every reader of the review headings breaks at once when one pass invents its own
 - Be a skill nothing invokes but its author typing the name. `orchestrator-launch.md` names it on the reviewer launch the way it names `role-planner` on a planning one, so a stretch where only a typed invocation reaches it is the signal that the role never took.
 
 ## Guards
