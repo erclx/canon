@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: What the scripts domain owns, the folder layout, and the decisions that set what stays bash
+description: What the scripts domain owns, the folder layout, and the decisions behind what has not moved to TypeScript yet
 ---
 
 # Overview
@@ -23,7 +23,7 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 - A migrated domain loses its dispatcher entirely. `tooling/`, `gov/`, `standards/`, and `claude/` still hold the verb scripts that have not moved, but nothing in `scripts/` routes to them. `src/commands/<domain>.ts` does.
 - A dispatcher holding domain logic migrates in one pull request per file rather than verb by verb, since splitting the migration of dispatchers that share the same tracking documents would collide there for no review benefit.
 - A dispatcher that grew domain logic migrates that logic out to `src/<domain>/` rather than into the command file. Seed collection, gitignore scanning, and a settings merge are the shape that forces it, since a command file can unit-test none of them while `src/exec.ts` throws under vitest.
-- Bash keeps only what it is good at as domains migrate. `read_frontmatter_field` stays here because `docs/list.sh` and `standards/list.sh` call it once per field inside a loop, where routing through the CLI would cost a process per read. Coarse operations called once per invocation shell into `canon` instead.
+- The language end state is the stack entry in `canon/ARCHITECTURE.md`. The stays-bash verdicts below record why each file has not moved yet rather than that it never will, and an inventory pass sorts each one into delete, rebuild, or wrap.
 - The frontmatter-loop cost is not on its own enough to keep a verb in bash. `gov/list.sh` reads frontmatter in a loop yet is migrated, because a stack entry naming a rule folder has to expand somewhere, and expanding it in bash beside the TypeScript resolver would put one rule in two languages. A parse the CLI already owns outweighs a process per read.
 - A recorded verdict is only as wide as its own reasoning. The frontmatter-loop cost above did not apply to every list verb: `claude/seeds-list.sh` reads with a plain `read -r` loop and `tooling/list.sh` uses `awk`, and both are migrated regardless. Check a stated reason against each file before counting one as settled.
 - The two remaining verb scripts stay bash because of who calls them, not how large they are. `tooling/verify.sh` and `tooling/create.sh` are toolkit-internal authoring helpers a human runs at a terminal here. They write nothing into a target and no skill consumes them, so they carry none of the agent-path obligations that moved the other five. `canon tooling reference <stack>` is the TypeScript read verb that replaced the sixth such script, `tooling/ref.sh`.
