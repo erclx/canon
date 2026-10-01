@@ -10,9 +10,12 @@ import {
   coveredCount,
   isOverCount,
   isOverLength,
+  hasRevisitSentence,
   measureArchitecture,
+  missingRevisit,
   readAllowances,
   readEntryCap,
+  readRevisitRule,
   risksSection,
   splitDecisions,
   testableCount,
@@ -57,6 +60,7 @@ function makeReport(
     words: 620,
     allowances: { frame: 34, perDecision: 6 },
     ceiling: 100,
+    revisitRequired: false,
     decisions: [],
     ...overrides,
   }
@@ -72,6 +76,7 @@ function makeDecision(
     figures: [],
     checks: [],
     words: 12,
+    revisit: false,
     ...overrides,
   }
 }
@@ -366,6 +371,164 @@ describe('measuring the entry cap', () => {
     const report = await measureArchitecture(root)
 
     expect(report?.entryCap).toBeUndefined()
+  })
+})
+
+describe('reading the revisit clause a record states for itself', () => {
+  it('should read the clause stated in the overview', () => {
+    const source =
+      '# Architecture\n\nEvery decision closes with a revisit sentence.\n'
+
+    expect(readRevisitRule(source)).toBe(true)
+  })
+
+  it('should read nothing from a record stating no clause', () => {
+    expect(readRevisitRule('# Architecture\n\n## Overview\n')).toBe(false)
+  })
+
+  it('should not read the clause quoted inside a fenced block', () => {
+    const source = [
+      '# Architecture',
+      '',
+      '```markdown',
+      'Every decision closes with a revisit sentence.',
+      '```',
+      '',
+    ].join('\n')
+
+    expect(readRevisitRule(source)).toBe(false)
+  })
+})
+
+describe('finding the revisit sentence in a decision', () => {
+  it('should find a sentence opening with Revisit when', () => {
+    const body =
+      'Bun won over Node. Revisit when Node runs the source without a build.'
+
+    expect(hasRevisitSentence(body)).toBe(true)
+  })
+
+  it('should find the sentence opening a paragraph', () => {
+    const body = 'Bun won over Node.\n\nRevisit when Node runs the source.'
+
+    expect(hasRevisitSentence(body)).toBe(true)
+  })
+
+  it('should not find the sentence in a decision lacking one', () => {
+    expect(hasRevisitSentence('Bun won over Node.')).toBe(false)
+  })
+
+  it('should not count the phrase inside a code span', () => {
+    const body = 'The standard asks for `Revisit when <finding>.` here.'
+
+    expect(hasRevisitSentence(body)).toBe(false)
+  })
+
+  it('should not count the phrase in the middle of a sentence', () => {
+    const body = 'Nobody says Revisit when anything changes.'
+
+    expect(hasRevisitSentence(body)).toBe(false)
+  })
+})
+
+describe('measuring the revisit sentence', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+    mkdirSync(join(root, 'canon'), { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  const clause = 'Every decision closes with a revisit sentence.'
+
+  it('should name the decision missing the sentence under the clause', async () => {
+    const source = [
+      '# Architecture',
+      '',
+      clause,
+      '',
+      '### Carries one',
+      '',
+      'Reasoning. Revisit when the reason goes.',
+      '',
+      '### Lacks one',
+      '',
+      'Reasoning.',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.revisitRequired).toBe(true)
+    expect(report?.decisions.map((entry) => entry.revisit)).toEqual([
+      true,
+      false,
+    ])
+    expect(report && missingRevisit(report)).toEqual(['Lacks one'])
+  })
+
+  it('should not count the sentence inside a fenced block', async () => {
+    const source = [
+      '# Architecture',
+      '',
+      clause,
+      '',
+      '### Fenced only',
+      '',
+      'Reasoning.',
+      '',
+      '```markdown',
+      'Revisit when the reason goes.',
+      '```',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report && missingRevisit(report)).toEqual(['Fenced only'])
+  })
+
+  it('should not count a fenced template heading as a decision missing one', async () => {
+    const source = [
+      '# Architecture',
+      '',
+      clause,
+      '',
+      '### Real',
+      '',
+      'Reasoning. Revisit when the reason goes.',
+      '',
+      '```markdown',
+      '### Decision name',
+      '',
+      'Reasoning.',
+      '```',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report && missingRevisit(report)).toEqual([])
+  })
+
+  it('should report but never require the sentence without the clause', async () => {
+    writeFileSync(
+      join(root, 'canon', 'ARCHITECTURE.md'),
+      '# Architecture\n\n### One\n\nBody.\n',
+    )
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.revisitRequired).toBe(false)
+    expect(report?.decisions[0]?.revisit).toBe(false)
+    expect(report && missingRevisit(report)).toEqual([])
   })
 })
 

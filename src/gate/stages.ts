@@ -354,7 +354,7 @@ export const STAGES: readonly Stage[] = [
     success: 'Context citations resolve',
   },
   {
-    // The record's two limits are facts it states about itself, unlike the
+    // The record's three rules are facts it states about itself, unlike the
     // judgment thresholds the stage above leaves out, so they gate here.
     id: 'architecture-record',
     label: 'Architecture record',

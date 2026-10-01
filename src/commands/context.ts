@@ -25,6 +25,7 @@ import {
   isOverCount,
   isOverLength,
   measureArchitecture,
+  missingRevisit,
   testableCount,
 } from '@/context/architecture'
 import { auditCitations, type CitationReport } from '@/context/citations'
@@ -122,8 +123,10 @@ export function register(program: Command): void {
         'states its own line allowances gates when it is past the ceiling',
         'those derive, on any run except --citations-only, which never',
         'measures it. A record stating an entry cap gates the same way when',
-        'it holds more decisions than the cap. A record stating neither is',
-        'reported and never gated. --gate widens the gate to the other two',
+        'it holds more decisions than the cap, and a record stating that',
+        'every decision closes with a revisit sentence gates when one lacks',
+        'it. A record stating none of the three is reported and never',
+        'gated. --gate widens the gate to the other two',
         'findings that are facts rather than judgments: a missing required',
         'section and index drift. A context entry requires Overview and',
         'Layout, and a wireframe requires Regions, States, Copy, and Not on',
@@ -739,6 +742,8 @@ async function runAudit(
     unresolvedCitations: citations.unresolved.length,
     recordOverLength: record !== undefined && isOverLength(record),
     recordOverCount: record !== undefined && isOverCount(record),
+    recordMissingRevisit:
+      record !== undefined && missingRevisit(record).length > 0,
     sections,
     drift,
     wireframes,
@@ -1191,6 +1196,24 @@ function reportRecord(
   } else {
     logInfo(
       `${plural(decisions, 'decision')} against a cap of ${report.entryCap}.`,
+    )
+  }
+
+  const revisited = report.decisions.filter((entry) => entry.revisit).length
+  const lackingRevisit = missingRevisit(report)
+  if (!report.revisitRequired) {
+    logInfo(
+      `${revisited} of ${plural(decisions, 'decision')} close with a revisit sentence, and the record states no revisit clause, so this is reported and never gated.`,
+    )
+  } else if (lackingRevisit.length > 0) {
+    for (const heading of lackingRevisit) {
+      logError(
+        `"${heading}" carries no sentence opening "Revisit when", which the record requires of every decision.`,
+      )
+    }
+  } else {
+    logInfo(
+      `Every one of ${plural(decisions, 'decision')} closes with the revisit sentence the record requires.`,
     )
   }
 

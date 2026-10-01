@@ -19,6 +19,12 @@ export interface GateInput {
    * gates under the same two modes and is false in the same two cases.
    */
   readonly recordOverCount: boolean
+  /**
+   * Whether a decision lacks the revisit sentence the record requires of
+   * every decision, which gates under the same two modes and is false in the
+   * same two cases, plus a record stating no such clause.
+   */
+  readonly recordMissingRevisit: boolean
   readonly sections: readonly SectionFinding[]
   readonly drift: readonly FolderDrift[]
   /**
@@ -73,8 +79,8 @@ export function hasSketchWithEvidence(
  * Whether the audit found something that should fail the caller.
  *
  * An unresolved citation is a broken pointer and gates unconditionally, and so
- * does a record past its own ceiling or its own entry cap: the record states
- * each limit for itself, which makes those the measures here that are facts
+ * does a record past its own ceiling or its own entry cap, or missing a
+ * revisit sentence it requires: the record states each rule for itself, which makes those the measures here that are facts
  * rather than thresholds a reader weighs. The findings `--gate` adds are
  * the ones answerable from the file itself: a required section it does not
  * declare, an index disagreeing with its folder, and a wireframe's States
@@ -88,13 +94,14 @@ export function isGating({
   unresolvedCitations,
   recordOverLength,
   recordOverCount,
+  recordMissingRevisit,
   sections,
   drift,
   wireframes,
   widened,
 }: GateInput): boolean {
   if (unresolvedCitations > 0) return true
-  if (recordOverLength || recordOverCount) return true
+  if (recordOverLength || recordOverCount || recordMissingRevisit) return true
   if (!widened) return false
 
   return sections.length > 0 || hasDrift(drift) || hasStatesMismatch(wireframes)

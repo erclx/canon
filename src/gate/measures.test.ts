@@ -975,6 +975,36 @@ describe('architectureRecord', () => {
     expect(report.failure).toContain('against a ceiling of 3')
   })
 
+  const revisitClause = 'Every decision closes with a revisit sentence.'
+
+  it('fails a decision with no revisit sentence under the clause', async () => {
+    writeRecord(
+      `# Architecture\n\n${revisitClause}\n\n### Bare\n\nReasoning.\n`,
+    )
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toContain('Bare')
+  })
+
+  it('passes the same decision carrying a revisit sentence', async () => {
+    writeRecord(
+      `# Architecture\n\n${revisitClause}\n\n### Bare\n\nReasoning. Revisit when the reason goes.\n`,
+    )
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('passes a decision with no revisit sentence when the record states no clause', async () => {
+    writeRecord(`# Architecture\n\n### Bare\n\nReasoning.\n`)
+
+    const report = await architectureRecord(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
   it('passes a project carrying no record', async () => {
     const report = await architectureRecord(context())
 

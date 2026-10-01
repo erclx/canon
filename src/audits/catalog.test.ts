@@ -172,6 +172,28 @@ describe('reading counts out of each record shape', () => {
     expect(counts).not.toHaveProperty('recordOverCount')
   })
 
+  it('should count a record missing a revisit sentence under its clause', () => {
+    const record = {
+      ...contextRecord,
+      architecture: {
+        ...contextRecord.architecture,
+        revisitRequired: true,
+        decisions: contextRecord.architecture.decisions.map((entry, index) => ({
+          ...entry,
+          revisit: index > 0,
+        })),
+      },
+    }
+
+    expect(countsFor(specFor('context'), record)?.recordMissingRevisit).toBe(1)
+  })
+
+  it('should omit the revisit key for a record stating no clause', () => {
+    const counts = countsFor(specFor('context'), contextRecord)
+
+    expect(counts).not.toHaveProperty('recordMissingRevisit')
+  })
+
   /**
    * Zero here would read as a record measured against a ceiling and found
    * conforming, where the truth is that it declared none to measure against.
