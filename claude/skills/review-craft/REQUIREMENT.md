@@ -24,7 +24,7 @@ Rendered output is the larger hole. `git-pr` posts an `## Evidence` comment thro
 - Open the evidence images on a rendered change through `git show` at the row's own sha, never through the embedded address, within a stated read budget
 - Test each ticked checklist box against an opened image, and name a ticked box no image covers as untested
 - Flag a rendered change that carries no screenshot, as a finding where the trunk already keeps them and as a question elsewhere
-- Read the posted comment rather than running `canon pr evidence`, which compares the local checkout's diff and names the wrong change from a reviewing session not on the branch
+- Read the posted comment rather than running `canon pr evidence`, which renders a new body from the pull request's files and can differ from the comment already posted
 
 ## Must not
 

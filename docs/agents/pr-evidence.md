@@ -6,10 +6,10 @@ description: What canon pr evidence compares, the marker that lets it edit its o
 # The pull request evidence comparison
 
 `canon pr evidence` renders one comment naming every changed image under an
-`evidence/` path segment, comparing each against the pull request's merge base
-with the trunk. `git-pr` posts it when a pull request opens or is edited, and
-`git-followup` posts it again after every later push, so a reviewer never has
-to open Files Changed to see what a case looked like before and after.
+`evidence/` path segment, comparing each against the pull request's merge base.
+`git-pr` posts it when a pull request opens or is edited, and `git-followup`
+posts it again after every later push, so a reviewer never has to open Files
+Changed to see what a case looked like before and after.
 
 ```bash
 canon pr evidence
@@ -55,9 +55,9 @@ image or marks the case new.
 | `gh-failed`            | `gh` could not answer for this repository or branch, or read its comments.    |
 | `no-branch`            | The pull request carries no head branch name.                                 |
 | `no-object-head`       | The pull request object reported no head commit.                              |
-| `no-base`              | No base resolves against the trunk.                                           |
-| `unreadable-tree`      | git could not read the tree at the base commit.                               |
-| `unreadable-changes`   | git could not list what this branch changed.                                  |
+| `no-base`              | GitHub reported no merge base for the pull request.                           |
+| `unreadable-changes`   | GitHub could not list what the pull request changed.                          |
+| `would-empty`          | The render holds no cases and the marked comment holds some. No body.         |
 
 `no-evidence` is not a refusal a caller reports. A project on a stack that
 carries no evidence path, such as `base` or `python`, hits this reason on
@@ -83,16 +83,32 @@ reporting the fields absent.
 
 ## What `[number]` selects, and what it does not
 
-Naming a number picks which pull request the rendered body claims to
-describe: its head commit and, when one already exists, the marked comment to
-edit in place. The base and the changed set are always read from the local
-checkout's own history, `git diff` and `git ls-tree` against the merge base
-with the trunk, rather than fetched for the named pull request over the API.
-That is correct for `git-pr` and `git-followup`, which never pass a number
-and always run from the worktree building the branch, so the local checkout
-and the named pull request describe the same branch. Naming a number for a
-pull request built somewhere else compares this checkout's own diff against a
-head commit that describes a different one.
+Naming a number picks the pull request the whole record describes: its head
+commit, its merge base, its changed set, and the marked comment to edit in
+place. The changed paths and whether each was added or modified come from the
+pull request's files endpoint, paged to the end, and the merge base comes from
+the compare endpoint, so the record is the same from any checkout. A run from
+the main worktree against a branch built elsewhere renders that branch's
+comparison.
+
+The trade is that the verb no longer sees evidence that is uncommitted or
+unpushed, which the comment's head-pinned image links could not show anyway.
+A path the pull request renamed or copied counts as added, since the new path
+has no counterpart at the merge base, so a rename loses its before image and
+renders `*(new)*`. A path the pull request removed is dropped, since it has no
+head image to show. A failed files read refuses as `unreadable-changes` rather
+than rendering a short set, and a missing merge base refuses as `no-base`.
+
+## A render never empties a comment that carries cases
+
+When the render holds no cases and the marked comment holds some, the verb
+refuses `would-empty` and prints no body. A render with no cases cannot tell a
+case removed on purpose from a short read, so the destructive direction needs a
+person: they edit the comment directly. The record keeps `commentId` and the
+carried fields, so the caller can still find the comment. A comment holding
+only a preview or a checklist has no cases to lose and still re-renders `ok`.
+`no-evidence` without a flag returns before any render, so the guard touches
+only `--preview`, `--local`, and `--checklist` calls.
 
 ## One comment, found by its own marker
 

@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execa, execaSync, type ResultPromise } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { countEvidenceCases, renderEvidenceBody } from '@/pr/evidence'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -251,14 +252,25 @@ describe('canon pr evidence --checklist', () => {
  * A `gh` stand-in that answers the reads `pr evidence` and `pr local` make and
  * records the body of any `gh api` write, so the command surface runs end to
  * end without a network.
+ *
+ * The pull request's files, head, and merge base come from the repository's
+ * own `main...HEAD` unless a fixture beside `apiLog` names them: `files.tsv`
+ * holds `status<TAB>path` rows, `head` a sha, `merge-base` a sha, and
+ * `files-fail` makes the files read fail. Every files read appends its
+ * arguments to `files-calls.log`.
  */
 function writeFakeGh(bin: string, comments: string, apiLog: string): void {
   mkdirSync(bin, { recursive: true })
+  const fx = dirname(apiLog)
   const script = [
     '#!/usr/bin/env bash',
+    `fx='${fx}'`,
     'case "$*" in',
+    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi ;;`,
+    '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
     `  api*) printf '%s' "\${@: -1}" > '${apiLog}'; echo "{}" ;;`,
-    '  *headRefOid*) echo "{\\"number\\":7,\\"headRefName\\":\\"feat/x\\",\\"headRefOid\\":\\"$(git rev-parse HEAD)\\",\\"mergeStateStatus\\":\\"CLEAN\\"}" ;;',
+    '  *baseRefName*) echo main ;;',
+    '  *headRefOid*) if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; echo "{\\"number\\":7,\\"headRefName\\":\\"feat/x\\",\\"headRefOid\\":\\"$h\\",\\"mergeStateStatus\\":\\"CLEAN\\"}" ;;',
     '  *nameWithOwner*) echo "{\\"nameWithOwner\\":\\"o/r\\"}" ;;',
     `  *comments*) cat '${comments}' ;;`,
     '  *) exit 1 ;;',
@@ -455,6 +467,203 @@ describe('canon pr evidence reports the marked comment', () => {
     const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
 
     expect(record.reason).toBe('gh-failed')
+  })
+})
+
+describe('canon pr evidence reads the pull request', () => {
+  let tempDir: string
+  let repoRoot: string
+  let commentsFile: string
+
+  async function runEvidenceRecord(
+    args: string[],
+  ): Promise<Record<string, unknown>> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot, ...args],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+      },
+    )
+    return JSON.parse(result.stdout)
+  }
+
+  function writeFixture(name: string, text: string): void {
+    writeFileSync(join(tempDir, name), text)
+  }
+
+  function writeComment(body: string): void {
+    writeFileSync(
+      commentsFile,
+      JSON.stringify({
+        comments: [
+          { url: 'https://github.com/o/r/pull/7#issuecomment-100', body },
+        ],
+      }),
+    )
+  }
+
+  function bodyWithCases(): string {
+    return renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/hero.png', stem: 'hero', added: true },
+          ],
+        },
+      ],
+      'o/r',
+      'base',
+      'abc123',
+    )
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-evidence-api-'))
+    repoRoot = join(tempDir, 'repo')
+    commentsFile = join(tempDir, 'comments.json')
+    mkdirSync(repoRoot)
+    writeFileSync(commentsFile, '{"comments":[]}')
+    writeFakeGh(join(tempDir, 'bin'), commentsFile, join(tempDir, 'api.log'))
+    initBranchRepo(repoRoot, { 'docs/guide.md': '# guide\n' })
+    execaSync('git', ['-C', repoRoot, 'checkout', '-q', 'main'])
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should compare the set the pull request lists while the checkout sits on main with none', async () => {
+    writeFixture(
+      'files.tsv',
+      'added\tevidence/dark/hero.png\nmodified\tevidence/dark/nav.png\n',
+    )
+    writeFixture('head', 'deadbeef')
+    writeFixture('merge-base', 'cafe01')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record).toMatchObject({
+      reason: 'ok',
+      head: 'deadbeef',
+      base: 'cafe01',
+    })
+    expect(countEvidenceCases(String(record.body))).toBe(2)
+  })
+
+  it('should pin every image link to the head the pull request reports', async () => {
+    writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+    writeFixture('head', 'deadbeef')
+    writeFixture('merge-base', 'cafe01')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain(
+      'https://github.com/o/r/blob/deadbeef/evidence/dark/nav.png?raw=true',
+    )
+  })
+
+  it('should render a base image for a modified path and new for an added one', async () => {
+    writeFixture(
+      'files.tsv',
+      'added\tevidence/dark/hero.png\nmodified\tevidence/dark/nav.png\n',
+    )
+    writeFixture('merge-base', 'cafe01')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain('| hero | *(new)* |')
+    expect(record.body).toContain(
+      '| nav | ![](https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true) |',
+    )
+  })
+
+  it('should drop a path the pull request removed', async () => {
+    writeFixture(
+      'files.tsv',
+      'removed\tevidence/dark/gone.png\nmodified\tevidence/dark/nav.png\n',
+    )
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(countEvidenceCases(String(record.body))).toBe(1)
+  })
+
+  it('should render a renamed path as new', async () => {
+    writeFixture('files.tsv', 'renamed\tevidence/dark/moved.png\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain('| moved | *(new)* |')
+  })
+
+  it('should render a copied path as new', async () => {
+    writeFixture('files.tsv', 'copied\tevidence/dark/dup.png\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.body).toContain('| dup | *(new)* |')
+  })
+
+  it('should refuse would-empty and print no body when a render holds no cases over a comment that does', async () => {
+    writeComment(bodyWithCases())
+    writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.reason).toBe('would-empty')
+    expect(record).not.toHaveProperty('body')
+  })
+
+  it('should keep the marked fields on a would-empty record', async () => {
+    writeComment(bodyWithCases())
+    writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record).toMatchObject({ commentId: 100 })
+  })
+
+  it('should still render ok over a marked comment that carries no cases', async () => {
+    writeComment(
+      '**Preview:** https://old.dev\n\n<!-- pr-evidence: head=abc -->',
+    )
+    writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.reason).toBe('ok')
+  })
+
+  it('should report no-evidence without a flag even over a comment carrying cases', async () => {
+    writeComment(bodyWithCases())
+    writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
+
+    const record = await runEvidenceRecord([])
+
+    expect(record.reason).toBe('no-evidence')
+  })
+
+  it('should read the files through the paginated endpoint', async () => {
+    writeFixture('files.tsv', 'added\tevidence/dark/hero.png\n')
+
+    await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(readFileSync(join(tempDir, 'files-calls.log'), 'utf8')).toContain(
+      '--paginate',
+    )
+  })
+
+  it('should refuse rather than render a short set when the files read fails', async () => {
+    writeFixture('files-fail', '')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.reason).toBe('unreadable-changes')
   })
 })
 

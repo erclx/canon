@@ -26,6 +26,7 @@ import {
   withMergeState,
 } from '@/pr/checks'
 import {
+  findEvidenceCaseCount,
   findEvidenceChecklist,
   findEvidenceCommentId,
   findEvidenceLocal,
@@ -173,20 +174,21 @@ const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
 type EvidenceRefusal =
   | 'gh-failed'
   | 'no-base'
-  | 'unreadable-tree'
   | 'unreadable-changes'
   | 'unreadable-checklist'
+  | 'would-empty'
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
     'The file named by --checklist could not be read, or holds nothing. Rendering without it would drop the only copy, since the caller deletes the handoff once a post reports success.',
-  'no-base': 'No base resolves against the trunk. Fetch origin and re-run.',
-  'unreadable-tree':
-    'git could not read the tree at the base commit, so no path could be judged added or changed.',
+  'no-base':
+    'GitHub reported no merge base for this pull request, so no path could be judged added or changed.',
   'unreadable-changes':
-    'git could not list what this branch changed, so the set is unknown.',
+    'GitHub could not list what this pull request changed, so the set is unknown.',
+  'would-empty':
+    'This render holds no cases and the marked comment holds some, so posting it would replace a comparison with an empty one. Edit the comment by hand if every case was removed on purpose.',
 }
 
 /** Why the read produced no comparison, ahead of the ones the compare owns. */
@@ -427,11 +429,13 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Compares the merge base with the trunk against the current head, never',
-        'the previous push against the new one, so the comment never claims more',
-        'than the branch currently shows. A path counts as evidence when one of',
-        'its segments is literally `evidence` and the filename carries an image',
-        'extension (png, jpg, jpeg, gif, webp, avif, svg). A README, a capture',
+        "Compares the pull request's merge base against its head, both read over",
+        'the API for the number named, so the record is the same from any',
+        'checkout. It never compares the previous push against the new one, so',
+        'the comment never claims more than the pull request currently shows.',
+        'A path counts as evidence when one of its segments is literally',
+        '`evidence` and the filename carries an image extension (png, jpg,',
+        'jpeg, gif, webp, avif, svg). A README, a capture',
         'script, or a raw data file kept beside the images is left out rather',
         'than rendered as a broken embed.',
         '',
@@ -440,6 +444,8 @@ export function register(program: Command): void {
         '               comment already exists and should be edited in place',
         '  no-evidence  nothing in the diff carries an evidence/ segment, which',
         '               is an ordinary, silent no-op rather than a refusal',
+        '  would-empty  the render holds no cases and the marked comment holds',
+        '               some, so no body is printed and a person edits the comment',
         '',
         "--preview puts the address on the body's first line. With no evidence",
         'in the diff, the body is that line and the marker alone, reported as',
@@ -1346,21 +1352,63 @@ async function runReviewState(
 }
 
 /**
- * Every path `git ls-tree` reports for `ref`, or undefined when the read
- * failed. One call for the whole tree rather than one `cat-file -e` per
- * evidence path, since existence at base is checked once per changed path and
- * a batch read is one round trip instead of many.
+ * The paths a pull request changed that still exist at its head, each tagged
+ * with whether the pull request added it, read through the paginated files
+ * endpoint so the set is the same from any checkout and never capped at the
+ * first view. `renamed` and `copied` count as added, since the new path has no
+ * counterpart at the merge base. Returns undefined when the read fails, which
+ * refuses rather than rendering a short set.
  */
-async function listTreePaths(
-  root: string,
-  ref: string,
-): Promise<Set<string> | undefined> {
-  const result = await $`git -C ${root} ls-tree -r --name-only ${ref}`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-  if (result.exitCode !== 0) return undefined
-  return new Set(result.text().split('\n').filter(Boolean))
+async function listPullFiles(
+  cwd: string,
+  number: number,
+): Promise<ReadonlyMap<string, boolean> | undefined> {
+  const stdout = await gh(cwd, [
+    'api',
+    '--paginate',
+    `repos/{owner}/{repo}/pulls/${number}/files`,
+    '--jq',
+    '.[] | "\(.status)\t\(.filename)"',
+  ])
+  if (stdout === null) return undefined
+  const files = new Map<string, boolean>()
+  for (const line of stdout.split('\n').filter(Boolean)) {
+    const [status, path] = line.split('\t')
+    if (status === undefined || path === undefined || status === 'removed') {
+      continue
+    }
+    files.set(path, status !== 'modified' && status !== 'changed')
+  }
+  return files
+}
+
+/**
+ * The commit the pull request diverged from its base at, from the compare
+ * endpoint, since a checkout on another branch resolves its own trunk tip
+ * instead and the base image links would then describe the wrong commit.
+ */
+async function readPullMergeBase(
+  cwd: string,
+  number: number,
+  head: string,
+): Promise<string | undefined> {
+  const baseRef = await gh(cwd, [
+    'pr',
+    'view',
+    String(number),
+    '--json',
+    'baseRefName',
+    '--jq',
+    '.baseRefName',
+  ])
+  if (baseRef === null || baseRef.trim() === '') return undefined
+  const sha = await gh(cwd, [
+    'api',
+    `repos/{owner}/{repo}/compare/${baseRef.trim()}...${head}`,
+    '--jq',
+    '.merge_base_commit.sha',
+  ])
+  return sha === null || sha.trim() === '' ? undefined : sha.trim()
 }
 
 async function runEvidence(
@@ -1404,16 +1452,20 @@ async function runEvidence(
     )
   }
 
-  const base = await resolveBaseRef(root)
-  if (base === undefined) {
-    return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
+  if (identity.number === undefined) {
+    return refuseWith(
+      'gh-failed',
+      EVIDENCE_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+    )
   }
 
-  const [changed, baseTree] = await Promise.all([
-    listChangedFiles(root, base),
-    listTreePaths(root, base),
+  const [pullFiles, base] = await Promise.all([
+    listPullFiles(root, identity.number),
+    readPullMergeBase(root, identity.number, identity.head),
   ])
-  if (changed === undefined) {
+  if (pullFiles === undefined) {
     return refuseWith(
       'unreadable-changes',
       EVIDENCE_REFUSALS['unreadable-changes'],
@@ -1421,61 +1473,57 @@ async function runEvidence(
       root,
     )
   }
-  if (baseTree === undefined) {
-    return refuseWith(
-      'unreadable-tree',
-      EVIDENCE_REFUSALS['unreadable-tree'],
-      emitJson,
-      root,
-    )
+  if (base === undefined) {
+    return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
   }
 
-  const grouped = await groupEvidence(changed, async (path) =>
-    baseTree.has(path),
+  const grouped = await groupEvidence(
+    [...pullFiles.keys()],
+    async (path) => pullFiles.get(path) === false,
   )
 
+  let existingCases = 0
   let commentId: number | undefined
   let carriedPreview: string | undefined
   let carriedChecklist: string | undefined
   let carriedLocal: string | undefined
-  if (identity.number !== undefined) {
-    const commentsRow = await gh(root, [
-      'pr',
-      'view',
-      String(identity.number),
-      '--json',
-      'comments',
-    ])
-    // An unread thread refuses rather than rendering, since a body built
-    // without it knows neither the comment to edit nor the preview address
-    // to carry, and posting it would duplicate the comment and drop the link.
-    // It refuses ahead of no-evidence too, so that record never reports an
-    // absent field it did not read.
-    let comments: readonly { url?: string; body: string }[] | undefined
-    if (commentsRow !== null) {
-      try {
-        comments = (
-          JSON.parse(commentsRow) as {
-            comments?: readonly { url?: string; body: string }[]
-          }
-        ).comments
-      } catch {
-        comments = undefined
-      }
+  const commentsRow = await gh(root, [
+    'pr',
+    'view',
+    String(identity.number),
+    '--json',
+    'comments',
+  ])
+  // An unread thread refuses rather than rendering, since a body built
+  // without it knows neither the comment to edit nor the preview address
+  // to carry, and posting it would duplicate the comment and drop the link.
+  // It refuses ahead of no-evidence too, so that record never reports an
+  // absent field it did not read.
+  let comments: readonly { url?: string; body: string }[] | undefined
+  if (commentsRow !== null) {
+    try {
+      comments = (
+        JSON.parse(commentsRow) as {
+          comments?: readonly { url?: string; body: string }[]
+        }
+      ).comments
+    } catch {
+      comments = undefined
     }
-    if (comments === undefined) {
-      return refuseWith(
-        'gh-failed',
-        EVIDENCE_REFUSALS['gh-failed'],
-        emitJson,
-        root,
-      )
-    }
-    commentId = findEvidenceCommentId(comments)
-    carriedPreview = findEvidencePreview(comments)
-    carriedChecklist = findEvidenceChecklist(comments)
-    carriedLocal = findEvidenceLocal(comments)
   }
+  if (comments === undefined) {
+    return refuseWith(
+      'gh-failed',
+      EVIDENCE_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+    )
+  }
+  commentId = findEvidenceCommentId(comments)
+  existingCases = findEvidenceCaseCount(comments)
+  carriedPreview = findEvidencePreview(comments)
+  carriedChecklist = findEvidenceChecklist(comments)
+  carriedLocal = findEvidenceLocal(comments)
 
   // What the marked comment already shows a reviewer, kept apart from the
   // flags this call passed so a reader learns what is posted.
@@ -1542,6 +1590,28 @@ async function runEvidence(
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
+
+  // A render with no cases cannot tell a removal from a short read, so it
+  // never replaces a comment that carries some. The record keeps the comment
+  // id and the carried fields so the caller can still edit by hand.
+  if (caseCount === 0 && existingCases > 0) {
+    logStep('Refused')
+    logWarn(EVIDENCE_REFUSALS['would-empty'])
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          number: identity.number,
+          reason: 'would-empty',
+          message: EVIDENCE_REFUSALS['would-empty'],
+          ...(commentId !== undefined && { commentId }),
+          ...carried,
+        })}\n`,
+      )
+    }
+    return 1
+  }
 
   logStep('Scope')
   logInfo(

@@ -23,7 +23,7 @@ The design axis has to survive the filter both bodies carry against subjective s
 
 ## Why the rendered read uses the posted comment
 
-`canon pr evidence` reads the local checkout's diff and names a pull request's head, so a reviewing session not on the branch compares the wrong change. The posted comment is what the author and the reviewer both see. The reference reads the comment, fetches the pull request head, and writes each image out with `git show` at the sha its row names, since the embedded address serves nothing to a session from a private repository.
+`canon pr evidence` reads the pull request's files over the API and renders a new body, which can differ from the comment already posted. The posted comment is what the author and the reviewer both see. The reference reads the comment, fetches the pull request head, and writes each image out with `git show` at the sha its row names, since the embedded address serves nothing to a session from a private repository.
 
 ## What the red runs measured
 
