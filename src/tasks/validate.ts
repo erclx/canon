@@ -6,7 +6,6 @@ import {
   declinedDir,
   isReservedStem,
   readOutcomes,
-  readPlanTarget,
   readPlanTargets,
   readPullRequest,
   resolveLivePlan,
@@ -731,11 +730,8 @@ async function planDisagreement(
   if (!existsSync(file)) return undefined
 
   const text = await readFile(file, 'utf8')
-  const target = readPlanTarget(text)
-  if (!target) {
-    const several = severalPlans(text, 'Run now', subject)
-    if (several) return several
-
+  const targets = readPlanTargets(text)
+  if (targets.length === 0) {
     return {
       kind: 'plan-uncited',
       group: 'Run now',
@@ -744,15 +740,22 @@ async function planDisagreement(
     }
   }
 
+  const twice = duplicatePlans(targets, 'Run now', subject, dir, root)
+  if (twice) return twice
+
   const rowed = planPath(row.plan, dir, root)
-  const cited = planPath(target, dir, root)
-  if (rowed === cited) return undefined
+  if (targets.some((target) => planPath(target, dir, root) === rowed)) {
+    return undefined
+  }
 
   return {
     kind: 'plan-mismatched',
     group: 'Run now',
     subject,
-    message: `is rowed against ${row.plan} and cites ${target} in its own Plan: line. One task names one plan.`,
+    message:
+      targets.length === 1
+        ? `is rowed against ${row.plan} and cites ${targets[0]} in its own Plan: line. One task names one plan.`
+        : `is rowed against ${row.plan}, which is none of the links on its own Plan: line (${targets.join(', ')}).`,
   }
 }
 
@@ -794,14 +797,15 @@ async function groupClaimFinding(
   if (!existsSync(file)) return undefined
 
   const text = await readFile(file, 'utf8')
-  const target = readPlanTarget(text)
-  if (!target) {
-    const several = severalPlans(text, row.group, row.stem)
-    if (several) return several
-  }
+  const targets = readPlanTargets(text)
+  const twice = duplicatePlans(targets, row.group, row.stem, dir, root)
+  if (twice) return twice
 
-  const live = target ? resolveLivePlan(target, dir, root) : undefined
-  const hasLivePlan = live !== undefined && existsSync(live)
+  const target = targets.find((link) => {
+    const live = resolveLivePlan(link, dir, root)
+    return live !== undefined && existsSync(live)
+  })
+  const hasLivePlan = target !== undefined
 
   if (row.group === 'Needs a plan' && hasLivePlan) {
     return {
@@ -817,9 +821,12 @@ async function groupClaimFinding(
       kind: 'plan-absent',
       group: row.group,
       subject: row.stem,
-      message: target
-        ? `sits under ${row.group}, which claims a written plan, and its task cites ${target}, which is not a live plan.`
-        : `sits under ${row.group}, which claims a written plan, and its task carries no Plan: line.`,
+      message:
+        targets.length > 1
+          ? `sits under ${row.group}, which claims a written plan, and its task cites ${targets.join(', ')}, none of which is a live plan.`
+          : targets.length === 1
+            ? `sits under ${row.group}, which claims a written plan, and its task cites ${targets[0]}, which is not a live plan.`
+            : `sits under ${row.group}, which claims a written plan, and its task carries no Plan: line.`,
     }
   }
 
@@ -827,23 +834,26 @@ async function groupClaimFinding(
 }
 
 /**
- * Reports a `Plan:` line linking more than one plan. `readPlanTarget` reads
- * such a line as naming nothing, so without this a caller would report the
- * line as absent when it is there and breaks the one-plan rule instead.
+ * Reports a `Plan:` line linking one plan more than once. Links to distinct
+ * plans are the shape a sliced task carries, so only a repeat is a finding.
+ * Links compare by the file they resolve to, so `../plans/x.md` beside
+ * `.canon/plans/x.md` is one plan listed twice.
  */
-function severalPlans(
-  text: string,
+function duplicatePlans(
+  targets: readonly string[],
   group: Finding['group'],
   subject: string,
+  dir: string,
+  root: string,
 ): Finding | undefined {
-  const targets = readPlanTargets(text)
-  if (targets.length < 2) return undefined
+  const paths = targets.map((target) => planPath(target, dir, root))
+  if (new Set(paths).size === paths.length) return undefined
 
   return {
     kind: 'plan-several',
     group,
     subject,
-    message: `cites ${targets.length} plans on its Plan: line (${targets.join(', ')}). One task names one plan, so split the task or drop the extra links.`,
+    message: `lists the same plan twice on its Plan: line (${targets.join(', ')}). Drop the repeat, or link a distinct plan per slice.`,
   }
 }
 

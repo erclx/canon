@@ -502,11 +502,40 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-uncited'])
   })
 
-  it('should report a run now row whose task links several plans, the first matching the row', async () => {
-    await seedTask('v1.0-first', '', undefined, NO_PLAN)
+  it('should read a sliced run now row naming one of the links as agreeing', async () => {
     await seedPlanLine('v1.0-first', SEVERAL_PLANS('v1.0-first'))
     await seedPlan('v1.0-first')
     await seedPlan('other')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    expect(await validateBoard(ROOT)).toMatchObject({ ok: true, findings: [] })
+  })
+
+  it('should report a run now row naming none of the links', async () => {
+    await seedPlanLine('v1.0-first', SEVERAL_PLANS('v1.0-first'))
+    await seedPlan('v1.0-first')
+    await seedPlan('other')
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', plan: '../plans/feature-third.md' }]),
+      ]),
+    )
+    await seedPlan('third')
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-mismatched'])
+    expect(outcome.ok && outcome.findings[0]).toMatchObject({
+      message: expect.stringContaining('none of the links'),
+    })
+  })
+
+  it('should report a run now line linking one plan twice', async () => {
+    await seedPlanLine(
+      'v1.0-first',
+      'Plan: [a](../plans/feature-v1.0-first.md), [b](.canon/plans/feature-v1.0-first.md)',
+    )
+    await seedPlan('v1.0-first')
     await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
 
     const outcome = await validateBoard(ROOT)
@@ -515,9 +544,7 @@ describe('validateBoard', () => {
     expect(outcome.ok && outcome.findings[0]).toMatchObject({
       group: 'Run now',
       subject: 'v1.0-first',
-      message: expect.stringContaining(
-        '../plans/feature-v1.0-first.md, ../plans/feature-other.md',
-      ),
+      message: expect.stringContaining('the same plan twice'),
     })
   })
 
@@ -634,22 +661,71 @@ describe('validateBoard', () => {
       })
     })
 
-    it('should report an up next row whose task links several plans', async () => {
+    it('should leave a sliced up next row with one live link unreported', async () => {
       await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
       await seedPlan('v3.0-third')
       await seedBoard(boardBody([parkedTable([upNextRow])]))
 
-      const outcome = await validateBoard(ROOT)
-
-      expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
-      expect(outcome.ok && outcome.findings[0]).toMatchObject({
-        group: 'Up next',
-        subject: 'v3.0-third',
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
       })
     })
 
-    it('should report a needs a plan row whose task links several plans', async () => {
+    it('should leave a sliced up next row with an archived and a live link unreported', async () => {
+      await seedPlanLine(
+        'v3.0-third',
+        'Plan: [old](../plans/archive/feature-old.md), [live](../plans/feature-v3.0-third.md)',
+      )
+      await seedArchivedPlan('old')
+      await seedPlan('v3.0-third')
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
+      })
+    })
+
+    it('should report a sliced up next row whose links are all absent', async () => {
       await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
+      await seedBoard(boardBody([parkedTable([upNextRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-absent',
+      ])
+    })
+
+    it('should report a sliced needs a plan row when any link is live', async () => {
+      await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
+      await seedPlan('v3.0-third')
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      const outcome = await validateBoard(ROOT)
+
+      expect(outcome.ok && claimKinds(outcome.findings)).toEqual([
+        'plan-parked',
+      ])
+    })
+
+    it('should leave a sliced needs a plan row with no live link unreported', async () => {
+      await seedPlanLine('v3.0-third', SEVERAL_PLANS('v3.0-third'))
+      await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
+
+      expect(await validateBoard(ROOT)).toMatchObject({
+        ok: true,
+        findings: [],
+      })
+    })
+
+    it('should report a parked row whose line links one plan twice', async () => {
+      await seedPlanLine(
+        'v3.0-third',
+        'Plan: [a](../plans/feature-v3.0-third.md), [b](.canon/plans/feature-v3.0-third.md)',
+      )
+      await seedPlan('v3.0-third')
       await seedBoard(boardBody([needsPlanTable([needsPlanRow])]))
 
       const outcome = await validateBoard(ROOT)
@@ -657,7 +733,6 @@ describe('validateBoard', () => {
       expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-several'])
       expect(outcome.ok && outcome.findings[0]).toMatchObject({
         group: 'Needs a plan',
-        subject: 'v3.0-third',
       })
     })
 
