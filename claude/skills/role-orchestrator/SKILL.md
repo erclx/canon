@@ -45,7 +45,7 @@ On a request to write the handoff or save the session, read `${CLAUDE_SKILL_DIR}
 
 On a request to resume after a compaction, read `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md`, which reads that file back with the board and the groundwork behind the live work.
 
-The review trigger takes the same shape. `references/orchestrator-poll.md` holds the loop prompt and the condition under which the poll runs, and `scripts/poll.sh` is what the prompt invokes. A session holding a recurring-prompt scheduler starts and cancels that loop itself, and no hook or check does, so the condition holds only while whoever holds the loop applies it.
+The review trigger takes the same shape. `references/orchestrator-poll.md` holds the loop prompt and the condition under which the poll runs, and `scripts/poll.ts` is what the prompt invokes. A session holding a recurring-prompt scheduler starts and cancels that loop itself, and no hook or check does, so the condition holds only while whoever holds the loop applies it.
 
 A board that is not moving is a third such moment. On a request to re-test the parked rows, read `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md` and follow it. It re-tests every `## Up next` and `## Needs a plan` blocker against the current tree, walks `backlog.md` on the same pass, writes what each test showed into the row, and plans what it clears. Its trigger is the inverse of the refill sweep's below, which fires on a merge and asks what to promote next rather than whether a row already parked is still parked for a reason.
 

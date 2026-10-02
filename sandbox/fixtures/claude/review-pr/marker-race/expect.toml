@@ -43,7 +43,7 @@ write_scope = [".canon/tmp/pr/review/**"]
 # a different script against the same seeded state.
 manual = [
   "The posted comment's marker names the head this pass read, not the commit the seeded pass named. Both are on the thread, and only the newest one scopes the pass after this",
-  "`claude/skills/role-orchestrator/scripts/poll.sh` reports this pull request as MOVED rather than SEEN on a first run against it. The seeded stamp equals the head, which is what SEEN fires on, and the marker is what keeps it from firing",
+  "`claude/skills/role-orchestrator/scripts/poll.ts` reports this pull request as MOVED rather than SEEN on a first run against it. The seeded stamp equals the head, which is what SEEN fires on, and the marker is what keeps it from firing",
   "The pass did not stop with 'The head is unchanged since the prior pass'. That stop is the failure this arm exists against, and it leaves no local file to assert on",
 ]
 

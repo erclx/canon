@@ -28,7 +28,7 @@ manual = [
   "The thread carries exactly one `## Review closed`. A second one posted beside the first is the whole defect this arm exists against, and no local file records whether the pass posted or rewrote",
   "The standing close-out's body now names the refactor commit rather than the commit it was first submitted against, which is what proves the rewrite landed rather than being skipped",
   "The pass raised no finding on the refactor commit. A pass that found something correctly posts a fresh `## Review` instead, and the guard is not what that outcome tests",
-  "No comment sits under a heading outside the five the review and reply families fix. `poll.sh` reports anything else as UNMATCHED",
+  "No comment sits under a heading outside the five the review and reply families fix. `poll.ts` reports anything else as UNMATCHED",
 ]
 
 # No max_turns yet. One clean run came in at 13 turns, and this arm's spread is

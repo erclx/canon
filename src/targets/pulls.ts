@@ -8,7 +8,7 @@ const GH_TIMEOUT_MS = 30_000
  * The two headings a review pass posts under.
  *
  * Owned by `review-pr`, which states the full set once, and pinned here
- * the way `role-orchestrator/scripts/poll.sh` pins them. All three surfaces
+ * the way `role-orchestrator/scripts/poll.ts` pins them. All three surfaces
  * ship separately, so a heading added in that skill goes stale here with
  * nothing comparing the copies.
  */
@@ -139,7 +139,7 @@ export function rollup(checks: readonly RawCheck[]): ChecksState | null {
 
 /**
  * Reads the heading of the newest pass carrying one, matching on the first line
- * alone the way `poll.sh` does.
+ * alone the way `poll.ts` does.
  *
  * The reviews arrive oldest first, so the last match is the current state of
  * the thread. A pass carrying neither heading is somebody reviewing by hand and
