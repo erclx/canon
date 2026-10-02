@@ -120,6 +120,28 @@ describe('canon pr preview', () => {
     expect(outcome).toEqual({ reason: 'unfenced', exit: 1 })
   })
 
+  it('should refuse --check combined with --timeout before reading anything', async () => {
+    const outcome = await runPreview(['1', '--check', '--timeout', '5'])
+
+    expect(outcome).toEqual({ reason: 'check-timeout', exit: 1 })
+  })
+
+  it('should list --check and its four reasons in the help text', async () => {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'preview', '--help'],
+      {
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+      },
+    )
+
+    expect(result.stdout).toMatch(/--check/)
+    for (const reason of ['fresh', 'stale', 'building', 'no-build']) {
+      expect(result.stdout).toContain(reason)
+    }
+  })
+
   it('should refuse a timeout that is not a positive number of minutes', async () => {
     const outcome = await runPreview(['1', '--timeout', 'soon'])
 

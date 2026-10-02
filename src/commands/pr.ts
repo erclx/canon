@@ -50,6 +50,8 @@ import { KEY_CHANGES } from '@/pr/paths'
 import {
   findDeployWorkflow,
   mintPreview,
+  type PreviewHeadReason,
+  readPreviewHead,
   type PreviewRefusal,
   type PreviewRunner,
   type RunRow,
@@ -116,6 +118,7 @@ const LOCAL_REFUSALS: Record<LocalRefusal | 'gh-failed', string> = {
 
 interface PreviewOptions extends ReadOptions {
   readonly timeout?: string
+  readonly check?: boolean
 }
 
 /** How long `canon pr preview` waits on the deploy run by default, in minutes. */
@@ -124,8 +127,13 @@ const PREVIEW_TIMEOUT_MINUTES = 15
 /** How often the deploy run is re-read while waiting on it. */
 const PREVIEW_POLL_MS = 15_000
 
-const PREVIEW_REFUSALS: Record<PreviewRefusal | 'bad-timeout', string> = {
+const PREVIEW_REFUSALS: Record<
+  PreviewRefusal | 'bad-timeout' | 'check-timeout',
+  string
+> = {
   'bad-timeout': '--timeout takes a positive number of minutes.',
+  'check-timeout':
+    '--check only reads the deploy runs and waits on nothing, so it takes no --timeout.',
   'no-deploy':
     'No workflow under .github/workflows/ runs pages deploy and carries a workflow_dispatch trigger, so there is nothing to dispatch.',
   // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
@@ -139,6 +147,17 @@ const PREVIEW_REFUSALS: Record<PreviewRefusal | 'bad-timeout', string> = {
     'The deploy run finished without succeeding, so no preview was published. Read the run log.',
   timeout:
     'The deploy run did not finish inside the bound. The preview may still land. Re-run with a longer --timeout or read the run.',
+}
+
+/** What a reader does about each way `canon pr preview --check` answers. */
+const PREVIEW_HEAD_NOTES: Record<PreviewHeadReason, string> = {
+  fresh: 'The newest successful deploy built the branch tip.',
+  stale:
+    'The newest successful deploy built an earlier head than the branch tip. Mint again with canon pr preview before driving the preview.',
+  building:
+    'A deploy of the branch tip is still running. Wait for it rather than minting again.',
+  'no-build':
+    'No successful deploy exists for this branch. Mint one with canon pr preview.',
 }
 
 /** Why a head-sensitive read produced no answer about a commit. */
@@ -528,8 +547,11 @@ export function register(program: Command): void {
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
       '--timeout <minutes>',
-      'How long to wait on the deploy run',
-      String(PREVIEW_TIMEOUT_MINUTES),
+      `How long to wait on the deploy run (default ${PREVIEW_TIMEOUT_MINUTES})`,
+    )
+    .option(
+      '--check',
+      'Read whether the newest successful deploy built the branch tip, dispatching nothing',
     )
     .addHelpText(
       'after',
@@ -554,13 +576,22 @@ export function register(program: Command): void {
         '  run-failed  the deploy run finished without succeeding',
         '  timeout     the run did not finish inside --timeout minutes',
         '',
+        'With --check nothing is dispatched or waited on. The newest successful',
+        'workflow_dispatch run is compared with the branch tip read from the remote.',
+        'Read `reason` on the JSON record, with `built`, `tip`, and `runId`:',
+        '  fresh       the newest successful deploy built the tip',
+        '  stale       the newest successful deploy built an earlier head',
+        '  building    a deploy of the tip is still running, so wait',
+        '  no-build    no deploy of this branch has succeeded',
+        '',
         'Exit codes:',
-        '  0  a preview was published',
-        '  1  refused, with the reason on stderr or in the JSON record',
+        '  0  a preview was published, or --check read fresh',
+        '  1  refused, or --check read anything but fresh',
         '',
         'Examples:',
         '  canon pr preview --json',
         '  canon pr preview 1341 --json --timeout 20',
+        '  canon pr preview 1341 --check --json',
         '',
       ].join('\n'),
     )
@@ -1773,7 +1804,7 @@ function ghPreviewRunner(root: string): PreviewRunner {
         '--limit',
         '20',
         '--json',
-        'databaseId,status,conclusion',
+        'databaseId,status,conclusion,headSha,createdAt',
       ])
       if (out === null) return undefined
       try {
@@ -1789,7 +1820,7 @@ function ghPreviewRunner(root: string): PreviewRunner {
           'view',
           String(id),
           '--json',
-          'databaseId,status,conclusion',
+          'databaseId,status,conclusion,headSha,createdAt',
         ]),
       )
     },
@@ -1809,6 +1840,15 @@ async function runPreview(
   const emitJson = opts.json ?? false
 
   intro('canon pr preview')
+
+  if (opts.check === true && opts.timeout !== undefined) {
+    return refuseWith(
+      'check-timeout',
+      PREVIEW_REFUSALS['check-timeout'],
+      emitJson,
+      root,
+    )
+  }
 
   const minutes = Number(opts.timeout ?? PREVIEW_TIMEOUT_MINUTES)
   if (!Number.isFinite(minutes) || minutes <= 0) {
@@ -1837,6 +1877,10 @@ async function runPreview(
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
   const { identity } = read
+
+  if (opts.check === true) {
+    return runPreviewCheck(root, emitJson, pick.path, identity)
+  }
 
   logStep('Deploy')
   logInfo(`${pick.path} on ${identity.branch}`)
@@ -1885,6 +1929,62 @@ async function runPreview(
   }
 
   return 0
+}
+
+/**
+ * Reads the built head against the tip. The tip comes from the remote rather
+ * than `headRefOid`, which lags a push, so a build of the last head reads stale
+ * the moment a newer commit lands.
+ */
+async function runPreviewCheck(
+  root: string,
+  emitJson: boolean,
+  workflow: string,
+  identity: { readonly branch: string; readonly number?: number },
+): Promise<number> {
+  const resolved = await resolveTip(identity.branch, refReader(root))
+  if (resolved.kind === 'refused') {
+    return refuseWith(
+      resolved.reason,
+      PULL_REFUSALS[resolved.reason],
+      emitJson,
+      root,
+    )
+  }
+
+  const reading = await readPreviewHead(ghPreviewRunner(root), {
+    workflow,
+    branch: identity.branch,
+    tip: resolved.tip,
+  })
+  if (reading.reason === 'gh-failed') {
+    return refuseWith(
+      'gh-failed',
+      PREVIEW_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+    )
+  }
+
+  logStep('Preview head')
+  logInfo(PREVIEW_HEAD_NOTES[reading.reason])
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        root,
+        ...(identity.number !== undefined && { number: identity.number }),
+        reason: reading.reason,
+        message: PREVIEW_HEAD_NOTES[reading.reason],
+        workflow,
+        tip: reading.tip,
+        ...(reading.built !== undefined && { built: reading.built }),
+        ...(reading.runId !== undefined && { runId: reading.runId }),
+      })}\n`,
+    )
+  }
+  return reading.reason === 'fresh' ? 0 : 1
 }
 
 async function readText(path: string): Promise<string | undefined> {
