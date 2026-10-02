@@ -42,10 +42,10 @@ Every observable behavior becomes a dependency once there are enough callers, wh
 ## Change additively
 
 - Add a field, a flag, or a parameter as optional, with a default that keeps the old behavior.
-- Never rename or remove anything in place. Add the new name beside the old one, keep both working, and remove the old one only once no caller reads it.
+- Never rename or remove anything in place. Add the new name beside the old one, keep both working, and remove the old one only once no caller reads it, proving that and moving the callers through `deprecation-migration`.
 - Never change what an existing field means or what type it carries. A new meaning takes a new name.
 - When a caller cannot pin a version, such as a module everything in one repository imports, keep one version of the surface live and migrate every caller in the change that alters it, the One-Version Rule. Two versions live side by side split the callers between them.
-- Record each deprecation where a caller looks, naming the replacement and what happens next, rather than in a commit message nobody reads again.
+- Record each deprecation where a caller looks, naming the replacement and what happens next, rather than in a commit message nobody reads again. Whether to deprecate, and when a deprecation turns compulsory, is `deprecation-migration`.
 
 ## Make a retried write safe
 
@@ -100,3 +100,4 @@ Check each line against the surface the change produced. A line answering no is 
 - Listing the consumers a finished change breaks, and the docs it made false, during review: `review-craft`
 - A visual interface, its layout, and its look: `design-taste`
 - Interface depth and the internals behind a boundary: `code-craft`
+- Retiring a surface, migrating its callers, and proving none remain before removal: `deprecation-migration`

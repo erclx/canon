@@ -39,6 +39,7 @@ export const PRACTICE_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'api-design'),
   join(SHIPPED_CORPUS, 'code-craft'),
   join(SHIPPED_CORPUS, 'build-in-slices'),
+  join(SHIPPED_CORPUS, 'deprecation-migration'),
 ]
 
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
