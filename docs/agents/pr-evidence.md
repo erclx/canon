@@ -46,19 +46,19 @@ image or marks the case new.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
-| Reason                 | What it means                                                                 |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| `ok`                   | A body was rendered. `commentId` is set when a marked comment already exists. |
-| `no-evidence`          | Nothing in the diff carries an `evidence/` segment. An ordinary silent no-op. |
-| `unreadable-checklist` | `--checklist` named a path that could not be read, or one holding nothing.    |
-| `gh-missing`           | `gh` is not on the path, so no pull request could be resolved.                |
-| `gh-failed`            | `gh` could not answer for this repository or branch, or read its comments.    |
-| `no-branch`            | The pull request carries no head branch name.                                 |
-| `no-object-head`       | The pull request object reported no head commit.                              |
-| `no-base`              | GitHub reported no merge base for the pull request.                           |
-| `unreadable-changes`   | GitHub could not list what the pull request changed.                          |
-| `would-empty`          | The render holds no cases and the marked comment holds some. No body.         |
-| `check-writes`         | `--check` was passed with `--preview`, `--local`, or `--checklist`.           |
+| Reason                 | What it means                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `ok`                   | A body was rendered. `commentId` is set when a marked comment already exists.           |
+| `no-evidence`          | No `evidence/` segment in the diff and no `--checklist` or `--preview`. A silent no-op. |
+| `unreadable-checklist` | `--checklist` named a path that could not be read, or one holding nothing.              |
+| `gh-missing`           | `gh` is not on the path, so no pull request could be resolved.                          |
+| `gh-failed`            | `gh` could not answer for this repository or branch, or read its comments.              |
+| `no-branch`            | The pull request carries no head branch name.                                           |
+| `no-object-head`       | The pull request object reported no head commit.                                        |
+| `no-base`              | GitHub reported no merge base for the pull request.                                     |
+| `unreadable-changes`   | GitHub could not list what the pull request changed.                                    |
+| `would-empty`          | The render holds no cases and the marked comment holds some. No body.                   |
+| `check-writes`         | `--check` was passed with `--preview`, `--local`, or `--checklist`.                     |
 
 `no-evidence` is not a refusal a caller reports. A project on a stack that
 carries no evidence path, such as `base` or `python`, hits this reason on
@@ -76,8 +76,9 @@ shows a reviewer, each field present only when that comment holds it:
 
 These come from the comment already posted, never from the flags the call
 passed, so a skill driving a review reads which address and which checklist a
-reviewer has without parsing the comment itself. A checklist posted on its own
-carries no marker, so the record reports none of the three for it. Reading
+reviewer has without parsing the comment itself. A checklist posted raw, which
+only the fallback for a refused render does now, carries no marker, so the
+record reports none of the three for it. Reading
 them means the thread is read before the `no-evidence` answer too, so an
 unreadable thread refuses as `gh-failed` on both reasons rather than
 reporting the fields absent.
@@ -156,11 +157,11 @@ already holds, the same way the preview address is carried. That is what keeps
 already ticked, since `git-pr` deletes the handoff once the first post reports
 success and no later call has a file to pass.
 
-The option does not decide `no-evidence` alone. A branch with a checklist and
-no changed evidence image still reports `no-evidence`, and the caller posts the
-checklist on its own, which is what it did before this option existed. A
-checklist passed together with `--local` is the exception, covered below. A path
-that cannot be read, or one holding nothing, refuses as
+The option decides `no-evidence` on its own. A branch with a checklist and no
+changed evidence image renders `ok` with a marked body holding the checklist,
+so the checklist always lands in the one comment a later call finds and edits.
+The raw post survives only as the caller's fallback when the render is refused.
+A path that cannot be read, or one holding nothing, refuses as
 `unreadable-checklist` rather than rendering without it: the caller deletes the
 handoff once a post succeeds, so a silently dropped checklist is the only copy
 gone.
@@ -175,8 +176,8 @@ the local address the marked comment already holds, the same as the other two.
 
 The option does not turn `no-evidence` into `ok` on its own. A branch with a
 dev server running and no rendered change would otherwise get a comment holding
-a link and nothing else. Together with `--checklist` it does, so the link and
-the checklist land in one comment rather than the checklist going out alone.
+a link and nothing else. Together with `--checklist` the link and the
+checklist land in one comment.
 `canon docs pr-local` covers where the address comes from and how the line is
 removed at close.
 
@@ -214,9 +215,9 @@ those ask a read to write.
 
 The thread cannot separate a skipped preview step from a failed one. A pull
 request whose deploy run failed or timed out reads as owing a preview, and the
-session that ran it holds the cause. A checklist posted on its own carries no
-marker, so a branch with a checklist and no evidence image never reads as
-owing a preview, though `git-pr` runs the preview step for it. The deploy
+session that ran it holds the cause. A checklist-only branch posts a marked
+comment, so it reads as owing a preview once that comment exists and a deploy
+workflow resolves. The deploy
 workflow is read from the checkout rather than the pull request's head, so a
 pull request that adds or removes its own deploy workflow reads against trunk's.
 
