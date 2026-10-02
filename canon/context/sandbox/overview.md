@@ -7,19 +7,26 @@ description: What the sandbox domain owns, the scenario categories, provisioning
 
 ## Overview
 
-Owns the scenarios that provision isolated project states for testing scripts, configs, and skills. Each scenario defines a known starting state plus instructions for what to run and what to expect. The scripts live under `scripts/sandbox/`, but the authoring contract is its own domain, which is why it sits apart from `canon/context/scripts/index.md`.
+Owns the scenarios that provision isolated project states for testing scripts, configs, and skills. Each scenario defines a known starting state plus instructions for what to run and what to expect. The scripts live under `sandbox/` at the project root rather than under `scripts/`, since the authoring contract is its own domain, which is also why it sits apart from `canon/context/scripts/index.md`.
 
 ## Layout
 
-- `scripts/sandbox/` owns the scenario scripts, one folder per category
-- `scripts/sandbox/<category>/` owns one file per command, each holding one or more named scenarios
-- `scripts/sandbox/fixtures/` owns file content staged into the sandbox and each arm's `expect.toml`
+- `sandbox/` owns the scenario scripts, one folder per category
+- `sandbox/<category>/` owns one file per command, each holding one or more named scenarios
+- `sandbox/fixtures/` owns file content staged into the sandbox and each arm's `expect.toml`
 - `src/sandbox/` owns the expectation checker, the coverage report, and the skill census
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project state, outside the repository and unique to the run that provisioned it
 
 Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `scripts/manage-sandbox.sh`, `src/commands/sandbox.ts`, and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in all three, so a helper the harness needs on disk goes to `scripts/lib/`, where `sandbox-dispatch.sh` sits.
 
 ## Decisions
+
+### A root folder named for its role
+
+- The scenario tree sits at `sandbox/` rather than under `scripts/`, the folder for a project's chores. The harness carries its own authoring contract, census, and expectation scoring, and it held seven eighths of the shell under `scripts/` before it moved, so the chores folder was mostly one domain that was not a chore.
+- Staying under `scripts/` was the alternative, and it ties the folder to the language. The scenarios are meant to be rebuilt in TypeScript in this same folder, which a role name survives and a language-shaped home does not.
+- The bash harness that provisions the tree, `scripts/manage-sandbox.sh` and the `scripts/lib/sandbox-*.sh` libraries, stays under `scripts/` until its TypeScript replacement lands under `src/`, so it does not move twice.
+- Four gates walked `scripts/` by name, being `check:shell`, the `shfmt` roots in `format` and `check:format`, and `scripts/core/check-color-source.sh`. Each names `sandbox` as a root of its own now, and the color check fails when either root is missing rather than reporting a tree it never walked.
 
 ### Scenario defaults and the reset contract
 
@@ -35,7 +42,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 ### Naming and staging a scenario
 
-- A scenario file is named for the skill it drives, not for the domain the skill sits in. `scripts/sandbox/claude/memory-review.sh` drives `/canon:memory-review`, and a name that diverged would leave the `<category>/<rest>.sh` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
+- A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/memory-review.sh` drives `/canon:memory-review`, and a name that diverged would leave the `<category>/<rest>.sh` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
 - A scenario whose expectation reads a slug checks out its branch explicitly. `git init` inherits the machine's `init.defaultBranch`, so an arm resting on the initial branch name passes or fails by local git config.
 - Git history initializes fresh each run, and a `refs/sandbox/baseline` ref marks the post-setup state so `canon sandbox reset` restores without provisioning again.
 

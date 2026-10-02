@@ -5,12 +5,12 @@ description: Driving a skill through run.sh, composing the prompt, the run envel
 
 # Headless
 
-`scripts/sandbox/run.sh` drives a skill through `claude -p` non-interactively, so a session can test a skill without a human opening an interactive sandbox. It provisions a scenario, invokes the skill from the sandbox tree, and prints the run envelope as JSON on stdout with a framed summary on stderr.
+`sandbox/run.sh` drives a skill through `claude -p` non-interactively, so a session can test a skill without a human opening an interactive sandbox. It provisions a scenario, invokes the skill from the sandbox tree, and prints the run envelope as JSON on stdout with a framed summary on stderr.
 
 ```bash
-scripts/sandbox/run.sh <cat:cmd> "<prompt>" [scenario]
-scripts/sandbox/run.sh git:commit "/canon:git-commit"
-scripts/sandbox/run.sh claude:plan-feature "/canon:plan-feature add a widget" small
+sandbox/run.sh <cat:cmd> "<prompt>" [scenario]
+sandbox/run.sh git:commit "/canon:git-commit"
+sandbox/run.sh claude:plan-feature "/canon:plan-feature add a widget" small
 ```
 
 ## Decisions

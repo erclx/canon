@@ -1,0 +1,88 @@
+# What a correct `/role-orchestrator` run reports against the staged board.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# The skill reads a board and reports state, writing nothing, so the reply
+# carries almost the whole verdict. Tree assertions cannot cover a proposal, which
+# is the generalization already recorded beside the superseded arm, and padding
+# this declaration with negatives over the staged board would print a healthy
+# number while measuring the fixture rather than the skill.
+
+# Every top-level key sits above any table block. A bare key below one belongs to
+# that table in TOML, so an array written at the bottom parses clean and asserts
+# nothing.
+
+# The default cap, which is what `sandbox/run.sh` runs under. A passing
+# run cost 4 turns, which is a floor on what a correct run costs rather than a
+# bound on it, since a proposal-only skill pays for however it reads the tree and
+# one sample of a varying cost lowers nothing. The routing arms beside this one
+# settled the same way for the same reason.
+max_turns = 30
+
+# The two files a run that overstepped would leave behind. Neither is staged, so
+# both are claims about what the session did rather than about provisioning.
+#
+# `feature-streak-view.md` is the boundary between reporting a route and taking
+# it. The board carries a task under `## Needs a plan`, so a run that wrote that
+# plan itself did the planning step it was meant to route. The slug follows the
+# task filename, which is where a plan for it would take its name, and a run
+# choosing another one passes this entry vacuously, which is a miss rather than
+# a false pass.
+#
+# `session-*.md` is the handoff. The skill writes it on a request to save the
+# session and on nothing else, so a bare invocation that produced one wrote
+# without being asked. The entry is a glob because the file takes one name per
+# session, derived from the branch, and the scenario's branch follows whatever
+# the machine's `git init` inherits. A single spelling would pass vacuously on
+# every machine deriving another.
+absent = [
+  ".canon/plans/feature-streak-view.md",
+  ".canon/tasks/session-*.md",
+]
+
+# Two of the scenario's five expectations reach a load-bearing token. Each pin is
+# a positive, since a negative substring passes on every reply that phrases the
+# thing differently.
+#
+# The plan path proves the run opened `.canon/plans/` rather than reporting the
+# task board alone, and `auto-ship` is the route that path earns. Both read
+# the same staged file, so the pair separates a run that read the board against
+# the plans folder from one that reported the single queued task and stopped.
+#
+# The route the unplanned task earns is `plan-feature`, and it was pinned here
+# until 2026-08-20. Nothing in the fixture fixes that token, so it moved to
+# `manual` under the `Judgment:` label rather than staying a pin whose verdict
+# moves between identical runs. `auto-ship` keeps its pin on the difference
+# the fixture makes: the planned task carries a staged plan file, so the run has a
+# concrete path to name and the pin reads a consequence of provisioning.
+#
+# What that pin reaches is the token anywhere in the reply rather than the row it
+# is written about. A negative on 2026-08-20 rewrote the ready-to-build row to
+# route to `/git-ship`, and the run followed it and still passed at 5 asserted and
+# 0 failed, because the skill's own `Next:` line names `auto-ship` from a
+# different part of its body. The entry below records the row the pin cannot
+# isolate, and anchoring it is not available here, since `reply` matches plain
+# substrings and a regex over prose goes red on any rewording.
+#
+# The surviving route is spelled without a leading slash. A session invoking
+# through the plugin writes `/canon:auto-ship`, which carries the bare name
+# and not the slashed one, so the shorter token survives either spelling.
+#
+# `Next:` is the output contract's last slot. It asserts the slot rather than the
+# singleness the scenario expects or the route it names, both of which the manual
+# entries below carry.
+reply = [
+  ".canon/plans/feature-log-entry.md",
+  "auto-ship",
+  "Next:",
+]
+
+manual = [
+  "The reply names no active version at all, since the fixture stages no file stating one. Semantic: a negative, and a substring cannot reach a version string the run invented from the task filenames.",
+  "The In review section is omitted where the fixture has no open pull request. Semantic: a negative, and an entry asserting what a run must not have written passes on every spelling that phrases it differently.",
+  "Execution order is read from priority.md rather than inferred from index.md. Unwired: the two staged rows sit in filename order in both files, and readiness is recoverable from the plans folder alone, so a run that never opened priority.md reports the same board.",
+  "The Next line proposes a single action. Semantic: a substring finds the slot and cannot count what follows it, so a reply offering three actions under one heading passes.",
+  "The Next line routes the unplanned task to plan-feature. Judgment: the fixture stages nothing naming that route, so the token is one the run chooses rather than one provisioning fixes. Two runs against one unchanged fixture on 2026-08-20 disagreed on it while every other entry held, which is what moved it out of the pins above.",
+  "The ready-to-build row for the planned task routes to auto-ship. Semantic: the pin above matches that token anywhere in the reply, and the skill names it on the Next line from a separate part of its body, so a run routing the row elsewhere still passes. Measured 2026-08-20 against a copy of the skill whose row read /git-ship.",
+  "The session wrote nothing at all. Unwired: an absence names a path, and the paths a wrong run would invent are unbounded, so the two entries above cover the two a wrong run most plausibly writes and nothing catches the rest.",
+]

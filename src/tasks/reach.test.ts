@@ -87,10 +87,10 @@ describe('readDeclarations', () => {
 
   it('should drop a path cited inside the reason behind the colon', () => {
     const entries = [
-      '`scripts/sandbox/a.sh`: moved by hand, which `src/gate/measures.ts` now fails on.',
+      '`sandbox/a.sh`: moved by hand, which `src/gate/measures.ts` now fails on.',
     ]
 
-    expect(readDeclarations(plan(entries))).toEqual(['scripts/sandbox/a.sh'])
+    expect(readDeclarations(plan(entries))).toEqual(['sandbox/a.sh'])
   })
 
   it('should read both sides of a rename stated ahead of the colon', () => {

@@ -170,9 +170,9 @@ describe('renamePath', () => {
   })
 
   it('should move a prefixed scenario script', () => {
-    expect(
-      renamePath('scripts/sandbox/claude/aitk-operator.sh', AITK_RULES),
-    ).toBe('scripts/sandbox/claude/canon-operator.sh')
+    expect(renamePath('sandbox/claude/aitk-operator.sh', AITK_RULES)).toBe(
+      'sandbox/claude/canon-operator.sh',
+    )
   })
 
   it('should leave a path carrying no token alone', () => {

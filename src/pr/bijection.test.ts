@@ -54,14 +54,14 @@ describe('compareKeyChanges', () => {
   it('should name a claimed file the diff does not carry', () => {
     const result = read(
       keyChanges(
-        '- Correct the happy-path `log_info` line in `scripts/sandbox/claude/autoship.sh` that overstated the output.',
-        '- Add `scripts/sandbox/fixtures/claude/autoship/happy-path/expect.toml`, pinning the completion line.',
+        '- Correct the happy-path `log_info` line in `sandbox/claude/autoship.sh` that overstated the output.',
+        '- Add `sandbox/fixtures/claude/autoship/happy-path/expect.toml`, pinning the completion line.',
       ),
-      ['scripts/sandbox/fixtures/claude/autoship/happy-path/expect.toml'],
+      ['sandbox/fixtures/claude/autoship/happy-path/expect.toml'],
     )
 
     expect(result.kind === 'measured' && result.unmet).toMatchObject([
-      { path: 'scripts/sandbox/claude/autoship.sh' },
+      { path: 'sandbox/claude/autoship.sh' },
     ])
     expect(result.kind === 'measured' && result.unnamed).toEqual([])
   })
@@ -124,7 +124,7 @@ describe('compareKeyChanges', () => {
     const result = read(keyChanges('- Add `src/cli.ts`.'), [
       'bun.lock',
       'docs/agents/index.md',
-      'scripts/sandbox/fixtures/claude/autoship/expect.toml',
+      'sandbox/fixtures/claude/autoship/expect.toml',
       'src/cli.ts',
       'src/pr/paths.test.ts',
     ])
@@ -134,15 +134,15 @@ describe('compareKeyChanges', () => {
     ])
     expect(result.kind === 'measured' && result.incidental).toEqual([
       'bun.lock',
-      'scripts/sandbox/fixtures/claude/autoship/expect.toml',
+      'sandbox/fixtures/claude/autoship/expect.toml',
       'src/pr/paths.test.ts',
     ])
   })
 
   it('should let a directory claim cover every file beneath it', () => {
     const result = read(
-      keyChanges('- Rename four sandbox arms under `scripts/sandbox/claude/`.'),
-      ['scripts/sandbox/claude/autoship.sh', 'scripts/sandbox/claude/ship.sh'],
+      keyChanges('- Rename four sandbox arms under `sandbox/claude/`.'),
+      ['sandbox/claude/autoship.sh', 'sandbox/claude/ship.sh'],
     )
 
     expect(result.kind === 'measured' && result.unnamed).toEqual([])

@@ -6,7 +6,7 @@
 FIXTURE_SUFFIX=".fixture"
 
 # The tree mirrors the scenario path, so `category` and `scenario` together match
-# `scripts/sandbox/<category>/<scenario>.sh`. Both segments are load-bearing:
+# `sandbox/<category>/<scenario>.sh`. Both segments are load-bearing:
 # four scenario basenames repeat across categories (`claude`, `docs`, `review`,
 # `sync`), and `docs` is also a category of its own.
 fixture_stage_dir() {
@@ -14,7 +14,7 @@ fixture_stage_dir() {
   local scenario="$2"
   local arm="$3"
   local stage="$4"
-  echo "$PROJECT_ROOT/scripts/sandbox/fixtures/$category/$scenario/$arm/$stage"
+  echo "$PROJECT_ROOT/sandbox/fixtures/$category/$scenario/$arm/$stage"
 }
 
 list_fixture_files() {

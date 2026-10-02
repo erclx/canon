@@ -138,7 +138,6 @@ export function expectFilePath(
 ): string {
   return join(
     root,
-    'scripts',
     'sandbox',
     'fixtures',
     category,

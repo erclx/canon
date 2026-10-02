@@ -37,4 +37,4 @@ canon sandbox check <cat:cmd> [arm]  # assert an arm against the provisioned tre
 canon sandbox coverage               # report which scenarios declare expectations
 ```
 
-`docs/agents/sandbox.md` carries the flags and JSON shapes. `canon/context/sandbox/headless.md` covers driving a skill through `scripts/sandbox/run.sh`.
+`docs/agents/sandbox.md` carries the flags and JSON shapes. `canon/context/sandbox/headless.md` covers driving a skill through `sandbox/run.sh`.

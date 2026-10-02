@@ -23,7 +23,7 @@ Gitignore merging is additive only and existing entries are never touched, so a 
 
 ## Gotchas
 
-- `runtime` is reserved and read by nothing. `scaffold` is read only by `scripts/sandbox/tooling/upstream.sh`, not by `canon tooling sync`.
+- `runtime` is reserved and read by nothing. `scaffold` is read only by `sandbox/tooling/upstream.sh`, not by `canon tooling sync`.
 - Bun's script shell expands command substitution and a leading environment assignment, so a script value may carry `VAR=$(bash scripts/x.sh) command`. Verified 2026-08-13 against `bun run`.
 - `Bun.Glob` skips dotfiles unless `dot: true` is set. Tooling configs are almost entirely dotfiles, so omitting it matches 4 of 14 files in `base` and fails silently.
 - Non-`.txt` seeds are copy-once. To re-seed a structured file, delete it and sync again.

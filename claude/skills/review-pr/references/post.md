@@ -59,7 +59,7 @@ A Testing box the Step 3 check raised goes in a `**Testing**` block placed after
 ```markdown
 **Testing**
 
-- `- [ ] <the box as written>` names no capability the agent lacks. `scripts/sandbox/run.sh <arm>` drives it. Was there a reason to leave it?
+- `- [ ] <the box as written>` names no capability the agent lacks. `sandbox/run.sh <arm>` drives it. Was there a reason to leave it?
 ```
 
 Keep it to the boxes the check raised. Restating a box whose stated requirement holds teaches the branch author to skip the block.

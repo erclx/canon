@@ -88,7 +88,7 @@ function armsFor(
  * a suite that proves something from one that runs.
  */
 export function collectCoverage(root: string): CoverageReport {
-  const sandboxDir = join(root, 'scripts', 'sandbox')
+  const sandboxDir = join(root, 'sandbox')
   const fixturesDir = join(sandboxDir, FIXTURES_DIR)
 
   const scenarios = listScenarios(sandboxDir).map((scenario) => ({

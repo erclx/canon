@@ -29,7 +29,7 @@ The rule gating a skill edit globs `.claude/skills/**/REQUIREMENT.md`, firing on
 
 ## Sandbox check verification route
 
-`internal-sandbox-check` maps changed items to scenarios and then verifies one of them. It drives `scripts/sandbox/run.sh` against the `Provisioning:` scenario, deriving the target from the scenario path and the prompt as `/canon:<skill-name>`, and reports the verdict `run.sh` returns rather than asserting its own.
+`internal-sandbox-check` maps changed items to scenarios and then verifies one of them. It drives `sandbox/run.sh` against the `Provisioning:` scenario, deriving the target from the scenario path and the prompt as `/canon:<skill-name>`, and reports the verdict `run.sh` returns rather than asserting its own.
 
 The arm is the third argument and roughly half the catalog requires it. `manage-sandbox.sh` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives an arm, so a multi-arm scenario invoked without one falls through to `select_or_route_scenario` and its picker, which aborts on a missing TTY and blocks on input when one is attached. Either way the run dies before the skill session.
 

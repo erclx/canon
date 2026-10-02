@@ -81,7 +81,8 @@ The toolkit has the following domains. Each maps to a skill. Load the skill befo
 - `tooling/`: golden configs (base), references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
 - `src/`: TypeScript CLI entry point, commander subcommands, exec helper
-- `scripts/`: bash domain scripts, core maintenance, sandbox, and prompt generation
+- `scripts/`: bash domain scripts, core maintenance, and prompt generation
+- `sandbox/`: scenarios that provision isolated project states, their fixtures, and the headless runner
 - `wiki/`: reference pages for Anthropic-owned subjects, under `wiki/claude/`
 
 ## Commands

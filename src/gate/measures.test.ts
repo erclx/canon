@@ -417,7 +417,7 @@ describe('shippedReferences', () => {
   })
 
   it('passes over a tree the files field negates', async () => {
-    write('scripts/sandbox/claude/review.sh', '# see #1307\n')
+    write('sandbox/claude/review.sh', '# see #1307\n')
     write('scripts/lib/ui.sh', 'resolve the root\n')
 
     const report = await shippedReferences(context())

@@ -40,7 +40,7 @@ show_help() {
   exit 0
 }
 
-ANCHOR_FIXTURE_DIR="$PROJECT_ROOT/scripts/sandbox/fixtures/anchor/create"
+ANCHOR_FIXTURE_DIR="$PROJECT_ROOT/sandbox/fixtures/anchor/create"
 
 # Where an anchor scenario's tree comes from and where its remote points are two
 # concerns, and only the remote needs a network. Taking the tree from a fixture
@@ -438,7 +438,7 @@ main() {
   fi
 
   SANDBOX="$(resolve_sandbox_dir)"
-  SANDBOX_DIR="$PROJECT_ROOT/scripts/sandbox"
+  SANDBOX_DIR="$PROJECT_ROOT/sandbox"
 
   local unsafe
   if ! unsafe="$(assert_sandbox_dir_safe "$SANDBOX" "$PROJECT_ROOT")"; then

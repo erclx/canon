@@ -419,9 +419,9 @@ describe('isRecordArtifact', () => {
   })
 
   it('should sweep a fixture whose path merely contains a record folder', () => {
-    expect(
-      isRecordArtifact('scripts/sandbox/fixtures/create/.claude/tasks/a.md'),
-    ).toBe(false)
+    expect(isRecordArtifact('sandbox/fixtures/create/.claude/tasks/a.md')).toBe(
+      false,
+    )
   })
 })
 

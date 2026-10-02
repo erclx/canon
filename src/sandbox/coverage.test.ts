@@ -17,13 +17,13 @@ function write(path: string, body: string): void {
 }
 
 function scenario(category: string, command: string): void {
-  write(`scripts/sandbox/${category}/${command}.sh`, 'stage_setup() { :; }\n')
+  write(`sandbox/${category}/${command}.sh`, 'stage_setup() { :; }\n')
 }
 
 function declaration(category: string, command: string, arm: string): void {
   const armSegment = arm === '' ? '' : `/${arm}`
   write(
-    `scripts/sandbox/fixtures/${category}/${command}${armSegment}/expect.toml`,
+    `sandbox/fixtures/${category}/${command}${armSegment}/expect.toml`,
     "paths = ['README.md']\n",
   )
 }
@@ -69,7 +69,7 @@ describe('collectCoverage', () => {
 
   it('should ignore an arm directory holding no declaration', () => {
     scenario('claude', 'docs')
-    write('scripts/sandbox/fixtures/claude/docs/drift/01-initial/a.md', 'x\n')
+    write('sandbox/fixtures/claude/docs/drift/01-initial/a.md', 'x\n')
 
     const report = collectCoverage(root)
 
@@ -79,7 +79,7 @@ describe('collectCoverage', () => {
 
   it('should exclude the fixtures directory from the scenario count', () => {
     scenario('git', 'commit')
-    write('scripts/sandbox/fixtures/anchor/create/utils.js', 'x\n')
+    write('sandbox/fixtures/anchor/create/utils.js', 'x\n')
 
     const report = collectCoverage(root)
 
@@ -112,7 +112,7 @@ describe('coveragePercent', () => {
   })
 
   it('should report zero for an empty catalog rather than dividing by zero', () => {
-    mkdirSync(join(root, 'scripts', 'sandbox'), { recursive: true })
+    mkdirSync(join(root, 'sandbox'), { recursive: true })
 
     expect(coveragePercent(collectCoverage(root))).toBe(0)
   })

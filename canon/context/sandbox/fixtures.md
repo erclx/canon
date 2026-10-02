@@ -5,7 +5,7 @@ description: Fixture tree layout, the helpers that stage it, the record root a t
 
 # Fixtures
 
-A scenario's file content lives under `scripts/sandbox/fixtures/<category>/<scenario>/<arm>/<stage>/`, and `stage_fixtures` from `scripts/lib/sandbox-fixtures.sh` copies one stage into the sandbox. The scenario keeps its own git operations between the calls, so the script holds logic and the tree holds content.
+A scenario's file content lives under `sandbox/fixtures/<category>/<scenario>/<arm>/<stage>/`, and `stage_fixtures` from `scripts/lib/sandbox-fixtures.sh` copies one stage into the sandbox. The scenario keeps its own git operations between the calls, so the script holds logic and the tree holds content.
 
 ```bash
 stage_fixtures claude task-board archive 01-initial
@@ -17,7 +17,7 @@ stage_fixtures claude task-board archive 02-rate-limit
 
 ### Tree shape
 
-- The first two segments mirror the scenario's own path at `scripts/sandbox/<category>/<scenario>.sh`. Both are needed, since scenario basenames such as `sync` repeat across categories.
+- The first two segments mirror the scenario's own path at `sandbox/<category>/<scenario>.sh`. Both are needed, since scenario basenames such as `sync` repeat across categories.
 - Stage numbering carries ordering, not identity. A stage exists because a commit or a branch switch has to happen before the next file lands.
 - Each stage splits into two optional subfolders. `create/` copies files in, making parent directories and overwriting what is there. `append/` concatenates onto a file the anchor or the injected seeds already provide, and fails when the target is missing, because an absent target means the upstream shape changed and the scenario's assumption is stale.
 - Every stored file carries a `.fixture` suffix the helper strips on copy. The suffix keeps the repository's own checks off the content: `canon indexes regen`, prettier, `shfmt`, and `shellcheck` all skip it. Without it, a fixture that deliberately drifts from its sibling frontmatter gets normalized by `bun run check` and the state it models disappears.
@@ -28,7 +28,7 @@ stage_fixtures claude task-board archive 02-rate-limit
 
 ### The anchor tree
 
-`scripts/sandbox/fixtures/anchor/create/` is the one tree outside the four-segment layout. It belongs to no single scenario, since every anchor scenario provisions from it, so `stage_anchor_tree` calls `create_from_fixtures` directly. The tree is copied rather than cloned from the remote, because a clone that deletes `.git` and re-initializes is a file transfer, and the remote stays real because anchor scenarios push to it and drive `gh` against it.
+`sandbox/fixtures/anchor/create/` is the one tree outside the four-segment layout. It belongs to no single scenario, since every anchor scenario provisions from it, so `stage_anchor_tree` calls `create_from_fixtures` directly. The tree is copied rather than cloned from the remote, because a clone that deletes `.git` and re-initializes is a file transfer, and the remote stays real because anchor scenarios push to it and drive `gh` against it.
 
 It holds the minimum a scenario reads: `utils.js`, which `git/{pr,issue,followup}.sh` append to, plus a `.gitignore` matching what `init_empty_sandbox` writes. Several anchor scenarios wipe or overwrite the tree before staging their own, so grow it only when a scenario reads a file that is missing.
 
@@ -45,9 +45,9 @@ A scenario covering a verb whose subject is git history stages a repository of i
 
 ### The record root a tree spells
 
-A fixture tree spells its own record root and nothing reconciles it against the arm's expectations. `create_from_fixtures` copies the stored path verbatim, so a tree staging `.claude/plans/` provisions a project the record resolver reads at the old root, while the `expect.toml` beside it asserts `.canon/`. The two meet only on a paid headless run, and every check on a push passes in between. Arms under `claude/context-fold`, `claude/plan-intake`, and `claude/task-board` still stage records under `.claude/`, and `find scripts/sandbox/fixtures -path '*/create/.claude/*' -name '*.fixture'` lists them. <!-- canon-keep-record-root -->
+A fixture tree spells its own record root and nothing reconciles it against the arm's expectations. `create_from_fixtures` copies the stored path verbatim, so a tree staging `.claude/plans/` provisions a project the record resolver reads at the old root, while the `expect.toml` beside it asserts `.canon/`. The two meet only on a paid headless run, and every check on a push passes in between. Arms under `claude/context-fold`, `claude/plan-intake`, and `claude/task-board` still stage records under `.claude/`, and `find sandbox/fixtures -path '*/create/.claude/*' -name '*.fixture'` lists them. <!-- canon-keep-record-root -->
 
-Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/` entry matches at any depth, so a fixture stored under `.../create/.canon/tasks/` cannot be tracked until something un-ignores it. `scripts/sandbox/fixtures/claude/task-board/decline/.gitignore`, carrying `!.canon/`, takes that route and is checked clean against the Ignore parity stage. Staging consistently at `.canon/` keeps every read and write in the sandboxed project resolving to one root, where a `.claude/`-staged board meets `.canon/`-spelled assertions only by accident and comes back `missing` on every path.
+Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/` entry matches at any depth, so a fixture stored under `.../create/.canon/tasks/` cannot be tracked until something un-ignores it. `sandbox/fixtures/claude/task-board/decline/.gitignore`, carrying `!.canon/`, takes that route and is checked clean against the Ignore parity stage. Staging consistently at `.canon/` keeps every read and write in the sandboxed project resolving to one root, where a `.claude/`-staged board meets `.canon/`-spelled assertions only by accident and comes back `missing` on every path.
 
 ## Gotchas
 
@@ -56,7 +56,7 @@ Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/
 - A stage leaves the tree coherent with what the scenario claims it staged. A stage that changes a module's signature carries its callers, or a skill reading the diff correctly sees a half-migration and the arm tests the fixture's incoherence rather than the skill.
 - A scenario picking fixture files positionally with `find ... | sort | head -n N` stops testing anything once the source tree grows, and keeps exiting 0 until the picked path no longer exists. Select by the property the scenario needs, and when a sandbox gate fails mid-migration, run it on unmodified `main` before assuming the branch caused it.
 - A trigger keyed to a file entering the tree never fires when the seed already put it there. With `SANDBOX_INJECT_SEEDS` on, the setup commit carries `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`, so a later fixture writing one produces `M` rather than `A`. Run `git show --name-status --format="" HEAD` inside the tree after provisioning a new arm, and `rm -f` a seeded path before the initial commit whenever the arm depends on it being added later.
-- A fixture built by cutting a seeded file at a line number is coupled to that file's line order and reports nothing when the coupling breaks. `scripts/sandbox/claude/seed-sync.sh` cuts the seed at the `## Commands` heading behind a `grep -q` check that fails loudly on a miss. Prefer staging keyed to a heading, and re-read an arm that slices a seeded file whenever that file is edited.
+- A fixture built by cutting a seeded file at a line number is coupled to that file's line order and reports nothing when the coupling breaks. `sandbox/claude/seed-sync.sh` cuts the seed at the `## Commands` heading behind a `grep -q` check that fails loudly on a miss. Prefer staging keyed to a heading, and re-read an arm that slices a seeded file whenever that file is edited.
 - A helper building a work list from `git diff --name-only` or `git ls-files` treats every path as present unless it skips one no longer in the tree, so a delete-only branch is where a missing existence check surfaces. The copy fails with `cp: cannot stat` while provisioning completes. Fix the guard in the same branch as any deletion-shaped change, and treat a non-fatal error printed mid-run as a defect.
 - A fixture modelling a timed heuristic outlasts the check window by a wide margin. Two sleeps of equal length finish in whichever order machine load puts them, so a fixture sleeping exactly the window the skill waits makes the arm flaky on the axis it exists to prove. The `dev` and `preview` fixtures on `claude:target-setup`'s `smoke-pass` and `smoke-fail` arms sleep three times the skill's five-second window.
 

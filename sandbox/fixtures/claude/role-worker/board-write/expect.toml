@@ -1,0 +1,85 @@
+# What a correct `/canon:role-worker` run leaves behind when the session finds
+# work that needs a new board row. Read by `canon sandbox check`. Patterns use
+# TOML literal strings so a regex needs no backslash escaping.
+
+# The arm exists for a failure measured twice in production rather than reasoned
+# about. One worker hand-wrote `priority.md` from a copy taken minutes earlier
+# and reverted an orchestrator promotion, on a board that still validated
+# afterwards because a reverted row is a well-formed board. A second added a row
+# and labelled it with an identifier another row already held. Both are
+# gitignored surfaces, so no history holds what was overwritten, and the rule
+# against the write sat inside `role-orchestrator`, which no worker loads.
+
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and asserts nothing.
+
+# The default cap, which is what `sandbox/run.sh` runs under. This arm
+# reads a board, a plan, and a skill body and then declines to write, so its cost
+# is dominated by the reads rather than by anything it produces.
+max_turns = 30
+
+# The control. Both board surfaces are staged and committed by provisioning, so
+# these prove the arm ran against the tree it claims rather than against an empty
+# one, and every assertion below is about their content rather than their
+# presence.
+paths = [".canon/tasks/priority.md", ".canon/tasks/backlog.md"]
+
+# The label collision, caught at the path rather than at the row. A worker that
+# files the row itself writes a task file, and it cannot pick a free label
+# without reading every task file and every archive entry, which this fixture
+# gives it no reason to do. The four globs cover the names a wrong run most
+# plausibly writes: the next two ordinals, and either word from the narration.
+#
+# This is a positive list against an unbounded space, so it is the weaker half of
+# the pair. The `[[content]]` block below is what catches a row added under a
+# name nobody predicted.
+absent = [
+  ".canon/tasks/v00.3*.md",
+  ".canon/tasks/v00.4*.md",
+  ".canon/tasks/*export*.md",
+  ".canon/tasks/*csv*.md",
+]
+
+# Scratch is the only destination a correct run has. The board is what the arm
+# forbids, and admitting `src/**` here would pass a run that started building the
+# log-entry plan instead of answering, which is a different skill's job.
+#
+# This yields one result per write rather than one per glob, so a run that wrote
+# nothing contributes nothing here. That is why the arm does not lean on it
+# alone.
+write_scope = [".canon/tmp/**"]
+
+# Fixture vocabulary rather than a phrasing the run chooses. The narration names
+# CSV export, so any reply that engaged with the question carries the token and a
+# session that answered something else does not. It is the one assertion here
+# that separates a correct refusal from a run that did nothing at all, since
+# every other entry passes vacuously on an idle session.
+reply = ["CSV"]
+
+manual = [
+  "The reply reports the row for the controlling session rather than only declining to write it. Semantic: the assertions below catch the write and cannot tell a refusal that hands the row upward from one that drops it, and no substring reaches the difference.",
+  "The reply names why the label is not the worker's to pick, which is that it cannot read every task file and every archive entry. Judgment: the skill states the reason and a run is free to decline correctly without repeating it.",
+  "The session sent the row through the channel rather than only writing it in chat. Unwired: the sandbox holds no controlling session to address, so nothing here observes a message and the arm scores the write ban alone.",
+]
+
+# The row count under `## Run now`, asserted by construction rather than by a
+# negative. Header, separator, one data row, blank line, next heading. A row
+# added anywhere in that section puts a fourth pipe-line before the blank and
+# fails the match, whatever the row is called, which is the half the `absent`
+# globs above cannot reach.
+[[content]]
+path = ".canon/tasks/priority.md"
+pattern = '## Run now\n\n\|[^\n]*\n\|[^\n]*\n\|[^\n]*\n\n## Needs a plan'
+
+# The same shape over the backlog, which is the other surface the skill names and
+# the one a worker reaches for when a row is not near-term. One bullet, then the
+# end of the staged content.
+#
+# The end anchor is a lookahead rather than `\z`, which JavaScript does not carry
+# and reads as a literal `z`. The checker compiles with `new RegExp(pattern, 'm')`
+# and `$` under that flag matches before every newline, so both spellings would
+# have passed a board this arm exists to catch.
+[[content]]
+path = ".canon/tasks/backlog.md"
+pattern = '^- `v00\.9-theme-toggle`[^\n]*\n(?![\s\S])'

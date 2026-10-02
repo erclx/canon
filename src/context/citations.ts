@@ -60,7 +60,7 @@ function ignoredCitations(line: string): IgnoredCitations | undefined {
  * eval harness names paths in its target project. Neither is a reference into
  * this repository, so an unresolved path there is correct rather than stale.
  */
-const FIXTURE_TREES: readonly string[] = ['scripts/sandbox/', 'scripts/eval/']
+const FIXTURE_TREES: readonly string[] = ['sandbox/', 'scripts/eval/']
 
 const FIXTURE_SEGMENTS: readonly string[] = ['fixtures', '__fixtures__']
 

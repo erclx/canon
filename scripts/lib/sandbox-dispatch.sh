@@ -9,7 +9,7 @@
 # them, so the escape watch reported clean throughout and was right to. The run
 # spent real cost until a person found it, and `SIGTERM` alone did not end it.
 #
-# Three mechanisms sit here rather than in `scripts/sandbox/run.sh`, which is the
+# Three mechanisms sit here rather than in `sandbox/run.sh`, which is the
 # only caller. Each is reachable from a test that never launches a session:
 # `src/sandbox-dispatch.test.ts` drives the shim against a stub binary and the
 # reap against a `sleep`, where proving either through `run.sh` would mean

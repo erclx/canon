@@ -44,11 +44,11 @@ skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
 governance = ["governance/", ".claude/rules/", "internal/rules/", "internal/governance.toml"]
 standards = ["standards/", ".claude/standards/", "internal/standards/", ".claude/internal/standards/"]
 tooling = ["tooling/"]
-# Both halves of the migration boundary. `scripts/core/` and `scripts/sandbox/`
-# are left to the rows below, so a new `scripts/` folder goes bare until the
+# Both halves of the migration boundary. `scripts/core/` and `sandbox/` are
+# left to the rows below, so a new `scripts/` folder goes bare until the
 # uncovered-surface check names it.
 cli = ["src/", "scripts/lib/", "scripts/eval/"]
-sandbox = ["scripts/sandbox/", "scripts/manage-sandbox.sh"]
+sandbox = ["sandbox/", "scripts/manage-sandbox.sh"]
 docs = ["docs/", "wiki/", "README.md", "CONTRIBUTING.md", "examples/"]
 # The canon.erclx.dev landing page: its own Astro config, its own manual
 # typecheck path, its own Playwright e2e suite, and its own deploy workflow

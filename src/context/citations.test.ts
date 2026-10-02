@@ -252,7 +252,7 @@ describe('auditCitations against a real tree', () => {
 
 describe('isFixture', () => {
   it.each([
-    'scripts/sandbox/claude/docs.sh',
+    'sandbox/claude/docs.sh',
     'scripts/eval/result-context.md',
     'src/docs/read.test.ts',
     'src/gov/fixtures/rule.md',
