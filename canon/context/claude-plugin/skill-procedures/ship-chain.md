@@ -83,6 +83,14 @@ Every write to an existing pull request reads `headRefName,state` first and refu
 
 Readying a pull request to merge is the operator's or the controlling session's act, taken directly, since GitHub requires it and no guard should prevent it. `role-worker` and `role-orchestrator` carry that boundary: a worker refuses an instruction to lift the mark itself, whoever sends it, and reports against the outcome rather than complying with the surface of the request.
 
+### A skip gate on a verb that answers for itself loses to a byproduct image
+
+`git-pr` once skipped the evidence call when no checklist existed and the diff showed no `evidence/` change, which asked a session to find an image it never edited. `bun run check` regenerates the hero as a side effect, so two branches reached a closed review with no evidence comment and the preview only after a controller relay. The verb already answers `no-evidence` for a branch with nothing to post, so the gate decided nothing the verb could not, and lost on the one input the session could not see.
+
+Both workers' thinking blocks were empty, so the cause is inferred from the transcripts rather than observed. The fix holds under any reading, since the call now runs on every pull request. The chain's close also reads `canon pr evidence <number> --check --json`, once, in `git-ship` after CI passes, and `git-followup` reads it after its own post. Nothing in the repository enforces that read beyond the skill bodies and the orchestrator's draft lift, which holds on any `reason` but `settled`.
+
+`--check` counts a carried `**Preview:**` line as settled whatever head built it, so a followup push leaves a stale preview reading `settled`.
+
 ### A failed commit leaks into the next group
 
 When a sequence of grouped commits runs unattended and one is rejected by a hook, its files stay staged and the next group's `git add` absorbs them, so the failure lands as a wrong commit rather than a missing one. A subject past `header-max-length` can carry two dozen files into the following group's message while the run reports a passing final `git log`, because the commit count is the only thing short.
