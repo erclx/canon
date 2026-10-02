@@ -37,7 +37,7 @@ The bash regen script exited 2 with no stdout and no stderr on roughly one run i
 
 ## Seed independence
 
-The Seed independence stage runs `scripts/core/check-seed-independence.sh`, which walks the `.md` files under every seed root and fails on the literal token `canon`. Seed prose installs into a scaffolded project and is read there as instruction about that project, so a line naming this repository's CLI hands a target a verb it may not be able to run and tells the reader the file is about somewhere else.
+The Seed independence stage runs the `seedIndependence` measure in `src/gate/boundaries.ts`, which walks the `.md` files under every seed root and fails on the literal token `canon`. Seed prose installs into a scaffolded project and is read there as instruction about that project, so a line naming this repository's CLI hands a target a verb it may not be able to run and tells the reader the file is about somewhere else.
 
 Banning a token is blunt, and the alternative is a judgment no stage can make. The only false-positive class is a fenced example naming the toolkit on purpose, which no seed carries, and a rule admitting fenced mentions would parse markdown to answer a question the corpus has never asked. The match is a bare substring rather than a word boundary, and `grep -w` does not narrow it, since a slash is a non-word character and `grep -w canon` still matches `canon/config/config.json`. The stage prefers a false positive to a missed citation because it gates.
 
@@ -45,9 +45,9 @@ Banning a token is blunt, and the alternative is a judgment no stage can make. T
 
 The walk is scoped by extension rather than by path. Three seed hooks, `tasks-index.sh`, `memory-index.sh`, and `standards-audit.sh`, call the CLI deliberately and each reports by name when the binary is absent, so they keep the dependency and the extension scope leaves them outside the walk with no exemption list to maintain against them.
 
-Discovery runs through `collect_seed_roots` in `scripts/lib/tooling.sh`, shared with the Seed standards stage, so a stack seeding `.claude/` later is covered with no edit to either caller.
+Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Seed standards stage, so a stack seeding `.claude/` later is covered with no edit to either caller.
 
-Three outcomes separate a clean walk from one that measured nothing, matching `check-plugin-boundary.sh` on the last two. A missing `tooling/` exits 1, since the walk covers nothing. Roots that resolve and carry no markdown between them exit 1 for the same reason, because a pass there says the seeds cite no CLI on the strength of having read no prose. No seed root carrying `.claude/` exits 0 and says so, because the Seed standards stage already reads that one condition as a skip.
+Three outcomes separate a clean walk from one that measured nothing, and all three report unmeasured, which warns on a contributor's machine and refuses under CI. A missing `tooling/` covers nothing. Roots that resolve and carry no markdown between them are unmeasured for the same reason, because a pass there says the seeds cite no CLI on the strength of having read no prose. No seed root carrying `.claude/` or `canon/` is unmeasured as well, which agrees with the Seed standards stage on the one condition. The bash this replaced exited 0 on that last case, and the agreement is what moved it.
 
 `internal/rules/claude/596-claude-md.md` carries the matching authoring rule, so a session editing the seed meets it at the edit rather than at the push. Its glob stays on the two `CLAUDE.md` paths rather than widening to every seed markdown, since the bullets beside it govern the root-and-seed pair and mean nothing over `canon/REQUIREMENTS.md`. The stage covers the rest of the seed tree.
 

@@ -45,7 +45,7 @@ The verb also needs a fallback rather than only a guard, since these scripts shi
 
 A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and copies whatever sits behind it into every plugin cache with no code in the path to stop it. A filterable subfolder such as `standards/canon/` still leaks through the symlink ahead of it.
 
-Internal content lives at `internal/` instead, which nothing under `claude/` reaches. `scripts/core/check-plugin-boundary.sh` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
+Internal content lives at `internal/` instead, which nothing under `claude/` reaches. The Plugin boundary measure in `src/gate/boundaries.ts` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
 
 A native Windows checkout without symlink support materializes the link as a plain text file holding the path `../standards`. The plugin then ships a junk file and no standards, and no stage notices, because every catalog command reads the real directories at the repository root. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 

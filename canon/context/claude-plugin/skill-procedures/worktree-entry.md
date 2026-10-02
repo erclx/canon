@@ -17,7 +17,7 @@ The rule was a bash function in a shared library until it was ported, kept there
 
 Every git call goes through `gitEnv()` with `extendEnv: false`, and the test strips every inherited `GIT_*` variable before building its fixtures. Git hooks export `GIT_DIR`, so without the scrub the suite passes standalone and fails under `pre-push`: `git -C real-bare.git` resolves against the toolkit's own repository rather than the fixture, and the genuinely-bare case reports the wrong flag. Any future test that shells out to git needs the same scrub, and the failure is invisible to a normal `bun run test`. See `wiki/claude/worktrees.md` for the upstream issue.
 
-Both call sites confirm the repository's common dir is named `.git` before writing, which separates the defect from a genuinely bare repository that keeps its objects at the root and would be broken by the repair. The skill states the upstream issue inline rather than pointing at `wiki/claude/worktrees.md`, since a shipped skill runs where no `wiki/` path resolves and `check-skill-paths.sh` fails the build on one.
+Both call sites confirm the repository's common dir is named `.git` before writing, which separates the defect from a genuinely bare repository that keeps its objects at the root and would be broken by the repair. The skill states the upstream issue inline rather than pointing at `wiki/claude/worktrees.md`, since a shipped skill runs where no `wiki/` path resolves and the Skill paths stage fails the build on one.
 
 ## The dependency check is a literal test
 
