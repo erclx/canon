@@ -38,20 +38,21 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## Build the feature
 
-| Skill                        | When to use                                                                                                |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `canon:session-worktree`     | At the plan-to-execute boundary, to get an isolated tree and branch, or to route a refused main-root write |
-| `canon:auto-ship`            | After plan approval, to chain implement, verify, review, draft PR                                          |
-| `canon:project-commands`     | When the project's own command needs running                                                               |
-| `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor                            |
-| `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts                            |
-| `canon:build-in-slices`      | While building a plan, to commit each tested slice and note out-of-scope defects rather than fix them      |
-| `canon:api-design`           | When changing what a caller sees, being an export, a flag, an output shape, or a retried write             |
-| `canon:code-craft`           | Before writing a function, class, or module, to pick the shape the next change needs                       |
-| `canon:review-craft`         | When reviewing a change, for what to look for and how much evidence a finding needs                        |
-| `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                                             |
-| `canon:design-taste`         | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |
-| `canon:ui-checklist`         | After a UI change, to write what to look at and name what ships untested                                   |
+| Skill                         | When to use                                                                                                |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `canon:session-worktree`      | At the plan-to-execute boundary, to get an isolated tree and branch, or to route a refused main-root write |
+| `canon:auto-ship`             | After plan approval, to chain implement, verify, review, draft PR                                          |
+| `canon:project-commands`      | When the project's own command needs running                                                               |
+| `canon:test-first`            | Before implementing a planned change, to run its test red, green, then refactor                            |
+| `canon:test-craft`            | When writing or changing any test, to pick its layer and filter what it asserts                            |
+| `canon:build-in-slices`       | While building a plan, to commit each tested slice and note out-of-scope defects rather than fix them      |
+| `canon:api-design`            | When changing what a caller sees, being an export, a flag, an output shape, or a retried write             |
+| `canon:deprecation-migration` | When deleting or replacing code something may still call, to migrate its callers and prove none remain     |
+| `canon:code-craft`            | Before writing a function, class, or module, to pick the shape the next change needs                       |
+| `canon:review-craft`          | When reviewing a change, for what to look for and how much evidence a finding needs                        |
+| `canon:systematic-debugging`  | When a test fails or a bug surfaces, to force root cause first                                             |
+| `canon:design-taste`          | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |
+| `canon:ui-checklist`          | After a UI change, to write what to look at and name what ships untested                                   |
 
 ## Check the work before it leaves the branch
 

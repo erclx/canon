@@ -85,6 +85,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'build-in-slices',
   },
   {
+    prompt:
+      'The old parseDate helper was replaced months ago. Can I just delete it, or could a few files still be calling it?',
+    expect: 'deprecation-migration',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },
