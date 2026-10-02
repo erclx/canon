@@ -13,7 +13,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "happy-path" "prose-informational" "prose-executable" "test-order-violation"
+  select_or_route_scenario "Which scenario?" "happy-path" "prose-informational" "prose-executable" "test-order-violation" "ui-continue"
 
   log_step "Configuring autoship environment ($ANCHOR_REPO)"
 
@@ -406,6 +406,78 @@ EOF
     log_info "         and stopping in the CI watch on the harness background ceiling. baseRef"
     log_info "         took, the branch carried both shout commits intact, Step 4 reported the"
     log_info "         one finding, and whisper shipped with its test."
+    ;;
+  "ui-continue")
+    # ui-checklist writes its handoff under .canon/tmp/, which no other arm
+    # reaches, so only this arm ignores it.
+    printf '.canon/tmp/\n' >>.gitignore
+
+    cat <<'EOF' >package.json
+{
+  "name": "sandbox-autoship-ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "echo 'lint ok' && echo 'typecheck ok'"
+  }
+}
+EOF
+
+    cat <<'EOF' >CLAUDE.md
+# My App
+
+Small React component library.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+EOF
+
+    mkdir -p src/components
+    cat <<'EOF' >src/components/Button.tsx
+export function Button({ label }: { label: string }) {
+  return (
+    <button style={{ padding: '4px 8px', borderRadius: 2 }}>{label}</button>
+  )
+}
+EOF
+
+    git add . && git commit --allow-empty -m "feat(project): initial button component" --no-verify -q
+    git push --force origin HEAD:main
+
+    git push origin --delete feat/roomier-button -q 2>/dev/null || true
+
+    mkdir -p .canon/plans .canon/review
+
+    cat <<'EOF' >.canon/plans/feature-roomier-button.md
+# Feature: roomier button
+
+Give `Button` more room: raise its padding to `8px 16px` and its corner radius to `6`. The change is visual only, with no new prop and no behavior change.
+
+**Files to touch:**
+
+- `src/components/Button.tsx`: raise the padding and the corner radius
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.
+EOF
+
+    log_step "Scenario ready: autoship over a UI diff that produces a visual checklist"
+    log_info "Context: main, with a plan staged for feat/roomier-button touching only a .tsx component"
+    log_info "Action:  /auto-ship"
+    log_info "Expect:  implements the padding and radius, verify passes, Step 5 invokes ui-checklist"
+    log_info "         and the checklist it writes does NOT stop the chain"
+    log_info "         Step 6 classifies the .tsx path as review and invokes review-branch"
+    log_info "         the PR opens as a draft and the closing block carries a line naming the"
+    log_info "         unchecked visual boxes, with the taste count in parentheses"
+    log_info "         a chain that stops on the checklist with nothing committed is the defect"
+    log_info "         this arm exists to catch"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

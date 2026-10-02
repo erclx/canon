@@ -15,7 +15,7 @@ Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the se
 
 When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
-Verify runs ahead of the sync skills so a stop leaves the tree exactly as the user left it. Re-running a suite the caller already ran costs one command, and the path it closes is the one that has no other guard: `auto-ship` verifies at its own Step 3 and then hands four of its stop points straight back here, so a fix made by hand after one of those stops otherwise reaches the remote with nothing re-run.
+Verify runs ahead of the sync skills so a stop leaves the tree exactly as the user left it. Re-running a suite the caller already ran costs one command, and the path it closes is the one that has no other guard: `auto-ship` verifies at its own Step 3 and then hands three of its stop points straight back here, so a fix made by hand after one of those stops otherwise reaches the remote with nothing re-run.
 
 ## Pre-check
 

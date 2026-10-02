@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Auto ship
 
-Chain the post-plan pipeline in a single run. Every step has a stop condition. State is always recoverable on stop: code lives on the branch, review output on disk, plan still linked.
+Chain the post-plan pipeline in a single run. Every step but the UI checklist has a stop condition. State is always recoverable on stop: code lives on the branch, review output on disk, plan still linked.
 
 ## Guards
 
@@ -95,11 +95,7 @@ Never read a missing subcommand as clean. Read `${CLAUDE_SKILL_DIR}/references/v
 
 ## Step 5: UI checklist (conditional)
 
-If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`.
-
-If `ui-checklist` produces a checklist, stop: `❌ UI requires visual verification. Checklist at .canon/tmp/handoff/ui-checklist/<slug>.md, which reaches the pull request once /git-ship runs. Verify manually, then run /git-ship.`
-
-If there is nothing to verify visually and nothing shipping untested, continue.
+If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`, then continue to Step 6 whatever it returns, in every run. The Step 8 draft mark holds the merge, so a stop here protects nothing. When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.md` for the counts to hold before `git-pr` removes the file.
 
 ## Step 6: review
 
@@ -149,10 +145,11 @@ Emit the Output block on the wake after `git-ship`'s background CI watch exits o
 
 ## Output
 
-Respond with up to five lines:
+Respond with up to six lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
+🖼️ <N> visual boxes unchecked (<M> taste), owed on the evidence comment of <PR url> to the operator, or to the UI reviewer for the boxes a driver can run
 <N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
@@ -161,7 +158,7 @@ Respond with up to five lines:
 
 `<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the undo asked for.
 
-Omit the second line if there were no minor findings, and the third if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session, and the fifth if it returned no review line. Pass that line through verbatim, since a dispatched worker's controller relays it to the operator.
+Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if there were no minor findings, and the fourth if nothing routed. Omit the fifth if `memory-capture` wrote no memory file this session, and the sixth if it returned no review line. Pass that line through verbatim, since a dispatched worker's controller relays it to the operator.
 
 This block replaces the one `git-ship` closes on rather than following it, since emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 

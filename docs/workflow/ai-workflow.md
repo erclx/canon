@@ -87,7 +87,8 @@ When features are independent, run them in parallel, one worktree and one sessio
 For features on a mature stack, chain the post-plan pipeline in one session. Approve the plan, invoke `canon:auto-ship`, and the skill runs implement → verify → review → ship sequentially.
 
 - Use when the plan is tight and the stack has real verify commands and test coverage
-- Autoship stops on: verify failure after one fix attempt, UI manual checklist non-empty, an inherited review finding above minor, no diff baseline resolving against `main`, an empty changed-file list, or hook failure
+- Autoship stops on: verify failure after one fix attempt, an inherited review finding above minor, no diff baseline resolving against `main`, an empty changed-file list, or hook failure
+- A produced UI checklist does not stop it. The checklist rides to the draft pull request's evidence comment, and the closing block names how many visual boxes are still unchecked and who owes them
 - Every stop leaves recoverable state. Fix and resume with `/git-ship`
 - Skip autoship for auth, migrations, security-sensitive changes, or work where the plan itself is uncertain
 

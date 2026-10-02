@@ -1,0 +1,28 @@
+# What a correct `/canon:auto-ship` run leaves behind on the ui-continue
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+
+# The diff is one `.tsx` component under `src/`, so Step 5 invokes
+# `ui-checklist`, which writes a checklist for the padding and radius change.
+# Step 5 used to stop there with nothing committed, and resuming at
+# `/git-ship` skipped review. This arm pins the continue path: the chain runs
+# review, opens the pull request as a draft, and carries the unchecked boxes
+# into its closing block. The checker reads `reply` as substrings, so the
+# boxes line is pinned by its fixed words rather than by its counts.
+
+# No max_turns yet. No run has measured this arm, and the chain here runs
+# ui-checklist and review-branch both, so it is longer than happy-path's.
+
+# `review-branch` writes this file when it runs. A chain that stopped at
+# Step 5, or one that skipped review on the UI diff, never creates it.
+paths = [".canon/review/branch-roomier-button.md"]
+
+# The completion line every autoship arm pins, plus the boxes line Step 5's
+# held counts feed. A chain halted on the checklist ends on neither.
+reply = ["Autoshipped (draft)", "visual boxes unchecked"]
+
+manual = [
+  "src/components/Button.tsx carries the padding and radius the plan describes. Judgment: the exact style object is the run's own, and a substring anchored to it goes red on an equivalent spelling.",
+  "The pull request itself opened as a draft, and its evidence comment carries the checklist. Unwired: confirming the PR object and its comment needs a gh call this declaration has no channel for.",
+  "The count in the boxes line matches the `- [ ]` lines ui-checklist wrote. Unwired: git-pr removes the handoff file once it posts, so the tree holds nothing to count against after the run.",
+]
