@@ -308,6 +308,31 @@ describe('writePlanLine', () => {
       })
     })
 
+    it('should keep a bare-path link readable when it appends', () => {
+      const text = '# A task\n\nPlan: ../plans/a.md\n'
+
+      expect(writePlanLine(text, '../plans/b.md', true)).toMatchObject({
+        text: '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n',
+        action: 'appended',
+      })
+    })
+
+    it('should append ahead of trailing prose on the line', () => {
+      const text = '# A task\n\nPlan: [a](../plans/a.md) (first slice)\n'
+
+      expect(writePlanLine(text, '../plans/b.md', true)).toMatchObject({
+        text: '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md) (first slice)\n',
+      })
+    })
+
+    it('should keep a CRLF line ending when it appends', () => {
+      const text = '# A task\r\n\r\nPlan: [a](../plans/a.md)\r\n'
+
+      expect(writePlanLine(text, '../plans/b.md', true)).toMatchObject({
+        text: '# A task\r\n\r\nPlan: [a](../plans/a.md), [b](../plans/b.md)\r\n',
+      })
+    })
+
     it('should report no change when the plan is already listed', () => {
       const text = '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n'
 

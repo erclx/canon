@@ -417,6 +417,33 @@ export function retargetPlanLine(
   return lines.join('\n')
 }
 
+/**
+ * Appends a link to a located `Plan:` line right after its last target, so
+ * trailing prose and a line ending stay where they were. A bare target is
+ * rewritten as a link on the way, since the reader takes bare paths only when
+ * no link sits on the line and the appended one would otherwise hide them.
+ */
+export function appendPlanLink(line: string, target: string): string {
+  const tokens = planTokens(line)
+  if (tokens.length === 0) {
+    const trailing = /\s*$/.exec(line)?.[0] ?? ''
+    return `${line.slice(0, line.length - trailing.length)} ${planLink(target)}${trailing}`
+  }
+
+  let rewritten = ''
+  let at = 0
+  for (const token of tokens) {
+    const isLink = line[token.start] === '['
+    rewritten += line.slice(at, token.start)
+    rewritten += isLink
+      ? line.slice(token.start, token.end)
+      : planLink(token.target)
+    at = token.end
+  }
+
+  return `${rewritten}, ${planLink(target)}${line.slice(at)}`
+}
+
 /** The `Ready:` line in either form, the link's target captured ahead of the bare path. */
 const READY_PATTERN = /^Ready:[ \t]*(?:\[[^\]]*\]\(([^)]+)\)|(\S+))[ \t]*$/m
 

@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { basename, join, relative } from 'node:path'
 import { planCandidates } from '@/tasks/answers'
 import {
+  appendPlanLink,
   describeUnmatchedStem,
   fenceMask,
   linkTo,
@@ -258,7 +259,7 @@ export function writePlanLine(
     if (readPlanTargets(lines[existing]).includes(target)) {
       return { ok: true, text, action: 'unchanged', replaced: undefined }
     }
-    lines[existing] = `${lines[existing]}, ${line.slice('Plan: '.length)}`
+    lines[existing] = appendPlanLink(lines[existing], target)
     return {
       ok: true,
       text: lines.join('\n'),

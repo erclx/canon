@@ -147,6 +147,6 @@ The write adds the line when it is absent and corrects the target in place when 
 
 A line already linking several plans is refused as `several-plans` and left unchanged, with `detail` listing each link, even when one of them is the plan named. The verb cannot tell which link to drop, and reporting `unchanged` would hide a line that breaks the one-plan rule.
 
-A sliced task ships one plan per slice, so `--add` appends the plan to the line rather than replacing the link. It keeps every link in its order, adds the line when the task carries none, reports `unchanged` and writes nothing when the plan is already listed, and is allowed on a line already holding several. Without the flag the replace behavior and the `several-plans` refusal above hold.
+A sliced task ships one plan per slice, so `--add` appends the plan to the line rather than replacing the link. It keeps every link in its order, writes a bare-path target as a link so it stays readable, leaves trailing prose and the line ending where they were, adds the line when the task carries none, reports `unchanged` and writes nothing when the plan is already listed, and is allowed on a line already holding several. Without the flag the replace behavior and the `several-plans` refusal above hold.
 
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, `no-plan`, `several-plans`, or `bad-input`.
