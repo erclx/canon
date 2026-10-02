@@ -3,6 +3,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -12,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = join(
   import.meta.dirname,
-  '../claude/skills/role-orchestrator/scripts/poll.sh',
+  '../claude/skills/role-orchestrator/scripts/poll.ts',
 )
 
 const HEAD = '1111111111111111111111111111111111111111'
@@ -136,7 +137,7 @@ interface PollResult {
 }
 
 const poll = (): PollResult => {
-  const run = spawnSync('bash', [SCRIPT], {
+  const run = spawnSync('bun', [SCRIPT], {
     cwd: join(root, 'repo'),
     encoding: 'utf8',
     env: buildEnv(),
@@ -247,7 +248,6 @@ describe('poll', () => {
     expect(carried.status).toBe(0)
     expect(carried.stdout).toBe('No movement.')
     expect(carried.stderr).toContain('#7 could not be read')
-    expect(carried.stderr).not.toContain('integer expression expected')
   })
 
   it('should report a comment posted under a heading outside the known set', () => {
@@ -350,6 +350,66 @@ describe('poll', () => {
     expect(poll().stdout).toContain('RESPONSE  #7')
   })
 
+  // A baseline the bash script wrote reads under the port with no first-run
+  // flood, so the first run after the swap says nothing.
+  it('should read a baseline line the bash script wrote without reporting it', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    mkdirSync(join(root, 'repo', '.canon', 'tmp', 'pr', 'poll'), {
+      recursive: true,
+    })
+    writeFileSync(
+      join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt'),
+      `7 ${HEAD} ${HEAD} 0 unknown closed 0 none\n`,
+    )
+
+    expect(poll().stdout).toBe('No movement.')
+  })
+
+  // A regression that blanks the count on a carry makes the next healthy run
+  // read zero against the thread's real count and report every comment already
+  // there as UNMATCHED.
+  it('should keep the unmatched count and UI token on a carried line', () => {
+    const dir = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
+    const baseline = join(dir, 'baseline.txt')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      baseline,
+      `7 ${HEAD} none 0 unknown closed 2 open-head-1111111\n`,
+    )
+    writeThread([], [])
+    breakView()
+
+    const carried = poll()
+
+    expect(carried.stdout).toBe('No movement.')
+    expect(readFileSync(baseline, 'utf8')).toBe(
+      `7 ${HEAD} none 0 unknown carried 2 open-head-1111111\n`,
+    )
+  })
+
+  // A refusal that exits zero carries a reason and no source, and one that
+  // exits nonzero carries nothing, so both send the read to the fallback and
+  // neither changes the run's status.
+  it('should fall back when the verb answers a refusal record', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    writeScope({ reason: 'no-marker' })
+
+    const run = poll()
+
+    expect(run.status).toBe(0)
+    expect(run.stdout).toContain('SEEN      #7 at 1111111')
+  })
+
+  it('should fall back when the verb exits nonzero', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    rmSync(join(root, 'fixtures', 'scope-7.json'))
+
+    const run = poll()
+
+    expect(run.status).toBe(0)
+    expect(run.stdout).toContain('SEEN      #7 at 1111111')
+  })
+
   describe('UI review state', () => {
     const UI_AT = '2026-08-20T02:05:00Z'
 
@@ -447,6 +507,5 @@ describe('poll', () => {
     expect(carried.status).toBe(0)
     expect(carried.stdout).toBe('No movement.')
     expect(carried.stderr).toContain('#7 could not be read')
-    expect(carried.stderr).not.toContain('integer expression expected')
   })
 })

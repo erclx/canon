@@ -5,7 +5,7 @@ description: The review trigger, the condition under which it runs, and how to r
 
 Run the orchestrator's review trigger. The poll reports pull request movement and the session acts on what it reports. The script reads and never writes, and the routing block below decides which report earns a review, which earns a dispatch, and which earns neither.
 
-`${CLAUDE_SKILL_DIR}/scripts/poll.sh` is the script. It needs `gh` authenticated against the remote and `jq` on the path, and it reads the base branch from `origin/HEAD` rather than assuming a name.
+`${CLAUDE_SKILL_DIR}/scripts/poll.ts` is the script, run as `bun <path>`. It needs `bun` and `gh` authenticated against the remote, and it reads the base branch from `origin/HEAD` rather than assuming a name.
 
 ## When to run it
 
@@ -13,7 +13,7 @@ Start the poll on an open pull request and stop it when the last one merges with
 
 A dispatch no longer starts it. The script reads pull requests and a building worker has none, so every interval between the launch and the push is a fixed cost returning nothing, measured as five consecutive runs reporting no movement across roughly fifteen minutes while one worker built. What replaces it is the worker announcing its own pull request the moment it opens one, per the `role-worker` skill that session loads, which covers exactly the transition the poll cannot observe.
 
-The dispatched-worker condition survives as a fallback rather than as a trigger. Start the poll against any dispatch still out after thirty minutes with no announcement, which is past the upper end of the ten to thirty minutes a row here takes. The announcement is newer than the narrowing it justifies, so a silent failure would otherwise leave a finished worker unnoticed the way one already sat idle for eighteen minutes, and the fallback keeps the cover a straight narrowing would have removed. `${CLAUDE_SKILL_DIR}/scripts/watch.sh` covers the same window at a lower cost, since it reads the roster alongside the pull request list and reports a worker that vanished as well as one that finished.
+The dispatched-worker condition survives as a fallback rather than as a trigger. Start the poll against any dispatch still out after thirty minutes with no announcement, which is past the upper end of the ten to thirty minutes a row here takes. The announcement is newer than the narrowing it justifies, so a silent failure would otherwise leave a finished worker unnoticed the way one already sat idle for eighteen minutes, and the fallback keeps the cover a straight narrowing would have removed. `${CLAUDE_SKILL_DIR}/scripts/watch.ts` covers the same window at a lower cost, since it reads the roster alongside the pull request list and reports a worker that vanished as well as one that finished.
 
 A session holding a recurring-prompt scheduler starts the loop itself on that condition and cancels it on the same test, without waiting for the operator. Both halves belong to whoever holds the loop, since a session that can start one can stop one, and a runbook stating only the start leaves the always-on failure unaddressed on the side that causes it.
 
@@ -29,10 +29,10 @@ The requirement is a recurring prompt at roughly three minutes carrying the bloc
 
 The interval belongs to the schedule rather than to the script. One run is a single snapshot returning in about six seconds, so a session that reads `3m` as the script's runtime and relaunches on completion fires every few seconds and never settles, which happened once for 35 minutes.
 
-Resolve `${CLAUDE_SKILL_DIR}/scripts/poll.sh` to an absolute path and paste that in place of `<POLL_SCRIPT>` below. The variable expands while this runbook renders and not in a standalone loop turn, so a block carrying the variable reaches the session as a literal string and the run improvises a substitute.
+Resolve `${CLAUDE_SKILL_DIR}/scripts/poll.ts` to an absolute path and paste that in place of `<POLL_SCRIPT>` below. The variable expands while this runbook renders and not in a standalone loop turn, so a block carrying the variable reaches the session as a literal string and the run improvises a substitute.
 
 ```plaintext
-Poll GitHub for pull request movement by running <POLL_SCRIPT>, then act on what it reports.
+Poll GitHub for pull request movement by running `bun <POLL_SCRIPT>`, then act on what it reports.
 
 - A release pull request, whatever state follows it: report it and stop. Its sweep carries no findings, so no pass is owed. Test this before any rule below, since a release pull request is reported OPENED like any other and would otherwise match that rule first.
 - MOVED or RESPONSE on a pull request I have already reviewed: run the canon:review-pr skill on it immediately, narrow pass, or message the live reviewer that took its first pass to run it. Re-reviews read prior..head and gain nothing from waiting.
@@ -59,7 +59,7 @@ The script exits non-zero and classifies nothing when the open pull request list
 
 The baseline lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root and is per-machine. A first run against a board already in flight reports each open pull request once before it settles.
 
-The eight headings the script knows are written by `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, and the whole set is stated once in the first. The reply family and the UI family are matched by jq filters in the script, so a project posting either under different headings edits those to match. The review family is matched inside `canon pr review-state` instead, which the script and `review-pr` both read through, so a project renaming either review heading changes the verb rather than the script. Either way, a heading nothing matches reads as a pull request nobody has reviewed. The `UI-` states report the newest UI pass on its transition, and `UI-STALE` fires beside the `MOVED` of a push that left its marker behind. A first sighting reports none, so hold the mark wherever `canon pr evidence <number> --json` carries a `checklist` until a UI close names the head.
+The eight headings the script knows are written by `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, and the whole set is stated once in the first. The reply family and the UI family are matched by filters in `poll.ts`, so a project posting either under different headings edits those to match. The review family is matched inside `canon pr review-state` instead, which the script and `review-pr` both read through, so a project renaming either review heading changes the verb rather than the script. Either way, a heading nothing matches reads as a pull request nobody has reviewed. The `UI-` states report the newest UI pass on its transition, and `UI-STALE` fires beside the `MOVED` of a push that left its marker behind. A first sighting reports none, so hold the mark wherever `canon pr evidence <number> --json` carries a `checklist` until a UI close names the head.
 
 `UNMATCHED` is what a comment reaches under a heading outside the six the comment filters know, a UI heading posted as a comment included, carried the same way `RESPONSE` is: a rising count against the baseline is what is new to this script, and the message names the heading so a person can tell whether to answer it by hand or add it to the set. It fires on a tracked pull request only, since a first sighting reports `SEEN` or `OPENED` and takes whatever count already sits on the thread as its starting baseline rather than flagging history the poll never watched.
 
@@ -75,7 +75,7 @@ The report is also where the load count in `orchestrator-review-dispatch.md` is 
 
 The count used to read low, and it erred in the direction that breaks the trigger. A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so an author pushing between the diff read and the post left the pass recorded against a commit it never saw, and `SEEN` then fired on a head still awaiting its first look at that delta.
 
-The pass now carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body it posts, and both this script and that skill resolve the covered state through `canon pr review-state`, which is the one place the marker is parsed. A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than as `SEEN`. The manual double-check that used to hang off this paragraph is retired with the defect: a `SEEN` is now a claim about what a session read rather than about what GitHub stamped, so it wants no second read to be believed.
+The pass now carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body it posts, and both this script and that skill resolve the covered state through `canon pr review-state`, which is the one place the marker is parsed. A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than as `SEEN`. A `SEEN` is a claim about what a session read rather than about what GitHub stamped, so it wants no second read to be believed.
 
 Read `source` on the record before trusting a `SEEN` on a thread whose newest pass is old. `marker` is the read-time record. `fallback` is a pass posted before the mechanism shipped, or a target whose CLI predates the verb, and it carries the defect above unchanged, so a `SEEN` under it is worth one `gh pr view --json reviews` before it is believed. `none` is a thread carrying no pass at all.
 
@@ -83,9 +83,9 @@ The other side of that comparison used to lag as well, which made the two errors
 
 ## The watch beside it
 
-`${CLAUDE_SKILL_DIR}/scripts/watch.sh` is a long-running loop rather than a scheduled prompt. It reads the open pull request list and the session roster together every sixty seconds and prints one line per new pull request, per worker whose status changed, and per worker that dropped out of the roster. Start it in the background and read what it emits. It writes nothing.
+`${CLAUDE_SKILL_DIR}/scripts/watch.ts` is a long-running loop rather than a scheduled prompt, started as `bun <path>`. It reads the open pull request list and the session roster together every sixty seconds and prints one line per new pull request, per worker whose name, branch, or status changed, and per worker that dropped out of the roster. Start it in the background and read what it emits. It writes nothing.
 
-Coverage is what it buys over the poll. A worker that finishes goes idle and a worker that crashes disappears, so a trigger reading pull requests alone stays silent through the second, and the roster read is the half `poll.sh` cannot make. It ran a full afternoon over four concurrent workers and caught every transition, while the three-minute poll it replaced reported no movement five times in a row.
+Coverage is what it buys over the poll. A worker that finishes goes idle and a worker that crashes disappears, so a trigger reading pull requests alone stays silent through the second, and the roster read is the half `poll.ts` cannot make. It ran a full afternoon over four concurrent workers and caught every transition, while the three-minute poll it replaced reported no movement five times in a row.
 
 It classifies nothing and routes nothing. A line it prints says a pull request opened or a worker moved, and the routing block above is still what decides whether a review follows, so the two compose rather than replace each other.
 
@@ -93,10 +93,10 @@ Every session in the repository holding a branch other than the base one counts 
 
 ## The stall alarm
 
-`watch.sh` prints `WORKER-STOPPED <name> <branch> <dwell>s` once a `waiting` row crosses `STALL_THRESHOLD_S`, and `WORKER-UNMEASURABLE <name> <branch>` for one whose record carries neither timestamp the dwell falls back to. Both are prints, not alerts, so the operator learns of one only when a session already reading the loop's output relays it further. The toolkit ships no notification verb, since the surface a stall reaches the operator through is a session tool rather than a command a shell loop can call.
+`watch.ts` prints `WORKER-STOPPED <name> <branch> <dwell>s` once a `waiting` row crosses `STALL_THRESHOLD_S`, and `WORKER-UNMEASURABLE <name> <branch>` for one whose record carries neither timestamp the dwell falls back to. Both are prints, not alerts, so the operator learns of one only when a session already reading the loop's output relays it further. The toolkit ships no notification verb, since the surface a stall reaches the operator through is a session tool rather than a command a shell loop can call.
 
 The two lines carry different confidence and the push has to say so rather than treat them as one signal. `WORKER-STOPPED` fires only once the dwell has already crossed the threshold, so it reports a wait already confirmed long. `WORKER-UNMEASURABLE` has no dwell to threshold on, so it fires on the first pass that meets a `waiting` row carrying neither stamp, whether that row has sat five seconds or fifty minutes.
 
-On meeting either line, push a notification to the operator through whatever notification surface the client offers, `PushNotification` in this repository's client and one example among the surfaces a different client exposes. Name the worker, the branch, which of the two lines fired, and the dwell where `WORKER-STOPPED` carries one, and send it once per stall the same way `watch.sh` prints it once, rather than repeating it on every interval the row stays stopped.
+On meeting either line, push a notification to the operator through whatever notification surface the client offers, `PushNotification` in this repository's client and one example among the surfaces a different client exposes. Name the worker, the branch, which of the two lines fired, and the dwell where `WORKER-STOPPED` carries one, and send it once per stall the same way `watch.ts` prints it once, rather than repeating it on every interval the row stays stopped.
 
 The bound stays open. The alarm reaches the operator only through the controller's own read, so a controller mid-turn does not see the line for as long as the turn runs, and a controller that is itself stopped never does. Neither case closes here, since the watch loop and the notification surface both live inside the same session that has to be free to act on either.

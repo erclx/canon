@@ -17,13 +17,13 @@ A finding withdrawn on a reply's argument leaves that count too, so a pass withd
 
 ## The full set, stated once
 
-Five headings route through `poll.sh`: `## Review`, `## Review closed`, `## Review response`, `## Rebase`, and `## Post-review findings`. `## Post-review findings` gets the same routing `## Review response` does, since a worker with something to report after a close-out needs a heading of its own: `poll.sh` reports it as a reply and sends a fresh pass.
+Five headings route through `poll.ts`: `## Review`, `## Review closed`, `## Review response`, `## Rebase`, and `## Post-review findings`. `## Post-review findings` gets the same routing `## Review response` does, since a worker with something to report after a close-out needs a heading of its own: `poll.ts` reports it as a reply and sends a fresh pass.
 
 `## Evidence`, written by `canon pr evidence`, is a sixth known heading routed nowhere. It answers no comment, so counting it as a reply would send the poll back for a re-review nothing asked for, and the poll excludes it from the unmatched filter on its own instead. `review-craft`'s rendered-output reference reads it, opening its images and testing its checklist, so routed nowhere describes the poll alone.
 
 Which headings exist, which family each belongs to, and who posts each is stated once in `review-pr`, beside the threshold that skill already states once, so `review-address` and the poll cite it rather than carry their own copy.
 
-`## UI review` and `## UI review closed` are the seventh and eighth, posted by `review-ui` as a pull request review beside the code pass. The poll reads them off `.reviews` with its own jq filter rather than through `canon pr review-state`, since no read-time scoping is needed for a pass that re-drives every box, and reports `UI-OPEN`, `UI-CLOSED`, or `UI-STALE` on a transition. The head a UI verdict covers comes from the `<!-- review-ui: head=<sha> -->` marker on the body's last line, because the submission stamp follows the head. The draft mark lifts only once both families are closed, the UI one at the current head. `canon targets` still reads `## Review closed` alone and stays blind to the UI family.
+`## UI review` and `## UI review closed` are the seventh and eighth, posted by `review-ui` as a pull request review beside the code pass. The poll reads them off `.reviews` with its own filter rather than through `canon pr review-state`, since no read-time scoping is needed for a pass that re-drives every box, and reports `UI-OPEN`, `UI-CLOSED`, or `UI-STALE` on a transition. The head a UI verdict covers comes from the `<!-- review-ui: head=<sha> -->` marker on the body's last line, because the submission stamp follows the head. The draft mark lifts only once both families are closed, the UI one at the current head. `canon targets` still reads `## Review closed` alone and stays blind to the UI family.
 
 A comment posted under a heading outside the six the comment filters know is reported as unmatched rather than passed over, a UI heading posted as a comment included. Silence and a match read alike otherwise, so the poll surfaces an invented heading as a state a person reads rather than absorbing it silently.
 
@@ -31,7 +31,7 @@ A comment posted under a heading outside the six the comment filters know is rep
 
 ### The closing comment folds into the reply
 
-`review-address` Step 7 appends its CI confirmation to the `## Review response` reply and edits it in place, rather than posting a second comment carrying no heading. A heading-free comment passes over the poll the way ordinary chatter does: `JQ_UNMATCHED_STATE` opens with `select(startswith("## "))`, so only a comment whose first line already carries a heading prefix reaches the known-set test at all.
+`review-address` Step 7 appends its CI confirmation to the `## Review response` reply and edits it in place, rather than posting a second comment carrying no heading. A heading-free comment passes over the poll the way ordinary chatter does: `unmatchedState` in `poll.ts` opens with a `.startsWith('## ')` test, so only a comment whose first line already carries a heading prefix reaches the known-set test at all.
 
 The confirmation states nothing the reply posted moments earlier does not already carry, so a second comment would reach no reader on either side of the channel.
 
@@ -43,7 +43,7 @@ A heading gated at should-fix and a dispatch gated at any finding, or the revers
 
 The cost is that a reader can no longer take the merge decision from the heading alone, and reads it off the counts on the summary line instead. What it buys is the invariant the poll's stalled state already assumes.
 
-`review-pr` states the rule once, and every other surface cites that skill by name rather than restating it, since the surfaces ship separately and none of them can import anything. A citation buys one edit for the next move rather than one per surface, but it buys no check: `poll.sh` and the `pr-review` sandbox scenario both pin heading strings the skill owns, and nothing compares either against the body that states the rule, so a skill edit missing one leaves an arm scoring green against a rule nothing follows. Building that check was declined rather than deferred, since comparing a script's literals against prose is a parser over prose, a larger question than the threshold it would guard.
+`review-pr` states the rule once, and every other surface cites that skill by name rather than restating it, since the surfaces ship separately and none of them can import anything. A citation buys one edit for the next move rather than one per surface, but it buys no check: `poll.ts` and the `pr-review` sandbox scenario both pin heading strings the skill owns, and nothing compares either against the body that states the rule, so a skill edit missing one leaves an arm scoring green against a rule nothing follows. Building that check was declined rather than deferred, since comparing a script's literals against prose is a parser over prose, a larger question than the threshold it would guard.
 
 A minor the dispatched worker declines goes to the `## Findings` section of the task the branch closes, which the queue-refill sweep already names as the destination for a finding that changes another task. That routing does not follow the threshold, since a declined minor needs a surface surviving the merge whatever heading the pass carried.
 
@@ -51,13 +51,13 @@ Whether a finding is new in the diff or pre-existing and out of it is a real dif
 
 ### The stalled state
 
-`poll.sh` carries the detection, because a rule firing only when a session reads it produces the inconsistency a split threshold has. A jq filter takes the last family review's first line rather than its commit, and a `STALLED` state names a pull request whose open pass covers the head with nothing following it.
+`poll.ts` carries the detection, because a rule firing only when a session reads it produces the inconsistency a split threshold has. A filter takes the last family review's first line rather than its commit, and a `STALLED` state names a pull request whose open pass covers the head with nothing following it.
 
 Reporting a standing condition rather than a transition would fire on every later run, so the classification writes a marker into the baseline field it derives and reports once per entry.
 
 The heading alone cannot decide staleness, which the marker hides rather than fixes: one threshold under the heading and the dispatch means an open pass is a dispatch owed and made, so the healthy thread is a worker still working, and a signal firing on that path is one an operator learns to skip.
 
-The same filter emits the pass's age beside its heading, computed in jq because `date -d` is GNU-only, and the state adds a floor of two hours, several times a review-to-follow-up cycle and well short of a thread left overnight. A project whose workers run longer raises the constant. A review carrying no timestamp reads as age zero and classifies nothing, matching the answer a pull request the run could not read already gets.
+The same filter emits the pass's age beside its heading, computed in the script, which keeps it off `date -d`, a GNU-only call, and the state adds a floor of two hours, several times a review-to-follow-up cycle and well short of a thread left overnight. A project whose workers run longer raises the constant. A review carrying no timestamp reads as age zero and classifies nothing, matching the answer a pull request the run could not read already gets.
 
 Keying on elapsed time rather than on two consecutive quiet polls also drops history the state would otherwise need. A baseline written before the field exists reads as not yet reported, so the first run after an upgrade names a thread already past the floor instead of waiting a poll to confirm what it can already see. The prose half still cannot be dropped, since the script reports and never instructs, and the state catches only a thread already in the wrong shape.
 

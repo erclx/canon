@@ -15,7 +15,7 @@ description: The task, plan, and ready-folder artifacts coordinating multi-sessi
 - `.canon/plans/` owns one gitignored plan per task, archived beside the task on ship
 - `.canon/ready/` owns the finished-text folders a plan names as its verbatim source
 - `claude/skills/role-orchestrator/references/` owns the orchestrator runbooks
-- `claude/skills/role-orchestrator/scripts/` owns `poll.sh` and `watch.sh`, the review trigger's two loops
+- `claude/skills/role-orchestrator/scripts/` owns `poll.ts` and `watch.ts`, the review trigger's two loops, and the `repo.ts` they share
 - `src/tasks/` owns the `canon tasks` verbs that validate, archive, and derive from the board
 - `src/sessions/` and `src/worktrees/` own the roster reads and the reclaim reading
 
