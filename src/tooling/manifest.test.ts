@@ -72,6 +72,30 @@ describe('loadManifest', () => {
       'cspell',
     ])
   })
+
+  it('should read the scaffold command from the stack table', () => {
+    seedStack('vite', '[stack]\nname = "vite"\nscaffold = "bun create vite"\n')
+
+    expect(loadManifest(root, 'vite')?.scaffold).toBe('bun create vite')
+  })
+
+  it('should read the verify prepare command', () => {
+    seedStack(
+      'astro',
+      '[stack]\nname = "astro"\n\n[verify]\nprepare = "bunx astro add react"\n',
+    )
+
+    expect(loadManifest(root, 'astro')?.prepare).toBe('bunx astro add react')
+  })
+
+  it('should leave scaffold and prepare unset when empty', () => {
+    seedStack('base', '[stack]\nname = "base"\nscaffold = ""\n')
+
+    const manifest = loadManifest(root, 'base')
+
+    expect(manifest?.scaffold).toBeUndefined()
+    expect(manifest?.prepare).toBeUndefined()
+  })
 })
 
 describe('resolveChain', () => {

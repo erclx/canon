@@ -14,10 +14,7 @@ const MODULES: Registration[] = await Promise.all(
 
 // These forward `--help` to a bash script that owns the real usage text, so
 // Commander's own option stays disabled on purpose.
-const FORWARDS_HELP_TO_SCRIPT = new Set([
-  'canon sandbox',
-  'canon tooling verify',
-])
+const FORWARDS_HELP_TO_SCRIPT = new Set(['canon sandbox'])
 
 function buildProgram(): Command {
   const program = new Command()
