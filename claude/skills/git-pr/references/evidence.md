@@ -5,7 +5,7 @@ description: How git-pr finds the UI checklist and the local server, posts the e
 
 # Rendered-surface evidence
 
-The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The session reads this file when a UI checklist exists or the diff changes a path under an `evidence/` segment.
+The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The step runs on every pull request, with no test on the diff ahead of it. `no-evidence` is the silent branch, so a pull request that changes no rendered surface posts nothing.
 
 ## Find the UI checklist
 
