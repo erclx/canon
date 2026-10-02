@@ -36,7 +36,7 @@ pattern = 'customerId'
 # The old field is still printed beside the new one.
 [[content]]
 path = "src/cli.ts"
-pattern = '\bbuyer[''"]?\s*:'
+pattern = '''\bbuyer['"]?\s*:'''
 
 # The script outside the command still reads the field it always read.
 [[content]]
