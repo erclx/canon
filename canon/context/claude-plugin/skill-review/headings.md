@@ -31,7 +31,7 @@ A comment posted under a heading outside the six the comment filters know is rep
 
 ### The closing comment folds into the reply
 
-`review-address` Step 7 appends its CI confirmation to the `## Review response` reply and edits it in place, rather than posting a second comment carrying no heading. A heading-free comment passes over the poll the way ordinary chatter does: `JQ_UNMATCHED_STATE` opens with `select(startswith("## "))`, so only a comment whose first line already carries a heading prefix reaches the known-set test at all.
+`review-address` Step 7 appends its CI confirmation to the `## Review response` reply and edits it in place, rather than posting a second comment carrying no heading. A heading-free comment passes over the poll the way ordinary chatter does: `unmatchedState` in `poll.ts` opens with a `.startsWith('## ')` test, so only a comment whose first line already carries a heading prefix reaches the known-set test at all.
 
 The confirmation states nothing the reply posted moments earlier does not already carry, so a second comment would reach no reader on either side of the channel.
 

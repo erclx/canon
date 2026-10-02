@@ -248,7 +248,6 @@ describe('poll', () => {
     expect(carried.status).toBe(0)
     expect(carried.stdout).toBe('No movement.')
     expect(carried.stderr).toContain('#7 could not be read')
-    expect(carried.stderr).not.toContain('integer expression expected')
   })
 
   it('should report a comment posted under a heading outside the known set', () => {
@@ -366,25 +365,25 @@ describe('poll', () => {
     expect(poll().stdout).toBe('No movement.')
   })
 
-  it('should keep the baseline fields a carried run could not refresh', () => {
-    writeThread([], [])
-    expect(poll().stdout).toContain('OPENED')
-    const baseline = join(
-      root,
-      'repo',
-      '.canon',
-      'tmp',
-      'pr',
-      'poll',
-      'baseline.txt',
+  // A regression that blanks the count on a carry makes the next healthy run
+  // read zero against the thread's real count and report every comment already
+  // there as UNMATCHED.
+  it('should keep the unmatched count and UI token on a carried line', () => {
+    const dir = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
+    const baseline = join(dir, 'baseline.txt')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      baseline,
+      `7 ${HEAD} none 0 unknown closed 2 open-head-1111111\n`,
     )
-    const written = readFileSync(baseline, 'utf8')
-
+    writeThread([], [])
     breakView()
-    poll()
 
+    const carried = poll()
+
+    expect(carried.stdout).toBe('No movement.')
     expect(readFileSync(baseline, 'utf8')).toBe(
-      written.replace(/ none 0 none\n$/, ' carried 0 none\n'),
+      `7 ${HEAD} none 0 unknown carried 2 open-head-1111111\n`,
     )
   })
 
@@ -508,6 +507,5 @@ describe('poll', () => {
     expect(carried.status).toBe(0)
     expect(carried.stdout).toBe('No movement.')
     expect(carried.stderr).toContain('#7 could not be read')
-    expect(carried.stderr).not.toContain('integer expression expected')
   })
 })
