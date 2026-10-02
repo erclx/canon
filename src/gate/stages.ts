@@ -203,7 +203,7 @@ export const STAGES: readonly Stage[] = [
     checks: [
       {
         kind: 'command',
-        argv: ['bash', 'scripts/core/regen-hero.sh', '--check'],
+        argv: ['bun', 'scripts/core/regen-hero.ts', '--check'],
         failure: 'Hero regen health check failed',
       },
       { kind: 'measure', measure: captureStamps },

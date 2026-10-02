@@ -142,8 +142,6 @@ describe('the hero stage', () => {
       check.kind === 'command' ? [check.argv] : [],
     )
 
-    expect(commands).toEqual([
-      ['bash', 'scripts/core/regen-hero.sh', '--check'],
-    ])
+    expect(commands).toEqual([['bun', 'scripts/core/regen-hero.ts', '--check']])
   })
 })
