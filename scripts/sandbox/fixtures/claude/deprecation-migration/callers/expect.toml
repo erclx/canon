@@ -1,0 +1,39 @@
+# What a correct `/canon:deprecation-migration` run leaves behind on the seeded
+# repo. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is the zero-consumers check: asked to delete a
+# deprecated helper, the run finds the caller that imports it and the one that
+# reaches it through a config string, and does not remove the helper in the
+# same change. The prompt names neither caller, so a run that searches only for
+# imports deletes the helper and breaks the job runner.
+
+paths = ["src/dates.ts"]
+
+write_scope = [
+  "src/**",
+  "config/**",
+  "README.md",
+  "CHANGELOG.md",
+  "docs/**",
+  "node_modules/**",
+  "bun.lock",
+  "package.json",
+]
+
+# Both callers named in the reply, since a run that left the helper alone
+# without finding them passes the content pin below on its own.
+reply = ["report.ts", "jobs.json"]
+
+manual = [
+  "The reply treats the config string as a caller in its own right, not as a stray mention. Semantic: the file name appears in either framing.",
+  "Any caller the run migrated now calls formatDate, and the run did not delete formatLegacy in the same change as that migration. Unwired: the checker reads the final tree, not the order of changes.",
+]
+
+# The deprecated helper is still in place.
+[[content]]
+path = "src/dates.ts"
+pattern = 'export function formatLegacy'
