@@ -9,7 +9,7 @@ description: What the ship chain is for, the gaps it closes, and why it does not
 
 Without this skill, the post-feature sequence runs from memory. Doc sync gets skipped, so the pull request ships with planning docs describing the previous scope, or it runs after staging has already closed and its output never reaches a commit. Chaining by hand is also where a session narrates between steps, which turns one flow into a conversation and invites a decision at every boundary.
 
-The sequence also reaches the remote on work nothing re-checked. This skill is the resume point `auto-ship` names at four of its stop points, including the one a failed verify takes, so the fix the user makes by hand after that stop is pushed with no suite run against it. Every branch shipped so far passed that verify on its first attempt, which is why the path has produced no instance rather than being closed.
+The sequence also reaches the remote on work nothing re-checked. This skill is the resume point `auto-ship` names at three of its stop points, including the one a failed verify takes, so the fix the user makes by hand after that stop is pushed with no suite run against it. Every branch shipped so far passed that verify on its first attempt, which is why the path has produced no instance rather than being closed.
 
 ## Must
 

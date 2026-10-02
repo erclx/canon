@@ -20,7 +20,6 @@ Every stop point leaves recoverable state. The user resumes manually from the ap
 | Empty changed-file list                    | Re-run once the plan produces tracked output. Ship gitignored output outside the chain, never by tracking it.                                   |
 | Branch collision on worktree entry         | `session-worktree` Step 5 found `<slug>` already as a local branch. Resolve manually (rename or delete the stale branch), then re-run autoship. |
 | Verify fails                               | Read logs, fix manually, run `/git-ship`                                                                                                        |
-| UI checklist                               | Verify visually, run `/git-ship`                                                                                                                |
 | Inherited review findings                  | Fix findings, run `/git-ship`                                                                                                                   |
 | Self-introduced finding survived           | Read the receipt for what the one repair pass left open, fix it, run `/git-ship`                                                                |
 | git-ship fails                             | Inspect hook or remote error, run again                                                                                                         |

@@ -21,6 +21,7 @@ Review is the step that varies most. It gets skipped on a diff that needed one, 
 - Own the review receipt's lifetime, since this chain writes it, cites it in its own closing block, and is the only body that can read whether the step keeping it is still using it
 - Delegate the ship sequence to `git-ship` rather than restating it, and name only what this chain adds to it
 - Open the pull request as a draft before the continuous integration watch begins, since a pull request marked after it is mergeable for the length of the run
+- Continue past a produced UI checklist rather than stopping on it, and report its unchecked boxes in the closing block, since the draft mark already holds the merge and a stop there skipped review on the resumed path
 - Prove the draft target's head is the current branch and its state is open before marking it, and stop with nothing marked on a mismatch, since the number is retyped between steps and a draft mark on a release pull request holds that release
 - Name the recovery for the stop it took, since the value of stopping is that the user knows where to resume
 
