@@ -8,26 +8,7 @@ use_config() {
 stage_setup() {
   select_or_route_scenario "Which scenario?" "feature" "chore" "noop"
 
-  mkdir -p src
-
-  cat <<'EOF' >src/server.ts
-export const config = { port: 8080 };
-export function start() { console.log("Starting..."); }
-EOF
-
-  cat <<'EOF' >README.md
-# API Server
-
-## Configuration
-
-Run on port `8080`.
-
-## Usage
-
-```typescript
-start();
-```
-EOF
+  stage_fixtures docs sync shared base
 
   # No mock standards folder. A target holds none, so `docs-sync` reaches the
   # standards it reads through `canon standards <name>` here as it would anywhere.
@@ -37,10 +18,7 @@ EOF
   "feature")
     git checkout -b feature/drift -q
 
-    cat <<'EOF' >src/server.ts
-export const config = { port: 3000 };
-export function start(debug: boolean) { console.log("Starting..."); }
-EOF
+    stage_fixtures docs sync feature 01-debug-port
 
     git add . && git commit -m "feat(server): change port to 3000 and add debug parameter" -q
 
@@ -65,16 +43,7 @@ EOF
   "noop")
     git checkout -b test/server-unit-tests -q
 
-    mkdir -p src/__tests__
-    cat <<'EOF' >src/__tests__/server.test.ts
-import { start } from "../server";
-
-describe("server", () => {
-  it("starts without error", () => {
-    expect(() => start()).not.toThrow();
-  });
-});
-EOF
+    stage_fixtures docs sync noop 01-test
 
     git add . && git commit -m "test(server): add unit tests for start function" -q
 

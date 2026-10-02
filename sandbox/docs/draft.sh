@@ -8,59 +8,7 @@ use_config() {
 stage_setup() {
   select_or_route_scenario "Which scenario?" "fits-category" "fits-none" "already-covered"
 
-  mkdir -p docs/agents
-
-  cat <<'EOF' >docs/index.md
----
-title: Docs
-subtitle: One-line reference for each doc in this folder.
----
-
-# Docs
-
-One-line reference for each doc in this folder.
-
-## Sub-catalogs
-
-- [Agents](agents/index.md): CLI catalog and invocation rules for agents, split by command domain. Start with overview.
-EOF
-
-  cat <<'EOF' >docs/agents/index.md
----
-title: Agents
-subtitle: CLI catalog and invocation rules for agents, split by command domain.
----
-
-# Agents
-
-CLI catalog and invocation rules for agents, split by command domain.
-
-## Governance
-
-- [Governance CLI](governance.md): Install, sync, and audit governance rules from the command line
-EOF
-
-  cat <<'EOF' >docs/agents/governance.md
----
-title: Governance CLI
-description: Install, sync, and audit governance rules from the command line
-category: Governance
----
-
-# Governance CLI
-
-Commands for installing, syncing, and auditing governance rules.
-
-## Install
-
-`canon gov install <stack>`
-
-Installs the named stack's rules into `.claude/rules/`.
-
-## Adjacent surface
-
-See `docs/agents/index.md` for the full agent CLI catalog.
-EOF
+  stage_fixtures docs draft shared catalog
 
   git add . && git commit -m "docs(agents): seed a populated governance catalog" -q
 

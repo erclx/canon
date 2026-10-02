@@ -1,0 +1,8 @@
+# Prose
+
+A reference is written as inline code.
+
+```markdown
+Bad: See [canon/context/retrieval.md](canon/context/retrieval.md) for the flow.
+Good: See `canon/context/retrieval.md` for the flow.
+```

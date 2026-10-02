@@ -1,0 +1,11 @@
+---
+title: Scripts
+subtitle: Bash entry points and the shared lib surface
+---
+
+# Scripts
+
+Bash entry points and the shared lib surface
+
+- [Overview](overview.md): Structure of the scripts domain
+- [Lib](lib.md): Shared functions sourced by domain scripts

@@ -1,0 +1,2 @@
+export const config = { port: 3000 };
+export function start(debug: boolean) { console.log("Starting..."); }

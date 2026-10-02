@@ -3,12 +3,7 @@ set -e
 set -o pipefail
 
 seed_legacy_wiki() {
-  mkdir -p wiki
-  cat <<'EOF' >wiki/setup.md
-# Setup
-
-Page authored before the wiki moved under .claude/.
-EOF
+  stage_fixtures infra wiki legacy 01-setup
 }
 
 stage_setup() {

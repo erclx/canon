@@ -1,0 +1,21 @@
+## Toolkit feedback
+
+### From project
+
+a sandbox arm
+
+### Surface
+
+CLI, canon feedback
+
+### Observed
+
+A report missing a required field was written to disk anyway.
+
+### Expected
+
+The command refuses and names the field.
+
+### Repro
+
+Pipe this block to canon feedback.

@@ -1,0 +1,5 @@
+# Sandbox-local rule
+
+## Authority
+
+- Authored under `internal/rules/`, so it reaches this repository and no target.

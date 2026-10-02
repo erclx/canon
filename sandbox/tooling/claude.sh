@@ -4,19 +4,10 @@ set -o pipefail
 
 stage_setup() {
   log_step "Initializing package"
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-claude-workflow",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures tooling claude shared package
   log_info "package.json created"
 
-  cat <<'EOF' >.gitignore
-node_modules/
-EOF
+  stage_fixtures tooling claude shared gitignore
   log_info ".gitignore created"
 
   log_step "Injecting governance rules"

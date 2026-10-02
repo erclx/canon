@@ -1,0 +1,12 @@
+---
+title: Agents
+subtitle: CLI catalog and invocation rules for agents, split by command domain.
+---
+
+# Agents
+
+CLI catalog and invocation rules for agents, split by command domain.
+
+## Governance
+
+- [Governance CLI](governance.md): Install, sync, and audit governance rules from the command line

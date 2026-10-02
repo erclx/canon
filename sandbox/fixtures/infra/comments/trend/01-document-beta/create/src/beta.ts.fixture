@@ -1,0 +1,7 @@
+/**
+ * Doubling is the contract the caller depends on, not an implementation
+ * detail, so the block is here rather than at the call site.
+ */
+export function beta(value: number): number {
+  return value * 2
+}

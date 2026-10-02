@@ -7,14 +7,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-tooling-infra",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures infra tooling shared package
 
   git add .
   git commit -m "chore(sandbox): scaffold tooling infra test directory" --no-verify -q
@@ -37,21 +30,7 @@ EOF
     exec bun "$PROJECT_ROOT/src/cli.ts" tooling sync base .
     ;;
   "sync-drift")
-    mkdir -p docs
-    cat <<'EOF' >docs/development.md
----
-title: Development (customized)
-description: User-edited copy
----
-
-# Development
-
-Local dev workflow for this project.
-
-## Setup
-
-- Install dependencies with `bun install`.
-EOF
+    stage_fixtures infra tooling sync-drift 01-development
     git add docs/development.md
     git commit -m "chore(sandbox): seed drifted docs/development.md" --no-verify -q
 
@@ -79,12 +58,7 @@ EOF
     ;;
   "reference-stale")
     log_step "Staging a stale installed reference copy"
-    mkdir -p .claude/tooling
-    cat <<'EOF' >.claude/tooling/base.md
-# Base reference (stale copy from before the read route shipped)
-
-This file predates canon tooling reference and no command still writes it.
-EOF
+    stage_fixtures infra tooling reference-stale 01-installed-copy
     git add .claude/tooling/base.md
     git commit -m "chore(sandbox): seed a stale installed reference copy" --no-verify -q
 

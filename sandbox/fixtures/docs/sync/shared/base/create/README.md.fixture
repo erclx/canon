@@ -1,0 +1,11 @@
+# API Server
+
+## Configuration
+
+Run on port `8080`.
+
+## Usage
+
+```typescript
+start();
+```

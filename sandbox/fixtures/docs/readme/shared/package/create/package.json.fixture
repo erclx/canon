@@ -1,0 +1,5 @@
+{
+  "name": "sample-cli",
+  "version": "0.1.0",
+  "bin": { "sample-cli": "./src/cli.js" }
+}

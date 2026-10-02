@@ -8,20 +8,8 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-init-infra",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures infra init shared scaffold
 
-  mkdir -p scripts
-  cat <<'SCRIPT' >scripts/placeholder.sh
-#!/bin/bash
-echo "placeholder"
-SCRIPT
   chmod +x scripts/placeholder.sh
 
   git add .

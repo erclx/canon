@@ -1,0 +1,19 @@
+---
+title: Governance CLI
+description: Install, sync, and audit governance rules from the command line
+category: Governance
+---
+
+# Governance CLI
+
+Commands for installing, syncing, and auditing governance rules.
+
+## Install
+
+`canon gov install <stack>`
+
+Installs the named stack's rules into `.claude/rules/`.
+
+## Adjacent surface
+
+See `docs/agents/index.md` for the full agent CLI catalog.

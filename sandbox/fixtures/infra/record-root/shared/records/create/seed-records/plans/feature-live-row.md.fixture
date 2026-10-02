@@ -1,0 +1,29 @@
+# Feature: A staged plan
+
+One paragraph of intro so the plan carries a body.
+
+## Summary
+
+- One bullet describing the change.
+
+**Files to touch:**
+
+- `src/thing.ts`: the surface this would edit.
+
+**Verification:**
+
+- The surface still builds: `bun run check`
+
+**Risks:**
+
+- One risk, stated.
+
+**Review focus:**
+
+None identified.
+
+**Questions:**
+
+1. Does this ship here?
+   - Suggested: yes, since the fixture needs an answerable question.
+   - Answer: yes

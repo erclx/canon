@@ -5,126 +5,20 @@ set -o pipefail
 source "$PROJECT_ROOT/scripts/lib/sandbox-git.sh"
 
 seed_folder() {
-  mkdir -p docs
-  cat <<'EOF' >docs/index.md
----
-title: Docs
-subtitle: Sample folder index for sandbox
----
-
-# Stale content that should be overwritten
-EOF
-  cat <<'EOF' >docs/alpha.md
----
-title: Alpha
-description: First sample entry
----
-
-# Alpha
-EOF
-  cat <<'EOF' >docs/beta.md
----
-title: Beta
-description: Second sample entry
----
-
-# Beta
-EOF
+  stage_fixtures infra indexes shared folder
 }
 
 seed_nested_folder() {
   seed_folder
-  mkdir -p docs/guides
-  cat <<'EOF' >docs/guides/index.md
----
-title: Guides
-subtitle: Step-by-step how-tos
----
-
-# Stale content that should be overwritten
-EOF
-  cat <<'EOF' >docs/guides/setup.md
----
-title: Setup
-description: Local environment bootstrap
----
-
-# Setup
-EOF
-  cat <<'EOF' >docs/guides/deploy.md
----
-title: Deploy
-description: Release and rollback steps
----
-
-# Deploy
-EOF
+  stage_fixtures infra indexes nested 01-guides
 }
 
 seed_bare_folder() {
-  mkdir -p docs
-  cat <<'EOF' >CLAUDE.md
-# Project
-
-Sample project for testing the indexes phase of the setup skill.
-
-## Rules
-
-- When editing any markdown file, follow project prose conventions.
-EOF
-  cat <<'EOF' >docs/architecture.md
-# Architecture
-
-System boundaries and module responsibilities for the sample project. Defines how the API gateway forwards requests to the worker pool and where state persists.
-
-## Sections
-
-Body content for the architecture doc goes here.
-EOF
-  cat <<'EOF' >docs/onboarding.md
-# Onboarding
-
-Steps for a new contributor to clone the repo, install dependencies, and run the dev loop end to end.
-
-## Sections
-
-Body content for the onboarding doc goes here.
-EOF
-  cat <<'EOF' >docs/deployment.md
-# Deployment
-
-Build, package, and release workflow for staging and production environments. Covers rollback procedure and post-deploy verification.
-
-## Sections
-
-Body content for the deployment doc goes here.
-EOF
-  cat <<'EOF' >docs/troubleshooting.md
-# Troubleshooting
-
-Common failure modes for the worker pool, with the symptom each surfaces and the recovery action that resolves it.
-
-## Sections
-
-Body content for the troubleshooting doc goes here.
-EOF
-  cat <<'EOF' >docs/glossary.md
-# Glossary
-
-Domain terms used across the codebase. Each entry is a single sentence so the doc stays scannable as the system grows.
-
-## Sections
-
-Body content for the glossary doc goes here.
-EOF
+  stage_fixtures infra indexes bootstrap 01-bare
 }
 
 seed_no_candidate() {
-  cat <<'EOF' >CLAUDE.md
-# Project
-
-Sample project for testing the indexes phase of the setup skill on an empty scan.
-EOF
+  stage_fixtures infra indexes no-candidate 01-claude
 }
 
 seed_git_repo() {

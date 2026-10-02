@@ -8,14 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-claude-infra",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures infra claude shared package
 
   git add .
   git commit -m "chore(sandbox): scaffold claude infra test directory" --no-verify -q

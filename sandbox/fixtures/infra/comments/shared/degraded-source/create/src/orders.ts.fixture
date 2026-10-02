@@ -1,0 +1,7 @@
+// TODO: revisit once the queue lands
+export function enqueue(): void {}
+
+// This previously used a lock file, kept for the migration window.
+export function drain(): void {}
+
+const message = 'TODO: this sits in a string and must not count'

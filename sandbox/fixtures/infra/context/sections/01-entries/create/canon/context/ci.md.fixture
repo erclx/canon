@@ -1,0 +1,14 @@
+---
+title: CI
+description: An entry declaring both required sections
+---
+
+# CI
+
+## Overview
+
+Owns the workflow that gates a merge.
+
+## Layout
+
+- `.github/workflows/` owns the workflow definitions

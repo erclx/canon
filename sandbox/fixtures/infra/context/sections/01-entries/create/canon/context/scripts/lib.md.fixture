@@ -1,0 +1,10 @@
+---
+title: Lib
+description: Shared functions sourced by domain scripts
+---
+
+# Lib
+
+## Decisions
+
+Each lib file owns one concern.
