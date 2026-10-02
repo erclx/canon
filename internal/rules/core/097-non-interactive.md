@@ -3,6 +3,7 @@ description: Enforce headless behavior for pickers and prompts in commands and s
 paths:
   - 'src/**/*.ts'
   - 'scripts/**/*.sh'
+  - 'sandbox/**/*.sh'
 ---
 
 # Non-interactive standards
