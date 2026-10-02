@@ -124,7 +124,7 @@ An intake folder answers that direction at folder scope rather than item scope. 
 
 A project that archived plans before the folder nested under `.canon/plans/` holds closed tasks pointing at `../plans-archive/` or `../.tmp/plans-archive/`. Leave those pointers where they are, since each resolves against the files it names and a task retargeted without its plan moving leads nowhere.
 
-One plan per task, or one per slice on a sliced task. A plan cited by two tasks is a misfile rather than a shape to design for.
+One plan per task, or one per slice, which the board check reads as distinct plans on one line. A plan cited by two tasks is a misfile.
 
 `canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, and `--add` appends a slice's plan, so the line is never hand-edited.
 
