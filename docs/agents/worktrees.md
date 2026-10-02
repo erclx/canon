@@ -1,6 +1,6 @@
 ---
 title: Worktrees
-description: Reporting which worktrees are reclaimable, removing the ones that are, the record a hook reads back, why the reading keys on the pull request rather than on git ancestry, the refusals it names, and the two removal shapes
+description: Reporting which worktrees are reclaimable, removing the ones that are, the hidden verb that clears a stranded bare flag, the record a hook reads back, why the reading keys on the pull request rather than on git ancestry, the refusals it names, and the two removal shapes
 ---
 
 # Worktrees
@@ -23,6 +23,21 @@ It reads and removes nothing. The question it answers is which worktrees the wor
 Exit codes: `0` every worktree was read, `1` refused. The refusal carries a `reason` of `gh-missing`, `gh-failed`, or `sessions-unreadable`.
 
 An exit code says nothing about a call made from a session, since a shell profile may wrap the binary in a function taking its status from a later command. Read the record's `reason` rather than the exit when a skill consumes this.
+
+## Repair the bare flag
+
+`canon worktrees repair-bare-flag` clears a `core.bare` flag that Claude Code's worktree entry left set in the shared config. It is hidden, so no help listing shows it, because its one caller is a hook rather than a person.
+
+```bash
+canon worktrees repair-bare-flag --root <path> --json
+```
+
+| Option          | Behavior                              |
+| --------------- | ------------------------------------- |
+| `--root <path>` | Repository to repair, default the cwd |
+| `--json`        | Print the record on stdout            |
+
+`--json` writes `{repaired, reason, message}` on stdout, once, whether or not anything was written. `reason` is `flag-unset`, `common-dir-unreadable`, `genuinely-bare`, or `write-failed` when `repaired` is false. `message` carries text when the flag is repaired and when the write failed, and is null on the three quiet skips. A `write-failed` record means the flag is still set, which a lock file or a read-only config causes. A repository whose common dir is not named `.git` keeps its flag. The exit code is always `0`, so a hook never fails a tool call. Without `--json`, a record carrying a message prints it on stderr and any other prints nothing.
 
 ## Reclaim
 

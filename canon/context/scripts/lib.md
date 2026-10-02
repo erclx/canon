@@ -1,11 +1,11 @@
 ---
 title: lib
-description: The four shared bash libraries, the functions each exports, and where the TypeScript equivalents sit
+description: The three shared bash libraries, the functions each exports, and where the TypeScript equivalents sit
 ---
 
 # lib
 
-`scripts/lib/` holds the functions domain scripts source and never execute. Each file owns one concern, and the surfaces below are what a session reads before adding a helper that already exists. `worktree.sh` is documented with the verification stage that calls it, in `canon/context/scripts/core.md`.
+`scripts/lib/` holds the functions domain scripts source and never execute. Each file owns one concern, and the surfaces below are what a session reads before adding a helper that already exists.
 
 ## `ui.sh`
 

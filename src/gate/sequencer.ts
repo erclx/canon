@@ -377,23 +377,3 @@ async function spawn(
     spawnError: code === 'ENOENT' ? `${file} is not on PATH` : undefined,
   }
 }
-
-/**
- * Repairs `core.bare`, which Claude Code's worktree entry leaves set in the
- * shared config and nothing restores.
- *
- * It runs ahead of every stage rather than as one of them, because the flag
- * breaks the git reads that scope the run. The rule itself stays in
- * `scripts/lib/worktree.sh`, which is the one bash function under test, so this
- * calls it rather than restating the guard that spares a genuinely bare
- * repository.
- */
-export async function repairBareFlag(root: string): Promise<void> {
-  await execa('bash', [join(root, 'scripts/core/repair-bare-flag.sh')], {
-    cwd: root,
-    reject: false,
-    stdio: 'inherit',
-    env: { ...gitEnv(), PROJECT_ROOT: root },
-    extendEnv: false,
-  })
-}

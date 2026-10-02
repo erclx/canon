@@ -27,7 +27,6 @@ What sequences those guards is not here. `bun run check` resolves to `canon gate
   - The regex matches the substring inside any word starting `canon` and continuing with something other than a slash, so "canonical" trips it exactly as `canon` alone would. Seed prose describing something as a "canonical doc" reads as a citation of the CLI binary, so write around the word rather than adding it to a seed file.
 - `check-color-source.sh`: walks `scripts/` and fails when any `.sh` other than `scripts/lib/ui.sh` spells an SGR escape, so one answer sits behind every bash writer
 - `check-ignore-parity.sh`: compares the record-root patterns in this repository's `.gitignore` against the `# Claude` array the claude manifest ships, so the ignore set a target receives cannot drift from the one the toolkit runs on. The comparison is exact and carries no exception list, which the move to `.canon/` is what allowed, and `canon/context/tooling/manifests.md` carries why the comparison exists
-- `repair-bare-flag.sh`: sources `repair_bare_flag` and runs it, which is how the gate reaches that rule without holding a second copy of the guard that spares a genuinely bare repository
 - `list-seed-roots.sh`: prints every `tooling/*/seeds` carrying a `.claude/`, which is how the seed-standards stage reads the same discovery `check-seed-independence.sh` reads
 
 ## What the hero frame chooses and what it samples
@@ -50,11 +49,7 @@ No stage carries either shape. Every reading that needs a payload runs through `
 
 CI runs every stage through `bun run check:ci`, which passes `--all`. The local run scopes shell, types, and tests to the changed-file set, so it is the weaker of the two. See `canon/context/ci/overview.md`.
 
-`repair_bare_flag` runs ahead of every stage rather than as one of them, because Claude Code's worktree entry leaves `core.bare` set in the shared config and that flag breaks the git reads that scope the run. It writes only when the flag is set and the repository's common dir is named `.git`, which spares a genuinely bare repository that keeps its objects at the root. `session-worktree` carries the same repair at entry, and this copy covers the entries that never go through the skill. See `canon/context/claude-plugin/skill-procedures/worktree-entry.md` for the split and `wiki/claude/worktrees.md` for the upstream issue.
-
-It lives in `scripts/lib/worktree.sh` rather than inline in the gate so `src/worktree-repair.test.ts` can source it, which is the one bash function in the repo under test. `scripts/core/repair-bare-flag.sh` is the two-line caller `canon gate run` reaches it through, which is what kept the rule in one place when the sequencing moved into TypeScript. The function takes its target root as an argument defaulting to `PROJECT_ROOT`, since a test cannot set that for a sourced function without leaking it across cases. The test builds six repository shapes and the `basename` guard is what it exists to pin: deleting that line leaves five cases passing and fails only the genuinely-bare one, which is the case where an unguarded repair does damage. Tests gate on `^src/` locally, so an edit to the lib alone runs them only under `check:ci`, which passes `--all`.
-
-The test strips every inherited `GIT_*` variable before building its fixtures. Git hooks export `GIT_DIR`, so without the scrub the suite passes standalone and fails under `pre-push`: `git -C real-bare.git` resolves against the toolkit's own repository rather than the fixture, and the genuinely-bare case reports the wrong flag. Any future test that shells out to git needs the same scrub, and the failure is invisible to a normal `bun run test`.
+The `core.bare` repair that runs ahead of every stage is TypeScript now, in `src/worktrees/bare-flag.ts`. `canon/context/claude-plugin/skill-procedures/worktree-entry.md` carries its narrative.
 
 ### Stage gotchas
 

@@ -21,7 +21,6 @@ The array and the list below are two copies of one set with nothing comparing th
 - `.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/`: `bun --bun vitest run src/hooks-guard.test.ts`
 - `claude/skills/role-orchestrator/scripts/poll.sh`: `bun --bun vitest run src/orchestrate-poll.test.ts`
 - `tooling/web/configs/scripts/worktree-port.sh`: `bun --bun vitest run src/worktree-port.test.ts`
-- `scripts/lib/worktree.sh`: `bun --bun vitest run src/worktree-repair.test.ts`
 - `scripts/core/check-ignore-parity.sh`: `bun --bun vitest run src/ignore-parity.test.ts`
 
 The patterns and the rows differ at both ends rather than by an omission. `^claude/skills/` covers both the skill-body row and the `poll.sh` row, `^governance/rules/` covers both governance rows, and the hooks row expands into two patterns because its test reaches the seed copy as well. The patterns that are directory prefixes exist because their tests walk the tree whole, and two of those reach a rule or a skill a branch adds rather than edits. `src/gov/adapter.test.ts` asserts an absence, that `governance/rules/project/` ships empty because the subfolder is reserved for a target, so adding a rule there is what trips it.
