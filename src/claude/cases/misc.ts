@@ -80,6 +80,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'code-craft',
   },
   {
+    prompt:
+      "I've got the plan approved and it touches the parser, the command, and the docs. How should I build it so I don't end up with one giant diff?",
+    expect: 'build-in-slices',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },

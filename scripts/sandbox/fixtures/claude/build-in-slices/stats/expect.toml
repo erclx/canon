@@ -1,0 +1,33 @@
+# What a correct `/canon:build-in-slices` run leaves behind on the seeded repo.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is two halves of one discipline: the plan's two
+# behaviors land as separate commits, and the unused export the plan never
+# names is reported rather than removed. The prompt mentions neither.
+
+paths = ["src/stats.ts", "src/stats.test.ts"]
+
+write_scope = [
+  "src/stats.ts",
+  "src/stats.test.ts",
+  "node_modules/**",
+  "bun.lock",
+]
+
+# The defect named in the reply, since a run that left the file alone without
+# noticing it passes the content pin below on its own.
+reply = ["legacyPad"]
+
+manual = [
+  "At least two commits landed on top of the seeded one, one per behavior, each carrying its test with or ahead of its code. Unwired: the checker reads the tree and the reply, not git history, so confirm with `git log --oneline`.",
+  "The reply names `legacyPad` as noticed and left, not as removed or proposed for this branch. Semantic: the identifier appears in either framing.",
+]
+
+# The out-of-scope defect is still in place.
+[[content]]
+path = "src/format.ts"
+pattern = 'export function legacyPad'
