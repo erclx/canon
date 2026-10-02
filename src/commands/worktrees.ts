@@ -17,6 +17,7 @@ import {
   type WorktreeVerdict,
 } from '@/worktrees/reclaim'
 import { mainWorktreeRoot } from '@/worktree'
+import { repairBareFlag } from '@/worktrees/bare-flag'
 import {
   removeReclaimable,
   type RemovalOutcome,
@@ -24,6 +25,11 @@ import {
 } from '@/worktrees/remove'
 
 interface ListCommandOptions {
+  readonly json?: boolean
+}
+
+interface RepairBareFlagOptions {
+  readonly root?: string
   readonly json?: boolean
 }
 
@@ -207,6 +213,37 @@ export function register(program: Command): void {
     )
     .action(async (opts: ReclaimCommandOptions) => {
       process.exitCode = await runReclaim(opts)
+    })
+
+  worktrees
+    .command('repair-bare-flag', { hidden: true })
+    .description('Clear a core.bare flag that worktree entry left set')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to repair', '.')
+    .option('--json', 'Print the record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  always, since the caller is a hook that must never fail a tool call',
+        '',
+        'Called by .claude/hooks/bare-flag-repair.sh, the one caller that is not',
+        'a person, so no help listing shows it. A repository whose common dir is',
+        'not named .git keeps its flag, since that is a genuinely bare one.',
+        '',
+        'Examples:',
+        '  canon worktrees repair-bare-flag --root . --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RepairBareFlagOptions) => {
+      const record = await repairBareFlag(opts.root ?? '.')
+      if (opts.json === true) {
+        process.stdout.write(`${JSON.stringify(record)}\n`)
+      } else if (record.repaired) {
+        logWarn(record.message)
+      }
     })
 }
 

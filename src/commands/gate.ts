@@ -5,7 +5,6 @@ import {
   commandRunner,
   exitCodeFor,
   type GateContext,
-  repairBareFlag,
   type StageResult,
   type Summary,
   runStages,
@@ -24,6 +23,7 @@ import {
   pipeOutput,
   plural,
 } from '@/ui'
+import { repairBareFlag } from '@/worktrees/bare-flag'
 
 interface RunCommandOptions {
   readonly all?: boolean
@@ -97,7 +97,8 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
 
   if (!emitJson && !nested) intro('canon gate run')
 
-  await repairBareFlag(root)
+  const repair = await repairBareFlag(root)
+  if (repair.repaired) logWarn(repair.message)
 
   const changed = opts.all
     ? { scoped: false, files: [] }

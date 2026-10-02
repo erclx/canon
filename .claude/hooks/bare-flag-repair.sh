@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: calls scripts/lib/worktree.sh, toolkit-internal and never shipped, so seeding this alone ships a permanent no-op. It already no-ops safely where the library is absent.
+# canon-no-seed: runs this checkout's src/cli.ts, which no target ships, so seeding this alone ships a permanent no-op. It already no-ops safely where src/cli.ts is absent.
 
 # Claude Code's worktree entry writes core.bare into the shared config and its
-# exit never restores it, so every later git command fails. verify.sh runs the
-# same repair, but a session that only reads git never runs the suite, so the
-# tool call is the trigger that fires while the session is still working.
+# exit never restores it, so every later git command fails. `canon gate run`
+# runs the same repair, but a session that only reads git never runs the suite,
+# so the tool call is the trigger that fires while the session is still working.
 
 # Draining stdin with the builtin keeps the flag read the only process on the
 # path that every invocation but a handful takes.
@@ -19,16 +19,17 @@ Bash) ;;
 *) exit 0 ;;
 esac
 
-lib="$root/scripts/lib/worktree.sh"
-[ -f "$lib" ] || exit 0
+cli="$root/src/cli.ts"
+[ -f "$cli" ] || exit 0
 
-# stdout carries the hook protocol, so the library's warning is captured and
-# re-emitted as additionalContext rather than printed where it would corrupt it.
-warning=""
-log_warn() { warning="$1"; }
-# shellcheck source=/dev/null
-source "$lib"
-repair_bare_flag "$root"
+# stdout carries the hook protocol, so the verb's record is parsed rather than
+# printed. A run that fails leaves the flag set, and the hook says so because the
+# flag is already known to be on and nothing else would report it.
+if ! record=$(bun "$cli" worktrees repair-bare-flag --root "$root" --json 2>/dev/null); then
+  jq -nc '{hookSpecificOutput:{hookEventName:"PreToolUse",additionalContext:"core.bare is set and the repair did not run, since bun is absent or failed on src/cli.ts. Recovery is '\''git config core.bare false'\''."}}'
+  exit 0
+fi
 
-[ -n "$warning" ] || exit 0
-jq -nc --arg msg "$warning" '{hookSpecificOutput:{hookEventName:"PreToolUse",additionalContext:$msg}}'
+message=$(printf '%s' "$record" | jq -r '.message // empty')
+[ -n "$message" ] || exit 0
+jq -nc --arg msg "$message" '{hookSpecificOutput:{hookEventName:"PreToolUse",additionalContext:$msg}}'
