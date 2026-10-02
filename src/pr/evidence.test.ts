@@ -555,6 +555,22 @@ describe('readOwed', () => {
     expect(owed).toEqual(['preview'])
   })
 
+  it('should owe a preview for a checklist-only branch once its marked comment exists', () => {
+    const owed = readOwed(
+      owedInput({
+        hasEvidenceChange: false,
+        hasMarkedComment: hasMarkedEvidenceComment([
+          {
+            body: '<!-- pr-checklist:start -->\n- [ ] look\n<!-- pr-checklist:end -->\n\n<!-- pr-evidence: head=abc -->',
+          },
+        ]),
+        deployWorkflowFound: true,
+      }),
+    )
+
+    expect(owed).toEqual(['preview'])
+  })
+
   it('should owe nothing when the marked comment carries a preview', () => {
     const owed = readOwed(
       owedInput({
