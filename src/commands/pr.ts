@@ -36,6 +36,17 @@ import {
   readOwed,
   renderEvidenceBody,
 } from '@/pr/evidence'
+import {
+  dropFrames,
+  FRAMES_BRANCH,
+  type FramesApi,
+  type FramesRefusal,
+  frameLink,
+  pruneFrames,
+  pushFrame,
+  readFrame,
+  type TreeEntry,
+} from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
   findLocalServer,
@@ -114,6 +125,48 @@ const LOCAL_REFUSALS: Record<LocalRefusal | 'gh-failed', string> = {
     'This machine offers neither lsof nor /proc, so no listening socket could be read. Nothing is posted.',
   'gh-failed':
     'gh could not read or edit the marked comment on this pull request.',
+}
+
+interface FramesOptions extends ReadOptions {
+  readonly add?: string
+  readonly box?: string
+  readonly head?: string
+  readonly drop?: boolean
+  readonly prune?: string
+}
+
+type FramesCommandRefusal =
+  | FramesRefusal
+  | 'bad-mode'
+  | 'no-number'
+  | 'bad-box'
+  | 'bad-days'
+  | 'unreadable-frame'
+  | 'read-only'
+  | 'gh-missing'
+  | 'gh-failed'
+  | 'no-object-head'
+
+const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
+  'bad-mode':
+    'Pass exactly one of --add, --drop, or --prune. --prune reads every pull request on the branch, so it takes no number.',
+  'no-number':
+    '--add and --drop write for one pull request, so name its number.',
+  'bad-box':
+    '--add takes --box <n>, a positive whole number naming the checklist box.',
+  'bad-days': '--prune takes a positive whole number of days.',
+  'unreadable-frame':
+    'The file named by --add is missing, empty, or not a PNG, so it would embed as a broken image. Nothing is pushed.',
+  'read-only': `GitHub refused the write to ${FRAMES_BRANCH}. The token cannot write this repository, which is what a fork pull request's workflow token gets, so describe the frame in words instead.`,
+  'gh-missing':
+    'gh is not on the path, so the branch could not be read or written.',
+  'gh-failed':
+    'gh could not answer for this repository or pull request, so no link could be built.',
+  'no-object-head':
+    'The pull request object reported no head commit and no --head was passed, so the frame has no head to file under.',
+  'unreadable-tip': `The ${FRAMES_BRANCH} branch could not be read, so nothing was written. A missing branch is not this, since an add creates it.`,
+  'push-failed': `A write to ${FRAMES_BRANCH} failed partway. The ref did not move, so the branch is as it was.`,
+  'ref-conflict': `Another writer kept moving ${FRAMES_BRANCH} through every attempt, so the add gave up. Re-run it.`,
 }
 
 interface PreviewOptions extends ReadOptions {
@@ -658,6 +711,74 @@ export function register(program: Command): void {
         opts.remove === true
           ? await runLocalRemove(number, opts)
           : await runLocal(opts)
+    })
+
+  pr.command('frames')
+    .description(
+      `Push a UI review frame to the never-merged ${FRAMES_BRANCH} branch and return its commit-pinned link, or drop frames from it`,
+    )
+    .argument(
+      '[number]',
+      'Pull request the frame belongs to, for --add and --drop',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to answer for, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--add <file>', 'Push this PNG as a frame')
+    .option('--box <n>', 'The checklist box the frame shows, with --add')
+    .option(
+      '--head <sha>',
+      "The head the frame was driven at, with --add, defaulting to the pull request's",
+    )
+    .option('--drop', "Rewrite the branch without this pull request's frames")
+    .option(
+      '--prune <days>',
+      'Drop the frames of every pull request closed more than this many days ago',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        `Writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
+        'so nothing is checked out and no other branch is touched. A frame lands',
+        'at pr-<number>/<short-head>/box-<n>.png, and `link` is pinned to the',
+        'commit the push made, so it keeps showing that frame after the branch',
+        'moves. The first --add creates the branch.',
+        '',
+        '--drop and --prune write one root commit and force-move the ref,',
+        'since a delete commit would keep every image reachable through history.',
+        'A rewrite that empties the branch deletes it. --prune keeps a pull',
+        'request still open, reopened, closed exactly the given days ago, or one',
+        'whose state could not be read, listing that last kind under `unread`.',
+        '',
+        'Read `reason` on the JSON record:',
+        '  ok                an add pushed, or a drop or prune finished',
+        '  bad-mode          not exactly one of --add, --drop, --prune',
+        '  no-number         --add or --drop named no pull request',
+        '  bad-box           --add without a positive --box',
+        '  bad-days          --prune without a positive number of days',
+        '  unreadable-frame  the --add file is missing, empty, or not a PNG',
+        '  read-only         GitHub refused the write, as on a fork token',
+        '  unreadable-tip    the branch could not be read',
+        '  push-failed       a write failed and the ref did not move',
+        '  ref-conflict      another writer kept moving the ref',
+        '  no-object-head    no head to file the frame under',
+        '  gh-missing        gh is not on the path',
+        '  gh-failed         gh could not answer for the repository',
+        '',
+        'Exit codes:',
+        '  0  pushed, or a drop or prune finished, including one removing nothing',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr frames 1341 --add frames/3.png --box 3 --json',
+        '  canon pr frames 1341 --drop --json',
+        '  canon pr frames --prune 30 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: FramesOptions) => {
+      process.exitCode = await runFrames(number, opts)
     })
 }
 
@@ -1743,6 +1864,7 @@ async function runEvidence(
         base,
         head: identity.head,
         body,
+        states,
         ...(commentId !== undefined && { commentId }),
         ...carried,
       })}\n`,
@@ -2196,6 +2318,308 @@ async function runLocalRemove(
   }
 
   return finish('removed', `comment ${commentId}`)
+}
+
+const POSITIVE_WHOLE = /^[1-9]\d*$/
+
+/** One `gh api` call, keeping the HTTP status of a failure so a refused write can be told from a missing ref. */
+type ApiCall =
+  | { readonly ok: true; readonly data: unknown }
+  | { readonly ok: false; readonly status: number | undefined }
+
+type ApiCaller = (
+  method: string,
+  path: string,
+  body?: unknown,
+) => Promise<ApiCall>
+
+/**
+ * Runs `gh api` against the repository's own path, recording every write
+ * GitHub answered 403 or 404, which is how a token without write access
+ * reads, so a failed push can be reported as read-only rather than broken.
+ */
+function ghApiRunner(root: string): {
+  readonly call: ApiCaller
+  readonly refusedWrites: number[]
+} {
+  const refusedWrites: number[] = []
+  const call: ApiCaller = async (method, path, body) => {
+    const args = ['api', '-X', method, `repos/{owner}/{repo}/${path}`]
+    if (body !== undefined) args.push('--input', '-')
+    const result = await execa('gh', args, {
+      cwd: root,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+      reject: false,
+      ...(body !== undefined && { input: JSON.stringify(body) }),
+    })
+    if (result.exitCode !== 0) {
+      const status = /HTTP (\d{3})/.exec(String(result.stderr))?.[1]
+      const code = status === undefined ? undefined : Number(status)
+      if (method !== 'GET' && (code === 403 || code === 404)) {
+        refusedWrites.push(code)
+      }
+      return { ok: false, status: code }
+    }
+    const text = String(result.stdout).trim()
+    try {
+      return { ok: true, data: text === '' ? null : JSON.parse(text) }
+    } catch {
+      return { ok: false, status: undefined }
+    }
+  }
+  return { call, refusedWrites }
+}
+
+function shaOf(data: unknown): string | undefined {
+  if (typeof data !== 'object' || data === null || !('sha' in data)) {
+    return undefined
+  }
+  return typeof data.sha === 'string' ? data.sha : undefined
+}
+
+function isTreeEntry(value: unknown): value is TreeEntry {
+  if (typeof value !== 'object' || value === null) return false
+  const entry = value as Record<string, unknown>
+  return (
+    typeof entry.path === 'string' &&
+    typeof entry.mode === 'string' &&
+    (entry.type === 'blob' || entry.type === 'tree') &&
+    typeof entry.sha === 'string'
+  )
+}
+
+/**
+ * The git data API behind `canon pr frames`. A 422 on a ref write is GitHub
+ * refusing a move that is not a fast-forward, or a create or update on a ref
+ * that already exists or no longer does, which is another writer's doing and
+ * worth a re-read rather than a failure.
+ */
+function ghFramesApi(call: ApiCaller): FramesApi {
+  const ref = `git/refs/heads/${FRAMES_BRANCH}`
+  const refWrite = (result: ApiCall) =>
+    result.ok ? 'ok' : result.status === 422 ? 'conflict' : 'failed'
+  return {
+    async readTip() {
+      const head = await call('GET', `git/ref/heads/${FRAMES_BRANCH}`)
+      if (!head.ok) {
+        return head.status === 404
+          ? { kind: 'missing' }
+          : { kind: 'unreadable' }
+      }
+      const commit = (head.data as { object?: { sha?: unknown } } | null)
+        ?.object?.sha
+      if (typeof commit !== 'string') return { kind: 'unreadable' }
+      const read = await call('GET', `git/commits/${commit}`)
+      const tree = read.ok
+        ? (read.data as { tree?: { sha?: unknown } } | null)?.tree?.sha
+        : undefined
+      return typeof tree === 'string'
+        ? { kind: 'found', commit, tree }
+        : { kind: 'unreadable' }
+    },
+    async listTree(tree) {
+      const read = await call('GET', `git/trees/${tree}`)
+      if (!read.ok) return undefined
+      const entries = (read.data as { tree?: unknown } | null)?.tree
+      return Array.isArray(entries) && entries.every(isTreeEntry)
+        ? entries
+        : undefined
+    },
+    async createBlob(base64) {
+      const made = await call('POST', 'git/blobs', {
+        content: base64,
+        encoding: 'base64',
+      })
+      return made.ok ? shaOf(made.data) : undefined
+    },
+    async createTree(entries, base) {
+      const made = await call('POST', 'git/trees', {
+        tree: entries.map(({ path, mode, type, sha }) => ({
+          path,
+          mode,
+          type,
+          sha,
+        })),
+        ...(base !== undefined && { base_tree: base }),
+      })
+      return made.ok ? shaOf(made.data) : undefined
+    },
+    async createCommit(message, tree, parents) {
+      const made = await call('POST', 'git/commits', {
+        message,
+        tree,
+        parents,
+      })
+      return made.ok ? shaOf(made.data) : undefined
+    },
+    async createRef(commit) {
+      return refWrite(
+        await call('POST', 'git/refs', {
+          ref: `refs/heads/${FRAMES_BRANCH}`,
+          sha: commit,
+        }),
+      )
+    },
+    async moveRef(commit, force) {
+      return refWrite(await call('PATCH', ref, { sha: commit, force }))
+    },
+    async deleteRef() {
+      const gone = await call('DELETE', ref)
+      return gone.ok || gone.status === 422
+    },
+    async readPull(number) {
+      const read = await call('GET', `pulls/${number}`)
+      if (!read.ok) return undefined
+      const row = read.data as { state?: unknown; closed_at?: unknown } | null
+      if (row?.state !== 'open' && row?.state !== 'closed') return undefined
+      return {
+        state: row.state,
+        ...(typeof row.closed_at === 'string' && { closedAt: row.closed_at }),
+      }
+    },
+  }
+}
+
+/** Validates the mode and its arguments before anything reads the network. */
+function framesArgumentRefusal(
+  number: string | undefined,
+  opts: FramesOptions,
+): FramesCommandRefusal | undefined {
+  const modes = [
+    opts.add !== undefined,
+    opts.drop === true,
+    opts.prune !== undefined,
+  ]
+  if (modes.filter(Boolean).length !== 1) return 'bad-mode'
+  if (opts.prune !== undefined) {
+    if (number !== undefined) return 'bad-mode'
+    return POSITIVE_WHOLE.test(opts.prune) ? undefined : 'bad-days'
+  }
+  if (number === undefined || !POSITIVE_WHOLE.test(number)) return 'no-number'
+  if (
+    opts.add !== undefined &&
+    (opts.box === undefined || !POSITIVE_WHOLE.test(opts.box))
+  ) {
+    return 'bad-box'
+  }
+  return undefined
+}
+
+async function readRepoName(root: string): Promise<string | undefined> {
+  const row = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
+  if (row === null) return undefined
+  try {
+    const name = (JSON.parse(row) as { nameWithOwner?: unknown }).nameWithOwner
+    return typeof name === 'string' ? name : undefined
+  } catch {
+    return undefined
+  }
+}
+
+async function runFrames(
+  number: string | undefined,
+  opts: FramesOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+  const refuseFrames = (reason: FramesCommandRefusal) =>
+    refuseWith(reason, FRAMES_REFUSALS[reason], emitJson, root)
+
+  intro('canon pr frames')
+
+  const invalid = framesArgumentRefusal(number, opts)
+  if (invalid !== undefined) return refuseFrames(invalid)
+
+  const bytes =
+    opts.add === undefined ? undefined : await readFrame(resolve(opts.add))
+  if (opts.add !== undefined && bytes === undefined) {
+    return refuseFrames('unreadable-frame')
+  }
+
+  if (Bun.which('gh') === null) return refuseFrames('gh-missing')
+  const runner = ghApiRunner(root)
+  const api = ghFramesApi(runner.call)
+  const refuseWrite = (reason: FramesRefusal) =>
+    refuseFrames(
+      reason === 'push-failed' && runner.refusedWrites.length > 0
+        ? 'read-only'
+        : reason,
+    )
+
+  const finish = (
+    record: Record<string, unknown>,
+    lines: readonly string[],
+  ): number => {
+    logStep('Frames')
+    for (const line of lines) logInfo(line)
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({ root, reason: 'ok', ...record })}\n`,
+      )
+    }
+    return 0
+  }
+
+  if (opts.prune !== undefined) {
+    const days = Number(opts.prune)
+    const result = await pruneFrames(api, days, new Date())
+    if (result.kind === 'refused') return refuseWrite(result.reason)
+    const { kind: _kind, ...rest } = result
+    return finish({ days, ...rest }, [
+      `removed ${plural(result.removed.length, 'pull request')}`,
+      ...(result.unread.length > 0
+        ? [`kept ${result.unread.map((n) => `#${n}`).join(', ')} unread`]
+        : []),
+    ])
+  }
+
+  const pull = Number(number)
+  if (opts.drop === true) {
+    const result = await dropFrames(api, [pull])
+    if (result.kind === 'refused') return refuseWrite(result.reason)
+    const { kind: _kind, ...rest } = result
+    return finish({ number: pull, ...rest }, [
+      result.removed.length === 0
+        ? `#${pull} holds no frames on ${FRAMES_BRANCH}`
+        : `dropped the frames of #${pull}`,
+    ])
+  }
+
+  const repo = await readRepoName(root)
+  if (repo === undefined) return refuseFrames('gh-failed')
+
+  let head = opts.head
+  if (head === undefined) {
+    const identity = await readIdentity(root, String(pull))
+    if (identity.kind === 'refused') return refuseFrames('gh-failed')
+    head = identity.identity.head
+  }
+  if (head === undefined || head === '') return refuseFrames('no-object-head')
+
+  const box = Number(opts.box)
+  const result = await pushFrame(api, {
+    number: pull,
+    head,
+    box,
+    bytes: bytes ?? new Uint8Array(),
+  })
+  if (result.kind === 'refused') return refuseWrite(result.reason)
+  const link = frameLink(repo, result.commit, result.path)
+  return finish(
+    {
+      number: pull,
+      box,
+      head,
+      path: result.path,
+      commit: result.commit,
+      link,
+      created: result.created,
+    },
+    [link],
+  )
 }
 
 /**
