@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.12.0](https://github.com/erclx/canon/compare/v5.11.0...v5.12.0) (2026-10-02)
+
+
+### Features
+
+* **cli:** render a checklist-only pull request as a marked comment ([#2059](https://github.com/erclx/canon/issues/2059)) ([c660cab](https://github.com/erclx/canon/commit/c660cabb047dbcee1c59dbf903db491a17e7c422))
+* **skills:** let auto-ship continue past a UI checklist ([#2063](https://github.com/erclx/canon/issues/2063)) ([20df474](https://github.com/erclx/canon/commit/20df4747377a30f03a688bb40799cc0cf720b847))
+* **tooling:** run the post-merge verb from the base stack hook ([#2060](https://github.com/erclx/canon/issues/2060)) ([953ad5c](https://github.com/erclx/canon/commit/953ad5c170d8530bdb85416af44157ee51f90b68))
+
+
+### Bug Fixes
+
+* **tasks:** accept a sliced task's multi-plan line in the board check ([#2062](https://github.com/erclx/canon/issues/2062)) ([dd93466](https://github.com/erclx/canon/commit/dd934664d21b94e7d133918fa8bf329091b1a7d7))
+
 ## [5.11.0](https://github.com/erclx/canon/compare/v5.10.0...v5.11.0) (2026-10-02)
 
 
