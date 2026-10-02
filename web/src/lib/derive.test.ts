@@ -7,6 +7,7 @@ import {
   matchRules,
   requireListed,
   ruleBullet,
+  skillGroups,
 } from './derive'
 
 function rule(name: string, paths?: string[]) {
@@ -193,5 +194,89 @@ describe('ruleBullet', () => {
 
   it('should refuse a rule that no longer carries the bullet', () => {
     expect(() => ruleBullet(text, 'Delete the test')).toThrow(/Delete the test/)
+  })
+})
+
+function mapOf(...groups: [string, [string, string][]][]) {
+  return groups
+    .map(([heading, rows]) =>
+      [
+        `## ${heading}`,
+        '',
+        '| Skill | When to use |',
+        '| --- | --- |',
+        ...rows.map(([name, usage]) => `| \`canon:${name}\` | ${usage} |`),
+      ].join('\n'),
+    )
+    .join('\n\n')
+}
+
+describe('skillGroups', () => {
+  it('should return groups in file order with the prefix stripped', () => {
+    const markdown = mapOf(
+      ['Second moment', [['beta', 'When b']]],
+      ['First moment', [['alpha', 'When a']]],
+    )
+
+    const groups = skillGroups(markdown, ['alpha', 'beta'])
+
+    expect(groups).toEqual([
+      { group: 'Second moment', skills: [{ name: 'beta', usage: 'When b' }] },
+      { group: 'First moment', skills: [{ name: 'alpha', usage: 'When a' }] },
+    ])
+  })
+
+  it('should remove an HTML comment and backticks from the usage text', () => {
+    const markdown = mapOf([
+      'Moment',
+      [['alpha', 'Use `beta` first <!-- canon-keep-retired -->']],
+    ])
+
+    const [group] = skillGroups(markdown, ['alpha'])
+
+    expect(group?.skills[0]?.usage).toBe('Use beta first')
+  })
+
+  it('should refuse a catalog skill with no row, naming it', () => {
+    const markdown = mapOf(['Moment', [['alpha', 'When a']]])
+
+    expect(() => skillGroups(markdown, ['alpha', 'gamma'])).toThrow(/gamma/)
+  })
+
+  it('should refuse a row naming no catalog skill, naming it', () => {
+    const markdown = mapOf([
+      'Moment',
+      [
+        ['alpha', 'When a'],
+        ['ghost', 'x'],
+      ],
+    ])
+
+    expect(() => skillGroups(markdown, ['alpha'])).toThrow(/ghost/)
+  })
+
+  it('should refuse a skill listed twice', () => {
+    const markdown = mapOf(
+      ['One', [['alpha', 'When a']]],
+      ['Two', [['alpha', 'Again']]],
+    )
+
+    expect(() => skillGroups(markdown, ['alpha'])).toThrow(
+      /listed twice: alpha/,
+    )
+  })
+
+  it('should render no group for a heading without skill rows', () => {
+    const markdown = `${mapOf(['Moment', [['alpha', 'When a']]])}\n\n## Notes\n\n| Term | Meaning |\n| --- | --- |\n| \`x\` | y |\n`
+
+    const groups = skillGroups(markdown, ['alpha'])
+
+    expect(groups.map((entry) => entry.group)).toEqual(['Moment'])
+  })
+
+  it('should refuse a row it cannot read rather than skip it', () => {
+    const markdown = '## Moment\n\n| `canon:alpha` | a \\| b |\n'
+
+    expect(() => skillGroups(markdown, ['alpha'])).toThrow(/alpha/)
   })
 })
