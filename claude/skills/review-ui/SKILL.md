@@ -93,13 +93,13 @@ Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body sha
 
 ## Step 8: read the review-event checks
 
-The `pull_request_review` runs start on the post and gate the body it carried. `canon pr checks` reports one aggregate `state` for every run on the tip and names no run, so an unrelated pending or failing run would hold or fail this step. Read the review-event run of the label gate itself instead, keyed on the head:
+The `pull_request_review` runs start on the post and gate the body it carried. `canon pr checks` reports one aggregate `state` for every run on the tip and names no run, so an unrelated pending or failing run would hold or fail this step. Read the review-event run of the label gate itself instead, keyed on the head and on the post. The code review posts its own review on the same head and fires a run of the same gate, so a head match alone can read a sibling's finished run as this pass's:
 
 ```bash
-gh run list --workflow phase-label-gate.yml --event pull_request_review --json headSha,status,conclusion --jq '[.[] | select(.headSha == "<head>")]'
+gh run list --workflow phase-label-gate.yml --event pull_request_review --limit 50 --json headSha,status,conclusion,createdAt --jq '[.[] | select(.headSha == "<head>" and .createdAt >= "<posted-at>")]'
 ```
 
-Re-read it until a run for `<head>` reads `completed`, for up to two minutes. A `conclusion` of `failure` means the posted body failed the scan, so carry that into the result line. No run for `<head>` at the bound, or one still going, reads as unread rather than passed, since a run that never started looks the same as one still going.
+`<posted-at>` is the instant Step 7 recorded before the post. Re-read until a run that survives the filter reads `completed`, for up to two minutes. A `conclusion` of `failure` means a review posted at that moment failed the scan, so carry that into the result line. No surviving run at the bound, or one still going, reads as unread rather than passed, since a run that never started looks the same as one still going.
 
 ## Step 9: output
 

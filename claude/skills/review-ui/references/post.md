@@ -63,7 +63,10 @@ End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 
 
 Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../../standards/publish.md`, since nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
 
+Record the instant just before the post, in UTC, as `<posted-at>`. Step 8 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
+
 ```bash
+date -u +%Y-%m-%dT%H:%M:%SZ
 gh pr review <number> --comment --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md
 ```
 
