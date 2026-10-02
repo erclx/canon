@@ -98,7 +98,8 @@ describe('repairBareFlag', () => {
 
   it('should read the repository the root names under an exported GIT_DIR', async () => {
     sh('git -C repo config core.bare true')
-    vi.stubEnv('GIT_DIR', join(root, 'linked', '.git'))
+    sh('git init -q other')
+    vi.stubEnv('GIT_DIR', join(root, 'other', '.git'))
 
     const record = await repairBareFlag(join(root, 'repo'))
 
