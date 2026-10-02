@@ -52,5 +52,6 @@ The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pu
 
 - Entering the worktree, which `session-worktree` owns
 - The chain from implement through pull request, which `auto-ship` owns
+- How the build moves through the plan, slice by slice with a commit each, which `build-in-slices` owns
 - Answering a posted review, which `review-address` owns
 - The controlling session's half of the channel, the review poll, and the watch beside it, which `role-orchestrator` and its runbooks hold

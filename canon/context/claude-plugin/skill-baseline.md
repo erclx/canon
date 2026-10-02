@@ -47,7 +47,7 @@ The rule is prose in a skill body rather than a verb, so nothing stops a later e
 
 Its unusable test is narrower than three of the four ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` drops the arm on the same reasoning, since its Step 2 reads one range, leaving `docs-sync`, `standards-audit`, and `git-pr` as the three still carrying it.
 
-`auto-ship` reaches Step 6 before `git-stage` has committed anything, so the base equals HEAD on every ordinary run, and the arm ported verbatim would stop the chain every time. The skill body states the omission at that point, because the next reader porting the block would otherwise add it back.
+`auto-ship` reaches Step 6 before `git-stage` commits, and its Step 2 may or may not have committed slices by then, so the base equals HEAD on any run that committed nothing yet, and the arm ported verbatim would stop each of those. The skill body states the omission at that point, because the next reader porting the block would otherwise add it back.
 
 An empty changed-file list stops the chain instead of routing into review. Routing it into review would re-create a silent skip by a longer path, since a review of no files produces no findings and the findings step reads that as a clean pass.
 
