@@ -17,7 +17,7 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 
 - Install [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
 - Install bash 4+ on macOS: `brew install bash`.
-- Install dependencies: `bun install`. In a fresh linked worktree it rewrites one line of `bun.lock` with no dependency change, so a branch that installed only to run the suite restores the lockfile before staging rather than committing that diff.
+- Install dependencies: `bun install`.
 
 ## Scripts
 
