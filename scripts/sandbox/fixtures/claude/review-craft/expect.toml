@@ -19,6 +19,13 @@
 # script is linted, so it is a floor like the security entry rather than a
 # discriminating case.
 
+# The upgrade in `package.json` and `package-lock.json` was added on 2026-10-02
+# and run twice against the body with no dependency reference. The first run
+# matched a loose pattern and could not say what it matched, since the report is
+# torn down with the sandbox. The second, with the pattern tightened to a graded
+# finding line, passed all six assertions, so the upgrade is a floor like the
+# security entry and no dependency reference was built for it.
+
 # The glob covers both slugs a run derives from `feat/release-tag`, with and
 # without the type segment, since the first red run wrote
 # `branch-feat-release-tag.md` and the second `branch-release-tag.md`.
@@ -53,3 +60,11 @@ pattern = '^- \*\*[a-z-]+\*\*:[^\n]*Safety|README\.md\n+- \*\*(critical|should-f
 [[content]]
 path = ".canon/review/branch-*release-tag.md"
 pattern = '^- \*\*[a-z-]+\*\*:[^\n]*(check\.sh|shellcheck|ShellCheck)|check\.sh\n+- \*\*(critical|should-fix|minor)\*\*'
+
+# The upgrade bumps two dependencies in one commit, one across a major version,
+# and the lockfile adds a package the manifest never names, carrying an install
+# script. Either a graded finding names the unread range or the split, or one
+# names the lockfile addition.
+[[content]]
+path = ".canon/review/branch-*release-tag.md"
+pattern = '^- \*\*[a-z-]+\*\*:[^\n]*(color-shim|install script|changelog|Changelog|breaking change|major (version|bump))'

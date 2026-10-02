@@ -15,6 +15,8 @@ The split copies `test-craft` and `test-first`. Before it, the axis list was a s
 
 A pass that fires only when a session names it is the pass nobody names. A standalone security skill or a standalone screenshot skill would load on an explicit request and stay silent on the ordinary review, which is where both were missing. As references inside the criteria skill, each loads on a condition the diff meets, being a sink the diff reaches or a file that paints.
 
+A third reference, for a dependency upgrade, was planned and not built. A seeded branch bumping one dependency across a major version beside a second, with a lockfile adding a transitive package carrying an install script, passed every assertion on the body with no such reference, so it is a floor and the amendment to the requirement's reference limit had no miss to cite. The security reference took the two lifts with no miss to measure, a threat-model opening and a class for a delete or clean on a derived path. `references/adopted.md` records the decline and when to revisit it.
+
 ## Why the filter and the severity stayed behind
 
 The two procedures grade on different ladders. `review-pr` routes a dispatch on its threshold and `review-branch` routes the ship chain on its own, and the two define `should-fix` differently. A criteria body stating a severity would contradict one of them. The references say flag, and the procedure grades.
