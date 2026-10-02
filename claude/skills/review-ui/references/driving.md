@@ -41,10 +41,10 @@ Each box takes exactly one.
 | Verdict             | When                                                    | Evidence it carries                                                                                                          |
 | ------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                    |
-| pass or fail, frame | The result has a stated criterion only an image settles | What the opened frame shows, and the frame's path under the scratch folder                                                   |
-| needs eyes          | The box ends in `(taste)`                               | The frame's path, and nothing about whether it looks right                                                                   |
+| pass or fail, frame | The result has a stated criterion only an image settles | What the opened frame shows, in words, with no path                                                                          |
+| needs eyes          | The box ends in `(taste)`                               | What the frame showed, in words, and nothing about whether it looks right                                                    |
 | not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold |
 
-A frame cannot be attached to a review comment and the reviewer writes no tracked file, so a frame verdict names its local path and the value or region it judged. The path resolves only on this machine.
+A frame cannot be attached to a review comment and the reviewer writes no tracked file, so a frame verdict describes the value or region it judged in words and cites no path. A path under `.canon/` is a board identifier the label scan rejects, and it resolves only on this machine. The description carries what the frame held, such as the element, its position, and the colors or text read, so the person merging can check it without the image.
 
 A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong. Its reason says whether the cause sits on the page or off it, since only a cause on the page opens the heading Step 7 picks.

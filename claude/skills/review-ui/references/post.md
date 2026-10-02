@@ -21,14 +21,14 @@ A needs-eyes box leaves the review closed, and so does a box not driven for a ca
 Write it to `.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` at the main worktree root, sent as a heredoc the way `session-worktree` states for a main-root write. Load the `write-human` skill for the prose and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation.
 
 ```markdown
-## UI review
+<## UI review, or ## UI review closed, by the rule above>
 
 P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, rendered by <renderer>.
 
 | Box                                | Verdict    | Evidence                                      |
 | ---------------------------------- | ---------- | --------------------------------------------- |
 | 1. <the box as written, shortened> | fail       | <the value read against what the box expects> |
-| 2. <box>                           | needs eyes | `<frame path>`                                |
+| 2. <box>                           | needs eyes | <what the frame showed, in words, no path>    |
 
 **Sweep**
 
@@ -43,6 +43,16 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 <!-- review-ui: head=<head> -->
 ```
 
+A frame cannot be attached and a path under `.canon/` is a board identifier the label scan rejects, so the Evidence cell describes what the frame showed in words and cites no path. Say plainly that the frame is not published where a reader could open it.
+
+A pass where every box needs eyes and nothing else is owed takes the closed heading:
+
+```markdown
+## UI review closed
+
+0 passed, 0 failed, 3 need eyes, 0 not driven. Drove <address> at <short-sha>, rendered by <renderer>.
+```
+
 Omit the Sweep block when it found nothing, and the Guessed wording block when every box named its route and width. Quote page text in backticks as content, never as the pass's own words.
 
 ## The marker
@@ -51,9 +61,12 @@ End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 
 
 ## Posting
 
-Run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the body first, since nothing gates a file under `.canon/tmp/`. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
+Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../../standards/publish.md`, since nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
+
+Record the instant just before the post, in UTC, as `<posted-at>`. Step 8 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
 
 ```bash
+date -u +%Y-%m-%dT%H:%M:%SZ
 gh pr review <number> --comment --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md
 ```
 
