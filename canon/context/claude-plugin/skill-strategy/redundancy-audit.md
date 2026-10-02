@@ -9,7 +9,8 @@ Toolkit skills with a plausible community counterpart are compared below. Every 
 
 ## Debugging, review, and planning counterparts
 
-- `canon:systematic-debugging` vs `obra/superpowers/systematic-debugging`. Same methodology. Ours is 71 lines to their 296, capturing the four phases, circuit breaker, and red flags in a prose-tight form that matches toolkit conventions. No borrow.
+- `canon:systematic-debugging` vs `obra/superpowers/systematic-debugging`. Same methodology. Ours is 97 lines to their 283 at `8ca22db`, capturing the four phases, circuit breaker, and red flags in a prose-tight form that matches toolkit conventions. No borrow from superpowers.
+  - Bisect, the reduce step, the non-reproducible branches, and error output as data were borrowed from `addyosmani/agent-skills`'s `debugging-and-error-recovery` instead, and the skill's `references/adopted.md` records each.
 - `canon:review-branch` vs Anthropic's `code-review` plugin. Different scopes. Ours runs on a local branch diff and reads four project docs. Theirs runs on a PR URL with multi-agent fan-out and posts inline comments via GitHub MCP. Borrowed a high-signal filter section from Anthropic's framing to sharpen severity judgment.
 - `canon:ux-audit` vs `impeccable`'s `/audit` and `/critique`. Different lenses. Ours enumerates UI surfaces to find missing states, edge cases, and inconsistencies. `/audit` scores technical quality across five dimensions and `/critique` scores design with Nielsen heuristics.
   - They compose, so run `ux-audit` first to find gaps, then the `impeccable` commands to polish what exists. No skill body change, because third-party skill references belong on this surface rather than in a `SKILL.md` body.
