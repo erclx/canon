@@ -16,6 +16,8 @@ canon hooks post-merge --root "$root"
 | --------------- | ---------------------------------------------------------------------------------------------------- |
 | `--root <path>` | Main worktree root holding the board and the records, resolved from `git worktree list` when omitted |
 
+The base stack ships the same call as its `.husky/post-merge`, behind the same board guard and upgrade bootstrap, so a target that syncs it runs these five steps.
+
 Exit codes: `0` on every path, since a hook failing aborts nothing useful. Lines go to stderr, and stdout stays empty. An ordinary merge prints nothing.
 
 ## The steps

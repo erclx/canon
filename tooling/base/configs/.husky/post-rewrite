@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Runs the `post-merge` board check for anyone pulling with rebase.
+# Runs the `post-merge` steps for anyone pulling with rebase.
 #
 # `git pull` under `pull.rebase=true` runs `git rebase`, which fires this event
 # and never `post-merge`. Without this the trigger is a silent no-op on that
@@ -9,8 +9,8 @@
 # target, where the pull style is not something this repository controls.
 #
 # Only the `rebase` argument delegates. `post-rewrite` also fires on
-# `commit --amend`, which rewrites nothing on the board and would print the
-# candidate list on an ordinary amend.
+# `commit --amend`, which rewrites nothing on the board and would run the
+# archive, reclaim, and upgrade steps on an ordinary amend.
 
 [ "$1" = "rebase" ] || exit 0
 

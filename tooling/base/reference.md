@@ -52,7 +52,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `pre-commit` runs `bunx lint-staged`.
 - `commit-msg` runs `bunx commitlint --edit "$1"`.
 - `pre-push` runs `bun run check`.
-- `post-merge` names `.canon/tasks/` archive candidates, staying silent otherwise and when the board is absent.
+- `post-merge` runs `canon hooks post-merge`: archive the task a merged pull request closed, push the records, reclaim merged worktrees, reinstall the CLI, and update the plugin. It does nothing when the board is absent. `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine. Read `canon docs hooks` for the contract.
 - `post-rewrite` delegates to `post-merge` on `rebase`, so a `pull.rebase=true` machine still gets the check.
 
 ## lint-staged
