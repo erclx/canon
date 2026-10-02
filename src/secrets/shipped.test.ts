@@ -87,7 +87,7 @@ describe('selectShipped', () => {
     'src/secrets/scan.ts',
     'src/secrets/scan.test.ts',
     'src/capture/run.ts',
-    'scripts/core/regen-hero.sh',
+    'scripts/core/regen-hero.ts',
     'scripts/sandbox/run.sh',
     'docs/index.md',
     'tsconfig.json',
@@ -106,7 +106,7 @@ describe('selectShipped', () => {
 
   it('should drop what a negated directory entry excludes', () => {
     expect(selectShipped(FILES, ['scripts', '!scripts/sandbox'])).toEqual([
-      'scripts/core/regen-hero.sh',
+      'scripts/core/regen-hero.ts',
     ])
   })
 

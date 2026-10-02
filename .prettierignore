@@ -7,7 +7,7 @@
 # hand-authored, no tool writes it, so it keeps its format gate
 !.claude-plugin/marketplace.json
 
-# regen-hero.sh writes these and serializes them its own way. Formatting them
+# regen-hero.ts writes these and serializes them its own way. Formatting them
 # too gives each file two writers that disagree, and the Hero stage then
 # fails for whichever of them committed last rather than for a stale count.
 # The templates beside them are hand-edited and keep their format gate, which
