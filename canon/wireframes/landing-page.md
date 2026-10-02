@@ -22,7 +22,7 @@ Eleven sections in reading order, then the footer. A skip link and a sticky nav 
 - Review and merge: the reviewer's turn with a before-and-after pair of real captures of one pull request, the review exchange, and the merge as a hook and its consequences, followed by the design tokens that merge landed, embedded live
 - Provenance: a ledger naming each session that built the change and what it produced
 - Install: three steps, one card each
-- Field: every command name and every skill name in two fields, the ones the session used lit
+- Field: every command name and every skill name in two fields, the ones the session used lit. Skills sit under the skill map's groups, and each name reveals its "when to use" text on hover, focus, and tap
 - Close: the closing headline and two actions
 - Footer: the brand line, three link columns, and a note on what is read and what is authored
 

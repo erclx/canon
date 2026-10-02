@@ -17,6 +17,7 @@ The page reads its figures at build time and deploys through `.github/workflows/
 
 - The rules figure reads the installed folder under `.claude/rules/canon/` for which rules the depicted session loaded, and the `gov list` catalog for what each carries
 - The command field reads `canon --help` rather than `gov counts`, since the help is the surface a reader meets, which keeps the heading's count and the names under it one reading. The reader walks across the help's group headings and stops at the first heading ending in a colon
+- The skills field reads `docs/workflow/skill-map.md` through `skillGroups`, which takes each row whose first cell is a backticked `canon:<name>` as that skill's group and usage text. It refuses in both directions, a catalog skill with no row and a row naming no catalog skill, since a skill missing from the map would otherwise drop out of the field while the heading's count still named it. It also refuses a row it cannot split into two cells. Both workflows list the map in their path filters, so a pull request that only drops a row still runs the build
 - The merge figure reads `canon hooks post-merge --help` for which verbs a merge runs, since `.husky/post-merge` hands every step to that verb and the help lists them from `STEP_VERBS` in `src/hooks/post-merge.ts`. It refuses when the hook stops calling the verb. A change to the post-merge steps changes the page, and no web workflow's path filter catches it, so `bun run web:build` is the proof
 - The branch graph, the review exchange, the provenance roster, and the lit names in the field are authored against the depicted session, since nothing on a build machine records which files four sessions held. The footer says so, which is the labelling repair for an authored figure. The lit names are still checked against their catalog, so a renamed skill fails the build rather than lighting nothing
 - The version dot lights only when the npm registry's latest matches the version the build carries. It reports state rather than a count, so an unreachable registry reads as unconfirmed and the build continues
@@ -43,7 +44,7 @@ The `design` gate stage regenerates and drift-checks `web/src/styles/tokens.css`
 
 ### Two copies of the path globs
 
-`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same eight shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. The visual list adds a ninth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
+`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same nine shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. The visual list adds a tenth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
 
 ## Gotchas
 
