@@ -1,0 +1,49 @@
+# What a correct `/canon:code-craft` run leaves behind on the seeded shop.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is one rule in one place: asked to add a third discount
+# to a rule written twice, the run merges the two copies rather than pasting a
+# third branch into each, and adds no pattern scaffolding for what is still a
+# few conditionals. The prompt never says the rule is duplicated.
+
+paths = ["src/cart.ts", "src/invoice.ts"]
+
+absent = [
+  "src/**/*strategy*",
+  "src/**/*Strategy*",
+  "src/**/*factory*",
+  "src/**/*Factory*",
+  "src/**/*registry*",
+  "src/**/*Registry*",
+]
+
+write_scope = [
+  "src/**",
+  "test/**",
+  "README.md",
+  "CHANGELOG.md",
+  "node_modules/**",
+  "bun.lock",
+  "package.json",
+]
+
+manual = [
+  "The rule may land in `src/cart.ts` with the invoice importing it, or in a new module both import. Either passes, which no single content assertion expresses, so confirm `src/cart.ts` holds at most one copy. Semantic: the merged rule can be spelled several ways.",
+  "The staff discount applies to every order size, not only the 100 threshold the member rule carries. Semantic: the condition can be written several ways.",
+  "The run named the duplicated member rule as the reason to merge before adding the variant. Unwired: the claim is about the session's turns, which the checker does not read.",
+]
+
+# The invoice no longer carries its own discount arithmetic, so it reads the
+# rule from wherever the merge put it.
+[[content]]
+path = "src/invoice.ts"
+pattern = '(?<![\s\S])(?![\s\S]*0\.[89]\b)'
+
+# No strategy or factory type for the variant inside the cart either.
+[[content]]
+path = "src/cart.ts"
+pattern = '(?<![\s\S])(?![\s\S]*(?:Strategy|Factory))'

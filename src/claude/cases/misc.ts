@@ -75,6 +75,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'api-design',
   },
   {
+    prompt:
+      'The same discount rule sits in two files and I need a third variant. Should I extract it, or add a strategy class for the two cases?',
+    expect: 'code-craft',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },
