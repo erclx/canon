@@ -44,7 +44,7 @@ The `design` gate stage regenerates and drift-checks `web/src/styles/tokens.css`
 
 ### Two copies of the path globs
 
-`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same nine shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. The visual list adds a tenth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
+`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same eight shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. The visual list adds a ninth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
 
 ## Gotchas
 

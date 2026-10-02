@@ -14,6 +14,7 @@ import { readSession, usedNames } from '../../lib/session'
 const session = readSession()
 const skillNames = session.skills.map((skill) => skill.name)
 const commandNames = [...session.commands].sort()
+const firstSkill = session.skillGroups[0]?.skills[0]?.name
 const fields = [
   {
     names: commandNames,
@@ -53,10 +54,13 @@ const fields = [
                     {group.skills.map((skill) => (
                       <li
                         class:list={{ on: entry.lit.has(skill.name) }}
-                        tabindex="0"
+                        tabindex={skill.name === firstSkill ? '0' : '-1'}
+                        aria-describedby={`usage-${skill.name}`}
                       >
                         {skill.name}
-                        <span class="usage">{skill.usage}</span>
+                        <span class="usage" id={`usage-${skill.name}`}>
+                          {skill.usage}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -92,12 +96,30 @@ const fields = [
       if (skill.matches(':hover, :focus')) skill.dataset.dismissed = ''
     }
   })
-  for (const skill of skills) {
+  // The field is one tab stop, and the arrow keys walk the names in reading
+  // order, so a keyboard reader passes the field without crossing every skill.
+  const names = [...skills]
+  for (const [index, skill] of names.entries()) {
     const lift = () => {
       if (!skill.matches(':hover, :focus')) delete skill.dataset.dismissed
     }
     skill.addEventListener('mouseleave', lift)
     skill.addEventListener('blur', lift)
+    skill.addEventListener('focus', () => {
+      for (const other of names) other.tabIndex = other === skill ? 0 : -1
+    })
+    skill.addEventListener('keydown', (event) => {
+      const step =
+        event.key === 'ArrowRight' || event.key === 'ArrowDown'
+          ? 1
+          : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+            ? -1
+            : 0
+      const next = names[index + step]
+      if (step === 0 || !next) return
+      event.preventDefault()
+      next.focus()
+    })
   }
 </script>
 

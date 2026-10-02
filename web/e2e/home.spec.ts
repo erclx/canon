@@ -182,6 +182,24 @@ test('a skill reveals its usage on focus and Escape dismisses it', async ({
   await expect(usage).toBeVisible()
 })
 
+test('the skills field is one tab stop and arrow keys move through it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const skills = page.locator('[data-field="skills"] li')
+  await expect(
+    page.locator('[data-field="skills"] li[tabindex="0"]'),
+  ).toHaveCount(1)
+
+  await skills.first().focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(skills.nth(1)).toBeFocused()
+  await expect(skills.nth(1)).toHaveAttribute('aria-describedby', /.+/)
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(skills.first()).toBeFocused()
+})
+
 test.describe('the social card', () => {
   const card = '/assets/social-card.png'
 
