@@ -1,0 +1,37 @@
+name: PR Frames Cleanup
+# canon-no-seed: seeding the prune into targets is a follow-up held until a target project's UI reviews write frames, and the seed then lifts the local-preview cleanup's pattern.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+# Writes refs/heads/canon-frames alone, through the git data API, and reads
+# pull requests to learn when each closed. No other ref is touched.
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  prune-frames:
+    name: 🖼️ Prune Review Frames
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # The verb picks which pull requests expired, so the selection is
+      # tested code rather than workflow shell.
+      - name: Drop the frames of pull requests closed over 30 days ago
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bun src/cli.ts pr frames --prune 30 --json
