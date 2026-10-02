@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      # The count and token inputs regen-hero.sh reads. The frames themselves
+      # The count and token inputs regen-hero.ts reads. The frames themselves
       # are not listed, so the refresh pull request merging does not start
       # another run.
       - 'src/design/**'
@@ -23,7 +23,8 @@ on:
       - 'tooling/**'
       - 'assets/brand/mark.svg'
       - 'assets/captures/*.tmpl'
-      - 'scripts/core/regen-hero.sh'
+      - 'scripts/core/regen-hero.ts'
+      - 'src/capture/frame-values.ts'
       # The inputs to the home render the hero frames do not share. The page is
       # built from web/ and reads its counts from the audit catalog under
       # src/audits/. assets/** stays off the list, since it holds the outputs
@@ -34,7 +35,7 @@ on:
       # The version canon --version reads into the footer and nav of the home
       # page, so a release merge moves the baseline.
       - 'package.json'
-      # GOV_STACK_COUNT in regen-hero.sh and the stacks web/src/lib/session.ts
+      # GOV_STACK_COUNT in regen-hero.ts and the stacks web/src/lib/session.ts
       # reads, so a stack-only merge moves both renders.
       - 'governance/stacks/**'
   workflow_dispatch:
@@ -90,10 +91,8 @@ jobs:
             exit 1
           fi
 
-      # Exits 2 with no output on about one run in five on WSL2, so it retries
-      # once and then fails loudly rather than leaving a refresh nobody sees.
       - name: Regenerate Frame Markup
-        run: bash scripts/core/regen-hero.sh || bash scripts/core/regen-hero.sh
+        run: bun scripts/core/regen-hero.ts
 
       # Only when the markup moved. A capture rewrites every image and stamp, and
       # a runner's chromium bytes differ from the committed ones, so capturing
