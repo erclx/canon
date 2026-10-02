@@ -82,4 +82,4 @@ extends = ""
 rules = ["canon", "claude"]
 ```
 
-The branch adding a stack owes no hero render. The Hero stage runs `regen-hero.sh --check`, which discards what it fills, so a changed stack count does not fail it. `refresh-capture-frames.yml` lists `governance/stacks/**` in its path filter and regenerates the frames in its own pull request after the merge.
+The branch adding a stack owes no hero render. The Hero stage runs `regen-hero.ts --check`, which discards what it fills, so a changed stack count does not fail it. `refresh-capture-frames.yml` lists `governance/stacks/**` in its path filter and regenerates the frames in its own pull request after the merge.
