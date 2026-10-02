@@ -31,16 +31,6 @@ The bash reading of frontmatter treats the first `---` on any line as the start 
 
 The divergence is latent on the current corpus. All 22 documents under `docs/` and `canon/context/` strip byte-identically under both, so the difference guards documents not yet written rather than repairing today's output. Three other inputs diverge and each favors the TypeScript reading: a file with no trailing newline, a block opening on line 2, and an unterminated block. The last two are the ones worth knowing, since the bash reading emits nothing at all for an unterminated block and swallows a mid-document block that was never frontmatter.
 
-## `tooling.sh`
-
-Consumed by `scripts/core/check-seed-independence.sh` and `scripts/core/list-seed-roots.sh` for seed discovery. The second exists so the seed-standards stage in `src/gate/measures.ts` reaches this definition rather than carrying a second copy of the walk in TypeScript, which is what would let the two stages measuring seed content disagree about which roots exist. `listStacks` in `src/tooling/manifest.ts` is the TypeScript equivalent, and it discovers by `manifest.toml` rather than by directory.
-
-- `list_tooling_stacks`: emit names of every directory under `tooling/`, minus excluded
-- `is_tooling_stack_excluded`: return 0 if the name is in `TOOLING_STACK_EXCLUDE`, 1 otherwise
-- `collect_seed_roots`: emit every `tooling/*/seeds` directory holding a `.claude/`, relative to `PROJECT_ROOT`
-
-`collect_seed_roots` serves the two stages that measure seed content, Seed standards and Seed independence. Both discover through it rather than naming a stack, so one glob decides what a seed stage covers and a stack seeding `.claude/` later arrives covered with no edit to either caller.
-
 ## Gotchas
 
 ### Sweep callers by path, not by function name

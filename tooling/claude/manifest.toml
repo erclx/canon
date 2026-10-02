@@ -1,5 +1,5 @@
 # Consumed only by `canon claude init`. Claude is not a discoverable tooling stack
-# and is excluded from `canon tooling` discovery via scripts/lib/tooling.sh.
+# and is excluded from `canon tooling` discovery via `EXCLUDED_STACKS` in src/tooling/manifest.ts.
 
 [stack]
 name = "claude"
@@ -8,8 +8,8 @@ runtime = ""
 scaffold = ""
 
 # Checked against this repository's own `.gitignore` by
-# scripts/core/check-ignore-parity.sh, which carries no sanctioned divergence
-# now that both sides ship the same two entries.
+# the Ignore parity stage of `bun run check`, which carries no sanctioned
+# divergence now that both sides ship the same two entries.
 #
 # One root entry rather than a folder apiece, so a target that gains a record
 # folder later receives no manifest edit and no sync. `.claude/worktrees/` is

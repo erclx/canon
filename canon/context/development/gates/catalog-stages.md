@@ -27,7 +27,7 @@ The guard tests twice, first that `claude` resolves on `PATH` and then that `cla
 
 ## Skill paths
 
-The Skill paths stage runs `scripts/core/check-skill-paths.sh` over the shipped skill tree and fails on a path that resolves only in this repository. A shipped skill runs from a plugin cache in someone else's project, where this tree's top-level folders reach nothing, so a citation reading correctly here is a dead pointer everywhere the skill actually runs.
+The Skill paths stage runs the `skillPaths` measure over the shipped skill tree and fails on a path that resolves only in this repository. A shipped skill runs from a plugin cache in someone else's project, where this tree's top-level folders reach nothing, so a citation reading correctly here is a dead pointer everywhere the skill actually runs.
 
 The walk reads inside fenced code blocks, which is what makes an illustrative example count. An example is the part of a reference a reader copies, so a target handed one built from this repository's own `docs/` and `wiki/` rows learns a folder set it does not have. That is a true positive rather than the fenced-example class the Seed independence stage accepts, and an example in shipped content invents its paths.
 

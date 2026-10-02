@@ -41,4 +41,4 @@ paths:
 
 ## Before shipping
 
-- Run `scripts/core/check-plugin-boundary.sh` on a change under `claude/`. It fails on any shipped file resolving under `internal/`.
+- Run `canon gate run` on a change under `claude/`. Its Plugin boundary stage always runs and fails on any shipped file resolving under `internal/`.

@@ -29,13 +29,13 @@ The reverse holds too. The root `cspell.json` checks `canon/context/`, so naming
 
 ### Seed prose never names the toolkit binary
 
-`tooling/*/seeds/**/*.md` prose may not name the toolkit CLI token literally, not even in a line explaining what an installed rule's own command citation refers to. `scripts/core/check-seed-independence.sh`, gated in `bun run check`'s Seed independence stage, greps every seed markdown file for the string and fails the run on a hit, since a scaffolded project may not have the CLI installed. Seed prose describing an optional capability states the capability rather than the binary, such as "a markdown-bans audit tool".
+`tooling/*/seeds/**/*.md` prose may not name the toolkit CLI token literally, not even in a line explaining what an installed rule's own command citation refers to. The `seedIndependence` measure in `src/gate/boundaries.ts`, gated in `bun run check`'s Seed independence stage, reads every seed markdown file for the string and fails the run on a hit, since a scaffolded project may not have the CLI installed. Seed prose describing an optional capability states the capability rather than the binary, such as "a markdown-bans audit tool".
 
 The check skips the token where a `/` follows, since that spelling is the tracked surface root the seed installs rather than the binary. A seeded `.sh` hook that calls the CLI on purpose sits outside the walk by extension, with no exemption list to maintain.
 
 ### Capability seeding
 
-Whether a hook, a workflow, or a husky script installs turns on presence in its domain's seed or config source. `scripts/core/check-capability-seeding.sh` walks `.claude/hooks/`, `.github/workflows/`, and `.husky/` by filename against `tooling/claude/seeds/.claude/hooks/`, every `tooling/*/configs/.github/workflows/` and `tooling/*/seeds/.github/workflows/`, and `tooling/base/configs/.husky/`. It fails a source absent from every destination unless the file carries a `canon-no-seed:` comment naming why. A maintained exclusion list was the alternative, and it puts the reason a lookup away from the file it explains.
+Whether a hook, a workflow, or a husky script installs turns on presence in its domain's seed or config source. The `capabilitySeeding` measure in `src/gate/boundaries.ts` walks `.claude/hooks/`, `.github/workflows/`, and `.husky/` by filename against `tooling/claude/seeds/.claude/hooks/`, every `tooling/*/configs/.github/workflows/` and `tooling/*/seeds/.github/workflows/`, and `tooling/base/configs/.husky/`. It fails a source absent from every destination unless the file carries a `canon-no-seed:` comment naming why. A maintained exclusion list was the alternative, and it puts the reason a lookup away from the file it explains.
 
 A second pass confirms every seeded hook name appears in a `command` string in the seeded `settings.json`, since a hook nobody wires in fails the same way as one that never shipped. `src/gate/` and the `scripts/core/check-*.sh` scripts are exempt by kind, because a target never receives this checkout's own build. Measured at `141885c2` on 2026-09-02.
 
@@ -45,7 +45,7 @@ The check stops at filename presence and never compares content, since a seed an
 
 The seed tree is held to the standards it seeds by a `check` stage, not by a rule path. Widening the `paths` globs on the claude rules was the alternative, and it fires only when a session happens to edit a seed, which leaves a seed nobody touches wrong indefinitely.
 
-The merge gate runs `context audit <root> --gate` against each `tooling/<stack>/seeds/` carrying a `.claude/` or a `canon/`, discovered per run through `scripts/core/list-seed-roots.sh` rather than listed, so a new stack is covered without an edit to the stage. A stack seeding only tracked surfaces carries `canon/` alone, which a `.claude/` test would drop.
+The merge gate runs `context audit <root> --gate` against each `tooling/<stack>/seeds/` carrying a `.claude/` or a `canon/`, discovered per run through `seedRoots` in `src/tooling/seeds.ts` rather than listed, so a new stack is covered without an edit to the stage. A stack seeding only tracked surfaces carries `canon/` alone, which a `.claude/` test would drop.
 
 The gate reaches only what the index-plus-entry contract covers, which is `tooling/base/seeds/canon/context/`. The claude tree seeds four folders holding an `index.md` and no entries, so the gate measures their indexes alone. `ARCHITECTURE.md`, `DESIGN.md`, and `REQUIREMENTS.md` sit under no audited folder, and reaching them needs an audit keyed to a document standard rather than a folder, which no command has.
 

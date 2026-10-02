@@ -31,7 +31,7 @@ Gitignore merging is additive only and existing entries are never touched, so a 
 
 ### The ignore-parity check
 
-Both the repository `.gitignore` and the claude manifest's list carry `.canon/` and `.claude/worktrees/`. A target that syncs and never runs `canon migrate records` stops ignoring records still under `.claude/`. `scripts/core/check-ignore-parity.sh` gates `bun run check` rather than reporting, because the manifest reaches every target on the next sync and a drift between the two lists surfaces to nobody.
+Both the repository `.gitignore` and the claude manifest's list carry `.canon/` and `.claude/worktrees/`. A target that syncs and never runs `canon migrate records` stops ignoring records still under `.claude/`. The Ignore parity measure in `src/gate/boundaries.ts` gates `bun run check` rather than reporting, because the manifest reaches every target on the next sync and a drift between the two lists surfaces to nobody.
 
 It reads the whole file rather than one header, since a claude-scoped entry filed under a header of its own would read as missing. It drops the trailing slash so either side may omit one, and matches `.canon` as a bare root as well as a prefix, since a pattern outside the case the loop matches on passes having compared nothing.
 

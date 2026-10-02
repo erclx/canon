@@ -30,7 +30,7 @@ The seed `settings.json` ships eight hook scripts across five blocks on three ev
 
 A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `canon markdown audit` against the edited file, reads the hits out of the `--json` record, and emits `additionalContext` so the agent self-corrects on the next turn. A checkout's own `src/cli.ts` wins over an installed binary, so the hook and the push stage read one build. Scratch dirs `.canon/tmp/`, `.canon/memory/`, `.canon/review/`, and `.canon/plans/` are skipped.
 
-The seed copy calls the same verb and diverges in what it can resolve. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names the install command when the machine carries none rather than exiting clean. `scripts/core/check-seed-independence.sh` exists to catch seed content depending on the toolkit checkout, which a resolved-binary call does not.
+The seed copy calls the same verb and diverges in what it can resolve. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names the install command when the machine carries none rather than exiting clean. The Seed independence measure in `src/gate/boundaries.ts` exists to catch seed content depending on the toolkit checkout, which a resolved-binary call does not.
 
 The same PostToolUse block also carries `.claude/hooks/tasks-index.sh`, which regenerates `.canon/tasks/index.md` after a task file changes. It is the only trigger that reaches that folder, because the board is gitignored and the whole-repo index walk filters candidates through `git check-ignore`.
 

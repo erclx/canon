@@ -56,7 +56,7 @@ demos/*.png
 # staying bare.
 #
 # Both entries are checked against the "# Claude" array in
-# tooling/claude/manifest.toml by scripts/core/check-ignore-parity.sh.
+# tooling/claude/manifest.toml by the Ignore parity stage of `bun run check`.
 .canon/
 # The one .claude/ record folder that did not move. EnterWorktree creates a
 # worktree here and requires its target to sit here, so relocating it breaks the
