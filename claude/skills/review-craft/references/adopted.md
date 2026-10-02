@@ -34,6 +34,10 @@ From `addyosmani/agent-skills@2686b620`, `skills/constraint-driven-development/S
 
 From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md` for the axis itself, a call inside a loop and an unbounded fetch, and `skills/performance-optimization/SKILL.md` for keep or revert: measure before and after the same way, and a neutral result argues for removing the added complexity. The repeated-run requirement against noise is stated here so one run on each side reads as an anecdote.
 
+### Security additions
+
+From `addyosmani/agent-skills@2686b620`, `skills/security-and-hardening/SKILL.md`: the threat model first and the derived-path rule. Adopted as the opening step of `references/security.md`, which names who supplies each input and what the code can reach before any class is read, and as the destructive-operations class, which asks for the empty-value collapse, the glob or symlink escape, the missing root check, and no read of what is there before the call. Both stay stack-neutral. No red run measures them, so they ship as lifts rather than as an answer to a miss.
+
 ### Closing sections
 
 The excuses, red flags, and closing checklist follow the practice skill shape every practice skill in this toolkit carries, taken from `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md). Each excuse row rebuts a reason a review stops at the hunk, such as passing tests against a test the diff skipped, rather than an objection nobody raised.
@@ -45,5 +49,9 @@ The excuses, red flags, and closing checklist follow the practice skill shape ev
 **A fixed line count for sizing.** Google's small-CL page sets no hard limit, and one concern regularly runs past a hundred lines here. A number would fire on nearly every branch, so the split is stated by concern instead.
 
 **Named structural remedies as a catalog.** A list of refactorings to propose reads as a menu a session fills in. A design finding states the cost, and the remedy is the author's.
+
+**A dependency upgrade reference.** From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md`: read the changelog across the range, one dependency per change, and the lockfile diff. Declined because the seeded upgrade is not a miss. The body without such a reference reported the planted major bump and the install script in the lockfile on the second of two runs, which passed the assertion naming them. Revisit when a run on a changed lockfile misses what a reference would have named.
+
+**STRIDE and abuse-case tests as a procedure.** They belong to a design session rather than a diff read, and the threat-model opening in the security reference takes the one step a diff supports, naming who supplies each input.
 
 **The web and database tables from `performance-optimization`.** They name a stack, and the axis stays stack-neutral until a target asks for a per-stack reference.
