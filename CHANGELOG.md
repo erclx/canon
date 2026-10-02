@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.14.0](https://github.com/erclx/canon/compare/v5.13.0...v5.14.0) (2026-10-02)
+
+
+### Features
+
+* **claude:** add the deprecation-migration practice skill ([#2076](https://github.com/erclx/canon/issues/2076)) ([6bf173b](https://github.com/erclx/canon/commit/6bf173b76331720284d606548cd11a9919da93b0))
+* **cli:** push review-ui frames to a never-merged branch ([#2075](https://github.com/erclx/canon/issues/2075)) ([94ab21a](https://github.com/erclx/canon/commit/94ab21aafd39218fb12bb60e5ef8afa3d9b8cef9))
+* **gate:** read the five boundary checks as typescript measures ([#2074](https://github.com/erclx/canon/issues/2074)) ([0074508](https://github.com/erclx/canon/commit/0074508d523b709dc760bd1519d979f4cf1a35ed))
+* **skills:** settle the evidence thread before shipping reports done ([#2077](https://github.com/erclx/canon/issues/2077)) ([f75d094](https://github.com/erclx/canon/commit/f75d0942aa912897c22b1c6c929faf4f64dc3484))
+
 ## [5.13.0](https://github.com/erclx/canon/compare/v5.12.0...v5.13.0) (2026-10-02)
 
 
