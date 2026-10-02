@@ -70,6 +70,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'codebase-layout',
   },
   {
+    prompt:
+      "I'm adding a field to the JSON this command prints and renaming one flag, anything to watch?",
+    expect: 'api-design',
+  },
+  {
     prompt: 'Does our github about text still match what the readme says?',
     expect: 'repo-metadata',
   },
