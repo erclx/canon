@@ -34,13 +34,13 @@ import {
   select,
 } from '@/ui'
 
-const SANDBOX_DIR = join(PROJECT_ROOT, 'scripts', 'sandbox')
+const SANDBOX_DIR = join(PROJECT_ROOT, 'sandbox')
 
 /**
  * Reports that the scenario tree does not ship, and answers whether it reported,
  * so a caller that sees `true` returns without touching the tree.
  *
- * `scripts/sandbox` is excluded from the published package, so an installed
+ * `sandbox` sits outside the published package, so an installed
  * `canon` resolves `SANDBOX_DIR` to a directory that is not there. Both entry
  * points that walk the tree ask here rather than carrying a check each, because
  * absence is a property of the install rather than of a verb, and a second copy

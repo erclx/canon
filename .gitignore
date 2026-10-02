@@ -51,8 +51,8 @@ demos/*.png
 # folder stays auto-ignored under the wildcard either way. A second route
 # reaches the same result without touching this line: a nested .gitignore
 # inside the tracked folder itself, negating .canon/ at that deeper level,
-# carves out just that folder. scripts/sandbox/fixtures/claude/task-board/
-# decline/.gitignore is the first to take it. Nothing enforces either spelling
+# carves out just that folder. sandbox/fixtures/claude/task-board/decline/
+# .gitignore is the first to take it. Nothing enforces either spelling
 # staying bare.
 #
 # Both entries are checked against the "# Claude" array in

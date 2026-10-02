@@ -17,7 +17,6 @@
     "docs",
     "tsconfig.json",
     "assets/brand/mark.svg",
-    "!scripts/sandbox",
     "!scripts/eval",
     "!**/*.test.ts",
     "!**/*.test.tsx"
@@ -27,9 +26,9 @@
   },
   "scripts": {
     "check:spell": "cspell '**' '.*/**' '.*' --no-progress --color --show-context",
-    "format": "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --write --indent 2 scripts/ tooling/ claude/",
-    "check:format": "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --diff --indent 2 scripts/ tooling/ claude/",
-    "check:shell": "find scripts tooling claude .claude/hooks -name '*.sh' -exec shellcheck --severity=warning {} + && find .husky -maxdepth 1 -type f -exec shellcheck --severity=warning --shell=sh {} +",
+    "format": "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --write --indent 2 scripts/ sandbox/ tooling/ claude/",
+    "check:format": "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --diff --indent 2 scripts/ sandbox/ tooling/ claude/",
+    "check:shell": "find scripts sandbox tooling claude .claude/hooks -name '*.sh' -exec shellcheck --severity=warning {} + && find .husky -maxdepth 1 -type f -exec shellcheck --severity=warning --shell=sh {} +",
     "check:types": "tsc --noEmit",
     "check:install": "./scripts/core/install-check.sh",
     "test": "bun --bun vitest run",

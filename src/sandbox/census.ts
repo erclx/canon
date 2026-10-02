@@ -134,7 +134,7 @@ export function parseExemptions(source: string): Map<string, string> {
 }
 
 function readExemptions(root: string): Map<string, string> {
-  const path = join(root, 'scripts', 'sandbox', EXEMPT_FILE)
+  const path = join(root, 'sandbox', EXEMPT_FILE)
   if (!existsSync(path)) return new Map()
 
   return parseExemptions(readFileSync(path, 'utf8'))

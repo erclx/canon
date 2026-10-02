@@ -14,6 +14,7 @@ const ROOTS = new Set([
   'docs',
   'governance',
   'internal',
+  'sandbox',
   'scripts',
   'snippets',
   'src',
@@ -164,7 +165,7 @@ describe('extractKeyChangePaths', () => {
   it('should drop a bullet that disclaims the change it names (#1274)', () => {
     expect(
       pathsOf(
-        '- Leave `scripts/sandbox/fixtures/claude/autoship/prose-executable/expect.toml` untouched, since the decision keeps the receipt rather than retiring it.',
+        '- Leave `sandbox/fixtures/claude/autoship/prose-executable/expect.toml` untouched, since the decision keeps the receipt rather than retiring it.',
       ),
     ).toEqual([])
   })
@@ -268,7 +269,7 @@ describe('extractKeyChangePaths', () => {
   it('should drop a trailing path when the bullet opens by disclaiming (#1274)', () => {
     expect(
       pathsOf(
-        '- Leave `scripts/sandbox/fixtures/claude/autoship/prose-executable/expect.toml` untouched, since `src/autoship/paths.ts` already reads the set.',
+        '- Leave `sandbox/fixtures/claude/autoship/prose-executable/expect.toml` untouched, since `src/autoship/paths.ts` already reads the set.',
       ),
     ).toEqual([])
   })
@@ -317,14 +318,14 @@ describe('extractKeyChangePaths', () => {
   it('should take a nested folder as a directory claim (#1250)', () => {
     const read = extractKeyChangePaths(
       body(
-        '- Rename four sandbox arms under `scripts/sandbox/claude/` and two fixture directories under `scripts/sandbox/fixtures/claude/`.',
+        '- Rename four sandbox arms under `sandbox/claude/` and two fixture directories under `sandbox/fixtures/claude/`.',
       ),
       ROOTS,
     )
 
     expect(read.kind === 'read' && read.claims).toMatchObject([
-      { path: 'scripts/sandbox/claude/', directory: true },
-      { path: 'scripts/sandbox/fixtures/claude/', directory: true },
+      { path: 'sandbox/claude/', directory: true },
+      { path: 'sandbox/fixtures/claude/', directory: true },
     ])
   })
 
@@ -344,7 +345,7 @@ describe('extractKeyChangePaths', () => {
   it('should keep a compound sibling folder unanchored rather than dropping it (#1253)', () => {
     const read = extractKeyChangePaths(
       body(
-        "- Add `scripts/sandbox/fixtures/claude/autoship/prose-informational/expect.toml` and `prose-executable/expect.toml`, asserting Step 5's review-skip split against `.claude/review/branch/review-<slug>.md`.",
+        "- Add `sandbox/fixtures/claude/autoship/prose-informational/expect.toml` and `prose-executable/expect.toml`, asserting Step 5's review-skip split against `.claude/review/branch/review-<slug>.md`.",
       ),
       ROOTS,
     )

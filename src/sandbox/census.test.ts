@@ -24,19 +24,19 @@ function skill(name: string): void {
 }
 
 function scenario(category: string, command: string): void {
-  write(`scripts/sandbox/${category}/${command}.sh`, 'stage_setup() { :; }\n')
+  write(`sandbox/${category}/${command}.sh`, 'stage_setup() { :; }\n')
 }
 
 function declaration(category: string, command: string, arm: string): void {
   const armSegment = arm === '' ? '' : `/${arm}`
   write(
-    `scripts/sandbox/fixtures/${category}/${command}${armSegment}/expect.toml`,
+    `sandbox/fixtures/${category}/${command}${armSegment}/expect.toml`,
     "paths = ['README.md']\n",
   )
 }
 
 function exempt(name: string, reason: string): void {
-  write('scripts/sandbox/exempt.toml', `[${name}]\nreason = "${reason}"\n`)
+  write('sandbox/exempt.toml', `[${name}]\nreason = "${reason}"\n`)
 }
 
 beforeEach(() => {

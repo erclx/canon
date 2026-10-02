@@ -184,9 +184,9 @@ describe('renamePath under the skill preset', () => {
   })
 
   it('should leave the sandbox domain folder, which names the harness rather than a skill', () => {
-    expect(
-      renamePath('scripts/sandbox/claude/feature.sh', SKILL_NAME_RULES),
-    ).toBe('scripts/sandbox/claude/feature.sh')
+    expect(renamePath('sandbox/claude/feature.sh', SKILL_NAME_RULES)).toBe(
+      'sandbox/claude/feature.sh',
+    )
   })
 
   it('should leave a filename that only opens with a skill name', () => {
@@ -196,9 +196,9 @@ describe('renamePath under the skill preset', () => {
   })
 
   it('should move the sandbox arm script named for the skill it drives', () => {
-    expect(
-      renamePath('scripts/sandbox/claude/canon-record.sh', SKILL_NAME_RULES),
-    ).toBe('scripts/sandbox/claude/record-screencast.sh')
+    expect(renamePath('sandbox/claude/canon-record.sh', SKILL_NAME_RULES)).toBe(
+      'sandbox/claude/record-screencast.sh',
+    )
   })
 })
 

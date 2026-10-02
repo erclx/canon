@@ -909,7 +909,7 @@ describe('parseTarget', () => {
 describe('expectFilePath', () => {
   it('should resolve beside the numbered stage directories of the arm', () => {
     expect(expectFilePath('/root', 'claude', 'docs', 'drift')).toBe(
-      '/root/scripts/sandbox/fixtures/claude/docs/drift/expect.toml',
+      '/root/sandbox/fixtures/claude/docs/drift/expect.toml',
     )
   })
 })

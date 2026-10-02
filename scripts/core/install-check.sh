@@ -22,7 +22,7 @@ Usage: scripts/core/install-check.sh [--keep]
 
 Verifies the published install path end to end:
   1. Packs this repo into a tarball at .canon/tmp/install-check/pack
-  2. Extracts it and asserts scripts/sandbox is absent from the tree
+  2. Extracts it and asserts sandbox is absent from the tree
   3. Runs bun install --production in the extracted tree
   4. Runs the CLI with --help from the extracted tree to confirm it resolves
   5. Scaffolds a fresh project in .canon/tmp/install-check/target
@@ -51,6 +51,15 @@ mkdir -p "$PACK_DIR" "$EXTRACT_DIR"
 
 open_timeline "Install verification"
 
+# An absence check over a path the source tree no longer holds passes on
+# nothing, so the excluded tree has to exist here before its absence below can
+# mean the publish left it out.
+log_step "Assert excluded path exists in source"
+if [ ! -f "$PROJECT_ROOT/sandbox/run.sh" ]; then
+  log_error "sandbox/run.sh is missing from the source tree, so the absence check below would pass on nothing"
+fi
+log_info "Present: sandbox/run.sh"
+
 log_step "Pack"
 TARBALL_PATH="$(cd "$PROJECT_ROOT" && bun pm pack --quiet --ignore-scripts --destination "$PACK_DIR" | tail -n 1)"
 log_info "Packed to $TARBALL_PATH"
@@ -60,10 +69,10 @@ tar -xzf "$TARBALL_PATH" -C "$EXTRACT_DIR" --strip-components=1
 log_info "Extracted to $EXTRACT_DIR"
 
 log_step "Assert excluded path is absent"
-if [ -e "$EXTRACT_DIR/scripts/sandbox" ]; then
-  log_error "scripts/sandbox shipped in the tarball, and the files field in package.json excludes it"
+if [ -e "$EXTRACT_DIR/sandbox" ]; then
+  log_error "sandbox shipped in the tarball, and the files field in package.json leaves it out"
 fi
-log_info "Absent: scripts/sandbox"
+log_info "Absent: sandbox"
 
 log_step "Install dependencies (production)"
 (cd "$EXTRACT_DIR" && bun install --production --ignore-scripts --silent 2>&1 | pipe_output) || log_error "bun install --production failed"

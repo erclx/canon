@@ -83,15 +83,13 @@ describe('languageFor', () => {
 
 describe('isPruned', () => {
   it('should prune fixture trees so harness content is never counted', () => {
-    expect(isPruned('scripts/sandbox/fixtures/infra/wiki/expect.toml')).toBe(
-      true,
-    )
+    expect(isPruned('sandbox/fixtures/infra/wiki/expect.toml')).toBe(true)
     expect(isPruned('src/__fixtures__/sample.ts')).toBe(true)
   })
 
   it('should keep ordinary source paths', () => {
     expect(isPruned('src/comments/scan.ts')).toBe(false)
-    expect(isPruned('scripts/sandbox/dev/comment.sh')).toBe(false)
+    expect(isPruned('sandbox/dev/comment.sh')).toBe(false)
   })
 })
 

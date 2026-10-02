@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# The sandbox tree lives outside the toolkit worktree. `scripts/sandbox/run.sh`
+# The sandbox tree lives outside the toolkit worktree. `sandbox/run.sh`
 # sets cwd to it for `claude -p`, and every `CLAUDE.md` between that cwd and the
 # filesystem root loads into the session. Under the repository the toolkit's own
 # instructions join that chain beside the seeded copy the scenario installed,

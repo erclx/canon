@@ -36,13 +36,10 @@ export const SHIPPED_CORPORA = [
 
 /**
  * Trees inside a corpus above that no target receives, matching the negations
- * the `files` field already makes. A number under either names something its
- * only reader can already resolve.
+ * the `files` field already makes. A number under one names something its only
+ * reader can already resolve.
  */
-export const SHIPPED_EXCLUSIONS = [
-  /^scripts\/sandbox\//,
-  /^scripts\/eval\//,
-] as const
+export const SHIPPED_EXCLUSIONS = [/^scripts\/eval\//] as const
 
 /** Whether a repository-relative path sits in the gated corpus. */
 export function isShippedCorpus(path: string): boolean {
@@ -97,10 +94,11 @@ const PULL_REQUEST = /(?<![0-9A-Za-z_])#([0-9]+)(?![0-9A-Za-z_])/g
  * The third is the one a later author meets. Admitting an all-digit sha admits
  * every run of seven or more decimal digits with it, so a date written without
  * separators, a large count, or a float artifact reads as a commit reference.
- * The corpus carries no instance and that is the exclusions rather than luck:
- * twelve such runs sit under the seven roots, eleven of them under
- * `scripts/sandbox/`, `scripts/eval/`, or a test file, and the twelfth is the
- * genuine sha in `orchestrator-poll.md`. Write a seven-digit measurement into a
+ * The corpus carries no instance and that is the corpus bounds rather than luck:
+ * twelve such runs were counted when the scenario tree still sat under
+ * `scripts/`, eleven of them under that tree, `scripts/eval/`, or a test file,
+ * all now outside the corpus, and the twelfth is the genuine sha in
+ * `orchestrator-poll.md`. Write a seven-digit measurement into a
  * shipped page and the push fails on it, which the marker answers and no
  * narrowing can, since requiring a letter loses the all-digit sha above.
  */

@@ -561,8 +561,11 @@ describe('isShippedCorpus', () => {
   })
 
   it('should exclude a tree the files field negates', () => {
-    expect(isShippedCorpus('scripts/sandbox/claude/review.sh')).toBe(false)
     expect(isShippedCorpus('scripts/eval/run.sh')).toBe(false)
+  })
+
+  it('should exclude the scenario tree, which sits under no corpus', () => {
+    expect(isShippedCorpus('sandbox/claude/review.sh')).toBe(false)
   })
 
   it('should exclude a test file, which no tarball carries', () => {
