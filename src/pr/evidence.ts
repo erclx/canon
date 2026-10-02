@@ -215,6 +215,41 @@ function hasEvidenceMarker(body: string): boolean {
   return (lines[index] ?? '').trim().startsWith(MARKER_PREFIX)
 }
 
+/** Whether any comment carries the evidence marker, url or not. */
+export function hasMarkedEvidenceComment(
+  comments: readonly EvidenceComment[],
+): boolean {
+  return comments.some((comment) => hasEvidenceMarker(comment.body))
+}
+
+/** A post-pull-request step of the ship chain that never landed on the thread. */
+export type OwedStep = 'evidence' | 'preview'
+
+export interface OwedInput {
+  readonly hasEvidenceChange: boolean
+  readonly hasMarkedComment: boolean
+  readonly carriedPreview: boolean
+  readonly deployWorkflowFound: boolean
+}
+
+/**
+ * The steps a pull request is still owed, read off the pull request rather
+ * than off any session's account of what it ran. The thread cannot tell a
+ * skipped preview from one whose deploy failed, so both read as owed.
+ */
+export function readOwed(input: OwedInput): OwedStep[] {
+  const owed: OwedStep[] = []
+  if (input.hasEvidenceChange && !input.hasMarkedComment) owed.push('evidence')
+  if (
+    (input.hasMarkedComment || input.hasEvidenceChange) &&
+    input.deployWorkflowFound &&
+    !input.carriedPreview
+  ) {
+    owed.push('preview')
+  }
+  return owed
+}
+
 /**
  * The REST id of the comment this module already posted, read off its `url`
  * field, since `gh pr view --json comments` reports only a GraphQL id there

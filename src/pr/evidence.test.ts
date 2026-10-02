@@ -6,6 +6,9 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
+  hasMarkedEvidenceComment,
+  type OwedInput,
+  readOwed,
   renderEvidenceBody,
 } from '@/pr/evidence'
 
@@ -504,5 +507,70 @@ describe('countEvidenceCases', () => {
     )
 
     expect(countEvidenceCases(body)).toBe(0)
+  })
+})
+
+describe('hasMarkedEvidenceComment', () => {
+  it('should find a marked comment that carries no url', () => {
+    expect(
+      hasMarkedEvidenceComment([{ body: 'x\n\n<!-- pr-evidence: head=a -->' }]),
+    ).toBe(true)
+  })
+
+  it('should not read a checklist posted on its own as marked', () => {
+    expect(hasMarkedEvidenceComment([{ body: '- [ ] look' }])).toBe(false)
+  })
+})
+
+describe('readOwed', () => {
+  function owedInput(overrides: Partial<OwedInput> = {}): OwedInput {
+    return {
+      hasEvidenceChange: false,
+      hasMarkedComment: false,
+      carriedPreview: false,
+      deployWorkflowFound: false,
+      ...overrides,
+    }
+  }
+
+  it('should owe evidence and preview in that order when an evidence change has no comment and a deploy resolves', () => {
+    const owed = readOwed(
+      owedInput({ hasEvidenceChange: true, deployWorkflowFound: true }),
+    )
+
+    expect(owed).toEqual(['evidence', 'preview'])
+  })
+
+  it('should owe evidence alone when no deploy workflow resolves', () => {
+    const owed = readOwed(owedInput({ hasEvidenceChange: true }))
+
+    expect(owed).toEqual(['evidence'])
+  })
+
+  it('should owe a preview when a marked comment opens with no preview line', () => {
+    const owed = readOwed(
+      owedInput({ hasMarkedComment: true, deployWorkflowFound: true }),
+    )
+
+    expect(owed).toEqual(['preview'])
+  })
+
+  it('should owe nothing when the marked comment carries a preview', () => {
+    const owed = readOwed(
+      owedInput({
+        hasEvidenceChange: true,
+        hasMarkedComment: true,
+        carriedPreview: true,
+        deployWorkflowFound: true,
+      }),
+    )
+
+    expect(owed).toEqual([])
+  })
+
+  it('should owe nothing when the pull request has no evidence change and no marked comment', () => {
+    const owed = readOwed(owedInput({ deployWorkflowFound: true }))
+
+    expect(owed).toEqual([])
   })
 })

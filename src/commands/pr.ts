@@ -32,6 +32,8 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
+  hasMarkedEvidenceComment,
+  readOwed,
   renderEvidenceBody,
 } from '@/pr/evidence'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
@@ -88,6 +90,7 @@ interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
   readonly checklist?: string
   readonly local?: string
+  readonly check?: boolean
 }
 
 interface LocalOptions extends ReadOptions {
@@ -172,6 +175,7 @@ const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
  * one `identity.head` owns (`no-object-head`).
  */
 type EvidenceRefusal =
+  | 'check-writes'
   | 'gh-failed'
   | 'no-base'
   | 'unreadable-changes'
@@ -179,6 +183,8 @@ type EvidenceRefusal =
   | 'would-empty'
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
+  'check-writes':
+    '--check is a read and renders no body, so it takes none of --preview, --local, or --checklist. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -425,6 +431,10 @@ export function register(program: Command): void {
       '--local <url>',
       "Add this worktree's running server under any preview line, from canon pr local",
     )
+    .option(
+      '--check',
+      'Report which post-pull-request steps the thread is still owed, rendering nothing',
+    )
     .addHelpText(
       'after',
       [
@@ -478,8 +488,19 @@ export function register(program: Command): void {
         'record reports none of the three for it. An unread thread refuses as',
         'gh-failed on both reasons rather than reporting the fields absent.',
         '',
+        '--check reads the same changed set and thread, renders no body, and',
+        'reports what the ship chain still owes the pull request:',
+        '  settled  nothing is owed',
+        '  owed     `owed` lists evidence, preview, or both, in that order',
+        'evidence is owed when an evidence image changed and no comment carries',
+        'the marker. preview is owed when either holds, a deploy workflow in',
+        "this checkout resolves, and the marked comment's first line is no",
+        '**Preview:** line. A failed deploy reads the same as a skipped one.',
+        'The record carries `owed` and the same marked fields. --check refuses',
+        'with --preview, --local, or --checklist as check-writes.',
+        '',
         'Exit codes:',
-        '  0  read, whether it produced a body or reported no-evidence',
+        '  0  read, whether it produced a body, reported no-evidence, or checked',
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'Examples:',
@@ -488,6 +509,7 @@ export function register(program: Command): void {
         '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
         '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
         '  canon pr evidence 1341 --local http://localhost:5173 --json',
+        '  canon pr evidence 1341 --check --json',
         '',
       ].join('\n'),
     )
@@ -1417,8 +1439,23 @@ async function runEvidence(
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
+  const isCheck = opts.check ?? false
 
   intro('canon pr evidence')
+
+  if (
+    isCheck &&
+    (opts.preview !== undefined ||
+      opts.local !== undefined ||
+      opts.checklist !== undefined)
+  ) {
+    return refuseWith(
+      'check-writes',
+      EVIDENCE_REFUSALS['check-writes'],
+      emitJson,
+      root,
+    )
+  }
 
   // Read ahead of anything else, so a bad path refuses before a `gh` round
   // trip rather than after one.
@@ -1531,6 +1568,36 @@ async function runEvidence(
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
     ...(carriedChecklist !== undefined && { checklist: carriedChecklist }),
+  }
+
+  if (isCheck) {
+    const owed = readOwed({
+      hasEvidenceChange: grouped.kind === 'read',
+      hasMarkedComment: hasMarkedEvidenceComment(comments),
+      carriedPreview: carriedPreview !== undefined,
+      deployWorkflowFound:
+        findDeployWorkflow(await readWorkflows(root)).kind === 'found',
+    })
+    logStep(owed.length === 0 ? 'Settled' : 'Owed')
+    logInfo(
+      owed.length === 0
+        ? 'Nothing the ship chain posts after the pull request is missing.'
+        : `missing ${owed.join(', ')}`,
+    )
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          number: identity.number,
+          reason: owed.length === 0 ? 'settled' : 'owed',
+          owed,
+          ...(commentId !== undefined && { commentId }),
+          ...carried,
+        })}\n`,
+      )
+    }
+    return 0
   }
 
   // A local address rides on a checklist or a hosted preview and never opens
