@@ -17,6 +17,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 - Say so and continue when the project names no verify command, since silence there reads as a suite that passed
 - Invoke each step through the Skill tool in the stated order and continue without waiting
 - Stage after the sync skills write, so what they produced reaches a commit
+- Reach the pull request on a branch whose work is already committed and whose sync steps wrote nothing, since `git-stage` stops on an empty index and a session building in slices leaves one
 - Emit no text between steps. The sequence is the unit and prose inside it reopens settled decisions.
 - Name the one point a wrapping caller may act at, so a chain built on this one is not left to pick a gap of its own
 - Name the condition under which the closing block is not emitted, since a caller that closes on its own block leaves two instructions about the last line and nothing deciding between them

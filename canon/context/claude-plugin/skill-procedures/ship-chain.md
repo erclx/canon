@@ -86,3 +86,7 @@ Readying a pull request to merge is the operator's or the controlling session's 
 ### A failed commit leaks into the next group
 
 When a sequence of grouped commits runs unattended and one is rejected by a hook, its files stay staged and the next group's `git add` absorbs them, so the failure lands as a wrong commit rather than a missing one. A subject past `header-max-length` can carry two dozen files into the following group's message while the run reports a passing final `git log`, because the commit count is the only thing short.
+
+### A branch built in slices reaches the stage step with nothing staged
+
+`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 6 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.
