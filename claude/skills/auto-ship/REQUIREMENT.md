@@ -14,6 +14,7 @@ Review is the step that varies most. It gets skipped on a diff that needed one, 
 ## Must
 
 - Take the approved plan for the branch as the scope, and implement only what it describes
+- Load `build-in-slices` before implementing, so the build reaches history as tested slices rather than one uncommitted pass
 - Give every step a stop condition, and leave the code on the branch and the receipts on disk at each one
 - Classify the changed-file list by path as well as by extension, so informational prose skips a code review with no signal on it and executable prose still reaches one
 - Check the branch's committed history for a test-order violation between verify and review, and report any finding without gating on it, matching the verb's own contract

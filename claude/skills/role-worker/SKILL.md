@@ -20,6 +20,10 @@ from the skill that owns it and invoke none of the three from here. The ordinary
 path arrives through `auto-ship` Step 0, which means that chain is already
 running and re-invoking it would restart the build.
 
+This body holds what the session may write. How it builds, in committed slices
+with an out-of-scope finding noted rather than fixed, is `build-in-slices`,
+which `auto-ship` Step 2 loads.
+
 ## Where the session stands
 
 - Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, `.canon/memory/`, and `.canon/ready/` at the main worktree root, never against the linked worktree this session builds in. Those folders are gitignored, so `git worktree add` never creates them and the copy beside the build is absent rather than empty.

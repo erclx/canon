@@ -27,7 +27,7 @@ Prefer `origin/main` over local `main`, since a local `main` trailing the remote
 
 The baseline is unusable when no merge base resolves against either ref. Stop: `❌ No diff baseline against main. Fetch origin, then re-run autoship.`
 
-The base equalling HEAD stays usable here. Step 6 runs before `git-stage` commits at Step 8, so the base equals HEAD on every ordinary run, and the classifier diffs the base against the working tree. Do not port the read-only siblings' `base == HEAD` stop into this skill.
+The base equalling HEAD stays usable, since nothing need be committed before Step 8. The classifier diffs the base against the working tree, so every slice Step 2 already committed stays in the changed set. Do not port the read-only siblings' `base == HEAD` stop into this skill.
 
 ## Step 0: take the role, then enter a worktree
 
@@ -67,7 +67,7 @@ Its sections and its answer contract are fixed by `${CLAUDE_SKILL_DIR}/../../sta
 
 ## Step 2: implement
 
-Implement only what the plan describes. Do not expand scope. Do not refactor neighbors. Do not touch files outside the plan's "Files to touch" list without reason.
+Load `canon:build-in-slices`, reporting it when it does not resolve, and implement only what the plan describes. Do not expand scope, refactor neighbors, or touch files outside the plan's "Files to touch" list without reason.
 
 ## Step 3: verify
 

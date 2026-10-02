@@ -23,4 +23,5 @@ description: Write the failing test for a behavior before writing the code that 
 
 - Which layer a test belongs at and what makes it a good one. `canon:test-craft` owns that judgment, and step 1 loads it.
 - A failure with no known cause. Route through `canon:systematic-debugging` first, whose own fix phase already writes the reproducing test as part of finding the cause. This skill starts once the shape of the fix or the feature is already decided.
+- Committing the green, refactored behavior as one slice of a larger build. `canon:build-in-slices` owns the commit and the order slices land in.
 - Confirming a change looks right once it has landed, which is a separate concern from whether the test passed and runs after implementation rather than before it.
