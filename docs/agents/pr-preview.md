@@ -14,6 +14,7 @@ rather than screenshots and a checklist alone.
 ```bash
 canon pr preview --json
 canon pr preview 1341 --json --timeout 20
+canon pr preview 1341 --check --json
 ```
 
 ## Which workflow it dispatches
@@ -61,21 +62,48 @@ keeps the match independent of the local clock.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
-| Reason        | What it means                                                              |
-| ------------- | -------------------------------------------------------------------------- |
-| `ok`          | The preview was published. `url` carries the address and `runId` the run.  |
-| `no-deploy`   | No dispatchable workflow runs `pages deploy`.                              |
-| `unfenced`    | The deploy passes no `--branch`, so nothing was dispatched.                |
-| `no-alias`    | The workflow prints no alias line, or the finished run's log carried none. |
-| `run-failed`  | The deploy run finished without succeeding. `runId` names it.              |
-| `timeout`     | The run did not finish inside `--timeout` minutes, 15 by default.          |
-| `bad-timeout` | `--timeout` was not a positive number.                                     |
-| `gh-missing`  | `gh` is not on the path.                                                   |
-| `gh-failed`   | `gh` could not read the pull request, or list or dispatch the workflow.    |
-| `no-branch`   | The pull request carries no head branch name.                              |
+| Reason          | What it means                                                              |
+| --------------- | -------------------------------------------------------------------------- |
+| `ok`            | The preview was published. `url` carries the address and `runId` the run.  |
+| `no-deploy`     | No dispatchable workflow runs `pages deploy`.                              |
+| `unfenced`      | The deploy passes no `--branch`, so nothing was dispatched.                |
+| `no-alias`      | The workflow prints no alias line, or the finished run's log carried none. |
+| `run-failed`    | The deploy run finished without succeeding. `runId` names it.              |
+| `timeout`       | The run did not finish inside `--timeout` minutes, 15 by default.          |
+| `bad-timeout`   | `--timeout` was not a positive number.                                     |
+| `gh-missing`    | `gh` is not on the path.                                                   |
+| `gh-failed`     | `gh` could not read the pull request, or list or dispatch the workflow.    |
+| `no-branch`     | The pull request carries no head branch name.                              |
+| `check-timeout` | `--check` was combined with `--timeout`.                                   |
 
 The exit is 0 on `ok` and 1 on every refusal. A `timeout` leaves the run
 going, so the preview may still land after the verb has given up on it.
+
+## Checking which head a preview was built from
+
+`--check` dispatches nothing and waits on nothing. It lists the branch's
+`workflow_dispatch` runs, takes the newest successful one by creation time, and
+compares the head it ran at with the branch tip read from the remote. The tip
+comes from the remote rather than the pull request object's `headRefOid`, which
+lags a push. `--check` takes no `--timeout` and refuses one as `check-timeout`.
+
+The alias serves the newest successful deployment for the branch and names no
+sha, so the run listing is the only record of the built head. The
+`workflow_dispatch` filter also drops the cleanup run a closed pull request
+fires, which concludes `success` with its deploy skipped. A project that deploys
+on `push` to a feature branch would need that filter widened.
+
+| Reason     | What it means                                                         |
+| ---------- | --------------------------------------------------------------------- |
+| `fresh`    | The newest successful deploy built the tip. Exit 0.                   |
+| `stale`    | It built an earlier head. `built` and `tip` name both. Mint again.    |
+| `building` | A deploy of the tip is still running. Wait rather than minting again. |
+| `no-build` | No deploy of the branch has succeeded.                                |
+
+The record also carries `runId` for the deploy it read. The check covers the
+hosted address only, so a local address has no run to read and stays unverified.
+`review-ui` runs it before driving a hosted preview and posts nothing on any
+reason but `fresh`.
 
 ## How the address reaches the pull request
 
