@@ -34,29 +34,12 @@ Group visual items by feature area. Use `- [ ]` checkbox syntax, and write each 
 Write each box so a session driving the running app can run it without guessing:
 
 - **Route.** Name where the box is driven, as a path or the control that reaches it. A box naming no route is driven from the address the driver opens, so a single-page app with no routing needs no invented path. Write "from the page the app opens on" when a state is reached by a sequence rather than a URL.
-- **Width.** Name the width a box is driven at only when the change can make it differ by width, the same test the widths block below uses for omission. A box about copy or color renders the same everywhere, so leave the width off rather than inventing one.
+- **Width.** Name the width a box is driven at only when the change can make it differ by width, such as layout, spacing, or anything responsive. A box about copy, color, or a state that renders the same everywhere leaves the width off rather than inventing one.
 - **Verb.** Open on an action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never open on "read" or "look at", which name no action.
 - **Taste.** End the line with `(taste)` when the result is a judgment of look or feel rather than a fact a driver can observe. A driver reports such a box as needing a person's eyes instead of passing it.
 - **Setup.** A box needing a state the page does not open in states the setup inline. When a hosted preview cannot reach that state, such as a stopped service or a seeded record, end the line with `(local only)` instead.
 
 The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment carries ticked boxes forward by that shape.
-
-## The widths block
-
-A screenshot shows one width, so a reviewer cannot tell from the picture alone whether any other width was looked at. When a change touches layout, spacing, or anything responsive, put this block above the visual items, since it frames what the screenshots beside it can support:
-
-```markdown
-**Widths:**
-
-Seen at: <the widths the reviewer looked at>
-Not seen at: <the widths nobody looked at, or "none">
-```
-
-Leave both lines for the reviewer to complete. This session cannot verify a width, so the block asks what was seen and never asserts coverage. Fix no width list in the block, since which widths matter belongs to the project.
-
-Keep the `Not seen at:` line even when the answer is "none", so an omission reads as a claim rather than a gap.
-
-Omit the block when the change cannot differ by width, such as copy, color, or a state that renders the same everywhere, the way the missing-test heading is omitted below.
 
 ## The missing-test list
 
