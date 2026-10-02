@@ -15,7 +15,14 @@ The toolkit retires its own surfaces often, and three observed cases show the fa
 - A skill kept a fallback beside a new command "until a release retires it", a compatibility path with no stated removal condition.
 - A sync engine reported entries a source had stopped shipping as retired, leaving each consumer to decide what to do with them, which is a deprecation announced without the owner migrating anyone.
 
-Each excuse row in the body traces to one of these cases or to a source in the ledger.
+Each excuse row in the body traces to one of these cases or to a source in the ledger:
+
+- Fallback row: the second case
+- Migrate-later and one-machine rows: the first and third cases
+- Notice row: the deprecation chapter of Software Engineering at Google
+- No-owner row: the upstream skill's zombie-code section
+- Search row: the upstream skill's red flag against removing code without verifying zero consumers
+- Add-and-drop row: the upstream skill's rationalization for adding a column and dropping the old one in one migration
 
 ## Must
 

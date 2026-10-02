@@ -29,7 +29,9 @@ External sources were read and filtered rather than imported. This file is the r
 - The strangler and adapter patterns, stated as when each fits rather than as worked code tied to one stack.
 - Expand, migrate, contract, lifted out of its schema section and stated for any surface as three separate changes.
 - Zombie code, narrowed to code that is unowned, uncalled, and still built, and settled by the same zero-consumers check rather than a list of staleness signals.
-- The rationalizations and red flags that carry across stacks, reworded as reasons this toolkit's sessions have given, with rows added for the search that found one spelling and for a fallback kept with no removal condition.
+- The rationalizations and red flags that carry across stacks, reworded for any surface rather than a service or a column. Two excuse rows come from here:
+  - The row on a search that found nothing, from its red flag against removing code without verifying zero active consumers.
+  - The row on adding the new one and dropping the old one now, generalized from its rationalization about adding a column and dropping the old one in the same migration.
 
 ## Declined
 

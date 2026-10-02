@@ -68,7 +68,7 @@ This sits beside the One-Version Rule `api-design` states rather than against it
 Zombie code is unowned and uncalled yet still built, tested, and shipped. It costs build time and reader attention, and it hides which code is live.
 
 - Run the zero-consumers check on it like anything else, since "nothing calls it" is the claim to prove.
-- When the check comes back clean, remove it, through expand, migrate, contract if anything outside the repository could still reach it.
+- When the check comes back clean, remove it. With no replacement there is nothing to expand or migrate, so the removal runs alone as the contract change.
 - When something does still call it, it is not zombie code. Give it an owner, or deprecate it through the steps above.
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external sources were adopted, which declined, and why.
@@ -81,7 +81,7 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 | I'll keep the fallback until callers move                | With no date and no owner, the fallback outlives every caller it was kept for. State when it goes and who removes it.            |
 | The callers can migrate when they get to it              | They will not. The owner of the surface moves its callers, or the deprecation never finishes.                                    |
 | It's cleaner to add the new one and drop the old one now | One change that adds and removes leaves no state where a missed caller still works, and a revert undoes the migration too.       |
-| The old layout only matters on one machine               | One caller is still a caller. Migrate it, or record it as the reason the old path stays.                                         |
+| This only matters on one machine                         | One caller is still a caller. Migrate it, or record it as the reason the old path stays.                                         |
 | Nobody owns this, so I can just delete it                | No owner is not no caller. Run the zero-consumers check before deciding, since unowned code is often the code nobody dares move. |
 | I'll mark it deprecated and move on                      | A notice with no shipped replacement and no removal date tells callers nothing they can act on.                                  |
 
