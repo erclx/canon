@@ -3,6 +3,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -12,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = join(
   import.meta.dirname,
-  '../claude/skills/role-orchestrator/scripts/poll.sh',
+  '../claude/skills/role-orchestrator/scripts/poll.ts',
 )
 
 const HEAD = '1111111111111111111111111111111111111111'
@@ -136,7 +137,7 @@ interface PollResult {
 }
 
 const poll = (): PollResult => {
-  const run = spawnSync('bash', [SCRIPT], {
+  const run = spawnSync('bun', [SCRIPT], {
     cwd: join(root, 'repo'),
     encoding: 'utf8',
     env: buildEnv(),
@@ -348,6 +349,66 @@ describe('poll', () => {
       [{ createdAt: RESPONSE_AT, heading: '## Post-review findings' }],
     )
     expect(poll().stdout).toContain('RESPONSE  #7')
+  })
+
+  // A baseline the bash script wrote reads under the port with no first-run
+  // flood, so the first run after the swap says nothing.
+  it('should read a baseline line the bash script wrote without reporting it', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    mkdirSync(join(root, 'repo', '.canon', 'tmp', 'pr', 'poll'), {
+      recursive: true,
+    })
+    writeFileSync(
+      join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt'),
+      `7 ${HEAD} ${HEAD} 0 unknown closed 0 none\n`,
+    )
+
+    expect(poll().stdout).toBe('No movement.')
+  })
+
+  it('should keep the baseline fields a carried run could not refresh', () => {
+    writeThread([], [])
+    expect(poll().stdout).toContain('OPENED')
+    const baseline = join(
+      root,
+      'repo',
+      '.canon',
+      'tmp',
+      'pr',
+      'poll',
+      'baseline.txt',
+    )
+    const written = readFileSync(baseline, 'utf8')
+
+    breakView()
+    poll()
+
+    expect(readFileSync(baseline, 'utf8')).toBe(
+      written.replace(/ none 0 none\n$/, ' carried 0 none\n'),
+    )
+  })
+
+  // A refusal that exits zero carries a reason and no source, and one that
+  // exits nonzero carries nothing, so both send the read to the fallback and
+  // neither changes the run's status.
+  it('should fall back when the verb answers a refusal record', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    writeScope({ reason: 'no-marker' })
+
+    const run = poll()
+
+    expect(run.status).toBe(0)
+    expect(run.stdout).toContain('SEEN      #7 at 1111111')
+  })
+
+  it('should fall back when the verb exits nonzero', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    rmSync(join(root, 'fixtures', 'scope-7.json'))
+
+    const run = poll()
+
+    expect(run.status).toBe(0)
+    expect(run.stdout).toContain('SEEN      #7 at 1111111')
   })
 
   describe('UI review state', () => {
