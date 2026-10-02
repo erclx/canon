@@ -1,6 +1,6 @@
 ---
 title: The pull request evidence comparison
-description: What canon pr evidence compares, the marker that lets it edit its own comment rather than duplicate it, the refusal reasons it names, and why the comparison anchors at the merge base rather than the previous push
+description: What canon pr evidence compares, the marker that lets it edit its own comment rather than duplicate it, the refusal reasons it names, what the --check read reports as owed, and why the comparison anchors at the merge base rather than the previous push
 ---
 
 # The pull request evidence comparison
@@ -58,6 +58,7 @@ image or marks the case new.
 | `no-base`              | GitHub reported no merge base for the pull request.                           |
 | `unreadable-changes`   | GitHub could not list what the pull request changed.                          |
 | `would-empty`          | The render holds no cases and the marked comment holds some. No body.         |
+| `check-writes`         | `--check` was passed with `--preview`, `--local`, or `--checklist`.           |
 
 `no-evidence` is not a refusal a caller reports. A project on a stack that
 carries no evidence path, such as `base` or `python`, hits this reason on
@@ -178,6 +179,52 @@ a link and nothing else. Together with `--checklist` it does, so the link and
 the checklist land in one comment rather than the checklist going out alone.
 `canon docs pr-local` covers where the address comes from and how the line is
 removed at close.
+
+## What a pull request is still owed
+
+`--check` reads the same changed set and the same thread, renders no body, and
+reports which steps of the ship chain that run after the pull request opens
+never landed on it. It reads the pull request rather than any session's account
+of what it ran, so a session that stopped after opening the pull request leaves
+a branch the check can tell apart from one that needed neither step.
+
+```bash
+canon pr evidence 1341 --check --json
+```
+
+| Reason    | What it means                                                      |
+| --------- | ------------------------------------------------------------------ |
+| `settled` | Nothing is owed. `owed` is empty.                                  |
+| `owed`    | `owed` lists `evidence`, `preview`, or both, always in that order. |
+
+- `evidence` is owed when the changed set carries an evidence image and no
+  comment carries the marker.
+- `preview` is owed when the pull request has a marked comment or an evidence
+  change, a deploy workflow resolves in the checkout the verb runs from, and
+  the marked comment's first line is no `**Preview:**` line. A
+  `**Local preview:**` line does not satisfy it. A project deploying nothing is
+  never owed a preview.
+
+The record carries `owed`, `commentId` when a marked comment exists, and the
+same `preview`, `local`, and `checklist` fields the other reasons carry, so a
+caller reads one shape. It never carries `body`, so a writer branching on `ok`
+and posting `body` cannot act on a check record. Passing `--preview`, `--local`,
+or `--checklist` with it refuses as `check-writes` before any `gh` call, since
+those ask a read to write.
+
+The thread cannot separate a skipped preview step from a failed one. A pull
+request whose deploy run failed or timed out reads as owing a preview, and the
+session that ran it holds the cause. A checklist posted on its own carries no
+marker, so a branch with a checklist and no evidence image never reads as
+owing a preview, though `git-pr` runs the preview step for it. The deploy
+workflow is read from the checkout rather than the pull request's head, so a
+pull request that adds or removes its own deploy workflow reads against trunk's.
+
+An unreadable thread refuses as `gh-failed` rather than reporting `settled` off
+a thread it never read. The check skips the merge base read, which only the
+render needs, so it never refuses `no-base`. The orchestrator's draft lift is
+the caller, and lifts only on `settled`, so a refusal holds it the same as
+`owed` does.
 
 ## What a collapsed comment still leaves to GitHub
 

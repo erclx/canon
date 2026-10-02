@@ -678,6 +678,198 @@ describe('canon pr evidence reads the pull request', () => {
   })
 })
 
+/** A deploy workflow `findDeployWorkflow` resolves as `found`. */
+const FENCED_DEPLOY = [
+  'on:',
+  '  workflow_dispatch:',
+  'jobs:',
+  '  deploy:',
+  '    steps:',
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
+  '      - run: wrangler pages deploy dist --branch=${{ github.ref_name }}',
+  '      - run: echo "canon-preview-alias: $ALIAS_URL"',
+  '',
+].join('\n')
+
+describe('canon pr evidence --check', () => {
+  let tempDir: string
+  let repoRoot: string
+  let commentsFile: string
+
+  async function runCheck(
+    args: string[] = [],
+  ): Promise<Record<string, unknown>> {
+    const result = await execa(
+      process.execPath,
+      [
+        CLI,
+        'pr',
+        'evidence',
+        '7',
+        '--check',
+        '--json',
+        '--root',
+        repoRoot,
+        ...args,
+      ],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+      },
+    )
+    return JSON.parse(result.stdout)
+  }
+
+  function writeComment(body: string): void {
+    writeFileSync(
+      commentsFile,
+      JSON.stringify({
+        comments: [
+          { url: 'https://github.com/o/r/pull/7#issuecomment-100', body },
+        ],
+      }),
+    )
+  }
+
+  function writeDeployWorkflow(): void {
+    mkdirSync(join(repoRoot, '.github', 'workflows'), { recursive: true })
+    writeFileSync(
+      join(repoRoot, '.github', 'workflows', 'deploy.yml'),
+      FENCED_DEPLOY,
+    )
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-evidence-check-'))
+    repoRoot = join(tempDir, 'repo')
+    commentsFile = join(tempDir, 'comments.json')
+    mkdirSync(repoRoot)
+    writeFileSync(commentsFile, '{"comments":[]}')
+    writeFakeGh(join(tempDir, 'bin'), commentsFile, join(tempDir, 'api.log'))
+    initBranchRepo(repoRoot, { 'docs/guide.md': '# guide\n' })
+    execaSync('git', ['-C', repoRoot, 'checkout', '-q', 'main'])
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should owe evidence for a changed evidence image with no marked comment, read from a checkout on another branch', async () => {
+    writeFileSync(
+      join(tempDir, 'files.tsv'),
+      'modified\tevidence/dark/nav.png\n',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'owed', owed: ['evidence'] })
+  })
+
+  it('should owe a preview for a marked comment with no preview line when a deploy workflow resolves', async () => {
+    writeDeployWorkflow()
+    writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+  })
+
+  it('should report settled for a marked comment with no preview line when no deploy workflow resolves', async () => {
+    writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'settled', owed: [] })
+  })
+
+  it('should not read a local preview line as a hosted preview', async () => {
+    writeDeployWorkflow()
+    writeComment(
+      '**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+    )
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+  })
+
+  it('should report settled and carry the marked fields when the comment opens with a preview', async () => {
+    writeDeployWorkflow()
+    writeFileSync(
+      join(tempDir, 'files.tsv'),
+      'modified\tevidence/dark/nav.png\n',
+    )
+    writeComment(markedCommentBody())
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({
+      reason: 'settled',
+      owed: [],
+      preview: 'https://feat-x.site.pages.dev',
+      local: 'http://localhost:5173',
+      checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+    })
+  })
+
+  it('should report settled with no evidence image and no marked comment', async () => {
+    writeDeployWorkflow()
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'settled', owed: [] })
+  })
+
+  it('should render no body and write nothing', async () => {
+    writeFileSync(
+      join(tempDir, 'files.tsv'),
+      'modified\tevidence/dark/nav.png\n',
+    )
+
+    const record = await runCheck()
+
+    expect(record).not.toHaveProperty('body')
+    expect(existsSync(join(tempDir, 'api.log'))).toBe(false)
+  })
+
+  it.each([
+    ['--preview', 'https://p.dev'],
+    ['--local', 'http://localhost:5173'],
+    ['--checklist', 'absent.md'],
+  ])(
+    'should refuse %s before any gh call and print no body',
+    async (flag, value) => {
+      const record = await runCheck([flag, value])
+
+      expect(record).toMatchObject({ reason: 'check-writes' })
+      expect(record).not.toHaveProperty('body')
+      expect(existsSync(join(tempDir, 'files-calls.log'))).toBe(false)
+    },
+  )
+
+  it('should check without the merge base the render needs', async () => {
+    writeFileSync(
+      join(tempDir, 'files.tsv'),
+      'modified\tevidence/dark/nav.png\n',
+    )
+    writeFileSync(join(tempDir, 'merge-base'), '')
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'owed', owed: ['evidence'] })
+  })
+
+  it('should refuse gh-failed rather than report settled off an unread thread', async () => {
+    rmSync(commentsFile)
+
+    const record = await runCheck()
+
+    expect(record.reason).toBe('gh-failed')
+  })
+})
+
 describe('canon pr local', () => {
   let tempDir: string
   let repoRoot: string
