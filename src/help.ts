@@ -95,7 +95,6 @@ const EXAMPLES = [
   'canon standards markdown',
   'canon init ../my-app',
   'canon tooling sync base',
-  'canon tooling create',
   'canon claude init',
   'canon indexes regen',
   'canon indexes regen --dry-run --json',

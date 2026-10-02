@@ -78,7 +78,6 @@ Stacks do not compose horizontally, meaning two `extends` chains resolving at on
 - `canon tooling sync` runs the full sync of configs, seeds, deps, and gitignore entries
 - `canon tooling diff` reports how a target differs from a stack and never writes
 - `canon tooling reference` prints a stack's reference doc and never writes
-- `canon tooling create` creates a stack folder with a stub manifest and reference
 - `canon tooling list` emits the catalog of stacks
 - `canon tooling verify` scaffolds into a temp dir, syncs, then runs the full project check
 
@@ -100,7 +99,7 @@ canon tooling sync python ./backend --skip base --write
 
 ### Adding a stack
 
-1. Run `canon tooling create` to generate the stub structure
+1. Copy the closest existing stack under `tooling/`, found through `canon tooling list`
 2. Fill in `manifest.toml` with `extends`, deps, scripts, and optionally `[gitignore]` or `[verify]`
 3. Fill in `reference.md` with prose documentation
 4. Add golden configs to `configs/` for anything that ships as source of truth

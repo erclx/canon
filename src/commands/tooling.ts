@@ -34,7 +34,7 @@ import {
   select,
 } from '@/ui'
 
-const PASS_THROUGH_VERBS = ['create', 'verify'] as const
+const PASS_THROUGH_VERBS = ['verify'] as const
 
 interface SyncOptions {
   readonly skip?: string
@@ -71,7 +71,7 @@ type Prepared =
 export function register(program: Command): void {
   const tooling = program
     .command('tooling')
-    .description('Manage tooling stacks (sync, reference, create)')
+    .description('Manage tooling stacks (sync, reference)')
     .helpOption('-h, --help', 'Show this help message')
 
   tooling

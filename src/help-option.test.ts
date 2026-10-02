@@ -16,7 +16,6 @@ const MODULES: Registration[] = await Promise.all(
 // Commander's own option stays disabled on purpose.
 const FORWARDS_HELP_TO_SCRIPT = new Set([
   'canon sandbox',
-  'canon tooling create',
   'canon tooling verify',
 ])
 

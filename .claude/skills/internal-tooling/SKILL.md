@@ -17,14 +17,14 @@ Syntax invariants and the manifest-to-reference symmetry live in `internal/rules
 
 - Version pins in `[dependencies.dev]` (e.g. `"eslint@^9"`) are enforced by major version. Sync compares the installed dep's major against the pin's major and re-installs on mismatch. Deps without pins are left alone when present.
 - `[scripts]` entries add only when the key is missing in `package.json`. Scaffolds win for keys both sides define. Use `[scripts.override]` to force-replace a key, for anti-patterns the scaffold ships by default.
-- `tooling/claude/` is excluded from stack discovery. It is storage for `canon claude` only. Do not route claude work through the `canon tooling` CLI, and do not add new exclusions without updating `scripts/lib/tooling.sh`.
+- `tooling/claude/` is excluded from stack discovery. It is storage for `canon claude` only. Do not route claude work through the `canon tooling` CLI, and do not add new exclusions without updating `listStacks` in `src/tooling/manifest.ts`.
 - When a golden config under `tooling/<stack>/configs/` extends or references a package, install that package as a devDependency at toolkit root. The deps are IDE-only, for TypeScript server resolution against the workspace `tsconfig.json`. Do not suppress via `.vscode/settings.json`.
 - List only paths in `[gitignore]` that the stack's tools generate beyond the scaffold's default `.gitignore`. Run the scaffold in `/tmp` first to confirm what it already writes.
 - `[gitignore]` group keys are single-word labels (`# VSCode`, `# Python`), not multi-word phrases. Keeps `.gitignore` comment headers terse and stable.
 
 ## Adding a new stack
 
-- Use `canon tooling create` to generate the stub structure, then fill in seeds, `manifest.toml`, and `reference.md`.
+- Copy the closest existing stack, found through `canon tooling list`, then edit its seeds, `manifest.toml`, and `reference.md`.
 - Pick the parent layer via `extends = "web"` for any web framework, or `extends = "base"` for non-web stacks.
 - Golden configs go in `configs/`. Only ship files that genuinely differ from the parent layer. Duplicating a parent config for no reason creates drift.
 
