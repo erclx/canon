@@ -141,6 +141,21 @@ describe('verifyStack phases', () => {
     expect(existsSync(join(tmpDir('prep'), 'prepared'))).toBe(true)
   })
 
+  it('should run later phases after a failed phase', async () => {
+    seedStack('web', scaffoldWith(['test:e2e']))
+    vi.stubEnv('FAIL_ON', 'check')
+
+    const outcome = await verifyStack({ root, stack: 'web' })
+
+    expect(outcome.results).toEqual([
+      { name: 'Sync', passed: true },
+      { name: 'lint:fix', passed: true },
+      { name: 'check', passed: false },
+      { name: 'test:e2e', passed: true },
+    ])
+    expect(bunCalls()).toContain('run test:e2e')
+  })
+
   it('should fail when screenshot writes no png', async () => {
     seedStack('web', scaffoldWith(['screenshot']))
 

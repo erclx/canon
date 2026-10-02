@@ -3,11 +3,13 @@ bradlc
 bunx
 commitlint
 dbaeumer
+dotenv
 dotfolders
 erclx
 errexit
 esac
 esbenp
+eslintcache
 frontmatter
 lintstagedrc
 mkhl

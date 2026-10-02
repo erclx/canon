@@ -17,7 +17,7 @@ The verb scaffolds fresh into `.canon/tmp/runs/verify-<stack>/`, runs the option
 
 Run it after any change to `tooling/<stack>/configs/`, a manifest, or the sync logic in `src/tooling/`. `src/tooling/verify-stack.ts` sets `CI` on every phase, so the `isCI` branches in the two shipped `playwright.config.ts` files run the way a target's CI job runs them.
 
-Measured 2026-10-02 against `25a32914` with every toolchain present: `vite-react`, `astro`, and `nextjs` pass every phase. `python`, `go`, and `php` fail `check` on spelling alone, since the `.gitignore` that `bun init -y` writes carries `dotenv` and `eslintcache` and no seed word list names either. Every other phase in those three passes once the two words are known.
+Measured 2026-10-02 against `25a32914` with every toolchain present: all six scaffolding stacks pass every phase. The `.gitignore` that `bun init -y` writes in the `python`, `go`, and `php` prepare carries `dotenv` and `eslintcache`, which is why both sit in base's seed word list rather than in any one stack's.
 
 ### Verify a parent layer through its children
 
