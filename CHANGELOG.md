@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.10.0](https://github.com/erclx/canon/compare/v5.9.0...v5.10.0) (2026-10-02)
+
+
+### Features
+
+* **capture:** port regen-hero to TypeScript ([#2042](https://github.com/erclx/canon/issues/2042)) ([14f8ca2](https://github.com/erclx/canon/commit/14f8ca2a2bd8624e6945017cfc6c6fdbd0d65814))
+* **cli:** let plan-link append a plan with --add ([#2048](https://github.com/erclx/canon/issues/2048)) ([b90a0f1](https://github.com/erclx/canon/commit/b90a0f13686439f6d3881be763e0bd8afeec2e14))
+* **skills:** add an api-design practice skill ([#2043](https://github.com/erclx/canon/issues/2043)) ([5ea8425](https://github.com/erclx/canon/commit/5ea842512cee6bd3254db14791d4837a748b30f8))
+* **skills:** add bisect, reduce, and cause branches to debugging ([#2040](https://github.com/erclx/canon/issues/2040)) ([ca4b5f3](https://github.com/erclx/canon/commit/ca4b5f38c65ced65bb88f0d988083e8b8d0bea6d))
+
+
+### Bug Fixes
+
+* **claude:** post a review-ui body its own label gate accepts ([#2047](https://github.com/erclx/canon/issues/2047)) ([faac0d4](https://github.com/erclx/canon/commit/faac0d4edff2784e27c55dd7bc6976501dd4859b))
+* **cli:** keep the pr files jq filter intact through JavaScript ([#2046](https://github.com/erclx/canon/issues/2046)) ([7a7bc7c](https://github.com/erclx/canon/commit/7a7bc7c1b5649b219600f9c296d346d8ae3018c1))
+
 ## [5.9.0](https://github.com/erclx/canon/compare/v5.8.0...v5.9.0) (2026-10-01)
 
 
