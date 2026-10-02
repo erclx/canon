@@ -8,6 +8,7 @@ Jeffries
 Ousterhout
 Parnas
 Pushback
+Vlissides
 aanerud
 ababab
 affordances

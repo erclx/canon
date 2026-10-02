@@ -12,7 +12,7 @@ description: Code placement, shape, dependency, error, and naming choices a mode
 
 ## Shape
 
-- Load the `canon:code-craft` skill before writing a new function, class, or module, and report it rather than proceeding silently when it does not resolve.
+- Load the `canon:code-craft` skill before deciding the shape of a new function, class, or module, and report it rather than proceeding silently when it does not resolve.
 
 ## Errors
 

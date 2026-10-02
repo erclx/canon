@@ -45,10 +45,8 @@ Birgitta Böckeler, [The role of developer skills in agentic coding](https://mar
 
 **Definitions a model already holds.** What coupling, cohesion, or a given pattern is. Declined because a definition changes no behavior a session would otherwise get wrong.
 
-**The interview framing.** The source workspace drilled these ideas as questions to answer aloud. Declined because a session writing code needs a check it can run, not an answer it can recite.
-
 **Language-specific pages.** Every page tied to one language, its type system, or its runtime. Declined because the body has to hold on every code stack, and the one language note the pattern table carried became "a plain function often replaces the class".
 
 **Layering and hexagonal architecture.** Beyond the one bullet kept, keeping business rules free of transport and storage and skipping ports and adapters for a thin application. Declined because where layers sit is a structure call made once, not a writing-time one.
 
-**The Gang of Four and The Pragmatic Programmer as books.** Declined as sources because the workspace cited them from recall rather than from a passage a reader can open. The articles above carry the same positions at a link.
+**The Gang of Four and The Pragmatic Programmer as books.** Gamma, Helm, Johnson, and Vlissides, Design Patterns, 1994, and Hunt and Thomas, The Pragmatic Programmer, 1999. Declined as cited sources because neither is open to read at a link, so a reader could not check the passage a rule rests on. The articles above carry the same positions where a reader can open them.

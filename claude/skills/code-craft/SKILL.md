@@ -71,7 +71,6 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Copying is safer than touching code that works           | Two copies of one rule drift. The next change fixes one and leaves the other wrong, with no test pointing at it. |
 | We will need this flexibility later                      | Later has no named change behind it. Build the seam when the second case arrives, and it costs the same then.    |
-| Small functions are always cleaner                       | Only when each hides something. A chain of one-line wrappers moves the logic out of sight without removing it.   |
 | The task did not say, so a sensible default is fine      | A default is a business rule nobody approved. Ask, or state the assumption where the reviewer reads it.          |
 | The test passes now, so the fix is done                  | A fix that suppresses the symptom passes the test it was aimed at and leaves the cause for the next one.         |
 | Following the existing pattern keeps the code consistent | Consistency with a shape that fails the next change spreads the cost. Match the neighbor only when it fits.      |
