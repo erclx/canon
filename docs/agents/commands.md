@@ -103,7 +103,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `worktrees`, in `worktrees.md`: `list`, `reclaim`
 - `hooks`, in `hooks.md`: `post-merge`
 - `autoship`, in `review-classification.md`: `classify`
-- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`
+- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`
 - `audits`, in `audits.md`: `run`, `list`
 - `gate`, in `gate.md`: `run`
 - `secrets`, in `state-scoped-risk.md`: `scan`

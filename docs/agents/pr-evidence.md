@@ -83,6 +83,11 @@ them means the thread is read before the `no-evidence` answer too, so an
 unreadable thread refuses as `gh-failed` on both reasons rather than
 reporting the fields absent.
 
+`ok` also carries `states`, the comparison the body renders as data: each
+state's name and its items, each with its `path`, `stem`, and whether it was
+`added`. `review-ui` matches a frame against it so it publishes no image the
+worker's evidence already shows. `canon docs pr-frames` covers that store.
+
 ## What `[number]` selects, and what it does not
 
 Naming a number picks the pull request the whole record describes: its head

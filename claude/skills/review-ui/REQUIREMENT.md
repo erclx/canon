@@ -23,7 +23,9 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 - Report an address that does not answer as not driven rather than as a fail, and leave the review closed on a box no commit on the branch can settle, so an absent preview never holds the draft mark at every head
 - Sweep console errors, sideways overflow at each named width, and the focus and details probes over the states reached, and nothing beyond them
 - Post its own comment as a pull request review under `## UI review` while anything is owed and `## UI review closed` once nothing is, ending on a marker naming the head it drove
-- Describe each frame in words in the evidence and cite no path, since a path under `.canon/` fails the label scan the review-event run applies to the posted body
+- Embed a frame only for a state the worker's evidence record lacks, pushed through `canon pr frames` to a branch that never merges and linked by its path there under this pass's own stamp, so the image lasts until its own pull request is dropped and no later pass replaces it, and cite the evidence stem for a state the record already shows, so the review adds no image the worker's evidence already carries
+- Push only a frame of the address the pass drove, since the branch is as public as the repository
+- Describe a frame in words when the push refuses, naming the reason, and cite no local path, since a path under `.canon/` fails the label scan the review-event run applies to the posted body
 - Read the review-event checks for the head after the post, bounded, and report a failure in the result line, or the checks as unread when they never settle
 - Report the heading it posted by reading the posted file's first line, so the result line and the body come from one source
 - Name the renderer the browser reported, and render on the GPU only when the launch names a config for it
@@ -55,4 +57,5 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 - Writing the checklist and its drivable format, which `ui-checklist` owns
 - Dispatching the pass, polling its verdict, and lifting the draft mark, which `role-orchestrator` owns
 - A subagent inside the code reviewer, dropped because its cost stays invisible until it returns
-- Hosting frames where a reader on another machine can open them, since the reviewer holds no upload route and writes no tracked file
+- Writing a tracked file or checking anything out to host a frame. The push goes through the GitHub API onto the frames branch alone, so the reviewer still enters no worktree and touches no branch a pull request holds.
+- Dropping a closed pull request's frames, which a scheduled workflow runs, and purging a dropped frame GitHub still serves by commit, which needs a platform request

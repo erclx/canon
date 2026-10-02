@@ -691,6 +691,27 @@ describe('canon pr evidence reads the pull request', () => {
     expect(countEvidenceCases(String(record.body))).toBe(2)
   })
 
+  it('should report each evidence state with its stems on the ok record', async () => {
+    writeFixture(
+      'files.tsv',
+      'added\tevidence/dark/hero.png\nmodified\tevidence/dark/nav.png\n',
+    )
+    writeFixture('head', 'deadbeef')
+    writeFixture('merge-base', 'cafe01')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.states).toEqual([
+      {
+        state: 'dark',
+        items: [
+          { path: 'evidence/dark/hero.png', stem: 'hero', added: true },
+          { path: 'evidence/dark/nav.png', stem: 'nav', added: false },
+        ],
+      },
+    ])
+  })
+
   it('should pin every image link to the head the pull request reports', async () => {
     writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
     writeFixture('head', 'deadbeef')
@@ -1139,5 +1160,222 @@ describe('canon pr local', () => {
       record: expect.objectContaining({ reason: 'no-comment' }),
       exit: 0,
     })
+  })
+})
+
+describe('canon pr frames', () => {
+  let tempDir: string
+  let bin: string
+  let callLog: string
+
+  /**
+   * A gh that answers the frames branch as missing and refuses every write
+   * with the status a token lacking write access gets, logging each call.
+   */
+  function writeReadOnlyGh(): void {
+    mkdirSync(bin, { recursive: true })
+    writeFileSync(
+      join(bin, 'gh'),
+      [
+        '#!/usr/bin/env bash',
+        `echo "$*" >> '${callLog}'`,
+        'case "$*" in',
+        '  *nameWithOwner*) echo \'{"nameWithOwner":"o/r"}\' ;;',
+        '  "api -X GET "*) echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;',
+        '  "api -X "*) echo "gh: Resource not accessible by integration (HTTP 403)" >&2; exit 1 ;;',
+        '  *) exit 1 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+      { mode: 0o755 },
+    )
+  }
+
+  async function runFrames(
+    args: string[],
+  ): Promise<{ readonly record: { reason?: string }; readonly exit: number }> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'frames', '--json', '--root', tempDir, ...args],
+      {
+        cwd: tempDir,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${bin}:${process.env.PATH}` },
+      },
+    )
+    return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
+  }
+
+  function calls(): string[] {
+    return existsSync(callLog)
+      ? readFileSync(callLog, 'utf8').split('\n').filter(Boolean)
+      : []
+  }
+
+  function addArgs(file: string): string[] {
+    return [
+      '7',
+      '--add',
+      join(tempDir, file),
+      '--box',
+      '1',
+      '--head',
+      'abc1234',
+      '--pass',
+      '20261002T154450Z',
+    ]
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-frames-'))
+    bin = join(tempDir, 'bin')
+    callLog = join(tempDir, 'gh.log')
+    writeReadOnlyGh()
+    writeFileSync(
+      join(tempDir, 'box-1.png'),
+      new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]),
+    )
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should refuse as bad-mode when no mode is passed', async () => {
+    const outcome = await runFrames(['7'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'bad-mode' }),
+      exit: 1,
+    })
+  })
+
+  it('should refuse as bad-mode when --add and --drop are both passed', async () => {
+    const outcome = await runFrames([...addArgs('box-1.png'), '--drop'])
+
+    expect(outcome.record.reason).toBe('bad-mode')
+  })
+
+  it('should refuse as bad-mode when --prune names a pull request', async () => {
+    const outcome = await runFrames(['7', '--prune', '30'])
+
+    expect(outcome.record.reason).toBe('bad-mode')
+  })
+
+  it('should refuse as no-number when --drop names no pull request', async () => {
+    const outcome = await runFrames(['--drop'])
+
+    expect(outcome.record.reason).toBe('no-number')
+  })
+
+  it('should refuse as bad-box when --add carries no box', async () => {
+    const outcome = await runFrames(['7', '--add', 'box-1.png'])
+
+    expect(outcome.record.reason).toBe('bad-box')
+  })
+
+  it('should refuse as bad-head without calling gh when --head names no commit', async () => {
+    const outcome = await runFrames([...addArgs('box-1.png'), '--head', 'main'])
+
+    expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+      reason: 'bad-head',
+      calls: [],
+    })
+  })
+
+  it('should refuse as bad-pass when --add carries no pass stamp', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--box',
+      '1',
+      '--head',
+      'abc1234',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-pass')
+  })
+
+  it('should refuse as bad-pass when the stamp is not compact UTC', async () => {
+    const outcome = await runFrames([
+      ...addArgs('box-1.png'),
+      '--pass',
+      '2026-10-02T15:44:50Z',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-pass')
+  })
+
+  it('should refuse as bad-days when --prune is not a positive number', async () => {
+    const outcome = await runFrames(['--prune', '0'])
+
+    expect(outcome.record.reason).toBe('bad-days')
+  })
+
+  it('should refuse as unreadable-frame without calling gh when the file is not a PNG', async () => {
+    writeFileSync(join(tempDir, 'notes.png'), 'text')
+
+    const outcome = await runFrames(addArgs('notes.png'))
+
+    expect({ outcome, calls: calls() }).toEqual({
+      outcome: {
+        record: expect.objectContaining({ reason: 'unreadable-frame' }),
+        exit: 1,
+      },
+      calls: [],
+    })
+  })
+
+  it('should refuse as read-only when GitHub refuses the write', async () => {
+    const outcome = await runFrames(addArgs('box-1.png'))
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'read-only' }),
+      exit: 1,
+    })
+  })
+
+  it('should report nothing removed when --drop finds the branch missing', async () => {
+    const outcome = await runFrames(['7', '--drop'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'ok', removed: [] }),
+      exit: 0,
+    })
+  })
+
+  it('should address no ref but the canon-frames branch', async () => {
+    await runFrames(addArgs('box-1.png'))
+
+    const refCalls = calls().filter((call) => call.includes('/git/ref'))
+    expect(refCalls.every((call) => call.includes('heads/canon-frames'))).toBe(
+      true,
+    )
+  })
+
+  it('should list every refusal reason in the help text', async () => {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'frames', '--help'],
+      { reject: false, timeout: RUN_TIMEOUT_MS },
+    )
+
+    expect(
+      [
+        'bad-mode',
+        'no-number',
+        'bad-box',
+        'bad-days',
+        'unreadable-frame',
+        'read-only',
+        'unreadable-tip',
+        'push-failed',
+        'ref-conflict',
+        'bad-head',
+        'bad-pass',
+      ].filter((reason) => !result.stdout.includes(reason)),
+    ).toEqual([])
   })
 })
