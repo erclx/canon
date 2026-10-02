@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.13.0](https://github.com/erclx/canon/compare/v5.12.0...v5.13.0) (2026-10-02)
+
+
+### Features
+
+* **claude:** add the build-in-slices practice skill ([#2072](https://github.com/erclx/canon/issues/2072)) ([8f0cc42](https://github.com/erclx/canon/commit/8f0cc428f317179af45a36afb9446354a3702ce3))
+* **claude:** add the code-craft practice skill ([#2064](https://github.com/erclx/canon/issues/2064)) ([ec21816](https://github.com/erclx/canon/commit/ec218163916eb3e595c1cbcf81c7f1ed53b7dd14))
+* **cli:** refuse a UI review built from an older head ([#2067](https://github.com/erclx/canon/issues/2067)) ([da02253](https://github.com/erclx/canon/commit/da02253652675f2317d26df7e660209ca2a0bdef))
+* **skills:** add threat-model and derived-path checks to review-craft ([#2071](https://github.com/erclx/canon/issues/2071)) ([e0f3951](https://github.com/erclx/canon/commit/e0f3951c269bd9aac7696baf7e6343f25657fb62))
+* **tooling:** run the verify verb from a typescript module ([#2070](https://github.com/erclx/canon/issues/2070)) ([d4a75d2](https://github.com/erclx/canon/commit/d4a75d2d71712517f218863aae25b2e3803dc0af))
+
 ## [5.12.0](https://github.com/erclx/canon/compare/v5.11.0...v5.12.0) (2026-10-02)
 
 
