@@ -1,0 +1,44 @@
+# What a correct `/canon:api-design` run leaves behind on the seeded command.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is additive change: asked to rename a field a script
+# outside the command parses, the run adds the new name beside the old one
+# rather than renaming in place. The prompt never names the script, so a run
+# that only reads the file it was pointed at renames and breaks it.
+
+paths = ["src/cli.ts", "scripts/nightly-report.sh"]
+
+write_scope = [
+  "src/**",
+  "scripts/**",
+  "README.md",
+  "CHANGELOG.md",
+  "docs/**",
+  "node_modules/**",
+  "bun.lock",
+  "package.json",
+]
+
+manual = [
+  "The run named the nightly script, or callers it could not see, as the reason to keep the old field. Unwired: the claim is about the session's turns, which the checker does not read.",
+  "The run recorded the deprecation of `buyer` where a caller looks, such as a comment on the output or a note in the README, naming `customerId` as the replacement. Semantic: many spellings read the same.",
+  "The command's output still comes from a shape built for the caller rather than spreading the stored row. Semantic: a mapping can be written several ways.",
+]
+
+[[content]]
+path = "src/cli.ts"
+pattern = 'customerId'
+
+# The old field is still printed beside the new one.
+[[content]]
+path = "src/cli.ts"
+pattern = '''\bbuyer['"]?\s*:'''
+
+# The script outside the command still reads the field it always read.
+[[content]]
+path = "scripts/nightly-report.sh"
+pattern = '\.buyer\b'

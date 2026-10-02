@@ -1,6 +1,6 @@
 ---
 name: codebase-layout
-description: Carries the rules that decide where a new file goes, when a folder splits, and when a file moves from its one consumer to shared code, so a plan places each new path by role and feature with a one-clause reason rather than beside its nearest neighbor. Use when a plan names a file or folder that does not exist yet, when `plan-feature` reaches its placement step, or when asked "where should this file go", "this folder is flat", "restructure this folder", or "should this be its own folder". Do NOT use to choose which layer a test belongs at, which is `test-craft`, or to shape a module's interface and seams.
+description: Carries the rules that decide where a new file goes, when a folder splits, and when a file moves from its one consumer to shared code, so a plan places each new path by role and feature with a one-clause reason rather than beside its nearest neighbor. Use when a plan names a file or folder that does not exist yet, when `plan-feature` reaches its placement step, or when asked "where should this file go", "this folder is flat", "restructure this folder", or "should this be its own folder". Do NOT use to choose which layer a test belongs at, which is `test-craft`, or to shape what a module's interface exposes, which is `api-design`.
 ---
 
 # Codebase layout
@@ -86,6 +86,7 @@ Check every new path the plan or the change names against each line, and fix the
 ## What this delegates
 
 - Which layer a test belongs at: `test-craft`. This skill decides where the test file sits once its layer is chosen.
+- What a module exposes across its boundary, being its exports, flags, output, and errors: `api-design`. This skill decides where the file holding it sits.
 - Where a new path gets written into a plan, and the plan's shape: `plan-feature` and the plan standard
 - The pointer here that every session of a code stack loads: `000-code`
 - Runner, suffix, and top-level test folder conventions per language: `300-testing-ts`, `330-testing-py`, `335-testing-go`, and `336-testing-php`

@@ -1,6 +1,7 @@
 # canon-keep-retired: the changelog and the eval transcripts still spell it
 addyosmani
 Dodds
+Hyrum
 Ousterhout
 Parnas
 Pushback
