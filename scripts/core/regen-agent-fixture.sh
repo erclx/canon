@@ -91,9 +91,9 @@ if [ -z "$SESSIONS_JSON" ]; then
 fi
 
 # The listing crosses into the eval as a file rather than an environment entry,
-# for the reason regen-hero.sh records: Linux caps a single env string at 128KB
-# and a machine running many sessions can cross it, which fails the exec with
-# E2BIG before any check can report a thing.
+# since Linux caps a single env string at 128KB and a machine running many
+# sessions can cross it, which fails the exec with E2BIG before any check can
+# report a thing.
 SESSIONS_FILE="$(mktemp)"
 trap 'rm -f "$SESSIONS_FILE"' EXIT
 printf '%s' "$SESSIONS_JSON" >"$SESSIONS_FILE"

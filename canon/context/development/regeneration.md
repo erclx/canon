@@ -31,15 +31,15 @@ Sample content committed at its real filename gets rewritten by every repo-wide 
 
 `assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web/assets.md`, which is why every render here gates on drift rather than carrying a disclaimer.
 
-The Hero stage runs `scripts/core/regen-hero.sh`, which fills every `assets/captures/*.html.tmpl` and writes the `.html` beside it, then asserts no drift over `assets/captures/*.html`. Two inputs reach the templates: five catalogs supply the counts, so no figure on a README frame is maintained by hand, and `canon design css --no-components` supplies the palette, so no frame carries its own copy of a hex value. A sixth value, `{{FAVICON}}`, fills the same map, derived from the live `assets/brand/mark.svg` colored with the accent hex parsed out of the same palette output.
+The Hero stage runs `bun scripts/core/regen-hero.ts`, which fills every `assets/captures/*.html.tmpl` and writes the `.html` beside it, then asserts no drift over `assets/captures/*.html`. The script is a thin entry and the value builder with every guard sits in `src/capture/frame-values.ts`, where tsc and vitest reach it. Two inputs reach the templates: five catalogs supply the counts, so no figure on a README frame is maintained by hand, and `buildDesignCss` without its component half supplies the palette, so no frame carries its own copy of a hex value. A sixth value, `{{FAVICON}}`, fills the same map, derived from the live `assets/brand/mark.svg` colored with the accent hex parsed out of the same palette output.
 
 One shared value map reaches every template, so a frame resolving only the placeholders that already exist costs a template file and nothing else. A frame needing data the map does not carry costs one row builder beside the others, and the script refuses when a builder renders empty, the same way it refuses a zeroed count.
 
-What the script can read bounds what a frame can show. It reads committed catalogs through the CLI, so a frame sourced from a gitignored folder such as `.canon/tasks/` regenerates here and fails in CI, where that folder does not exist. A frame wanting that content carries its text the way `install.html.tmpl` does, recorded from a real run in the template with its elisions named.
+What the script can read bounds what a frame can show. It reads committed catalogs through the modules their verbs call, so a frame sourced from a gitignored folder such as `.canon/tasks/` regenerates here and fails in CI, where that folder does not exist. A frame wanting that content carries its text the way `install.html.tmpl` does, recorded from a real run in the template with its elisions named.
 
 ### The source folder is read flat three times
 
-`regen-hero.sh` collects templates twice, once as a shell glob and once through `readdirSync`, `resolveCaptureSources` expands a directory to the `.html` files directly inside it, and `captureBases` finds a capture set the same way. All three read `assets/captures/` and none of them descends.
+`regen-hero.ts` collects templates through `readdirSync`, `resolveCaptureSources` expands a directory to the `.html` files directly inside it, and `captureBases` finds a capture set the same way. All three read `assets/captures/` and none of them descends.
 
 So a template placed a further folder down is skipped by regeneration, by capture, and by the drift gate at once, and nothing reports it, because each is a filter over a listing and a filter matching nothing returns an empty set. The nesting therefore stops at that one level, and `assets/brand/` is safe only because no stage ever looks for the SVG it holds.
 
@@ -73,4 +73,4 @@ That entry is a folder glob rather than a list of frames. The script writes what
 
 ### An exit 2 with no message
 
-`scripts/core/regen-hero.sh` intermittently exits 2 with nothing on stderr. `canon/context/development/gates/content-stages.md` holds the record under `## Hero provenance`.
+The bash version of `regen-hero` intermittently exited 2 with nothing on stderr. The TypeScript script spawns nothing and discards no stderr, and thirty consecutive `--check` runs passed clean on WSL2. `canon/context/development/gates/content-stages.md` holds the record under `## Hero provenance`.

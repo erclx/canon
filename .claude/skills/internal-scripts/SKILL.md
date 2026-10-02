@@ -46,7 +46,7 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 ## Assets and captures
 
-- Read `canon/context/development/regeneration.md`'s Hero section before touching `assets/captures/` or `assets/*.png`. Those renders gate on drift, so a hand edit to a generated frame is overwritten by the next `scripts/core/regen-hero.sh` run.
+- Read `canon/context/development/regeneration.md`'s Hero section before touching `assets/captures/` or `assets/*.png`. Those renders gate on drift, so a hand edit to a generated frame is overwritten by the next `scripts/core/regen-hero.ts` run.
 
 ## Hooks and husky
 

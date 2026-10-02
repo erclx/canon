@@ -7,7 +7,7 @@ description: The gate stages reading what a file says, covering hero provenance 
 
 ## Hero provenance
 
-The Hero stage asks two questions of a branch and neither is whether the frames are current. `scripts/core/regen-hero.sh --check` fills every template into a temp folder and discards the result, so a renamed featured skill, an empty catalog, or an unresolved placeholder still fails. The `captureStamps` measure in `src/gate/measures.ts` then checks each image against its markup. A branch commits no frame file of its own.
+The Hero stage asks two questions of a branch and neither is whether the frames are current. `bun scripts/core/regen-hero.ts --check` fills every template into a temp folder and discards the result, so a renamed featured skill, an empty catalog, or an unresolved placeholder still fails. The `captureStamps` measure in `src/gate/measures.ts` then checks each image against its markup. A branch commits no frame file of its own.
 
 Currency sits off the branch because committed images cannot merge. Were each branch to capture, the first to land would force every branch behind it to rebase and redo the capture, across the markup, image, and stamp of every frame. `.github/workflows/refresh-capture-frames.yml` regenerates them from `main` and opens one pull request, which merges itself once its required check passes, so the committed frames lag `main` by one check run.
 
@@ -25,15 +25,15 @@ Writing the stamp inside the render rather than in a wrapper is what makes it wo
 
 ### What moves a frame
 
-The counts rendered into the frame come from the standards and skills trees and from the CLI registration block, so a merge adding a standard, a skill, or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes through `canon gov counts`, which parses the registration list in `src/cli.ts` directly.
+The counts rendered into the frame come from the standards and skills trees and from the CLI registration block, so a merge adding a standard, a skill, or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes from `countCommands` in `src/counts/catalogs.ts`, which parses the registration list in `src/cli.ts` directly.
 
 ### Gotchas
 
 `file_sha256` refuses on a machine carrying neither `sha256sum` nor `shasum`, and it refuses on stderr. Every caller reads it through a command substitution that captures stdout into the digest, so a message written there is swallowed and the stage reports a mismatch against a blank value, which names the image as wrong when the checker is what could not run.
 
-The regen script is intermittently non-deterministic and nothing here explains why. `scripts/core/regen-hero.sh` exits 2 with no stdout and no stderr on roughly one run in five on WSL2, reaching the reader as `Hero regen health check failed` under a `run_check` that has nothing to print. The catalog verbs it shells out to run clean individually with stderr surfaced, and a trace ends mid-write of the `STANDARDS_JSON` assignment, so the failing command is unpinned.
+The bash regen script exited 2 with no stdout and no stderr on roughly one run in five on WSL2, reaching the reader as `Hero regen health check failed` under a `run_check` that has nothing to print. Its catalog verbs ran clean individually with stderr surfaced and a trace ended mid-write of a payload assignment, so the failing command was never pinned. Silence was the script's own doing rather than the stage's, since a wrapper sent every `list` call's stderr to `/dev/null`.
 
-Silence is the script's own doing rather than the stage's: `catalog()` sends every `list` call's stderr to `/dev/null`, so a failure inside one reaches nobody. Re-run the script before reading that shape as a real stale count, and know that `auto-ship` bounds verify at one fix attempt, so a chain meeting this stops on a stage that passes on retry.
+`scripts/core/regen-hero.ts` replaced it and spawns no verb, so that path is gone, and thirty consecutive `--check` runs on WSL2 passed clean. The cause is still unpinned, since the rewrite removed the suspected path rather than reproducing the failure. A failure now prints a `regen-hero:` message, so record it here if one appears, and re-run before reading it as a real stale count.
 
 ## Seed independence
 

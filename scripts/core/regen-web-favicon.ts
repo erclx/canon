@@ -3,7 +3,7 @@
  * own colors in src/design/favicon.ts, apart from the page accent tokens.
  *
  * The page is the fourth surface to carry the mark as a favicon and the only
- * one that can answer for itself. `regen-hero.sh` and `src/design/render.ts`
+ * one that can answer for itself. `regen-hero.ts` and `src/design/render.ts`
  * each bake a single literal, because both embed the mark as a data URI and a
  * data URI has no CSS context. A file served at its own URL does have one, so
  * this copy carries a `prefers-color-scheme` branch and tracks the reader's
