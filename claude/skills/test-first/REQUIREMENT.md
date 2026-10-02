@@ -14,7 +14,7 @@ Without this skill, a session implementing a planned change writes the test afte
 - Write or extend the test before the implementation it covers, for any behavior whose shape is already known
 - Run the test before implementing and confirm it fails for the missing behavior, not for an unrelated mistake in the test itself
 - Implement the minimum the current test demands, and start a new test before extending past it
-- Load `canon:code-craft` before writing the implementation, so the shape of the code is settled before the body rather than during refactor
+- Load `canon:code-craft` before writing the implementation when its shape is still open and the session has not loaded the skill, so the shape of the code is settled before the body rather than during refactor
 - Re-run the test after implementing and confirm the pass is the one the test was written to prove
 - Refactor the implementation and the test once the suite is green, re-running it after each change, since the smallest change that passes leaves duplication and shortcuts the loop exists to remove before they reach history
 
