@@ -197,8 +197,8 @@ const asText = (value: unknown, fallback: string): string =>
 
 /**
  * Every session in this repository holding a branch other than the base one is
- * a worker, whoever launched it. A prefix match on the name reads a dispatched
- * worker and misses every hand-launched one. The name stays whole, since one
+ * a worker, whoever launched it. A match on the `orchestrator-` name prefix
+ * reads a dispatched worker and misses every hand-launched one. The name stays whole, since one
  * this client writes carries spaces.
  */
 const readWorkers = (repository: string, base: string): Read<Worker[]> => {
