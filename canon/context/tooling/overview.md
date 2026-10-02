@@ -63,7 +63,7 @@ Test files, an e2e spec, the screenshot template, and six shell scripts land exe
 
 Stacks do not compose horizontally, meaning two `extends` chains resolving at one root in a single `sync` call. A monorepo uses the subfolder pattern instead. A second, orthogonal stack synced onto the same root is a different case and works: `cloudflare` sets `extends = ""` and ships one config with no dependency or gitignore entries, so `canon tooling sync cloudflare . --write` at a root already carrying `astro` collides with nothing.
 
-`tooling/claude/` is storage, not a stack. It holds seeds, user-level config, and a minimal manifest consumed only by the `canon claude` CLI, so `TOOLING_STACK_EXCLUDE` keeps it out of discovery.
+`tooling/claude/` is storage, not a stack. It holds seeds, user-level config, and a minimal manifest consumed only by the `canon claude` CLI, so `EXCLUDED_STACKS` in `src/tooling/manifest.ts` keeps it out of discovery.
 
 ## Gotchas
 

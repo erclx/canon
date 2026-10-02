@@ -24,8 +24,50 @@ const refuse = () => {
   throw new Error('a boundary measure reads the tree and runs nothing')
 }
 
-const measure = (check: Measure): Promise<MeasureReport> =>
+const raw = (check: Measure): Promise<MeasureReport> =>
   check({ root, ci: false, run: refuse, cli: refuse } as MeasureContext)
+
+/**
+ * The report as a reader sees a failing stage: the borrowed output lines, then
+ * the stage's one-line failure. A passing or unmeasured report comes back as it
+ * was, so a case asserting an absent failure reads the same either way.
+ */
+const measure = async (check: Measure): Promise<MeasureReport> => {
+  const report = await raw(check)
+  if (report.failure === undefined) return report
+  const lines = report.emissions.map((emission) => emission.text)
+  return { ...report, failure: [...lines, report.failure].join('\n') }
+}
+
+describe('a failing measure', () => {
+  const seedMd = (body: string): void =>
+    write('tooling/claude/seeds/.claude/rules/a.md', body)
+
+  it('should keep its failure to one line and carry the detail as output', async () => {
+    seedMd('Run canon sync now.\n')
+
+    const report = await raw(seedIndependence)
+
+    expect(report.failure).toBe('Seed prose cites the toolkit CLI.')
+    expect(report.emissions).toEqual([
+      {
+        kind: 'output',
+        text: expect.stringContaining('rules/a.md:1:Run canon sync now.'),
+      },
+    ])
+  })
+
+  it('should carry the header and the remediation sentence in that output', async () => {
+    write('claude/skills/a/SKILL.md', 'wiki/index.md\n')
+
+    const report = await raw(skillPaths)
+
+    expect(report.failure).toBe('Shipped skills reference a repo-local path.')
+    expect(report.emissions[0]?.text).toContain(
+      'Shipped skills reference a repo-local path that does not exist in a target project:',
+    )
+  })
+})
 
 const write = (path: string, body = ''): void => {
   const full = join(root, path)
@@ -384,6 +426,19 @@ describe('capabilitySeeding', () => {
 
     expect((await measure(capabilitySeeding)).failure).toContain(
       'Seed settings: no settings.json at tooling/claude/seeds/.claude/settings.json',
+    )
+  })
+
+  it('should fail on a seeded settings.json that does not parse', async () => {
+    hook('.claude/hooks', 'a.sh')
+    hook('tooling/claude/seeds/.claude/hooks', 'a.sh')
+    write('tooling/claude/seeds/.claude/settings.json', '{ not json')
+
+    const report = await measure(capabilitySeeding)
+
+    expect(report.unmeasured).toBeUndefined()
+    expect(report.failure).toContain(
+      'Seed settings: tooling/claude/seeds/.claude/settings.json is not valid JSON',
     )
   })
 

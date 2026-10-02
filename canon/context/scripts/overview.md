@@ -31,6 +31,6 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 
 - Domain scripts require bash 4+. `scripts/lib/ui.sh` guards the version on source and exits with `brew install bash` instructions when stock macOS bash 3.2 is detected.
 - Deleting a bash file needs a sweep by path (`source`, `exec`, `bash <path>`), not by function name. Twelve sandbox scripts sourced `lib/inject.sh` without calling any of its functions, and a sweep by function name missed every one of them along with five live `exec` sites.
-- `TOOLING_STACK_EXCLUDE` currently holds only `claude`. Excluded names print a redirect error pointing at the correct CLI and exit 1.
+- `EXCLUDED_STACKS` in `src/tooling/manifest.ts` currently holds only `claude`. Excluded names print a redirect error pointing at the correct CLI and exit 1.
 - Headless picker behavior moved to `internal/rules/core/097-non-interactive.md`, which globs `scripts/**/*.sh` and `src/**/*.ts` so it loads when a picker is added rather than when someone thinks to check
 - `canon gov install` is the live refusal, returning 1 with the valid names when the argument is missing, because defaulting there picked a whole stack for the caller

@@ -111,9 +111,8 @@ export function isStackExcluded(stack: string): boolean {
 }
 
 /**
- * Lists installable stack names, filtering the `claude` stack the way
- * `is_tooling_stack_excluded` in `scripts/lib/tooling.sh` did. Claude is
- * managed by `canon claude`, not `canon tooling`.
+ * Lists installable stack names, filtering the stacks in `EXCLUDED_STACKS`.
+ * Claude is managed by `canon claude`, not `canon tooling`.
  */
 export function listStacks(root: string): string[] {
   const dir = toolingDir(root)

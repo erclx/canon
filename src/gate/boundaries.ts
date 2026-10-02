@@ -31,13 +31,21 @@ const unmeasured = (text: string): MeasureReport => ({
   unmeasured: text,
 })
 
+/**
+ * The stage's one-line `failure` frames as a single line, so the header, the
+ * offender lines, and the remediation sentence travel as borrowed output, the
+ * way the script's own stderr did.
+ */
 const failureOf = (
+  failure: string,
   header: string,
   lines: readonly string[],
   remediation: string,
 ): MeasureReport => ({
-  emissions: [],
-  failure: [header, ...lines, remediation].join('\n'),
+  emissions: [
+    { kind: 'output', text: [header, ...lines, remediation].join('\n') },
+  ],
+  failure,
 })
 
 function isDirectory(path: string): boolean {
@@ -180,6 +188,7 @@ export const ignoreParity: Measure = async (ctx) => {
   if (failures.length === 0) return pass()
 
   return failureOf(
+    "The ignore set a target receives disagrees with this repository's own.",
     "The ignore set a target receives disagrees with this repository's own:",
     failures,
     `Add the entry to the "${IGNORE_SECTION}" array in ${CLAUDE_MANIFEST} and to .gitignore. The two lists are compared exactly, and nothing here records an exception.`,
@@ -293,20 +302,23 @@ export const capabilitySeeding: Measure = async (ctx) => {
       try {
         settings = JSON.parse(readFileSync(seedSettings, 'utf8'))
       } catch {
-        return unmeasured(
-          `${posixRel(root, seedSettings)} is not valid JSON, seeded-hook wiring unverifiable.`,
+        settings = undefined
+        failures.push(
+          `  Seed settings: ${posixRel(root, seedSettings)} is not valid JSON, so seeded-hook wiring cannot be read`,
         )
       }
-      const wired = new Set(
-        collectCommands(settings).flatMap((command) =>
-          command.split(/[/\s]+/).filter((segment) => segment !== ''),
-        ),
-      )
-      for (const file of seedHooks) {
-        if (wired.has(basename(file))) continue
-        failures.push(
-          `  Seed settings: ${basename(file)} is seeded and wired into no command in ${posixRel(root, seedSettings)}`,
+      if (settings !== undefined) {
+        const wired = new Set(
+          collectCommands(settings).flatMap((command) =>
+            command.split(/[/\s]+/).filter((segment) => segment !== ''),
+          ),
         )
+        for (const file of seedHooks) {
+          if (wired.has(basename(file))) continue
+          failures.push(
+            `  Seed settings: ${basename(file)} is seeded and wired into no command in ${posixRel(root, seedSettings)}`,
+          )
+        }
       }
     }
   }
@@ -314,6 +326,7 @@ export const capabilitySeeding: Measure = async (ctx) => {
   if (failures.length === 0) return pass()
 
   return failureOf(
+    'A capability reaches one side of the seed or config boundary and not the other.',
     'A capability reaches one side of the seed or config boundary and not the other:',
     failures,
     `Seed or configure the capability, or mark the source line with # ${NO_SEED_MARKER} <reason>.`,
@@ -377,6 +390,7 @@ export const pluginBoundary: Measure = async (ctx) => {
   if (leaked.length === 0) return pass()
 
   return failureOf(
+    'Plugin ships toolkit-internal content.',
     'Plugin ships toolkit-internal content:',
     leaked,
     'Author internal content under internal/, which nothing under claude/ reaches.',
@@ -457,6 +471,7 @@ export const seedIndependence: Measure = async (ctx) => {
   if (cited.length === 0) return pass()
 
   return failureOf(
+    'Seed prose cites the toolkit CLI.',
     'Seed prose cites the toolkit CLI:',
     cited,
     `A scaffolded project may not have ${TOOLKIT_TOKEN} installed. State the capability the line needs rather than the binary that supplies it.`,
@@ -485,13 +500,10 @@ export const skillPaths: Measure = async (ctx) => {
   )
   if (matches.length === 0) return pass()
 
-  return {
-    emissions: [],
-    failure: [
-      'Shipped skills reference a repo-local path that does not exist in a target project:',
-      ...matches,
-      '',
-      'Reach supporting prose through a canon docs command, a standard cited at the flat root, or inlined text.',
-    ].join('\n'),
-  }
+  return failureOf(
+    'Shipped skills reference a repo-local path.',
+    'Shipped skills reference a repo-local path that does not exist in a target project:',
+    [...matches, ''],
+    'Reach supporting prose through a canon docs command, a standard cited at the flat root, or inlined text.',
+  )
 }
