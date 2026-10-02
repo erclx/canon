@@ -5,7 +5,7 @@ description: How git-pr finds the UI checklist and the local server, posts the e
 
 # Rendered-surface evidence
 
-The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The session reads this file when a UI checklist exists or the diff changes a path under an `evidence/` segment.
+The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The step runs on every pull request, with no test on the diff ahead of it. `no-evidence` is the silent branch, so a pull request that changes no rendered surface posts nothing.
 
 ## Find the UI checklist
 
@@ -92,7 +92,7 @@ Deleting the file is what makes the later re-render safe. `git-followup` re-runs
 
 ## Post the preview address
 
-Run this step only when the evidence step above returned `ok` or a checklist was posted by the fallback. Either one means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. Otherwise skip it silently.
+Run this step when the evidence step above returned `ok`, a checklist was posted by the fallback, or `canon pr evidence <number> --check --json` lists `preview` in `owed`. The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out, so no evidence step ran in the current one. Otherwise skip it silently.
 
 The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs. Mint the preview against the same `<number>`:
 

@@ -22,6 +22,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 - Name the one point a wrapping caller may act at, so a chain built on this one is not left to pick a gap of its own
 - Name the condition under which the closing block is not emitted, since a caller that closes on its own block leaves two instructions about the last line and nothing deciding between them
 - Watch continuous integration to a terminal state in the background, so the session stays reachable while CI runs, and stop on a failure naming the check
+- Read the evidence thread with `canon pr evidence <number> --check --json` once CI passes, run what it reports owed, and report done only on `settled`, since a chain that never reads the thread ships a regenerated image with no comment and no preview and leaves the controller to repair it
 - Stop memory work at the Propose phase
 
 ## Must not
@@ -36,6 +37,8 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 ## Guards
 
 - A failing verify stops the run before the sync skills write, so the tree is left as the user left it
+- A binary lacking `--check` reports the thread unread, never settled, since reading the absence as a pass repeats the failure the read exists to close
+- Re-read the thread once after running what was owed and stop on anything but `settled`, so a refused preview cannot loop the chain
 - A failing check stops the sequence. A stop report and the line announcing the background watch are the two places text is allowed between steps.
 
 ## Out of scope

@@ -28,6 +28,7 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Label from the paths the branch changed, against a map the project declares, so the label set belongs to the project rather than to the skill
 - Apply labels after the pull request exists, so a label the remote does not carry costs a warning rather than the pull request
 - Report a refused label, since a warning nothing surfaces leaves the run indistinguishable from one that labelled
+- Run the evidence verb on every pull request the skill opens, and let its `no-evidence` answer be the skip, since a session cannot see a regenerated image it did not author and a gate asking it to look lets that image ship with no comment
 - Put a preview address on a pull request that changes a rendered surface when the project's deploy can mint one, since screenshots and a checklist leave a reviewer nothing to click into before merging
 - Bound the wait on that preview and finish the chain without the link on a timeout, since a slow deploy must not hold the ship
 - Put the branch's running local server on the same pull request when this worktree is serving one, and remove it when the pull request closes, since a reviewer on the operator's machine can interact with the branch and a link that outlives it points at whatever runs there next
