@@ -159,6 +159,75 @@ export function hookActions(
   return actions
 }
 
+export interface SkillGroup {
+  readonly group: string
+  readonly skills: readonly { name: string; usage: string }[]
+}
+
+const SKILL_ROW = /^\|\s*`canon:([^`]+)`\s*\|(.*)$/
+
+/**
+ * The skill map's groups, each skill with the text saying when to reach for
+ * it. A row counts only when its first cell is a backticked `canon:<name>`, so
+ * any other table on the page is left alone. The read refuses in both
+ * directions, a catalog skill with no row and a row naming no catalog skill,
+ * and refuses a row it cannot split, so a reformat fails the build rather than
+ * dropping a skill from the field.
+ */
+export function skillGroups(
+  markdown: string,
+  names: readonly string[],
+): SkillGroup[] {
+  const groups: { group: string; skills: { name: string; usage: string }[] }[] =
+    []
+  const seen = new Set<string>()
+  const twice: string[] = []
+  for (const line of markdown.split('\n')) {
+    const heading = line.match(/^## (.+)$/)
+    if (heading) {
+      groups.push({ group: (heading[1] as string).trim(), skills: [] })
+      continue
+    }
+    const row = line.match(SKILL_ROW)
+    if (!row) continue
+    const name = row[1] as string
+    const cell = (row[2] as string).trim().replace(/\|$/, '')
+    if (cell.includes('|')) {
+      throw new Error(`The skill map row for ${name} has more than two cells`)
+    }
+    const current = groups[groups.length - 1]
+    if (!current) {
+      throw new Error(`The skill map row for ${name} sits under no group`)
+    }
+    if (seen.has(name)) twice.push(name)
+    seen.add(name)
+    const usage = cell
+      .replace(/<!--.*?-->/g, '')
+      .replace(/`/g, '')
+      .trim()
+    current.skills.push({ name, usage })
+  }
+
+  const problems: string[] = []
+  const missing = names.filter((name) => !seen.has(name))
+  const unknown = [...seen].filter((name) => !names.includes(name))
+  if (missing.length > 0) {
+    problems.push(`skills with no row: ${missing.join(', ')}`)
+  }
+  if (unknown.length > 0) {
+    problems.push(`rows naming no catalog skill: ${unknown.join(', ')}`)
+  }
+  if (twice.length > 0) {
+    problems.push(`skills listed twice: ${twice.join(', ')}`)
+  }
+  if (problems.length > 0) {
+    throw new Error(
+      `The skill map disagrees with the catalog, ${problems.join('; ')}`,
+    )
+  }
+  return groups.filter((entry) => entry.skills.length > 0)
+}
+
 /** A rule's bullet, read whole, so the page quotes what the rule still says. */
 export function ruleBullet(text: string, opening: string): string {
   const line = text

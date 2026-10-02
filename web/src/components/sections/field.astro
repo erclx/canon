@@ -6,8 +6,10 @@ import { readSession, usedNames } from '../../lib/session'
  * Every command and every skill, with the ones the session used lit. The names
  * and both totals are build-time reads, the command names off `canon --help`
  * and the skills off `canon claude skills list`, so each heading's count is the
- * length of the list under it. The lit names are authored and checked against
- * the catalog, so a rename fails the build rather than lighting nothing.
+ * length of the list under it. The skills sit under the groups of the skill
+ * map, each with its "When to use" text, and `skillGroups` refuses a skill the
+ * map does not carry. The lit names are authored and checked against the
+ * catalog, so a rename fails the build rather than lighting nothing.
  */
 const session = readSession()
 const skillNames = session.skills.map((skill) => skill.name)
@@ -40,20 +42,64 @@ const fields = [
               {entry.label.total}
               <i>{entry.label.used}</i>
             </p>
-            <ul
-              class="names"
-              style={`--rows: ${Math.ceil(entry.names.length / 4)}`}
-            >
-              {entry.names.map((name) => (
-                <li class:list={{ on: entry.lit.has(name) }}>{name}</li>
-              ))}
-            </ul>
+            {entry.kind === 'skills' ? (
+              session.skillGroups.map((group) => (
+                <div class="group">
+                  <h3 class="group-name">{group.group}</h3>
+                  <ul
+                    class="names"
+                    style={`--rows: ${Math.ceil(group.skills.length / 4)}`}
+                  >
+                    {group.skills.map((skill) => (
+                      <li
+                        class:list={{ on: entry.lit.has(skill.name) }}
+                        tabindex="0"
+                      >
+                        {skill.name}
+                        <span class="usage">{skill.usage}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            ) : (
+              <ul
+                class="names"
+                style={`--rows: ${Math.ceil(entry.names.length / 4)}`}
+              >
+                {entry.names.map((name) => (
+                  <li class:list={{ on: entry.lit.has(name) }}>{name}</li>
+                ))}
+              </ul>
+            )}
           </div>
         ))
       }
     </div>
   </div>
 </section>
+
+<script>
+  // A revealed usage line has to be closable without moving the pointer or
+  // focus (WCAG 1.4.13), so Escape marks the entry it belongs to, and the mark
+  // lifts once that entry loses both hover and focus.
+  const skills = document.querySelectorAll<HTMLElement>(
+    '[data-field="skills"] li',
+  )
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return
+    for (const skill of skills) {
+      if (skill.matches(':hover, :focus')) skill.dataset.dismissed = ''
+    }
+  })
+  for (const skill of skills) {
+    const lift = () => {
+      if (!skill.matches(':hover, :focus')) delete skill.dataset.dismissed
+    }
+    skill.addEventListener('mouseleave', lift)
+    skill.addEventListener('blur', lift)
+  }
+</script>
 
 <style>
   .coda {
@@ -125,6 +171,56 @@ const fields = [
   .names li {
     color: var(--ink-faint);
     padding: var(--space-xs) 0;
+  }
+
+  .group + .group {
+    margin-top: var(--space-xl);
+  }
+
+  .group-name {
+    margin: 0 0 var(--space-sm);
+    text-align: center;
+    font-size: var(--t5);
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /*
+   * The usage line is revealed on hover, focus, and tap rather than printed
+   * under every name, which keeps the field near the height of the name grid.
+   * It is anchored to the group's list, so its width never depends on which
+   * column the name sits in and it cannot run off a 320 screen.
+   */
+  .group .names {
+    position: relative;
+  }
+
+  .group li {
+    cursor: default;
+  }
+
+  .usage {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    margin-top: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    color: var(--ink);
+    font-weight: 400;
+    font-size: var(--t6);
+  }
+
+  .group li:hover .usage,
+  .group li:focus .usage {
+    display: block;
+  }
+
+  .group li[data-dismissed] .usage {
+    display: none;
   }
 
   /* Full ink at weight 500 against a faint sibling carries the distinction alone. */
