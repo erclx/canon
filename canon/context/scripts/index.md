@@ -1,11 +1,11 @@
 ---
 title: Scripts
-subtitle: Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the eval harness. Start with overview.
+subtitle: Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the frozen eval records. Start with overview.
 ---
 
 # Scripts
 
-Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the eval harness. Start with overview.
+Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the frozen eval records. Start with overview.
 
 - [Core scripts](core.md): Repo maintenance scripts, the guard stages check fires, and the bare-flag repair that runs ahead of them
 - [Eval records](eval.md): What each arm measured, the ablation findings, the frozen records a run left, and the limits the results report past

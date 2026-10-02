@@ -10,7 +10,7 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 ## Layout
 
 - `scripts/` owns `manage-sandbox.sh`, the only entry point in the folder. No other domain has a dispatcher
-- `scripts/core/` owns repo maintenance: bootstrap, verify, regen, snapshot, clean
+- `scripts/core/` owns repo maintenance: bootstrap, verify, regen
 - `scripts/<domain>/` owns the subcommands for that domain, one file per verb. `standards` and `docs` keep only a list command there, `claude` and `gov` keep nothing, and `tooling` keeps only authoring helpers
 - `scripts/standards/` and `scripts/tooling/` hold verbs with no dispatcher above them. Their domains are TypeScript now and `src/commands/` routes into what is left. `gov` is the first domain to empty its folder outright
 - `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results. It carries no runner and nothing dispatches to it
