@@ -182,7 +182,7 @@ test('a skill reveals its usage on focus and Escape dismisses it', async ({
   await expect(usage).toBeVisible()
 })
 
-test('the skills field is one tab stop and arrow keys move through it', async ({
+test('the skills field is one tab stop with a described usage line', async ({
   page,
 }) => {
   await page.goto('/')
@@ -190,14 +190,51 @@ test('the skills field is one tab stop and arrow keys move through it', async ({
   await expect(
     page.locator('[data-field="skills"] li[tabindex="0"]'),
   ).toHaveCount(1)
+  await expect(skills.nth(1)).toHaveAttribute('aria-describedby', /.+/)
+})
+
+// The first group holds seven names, so it lays out as two rows of four
+// columns above 900px, filling down each column, and as rows of two at 320.
+test('arrow keys follow a column-first grid at desktop width', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto('/')
+  const skills = page.locator('[data-field="skills"] li')
+
+  await skills.first().focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(skills.nth(2)).toBeFocused()
+
+  await page.keyboard.press('ArrowDown')
+  await expect(skills.nth(3)).toBeFocused()
+
+  await page.keyboard.press('ArrowLeft')
+  await expect(skills.nth(1)).toBeFocused()
+
+  await page.keyboard.press('ArrowUp')
+  await expect(skills.first()).toBeFocused()
+})
+
+test('arrow keys follow a row-first grid at the 320 floor', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 })
+  await page.goto('/')
+  const skills = page.locator('[data-field="skills"] li')
 
   await skills.first().focus()
   await page.keyboard.press('ArrowRight')
   await expect(skills.nth(1)).toBeFocused()
-  await expect(skills.nth(1)).toHaveAttribute('aria-describedby', /.+/)
+
+  await page.keyboard.press('ArrowDown')
+  await expect(skills.nth(3)).toBeFocused()
 
   await page.keyboard.press('ArrowLeft')
-  await expect(skills.first()).toBeFocused()
+  await expect(skills.nth(2)).toBeFocused()
+
+  await page.keyboard.press('ArrowUp')
+  await expect(skills.nth(0)).toBeFocused()
 })
 
 test.describe('the social card', () => {

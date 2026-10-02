@@ -99,6 +99,30 @@ const fields = [
   // The field is one tab stop, and the arrow keys walk the names in reading
   // order, so a keyboard reader passes the field without crossing every skill.
   const names = [...skills]
+
+  // The group's grid fills down each column above 900px and across each row
+  // below it, so the neighbor in a direction comes from the computed layout at
+  // the current width. A step that leaves the group falls back to reading order.
+  function neighbor(skill: HTMLElement, key: string): HTMLElement | undefined {
+    const list = skill.parentElement
+    if (!list) return undefined
+    const items = [...list.children] as HTMLElement[]
+    const style = getComputedStyle(list)
+    const isColumnFlow = style.gridAutoFlow.startsWith('column')
+    const columns = style.gridTemplateColumns.split(' ').length
+    const rows = style.gridTemplateRows.split(' ').length
+    const index = items.indexOf(skill)
+    // The length of the line whose cells follow one another in the DOM.
+    const lane = isColumnFlow ? rows : columns
+    const isVertical = key === 'ArrowDown' || key === 'ArrowUp'
+    const sign = key === 'ArrowDown' || key === 'ArrowRight' ? 1 : -1
+    const isAlongLane = isColumnFlow === isVertical
+    if (!isAlongLane) return items[index + sign * lane]
+    const position = (index % lane) + sign
+    if (position < 0 || position >= lane) return undefined
+    return items[index + sign]
+  }
+
   for (const [index, skill] of names.entries()) {
     const lift = () => {
       if (!skill.matches(':hover, :focus')) delete skill.dataset.dismissed
@@ -109,14 +133,12 @@ const fields = [
       for (const other of names) other.tabIndex = other === skill ? 0 : -1
     })
     skill.addEventListener('keydown', (event) => {
-      const step =
-        event.key === 'ArrowRight' || event.key === 'ArrowDown'
-          ? 1
-          : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-            ? -1
-            : 0
-      const next = names[index + step]
-      if (step === 0 || !next) return
+      const forward = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+      const backward = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+      if (!forward && !backward) return
+      const next =
+        neighbor(skill, event.key) ?? names[index + (forward ? 1 : -1)]
+      if (!next) return
       event.preventDefault()
       next.focus()
     })
