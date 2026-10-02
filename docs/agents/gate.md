@@ -5,7 +5,7 @@ description: Running the gate this repository verifies a branch with, what the s
 
 # Merge gate
 
-`canon gate run` runs every stage that guards a branch here, in order, stopping at the first stage that finds a fact. `bun run check` and `bun run check:ci` resolve to it, and `scripts/core/update.sh` calls it with `--nested` after a dependency update.
+`canon gate run` runs every stage that guards a branch here, in order, stopping at the first stage that finds a fact. `bun run check` and `bun run check:ci` resolve to it, and the `update` package script runs `bun run check` after a dependency update.
 
 ```bash
 canon gate run

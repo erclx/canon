@@ -17,7 +17,6 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/src/components/` owns the site chrome, being the nav and the footer, and the shared panel primitives the gallery renders
 - `web/src/content/` owns page copy, each string tied to a `README.md` citation or a paraphrase marker
 - `web/src/lib/` owns the build-time reads, split into the pure derivations and the CLI and file reads that feed them
-- `web/src/fixtures/` owns the agent-view session snapshot, which no section renders
 - `web/src/layouts/` owns the shared page shell
 - `web/src/styles/` owns the page stylesheet and the generated design tokens
 - `web/e2e/` owns the Playwright suite

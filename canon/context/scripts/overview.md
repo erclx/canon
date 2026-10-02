@@ -13,7 +13,7 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 - `scripts/core/` owns repo maintenance: bootstrap, verify, regen, snapshot, clean
 - `scripts/<domain>/` owns the subcommands for that domain, one file per verb. `standards` and `docs` keep only a list command there, `claude` and `gov` keep nothing, and `tooling` keeps only authoring helpers
 - `scripts/standards/` and `scripts/tooling/` hold verbs with no dispatcher above them. Their domains are TypeScript now and `src/commands/` routes into what is left. `gov` is the first domain to empty its folder outright
-- `scripts/eval/` owns the authoring harness and its ablation variants. It is not a verb and nothing dispatches to it, so it is invoked by path and never through `canon`
+- `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results. It carries no runner and nothing dispatches to it
 - `scripts/lib/` owns shared functions, sourced and never executed directly. No bash function is under test
 - `scripts/sandbox/` owns scenario provisioning, covered in `canon/context/sandbox/index.md`
 
