@@ -44,7 +44,7 @@ Read nothing else about the change. The diff, the plan, the task, and the descri
 canon pr evidence <number> --json
 ```
 
-Take three fields off the record, each present only when the posted evidence comment holds it: `checklist`, `preview`, and `local`. They come from the comment already on the thread, so `reason` reading `ok` or `no-evidence` makes no difference here, and the rendered `body` is not this pass's to read. Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Only `ok` and `no-evidence` read the thread. Every other `reason` is a refusal that never reached the comment, so report it verbatim and stop rather than reading the missing fields as an absent checklist.
+Take three fields off the record, each present only when the posted evidence comment holds it: `checklist`, `preview`, and `local`. They come from the comment already on the thread, so `reason` reading `ok` or `no-evidence` makes no difference here, and the rendered `body` is not this pass's to read. Keep `states` as well when `reason` reads `ok`, being each evidence state's name and the stems under it, which Step 5 matches a frame against. A record carrying no `states`, on `no-evidence` or from an older binary, covers no state, so every frame is pushed. Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Only `ok` and `no-evidence` read the thread. Every other `reason` is a refusal that never reached the comment, so report it verbatim and stop rather than reading the missing fields as an absent checklist.
 
 A binary older than 5.4.0 reports none of the three fields whatever the thread holds, so a record carrying none is ambiguous. Read `canon --version` before taking the no-checklist stop, and on an older release report the release this pass needs and stop rather than parsing the comment by hand.
 
@@ -86,6 +86,14 @@ Give every box exactly one verdict, in checklist order. A box the pass could not
 
 Never judge a box ending in `(taste)`. Drive to the state, capture the frame, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is the author's claim and this pass exists to check it.
 
+A frame the verdict rests on is published only when the worker's evidence lacks it. Compare the box's route, width, and theme against the `states` Step 2 kept, and when a state and stem show the same thing, cite that stem and push nothing. The match is this pass's judgment over the box's wording, so the verb never makes it. Otherwise push the frame and keep the `link` the record returns:
+
+```bash
+canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --json
+```
+
+Push only a frame of the address this pass drove, since the branch is as public as the repository. Branch on `reason` rather than on the exit code. Every reason but `ok` is a refusal, `read-only` among them on a fork's token, so describe that frame in words and name the reason in its evidence rather than failing the pass.
+
 ## Step 6: sweep
 
 Run three checks over every route the boxes reached, and nothing beyond them:
@@ -100,7 +108,7 @@ Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> 
 
 ## Step 7: post
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command.
+Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each Evidence cell embeds the `link` its Step 5 push returned, as given, or names the evidence stem it matched.
 
 ## Step 8: read the review-event checks
 
@@ -130,4 +138,4 @@ Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendat
 - Drive the checklist and the sweep, and nothing else. Open exploration has no end a dispatcher can predict.
 - Never check out, build, or serve the head. An address is handed to this pass or the pass refuses.
 - Never read a value off the snapshot file whole. Search it for the ref a box needs, and read text, styles, and geometry with `eval`.
-- Write only under `.canon/tmp/pr/review-ui/`, at the main worktree root.
+- Write only under `.canon/tmp/pr/review-ui/`, at the main worktree root, and to the frames branch through `canon pr frames`, which goes through the API and checks nothing out.

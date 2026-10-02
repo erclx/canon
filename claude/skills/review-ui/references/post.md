@@ -28,7 +28,8 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 | Box                                | Verdict    | Evidence                                      |
 | ---------------------------------- | ---------- | --------------------------------------------- |
 | 1. <the box as written, shortened> | fail       | <the value read against what the box expects> |
-| 2. <box>                           | needs eyes | <what the frame showed, in words, no path>    |
+| 2. <box>                           | needs eyes | ![](link) <what the frame showed, in words>   |
+| 3. <box>                           | pass       | Evidence `<stem>` <what it showed, in words>  |
 
 **Sweep**
 
@@ -43,7 +44,7 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 <!-- review-ui: head=<head> -->
 ```
 
-A frame cannot be attached and a path under `.canon/` is a board identifier the label scan rejects, so the Evidence cell describes what the frame showed in words and cites no path. Say plainly that the frame is not published where a reader could open it.
+An Evidence cell resting on a frame takes one of three forms. A frame Step 5 pushed embeds as `![](<link>)`, with the link exactly as `canon pr frames` returned it, pinned to the commit the push made rather than to the branch. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
 
 A pass where every box needs eyes and nothing else is owed takes the closed heading:
 
