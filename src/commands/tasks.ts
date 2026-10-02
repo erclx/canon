@@ -114,6 +114,7 @@ interface PullRequestCommandOptions {
 }
 
 interface PlanLinkCommandOptions {
+  readonly add?: boolean
   readonly json?: boolean
   readonly root?: string
 }
@@ -454,6 +455,10 @@ export function register(program: Command): void {
     .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
     .argument('<plan>', 'Plan path or its slug, as in dispatch-answer-gate')
     .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--add',
+      'Append the plan to the line, for a task sliced over plans',
+    )
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
     .addHelpText(
@@ -461,7 +466,7 @@ export function register(program: Command): void {
       [
         '',
         'Exit codes:',
-        '  0  the line was added, corrected, or already correct',
+        '  0  the line was added, appended to, corrected, or already correct',
         '  1  refused, including several-plans for a line linking more than one',
         '     plan, with the reason on stderr or in the JSON record',
         '',
@@ -471,8 +476,13 @@ export function register(program: Command): void {
         'tasks plan-answers does. Safe from a linked worktree, since it',
         'resolves the board root in-process.',
         '',
+        'With --add it keeps every link in order and appends the plan, so a',
+        'sliced task links one plan per slice. It reports unchanged when the',
+        'plan is already listed and is allowed on a line holding several.',
+        '',
         'Examples:',
         '  canon tasks plan-link v28.1-trigger-escalation dispatch-answer-gate',
+        '  canon tasks plan-link v28.1-trigger-escalation second-slice --add',
         '  canon tasks plan-link v28.1-trigger-escalation .canon/plans/feature-dispatch-answer-gate.md --json',
         '',
       ].join('\n'),
@@ -725,7 +735,7 @@ async function runPlanLink(
 ): Promise<number> {
   const emitJson = opts.json ?? false
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await recordPlan(root, task, plan)
+  const outcome = await recordPlan(root, task, plan, opts.add ?? false)
 
   return reportPlanLink(outcome, emitJson, root)
 }

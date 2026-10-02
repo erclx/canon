@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { basename, join, relative } from 'node:path'
 import { planCandidates } from '@/tasks/answers'
 import {
+  appendPlanLink,
   describeUnmatchedStem,
   fenceMask,
   linkTo,
@@ -240,11 +241,32 @@ export type PlanLineWrite =
  * A line already linking several plans is refused whole, even when one of them
  * is the target, since overwriting it drops links the caller never named and
  * reporting it unchanged hides a line that breaks the one-plan rule.
+ *
+ * `add` is the sliced task's writer, which links one plan per slice. It keeps
+ * every link in order and appends the target, reports `unchanged` when the
+ * target is already listed, and so never refuses a line holding several.
  */
-export function writePlanLine(text: string, target: string): PlanLineWrite {
+export function writePlanLine(
+  text: string,
+  target: string,
+  add = false,
+): PlanLineWrite {
   const line = planLine(target)
   const lines = text.split('\n')
   const existing = planLineIndex(lines)
+
+  if (existing !== -1 && add) {
+    if (readPlanTargets(lines[existing]).includes(target)) {
+      return { ok: true, text, action: 'unchanged', replaced: undefined }
+    }
+    lines[existing] = appendPlanLink(lines[existing], target)
+    return {
+      ok: true,
+      text: lines.join('\n'),
+      action: 'appended',
+      replaced: undefined,
+    }
+  }
 
   if (existing !== -1) {
     const targets = readPlanTargets(lines[existing])
@@ -449,6 +471,7 @@ export async function recordPlan(
   root: string,
   stem: string,
   reference: string,
+  add = false,
 ): Promise<PlanOutcome> {
   const opened = await openTask(root, { kind: 'stem', stem })
   if ('ok' in opened) return opened
@@ -464,7 +487,7 @@ export async function recordPlan(
   }
 
   const target = linkTo(dir, plan)
-  const written = writePlanLine(await readFile(path, 'utf8'), target)
+  const written = writePlanLine(await readFile(path, 'utf8'), target, add)
 
   if (!written.ok) {
     return refuse(
