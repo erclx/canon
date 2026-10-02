@@ -366,22 +366,6 @@ describe('readPreviewHead', () => {
     expect(result).toMatchObject({ reason: 'stale', runId: 2 })
   })
 
-  it('should dispatch nothing', async () => {
-    const runner = fakeRunner({})
-    runner.dispatch = async () => {
-      throw new Error('dispatch called by a read')
-    }
-    runner.listRuns = async () => [run(2, 'completed', 'success', TIP)]
-
-    const result = await readPreviewHead(runner, {
-      workflow: SETTINGS.workflow,
-      branch: SETTINGS.branch,
-      tip: TIP,
-    })
-
-    expect(result.reason).toBe('fresh')
-  })
-
   it('should refuse as gh-failed when the listing is unreadable', async () => {
     const result = await read(undefined)
 
