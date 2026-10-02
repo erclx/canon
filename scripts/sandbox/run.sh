@@ -268,6 +268,17 @@ run_cleanup() {
     shim_dir=""
   fi
 
+  # The manifests are assigned only once provisioning passes, so an exit before
+  # then finds them unset, and the success path removes them before clearing the
+  # trap.
+  local manifest_file
+  for manifest_file in "${before:-}" "${after:-}" "${envelope:-}" "${writes:-}" \
+    "${escapes:-}" "${session_records:-}" "${session_concurrent:-}"; do
+    if [ -n "$manifest_file" ]; then
+      rm -f "$manifest_file"
+    fi
+  done
+
   close_timeline
 }
 
