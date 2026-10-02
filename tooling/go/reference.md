@@ -32,6 +32,7 @@ The go stack also ships `smoke_test.go` at the module root as a copy-once seed. 
 - Probe `go` and `golangci-lint` first, and name the `go install` command when `golangci-lint` is missing.
 - Keep `build` out of `verify.json`, even though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file, and a seeded `main.go` would assume every module is a binary rather than a library.
 - Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than in a local `bun run check`.
+- The manifest's `[verify] prepare` runs checklist steps 3 and 6 for `canon tooling verify go`: `bun init -y`, then the `golangci-lint` `go install` when the binary is not already on PATH. The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI
 

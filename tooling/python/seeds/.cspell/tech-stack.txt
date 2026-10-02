@@ -2,7 +2,6 @@ addopts
 appuser
 asyncio
 coveragerc
-dotenv
 fastapi
 flake8
 htmlcov

@@ -1,6 +1,5 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { execScript } from '@/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import {
   injectConfigs,
@@ -21,6 +20,7 @@ import { readReference, resolveReference } from '@/tooling/read'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordedStacks, recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
+import { verifyStack } from '@/tooling/verify-stack'
 import {
   intro,
   isNonInteractive,
@@ -33,8 +33,6 @@ import {
   palette,
   select,
 } from '@/ui'
-
-const PASS_THROUGH_VERBS = ['verify'] as const
 
 interface SyncOptions {
   readonly skip?: string
@@ -58,6 +56,10 @@ interface InjectOptions {
 
 interface PruneOptions {
   readonly nested?: boolean
+}
+
+interface VerifyOptions {
+  readonly keep?: boolean
 }
 
 interface ListOptions {
@@ -207,18 +209,39 @@ export function register(program: Command): void {
       process.exitCode = printReference(stack)
     })
 
-  for (const verb of PASS_THROUGH_VERBS) {
-    tooling
-      .command(verb)
-      .description(`Run the tooling ${verb} command`)
-      .allowUnknownOption()
-      .allowExcessArguments(true)
-      .passThroughOptions()
-      .helpOption(false)
-      .action(async (_opts: unknown, cmd: Command) => {
-        await execScript(`tooling/${verb}.sh`, cmd.args)
+  tooling
+    .command('verify')
+    .description('Scaffold a stack fresh, sync it, and run its checks')
+    .argument('<stack>', 'Tooling stack name (e.g. vite-react, astro)')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--keep', 'Keep the tmp dir after a clean run for inspection')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Scaffolds <stack> into .canon/tmp/runs/verify-<stack>/, runs the',
+        "manifest's [verify] prepare, syncs the chain from this checkout, then",
+        'runs lint:fix, check, test:e2e, and screenshot where the scaffold',
+        'declares them. A scaffold with no package.json after Sync fails.',
+        '',
+        'Exit codes:',
+        '  0  every phase passed',
+        '  1  a phase failed, or the stack cannot be verified',
+        '',
+        'Examples:',
+        '  canon tooling verify vite-react',
+        '  canon tooling verify astro --keep',
+        '',
+      ].join('\n'),
+    )
+    .action(async (stack: string, opts: VerifyOptions) => {
+      const outcome = await verifyStack({
+        root: PROJECT_ROOT,
+        stack,
+        keep: opts.keep === true,
       })
-  }
+      process.exitCode = outcome.exitCode
+    })
 }
 
 /**
@@ -227,8 +250,8 @@ export function register(program: Command): void {
  * quote emitted output a consuming skill could not parse.
  *
  * The frame opens after the `--json` return. The bash emitted a closing `└`
- * from its EXIT trap with no `┌` above it, because the hand-rolled
- * pass-through loop below opens no frame before it runs the script.
+ * from its EXIT trap with no `┌` above it, because the pass-through loop that
+ * ran it opened no frame first.
  */
 function runList(opts: ListOptions): number {
   // The warning is a frame-interior line, so it goes out after `intro` on the

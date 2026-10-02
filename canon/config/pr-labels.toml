@@ -47,7 +47,7 @@ tooling = ["tooling/"]
 # Both halves of the migration boundary. `scripts/core/` and `scripts/sandbox/`
 # are left to the rows below, so a new `scripts/` folder goes bare until the
 # uncovered-surface check names it.
-cli = ["src/", "scripts/lib/", "scripts/tooling/", "scripts/eval/"]
+cli = ["src/", "scripts/lib/", "scripts/eval/"]
 sandbox = ["scripts/sandbox/", "scripts/manage-sandbox.sh"]
 docs = ["docs/", "wiki/", "README.md", "CONTRIBUTING.md", "examples/"]
 # The canon.erclx.dev landing page: its own Astro config, its own manual

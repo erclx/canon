@@ -30,6 +30,14 @@ export interface Manifest {
    * gitignore entries.
    */
   readonly onlyConfigs?: readonly string[]
+  /**
+   * The command that creates a fresh project for this stack, from `[stack]
+   * scaffold`, with `{{name}}` standing for the project folder. Unset on a
+   * layer stack, which scaffolds nothing of its own.
+   */
+  readonly scaffold?: string
+  /** Post-scaffold setup `canon tooling verify` runs ahead of Sync. */
+  readonly prepare?: string
 }
 
 export interface ChainOptions {
@@ -134,6 +142,8 @@ export function loadManifest(
     typeof stackTable.extends === 'string' ? stackTable.extends : ''
   const scriptsTable = asTable(parsed.scripts)
   const perRoot = readStrings(asTable(parsed.sync).per_root)
+  const scaffold = readString(stackTable.scaffold)
+  const prepare = readString(asTable(parsed.verify).prepare)
   const dir = join(toolingDir(root), stack)
 
   return {
@@ -147,6 +157,8 @@ export function loadManifest(
     gitignore: readGitignoreSections(asTable(parsed.gitignore)),
     devPackages: readDevPackages(parsed.dependencies),
     ...(perRoot.length > 0 ? { perRoot } : {}),
+    ...(scaffold !== undefined ? { scaffold } : {}),
+    ...(prepare !== undefined ? { prepare } : {}),
   }
 }
 
@@ -229,6 +241,10 @@ function readGitignoreSections(
 
 function readDevPackages(dependencies: unknown): string[] {
   return readStrings(asTable(asTable(dependencies).dev).packages)
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : undefined
 }
 
 function readStrings(value: unknown): string[] {

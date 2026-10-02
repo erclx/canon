@@ -13,3 +13,6 @@ scaffold = "mkdir {{name}} && cd {{name}} && composer init -n --name example/{{n
 
 [gitignore]
 "# PHP" = ["vendor/", ".php-cs-fixer.cache", ".phpunit.cache/", ".phpunit.result.cache"]
+
+[verify]
+prepare = "bun init -y && composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit"
