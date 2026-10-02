@@ -14,6 +14,8 @@ import {
   type RuleMatchResult,
   type RuleMeta,
   ruleBullet,
+  type SkillGroup,
+  skillGroups,
 } from './derive'
 
 /**
@@ -39,6 +41,7 @@ interface Skill {
 
 export interface SessionReads {
   readonly skills: readonly Skill[]
+  readonly skillGroups: readonly SkillGroup[]
   readonly standards: number
   readonly commands: readonly string[]
   readonly toolingFiles: number
@@ -116,6 +119,10 @@ export function readSession(): SessionReads {
 
   cached = {
     skills,
+    skillGroups: skillGroups(
+      readRepoFile(root, 'docs/workflow/skill-map.md'),
+      skills.map((skill) => skill.name),
+    ),
     standards: counts.standards,
     commands: commandNamesFromHelp(readCanonText(['--help'])),
     toolingFiles: census.files,

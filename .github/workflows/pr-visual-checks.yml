@@ -20,6 +20,7 @@ on:
       - 'governance/rules/**'
       - 'standards/**'
       - 'claude/skills/**'
+      - 'docs/workflow/skill-map.md'
       - '.github/workflows/deploy-site.yml'
       - 'tooling/web/configs/e2e/**'
   workflow_dispatch:
