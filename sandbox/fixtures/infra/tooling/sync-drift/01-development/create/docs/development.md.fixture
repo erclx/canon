@@ -1,0 +1,12 @@
+---
+title: Development (customized)
+description: User-edited copy
+---
+
+# Development
+
+Local dev workflow for this project.
+
+## Setup
+
+- Install dependencies with `bun install`.

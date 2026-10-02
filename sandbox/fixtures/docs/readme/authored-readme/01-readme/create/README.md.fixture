@@ -1,0 +1,15 @@
+# Sample CLI
+
+A command-line tool for doing the sample thing.
+
+## Installation
+
+    npm install -g sample-cli
+
+## Usage
+
+    sample-cli run
+
+## Support
+
+Open an issue for bug reports.

@@ -1,0 +1,7 @@
+{
+  "name": "sample-site",
+  "version": "0.1.0",
+  "description": "A landing page for the sample thing.",
+  "homepage": "https://sample-site.example.com",
+  "dependencies": { "astro": "^5.0.0" }
+}

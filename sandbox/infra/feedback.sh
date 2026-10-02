@@ -35,30 +35,9 @@ stage_setup() {
     local refusal_status=0
     (
       cd install
-      cat <<'REPORT' | bun "$PROJECT_ROOT/src/cli.ts" feedback \
+      bun "$PROJECT_ROOT/src/cli.ts" feedback \
+        <"$(fixture_stage_dir infra feedback refusal stdin)/report.md.fixture" \
         >refusal-stdout.log 2>refusal.log
-## Toolkit feedback
-
-### From project
-
-a sandbox arm
-
-### Surface
-
-CLI, canon feedback
-
-### Observed
-
-A report missing a required field was written to disk anyway.
-
-### Expected
-
-The command refuses and names the field.
-
-### Repro
-
-Pipe this block to canon feedback.
-REPORT
     ) || refusal_status=$?
     printf '%s\n' "$refusal_status" >install/refusal-status.txt
     # Byte count rather than the stream, because an assertion cannot pattern

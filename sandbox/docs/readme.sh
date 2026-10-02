@@ -10,26 +10,12 @@ stage_setup() {
 
   mkdir -p src
 
-  cat <<'EOF' >package.json
-{
-  "name": "sample-cli",
-  "version": "0.1.0",
-  "bin": { "sample-cli": "./src/cli.js" }
-}
-EOF
+  stage_fixtures docs readme shared package
 
   case "$SELECTED_OPTION" in
   "web-project")
     mkdir -p public
-    cat <<'EOF' >package.json
-{
-  "name": "sample-site",
-  "version": "0.1.0",
-  "description": "A landing page for the sample thing.",
-  "homepage": "https://sample-site.example.com",
-  "dependencies": { "astro": "^5.0.0" }
-}
-EOF
+    stage_fixtures docs readme web-project 01-site-package
     printf '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="30"/></svg>\n' >public/logo.svg
     printf '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="#eee"/></svg>\n' >public/screenshot.svg
     git add . && git commit -m "chore: seed a site project with a mark and a product image" -q
@@ -48,17 +34,7 @@ EOF
     ;;
 
   "scaffold-readme")
-    cat <<'EOF' >README.md
-This is a sample project bootstrapped with a generator.
-
-## Getting Started
-
-Run the dev server.
-
-## Learn More
-
-See the generator's own docs.
-EOF
+    stage_fixtures docs readme scaffold-readme 01-readme
     git add . && git commit -m "chore: seed a scaffold-written README" -q
     log_step "Scenario ready: README is unedited scaffold output"
     log_info "Context: README.md carries no H1 and only the generator's own headings"
@@ -67,23 +43,7 @@ EOF
     ;;
 
   "authored-readme")
-    cat <<'EOF' >README.md
-# Sample CLI
-
-A command-line tool for doing the sample thing.
-
-## Installation
-
-    npm install -g sample-cli
-
-## Usage
-
-    sample-cli run
-
-## Support
-
-Open an issue for bug reports.
-EOF
+    stage_fixtures docs readme authored-readme 01-readme
     git add . && git commit -m "chore: seed an authored README" -q
     log_step "Scenario ready: README is already authored"
     log_info "Context: README.md carries an H1 naming the project"

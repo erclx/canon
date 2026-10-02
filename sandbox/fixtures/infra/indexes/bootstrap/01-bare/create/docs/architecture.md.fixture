@@ -1,0 +1,7 @@
+# Architecture
+
+System boundaries and module responsibilities for the sample project. Defines how the API gateway forwards requests to the worker pool and where state persists.
+
+## Sections
+
+Body content for the architecture doc goes here.

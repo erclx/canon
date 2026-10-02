@@ -1,0 +1,7 @@
+import { start } from "../server";
+
+describe("server", () => {
+  it("starts without error", () => {
+    expect(() => start()).not.toThrow();
+  });
+});

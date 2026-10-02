@@ -1,0 +1,12 @@
+---
+title: Claude Code hooks
+description: Event hooks, configuration, and behavior control
+---
+
+# Claude Code hooks
+
+Hooks are shell commands that run in response to Claude Code events. The harness executes them, not Claude. Source: Anthropic, in the [Claude Code docs](https://code.claude.com/docs).
+
+## Events
+
+`PreToolUse` fires before a tool runs and can block it. `PostToolUse` fires after one succeeds.

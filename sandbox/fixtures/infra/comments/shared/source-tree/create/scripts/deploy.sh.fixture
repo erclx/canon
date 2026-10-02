@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+# The remote rejects a push older than the tag, so fetch first.
+git fetch --tags
+git push

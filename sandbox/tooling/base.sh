@@ -4,14 +4,7 @@ set -o pipefail
 
 stage_setup() {
   log_step "Initializing package"
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-base-tooling",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures tooling base shared package
   log_info "package.json created"
 
   bun "$PROJECT_ROOT/src/cli.ts" tooling inject base . --nested

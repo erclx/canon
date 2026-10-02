@@ -1,0 +1,9 @@
+/**
+ * A doc block recording why this boundary exists.
+ */
+export function alpha(): void {}
+
+// An inline comment holding a decision the code cannot carry.
+export const RETRIES = 3
+
+const endpoint = 'https://example.com//health'

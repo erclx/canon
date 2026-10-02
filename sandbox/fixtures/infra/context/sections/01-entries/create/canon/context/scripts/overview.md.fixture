@@ -1,0 +1,10 @@
+---
+title: Overview
+description: Structure of the scripts domain
+---
+
+# Overview
+
+## Layout
+
+- `scripts/lib/` owns shared bash functions sourced by domain scripts

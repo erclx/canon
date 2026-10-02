@@ -35,21 +35,7 @@ ENTRY
 }
 
 seed_folder() {
-  mkdir -p canon/context
-
-  cat <<'INDEX' >canon/context/index.md
----
-title: Context
-subtitle: Per-domain narrative loaded on demand
----
-
-# Context
-
-Per-domain narrative loaded on demand
-
-- [API](api.md): HTTP layer structure and request validation
-- [Web](web.md): Client rendering and routing
-INDEX
+  stage_fixtures infra context shared folder
 
   write_entry canon/context/api.md API
   write_entry canon/context/web.md Web
@@ -79,16 +65,7 @@ seed_stale_citation() {
 seed_illustrations() {
   mkdir -p docs sandbox/infra
 
-  cat <<'STANDARD' >docs/prose.md
-# Prose
-
-A reference is written as inline code.
-
-```markdown
-Bad: See [canon/context/retrieval.md](canon/context/retrieval.md) for the flow.
-Good: See `canon/context/retrieval.md` for the flow.
-```
-STANDARD
+  stage_fixtures infra context illustration 01-prose
 
   printf 'One `%s` per domain. <!-- audit-ignore-citations -->\n' \
     'canon/context/<domain>.md' >docs/layout.md
@@ -138,91 +115,7 @@ seed_drift() {
 # arm seeding only the first would pass while both halves of the unit rule went
 # unmeasured.
 seed_short_sections() {
-  mkdir -p canon/context/scripts
-
-  cat <<'INDEX' >canon/context/index.md
----
-title: Context
-subtitle: Per-domain narrative loaded on demand
----
-
-# Context
-
-Per-domain narrative loaded on demand
-
-- [CI](ci.md): An entry declaring both required sections
-- [Short](short.md): An entry declaring neither required section
-INDEX
-
-  cat <<'ENTRY' >canon/context/ci.md
----
-title: CI
-description: An entry declaring both required sections
----
-
-# CI
-
-## Overview
-
-Owns the workflow that gates a merge.
-
-## Layout
-
-- `.github/workflows/` owns the workflow definitions
-ENTRY
-
-  cat <<'ENTRY' >canon/context/short.md
----
-title: Short
-description: An entry declaring neither required section
----
-
-# Short
-
-## Triggers
-
-On every push to a pull request.
-ENTRY
-
-  cat <<'INDEX' >canon/context/scripts/index.md
----
-title: Scripts
-subtitle: Bash entry points and the shared lib surface
----
-
-# Scripts
-
-Bash entry points and the shared lib surface
-
-- [Overview](overview.md): Structure of the scripts domain
-- [Lib](lib.md): Shared functions sourced by domain scripts
-INDEX
-
-  cat <<'ENTRY' >canon/context/scripts/overview.md
----
-title: Overview
-description: Structure of the scripts domain
----
-
-# Overview
-
-## Layout
-
-- `scripts/lib/` owns shared bash functions sourced by domain scripts
-ENTRY
-
-  cat <<'ENTRY' >canon/context/scripts/lib.md
----
-title: Lib
-description: Shared functions sourced by domain scripts
----
-
-# Lib
-
-## Decisions
-
-Each lib file owns one concern.
-ENTRY
+  stage_fixtures infra context sections 01-entries
 }
 
 run_audit() {

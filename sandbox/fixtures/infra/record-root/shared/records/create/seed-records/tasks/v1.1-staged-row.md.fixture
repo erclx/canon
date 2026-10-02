@@ -1,0 +1,18 @@
+---
+title: 'v1.1: A staged row'
+description: One line on what this task achieves
+---
+
+# v1.1: A staged row
+
+Plan: [../plans/archive/feature-shipped-row.md](../plans/archive/feature-shipped-row.md)
+
+Pull request: #1
+
+## Outcomes
+
+- [x] Outcome: it shipped
+
+## Findings
+
+- A note.

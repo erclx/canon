@@ -1,0 +1,12 @@
+---
+title: Docs
+subtitle: One-line reference for each doc in this folder.
+---
+
+# Docs
+
+One-line reference for each doc in this folder.
+
+## Sub-catalogs
+
+- [Agents](agents/index.md): CLI catalog and invocation rules for agents, split by command domain. Start with overview.

@@ -48,18 +48,7 @@ stage_setup() {
   mkdir -p regen/internal/rules/claude regen/.claude/rules/canon/claude
   cp -R "$PROJECT_ROOT/governance" regen/governance
 
-  cat >regen/internal/governance.toml <<'TOML'
-stack = "node"
-add = ["300-testing-ts"]
-TOML
-
-  cat >regen/internal/rules/claude/599-sandbox-local.md <<'RULE'
-# Sandbox-local rule
-
-## Authority
-
-- Authored under `internal/rules/`, so it reaches this repository and no target.
-RULE
+  stage_fixtures infra gov shared regen
 
   # A destination-only file the regen must delete, and a drifted copy it must
   # overwrite. Together they are the before state the run is judged against.

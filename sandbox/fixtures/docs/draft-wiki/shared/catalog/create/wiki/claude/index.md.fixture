@@ -1,0 +1,10 @@
+---
+title: Claude
+subtitle: Claude Code features and the adjacent Anthropic products, one page per subject Anthropic owns.
+---
+
+# Claude
+
+Claude Code features and the adjacent Anthropic products, one page per subject Anthropic owns.
+
+- [Claude Code hooks](hooks.md): Event hooks, configuration, and behavior control

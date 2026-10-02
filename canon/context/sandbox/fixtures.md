@@ -22,9 +22,24 @@ stage_fixtures claude task-board archive 02-rate-limit
 - Each stage splits into two optional subfolders. `create/` copies files in, making parent directories and overwriting what is there. `append/` concatenates onto a file the anchor or the injected seeds already provide, and fails when the target is missing, because an absent target means the upstream shape changed and the scenario's assumption is stale.
 - Every stored file carries a `.fixture` suffix the helper strips on copy. The suffix keeps the repository's own checks off the content: `canon indexes regen`, prettier, `shfmt`, and `shellcheck` all skip it. Without it, a fixture that deliberately drifts from its sibling frontmatter gets normalized by `bun run check` and the state it models disappears.
 
-### Single-arm scenarios stage inline
+### Content a scenario stages for every arm
 
-`stage_fixtures` takes four segments ending in an arm name, and a scenario with one unnamed arm has no segment to pass. `claude/review-branch`, `claude/write-human`, and `claude/session-map` stage their tree from heredocs inside `stage_setup`, and their fixture folder holds `expect.toml` alone. Naming the arm to recover the helper moves the declaration under that name too, so `canon sandbox check <category>:<command>` with no arm then asserts nothing and reports a clean run.
+`stage_fixtures` takes four segments ending in an arm name, and a scenario with one unnamed arm has no segment to pass. Naming the arm to recover the helper moves the declaration under that name too, so `canon sandbox check <category>:<command>` with no arm then asserts nothing and reports a clean run.
+
+The `shared` folder answers both cases. It sits beside the arm folders and holds a stage that more than one arm reaches, or that a scenario with no arm names stages for its only run. A scenario calls it as `stage_fixtures infra indexes shared folder`, with the four-segment call unchanged. `armsFor` in `src/sandbox/coverage.ts` counts a folder as an arm only when it carries an `expect.toml`, and `shared` carries none, so it never reads as an arm and a default arm's `expect.toml` stays at the scenario level.
+
+A seed function one arm calls stores its stage under that arm. One several arms call stores its stage once under `shared/<helper>`, and an arm that adds to the result stages its own folder after the call, so no near-duplicate file appears. `infra/indexes` is the worked case, where `seed_nested_folder` calls `seed_folder` and then stages `nested/01-guides`.
+
+### What leaves a scenario and what stays
+
+A heredoc with a quoted delimiter is a literal body, so it leaves the scenario and becomes a stored file that arrives byte for byte, `${`, backticks, and `$(` included. These stay inline:
+
+- An unquoted heredoc, which interpolates. `write_entry` in `infra/context.sh` fills in a title, and a substitution step in the helper would be harness behavior for two call sites.
+- A `chmod`, since `cp` carries the stored file's mode and a `.fixture` suffix on an executable file reads as a shell file nobody can lint.
+- A body fed to a command's stdin rather than written to a path. `infra/feedback.sh` reads `refusal/stdin/report.md.fixture` through `fixture_stage_dir`, so the staged tree gains no file.
+- A body whose path interpolates a root. `infra/record-root.sh` stores its records under a neutral `seed-records/` folder and moves them to the root the arm names, which keeps a stored `.canon/` path out of the ignore rule and a stored `.claude/` path from pinning the fallback.
+
+`claude/review-branch`, `claude/write-human`, and `claude/session-map` still stage from heredocs inside `stage_setup`, and the rest of `claude` and all of `git` move in later slices.
 
 ### The anchor tree
 
@@ -63,5 +78,6 @@ Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/
 ### Matching a real install
 
 - An injector that reproduces by hand what a real CLI verb installs drifts silently. The cheap proof is running the verb into a scratch target and diffing the two trees. Where the artifact is a git repository, diff `git ls-files -s` for modes and blob hashes, the commit subjects in order, the checked-out branch, and `git status --porcelain`, since commit SHAs carry timestamps that never match.
+- A before and after provisioning diff of the scenarios needs a baseline checkout with history, since `infra:drift unclaimed` reads deleted paths through `pick_dropped_root` and fails with no dropped root on a one-commit copy. Mask the run id in `canon/config/config.json`, the nested repositories under `.git/`, and the captured `*-record.json` and `*-frame.log` files, which differ between two runs of one commit.
 - Running the genuine CLI is not enough on its own, since a fixture that skips a domain measures a project shape nobody ships. An eval arm installing seeds without governance confounds a finding about a routing rule the missing rules would have carried.
 - A fixture staging drift against an installed `CLAUDE.md` cannot assume the toolkit's commit history is reachable. `seed-sync` goes through the `canon` on PATH, a global install carrying no history, so `historyUnavailable` reads true and a `drifted` file always falls to the skill's appearance heuristic. Expect a one-word change inside an otherwise original sentence to propose an Update rather than read as Customized.

@@ -1,0 +1,14 @@
+# Code comment standards
+
+## Comments
+
+- Comment what the code cannot say.
+
+## Degradation vocabulary
+
+- Markers: `FIXED`, `BUGFIX`, `HACK`, `XXX`, `TODO`, `FIXME`
+- Prose: `previously`, `used to`, `workaround`
+
+## Density
+
+- Report density as an output. Do not set a target.

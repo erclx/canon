@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+# One real comment, recording why the fixture is inline.
+stage_setup() {
+  cat <<'INNER' >README.md
+# API Server
+
+## Configuration
+
+### Ports
+
+# Still a heading, not a comment
+INNER
+
+  echo provisioned
+}
