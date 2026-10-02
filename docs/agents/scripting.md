@@ -79,9 +79,6 @@ surface is in `skills-audit.md`.
 ## Non-interactive examples
 
 ```bash
-# Create a new tooling stack
-CANON_NON_INTERACTIVE=1 canon tooling create astro
-
 # Report what a stack would change, writing nothing
 CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
 

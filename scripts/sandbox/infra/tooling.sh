@@ -26,10 +26,9 @@ EOF
   log_info "reference   : prints a stack's reference doc, nothing written"
   log_info "reference-stale: an old installed copy sits in .claude/tooling/; the verb ignores it and sync leaves it alone"
   log_info "monorepo    : base at root, subtree synced with --skip base; only one .husky expected"
-  log_info "create      : creates a new stack stub"
   log_info "list        : read-only catalog dump, no target needed"
 
-  select_or_route_scenario "Which scenario?" "sync" "sync-drift" "sync-headless" "reference" "reference-stale" "monorepo" "create" "list"
+  select_or_route_scenario "Which scenario?" "sync" "sync-drift" "sync-headless" "reference" "reference-stale" "monorepo" "list"
 
   case "$SELECTED_OPTION" in
   "sync")
@@ -110,10 +109,6 @@ EOF
     log_info "Expected: only the root .husky exists, no frontend/.husky."
     log_info "Expected: .github/ is withheld and named with 'working-directory: frontend', and frontend/cspell.json lands."
     exec bun "$PROJECT_ROOT/src/cli.ts" tooling sync vite-react ./frontend --skip base
-    ;;
-  "create")
-    log_step "Running: canon tooling create"
-    exec "$PROJECT_ROOT/scripts/tooling/create.sh"
     ;;
   "list")
     log_step "Running: canon tooling list"

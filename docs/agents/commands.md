@@ -85,7 +85,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `targets`, in `targets.md`: `list`, `pulls`
 - `gov`, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `test-order`, `counts`, `superseded`, `citations`, `restated`
 - `standards`, in `standards-audit.md`: `list`, `audit`, `<name>`
-- `tooling`, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `create`, `verify`, `inject`, `prune-gitignore`
+- `tooling`, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `verify`, `inject`, `prune-gitignore`
 - `claude`, in `skills-audit.md`: `init`, `sync`, `setup`, `routing`, `plugin-update`, `seeds list`, `skills list`, `skills audit`, `skills drift`, `skills reach`, `skills rank`
 - `wiki`, in `scripting.md`: `init`
 - `indexes`, in `indexes.md`: `regen`, `list`
