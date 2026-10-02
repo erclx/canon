@@ -26,7 +26,7 @@ rather than inside it, so the two passes finish on their own clocks.
 
 ## Step 1: resolve the pull request
 
-Resolve the number with `gh pr view --json number,headRefName,headRefOid`, or take the one the launch names. Take `<head>` off `canon pr head <number> --json`, reading its `tip`, and fall back to `headRefOid` when no record comes back. The first seven characters are `<short-sha>`.
+Resolve the number with `gh pr view --json number,headRefName,headRefOid`, or take the one the launch names. Take `<head>` off `canon pr head <number> --json`, reading its `tip`, and fall back to `headRefOid` when no record comes back. The first seven characters are `<short-sha>`. Record `<pass>` once, as the instant this pass starts, with `date -u +%Y%m%dT%H%M%SZ`. Every frame Step 5 pushes files under it, so a later pass at the same head never replaces an image this one's comment shows.
 
 Read the newest UI verdict for the head guard:
 
@@ -89,7 +89,7 @@ Never judge a box ending in `(taste)`. Drive to the state, capture the frame, an
 A frame the verdict rests on is published only when the worker's evidence lacks it. Compare the box's route, width, and theme against the `states` Step 2 kept, and when a state and stem show the same thing, cite that stem and push nothing. The match is this pass's judgment over the box's wording, so the verb never makes it. Otherwise push the frame and keep the `link` the record returns:
 
 ```bash
-canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --json
+canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --pass <pass> --json
 ```
 
 Push only a frame of the address this pass drove, since the branch is as public as the repository. Branch on `reason` rather than on the exit code. Every reason but `ok` is a refusal, `read-only` among them on a fork's token, so describe that frame in words and name the reason in its evidence rather than failing the pass.

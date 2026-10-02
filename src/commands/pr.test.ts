@@ -691,6 +691,27 @@ describe('canon pr evidence reads the pull request', () => {
     expect(countEvidenceCases(String(record.body))).toBe(2)
   })
 
+  it('should report each evidence state with its stems on the ok record', async () => {
+    writeFixture(
+      'files.tsv',
+      'added\tevidence/dark/hero.png\nmodified\tevidence/dark/nav.png\n',
+    )
+    writeFixture('head', 'deadbeef')
+    writeFixture('merge-base', 'cafe01')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.states).toEqual([
+      {
+        state: 'dark',
+        items: [
+          { path: 'evidence/dark/hero.png', stem: 'hero', added: true },
+          { path: 'evidence/dark/nav.png', stem: 'nav', added: false },
+        ],
+      },
+    ])
+  })
+
   it('should pin every image link to the head the pull request reports', async () => {
     writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
     writeFixture('head', 'deadbeef')
@@ -1201,6 +1222,8 @@ describe('canon pr frames', () => {
       '1',
       '--head',
       'abc1234',
+      '--pass',
+      '20261002T154450Z',
     ]
   }
 
@@ -1250,6 +1273,39 @@ describe('canon pr frames', () => {
     const outcome = await runFrames(['7', '--add', 'box-1.png'])
 
     expect(outcome.record.reason).toBe('bad-box')
+  })
+
+  it('should refuse as bad-head without calling gh when --head names no commit', async () => {
+    const outcome = await runFrames([...addArgs('box-1.png'), '--head', 'main'])
+
+    expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+      reason: 'bad-head',
+      calls: [],
+    })
+  })
+
+  it('should refuse as bad-pass when --add carries no pass stamp', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--box',
+      '1',
+      '--head',
+      'abc1234',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-pass')
+  })
+
+  it('should refuse as bad-pass when the stamp is not compact UTC', async () => {
+    const outcome = await runFrames([
+      ...addArgs('box-1.png'),
+      '--pass',
+      '2026-10-02T15:44:50Z',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-pass')
   })
 
   it('should refuse as bad-days when --prune is not a positive number', async () => {
@@ -1317,6 +1373,8 @@ describe('canon pr frames', () => {
         'unreadable-tip',
         'push-failed',
         'ref-conflict',
+        'bad-head',
+        'bad-pass',
       ].filter((reason) => !result.stdout.includes(reason)),
     ).toEqual([])
   })

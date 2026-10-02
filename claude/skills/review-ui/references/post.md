@@ -44,7 +44,7 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 <!-- review-ui: head=<head> -->
 ```
 
-An Evidence cell resting on a frame takes one of three forms. A frame Step 5 pushed embeds as `![](<link>)`, with the link exactly as `canon pr frames` returned it, pinned to the commit the push made rather than to the branch. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
+An Evidence cell resting on a frame takes one of three forms. A frame Step 5 pushed embeds as `![](<link>)`, with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
 
 A pass where every box needs eyes and nothing else is owed takes the closed heading:
 

@@ -1,12 +1,17 @@
 import { readFile } from 'node:fs/promises'
 
-/** The branch holding review frames. It never merges, so nothing on it reaches a checkout. */
+/** The branch holding review frames. It never merges into a branch anyone checks out. */
 export const FRAMES_BRANCH = 'canon-frames'
 
 /** The eight bytes every PNG opens with. A frame that lacks them embeds as a broken image. */
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 
 const SHORT_HEAD_LENGTH = 7
+
+const HEAD_PATTERN = /^[0-9a-f]{7,40}$/
+
+/** A compact UTC instant such as `20261002T154450Z`, the form `date -u +%Y%m%dT%H%M%SZ` prints. */
+const PASS_PATTERN = /^\d{8}T\d{6}Z$/
 
 /** How many times an add rebuilds on a tip another writer moved. */
 const ADD_ATTEMPTS = 3
@@ -64,6 +69,7 @@ export type FramesRefusal = 'unreadable-tip' | 'push-failed' | 'ref-conflict'
 export interface FrameInput {
   readonly number: number
   readonly head: string
+  readonly pass: string
   readonly box: number
   readonly bytes: Uint8Array
 }
@@ -97,14 +103,40 @@ export type PruneResult =
     }
   | { readonly kind: 'refused'; readonly reason: FramesRefusal }
 
-export function framePath(number: number, head: string, box: number): string {
-  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/box-${box}.png`
+/** Whether a value names a commit, so a branch name or a path never becomes a folder. */
+export function isFrameHead(head: string): boolean {
+  return HEAD_PATTERN.test(head)
 }
 
-// The same blob form `canon pr evidence` embeds, which a private repository's
-// browser can open where the raw host serves nothing.
-export function frameLink(repo: string, commit: string, path: string): string {
-  return `https://github.com/${repo}/blob/${commit}/${path}?raw=true`
+/** Whether a value is a compact UTC stamp, the only pass segment the path takes. */
+export function isFramePass(pass: string): boolean {
+  return PASS_PATTERN.test(pass)
+}
+
+/**
+ * Where a frame lands. The pass segment keeps a second pass at the same head
+ * and box from replacing the image an earlier review comment shows, since a
+ * branch-path link reads whatever the path holds now.
+ */
+export function framePath(
+  number: number,
+  head: string,
+  pass: string,
+  box: number,
+): string {
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/box-${box}.png`
+}
+
+/**
+ * The embed link, by branch path rather than by commit. Every drop rewrites
+ * the branch, so a commit-pinned link to another pull request's frame would
+ * stop resolving once GitHub collects the commit, while a path link lives
+ * exactly as long as its file. The blob form is the one `canon pr evidence`
+ * embeds, which a private repository's browser can open where the raw host
+ * serves nothing.
+ */
+export function frameLink(repo: string, path: string): string {
+  return `https://github.com/${repo}/blob/${FRAMES_BRANCH}/${path}?raw=true`
 }
 
 /** The frame's bytes, or undefined when the file is absent, empty, or not a PNG. */
@@ -128,7 +160,7 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path = framePath(input.number, input.head, input.box)
+  const path = framePath(input.number, input.head, input.pass, input.box)
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }

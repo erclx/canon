@@ -42,6 +42,8 @@ import {
   type FramesApi,
   type FramesRefusal,
   frameLink,
+  isFrameHead,
+  isFramePass,
   pruneFrames,
   pushFrame,
   readFrame,
@@ -131,6 +133,7 @@ interface FramesOptions extends ReadOptions {
   readonly add?: string
   readonly box?: string
   readonly head?: string
+  readonly pass?: string
   readonly drop?: boolean
   readonly prune?: string
 }
@@ -140,6 +143,8 @@ type FramesCommandRefusal =
   | 'bad-mode'
   | 'no-number'
   | 'bad-box'
+  | 'bad-head'
+  | 'bad-pass'
   | 'bad-days'
   | 'unreadable-frame'
   | 'read-only'
@@ -154,6 +159,10 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
     '--add and --drop write for one pull request, so name its number.',
   'bad-box':
     '--add takes --box <n>, a positive whole number naming the checklist box.',
+  'bad-head':
+    '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
+  'bad-pass':
+    '--add takes --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
   'bad-days': '--prune takes a positive whole number of days.',
   'unreadable-frame':
     'The file named by --add is missing, empty, or not a PNG, so it would embed as a broken image. Nothing is pushed.',
@@ -715,7 +724,7 @@ export function register(program: Command): void {
 
   pr.command('frames')
     .description(
-      `Push a UI review frame to the never-merged ${FRAMES_BRANCH} branch and return its commit-pinned link, or drop frames from it`,
+      `Push a UI review frame to the never-merged ${FRAMES_BRANCH} branch and return its embed link, or drop frames from it`,
     )
     .argument(
       '[number]',
@@ -730,6 +739,10 @@ export function register(program: Command): void {
       '--head <sha>',
       "The head the frame was driven at, with --add, defaulting to the pull request's",
     )
+    .option(
+      '--pass <stamp>',
+      'The instant the pass started, in compact UTC such as 20261002T154450Z, with --add',
+    )
     .option('--drop', "Rewrite the branch without this pull request's frames")
     .option(
       '--prune <days>',
@@ -741,9 +754,11 @@ export function register(program: Command): void {
         '',
         `Writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
         'so nothing is checked out and no other branch is touched. A frame lands',
-        'at pr-<number>/<short-head>/box-<n>.png, and `link` is pinned to the',
-        'commit the push made, so it keeps showing that frame after the branch',
-        'moves. The first --add creates the branch.',
+        'at pr-<number>/<short-head>/<pass>/box-<n>.png, and `link` names that',
+        `path on ${FRAMES_BRANCH}, so it survives a rewrite that drops other pull`,
+        'requests and resolves until its own pull request is dropped. The pass',
+        'segment keeps a second pass at one head and box from replacing an image',
+        'an earlier comment shows. The first --add creates the branch.',
         '',
         '--drop and --prune write one root commit and force-move the ref,',
         'since a delete commit would keep every image reachable through history.',
@@ -756,6 +771,8 @@ export function register(program: Command): void {
         '  bad-mode          not exactly one of --add, --drop, --prune',
         '  no-number         --add or --drop named no pull request',
         '  bad-box           --add without a positive --box',
+        '  bad-head          --head is not 7 to 40 lowercase hex characters',
+        '  bad-pass          --add without a compact UTC --pass stamp',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
         '  read-only         GitHub refused the write, as on a fork token',
@@ -771,7 +788,7 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'Examples:',
-        '  canon pr frames 1341 --add frames/3.png --box 3 --json',
+        '  canon pr frames 1341 --add frames/3.png --box 3 --pass 20261002T154450Z --json',
         '  canon pr frames 1341 --drop --json',
         '  canon pr frames --prune 30 --json',
         '',
@@ -2504,6 +2521,13 @@ function framesArgumentRefusal(
   ) {
     return 'bad-box'
   }
+  if (opts.head !== undefined && !isFrameHead(opts.head)) return 'bad-head'
+  if (
+    opts.add !== undefined &&
+    (opts.pass === undefined || !isFramePass(opts.pass))
+  ) {
+    return 'bad-pass'
+  }
   return undefined
 }
 
@@ -2598,21 +2622,25 @@ async function runFrames(
     head = identity.identity.head
   }
   if (head === undefined || head === '') return refuseFrames('no-object-head')
+  if (!isFrameHead(head)) return refuseFrames('bad-head')
 
   const box = Number(opts.box)
+  const pass = opts.pass ?? ''
   const result = await pushFrame(api, {
     number: pull,
     head,
+    pass,
     box,
     bytes: bytes ?? new Uint8Array(),
   })
   if (result.kind === 'refused') return refuseWrite(result.reason)
-  const link = frameLink(repo, result.commit, result.path)
+  const link = frameLink(repo, result.path)
   return finish(
     {
       number: pull,
       box,
       head,
+      pass,
       path: result.path,
       commit: result.commit,
       link,

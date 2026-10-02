@@ -4,9 +4,12 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   dropFrames,
+  type FrameInput,
   type FramesApi,
   frameLink,
   framePath,
+  isFrameHead,
+  isFramePass,
   type PullClosure,
   pruneFrames,
   pushFrame,
@@ -17,6 +20,7 @@ import {
 const DAY_MS = 86_400_000
 const NOW = new Date('2026-10-02T12:00:00Z')
 const HEAD = 'abcdef0123456789abcdef0123456789abcdef01'
+const PASS = '20261002T154450Z'
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1])
 
 interface FakeCommit {
@@ -175,21 +179,52 @@ function closedDaysAgo(days: number): PullClosure {
   }
 }
 
-describe('framePath', () => {
-  it('should place a frame under the pull request, the short head, and the box', () => {
-    const path = framePath(12, HEAD, 3)
+function frame(number: number, box: number, pass = PASS): FrameInput {
+  return { number, head: HEAD, pass, box, bytes: PNG }
+}
 
-    expect(path).toBe('pr-12/abcdef0/box-3.png')
+describe('framePath', () => {
+  it('should place a frame under the pull request, the short head, the pass, and the box', () => {
+    const path = framePath(12, HEAD, PASS, 3)
+
+    expect(path).toBe(`pr-12/abcdef0/${PASS}/box-3.png`)
   })
 })
 
 describe('frameLink', () => {
-  it('should pin the link to the commit in the blob form', () => {
-    const link = frameLink('o/r', 'c0ffee', 'pr-12/abcdef0/box-3.png')
+  it('should link by the frames branch path in the blob form', () => {
+    const link = frameLink('o/r', 'pr-12/abcdef0/x/box-3.png')
 
     expect(link).toBe(
-      'https://github.com/o/r/blob/c0ffee/pr-12/abcdef0/box-3.png?raw=true',
+      'https://github.com/o/r/blob/canon-frames/pr-12/abcdef0/x/box-3.png?raw=true',
     )
+  })
+})
+
+describe('isFrameHead', () => {
+  it('should accept a short and a full lowercase sha', () => {
+    expect([isFrameHead('abc1234'), isFrameHead(HEAD)]).toEqual([true, true])
+  })
+
+  it('should refuse a branch name, a path, and a six-character prefix', () => {
+    expect([
+      isFrameHead('main'),
+      isFrameHead('abc1234/x'),
+      isFrameHead('abc123'),
+    ]).toEqual([false, false, false])
+  })
+})
+
+describe('isFramePass', () => {
+  it('should accept a compact UTC stamp', () => {
+    expect(isFramePass(PASS)).toBe(true)
+  })
+
+  it('should refuse an extended ISO stamp and a path', () => {
+    expect([isFramePass('2026-10-02T15:44:50Z'), isFramePass('../x')]).toEqual([
+      false,
+      false,
+    ])
   })
 })
 
@@ -197,12 +232,7 @@ describe('pushFrame', () => {
   it('should create a missing branch with a root commit holding the frame', async () => {
     const fake = fakeApi()
 
-    const result = await pushFrame(fake.api, {
-      number: 12,
-      head: HEAD,
-      box: 1,
-      bytes: PNG,
-    })
+    const result = await pushFrame(fake.api, frame(12, 1))
 
     expect({
       result,
@@ -210,7 +240,7 @@ describe('pushFrame', () => {
       parents: fake.parentsAtTip(),
     }).toEqual({
       result: expect.objectContaining({ kind: 'pushed', created: true }),
-      files: ['pr-12/abcdef0/box-1.png'],
+      files: [`pr-12/abcdef0/${PASS}/box-1.png`],
       parents: [],
     })
   })
@@ -219,17 +249,12 @@ describe('pushFrame', () => {
     const fake = fakeApi()
     fake.seed(['pr-3/1234567/box-1.png'])
 
-    const result = await pushFrame(fake.api, {
-      number: 12,
-      head: HEAD,
-      box: 2,
-      bytes: PNG,
-    })
+    const result = await pushFrame(fake.api, frame(12, 2))
 
     expect(result).toEqual({
       kind: 'pushed',
       commit: fake.state.ref,
-      path: 'pr-12/abcdef0/box-2.png',
+      path: `pr-12/abcdef0/${PASS}/box-2.png`,
       created: false,
     })
   })
@@ -238,11 +263,23 @@ describe('pushFrame', () => {
     const fake = fakeApi()
     fake.seed(['pr-3/1234567/box-1.png'])
 
-    await pushFrame(fake.api, { number: 12, head: HEAD, box: 2, bytes: PNG })
+    await pushFrame(fake.api, frame(12, 2))
 
     expect(fake.filesAtTip()).toEqual([
-      'pr-12/abcdef0/box-2.png',
+      `pr-12/abcdef0/${PASS}/box-2.png`,
       'pr-3/1234567/box-1.png',
+    ])
+  })
+
+  it('should keep the first pass frame when a second pass drives the same head and box', async () => {
+    const fake = fakeApi()
+    await pushFrame(fake.api, frame(12, 2))
+
+    await pushFrame(fake.api, frame(12, 2, '20261002T170000Z'))
+
+    expect(fake.filesAtTip()).toEqual([
+      `pr-12/abcdef0/${PASS}/box-2.png`,
+      'pr-12/abcdef0/20261002T170000Z/box-2.png',
     ])
   })
 
@@ -251,10 +288,10 @@ describe('pushFrame', () => {
     fake.seed(['pr-3/1234567/box-1.png'])
     fake.raceOnce(() => fake.landOnTip('pr-4/abcdef0/box-1.png'))
 
-    await pushFrame(fake.api, { number: 12, head: HEAD, box: 2, bytes: PNG })
+    await pushFrame(fake.api, frame(12, 2))
 
     expect(fake.filesAtTip()).toEqual([
-      'pr-12/abcdef0/box-2.png',
+      `pr-12/abcdef0/${PASS}/box-2.png`,
       'pr-3/1234567/box-1.png',
       'pr-4/abcdef0/box-1.png',
     ])
@@ -263,12 +300,7 @@ describe('pushFrame', () => {
   it('should refuse as unreadable-tip when the branch could not be read', async () => {
     const fake = fakeApi({ unreadableTip: true })
 
-    const result = await pushFrame(fake.api, {
-      number: 12,
-      head: HEAD,
-      box: 1,
-      bytes: PNG,
-    })
+    const result = await pushFrame(fake.api, frame(12, 1))
 
     expect(result).toEqual({ kind: 'refused', reason: 'unreadable-tip' })
   })
@@ -276,12 +308,7 @@ describe('pushFrame', () => {
   it('should refuse as push-failed when a write is refused', async () => {
     const fake = fakeApi({ failBlob: true })
 
-    const result = await pushFrame(fake.api, {
-      number: 12,
-      head: HEAD,
-      box: 1,
-      bytes: PNG,
-    })
+    const result = await pushFrame(fake.api, frame(12, 1))
 
     expect(result).toEqual({ kind: 'refused', reason: 'push-failed' })
   })
@@ -300,7 +327,7 @@ describe('dropFrames', () => {
   it('should leave the tip commit with no parent', async () => {
     const fake = fakeApi()
     fake.seed(['pr-12/abcdef0/box-1.png', 'pr-3/1234567/box-1.png'])
-    await pushFrame(fake.api, { number: 3, head: HEAD, box: 2, bytes: PNG })
+    await pushFrame(fake.api, frame(3, 2))
 
     await dropFrames(fake.api, [12])
 
