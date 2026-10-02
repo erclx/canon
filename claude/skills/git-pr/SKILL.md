@@ -152,9 +152,7 @@ The last output line carries `head=` so a caller relaying the number holds a bra
 
 ### Post the rendered-surface evidence
 
-Run this step on every pull request this skill opens or edits. Read `${CLAUDE_SKILL_DIR}/references/evidence.md` for finding the checklist and the local server, posting the evidence comparison, posting the checklist alone, and posting the preview address, each against the `<number>` the final command printed.
-
-Never judge from the diff whether an evidence image changed. The verb answers `no-evidence` for a branch that changed none, and a session cannot see an image it did not author, such as the hero that `bun run check` regenerates as a side effect.
+Run this step on every pull request this skill opens or edits. Read `${CLAUDE_SKILL_DIR}/references/evidence.md` for finding the checklist and the local server, posting the evidence comparison, posting the checklist alone, and posting the preview address, each against the `<number>` the final command printed. Never judge from the diff whether an evidence image changed, since the verb answers `no-evidence` for a branch that changed none and a session cannot see an image it did not author.
 
 ### Record the number on the task
 
