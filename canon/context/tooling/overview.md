@@ -15,8 +15,7 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 - `tooling/<stack>/configs/` owns golden files that always overwrite on sync
 - `tooling/<stack>/seeds/` owns user-owned files that sync preserves
 - `tooling/claude/` owns storage for `canon claude`, excluded from stack discovery
-- `src/tooling/` owns the manifest walk, scan, injection engine, and the reference resolver, in TypeScript
-- `scripts/tooling/` owns the create and verify subcommands, still bash
+- `src/tooling/` owns the manifest walk, scan, injection engine, the reference resolver, and the end-to-end verify, in TypeScript
 
 `canon tooling list` returns every stack with its extends chain and a dependency summary, so this entry carries no stack table. `canon/context/tooling/stacks.md` covers what individual stacks decide, `canon/context/tooling/capture.md` the served port and the capture seed, `canon/context/tooling/manifests.md` the manifest and how layers resolve, `canon/context/tooling/seeds.md` seed ownership and the seed gate, and `canon/context/tooling/testing.md` the end-to-end verify.
 

@@ -39,7 +39,7 @@ A first commit to `evidence/` runs the capture twice with no code change between
 
 ### Where server readiness lives
 
-`scripts/tooling/verify.sh` runs `bun run screenshot` in every scaffolded stack whose `package.json` declares it, being `astro` and `nextjs`, then asserts PNGs landed under `screenshots/`. A capture seed naming one project's selectors therefore fails every other stack's verify unless a selector matching nothing is reported and skipped. `canon tooling verify web` cannot catch that, since `web` carries no scaffold command.
+`canon tooling verify` runs `bun run screenshot` in every scaffolded stack whose `package.json` declares it, being `astro` and `nextjs`, then asserts PNGs landed under `screenshots/`. A capture seed naming one project's selectors therefore fails every other stack's verify unless a selector matching nothing is reported and skipped. `canon tooling verify web` cannot catch that, since `web` carries no scaffold command.
 
 Server readiness stays in `scripts/screenshot.sh` rather than the seed. The wrapper already builds, starts the preview, polls it for ten seconds, and refuses a port already in use, so lifting it into TypeScript rewrites working shell with no defect behind it.
 
