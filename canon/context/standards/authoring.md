@@ -19,7 +19,7 @@ The template outranks the prose where they disagree. An author copies the block,
 
 ## Where the template rule stops
 
-`standards/index.md` is out of scope despite reading as a standard with no template. It is the generated catalog of the folder, rewritten by `scripts/core/regen-indexes.sh`, so a template added there is deleted by the next `bun run check`.
+`standards/index.md` is out of scope despite reading as a standard with no template. It is the generated catalog of the folder, rewritten by `canon indexes regen`, so a template added there is deleted by the next `bun run check`.
 
 `design.md` is the sharpest case for the rule: the token tables carry fixed headers the renderer reads, and a standard that names the shape without spelling those headers verbatim sends an author into `src/design/parse.ts` and `src/design/render.ts` to recover them. The shape rule asks any standard for the headers and labels a tool parses, verbatim, which is the general form of what `design.md` would otherwise leave missing.
 
@@ -39,7 +39,7 @@ A standard states a success criterion, near the top and above the shape rules. S
 
 A standard then changes on a failure rather than on a finding. A finding is that the vendor docs say X or a paper suggests Y, and it goes to the task board as a hypothesis. A failure is an artifact that satisfied every shape rule and still missed the criterion, and it edits the standard. The change cites the failing artifact.
 
-`scripts/eval/` is how a failure gets produced on demand. It extracts a synthetic fixture outside the repo, copies the live standard in, and asks a headless session to author against it. Running outside the repo is load-bearing: a fixture under the repo would load this project's `CLAUDE.md` through the ancestor chain, and the session under test would arrive already knowing what the test is trying to measure. Writes under `.claude/` stay blocked even with `--permission-mode acceptEdits`, so the artifact comes back in the final message and stdout is what gets judged.
+`scripts/eval/` was how a failure got produced on demand, and its results are the record of what that found. The runner extracted a synthetic fixture outside the repo, copied the live standard in, and asked a headless session to author against it. Running outside the repo is load-bearing: a fixture under the repo would load this project's `CLAUDE.md` through the ancestor chain, and the session under test would arrive already knowing what the test is trying to measure. Writes under `.claude/` stay blocked even with `--permission-mode acceptEdits`, so the artifact comes back in the final message and stdout is what gets judged.
 
 `canon standards audit` reads the corpus at `standards/` and reports every filename carrying the success-criterion section against every one that does not, matching either the literal `## Success criterion` heading or the templated `## What a working <document type> looks like` form the standard itself uses. `--arrivals-only` narrows the exit code to a standard new on the current branch, wired into `src/gate/stages.ts` beside the skill-requirement gate whose shape it copies, so gating the whole corpus does not fail every push until every existing standard carries the section. Only an arrival missing it fails.
 

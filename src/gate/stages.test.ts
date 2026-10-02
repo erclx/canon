@@ -19,7 +19,7 @@ describe('the shell stage scope', () => {
   it('should still fire on a script named .sh and on the manifest', () => {
     const scope = scopeOf('shell')
 
-    expect(scope.test('scripts/core/regen-claude-copies.sh')).toBe(true)
+    expect(scope.test('scripts/core/check-skill-paths.sh')).toBe(true)
     expect(scope.test('package.json')).toBe(true)
   })
 

@@ -139,8 +139,8 @@ since a target has no rule source of its own that ships nowhere.
 
 It takes `--root <path>` and defaults to the toolkit root, prints nothing on success, and
 reports the reason on stderr with exit 1 when the record names a stack or rule
-that does not resolve. `scripts/core/regen-claude-copies.sh` calls it, and the
-Consumed copies stage of `bun run check` asserts the result is committed.
+that does not resolve. The Consumed copies stage of `bun run check` calls it and
+asserts the result is committed.
 
 ## Whole-project sync
 

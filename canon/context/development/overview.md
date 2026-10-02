@@ -33,7 +33,6 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 | `bun run format`        | Auto-fix prettier and shfmt formatting.                                                  |
 | `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                        |
 | `bun run update`        | Interactive `bun update` followed by verification.                                       |
-| `bun run snapshot`      | Snapshot project state for diffs.                                                        |
 
 ### What reads the table
 

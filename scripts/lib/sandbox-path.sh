@@ -7,7 +7,7 @@
 # both carry the rule sending shared session scratch to the main worktree root,
 # and nothing decides which root wins. A session picking the toolkit writes its
 # output where no manifest reads it, so the run reports success while the verdict
-# reports no writes at all. `scripts/eval/run.sh` keeps its fixture outside the
+# reports no writes at all. The retired eval runner kept its fixture outside the
 # repository for the same reason.
 #
 # Mints a short random per-run identifier the first time it is asked for, then

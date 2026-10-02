@@ -163,7 +163,11 @@ export const STAGES: readonly Stage[] = [
     id: 'indexes',
     label: 'Indexes',
     checks: [
-      script('regen-indexes.sh', 'Index regen failed'),
+      {
+        kind: 'cli',
+        argv: ['indexes', 'regen'],
+        failure: 'Index regen failed',
+      },
       {
         kind: 'drift',
         pathspec: '*index.md',
@@ -177,7 +181,11 @@ export const STAGES: readonly Stage[] = [
     id: 'consumed-copies',
     label: 'Consumed copies',
     checks: [
-      script('regen-claude-copies.sh', 'Consumed-copy regen failed'),
+      {
+        kind: 'cli',
+        argv: ['gov', 'regen'],
+        failure: 'Consumed-copy regen failed',
+      },
       {
         kind: 'drift',
         pathspec: '.claude/rules',

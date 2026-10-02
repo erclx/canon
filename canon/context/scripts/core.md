@@ -12,10 +12,6 @@ What sequences those guards is not here. `bun run check` resolves to `canon gate
 ## The catalog
 
 - `bootstrap.sh`, run as `bun run bootstrap`: installs deps, links the CLI globally, and appends the Claude Code aliases to `~/.zshrc`. Idempotent and re-runnable, which cuts both ways on the alias block: `install_aliases` returns at the marker check, so growing the canonical block reaches nobody who already ran it until they delete the marked block and re-run
-- `update.sh`, run as `bun run update`: interactive dep update via `bun update --interactive`, then `canon gate run --nested`
-- `clean.sh`, run as `bun run clean`: wipes `node_modules/`, clears bun cache, reinstalls from lockfile
-- `snapshot.sh`, run as `bun run snapshot`: writes the project file tree to `.canon/tmp/project/PROJECT-SNAPSHOT.md` for Claude chat context, framing entirely to stderr
-- `regen-indexes.sh`: thin wrapper calling `canon indexes regen` by path so a linked worktree uses its own CLI
 - `regen-hero.ts`: fills every `assets/captures/*.html.tmpl` and writes the `.html` beside it. The catalogs supply the counts so no figure on the README frame is hand-maintained, and `buildDesignCss` without its component half supplies the palette so neither frame carries its own copy of a hex. Clone-only, and it writes the HTML while `canon capture` renders each image and stamps both sides with a digest.
   - The name says hero while the loop covers every template in the folder, since every citation across `docs/`, `canon/context/`, and `src/` spells that name. A template naming a placeholder nothing fills fails the run rather than shipping the literal braces.
   - Each catalog is read in-process through the module its verb calls, and the command count through `countCommands` in `src/counts/catalogs.ts`, so no child process runs and no catalog crosses an environment or file channel. The pure half, every row builder and refusal, sits in `src/capture/frame-values.ts` with a test beside it, since `tsc` and vitest reach `src/` only.

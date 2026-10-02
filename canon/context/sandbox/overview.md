@@ -41,7 +41,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 ### Two headless harnesses rather than one
 
-`scripts/eval/run.sh` extracts its fixture to a `mktemp -d` carrying no seed, which is the opposite of the sandbox's need to look like a real installed project. Merging the two would cost one of them its defining property. Location and inheritance are separable, which is what lets both sit outside the repository: the eval fixture carries no seed, and the sandbox still carries its seed and its gov rules.
+The retired eval runner extracted its fixture to a `mktemp -d` carrying no seed, which was the opposite of the sandbox's need to look like a real installed project. Merging the two would cost one of them its defining property. Location and inheritance are separable, which is what lets both sit outside the repository: the eval fixture carries no seed, and the sandbox still carries its seed and its gov rules.
 
 ## Gotchas
 
