@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.11.0](https://github.com/erclx/canon/compare/v5.10.0...v5.11.0) (2026-10-02)
+
+
+### Features
+
+* **cli:** report the steps a pull request is owed from pr evidence ([#2050](https://github.com/erclx/canon/issues/2050)) ([009cefc](https://github.com/erclx/canon/commit/009cefc32d9b4be3dbf60cc7fdd37acb049ab7fc))
+* **web:** group the skills field by the skill map ([#2051](https://github.com/erclx/canon/issues/2051)) ([ec66659](https://github.com/erclx/canon/commit/ec66659537552d8098e3eaa421754aa0055fe898))
+
 ## [5.10.0](https://github.com/erclx/canon/compare/v5.9.0...v5.10.0) (2026-10-02)
 
 
