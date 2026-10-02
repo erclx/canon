@@ -256,8 +256,10 @@ describe('canon pr evidence --checklist', () => {
  * The pull request's files, head, and merge base come from the repository's
  * own `main...HEAD` unless a fixture beside `apiLog` names them: `files.tsv`
  * holds `status<TAB>path` rows, `head` a sha, `merge-base` a sha, and
- * `files-fail` makes the files read fail. Every files read appends its
- * arguments to `files-calls.log`.
+ * `files-fail` makes the files read fail. The rows become the files API's JSON
+ * array and pass through the `--jq` filter the caller sent, so a filter that
+ * mangles its own output fails here as it would against GitHub. Every files
+ * read appends its arguments to `files-calls.log`.
  */
 function writeFakeGh(bin: string, comments: string, apiLog: string): void {
   mkdirSync(bin, { recursive: true })
@@ -266,7 +268,7 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     '#!/usr/bin/env bash',
     `fx='${fx}'`,
     'case "$*" in',
-    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi ;;`,
+    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; f=; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
     `  api*) printf '%s' "\${@: -1}" > '${apiLog}'; echo "{}" ;;`,
     '  *baseRefName*) echo main ;;',
@@ -646,6 +648,15 @@ describe('canon pr evidence reads the pull request', () => {
     const record = await runEvidenceRecord([])
 
     expect(record.reason).toBe('no-evidence')
+  })
+
+  it('should find a changed evidence image through the filter gh receives', async () => {
+    writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.reason).toBe('ok')
+    expect(countEvidenceCases(String(record.body))).toBe(1)
   })
 
   it('should read the files through the paginated endpoint', async () => {
