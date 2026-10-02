@@ -49,7 +49,7 @@ Emit `⏳ Watching CI on #<number> in the background` and end the turn. Print no
 
 On the wake, branch on the final record's fields rather than on the exit:
 
-- `state: passing`: continue to After completion.
+- `state: passing`: read the evidence thread under `### Settling the evidence thread` below, then continue to After completion on `settled`.
 - `state: failing`: stop the sequence and report the failing check with its URL.
 - `conflicted: true`: stop the sequence and report that the branch conflicts with its base, since no run will start for it. A rebase is the repair.
 - A `reason` and no `state`: the read was refused, such as `no-remote-branch` for a branch deleted on the remote. Stop and report that `reason`. A missing `state` is never a pass.
@@ -57,6 +57,17 @@ On the wake, branch on the final record's fields rather than on the exit:
 - The `gh pr checks --watch` fallback ran, which prints a check table rather than a record. Only a printed table carrying at least one check, every one passing, continues to After completion. Any failing check stops the sequence naming it with its URL. Empty or errored output stops the sequence and reports the message, since `no checks reported on the '<branch>' branch` is what a conflicted branch prints, and that fallback has no `conflicted` field to separate it from lag.
 
 Do not auto-fix any of these. The watch line and a stop report from any branch above are the two exceptions to the no-text-between-steps rule.
+
+### Settling the evidence thread
+
+On a `passing` wake, run `canon pr evidence <number> --check --json` against the number step 8 returned. It reads the pull request's comments and edits none, so the comment a reviewer already ticked stays as it is. Branch on `reason` and `owed` rather than the exit.
+
+- `settled`: nothing is owed, which is also what a branch that changed no rendered surface reads. Continue to After completion.
+- `owed`: run each step the record's `owed` list names, from `canon:git-pr`'s `references/evidence.md`, evidence first and then preview. Re-read once with the same command. Continue to After completion only on `settled`. Any other reading stops the sequence and reports the `reason` with the `owed` list, and the sequence never loops back for a second pass. A preview step that refuses, or a deploy that failed, leaves `preview` owed on the re-read, so that is the stop and not a retry.
+- Any other `reason`, such as `gh-failed`: the thread went unread. Stop and report the `reason`, since an unread thread is not a settled one.
+- No record at all, or an unknown flag error: the installed binary predates `--check`. Report the thread unread rather than settled, and continue to After completion without emitting a claim that it was checked.
+
+The read is a closing step and the draft mark stays the only thing between steps 8 and 9. A caller that closes on its own block, as `auto-ship` does, waits on the same CI wake, so the read lands here and not in that body.
 
 ### Why the reach reads at step 5
 
