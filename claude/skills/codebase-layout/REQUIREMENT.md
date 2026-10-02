@@ -44,7 +44,7 @@ A placement rule in front of the session is also one it can argue past. Each fla
 ## Out of scope
 
 - Which layer a test belongs at: `test-craft`
-- Interface depth, seams, and where a module boundary sits in code, which govern a module's shape rather than its path on disk
+- Interface depth, seams, and where a module boundary sits in code, which govern a module's shape rather than its path on disk. What crosses that boundary is `api-design`, and depth has no owner yet.
 - Per-language placement conventions such as test suffixes and the top-level test folder: the language testing rules
 - Backend, asset, and script layouts, which wait for a driving project before a reference is written
 - Whether a plan that loaded the skill actually places files differently, which needs a measured run on a target rather than a rule here
