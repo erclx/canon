@@ -35,6 +35,6 @@ From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL
 
 **Protocol-specific guidance.** The source skill carries verbs, status codes, pagination, and URL shapes for one protocol style. Declined because the body has to hold for a function's exports, a command's flags, and a file format as much as an endpoint, and a protocol section would route every non-network surface to rules that do not apply. A project needing those conventions states them in its own stack rule.
 
-**Interface depth.** Ousterhout's deep modules, after [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php), judge how much a module hides behind its surface. Declined here because depth is about what sits behind a boundary, and this skill owns only what crosses it. It is left for a skill on code internals.
+**Interface depth.** Ousterhout's deep modules, after [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php), judge how much a module hides behind its surface. Declined here because depth is about what sits behind a boundary, and this skill owns only what crosses it. `code-craft` carries it.
 
 **Versioned surfaces as the default.** Shipping a new version beside the old for every breaking change. Declined as the default because additive change avoids the break in the first place, and two live versions split the callers. The One-Version Rule covers a caller that cannot pin.

@@ -46,6 +46,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:test-first`           | Before implementing a planned change, to run its test red, green, then refactor                            |
 | `canon:test-craft`           | When writing or changing any test, to pick its layer and filter what it asserts                            |
 | `canon:api-design`           | When changing what a caller sees, being an export, a flag, an output shape, or a retried write             |
+| `canon:code-craft`           | Before writing a function, class, or module, to pick the shape the next change needs                       |
 | `canon:review-craft`         | When reviewing a change, for what to look for and how much evidence a finding needs                        |
 | `canon:systematic-debugging` | When a test fails or a bug surfaces, to force root cause first                                             |
 | `canon:design-taste`         | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |

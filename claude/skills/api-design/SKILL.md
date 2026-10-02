@@ -99,4 +99,4 @@ Check each line against the surface the change produced. A line answering no is 
 - The structured error rule and hidden internals floor every code stack loads: `000-code`
 - Listing the consumers a finished change breaks, and the docs it made false, during review: `review-craft`
 - A visual interface, its layout, and its look: `design-taste`
-- Interface depth and the internals behind a boundary, which this skill leaves open
+- Interface depth and the internals behind a boundary: `code-craft`

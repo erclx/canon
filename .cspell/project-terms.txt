@@ -1,10 +1,14 @@
 # canon-keep-retired: the changelog and the eval transcripts still spell it
 addyosmani
+Birgitta
+Böckeler
 Dodds
 Hyrum
+Jeffries
 Ousterhout
 Parnas
 Pushback
+Vlissides
 aanerud
 ababab
 affordances
@@ -115,6 +119,7 @@ nextlevelbuilder
 notionhq
 obra
 oneline
+overeagerness
 overfitted
 overfitting
 palettegen
