@@ -45,7 +45,7 @@ Take the sha from the row, so the base and head sides are exactly what the comme
 
 Open at most 12 images per pass, filled in this order:
 
-1. Every image a ticked checklist box or the `Seen at:` line names
+1. Every image a ticked checklist box names
 2. The head side of each state at its narrowest and widest captured width, in one theme
 3. The base side, only for a state whose head image looks wrong or whose diff was meant to change appearance
 
@@ -65,7 +65,6 @@ The `## What to look at` block between the `pr-checklist` markers is the author'
 
 - Test each ticked box against an opened image showing the state and width it names. Flag a box whose image contradicts it, quoting the box.
 - A ticked box no image covers is untested rather than confirmed, and the finding says so.
-- Read the `**Widths:**` block's `Seen at:` line against the widths the images carry.
 - Test only the rows the current comment shows. A box ticked on an earlier head can describe images the comment no longer carries.
 - Leave unchecked boxes to the procedure's own read of the description.
 

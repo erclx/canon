@@ -378,11 +378,6 @@ EOF
   local handoff=".canon/tmp/handoff/ui-checklist/header-pricing.md"
   mkdir -p "$(dirname "$handoff")"
   cat <<'EOF' >"$handoff"
-**Widths:**
-
-Seen at: 390, 1280
-Not seen at: none
-
 **What to verify visually:**
 
 **Header**
