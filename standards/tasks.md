@@ -124,9 +124,9 @@ An intake folder answers that direction at folder scope rather than item scope. 
 
 A project that archived plans before the folder nested under `.canon/plans/` holds closed tasks pointing at `../plans-archive/` or `../.tmp/plans-archive/`. Leave those pointers where they are, since each resolves against the files it names and a task retargeted without its plan moving leads nowhere.
 
-One plan per task. A plan cited by two tasks is a misfile rather than a shape to design for.
+One plan per task, or one per slice on a sliced task. A plan cited by two tasks is a misfile rather than a shape to design for.
 
-`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, so the line is a mechanical write rather than hand-edited markdown.
+`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, and `--add` appends a slice's plan, so the line is never hand-edited.
 
 `Groundwork:` points at `../groundwork/<slug>/`, the folder `plan-groundwork` fills. It names the surface it points at the way `Plan:` does. Use this key alone. `Research record` and `Decision record` are earlier spellings of the same thing and both convert to it.
 

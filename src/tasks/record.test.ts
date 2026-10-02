@@ -274,6 +274,52 @@ describe('writePlanLine', () => {
     })
   })
 
+  describe('with add', () => {
+    it('should add the line when the task carries none', () => {
+      expect(
+        writePlanLine('# A task\n\n## Outcomes\n', '../plans/b.md', true),
+      ).toEqual({
+        ok: true,
+        text: '# A task\n\nPlan: [b](../plans/b.md)\n\n## Outcomes\n',
+        action: 'added',
+        replaced: undefined,
+      })
+    })
+
+    it('should append to a line holding one link', () => {
+      const text = '# A task\n\nPlan: [a](../plans/a.md)\n'
+
+      expect(writePlanLine(text, '../plans/b.md', true)).toEqual({
+        ok: true,
+        text: '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n',
+        action: 'appended',
+        replaced: undefined,
+      })
+    })
+
+    it('should append to a line holding several links and keep their order', () => {
+      const text = '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n'
+
+      expect(writePlanLine(text, '../plans/c.md', true)).toEqual({
+        ok: true,
+        text: '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md), [c](../plans/c.md)\n',
+        action: 'appended',
+        replaced: undefined,
+      })
+    })
+
+    it('should report no change when the plan is already listed', () => {
+      const text = '# A task\n\nPlan: [a](../plans/a.md), [b](../plans/b.md)\n'
+
+      expect(writePlanLine(text, '../plans/a.md', true)).toEqual({
+        ok: true,
+        text,
+        action: 'unchanged',
+        replaced: undefined,
+      })
+    })
+  })
+
   it('should leave a plan line inside a fenced sample alone', () => {
     const text = [
       '# A task',
@@ -542,6 +588,23 @@ describe('recordPlan', () => {
       detail: ['../plans/a.md', '../plans/b.md'],
     })
     await expect(readTask(stem)).resolves.toBe(text)
+  })
+
+  it('should append a second slice and keep the first matchable by pull-request', async () => {
+    const stem = await seedTask()
+    await seedPlan('slice-one')
+    await seedPlan('slice-two')
+    await recordPlan(ROOT, stem, 'slice-one')
+
+    const outcome = await recordPlan(ROOT, stem, 'slice-two', true)
+
+    expect(outcome).toMatchObject({ ok: true, action: 'appended' })
+    await expect(readTask(stem)).resolves.toContain(
+      'Plan: [feature-slice-one](../plans/feature-slice-one.md), [feature-slice-two](../plans/feature-slice-two.md)',
+    )
+    await expect(
+      recordPullRequest(ROOT, { kind: 'plan', plan: 'feature-slice-one' }, 7),
+    ).resolves.toMatchObject({ ok: true, stem })
   })
 
   it('should refuse when the task does not exist', async () => {
