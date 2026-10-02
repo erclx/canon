@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.14.1](https://github.com/erclx/canon/compare/v5.14.0...v5.14.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **deps:** sync the bun.lock spec with package.json ([#2081](https://github.com/erclx/canon/issues/2081)) ([05d6b2a](https://github.com/erclx/canon/commit/05d6b2a1cbd0ad1819bcc058c47c5efd0b43ae5e))
+
 ## [5.14.0](https://github.com/erclx/canon/compare/v5.13.0...v5.14.0) (2026-10-02)
 
 
