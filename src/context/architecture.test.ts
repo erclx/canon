@@ -634,6 +634,55 @@ describe('measuring word weight', () => {
   })
 })
 
+describe('naming a gate module as a check', () => {
+  let root: string
+
+  const record = (span: string): string =>
+    [
+      '# Architecture',
+      '',
+      '## Key technical decisions',
+      '',
+      '### A boundary',
+      '',
+      `Nothing under the plugin reaches internal files, which \`${span}\` walks.`,
+      '',
+    ].join('\n')
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+    mkdirSync(join(root, 'canon'), { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should count a code span naming an existing gate module as a named check', async () => {
+    mkdirSync(join(root, 'src/gate'), { recursive: true })
+    writeFileSync(join(root, 'src/gate/boundaries.ts'), '')
+    writeFileSync(
+      join(root, 'canon/ARCHITECTURE.md'),
+      record('src/gate/boundaries.ts'),
+    )
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.decisions[0]?.checks).toEqual(['src/gate/boundaries.ts'])
+  })
+
+  it('should not count a gate module that is absent', async () => {
+    writeFileSync(
+      join(root, 'canon/ARCHITECTURE.md'),
+      record('src/gate/boundaries.ts'),
+    )
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.decisions[0]?.checks).toEqual([])
+  })
+})
+
 describe('coverage across the classified entries', () => {
   it('should count an entry carrying either testable claim', () => {
     const report = makeReport({

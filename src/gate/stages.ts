@@ -1,4 +1,11 @@
 import {
+  capabilitySeeding,
+  ignoreParity,
+  pluginBoundary,
+  seedIndependence,
+  skillPaths,
+} from '@/gate/boundaries'
+import {
   architectureRecord,
   auditSet,
   captureStamps,
@@ -99,7 +106,6 @@ export const TEST_CORPORA_PATTERNS = [
   '^standards/markdown\\.md$',
   '^tooling/base/reference\\.md$',
   '^tooling/web/configs/scripts/worktree-port\\.sh$',
-  '^scripts/core/check-ignore-parity\\.sh$',
 ]
 
 const TESTS_SCOPE = new RegExp(
@@ -277,34 +283,19 @@ export const STAGES: readonly Stage[] = [
     // produces either list, so there is nothing to regenerate and diff.
     id: 'ignore-parity',
     label: 'Ignore parity',
-    checks: [
-      script(
-        'check-ignore-parity.sh',
-        "The ignore set a target receives disagrees with this repository's own.",
-      ),
-    ],
+    checks: [{ kind: 'measure', measure: ignoreParity }],
     success: 'Ignore parity clean',
   },
   {
     id: 'skill-paths',
     label: 'Skill paths',
-    checks: [
-      script(
-        'check-skill-paths.sh',
-        'Shipped skills reference a repo-local path.',
-      ),
-    ],
+    checks: [{ kind: 'measure', measure: skillPaths }],
     success: 'Skill paths clean',
   },
   {
     id: 'plugin-boundary',
     label: 'Plugin boundary',
-    checks: [
-      script(
-        'check-plugin-boundary.sh',
-        'Plugin ships toolkit-internal content.',
-      ),
-    ],
+    checks: [{ kind: 'measure', measure: pluginBoundary }],
     success: 'Plugin boundary clean',
   },
   {
@@ -315,9 +306,7 @@ export const STAGES: readonly Stage[] = [
     // propagates into every project scaffolded after it.
     id: 'seed-independence',
     label: 'Seed independence',
-    checks: [
-      script('check-seed-independence.sh', 'Seed prose cites the toolkit CLI.'),
-    ],
+    checks: [{ kind: 'measure', measure: seedIndependence }],
     success: 'Seed prose cites no toolkit CLI',
   },
   {
@@ -326,12 +315,7 @@ export const STAGES: readonly Stage[] = [
     // recorded reason, per the criterion in canon/context/tooling/seeds.md.
     id: 'capability-seeding',
     label: 'Capability seeding',
-    checks: [
-      script(
-        'check-capability-seeding.sh',
-        'A capability reaches one side of the seed or config boundary and not the other.',
-      ),
-    ],
+    checks: [{ kind: 'measure', measure: capabilitySeeding }],
     success: 'Capability seeding clean',
   },
   {

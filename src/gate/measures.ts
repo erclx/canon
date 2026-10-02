@@ -31,6 +31,7 @@ import {
   type ShippedReference,
 } from '@/shipped/references'
 import { surfaceDir } from '@/surface-root'
+import { seedRoots } from '@/tooling/seeds'
 import { plural } from '@/ui'
 import {
   README_PARAPHRASE_MARKER,
@@ -585,26 +586,14 @@ export const markdownBans: Measure = async (ctx) => {
  * required section and index drift, and leaves the thresholds advisory for the
  * reason the stage above leaves its own so.
  *
- * The roots are discovered rather than listed, through the one bash definition
- * `check-seed-independence.sh` already reads, so a stack seeding `.claude/`
- * later is covered with no edit here and the two stages cannot disagree about
- * which roots exist.
+ * The roots are discovered rather than listed, through `seedRoots`, which the
+ * Seed independence measure reads too, so a stack seeding `.claude/` later is
+ * covered with no edit here and the two stages cannot disagree about which
+ * roots exist.
  */
 export const seedStandards: Measure = async (ctx) => {
-  const roots = await ctx.run([
-    'bash',
-    join(ctx.root, 'scripts/core/list-seed-roots.sh'),
-  ])
-
-  if (roots.exitCode !== 0) {
-    return {
-      emissions: [],
-      unmeasured: 'The seed roots could not be listed, so no seed was read.',
-    }
-  }
-
-  const seedRoots = roots.stdout.split('\n').filter((line) => line !== '')
-  if (seedRoots.length === 0) {
+  const roots = seedRoots(ctx.root)
+  if (roots.length === 0) {
     return {
       emissions: [],
       unmeasured:
@@ -615,7 +604,7 @@ export const seedStandards: Measure = async (ctx) => {
   const emissions: Emission[] = []
   let measured = 0
 
-  for (const seedRoot of seedRoots) {
+  for (const seedRoot of roots) {
     const run = await ctx.cli([
       'context',
       'audit',

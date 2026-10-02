@@ -122,8 +122,11 @@ const QUANTIFIES_PATH = new RegExp(
   'i',
 )
 
-/** A code span naming a shell check this repository could run. */
-const SCRIPT_SPAN = /^scripts\/[\w./-]+\.sh$/
+/**
+ * A code span naming a check this repository could run: a shell script, or a
+ * gate module whose measures read the tree in-process.
+ */
+const SCRIPT_SPAN = /^(?:scripts\/[\w./-]+\.sh|src\/gate\/[\w./-]+\.ts)$/
 /** A code span invoking the CLI, which may or may not name a registered audit. */
 const CANON_SPAN = /^canon\s+(.+)$/
 
