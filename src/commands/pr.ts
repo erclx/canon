@@ -466,17 +466,17 @@ export function register(program: Command): void {
         '--checklist closes the body with a visual checklist, below the',
         'comparison it annotates. A checklist the marked comment already',
         'carries is read back and carried forward the same way the preview',
-        'address is, which keeps a re-render from wiping ticked boxes. It does',
-        'not decide no-evidence: a branch with a checklist and no evidence',
-        'image still reports no-evidence, and the caller posts the checklist',
-        'on its own.',
+        'address is, which keeps a re-render from wiping ticked boxes. It',
+        'turns no-evidence into ok: a branch with a checklist and no evidence',
+        'image renders a marked body holding the checklist, so a later call',
+        'finds and edits that comment.',
         '',
         '--local adds a **Local preview:** line under the hosted preview line,',
         'or opens the body with it when there is none, and is carried forward',
         'the same way. It does not by itself turn no-evidence into ok, so a',
         'branch with a server running and nothing to show posts no link-only',
-        'comment. Together with --checklist it does, so the checklist and the',
-        'link land in one comment.',
+        'comment. Together with --checklist the link and the checklist land in',
+        'one comment.',
         '',
         'Both reasons carry what the marked comment already posted, each field',
         'present only when that comment holds it:',
@@ -1605,14 +1605,15 @@ async function runEvidence(
     return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
   }
 
-  // A local address rides on a checklist or a hosted preview and never opens
-  // a comment alone, so a docs-only branch with a server up posts nothing.
-  const hasChecklistAndLocal =
-    suppliedChecklist !== undefined && opts.local !== undefined
+  // A checklist opens a comment on its own, so it always lands in the marked
+  // comment a later call edits. A local address rides on a checklist or a
+  // hosted preview and never opens one alone, so a docs-only branch with a
+  // server up posts nothing.
+  const hasChecklist = suppliedChecklist !== undefined
   if (
     grouped.kind === 'refused' &&
     opts.preview === undefined &&
-    !hasChecklistAndLocal
+    !hasChecklist
   ) {
     logStep('Skipped')
     logInfo(

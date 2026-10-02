@@ -351,6 +351,18 @@ describe('canon pr evidence --local', () => {
     expect(record.reason).toBe('no-evidence')
   })
 
+  it('should render a marked body for a checklist alone with no evidence image and no local address', async () => {
+    const record = await runEvidenceCommand([
+      '--checklist',
+      join(tempDir, 'checklist.md'),
+    ])
+
+    expect(record.reason).toBe('ok')
+    expect(record.body).toContain('<!-- pr-checklist:start -->')
+    expect(record.body).toContain('<!-- pr-checklist:end -->')
+    expect(record.body).toContain('<!-- pr-evidence:')
+  })
+
   it('should render a checklist and a local address together with no evidence image', async () => {
     const record = await runEvidenceCommand([
       '--local',
