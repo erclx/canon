@@ -75,7 +75,7 @@ The report is also where the load count in `orchestrator-review-dispatch.md` is 
 
 The count used to read low, and it erred in the direction that breaks the trigger. A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so an author pushing between the diff read and the post left the pass recorded against a commit it never saw, and `SEEN` then fired on a head still awaiting its first look at that delta.
 
-The pass now carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body it posts, and both this script and that skill resolve the covered state through `canon pr review-state`, which is the one place the marker is parsed. A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than as `SEEN`. The manual double-check that used to hang off this paragraph is retired with the defect: a `SEEN` is now a claim about what a session read rather than about what GitHub stamped, so it wants no second read to be believed.
+The pass now carries its own record instead. `review-pr` writes the commit it read and the instant it read it as a marker on the last line of every body it posts, and both this script and that skill resolve the covered state through `canon pr review-state`, which is the one place the marker is parsed. A commit pushed inside a pass's compose window falls outside the marked range, so it reads as `MOVED` rather than as `SEEN`. A `SEEN` is a claim about what a session read rather than about what GitHub stamped, so it wants no second read to be believed.
 
 Read `source` on the record before trusting a `SEEN` on a thread whose newest pass is old. `marker` is the read-time record. `fallback` is a pass posted before the mechanism shipped, or a target whose CLI predates the verb, and it carries the defect above unchanged, so a `SEEN` under it is worth one `gh pr view --json reviews` before it is believed. `none` is a thread carrying no pass at all.
 
@@ -83,7 +83,7 @@ The other side of that comparison used to lag as well, which made the two errors
 
 ## The watch beside it
 
-`${CLAUDE_SKILL_DIR}/scripts/watch.ts` is a long-running loop rather than a scheduled prompt, started as `bun <path>`. It reads the open pull request list and the session roster together every sixty seconds and prints one line per new pull request, per worker whose name, branch, or status changed, and per worker that dropped out of the roster. A worker's dwell grows every second and moves no line on its own. Start it in the background and read what it emits. It writes nothing.
+`${CLAUDE_SKILL_DIR}/scripts/watch.ts` is a long-running loop rather than a scheduled prompt, started as `bun <path>`. It reads the open pull request list and the session roster together every sixty seconds and prints one line per new pull request, per worker whose name, branch, or status changed, and per worker that dropped out of the roster. Start it in the background and read what it emits. It writes nothing.
 
 Coverage is what it buys over the poll. A worker that finishes goes idle and a worker that crashes disappears, so a trigger reading pull requests alone stays silent through the second, and the roster read is the half `poll.ts` cannot make. It ran a full afternoon over four concurrent workers and caught every transition, while the three-minute poll it replaced reported no movement five times in a row.
 
