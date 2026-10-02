@@ -43,7 +43,7 @@ The one skill nearest the subject leaves the pointer open. `codebase-layout` exc
 ## Out of scope
 
 - Where the file holding a surface sits on disk: `codebase-layout`
-- Interface depth, deep modules, and the internals behind a boundary
+- Interface depth, deep modules, and the internals behind a boundary: `code-craft`
 - Listing the consumers a finished change breaks, and the docs it made false: `review-craft`
 - A visual interface, its layout, and its look: `design-taste`
 - Retiring a surface and migrating its last consumers off it, beyond the additive rule stated here
