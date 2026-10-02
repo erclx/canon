@@ -18,6 +18,7 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 - Drive every checklist box in the running app and give each exactly one verdict: pass or fail read off the page with the value quoted, pass or fail against a frame with what it shows, needs eyes for a box marked as taste, or not driven with the reason
 - Drive a box written before the drivable format all the same, naming the route or width it guessed, so no box is skipped silently
 - Read the checklist and the address from the evidence record rather than from the diff, the plan, or the author's description
+- Drive only a build of the head the verdict names, and stop with nothing posted when the hosted preview was built from an older one
 - Take the hosted preview, then the local preview, then an address the launch names, and refuse when none exists
 - Report an address that does not answer as not driven rather than as a fail, and leave the review closed on a box no commit on the branch can settle, so an absent preview never holds the draft mark at every head
 - Sweep console errors, sideways overflow at each named width, and the focus and details probes over the states reached, and nothing beyond them

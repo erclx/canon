@@ -120,6 +120,128 @@ describe('canon pr preview', () => {
     expect(outcome).toEqual({ reason: 'unfenced', exit: 1 })
   })
 
+  describe('--check against a fake gh', () => {
+    let binDir: string
+    let logFile: string
+    let tip: string
+
+    function git(...args: string[]): string {
+      return execaSync('git', ['-C', rootDir, ...args], {
+        env: {
+          GIT_AUTHOR_NAME: 'Test',
+          GIT_AUTHOR_EMAIL: 'test@example.com',
+          GIT_COMMITTER_NAME: 'Test',
+          GIT_COMMITTER_EMAIL: 'test@example.com',
+        },
+      }).stdout
+    }
+
+    async function runCheck(): Promise<{
+      readonly reason: string | undefined
+      readonly calls: string[]
+    }> {
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'preview', '1', '--check', '--json', '--root', rootDir],
+        {
+          cwd: rootDir,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: {
+            PATH: `${binDir}:${process.env.PATH ?? ''}`,
+            FAKE_TIP: tip,
+            FAKE_LOG: logFile,
+          },
+        },
+      )
+      const record = JSON.parse(result.stdout) as { reason?: string }
+      const calls = readFileSync(logFile, 'utf8').split('\n').filter(Boolean)
+      return { reason: record.reason, calls }
+    }
+
+    beforeEach(async () => {
+      binDir = join(rootDir, 'bin')
+      logFile = join(rootDir, 'gh.log')
+      mkdirSync(binDir, { recursive: true })
+      mkdirSync(join(rootDir, '.github', 'workflows'), { recursive: true })
+      await writeFile(
+        join(rootDir, '.github', 'workflows', 'deploy.yml'),
+        [
+          'on:',
+          '  workflow_dispatch:',
+          'jobs:',
+          '  d:',
+          '    steps:',
+          // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
+          '      - run: wrangler pages deploy dist --project-name=site --branch=${{ github.ref_name }}',
+          '      - run: echo "canon-preview-alias: $URL"',
+          '',
+        ].join('\n'),
+      )
+      await writeFile(
+        join(binDir, 'gh'),
+        `#!/bin/sh
+echo "$*" >> "$FAKE_LOG"
+case "$1 $2" in
+  "pr view") printf '{"number":1,"headRefName":"feat/x","headRefOid":"%s"}' "$FAKE_TIP" ;;
+  "run list") printf '[{"databaseId":7,"status":"completed","conclusion":"success","headSha":"%s","createdAt":"2026-10-02T10:00:00Z"}]' "$FAKE_TIP" ;;
+  *) exit 0 ;;
+esac
+`,
+        { mode: 0o755 },
+      )
+      git('init', '--initial-branch=feat/x')
+      git('config', 'user.email', 'test@example.com')
+      git('config', 'user.name', 'Test')
+      await writeFile(join(rootDir, 'a.txt'), 'a')
+      git('add', 'a.txt')
+      git('commit', '-m', 'chore: init')
+      const bare = join(rootDir, 'origin.git')
+      execaSync('git', ['init', '--bare', bare])
+      git('remote', 'add', 'origin', bare)
+      git('push', 'origin', 'feat/x')
+      tip = git('rev-parse', 'HEAD').trim()
+    })
+
+    it('should list runs with the workflow_dispatch event filter', async () => {
+      const { calls } = await runCheck()
+
+      const listing = calls.find((call) => call.startsWith('run list'))
+      expect(listing).toContain('--event workflow_dispatch')
+    })
+
+    it('should read fresh without dispatching a workflow', async () => {
+      const { reason, calls } = await runCheck()
+
+      expect({
+        reason,
+        dispatched: calls.some((call) => call.startsWith('workflow run')),
+      }).toEqual({ reason: 'fresh', dispatched: false })
+    })
+  })
+
+  it('should refuse --check combined with --timeout before reading anything', async () => {
+    const outcome = await runPreview(['1', '--check', '--timeout', '5'])
+
+    expect(outcome).toEqual({ reason: 'check-timeout', exit: 1 })
+  })
+
+  it('should list --check and its four reasons in the help text', async () => {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'preview', '--help'],
+      {
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+      },
+    )
+
+    expect(result.stdout).toMatch(/--check/)
+    for (const reason of ['fresh', 'stale', 'building', 'no-build']) {
+      expect(result.stdout).toContain(reason)
+    }
+  })
+
   it('should refuse a timeout that is not a positive number of minutes', async () => {
     const outcome = await runPreview(['1', '--timeout', 'soon'])
 

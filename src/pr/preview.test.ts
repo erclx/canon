@@ -4,6 +4,7 @@ import {
   mintPreview,
   type PreviewRunner,
   readPreviewAlias,
+  readPreviewHead,
   type RunRow,
   type WorkflowFile,
 } from '@/pr/preview'
@@ -25,8 +26,14 @@ function workflow(path: string, text: string): WorkflowFile {
   return { path, text }
 }
 
-function run(databaseId: number, status: string, conclusion = ''): RunRow {
-  return { databaseId, status, conclusion }
+function run(
+  databaseId: number,
+  status: string,
+  conclusion = '',
+  headSha = 'aaa',
+  createdAt = `2026-10-02T00:00:${String(databaseId).padStart(2, '0')}Z`,
+): RunRow {
+  return { databaseId, status, conclusion, headSha, createdAt }
 }
 
 interface FakeRunnerOptions {
@@ -273,5 +280,95 @@ describe('mintPreview', () => {
     const result = await mintPreview(runner, SETTINGS)
 
     expect(result).toEqual({ kind: 'refused', reason: 'gh-failed' })
+  })
+})
+
+describe('readPreviewHead', () => {
+  const TIP = 'tip0000'
+
+  async function read(rows: readonly RunRow[] | undefined) {
+    const runner = fakeRunner({ before: rows })
+    runner.listRuns = async () => rows
+    return readPreviewHead(runner, {
+      workflow: SETTINGS.workflow,
+      branch: SETTINGS.branch,
+      tip: TIP,
+    })
+  }
+
+  it('should read fresh when the newest successful run built the tip', async () => {
+    const result = await read([run(2, 'completed', 'success', TIP)])
+
+    expect(result).toEqual({
+      reason: 'fresh',
+      built: TIP,
+      tip: TIP,
+      runId: 2,
+    })
+  })
+
+  it('should read stale naming both shas when the newest success built an earlier head', async () => {
+    const result = await read([run(2, 'completed', 'success', 'old1111')])
+
+    expect(result).toEqual({
+      reason: 'stale',
+      built: 'old1111',
+      tip: TIP,
+      runId: 2,
+    })
+  })
+
+  it('should read building when a run at the tip is still going beside an older success', async () => {
+    const result = await read([
+      run(3, 'in_progress', '', TIP),
+      run(2, 'completed', 'success', 'old1111'),
+    ])
+
+    expect(result).toEqual({
+      reason: 'building',
+      built: 'old1111',
+      tip: TIP,
+      runId: 3,
+    })
+  })
+
+  it('should read no-build when no run succeeded', async () => {
+    const result = await read([run(2, 'completed', 'failure', TIP)])
+
+    expect(result).toEqual({ reason: 'no-build', tip: TIP })
+  })
+
+  it('should read stale when a run at the tip failed beside an older success', async () => {
+    const result = await read([
+      run(3, 'completed', 'failure', TIP),
+      run(2, 'completed', 'success', 'old1111'),
+    ])
+
+    expect(result.reason).toBe('stale')
+  })
+
+  it('should order runs by creation rather than list position', async () => {
+    const result = await read([
+      run(1, 'completed', 'success', 'old1111', '2026-10-02T09:00:00Z'),
+      run(2, 'completed', 'success', TIP, '2026-10-02T10:00:00Z'),
+      run(3, 'completed', 'success', 'old1111', '2026-10-02T08:00:00Z'),
+    ])
+
+    expect(result).toMatchObject({ reason: 'fresh', runId: 2 })
+  })
+
+  it('should follow the most recent deploy when it built an older sha than an earlier one', async () => {
+    const result = await read([
+      run(1, 'completed', 'success', TIP, '2026-10-02T08:00:00Z'),
+      run(2, 'completed', 'success', 'old1111', '2026-10-02T10:00:00Z'),
+    ])
+
+    expect(result).toMatchObject({ reason: 'stale', runId: 2 })
+  })
+
+  it('should refuse as gh-failed when the listing is unreadable', async () => {
+    const result = await read(undefined)
+
+    expect(result.reason).toBe('gh-failed')
   })
 })

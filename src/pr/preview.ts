@@ -95,6 +95,8 @@ export interface RunRow {
   readonly databaseId: number
   readonly status: string
   readonly conclusion: string
+  readonly headSha: string
+  readonly createdAt: string
 }
 
 /** The `gh` calls a preview makes, injected so the wait can be driven without a network. */
@@ -175,4 +177,68 @@ export async function mintPreview(
   if (url === undefined) return { kind: 'refused', reason: 'no-alias', runId }
 
   return { kind: 'minted', runId, url }
+}
+
+export type PreviewHeadReason = 'fresh' | 'stale' | 'building' | 'no-build'
+
+export type PreviewHeadReading =
+  | {
+      readonly reason: PreviewHeadReason
+      readonly tip: string
+      readonly built?: string
+      readonly runId?: number
+    }
+  | { readonly reason: 'gh-failed' }
+
+/**
+ * Compares the head the newest successful dispatch built with the branch tip.
+ *
+ * The run listing is the only record of the built head, since the alias serves
+ * the newest successful deployment per branch and names no sha. Runs are
+ * ordered by creation rather than list position, so the verdict follows the
+ * most recent deploy. A run still going at the tip reads `building` rather
+ * than `stale`, so a mint already under way is not reported as a failure.
+ */
+export async function readPreviewHead(
+  runner: PreviewRunner,
+  target: {
+    readonly workflow: string
+    readonly branch: string
+    readonly tip: string
+  },
+): Promise<PreviewHeadReading> {
+  const rows = await runner.listRuns(target.workflow, target.branch)
+  if (rows === undefined) return { reason: 'gh-failed' }
+
+  const { tip } = target
+  const newest = [...rows].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
+  )
+  const built = newest.find(
+    (row) => row.status === 'completed' && row.conclusion === 'success',
+  )
+
+  if (built?.headSha === tip) {
+    return {
+      reason: 'fresh',
+      built: built.headSha,
+      tip,
+      runId: built.databaseId,
+    }
+  }
+
+  const pending = newest.find(
+    (row) => row.status !== 'completed' && row.headSha === tip,
+  )
+  if (pending !== undefined) {
+    return {
+      reason: 'building',
+      tip,
+      runId: pending.databaseId,
+      ...(built !== undefined && { built: built.headSha }),
+    }
+  }
+
+  if (built === undefined) return { reason: 'no-build', tip }
+  return { reason: 'stale', built: built.headSha, tip, runId: built.databaseId }
 }

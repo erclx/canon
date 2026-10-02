@@ -21,6 +21,7 @@ rather than inside it, so the two passes finish on their own clocks.
 - No address resolves under Step 3: stop and post nothing, `❌ No address to drive. PR #<number> carries no preview and no local preview, and the launch named none.`
 - The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
 - The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.` An open verdict at the head stops the same way only when nothing has arrived since it: drive again when a `## Review response` or `## Post-review findings` comment is newer than the verdict, or the launch names an address.
+- The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher. A verdict posted against an older build carries a marker naming a head nobody drove.
 - Post and stop. Never merge, never tick a box on the evidence comment, and never lift the draft mark.
 
 ## Step 1: resolve the pull request
@@ -54,6 +55,16 @@ Take the first rung that answers, testing each with `curl -s -o /dev/null -w '%{
 1. The hosted `preview` off the record.
 2. The `local` address off the record.
 3. An address the launch names.
+
+When the hosted rung answers, check that it was built from the head before driving it:
+
+```bash
+canon pr preview <number> --check --json
+```
+
+Branch on the record's `reason`. Only `fresh` continues. Any other stops with nothing posted, naming `built`, `tip`, and the next act: `stale` and `no-build` ask the dispatcher to run `canon pr preview <number> --json`, and `building` asks it to wait, since a mint is already running for the tip. This pass never mints. A `canon` that rejects `--check` predates the verb. Report that this pass needs a `canon` whose `pr preview` takes `--check`, naming the installed `canon --version`, and stop rather than reading the missing flag as `fresh`, the way Step 2 does for its own older binaries. A `reason` of `no-deploy`, `unfenced`, or `no-alias` means the project has no fenced deploy to read, so the hosted build cannot be verified. Stop on the hosted address then too, and say so.
+
+The check covers the hosted address only. The local rung and an address the launch names have no deploy run to read, so say in the comment that they were driven unverified rather than implying the same coverage.
 
 An address that exists and does not answer is a different outcome from no address at all. When every rung that exists fails to answer, skip the drive, record each box as not driven with the addresses tried and what each returned, and go to Step 7. A local address on another machine is the usual cause, and it says nothing about the change.
 
