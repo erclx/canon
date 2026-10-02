@@ -20,7 +20,7 @@ Queued (run manually after testing the current scenario):
   CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
 
 Headless verification (this session runs it):
-  scripts/sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
+  sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
 
 Interactive re-test (copied to clipboard):
 cd <current-root>/.sandbox && claude --plugin-dir <current-root>/claude --model sonnet

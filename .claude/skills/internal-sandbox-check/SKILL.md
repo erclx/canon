@@ -7,7 +7,7 @@ description: Audits the current branch for skill or script edits that lack a mat
 
 Manual guard after editing a plugin skill or a domain script. Reports whether each changed item has a paired scenario edit, verifies the first changed scenario headlessly, and prints the interactive re-test command for the user to launch against the rest.
 
-Verification runs without a human opening a session. `scripts/sandbox/run.sh` drives a skill through `claude -p`, provisions the scenario itself, and returns a verdict. An item that still ships unverified names which gate stopped it.
+Verification runs without a human opening a session. `sandbox/run.sh` drives a skill through `claude -p`, provisions the scenario itself, and returns a verdict. An item that still ships unverified names which gate stopped it.
 
 ## Guards
 
@@ -27,7 +27,7 @@ git diff "$(git merge-base main HEAD)" --name-only -- 'scripts/**' 'src/**'
 ```
 
 ```bash
-git diff "$(git merge-base main HEAD)" --name-only -- 'scripts/sandbox/**/*.sh'
+git diff "$(git merge-base main HEAD)" --name-only -- 'sandbox/**/*.sh'
 ```
 
 ```bash
@@ -57,18 +57,18 @@ Use the local entry point for the reason the `Provisioning:` line does. A global
 
 For each changed skill path under `claude/skills/<skill-name>/SKILL.md` or `.claude/skills/<skill-name>/SKILL.md`, apply the first matching rule:
 
-1. Split `<skill-name>` on the first `-` into `<category>` and `<rest>`. If `scripts/sandbox/<category>/<rest>.sh` exists in the worktree, record that path as the scenario.
-2. If the skill's census entry names a scenario `<category>:<command>`, record `scripts/sandbox/<category>/<command>.sh`. The census pairs a second spelling this step's split does not, which is what reaches `target-setup` through `claude:target-setup`, a name rule 1 cannot split at all.
-3. If the census carries the skill with no scenario and `scripts/sandbox/infra/<rest>.sh` exists, a scenario file is sitting where no spelling reaches it. Ask, naming the candidate: `Scenario for <skill-name>? Candidate: scripts/sandbox/infra/<rest>.sh (path under scripts/sandbox/, or "none")`. Accept `none` as an explicit opt-out.
+1. Split `<skill-name>` on the first `-` into `<category>` and `<rest>`. If `sandbox/<category>/<rest>.sh` exists in the worktree, record that path as the scenario.
+2. If the skill's census entry names a scenario `<category>:<command>`, record `sandbox/<category>/<command>.sh`. The census pairs a second spelling this step's split does not, which is what reaches `target-setup` through `claude:target-setup`, a name rule 1 cannot split at all.
+3. If the census carries the skill with no scenario and `sandbox/infra/<rest>.sh` exists, a scenario file is sitting where no spelling reaches it. Ask, naming the candidate: `Scenario for <skill-name>? Candidate: sandbox/infra/<rest>.sh (path under sandbox/, or "none")`. Accept `none` as an explicit opt-out.
 4. If the census carries the skill with no scenario and no candidate exists, record its `verdict`, carrying the `reason` for an exempt one. Do not ask. A verdict is a standing ruling, and re-deciding it per branch is what produces an answer that lives one session.
 5. If the path is under `.claude/skills/`, record `outside-census`. The census counts `claude/skills/` alone, so an internal skill is absent by construction rather than unknown, and asking would repeat the question every branch.
-6. Otherwise the skill is a plugin skill the census has yet to see, which is a genuine unknown. Ask the user: `Scenario for <skill-name>? (path under scripts/sandbox/, or "none" if the skill has no scenario)`. Record the answer. Accept `none` as an explicit opt-out.
+6. Otherwise the skill is a plugin skill the census has yet to see, which is a genuine unknown. Ask the user: `Scenario for <skill-name>? (path under sandbox/, or "none" if the skill has no scenario)`. Record the answer. Accept `none` as an explicit opt-out.
 
 Rule 3 offers the candidate and does not record it. Both answers are live, because a file at that path is evidence a scenario exists rather than proof it exercises this skill. A coincidental name match would report a skill as covered by a scenario that stages an unrelated tree, which is the vacuous pass the coverage entry exists to prevent, while `setup-gov` against `infra/gov.sh` was a real pairing before the setup merge retired that skill. One person settling that beats either rule deciding it.
 
 Do not guess past the candidate. Fuzzy matching across sandbox categories produces wrong pairings, such as the retired `setup-gov` pairing to `infra/gov.sh` rather than to `gov/install.sh`, so rule 3 tests one path and offers it rather than searching for a plausible one.
 
-Do not write to `scripts/sandbox/exempt.toml` from this step. An exemption is a claim about the harness rather than about the branch in hand, and one authored mid-ship-check is how the file's two-kinds rule erodes. Entries are hand-authored.
+Do not write to `sandbox/exempt.toml` from this step. An exemption is a claim about the harness rather than about the branch in hand, and one authored mid-ship-check is how the file's two-kinds rule erodes. Entries are hand-authored.
 
 ## Step 2b: map script changes
 
@@ -83,12 +83,12 @@ For each changed script path, apply the first matching rule:
 
 For `scripts/lib/<name>.sh`:
 
-1. If `scripts/sandbox/infra/<name>.sh` exists, record that path as the scenario.
-2. Otherwise, grep `scripts/sandbox/**/*.sh` for `source.*<name>` and record every matched scenario.
+1. If `sandbox/infra/<name>.sh` exists, record that path as the scenario.
+2. Otherwise, grep `sandbox/**/*.sh` for `source.*<name>` and record every matched scenario.
 
 For `src/**`, do not record a scenario. Mark the row `UNMAPPED` and append `Closest e2e: bun run check:install` to the row's hint.
 
-If a domain produces no `infra/<domain>.sh`, do not guess. Ask the user: `Scenario for <script-path>? (path under scripts/sandbox/, or "none" if the domain has no scenario)`. Accept `none` as an explicit opt-out.
+If a domain produces no `infra/<domain>.sh`, do not guess. Ask the user: `Scenario for <script-path>? (path under sandbox/, or "none" if the domain has no scenario)`. Accept `none` as an explicit opt-out.
 
 The census does not reach this step. It is a census of skills, and a script domain is not one, so the prompt Step 2a drops stays here in full. Standing up a second census for domains costs more than the one prompt it would remove.
 
@@ -126,7 +126,7 @@ Also skip it when the gate resolved in Step 4 leaves Step 6 free to run. `run.sh
 
 ## Step 6: run the headless verification
 
-Verify the `Provisioning:` scenario, one arm, through `scripts/sandbox/run.sh`. Read `.claude/skills/internal-sandbox-check/references/headless.md` on reaching this step for the arguments, the verdict report, and the gate vocabulary. Never sweep the `Queued:` list, and do not fix a failing verdict.
+Verify the `Provisioning:` scenario, one arm, through `sandbox/run.sh`. Read `.claude/skills/internal-sandbox-check/references/headless.md` on reaching this step for the arguments, the verdict report, and the gate vocabulary. Never sweep the `Queued:` list, and do not fix a failing verdict.
 
 Skip the run and print `Verification: skipped  <category>:<rest>  →  gate: <label>` when either condition holds:
 
@@ -138,6 +138,6 @@ Skip this step when no pairing carries a scenario, the same condition Step 5 nam
 ## Do not
 
 - Do not open an interactive sandbox session. An interactive session holds a terminal a headless caller cannot release, so the user launches that one from the `Interactive re-test:` line.
-- Do not read the line above as a ban on `scripts/sandbox/run.sh`. The runner returns when its session ends and holds nothing, and Step 6 is where this session uses it.
+- Do not read the line above as a ban on `sandbox/run.sh`. The runner returns when its session ends and holds nothing, and Step 6 is where this session uses it.
 - Do not sweep the `Queued:` list through the runner. Verify one arm and let the user ask for the rest.
 - Do not propose scenario edits, and do not write an exemption. The skill flags the gap and reports the standing verdict. The user decides whether to edit, rescope, or accept as intentional.

@@ -35,7 +35,7 @@ Pairing tries two spellings, `<category>-<command>` first and bare `<command>` s
 
 ### Exemptions
 
-An exemption lives in `scripts/sandbox/exempt.toml`, keyed by skill with a `reason`. It cannot live in the arm's `manual` array, because `resolveVerdict` fails any declaration carrying zero mechanical assertions, so an `expect.toml` holding only an exempt reason goes red the moment it is written.
+An exemption lives in `sandbox/exempt.toml`, keyed by skill with a `reason`. It cannot live in the arm's `manual` array, because `resolveVerdict` fails any declaration carrying zero mechanical assertions, so an `expect.toml` holding only an exempt reason goes red the moment it is written.
 
 - Two reasons qualify: a harness limit the checker cannot reach past, and a skill that writes no artifact. "Nobody has written one yet" is `should-be-asserted`.
 - An armed arm outranks an exemption. Two kinds of wrong exemption print as errors and exit 1 without `--strict`, since a claim nobody can check is worse than no claim: one names a skill the tree no longer carries, and the other names a skill an arm now asserts. Reporting the verdict while dropping the entry would leave committed data nobody is told to delete.
@@ -43,8 +43,8 @@ An exemption lives in `scripts/sandbox/exempt.toml`, keyed by skill with a `reas
 
 ## Gotchas
 
-- `internal-sandbox-check` Step 2a splits a skill name on its first `-`, so `internal-claude` resolves to `scripts/sandbox/internal/claude.sh`, and no `internal/` category exists. Internal skills carry the reserved `internal-` prefix and the missing file is correct by design, so answer `none` and do not invent the category.
-- The `canon-` family splits the same way and is rescued. Rule 1 sends `canon-operator` to a `scripts/sandbox/canon/` category that does not exist, and rule 2 reads the census pairing and records `scripts/sandbox/claude/canon-operator.sh`, reached through the bare-command fallback. Rule 1 running first is harmless, since a split resolving to nothing costs a wasted test rather than a wrong pairing.
+- `internal-sandbox-check` Step 2a splits a skill name on its first `-`, so `internal-claude` resolves to `sandbox/internal/claude.sh`, and no `internal/` category exists. Internal skills carry the reserved `internal-` prefix and the missing file is correct by design, so answer `none` and do not invent the category.
+- The `canon-` family splits the same way and is rescued. Rule 1 sends `canon-operator` to a `sandbox/canon/` category that does not exist, and rule 2 reads the census pairing and records `sandbox/claude/canon-operator.sh`, reached through the bare-command fallback. Rule 1 running first is harmless, since a split resolving to nothing costs a wasted test rather than a wrong pairing.
 - The `create-*` skills report `no scenario` and `exempt.toml` carries none of them, so they read `should-be-asserted`. Answer `none` when the ship is not the place to write a scenario, and record the gap rather than reading `NONE` as settled coverage.
 - A skill rename that leaves its scenario file's name behind breaks pairing silently. `docs/draft.sh` pairs `docs-draft` rather than `draft-docs`, `draft-context`, `draft-wireframes`, or `draft-readme`, and the bare fallback `draft` misses too, so `--skills --json` reports all four `should-be-asserted` with an empty `scenarios` array while a real scenario exists. Renaming the scenario file and fixture folder to match is a separate step from renaming the skill.
 - A citation sweep after a scenario rename greps for two more shapes than `claude/<name>(\.sh|/)` and `claude:<name>`. A `stage_fixtures claude <name> <arm> <stage>` call is a space-separated positional argument, and it breaks fixture staging at run time when the folder moves. Prose naming a scenario bare leaves a reader-facing sentence that no longer resolves. Re-read the narrative around any hit.

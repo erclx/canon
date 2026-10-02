@@ -44,8 +44,8 @@ When adding a new skill:
 - Create the skill folder and `SKILL.md` in `claude/skills/`
 - Add an internal skill to the list in `canon/context/claude-internal/skills.md`. A plugin skill needs no catalog edit, since `canon claude skills list` reads the folder and the plugin entries hold reasons rather than a roster. Add a `skill-*` entry under `canon/context/claude-plugin/` only when the new skill introduces reasoning no existing child covers.
 - Add a row to the skill's group in `docs/workflow/skill-map.md`. Every name `canon claude skills list --names` reports takes exactly one row there, per that file's own coverage rule.
-- Draft a `scripts/sandbox/<category>/<skill>.sh` scenario alongside `SKILL.md`, even when the skill's output is judgment-driven. The deterministic seeded input is the point. Exception: skills whose body explicitly forbids probing, listing, grepping, or reading project surfaces have nothing for a seeded sandbox to anchor against. Skip the scenario for these and do not list it as a follow-up.
-- `canon sandbox <cat:cmd>` provisions fixture state, and `scripts/sandbox/run.sh <cat:cmd> "<prompt>"` provisions the same tree and drives the arm, spawning `claude -p` and scoring its assertions. Authorizing the spend is the operator's call, performing it is not, matching `canon/context/scripts/eval.md`. "Sandbox cannot drive Claude" is not a reason to skip one, because it can.
+- Draft a `sandbox/<category>/<skill>.sh` scenario alongside `SKILL.md`, even when the skill's output is judgment-driven. The deterministic seeded input is the point. Exception: skills whose body explicitly forbids probing, listing, grepping, or reading project surfaces have nothing for a seeded sandbox to anchor against. Skip the scenario for these and do not list it as a follow-up.
+- `canon sandbox <cat:cmd>` provisions fixture state, and `sandbox/run.sh <cat:cmd> "<prompt>"` provisions the same tree and drives the arm, spawning `claude -p` and scoring its assertions. Authorizing the spend is the operator's call, performing it is not, matching `canon/context/scripts/eval.md`. "Sandbox cannot drive Claude" is not a reason to skip one, because it can.
 - `src/claude/cases/all.test.ts` requires a routing case for the new skill in one of `src/claude/cases/*.ts`, or `bun run check` fails naming the skill rather than this step. See `canon/context/claude-plugin/skill-procedures/overview.md` for why.
 - Once the skill count changes, the Hero gate stage fails until `bun scripts/core/regen-hero.ts` runs and `canon capture assets/captures --selector .window --out assets/evidence` re-renders the frame. Commit the markup, the image, and the stamp together. See `canon/context/claude-plugin/skill-procedures/overview.md` for why.
 
@@ -53,7 +53,7 @@ When modifying a skill:
 
 - Read the skill's sibling `REQUIREMENT.md` first when one exists. If the change closes no gap it states, change the requirement first or drop the change.
 - Update the matching bullet in `canon/context/claude-internal/skills.md` if an internal skill's description changed. A plugin skill's description is read from its own frontmatter, so nothing mirrors it.
-- Check if a corresponding sandbox scenario exists in `scripts/sandbox/` and update it if the skill's behavior changed
+- Check if a corresponding sandbox scenario exists in `sandbox/` and update it if the skill's behavior changed
 - Run `/internal-sandbox-check` before shipping to audit which skills changed without a paired scenario edit
 
 When modifying either CLAUDE.md:

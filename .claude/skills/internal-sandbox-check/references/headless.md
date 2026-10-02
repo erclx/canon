@@ -1,22 +1,22 @@
 ---
 title: Headless verification
-description: How internal-sandbox-check Step 6 drives one arm of the provisioning scenario through scripts/sandbox/run.sh, resolves the arm, reports the verdict, and names the gate an unverified item carries
+description: How internal-sandbox-check Step 6 drives one arm of the provisioning scenario through sandbox/run.sh, resolves the arm, reports the verdict, and names the gate an unverified item carries
 ---
 
 # Run the headless verification
 
 Step 6 of `internal-sandbox-check`. Step 4 reads the arm rule below before the report prints, and Step 6 reads the rest when neither skip condition in the body holds.
 
-Verify the `Provisioning:` scenario through `scripts/sandbox/run.sh`, which drives the skill under `claude -p` and returns without holding a terminal. One arm per invocation. Never sweep the `Queued:` list, which is what keeps the spend inside the $0.10 to $0.25 a run costs.
+Verify the `Provisioning:` scenario through `sandbox/run.sh`, which drives the skill under `claude -p` and returns without holding a terminal. One arm per invocation. Never sweep the `Queued:` list, which is what keeps the spend inside the $0.10 to $0.25 a run costs.
 
 Derive the arguments from the Step 2 mapping:
 
-- Target: `<category>:<rest>` from the scenario path `scripts/sandbox/<category>/<rest>.sh`
+- Target: `<category>:<rest>` from the scenario path `sandbox/<category>/<rest>.sh`
 - Prompt: `/canon:<skill-name>` with no arguments. The qualified form resolves through `--plugin-dir` whether or not the branch changed the skill, and a bare `/<skill-name>` resolves only for the ones the sandbox injects.
 - Arm: required for a multi-arm scenario, omitted for a single-arm one
 
 ```bash
-scripts/sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
+sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
 ```
 
 ## Resolving the arm

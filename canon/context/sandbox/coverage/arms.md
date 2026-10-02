@@ -5,7 +5,7 @@ description: What the board, intake, routing, and standards citation arms prove,
 
 # Arms
 
-Each section states what an arm's declaration proves and what it leaves open, so a green verdict reads at its real width. Read the declaration itself in `scripts/sandbox/fixtures/<category>/<scenario>/`, which carries the pins, the ceilings, and the `manual` entries this entry does not restate.
+Each section states what an arm's declaration proves and what it leaves open, so a green verdict reads at its real width. Read the declaration itself in `sandbox/fixtures/<category>/<scenario>/`, which carries the pins, the ceilings, and the `manual` entries this entry does not restate.
 
 ## Decisions
 

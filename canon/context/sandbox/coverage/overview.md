@@ -12,8 +12,8 @@ description: The coverage report and what its two percentages measure, and the b
 ## Layout
 
 - `src/sandbox/` owns the coverage report and the skill census
-- `scripts/sandbox/fixtures/` owns each arm's `expect.toml`, which the report counts
-- `scripts/sandbox/` owns the scenario scripts the report enumerates, and `exempt.toml` beside them
+- `sandbox/fixtures/` owns each arm's `expect.toml`, which the report counts
+- `sandbox/` owns the scenario scripts the report enumerates, and `exempt.toml` beside them
 
 `canon/context/sandbox/coverage/arms.md` and `canon/context/sandbox/coverage/workflow-arms.md` record what individual arms prove, and `canon/context/sandbox/coverage/census.md` covers the per-skill census, pairing, and exemptions.
 
@@ -25,7 +25,7 @@ Scenarios and arms count separately, and the report prints both rather than pick
 
 Both percentages floor rather than round, so a percentage a point under a hand-worked division is the measure working. `coveragePercent` states the reason.
 
-A scenario enumerates from its script under `scripts/sandbox/<category>/`, not from the fixture tree. An unarmed scenario has no fixture directory to find, so counting fixtures would hide exactly the arms the report exists to surface. A declaration sitting at the command root belongs to the unnamed arm and reports as `(default)`.
+A scenario enumerates from its script under `sandbox/<category>/`, not from the fixture tree. An unarmed scenario has no fixture directory to find, so counting fixtures would hide exactly the arms the report exists to surface. A declaration sitting at the command root belongs to the unnamed arm and reports as `(default)`.
 
 ### What a percentage does not weigh
 
@@ -42,4 +42,4 @@ Arm a skill when a wrong run is silent and the damage lands in a target project 
 - A gov injection flag does not select an arm. `SANDBOX_INJECT_GOV` is a boolean naming no rule, so which scenario depends on which rule resolves by reading the skill bodies rather than by paying for an arm each.
 - The rule selects `git-stage` and `git-split` ahead of everything else, and the harness cannot assert either, which is the git-state standing limit in `canon/context/sandbox/overview.md`. A rule selecting what nothing can check is working correctly, since it names the gap instead of hiding it behind a skill nobody nominated.
 
-`scripts/sandbox/exempt.toml` holds the other half of the split: the rule says what to write, and an exemption says what never will be.
+`sandbox/exempt.toml` holds the other half of the split: the rule says what to write, and an exemption says what never will be.

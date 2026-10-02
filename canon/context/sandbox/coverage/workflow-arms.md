@@ -37,7 +37,7 @@ The skill names its route again on the `Next:` line, so the `auto-ship` pin read
 
 ## Groundwork
 
-`scripts/sandbox/fixtures/claude/plan-groundwork/` does not exist, so every `claude:plan-groundwork` arm returns `unchecked` with nothing asserted, and a verdict confirms only that the session completed.
+`sandbox/fixtures/claude/plan-groundwork/` does not exist, so every `claude:plan-groundwork` arm returns `unchecked` with nothing asserted, and a verdict confirms only that the session completed.
 
 The `open`, `resume`, and `decline` arms cover creating, continuing, and refusing a track. None runs a spike or produces an artifact, so the write-scope rule sending evidence to `evidence/` inside a track has no arm exercising it. The skill's first guard refuses a missing topic without creating a folder, so each arm names its intended prompt on its own `Action:` line and has to be driven with that topic.
 

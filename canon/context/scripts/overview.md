@@ -14,7 +14,7 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 - No domain keeps a verb folder under `scripts/`. `tooling` was the last to empty its own, once `canon tooling verify` moved to `src/tooling/verify-stack.ts`
 - `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results. It carries no runner and nothing dispatches to it
 - `scripts/lib/` owns shared functions, sourced and never executed directly. No bash function is under test
-- `scripts/sandbox/` owns scenario provisioning, covered in `canon/context/sandbox/index.md`
+- The scenario tree that `manage-sandbox.sh` provisions from sits at `sandbox/` in the project root, outside this folder, covered in `canon/context/sandbox/index.md`
 
 ## Decisions
 
