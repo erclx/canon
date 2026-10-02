@@ -7,18 +7,27 @@ export type BareFlagSkip =
   | 'flag-unset'
   | 'common-dir-unreadable'
   | 'genuinely-bare'
+  | 'write-failed'
 
-/** What the repair did, or the reason it left the configuration alone. */
+/**
+ * What the repair did, or the reason it left the configuration alone.
+ *
+ * `message` is non-null whenever the flag is still set and a caller should say
+ * so, which is a repair and a failed write. The three quiet skips carry none.
+ */
 export type BareFlagRecord =
   | { readonly repaired: true; readonly reason: null; readonly message: string }
   | {
       readonly repaired: false
       readonly reason: BareFlagSkip
-      readonly message: null
+      readonly message: string | null
     }
 
 export const REPAIRED_MESSAGE =
   "Repaired core.bare, which worktree entry left set. Recovery is 'git config core.bare false'."
+
+export const WRITE_FAILED_MESSAGE =
+  "core.bare is set and the repair could not write the config, which a lock file or a read-only config causes. Recovery is 'git config core.bare false'."
 
 const skipped = (reason: BareFlagSkip): BareFlagRecord => ({
   repaired: false,
@@ -62,7 +71,13 @@ export async function repairBareFlag(root: string): Promise<BareFlagRecord> {
     return skipped('genuinely-bare')
 
   const write = await git('config', 'core.bare', 'false')
-  if (write.exitCode !== 0) return skipped('common-dir-unreadable')
+  if (write.exitCode !== 0) {
+    return {
+      repaired: false,
+      reason: 'write-failed',
+      message: WRITE_FAILED_MESSAGE,
+    }
+  }
 
   return { repaired: true, reason: null, message: REPAIRED_MESSAGE }
 }

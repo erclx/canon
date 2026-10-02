@@ -37,7 +37,7 @@ canon worktrees repair-bare-flag --root <path> --json
 | `--root <path>` | Repository to repair, default the cwd |
 | `--json`        | Print the record on stdout            |
 
-`--json` writes `{repaired, reason, message}` on stdout, once, whether or not anything was written. `reason` is `flag-unset`, `common-dir-unreadable`, or `genuinely-bare` when `repaired` is false, and `message` carries the warning text when it is true. A repository whose common dir is not named `.git` keeps its flag. The exit code is always `0`, so a hook never fails a tool call. Without `--json`, a repair prints its warning on stderr and a no-op prints nothing.
+`--json` writes `{repaired, reason, message}` on stdout, once, whether or not anything was written. `reason` is `flag-unset`, `common-dir-unreadable`, `genuinely-bare`, or `write-failed` when `repaired` is false. `message` carries text when the flag is repaired and when the write failed, and is null on the three quiet skips. A `write-failed` record means the flag is still set, which a lock file or a read-only config causes. A repository whose common dir is not named `.git` keeps its flag. The exit code is always `0`, so a hook never fails a tool call. Without `--json`, a record carrying a message prints it on stderr and any other prints nothing.
 
 ## Reclaim
 

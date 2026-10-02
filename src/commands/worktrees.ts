@@ -241,7 +241,7 @@ export function register(program: Command): void {
       const record = await repairBareFlag(opts.root ?? '.')
       if (opts.json === true) {
         process.stdout.write(`${JSON.stringify(record)}\n`)
-      } else if (record.repaired) {
+      } else if (record.message !== null) {
         logWarn(record.message)
       }
     })

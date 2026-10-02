@@ -1,9 +1,11 @@
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { repairBareFlag } from '@/worktrees/bare-flag'
+
+const CLI = join(import.meta.dirname, '../cli.ts')
 
 let root: string
 
@@ -39,6 +41,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   rmSync(root, { force: true, recursive: true })
 })
 
@@ -91,5 +94,67 @@ describe('repairBareFlag', () => {
     const record = await repairBareFlag(join(root, 'plain'))
 
     expect(record.repaired).toBe(false)
+  })
+
+  it('should read the repository the root names under an exported GIT_DIR', async () => {
+    sh('git -C repo config core.bare true')
+    vi.stubEnv('GIT_DIR', join(root, 'linked', '.git'))
+
+    const record = await repairBareFlag(join(root, 'repo'))
+
+    expect(record.repaired).toBe(true)
+    expect(bareFlag('repo')).toBe('false')
+  })
+
+  it('should say why when the config write fails', async () => {
+    sh('git -C repo config core.bare true')
+    sh('touch repo/.git/config.lock')
+
+    const record = await repairBareFlag(join(root, 'repo'))
+
+    expect(record).toMatchObject({ repaired: false, reason: 'write-failed' })
+    expect(record.message).toContain('git config core.bare false')
+    expect(bareFlag('repo')).toBe('true')
+  })
+})
+
+describe('canon worktrees repair-bare-flag --json', () => {
+  const verb = (target: string): { stdout: string; status: number } => {
+    const result = spawnSync(
+      'bun',
+      [CLI, 'worktrees', 'repair-bare-flag', '--root', target, '--json'],
+      { encoding: 'utf8' },
+    )
+    return { stdout: result.stdout, status: result.status ?? -1 }
+  }
+
+  it('should print one repaired record and exit 0', () => {
+    sh('git -C repo config core.bare true')
+
+    const { stdout, status } = verb(join(root, 'repo'))
+
+    expect(status).toBe(0)
+    expect(stdout.trim().split('\n')).toHaveLength(1)
+    expect(JSON.parse(stdout)).toMatchObject({ repaired: true })
+  })
+
+  it('should print one no-op record and exit 0 on a healthy repository', () => {
+    const { stdout, status } = verb(join(root, 'repo'))
+
+    expect(status).toBe(0)
+    expect(JSON.parse(stdout)).toMatchObject({
+      repaired: false,
+      reason: 'flag-unset',
+    })
+  })
+
+  it('should print one record and exit 0 outside a git repository', () => {
+    sh('mkdir plain')
+
+    const { stdout, status } = verb(join(root, 'plain'))
+
+    expect(status).toBe(0)
+    expect(stdout.trim().split('\n')).toHaveLength(1)
+    expect(JSON.parse(stdout)).toMatchObject({ repaired: false })
   })
 })

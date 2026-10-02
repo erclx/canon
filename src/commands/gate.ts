@@ -98,7 +98,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   if (!emitJson && !nested) intro('canon gate run')
 
   const repair = await repairBareFlag(root)
-  if (repair.repaired) logWarn(repair.message)
+  if (repair.message !== null) logWarn(repair.message)
 
   const changed = opts.all
     ? { scoped: false, files: [] }

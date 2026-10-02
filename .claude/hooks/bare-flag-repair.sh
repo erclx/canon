@@ -20,7 +20,10 @@ Bash) ;;
 esac
 
 cli="$root/src/cli.ts"
-[ -f "$cli" ] || exit 0
+if [ ! -f "$cli" ]; then
+  jq -nc '{hookSpecificOutput:{hookEventName:"PreToolUse",additionalContext:"core.bare is set and the repair did not run, since src/cli.ts is absent. Recovery is '\''git config core.bare false'\''."}}'
+  exit 0
+fi
 
 # stdout carries the hook protocol, so the verb's record is parsed rather than
 # printed. A run that fails leaves the flag set, and the hook says so because the
