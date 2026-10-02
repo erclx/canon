@@ -1368,7 +1368,7 @@ async function listPullFiles(
     '--paginate',
     `repos/{owner}/{repo}/pulls/${number}/files`,
     '--jq',
-    '.[] | "\(.status)\t\(.filename)"',
+    '.[] | [.status, .filename] | @tsv',
   ])
   if (stdout === null) return undefined
   const files = new Map<string, boolean>()
