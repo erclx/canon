@@ -221,8 +221,10 @@ workflow is read from the checkout rather than the pull request's head, so a
 pull request that adds or removes its own deploy workflow reads against trunk's.
 
 An unreadable thread refuses as `gh-failed` rather than reporting `settled` off
-a thread it never read. The orchestrator's draft lift is the caller, and holds
-while `owed` is non-empty.
+a thread it never read. The check skips the merge base read, which only the
+render needs, so it never refuses `no-base`. The orchestrator's draft lift is
+the caller, and lifts only on `settled`, so a refusal holds it the same as
+`owed` does.
 
 ## What a collapsed comment still leaves to GitHub
 

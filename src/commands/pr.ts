@@ -1498,9 +1498,13 @@ async function runEvidence(
     )
   }
 
+  // The check never reads the merge base, so it skips the compare call and
+  // a failed one cannot hold a draft lift for a reason the check never had.
   const [pullFiles, base] = await Promise.all([
     listPullFiles(root, identity.number),
-    readPullMergeBase(root, identity.number, identity.head),
+    isCheck
+      ? undefined
+      : readPullMergeBase(root, identity.number, identity.head),
   ])
   if (pullFiles === undefined) {
     return refuseWith(
@@ -1509,9 +1513,6 @@ async function runEvidence(
       emitJson,
       root,
     )
-  }
-  if (base === undefined) {
-    return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
   }
 
   const grouped = await groupEvidence(
@@ -1598,6 +1599,10 @@ async function runEvidence(
       )
     }
     return 0
+  }
+
+  if (base === undefined) {
+    return refuseWith('no-base', EVIDENCE_REFUSALS['no-base'], emitJson, root)
   }
 
   // A local address rides on a checklist or a hosted preview and never opens

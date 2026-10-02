@@ -849,6 +849,18 @@ describe('canon pr evidence --check', () => {
     },
   )
 
+  it('should check without the merge base the render needs', async () => {
+    writeFileSync(
+      join(tempDir, 'files.tsv'),
+      'modified\tevidence/dark/nav.png\n',
+    )
+    writeFileSync(join(tempDir, 'merge-base'), '')
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'owed', owed: ['evidence'] })
+  })
+
   it('should refuse gh-failed rather than report settled off an unread thread', async () => {
     rmSync(commentsFile)
 
