@@ -14,3 +14,6 @@ scaffold = "uv init --package {{name}}"
 
 [gitignore]
 "# Python" = [".pytest_cache/", ".mypy_cache/", ".ruff_cache/", ".coverage_cache/"]
+
+[verify]
+prepare = "bun init -y && uv add --dev ruff mypy pytest pytest-cov && uv sync"

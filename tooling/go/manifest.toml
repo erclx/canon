@@ -11,3 +11,6 @@ scaffold = "mkdir {{name}} && cd {{name}} && go mod init example.com/{{name}} &&
 "test" = "go test ./..."
 "test:run" = "go test -v ./..."
 "build" = "go build ./..."
+
+[verify]
+prepare = "bun init -y && (command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest)"

@@ -39,7 +39,7 @@ The manifest declares no `[dependencies.dev]`. Manifest injection currently call
 
 ## Verify command
 
-`canon tooling verify <stack>` currently runs `bun run lint:fix` and `bun run check` against any stack with a `package.json`. Since base ships a `package.json`, those run for python too. Python's `verify.json` requires the package.json `lint`/`typecheck`/`test:run` scripts that delegate to `uv run`, so the verify path works end-to-end as long as `uv` is installed in the verify environment. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they cleanly skip.
+`canon tooling verify python` runs the manifest's `[verify] prepare` before Sync, which is checklist steps 2, 5, and 6: `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`. `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix` and `bun run check` run at all. Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they skip.
 
 ## Anti-patterns
 

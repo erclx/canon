@@ -44,6 +44,7 @@ The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run 
 - Probe `php` and `composer` first.
 - Hold a precondition on `vendor/bin/phpunit`, so the run stops and names `composer install` when it is missing.
 - Require Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`). Base's runner adds the four base phases wherever the folder declares their scripts, then the markdown bans stage.
+- The manifest's `[verify] prepare` runs checklist steps 2 and 5 for `canon tooling verify php`: `bun init -y`, then the `composer require --dev` line. The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## Gitignore
 
