@@ -6,19 +6,19 @@ use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"
 }
 
-# A record tree at whichever root the caller names, built by hand so one seeder
-# serves both sides of the fallback. The arms below differ only in that argument,
-# which is what keeps a difference in outcome attributable to the resolution
-# rather than to two fixtures that drifted apart.
+# A record tree at whichever root the caller names, so one seeder serves both
+# sides of the fallback. The arms below differ only in that argument, which is
+# what keeps a difference in outcome attributable to the resolution rather than
+# to two fixtures that drifted apart. The records are stored once under a
+# neutral folder and moved to the named root, since a stored `.canon/` path
+# would be ignored and a stored `.claude/` path would pin the fallback's other
+# branch.
 #
 seed_records() {
   local root=$1 scratch=$2
 
   mkdir -p "$root/plans/archive" "$root/tasks" "$root/memory" "$root/$scratch"
 
-  # The records are stored once under a neutral folder and moved to whichever
-  # root the caller names, since a stored `.canon/` path would be ignored and a
-  # stored `.claude/` path would pin the fallback's other branch.
   stage_fixtures infra record-root shared records
   cp -R seed-records/. "$root/"
   rm -rf seed-records
