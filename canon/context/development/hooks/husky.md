@@ -63,6 +63,14 @@ The verb resolves the plugin's own id by reading `claude/.claude-plugin/plugin.j
 
 An older global binary carrying no `upgrade` or `plugin-update` subcommand produces no parseable record, and the verb stays quiet on that the way every such gap here does until a release lands.
 
+### The base stack's copy
+
+`tooling/base/configs/.husky/post-merge` carries the same guard, bootstrap, and verb call, and differs in two ways. It has no source-CLI fallback, since a target holds no `src/cli.ts` of the toolkit's, so a target on a binary the registry has not caught up with runs nothing until a release publishes the verb, quietly. And a target's global binary may predate the verb for longer than this checkout's does, because the hook ships on sync and the binary on publish, which the `canon upgrade` probe covers unless `CANON_SKIP_UPGRADE` is set.
+
+A target's hook archives rather than announces. The board is gitignored, so a shell-side archive leaves no diff to review, which is why an announce-only hook was the earlier choice. `tasks archive` bounds the archive by a pull request number the merge carried and a closed task, so the verb stands in for that person-in-the-loop check. A target runs five steps, three of which act on the machine, so the `CANON_SKIP_*` switches sit in the hook's header. Hook output goes to the verb's stderr rather than stdout.
+
+`src/hooks/post-merge-hook.test.ts` runs its shared cases against both copies and keeps the source-fallback cases on this repository's copy only.
+
 ## Gotchas
 
 ### Every hook runs as POSIX sh under errexit

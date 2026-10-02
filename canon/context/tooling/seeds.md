@@ -39,7 +39,7 @@ Whether a hook, a workflow, or a husky script installs turns on presence in its 
 
 A second pass confirms every seeded hook name appears in a `command` string in the seeded `settings.json`, since a hook nobody wires in fails the same way as one that never shipped. `src/gate/` and the `scripts/core/check-*.sh` scripts are exempt by kind, because a target never receives this checkout's own build. Measured at `141885c2` on 2026-09-02.
 
-The check stops at filename presence and never compares content, since a seed and its hook diverge by design. `standards-audit.sh` resolves `src/cli.ts` from this checkout while a seeded target resolves an installed binary, and `tooling/base/configs/.husky/post-merge` reads the records-push block's fields off its own `root`. Measured at `64a4297b` on 2026-09-07, against eleven tracked hooks: seven byte-identical to their seed, one diverging by design, and three carrying no seed.
+The check stops at filename presence and never compares content, since a seed and its hook diverge by design. `standards-audit.sh` resolves `src/cli.ts` from this checkout while a seeded target resolves an installed binary, and `tooling/base/configs/.husky/post-merge` drops the source-CLI fallback this repository's hook carries. Measured at `64a4297b` on 2026-09-07, against eleven tracked hooks: seven byte-identical to their seed, one diverging by design, and three carrying no seed.
 
 ### The seed gate
 

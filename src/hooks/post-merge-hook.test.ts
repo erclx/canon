@@ -13,7 +13,16 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git-env'
 
-const HOOK = join(import.meta.dirname, '../../.husky/post-merge')
+const HOOKS = [
+  { name: 'repo', path: join(import.meta.dirname, '../../.husky/post-merge') },
+  {
+    name: 'base',
+    path: join(
+      import.meta.dirname,
+      '../../tooling/base/configs/.husky/post-merge',
+    ),
+  },
+]
 
 const VERB_USAGE = 'Usage: canon hooks post-merge [options]'
 const ROOT_USAGE = 'Usage: canon [command]'
@@ -46,13 +55,38 @@ function calls(name: string): string {
   return existsSync(log) ? readFileSync(log, 'utf8') : ''
 }
 
-function runHook(): number {
-  const result = execaSync('sh', ['-e', HOOK], {
+/**
+ * A `canon` that lacks the verb until `upgrade` runs, then carries it, so a
+ * test reads whether the hook reinstalled before handing the verb over.
+ */
+function upgradableStub(): void {
+  const log = join(root, 'canon.log')
+  const flag = join(root, 'upgraded')
+  writeFileSync(
+    join(bin, 'canon'),
+    [
+      '#!/bin/sh',
+      'for arg in "$@"; do',
+      '  if [ "$arg" = "--help" ]; then',
+      `    if [ -f '${flag}' ]; then echo '${VERB_USAGE}'; else echo '${ROOT_USAGE}'; fi`,
+      '    exit 0',
+      '  fi',
+      'done',
+      `echo "$*" >> '${log}'`,
+      `if [ "$1" = "upgrade" ]; then touch '${flag}'; fi`,
+      '',
+    ].join('\n'),
+  )
+  chmodSync(join(bin, 'canon'), 0o755)
+}
+
+function runHook(hook: string, skipUpgrade = true): number {
+  const result = execaSync('sh', ['-e', hook], {
     cwd: root,
     env: {
       ...gitEnv(),
       PATH: `${bin}:/usr/bin:/bin`,
-      CANON_SKIP_UPGRADE: '1',
+      ...(skipUpgrade ? { CANON_SKIP_UPGRADE: '1' } : {}),
     },
     extendEnv: false,
     reject: false,
@@ -75,14 +109,60 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true })
 })
 
-describe('post-merge hook', () => {
+describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
   it('should hand the steps to the global binary when it carries the verb', () => {
     stub('canon', VERB_USAGE)
 
-    runHook()
+    runHook(path)
 
     expect(calls('canon')).toBe(`hooks post-merge --root ${root}\n`)
   })
+
+  it('should reinstall once and then run the verb when the binary gains it', () => {
+    upgradableStub()
+
+    runHook(path, false)
+
+    expect(calls('canon')).toBe(`upgrade\nhooks post-merge --root ${root}\n`)
+  })
+
+  it('should not reinstall when CANON_SKIP_UPGRADE is set', () => {
+    upgradableStub()
+
+    const code = runHook(path)
+
+    expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
+  })
+
+  it('should exit zero when the binary never gains the verb', () => {
+    stub('canon', ROOT_USAGE)
+
+    const code = runHook(path, false)
+
+    expect({ code, canon: calls('canon') }).toEqual({
+      code: 0,
+      canon: 'upgrade\n',
+    })
+  })
+
+  it('should exit zero with no canon on PATH', () => {
+    const code = runHook(path)
+
+    expect(code).toBe(0)
+  })
+
+  it('should exit zero with no board', () => {
+    stub('canon', VERB_USAGE)
+    rmSync(join(root, '.canon'), { recursive: true })
+
+    const code = runHook(path)
+
+    expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
+  })
+})
+
+describe('post-merge hook (repo copy source fallback)', () => {
+  const hook = HOOKS[0].path
 
   it('should fall back to the source CLI when the global binary lacks the verb', () => {
     stub('canon', ROOT_USAGE)
@@ -90,7 +170,7 @@ describe('post-merge hook', () => {
     mkdirSync(join(root, 'src'))
     writeFileSync(join(root, 'src/cli.ts'), '')
 
-    runHook()
+    runHook(hook)
 
     expect(calls('bun')).toBe(
       `${root}/src/cli.ts hooks post-merge --root ${root}\n`,
@@ -103,7 +183,7 @@ describe('post-merge hook', () => {
     mkdirSync(join(root, 'src'))
     writeFileSync(join(root, 'src/cli.ts'), '')
 
-    const code = runHook()
+    const code = runHook(hook)
 
     expect({ code, canon: calls('canon'), bun: calls('bun') }).toEqual({
       code: 0,
@@ -116,7 +196,7 @@ describe('post-merge hook', () => {
     stub('canon', ROOT_USAGE)
     stub('bun', VERB_USAGE)
 
-    const code = runHook()
+    const code = runHook(hook)
 
     expect({ code, bun: calls('bun') }).toEqual({ code: 0, bun: '' })
   })
