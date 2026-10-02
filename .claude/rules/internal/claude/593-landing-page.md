@@ -21,7 +21,7 @@ Two conventions were rewritten against the current composition, the motion test 
 
 ## Every image is generated, never a screenshot pasted in
 
-- Point an image at a file some script writes. The frames under `assets/` come from `scripts/core/regen-hero.sh` and `canon capture`, and `web/public/assets/` symlinks them rather than holding a second copy.
+- Point an image at a file some script writes. The frames under `assets/` come from `scripts/core/regen-hero.ts` and `canon capture`, and `web/public/assets/` symlinks them rather than holding a second copy.
 - Say so on the page when a frame is a hand-taken snapshot that no build refreshes.
 - Never hand-edit a generated artifact. A hand-edit after generation defeats the discipline silently, which is the failure `assets/captures/install.html.tmpl` documents for the terminal frames.
 
