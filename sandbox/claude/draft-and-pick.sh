@@ -17,7 +17,7 @@ stage_setup() {
   git add . && git commit -m "feat(page): release notes with an undecided callout treatment" --no-verify -q
 
   log_step "Scenario ready: a stated visual decision with one treatment undecided"
-  log_info "Context: index.html carries one flat callout, and .claude/DESIGN.md states the"
+  log_info "Context: index.html carries one flat callout, and canon/DESIGN.md states the"
   log_info "         treatment as undecided between a border, a ground shift, and an edge rule"
   log_info "Browser: machine-dependent, and the sandbox does not decide it. canon capture resolves"
   log_info "         playwright-core through the installed canon rather than this project, so the"
