@@ -1,6 +1,7 @@
 import {
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
@@ -861,6 +862,28 @@ describe('parseExpectation', () => {
   it('should distinguish an absent escape scope from a declared empty one', () => {
     expect(parseExpectation('').escapeScope).toBeUndefined()
     expect(parseExpectation('escape_scope = []\n').escapeScope).toEqual([])
+  })
+})
+
+describe('the claude:search-craft refused declaration', () => {
+  const declare = (): Expectation =>
+    parseExpectation(
+      readFileSync(
+        join(
+          import.meta.dirname,
+          '../../sandbox/fixtures/claude/search-craft/refused/expect.toml',
+        ),
+        'utf8',
+      ),
+    )
+
+  it('should assert the reply and the absent login marker with no paths', () => {
+    const expectation = declare()
+
+    expect(expectation.paths).toEqual([])
+    expect(expectation.reply).toEqual(['cookie'])
+    expect(expectation.absent).toEqual(['.pull-used-login'])
+    expect(countMechanicalAssertions(expectation)).toBeGreaterThan(0)
   })
 })
 
