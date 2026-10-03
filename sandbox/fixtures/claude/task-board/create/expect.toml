@@ -2,10 +2,10 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# The create path has no CLI verb. `src/commands/tasks.ts` registers `archive`
-# alone, so the skill writes this file itself from `canon standards tasks`.
-# That makes the whole of what this arm asserts prose behavior, with no unit
-# test underneath it, which is the opposite of the archive arm beside it.
+# `canon tasks next-label` allocates the label, and the skill writes the file
+# itself from `canon standards tasks`. Nothing writes the task for it, so the
+# file's frontmatter, body, and links are prose behavior with no unit test
+# underneath them, which is the opposite of the archive arm beside it.
 
 # Every top-level key sits above the first `[[content]]` block. A bare key below
 # one belongs to that table in TOML, so a `manual` array written at the bottom
