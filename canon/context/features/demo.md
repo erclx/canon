@@ -15,7 +15,8 @@ The browser engine already in this repository can produce a video from a driven 
 
 - `src/demo/` owns the beats reader, the compiler, the pointer and its bundled cursors, the cursor theme reader, the browser driver, and the container post-steps
 - `src/browser/` owns the engine helpers shared with `canon inventory` and `canon drive`
-- `demos/` owns the committed plans and the recordings they produce
+- `demos/<slug>/` owns one demo: the committed `beats.md`, `plan.json`, an optional HyperFrames `index.html`, and the one gif a README embeds, named `demo.gif` because the folder-echoed filename gate rejects a repeated folder name. The raw take lands in the ignored `take/` and a composed render in the ignored `renders/`
+- `record-screencast` passes `--slug` to `compile`, since the default slug reads the draft filename and would name every demo `beats`. Ignoring `take/` in a target is open, since no tooling stack carries a gitignore seed
 
 ## Decisions
 
