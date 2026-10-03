@@ -91,7 +91,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `wiki`, in `scripting.md`: `init`
 - `indexes`, in `indexes.md`: `regen`, `list`
 - `docs`, in `docs.md`: `list`, `<topic>`
-- `design`, in `design-board.md`: `render`, `regen`, `board`, `css`, `install`, `sync`
+- `design`, in `install-and-sync.md` for `install` and `sync`, and described below for the rest: `render`, `regen`, `css`, `install`, `sync`
 - `slides`, described below: `render`, `list`
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`

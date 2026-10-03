@@ -24,7 +24,7 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/gallery-src/` owns the component gallery, a second Astro config owned by the design board rather than the landing page
 - `web/card-src/` owns the social card route, a third Astro config
 
-`canon/context/web/build.md` covers the build-time reads, the build, and deploy, `canon/context/web/assets.md` the social card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks and the capture of this page. `canon/context/design/board.md` covers the gallery.
+`canon/context/web/build.md` covers the build-time reads, the build, and deploy, `canon/context/web/assets.md` the social card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks and the capture of this page.
 
 ## Decisions
 
