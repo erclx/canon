@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 /** @jsxImportSource preact */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { render } from 'preact'
 import { act } from 'preact/test-utils'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -235,6 +237,21 @@ describe('Details', () => {
 
     expect(mount.querySelector('.panel-right')?.textContent).toContain(
       'No token stylesheet',
+    )
+  })
+})
+
+describe('index.html', () => {
+  it('should declare an inline icon so the browser never requests /favicon.ico', () => {
+    const html = readFileSync(
+      join(import.meta.dirname, '..', 'index.html'),
+      'utf8',
+    )
+
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+
+    expect(doc.querySelector('link[rel="icon"]')?.getAttribute('href')).toMatch(
+      /^data:/,
     )
   })
 })

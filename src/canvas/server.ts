@@ -53,6 +53,11 @@ export interface CanvasOptions {
 
 export interface ChangeEvent {
   readonly page: string
+  /**
+   * The path under the page folder, or empty when the change is to the
+   * top-level entry itself, being a page folder added, renamed, or removed.
+   * An empty file names no frame, so a reader rereads the page list alone.
+   */
   readonly file: string
 }
 
@@ -129,9 +134,9 @@ async function serveFrame(
 }
 
 /**
- * Fans each file change under the canvas folder out to every open shell. A
- * path one segment deep or deeper is a page file, and the root is skipped,
- * since a file sitting beside the pages belongs to no page.
+ * Fans each change under the canvas folder out to every open shell. The first
+ * segment names the page and the rest names the file within it, so a
+ * top-level entry goes out with an empty file. Only an empty path is skipped.
  */
 class ChangeStream {
   private readonly clients = new Set<ReadableStreamDefaultController<string>>()
@@ -145,10 +150,10 @@ class ChangeStream {
   }
 
   /**
-   * A path one segment deep is a page folder appearing, going, or being
-   * renamed, which the recursive watch reports under its bare name with
-   * nothing beneath it. It goes out with an empty file, so the shell rereads
-   * the page list without reloading a frame.
+   * A one-segment path is kept because the recursive watch reports a page
+   * folder appearing, going, or being renamed under its bare name with nothing
+   * beneath it. A stray file beside the pages goes out the same way, which
+   * costs the shell one page-list reread.
    */
   private queue(path: string): void {
     const [page, ...rest] = path.split(/[\\/]/)
