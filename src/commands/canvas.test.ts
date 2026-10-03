@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -225,6 +225,29 @@ describe('canon canvas selection', () => {
       box: { width: 390 },
     })
     expect(existsSync(selection.path)).toBe(true)
+  })
+
+  it('should report the selected element with its index, tag, classes, and text', () => {
+    canvas('page', 'add', 'drafts')
+    writeFileSync(
+      join(ROOT, '.canon', 'canvas', 'drafts', 'hero.html'),
+      '<html><head></head><body><button class="cta">Start</button></body></html>',
+    )
+    writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 3, tag: 'button', count: 4 },
+    })
+
+    const run = canvas('selection', '--json')
+
+    expect(JSON.parse(run.stdout).selection.element).toEqual({
+      index: 3,
+      tag: 'button',
+      classes: ['cta'],
+      text: 'Start',
+      stale: false,
+    })
   })
 
   it('should report none once the selected frame is removed', () => {

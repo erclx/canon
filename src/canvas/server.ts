@@ -1,7 +1,13 @@
 import { type FSWatcher, mkdirSync, watch } from 'node:fs'
 import {
+  type ElementAddress,
+  HASH_ATTRIBUTE,
+  TOKENS_ATTRIBUTE,
+} from '@/canvas/address'
+import {
   type ContentRefused,
   canvasDir,
+  contentHash,
   listPages,
   LOCK_SUFFIX,
   moveFrame,
@@ -70,21 +76,31 @@ export interface ChangeEvent {
   readonly file: string
 }
 
-/** Escapes the one sequence that would end the injected element early. */
-function styleElement(css: string): string {
-  return `<style data-canvas-tokens>${css.replaceAll('</style', '<\\/style')}</style>`
+/**
+ * Escapes the one sequence that would end the injected element early. The
+ * hash is hex, so it needs no escaping inside the attribute.
+ */
+function styleElement(css: string, hash: string | undefined): string {
+  const stamp = hash === undefined ? '' : ` ${HASH_ATTRIBUTE}="${hash}"`
+  return `<style ${TOKENS_ATTRIBUTE}${stamp}>${css.replaceAll('</style', '<\\/style')}</style>`
 }
 
 /**
  * Puts the tokens first in the head, so a stylesheet the frame links itself
- * still wins the cascade. A frame with no head gets the element ahead of
- * everything, which a browser hoists into the head it builds.
+ * still wins the cascade. A frame with no head gets the element right after
+ * its doctype, which a browser hoists into the head it builds. A hash stamps
+ * the element even when no tokens resolve, since the shell sends it back with
+ * an element pick.
  */
-export function injectTokens(html: string, css: string): string {
-  if (css === '') return html
-  const element = styleElement(css)
+export function injectTokens(html: string, css: string, hash?: string): string {
+  if (css === '' && hash === undefined) return html
+  const element = styleElement(css, hash)
   const head = html.match(/<head(?:\s[^>]*)?>/i)
-  if (head?.index === undefined) return `${element}${html}`
+  if (head?.index === undefined) {
+    /* Ahead of a doctype the element would drop the frame into quirks mode. */
+    const doctype = html.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
+    return `${doctype}${element}${html.slice(doctype.length)}`
+  }
   const at = head.index + head[0].length
   return `${html.slice(0, at)}${element}${html.slice(at)}`
 }
@@ -133,6 +149,9 @@ const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
   exists: 409,
   'malformed-layout': 409,
   busy: 409,
+  'invalid-address': 400,
+  'address-mismatch': 409,
+  'stale-address': 409,
 }
 
 function refusal(refused: ContentRefused): Response {
@@ -184,6 +203,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function isAddressShape(value: unknown): value is ElementAddress {
+  return (
+    isRecord(value) &&
+    typeof value.index === 'number' &&
+    typeof value.tag === 'string' &&
+    typeof value.count === 'number' &&
+    (value.hash === undefined || typeof value.hash === 'string')
+  )
+}
+
 async function serveFrame(
   root: string,
   content: string,
@@ -198,7 +227,13 @@ async function serveFrame(
   if (file.status !== 200 || !type.startsWith('text/html')) return file
 
   const { css } = resolveFrameTokens(root, tokens)
-  return new Response(injectTokens(await file.text(), css), {
+  /*
+   * Hashed over the bytes on disk, the same input `writeSelection` reads,
+   * since decoding to text drops a byte order mark the file still holds.
+   */
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const html = new TextDecoder().decode(bytes)
+  return new Response(injectTokens(html, css, contentHash(bytes)), {
     headers: { 'content-type': type, 'cache-control': 'no-store' },
   })
 }
@@ -324,6 +359,13 @@ export function startCanvas(
               selection: selected && {
                 page: selected.page,
                 frame: selected.frame,
+                ...(selected.element && {
+                  element: {
+                    index: selected.element.index,
+                    tag: selected.element.tag,
+                    stale: selected.element.stale,
+                  },
+                }),
               },
             })
           }),
@@ -359,7 +401,17 @@ export function startCanvas(
                 if (target === undefined && (page != null || frame != null)) {
                   return badBody('send both page and frame, or neither')
                 }
-                const outcome = writeSelection(root, target)
+                const { element } = body
+                if (element != null && target === undefined) {
+                  return badBody('send an element with its page and frame')
+                }
+                if (element != null && !isAddressShape(element)) {
+                  return badBody('send an element as index, tag, and count')
+                }
+                const outcome = writeSelection(
+                  root,
+                  target && element != null ? { ...target, element } : target,
+                )
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),
             ),

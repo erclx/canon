@@ -14,6 +14,7 @@ import {
   addFrame,
   addPage,
   canvasDir,
+  contentHash,
   DEFAULT_FRAME,
   FRAME_GAP,
   listPages,
@@ -507,5 +508,130 @@ describe('selection', () => {
     expect(writeSelection(ROOT, { page: 'missing', frame: 'a' })).toMatchObject(
       { ok: false, reason: 'no-page' },
     )
+  })
+})
+
+const BUTTON_FRAME = `<!doctype html>
+<html lang="en">
+  <head><title>hero</title></head>
+  <body><main><h1>Hero</h1><button class="cta primary">Start now</button></main></body>
+</html>
+`
+
+/** html, head, title, body, main, h1, button: the button sits at index 6. */
+const BUTTON = { index: 6, tag: 'button', count: 7 } as const
+
+function seedButtonFrame(): void {
+  mkdirSync(pageDir('drafts'), { recursive: true })
+  writeFileSync(join(pageDir('drafts'), 'hero.html'), BUTTON_FRAME)
+}
+
+describe('element selection', () => {
+  it('should read back the element written, with its tag, classes, and text', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: BUTTON,
+    })
+
+    expect(outcome).toEqual({ ok: true })
+    expect(readSelection(ROOT)?.element).toEqual({
+      index: 6,
+      tag: 'button',
+      classes: ['cta', 'primary'],
+      text: 'Start now',
+      stale: false,
+    })
+  })
+
+  it('should report the selection stale once the frame file changes', () => {
+    seedButtonFrame()
+    writeSelection(ROOT, { page: 'drafts', frame: 'hero', element: BUTTON })
+
+    writeFileSync(
+      join(pageDir('drafts'), 'hero.html'),
+      BUTTON_FRAME.replace('<h1>Hero</h1>', '<p>new</p><h1>Hero</h1>'),
+    )
+
+    expect(readSelection(ROOT)?.element).toMatchObject({
+      index: 6,
+      tag: 'button',
+      text: 'Start now',
+      stale: true,
+    })
+  })
+
+  it('should refuse an address the file does not hold at that index', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, count: 9 },
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'address-mismatch' })
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should refuse a pick made against an earlier version of the file', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: 'a-hash-of-another-version' },
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'stale-address' })
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should take a pick made against the file as it stands', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: contentHash(BUTTON_FRAME) },
+    })
+
+    expect(outcome).toEqual({ ok: true })
+  })
+
+  it('should take a pick on a frame saved with a byte order mark', () => {
+    mkdirSync(pageDir('drafts'), { recursive: true })
+    const file = `\uFEFF${BUTTON_FRAME}`
+    writeFileSync(join(pageDir('drafts'), 'hero.html'), file)
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: contentHash(file) },
+    })
+
+    expect(outcome).toEqual({ ok: true })
+  })
+
+  it('should refuse an address that is not a whole number', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, index: -1 },
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'invalid-address' })
+  })
+
+  it('should carry no element when only the frame is selected', () => {
+    seedButtonFrame()
+
+    writeSelection(ROOT, { page: 'drafts', frame: 'hero' })
+
+    expect(readSelection(ROOT)?.element).toBeUndefined()
   })
 })

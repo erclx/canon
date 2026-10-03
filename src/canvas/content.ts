@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import {
   closeSync,
   existsSync,
@@ -12,6 +13,11 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { join } from 'node:path'
+import {
+  type ElementAddress,
+  resolveAddress,
+  type SourceElement,
+} from '@/canvas/address'
 import { recordDir } from '@/record-root'
 
 /**
@@ -25,7 +31,7 @@ export const CANVAS_FOLDER = 'canvas'
 
 export const LAYOUT_FILE = 'layout.json'
 
-/** The one frame the operator pointed at, beside the pages it names. */
+/** The frame or element the operator pointed at, beside the pages it names. */
 export const SELECTION_FILE = 'selection.json'
 
 /** Suffix of the file a write goes through before it replaces its target. */
@@ -87,6 +93,9 @@ export type ContentRefusal =
   | 'invalid-position'
   | 'malformed-layout'
   | 'busy'
+  | 'invalid-address'
+  | 'address-mismatch'
+  | 'stale-address'
 
 export interface ContentRefused {
   readonly ok: false
@@ -447,23 +456,58 @@ export function moveFrame(
 export interface Selection {
   readonly page: string
   readonly frame: string
+  readonly element?: ElementAddress
 }
 
-export interface SelectedFrame extends Selection {
+export interface SelectedElement extends SourceElement {
+  readonly index: number
+  /**
+   * Whether the frame file changed since the element was picked. The address
+   * is an index, so an edit can shift it onto another element, and the fields
+   * here are what was picked rather than what sits at the index now.
+   */
+  readonly stale: boolean
+}
+
+export interface SelectedFrame {
+  readonly page: string
+  readonly frame: string
   readonly file: string
   readonly box: Box
+  readonly element?: SelectedElement
 }
 
 export type SelectionOutcome = { readonly ok: true } | ContentRefused
+
+interface StoredElement extends SourceElement {
+  readonly index: number
+  readonly hash: string
+}
 
 function selectionPath(root: string): string {
   return join(canvasDir(root), SELECTION_FILE)
 }
 
+export function contentHash(html: string | Uint8Array): string {
+  return createHash('sha256').update(html).digest('hex')
+}
+
+function isAddress(value: ElementAddress): boolean {
+  return (
+    Number.isInteger(value.index) &&
+    Number.isInteger(value.count) &&
+    value.index >= 0 &&
+    value.index < value.count &&
+    typeof value.tag === 'string' &&
+    value.tag !== ''
+  )
+}
+
 /**
- * Records which frame "this one" means, or clears it. Only a frame on disk can
- * be recorded, so the file never names something a reader would have to guess
- * about.
+ * Records which frame, or which element in it, "this one" means, or clears it.
+ * Only a frame on disk can be recorded, and only an element the file holds at
+ * the address given, so the file never names something a reader would have to
+ * guess about.
  */
 export function writeSelection(
   root: string,
@@ -474,27 +518,68 @@ export function writeSelection(
     return { ok: true }
   }
 
-  const { page, frame } = selection
+  const { page, frame, element } = selection
   if (!isValidName(page) || !isValidName(frame)) {
     return refuse('invalid-name', `${page}/${frame} is not a valid frame`)
   }
-  const found = readPage(root, page)
-  if (!found) return refuse('no-page', `page ${page} does not exist`)
-  if (!found.frames.some((candidate) => candidate.name === frame)) {
+  const onPage = readPage(root, page)
+  if (!onPage) return refuse('no-page', `page ${page} does not exist`)
+  const found = onPage.frames.find((candidate) => candidate.name === frame)
+  if (!found) {
     return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  let stored: StoredElement | undefined
+  if (element !== undefined) {
+    if (!isAddress(element)) {
+      return refuse(
+        'invalid-address',
+        'an element address needs a whole index below its count and a tag',
+      )
+    }
+    const bytes = readFileSync(join(pagePath(root, page), found.file))
+    const hash = contentHash(bytes)
+    const html = bytes.toString('utf8')
+    if (element.hash !== undefined && element.hash !== hash) {
+      return refuse(
+        'stale-address',
+        `${page}/${frame} changed after the pick was made, so pick it again`,
+      )
+    }
+    const check = resolveAddress(html, element)
+    if (!check.ok) return refuse(check.reason, check.detail)
+    stored = { index: element.index, ...check.element, hash }
   }
 
   const target = selectionPath(root)
   const temp = `${target}.${process.pid}${TEMP_SUFFIX}`
-  writeFileSync(temp, `${JSON.stringify({ page, frame })}\n`)
+  const record = stored ? { page, frame, element: stored } : { page, frame }
+  writeFileSync(temp, `${JSON.stringify(record)}\n`)
   renameSync(temp, target)
   return { ok: true }
+}
+
+function readStoredElement(value: unknown): StoredElement | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const { index, tag, classes, text, hash } = value as Record<string, unknown>
+  if (
+    typeof index !== 'number' ||
+    typeof tag !== 'string' ||
+    !Array.isArray(classes) ||
+    !classes.every((name) => typeof name === 'string') ||
+    typeof text !== 'string' ||
+    typeof hash !== 'string'
+  ) {
+    return undefined
+  }
+  return { index, tag, classes, text, hash }
 }
 
 /**
  * The selected frame with its box, or undefined when nothing is selected, the
  * file does not parse, or the frame it names has since been removed, so a
- * reader never gets a stale name back.
+ * reader never gets a stale name back. An element is reported as picked, with
+ * `stale` set once the frame file no longer matches what was picked from.
  */
 export function readSelection(root: string): SelectedFrame | undefined {
   const path = selectionPath(root)
@@ -507,7 +592,7 @@ export function readSelection(root: string): SelectedFrame | undefined {
     return undefined
   }
   if (typeof parsed !== 'object' || parsed === null) return undefined
-  const { page, frame } = parsed as Record<string, unknown>
+  const { page, frame, element } = parsed as Record<string, unknown>
   if (typeof page !== 'string' || typeof frame !== 'string') return undefined
 
   const found = readPage(root, page)?.frames.find(
@@ -515,5 +600,18 @@ export function readSelection(root: string): SelectedFrame | undefined {
   )
   if (!found) return undefined
   const { x, y, width, height } = found
-  return { page, frame, file: found.file, box: { x, y, width, height } }
+  const selected = {
+    page,
+    frame,
+    file: found.file,
+    box: { x, y, width, height },
+  }
+
+  const stored = readStoredElement(element)
+  if (!stored) return selected
+  const { hash, ...picked } = stored
+  const current = contentHash(
+    readFileSync(join(pagePath(root, page), found.file)),
+  )
+  return { ...selected, element: { ...picked, stale: current !== hash } }
 }

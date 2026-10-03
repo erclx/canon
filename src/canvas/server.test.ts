@@ -5,6 +5,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -160,8 +161,19 @@ describe('startCanvas', () => {
     const body = await (await get(server, '/frames/drafts/hero.html')).text()
 
     expect(body).toMatch(
-      /<head><style data-canvas-tokens>[^<]*teal[^<]*<\/style><title>/,
+      /<head><style data-canvas-tokens[^>]*>[^<]*teal[^<]*<\/style><title>/,
     )
+  })
+
+  it('should stamp a frame with the hash of its file, tokens or none', async () => {
+    const file = '<!doctype html><html><head></head><body>hero</body></html>'
+    seed('drafts/hero.html', file)
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/hero.html')).text()
+
+    const hash = createHash('sha256').update(file).digest('hex')
+    expect(body).toContain(`data-canvas-hash="${hash}"`)
   })
 
   it('should inject into a frame that carries no head', async () => {
@@ -172,6 +184,30 @@ describe('startCanvas', () => {
     const body = await (await get(server, '/frames/drafts/bare.html')).text()
 
     expect(body.indexOf('teal')).toBeLessThan(body.indexOf('<p>bare'))
+  })
+
+  it('should keep the doctype first in a frame that carries no head', async () => {
+    seed('drafts/bare.html', '<!DOCTYPE html>\n<p>bare</p>')
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/bare.html')).text()
+
+    expect(body.startsWith('<!DOCTYPE html>')).toBe(true)
+    expect(body.indexOf('data-canvas-hash')).toBeLessThan(
+      body.indexOf('<p>bare'),
+    )
+  })
+
+  it('should stamp a frame saved with a byte order mark with the hash of its bytes', async () => {
+    const file =
+      '\uFEFF<!doctype html><html><head></head><body>hero</body></html>'
+    seed('drafts/hero.html', file)
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/hero.html')).text()
+
+    const hash = createHash('sha256').update(file).digest('hex')
+    expect(body).toContain(`data-canvas-hash="${hash}"`)
   })
 
   it('should serve a frame asset without touching it', async () => {
@@ -427,6 +463,66 @@ describe('POST /api/selection', () => {
     const record = await (await get(server, '/api/pages')).json()
 
     expect(record.selection).toBeUndefined()
+  })
+
+  it('should record an element and report it in the page list', async () => {
+    seed(
+      'drafts/hero.html',
+      '<html><head></head><body><button>Go</button></body></html>',
+    )
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 3, tag: 'button', count: 4 },
+    })
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(response.status).toBe(200)
+    expect(record.selection).toEqual({
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 3, tag: 'button', stale: false },
+    })
+  })
+
+  it('should answer 409 for an element the file does not hold', async () => {
+    seed('drafts/hero.html', '<table><tr><td>a</td></tr></table>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 6, tag: 'td', count: 7 },
+    })
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ reason: 'address-mismatch' })
+  })
+
+  it('should answer 400 for an element sent without its frame', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      element: { index: 0, tag: 'p', count: 1 },
+    })
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should answer 400 for an element that is not an address', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: 'the button',
+    })
+
+    expect(response.status).toBe(400)
   })
 
   it('should answer 404 for a frame that does not exist', async () => {

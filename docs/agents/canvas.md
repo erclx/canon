@@ -25,6 +25,10 @@ The shell writes through the same writer when the operator drags a frame. Both t
 
 `canvas selection --json` emits `{ ok, selection }` with the page, frame, file, box, and path of the frame the operator selected, or `selection: null` when nothing is selected or the selected frame has since been removed. Read it when the operator says "this one".
 
+The operator can also pick one element inside a frame, by clicking it on the surface or in the frame's layers tree. The selection then carries `element`, recording the `index` in document order, `tag`, `classes`, and `text` excerpt as they were at the pick. An edit to the frame since can shift that index onto another element, so `stale` turns true once the file's content no longer matches what the pick was made against. Check it before acting on the index.
+
+A pick is refused as `address-mismatch` when the browser builds elements the file never states, such as a `tbody` a table leaves out or the document wrapper around a fragment. The shell sends its own element count beside the index, so a frame the two sides count differently is reported rather than recorded against the wrong element. A pick is refused as `stale-address` when the frame file changed between the frame being served and the pick arriving, since every served frame carries the hash of its file and the shell sends that hash back.
+
 ## Capture
 
 `canvas capture <page>/<frame>` renders one frame as a PNG, and `canvas capture <page>` renders every frame on the page. Each goes through a server started for the call, so the injected tokens are in the image, and renders at the frame's own width from the layout, so a media query resolves there. It never captures the file on disk.
