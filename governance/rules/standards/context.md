@@ -3,7 +3,6 @@
 description: Shape and content rules for canon/context/<domain>.md entries
 paths:
   - 'canon/context/**'
-  - '.claude/context/**'
 ---
 
 # Context entry standards

@@ -3,7 +3,6 @@
 description: Shape and content rules for canon/ARCHITECTURE.md
 paths:
   - 'canon/ARCHITECTURE.md'
-  - '.claude/ARCHITECTURE.md'
 ---
 
 # Architecture standards

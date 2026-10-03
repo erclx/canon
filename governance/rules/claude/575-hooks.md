@@ -1,8 +1,7 @@
 ---
-description: State the hook stdin guard and the silencing rule for .claude/hooks scripts and their seeded copies
+description: State the hook stdin guard and the silencing rule for .claude/hooks scripts
 paths:
   - '.claude/hooks/**/*.sh'
-  - 'tooling/claude/seeds/.claude/hooks/**/*.sh'
 ---
 
 # Hook standards

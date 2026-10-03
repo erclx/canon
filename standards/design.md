@@ -3,7 +3,6 @@ title: Design reference
 description: Shape and content rules for canon/DESIGN.md
 paths:
   - 'canon/DESIGN.md'
-  - '.claude/DESIGN.md'
 ---
 
 # Design reference

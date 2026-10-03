@@ -1,8 +1,7 @@
 ---
-description: State the autoContinueAtUsageLimit inversion and the autoCompactWindow cap for .claude/settings.json and its seeded copy
+description: State the autoContinueAtUsageLimit inversion and the autoCompactWindow cap for .claude/settings.json
 paths:
   - '.claude/settings.json'
-  - 'tooling/claude/seeds/.claude/settings.json'
 ---
 
 # Settings standards
