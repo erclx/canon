@@ -28,7 +28,7 @@ paths = [
 # under the old record root, are the two wrong turns the seeded tree invites.
 absent = [
   ".canon/canvas/pricing.html",
-  ".claude/canvas",
+  ".claude/canvas", # canon-keep-record-root: asserts the old root stays unwritten
 ]
 
 # The skill draws on the canvas and captures into session scratch, and nothing
