@@ -144,7 +144,7 @@ describe('addMotion', () => {
   it.each([
     ['fade', 'presetID="10"', 'filter="fade"'],
     ['fly', 'presetID="2"', '<p:attrName>ppt_y</p:attrName>'],
-    ['wipe', 'presetID="22"', 'filter="wipe(right)"'],
+    ['wipe', 'presetID="22"', 'filter="wipe(left)"'],
     ['zoom', 'presetID="53"', '<p:attrName>ppt_w</p:attrName>'],
   ])('should write the %s entrance', (effect, preset, behavior) => {
     const result = addMotion(
@@ -154,6 +154,17 @@ describe('addMotion', () => {
 
     expect(result.xml).toContain(preset)
     expect(result.xml).toContain(behavior)
+  })
+
+  it('should pair the wipe from the left with the filter PowerPoint writes for it', () => {
+    const result = addMotion(
+      slideXml(),
+      motion({ entrances: [entrance({ effect: 'wipe' })] }),
+    )
+
+    expect(result.xml).toMatch(
+      /presetID="22" presetClass="entr" presetSubtype="8".*filter="wipe\(left\)"/,
+    )
   })
 
   it('should make every entrance appear before it animates', () => {

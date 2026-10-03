@@ -93,7 +93,8 @@ interface Preset {
 /**
  * PowerPoint's own preset ids, so the effect shows by name in its animation
  * pane. Fly comes in from the bottom and wipe from the left, the directions
- * PowerPoint picks when none is chosen.
+ * PowerPoint picks when none is chosen. A wipe filter names the edge the
+ * reveal starts from, so from the left pairs with `wipe(left)`.
  */
 const ENTRANCES: Readonly<Record<string, Preset>> = {
   fade: { id: 10, subtype: 0, behaviors: animEffect('fade') },
@@ -104,7 +105,7 @@ const ENTRANCES: Readonly<Record<string, Preset>> = {
       anim(spid, duration, next(), 'ppt_x', '#ppt_x', '#ppt_x') +
       anim(spid, duration, next(), 'ppt_y', '1+#ppt_h/2', '#ppt_y'),
   },
-  wipe: { id: 22, subtype: 8, behaviors: animEffect('wipe(right)') },
+  wipe: { id: 22, subtype: 8, behaviors: animEffect('wipe(left)') },
   zoom: {
     id: 53,
     subtype: 16,
