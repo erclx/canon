@@ -12,7 +12,13 @@ The diff touches a file that paints: markup, a stylesheet, a component or templa
 
 Run this before any other section, since a pass that finds nothing to open otherwise reads the stylesheet instead and reports as if it had looked. Read its answer before composing any report or body, never in the same batch as the write, since what it decides is a finding the report has to carry.
 
-Read `gh pr view <number> --json comments,headRefOid` and take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with a `**Preview:**` line when the project has a preview address.
+Read the thread over REST, which a cloud session's GitHub proxy serves where it refuses GraphQL, and take the head off `canon pr head <number> --json`, from the record's `tip`:
+
+```bash
+gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' --jq '.[] | select((.body // "") | contains("<!-- pr-evidence: head=")) | .body'
+```
+
+Take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with a `**Preview:**` line when the project has a preview address.
 
 Flag the change as shipping no screenshot when it paints and the pull request carries no marked comment, carries one with no `## Evidence` section, or carries only a checklist posted alone. Then decide how to raise it by whether the project keeps captures, which is the same test `canon pr evidence` applies:
 
