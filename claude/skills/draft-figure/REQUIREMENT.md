@@ -44,5 +44,5 @@ The color failure is the quiet one. Mermaid's own theme writes literal hex value
 
 - The toolkit's own `.canon/diagrams/` architecture surface, which shares no code, font, or visual language with this convention: `draft-diagram`
 - Mermaid's own layout, budgets, and label rules for the fence itself: the mermaid standard, cited rather than restated here
-- A UI wireframe or screen mockup: `draft-wireframes`
+- A UI wireframe or screen mockup: `draft-doc`
 - Which lesson needs a figure and where it sits among the lesson's blocks: `teach-workspace`, which calls this skill to draw one

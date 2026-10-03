@@ -7,7 +7,7 @@ description: Why a session needs a thinking step before an outside search, deriv
 
 ## Gap
 
-Without this skill, a session reaching outside the project runs one generic `WebSearch` and takes what ranks highest. Nothing in the toolkit says how to search, and the two procedures that require an outside source, `plan-groundwork` and `draft-wiki`, give no route to one.
+Without this skill, a session reaching outside the project runs one generic `WebSearch` and takes what ranks highest. Nothing in the toolkit says how to search, and the two procedures that require an outside source, `plan-groundwork` and `draft-doc`'s wiki kind, give no route to one.
 
 The miss is measured. On 2026-10-02 two queries ran twice each with identical text, once open and once with `allowed_domains` set to authorities the session derived itself with no list to consult.
 
@@ -30,7 +30,7 @@ Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit ref
 - Prefer a public API over a fetched and summarized page where one exists, since the API returns the dates, authors, and identifiers a citation needs
 - Carry a dated access note grown only from a failure a session hit, and stop to ask the operator before any paid or logged-in route
 - Close with the practice skill's excuses, red flags, and closing checklist, answering "the model already knows the good sites" and "one search was enough"
-- Be loaded from the sourcing steps of `plan-groundwork` and `draft-wiki`, each reporting when the skill does not resolve
+- Be loaded from the sourcing steps of `plan-groundwork` and `draft-doc`'s wiki kind, each reporting when the skill does not resolve
 
 ## Must not
 
@@ -42,7 +42,7 @@ Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit ref
 ## Out of scope
 
 - The form a citation takes: the procedure or standard writing it
-- A Claude Code subject: the `claude-code-guide` agent, which `draft-wiki` already routes to
+- A Claude Code subject: the `claude-code-guide` agent, which `draft-doc`'s wiki sourcing step already routes to
 - Image generation, which makes a picture rather than finding a source
 - Loading on every web search rather than on a research-shaped request: a hook matching `WebSearch`, planned on its own
 - Whether a session already scopes searches without the skill, which only a run on a fresh research request without it would show
@@ -54,4 +54,4 @@ Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit ref
 - No `Skill` call fired, so the description did not route a plain research request to the body.
 - The run searched four times with no domain filter, naming authors and journals from recall, then fetched the papers' own pages. It never named the field, so the scenario's field pattern failed and the arm went red on one of its assertions.
 
-The arm shows the trigger is the gap rather than the body: a session that never loads the skill cannot follow it. The pointers from `plan-groundwork` and `draft-wiki` reach only those procedures, and the hook matching `WebSearch` is the route for every other search. One run on one model shows the miss exists and does not size it.
+The arm shows the trigger is the gap rather than the body: a session that never loads the skill cannot follow it. The pointers from `plan-groundwork` and `draft-doc`'s wiki kind reach only those procedures, and the hook matching `WebSearch` is the route for every other search. One run on one model shows the miss exists and does not size it.

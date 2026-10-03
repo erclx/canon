@@ -78,6 +78,6 @@ Each line is a claim measured once, and `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` rec
 ## What this delegates
 
 - The form a citation takes: the surface writing it, such as the standard the procedure writes to
-- A Claude Code subject: the `claude-code-guide` agent, which `draft-wiki` routes to
+- A Claude Code subject: the `claude-code-guide` agent, which `draft-doc`'s wiki sourcing step routes to
 - Generating an image: whatever draws the surface, since making one is not search
 - Access code a session needs repeatedly: a `canon` verb, never a script in this skill
