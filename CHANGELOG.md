@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.25.0](https://github.com/erclx/canon/compare/v5.24.0...v5.25.0) (2026-10-03)
+
+
+### Features
+
+* **claude:** add the canvas standard and skill ([#2178](https://github.com/erclx/canon/issues/2178)) ([9cec506](https://github.com/erclx/canon/commit/9cec506cdf97d27dd16286936a13c6fa8751e28b))
+* **claude:** add the internal canvas skill ([#2190](https://github.com/erclx/canon/issues/2190)) ([86d1a9c](https://github.com/erclx/canon/commit/86d1a9c9cc169ed486683298c26ce12b55f37c85))
+* **claude:** fold draft-diagram into draft-figure as three references ([#2179](https://github.com/erclx/canon/issues/2179)) ([61e9c4b](https://github.com/erclx/canon/commit/61e9c4b74d62617ff087dd7dc97a8aabcd3d999a))
+* **claude:** keep a triage row only on a named cost or reach ([#2168](https://github.com/erclx/canon/issues/2168)) ([e0b28bd](https://github.com/erclx/canon/commit/e0b28bd0257d93d06e4495d563abea97eeafcefb))
+* **claude:** read the orchestrator poll over REST ([#2192](https://github.com/erclx/canon/issues/2192)) ([e898844](https://github.com/erclx/canon/commit/e898844ca82eabef623330b708bfb6d0fe10a6a5))
+* **pr:** move pr reads to rest and dispatch reviews to the cloud ([#2174](https://github.com/erclx/canon/issues/2174)) ([7f3379c](https://github.com/erclx/canon/commit/7f3379cc790f085857dfe4ce975066b430b2b0b1))
+* **pr:** open evidence comments by default and name their commits ([#2184](https://github.com/erclx/canon/issues/2184)) ([8e0db18](https://github.com/erclx/canon/commit/8e0db1807691479cb21dd4b133b0c82b96afb8be))
+
 ## [5.24.0](https://github.com/erclx/canon/compare/v5.23.0...v5.24.0) (2026-10-03)
 
 
