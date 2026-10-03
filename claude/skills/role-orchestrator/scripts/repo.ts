@@ -53,12 +53,10 @@ export const baseRef = (): string => {
   if (symbolic.isOk && ref !== '') return ref
 
   const repo = run('gh', [
-    'repo',
-    'view',
-    '--json',
-    'defaultBranchRef',
+    'api',
+    'repos/{owner}/{repo}',
     '--jq',
-    '.defaultBranchRef.name',
+    '.default_branch',
   ])
   const name = repo.isOk ? repo.stdout.trim() : ''
 

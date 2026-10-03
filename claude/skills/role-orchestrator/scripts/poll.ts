@@ -20,7 +20,6 @@ interface Review {
 
 export interface Payload {
   comments?: Comment[]
-  headRefOid?: string
   reviews?: Review[]
 }
 
@@ -416,11 +415,80 @@ const parseJson = (text: string): unknown => {
   }
 }
 
+/**
+ * One JSON object per line, which is what `.[] | <projection> | @json` prints
+ * across every page. The projection keeps stdout to the fields the mappers
+ * read, since a whole REST row carries user objects and links and a long thread
+ * could overrun the spawn buffer and read as unreadable. A failed read and a
+ * line that does not parse both return null, so neither reads as a thread with
+ * nothing on it.
+ */
+const readRows = (
+  path: string,
+  fields: string,
+): null | Record<string, unknown>[] => {
+  const read = run('gh', [
+    'api',
+    '--paginate',
+    `repos/{owner}/{repo}/${path}`,
+    '--jq',
+    `.[] | {${fields}} | @json`,
+  ])
+  if (!read.isOk) return null
+
+  const rows: Record<string, unknown>[] = []
+  for (const line of read.stdout.split('\n')) {
+    if (line.trim() === '') continue
+    const row = parseJson(line)
+    if (typeof row !== 'object' || row === null) return null
+    rows.push(row as Record<string, unknown>)
+  }
+
+  return rows
+}
+
+const text = (value: unknown): null | string =>
+  typeof value === 'string' ? value : null
+
+/**
+ * The REST rows carry snake_case names, mapped onto the camelCase shape the
+ * classifiers read. `commit_id` becomes `commit.oid`. A pending review has no
+ * `submitted_at`, which maps to null.
+ */
+export const toReview = (row: Record<string, unknown>): Review => ({
+  body: text(row.body),
+  commit: { oid: text(row.commit_id) },
+  submittedAt: text(row.submitted_at),
+})
+
+export const toComment = (row: Record<string, unknown>): Comment => ({
+  body: text(row.body),
+  createdAt: text(row.created_at),
+})
+
+/**
+ * Two reads feed one payload, so either failing makes the pull request
+ * unreadable rather than a thread missing half its rows.
+ */
+const readPayload = (number: string): null | Payload => {
+  const reviews = readRows(
+    `pulls/${number}/reviews?per_page=100`,
+    'body, commit_id, submitted_at',
+  )
+  const comments = readRows(
+    `issues/${number}/comments?per_page=100`,
+    'body, created_at',
+  )
+  if (reviews === null || comments === null) return null
+
+  return { comments: comments.map(toComment), reviews: reviews.map(toReview) }
+}
+
 type Snapshot = { baseline: Baseline } | { row: Row }
 
 const nowSeconds = (): number => Math.floor(Date.now() / 1000)
 
-const readHead = (number: string, payload: Payload): string => {
+const readHead = (number: string): string => {
   // The tip is the authority for the head, not the pull request object, which
   // lags the ref by up to a minute after a push. The object's head is the
   // fallback for a target on an older binary with no `pr head` verb.
@@ -432,13 +500,20 @@ const readHead = (number: string, payload: Payload): string => {
       ? (record as Record<string, unknown>).tip
       : undefined
 
-  return typeof tip === 'string' && tip !== ''
-    ? tip
-    : (payload.headRefOid ?? '')
+  if (typeof tip === 'string' && tip !== '') return tip
+
+  const pull = run('gh', [
+    'api',
+    `repos/{owner}/{repo}/pulls/${number}`,
+    '--jq',
+    '.head.sha',
+  ])
+
+  return pull.isOk ? pull.stdout.trim() : ''
 }
 
 /**
- * `gh pr view --json mergeable` reports UNKNOWN until GitHub finishes
+ * The pull read's `mergeable_state` reports unknown until GitHub finishes
  * computing it, which is exactly when a poll asks. merge-tree answers locally
  * against the base this machine has. It exits non-zero on a ref it cannot
  * resolve as well as on a real conflict, so both sides are checked first.
@@ -530,12 +605,9 @@ const main = (): number => {
   // one as GONE. That is a louder wrong answer than the one this script was
   // fixed for, so the run aborts rather than classify on it.
   const listed = run('gh', [
-    'pr',
-    'list',
-    '--state',
-    'open',
-    '--json',
-    'number',
+    'api',
+    '--paginate',
+    'repos/{owner}/{repo}/pulls?state=open&per_page=100',
     '--jq',
     '.[].number',
   ])
@@ -550,19 +622,10 @@ const main = (): number => {
 
   const snapshots: Snapshot[] = []
   for (const number of listed.stdout.split(/\s+/).filter((n) => n !== '')) {
-    // A query that failed and a pull request with no reviews both arrive as
-    // an empty result, so one query per pull request gives the failure a
-    // single place to surface.
-    const view = run('gh', [
-      'pr',
-      'view',
-      number,
-      '--json',
-      'headRefOid,reviews,comments',
-    ])
-    const payload = view.isOk
-      ? (parseJson(view.stdout) as Payload | null)
-      : null
+    // A read that failed and a pull request with no reviews both arrive as an
+    // empty result, so each read returns null on failure and the payload gives
+    // the failure a single place to surface.
+    const payload = readPayload(number)
     const old = known.get(number)
     const unreadable = (reason: string): void => {
       if (old === undefined) {
@@ -578,12 +641,12 @@ const main = (): number => {
       snapshots.push({ baseline: carryForward(old) })
     }
 
-    if (payload === null || typeof payload !== 'object') {
+    if (payload === null) {
       unreadable('could not be read')
       continue
     }
 
-    const head = readHead(number, payload)
+    const head = readHead(number)
     if (head === '') {
       unreadable('returned no head')
       continue

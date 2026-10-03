@@ -175,14 +175,11 @@ export const pass = (
 
 const readPulls = (): Read<string[]> => {
   const listed = run('gh', [
-    'pr',
-    'list',
-    '--state',
-    'open',
-    '--json',
-    'number,headRefName,title',
+    'api',
+    '--paginate',
+    'repos/{owner}/{repo}/pulls?state=open&per_page=100',
     '--jq',
-    '.[] | "PR-OPEN #\\(.number) \\(.headRefName) \\(.title)"',
+    '.[] | "PR-OPEN #\\(.number) \\(.head.ref) \\(.title)"',
   ])
   if (!listed.isOk) return { isOk: false }
 

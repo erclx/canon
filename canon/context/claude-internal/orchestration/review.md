@@ -59,7 +59,7 @@ The UI family is one token, `none` or `<open|closed>-<head|behind>-<short-sha>`,
 
 ### The poll's tests
 
-`src/orchestrate-poll.test.ts` covers the classifier, which puts a shipped skill script under test. The harness builds a throwaway repository under `mktemp` and puts a stub `gh` first on `PATH`, answering `pr list`, `pr view`, and `repo view` out of fixture files a case rewrites between runs.
+`src/orchestrate-poll.test.ts` covers the classifier, which puts a shipped skill script under test. The harness builds a throwaway repository under `mktemp` and puts a stub `gh` first on `PATH`, answering the REST list, reviews, issue-comments, pull, and repository reads out of fixture files a case rewrites between runs. The stub refuses `pr`, `repo view`, and `graphql`. Either of the reviews and comments reads failing carries the pull request forward.
 
 A stub `canon` sits beside it answering `pr review-state` alone, which keeps the review scope a value a case sets rather than one the machine's installed binary decides, and refusing everything else, which is the answer `pr head` gives against a fixture with no remote. Writing the scope record from the same reviews lets a case override it to a marker naming an earlier commit, and disabling the stub turns that case back into the stale `SEEN` while the rest stay green.
 
