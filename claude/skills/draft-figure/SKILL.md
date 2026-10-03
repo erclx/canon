@@ -27,10 +27,11 @@ Apply the standard's bar: a relationship, a boundary, a path, or a before-and-af
 
 ## Step 3: decide the render path
 
+- **A teach lesson**, meaning the destination is a lesson page in a learning workspace's `lessons/` folder: draw it through Step 5 whatever its shape. The lesson letters its figures in a hand font the renderer cannot load, so a Mermaid render measures its labels in a narrower face and the lesson clips them.
 - **Graph-shaped**, meaning the relationship, boundary, or path is already what a flowchart or sequence diagram expresses: draw it through Step 4.
 - **Not graph-shaped**, meaning the subject is a spatial or physical arrangement no flowchart reduces to: draw it through Step 5.
 
-State which path was picked and why in one sentence. The standard states this as a render-first policy rather than a ban on any tool-exported drawing, so a graph-shaped subject always routes through Mermaid even though that is itself an external renderer.
+Take the first that matches, and state which path was picked and why in one sentence. The standard states this as a render-first policy rather than a ban on any tool-exported drawing, so outside a teach lesson a graph-shaped subject always routes through Mermaid even though that is itself an external renderer.
 
 ## Step 4: the Mermaid path
 
@@ -51,6 +52,8 @@ Render both formats in one pass: the SVG is what ships inside the `<figure>`, an
 Use `bunx` when bun is available, falling back to `npx -y @mermaid-js/mermaid-cli ...` otherwise.
 
 - Rewrite every stroke, fill, and text color the renderer wrote as a literal hex value into the custom property the host stylesheet defines, per the standard's color rule. Mermaid's own theme has no notion of a custom property, so this is a source edit made to the rendered SVG, not a config option.
+- Expect a group title or a long label to clip once the destination shows it in the hand font, since the renderer sized its box in a fallback face.
+- When the in-page check shows a clipped title, add a `<style>` inside the SVG, scoped to that SVG's own id, that sets `overflow: visible` on the clipped label's `foreignObject` and centers the label within it, so the wider text spills past both edges evenly. The style hides the mismatch for a title and does nothing for a node label crowding its box, which takes a shorter label instead.
 - Check whether the project ran `canon design css --figures`. The figure and figcaption styling ships unconditionally either way, but that flag alone embeds the Virgil and Excalifont font files. Without it, the figure falls back to the browser's own generic `cursive` face rather than the intended hand-drawn font, and Step 7's output names that gap when the flag was not passed.
 
 ## Step 5: the freehand path
@@ -58,7 +61,7 @@ Use `bunx` when bun is available, falling back to `npx -y @mermaid-js/mermaid-cl
 - Author the SVG by hand: plain shapes and lines authored directly in the markup.
 - Follow the standard's `## Color and accessibility` section for every fill, stroke, and accessible name.
 
-There is no external render to verify a freehand drawing against. The check here is the stroke-and-fill audit above and a read of the markup against what the subject means to show, done once rather than looped.
+There is no external render to verify a freehand drawing against before it is written. The check here is the stroke-and-fill audit above and a read of the markup against what the subject means to show, done once rather than looped. Hand-placed coordinates can drift out of line where a layout engine would not, so a freehand figure bound for a rendered page also takes Step 7's in-page capture.
 
 ## Step 6: wrap, caption, and verify
 
@@ -66,12 +69,23 @@ There is no external render to verify a freehand drawing against. The check here
 - On the Mermaid path, read the rendered PNG back and judge it against what the figure means to say, the same check `draft-diagram` Steps 5 and 6 run for the architecture surface. Fix the mermaid source and re-render on a defect. Stop after two correction passes. When a defect survives, keep the figure and name the defect in the output rather than reporting a false verification.
 - On either path, confirm the figure still reads once every color and font it depends on is stripped to its fallback, per the standard's own working-figure bar.
 - When the render fails for any reason, no browser engine, no network, no package manager, continue to Step 7 and name the skipped check. A missing renderer degrades the loop rather than failing it.
+- When the destination is a rendered page, an HTML file a browser loads, the check that counts is the figure inside that page, which Step 7 runs once the figure is written. The standalone PNG is measured in the renderer's own fonts and can read clean while the page clips it. A markdown destination has no page to load, so the standalone check above is the whole check there.
 
 ## Step 7: confirm and write
 
 Show the destination path, the decided render path, and the full `<figure>` markup before writing. Confirm with the user, since the graph-shaped decision and the render verdict are judgment calls with no diff to preview either against.
 
-Write the figure into the destination document at the location the user named. Renders under `.canon/tmp/figures/` are verification artifacts, and the scratch PNG and JSON config are deleted after Step 6 confirms, since only the SVG ships.
+Write the figure into the destination document at the location the user named.
+
+When the destination is a rendered page, capture the figure inside it and read the capture against what the figure means to say:
+
+```bash
+canon capture <destination> --selector figure --out .canon/tmp/figures/
+```
+
+Narrow the selector to this figure, such as by an id on its `<figure>`, when the page carries more than one. Fix a clipped label, a misaligned shape, or an arrow that misses its target in the destination and capture again, within the same two correction passes Step 6 allows. When the capture fails, keep the figure and name the skipped check in the output, the same way Step 6 treats a failed render.
+
+Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs and JSON config are deleted once the checks confirm, since only the SVG ships.
 
 ## Output
 
@@ -88,6 +102,7 @@ Write the figure into the destination document at the location the user named. R
 
 ```plaintext
 ✅ Drafted figure in <path>
-Verified render. <defect or skipped check, one line, omitted when clean>
+Render path: <mermaid | freehand>
+Verified <in page | as a standalone render>. <defect or skipped check, one line, omitted when clean>
 <Font not embedded: run `canon design css --figures` to ship Virgil and Excalifont. Omitted when the project already ran it.>
 ```
