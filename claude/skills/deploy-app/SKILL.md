@@ -1,9 +1,9 @@
 ---
-name: deploy-cloudflare
+name: deploy-app
 description: Sets up a Cloudflare Pages deploy for the current project by creating the Pages project, fetching the account ID, and stopping twice for the operator to issue the API token and attach the custom domain. Calls `wrangler` and `gh` rather than reimplementing them. Use when asked to "set up Cloudflare deploy", "deploy this to Cloudflare Pages", "set up the Pages project", or "connect this repo to Cloudflare". Do NOT use to run an already-configured deploy, which the seeded workflow does on push, or to reconfigure an existing Pages project's build settings.
 ---
 
-# Deploy Cloudflare
+# Deploy app
 
 Runs the one-time setup a Cloudflare Pages deploy needs before the seeded `deploy.yml` workflow can run, stopping twice for the two acts only the operator can take.
 

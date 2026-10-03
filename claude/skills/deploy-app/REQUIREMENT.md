@@ -1,9 +1,9 @@
 ---
-name: deploy-cloudflare
+name: deploy-app
 description: What the Cloudflare Pages setup gap is, which of the four manual steps this skill closes, and why the credential and the custom domain stay the operator's
 ---
 
-# Deploy Cloudflare requirement
+# Deploy app requirement
 
 ## Gap
 

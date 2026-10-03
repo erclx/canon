@@ -104,6 +104,6 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Connect this repo to Cloudflare Pages and set up the deploy.',
-    expect: 'deploy-cloudflare',
+    expect: 'deploy-app',
   },
 ]
