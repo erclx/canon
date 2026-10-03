@@ -17,6 +17,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { collectCoverage, DEFAULT_ARM } from '@/sandbox/coverage'
+import { createStubRemote, readStubManifest } from '@/sandbox/stub-remote'
 
 /** Holds fixture content rather than scenarios. Twin of the filter in `sandbox.ts`. */
 const FIXTURES_DIR = 'fixtures'
@@ -136,6 +137,8 @@ export interface EquivalenceOptions {
   readonly targets: readonly string[]
   readonly base: string
   readonly includeAnchor: boolean
+  /** Runs anchor arms against a local bare repository and a stub `gh`, never the shared anchor. */
+  readonly stubRemote?: boolean
   readonly useMasks: boolean
   readonly out?: string
 }
@@ -516,7 +519,15 @@ function configDirFor(dir: string): string {
   return `${dir}.config`
 }
 
-function provisionEnv(arm: Arm, dir: string): NodeJS.ProcessEnv {
+function stubDirFor(dir: string): string {
+  return `${dir}.stub`
+}
+
+function provisionEnv(
+  arm: Arm,
+  dir: string,
+  stubbed = false,
+): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     CANON_NON_INTERACTIVE: '1',
@@ -524,6 +535,7 @@ function provisionEnv(arm: Arm, dir: string): NodeJS.ProcessEnv {
     CANON_SANDBOX_RUN_ID: PINNED_RUN_ID,
     CLAUDE_CONFIG_DIR: configDirFor(dir),
   }
+  if (stubbed) Object.assign(env, createStubRemote(stubDirFor(dir)))
   if (arm.arm === undefined) delete env.SANDBOX_SCENARIO
   else env.SANDBOX_SCENARIO = arm.arm
 
@@ -541,13 +553,14 @@ async function provision(
   arm: Arm,
   dir: string,
   logPath: string,
+  stubbed: boolean,
 ): Promise<Provisioned> {
   rmSync(dir, { recursive: true, force: true })
   rmSync(configDirFor(dir), { recursive: true, force: true })
   const exit = await runProcess(
     'bun',
     [join(root, 'src', 'cli.ts'), 'sandbox', `${arm.category}:${arm.command}`],
-    { cwd: root, env: provisionEnv(arm, dir), logPath },
+    { cwd: root, env: provisionEnv(arm, dir, stubbed), logPath },
   )
   const log = readFileSync(logPath, 'utf8').split(root).join(ROOT_PLACEHOLDER)
 
@@ -592,8 +605,12 @@ async function checkHead(
   }
 }
 
-function withExit(manifest: Manifest, run: Provisioned): Manifest {
-  const next = new Map(manifest)
+function withExit(
+  manifest: Manifest,
+  run: Provisioned,
+  stub?: Manifest,
+): Manifest {
+  const next = new Map([...manifest, ...(stub ?? [])])
   next.set('exit', String(run.exit))
   next.set('log', run.log)
 
@@ -608,16 +625,20 @@ async function runArm(
   headRoot: string,
   masks: readonly Mask[],
   declared: boolean,
+  stubbed: boolean,
 ): Promise<ArmRecord> {
   const key = armKey(arm)
   const dir = join(workDir, 'arms', `arm-${index}`)
   const logPath = join(workDir, 'logs', `arm-${index}.log`)
 
-  const base = await provision(baseRoot, arm, dir, logPath)
-  const baseManifest = withExit(buildManifest(dir), base)
+  const stubManifest = (): Manifest | undefined =>
+    stubbed ? readStubManifest(stubDirFor(dir)) : undefined
 
-  const head = await provision(headRoot, arm, dir, logPath)
-  const headManifest = withExit(buildManifest(dir), head)
+  const base = await provision(baseRoot, arm, dir, logPath, stubbed)
+  const baseManifest = withExit(buildManifest(dir), base, stubManifest())
+
+  const head = await provision(headRoot, arm, dir, logPath, stubbed)
+  const headManifest = withExit(buildManifest(dir), head, stubManifest())
 
   // Kept beside the logs, so a reader of an `--out` folder can see what a
   // difference was rather than only that one exists.
@@ -643,6 +664,7 @@ async function runArm(
     : undefined
 
   rmSync(configDirFor(dir), { recursive: true, force: true })
+  rmSync(stubDirFor(dir), { recursive: true, force: true })
 
   return {
     arm: key,
@@ -770,8 +792,13 @@ export async function runEquivalence(
   try {
     const baseRoot = join(workDir, 'base')
     const baseCommit = git(options.root, ['rev-parse', options.base])
-    const runnable = arms.filter((a) => !a.anchor || options.includeAnchor)
-    const skipped = arms.filter((a) => a.anchor && !options.includeAnchor)
+    const stubRemote = options.stubRemote === true
+    const runnable = arms.filter(
+      (a) => !a.anchor || options.includeAnchor || stubRemote,
+    )
+    const skipped = arms.filter(
+      (a) => a.anchor && !options.includeAnchor && !stubRemote,
+    )
 
     const indexed = new Map(arms.map((a, i) => [armKey(a), i]))
     const run = (arm: Arm): Promise<ArmRecord> =>
@@ -783,18 +810,20 @@ export async function runEquivalence(
         options.root,
         masks,
         declaredKeys.has(armKey(arm)),
+        stubRemote && arm.anchor,
       )
 
     // Anchor arms force-push `main` and recreate a pull request on one shared
-    // remote, so they run strictly one at a time.
+    // remote, so they run strictly one at a time. A stub remote is private to its
+    // arm, so those arms join the pool.
+    const shared = (a: Arm): boolean => a.anchor && !stubRemote
     const offline = await pool(
-      runnable.filter((a) => !a.anchor),
+      runnable.filter((a) => !shared(a)),
       CONCURRENCY,
       (arm) => run(arm),
     )
     const anchored: ArmRecord[] = []
-    for (const arm of runnable.filter((a) => a.anchor))
-      anchored.push(await run(arm))
+    for (const arm of runnable.filter(shared)) anchored.push(await run(arm))
 
     const records: ArmRecord[] = [
       ...offline,

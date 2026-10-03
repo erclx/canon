@@ -1,0 +1,5 @@
+import { logger } from "./logger.js";
+export function charge(amount) {
+  logger("charging " + amount);
+  return fetch("/api/charge");
+}

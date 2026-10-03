@@ -25,11 +25,7 @@ stage_setup() {
 
     git checkout -b feature/string-utils -q
 
-    cat <<'EOF' >>utils.js
-export function capitalize(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-EOF
+    stage_fixtures git pr feature-branch 01-capitalize
 
     git add utils.js
     git commit -m "feat(utils): add capitalize helper" -q
@@ -53,11 +49,7 @@ EOF
 
     git checkout -b feat/slugify -q
 
-    cat <<'EOF' >>utils.js
-export function slugify(text) {
-  return text.toLowerCase().replace(/\s+/g, "-");
-}
-EOF
+    stage_fixtures git pr reused-name 01-slugify
 
     git add utils.js
     git commit -m "feat(utils): add slugify helper" -q
@@ -83,11 +75,7 @@ EOF
 
     git checkout -b feat/slugify -q
 
-    cat <<'EOF' >>utils.js
-export function truncate(text, max) {
-  return text.length > max ? text.slice(0, max) : text;
-}
-EOF
+    stage_fixtures git pr reused-name 02-truncate
 
     git add utils.js
     git commit -m "feat(utils): add truncate helper" -q

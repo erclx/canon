@@ -18,11 +18,7 @@ stage_setup() {
   configure_sandbox_anchor_remote
   git push --force origin HEAD:main
 
-  cat <<'EOF' >>utils.js
-export function capitalize(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-EOF
+  stage_fixtures git issue shared 01-capitalize
 
   git add utils.js
   git commit -m "feat(utils): add capitalize helper" -q

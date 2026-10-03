@@ -32,12 +32,7 @@ stage_setup() {
     echo 'export function logout() { return fetch("/api/logout"); }' >>src/auth.js
     git add . && git commit -m "feat(auth): add logout function" -q
 
-    mkdir -p scripts
-    cat <<'EOF' >scripts/setup.sh
-#!/bin/bash
-echo "Setting up project..."
-npm install
-EOF
+    stage_fixtures git split independent 03-setup-script
     git add . && git commit -m "chore(scripts): add project setup script" -q
 
     mkdir -p docs
@@ -66,13 +61,7 @@ EOF
     echo 'export function charge(amount) { return fetch("/api/charge"); }' >src/payments.js
     git add . && git commit -m "feat(payments): add charge function" -q
 
-    cat <<'EOF' >src/payments.js
-import { logger } from "./logger.js";
-export function charge(amount) {
-  logger("charging " + amount);
-  return fetch("/api/charge");
-}
-EOF
+    stage_fixtures git split stacked 03-use-logger
     git add . && git commit -m "refactor(payments): use logger" -q
 
     log_step "Scenario ready: 3 stacked commits on feat/payments"

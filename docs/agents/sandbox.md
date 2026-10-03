@@ -56,13 +56,14 @@ canon sandbox equivalence claude:plan-feature/full --base HEAD
 
 A target is `<category>`, `<category>:<command>`, or `<category>:<command>/<arm>`, defaulting to every category.
 
-| Flag               | Effect                                                                                      |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `--base <ref>`     | Ref the baseline is provisioned from, `main` by default                                     |
-| `--include-anchor` | Also run the arms that push to the shared GitHub anchor, one at a time, for an attended run |
-| `--out <dir>`      | Keep the provisioned trees, logs, and per-side manifests in this folder                     |
-| `--no-masks`       | Compare every path, which lists what each mask would hide                                   |
-| `--json`           | Emit the record on stdout                                                                   |
+| Flag               | Effect                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| `--base <ref>`     | Ref the baseline is provisioned from, `main` by default                                            |
+| `--include-anchor` | Also run the arms that push to the shared GitHub anchor, one at a time, for an attended run        |
+| `--stub-remote`    | Run the anchor arms against a local bare repository and a stub `gh`, writing nothing to the anchor |
+| `--out <dir>`      | Keep the provisioned trees, logs, and per-side manifests in this folder                            |
+| `--no-masks`       | Compare every path, which lists what each mask would hide                                          |
+| `--json`           | Emit the record on stdout                                                                          |
 
 The baseline is a detached worktree with full history, removed on exit including after `SIGINT`. Each arm provisions on the base side, is read into a manifest, is deleted, then provisions on the head side at the same path with the run id pinned. A manifest holds every file's mode and hash, every symlink's target, the exit status, the narration, and for the outer repository and each nested one the commit subjects, the staged index, and the branch.
 

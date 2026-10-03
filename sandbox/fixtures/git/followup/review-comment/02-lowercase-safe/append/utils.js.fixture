@@ -1,0 +1,4 @@
+
+export function lowercaseSafe(text) {
+  return text?.toLowerCase() ?? "";
+}

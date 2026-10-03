@@ -346,6 +346,7 @@ function runCoverage(options: CoverageOptions): void {
 interface EquivalenceOptions {
   readonly base: string
   readonly includeAnchor?: boolean
+  readonly stubRemote?: boolean
   readonly out?: string
   readonly masks: boolean
   readonly json?: boolean
@@ -372,6 +373,7 @@ async function runEquivalence(
       targets,
       base: options.base,
       includeAnchor: options.includeAnchor === true,
+      stubRemote: options.stubRemote === true,
       useMasks: options.masks,
       out: options.out,
     })
@@ -568,6 +570,10 @@ export function register(program: Command): void {
       '--include-anchor',
       'Also run the arms that push to the shared GitHub anchor, one at a time (attended)',
     )
+    .option(
+      '--stub-remote',
+      'Run the anchor arms against a local bare repository and a stub gh, writing nothing to the shared anchor',
+    )
     .option('--out <dir>', 'Keep the provisioned trees and logs in this folder')
     .option(
       '--no-masks',
@@ -583,6 +589,7 @@ export function register(program: Command): void {
         '  canon sandbox equivalence claude:plan-feature --base origin/main',
         '',
         'Provisions offline only and never runs sandbox/run.sh or a claude binary.',
+        '--stub-remote also runs the anchor arms, and wins over --include-anchor.',
         'Exit codes: 0 when every compared arm is identical or red the same way',
         'on both sides, 1 on any difference, exit mismatch, or enumeration error.',
       ].join('\n'),
