@@ -1029,6 +1029,40 @@ describe('Inspector edit', () => {
   })
 })
 
+describe('ThemePanel', () => {
+  it('should list the tokens by group on the Theme tab', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Theme').click())
+
+    const panel = mount.querySelector('[aria-label="Theme"]')
+    expect(panel?.textContent).toContain('Color')
+    expect(panel?.textContent).toContain('--color-accent')
+    expect(panel?.textContent).toContain('#c76b5f')
+    expect(panel?.textContent).toContain('Spacing')
+    expect(panel?.querySelector('input, select, textarea')).toBeNull()
+  })
+
+  it('should say no tokens resolve when the sheet defines none', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Theme').click())
+
+    expect(mount.querySelector('[aria-label="Theme"]')?.textContent).toContain(
+      'No tokens resolve',
+    )
+  })
+
+  it('should return to the pages from the Pages tab', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Theme').click())
+
+    act(() => buttonNamed('Pages').click())
+
+    expect(mount.querySelector('[aria-label="Pages"]')).not.toBeNull()
+  })
+})
+
 describe('index.html', () => {
   it('should declare an inline icon so the browser never requests /favicon.ico', () => {
     const html = readFileSync(

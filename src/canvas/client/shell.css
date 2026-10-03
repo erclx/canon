@@ -506,3 +506,69 @@ code {
   color: var(--color-success);
   font-weight: 400;
 }
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: var(--space-sm);
+  padding: 2px;
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+}
+
+.tab {
+  flex: 1;
+  min-height: 24px;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--color-chrome);
+  color: var(--color-text);
+}
+
+.tokens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.token {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 24px;
+  padding: 0 var(--space-sm);
+}
+
+.token .row-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.token-value {
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
