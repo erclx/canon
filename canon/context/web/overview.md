@@ -14,7 +14,7 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/src/pages/` owns the one route, assembling the sections in reading order
 - `web/src/components/beats/` owns the eleven beats of the session, one component each, plus the turn and band primitives they render through
 - `web/src/components/sections/` owns the sections around the beats: the fold, the proof band, the beat group, the provenance ledger, the install steps, the field, and the close
-- `web/src/components/` owns the site chrome, being the nav and the footer, and the shared panel primitives the sections compose
+- `web/src/components/` owns the site chrome, being the nav and the footer, and the panel primitives `panel`, `panel-group`, and `panel-row`, which no page imports since the component gallery that rendered them retired
 - `web/src/content/` owns page copy, each string tied to a `README.md` citation or a paraphrase marker
 - `web/src/lib/` owns the build-time reads, split into the pure derivations and the CLI and file reads that feed them
 - `web/src/layouts/` owns the shared page shell
