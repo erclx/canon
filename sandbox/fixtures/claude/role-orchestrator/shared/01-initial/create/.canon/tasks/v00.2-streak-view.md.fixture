@@ -1,0 +1,11 @@
+---
+title: 'v00.2: Show the current and longest streak'
+description: Read the logged entries and report both streaks per habit
+---
+
+# v00.2: Show the current and longest streak
+
+- [ ] Outcome: each habit shows the run of consecutive days ending today
+- [ ] Outcome: each habit shows its longest run ever
+
+> Test strategy: unit, streak arithmetic over a seeded entry list
