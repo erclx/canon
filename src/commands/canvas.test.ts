@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -10,6 +11,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { writeSelection } from '@/canvas/content'
+import { missingClientDeps } from '@/commands/canvas'
+import { PROJECT_ROOT } from '@/project-root'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 
@@ -399,5 +402,29 @@ describe('canon canvas capture', () => {
 
     expect(run.status).toBe(1)
     expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
+  })
+})
+
+describe('missingClientDeps', () => {
+  it('should refuse naming bun install when the client packages do not resolve', () => {
+    /*
+     * An empty `node_modules` rather than none, since Bun resolves from its
+     * global cache where no `node_modules` exists, and the CLI cannot run from
+     * a package root without one anyway.
+     */
+    mkdirSync(join(ROOT, 'node_modules'))
+
+    const refused = missingClientDeps(ROOT)
+
+    expect(refused).toMatchObject({
+      ok: false,
+      reason: 'missing-client-deps',
+      detail: expect.stringContaining('bun install'),
+    })
+    expect(refused?.detail).toContain('preact, @preact/signals')
+  })
+
+  it('should pass when the client packages resolve from the package root', () => {
+    expect(missingClientDeps(PROJECT_ROOT)).toBeUndefined()
   })
 })
