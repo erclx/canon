@@ -71,7 +71,7 @@ Keep the `## Scripts` table in `canon/context/development.md` current as scripts
 
 Scaffold installs tooling and seeds. It does not fill the planning docs or the design system. Complete those before the first feature session:
 
-1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write.
+1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write. Each seed states its own caps, 12 decisions of at most 150 words and 6 risk bullets for the architecture record and 600 words for the requirements, and `canon context audit` gates on them. Edit a number in the record to loosen it.
 2. For a UI project, invoke `canon:design-extract` to draft `canon/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
 3. Optionally invoke `canon:draft-diagram` to draft entries under `.canon/diagrams/` from the architecture and the requirements. One file per diagram kind, so a later refresh of one kind leaves the others untouched. It renders each diagram it writes to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
 4. Start the feature loop. See [AI workflow](../workflow/ai-workflow.md) for the per-feature sequence.
