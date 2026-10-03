@@ -13,6 +13,16 @@ Derive both segments from Step 1. Never pick a suffix by hand, and never reuse a
 
 When `<prior-oid>` from Step 2 equals `headRefOid`, the head repeats and the folder already holds `body-<number>-<short-sha>.md`. Add a third segment taking the id of the reply Step 2 resolved, giving `body-<number>-<short-sha>-r<comment-id>.md`, which is `<body-file>` on that path. That satisfies both prohibitions above rather than carving an exception into either. Step 2 already stopped the pass when that resolution came back empty, so reaching this line means the comment id is in hand.
 
+A finding bound to a line links to it, so a reader skips the hunt:
+
+```markdown
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/<path>#L12)): what breaks and the fix
+```
+
+A finding that spans lines anchors to the span as `#L12-L14`, with no spaces and no en dash, and a single-line finding anchors as `#L12`. Take the line number from the file read at `<headRefOid>`, `git show <headRefOid>:<path>`, never from another checkout. The URL carries the full 40-character `<headRefOid>`, never `<short-sha>`, `HEAD`, or the branch name, so the link survives a push. A later pass restating an open finding links it again at its own `<headRefOid>` rather than copying the old bullet.
+
+Three findings take the plain bullet with no link: a `**PR body**` entry, a finding on a file the head deleted, where `blob/<headRefOid>/<path>` 404s, and a finding about a whole file with no one line. A path holding a character a URL needs encoded, such as a space or `#`, is percent-encoded in the link or keeps the plain bullet. Keep the file block header a bare backticked path, so the section-marker reading in `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` does not change.
+
 The comment is a rendered-for-human GitHub surface, so load the `write-human` skill for voice and word choice and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation: cut editorializing, and keep every sentence load-bearing. Match this shape on a first pass:
 
 ```markdown
@@ -22,8 +32,8 @@ X critical, Y should-fix, Z minor. Reviewed against project docs and the board.
 
 **`path/to/file.ext`**
 
-- **should-fix**: what breaks and the fix, in two or three sentences.
-- **minor**: finding.
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks and the fix, in two or three sentences.
+- **minor** ([lines 30-34](<repo-url>/blob/<headRefOid>/path/to/file.ext#L30-L34)): finding.
 
 **What is right**
 
@@ -47,7 +57,7 @@ Re-reviewed `<short-sha>`, N commits since the prior pass. X critical, Y should-
 
 **`path/to/file.ext`**
 
-- **should-fix**: what breaks and the fix, in two or three sentences.
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks and the fix, in two or three sentences.
 
 🤖 Reviewed by Claude Code
 
@@ -133,7 +143,7 @@ A pass carrying only minors is an ordinary finding-carrying pass, so it takes th
 
 **`path/to/file.ext`**
 
-- **minor**: finding, and the fix it wants.
+- **minor** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): finding, and the fix it wants.
 
 🤖 Reviewed by Claude Code
 

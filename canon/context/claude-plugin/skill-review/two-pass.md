@@ -70,3 +70,11 @@ What it costs is a release of silence and a round trip. A target whose CLI preda
 ## A submitted review cannot be deleted
 
 A submitted pull request review is editable and never deletable. `DELETE /repos/{owner}/{repo}/pulls/{n}/reviews/{id}` returns 422 with `Can not delete a non-pending pull request review`, and dismissal covers approvals and change requests rather than comments, so a mistimed or malformed comment is repaired with `PUT` to the same path, which replaces the body and keeps its timestamp and position in the thread. When the repair leaves a comment that should no longer anchor the review state, strip its heading, since `review-pr` scopes a later narrow pass by matching a comment's first line against `## Review` and `## Review closed` and would otherwise point the next pass at the wrong commit.
+
+## A finding links to its line
+
+A finding sits under a bare backticked file block with no line in it, so a reader opens the diff and hunts for the spot. Each file-bound finding now carries a permalink to its line, `<repo-url>/blob/<headRefOid>/<path>#L12` or `#L12-L14` for a span, stated once in `post.md` and shown in every template.
+
+Inline review threads were the alternative, and they lost because a thread changes how `review-address`, the poll, the re-review scope, and the close-out each read a review, while a link changes only how one bullet is written. The URL pins the full oid from Step 1 rather than the branch, so it keeps opening on the reviewed line after a push, and the pass reads the line from the file at `<headRefOid>` rather than from a checkout at another commit. A later pass restating an open finding links at its own head, since the earlier link points at code the delta may have changed.
+
+A `**PR body**` entry, a finding on a file the head deleted, and a whole-file finding keep the plain bullet. A fork pull request's link is built on the base repository, which GitHub resolves through the same network, and the sandbox arm did not drive a fork.

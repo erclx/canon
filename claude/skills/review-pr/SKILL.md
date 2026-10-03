@@ -46,12 +46,12 @@ Everything from that line to the post is the compose window, and a commit pushed
 Then resolve the PR through `canon pr head --json` for the current branch, or `canon pr head <number> --json` for a number the user names. Take `<number>` off the record's `number` and `<headRefOid>` off its `tip`. The first seven characters are `<short-sha>`, which names the body file in Step 4. Read the title and body over REST:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha}'
+gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha, repo: .base.repo.html_url}'
 ```
 
 Every read in this skill runs on REST, since the `gh pr` lookups run on GraphQL and a cloud session's GitHub proxy refuses it. A target whose CLI predates the verb gets no record back. Fall back there to the `head` field above for `<headRefOid>`, and to `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'` for a branch with no number named, stopping on the guard above when that prints anything but one number.
 
-`<headRefOid>` and `<read-at>` travel together into Step 4's marker, and neither is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
+`<headRefOid>`, `<read-at>`, and the `repo` field as `<repo-url>` travel together into Step 4's marker and finding links, and none is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
 
 Read these in parallel from the project root, skipping any that do not exist:
 
