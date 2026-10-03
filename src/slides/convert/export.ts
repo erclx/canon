@@ -146,8 +146,9 @@ export async function exportHtmlDeck(
       )
       const slide = pptx.addSlide()
       slide.background = { color: walked.background.hex }
-      for (const op of plan.ops) {
-        await draw(page, slide, slideNumber, op, patches)
+      for (const [opIndex, op] of plan.ops.entries()) {
+        const name = `canon-${slideNumber}-${opIndex + 1}`
+        await draw(page, slide, { slide: slideNumber, name }, op, patches)
       }
     }
   } catch (error) {
@@ -226,7 +227,7 @@ const base64 = (bytes: Buffer | string): string =>
 async function draw(
   page: Page,
   slide: PptxGenJS.Slide,
-  slideNumber: number,
+  target: { readonly slide: number; readonly name: string },
   op: DrawOp,
   patches: Patch[],
 ): Promise<void> {
@@ -237,23 +238,20 @@ async function draw(
   } else if (op.kind === 'table') {
     slide.addTable(op.rows, op.options)
   } else if (op.kind === 'image') {
-    const name = `canon-image-${slideNumber}-${patches.length + 1}`
-    slide.addImage({ ...op.options, ...imageSource(op.src), objectName: name })
-    if (op.radius > 0)
-      patches.push({ slide: slideNumber, name, radius: op.radius })
+    slide.addImage({
+      ...op.options,
+      ...imageSource(op.src),
+      objectName: target.name,
+    })
+    if (op.radius > 0) patches.push({ ...target, radius: op.radius })
     if (op.frame) slide.addShape(op.radius > 0 ? 'roundRect' : 'rect', op.frame)
   } else if (op.kind === 'svg') {
-    const name = `canon-svg-${slideNumber}-${patches.length + 1}`
     slide.addImage({
       ...op.options,
       data: `image/svg+xml;base64,${base64(op.markup)}`,
-      objectName: name,
+      objectName: target.name,
     })
-    patches.push({
-      slide: slideNumber,
-      name,
-      png: await screenshot(page, op.id),
-    })
+    patches.push({ ...target, png: await screenshot(page, op.id) })
   } else {
     const png = await screenshot(page, op.id)
     slide.addImage({ ...op.options, data: `image/png;base64,${base64(png)}` })

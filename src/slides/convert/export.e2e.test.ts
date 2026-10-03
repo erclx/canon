@@ -34,11 +34,13 @@ const STYLE = `
 const SLIDES: Record<string, string> = {
   '01-overview.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}
     .note { position: absolute; left: 96px; top: 176px; width: 420px; margin: 0; padding: 24px 28px; border: 1px solid #D6D3CE; border-radius: 12px; background: #F4F1EC; }
+    .thumb { position: absolute; left: 1140px; top: 48px; width: 96px; height: 54px; }
     .photo { position: absolute; left: 640px; top: 176px; width: 480px; height: 270px; border: 1px solid #D6D3CE; border-radius: 12px; object-fit: cover; }
     body > ul { position: absolute; left: 96px; top: 400px; margin: 0; }
   </style></head><body>
     <h1>Quarterly review</h1>
     <p class="note">Revenue grew <strong>eighteen percent</strong> on the year.</p>
+    <img class="thumb" src="photo.png" alt="Thumbnail">
     <img class="photo" src="photo.png" alt="The team at the launch event">
     <ul>
       <li>Level one
@@ -145,6 +147,14 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   })
 
   const allXml = (): string => slideXml.join('\n')
+  const picture = (index: number, alt: string): string => {
+    const xml = slideXml[index] ?? ''
+    const at = xml.indexOf(`descr="${alt}"`)
+    return xml.slice(
+      xml.lastIndexOf('<p:pic>', at),
+      xml.indexOf('</p:pic>', at),
+    )
+  }
   const runs = (): string[] =>
     [...allXml().matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(
       (match) => match[1] ?? '',
@@ -183,9 +193,13 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   })
 
   it('should round the corners of the bordered image', () => {
-    expect(slideXml[0]).toMatch(
+    expect(picture(0, 'The team at the launch event')).toMatch(
       /<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj"/,
     )
+  })
+
+  it('should leave an image with no radius square', () => {
+    expect(picture(0, 'Thumbnail')).toContain('<a:prstGeom prst="rect">')
   })
 
   it('should land the svg as a vector', () => {
