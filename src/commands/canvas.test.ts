@@ -15,7 +15,11 @@ interface Run {
 }
 
 function canvas(...args: string[]): Run {
-  const result = spawnSync('bun', [CLI, 'canvas', ...args, '--root', ROOT], {
+  return canvasAt(ROOT, ...args)
+}
+
+function canvasAt(root: string, ...args: string[]): Run {
+  const result = spawnSync('bun', [CLI, 'canvas', ...args, '--root', root], {
     encoding: 'utf8',
     env: { ...process.env, CANON_NON_INTERACTIVE: '1', NO_COLOR: '1' },
   })
@@ -114,5 +118,18 @@ describe('canon canvas', () => {
 
     expect(run.status).toBe(1)
     expect(run.stderr).toContain('width and height must be positive')
+  })
+
+  it('should refuse a root that does not exist rather than create it', () => {
+    const missing = join(ROOT, 'typo')
+
+    const run = canvasAt(missing, 'page', 'add', 'drafts', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: false,
+      reason: 'no-root',
+    })
+    expect(existsSync(missing)).toBe(false)
   })
 })

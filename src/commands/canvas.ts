@@ -1,3 +1,4 @@
+import { statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
@@ -31,10 +32,31 @@ interface RootOptions {
   readonly json?: boolean
 }
 
-async function resolveRoot(opts: RootOptions): Promise<string> {
-  return opts.root
+interface Refused {
+  readonly ok: false
+  readonly reason: ContentRefused['reason'] | 'no-root'
+  readonly detail: string
+}
+
+type RootOutcome = { readonly ok: true; readonly root: string } | Refused
+
+/**
+ * Refuses a root that is not a directory rather than letting the first write
+ * scaffold `.canon/canvas/` under a mistyped path, the way `canon serve`
+ * refuses a directory it cannot find.
+ */
+async function resolveRoot(opts: RootOptions): Promise<RootOutcome> {
+  const root = opts.root
     ? resolve(process.cwd(), opts.root)
     : await mainWorktreeRoot()
+  if (!statSync(root, { throwIfNoEntry: false })?.isDirectory()) {
+    return {
+      ok: false,
+      reason: 'no-root',
+      detail: `${root} is not a directory`,
+    }
+  }
+  return { ok: true, root }
 }
 
 function writeJson(record: unknown): void {
@@ -42,7 +64,7 @@ function writeJson(record: unknown): void {
 }
 
 /** Every verb's refusal, framed on stderr and mirrored on stdout under --json. */
-function refuse(refusal: ContentRefused, emitJson: boolean): number {
+function refuse(refusal: Refused, emitJson: boolean): number {
   if (emitJson) writeJson(refusal)
   intro(BANNER)
   logError(refusal.detail)
@@ -118,7 +140,12 @@ export function register(program: Command): void {
   withRoot(
     canvas.command('list').description('List pages and the frames on each'),
   ).action(async (opts: RootOptions) => {
-    const root = await resolveRoot(opts)
+    const resolved = await resolveRoot(opts)
+    if (!resolved.ok) {
+      process.exitCode = refuse(resolved, opts.json ?? false)
+      return
+    }
+    const { root } = resolved
     const pages = listPages(root)
     if (opts.json) {
       writeJson({ ok: true, root, content: canvasDir(root), pages })
@@ -151,8 +178,8 @@ export function register(program: Command): void {
       .description('Add a page')
       .argument('<name>', 'Page name, one path segment'),
   ).action(async (name: string, opts: RootOptions) => {
-    const root = await resolveRoot(opts)
-    const outcome = addPage(root, name)
+    const resolved = await resolveRoot(opts)
+    const outcome = resolved.ok ? addPage(resolved.root, name) : resolved
     if (!outcome.ok) {
       process.exitCode = refuse(outcome, opts.json ?? false)
       return
@@ -170,8 +197,8 @@ export function register(program: Command): void {
       .argument('<from>', 'Current page name')
       .argument('<to>', 'New page name'),
   ).action(async (from: string, to: string, opts: RootOptions) => {
-    const root = await resolveRoot(opts)
-    const outcome = renamePage(root, from, to)
+    const resolved = await resolveRoot(opts)
+    const outcome = resolved.ok ? renamePage(resolved.root, from, to) : resolved
     if (!outcome.ok) {
       process.exitCode = refuse(outcome, opts.json ?? false)
       return
@@ -201,7 +228,12 @@ export function register(program: Command): void {
       name: string,
       opts: RootOptions & { width?: string; height?: string },
     ) => {
-      const root = await resolveRoot(opts)
+      const resolved = await resolveRoot(opts)
+      if (!resolved.ok) {
+        process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      const { root } = resolved
       const outcome = addFrame(root, pageName, name, {
         width: parseSize(opts.width, DEFAULT_FRAME.width),
         height: parseSize(opts.height, DEFAULT_FRAME.height),
@@ -235,7 +267,11 @@ async function runServe(
     return refuseServe('no-port', `${opts.port} is not a port`, emitJson)
   }
 
-  const root = await resolveRoot(opts)
+  const resolved = await resolveRoot(opts)
+  if (!resolved.ok) {
+    return refuseServe(resolved.reason, resolved.detail, emitJson)
+  }
+  const { root } = resolved
   /*
    * Imported here rather than at the top, so a command module the test runner
    * loads never asks it for an HTML module it cannot parse.
