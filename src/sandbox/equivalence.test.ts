@@ -10,7 +10,7 @@ import {
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
@@ -225,7 +225,7 @@ describe('diffManifests', () => {
 
     expect(diffManifests('x:y', a, b, masks)).toEqual({
       differs: [],
-      masked: ['file:m'],
+      masked: [{ key: 'file:m', reason: 'test' }],
     })
   })
 
@@ -248,8 +248,21 @@ describe('diffManifests', () => {
 
     expect(diffManifests('x:y', a, b, masks)).toEqual({
       differs: [],
-      masked: ['log'],
+      masked: [{ key: 'log', reason: 'test' }],
     })
+  })
+
+  it('should name the mask that fired when two share a key', () => {
+    const a = new Map([['log', 'pid 1 fetched [3]']])
+    const b = new Map([['log', 'pid 1 fetched [0]']])
+    const masks: Mask[] = [
+      { key: /^log$/, replace: /pid \d+/g, reason: 'pid' },
+      { key: /^log$/, replace: /\[\d+\]/g, reason: 'fetch count' },
+    ]
+
+    expect(diffManifests('x:y', a, b, masks).masked).toEqual([
+      { key: 'log', reason: 'fetch count' },
+    ])
   })
 
   it('should still report a difference outside a rewritten pattern', () => {
@@ -340,7 +353,29 @@ describe('runEquivalence', () => {
     240_000,
   )
 
-  it('should find the toolkit identical to itself on one real arm', async () => {
+  it('should leave no fake session record in the operator config folder', async () => {
+    const sessions = join(
+      process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude'),
+      'sessions',
+    )
+    const records = (): string[] =>
+      existsSync(sessions)
+        ? readdirSync(sessions).filter((n) => n.startsWith('sandbox-occupant-'))
+        : []
+    const before = records()
+
+    await runEquivalence({
+      root: process.cwd(),
+      targets: ['claude:git-worktree/cleanup'],
+      base: 'HEAD',
+      includeAnchor: false,
+      useMasks: true,
+    })
+
+    expect(records()).toEqual(before)
+  }, 240_000)
+
+  it('should never find the toolkit different from itself on one real arm', async () => {
     const record = await runEquivalence({
       root: process.cwd(),
       targets: ['claude:plan-feature/full'],
@@ -349,8 +384,10 @@ describe('runEquivalence', () => {
       useMasks: true,
     })
 
-    expect(record.arms.map((a) => [a.arm, a.state])).toEqual([
-      ['claude:plan-feature/full', 'identical'],
+    // A machine without the tools the arm needs reads it red on both sides, which
+    // is still no difference, so the claim holds wherever the test runs.
+    expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
+      ['claude:plan-feature/full', []],
     ])
   }, 240_000)
 })

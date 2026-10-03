@@ -97,13 +97,19 @@ export const MASKS: readonly Mask[] = [
 
 const MASKED_TOKEN = '<masked>'
 
+/** A key a mask touched, with the reason of the mask that did, so two masks on one key stay apart. */
+export interface MaskedKey {
+  readonly key: string
+  readonly reason: string
+}
+
 export type Manifest = ReadonlyMap<string, string>
 
 export interface ArmRecord {
   readonly arm: string
   readonly state: ArmState
   readonly differs: readonly string[]
-  readonly masked: readonly string[]
+  readonly masked: readonly MaskedKey[]
   readonly baseExit?: number
   readonly headExit?: number
   readonly check?: CheckRecord
@@ -349,17 +355,24 @@ export function diffManifests(
   a: Manifest,
   b: Manifest,
   masks: readonly Mask[],
-): { differs: string[]; masked: string[] } {
+): { differs: string[]; masked: MaskedKey[] } {
   const differs: string[] = []
-  const masked: string[] = []
+  const masked: MaskedKey[] = []
 
   const applies = (m: Mask, key: string): boolean =>
     (m.arm === undefined || m.arm === arm) && m.key.test(key)
-  const isMasked = (key: string): boolean =>
-    masks.some((m) => m.replace === undefined && applies(m, key))
+  const hidingMask = (key: string): Mask | undefined =>
+    masks.find((m) => m.replace === undefined && applies(m, key))
+  const isMasked = (key: string): boolean => hidingMask(key) !== undefined
+  const note = (key: string, reason: string): void => {
+    if (!masked.some((m) => m.key === key && m.reason === reason))
+      masked.push({ key, reason })
+  }
 
-  // A rewriting mask changes the value before the comparison and fires only when
-  // its pattern matched, so one that stops matching leaves no trace to lie with.
+  // A rewriting mask changes the value before the comparison. It counts as having
+  // fired only where the text it rewrites differs between the sides, since a
+  // match both sides share hides nothing and would otherwise take the credit for
+  // a difference another mask on the same key absorbed.
   const rewrite = (
     key: string,
     value: string | undefined,
@@ -368,14 +381,18 @@ export function diffManifests(
     for (const m of masks) {
       if (m.replace === undefined || !applies(m, key) || next === undefined)
         continue
-      const hit = next.replace(m.replace, MASKED_TOKEN)
-      if (hit !== next) {
-        if (!masked.includes(key)) masked.push(key)
-        next = hit
-      }
+      next = next.replace(m.replace, MASKED_TOKEN)
     }
 
     return next
+  }
+  const noteRewrites = (key: string): void => {
+    for (const m of masks) {
+      if (m.replace === undefined || !applies(m, key)) continue
+      const matches = (v: string | undefined): string =>
+        (v?.match(m.replace as RegExp) ?? []).join('\n')
+      if (matches(a.get(key)) !== matches(b.get(key))) note(key, m.reason)
+    }
   }
 
   const keys = [...new Set([...a.keys(), ...b.keys()])].sort()
@@ -406,10 +423,12 @@ export function diffManifests(
   }
 
   for (const key of keys) {
-    if (isMasked(key)) {
-      masked.push(key)
+    const hiding = hidingMask(key)
+    if (hiding !== undefined) {
+      note(key, hiding.reason)
       continue
     }
+    noteRewrites(key)
     if (comparable(key, a.get(key)) !== comparable(key, b.get(key)))
       differs.push(key)
   }
@@ -488,12 +507,22 @@ function runProcess(
   })
 }
 
+/**
+ * A scratch Claude config folder beside each arm's tree. A scenario can register
+ * a fake session record under the config folder, which would otherwise be the
+ * operator's own, and nothing removes it once the process it names is gone.
+ */
+function configDirFor(dir: string): string {
+  return `${dir}.config`
+}
+
 function provisionEnv(arm: Arm, dir: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     CANON_NON_INTERACTIVE: '1',
     CANON_SANDBOX_DIR: dir,
     CANON_SANDBOX_RUN_ID: PINNED_RUN_ID,
+    CLAUDE_CONFIG_DIR: configDirFor(dir),
   }
   if (arm.arm === undefined) delete env.SANDBOX_SCENARIO
   else env.SANDBOX_SCENARIO = arm.arm
@@ -514,6 +543,7 @@ async function provision(
   logPath: string,
 ): Promise<Provisioned> {
   rmSync(dir, { recursive: true, force: true })
+  rmSync(configDirFor(dir), { recursive: true, force: true })
   const exit = await runProcess(
     'bun',
     [join(root, 'src', 'cli.ts'), 'sandbox', `${arm.category}:${arm.command}`],
@@ -611,6 +641,8 @@ async function runArm(
         join(workDir, 'logs', `check-${index}.log`),
       )
     : undefined
+
+  rmSync(configDirFor(dir), { recursive: true, force: true })
 
   return {
     arm: key,
@@ -788,14 +820,7 @@ export async function runEquivalence(
     const masksApplied = [
       ...new Set(
         records.flatMap((r) =>
-          r.masked.map((key) => {
-            const mask = masks.find(
-              (m) =>
-                (m.arm === undefined || m.arm === r.arm) && m.key.test(key),
-            )
-
-            return `${r.arm} ${key}: ${mask?.reason ?? ''}`
-          }),
+          r.masked.map((m) => `${r.arm} ${m.key}: ${m.reason}`),
         ),
       ),
     ]
