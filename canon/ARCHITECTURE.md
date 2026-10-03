@@ -4,79 +4,70 @@ Authoring guidance: `standards/architecture.md`.
 
 ## Overview
 
-The toolkit is a CLI plus a Claude Code plugin, built so an agent can drive every surface a human can. Content is authored once at a project-root folder, consumed here through a generated copy under `.claude/`, and reaches a target project either by a `canon` install command or by loading live from the plugin root.
+The toolkit is a CLI plus a Claude Code plugin, built so an agent can drive every surface a human can. Content is authored once at a project-root folder and reaches a target either through a `canon` install command or live from the plugin root.
 
-Five domains carry the weight: governance rules, standards, tooling stacks, plugin skills, and the CLI that installs them. This file holds only the decisions that fill one of five slots: stack and runtime, delivery, enforced boundaries, layout, and build principles. Every other decision lives in the `canon/context/<domain>.md` entry for the domain it constrains, which is also where a reader goes for how rather than why.
+This file holds only decisions that fill one of five slots: stack and runtime, delivery, enforced boundaries, layout, and build principles. Every other decision lives in the `canon/context/<domain>/` entry it constrains, which is also where a reader goes for how rather than why.
 
-This record holds at most 12 decisions, and the Architecture record stage in `bun run check` fails a push past that cap. Every decision closes with a revisit sentence, and the same stage fails a push on a decision without one.
+This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets, and the Canonical records stage in `bun run check` fails a push past any of the three. Every decision closes with a revisit sentence.
 
 ## Key technical decisions
 
 ### TypeScript on Bun, with shell only as a small wrapper
 
-TypeScript on Bun is the language for every surface, and shell stays only as a small wrapper. A shell file over 100 lines is rewritten, the line the [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) draws. `src/` owns every migrated domain and `scripts/` holds what has not moved, with domains migrating one verb at a time. The rule that lost kept bash for whatever suited it, so every leftover file argued its own case. Of 152 tracked `.sh` files, 64 sit over the line, and no gate checks it yet. A folder is named for its role rather than its language, so `scripts/` holds a project's chores in the project's own language, here and in every stack the toolkit ships.
+Every surface is TypeScript on Bun, and shell stays only as a wrapper under 100 lines, the line the [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) draws. Domains migrate from `scripts/` to `src/` one verb at a time. `bin` runs `src/cli.ts` directly through its shebang, so nothing compiles and no `dist/` can drift from the source.
 
-`bin` points at `src/cli.ts` and its `#!/usr/bin/env bun` shebang runs the source directly, so the package ships TypeScript and nothing compiles. Node with a build step was the alternative, and it costs a publish pipeline plus a `dist/` that can drift from the source a contributor reads. The trade is that the CLI does not run under Node at all, since `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` stand in for globbing and parser dependencies, so a target needs Bun on the machine rather than only a package manager. Revisit when a target canon installs into cannot run Bun, Node runs the shipped TypeScript with no build step and no `dist/` to drift, or a caller requires a shell command a one-line wrapper cannot serve. Measured at `4589a50d` on 2026-10-01.
+Node with a build step was the alternative and costs a publish pipeline. The trade is that a target needs Bun installed, since `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` replace parser dependencies. A folder is named for its role, not its language. `canon/context/cli/overview.md` carries the migration state. Revisit when a target cannot run Bun, or Node runs shipped TypeScript with no build step.
 
 ### Two delivery paths rather than one
 
-`canon` commands copy governance rules, tooling configs, and design files into a project, and the marketplace plugin loads skills live from `claude/`. A single channel was the obvious alternative, and neither channel does the other's job. Copied content is what a project edits and owns, so it lands as real files under version control, while a skill is toolkit-owned process that goes stale the moment it is copied.
+`canon` commands copy governance rules, tooling configs, and design files into a project, and the marketplace plugin loads skills live from `claude/`. Copied content is what a project edits and owns, so it lands as files under version control.
 
-What the split costs is a citation crossing it, since a skill body naming an installed path resolves only for a project that ran the matching install and an unresolved path raises nothing until a session opens it. A file only one skill reads therefore travels inside that skill, which is what moved the three orchestrator runbooks into `claude/skills/role-orchestrator/references/`. Publishing on both surfaces was the alternative, and it makes two sources for one text. Revisit when a plugin install can write files a project then owns and edits, or a copied skill stops going stale because something re-syncs it on every session.
+A skill is toolkit-owned process that goes stale the moment it is copied. A single channel was the alternative, and neither channel does the other's job. The cost is a citation crossing the split: a skill naming an installed path resolves only where that install ran. So a file only one skill reads travels inside that skill. Revisit when a plugin install can write files a project then owns, or a copied skill is re-synced on every session.
 
 ### Something other than the model resolving a file by path decides whether it installs
 
-A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a governance rule, and a target's own build tooling reads a tooling config or `.claude/design/base.css` straight off its path, so none needs a command in the loop. A standard is the one domain the model opens on purpose, which is why `canon standards` carries no install and no sync. Deciding per domain case by case lost to writing the criterion down, and nothing checks that a new domain answers it the same way. `canon/context/standards/resolution.md` carries the closed install channel for standards and tooling references. Revisit when Claude Code loads a document on demand from a catalog of its own, since a standard would then be resolved by something other than the model's judgment.
+A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a rule, and a target's build tooling reads a config or `.claude/design/base.css` off its path, so each installs. A standard is opened by the model on purpose, so `canon standards` carries no install and no sync.
+
+Deciding case by case lost to writing the criterion down. `canon/context/standards/resolution.md` carries the closed install channel. Revisit when Claude Code loads a document on demand from a catalog of its own.
 
 ### Skills call the CLI and never reimplement it
 
-A plugin skill reads a catalog through `canon <domain> list --json`, matches it against project context, then executes the CLI under `CANON_NON_INTERACTIVE=1`. Every domain owes a `list` verb with `--json` and no skill hardcodes a rule or stack name, which keeps one behavior in one place rather than restated in a skill body that could drift from the CLI on its own cadence.
+A plugin skill reads a catalog through `canon <domain> list --json` and acts through the CLI under `CANON_NON_INTERACTIVE=1`. Every domain owes a `list --json` verb, and no skill hardcodes a rule or stack name, which keeps one behavior in one place.
 
-The rule covers a catalog and stops at a document, so a skill reads a standard by path off the `claude/standards` symlink, while a rule, which a glob match loads with no skill context, names `canon standards <name>` instead. Revisit when skills failing on a verb the installed binary lacks outnumber the drift that restating a catalog in skill bodies would cause.
+Restating catalogs in skill bodies was the alternative, and it drifts on its own cadence. The rule covers catalogs, not documents: a skill reads a standard by path off the `claude/standards` symlink, and a rule names `canon standards <name>`, since a rule loads with no skill context. Revisit when skills failing on a verb the installed binary lacks outnumber the drift restated catalogs would cause.
 
 ### Location enforces the plugin boundary
 
-Toolkit-internal content lives under `internal/`, a tree nothing inside `claude/` reaches, and the marketplace entry sources the plugin from `./claude` rather than from the repository root. `src/gate/boundaries.ts` walks the shipped tree with symlinks followed and fails on any file resolving under `internal/`. `SyncAdapter.projectSubdir` answers the same question inside the sync engine, recorded in `canon/context/cli/sync.md`.
+Toolkit-internal content lives under `internal/`, which nothing inside `claude/` reaches, and the marketplace sources the plugin from `./claude` rather than the root. `src/gate/boundaries.ts` follows symlinks across the shipped tree and fails on any file resolving under `internal/`.
 
-The boundary does not keep internal files off a user's disk, since adding a git marketplace clones the whole repository with `internal/` in it. The leak that first argued for it, internal snippets surfacing in a target's catalog as if the plugin offered them, went with the retired snippets domain. What argues for the `./claude` source now is the cost of the root. The plugin installer runs a `bun install` it offers no way to skip, under a 60-second timeout, into every cached version of a plugin whose root holds a `package.json` and a supported lockfile, and this repository's root holds both. Moving the source would also sweep 249 lines referencing `claude/skills` across `src/` and `scripts/`. Revisit when the plugin installer lets a plugin skip that dependency install, or a file under `internal/` surfaces in a target as something the plugin offers. Measured at `b0769baa` on 2026-10-01.
+Sourcing from the root was the alternative. The plugin installer runs a `bun install` it offers no way to skip into every cached version whose root holds a `package.json` and a lockfile, and this root holds both. Revisit when the installer lets a plugin skip that install, or an `internal/` file surfaces in a target as something the plugin offers.
 
 ### Three tiers of context, bounded by slots
 
-Context splits three ways: `CLAUDE.md` and this file load eagerly, `.claude/rules/` load on glob match, and `canon/context/<domain>.md` is read on demand. One large `CLAUDE.md` was the starting point and grows without bound. Nested `CLAUDE.md` files below the cwd were the other candidate, and they load cheaply but announce nothing, so a session never learns they exist. The `index.md` catalog is what the third tier buys, since it lists every entry up front.
+`CLAUDE.md` and this file load eagerly, `.claude/rules/` load on glob match, and `canon/context/` is read on demand through its `index.md` catalog. One large `CLAUDE.md` grows without bound. Nested `CLAUDE.md` files load cheaply but announce nothing, so a session never learns they exist.
 
-The eager tier is bounded by what it may hold rather than by how many domains a fact reaches. Reach always passes, since nearly every decision touches two domains, which is how this file grew to forty entries and about 15k tokens loaded into every session. A decision lands here only when it fills a slot, and a domain context entry is its default home otherwise. A numeric ceiling on the file's length was tried first and dropped, since nothing enforced it and every merge drifted past it. The entry cap holds where that ceiling did not because the Architecture record stage fails a push on it. `canon/context/context-model/overview.md` carries the test that sorts a fact between a rule, an entry, and a skill. Revisit when Claude Code tells a session which nested memory files exist before it opens them, since the catalog would then buy nothing a nested `CLAUDE.md` does not. Measured at `6b12dfa3` on 2026-09-19.
+The eager tier is bounded by what it may hold, a slot, rather than by reach, since nearly every decision touches two domains. A gated cap holds where an ungated length ceiling did not. `canon/context/context-model/overview.md` carries the test sorting a fact between tiers. Revisit when Claude Code tells a session which nested memory files exist before it opens them.
 
 ### Whether a file is committed, and whether Claude Code reads it, decides which root it sits under
 
-Three roots split the project on two tests applied in order. Whether a file is committed separates `.canon/`, which takes every gitignored session record, from the other two. Whether Claude Code reads it by path then separates `.claude/`, which keeps `rules`, `skills`, `hooks`, and `settings.json`, from `canon/`, which keeps what the toolkit authors and commits. Both lines are mechanical rather than conceptual, which is the whole of their value.
+Two tests sort the project's roots in order. Whether a file is committed separates `.canon/`, every gitignored session record, from the rest. Whether Claude Code reads it by path then separates `.claude/`, holding `rules`, `skills`, `hooks`, and `settings.json`, from `canon/`, holding what the toolkit authors and commits. Both lines are mechanical, which is their value.
 
-The committed test alone was the alternative, and it left tracked content the harness never opens sharing a root with the files it loads. Sorting by what a folder is for was an earlier alternative still, and it lost because every new record folder needed a reader to judge it and then an ignore line to be written. `canon/context/context-model/overview.md` carries what each root holds, the two carve-outs under `.claude/`, and how the move ran. Revisit when Claude Code reads its files from a root a project can configure, since the second test would then sort nothing.
+Sorting by what a folder is for was the alternative, and every new folder then needed a judgment and an ignore line. `canon/context/context-model/overview.md` carries what each root holds. Revisit when Claude Code reads its files from a root a project can configure.
 
 ### Build principles
 
-Four principles decide how a behavior is built, and each domain entry carries its own instances.
+- A hook, a gate stage, or a verb enforces what prose only states. Each one says what it does when its inputs are missing rather than reporting a pass.
+- A standard governs an artifact's shape, and the skill driving it governs the procedure.
+- A rule the model can talk itself out of moves into a verb.
+- A safe behavior sits on the default path, not behind a flag.
 
-- A hook, a gate stage, or a verb enforces what prose only states, since a rule written in a standard fires only when a session reads it. The cost is that an enforcement point is code with its own failure modes, so each one says what it does when its inputs are missing rather than reporting a pass.
-- A standard governs an artifact's shape and the skill driving it governs the procedure, since a standard covering both hides the enforceable half behind the judgment half.
-- A rule the model can talk itself out of moves into a verb, since an instruction is a hope and a verb is a check. What stays open is that a body remains free to reorder what the verb reports.
-- A safe behavior sits on the default path rather than behind a flag, since a flag you have to remember is one nobody passes the first time, which is when the target still holds the work.
-
-The four share one premise, that a model follows a prose rule only when a session happens to read it. Revisit when a measured run shows a prose rule followed as reliably as a gate enforces the same rule.
+The four share one premise, that a model follows a prose rule only when a session happens to read it. Each domain entry carries its instances. Revisit when a measured run shows a prose rule followed as reliably as a gate enforces it.
 
 ## Risks / open questions
 
-- Skills and the CLI ship at two speeds. A skill merged to `main` reaches a `--plugin-dir` session immediately, while the CLI reaches a user only once a release publishes it, so a skill calling an unpublished verb or flag fails in a target and nothing detects that call.
-  - `canon sync --check` and `canon claude skills drift` each read the installed version against the newest published one, but neither reports which verb is missing, and a reader who never runs either is reached by no route at all.
-  - A missing subcommand under a command that exists is the quieter failure: a target on an older binary archives a task and leaves its plan live, reporting success either way.
-  - Two binaries disagree with the nested plan archive by behavior rather than by version. One reads a nested archived plan as live and refuses, which is the safe direction, and the other writes to a flat `.claude/task-archive/` sibling. The one known target still on the flat layout, `erclx.dev`, has no checkout reachable from this repository to run the move in.
-  - `800-prose`, `661-teach`, and `605-worktrees` point at a skill carrier a project installing governance without the plugin does not have. Each rule tells a session to say so, which reports the gap without closing it.
-  - An exit code says nothing about a `canon` call here, because an operator's shell profile may wrap the binary in a function whose status comes from a trailing command, which is why every task verb tells a caller to branch on the record's `reason`.
-  - `git-pr` calls `canon labels audit` and keeps the stated matching rule as a fallback, and the duplication runs until a release retires it.
-- `canon-operator` answers an absent key as unread rather than as empty, a pattern the remaining skills could take rather than a check the repository runs, so the skew can reach a reader as a confident wrong answer.
-- A marketplace install is a cached copy, which is the same skew in the other direction, and neither direction is detected.
-- The skill-body drift verb answers only when a session runs it, goes quiet on a body the running session edited and has not committed, and refuses in a project consuming the plugin from a cache.
-- Verification anchors here have a writer and a sweeper, and the sweeper reaches only what a diff can point at, so an anchor on a decision no branch touches is checked only by a person re-reading it.
-- A decision moved to a context entry leaves a pointer with no check behind it, since nothing compares a slot entry against the entry it defers to.
-- Two classes of claim stay unflagged: one counting over a tree the branch never opened, and one citing nothing narrower than a single path segment, which is deliberate since a prefix match on `src/` fires on nearly every branch.
-- A native Windows checkout without symlink support materializes `claude/standards` as a plain file holding a path, so the plugin ships no standards and no stage notices.
-- The cap counts decisions by heading, so a writer at the cap can pack two decisions under one heading and pass. `standards/architecture.md` asks for a merge or a retirement instead, and nothing enforces the difference.
+- Skills and the CLI ship at two speeds. A skill merged to `main` reaches a `--plugin-dir` session at once, while the CLI reaches users only on release, so a skill calling an unpublished verb fails in a target, and `canon sync --check` reports the version gap but not the missing verb.
+- A marketplace install is a cached copy, the same skew in the other direction, and nothing detects either.
+- `800-prose`, `661-teach`, and `605-worktrees` point at a plugin skill that a project installing governance alone does not have. Each rule tells the session to say so, which reports the gap without closing it.
+- An exit code says nothing about a `canon` call here, since a shell profile may wrap the binary, so every task verb tells a caller to branch on the record's `reason`.
+- Verification anchors are re-checked only when a diff touches the decision they mark.
+- A Windows checkout without symlink support turns `claude/standards` into a plain file, so the plugin ships no standards and no stage notices.
