@@ -19,7 +19,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
 | `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
 | `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                        |
-| `canon:deploy-app`     | Once a project is ready to publish, to set up its Cloudflare Pages deploy and stop for the token and domain |
+| `canon:deploy-app`     | Once a project is ready to publish, to set up its Cloudflare or Vercel deploy and stop for token and domain |
 | `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
 
 ## Decide what to build
