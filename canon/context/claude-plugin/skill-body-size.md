@@ -25,6 +25,8 @@ That test is what bounds the rule. In `context-fold`, a project with no wirefram
 
 ## Applying it is maintenance, not a sweep
 
+A body sitting at the ceiling takes no new line at all, since the Document ceiling gate stage fails a push past 300 rendered lines whatever the line adds. `role-orchestrator/SKILL.md` sits at exactly 300, so new orchestrator procedure lands in a reference and reaches the body through one it already points at, such as `orchestrator-dispatch.md`, rather than through a pointer line of its own.
+
 Ten bodies clear the checkpoint. Moving all of them in one pass turns a standards change into a corpus rewrite, so the checkpoint fires on each skill as that skill is next edited and the rest stay as they are. The value is that it applies on every later edit rather than that the corpus is uniform on the day it lands.
 
 Pointing one skill at a sibling's folder is banned outright, since a bare relative path across folders resolves against the session cwd and breaks the moment either skill runs from a plugin cache. A reference two skills read is authored as a standard at the flat root instead, cited from each skill through `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, which resolves off the `claude/standards` symlink in a plugin cache holding no project files. `git-pr` and `git-split` both citing `standards/branch.md` and `standards/pr.md` this way is the shape to expect.

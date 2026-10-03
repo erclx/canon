@@ -17,6 +17,8 @@ The acting payload is what a mangled read fails. A corrupted payload reaches the
 
 The two index hooks run with `canon` dropped from `PATH`, which pins them to the branch reporting a stale index instead of leaving the assertion to depend on whether the CLI is installed.
 
+`cloud-setup.sh` run with `CLAUDE_CODE_REMOTE=true` anywhere but a cloud VM runs a real `bun link`, which repoints the machine's global `@erclx/canon` at that checkout. Exercise it with a stub `bun` on `PATH`, as `src/hooks-guard.test.ts` does, and restore a relinked machine with `bun add -g @erclx/canon@<version>`.
+
 ## The path form hook
 
 `path-form.sh` shares the `Edit|Write|MultiEdit` matcher and hands back the absolute form of a path written from a linked worktree, so a session prefers that form over computing it. `governance/rules/claude/566-output.md` keeps the instruction as a self-sufficient fallback rather than a branch the hook replaced. The hook reaches a project only through `tooling/claude/seeds/` at scaffold time while the rule reaches one through `canon gov sync`, and a target that synced governance without ever scaffolding through the seed would otherwise read a line naming a source it does not have.
