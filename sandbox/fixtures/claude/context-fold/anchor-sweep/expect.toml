@@ -22,7 +22,7 @@ reply = [
   "The toolkit states its rules in one file",
 ]
 
-write_scope = [".claude/**"]
+write_scope = [".claude/**", "canon/**"]
 
 # Every top-level key sits above the first [[content]] block. A bare key written
 # below one belongs to that table in TOML, and the whole declaration then fails
@@ -40,7 +40,7 @@ max_turns = 26
 # failure this arm exists to catch, because the sweep measured nothing and a
 # date it wrote would assert a read that never happened.
 [[content]]
-path = ".claude/ARCHITECTURE.md"
+path = "canon/ARCHITECTURE.md"
 pattern = 'installer at `src/gov/install\.ts` carries 4 rules today, which is small enough that copying costs nothing and a pointer would cost every project a resolver\. Measured at a1b2c3d4 on 2026-07-20\.$'
 
 # The unanchored entry stays unanchored. Its cited path changes on this branch
@@ -54,12 +54,12 @@ pattern = 'Overwriting keeps the target uniform and discards the local edits a p
 # is the one the sweep has to stay silent about. Pinned whole, since an edit
 # anywhere in it means the pass reached an entry no signal pointed at.
 [[content]]
-path = ".claude/ARCHITECTURE.md"
+path = "canon/ARCHITECTURE.md"
 pattern = '^`src/gov/plan\.ts` resolves which rules a stack pulls in before anything is written, chosen over resolving inside the writer\. The planner reaches 3 stacks and a single pass over them is cheap, while a writer that resolves as it goes cannot report what it is about to do\. Measured at a1b2c3d4 on 2026-07-20\.$'
 
 # The root-file entry is reported and still not written. Its cited count moves
 # from 2 rules to 4 on this branch, which is exactly the claim a refreshed anchor
 # would silently bless without anyone re-reading it.
 [[content]]
-path = ".claude/ARCHITECTURE.md"
+path = "canon/ARCHITECTURE.md"
 pattern = '^`CLAUDE\.md` carries 2 standing rules today, chosen over a folder of path-scoped files\. That is few enough for a reader to take in one pass, and splitting them would cost more to find than to read\. Measured at a1b2c3d4 on 2026-07-20\.$'

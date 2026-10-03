@@ -2,10 +2,10 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# The create path has no CLI verb. `src/commands/tasks.ts` registers `archive`
-# alone, so the skill writes this file itself from `canon standards tasks`.
-# That makes the whole of what this arm asserts prose behavior, with no unit
-# test underneath it, which is the opposite of the archive arm beside it.
+# `canon tasks next-label` allocates the label, and the skill writes the file
+# itself from `canon standards tasks`. Nothing writes the task for it, so the
+# file's frontmatter, body, and links are prose behavior with no unit test
+# underneath them, which is the opposite of the archive arm beside it.
 
 # Every top-level key sits above the first `[[content]]` block. A bare key below
 # one belongs to that table in TOML, so a `manual` array written at the bottom
@@ -14,14 +14,14 @@
 max_turns = 30
 
 # The label is the assertion, not the slug. The board carries v01.0 through
-# v03.0 with no gaps, so a skill reading it proposes v04.0 and one that guessed
-# from a version file or from the plan name lands somewhere else.
+# v03.0 with no gaps, so `canon tasks next-label` allocates v03.1 and a skill
+# that guessed from a version file or from the plan name lands somewhere else.
 #
 # The three existing tasks are the control. A run that renumbered the board to
 # fit its new entry, or rewrote a neighbor while reading it, goes red here
 # rather than passing on the one file it was asked to write.
 paths = [
-  ".canon/tasks/v04.0-csv-export.md",
+  ".canon/tasks/v03.1-csv-export.md",
   ".canon/tasks/v01.0-rate-limit.md",
   ".canon/tasks/v02.0-pagination.md",
   ".canon/tasks/v03.0-search.md",
@@ -34,7 +34,7 @@ write_scope = [".canon/tasks/**"]
 # The skill's Output block emits the full relative path from the project root,
 # since a bare filename is not clickable. The fragment stops at the label so the
 # assertion reads the part the board determines and leaves the slug free.
-reply = [".canon/tasks/v04.0-"]
+reply = [".canon/tasks/v03.1-"]
 
 manual = [
   "The proposed label is reported with the neighbors it sits between. Semantic: the sentence is prose and any pin over it goes red on a rewording.",
@@ -50,31 +50,31 @@ manual = [
 # and a basic string would reintroduce the backslash doubling the literal form
 # exists to avoid.
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
-pattern = '^title: .v04\.0: '
+path = ".canon/tasks/v03.1-csv-export.md"
+pattern = '^title: .v03\.1: '
 
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
+path = ".canon/tasks/v03.1-csv-export.md"
 pattern = '^description: \S'
 
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
-pattern = '^# v04\.0: '
+path = ".canon/tasks/v03.1-csv-export.md"
+pattern = '^# v03\.1: '
 
 # The origin line, written relative to `.canon/tasks/` rather than from the
 # project root. A root-relative path still renders as a link and resolves to
 # nothing in an editor rooted at the project, which is the failure the form
 # exists to prevent and which no reader notices until they click it.
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
+path = ".canon/tasks/v03.1-csv-export.md"
 pattern = '^Plan: \[feature-csv-export\]\(\.\./plans/feature-csv-export\.md\)'
 
 # An outcome, open. A task written with its outcomes already marked would
 # archive on the next unattended sweep without the work ever happening.
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
+path = ".canon/tasks/v03.1-csv-export.md"
 pattern = '^- \[ \] Outcome: '
 
 [[content]]
-path = ".canon/tasks/v04.0-csv-export.md"
+path = ".canon/tasks/v03.1-csv-export.md"
 pattern = '^> Test strategy: '
