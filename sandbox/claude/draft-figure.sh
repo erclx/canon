@@ -9,7 +9,9 @@ use_config() {
 
 # A rendered lesson page rather than markdown, since the in-page capture needs a
 # page to load. The stylesheet defines the custom properties a figure colors
-# through, and the hand font is what Mermaid cannot measure.
+# through, and the hand font is what Mermaid cannot measure. The body face is
+# one every machine resolves, since `canon capture` refuses a page whose figure
+# inherits a family the machine lacks.
 seed_lesson() {
   local file="$1"
 
@@ -22,7 +24,7 @@ seed_lesson() {
     <title>Order states</title>
     <style>
       :root { --ink: #1f1d1a; --paper: #fbf8f1; --muted: #6b665c; --accent: #b4532a; }
-      body { background: var(--paper); color: var(--ink); font-family: Georgia, serif; line-height: 1.6; }
+      body { background: var(--paper); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.6; }
       main { max-width: 68ch; margin: 0 auto; padding: 2rem 1rem; }
       figure { margin: 2rem -4rem; }
       figure svg text { font-family: Virgil, Excalifont, cursive; }
