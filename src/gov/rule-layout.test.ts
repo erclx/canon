@@ -37,12 +37,16 @@ function seedRule(rel: string, content: string): void {
   writeFileSync(path, content)
 }
 
+// A bare path ending a clause carries the clause's punctuation into the match.
+const TRAILING_PUNCTUATION = /[.,;:]+$/
+
 function retiredClaudePaths(rel: string, text: string): string[] {
   return [...text.matchAll(CLAUDE_PATH)]
-    .filter((match) => !CURRENT_CLAUDE_ROOTS.includes(match[1]))
+    .map((match) => match[1].replace(TRAILING_PUNCTUATION, ''))
+    .filter((segment) => !CURRENT_CLAUDE_ROOTS.includes(segment))
     .map(
-      (match) =>
-        `${rel}: .claude/${match[1]} is outside the current layout (${CURRENT_CLAUDE_ROOTS.join(', ')})`,
+      (segment) =>
+        `${rel}: .claude/${segment} is outside the current layout (${CURRENT_CLAUDE_ROOTS.join(', ')})`,
     )
 }
 
@@ -107,7 +111,7 @@ describe('rule layout', () => {
   it('should pass the current roots, including a home-relative one', () => {
     seedRule(
       'claude/566-output.md',
-      '- Under `.claude/worktrees/<name>/`, not `~/.claude/projects/`, see `.claude/rules/canon/x.md`\n',
+      '- Under `.claude/worktrees/<name>/`, not `~/.claude/projects/`, see `.claude/rules/canon/x.md`\n- Edit .claude/hooks, then .claude/settings.json.\n',
     )
 
     const findings = layoutFindings(root)
