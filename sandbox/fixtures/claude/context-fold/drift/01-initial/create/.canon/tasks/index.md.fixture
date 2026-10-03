@@ -1,0 +1,11 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Migrate storage to Postgres](v01.0-postgres-migration.md): Persist tasks in Postgres instead of SQLite
+- [v02.0: Add multi-user accounts](v02.0-multi-user.md): Let users sign up and scope tasks to their owner

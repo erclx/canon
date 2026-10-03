@@ -1,0 +1,13 @@
+---
+title: 'v01.0: Rate limit the task API'
+description: Reject a client that exceeds the request budget for a window
+---
+
+# v01.0: Rate limit the task API
+
+Plan: [feature-rate-limit](../plans/feature-rate-limit.md)
+
+- [x] Outcome: a client over the request budget is rejected
+- [x] Outcome: the budget resets on a rolling window
+
+> Test strategy: unit, drive the limiter past the budget and past the window.

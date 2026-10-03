@@ -1,0 +1,3 @@
+# Feature: Postgres migration
+
+Plan linked from the "Migrate storage to Postgres" task block. The context-fold skill should leave this file live after marking the task [x], since only the merge settles a plan.

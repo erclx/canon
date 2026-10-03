@@ -1,0 +1,3 @@
+# Feature: search tasks by title
+
+Plan for the "Search tasks by title" task, whose outcomes are still open. Nothing in HEAD ships search, so the sweep must leave this file in .canon/plans/. A run that archives it has widened the board scan past the outcome gate rather than only past the session.

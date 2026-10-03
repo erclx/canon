@@ -64,7 +64,7 @@ One file, no extra service, ships embedded in the deploy image.
 The deployed app does not carry an LLM key. Users supply their own at chat time, held in browser sessionStorage.
 EOF
 
-  mkdir -p web/src/agent web/src/tools api/src/retrieval api/src/ranking
+  mkdir -p web/src/agent web/src/tools api/src/retrieval api/src/ranking .canon/diagrams
 
   cat <<'EOF' >web/src/agent/loop.ts
 // Vercel AI SDK agent loop. Registers tools and streams to the chat UI.

@@ -1,0 +1,9 @@
+---
+title: 'v02.0: Add multi-user accounts'
+description: Let users sign up and scope tasks to their owner
+---
+
+# v02.0: Add multi-user accounts
+
+- [ ] Outcome: users can sign up and log in
+- [ ] Outcome: tasks are scoped to the owning user

@@ -1,0 +1,12 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Rate limit the task API](v01.0-rate-limit.md): Reject a client that exceeds the request budget for a window
+- [v02.0: Paginate the task list](v02.0-pagination.md): Return a bounded page of tasks instead of the whole collection
+- [v03.0: Search tasks by title](v03.0-search.md): Match a query against task titles and return the hits
