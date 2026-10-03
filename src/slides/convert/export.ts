@@ -30,15 +30,12 @@ import {
 } from '@/slides/convert/master'
 import {
   type DrawOp,
-  type ElementRecord,
   type Fallback,
-  type NamedShape,
   planSlide,
   type RefusedLink,
 } from '@/slides/convert/shapes'
 import {
   type BandOverride,
-  type EntranceRecord,
   ID_ATTRIBUTE,
   readTheme,
   type SlideMeta,
@@ -48,6 +45,7 @@ import {
 import { embedFonts, type FontNotice } from '@/slides/package/fonts'
 import {
   type EntranceSpec,
+  entranceShapes,
   type MotionNotice,
   type SlideMotionEdit,
   writeMotion,
@@ -258,8 +256,16 @@ export async function exportHtmlDeck(
       drawOverrides(slide, deck, theme, walked.meta)
       if (walked.meta.notes) slide.addNotes(walked.meta.notes)
       const { transition } = walked.meta
-      const entrances = walked.entrances.map((entrance) =>
-        entranceSpec(entrance, walked.records, plan.names),
+      const roots = new Set(
+        walked.entrances.flatMap(({ record }) =>
+          record === null ? [] : [record],
+        ),
+      )
+      const entrances = walked.entrances.map(
+        ({ record, ...spec }): EntranceSpec => ({
+          ...spec,
+          shapes: entranceShapes(record, walked.records, plan.names, roots),
+        }),
       )
       if (transition || entrances.length > 0) {
         motions.push({
@@ -333,32 +339,6 @@ export async function exportHtmlDeck(
     refusedMotion,
     refusedFonts,
     notices,
-  }
-}
-
-/**
- * An entrance animates every shape drawn from its element and from the
- * elements inside it, so a card's box and its text come in together. A record
- * follows its parent in document order, which lets one pass collect the subtree.
- */
-function entranceSpec(
-  entrance: EntranceRecord,
-  records: readonly ElementRecord[],
-  names: readonly NamedShape[],
-): EntranceSpec {
-  const subtree = new Set<number>()
-  if (entrance.record !== null) subtree.add(entrance.record)
-  for (const record of records) {
-    if (record.parent !== null && subtree.has(record.parent)) {
-      subtree.add(record.id)
-    }
-  }
-  const { record: _record, ...spec } = entrance
-  return {
-    ...spec,
-    shapes: names
-      .filter((named) => subtree.has(named.record))
-      .map((named) => named.name),
   }
 }
 

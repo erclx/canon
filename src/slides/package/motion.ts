@@ -122,6 +122,36 @@ const ANCHOR = '</p:clrMapOvr>'
 const list = (names: readonly string[]): string =>
   `${names.slice(0, -1).join(', ')}, or ${names.at(-1)}`
 
+/**
+ * The object names an entrance on `root` brings in: every shape drawn from it
+ * and from the elements inside it, so a card's box and its text arrive on one
+ * click. A descendant in `roots` declares its own entrance and keeps its
+ * subtree for that click. A record follows its parent in document order, which
+ * lets one pass collect the subtree.
+ */
+export function entranceShapes(
+  root: number | null,
+  records: readonly { readonly id: number; readonly parent: number | null }[],
+  names: readonly { readonly record: number; readonly name: string }[],
+  roots: ReadonlySet<number>,
+): string[] {
+  if (root === null) return []
+  const subtree = new Set([root])
+  for (const record of records) {
+    const isOwnEntrance = roots.has(record.id)
+    if (
+      record.parent !== null &&
+      subtree.has(record.parent) &&
+      !isOwnEntrance
+    ) {
+      subtree.add(record.id)
+    }
+  }
+  return names
+    .filter((named) => subtree.has(named.record))
+    .map((named) => named.name)
+}
+
 /** Milliseconds from `500`, `500ms`, or `0.5s`, or undefined when unreadable. */
 export function millisecondsOf(value: string | undefined): number | undefined {
   const match = /^\s*(\d+(?:\.\d+)?)\s*(ms|s)?\s*$/.exec(value ?? '')

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addMotion,
   type EntranceSpec,
+  entranceShapes,
   type SlideMotion,
 } from '@/slides/package/motion'
 
@@ -33,6 +34,37 @@ const clickTargets = (xml: string): string[] =>
   [...xml.matchAll(/nodeType="clickEffect">.*?<p:spTgt spid="(\d+)"\/>/g)].map(
     (match) => match[1] ?? '',
   )
+
+describe('entranceShapes', () => {
+  const records = [
+    { id: 1, parent: null },
+    { id: 2, parent: 1 },
+    { id: 3, parent: 2 },
+    { id: 4, parent: null },
+  ]
+  const names = records.map((record) => ({
+    record: record.id,
+    name: `canon-${record.id}`,
+  }))
+
+  it('should take every shape drawn from the element and its descendants', () => {
+    expect(entranceShapes(1, records, names, new Set([1]))).toEqual([
+      'canon-1',
+      'canon-2',
+      'canon-3',
+    ])
+  })
+
+  it('should leave out a descendant that declares its own entrance', () => {
+    expect(entranceShapes(1, records, names, new Set([1, 2]))).toEqual([
+      'canon-1',
+    ])
+  })
+
+  it('should take nothing for an element that was never walked', () => {
+    expect(entranceShapes(null, records, names, new Set())).toEqual([])
+  })
+})
 
 describe('addMotion', () => {
   it('should give a target sharing its id with another shape an id of its own', () => {

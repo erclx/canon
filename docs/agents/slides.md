@@ -91,7 +91,7 @@ A slide declares how it arrives on `<body>`, and an element declares how it come
 </body>
 ```
 
-Each entrance is its own click. Entrances without an order play after the ordered ones, in page order. An entrance brings in every shape drawn from its element and the elements inside it together, so a card's box and its text arrive on one click, and an element drawn as a picture brings in that picture. Fly comes in from the bottom and wipe from the left.
+Each entrance is its own click. Entrances without an order play after the ordered ones, in page order. An entrance brings in every shape drawn from its element and the elements inside it together, so a card's box and its text arrive on one click, and an element drawn as a picture brings in that picture. An element inside it with its own `data-enter` waits for its own click. Fly comes in from the bottom and wipe from the left.
 
 A transition length rounds to the nearest of the three speeds PowerPoint's file format names, since a length in milliseconds needs an extension the deck does not write.
 
