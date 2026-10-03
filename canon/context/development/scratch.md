@@ -46,9 +46,9 @@ Resolution runs `CLAUDE_BG_ISOLATION` first, then a value stamped into the job r
 
 A shell write costs the index hook, which matters wherever a folder's `index.md` is generated. The `PostToolUse` triggers match `Write|Edit|MultiEdit`, so nothing fires on `Bash`, and `task-board` and `memory-capture` each regenerate positionally after a shell write rather than leaving the index a row short.
 
-The bypass reaches five hooks: `PostToolUse` on `Edit|Write|MultiEdit` runs `standards-audit.sh`, `records-index.sh`, and `path-form.sh`, and `PreToolUse` on `Write|Edit` runs `scratch-guard.sh`.
+The bypass reaches four hooks: `PostToolUse` on `Edit|Write|MultiEdit` runs `standards-audit.sh`, `records-index.sh`, and `path-form.sh`, and `PreToolUse` on `Write|Edit` runs `scratch-guard.sh`.
 
-A plan write is a no-op for every one of the five: `standards-audit.sh` exits on `*.canon/plans/*` by an explicit skip, `records-index.sh` matches the tasks and memory folders alone, `path-form.sh` answers only a path carrying a worktree segment, and `scratch-guard.sh` fires only on a `tmp`, `Temp`, or `var/folders` segment. `.canon/review/` clears the same five for the same reasons, so the cost lands on `.canon/tasks/` and `.canon/memory/` alone, where the index hook is a real writer.
+A plan write is a no-op for every one of the four: `standards-audit.sh` exits on `*.canon/plans/*` by an explicit skip, `records-index.sh` matches the tasks and memory folders alone, `path-form.sh` answers only a path carrying a worktree segment, and `scratch-guard.sh` fires only on a `tmp`, `Temp`, or `var/folders` segment. `.canon/review/` clears the same four for the same reasons, so the cost lands on `.canon/tasks/` and `.canon/memory/` alone, where the index hook is a real writer.
 
 ## Which `.canon/tmp/` writers state a root
 

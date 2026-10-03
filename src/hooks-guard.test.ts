@@ -77,7 +77,7 @@ let hookPath: string
 let readOnlyRoot: string
 let acting: Record<string, ActingCase>
 
-// `canon indexes regen` succeeds on the index hooks where the CLI is installed
+// `canon indexes regen` succeeds on the index hook where the CLI is installed
 // and is absent on a CI runner, so the acting output would differ by machine.
 // Removing it from PATH pins both to the branch that reports a stale index,
 // which fires only after the payload parsed and the path guard matched.

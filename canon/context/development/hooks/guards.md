@@ -15,7 +15,7 @@ The guard uses `read` rather than `timeout cat`, because macOS ships no `timeout
 
 The acting payload is what a mangled read fails. A corrupted payload reaches the same quiet exit as one naming a tool the hook filters out, so a test built on the filtered case passes whatever the read did to the bytes. Each hook therefore carries a payload reaching the branch that does its work, paired with a string only that branch emits, and a hook added without one fails rather than passing on the refusal alone.
 
-The two index hooks run with `canon` dropped from `PATH`, which pins them to the branch reporting a stale index instead of leaving the assertion to depend on whether the CLI is installed.
+The index hook runs with `canon` dropped from `PATH`, which pins it to the branch reporting a stale index instead of leaving the assertion to depend on whether the CLI is installed.
 
 `cloud-setup.sh` run with `CLAUDE_CODE_REMOTE=true` anywhere but a cloud VM runs a real `bun link`, which repoints the machine's global `@erclx/canon` at that checkout. Exercise it with a stub `bun` on `PATH`, as `src/hooks-guard.test.ts` does, and restore a relinked machine with `bun add -g @erclx/canon@<version>`.
 

@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: Where shell scripts and hooks live, the nine hooks shared with the seed, the audit hook's unresolved dependencies, the dev command reminder, and linting both hook trees
+description: Where shell scripts and hooks live, the eight hooks shared with the seed, the audit hook's unresolved dependencies, the dev command reminder, and linting both hook trees
 ---
 
 # Overview
