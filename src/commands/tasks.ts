@@ -42,6 +42,7 @@ import {
 import {
   type Finding,
   type FolderClaim,
+  type WideToken,
   type Unplaced,
   type Untested,
   type ValidateOutcome,
@@ -1411,6 +1412,16 @@ function reportValidation(
       for (const claim of outcome.claims) logWarn(describeClaim(claim))
     }
 
+    // The width limit is a heuristic over one preview pane, so a wide token
+    // reports and moves no exit code, and a measure failing on a cell that
+    // fits would teach a reader to skip it.
+    logStep('Wide tokens')
+    if (outcome.wide.length === 0) {
+      logInfo('every code span fits the preview pane')
+    } else {
+      for (const token of outcome.wide) logWarn(describeWide(token))
+    }
+
     // Unplaced is the normal state between a session filing a task and an
     // orchestrator placing its row, so it moves no exit code. It still reports,
     // since it is the only local detector for a row a hand-edit dropped or a
@@ -1436,6 +1447,7 @@ function reportValidation(
         findings: outcome.findings,
         untested: outcome.untested,
         claims: outcome.claims,
+        wide: outcome.wide,
         unplaced: outcome.unplaced,
       })}\n`,
     )
@@ -1455,6 +1467,10 @@ function describeUntested(row: Untested): string {
 
 function describeClaim(claim: FolderClaim): string {
   return `${claim.group}: ${claim.subject} ${claim.message}`
+}
+
+function describeWide(token: WideToken): string {
+  return `${token.group}: ${token.subject} ${token.message}`
 }
 
 function describeUnplaced(task: Unplaced): string {
