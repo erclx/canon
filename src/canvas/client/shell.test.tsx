@@ -664,6 +664,34 @@ describe('element selection', () => {
     expect(sentTo('/api/frames/move')).toEqual([])
   })
 
+  it('should return the selection to the frame when its label is pressed', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
+
+    expect(sentTo('/api/selection').at(-1)).toEqual({
+      page: 'drafts',
+      frame: 'hero',
+    })
+    expect(mount.querySelector('[aria-label="Element"]')).toBeNull()
+  })
+
+  it('should return the selection to the frame on Enter', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+
+    press(figureFor('hero'), 'Enter')
+
+    expect(sentTo('/api/selection').at(-1)).toEqual({
+      page: 'drafts',
+      frame: 'hero',
+    })
+  })
+
   it('should still move the frame dragged by its label after an element is selected', () => {
     renderApp([page('drafts', [frame('hero', { x: 0, y: 0 })])])
     const doc = loadFrame('hero', HERO_BODY)

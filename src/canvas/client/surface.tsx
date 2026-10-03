@@ -199,8 +199,9 @@ function FrameView({
       ? documentElements(doc)[hovered.index]
       : undefined
 
+  /* The label means the frame itself, so it also drops a picked element. */
   const select = () => {
-    if (!isSelected) void selectFrame(ref)
+    if (!isSelected || selection.value?.element) void selectFrame(ref)
   }
 
   const handlePointerDown = (event: PointerEvent) => {
