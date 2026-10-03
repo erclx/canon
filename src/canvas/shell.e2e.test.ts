@@ -249,12 +249,15 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     const width = page.getByRole('textbox', { name: 'width', exact: true })
     await expect
       .poll(
+        // Each try is bounded, since an action waits forever by default and a
+        // reload can leave the row or the field missing for a moment.
         async () => {
           await page
             .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
             .locator('button.layer', { hasText: /^h1/ })
-            .click()
-          return width.inputValue().catch(() => '')
+            .click({ timeout: 2_000 })
+            .catch(() => undefined)
+          return width.inputValue({ timeout: 2_000 }).catch(() => '')
         },
         { timeout: 15_000 },
       )
