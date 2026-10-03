@@ -150,6 +150,18 @@ describe('startCanvas', () => {
     expect(record.tokens.notice).toContain('.claude/design/base.css')
   })
 
+  it('should list the tokens the frames resolve, grouped by kind', async () => {
+    seedTokens(':root { --color-accent: teal; --space-sm: 4px; }')
+    const server = start()
+
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(record.tokens.groups).toEqual([
+      { kind: 'color', tokens: [{ name: '--color-accent', value: 'teal' }] },
+      { kind: 'spacing', tokens: [{ name: '--space-sm', value: '4px' }] },
+    ])
+  })
+
   it('should inject the token stylesheet into the head of a frame', async () => {
     seedTokens(':root { --color-text: teal; }')
     seed(

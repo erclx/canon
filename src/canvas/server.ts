@@ -16,7 +16,11 @@ import {
   writeSelection,
 } from '@/canvas/content'
 import { type EditRefused, editFrame } from '@/canvas/edit'
-import { resolveFrameTokens, type TokenOptions } from '@/canvas/tokens'
+import {
+  resolveFrameTokens,
+  type TokenOptions,
+  tokenGroups,
+} from '@/canvas/tokens'
 import { buildDesignCss } from '@/design/css'
 import {
   bindFirstFree,
@@ -354,11 +358,11 @@ export function startCanvas(
           '/': options.shell,
           '/api/pages': guarded(() => {
             const resolved = resolveFrameTokens(root, tokens)
-            const { css: _css, ...source } = resolved
+            const { css, ...source } = resolved
             const selected = readSelection(root)
             return json({
               pages: listPages(root),
-              tokens: source,
+              tokens: { ...source, groups: tokenGroups(css) },
               selection: selected && {
                 page: selected.page,
                 frame: selected.frame,
