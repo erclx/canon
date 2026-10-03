@@ -76,14 +76,14 @@ Lead with the table, then one detail block per domain that is not current:
 ```markdown
 Target check: `<path>`, against canon `<version>`.
 
-| Domain           | State                     | Evidence                          |
-| ---------------- | ------------------------- | --------------------------------- |
-| Toolkit version  | current / behind / unread | `skew.installed` against `latest` |
-| `canon/` folder  | current / behind / unread | the layout fields, incl. unmoved  |
-| Governance rules | current / behind / unread | the per-state counts              |
-| Tooling          | current / behind / unread | what a sync would change          |
-| Seeds            | current / behind / unread | the per-state counts              |
-| Claude harness   | unchecked                 | no verb reads it                  |
+| Domain           | State                     | Evidence                                       |
+| ---------------- | ------------------------- | ---------------------------------------------- |
+| Toolkit version  | current / behind / unread | `skew.installed` against `latest`              |
+| `canon/` folder  | current / behind / unread | the layout fields, including `unmovedSurfaces` |
+| Governance rules | current / behind / unread | the per-state counts                           |
+| Tooling          | current / behind / unread | what a sync would change                       |
+| Seeds            | current / behind / unread | the per-state counts                           |
+| Claude harness   | unchecked                 | no verb reads it                               |
 
 No overall verdict. The harness row is unchecked rather than passing.
 ```
