@@ -25,7 +25,7 @@ Root `CLAUDE.md` and the `CLAUDE.md` seed each own the policy statement, and the
 
 ## The baseline in the ported skills
 
-`review-branch`, `docs-sync`, `standards-audit`, and `git-pr` each resolve a base against `<base>`, the same merge-base preference stated above, rather than against bare local `main`. A bare local `main` drops every committed change on the branch it was cut from, so a skill reading it reports a clean result rather than admitting it cannot see the work.
+`review-branch`, `docs-sync`, and `git-pr` each resolve a base against `<base>`, the same merge-base preference stated above, rather than against bare local `main`. A bare local `main` drops every committed change on the branch it was cut from, so a skill reading it reports a clean result rather than admitting it cannot see the work.
 
 `git-pr` reads both its diff and its commit log against `<base>`. A two-dot range such as `git diff main..HEAD` compares tips rather than resolving a merge base, so it reads reversed or incomplete whenever local `main` trails `origin/main`. Reading `<base>` on both sides is what keeps the commits and the changes describing one branch.
 
@@ -45,7 +45,7 @@ The rule is prose in a skill body rather than a verb, so nothing stops a later e
 
 `auto-ship`'s classifier decides whether a review runs at all, so widening what it sees would turn a branch that reads as prose-only into a mixed one and change behavior rather than only correctness.
 
-Its unusable test is narrower than three of the four ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` drops the arm on the same reasoning, since its Step 2 reads one range, leaving `docs-sync`, `standards-audit`, and `git-pr` as the three still carrying it.
+Its unusable test is narrower than two of the three ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` drops the arm on the same reasoning, since its Step 2 reads one range, leaving `docs-sync` and `git-pr` as the two still carrying it.
 
 `auto-ship` reaches Step 6 before `git-stage` commits, and its Step 2 may or may not have committed slices by then, so the base equals HEAD on any run that committed nothing yet, and the arm ported verbatim would stop each of those. The skill body states the omission at that point, because the next reader porting the block would otherwise add it back.
 
@@ -75,4 +75,4 @@ A plan whose output is entirely gitignored still reaches the stop rather than a 
 
 Internal duplication, authoring-standard conformance, and a body's agreement with its own later steps are all unenforced. The format stage normalizes syntax, cspell reads words, and the skill-paths stage greps one banned path pattern, so none reads a body against `standards/skill.md` or against itself. A skill body's own claims can drift from each other with nothing catching it: two sections repeating one summary verbatim, or a heading whose casing disagrees with the sentence-case rule, both pass `bun run check` unnoticed. A rule added identically to several skills in one edit can produce that class more than once.
 
-A step that scopes a set and a later step that maps over it can disagree about what the set contains, and both pass every conformance check. `standards-audit` scopes to changed markdown files and then maps branch names and pull request bodies, which are not files in that set, and `memory-review` cleanup targets entries its own apply phase already deleted. The same test runs backwards on a guard, which executes before every step and can only read what is already on disk: a guard testing every standard the changed files map to depends on output a mapping step produces two steps later.
+A step that scopes a set and a later step that maps over it can disagree about what the set contains, and both pass every conformance check. `memory-review` cleanup targets entries its own apply phase already deleted. The same test runs backwards on a guard, which executes before every step and can only read what is already on disk: a guard testing every standard the changed files map to depends on output a mapping step produces two steps later.

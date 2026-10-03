@@ -7,9 +7,9 @@ description: Why a markdown rewrite is proposed per file and answered before any
 
 ## Gap
 
-Rewriting a passage in a governing document today means editing it live or arguing in chat, and three surfaces sit near this moment without covering it. `standards-audit` maps changed markdown to the standards claiming it and reports violations, ending on its own description: `Do NOT fix violations. Reporting only.` `canon markdown audit` measures bans and structural checkpoints from package data.
+Rewriting a passage in a governing document today means editing it live or arguing in chat, and two surfaces sit near this moment without covering it. `canon markdown audit` measures bans and structural checkpoints from package data.
 
-`review-branch` reports findings on a diff someone already wrote. None of the three drafts a replacement, carries an answer slot, or waits.
+`review-branch` reports findings on a diff someone already wrote. Neither drafts a replacement, carries an answer slot, or waits.
 
 A review delivered in chat gets applied from memory across files nobody reopened, and nothing records which changes the operator approved. A change nobody agreed to either lands unreviewed, because the session acting on a chat review cannot tell an approved line from an inferred one, or never gets written down at all, because a finding with no draft behind it hands the rewrite back to whoever reads it next.
 
@@ -41,7 +41,7 @@ A second failure compounds the first. A claim copied across several files is cor
 
 ## Out of scope
 
-- Reporting a violation with no drafted replacement, which `standards-audit` and `canon markdown audit` already own
+- Reporting a violation with no drafted replacement, which `canon markdown audit` already owns
 - Reviewing a diff someone already wrote, which `review-branch` owns
 - Filing a raw brain dump as findings, which `plan-intake` owns
 - Reviewing `.canon/memory/` and proposing promote-or-retire actions per entry, which `memory-review` owns on a different subject with a different answer contract

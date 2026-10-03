@@ -7,7 +7,7 @@ description: The proposal, candidate, docs, context, and wireframe draft surface
 
 ## The proposal surface
 
-`markdown-propose` closes a gap three shipped surfaces sit beside without covering: nothing else drafts a markdown replacement, carries an answer slot, and waits. `standards-audit` maps changed files to standards and reports, ending on its own description, `Do NOT fix violations. Reporting only.` `canon markdown audit` measures bans and structural checkpoints from package data. `review-branch` reports findings on a diff someone already wrote. All three report, and none drafts or waits for an answer.
+`markdown-propose` closes a gap two shipped surfaces sit beside without covering: nothing else drafts a markdown replacement, carries an answer slot, and waits. `canon markdown audit` measures bans and structural checkpoints from package data. `review-branch` reports findings on a diff someone already wrote. Both report, and neither drafts or waits for an answer.
 
 It is a recombination rather than a new design. Its phases are an external content-audit skill's five passes, generalized down to what describes a governing document rather than a person: inflation, staleness, contradiction, and duplication survive the generalization, and register drift does not, since this repository's docs carry no spoken-versus-written split for a word to drift across.
 

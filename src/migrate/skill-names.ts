@@ -110,11 +110,6 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  * what shipped or what a session ran under whatever name was current then, so
  * rewriting one makes it testify to a release or a run that never happened.
  *
- * The pointer left at `docs-fold` is excluded because it exists to answer under
- * the old name, so a later run would move it onto the skill it points at. The
- * exclusion is only safe once the real body has moved, since excluding the path
- * ahead of the first sweep leaves that body behind.
- *
  * The record archives need no entry here. They are gitignored, so the tracked
  * listing every sweep reads never reaches them.
  */
@@ -127,7 +122,5 @@ export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
     'CHANGELOG.md',
     'src/migrate/skill-names.ts',
     'src/migrate/skill-names.test.ts',
-    'claude/skills/docs-fold/SKILL.md',
-    'claude/skills/docs-fold/REQUIREMENT.md',
   ],
 })

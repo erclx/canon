@@ -40,12 +40,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed the old fold skill name and it says it was renamed, where did it go?',
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'docs-fold',
-  },
-  {
-    prompt:
       'Sketch out a plan for adding this new capability before we touch any code.',
     expect: 'plan-feature',
   },
@@ -143,16 +137,10 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt: 'Turn this topic into a slide deck I can render.',
     expect: 'draft-slides',
   },
-  {
-    prompt:
-      'Check whether the markdown I changed violates any authoring standards.',
-    expect: 'standards-audit',
-  },
-  // Rot across documents nobody changed is what separates this from
-  // `standards-audit`, which is diff-scoped and reports a stated rule broken on
-  // a given line. It is also not `target-check`, which asks whether a document
-  // exists and holds its sections rather than whether it still describes the
-  // tree.
+  // Rot across documents nobody changed is what this reads, rather than a
+  // stated rule broken on a given line. It is also not `target-check`, which
+  // asks whether a document exists and holds its sections rather than whether
+  // it still describes the tree.
   {
     prompt:
       'Which of our docs have gone stale, grown too long, or ended up in the wrong file?',
@@ -229,10 +217,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt:
       "Go through what's still unanswered in the intake folder and decide.",
     expect: 'plan-intake-answer',
-  },
-  {
-    prompt: 'Check this markdown against the house style rules.',
-    expect: 'standards-audit',
   },
   {
     prompt: 'Find the rough, unfinished-feeling spots in this interface.',
