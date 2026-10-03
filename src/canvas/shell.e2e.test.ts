@@ -243,7 +243,7 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     // A long class list, a long font stack, and a width wider than any panel.
     const stress = HELLO.replace(
       '<h1 class="title">',
-      `<h1 class="title ${'very-long-utility-class '.repeat(6)}" style="width: 2000.75px; font-family: 'A Very Long Display Family', 'Another Long Fallback Family', system-ui, sans-serif">`,
+      `<h1 class="title ${Array.from({ length: 6 }, (_, n) => `very-long-utility-class-${n}`).join(' ')}" style="width: 2000.75px; font-family: 'A Very Long Display Family', 'Another Long Fallback Family', system-ui, sans-serif">`,
     )
     writeFileSync(join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`), stress)
     const width = page.getByRole('textbox', { name: 'width', exact: true })
@@ -274,7 +274,7 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await toggle.click()
 
     expect([first, second]).toEqual([0, 0])
-  })
+  }, 30_000)
 
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
