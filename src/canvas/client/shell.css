@@ -39,7 +39,7 @@ code {
 
 .shell {
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 13rem;
+  grid-template-columns: 15rem minmax(0, 1fr) 16rem;
   height: 100%;
 }
 
@@ -446,4 +446,63 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.styles .box-row {
+  align-items: center;
+}
+
+.styles dt {
+  flex: none;
+  width: 4.5rem;
+}
+
+.styles dd {
+  flex: 1;
+}
+
+.field-cell {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.field,
+.token-picker {
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.field {
+  flex: 1;
+  width: 100%;
+}
+
+.token-picker {
+  flex: none;
+  width: 4.5rem;
+  cursor: pointer;
+}
+
+.field:hover,
+.token-picker:hover {
+  border-color: var(--color-muted);
+}
+
+.field:disabled,
+.token-picker:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saved {
+  margin-left: var(--space-sm);
+  color: var(--color-success);
+  font-weight: 400;
 }
