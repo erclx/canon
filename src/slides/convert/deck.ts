@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { basename, isAbsolute, join, relative, resolve } from 'node:path'
 
 /**
@@ -151,6 +151,11 @@ function parse(raw: unknown, folder: string): DeckConfig {
   return { title, header, footer, slideNumbers, mark, fonts }
 }
 
+function isWithin(folder: string, path: string): boolean {
+  const inside = relative(folder, path)
+  return inside !== '' && !inside.startsWith('..') && !isAbsolute(inside)
+}
+
 /**
  * A face is read from the deck folder only, so a `deck.json` cannot point the
  * export at a file elsewhere on the machine and carry it out inside the deck.
@@ -194,19 +199,19 @@ function fontList(value: unknown, folder: string): DeckFont[] {
       throw new FieldError(`${field}.path`, `${field}.path is required`)
     }
     const path = resolve(folder, source)
-    const inside = relative(folder, path)
-    if (!inside || inside.startsWith('..') || isAbsolute(inside)) {
-      throw new FieldError(
-        `${field}.path`,
-        `${field}.path ${source} lies outside the deck folder`,
-      )
-    }
+    const outside = new FieldError(
+      `${field}.path`,
+      `${field}.path ${source} lies outside the deck folder`,
+    )
+    if (!isWithin(folder, path)) throw outside
     if (!existsSync(path) || !statSync(path).isFile()) {
       throw new FieldError(
         `${field}.path`,
         `${field}.path ${path} does not exist`,
       )
     }
+    // A link inside the folder can still lead out of it.
+    if (!isWithin(realpathSync(folder), realpathSync(path))) throw outside
     return { family, weight, style, path, source }
   })
 }

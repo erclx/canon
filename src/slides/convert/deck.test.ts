@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -264,6 +270,21 @@ describe('readDeck fonts', () => {
       status: 'refused',
       field: 'fonts[0].path',
       message: `${join(folder, DECK_FILE)}: fonts[0].path ../outside.ttf lies outside the deck folder`,
+    })
+  })
+
+  it('should refuse a link inside the folder that leads outside it', () => {
+    mkdirSync(join(folder, 'fonts'))
+    writeFileSync(join(folder, '..', 'outside.ttf'), 'face')
+    symlinkSync(
+      join(folder, '..', 'outside.ttf'),
+      join(folder, 'fonts', 'linked.ttf'),
+    )
+    writeDeck({ fonts: [{ family: 'Sans', path: 'fonts/linked.ttf' }] })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].path',
     })
   })
 
