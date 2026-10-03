@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  utimesSync,
+} from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
@@ -127,6 +135,16 @@ async function seedGlossary(
 ): Promise<void> {
   const path = join(workspaceDir(slug), 'GLOSSARY.md')
   await writeFile(path, `${entries.map((entry) => `- ${entry}`).join('\n')}\n`)
+}
+
+/** A time no write during a test can land on, so an unchanged mtime means no write. */
+const PAST = new Date('2020-01-01T00:00:00Z')
+const PAST_MS = PAST.getTime()
+
+function listFiles(dir: string): string[] {
+  return readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name))
 }
 
 beforeEach(() => {
@@ -583,6 +601,46 @@ describe('generateNav', () => {
     )
 
     expect(second).toEqual(first)
+  })
+
+  it('should touch no file on a second run against unchanged sources', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await writeStylesheet(ROOT, 'regular-expressions')
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+    await seedGlossary('01-regular-expressions', [
+      '**anchor**: Marks a fixed position in the subject. First seen in 0001-anchors.html.',
+    ])
+    await generateNav(ROOT)
+    const files = listFiles(teachDir(ROOT))
+    for (const file of files) utimesSync(file, PAST, PAST)
+
+    await generateNav(ROOT)
+
+    expect(files.filter((file) => statSync(file).mtimeMs !== PAST_MS)).toEqual(
+      [],
+    )
+  })
+
+  it('should still rewrite the page whose source changed between runs', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await generateNav(ROOT)
+    const contents = join(workspaceDir('01-regular-expressions'), 'index.html')
+    utimesSync(contents, PAST, PAST)
+    await seedLesson(
+      '01-regular-expressions',
+      '0001-anchors.html',
+      'Anchors',
+      'Where a pattern starts and ends.',
+    )
+
+    await generateNav(ROOT)
+
+    expect(statSync(contents).mtimeMs).not.toBe(PAST_MS)
   })
 
   it('should link a lesson mention in the body and leave the chrome regions as a run without one writes them', async () => {

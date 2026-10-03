@@ -7,6 +7,7 @@ import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { type BodyLine, bodyLines } from '@/markdown/scan'
 import { recordDir } from '@/record-root'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
+import { writeIfChanged } from '@/teach/write-if-changed'
 
 export const TEACH_REFUSALS = [
   'no-teach',
@@ -1132,7 +1133,7 @@ export async function writeStylesheet(
   const path = join(root, rel)
 
   await mkdir(join(root, assetsDir), { recursive: true })
-  await writeFile(
+  await writeIfChanged(
     basePath,
     buildDesignCss(undefined, {
       banner: STYLESHEET_BASE_BANNER,
