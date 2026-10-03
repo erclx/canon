@@ -1,0 +1,26 @@
+# Search results
+
+Query: `Quillstream streaming export first release`
+
+Tool: WebSearch
+Arguments: `allowed_domains = ["docs.quillstream.example", "changelog.quillstream.example"]`
+
+## 1. Streaming export (Quillstream reference)
+
+https://docs.quillstream.example/reference/export/streaming
+
+Streaming export lets `export()` yield rows as they are read instead of
+buffering the whole table. Added in 4.2.0.
+
+## 2. Quillstream changelog, 4.2.0
+
+https://changelog.quillstream.example/4.2.0
+
+4.2.0 introduces streaming export. The `stream: true` option on `export()` is
+new in this release.
+
+## 3. Quillstream 3.x migration notes
+
+https://blog.migrations.example/quillstream-3x-streaming
+
+Streaming export first shipped in 3.9.0, and 4.x only renamed the option.

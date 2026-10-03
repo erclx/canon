@@ -1,0 +1,33 @@
+# Search results
+
+Query: `Quillstream streaming export first release`
+
+Tool: WebSearch
+Arguments: none, no domain filter
+
+Summary: Streaming export first shipped in Quillstream 3.9.0, according to
+most of the results below.
+
+## 1. What changed in Quillstream 3.9
+
+https://devnotes.example/quillstream-3-9
+
+3.9.0 was the release that brought streaming export to Quillstream.
+
+## 2. Upgrading Quillstream exports
+
+https://codecorner.example/upgrading-quillstream-exports
+
+Streaming export has been available since 3.9.0, so upgrade from 3.8 first.
+
+## 3. Quillstream streaming export explained
+
+https://stackhelp.example/q/quillstream-streaming-export
+
+Streaming export arrived in 3.9.0, and the option has not changed since.
+
+## 4. Quillstream 3.x migration notes
+
+https://blog.migrations.example/quillstream-3x-streaming
+
+Streaming export first shipped in 3.9.0, and 4.x only renamed the option.
