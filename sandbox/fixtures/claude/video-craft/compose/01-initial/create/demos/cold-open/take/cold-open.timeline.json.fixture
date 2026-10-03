@@ -1,0 +1,19 @@
+{
+  "entries": [
+    { "index": 0, "kind": "navigate", "startMs": 0, "endMs": 1100 },
+    {
+      "index": 1,
+      "kind": "fill",
+      "startMs": 1100,
+      "endMs": 3900,
+      "box": { "x": 8, "y": 74, "width": 180, "height": 21 }
+    },
+    {
+      "index": 2,
+      "kind": "click",
+      "startMs": 3900,
+      "endMs": 5700,
+      "box": { "x": 192, "y": 73, "width": 72, "height": 23 }
+    }
+  ]
+}

@@ -57,7 +57,7 @@ Read the draft's `## Wrap` section. When intro, outro, and music all say `none`,
 
 Otherwise confirm HyperFrames' `hyperframes` skill resolves. `bunx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test. When it does not resolve, stop and report the install command, `bunx -y hyperframes init`, with the warning that init installs its skills machine-wide without asking, and report the take's paths as Step 6 does so the operator still holds the recording the run wrote. Never install it from here.
 
-When it resolves, load it and build `demos/<slug>/index.html` around the take, with the intro, outro, and music the wrap section names. That skill owns the composition rules, so this body states none of them. Then run both from `demos/<slug>/`:
+When it resolves, load it, then load `canon:video-craft` for the captions, zoom, pointer, and audio judgment a video of software needs, reporting it rather than proceeding silently when it does not resolve. Build `demos/<slug>/index.html` around the take, with the intro, outro, and music the wrap section names, aiming each zoom from the timeline the run wrote beside the take. Those two skills own the composition rules, so this body states none of them. Then run both from `demos/<slug>/`:
 
 ```bash
 bunx -y hyperframes check
@@ -72,6 +72,6 @@ Hand the render to `read-frames` as its video path, so the composed result is ch
 
 ## Step 6: output
 
-The record carries `video`, `mp4`, `gif`, and `still`, each a path or `null`. Report each one that is not `null`, one per line, skipping the rest, and add the render path when Step 4 wrote one. Name the mp4 as the deliverable, the webm as the raw take, and the gif as the form for a host that strips video.
+The record carries `video`, `mp4`, `gif`, `still`, and `timeline`, each a path or `null`. Report each one that is not `null`, one per line, skipping the rest, and add the render path when Step 4 wrote one. Name the mp4 as the deliverable, the webm as the raw take, the gif as the form for a host that strips video, and the timeline as the per-step timing a composition aims its zooms from.
 
 Say so plainly if `canon demo compile` or `canon demo run` is not available, rather than driving the application some other way. Both ship with the CLI and this skill ships with the plugin, so a project carrying one and not the other is a real state.

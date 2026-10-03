@@ -1,0 +1,29 @@
+# What a correct run leaves behind once `video-craft` loads on a compose
+# request. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The staged take carries its timeline and no recording, so the arm judges the
+# composition source rather than a render. Whether a caption names its frame or
+# a zoom reads fast enough is semantic, so the craft judgments sit under
+# `manual`.
+
+paths = ["demos/cold-open/index.html"]
+
+write_scope = ["demos/**", ".claude/**", ".canon/**"]
+
+manual = [
+  "Each caption names what its frame shows at that moment, such as the field filling or the card landing, rather than narrating the whole flow or pitching the feature. Semantic: whether a caption describes its frame is a reading of the caption against the beat.",
+  "Each zoom aims at the fill or the click, with its start and its target taken from the timeline's entries rather than added up from the plan's holds. Semantic: a start time can be copied from either source and land on the same number.",
+  "A push onto an action runs no faster than HyperFrames' viewport-change floor and never past 1 second. Semantic: a duration is written in many forms, seconds or milliseconds, in a tween or a CSS variable.",
+  "No second, synthetic cursor is drawn over the take, and captions sit off the element each step acts on. Semantic: placement is read against the timeline's boxes.",
+  "The music bed sits at least 20 dB under any voice, or the run says no voice is present and why the bed level it chose is quiet. Semantic: a level is written as a volume, a gain, or a decibel figure.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# The composition is built around the staged take.
+[[content]]
+path = "demos/cold-open/index.html"
+pattern = 'cold-open\.webm'

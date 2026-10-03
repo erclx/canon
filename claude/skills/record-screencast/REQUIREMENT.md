@@ -14,7 +14,8 @@ Without this skill, `draft-screencast` writes a draft and names `canon demo comp
 - Resolve the default plan path the same way `canon demo compile` does, so a caller passing only the draft path reaches the plan without naming it
 - Skip compiling when a plan already exists at that path, since its timing may be tuned by hand and a draft cannot reproduce that
 - Report every unresolved field from the compile or run record and stop rather than filling one in
-- Report every path a run wrote, video, mp4, gif, still, skipping any the record carries as null
+- Report every path a run wrote, video, mp4, gif, still, and timeline, skipping any the record carries as null
+- Load the video craft guidance before composing, so a composition applies sourced judgment on captions, zoom, pointer, and audio rather than the defaults an unguided session reaches for
 - Compose the take into a finished mp4 through HyperFrames when the draft's wrap section asks for anything, check the composition before rendering, and hand the render to `read-frames`
 - Stop at the take when the wrap section says `none` throughout, and stop with the install command when HyperFrames is absent
 

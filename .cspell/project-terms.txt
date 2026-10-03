@@ -54,6 +54,7 @@ crystaldba
 cspell
 daringfireball
 dbaeumer
+dcmp
 declaratives
 deprioritized
 desaturate
@@ -110,6 +111,7 @@ lintstagedrc
 lockdown
 lockfiles
 logicgate
+lufs
 metaregistry
 metas
 middot

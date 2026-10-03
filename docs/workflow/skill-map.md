@@ -53,6 +53,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:search-craft`          | Before searching outside the project, to derive where the field's authorities publish and search there too |
 | `canon:systematic-debugging`  | When a test fails or a bug surfaces, to force root cause first                                             |
 | `canon:design-taste`          | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |
+| `canon:video-craft`           | Before composing or judging a video, for sourced captions, zoom, pointer, and audio judgment               |
 | `canon:ui-checklist`          | After a UI change, to write what to look at and name what ships untested                                   |
 
 ## Check the work before it leaves the branch

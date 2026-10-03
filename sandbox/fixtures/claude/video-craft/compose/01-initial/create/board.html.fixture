@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Board</title>
+  </head>
+  <body>
+    <h1>Board</h1>
+    <input id="title" placeholder="Card title" />
+    <button id="add">Add card</button>
+    <div id="output"></div>
+    <script>
+      document.getElementById('add').addEventListener('click', () => {
+        const value = document.getElementById('title').value
+        document.getElementById('output').textContent = value ? 'Added ' + value : ''
+      })
+    </script>
+  </body>
+</html>
