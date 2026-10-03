@@ -69,7 +69,7 @@ canon teach resource <topic> --json \
   --lead "<title>=<url>"
 ```
 
-Each flag repeats, and the pair splits on the first `=` so a URL carrying one survives. A URL already listed is refused rather than repeated.
+Each flag repeats, and the pair splits on the first `=` so a URL carrying one survives. A listed URL is refused, but `--read` moves an opened lead.
 
 A claim nothing was read for is the failure this step exists against. Where no source is reachable, say so in the lesson and mark what rests on recall.
 
