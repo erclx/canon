@@ -4,8 +4,10 @@
 #
 # The arm replays two recorded result sets and never searches, so it proves the
 # body's reconciliation rules once the skill is loaded and nothing about whether
-# a session scopes a search. Which side was kept and why is semantic, so it sits
-# under `manual`.
+# a session scopes a search. A fetch attempt is a failure of the arm's own
+# setup, since the recorded sets are the whole evidence, and the run's denial
+# count catches it because the tool list allows no fetch. Which side was kept
+# and why is semantic, so it sits under `manual`.
 #
 # Every top-level key sits above the first `[[content]]` header, since a bare
 # key below one binds to that table and asserts nothing.
