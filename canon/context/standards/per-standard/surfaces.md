@@ -15,6 +15,8 @@ Scope is forward. A decision already in the record when the rule shipped stays u
 
 Nothing writes the anchor back. The diagram field has two writers, one setting `verified` and one appending `stale`, and the architecture record has neither. `canon/ARCHITECTURE.md` records that gap as an open risk.
 
+The sweep that reports a stale anchor reaches only what a diff can point at, so an anchor on a decision no branch touches is checked only by a person re-reading it. Two classes of claim stay unflagged: one counting over a tree the branch never opened, and one citing nothing narrower than a single path segment. The second is deliberate, since a prefix match on `src/` fires on nearly every branch.
+
 A pass that amends a decision's reasoning without re-reading its numbers dates the measurement rather than the edit: a decision importing an existing observation carries that observation's own anchor rather than a fresh one stamped at the import.
 
 ## Teach

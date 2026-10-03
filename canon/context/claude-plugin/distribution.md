@@ -9,6 +9,10 @@ description: The marketplace entry, the install-shape traps it avoids, and the r
 
 Sourcing the repository root instead is the trap this shape exists to avoid, and it was measured rather than reasoned about. Skills are discovered at `<plugin-root>/skills/` unless the entry names them explicitly, and this repository keeps them a level down, so a root-sourced entry carrying no `skills` array exposes zero skills. It also costs 312M, because Claude Code runs a dependency install on any plugin carrying a package manifest and copies `.claude/` and the internal skills into the cache. The closest comparable project sources its root, which works only because its skills sit there.
 
+The dependency install is the cost that still argues for the `./claude` source. The plugin installer runs a `bun install` it offers no way to skip, under a 60-second timeout, into every cached version of a plugin whose root holds a `package.json` and a supported lockfile, and this repository's root holds both. Moving the source back to the root would also sweep 251 lines referencing `claude/skills` across `src/` and `scripts/`. Measured at `2022f604` on 2026-10-03.
+
+The `internal/` boundary does not keep internal files off a user's disk, since adding a git marketplace clones the whole repository with `internal/` in it. The leak that first argued for the boundary, internal snippets surfacing in a target's catalog as if the plugin offered them, went with the retired snippets domain.
+
 `claude/standards` is a symlink to the root authoring source. A symlink inside a plugin that resolves elsewhere within the marketplace is dereferenced at install and its content copied, so the files arrive as real directories in the cache. The measured install is 964K with 55 skills, against 760K for the same shape without the symlinks.
 
 The entry carries no version on purpose. `plugin.json` overrides the enclosing entry for both name and version, so a version on the entry would drift on every release with nothing reporting it, and the release config writes only the plugin manifest.

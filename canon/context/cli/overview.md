@@ -36,6 +36,14 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 - `src/git-files.ts` also owns `listRenames()` and `listIgnoreAdditions()`, the evidence `canon pr key-changes` credits a claim against past its own changed-file list: a git-detected rename's old path, and a pattern newly added to `.gitignore`. `parseIgnoreAdditions()` is the shared parse behind the second, since the same shape reaches it from a local `git diff` and from a patch string GitHub returns inline. Reasoned about in `canon/context/cli/audits/reports.md`
 - `src/capture/` owns the capture render, one of the four browser modules under `src/`
 
+## Decisions
+
+### TypeScript on Bun, and what the shell line costs
+
+`canon/ARCHITECTURE.md` holds the stack choice. The rule that lost kept bash for whatever suited it, so every leftover file argued its own case, and the 100-line line replaced that with one test. Of 131 tracked `.sh` files, 45 sit over the line, and no gate checks it yet, so the migration is measured by that count rather than enforced. Measured at `2022f604` on 2026-10-03.
+
+The CLI does not run under Node at all. `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` stand in for globbing and parser dependencies, so a target needs Bun on the machine rather than only a package manager. Node with a build step would cost a publish pipeline plus a `dist/` that drifts from the source a contributor reads, which is the trade the stack decision's revisit sentence watches.
+
 ## Gotchas
 
 ### Wiring and output
