@@ -12,7 +12,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import {
   type ElementAddress,
   resolveAddress,
@@ -200,7 +200,18 @@ function sleep(ms: number): void {
  * found it.
  */
 function withLayoutLock(dir: string, run: () => FrameOutcome): FrameOutcome {
-  const lock = join(dir, `${LAYOUT_FILE}${LOCK_SUFFIX}`)
+  return withFileLock(join(dir, LAYOUT_FILE), run)
+}
+
+/**
+ * The same lock over any one file under the canvas folder, which a frame
+ * writer takes so its hash check and its write cannot straddle another's.
+ */
+export function withFileLock<T>(
+  target: string,
+  run: () => T,
+): T | ContentRefused {
+  const lock = `${target}${LOCK_SUFFIX}`
   const deadline = Date.now() + LOCK_WAIT_MS
   for (;;) {
     try {
@@ -214,7 +225,7 @@ function withLayoutLock(dir: string, run: () => FrameOutcome): FrameOutcome {
         continue
       }
       if (Date.now() >= deadline) {
-        return refuse('busy', `${LAYOUT_FILE} is being written, try again`)
+        return refuse('busy', `${basename(target)} is being written, try again`)
       }
       sleep(LOCK_POLL_MS)
     }

@@ -15,7 +15,12 @@ import {
   TEMP_SUFFIX,
   writeSelection,
 } from '@/canvas/content'
-import { resolveFrameTokens, type TokenOptions } from '@/canvas/tokens'
+import { type EditRefused, editFrame } from '@/canvas/edit'
+import {
+  resolveFrameTokens,
+  type TokenOptions,
+  tokenGroups,
+} from '@/canvas/tokens'
 import { buildDesignCss } from '@/design/css'
 import {
   bindFirstFree,
@@ -140,7 +145,9 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
-const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
+const REFUSAL_STATUS: Record<EditRefused['reason'], number> = {
+  'invalid-edit': 400,
+  'not-text-only': 409,
   'invalid-name': 400,
   'invalid-size': 400,
   'invalid-position': 400,
@@ -154,7 +161,7 @@ const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
   'stale-address': 409,
 }
 
-function refusal(refused: ContentRefused): Response {
+function refusal(refused: ContentRefused | EditRefused): Response {
   return json(refused, REFUSAL_STATUS[refused.reason])
 }
 
@@ -351,11 +358,11 @@ export function startCanvas(
           '/': options.shell,
           '/api/pages': guarded(() => {
             const resolved = resolveFrameTokens(root, tokens)
-            const { css: _css, ...source } = resolved
+            const { css, ...source } = resolved
             const selected = readSelection(root)
             return json({
               pages: listPages(root),
-              tokens: source,
+              tokens: { ...source, groups: tokenGroups(css) },
               selection: selected && {
                 page: selected.page,
                 frame: selected.frame,
@@ -385,6 +392,44 @@ export function startCanvas(
                   x: body.x,
                   y: body.y,
                 })
+                return outcome.ok ? json(outcome) : refusal(outcome)
+              }),
+            ),
+          },
+          '/api/frames/edit': {
+            POST: guarded(
+              mutation((body) => {
+                if (
+                  !isRecord(body) ||
+                  typeof body.page !== 'string' ||
+                  typeof body.frame !== 'string' ||
+                  typeof body.property !== 'string' ||
+                  typeof body.value !== 'string'
+                ) {
+                  return badBody(
+                    'send page, frame, element, property, and value',
+                  )
+                }
+                const { element } = body
+                /*
+                 * The hash is what keeps an edit off an element the file has
+                 * since moved, so the shell's edit never goes without it.
+                 */
+                if (!isAddressShape(element) || element.hash === undefined) {
+                  return badBody(
+                    'send an element as index, tag, count, and the hash it was served with',
+                  )
+                }
+                const outcome = editFrame(
+                  root,
+                  body.page,
+                  body.frame,
+                  element,
+                  {
+                    property: body.property,
+                    value: body.value,
+                  },
+                )
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),
             ),

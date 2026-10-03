@@ -1,6 +1,7 @@
 import { computed, signal } from '@preact/signals'
 import type { ElementAddress } from '@/canvas/address'
 import type { Frame, Page } from '@/canvas/content'
+import type { TokenGroup } from '@/canvas/tokens'
 
 /**
  * Everything the panels read. Type imports only from outside `client/`, since
@@ -15,6 +16,17 @@ export interface TokenSource {
   readonly source: 'toolkit' | 'installed' | 'none'
   readonly files?: readonly string[]
   readonly notice?: string
+  /** What the stylesheet defines, which the token picker and Theme tab list. */
+  readonly groups?: readonly TokenGroup[]
+}
+
+export type LeftTab = 'pages' | 'theme'
+
+/** One property change to the selected element, as the inspector posts it. */
+export interface PendingEdit {
+  readonly key: string
+  readonly index: number
+  readonly property: string
 }
 
 export interface FrameRef {
@@ -98,6 +110,26 @@ export const draggingFrame = signal<string | undefined>(undefined)
 /** Why the last write to the canvas failed, until the next one succeeds. */
 export const writeError = signal<string | undefined>(undefined)
 
+export const leftTab = signal<LeftTab>('pages')
+
+/** The edit in flight, which holds its field until the server answers. */
+export const pendingEdit = signal<PendingEdit | undefined>(undefined)
+
+/** The edit that last landed, for a moment after it does. */
+export const savedEdit = signal<PendingEdit | undefined>(undefined)
+
+const SAVED_MS = 2500
+
+/** Why the last edit wrote nothing, until the next one lands. */
+export const editRefusal = signal<string | undefined>(undefined)
+
+/**
+ * The hash an edit answered by frame key, until that frame reloads. A second
+ * edit sent before the reload is made from the file the first one wrote, not
+ * from the document still on screen.
+ */
+export const editedHashes = signal<ReadonlyMap<string, string>>(new Map())
+
 export const currentPage = computed<Page | undefined>(() => {
   const all = pages.value
   return all.find((page) => page.name === selectedPage.value) ?? all[0]
@@ -142,6 +174,17 @@ export function registerFrameDocument(key: string, doc: Document): void {
   const next = new Map(frameDocuments.value)
   next.set(key, doc)
   frameDocuments.value = next
+  if (editedHashes.value.has(key)) {
+    const hashes = new Map(editedHashes.value)
+    hashes.delete(key)
+    editedHashes.value = hashes
+  }
+}
+
+function reloadFrame(key: string): void {
+  const next = new Map(frameVersions.value)
+  next.set(key, (next.get(key) ?? 0) + 1)
+  frameVersions.value = next
 }
 
 export function toggleLayers(key: string): void {
@@ -181,10 +224,7 @@ export async function applyChange(
   fetchImpl: typeof fetch = fetch,
 ): Promise<void> {
   if (change.file.endsWith('.html')) {
-    const key = `${change.page}/${change.file}`
-    const next = new Map(frameVersions.value)
-    next.set(key, (next.get(key) ?? 0) + 1)
-    frameVersions.value = next
+    reloadFrame(`${change.page}/${change.file}`)
   }
   await loadPages(fetchImpl)
 }
@@ -265,6 +305,77 @@ export async function selectElement(
   }
   if (!expandedFrames.value.has(key)) toggleLayers(key)
   await write('/api/selection', { ...ref, element: address }, fetchImpl)
+}
+
+/** What a refused edit tells the operator, by the server's reason. */
+const EDIT_NOTICES: Readonly<Record<string, string | undefined>> = {
+  'stale-address':
+    'The frame changed before this edit arrived, so nothing was saved. It reloads with the file as it stands now. Make the edit again there.',
+  'address-mismatch':
+    'Could not save, since the browser and the file count the elements of this frame differently.',
+  'not-text-only':
+    'Could not save the text, since this element holds other elements.',
+}
+
+/**
+ * Posts one property change to the element the address names. A refusal
+ * says why and reloads the frame, so a pending value never sits over a file
+ * that moved under it.
+ */
+export async function editElement(
+  ref: FrameRef,
+  key: string,
+  address: ElementAddress,
+  property: string,
+  value: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  const hash = editedHashes.value.get(key) ?? address.hash
+  pendingEdit.value = { key, index: address.index, property }
+  try {
+    const response = await fetchImpl('/api/frames/edit', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        ...ref,
+        element: { ...address, hash },
+        property,
+        value,
+      }),
+    })
+    const body: unknown = await response.json().catch(() => undefined)
+    const record =
+      typeof body === 'object' && body !== null
+        ? (body as Record<string, unknown>)
+        : {}
+    if (!response.ok) {
+      const reason = typeof record.reason === 'string' ? record.reason : ''
+      const detail = typeof record.detail === 'string' ? record.detail : ''
+      editRefusal.value =
+        EDIT_NOTICES[reason] ??
+        (reason === 'invalid-edit'
+          ? `Could not save that value (${detail}).`
+          : `Could not save (status ${response.status}). Check canon canvas serve is still running.`)
+      reloadFrame(key)
+      await loadPages(fetchImpl)
+      return
+    }
+    editRefusal.value = undefined
+    const saved = pendingEdit.value
+    savedEdit.value = saved
+    setTimeout(() => {
+      if (savedEdit.value === saved) savedEdit.value = undefined
+    }, SAVED_MS)
+    if (typeof record.hash === 'string') {
+      const hashes = new Map(editedHashes.value)
+      hashes.set(key, record.hash)
+      editedHashes.value = hashes
+    }
+  } catch (error) {
+    editRefusal.value = `Could not save (${error instanceof Error ? error.message : 'unknown'}). Check canon canvas serve is still running.`
+  } finally {
+    pendingEdit.value = undefined
+  }
 }
 
 /**
@@ -369,4 +480,9 @@ export function resetState(): void {
   expandedFrames.value = new Set()
   draggingFrame.value = undefined
   writeError.value = undefined
+  leftTab.value = 'pages'
+  pendingEdit.value = undefined
+  savedEdit.value = undefined
+  editRefusal.value = undefined
+  editedHashes.value = new Map()
 }

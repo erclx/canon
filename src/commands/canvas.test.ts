@@ -1,5 +1,11 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -265,6 +271,82 @@ describe('canon canvas selection', () => {
     const run = canvas('selection', '--json')
 
     expect(run.stdout.trim().split('\n')).toHaveLength(1)
+  })
+})
+
+describe('canon canvas edit', () => {
+  const HERO =
+    '<html><head></head><body>\n  <h1 class="title">Hero</h1>\n</body></html>\n'
+
+  function seedHero(): string {
+    canvas('page', 'add', 'drafts')
+    const path = join(ROOT, '.canon', 'canvas', 'drafts', 'hero.html')
+    writeFileSync(path, HERO)
+    return path
+  }
+
+  it('should write one attribute and report it as one JSON record', () => {
+    const path = seedHero()
+
+    const run = canvas(
+      'edit',
+      'drafts/hero',
+      '--element',
+      '3',
+      '--set',
+      'color=var(--color-accent)',
+      '--json',
+    )
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: true,
+      page: 'drafts',
+      frame: 'hero',
+      property: 'color',
+      value: 'var(--color-accent)',
+      path,
+    })
+    expect(readFileSync(path, 'utf8')).toBe(
+      HERO.replace(
+        'class="title"',
+        'class="title" style="color: var(--color-accent)"',
+      ),
+    )
+  })
+
+  it('should refuse a setting with no property name', () => {
+    seedHero()
+
+    const run = canvas(
+      'edit',
+      'drafts/hero',
+      '--element',
+      '3',
+      '--set',
+      'blue',
+      '--json',
+    )
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'invalid-edit' })
+  })
+
+  it('should refuse a target that does not name a page and a frame', () => {
+    seedHero()
+
+    const run = canvas(
+      'edit',
+      'drafts',
+      '--element',
+      '3',
+      '--set',
+      'color=blue',
+      '--json',
+    )
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'invalid-name' })
   })
 })
 

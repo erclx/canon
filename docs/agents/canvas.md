@@ -1,6 +1,6 @@
 ---
 title: Canvas
-description: The canvas server, its content format, and the verbs that list, arrange, select, and capture frames
+description: The canvas server, its content format, and the verbs that list, arrange, select, edit, and capture frames
 ---
 
 # Canvas
@@ -28,6 +28,18 @@ The shell writes through the same writer when the operator drags a frame. Both t
 The operator can also pick one element inside a frame, by clicking it on the surface or in the frame's layers tree. The selection then carries `element`, recording the `index` in document order, `tag`, `classes`, and `text` excerpt as they were at the pick. An edit to the frame since can shift that index onto another element, so `stale` turns true once the file's content no longer matches what the pick was made against. Check it before acting on the index.
 
 A pick is refused as `address-mismatch` when the browser builds elements the file never states, such as a `tbody` a table leaves out or the document wrapper around a fragment. The shell sends its own element count beside the index, so a frame the two sides count differently is reported rather than recorded against the wrong element. A pick is refused as `stale-address` when the frame file changed between the frame being served and the pick arriving, since every served frame carries the hash of its file and the shell sends that hash back.
+
+## Edit
+
+`canvas edit <page>/<frame> --element <index> --set <property>=<value>` sets one property of the element at that index, the same index `canvas selection` reports. The properties are `text`, `color`, `background-color`, `font-size`, `font-weight`, `width`, `height`, `padding`, `gap`, and `flex-direction`. A style property is written into the element's inline `style`, replacing that property and leaving the others as they were, and an empty value drops it.
+
+`text` replaces the text of an element holding text alone and refuses one holding other elements as `not-text-only`. Every byte outside the element stays as it was. `--json` emits the page, frame, file, path, and the file's new `hash`.
+
+The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. A color picked from the project's tokens is written as `var(--<name>)`. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
+
+Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
+
+The Theme tab in the shell lists what the token stylesheet defines, grouped as color, spacing, radius, font family, font size, and other. The page record at `/api/pages` carries the same list as `tokens.groups`.
 
 ## Capture
 

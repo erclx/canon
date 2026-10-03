@@ -1,12 +1,15 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { Layers } from '@/canvas/client/layers'
+import { ThemePanel } from '@/canvas/client/theme-panel'
 import type { Frame } from '@/canvas/content'
 import {
   currentPage,
   expandedFrames,
   frameKey,
   isLoaded,
+  type LeftTab,
+  leftTab,
   loadError,
   pages,
   selectedFrame,
@@ -127,6 +130,48 @@ function FrameList({ onFocusFrame }: PagesPanelProps): JSX.Element | null {
   )
 }
 
+const TABS: readonly { readonly id: LeftTab; readonly label: string }[] = [
+  { id: 'pages', label: 'Pages' },
+  { id: 'theme', label: 'Theme' },
+]
+
+/** Two tabs, so the arrow keys move between them and wrap. */
+function Tabs(): JSX.Element {
+  const select = (at: number) => {
+    const tab = TABS[(at + TABS.length) % TABS.length]
+    if (!tab) return
+    leftTab.value = tab.id
+    document.getElementById(`tab-${tab.id}`)?.focus()
+  }
+  return (
+    <div class="tabs" role="tablist" aria-label="Left panel">
+      {TABS.map((tab, at) => {
+        const isSelected = leftTab.value === tab.id
+        return (
+          <button
+            key={tab.id}
+            id={`tab-${tab.id}`}
+            type="button"
+            role="tab"
+            class="tab"
+            aria-selected={isSelected}
+            tabIndex={isSelected ? 0 : -1}
+            onClick={() => {
+              leftTab.value = tab.id
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowRight') select(at + 1)
+              if (event.key === 'ArrowLeft') select(at - 1)
+            }}
+          >
+            {tab.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function PagesPanel(props: PagesPanelProps): JSX.Element {
   return (
     <nav class="panel panel-left" aria-label="Pages and frames">
@@ -140,8 +185,14 @@ export function PagesPanel(props: PagesPanelProps): JSX.Element {
         </p>
       ) : !isLoaded.value ? (
         <p class="empty">Loading</p>
+      ) : leftTab.value === 'theme' ? (
+        <>
+          <Tabs />
+          <ThemePanel />
+        </>
       ) : (
         <>
+          <Tabs />
           <h2 class="section-label">Pages</h2>
           <PageList />
           {currentPage.value ? (

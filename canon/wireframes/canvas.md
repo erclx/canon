@@ -9,14 +9,15 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 
 ## Regions
 
-- Pages panel: a column down the left edge holding the brand line and theme toggle at its top, the page list, and below it the current page's frame list
+- Pages panel: a column down the left edge holding the brand line and theme toggle at its top, then the Pages and Theme tabs. The Pages tab holds the page list and below it the current page's frame list
+- Theme tab: in place of the page and frame lists while picked, the project's tokens under one label per group (color, spacing, radius, font family, font size, other), one row a token reading its name and value, with a swatch beside each color. Read-only
 - Layers: under each frame's row in the frame list, opened by the disclosure beside it, the frame's element tree from its body down, one row per element reading `tag.class` and a leaf's text
 - Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, and theme switch on one line above it. That line is the frame's handle
 - Element outline: drawn over a frame, dashed around the element under the pointer and solid around the selected one
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only values
-- Element inspector: below the frame inspector when an element is selected, showing its `tag.class` name, then its box within the frame, color, background, font family, size, and weight from computed style, one read-only value a row
+- Element inspector: below the frame inspector when an element is selected, showing its `tag.class` name, then its x, y, and font family read-only, then one editable field a row for text, color, background, size, weight, width, height, padding, gap, and direction. Each field starts at the element's inline value, else its computed one. Color and background each carry a token picker beside the field. Text is a field only on an element holding text alone, and read-only otherwise
 
 ### Below 900 wide
 
@@ -29,20 +30,20 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 The sketch stays until a capture of the canvas exists.
 
 ```plaintext
-+------------+------------------------------------------+---------+
-| Canvas  (☾)|  hero 1440 × 900    [Dark]  phone 390 ×  | Page    | ← details panel
-|            |  +----------------------+   +--------+   | drafts  |
-| Pages      |  | +------------------+ |   |        |   | 2 frames|
-| > drafts  2|  | | <selected elem>  | |   | <frame>|   |         |
-|   approved1|  | +------------------+ |   |        |   | Element |
-|            |  |   <frame document>   |   |        |   | button  |
-| Frames     |  +----------------------+   +--------+   | x  48   |
-| ▾ hero 1440|                                          | color   |
-|    body    |                                          | size    |
-|     main   |                                          |         |
-|      h1    |                                          | Tokens  |
-| ▸ phone 390|                       [ − 47% + Fit ]    | <source>|
-+------------+------------------------------------------+---------+
++------------+------------------------------------------+---------------+
+| Canvas  (☾)|  hero 1440 × 900    [Dark]  phone 390 ×  | Element Saved | ← details panel
+|[Pages|Theme]  +----------------------+   +--------+   | button        |
+| Pages      |  | +------------------+ |   |        |   | x      48     |
+| > drafts  2|  | | <selected elem>  | |   | <frame>|   | text  [Start] |
+|   approved1|  | +------------------+ |   |        |   | color [   ][▾]|
+|            |  |   <frame document>   |   |        |   | size  [20px ] |
+| Frames     |  +----------------------+   +--------+   | gap   [     ] |
+| ▾ hero 1440|                                          |               |
+|    body    |                                          | Page          |
+|     main   |                                          | drafts        |
+|      h1    |                                          | Tokens        |
+| ▸ phone 390|                       [ − 47% + Fit ]    | <source>      |
++------------+------------------------------------------+---------------+
   ↑ pages panel        ↑ surface             ↑ zoom toolbar
     and layers
 ```
@@ -68,6 +69,10 @@ The sketch stays until a capture of the canvas exists.
 | element-mismatch | The browser counts the frame's elements differently from its file, as with a table written without its tbody | The pick refused and an alert in the details panel                                                                             | `assets/evidence/canvas-layers/element-mismatch-1440.png` |
 | dragging         | The operator moves a pressed frame                                                                           | The frame following the pointer, and its x and y updating in the inspector                                                     | `assets/evidence/canvas-arrange/dragged-1440.png`         |
 | write-failed     | The server refuses a move or a selection                                                                     | The frame back at its stored place and an alert in the details panel                                                           | not captured                                              |
+| edited           | The operator commits a changed field or picks a token                                                        | The frame reloading with the change, and `Saved` beside the element label for a moment                                         | not captured                                              |
+| edit-refused     | The server refuses an edit, as when the frame file changed after the edit was made                           | The frame reloaded from the file, the typed value dropped, and an alert in the details panel saying nothing was saved          | not captured                                              |
+| theme            | The operator picks the Theme tab                                                                             | The token groups in place of the page and frame lists                                                                          | not captured                                              |
+| theme-empty      | The Theme tab is picked and no token stylesheet resolves                                                     | One line saying no tokens resolve, then the server's notice                                                                    | not captured                                              |
 
 ## Copy
 
@@ -83,7 +88,16 @@ The sketch stays until a capture of the canvas exists.
 - Frame label: `<name> <width> × <height>`, then the theme switch reading `Dark` or `Light`
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field names `x`, `y`, `width`, `height`
-- Element inspector label: `Element`, with field names `x`, `y`, `width`, `height`, `color`, `background`, `font`, `size`, `weight`
+- Element inspector label: `Element`, with row names `x`, `y`, `font`, `text`, `color`, `background`, `size`, `weight`, `width`, `height`, `padding`, `gap`, `direction`
+- Left panel tabs: `Pages`, `Theme`
+- Token picker: `Token` as its empty choice, then each color token by name, with `<field> token` as its accessible name
+- Edit landed: `Saved`
+- Theme group labels: `Color`, `Spacing`, `Radius`, `Font family`, `Font size`, `Other`
+- Theme empty: `No tokens resolve for this project, so there is nothing to list.`, then the server's notice
+- Edit refused, frame changed: `The frame changed before this edit arrived, so nothing was saved. It reloads with the file as it stands now. Make the edit again there.`
+- Edit refused, counts differ: `Could not save, since the browser and the file count the elements of this frame differently.`
+- Edit refused, nested text: `Could not save the text, since this element holds other elements.`
+- Edit refused, bad value: `Could not save that value (<detail>).`, with `<detail>` the server's reason
 - Layers disclosure: `Show layers of <frame>` or `Hide layers of <frame>` as its accessible name
 - Layers loading: `Loading layers`
 - Element loading: `Loading the frame to read this element`
@@ -112,10 +126,17 @@ The sketch stays until a capture of the canvas exists.
 - With a frame focused, Enter or Space selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
 - Picking a frame in the list selects it on the surface, and pressing one on the surface marks its row
 - A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
+- An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
+- A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it
+- Picking a color token writes `var(--<name>)` into the file rather than the value it resolves to
+- Fields hold while an edit is in flight and take the file's values again once the frame reloads
+- An edit made against a version of the frame the file has since moved past is refused, never applied to a shifted element, and the frame reloads from the file
+- The Theme tab lists what the token stylesheet defines and edits nothing
 
 ## Not on this surface
 
-- No property editing, which arrives in a later slice
-- No editable inspector field, since the box and the element values are read-only here
+- No editable frame box, since the frame's x, y, width, and height are read-only here
+- No shadows, constraints, effects, or components, since the inspector edits the basic set alone
+- No token editing, since the Theme tab only lists them
 - No project tabs, since one canvas serves one repository
 - No capture control on the surface

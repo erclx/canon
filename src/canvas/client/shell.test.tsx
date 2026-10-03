@@ -6,6 +6,7 @@ import { Window } from 'happy-dom'
 import { render } from 'preact'
 import { act } from 'preact/test-utils'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { documentElements } from '@/canvas/address'
 import { App } from '@/canvas/client/app'
 import {
   applyChange,
@@ -562,7 +563,7 @@ describe('Inspector', () => {
     )
   })
 
-  it('should offer no editable field in this slice', () => {
+  it('should keep the frame box read-only', () => {
     renderApp([page('drafts', [frame('hero')])])
     pointer('pointerdown', labelFor('hero'), 10, 10)
     pointer('pointerup', labelFor('hero'), 10, 10)
@@ -787,7 +788,7 @@ describe('element hash', () => {
 })
 
 describe('Inspector element', () => {
-  it('should show the selected element tag and computed style, read-only', () => {
+  it('should show the selected element tag and its values in its fields', () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
 
@@ -795,10 +796,9 @@ describe('Inspector element', () => {
 
     const panel = mount.querySelector('[aria-label="Element"]')
     expect(panel?.textContent).toContain('button.cta')
-    expect(panel?.textContent).toMatch(/color\s*rgb\(255, 0, 0\)/)
-    expect(panel?.textContent).toMatch(/size\s*20px/)
-    expect(panel?.textContent).toMatch(/weight\s*700/)
-    expect(panel?.querySelector('input, textarea')).toBeNull()
+    expect(fieldNamed('color').value).toBe('rgb(255, 0, 0)')
+    expect(fieldNamed('size').value).toBe('20px')
+    expect(fieldNamed('weight').value).toBe('700')
   })
 
   it('should say the pick may have moved once the server reports it stale', () => {
@@ -839,6 +839,238 @@ describe('Inspector element', () => {
     act(() => buttonNamed('Show layers of hero').click())
 
     expect(layersFor('hero')?.querySelector('[aria-current="true"]')).toBeNull()
+  })
+})
+
+/** An inspector field by its accessible name. */
+function fieldNamed(name: string): HTMLInputElement {
+  const field = mount.querySelector<HTMLInputElement>(
+    `[aria-label="Element"] [aria-label="${name}"]`,
+  )
+  if (!field) throw new Error(`no field named ${name}`)
+  return field
+}
+
+/** What the server stamps on a served frame, which the shell sends back. */
+function stampHash(doc: Document, hash: string): void {
+  const marker = doc.createElement('style')
+  marker.setAttribute('data-canvas-tokens', '')
+  marker.setAttribute('data-canvas-hash', hash)
+  doc.head.append(marker)
+}
+
+async function commit(
+  field: HTMLInputElement | HTMLSelectElement,
+  value: string,
+) {
+  await act(async () => {
+    field.value = value
+    field.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+}
+
+const TOKENS: PagesRecord['tokens'] = {
+  source: 'installed',
+  files: ['.claude/design/base.css'],
+  groups: [
+    {
+      kind: 'color',
+      tokens: [
+        { name: '--color-text', value: '#111' },
+        { name: '--color-accent', value: '#c76b5f' },
+      ],
+    },
+    { kind: 'spacing', tokens: [{ name: '--space-sm', value: '0.5rem' }] },
+  ],
+}
+
+function renderWithTokens(pages: Page[]): void {
+  act(() => {
+    applyRecord({ ...record(pages), tokens: TOKENS })
+    render(<App />, mount)
+  })
+}
+
+describe('Inspector edit', () => {
+  it('should post the changed field as one property of the selected element', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('color'), 'blue')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        element: {
+          index: documentElements(doc).findIndex(
+            (element) => element.tagName === 'H1',
+          ),
+          tag: 'h1',
+          count: documentElements(doc).length,
+          hash: 'abc123',
+        },
+        property: 'color',
+        value: 'blue',
+      },
+    ])
+  })
+
+  it('should show the values of the frame picked from when two frames share an index', () => {
+    renderApp([page('drafts', [frame('hero'), frame('alt', { x: 1600 })])])
+    const hero = loadFrame('hero', '<h1 style="color: red">A</h1>')
+    const alt = loadFrame('alt', '<h1 style="color: blue">B</h1>')
+    clickIn(hero, 'h1')
+
+    clickIn(alt, 'h1')
+
+    expect(fieldNamed('color').value).toBe('blue')
+  })
+
+  it('should post nothing for a field committed unchanged', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'button')
+
+    await commit(fieldNamed('size'), '20px')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should offer the project color tokens and write the one picked as var()', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = mount.querySelector<HTMLSelectElement>(
+      '[aria-label="Element"] [aria-label="background token"]',
+    )
+    if (!picker) throw new Error('no token picker')
+
+    await commit(picker, 'var(--color-accent)')
+
+    expect([...picker.options].map((option) => option.textContent)).toContain(
+      '--color-accent',
+    )
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'background-color',
+        value: 'var(--color-accent)',
+      }),
+    ])
+  })
+
+  it('should edit text on an element holding text alone', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('text'), 'Launch')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'text', value: 'Launch' }),
+    ])
+  })
+
+  it('should show the text of an element holding others read-only', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'main')
+
+    expect(
+      mount.querySelector('[aria-label="Element"] [aria-label="text"]'),
+    ).toBeNull()
+    expect(
+      mount.querySelector('[aria-label="Element"]')?.textContent,
+    ).toContain('HeroStart')
+  })
+
+  it('should send the hash the last edit answered with the next edit', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({ url: String(url), body: JSON.parse(String(init?.body)) })
+      return new Response('{"ok":true,"hash":"def456"}', {
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+
+    await commit(fieldNamed('color'), 'blue')
+    await commit(fieldNamed('size'), '40px')
+
+    expect(sentTo('/api/frames/edit').at(-1)).toMatchObject({
+      element: { hash: 'def456' },
+    })
+  })
+
+  it('should say the edit was refused and reload the frame when the file moved', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderApp(pages)
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const before = iframeFor('hero').getAttribute('src')
+    globalThis.fetch = (async (_url: unknown, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? new Response(
+            '{"ok":false,"reason":"stale-address","detail":"changed"}',
+            { status: 409, headers: { 'content-type': 'application/json' } },
+          )
+        : new Response(JSON.stringify(record(pages)), {
+            headers: { 'content-type': 'application/json' },
+          })) as typeof fetch
+
+    await commit(fieldNamed('color'), 'blue')
+
+    expect(
+      [...mount.querySelectorAll('[aria-label="Details"] [role="alert"]')].map(
+        (alert) => alert.textContent,
+      ),
+    ).toContainEqual(
+      expect.stringContaining('changed before this edit arrived'),
+    )
+    expect(iframeFor('hero').getAttribute('src')).not.toBe(before)
+  })
+})
+
+describe('ThemePanel', () => {
+  it('should list the tokens by group on the Theme tab', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Theme').click())
+
+    const panel = mount.querySelector('[aria-label="Theme"]')
+    expect(panel?.textContent).toContain('Color')
+    expect(panel?.textContent).toContain('--color-accent')
+    expect(panel?.textContent).toContain('#c76b5f')
+    expect(panel?.textContent).toContain('Spacing')
+    expect(panel?.querySelector('input, select, textarea')).toBeNull()
+  })
+
+  it('should say no tokens resolve when the sheet defines none', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Theme').click())
+
+    expect(mount.querySelector('[aria-label="Theme"]')?.textContent).toContain(
+      'No tokens resolve',
+    )
+  })
+
+  it('should return to the pages from the Pages tab', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Theme').click())
+
+    act(() => buttonNamed('Pages').click())
+
+    expect(mount.querySelector('[aria-label="Pages"]')).not.toBeNull()
   })
 })
 
