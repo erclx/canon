@@ -1,6 +1,14 @@
 ---
 title: Plan reference
 description: Filename and slug, required sections, the suggested-and-answer contract, and the lifecycle from the live folder to the archive
+paths:
+  - '.canon/plans/**'
+rule:
+  - 'Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.'
+  - 'Never ship a question without a `- Suggested:` line. Write `- Suggested: needs your call, <why>` where the answer turns on preference.'
+  - "Rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates from an unanswered question, leaving the slot blank. Put the same deviation in one line under the open task's `## Findings`."
+  - 'Move a shipped plan to `.canon/plans/archive/`. Never delete one.'
+  - 'Amend a plan in place when a decision changes. Do not append a second passage narrating the change.'
 ---
 
 # Plan reference
