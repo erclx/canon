@@ -20,7 +20,7 @@ File types and what they hold:
 Verdicts (pick exactly one):
 - KEEP: states current design, a rule, copy, a decision with its rejected alternative, or a live gotcha, on the right surface.
 - REPLACE: restates a fact or figure the existing section already carries ("moved again", "now", "the count moved", a newer number appended after an older one). The old statement should be rewritten in place, not appended to.
-- HISTORY: narrates how things got here: which branch/PR changed what, "closed on", "did not survive", review-pass stories, pick-by-pick rounds. The current state is what belongs; the trail goes to the PR or a decision log.
+- HISTORY: narrates how things got here: which branch/PR changed what, "closed on", "did not survive", review-pass stories, pick-by-pick rounds. The current state is what belongs; the trail goes to the PR.
 - MOVE: correct content on the wrong surface (domain mechanism in ARCHITECTURE.md, implementation detail in a wireframe).
 
 Return only JSON: {"verdict": "...", "quote": "<the shortest added phrase that decided it>", "reason": "<one sentence>"}

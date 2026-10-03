@@ -53,7 +53,7 @@ afterEach(async () => {
 })
 
 describe('planSeeds', () => {
-  it('should scan the claude root level before its subdirectories', async () => {
+  it('should scan the claude root level before its subdirectories, leaving a retired decisions folder unseeded', async () => {
     const root = await makeRoot()
     const target = await makeDir()
 
@@ -64,7 +64,6 @@ describe('planSeeds', () => {
       'ARCHITECTURE.md',
       'hooks/guard.sh',
       'context/index.md',
-      'decisions/index.md',
       'tasks/index.md',
       'wireframes/index.md',
       'CLAUDE.md',
@@ -132,7 +131,7 @@ describe('countByScope', () => {
 
     const counts = countByScope(pendingSeeds(planSeeds(root, target)))
 
-    expect(counts).toEqual({ claude: 7, root: 1 })
+    expect(counts).toEqual({ claude: 6, root: 1 })
   })
 })
 
@@ -148,7 +147,6 @@ describe('applySeeds', () => {
       'canon/ARCHITECTURE.md',
       '.claude/hooks/guard.sh',
       'canon/context/index.md',
-      'canon/decisions/index.md',
       '.canon/tasks/index.md',
       'canon/wireframes/index.md',
       'CLAUDE.md',
