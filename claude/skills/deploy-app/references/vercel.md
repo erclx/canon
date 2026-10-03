@@ -10,6 +10,7 @@ Run these steps once the body's Pick step resolves to Vercel. Read `vercel <comm
 ## Guard
 
 - If `vercel whoami` fails, stop: `❌ vercel is not authenticated. Run vercel login, then re-invoke.`
+- If `command -v jq` fails, stop: `❌ jq is not installed. Install it, then re-invoke.` Step 3 pipes its output into a secret, and a missing reader would set that secret empty while `gh secret list` still lists its name.
 
 ## Step 1: create and link the project
 
@@ -43,7 +44,7 @@ No workflow reads these today. They are what a GitHub Actions job calling `verce
 
 ## Step 4: stop for the token
 
-Stop: `⏸ Create a Vercel token at the Vercel account settings, then run: gh secret set VERCEL_TOKEN. Re-invoke this skill once that's done.`
+Stop: `⏸ Create a Vercel token at the Vercel account settings, then run: gh secret set VERCEL_TOKEN. Confirm here once that's done.`
 
 This is the one credential the skill never touches. Resume only once the operator confirms the token is set.
 

@@ -24,7 +24,7 @@ The same sequence repeats on Vercel with different calls, so a skill per host wo
 ## Must not
 
 - Accept an API token as input in any form. The toolkit verifies a secret exists, never what it contains.
-- Print an ID to the transcript on its way to a secret
+- Take an ID from the operator rather than from the host CLI's own session or files
 - Default to a host when the signals are absent or disagree
 - Reimplement a host CLI call or `gh secret set` as a hand-built API call
 - Seed a deploy workflow for Vercel, whose git integration already deploys on push

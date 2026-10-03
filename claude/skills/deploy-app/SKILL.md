@@ -10,7 +10,7 @@ Runs the one-time setup a deploy needs before the host can publish on push, stop
 ## Guards
 
 - Never accept an API token as input, in a prompt, an argument, or a file. Verify a secret's presence with `gh secret list` rather than asking for or reading its content.
-- Never print an account, org, or project ID to the transcript. Read it from the host CLI's own session or files and pipe it straight into `gh secret set`.
+- Read every account, org, or project ID from the host CLI's own session or files, never from the operator, and pipe it into `gh secret set` rather than reporting it first.
 - Never reimplement a host CLI call or `gh secret set` as a hand-built HTTP call. Call the tools directly.
 - If the project name is not supplied, derive it from the repository's own name (`basename` of `git remote get-url origin`, stripped of a trailing `.git`) and confirm it in the preview rather than asking first.
 
