@@ -2,6 +2,8 @@
 
 Authoring guidance: the requirements standard.
 
+This record holds at most 600 words.
+
 ## Problem
 
 ## Goals

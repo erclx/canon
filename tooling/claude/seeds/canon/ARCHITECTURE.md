@@ -4,7 +4,7 @@ Authoring guidance: the architecture standard.
 
 ## Overview
 
-This record holds at most 12 decisions.
+This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets.
 
 ## Key technical decisions
 
