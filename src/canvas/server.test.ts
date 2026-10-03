@@ -186,6 +186,30 @@ describe('startCanvas', () => {
     expect(body.indexOf('teal')).toBeLessThan(body.indexOf('<p>bare'))
   })
 
+  it('should keep the doctype first in a frame that carries no head', async () => {
+    seed('drafts/bare.html', '<!DOCTYPE html>\n<p>bare</p>')
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/bare.html')).text()
+
+    expect(body.startsWith('<!DOCTYPE html>')).toBe(true)
+    expect(body.indexOf('data-canvas-hash')).toBeLessThan(
+      body.indexOf('<p>bare'),
+    )
+  })
+
+  it('should stamp a frame saved with a byte order mark with the hash of its bytes', async () => {
+    const file =
+      '\uFEFF<!doctype html><html><head></head><body>hero</body></html>'
+    seed('drafts/hero.html', file)
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/hero.html')).text()
+
+    const hash = createHash('sha256').update(file).digest('hex')
+    expect(body).toContain(`data-canvas-hash="${hash}"`)
+  })
+
   it('should serve a frame asset without touching it', async () => {
     seed('drafts/logo.svg', '<svg></svg>')
     const server = start()

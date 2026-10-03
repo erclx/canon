@@ -601,6 +601,20 @@ describe('element selection', () => {
     expect(outcome).toEqual({ ok: true })
   })
 
+  it('should take a pick on a frame saved with a byte order mark', () => {
+    mkdirSync(pageDir('drafts'), { recursive: true })
+    const file = `\uFEFF${BUTTON_FRAME}`
+    writeFileSync(join(pageDir('drafts'), 'hero.html'), file)
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: contentHash(file) },
+    })
+
+    expect(outcome).toEqual({ ok: true })
+  })
+
   it('should refuse an address that is not a whole number', () => {
     seedButtonFrame()
 

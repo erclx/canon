@@ -488,7 +488,7 @@ function selectionPath(root: string): string {
   return join(canvasDir(root), SELECTION_FILE)
 }
 
-export function contentHash(html: string): string {
+export function contentHash(html: string | Uint8Array): string {
   return createHash('sha256').update(html).digest('hex')
 }
 
@@ -537,8 +537,9 @@ export function writeSelection(
         'an element address needs a whole index below its count and a tag',
       )
     }
-    const html = readFileSync(join(pagePath(root, page), found.file), 'utf8')
-    const hash = contentHash(html)
+    const bytes = readFileSync(join(pagePath(root, page), found.file))
+    const hash = contentHash(bytes)
+    const html = bytes.toString('utf8')
     if (element.hash !== undefined && element.hash !== hash) {
       return refuse(
         'stale-address',
@@ -610,7 +611,7 @@ export function readSelection(root: string): SelectedFrame | undefined {
   if (!stored) return selected
   const { hash, ...picked } = stored
   const current = contentHash(
-    readFileSync(join(pagePath(root, page), found.file), 'utf8'),
+    readFileSync(join(pagePath(root, page), found.file)),
   )
   return { ...selected, element: { ...picked, stale: current !== hash } }
 }

@@ -87,8 +87,8 @@ function styleElement(css: string, hash: string | undefined): string {
 
 /**
  * Puts the tokens first in the head, so a stylesheet the frame links itself
- * still wins the cascade. A frame with no head gets the element ahead of
- * everything, which a browser hoists into the head it builds. A hash stamps
+ * still wins the cascade. A frame with no head gets the element right after
+ * its doctype, which a browser hoists into the head it builds. A hash stamps
  * the element even when no tokens resolve, since the shell sends it back with
  * an element pick.
  */
@@ -96,7 +96,11 @@ export function injectTokens(html: string, css: string, hash?: string): string {
   if (css === '' && hash === undefined) return html
   const element = styleElement(css, hash)
   const head = html.match(/<head(?:\s[^>]*)?>/i)
-  if (head?.index === undefined) return `${element}${html}`
+  if (head?.index === undefined) {
+    /* Ahead of a doctype the element would drop the frame into quirks mode. */
+    const doctype = html.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
+    return `${doctype}${element}${html.slice(doctype.length)}`
+  }
   const at = head.index + head[0].length
   return `${html.slice(0, at)}${element}${html.slice(at)}`
 }
@@ -223,8 +227,13 @@ async function serveFrame(
   if (file.status !== 200 || !type.startsWith('text/html')) return file
 
   const { css } = resolveFrameTokens(root, tokens)
-  const html = await file.text()
-  return new Response(injectTokens(html, css, contentHash(html)), {
+  /*
+   * Hashed over the bytes on disk, the same input `writeSelection` reads,
+   * since decoding to text drops a byte order mark the file still holds.
+   */
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const html = new TextDecoder().decode(bytes)
+  return new Response(injectTokens(html, css, contentHash(bytes)), {
     headers: { 'content-type': type, 'cache-control': 'no-store' },
   })
 }
