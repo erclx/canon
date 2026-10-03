@@ -1,0 +1,4 @@
+
+export function trim(text) {
+  return text.trim();
+}

@@ -27,12 +27,7 @@ stage_setup() {
   "open-pr")
     git checkout -b feat/utils-followup -q
 
-    cat <<'EOF' >>utils.js
-
-export function lowercase(text) {
-  return text.toLowerCase();
-}
-EOF
+    stage_fixtures git followup shared 01-lowercase
     git add utils.js && git commit -m "feat(utils): add lowercase helper" -q
     git push -u origin feat/utils-followup -q
 
@@ -42,12 +37,7 @@ EOF
       --head feat/utils-followup \
       --base main >/dev/null
 
-    cat <<'EOF' >>utils.js
-
-export function trim(text) {
-  return text.trim();
-}
-EOF
+    stage_fixtures git followup open-pr 02-trim
 
     log_step "Scenario ready: open PR with one followup edit"
     log_info "Context: feat/utils-followup tracks origin, PR open, unstaged trim() addition"
@@ -57,12 +47,7 @@ EOF
   "review-comment")
     git checkout -b feat/utils-followup -q
 
-    cat <<'EOF' >>utils.js
-
-export function lowercase(text) {
-  return text.toLowerCase();
-}
-EOF
+    stage_fixtures git followup shared 01-lowercase
     git add utils.js && git commit -m "feat(utils): add lowercase helper" -q
     git push -u origin feat/utils-followup -q
 
@@ -80,12 +65,7 @@ EOF
       -F line="$review_line" \
       -f side="RIGHT" >/dev/null
 
-    cat <<'EOF' >>utils.js
-
-export function lowercaseSafe(text) {
-  return text?.toLowerCase() ?? "";
-}
-EOF
+    stage_fixtures git followup review-comment 02-lowercase-safe
 
     log_step "Scenario ready: open PR with a review comment and an unstaged fix"
     log_info "Context: feat/utils-followup tracks origin, PR open with one review comment, unstaged null-guard addition"
