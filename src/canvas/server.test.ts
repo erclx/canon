@@ -465,6 +465,17 @@ describe('POST /api/selection', () => {
     expect(await response.json()).toMatchObject({ reason: 'address-mismatch' })
   })
 
+  it('should answer 400 for an element sent without its frame', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      element: { index: 0, tag: 'p', count: 1 },
+    })
+
+    expect(response.status).toBe(400)
+  })
+
   it('should answer 400 for an element that is not an address', async () => {
     seed('drafts/hero.html', '<p>hero</p>')
     const server = start()

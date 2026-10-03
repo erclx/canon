@@ -379,6 +379,9 @@ export function startCanvas(
                   return badBody('send both page and frame, or neither')
                 }
                 const { element } = body
+                if (element != null && target === undefined) {
+                  return badBody('send an element with its page and frame')
+                }
                 if (element != null && !isAddressShape(element)) {
                   return badBody('send an element as index, tag, and count')
                 }
