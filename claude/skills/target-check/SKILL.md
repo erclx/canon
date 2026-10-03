@@ -26,7 +26,7 @@ CANON_NON_INTERACTIVE=1 canon sync --check . --json
 CANON_NON_INTERACTIVE=1 canon context audit --json
 ```
 
-The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, and `reverse`. The second deepens a domain that first read only counts.
+The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. The second deepens a domain that first read only counts.
 
 Then run `CANON_NON_INTERACTIVE=1 canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
 
@@ -79,7 +79,7 @@ Target check: `<path>`, against canon `<version>`.
 | Domain           | State                     | Evidence                          |
 | ---------------- | ------------------------- | --------------------------------- |
 | Toolkit version  | current / behind / unread | `skew.installed` against `latest` |
-| `canon/` folder  | current / behind / unread | what the layout fields named      |
+| `canon/` folder  | current / behind / unread | the layout fields, incl. unmoved  |
 | Governance rules | current / behind / unread | the per-state counts              |
 | Tooling          | current / behind / unread | what a sync would change          |
 | Seeds            | current / behind / unread | the per-state counts              |

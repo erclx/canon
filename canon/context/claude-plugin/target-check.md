@@ -12,7 +12,7 @@ description: The six domains the target check reports, why the harness ships as 
 Five answer from a verb that already exists and one answers from nothing.
 
 - Toolkit version, from `skew` on `canon sync --check . --json`
-- The `canon/` folder, from `unmigrated`, `superseded`, and `reverse` on that report, plus `canon context audit` and `canon records validate`
+- The `canon/` folder, from `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse` on that report, plus `canon context audit` and `canon records validate`
 - Governance rules, from the `domains` array on that report
 - Tooling, from the `tooling` block plus `canon tooling sync --check <stack>`
 - Seeds, from `seeds.entries`
