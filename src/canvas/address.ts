@@ -91,6 +91,58 @@ interface Collected {
 }
 
 /**
+ * Called on each element the address counts, with its index. What it returns
+ * runs at the element's end tag, since a second `onEndTag` on one element
+ * replaces the first rather than adding to it.
+ */
+export type ElementVisitor = (
+  element: HTMLRewriterTypes.Element,
+  index: number,
+) => (() => void) | undefined
+
+/**
+ * Registers the one counting rule both the reader and the edit writer follow,
+ * so an index means the same element to each.
+ */
+export function countElements(
+  rewriter: HTMLRewriter,
+  visit: ElementVisitor,
+): HTMLRewriter {
+  let count = 0
+  /* A template's content is a fragment `querySelectorAll` never reaches. */
+  let templateDepth = 0
+
+  return rewriter.on('*', {
+    element(element) {
+      const tag = element.tagName.toLowerCase()
+      if (templateDepth > 0) {
+        if (tag === 'template') {
+          templateDepth += 1
+          element.onEndTag(() => {
+            templateDepth -= 1
+          })
+        }
+        return
+      }
+      const end = visit(element, count)
+      count += 1
+      if (!element.canHaveContent || element.selfClosing) return
+      const isTemplate = tag === 'template'
+      if (isTemplate) templateDepth += 1
+      element.onEndTag(() => {
+        if (isTemplate) templateDepth -= 1
+        end?.()
+      })
+    },
+  })
+}
+
+/** Whether an element's content is raw text rather than parsed markup. */
+export function isRawText(tag: string): boolean {
+  return RAW_TEXT.has(tag)
+}
+
+/**
  * Every element the file states, in document order. Text is gathered into
  * each open element, which an element closed only by implication keeps open to
  * the end, so its excerpt can run past where a browser would end it.
@@ -99,8 +151,6 @@ export function sourceElements(html: string): SourceElement[] {
   const elements: Collected[] = []
   const open: number[] = []
   let rawDepth = 0
-  /* A template's content is a fragment `querySelectorAll` never reaches. */
-  let templateDepth = 0
 
   const appendText = (text: string) => {
     for (const index of open) {
@@ -111,44 +161,28 @@ export function sourceElements(html: string): SourceElement[] {
     }
   }
 
-  new HTMLRewriter()
-    .on('*', {
-      element(element) {
-        const tag = element.tagName.toLowerCase()
-        if (templateDepth > 0) {
-          if (tag === 'template') {
-            templateDepth += 1
-            element.onEndTag(() => {
-              templateDepth -= 1
-            })
-          }
-          return
-        }
-        const index = elements.length
-        /* A tag boundary separates words the way a rendered block would. */
-        appendText(' ')
-        elements.push({
-          tag,
-          classes: (element.getAttribute('class') ?? '')
-            .split(/\s+/)
-            .filter(Boolean),
-          text: '',
-        })
-        if (!element.canHaveContent || element.selfClosing) return
-        const isRaw = RAW_TEXT.has(tag)
-        const isTemplate = tag === 'template'
-        open.push(index)
-        if (isRaw) rawDepth += 1
-        if (isTemplate) templateDepth += 1
-        element.onEndTag(() => {
-          const at = open.lastIndexOf(index)
-          if (at !== -1) open.splice(at, 1)
-          if (isRaw) rawDepth -= 1
-          if (isTemplate) templateDepth -= 1
-          appendText(' ')
-        })
-      },
+  countElements(new HTMLRewriter(), (element, index) => {
+    const tag = element.tagName.toLowerCase()
+    /* A tag boundary separates words the way a rendered block would. */
+    appendText(' ')
+    elements.push({
+      tag,
+      classes: (element.getAttribute('class') ?? '')
+        .split(/\s+/)
+        .filter(Boolean),
+      text: '',
     })
+    if (!element.canHaveContent || element.selfClosing) return undefined
+    const isRaw = isRawText(tag)
+    open.push(index)
+    if (isRaw) rawDepth += 1
+    return () => {
+      const at = open.lastIndexOf(index)
+      if (at !== -1) open.splice(at, 1)
+      if (isRaw) rawDepth -= 1
+      appendText(' ')
+    }
+  })
     .onDocument({
       text(chunk) {
         if (rawDepth === 0) appendText(chunk.text)
