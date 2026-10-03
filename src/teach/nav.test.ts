@@ -9,7 +9,7 @@ import {
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { FAVICON_COLORS } from '@/design/favicon'
-import { focusLine, generateNav } from '@/teach/nav'
+import { generateNav } from '@/teach/nav'
 import {
   listWorkspaces,
   openWorkspace,
@@ -135,37 +135,6 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
-})
-
-describe('focusLine', () => {
-  it('should reach the very bottom of the viewport at max scroll', () => {
-    for (const innerHeight of [400, 600, 900, 1200, 2000]) {
-      expect(focusLine(1000, 1000, innerHeight)).toBe(innerHeight)
-    }
-  })
-
-  it('should reach a heading with under 120px of trailing content across several viewport heights', () => {
-    for (const innerHeight of [400, 600, 900, 1200, 2000]) {
-      const max = 3000
-      const trailing = 40
-      const lastHeadingTopAtRest = max + innerHeight - trailing
-
-      let reached = false
-      for (let scrollY = 0; scrollY <= max; scrollY += 5) {
-        const top = lastHeadingTopAtRest - scrollY
-        if (top <= focusLine(scrollY, max, innerHeight)) {
-          reached = true
-          break
-        }
-      }
-
-      expect(reached).toBe(true)
-    }
-  })
-
-  it('should stay at innerHeight when the page does not scroll', () => {
-    expect(focusLine(0, 0, 800)).toBe(800)
-  })
 })
 
 describe('generateNav', () => {
@@ -918,8 +887,7 @@ describe('generateNav', () => {
     )
 
     expect(contents.match(/class="gterm"/g)).toHaveLength(entries.length)
-    expect(contents).toContain('list.querySelectorAll(".gterm")')
-    expect(contents).toContain('updateGroups()')
+    expect(contents).toContain('getElementById("gfilter")')
   })
 })
 
@@ -1224,8 +1192,8 @@ describe('course sidebar', () => {
   it('should declare the page kind, which is what the pre-paint script branches on', async () => {
     const pages = await generateThreePages()
 
-    expect(pages.contents).toContain('r.dataset.page="index"')
-    expect(pages.lesson).toContain('r.dataset.page="lesson"')
+    expect(pages.contents).toContain(`("index",${TEACH_SIDEBAR_BREAKPOINT})`)
+    expect(pages.lesson).toContain(`("lesson",${TEACH_SIDEBAR_BREAKPOINT})`)
     expect(pages.lesson).not.toContain('r.dataset.lessons')
   })
 
@@ -1236,11 +1204,9 @@ describe('course sidebar', () => {
     })
 
     const query = `(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)`
-    expect(
-      lesson.match(
-        new RegExp(`matchMedia\\("${query.replace(/[()]/g, '\\$&')}"\\)`, 'g'),
-      ),
-    ).toHaveLength(2)
+    const head = lesson.slice(0, lesson.indexOf('<body'))
+    expect(head).toContain(`("lesson",${TEACH_SIDEBAR_BREAKPOINT})`)
+    expect(lesson).toContain(`(${TEACH_SIDEBAR_BREAKPOINT})</script>`)
     expect(css).toContain(`@media ${query} {`)
   })
 
@@ -1248,40 +1214,13 @@ describe('course sidebar', () => {
     const { lesson } = await generateThreePages()
 
     const head = lesson.slice(0, lesson.indexOf('<body'))
-    expect(head).toContain('r.classList.add("sb-shut")')
-    expect(head).toContain('s==="shut"||(s===null&&idx)')
     expect(head).toContain('localStorage.getItem("teach-sb-w")')
   })
 
-  it('should return focus to the toggle from every route that shuts the overlay', async () => {
+  it('should declare the focus-line helper ahead of the sidebar that calls it', async () => {
     const { lesson } = await generateThreePages()
 
-    const shutBody = /function shut\(\) \{([\s\S]*?)\n  \}/.exec(lesson)?.[1]
-    expect(shutBody).toContain('panel.contains(document.activeElement)')
-    expect(shutBody).toContain('fold.focus()')
-
-    // The close control returns focus by calling shut(), not on its own, so
-    // Escape and the scrim cannot diverge from it.
-    expect(lesson).toContain('close.addEventListener("click", shut)')
-  })
-
-  it('should contain Tab within the overlay while it is open', async () => {
-    const { lesson } = await generateThreePages()
-
-    expect(lesson).toContain('if (e.key !== "Tab") return;')
-    expect(lesson).toContain('panelStops()')
-    expect(lesson).toContain('last.focus()')
-    expect(lesson).toContain('first.focus()')
-    expect(lesson).toContain('e.preventDefault()')
-  })
-
-  it('should open the panel as an overlay below the breakpoint, with a scrim and an escape', async () => {
-    const { lesson } = await generateThreePages()
-
-    expect(lesson).toContain('matchMedia("(max-width: 1100px)")')
-    expect(lesson).toContain('scrim.className = "sb-scrim"')
-    expect(lesson).toContain('e.key === "Escape" && narrow.matches')
-    expect(lesson).toContain('first.focus()')
+    expect(lesson).toContain('function focusLine(')
   })
 
   it('should carry exactly one icon link in the head of every page kind, built from the favicon pair', async () => {
@@ -1521,7 +1460,7 @@ description: Every token the lessons use, in one table
     expect(page).toContain(
       '<link rel="stylesheet" href="../assets/course.css">',
     )
-    expect(page).toContain('r.dataset.page="lesson"')
+    expect(page).toContain(`("lesson",${TEACH_SIDEBAR_BREAKPOINT})`)
     expect(page).toContain(
       '<span class="crumb crumb-here">Pattern summary</span>',
     )

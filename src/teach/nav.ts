@@ -10,6 +10,14 @@ import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
 import { stripFrontmatter } from '@/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { PROJECT_ROOT } from '@/project-root'
+import { compileScript } from '@/teach/browser/compile'
+import { dismiss } from '@/teach/browser/dismiss'
+import { focusLine } from '@/teach/browser/focus-line'
+import { glossaryFilter } from '@/teach/browser/glossary-filter'
+import { head } from '@/teach/browser/head'
+import { quiz } from '@/teach/browser/quiz'
+import { sidebar } from '@/teach/browser/sidebar'
+import { theme } from '@/teach/browser/theme'
 import { linkLessonReferences } from '@/teach/cross-references'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
 import { LESSON_NUMBER } from '@/teach/lesson'
@@ -82,76 +90,6 @@ const CARET =
 const THEME_BUTTON =
   '<button class="theme" type="button" aria-label="Switch between light and dark"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>'
 
-const THEME_SCRIPT =
-  '<script>(function(){var r=document.documentElement;try{var s=localStorage.getItem("course-theme");if(s)r.dataset.theme=s;}catch(e){}document.addEventListener("click",function(e){var b=e.target.closest(".theme");if(!b)return;var d=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme: dark)").matches);r.dataset.theme=d?"light":"dark";try{localStorage.setItem("course-theme",r.dataset.theme);}catch(e){}});})();</script>'
-
-const CLOSE_OUTSIDE_CLICK_SCRIPT = `<script>
-(function () {
-  var MENUS = "details.jump[open], details.sb-ws[open]";
-
-  function close(except) {
-    document.querySelectorAll(MENUS).forEach(function (d) {
-      if (d !== except) d.open = false;
-    });
-  }
-  document.addEventListener("click", function (e) {
-    var inside = e.target.closest("details.jump, details.sb-ws");
-    close(inside);
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key !== "Escape") return;
-    var open = document.querySelector(MENUS);
-    if (!open) return;
-    open.open = false;
-    var s = open.querySelector("summary");
-    if (s) s.focus();
-  });
-
-  /* Hover intent on the breadcrumb only. The sidebar's workspace switcher stays
-     click-only on purpose: its panel opens directly over the lesson list, which
-     is where the pointer is headed, so hovering it would cover the thing
-     being reached for. The breadcrumb's panel drops over body text instead. */
-  var OPEN = 120, SHUT = 260;
-
-  document.querySelectorAll("details.jump").forEach(function (d) {
-    var host = d.closest(".crumb-item") || d;
-    var timer = null;
-    var openedByHover = false;
-
-    function arm(want) {
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        if (want) close(d);
-        d.open = want;
-      }, want ? OPEN : SHUT);
-    }
-
-    host.addEventListener("mouseenter", function () {
-      if (!d.open) openedByHover = true;
-      arm(true);
-    });
-    host.addEventListener("mouseleave", function () {
-      openedByHover = false;
-      arm(false);
-    });
-    /* Keeps it open while the pointer is inside the panel, without cancelling a
-       pending open, which is what silently disabled this on one of two menus. */
-    d.addEventListener("mouseenter", function () { if (d.open) clearTimeout(timer); });
-
-    /* Hover and click were wired to one disclosure and fought: hover opened the
-       panel, then the summary's native click toggled what hover had already
-       opened, so reaching for an item shut it. A click on a panel hover opened
-       keeps it open, and a second click closes. The click path stays live for
-       touch, where no hover exists, and for the keyboard, where Enter is the
-       only way in. */
-    var summary = d.querySelector("summary");
-    if (summary) summary.addEventListener("click", function (e) {
-      if (d.open && openedByHover) { e.preventDefault(); openedByHover = false; }
-    });
-  });
-})();
-</script>`
-
 /**
  * The stepper, as CSS over the radio inputs a lesson's quiz is written from.
  *
@@ -194,307 +132,6 @@ const QUIZ_CSS = `@supports selector(:has(*)) {
  * one it has decides both the style and the scripts region.
  */
 const LEGACY_OPTION = '<button class="opt"'
-
-/**
- * What reveals feedback in a lesson written against `LEGACY_OPTION`. The radio
- * shape needs none of it, so a lesson carrying no button option gets no script,
- * and removing this outright would leave the lessons already written showing no
- * feedback at all.
- */
-const QUIZ_SCRIPT =
-  '<script>document.querySelectorAll(".q").forEach(function(q){var f=q.querySelector(".fb");q.querySelectorAll(".opt").forEach(function(b){b.addEventListener("click",function(){if(f.classList.contains("show"))return;q.querySelectorAll(".opt").forEach(function(o){o.dataset.state=o.dataset.a==="1"?"right":(o===b?"chosen":"wrong");});f.classList.add("show");});});});</script>'
-
-const GLOSSARY_FILTER_SCRIPT = `<script>
-(function () {
-  var input = document.getElementById("gfilter");
-  var list = document.getElementById("gloss");
-  var count = document.getElementById("gloss-count");
-  if (!input || !list) return;
-  function updateGroups() {
-    list.querySelectorAll(".gloss-group").forEach(function (heading) {
-      var el = heading.nextElementSibling;
-      var any = false;
-      while (el && !el.classList.contains("gloss-group")) {
-        if (el.style.display !== "none") any = true;
-        el = el.nextElementSibling;
-      }
-      heading.style.display = any ? "" : "none";
-    });
-  }
-  input.addEventListener("input", function () {
-    var q = input.value.toLowerCase();
-    var n = 0;
-    list.querySelectorAll(".gterm").forEach(function (entry) {
-      var match = entry.textContent.toLowerCase().includes(q);
-      entry.style.display = match ? "" : "none";
-      if (match) n++;
-    });
-    list.classList.toggle("none", n === 0);
-    updateGroups();
-    if (count) {
-      var total = list.querySelectorAll(".gterm").length;
-      count.textContent = (n === total ? total : n + " of " + total) + (total === 1 ? " term" : " terms");
-    }
-  });
-  var clear = list.querySelector(".clear");
-  if (clear) {
-    clear.addEventListener("click", function () {
-      input.value = "";
-      input.dispatchEvent(new Event("input"));
-      input.focus();
-    });
-  }
-})();
-</script>`
-
-/**
- * The outline rail's focus-line ramp, as the JavaScript source `OUTLINE_SCRIPT`
- * embeds verbatim, so there is one copy of the formula rather than a TS
- * reimplementation that could drift from what a browser actually runs.
- *
- * It ramps the line from near the top at scroll 0 to the viewport's bottom
- * edge at max scroll, so the last heading is reachable regardless of how
- * little content trails it. The prior formula ended the ramp 120px short of
- * the edge, which left a heading followed by under 120px of trailing content
- * permanently unmarked, since its top never fell below the line even at max
- * scroll.
- */
-const FOCUS_LINE_BODY = `if (max <= 0) return innerHeight;
-    var progress = Math.min(1, Math.max(0, scrollY / max));
-    return 120 + progress * Math.max(0, innerHeight - 120);`
-
-/**
- * Compiles and runs `FOCUS_LINE_BODY`, so a test exercises the exact source
- * the browser runs rather than a parallel copy of it.
- */
-export function focusLine(
-  scrollY: number,
-  max: number,
-  innerHeight: number,
-): number {
-  const compiled = new Function(
-    'scrollY',
-    'max',
-    'innerHeight',
-    FOCUS_LINE_BODY,
-  ) as (scrollY: number, max: number, innerHeight: number) => number
-
-  return compiled(scrollY, max, innerHeight)
-}
-
-/**
- * The panel's state, settled before the first paint rather than after it. An
- * arm that set the narrow default afterwards slid the panel in and back out on
- * every load, and a restored custom width animated in from the default.
- *
- * A listing page starts shut because the body already lists what the panel
- * would, and a lesson starts open because there the panel is the only
- * cross-lesson navigation on the page. A stored preference beats both. A count
- * threshold on its own was built and reverted, since it hides the panel on a
- * lesson too.
- */
-function headScript(page: 'index' | 'lesson'): string {
-  return `<script>(function(){var r=document.documentElement,s=null;
-r.dataset.page="${page}";
-if(matchMedia("(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)").matches){r.classList.add("sb-shut");return}
-try{s=localStorage.getItem("teach-sb")}catch(e){}
-var idx=r.dataset.page==="index";
-if(s==="shut"||(s===null&&idx))r.classList.add("sb-shut");
-var w=null;try{w=localStorage.getItem("teach-sb-w")}catch(e){}
-if(w)r.style.setProperty("--sb-w",w+"px")})();</script>`
-}
-
-const SIDEBAR_SCRIPT = `<script>
-(function () {
-  var root = document.documentElement;
-  var panel = document.querySelector(".sb");
-  if (!panel) return;
-
-  var fold = document.querySelector(".sb-fold");
-  var narrow = matchMedia("(max-width: ${TEACH_SIDEBAR_BREAKPOINT}px)");
-
-  var FOCUSABLE = "a[href], button:not([disabled]), summary, input, [tabindex]:not([tabindex='-1'])";
-
-  function panelStops() {
-    return Array.prototype.slice.call(panel.querySelectorAll(FOCUSABLE))
-      .filter(function (el) { return el.offsetParent !== null || el === document.activeElement; });
-  }
-
-  /* The focus return belongs here rather than on the close control, because all
-     three routes out land here and only one of them used to move focus. The
-     shut panel takes visibility: hidden 180ms later, so a reader who pressed
-     Escape kept focus on a control that then disappeared under them and the
-     browser dropped them at the top of the document. */
-  function shut() {
-    var inside = panel.contains(document.activeElement);
-    root.classList.add("sb-shut");
-    try { localStorage.setItem("teach-sb", "shut"); } catch (e) {}
-    if (inside && fold) fold.focus();
-  }
-
-  if (fold) fold.addEventListener("click", function () {
-    root.classList.toggle("sb-shut");
-    try {
-      localStorage.setItem("teach-sb", root.classList.contains("sb-shut") ? "shut" : "open");
-    } catch (e) {}
-    /* An overlay takes focus with it. Without this a keyboard reader opens the
-       panel and goes on tabbing through the lesson behind the scrim. */
-    if (!narrow.matches || root.classList.contains("sb-shut")) return;
-    var first = panel.querySelector("a, button, summary, input");
-    if (first) first.focus();
-  });
-
-  var scrim = document.createElement("div");
-  scrim.className = "sb-scrim";
-  document.body.appendChild(scrim);
-  scrim.addEventListener("click", shut);
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && narrow.matches) { shut(); return; }
-
-    /* The scrim says the lesson is unavailable, so Tab must not reach it.
-       Moving focus into the panel on open only defers this by however many
-       controls the panel holds. */
-    if (e.key !== "Tab") return;
-    if (!narrow.matches || root.classList.contains("sb-shut")) return;
-
-    var stops = panelStops();
-    if (!stops.length) return;
-
-    var first = stops[0];
-    var last = stops[stops.length - 1];
-
-    if (!panel.contains(document.activeElement)) {
-      (e.shiftKey ? last : first).focus();
-      e.preventDefault();
-    } else if (e.shiftKey && document.activeElement === first) {
-      last.focus();
-      e.preventDefault();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      first.focus();
-      e.preventDefault();
-    }
-  });
-
-  /* The panel covers the masthead and the toggle that opened it, so it carries
-     its own way out rather than leaving the scrim as the only route. */
-  var close = document.createElement("button");
-  close.type = "button";
-  close.className = "sb-close";
-  close.setAttribute("aria-label", "Close the course panel");
-  close.textContent = "\\u00d7";
-  close.addEventListener("click", shut);
-  panel.appendChild(close);
-
-  var MIN = 208, MAX = 296, DEF = 256;
-  var grip = document.querySelector(".sb-grip");
-  var lastWidth = parseInt(root.style.getPropertyValue("--sb-w"), 10) || DEF;
-
-  function setWidth(px, save) {
-    var w = Math.max(MIN, Math.min(MAX, Math.round(px)));
-    root.style.setProperty("--sb-w", w + "px");
-    lastWidth = w;
-    if (save) { try { localStorage.setItem("teach-sb-w", String(w)); } catch (e) {} }
-  }
-
-  if (grip) {
-    var dragging = false;
-    grip.addEventListener("pointerdown", function (e) {
-      dragging = true;
-      grip.setPointerCapture(e.pointerId);
-      root.classList.add("sb-drag");
-      e.preventDefault();
-    });
-    grip.addEventListener("pointermove", function (e) {
-      if (dragging) setWidth(e.clientX, false);
-    });
-    grip.addEventListener("pointerup", function (e) {
-      if (!dragging) return;
-      dragging = false;
-      root.classList.remove("sb-drag");
-      grip.releasePointerCapture(e.pointerId);
-      setWidth(lastWidth, true);
-    });
-    grip.addEventListener("dblclick", function () { setWidth(DEF, true); });
-    grip.addEventListener("keydown", function (e) {
-      var step = e.shiftKey ? 32 : 8;
-      if (e.key === "ArrowLeft") { setWidth(lastWidth - step, true); e.preventDefault(); }
-      else if (e.key === "ArrowRight") { setWidth(lastWidth + step, true); e.preventDefault(); }
-      else if (e.key === "Home") { setWidth(DEF, true); e.preventDefault(); }
-    });
-  }
-
-  var filter = document.querySelector(".sb-filter input");
-  if (filter) filter.addEventListener("input", function () {
-    var q = filter.value.trim().toLowerCase();
-    document.querySelectorAll(".sb-list > li").forEach(function (li) {
-      li.classList.toggle("hide", q !== "" && li.textContent.toLowerCase().indexOf(q) === -1);
-    });
-  });
-
-  var slot = document.querySelector(".sb-out-slot");
-  var hs = Array.prototype.slice.call(document.querySelectorAll("main h2"));
-  var links = [];
-
-  if (slot && hs.length) {
-    var list = document.createElement("ul");
-    list.className = "sb-out";
-    hs.forEach(function (h, i) {
-      if (!h.id) h.id = "s" + i;
-      var li = document.createElement("li");
-      var a = document.createElement("a");
-      a.href = "#" + h.id;
-      a.textContent = h.textContent.trim();
-      li.appendChild(a);
-      list.appendChild(li);
-    });
-    slot.parentNode.replaceChild(list, slot);
-    links = Array.prototype.slice.call(list.querySelectorAll("a"));
-  }
-
-  /* The bar reports position inside the lesson, which nothing reported before
-     the segmented track retired. The breadcrumb's last segment carries the
-     lesson title once the real one has scrolled off. */
-  var bar = document.querySelector(".bar");
-  var here = document.querySelector(".crumb-here");
-  var h1 = document.querySelector("main h1");
-  var counter = here ? here.textContent.trim() : "";
-  var title = h1 ? h1.textContent.trim() : "";
-
-  function focusLine() {
-    var max = document.documentElement.scrollHeight - innerHeight;
-    ${FOCUS_LINE_BODY}
-  }
-
-  function sync() {
-    if (bar) {
-      var max = document.documentElement.scrollHeight - innerHeight;
-      var pct = max > 0 ? Math.min(100, Math.max(0, (scrollY / max) * 100)) : 0;
-      bar.style.setProperty("--read", pct.toFixed(1) + "%");
-    }
-
-    if (here && h1 && title && counter) {
-      var want = h1.getBoundingClientRect().bottom < 56 ? title : counter;
-      if (here.textContent !== want) here.textContent = want;
-    }
-
-    if (links.length) {
-      /* Nothing is marked until a heading has actually passed the line, so the
-         first section is not reported as current while the title is on screen. */
-      var best = -1;
-      var line = focusLine();
-      for (var i = 0; i < hs.length; i++) {
-        if (hs[i].getBoundingClientRect().top <= line) best = i;
-      }
-      links.forEach(function (l, j) { l.classList.toggle("on", j === best); });
-    }
-  }
-
-  addEventListener("scroll", sync, { passive: true });
-  addEventListener("resize", sync);
-  sync();
-})();
-</script>`
 
 function escapeHtml(text: string): string {
   return text
@@ -685,13 +322,21 @@ function renderHeader(
 </header>`
 }
 
+function headScript(page: 'index' | 'lesson'): string {
+  return compileScript(head, [page, TEACH_SIDEBAR_BREAKPOINT])
+}
+
 function renderScripts(
   includeQuiz: boolean,
   includeGlossaryFilter: boolean,
 ): string {
-  const scripts = [THEME_SCRIPT, CLOSE_OUTSIDE_CLICK_SCRIPT, SIDEBAR_SCRIPT]
-  if (includeGlossaryFilter) scripts.push(GLOSSARY_FILTER_SCRIPT)
-  if (includeQuiz) scripts.push(QUIZ_SCRIPT)
+  const scripts = [
+    compileScript(theme),
+    compileScript(dismiss),
+    compileScript(sidebar, [TEACH_SIDEBAR_BREAKPOINT], [focusLine]),
+  ]
+  if (includeGlossaryFilter) scripts.push(compileScript(glossaryFilter))
+  if (includeQuiz) scripts.push(compileScript(quiz))
   return scripts.join('\n')
 }
 
