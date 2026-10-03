@@ -12,7 +12,6 @@ Without this skill, a session editing the landing page or this repository's imag
 - Drafts a page change without opening `internal/rules/claude/593-landing-page.md`, which is scoped to `web/**` and holds conventions that fail silently. A five-round drafting pass did this and reproduced three of the failures the rule names.
 - Paraphrases a convention into a plan rather than citing the rule, so a worker enforces a requirement the rule does not carry. One plan restated an image convention as a rule about where an `img` tag sits, where the actual convention is about what wrote the file.
 - Types a count into the page. Every count is read from the CLI at build time, and a typed one ships looking correct.
-- Adds a component under `web/src/components/` and reasons about it as page-only, missing that the gallery build renders every component in that folder whether or not the page imports it.
 - Hand-edits a generated frame under `assets/`, which the next regeneration overwrites and which the drift gate reports only once the digests disagree.
 - Ships a page change without `bun run web:build`, which is the only typecheck `web/` gets, since the `types` stage in `src/gate/stages.ts` never matches a web-only diff.
 - Writes a string into `copy.ts` with no readme anchor, or with a line number, or with a paraphrase marker over a string that also quotes.
@@ -22,7 +21,6 @@ Without this skill, a session editing the landing page or this repository's imag
 - Point at `canon/context/web/index.md` and at the path-scoped rule rather than restating either, so a rule rewrite moves what a reader sees without touching this skill.
 - Say to open the rule before drafting rather than after, since the failure this addresses is a draft produced without it.
 - Carry the citation contract in a reference the session opens when editing `copy.ts` rather than in the body every session loads.
-- Name the `web/gallery-src` separation, which no rule states and which the guard script enforces only at build time.
 - Carry a sync checklist naming the build, the suite, and the gate, since `web/` is outside the automated typecheck and a session cannot infer that from the tree.
 
 ## Must not

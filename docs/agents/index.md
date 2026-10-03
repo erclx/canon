@@ -20,7 +20,6 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Doc classifier](context-classify.md): Classifying canonical-doc content as keep, replace/rewrite, history, or move in diff and sweep mode, the classifier setting pair, the record shape, and the exit codes
 - [Self-stated counts](counts.md): Reading a sentence that asserts a closed catalog's size, how a match is decided, the plausibility filter that keeps a generic word from matching a subset, and why the sweep reports rather than gates
 - [Demo](demo.md): Compiling a screencast draft into a runnable plan, driving a served application to a recording and a still, reading numbered frames back out of a recording, the pointer the recording paints, and what each refusal reports
-- [Design board](design-board.md): Generating a static index over a project's design surfaces, what each panel reads, and which two stay toolkit-checkout-only
 - [Docs](docs.md): How canon docs resolves the toolkit's own reference surface from an install root, and how a split domain is named
 - [Drift surfaces](drift-surfaces.md): The seven sections canon sync --check reports beside the per-domain scan, being seeds, superseded artifacts, unmigrated domains, surfaces at the old root, new rules and skills, and the reverse walk, with the managed-target gate and what counts toward the exit code
 - [Driver](driver.md): Walking a page through named interactions, the probe catalog and the false finding each one carries, why viewport heights are never defaulted, and what each refusal reports

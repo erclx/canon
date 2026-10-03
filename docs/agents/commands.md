@@ -11,50 +11,50 @@ Full help: `canon <command> --help`. Bare `canon --help` lists every top-level c
 
 One row per top-level command, in the order `canon --help` prints them. A domain's subcommands are in `## Domain commands` below.
 
-| Command                     | Purpose                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `canon init [path]`         | Bootstrap a project with selected toolkit domains                               |
-| `canon sync [path]`         | Sync every installed domain, or report drift and version skew with `--check`    |
-| `canon upgrade`             | Reinstall the CLI globally with the package manager the install path names      |
-| `canon migrate <verb>`      | Move a project off a retired name or layout, reporting the plan until `--write` |
-| `canon targets <verb>`      | Report the projects this toolkit installed into                                 |
-| `canon gov <verb>`          | Install and sync governance rules, and audit the tree against them              |
-| `canon standards <verb>`    | List, audit, or print a standard by name                                        |
-| `canon tooling <verb>`      | Sync, diff, and verify tooling stacks                                           |
-| `canon claude <verb>`       | Install the Claude workflow and audit both skill corpora                        |
-| `canon wiki <verb>`         | Scaffold the wiki pages                                                         |
-| `canon indexes <verb>`      | Regenerate `index.md` files from sibling frontmatter, or flatten them           |
-| `canon docs [topic]`        | Emit toolkit reference docs (`list`, or a topic by name)                        |
-| `canon design <verb>`       | Render `canon/DESIGN.md` tokens, build the board, install the base stylesheet   |
-| `canon slides <verb>`       | Render a `.claude/SLIDES.md` deck, or list its layouts                          |
-| `canon capture [source]`    | Render HTML or a URL to PNG and prove each declared font resolved               |
-| `canon serve [dir]`         | Serve a directory on loopback and print the link that opens it                  |
-| `canon demo <verb>`         | Compile and record a running app                                                |
-| `canon inventory [subject]` | Group every route's elements by one computed property, never gating             |
-| `canon drive <url> <run>`   | Walk a page through named interactions and measure each state                   |
-| `canon transcripts <url>`   | Fetch a YouTube transcript with metadata frontmatter (needs `yt-dlp`)           |
-| `canon teach <verb>`        | Open and author learning workspaces                                             |
-| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, arrange, edit, and capture them  |
-| `canon sandbox [cat:cmd]`   | Run sandbox scenarios, toolkit-only like the tree it reads                      |
-| `canon tasks <verb>`        | Read and write the task board, the plans it cites, and its archive              |
-| `canon intake <verb>`       | Report intake folders and write answers into them                               |
-| `canon records <verb>`      | Validate, size, prune, and back up the session records                          |
-| `canon sessions <verb>`     | Resolve live sessions to worktree and branch, and move one between machines     |
-| `canon worktrees <verb>`    | Report and remove worktrees whose pull request merged                           |
-| `canon hooks <verb>`        | Run the steps a git hook drives                                                 |
-| `canon autoship <verb>`     | Decide whether a changed set needs the review pass                              |
-| `canon pr <verb>`           | Read a pull request's diff, head, checks, and review, and post its evidence     |
-| `canon feedback`            | Write toolkit feedback from stdin, or open an issue with `--github`             |
-| `canon audits <verb>`       | Run every audit as one set under one verdict against the recorded baseline      |
-| `canon gate <verb>`         | Run every stage that guards a branch here                                       |
-| `canon secrets <verb>`      | Report credential-shaped values in the tree the package ships                   |
-| `canon deps <verb>`         | Report published advisories against the resolved dependency set                 |
-| `canon labels <verb>`       | Read a changed set against the label map, and scan pull request text            |
-| `canon comments <verb>`     | Measure comment density by language and kind, with a trend from git             |
-| `canon context <verb>`      | Report context folder health, and classify changed or stale sections            |
-| `canon markdown <verb>`     | Fail markdown on a banned character or a dead link, and report its structure    |
-| `canon repo <verb>`         | Propose and apply the remote's description, homepage, and topics                |
-| `canon census [path]`       | Report tracked file count, extensions, and a line total skipping binaries       |
+| Command                     | Purpose                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `canon init [path]`         | Bootstrap a project with selected toolkit domains                                          |
+| `canon sync [path]`         | Sync every installed domain, or report drift and version skew with `--check`               |
+| `canon upgrade`             | Reinstall the CLI globally with the package manager the install path names                 |
+| `canon migrate <verb>`      | Move a project off a retired name or layout, reporting the plan until `--write`            |
+| `canon targets <verb>`      | Report the projects this toolkit installed into                                            |
+| `canon gov <verb>`          | Install and sync governance rules, and audit the tree against them                         |
+| `canon standards <verb>`    | List, audit, or print a standard by name                                                   |
+| `canon tooling <verb>`      | Sync, diff, and verify tooling stacks                                                      |
+| `canon claude <verb>`       | Install the Claude workflow and audit both skill corpora                                   |
+| `canon wiki <verb>`         | Scaffold the wiki pages                                                                    |
+| `canon indexes <verb>`      | Regenerate `index.md` files from sibling frontmatter, or flatten them                      |
+| `canon docs [topic]`        | Emit toolkit reference docs (`list`, or a topic by name)                                   |
+| `canon design <verb>`       | Render or regenerate `canon/DESIGN.md` tokens, emit their CSS, install the base stylesheet |
+| `canon slides <verb>`       | Render a `.claude/SLIDES.md` deck, or list its layouts                                     |
+| `canon capture [source]`    | Render HTML or a URL to PNG and prove each declared font resolved                          |
+| `canon serve [dir]`         | Serve a directory on loopback and print the link that opens it                             |
+| `canon demo <verb>`         | Compile and record a running app                                                           |
+| `canon inventory [subject]` | Group every route's elements by one computed property, never gating                        |
+| `canon drive <url> <run>`   | Walk a page through named interactions and measure each state                              |
+| `canon transcripts <url>`   | Fetch a YouTube transcript with metadata frontmatter (needs `yt-dlp`)                      |
+| `canon teach <verb>`        | Open and author learning workspaces                                                        |
+| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, arrange, edit, and capture them             |
+| `canon sandbox [cat:cmd]`   | Run sandbox scenarios, toolkit-only like the tree it reads                                 |
+| `canon tasks <verb>`        | Read and write the task board, the plans it cites, and its archive                         |
+| `canon intake <verb>`       | Report intake folders and write answers into them                                          |
+| `canon records <verb>`      | Validate, size, prune, and back up the session records                                     |
+| `canon sessions <verb>`     | Resolve live sessions to worktree and branch, and move one between machines                |
+| `canon worktrees <verb>`    | Report and remove worktrees whose pull request merged                                      |
+| `canon hooks <verb>`        | Run the steps a git hook drives                                                            |
+| `canon autoship <verb>`     | Decide whether a changed set needs the review pass                                         |
+| `canon pr <verb>`           | Read a pull request's diff, head, checks, and review, and post its evidence                |
+| `canon feedback`            | Write toolkit feedback from stdin, or open an issue with `--github`                        |
+| `canon audits <verb>`       | Run every audit as one set under one verdict against the recorded baseline                 |
+| `canon gate <verb>`         | Run every stage that guards a branch here                                                  |
+| `canon secrets <verb>`      | Report credential-shaped values in the tree the package ships                              |
+| `canon deps <verb>`         | Report published advisories against the resolved dependency set                            |
+| `canon labels <verb>`       | Read a changed set against the label map, and scan pull request text                       |
+| `canon comments <verb>`     | Measure comment density by language and kind, with a trend from git                        |
+| `canon context <verb>`      | Report context folder health, and classify changed or stale sections                       |
+| `canon markdown <verb>`     | Fail markdown on a banned character or a dead link, and report its structure               |
+| `canon repo <verb>`         | Propose and apply the remote's description, homepage, and topics                           |
+| `canon census [path]`       | Report tracked file count, extensions, and a line total skipping binaries                  |
 
 `canon serve` drives no browser, which is what separates it from the four that do. All four ship now that `capture` does, so the line between them is the engine rather than the package. A generated page loses its script to an editor preview and to a `file://` open, so the link is the delivery rather than a convenience, and every generated surface here reaches a reader through one. A teach lesson's stylesheet is embedded rather than linked, so only its script still needs a server. It binds `127.0.0.1` and never a wildcard, because what it is pointed at is routinely a gitignored record tree. It sends `cache-control: no-store`, since a preview exists to be edited and reloaded and a cached stylesheet reads as a fix that did not work.
 
@@ -91,7 +91,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `wiki`, in `scripting.md`: `init`
 - `indexes`, in `indexes.md`: `regen`, `list`
 - `docs`, in `docs.md`: `list`, `<topic>`
-- `design`, in `design-board.md`: `render`, `regen`, `board`, `css`, `install`, `sync`
+- `design`, in `install-and-sync.md` for `install` and `sync`, and described below for the rest: `render`, `regen`, `css`, `install`, `sync`
 - `slides`, described below: `render`, `list`
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`

@@ -41,6 +41,12 @@ The server injects one stylesheet first in each frame's `head`, so a frame drawn
 - The skill starts the server before writing any frame, then fetches the printed address and checks the shell itself. Captures go through the frame route, so a shell that failed to build answers `/` with an empty `200` while every capture still passes, and only the shell check notices.
 - A picked direction leaves the canvas for the project's design document or wireframes. The canvas is a drafting surface, and its folder is gitignored, so nothing on it is citable from a tracked file.
 
+### The static board retired
+
+`canon design board` generated a static page set indexing six design surfaces, with a components panel framing a second Astro build of every site component. The canvas replaced it rather than joining it. That board only looked back at what the project already held, while the canvas is where an idea gets drawn before one is written into the design record. Keeping both meant one more generator to hold in step with every surface it indexed, for a page nobody drafted on.
+
+The component gallery existed only for the board's components panel and retired with it, taking its second Astro config, its exclusion check, and its two workflow steps.
+
 ## Gotchas
 
 - `canon records push` does not back `.canon/canvas/`, so a lost checkout loses every page. The skill promises nothing about survival until the backup covers it.

@@ -17,9 +17,6 @@ web/dist/
 web/.astro/
 web/playwright-report/
 web/test-results/
-# The board's own gallery panel. The published build never reads
-# web/gallery-src/, so nothing here reaches web/dist.
-web/gallery-dist/
 # Social card
 web/card-dist/
 # screenshot.ts's own sweep. web/evidence/ is unused on purpose, not by

@@ -30,7 +30,7 @@ The social card is a `draft-identity` composition: the mark on a tile in `FAVICO
 
 The card route and its config are copied from the `astro` stack rather than synced, since `canon tooling sync astro web --write` would overwrite every other golden config under `web/`. `bun run web:card` serves it on 4421 plus `WORKTREE_PORT_OFFSET`. The route differs from the stack copy in three ways: it emits the Geist face itself, reads the mark, copy, and `FAVICON_COLORS` from their sources, and takes `?theme=light`. The config turns the Astro dev toolbar off, since it paints over the viewport `canon capture` cuts the card from.
 
-`bun run web:card:check` runs `tooling/astro/configs/scripts/check-card-exclusion.sh` in place with `PROJECT_ROOT=web`, in `deploy-site.yml` and `pr-visual-checks.yml` right after the gallery check. It fails a build carrying the route's `og-card-marker` meta tag or any file named `*og-card*`, which is why the published card is `social-card.png` rather than a name taken from the route.
+`bun run web:card:check` runs `tooling/astro/configs/scripts/check-card-exclusion.sh` in place with `PROJECT_ROOT=web`, in `deploy-site.yml` and `pr-visual-checks.yml` right after the page build. It fails a build carrying the route's `og-card-marker` meta tag or any file named `*og-card*`, which is why the published card is `social-card.png` rather than a name taken from the route.
 
 ### The favicon
 

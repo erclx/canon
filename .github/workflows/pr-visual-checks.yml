@@ -127,12 +127,6 @@ jobs:
       - name: Build, capture, and stage the frames
         run: bash scripts/core/capture-home.sh
 
-      - name: Build gallery
-        run: bun run web:gallery
-
-      - name: Verify gallery excluded from build
-        run: ./scripts/core/check-gallery-exclusion.sh
-
       - name: Verify social card excluded from build
         run: bun run web:card:check
 
