@@ -19,6 +19,7 @@ The same procedure ran as five skills, one per kind, each restating the read, th
 - Check the catalog by exact name and by title and description, since a subject can be covered under a name the request does not guess
 - Confirm the resolved path, the kind's detections, and the full content with the user before writing, since placement and detection are judgment calls with no diff to preview them against
 - Regenerate the catalog of the folder the document landed in, where the kind keeps one, so the next run's collision check sees it
+- Draft a README from the template for every detected project type and combine them, never the closest one, since a project that is a CLI and a plugin owes its reader both
 - Carry each kind's own musts in its reference: the root check for context and wireframes, tier detection and the two modes for wireframes, both placement tests and a fetched source for the wiki, and project detection and rendered-value badges for the readme
 
 ## Must not
