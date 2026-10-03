@@ -450,8 +450,8 @@ describe('selection', () => {
   })
 
   it('should refuse to select on a page that does not exist', () => {
-    expect(
-      writeSelection(ROOT, { page: 'missing', frame: 'a' }),
-    ).toMatchObject({ ok: false, reason: 'no-page' })
+    expect(writeSelection(ROOT, { page: 'missing', frame: 'a' })).toMatchObject(
+      { ok: false, reason: 'no-page' },
+    )
   })
 })
