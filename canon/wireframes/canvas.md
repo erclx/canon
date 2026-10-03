@@ -16,8 +16,10 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Element outline: drawn over a frame, dashed around the element under the pointer and solid around the selected one
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
-- Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only values
-- Element inspector: below the frame inspector when an element is selected, showing its `tag.class` name, then its x, y, and font family read-only, then one editable field a row for text, color, background, size, weight, width, height, padding, gap, and direction. Each field starts at the element's inline value, else its computed one. Color and background each carry a token picker beside the field. Text is a field only on an element holding text alone, and read-only otherwise
+- Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
+- Element inspector: below the frame inspector when an element is selected, its `tag.class` name over five titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
+- Sections: Layout holds x and y read-only, then width and height. Flex holds direction, gap, and padding. Typography holds size, weight, and the font family read-only. Fill holds color and background with a token picker each. Text holds the text field, read-only on an element holding others
+- Field: a bordered box with a short glyph inside its left edge, such as `W`, and the value right of it. A section header keeps an empty lane at its right for later buttons
 
 ### Below 900 wide
 
@@ -33,16 +35,16 @@ The sketch stays until a capture of the canvas exists.
 +------------+------------------------------------------+---------------+
 | Canvas  (☾)|  hero 1440 × 900    [Dark]  phone 390 ×  | Element Saved | ← details panel
 |[Pages|Theme]  +----------------------+   +--------+   | button        |
-| Pages      |  | +------------------+ |   |        |   | x      48     |
-| > drafts  2|  | | <selected elem>  | |   | <frame>|   | text  [Start] |
-|   approved1|  | +------------------+ |   |        |   | color [   ][▾]|
-|            |  |   <frame document>   |   |        |   | size  [20px ] |
-| Frames     |  +----------------------+   +--------+   | gap   [     ] |
-| ▾ hero 1440|                                          |               |
-|    body    |                                          | Page          |
-|     main   |                                          | drafts        |
-|      h1    |                                          | Tokens        |
-| ▸ phone 390|                       [ − 47% + Fit ]    | <source>      |
+| Pages      |  | +------------------+ |   |        |   | Layout        |
+| > drafts  2|  | | <selected elem>  | |   | <frame>|   | [X 48][Y 120] |
+|   approved1|  | +------------------+ |   |        |   | [W 96][H 40 ] |
+|            |  |   <frame document>   |   |        |   | Fill          |
+| Frames     |  +----------------------+   +--------+   | [Fg red ][▾]  |
+| ▾ hero 1440|                                          | Text          |
+|    body    |                                          | [T Start    ] |
+|     main   |                                          | Page          |
+|      h1    |                                          | drafts        |
+| ▸ phone 390|                       [ − 47% + Fit ]    | Tokens        |
 +------------+------------------------------------------+---------------+
   ↑ pages panel        ↑ surface             ↑ zoom toolbar
     and layers
@@ -87,8 +89,10 @@ The sketch stays until a capture of the canvas exists.
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
 - Frame label: `<name> <width> × <height>`, then the theme switch reading `Dark` or `Light`
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
-- Inspector label: `Frame`, with field names `x`, `y`, `width`, `height`
-- Element inspector label: `Element`, with row names `x`, `y`, `font`, `text`, `color`, `background`, `size`, `weight`, `width`, `height`, `padding`, `gap`, `direction`
+- Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
+- Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Typography`, `Fill`, `Text`
+- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Size`, `Wt`, `Font`, `Fg`, `Bg`, `T`, each named for assistive technology by its full word
+- Empty field placeholders: `0` for gap, `None` for background
 - Left panel tabs: `Pages`, `Theme`
 - Token picker: `Token` as its empty choice, then each color token by name, with `<field> token` as its accessible name
 - Edit landed: `Saved`
@@ -127,6 +131,8 @@ The sketch stays until a capture of the canvas exists.
 - Picking a frame in the list selects it on the surface, and pressing one on the surface marks its row
 - A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
 - An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
+- A field shows a pixel length rounded and with no unit, reads `auto` and `normal` as words, and shows a `normal` gap or a transparent background empty. A bare number typed into a length writes as pixels, and a rounded value left unchanged sends nothing
+- Dragging a number field's glyph scrubs it, one per pixel or ten with Shift, previewed in the frame and written once on release. A length stops at 0, a weight at 1 and 1000, and an empty gap scrubs from 0. A cancelled drag puts both back
 - A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it
 - Picking a color token writes `var(--<name>)` into the file rather than the value it resolves to
 - Fields hold while an edit is in flight and take the file's values again once the frame reloads
