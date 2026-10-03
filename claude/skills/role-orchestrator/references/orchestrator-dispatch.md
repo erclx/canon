@@ -56,17 +56,7 @@ What the ref read cannot see is a branch pushed from another machine since the l
 
 ### A cloud worker's claim
 
-A cloud worker never appears in `canon sessions list` and never pushes the derived branch, since the cloud assigns it a `claude/` branch of its own. So the roster and the refs read clear on a row a cloud worker is already building. Run the local check above anyway, since a local worker on the same row still collides, then read the two places a cloud worker does show:
-
-```bash
-gh api 'repos/{owner}/{repo}/pulls?state=open&per_page=100' --jq '.[] | select(.head.ref | startswith("claude/")) | select((.title + " " + (.body // "")) | contains("<slug>")) | .number'
-```
-
-- Any number printed: a cloud worker's pull request names the plan slug. Treat the row as claimed and report the number.
-- Nothing printed, and this pass's launched record holds no cloud session for the row: the row is clear of cloud workers.
-- The call fails: treat the candidate as unverified and fall back to the human-launch line, the same as a refused local check.
-
-The launched record covers the minutes before the pull request opens, when nothing on GitHub names the row yet. It is this session's alone, so a second dispatcher sees only the pull request list, which is the window `## Hold what this pass already launched` already states for local workers.
+A cloud worker never appears in the roster and never pushes the derived branch, so run the local check above and then the cloud claim in `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` before a cloud dispatch.
 
 ## Hold what this pass already launched
 
