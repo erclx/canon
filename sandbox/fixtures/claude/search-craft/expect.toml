@@ -25,7 +25,7 @@ manual = [
 # The notes name the field the question sits in.
 [[content]]
 path = "notes/research.md"
-pattern = '[Ee]conomic'
+pattern = 'economic|Economic'
 
 # At least one claim carries a link to its source.
 [[content]]
