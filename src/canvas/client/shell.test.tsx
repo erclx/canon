@@ -919,6 +919,17 @@ describe('Inspector edit', () => {
     ])
   })
 
+  it('should show the values of the frame picked from when two frames share an index', () => {
+    renderApp([page('drafts', [frame('hero'), frame('alt', { x: 1600 })])])
+    const hero = loadFrame('hero', '<h1 style="color: red">A</h1>')
+    const alt = loadFrame('alt', '<h1 style="color: blue">B</h1>')
+    clickIn(hero, 'h1')
+
+    clickIn(alt, 'h1')
+
+    expect(fieldNamed('color').value).toBe('blue')
+  })
+
   it('should post nothing for a field committed unchanged', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
