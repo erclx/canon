@@ -565,6 +565,24 @@ describe('startServer with live', () => {
     expect(body).toBe(`<body><h1>root</h1>${LIVE_SCRIPT}</body>\n`)
   })
 
+  it('should splice whole when a character ahead of the tag lowercases longer', async () => {
+    seed('index.html', '<body>İ<p></p></body>\n')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe(`<body>İ<p></p>${LIVE_SCRIPT}</body>\n`)
+  })
+
+  it('should splice before an uppercase closing body tag', async () => {
+    seed('index.html', '<BODY><h1>root</h1></BODY>\n')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe(`<BODY><h1>root</h1>${LIVE_SCRIPT}</BODY>\n`)
+  })
+
   it('should leave a page with no closing body tag as it is on disk', async () => {
     seed('index.html', '<h1>root</h1>')
     const server = startLive()

@@ -283,9 +283,14 @@ export async function injectLive(
 
   const bytes = new Uint8Array(await response.arrayBuffer())
   const html = new TextDecoder().decode(bytes)
-  const at = html.toLowerCase().lastIndexOf('</body>')
+  /*
+   * Searched in the original rather than a lowercased copy, since lowercasing
+   * changes the length of some characters, such as İ, and an index read off
+   * the copy would cut the original inside the tag.
+   */
+  const at = [...html.matchAll(/<\/body>/gi)].at(-1)?.index
   const init = { status: response.status, headers: response.headers }
-  if (at === -1) return new Response(bytes, init)
+  if (at === undefined) return new Response(bytes, init)
   return new Response(`${html.slice(0, at)}${script}${html.slice(at)}`, init)
 }
 
