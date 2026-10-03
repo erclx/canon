@@ -1,0 +1,11 @@
+export function createTask(title: string) {
+  return { id: crypto.randomUUID(), title };
+}
+
+export function handleCreate(body: { title: string }) {
+  return createTask(body.title);
+}
+
+export function handleList() {
+  return [];
+}

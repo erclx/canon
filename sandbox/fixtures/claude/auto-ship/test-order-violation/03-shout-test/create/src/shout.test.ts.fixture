@@ -1,0 +1,9 @@
+import { describe, expect, it } from 'bun:test'
+
+import { shout } from './shout'
+
+describe('shout', () => {
+  it('should upper-case the name it was given', () => {
+    expect(shout('Ada')).toBe('HELLO, ADA!')
+  })
+})

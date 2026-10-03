@@ -1,0 +1,15 @@
+# Feature: expand intro doc
+
+Replace the placeholder intro with two short paragraphs covering scope and structure.
+
+**Files to touch:**
+
+- `docs/intro.md`: replace placeholder with real intro prose
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

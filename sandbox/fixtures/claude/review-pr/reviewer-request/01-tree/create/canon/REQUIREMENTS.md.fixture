@@ -1,0 +1,6 @@
+# Requirements
+
+## MVP features
+
+1. List tasks: GET /tasks returns all tasks
+2. Create task: POST /tasks adds a task

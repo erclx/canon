@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+out="canon/context/index.md"
+
+{
+  printf -- '---\ntitle: Context\ndescription: Per-domain narrative loaded on demand\n---\n\n# Context\n\n'
+  for entry in canon/context/*.md; do
+    if [ "$entry" = "$out" ]; then
+      continue
+    fi
+    title=$(grep -m1 '^title: ' "$entry" | cut -d' ' -f2-)
+    description=$(grep -m1 '^description: ' "$entry" | cut -d' ' -f2-)
+    printf -- '- [%s](%s): %s\n' "$title" "$(basename "$entry")" "$description"
+  done
+} >"$out"

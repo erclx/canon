@@ -1,0 +1,11 @@
+# My App
+
+Task API. Route handlers live in `src/`.
+
+## Commands
+
+- `bun run check`: regenerate `canon/context/index.md`, then lint and typecheck
+
+## Indexes
+
+- Never hand-edit `canon/context/index.md`. `bun run check` regenerates it from sibling frontmatter.

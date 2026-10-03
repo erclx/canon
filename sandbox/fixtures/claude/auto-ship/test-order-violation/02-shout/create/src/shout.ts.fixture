@@ -1,0 +1,3 @@
+export function shout(name: string): string {
+  return `HELLO, ${name.toUpperCase()}!`
+}

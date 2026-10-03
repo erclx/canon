@@ -1,0 +1,15 @@
+# Feature: roomier button
+
+Give `Button` more room: raise its padding to `8px 16px` and its corner radius to `6`. The change is visual only, with no new prop and no behavior change.
+
+**Files to touch:**
+
+- `src/components/Button.tsx`: raise the padding and the corner radius
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

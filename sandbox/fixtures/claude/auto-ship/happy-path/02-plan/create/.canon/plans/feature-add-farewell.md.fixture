@@ -1,0 +1,15 @@
+# Feature: add farewell utility
+
+Add a `farewell` function to `src/index.ts` that returns a goodbye message, and export it alongside `greet`.
+
+**Files to touch:**
+
+- `src/index.ts`: add `farewell` function
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

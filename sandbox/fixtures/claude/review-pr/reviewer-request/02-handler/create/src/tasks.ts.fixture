@@ -1,0 +1,11 @@
+export function createTask(title: string) {
+  return { id: crypto.randomUUID(), title };
+}
+
+export function handleCreate(body: { title?: string } | undefined) {
+  const title = body?.title?.trim() ?? "";
+  if (!title) {
+    throw new Error("title is required");
+  }
+  return createTask(title);
+}
