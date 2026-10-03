@@ -12,6 +12,7 @@ rule:
   - 'Re-read a skill body this session edited before invoking that skill again in the same session'
   - 'Do not read a resolved file path in a held body as evidence the body is current'
   - 'Follow the skill requirement standard for the shape a `REQUIREMENT.md` states. Read it with `canon standards skill-requirement`.'
+  - 'Follow the skill path standard for which root a path in a body resolves against and how a body cites a standard. Read it with `canon standards skill-paths`.'
 ---
 
 # Claude skill reference
@@ -28,6 +29,7 @@ Does not govern:
 
 - What a `REQUIREMENT.md` must answer, its sections, and its template: `skill-requirement.md`
 - A practice skill's closing sections and ledger: `skill-practice.md`
+- Which root a path in a body resolves against, and how a body cites a standard: `skill-paths.md`
 - Path-scoped coding rules, which load on a file match rather than on a request match: `rule.md`
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
@@ -156,27 +158,6 @@ allowed-tools: <tools required>
 - Use XML tags in script output for reliable parsing: `<SECTION>content</SECTION>`
 - Use `#!/usr/bin/env bash` shebang
 - Always include `2>/dev/null || echo "FALLBACK"` guards on git and shell commands
-
-## Path resolution
-
-A skill reads from two roots, so know which one a file lives under before referencing it.
-
-- Bundled skill assets (`references/`, `scripts/`, `assets/`) resolve against the skill's own directory. Reference them with `${CLAUDE_SKILL_DIR}/<path>`, never a bare relative path, which resolves against the session cwd and fails when a plugin skill runs from another project.
-- Installed shared docs (`.claude/rules/`, `canon/context/`) resolve against the target project cwd, where install placed them. Reference them by that path.
-- Do not hand-copy a standard into a skill. If a skill must carry its own copy, generate it from the single source and reference it through `${CLAUDE_SKILL_DIR}`, so one owner keeps every copy in sync.
-
-### Citing a standard
-
-No standard installs into a project, so a body cites one place rather than choosing between two.
-
-- Cite `${CLAUDE_SKILL_DIR}/../../standards/X.md`. The plugin ships the whole standards folder beside `skills/`, so the path resolves in every install.
-- Never cite `.claude/standards/X.md` from a shipped body. A target holds no such folder. <!-- audit-ignore-citations: .claude/standards/X.md -->
-- Name `canon standards X` instead where the body wants the document rather than a path to open, such as a value it captures or reports. That verb resolves `standards/` at the project root and then the corpus inside the package.
-- State the path once per body, at the site that reads the standard. A later mention of a standard the body already read stays bare, since repeating the path at every mention is noise rather than instruction.
-- A guard on a standard's presence names the file rather than the folder holding it, since a folder test answers for a sibling that happens to be there.
-- Use `${CLAUDE_SKILL_DIR}`, never a bare `../../` and never `${CLAUDE_PLUGIN_ROOT}`, since only the first expands before the body reaches the model.
-- Cite a shared procedure, never restate it. A procedure two or more skills execute gets one definition in a standard and a citation in each body.
-- Keep the trigger in the body and the procedure in the standard. The citing skill states when the procedure runs and what it runs against, since that varies per skill and the standard cannot know it.
 
 ## Invocation
 

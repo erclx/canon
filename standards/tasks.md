@@ -6,6 +6,7 @@ paths:
 rule:
   - 'Follow the board standard for `priority.md` and `backlog.md`, their readiness groups, and row order. Read it with `canon standards board`.'
   - 'Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter.'
+  - 'Follow the task decline standard for a task decided against. Read it with `canon standards tasks-decline`.'
 ---
 
 # Tasks reference
@@ -18,10 +19,11 @@ The folder is gitignored. Board state changes when work ships rather than when a
 
 ## Scope
 
-Governs the task files under `.canon/tasks/`: folder layout, filenames, frontmatter, file format, origin lines, archiving, and declining.
+Governs the task files under `.canon/tasks/`: folder layout, filenames, frontmatter, file format, origin lines, and archiving.
 
 Does not govern:
 
+- The declined folder, the `Declined:` line, and what declining does to a plan and a board row: `tasks-decline.md`
 - Execution order, readiness groups, the backlog, and the generated index beside the tasks: `board.md`
 - The plan file a task cites, its sections, and its answer contract: `plan.md`
 - Phase-label format and which surfaces a label may appear on: `versioning.md`
@@ -166,15 +168,3 @@ The archive nests inside `.canon/tasks/` rather than sitting beside it as a flat
 Archiving a task archives its plan alongside it, when the closing task is that plan's last live citation. The archived task's `Plan:` line is retargeted at `../../plans/archive/feature-<slug>.md`. The ready folder its `Ready:` line names moves with the plan to `.canon/ready/archive/<nn>-<slug>/`, and both pointers to it are retargeted. A plan several tasks share stays live with its ready folder, and the task archives anyway.
 
 A task with an open outcome stays on the board, and so does its plan. Close it, or cut it from the task when the work is being abandoned, so what was dropped is recorded rather than inferred from an archived file. Cutting means striking the outcome's body: `- ~~<outcome>~~ <why>`. A struck body reads as cut whatever its checkbox holds, so a task carrying only cut outcomes still archives.
-
-## Declining
-
-A task decided against moves to `.canon/tasks/declined/` rather than `.canon/tasks/archive/`. The two folders answer different questions: archive means the work shipped, declined means somebody decided against doing it. Neither reading fits a task that is merely unscheduled, which stays on `backlog.md` rather than moving anywhere, since nobody has decided against it and it may still rise when the board has room.
-
-`canon tasks decline` carries no outcome-state gate, so a task can be decided against at any outcome state, open outcomes included.
-
-The decision is recorded on the task itself with a `Declined:` line, in the `Plan:`/`Pull request:` family: `Declined: <reason>, <who> on <YYYY-MM-DD>`. It anchors the same way `Pull request:` does, after the last origin line the task carries. The line is free prose after the colon, since it names no file to link.
-
-Declining a task moves its plan alongside it the same way archiving does, when the declining task is that plan's last live citation. A plan several tasks share stays where it is, and a declined task's plan lands in `.canon/plans/archive/` indistinguishable from a shipped one by folder alone. The task file under `.canon/tasks/declined/` is what records which it was.
-
-The move clears whichever of `priority.md` or `backlog.md` holds the task's row.

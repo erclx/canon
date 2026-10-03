@@ -3,6 +3,8 @@ title: Groundwork reference
 description: Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
 paths:
   - '.canon/groundwork/**'
+rule:
+  - 'Follow the groundwork spikes standard for `08-spikes.md` and the folders holding what a spike produced. Read it with `canon standards groundwork-spikes`.'
 ---
 
 # Groundwork reference
@@ -17,6 +19,7 @@ Governs a groundwork track under `.canon/groundwork/<nn>-<slug>/`: folder layout
 
 Does not govern:
 
+- `08-spikes.md`, what each spike records, and the folders holding what a spike produced: `groundwork-spikes.md`
 - A dump of many findings filed by domain, each carrying its own verdict: `intake.md`
 - The feature plan a closed track feeds, and the contract its answer slots keep: `plan.md`
 - The task file a closing track writes, and the origin line pointing back at the folder: `tasks.md`
@@ -111,31 +114,6 @@ The dropped list is what stops a future session re-proposing something already r
 ## 07-next-session.md
 
 Written to survive a compaction that loses the conversation. It repeats facts held elsewhere in the folder rather than pointing at them. That duplication is correct here and wrong everywhere else.
-
-## 08-spikes.md
-
-Evidence by experiment, beside the evidence by measurement `01-current-state.md` holds. Optional, since measuring what is already there settles most questions.
-
-Each spike carries four things:
-
-- The open question it answers, named by file and number. A spike attached to no question is a runaway.
-- The method, stated fully enough for a later reader to re-run it. Name the fixture and where it lived, since an arm pointed at a fixture inside the project measured the project, plus the exact command and the repetition count.
-- The result, and which question it closes. Record a spike that settles nothing too, so a later pass does not pay for it twice.
-- The measured cost, even for a single read, and the caveats bounding what the result proves. Cost is a report rather than a limit, and it makes the next spike estimable.
-
-Start a spike against a sample bounded on input size, duration, and spend, and scale up only once it shows the method works. Record the sample's bounds beside the figure for the full input.
-
-A file a reader opens to verify how a result was produced or what it showed lives inside the track, and bulk input such as a large fixture stays outside it. Three unnumbered subfolders carry the first kind, since a reader reaches them from the citing claim rather than in read order:
-
-- `evidence/`: what a run produced and the record cites, being a recording, a render, or a frame pulled from one, beside the file citing it.
-- `scripts/`: the arm scripts and harnesses a spike ran, which a reader opens to check the method.
-- `clones/`: checkouts and copies of outside material a claim rests on, kept small enough to hold in the folder. A checkout too large to keep is cited by its address and commit instead.
-
-Open no other subfolder: `spikes/`, `web/`, and `research/` fold into these three, with a fetched page in `clones/` and a reference-site screenshot in `evidence/`.
-
-Reach for a test harness the project already carries before building one. An experiment no existing harness can express is a finding for the folder, not a new abstraction.
-
-Never count transcript matches to show a file was read. An instruction naming a path puts it in the transcript whether or not anything opened it, so the check is the tool call.
 
 ## Open questions
 

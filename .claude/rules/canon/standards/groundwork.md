@@ -10,3 +10,4 @@ paths:
 ## Authority
 
 - Follow the groundwork standard for folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track. It is the single source. Read it with `canon standards groundwork`.
+- Follow the groundwork spikes standard for `08-spikes.md` and the folders holding what a spike produced. Read it with `canon standards groundwork-spikes`.

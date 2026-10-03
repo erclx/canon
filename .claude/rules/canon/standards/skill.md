@@ -18,3 +18,4 @@ paths:
 - Re-read a skill body this session edited before invoking that skill again in the same session
 - Do not read a resolved file path in a held body as evidence the body is current
 - Follow the skill requirement standard for the shape a `REQUIREMENT.md` states. Read it with `canon standards skill-requirement`.
+- Follow the skill path standard for which root a path in a body resolves against and how a body cites a standard. Read it with `canon standards skill-paths`.

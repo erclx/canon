@@ -40,7 +40,7 @@ Open each file before describing what is in it. A count or a claim carried from 
 
 ## Step 3: build the plan
 
-The section list, what each section holds, the suggested-and-answer contract, and the lifecycle are fixed by `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. Read it before writing the file and follow it rather than working the shape from memory.
+The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/../../standards/plan-lifecycle.md`. Read it before writing the file and follow it rather than working the shape from memory.
 
 What this skill adds on top of the standard:
 
