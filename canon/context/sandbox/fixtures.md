@@ -41,13 +41,15 @@ A heredoc with a quoted delimiter is a literal body, so it leaves the scenario a
 - A body fed to a command's stdin rather than written to a path. `infra/feedback.sh` reads `refusal/stdin/report.md.fixture` through `fixture_stage_dir`, so the staged tree gains no file.
 - A body whose path interpolates a root. `infra/record-root.sh` stores its records under a neutral `seed-records/` folder and moves them to the root the arm names, which keeps a stored `.canon/` path out of the ignore rule and a stored `.claude/` path from pinning the fallback.
 
-`claude/auto-ship`, `claude/deploy-app`, `claude/review-address`, `claude/review-pr`, `claude/review-ui`, and `claude/search-craft` still stage from heredocs inside `stage_setup` and move in a later slice.
+`claude/deploy-app` and `claude/search-craft` still stage from heredocs inside `stage_setup` and move in a later slice.
 
 ### The anchor tree
 
 `sandbox/fixtures/anchor/create/` is the one tree outside the four-segment layout. It belongs to no single scenario, since every anchor scenario provisions from it, so `stage_anchor_tree` calls `create_from_fixtures` directly. The tree is copied rather than cloned from the remote, because a clone that deletes `.git` and re-initializes is a file transfer, and the remote stays real because anchor scenarios push to it and drive `gh` against it.
 
 It holds the minimum a scenario reads: `utils.js`, which `git/{pr,issue,followup}.sh` append to, plus a `.gitignore` matching what `init_empty_sandbox` writes. Several anchor scenarios wipe or overwrite the tree before staging their own, so grow it only when a scenario reads a file that is missing.
+
+The claude anchor scenarios (`auto-ship`, `review-pr`, `review-address`, `review-ui`) keep every `git push`, `gh pr create`, and cleanup call in the script and stage only the file content between them. A stage sits wherever a command other than a write, such as a commit, a branch switch, or a copy, separates two writes. A body a pull request or a comment carries is read from a stored file the same way, and the stored bytes reach `gh` unchanged. `canon sandbox equivalence --stub-remote` proves what such a scenario sends. The three arms that post through `canon pr evidence` read `red-on-base` under the stub, since the stub `gh` does not model the call that verb makes. They compare identical up to that call, and a real remote run is what covers the rest.
 
 ### Content staged from the toolkit itself
 
