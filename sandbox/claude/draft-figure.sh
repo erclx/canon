@@ -39,14 +39,14 @@ seed_lesson() {
       delivery scan moves it to delivered.</p>
       <p>One branch leaves the path. A paid order that has not shipped can be
       refunded, which ends it in the refunded state instead of delivered.</p>
-      <section class="quiz">
+      <div class="quiz">
         <h2>Quiz</h2>
-        <fieldset class="q">
-          <legend>Which state can a refund start from?</legend>
+        <div class="q">
+          <p>Which state can a refund start from?</p>
           <label><input type="radio" name="q1" /> Paid, before the carrier scan</label>
           <label><input type="radio" name="q1" /> Shipped, before delivery scan</label>
-        </fieldset>
-      </section>
+        </div>
+      </div>
     </main>
   </body>
 </html>

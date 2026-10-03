@@ -64,7 +64,7 @@ pattern = '(stroke|fill)(="|:\s*)var\(--'
 # what the stepper's gating needs.
 [[content]]
 path = ".canon/teach/01-orders/lessons/0001-order-states.html"
-pattern = '</figure>[\s\S]*<section class="quiz">'
+pattern = '</figure>[\s\S]*<div class="quiz">'
 
 # The seeded prose survives the write.
 [[content]]
