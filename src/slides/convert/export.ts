@@ -227,9 +227,8 @@ export async function exportHtmlDeck(
         slide.background = { color: walked.background.hex }
       }
       if (walked.meta.isHidden) slide.hidden = true
-      for (const [opIndex, op] of plan.ops.entries()) {
-        const name = `canon-${slideNumber}-${opIndex + 1}`
-        await draw(page, slide, { slide: slideNumber, name }, op, patches)
+      for (const op of plan.ops) {
+        await draw(page, slide, slideNumber, op, patches)
       }
       for (const record of walked.charts) {
         const chart = planChart(record, chartTheme)
@@ -437,10 +436,11 @@ const base64 = (bytes: Buffer | string): string =>
 async function draw(
   page: Page,
   slide: PptxGenJS.Slide,
-  target: { readonly slide: number; readonly name: string },
+  slideNumber: number,
   op: DrawOp,
   patches: Patch[],
 ): Promise<void> {
+  const target = { slide: slideNumber, name: op.options.objectName ?? '' }
   if (op.kind === 'shape') {
     slide.addShape(op.shape, op.options)
   } else if (op.kind === 'text') {
@@ -448,18 +448,13 @@ async function draw(
   } else if (op.kind === 'table') {
     slide.addTable(op.rows, op.options)
   } else if (op.kind === 'image') {
-    slide.addImage({
-      ...op.options,
-      ...imageSource(op.src),
-      objectName: target.name,
-    })
+    slide.addImage({ ...op.options, ...imageSource(op.src) })
     if (op.radius > 0) patches.push({ ...target, radius: op.radius })
     if (op.frame) slide.addShape(op.radius > 0 ? 'roundRect' : 'rect', op.frame)
   } else if (op.kind === 'svg') {
     slide.addImage({
       ...op.options,
       data: `image/svg+xml;base64,${base64(op.markup)}`,
-      objectName: target.name,
     })
     patches.push({ ...target, png: await screenshot(page, op.id) })
   } else {
@@ -472,8 +467,8 @@ async function draw(
  * Two things pptxgenjs cannot write, fixed in the package it wrote. An SVG's
  * PNG fallback comes out as the SVG's own bytes under a `.png` name in Node, so
  * a viewer that cannot draw SVG gets a broken image, and a picture takes no
- * corner radius. Each patched picture is found by the object name `draw` gave
- * it, which is the only handle the written XML keeps.
+ * corner radius. Each patched picture is found by the object name `planSlide`
+ * gave it, which is the only handle the written XML keeps.
  */
 async function applyPatches(
   deck: Uint8Array,
