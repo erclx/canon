@@ -1,7 +1,0 @@
-# Sandbox project
-
-A tiny reference project used to exercise the standards audit skill.
-
-## Commands
-
-- `bun run check`: lint and typecheck
