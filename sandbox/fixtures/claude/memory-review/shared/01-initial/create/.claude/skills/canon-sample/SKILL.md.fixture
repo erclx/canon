@@ -1,0 +1,14 @@
+---
+name: canon-sample
+description: Guide edits under src/.
+---
+
+# Sample skill
+
+## When to load
+
+When editing anything under `src/`.
+
+## Conventions
+
+- Route handlers live in `src/routes/`.

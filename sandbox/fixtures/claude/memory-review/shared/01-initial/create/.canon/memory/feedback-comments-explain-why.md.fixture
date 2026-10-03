@@ -1,0 +1,11 @@
+---
+title: Comments should explain why, not what
+description: Reserve comments for non-obvious rationale, hidden constraints, and workarounds
+category: Feedback
+---
+
+When a comment is warranted, it explains why the code is shaped this way, not what it does.
+
+**Why:** "What" comments duplicate code. "Why" comments capture invariants the code cannot express.
+
+**How to apply:** If a comment starts with a verb describing the code's action, rewrite it to name the constraint or reason instead.
