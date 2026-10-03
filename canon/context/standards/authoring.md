@@ -27,7 +27,7 @@ A template and a seed hold different things for the same document, which is what
 
 ## The meta-standard in the flat root
 
-The meta-standard sits in the flat root, same as every standard it governs. That placement gives `891-standard-authoring` a path that resolves in the toolkit and in every target, so an author editing an existing standard has something to work against. The flat root installs it and indexes it too.
+The meta-standard sits in the flat root, same as every standard it governs. That placement gives `governance/rules/standards/standard.md` a path that resolves in the toolkit and in every target, so an author editing an existing standard has something to work against. The flat root installs it and indexes it too.
 
 The rule's glob is recursive, so it governs a standard at any depth the same way it governs one at the flat root, with no exception carved out for nesting.
 
@@ -67,7 +67,7 @@ A second reader takes prose rather than a list. `appliesTo` in `src/standards/sc
 
 ## Authoring a new standard
 
-Follow `standards/standard.md`. It is the meta-standard: the success criterion, the scope rules, the frontmatter contract, heading and structure conventions, imperative rule bullets, and when to include examples. It governs itself, so it is also the worked example. `891-standard-authoring` routes any edit under `standards/` to it.
+Follow `standards/standard.md`. It is the meta-standard: the success criterion, the scope rules, the frontmatter contract, heading and structure conventions, imperative rule bullets, and when to include examples. It governs itself, so it is also the worked example. `governance/rules/standards/standard.md` routes any edit under `standards/` to it.
 
 Create the `.md` file in `standards/` with `title` and `description` frontmatter, then run `bun run check` to regenerate `standards/index.md` and commit both. No consumed copy follows it.
 

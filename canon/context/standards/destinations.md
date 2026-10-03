@@ -38,7 +38,7 @@ One attribute standard lands on the CLI: `markdown.md`, whose character bans and
 
 ## Gotchas
 
-- The meta-standard's subject is the corpus this census is dissolving. `standard.md` routes to `891-standard-authoring.md` while standards remain a document type someone authors, and it is the one entry whose destination expires if the corpus does. Nothing detects that, because a rule globbing an empty folder reports the same as one globbing a full folder.
+- The meta-standard's subject is the corpus this census is dissolving. `standard.md` routes to `governance/rules/standards/standard.md` while standards remain a document type someone authors, and it is the one entry whose destination expires if the corpus does. Nothing detects that, because a rule globbing an empty folder reports the same as one globbing a full folder.
 - A destination recorded against a carrier nobody has built reads identically to one recorded against a live carrier, and only the marker below separates them. Nothing reads `to write`: every destination below is either `arrived` or moved to `## Withdrawn`, so a reversal does not read as an arrival.
 - `internal/standards/tooling-reference.md` is outside this census. It never installs into a target, so it has no corpus to leave, and `595-tooling-reference.md` already carries it.
 - A destination is not an install channel. The corpus has no install channel, so recording a home for a standard is the only route its guidance reaches a project through.
@@ -51,39 +51,39 @@ Shipping a dependency beside its consumer connects them only when the consumer's
 
 Twenty-eight standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
 
-The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a session through `802-mermaid.md`, which globs a fence rather than a document type. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `597-wiki.md` globs `wiki/**/*.md` and points at it.
+The corpus stands at 31, so four standards carry no row. `mermaid.md` reaches a session through `governance/rules/standards/mermaid.md`, which globs a fence rather than a document type. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `governance/rules/standards/wiki.md` globs `wiki/**/*.md` and points at it. It ships through `base` like every generated rule, since the standard and `draft-wiki` already reach targets and the glob matches nothing where no `wiki/` exists.
 
 `figures.md` is a fragment standard with no document type of its own to glob, so no rule carries it. It reaches a session through the citation each caller's own body writes, the fallback form a flat standard takes when nothing globs it.
 
 ### To the CLI
 
-- `markdown.md` fixes what a check can decide about any markdown file. `canon markdown audit`, arrived, with `801-markdown.md` left pointing at it.
+- `markdown.md` fixes what a check can decide about any markdown file. `canon markdown audit`, arrived, with `governance/rules/standards/markdown.md` left pointing at it.
 
 `slug.md` and `publish.md` are withdrawn below rather than routed here.
 
 ### To an existing governance rule
 
-- `architecture.md` fixes what a cross-domain decision record holds. `640-architecture.md`.
-- `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `655-tasks.md`, which already globs the whole folder.
-- `context.md` fixes the per-domain narrative entry. `610-context.md`.
-- `design.md` fixes visual intent and the token tables. `650-design.md`.
-- `diagrams.md` fixes the per-kind Mermaid entry. `660-diagrams.md`.
-- `groundwork.md` fixes the measurement track a topic gets before anyone plans it. `656-groundwork.md`.
-- `intake.md` fixes the folder a raw dump is filed into. `657-intake.md`.
-- `memory.md` fixes the pen entry and its lifecycle from write to retire. `659-memory.md`.
-- `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `658-plan.md`.
-- `readme.md` fixes the voice and structure of the page a project leads with. `880-readme.md`.
-- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it. `663-ready.md`.
-- `requirements.md` fixes the problem, goals, and non-goals record. `630-requirements.md`.
-- `rule.md` fixes a path-scoped governance rule. `590-rule-authoring.md`.
-- `session.md` fixes the pre-compaction handoff. `662-session.md`, which globs the `session-` file alone because `655-tasks.md` globs the board around it and one rule over both shapes would carry two.
-- `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `570-skill.md`.
-- `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `570-skill.md`, which already globs the requirement file beside the body.
-- `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `570-skill.md` points at, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
-- `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `891-standard-authoring.md`.
-- `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `655-tasks.md`.
-- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `661-teach.md`, whose frontmatter states that most targets open no workspace for it to fire on. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
-- `wireframes.md` fixes layout and interaction intent before any UI exists. `620-wireframes.md`.
+- `architecture.md` fixes what a cross-domain decision record holds. `governance/rules/standards/architecture.md`.
+- `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `governance/rules/standards/tasks.md`, which already globs the whole folder.
+- `context.md` fixes the per-domain narrative entry. `governance/rules/standards/context.md`.
+- `design.md` fixes visual intent and the token tables. `governance/rules/standards/design.md`.
+- `diagrams.md` fixes the per-kind Mermaid entry. `governance/rules/standards/diagrams.md`.
+- `groundwork.md` fixes the measurement track a topic gets before anyone plans it. `governance/rules/standards/groundwork.md`.
+- `intake.md` fixes the folder a raw dump is filed into. `governance/rules/standards/intake.md`.
+- `memory.md` fixes the pen entry and its lifecycle from write to retire. `governance/rules/standards/memory.md`.
+- `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `governance/rules/standards/plan.md`.
+- `readme.md` fixes the voice and structure of the page a project leads with. `governance/rules/standards/readme.md`.
+- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it. `governance/rules/standards/ready.md`.
+- `requirements.md` fixes the problem, goals, and non-goals record. `governance/rules/standards/requirements.md`.
+- `rule.md` fixes a path-scoped governance rule. `governance/rules/standards/rule.md`.
+- `session.md` fixes the pre-compaction handoff. `governance/rules/standards/session.md`, which globs the `session-` file alone because `governance/rules/standards/tasks.md` globs the board around it and one rule over both shapes would carry two.
+- `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `governance/rules/standards/skill.md`.
+- `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `governance/rules/standards/skill.md`, which already globs the requirement file beside the body.
+- `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `governance/rules/standards/skill.md` points at, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
+- `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
+- `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/standards/tasks.md`.
+- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `governance/rules/standards/teach.md`, which most targets never fire, since they open no workspace. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
+- `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root
 
