@@ -20,6 +20,7 @@ import {
   STYLE_PROPERTIES,
 } from '@/canvas/edit'
 import { CANVAS_PORT, startCanvas } from '@/canvas/server'
+import { PROJECT_ROOT } from '@/project-root'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
 import {
@@ -49,7 +50,33 @@ interface Refused {
     | 'no-root'
     | 'no-server'
     | 'capture-failed'
+    | 'missing-client-deps'
   readonly detail: string
+}
+
+const CLIENT_DEPS = ['preact', '@preact/signals'] as const
+
+/**
+ * Refuses when the shell's client packages do not resolve from `from`, since
+ * the bundler then answers `/` with an empty page rather than an error. The
+ * caller passes the package root the binary runs from, never the served
+ * project's, so a global install serving a target finds its own copies.
+ */
+export function missingClientDeps(from: string): Refused | undefined {
+  const missing = CLIENT_DEPS.filter((name) => {
+    try {
+      Bun.resolveSync(name, from)
+      return false
+    } catch {
+      return true
+    }
+  })
+  if (missing.length === 0) return undefined
+  return {
+    ok: false,
+    reason: 'missing-client-deps',
+    detail: `${missing.join(', ')} not installed in ${from}, so the canvas shell cannot load. Run bun install there`,
+  }
 }
 
 type RootOutcome = { readonly ok: true; readonly root: string } | Refused
@@ -637,6 +664,8 @@ async function runServe(
     return refuseServe(resolved.reason, resolved.detail, emitJson)
   }
   const { root } = resolved
+  const missing = missingClientDeps(PROJECT_ROOT)
+  if (missing) return refuseServe(missing.reason, missing.detail, emitJson)
   /*
    * Imported here rather than at the top, so a command module the test runner
    * loads never asks it for an HTML module it cannot parse.

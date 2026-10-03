@@ -8,6 +8,7 @@ import { act } from 'preact/test-utils'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { documentElements } from '@/canvas/address'
 import { App } from '@/canvas/client/app'
+import { isRawValue } from '@/canvas/client/inspector'
 import {
   applyChange,
   applyRecord,
@@ -839,6 +840,97 @@ describe('Inspector element', () => {
     act(() => buttonNamed('Show layers of hero').click())
 
     expect(layersFor('hero')?.querySelector('[aria-current="true"]')).toBeNull()
+  })
+})
+
+/** The inspector row holding the field of that accessible name. */
+function rowOf(name: string): Element {
+  const row = fieldNamed(name).closest('.box-row')
+  if (!row) throw new Error(`no row for ${name}`)
+  return row
+}
+
+describe('isRawValue', () => {
+  it('should read a literal color as raw', () => {
+    expect(isRawValue('rgb(0, 0, 0)')).toBe(true)
+  })
+
+  it('should not read a color mixed from a token as raw', () => {
+    expect(
+      isRawValue('color-mix(in srgb, var(--color-accent) 50%, white)'),
+    ).toBe(false)
+  })
+
+  it('should not read currentColor in any casing as raw', () => {
+    expect(isRawValue('CurrentColor')).toBe(false)
+  })
+
+  it('should not read a CSS-wide keyword as raw', () => {
+    expect(isRawValue('revert-layer')).toBe(false)
+  })
+})
+
+describe('Inspector raw marker', () => {
+  it('should mark a color set inline as a raw value in text', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="color: rgb(0, 0, 0)">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    const marker = rowOf('color').querySelector('.raw')
+    expect(marker?.textContent).toBe('raw')
+    expect(marker?.getAttribute('title')).toContain('theme')
+  })
+
+  it('should mark a background set inline as a raw value', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="background-color: #fff">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('background').textContent).toContain('raw')
+  })
+
+  it('should not mark a color set inline to a token', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="color: var(--color-accent)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a color set inline to inherit', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="color: inherit">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a background set inline to currentColor', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: currentColor">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('background').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a color the element only inherits', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
   })
 })
 

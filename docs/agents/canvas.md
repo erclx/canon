@@ -11,6 +11,10 @@ description: The canvas server, its content format, and the verbs that list, arr
 
 `canvas serve` serves the canvas on `127.0.0.1`, walks ports like `canon serve`, refuses a `Host` other than loopback on its own port, and runs until interrupted. Each frame gets the project's token stylesheet injected, being this toolkit's tokens in its own checkout, else `.claude/design/base.css` plus anything under `.claude/design/project/`, else none with a notice. An open canvas reloads a frame whose file changes.
 
+The toolkit's own tokens arrive with the font faces they name embedded, so a frame renders in them on a machine that never installed them. An installed base owns its fonts and gets no faces added.
+
+Before it binds a port, `canvas serve` checks that `preact` and `@preact/signals` resolve from the package the CLI runs from, never from the served project. When either is missing it refuses with reason `missing-client-deps` and names `bun install` in the detail, rather than serving a shell that loads as a blank page.
+
 The write routes the shell posts to also refuse a request carrying an `Origin` other than the server's own, and a body that is not JSON.
 
 ## List and add
@@ -37,7 +41,7 @@ A pick is refused as `address-mismatch` when the browser builds elements the fil
 
 The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. A color picked from the project's tokens is written as `var(--<name>)`. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
 
-Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
+Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. The inspector marks a color or background set inline with the word `raw` when its value names no `var()` and is not `currentColor` or a CSS-wide keyword, since that value stays fixed when the theme changes. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
 
 The Theme tab in the shell lists what the token stylesheet defines, grouped as color, spacing, radius, font family, font size, and other. The page record at `/api/pages` carries the same list as `tokens.groups`.
 

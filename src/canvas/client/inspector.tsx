@@ -76,15 +76,49 @@ function positionRows(element: Element): Row[] {
   ]
 }
 
+function inlineValue(element: Element, property: string): string {
+  return 'style' in element
+    ? (element as HTMLElement).style.getPropertyValue(property)
+    : ''
+}
+
+/** Values that defer to something else, so they follow the theme as it does. */
+const DEFERRING = new Set([
+  'currentcolor',
+  'inherit',
+  'initial',
+  'unset',
+  'revert',
+  'revert-layer',
+])
+
+/**
+ * A color that stays put when the theme changes: one naming no token anywhere
+ * in it and deferring to nothing, so `color-mix()` over a `var()` is not raw.
+ */
+export function isRawValue(value: string): boolean {
+  const normalized = value.trim().toLowerCase()
+  return (
+    normalized !== '' &&
+    !normalized.includes('var(') &&
+    !DEFERRING.has(normalized)
+  )
+}
+
+/**
+ * Inherited and stylesheet values are not the element's own, so only an
+ * inline value counts.
+ */
+function isRawInline(element: Element, property: string): boolean {
+  return isRawValue(inlineValue(element, property))
+}
+
 /**
  * What the element states inline, else the value the browser settled on, so
  * an edit starts from what the operator sees.
  */
 function currentValue(element: Element, property: string): string {
-  const inline =
-    'style' in element
-      ? (element as HTMLElement).style.getPropertyValue(property)
-      : ''
+  const inline = inlineValue(element, property)
   if (inline) return inline
   return (
     element.ownerDocument.defaultView
@@ -223,6 +257,14 @@ function ElementFields({
                 isBusy={isBusy}
                 onCommit={commit(field.property)}
               />
+              {field.isColor && isRawInline(node, field.property) ? (
+                <span
+                  class="raw"
+                  title="Set as a raw value, so it will not follow the theme. Pick a token to fix it"
+                >
+                  raw
+                </span>
+              ) : null}
               {field.isColor ? (
                 <TokenPicker
                   label={field.label}

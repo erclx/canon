@@ -490,6 +490,13 @@ code {
   cursor: pointer;
 }
 
+.raw {
+  flex: none;
+  align-self: center;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+
 .field:hover,
 .token-picker:hover {
   border-color: var(--color-muted);
