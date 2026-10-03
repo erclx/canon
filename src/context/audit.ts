@@ -18,9 +18,9 @@ import { isStubSeed } from '@/seed-marker'
  * Every reason `canon context audit` refuses for.
  *
  * `no-folders` is the one ordinary absence: a project that never adopted
- * `canon/context/`, `.canon/diagrams/`, or `canon/wireframes/` names no
- * corpus this audit can measure, the same state `no-skills` reads for the
- * skill corpora. The other four are a malformed invocation or a checkout git
+ * `canon/context/` or `canon/wireframes/`, and holds no `.canon/diagrams/`
+ * folder an older install left, names no corpus this audit can measure, the
+ * same state `no-skills` reads for the skill corpora. The other four are a malformed invocation or a checkout git
  * cannot read, which stay a break rather than an absence.
  */
 export type ContextAuditRefusal =
@@ -157,9 +157,10 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * JSON record publishes as `checkpoints.provenanceFolder` breaks every consumer
  * reading that field for a gain of one word.
  *
- * `standards/context.md` opens its scope by handing diagrams and wireframes to
- * `diagrams.md` and `wireframes.md`, so a marker reported in either would cite
- * a rule that entry's own standard routes elsewhere. The length and table
+ * `standards/context.md` opens its scope by handing figures to the
+ * `draft-figure` skill and wireframes to `wireframes.md`, so a marker reported
+ * in a diagrams or wireframes entry would cite a rule that entry's own
+ * standard routes elsewhere. The length and table
  * checkpoints are quoted from the same standard and keep reaching every audited
  * folder, because a threshold on how far a reader travels generalizes across
  * entry types while a rule about what an entry may say does not.

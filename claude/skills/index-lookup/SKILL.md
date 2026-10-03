@@ -13,7 +13,7 @@ Answers a topic search over the project's tracked `index.md` catalogs, not a tex
 2. Run `canon indexes list --json` from that root.
 3. Read `errors` first. A folder failing frontmatter validation drops out of `entries` and lands its message in `errors` instead, per the verb's own per-folder isolation, so report an error alongside the match rather than reading it as a reason to stop.
 4. Match the topic case-insensitively as a substring against each entry's `title`, `description`, and `path`. Report every match. A lookup with no ranking is honest about what it found, and a single best guess is not.
-5. Check whether the project carries a gitignored indexed folder or a README-based record catalog outside `list`'s walk: `.canon/tasks/`, `.canon/memory/`, `.canon/diagrams/`, `.canon/groundwork/`, `.canon/intake/`. Test each for existence and at least one file inside it before naming it. A folder absent from this project names nothing.
+5. Check whether the project carries a gitignored indexed folder or a README-based record catalog outside `list`'s walk: `.canon/tasks/`, `.canon/memory/`, `.canon/groundwork/`, `.canon/intake/`. Test each for existence and at least one file inside it before naming it. A folder absent from this project names nothing.
 6. Report the hits, plus a pointer to any outside-the-walk folder found present, per Output below.
 
 ## Rules

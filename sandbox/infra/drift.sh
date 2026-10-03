@@ -56,14 +56,14 @@ stage_setup() {
 
   "retired")
     printf '# Tasks\n\nOld single-file board.\n' >.claude/TASKS.md
-    printf '# Diagrams\n\nOld single-file diagrams.\n' >.claude/DIAGRAMS.md
+    printf '# Wireframes\n\nOld single-file wireframes.\n' >.claude/WIREFRAMES.md
     printf '# Archive\n\nSuffixed variant the stem rule does not match.\n' >.claude/TASKS-ARCHIVE.md
 
     write_report
 
     log_step "Scenario ready: retired artifacts present"
     log_info "Context: the seed tree moved to folders and the target kept the files"
-    log_info "  .claude/TASKS.md and .claude/DIAGRAMS.md are superseded"
+    log_info "  .claude/TASKS.md and .claude/WIREFRAMES.md are superseded"
     log_info "  .claude/TASKS-ARCHIVE.md is the suffixed variant, deliberately unmatched"
     log_info ""
     log_info "The report names these and proposes nothing. No command moves them,"

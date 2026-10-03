@@ -49,7 +49,7 @@ describe('listSeeds', () => {
     ])
   })
 
-  it('should list hooks, diagrams, tasks, and wireframes alongside the claude root level, leaving a retired decisions folder unlisted', () => {
+  it('should list hooks, tasks, and wireframes alongside the claude root level, leaving retired decisions and diagrams folders unlisted', () => {
     seedFile(join('.claude', 'settings.json'), '{}')
     seedFile(join('.claude', 'hooks', 'scratch-guard.sh'), 'Hook')
     seedFile(join('canon', 'decisions', 'index.md'), 'Decisions')
@@ -60,7 +60,6 @@ describe('listSeeds', () => {
     expect(listSeeds(root).map((entry) => entry.name)).toEqual([
       'settings.json',
       'hooks/scratch-guard.sh',
-      'diagrams/index.md',
       'tasks/index.md',
       'wireframes/index.md',
     ])
