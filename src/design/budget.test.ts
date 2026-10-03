@@ -65,6 +65,22 @@ describe('measureDesignProse', () => {
     expect(measureDesignProse(source)).toEqual([])
   })
 
+  it('never counts the lines inside a multi-line HTML comment', () => {
+    const source = record({ Motion: ['<!--', words(30), '-->'].join('\n') })
+
+    expect(measureDesignProse(source)).toEqual([])
+  })
+
+  it('counts prose after a comment closes', () => {
+    const source = record({
+      Motion: ['<!--', words(3), '-->', '', words(30)].join('\n'),
+    })
+
+    expect(measureDesignProse(source)).toEqual([
+      `Motion rule 1 holds 30 words against a cap of ${DESIGN_BUDGET.ruleWords}`,
+    ])
+  })
+
   it('passes a rule at the word cap', () => {
     const source = record({ Motion: rules(1, DESIGN_BUDGET.ruleWords) })
 
