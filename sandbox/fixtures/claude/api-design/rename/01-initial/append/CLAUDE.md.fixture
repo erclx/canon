@@ -1,0 +1,10 @@
+
+# Orders
+
+A small order store with a command line. The library lives in `src/orders.ts`,
+the command in `src/cli.ts`, and `scripts/nightly-report.sh` is one of several
+scripts other teams run against the command's JSON output.
+
+## Commands
+
+- `bun src/cli.ts show <id>`: print one order as JSON on stdout
