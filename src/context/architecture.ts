@@ -115,7 +115,7 @@ const DECISION_HEADING = /^###\s+(.+?)\s*$/
 const SECTION_HEADING = /^##\s+\S/
 /** A markdown list item at any depth, which is what a risk bullet is. */
 const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+\S/
-/** The one H2 the standard's `## Length` section asks to be weighed by words. */
+/** The H2 whose bullets the standard's `## Caps` section counts. */
 const RISKS_HEADING = /^##\s+Risks\s*\/\s*open questions\s*$/i
 const CODE_SPAN = /`[^`]*`/g
 /** Dropped ahead of the figure scan, since an anchor date is not a claim. */
