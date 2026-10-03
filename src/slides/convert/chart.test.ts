@@ -69,6 +69,39 @@ describe('planChart', () => {
     expect(plan.status === 'chart' && plan.data[0]?.values).toEqual([1200])
   })
 
+  it('should refuse a comma that does not group thousands', () => {
+    const plan = planChart(
+      record({
+        rows: [
+          ['Region', 'Q1'],
+          ['North', '3,5'],
+        ],
+      }),
+      theme(),
+    )
+
+    expect(plan).toMatchObject({
+      status: 'refused',
+      message: 'cell "3,5" at row 2, column 2 is not a number',
+    })
+  })
+
+  it('should read a grouped number with a decimal part', () => {
+    const plan = planChart(
+      record({
+        rows: [
+          ['Region', 'Q1'],
+          ['North', '-12,345,678.5'],
+        ],
+      }),
+      theme(),
+    )
+
+    expect(plan.status === 'chart' && plan.data[0]?.values).toEqual([
+      -12345678.5,
+    ])
+  })
+
   it('should read an empty cell as a gap', () => {
     const plan = planChart(
       record({

@@ -102,7 +102,7 @@ A `<figure data-chart="...">` holding a `<table>` becomes a native, editable cha
 
 - `data-chart` takes `bar`, `line`, `area`, `pie`, or `doughnut`.
 - The header row names the series and the first column names the categories.
-- An empty cell is a gap, not a zero. A comma inside a number is a thousands separator.
+- An empty cell is a gap, not a zero. A comma is a thousands separator only where it groups in threes, as in `12,345.5`, so a comma-decimal `3,5` refuses rather than reading as 35.
 - `data-labels` shows each value. A `<figcaption>` becomes the chart title.
 - Series take the accent first, then every other declared `--color-*` role in sheet order except the background and surface, repeating past the last.
 

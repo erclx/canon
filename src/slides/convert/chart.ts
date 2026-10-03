@@ -59,6 +59,12 @@ const GROUND_ROLES = new Set(['--color-background', '--color-surface'])
 
 const NUMBER = /^-?(\d+\.?\d*|\.\d+)$/
 
+/**
+ * A comma counts as a thousands separator only where it groups in threes, so a
+ * comma-decimal `3,5` refuses rather than reading as 35.
+ */
+const GROUPED = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/
+
 const isChartType = (value: string): value is ChartType =>
   (CHART_TYPES as readonly string[]).includes(value)
 
@@ -114,7 +120,7 @@ export function planChart(record: ChartRecord, theme: ChartTheme): ChartPlan {
         values.push(null)
         continue
       }
-      const bare = text.replace(/,/g, '')
+      const bare = GROUPED.test(text) ? text.replace(/,/g, '') : text
       if (!NUMBER.test(bare)) {
         return refuse(
           `cell "${text}" at row ${index + 2}, column ${column + 1} is not a number`,
