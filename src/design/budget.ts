@@ -8,7 +8,9 @@
  * A row is excluded on the same test `table()` in `@/design/parse` reads one
  * by, a line opening with a pipe, so a code span carrying a pipe or a cell
  * carrying the uncertainty tag never reaches the count. A line opening with
- * `<` is dropped the way `prose()` drops it, and so is a fenced block.
+ * `<` is dropped the way `prose()` drops it, and so is a fenced block. A
+ * `###` subsection counts toward the `##` section holding it, since the
+ * standard fixes the sections and a subheading is no way past the cap.
  */
 export const DESIGN_BUDGET = {
   /** Words before the first `##` section, the title excluded. */
