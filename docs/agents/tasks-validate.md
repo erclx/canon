@@ -1,6 +1,6 @@
 ---
 title: Tasks validate
-description: Validating the board against the tree, the seven checks, the untested, claims, and unplaced arrays, the exit codes, and the refusal reasons
+description: Validating the board against the tree, the seven checks, the untested, claims, wide, and unplaced arrays, the exit codes, and the refusal reasons
 ---
 
 # Tasks validate
@@ -103,7 +103,23 @@ That claim collides with every row a later session writes under the folder, and 
 
 The scan reaches `## Run now` and stops, where the collision check stops. A cell in another group describes work nobody has planned, written as a sentence and rewritten once a plan exists, so a claim read off one reports on prose rather than on a file set. A parked folder claim surfaces when its row is promoted, which is when the cell becomes something a dispatcher can act on.
 
-A task file neither surface names lands in a fourth array, on the same reasoning:
+A code span in any cell that the markdown preview cannot break lands in a fourth array, `wide`:
+
+```json
+{
+  "wide": [
+    {
+      "group": "Up next",
+      "subject": "v1.0-first", // canon-allow-reference: shows the subject field's real vXX.Y-slug shape, not a citation of a real task
+      "message": "holds a 78-character token, `...`, past the 60 a preview pane fits, so its table scrolls sideways."
+    }
+  ]
+}
+```
+
+A span breaks only at whitespace, so the scan measures its longest whitespace-free run and flags one past 60 characters. A 57-character span fit the pane and a 78-character one did not, and nothing between is measured, which is why the limit is a heuristic and the array moves no exit code. A span holding a brace-glob is flagged at any width, since the preview renders it as one token. Only code spans are read, because prose breaks at spaces and a bare word breaks at a hyphen, and a link target is skipped because only its label renders. The scan reaches every group, unlike the folder claims, since the overflow it exists for happened under `## Up next`.
+
+A task file neither surface names lands in a fifth array, on the same reasoning:
 
 ```json
 {

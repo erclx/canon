@@ -57,6 +57,8 @@ Each group fixes its own columns, which follow from the test above it rather tha
 
 A `Touches` cell is copied from its plan's own list, so it states what the branch sets out to write rather than a bound on it, and a branch outgrows it while the row still reads as it did at dispatch. Correct the cell from the branch rather than from the plan once one is running, since the plan is the prediction that already went stale and only the diff says what was written. `canon tasks plan-reach <plan>` reads that diff against every live plan and every cell in this group, and the row's owner is the one who writes the correction: a worker never edits this board.
 
+A cell holds no code span whose longest unbroken run passes 60 characters, since a span has no break point and a wider one makes its table scroll sideways in the preview. Write a brace-glob out as separate paths for the same reason. `canon tasks validate` reports both in its `wide` array and moves no exit code.
+
 ### Row order
 
 Row position inside `## Needs a plan` is the order those tasks get planned in, top first. The three tests answer whether a task can start, which is mechanical, and none of them answers which task is worth starting, which is a judgment no column holds. Position is where that judgment is recorded, so the top row is the answer to what to plan next and a reader needs no other surface to get it. The other two groups take the same reading, and it costs them little, since a group holding what is already planned is short by construction.
