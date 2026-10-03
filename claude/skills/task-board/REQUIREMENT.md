@@ -31,6 +31,7 @@ Placing a row without checking for another writer collides the same way. Two ses
 - Write a pull request line at creation, when any number is a guess at someone else's work
 - Archive around a refusal
 - Split the legacy single-file archive into per-task files nobody wrote
+- Claim a label or write a task file for a session holding the worker role, since that role reports a row upward and the controlling session places it
 - Fall through to a direct write when no orchestrator is found and this session's own name starts with `worker-` or `planner-`, since those role bodies ban the write with no exception
 
 ## Guards

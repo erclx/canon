@@ -27,6 +27,12 @@ A task with no origin is either lost context or work nobody decided to do. This 
 
 Accept work whose origin is the conversation itself only when the user says so explicitly, and record what it was in the intro paragraph instead of writing a link line to a file that does not exist.
 
+### Stop a worker before it claims a label
+
+A session that asserted `canon:role-worker` this run, or whose name starts with `worker-`, stops here. It claims no label and writes no file. Report the row's title, its origin, and the surface it would take to the controlling session instead, since a task file with no row is a dropped task and placing the row is that session's call.
+
+The guard sits ahead of Step 2 because `--claim` reserves a label on disk, so a stop after it leaves a reservation nothing uses. It names the worker role alone. A planner closing a groundwork track still writes its task file here and reaches Step 4's roster check as before.
+
 ### Step 2: allocate the phase label
 
 Run `canon tasks next-label --claim --json` and take its `label` field. The verb reads the live board and its `archive/` sibling together, so the label it returns accounts for what the board alone no longer shows, and `--claim` reserves it under `.canon/ordinal-locks/` so a second session filing at the same moment gets the next one. Branch on the record's `reason` rather than the exit: `label-contended` means re-run the claim, and a usage error from an unknown `--claim` means the installed binary predates the flag, so report the verb as unavailable rather than falling back to a bare read, which reopens the race.
