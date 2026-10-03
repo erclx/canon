@@ -403,6 +403,21 @@ describe('POST /api/selection', () => {
     expect(record.selection).toBeUndefined()
   })
 
+  it('should clear the selection when both fields are null', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+    await post(server, '/api/selection', { page: 'drafts', frame: 'hero' })
+
+    const response = await post(server, '/api/selection', {
+      page: null,
+      frame: null,
+    })
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(response.status).toBe(200)
+    expect(record.selection).toBeUndefined()
+  })
+
   it('should report no selection once the selected frame is removed', async () => {
     seed('drafts/hero.html', '<p>hero</p>')
     const server = start()

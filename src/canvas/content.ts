@@ -1,9 +1,12 @@
 import {
+  closeSync,
   existsSync,
   mkdirSync,
+  openSync,
   readdirSync,
   readFileSync,
   renameSync,
+  rmSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -27,6 +30,17 @@ export const SELECTION_FILE = 'selection.json'
 
 /** Suffix of the file a write goes through before it replaces its target. */
 export const TEMP_SUFFIX = '.tmp'
+
+/** Suffix of the file a writer holds while it reads, merges, and replaces. */
+export const LOCK_SUFFIX = '.lock'
+
+/** A lock older than this was left by a writer that died holding it. */
+const LOCK_STALE_MS = 10_000
+
+/** How long a writer waits on another's lock before it refuses. */
+const LOCK_WAIT_MS = 2_000
+
+const LOCK_POLL_MS = 5
 
 const FRAME_EXTENSION = '.html'
 
@@ -72,6 +86,7 @@ export type ContentRefusal =
   | 'no-frame'
   | 'invalid-position'
   | 'malformed-layout'
+  | 'busy'
 
 export interface ContentRefused {
   readonly ok: false
@@ -164,11 +179,48 @@ function readLayout(dir: string): LayoutRead {
   return { boxes, malformed: false }
 }
 
+function sleep(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
+/**
+ * Holds an exclusive lock file for the length of a read, merge, and write. The
+ * server and a CLI verb are two processes, so a synchronous step inside either
+ * does not keep them from reading the same layout and each replacing it with
+ * its own edit, which loses the other's. A refused call leaves the file as it
+ * found it.
+ */
+function withLayoutLock(dir: string, run: () => FrameOutcome): FrameOutcome {
+  const lock = join(dir, `${LAYOUT_FILE}${LOCK_SUFFIX}`)
+  const deadline = Date.now() + LOCK_WAIT_MS
+  for (;;) {
+    try {
+      closeSync(openSync(lock, 'wx'))
+      break
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      const modified = statSync(lock, { throwIfNoEntry: false })?.mtimeMs
+      if (modified !== undefined && Date.now() - modified > LOCK_STALE_MS) {
+        rmSync(lock, { force: true })
+        continue
+      }
+      if (Date.now() >= deadline) {
+        return refuse('busy', `${LAYOUT_FILE} is being written, try again`)
+      }
+      sleep(LOCK_POLL_MS)
+    }
+  }
+  try {
+    return run()
+  } finally {
+    rmSync(lock, { force: true })
+  }
+}
+
 /**
  * Replaces the file in one rename, so the shell reading while a CLI verb writes
- * never sees half a layout and reports it as malformed. Every writer reads,
- * merges, and calls this in one synchronous step, which is what keeps two of
- * them from losing each other's frame.
+ * never sees half a layout and reports it as malformed. The caller holds
+ * `withLayoutLock`, which is what keeps two writers from losing each other.
  */
 function writeLayout(dir: string, boxes: ReadonlyMap<string, Box>): void {
   const frames = Object.fromEntries(boxes)
@@ -323,21 +375,23 @@ export function addFrame(
     return refuse('exists', `frame ${frame} already exists on ${page}`)
   }
 
-  /*
-   * Placed against the boxes a reader would draw, unplaced frames included, so
-   * a new frame never lands under one the layout has yet to name.
-   */
-  const current = readPage(root, page)?.frames ?? []
-  const { boxes, malformed } = readLayout(dir)
-  /* Writing over a layout that does not parse would erase every box in it. */
-  if (malformed) {
-    return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
-  }
-  const box: Box = { x: nextX(current), y: 0, ...size }
+  return withLayoutLock(dir, () => {
+    /*
+     * Placed against the boxes a reader would draw, unplaced frames included,
+     * so a new frame never lands under one the layout has yet to name.
+     */
+    const current = readPage(root, page)?.frames ?? []
+    const { boxes, malformed } = readLayout(dir)
+    /* Writing over a layout that does not parse would erase every box in it. */
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const box: Box = { x: nextX(current), y: 0, ...size }
 
-  writeFileSync(join(dir, file), frameScaffold(frame))
-  writeLayout(dir, new Map([...boxes, [frame, box]]))
-  return { ok: true, page, frame, file, box }
+    writeFileSync(join(dir, file), frameScaffold(frame))
+    writeLayout(dir, new Map([...boxes, [frame, box]]))
+    return { ok: true, page, frame, file, box }
+  })
 }
 
 export interface Position {
@@ -372,15 +426,22 @@ export function moveFrame(
     return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
   }
 
-  const { boxes, malformed } = readLayout(dir)
-  if (malformed) {
-    return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
-  }
-  const size = boxes.get(frame) ?? DEFAULT_FRAME
-  const box: Box = { x: to.x, y: to.y, width: size.width, height: size.height }
+  return withLayoutLock(dir, () => {
+    const { boxes, malformed } = readLayout(dir)
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const size = boxes.get(frame) ?? DEFAULT_FRAME
+    const box: Box = {
+      x: to.x,
+      y: to.y,
+      width: size.width,
+      height: size.height,
+    }
 
-  writeLayout(dir, new Map([...boxes, [frame, box]]))
-  return { ok: true, page, frame, file, box }
+    writeLayout(dir, new Map([...boxes, [frame, box]]))
+    return { ok: true, page, frame, file, box }
+  })
 }
 
 export interface Selection {

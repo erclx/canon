@@ -1,9 +1,19 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { addFrame } from '@/canvas/content'
-import { CAPTURE_SELECTOR, resolveCaptureTargets } from '@/canvas/capture'
+import {
+  CAPTURE_SELECTOR,
+  captureCanvas,
+  resolveCaptureTargets,
+} from '@/canvas/capture'
 
 let ROOT = ''
 
@@ -26,6 +36,15 @@ function seedFrame(page: string, frame: string, width?: number): void {
   }
   addFrame(ROOT, page, frame, { width, height: 700 })
 }
+
+describe('captureCanvas', () => {
+  it('should refuse a missing page without creating the canvas folder', async () => {
+    const outcome = await captureCanvas(ROOT, 'missing')
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-page' })
+    expect(existsSync(join(ROOT, '.canon', 'canvas'))).toBe(false)
+  })
+})
 
 describe('resolveCaptureTargets', () => {
   it('should resolve a frame to its served address', () => {

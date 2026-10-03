@@ -3,6 +3,7 @@ import {
   type ContentRefused,
   canvasDir,
   listPages,
+  LOCK_SUFFIX,
   moveFrame,
   readSelection,
   TEMP_SUFFIX,
@@ -131,6 +132,7 @@ const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
   'no-frame': 404,
   exists: 409,
   'malformed-layout': 409,
+  busy: 409,
 }
 
 function refusal(refused: ContentRefused): Response {
@@ -226,8 +228,8 @@ class ChangeStream {
   private queue(path: string): void {
     const [page, ...rest] = path.split(/[\\/]/)
     if (page === undefined || page === '') return
-    /* A write's staging file, replaced by its target a moment later. */
-    if (path.endsWith(TEMP_SUFFIX)) return
+    /* A write's staging or lock file, gone a moment later. */
+    if (path.endsWith(TEMP_SUFFIX) || path.endsWith(LOCK_SUFFIX)) return
     clearTimeout(this.pending.get(path))
     this.pending.set(
       path,
@@ -354,7 +356,7 @@ export function startCanvas(
                   typeof page === 'string' && typeof frame === 'string'
                     ? { page, frame }
                     : undefined
-                if (target === undefined && (page ?? frame) !== undefined) {
+                if (target === undefined && (page != null || frame != null)) {
                   return badBody('send both page and frame, or neither')
                 }
                 const outcome = writeSelection(root, target)

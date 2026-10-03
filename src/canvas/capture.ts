@@ -110,6 +110,13 @@ export async function captureCanvas(
   spec: string,
   out?: string,
 ): Promise<CaptureOutcome> {
+  /*
+   * Refused before the server starts, since starting it creates the canvas
+   * folder and a refused capture should leave the project as it found it.
+   */
+  const early = resolveCaptureTargets(root, spec, '')
+  if (!early.ok) return early
+
   const server = startCanvas(root, { port: 0, shell: new Response('') })
   if (!server.ok) {
     return {

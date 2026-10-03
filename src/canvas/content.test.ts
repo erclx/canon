@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -376,6 +377,59 @@ describe('moveFrame', () => {
     expect(readFileSync(join(pageDir('drafts'), 'layout.json'), 'utf8')).toBe(
       '{ not json',
     )
+  })
+})
+
+describe('layout lock', () => {
+  it('should leave no lock file behind after a move', () => {
+    seedPage('drafts', ['hero'])
+
+    moveFrame(ROOT, 'drafts', 'hero', { x: 1, y: 1 })
+
+    expect(existsSync(join(pageDir('drafts'), 'layout.json.lock'))).toBe(false)
+  })
+
+  it('should take over a lock a dead writer left behind', () => {
+    seedPage('drafts', ['hero'])
+    const lock = join(pageDir('drafts'), 'layout.json.lock')
+    writeFileSync(lock, '')
+    const longAgo = new Date(Date.now() - 60_000)
+    utimesSync(lock, longAgo, longAgo)
+
+    const outcome = moveFrame(ROOT, 'drafts', 'hero', { x: 7, y: 8 })
+
+    expect(outcome).toMatchObject({ ok: true, box: { x: 7, y: 8 } })
+    expect(existsSync(lock)).toBe(false)
+  })
+
+  it('should keep every position when several processes move frames at once', async () => {
+    const names = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    seedPage('drafts', names)
+    const content = join(import.meta.dirname, 'content.ts')
+
+    const children = names.map((name, index) =>
+      Bun.spawn(
+        [
+          'bun',
+          '-e',
+          `import { moveFrame } from ${JSON.stringify(content)}
+          moveFrame(${JSON.stringify(ROOT)}, 'drafts', '${name}', { x: ${index + 1}, y: 5 })`,
+        ],
+        { cwd: join(import.meta.dirname, '..', '..') },
+      ),
+    )
+    await Promise.all(children.map((child) => child.exited))
+
+    const frames = readPage(ROOT, 'drafts')?.frames ?? []
+    expect(frames.map((frame) => frame.x)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+  })
+
+  it('should leave no lock file behind after a refused move', () => {
+    seedPage('drafts', ['hero'], '{ not json')
+
+    moveFrame(ROOT, 'drafts', 'hero', { x: 1, y: 1 })
+
+    expect(existsSync(join(pageDir('drafts'), 'layout.json.lock'))).toBe(false)
   })
 })
 
