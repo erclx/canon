@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Decide what to do about tooling config drift](v01.0-config-drift.md): Settle whether the three packages share tooling config

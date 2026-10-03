@@ -1,0 +1,15 @@
+# Current state
+
+Verified facts only, measured 2026-07-20.
+
+## Lint config
+
+Measured when the workspace held two packages.
+
+- `packages/api/eslint.config.js`: 3 rules
+- `packages/web/eslint.config.js`: 3 rules
+
+## Open questions
+
+1. Do the tsconfig compiler options differ in ways that would break a shared base? Open.
+2. Is a preset package or a root config with overrides the better shape? Open.

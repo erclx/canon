@@ -1,0 +1,10 @@
+---
+title: 'v01.0: Decide what to do about tooling config drift'
+description: Settle whether the three packages share tooling config
+---
+
+# v01.0: Decide what to do about tooling config drift
+
+The three packages each carry their own lint and TypeScript config. Nobody knows how far apart they are. Candidate approaches: extract a shared preset package, adopt a single root config with per-package overrides, or leave them independent.
+
+- [ ] Outcome: a decision backed by a measurement of the actual drift

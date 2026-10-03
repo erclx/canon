@@ -8,26 +8,7 @@ use_config() {
 }
 
 seed_duplicated_workspace() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-groundwork",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "workspaces": ["packages/*"]
-}
-EOF
-
-  cat <<'EOF' >>CLAUDE.md
-
-# My Workspace
-
-Three-package workspace. Each package owns its own build and lint config.
-
-## Commands
-
-- `bun run check`: lint and typecheck every package
-EOF
+  stage_fixtures claude plan-groundwork shared duplicated-workspace
 
   local pkg
   for pkg in api web worker; do
@@ -46,52 +27,7 @@ EOF
 }
 EOF
 
-    cat <<'EOF' >"packages/$pkg/tsconfig.json"
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true
-  },
-  "include": ["src"]
-}
-EOF
   done
-
-  cat <<'EOF' >packages/api/eslint.config.js
-export default [
-  { rules: { "no-console": "error", eqeqeq: "error", "no-unused-vars": "error" } },
-];
-EOF
-
-  cat <<'EOF' >packages/web/eslint.config.js
-export default [
-  { rules: { "no-console": "warn", eqeqeq: "error", "prefer-const": "error" } },
-];
-EOF
-
-  cat <<'EOF' >packages/worker/eslint.config.js
-export default [
-  { rules: { "no-console": "off", "no-unused-vars": "warn" } },
-];
-EOF
-
-  cat <<'EOF' >packages/web/tsconfig.json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "strict": false,
-    "jsx": "react-jsx",
-    "noEmit": true
-  },
-  "include": ["src"]
-}
-EOF
 
   echo 'export const api = () => "api";' >packages/api/src/index.ts
   echo 'export const web = () => "web";' >packages/web/src/index.ts
@@ -115,45 +51,9 @@ stage_setup() {
     seed_duplicated_workspace
 
     mkdir -p .claude
-    cat <<'EOF' >>canon/ARCHITECTURE.md
-
-# Architecture
-
-## Packages
-
-Three independent packages under `packages/`. Each was scaffolded separately and carries its own `tsconfig.json` and `eslint.config.js`.
-
-## Tooling
-
-No shared preset exists. Config drift between packages has never been measured.
-EOF
+    stage_fixtures claude plan-groundwork open 01-initial
 
     mkdir -p .canon/tasks
-    cat <<'EOF' >.canon/tasks/index.md
----
-title: Tasks
-subtitle: One file per task, ordered by phase label
----
-
-# Tasks
-
-One file per task, ordered by phase label
-
-- [v01.0: Decide what to do about tooling config drift](v01.0-config-drift.md): Settle whether the three packages share tooling config
-EOF
-
-    cat <<'EOF' >.canon/tasks/v01.0-config-drift.md
----
-title: 'v01.0: Decide what to do about tooling config drift'
-description: Settle whether the three packages share tooling config
----
-
-# v01.0: Decide what to do about tooling config drift
-
-The three packages each carry their own lint and TypeScript config. Nobody knows how far apart they are. Candidate approaches: extract a shared preset package, adopt a single root config with per-package overrides, or leave them independent.
-
-- [ ] Outcome: a decision backed by a measurement of the actual drift
-EOF
 
     git add . && git commit -m "feat(workspace): three packages with independent tooling" --no-verify -q
 
@@ -170,57 +70,7 @@ EOF
     seed_duplicated_workspace
 
     mkdir -p .canon/groundwork/01-tooling-drift
-    cat <<'EOF' >.canon/groundwork/01-tooling-drift/README.md
----
-title: Tooling drift
-description: Whether the three packages should share a tooling preset, and how far their configs have drifted
-date: 2026-07-20
----
-
-# Tooling drift
-
-Groundwork phase. Nothing here is a feature plan.
-
-Whether the three packages should share a tooling preset.
-
-## Why
-
-Each package was scaffolded separately. A change to a lint rule currently has to be
-made three times, and nobody has measured how far the configs have actually drifted.
-
-## Files
-
-| File | Holds |
-| ---- | ----- |
-| `01-current-state.md` | Measured config drift across the three packages |
-
-## Method
-
-Internal: direct read of every `eslint.config.js` and `tsconfig.json` under `packages/`.
-External: not yet done. Shared-preset patterns from comparable workspaces are unread.
-
-## Prior art
-
-None. This is the first pass at the question.
-EOF
-
-    cat <<'EOF' >.canon/groundwork/01-tooling-drift/01-current-state.md
-# Current state
-
-Verified facts only, measured 2026-07-20.
-
-## Lint config
-
-Measured when the workspace held two packages.
-
-- `packages/api/eslint.config.js`: 3 rules
-- `packages/web/eslint.config.js`: 3 rules
-
-## Open questions
-
-1. Do the tsconfig compiler options differ in ways that would break a shared base? Open.
-2. Is a preset package or a root config with overrides the better shape? Open.
-EOF
+    stage_fixtures claude plan-groundwork resume 01-initial
 
     git add . && git commit -m "feat(workspace): three packages with independent tooling" --no-verify -q
 
@@ -236,59 +86,11 @@ EOF
     log_info "         Re-measures only because the project moved, and marks what changed"
     ;;
   "decline")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-groundwork-decline",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-    cat <<'EOF' >>CLAUDE.md
-
-# My App
-
-Small CLI. Single entry point.
-EOF
+    stage_fixtures claude plan-groundwork decline 01-initial
 
     mkdir -p src .claude
-    cat <<'EOF' >src/cli.ts
-export function run(args: string[]) {
-  if (args.includes("--version")) {
-    console.log("1.0.0");
-    return;
-  }
-  console.log("usage: cli [--version]");
-}
-EOF
 
     mkdir -p .canon/tasks
-    cat <<'EOF' >.canon/tasks/index.md
----
-title: Tasks
-subtitle: One file per task, ordered by phase label
----
-
-# Tasks
-
-One file per task, ordered by phase label
-
-- [v01.0: Add a --help flag to the CLI](v01.0-help-flag.md): Print the usage line explicitly behind a --help flag
-EOF
-
-    cat <<'EOF' >.canon/tasks/v01.0-help-flag.md
----
-title: 'v01.0: Add a --help flag to the CLI'
-description: Print the usage line explicitly behind a --help flag
----
-
-# v01.0: Add a --help flag to the CLI
-
-The CLI already prints a usage line for unknown input. Add a `--help` flag that prints the same usage line explicitly. Decided: mirror the existing `--version` branch in `src/cli.ts`.
-
-- [ ] Outcome: `cli --help` prints the usage line
-EOF
 
     git add . && git commit -m "feat(cli): version flag and usage line" --no-verify -q
 
