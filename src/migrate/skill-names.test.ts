@@ -4,7 +4,7 @@ import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(31)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(36)
   })
 
   it('should retire the prefix on every row', () => {
@@ -31,7 +31,7 @@ describe('SKILL_NAME_MAP', () => {
     expect(chained).toEqual([])
   })
 
-  it('should let two keys share a name only where a retired name was retargeted past its first rename', () => {
+  it('should let keys share a name only where a retired name was retargeted or several skills merged into one', () => {
     const byName = new Map<string, string[]>()
     for (const [key, name] of Object.entries(SKILL_NAME_MAP)) {
       byName.set(name, [...(byName.get(name) ?? []), key])
@@ -42,6 +42,13 @@ describe('SKILL_NAME_MAP', () => {
     expect(shared).toEqual([
       ['claude-docs', 'docs-fold'],
       ['claude-ui-test', 'ui-test'],
+      [
+        'draft-docs',
+        'draft-context',
+        'draft-wireframes',
+        'draft-readme',
+        'draft-wiki',
+      ],
     ])
   })
 
@@ -154,6 +161,15 @@ describe('renameText under the skill preset', () => {
     expect(
       renameText('canon:claude-ui-test and canon:ui-test', SKILL_NAME_RULES),
     ).toBe('canon:ui-checklist and canon:ui-checklist')
+  })
+
+  it('should land the five merged drafters on the one skill that replaced them', () => {
+    expect(
+      renameText(
+        'canon:draft-docs, draft-context, draft-wireframes, draft-readme, draft-wiki',
+        SKILL_NAME_RULES,
+      ),
+    ).toBe('canon:draft-doc, draft-doc, draft-doc, draft-doc, draft-doc')
   })
 
   it('should rewrite the two canon- names that take a standalone verb-first name', () => {
