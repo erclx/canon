@@ -8,6 +8,7 @@ description: The internal canon skills loaded before editing a toolkit domain, t
 Internal skills live in `.claude/skills/` and are toolkit-only. They are not installed into target projects.
 
 - `internal-ask`: Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`
+- `internal-canvas`: Load before editing the canvas server, its browser shell, or the `canon canvas` verbs
 - `internal-claude`: Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries
 - `internal-governance`: Load before editing governance rules or stack definitions
 - `internal-rule-audit`: Audit the governance rule set, returning one keep, move, retire, or merge verdict per rule with the check that decided it

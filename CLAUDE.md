@@ -45,6 +45,7 @@ Load the skill before editing anything in its domain.
 | `claude/skills/`, `claude/README.md`, `.claude/skills/` | `internal-claude`     |
 | `web/`, `assets/`, the landing page                     | `internal-web`        |
 | `src/teach/`, `examples/teach/`, `standards/teach.md`   | `internal-teach`      |
+| `src/canvas/`, `src/commands/canvas.ts`                 | `internal-canvas`     |
 
 @canon/REQUIREMENTS.md
 @canon/ARCHITECTURE.md
