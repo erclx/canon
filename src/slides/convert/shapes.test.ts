@@ -96,7 +96,7 @@ function textRecord(overrides: Partial<Kind<'text'>> = {}): Kind<'text'> {
     ...base(1),
     kind: 'text',
     content: content(),
-    inlines: [],
+    inlineStyles: [],
     ...overrides,
   }
 }
@@ -432,7 +432,7 @@ describe('planSlide', () => {
 
   it('should send a text block to a picture when an inline run is unmapped', () => {
     const record = textRecord({
-      inlines: [style({ raw: raw({ filter: 'blur(4px)' }) })],
+      inlineStyles: [style({ raw: raw({ filter: 'blur(4px)' }) })],
     })
 
     const plan = planSlide([record], CONTEXT)

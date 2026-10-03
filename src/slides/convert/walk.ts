@@ -417,7 +417,7 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       kind: 'text',
       content: textContent(element, runs),
       list,
-      inlines: Array.from(gathered)
+      inlineStyles: Array.from(gathered)
         .filter((inline) => inline.tagName !== 'BR')
         .map((inline) =>
           boxStyle(inline, rectOf(inline.getBoundingClientRect())),

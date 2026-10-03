@@ -121,7 +121,7 @@ export type ElementRecord =
       readonly content: TextContent
       readonly list?: ListMarker
       /** The style of each inline element the runs were gathered through. */
-      readonly inlines: readonly BoxStyle[]
+      readonly inlineStyles: readonly BoxStyle[]
     })
   | (RecordBase & {
       readonly kind: 'image'
@@ -214,7 +214,7 @@ function isUnmapped(style: BoxStyle, property: UnmappedProperty): boolean {
 export function unmappedProperties(record: ElementRecord): UnmappedProperty[] {
   const styles = [
     record.style,
-    ...(record.kind === 'text' ? record.inlines : []),
+    ...(record.kind === 'text' ? record.inlineStyles : []),
     ...(record.kind === 'table'
       ? record.rows.flat().map((cell) => cell.style)
       : []),
