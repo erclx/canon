@@ -42,7 +42,7 @@ The server injects one stylesheet first in each frame's `head`, so a frame drawn
 
 ### The static board retired
 
-`canon design board` generated a static page set indexing six design surfaces, with a components panel framing a second Astro build of every site component. The canvas replaced it rather than joining it. That board only looked back at what the project already held, while the canvas is where an idea gets drawn before one is written into the design record. Keeping both meant one more generator to hold in step with every surface it indexed, for a page nobody drafted on.
+`canon design board` generated a static page set indexing six design surfaces, with a components panel framing a second Astro build of every site component. The canvas replaced it rather than joining it. That board only looked back at what the project already held, while the canvas is where an idea gets drawn before one is written into the design record. Keeping both meant one more generator to hold in step with every surface it indexed, for a page nobody drafted on. The component gallery existed only for the board's components panel and retired with it, taking its second Astro config, its exclusion check, and its two workflow steps.
 
 ## Gotchas
 

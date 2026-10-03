@@ -14,14 +14,13 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/src/pages/` owns the one route, assembling the sections in reading order
 - `web/src/components/beats/` owns the eleven beats of the session, one component each, plus the turn and band primitives they render through
 - `web/src/components/sections/` owns the sections around the beats: the fold, the proof band, the beat group, the provenance ledger, the install steps, the field, and the close
-- `web/src/components/` owns the site chrome, being the nav and the footer, and the shared panel primitives the gallery renders
+- `web/src/components/` owns the site chrome, being the nav and the footer, and the shared panel primitives the sections compose
 - `web/src/content/` owns page copy, each string tied to a `README.md` citation or a paraphrase marker
 - `web/src/lib/` owns the build-time reads, split into the pure derivations and the CLI and file reads that feed them
 - `web/src/layouts/` owns the shared page shell
 - `web/src/styles/` owns the page stylesheet and the generated design tokens
 - `web/e2e/` owns the Playwright suite
 - `web/public/` owns the social card symlink, the evidence beat's fixed captures, and the build-time previews
-- `web/gallery-src/` owns the component gallery, a second Astro config owned by the design board rather than the landing page
 - `web/card-src/` owns the social card route, a third Astro config
 
 `canon/context/web/build.md` covers the build-time reads, the build, and deploy, `canon/context/web/assets.md` the social card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks and the capture of this page.

@@ -15,10 +15,6 @@ Read `canon/context/web/index.md` for structure, the Astro build, and the gotcha
 - Read `references/citation-anchors.md` before adding or editing any string in `web/src/content/copy.ts`.
 - Check whether the change moves a count. A count is read from the CLI at build time and never typed, so a number in a draft is a defect the build cannot catch on its own.
 
-## The two trees are not the same tree
-
-`web/gallery.config.mjs` reads `web/gallery-src` and never `web/src`, and `scripts/core/check-gallery-exclusion.sh` guards the separation on every build reaching the live domain. A component under `web/src/components/` renders in the gallery whether or not the page imports it, so a component left unused after a section is dropped reads as one somebody deleted a reference to by mistake.
-
 ## Images are generated
 
 - Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote, and `bun run check` fails when either moves.

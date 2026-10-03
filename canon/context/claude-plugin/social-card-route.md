@@ -11,7 +11,7 @@ description: Why the card is a route the project keeps, the build-exclusion meas
 
 Next and vite-react carry no structural build exclusion as clean as Astro's `srcDir`, and the three differ enough that one shared scaffold does not cover them. Measured at `dea5b47b` on 2026-09-20.
 
-- **Astro: yes, structural.** A second config sets `srcDir` at a folder the page router never reads. This repository proves it with the gallery's own second config, whose comment states it excludes the gallery structurally rather than by a filename convention, and a shell check fails on a leak.
+- **Astro: yes, structural.** A second config sets `srcDir` at a folder the page router never reads. This repository proves it with the card's own second config, `web/card.config.mjs`, whose comment states it keeps the card route out of the page build structurally rather than by a filename convention, and a shell check fails on a leak.
 - **Next: no.** The App Router has no build-time route exclusion. Its practical workaround is a `pageExtensions` regex over a filename pattern, which is the convention the Astro approach was chosen over, and a route group such as `app/(debug)/` needs a runtime environment check instead. Four open discussions in the Next.js repository ask for the feature, which is the clearest evidence it does not exist.
 - **vite-react: the question does not apply.** It builds a single-page app with no page router, so routes are client-side and a build has nothing to exclude. A card there is a second Rollup entry rather than a route, which is a third shape.
 
