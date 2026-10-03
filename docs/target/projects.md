@@ -73,7 +73,7 @@ Scaffold installs tooling and seeds. It does not fill the planning docs or the d
 
 1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write.
 2. For a UI project, invoke `canon:design-extract` to draft `canon/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
-3. Optionally invoke `canon:draft-figure` naming an architecture view and the document it belongs in, such as `/canon:draft-figure the components view in canon/context/overview.md`. It draws the view from the architecture and the requirements and renders it to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
+3. Optionally invoke `canon:draft-figure` naming an architecture view, such as system context or components, and the document it belongs in. It draws the view from the architecture and the requirements and renders it to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
 4. Start the feature loop. See [AI workflow](../workflow/ai-workflow.md) for the per-feature sequence.
 
 A machine without a renderer still gets the figure and is told which check was skipped.
