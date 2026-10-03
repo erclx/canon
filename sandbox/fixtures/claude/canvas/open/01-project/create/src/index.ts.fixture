@@ -1,0 +1,10 @@
+export interface Plan {
+  readonly name: string;
+  readonly monthly: number;
+}
+
+export const PLANS: readonly Plan[] = [
+  { name: "Starter", monthly: 0 },
+  { name: "Team", monthly: 12 },
+  { name: "Business", monthly: 40 },
+];
