@@ -13,3 +13,4 @@ Unordered. Nothing here is scheduled, and a task rises to `priority.md` when it 
 - [v04.0 search the task list](v04.0-search.md)
 - [v05.0 a dark theme](v05.0-dark-theme.md)
 - [v06.0 retry failed webhooks](v06.0-retry-webhooks.md)
+- [v08.0 an unused page size constant](v08.0-unused-page-size-constant.md)

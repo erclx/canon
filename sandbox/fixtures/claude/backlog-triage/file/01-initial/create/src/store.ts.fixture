@@ -1,5 +1,7 @@
 import type { Task } from './routes/tasks'
 
+export const DEFAULT_PAGE_SIZE = 50
+
 const tasks: Task[] = []
 
 export function allTasks(): Task[] {

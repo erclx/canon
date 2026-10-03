@@ -9,12 +9,12 @@ description: Why the backlog gets a measured verdict per row with a lean toward 
 
 Without this skill, the backlog only grows. `task-board` declines or archives one named task, and nothing reads the backlog as a whole, so a row stays until somebody happens to remember it and decides by hand. The orchestrator's backlog re-test only clears a row upward onto the board, so no sweep ever takes one off. A backlog past fifty rows had no surface that could say which of them still mattered.
 
-Three failure modes cost more than the rest. A pass that judges a row by what its task file says rather than by the tree keeps every row, since a task file reads as live the day it was written and every day after. A pass that applies its own verdicts decides rows on silence, which ships a decline nobody approved on a board with no history to restore it from. And a keep that carries no measurement is the default nobody argues with, so a triage without a lean toward decline ends with the same backlog it started with.
+Four failure modes cost more than the rest. A pass that judges a row by what its task file says rather than by the tree keeps every row, since a task file reads as live the day it was written and every day after. A pass that applies its own verdicts decides rows on silence, which ships a decline nobody approved on a board with no history to restore it from. A keep that carries no measurement is the default nobody argues with, so a triage without a lean toward decline ends with the same backlog it started with. And a keep that measures only that the defect still exists keeps nearly everything, since a row filed against the tree almost always still reproduces. One pass suggested keeping 24 of 27 rows that way, where the operator kept 6 and promoted 1.
 
 ## Must
 
 - Measure every row against the tree and the log during the pass, carrying a count, a path, or a commit rather than the task file's own claim
-- Suggest decline for any row this pass cannot argue for, putting the burden of proof on keep and promote
+- Suggest keep or promote only for a row that names a cost, being a wrong result the pass observed or a case someone hit, including a user asking for a feature or working around its absence, or a reach, being a defect on a path the project ships that changes what its users or targets receive, hit or not, and suggest decline for a row whose defect merely still exists
 - Name the commit or pull request per outcome position before suggesting archive
 - File into an ordinary intake folder, so the intake list and answer verbs read and write it unchanged
 - Carry the verdict in the suggestion line and the task stem in the item heading, rather than in new fields

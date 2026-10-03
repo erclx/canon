@@ -21,7 +21,7 @@ stage_history() {
 }
 
 stage_setup() {
-  log_info "file  : six backlog rows, one per verdict shape, and a tree to measure them against"
+  log_info "file  : seven backlog rows, one per verdict shape, and a tree to measure them against"
   log_info "apply : the same board plus an answered triage folder carrying one override"
 
   select_or_route_scenario "Which scenario?" "file" "apply"
@@ -31,13 +31,14 @@ stage_setup() {
     stage_history
 
     log_step "Scenario ready: every backlog row filed with a verdict"
-    log_info "Context: .canon/tasks/backlog.md lists six rows, and priority.md holds"
+    log_info "Context: .canon/tasks/backlog.md lists seven rows, and priority.md holds"
     log_info "  one control row, v07.0, that a triage never files"
     log_info "  v01.0 names console.log calls the tree no longer holds"
     log_info "  v02.0's outcomes shipped in #58 under other work"
-    log_info "  v03.0's missing rate limit still reproduces"
+    log_info "  v03.0's missing rate limit reproduces on routes every client calls"
     log_info "  v04.0 waited on pagination, which landed in #61"
     log_info "  v05.0 and v06.0 carry no argument, since no interface or webhook exists"
+    log_info "  v08.0's unused export reproduces but names no cost"
     log_info ""
     log_info "Action:  /canon:backlog-triage"
     log_info "Expect:  declared in fixtures/claude/backlog-triage/file/expect.toml"
