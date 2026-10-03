@@ -38,7 +38,7 @@ Two families carry the page. A humanist sans sets every role but `tide`, and a t
 
 ## Spacing
 
-Six steps run from a quarter rem to four, doubling after the second.
+Six steps run from a quarter rem to four. The first four double, and the last two add one rem each.
 
 | Step | Multiplier | Value         |
 | ---- | ---------- | ------------- |
