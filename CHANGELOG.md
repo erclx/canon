@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.18.0](https://github.com/erclx/canon/compare/v5.17.0...v5.18.0) (2026-10-03)
+
+
+### Features
+
+* **canvas:** edit an element's basic properties from the inspector ([#2118](https://github.com/erclx/canon/issues/2118)) ([c5aa2e5](https://github.com/erclx/canon/commit/c5aa2e55b83f2da7eb1c725798a4ba3c6070f229))
+* **claude:** cover Cloudflare and Vercel in one deploy-app skill ([#2121](https://github.com/erclx/canon/issues/2121)) ([71d3387](https://github.com/erclx/canon/commit/71d3387442eae6cc106eb9fe8595f1a11c5cdc2f))
+* **gate:** cap words per decision, risk bullets, and requirements ([#2119](https://github.com/erclx/canon/issues/2119)) ([a0f3b68](https://github.com/erclx/canon/commit/a0f3b68c9079e80422656716c7c94473ab66b213))
+
 ## [5.17.0](https://github.com/erclx/canon/compare/v5.16.0...v5.17.0) (2026-10-03)
 
 
