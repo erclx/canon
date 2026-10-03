@@ -6,6 +6,7 @@ import {
   declinedDir,
   isReservedStem,
   readOutcomes,
+  readPendingBranches,
   readPlanTargets,
   readPullRequest,
   resolveLivePlan,
@@ -1065,6 +1066,10 @@ function nothing(): CitedResult {
  * about, and a task naming none leaves the row untested rather than settled,
  * because the only local signal left is the checkbox that produced the defect.
  *
+ * A task still carrying a pending branch is untested whatever its recorded
+ * pull request says, since a slice is in flight that has recorded no number yet
+ * and the landed one may belong to an earlier slice.
+ *
  * The outcome list comes off `readOutcomes` rather than a pattern of its own,
  * so this check cannot disagree with the archive and outcome verbs about which
  * checkboxes are outcomes and which sit inside a block a task displays.
@@ -1113,6 +1118,15 @@ async function checkCitedTask(
   const text = await readFile(live, 'utf8')
   const { open, closed } = readOutcomes(text)
   if (open.length > 0 || closed.length === 0) return nothing()
+
+  const pending = readPendingBranches(text)
+  if (pending.length > 0) {
+    return untestedRow(
+      group,
+      subject,
+      `waits on ${cited}, which closed every outcome but holds a pending branch (${pending.join(', ')}) that has yet to record its pull request.`,
+    )
+  }
 
   // The last number is the newest slice, and an earlier one closed without
   // merging never lands, so only the last says whether the work reached trunk.

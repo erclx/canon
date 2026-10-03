@@ -512,12 +512,18 @@ export async function recordPlan(
  * line, so the merge of an earlier slice cannot archive the task in the window
  * before this branch's own number is recorded. A rerun that ticks nothing adds
  * no marker, since its branch has already recorded or is already listed.
+ *
+ * `branchPulls` holds the pull request numbers the branch's own head carries.
+ * One already on the task's `Pull request:` line means the branch recorded its
+ * number, so a marker would outlive the branch with nothing left to clear it.
+ * An absent or empty list keeps the marker, which is the first slice's case.
  */
 export async function closeOutcomes(
   root: string,
   selector: RecordSelector,
   positions: readonly number[],
   branch?: string,
+  branchPulls: readonly number[] = [],
 ): Promise<CloseOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
@@ -541,8 +547,12 @@ export async function closeOutcomes(
     )
   }
 
+  const recorded = readPullRequest(result.text).some((number) =>
+    branchPulls.includes(number),
+  )
+
   const text =
-    result.closed.length > 0 && branch
+    result.closed.length > 0 && branch && !recorded
       ? writePendingBranch(result.text, branch).text
       : result.text
 

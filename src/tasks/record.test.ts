@@ -737,6 +737,46 @@ describe('closeOutcomes', () => {
     await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
   })
 
+  it('should leave the marker off when the branch pull request is already listed', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [ ] Outcome: one'],
+      pullRequest: 412,
+    })
+
+    const outcome = await closeOutcomes(
+      ROOT,
+      { kind: 'stem', stem },
+      [1],
+      'feat/a',
+      [412],
+    )
+
+    expect(outcome).toMatchObject({ ok: true, pending: [] })
+    await expect(readTask(stem)).resolves.not.toContain('Pending branch:')
+  })
+
+  it('should write the marker when the branch pull request is not listed', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [ ] Outcome: one'],
+      pullRequest: 411,
+    })
+
+    await closeOutcomes(ROOT, { kind: 'stem', stem }, [1], 'feat/b', [412])
+
+    await expect(readTask(stem)).resolves.toContain('Pending branch: feat/b\n')
+  })
+
+  it('should write the marker when the branch has no pull request', async () => {
+    const stem = await seedTask({
+      outcomes: ['- [ ] Outcome: one'],
+      pullRequest: 411,
+    })
+
+    await closeOutcomes(ROOT, { kind: 'stem', stem }, [1], 'feat/b', [])
+
+    await expect(readTask(stem)).resolves.toContain('Pending branch: feat/b\n')
+  })
+
   it('should add a second closing branch beside the first', async () => {
     const stem = await seedTask({
       outcomes: ['- [ ] Outcome: one', '- [ ] Outcome: two'],
