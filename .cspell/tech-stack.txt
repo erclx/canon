@@ -7,7 +7,9 @@ asyncio
 autocompact
 axios
 backgrounded
+bhvr
 bierner
+calcmode
 calibri
 cambria
 canva
@@ -35,9 +37,11 @@ dotglob
 dunder
 elif
 enotdir
+entr
 errexit
 errorf
 esbuild
+eudc
 excalidraw
 excalifont
 execa
@@ -49,8 +53,11 @@ fatalf
 firecrawl
 flowchart
 fmla
+fntdata
+fontdata
 friendsofphp
 fromdateiso
+fvar
 getline
 gitattributes
 gitdir
@@ -109,6 +116,7 @@ ollama
 oxlint
 oxlintrc
 packument
+panose
 parametrize
 pathlib
 pathspec
@@ -150,12 +158,15 @@ scrollend
 semgrep
 setattr
 setsid
+sfnt
 shdw
 shiki
 sidepanel
 sigpipe
 slidenum
 soffice
+spid
+spids
 stackr
 startswith
 statusline

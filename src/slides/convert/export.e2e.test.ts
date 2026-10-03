@@ -19,6 +19,7 @@ import {
   Sections,
 } from '@/slides/convert/export'
 import type { SlideMeta } from '@/slides/convert/walk'
+import { testFace } from '@/slides/package/test-face'
 
 /**
  * Exports a four-slide fixture deck through a real Chromium and reads the XML
@@ -43,7 +44,14 @@ const TOKENS = `:root {
   --type-body-family: "Fixture Sans Variable", sans-serif;
 }`
 
-const DECK = { title: 'Fixture deck', mark: 'photo.png' }
+const DECK = {
+  title: 'Fixture deck',
+  mark: 'photo.png',
+  fonts: [
+    { family: 'Fixture Sans', path: 'fonts/fixture.ttf' },
+    { family: 'Fixture Sans', weight: 700, path: 'fonts/locked.ttf' },
+  ],
+}
 
 const STYLE = `
   body { margin: 0; width: 1280px; height: 720px; background: #FBFAF8; color: #2C2C29; font: 24px/32px var(--type-body-family, system-ui); }
@@ -101,8 +109,15 @@ const SLIDES: Record<string, string> = {
   '03-backup.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-hidden data-footer="off" style="--color-text: #FFFFFF">
     <h1>Backup</h1>
   </body></html>`,
-  '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-footer-center="Appendix only">
+  '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}
+    .second { position: absolute; left: 96px; top: 200px; margin: 0; }
+    .first { position: absolute; left: 96px; top: 300px; width: 240px; height: 80px; margin: 0; background-image: linear-gradient(90deg, #B45309, #0F766E); color: #FFFFFF; }
+    .spun { position: absolute; left: 96px; top: 420px; margin: 0; }
+  </style></head><body data-footer-center="Appendix only" data-transition="push" data-transition-duration="1s">
     <h1>Appendix</h1>
+    <p class="second" data-enter="fly" data-enter-order="2">Second in</p>
+    <div class="first" data-enter="fade" data-enter-order="1">First in</div>
+    <p class="spun" data-enter="spin">Never in</p>
   </body></html>`,
 }
 
@@ -144,6 +159,12 @@ function writeFixture(root: string): string {
   copyFileSync(PHOTO, join(source, 'photo.png'))
   writeFileSync(join(source, 'notes.txt'), 'not a slide')
   writeFileSync(join(source, 'deck.json'), JSON.stringify(DECK))
+  mkdirSync(join(source, 'fonts'))
+  writeFileSync(join(source, 'fonts', 'fixture.ttf'), testFace())
+  writeFileSync(
+    join(source, 'fonts', 'locked.ttf'),
+    testFace({ weight: 700, fsType: 0x0002 }),
+  )
   mkdirSync(join(root, '.claude', 'design'), { recursive: true })
   writeFileSync(join(root, '.claude', 'design', 'base.css'), TOKENS)
   return source
@@ -389,6 +410,79 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     expect(result.status === 'written' && result.fallbacks).toContainEqual(
       expect.objectContaining({ selector: 'p.soft', properties: ['filter'] }),
     )
+  })
+
+  const shapeId = (index: number, text: string): string | undefined => {
+    const xml = slideXml[index] ?? ''
+    const at = xml.indexOf(text)
+    const shapes = [
+      ...xml.slice(0, at).matchAll(/<p:cNvPr id="(\d+)" name="canon-/g),
+    ]
+    return shapes.at(-1)?.[1]
+  }
+  const pictureId = (index: number, alt: string): string | undefined =>
+    new RegExp(`<p:cNvPr id="(\\d+)" name="canon-[^"]*" descr="${alt}"`).exec(
+      slideXml[index] ?? '',
+    )?.[1]
+
+  it('should write the declared transition at the nearest speed', () => {
+    expect(slideXml[3]).toContain(
+      '<p:transition spd="slow"><p:push/></p:transition>',
+    )
+  })
+
+  it('should leave a slide declaring no motion without a transition', () => {
+    expect(slideXml[0]).not.toContain('<p:transition')
+  })
+
+  it('should target the two entrances in their declared order', () => {
+    const targets = [
+      ...(slideXml[3] ?? '').matchAll(
+        /nodeType="clickEffect">.*?<p:spTgt spid="(\d+)"\/>/g,
+      ),
+    ].map((match) => match[1])
+
+    expect(targets).toEqual([pictureId(3, 'First in'), shapeId(3, 'Second in')])
+  })
+
+  it('should report an unknown entrance by its element', () => {
+    expect(result.status === 'written' && result.refusedMotion).toEqual([
+      {
+        slide: 4,
+        message: 'p.spun: unknown entrance spin. Use fade, fly, wipe, or zoom',
+      },
+    ])
+  })
+
+  it('should embed the allowed face as a font part', () => {
+    expect(zip.file('ppt/fonts/font1.fntdata')).not.toBeNull()
+  })
+
+  it('should register the font part and its content type', async () => {
+    expect(await part('ppt/_rels/presentation.xml.rels')).toContain(
+      'Target="fonts/font1.fntdata"',
+    )
+    expect(await part('[Content_Types].xml')).toContain(
+      '<Default Extension="fntdata" ContentType="application/x-fontdata"/>',
+    )
+  })
+
+  it('should list the face and turn embedding on', async () => {
+    const presentation = await part('ppt/presentation.xml')
+
+    expect(presentation).toContain('embedTrueTypeFonts="1"')
+    expect(presentation).toContain(
+      '<p:embeddedFont><p:font typeface="Fixture Sans"/><p:regular r:id="rIdCanonFont1"/></p:embeddedFont>',
+    )
+  })
+
+  it('should refuse the restricted face by its path', () => {
+    expect(result.status === 'written' && result.refusedFonts).toEqual([
+      {
+        path: 'fonts/locked.ttf',
+        message: 'its license forbids embedding (fsType restricted)',
+      },
+    ])
   })
 
   it.skipIf(!hasOffice)(

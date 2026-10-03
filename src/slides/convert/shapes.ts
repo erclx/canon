@@ -521,10 +521,44 @@ export interface Fallback {
   readonly properties: readonly UnmappedProperty[]
 }
 
+/** A shape the slide will hold, by the record that produced it. */
+export interface NamedShape {
+  readonly record: number
+  readonly name: string
+}
+
 export interface SlidePlan {
   readonly ops: readonly DrawOp[]
   readonly fallbacks: readonly Fallback[]
   readonly refusedLinks: readonly RefusedLink[]
+  /** Every object name the ops carry, in the order they are drawn. */
+  readonly names: readonly NamedShape[]
+}
+
+/**
+ * pptxgenjs numbers shape ids itself, so the object name is the only handle a
+ * later pass over the written XML can find a shape by.
+ */
+export const objectNameOf = (record: number): string => `canon-${record}`
+
+/** An image's border is a second shape over it, named after the picture. */
+function named<T extends DrawOp>(op: T, record: number): T {
+  const name = objectNameOf(record)
+  const options = { ...op.options, objectName: name }
+  if (op.kind === 'image' && op.frame) {
+    return {
+      ...op,
+      options,
+      frame: { ...op.frame, objectName: `${name}-frame` },
+    }
+  }
+  return { ...op, options }
+}
+
+function namesOf(record: number, op: DrawOp): NamedShape[] {
+  const names = [op.options.objectName]
+  if (op.kind === 'image') names.push(op.frame?.objectName)
+  return names.flatMap((name) => (name ? [{ record, name }] : []))
 }
 
 function boxOp(record: ElementRecord): DrawOp | undefined {
@@ -729,7 +763,13 @@ export function planSlide(
   const ops: DrawOp[] = []
   const fallbacks: Fallback[] = []
   const refusedLinks: RefusedLink[] = []
+  const names: NamedShape[] = []
   const dropped = new Set<number>()
+  const add = (record: number, op: DrawOp): void => {
+    const withName = named(op, record)
+    ops.push(withName)
+    names.push(...namesOf(record, withName))
+  }
 
   for (const record of records) {
     if (record.parent !== null && dropped.has(record.parent)) {
@@ -740,7 +780,7 @@ export function planSlide(
     if (properties.length > 0) {
       dropped.add(record.id)
       fallbacks.push({ id: record.id, selector: record.selector, properties })
-      ops.push({
+      add(record.id, {
         kind: 'fallback',
         id: record.id,
         options: { ...position(record.bounds), altText: record.text },
@@ -757,8 +797,8 @@ export function planSlide(
             : record.kind === 'svg'
               ? svgOp(record)
               : tableOp(record, context, refusedLinks)
-    if (op) ops.push(op)
+    if (op) add(record.id, op)
   }
 
-  return { ops, fallbacks, refusedLinks }
+  return { ops, fallbacks, refusedLinks, names }
 }

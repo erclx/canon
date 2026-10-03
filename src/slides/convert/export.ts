@@ -42,13 +42,23 @@ import {
   type WalkedSlide,
   walkSlide,
 } from '@/slides/convert/walk'
+import { embedFonts, type FontNotice } from '@/slides/package/fonts'
+import {
+  type EntranceSpec,
+  entranceShapes,
+  type MotionNotice,
+  type SlideMotionEdit,
+  writeMotion,
+} from '@/slides/package/motion'
 
 /**
  * Turns a folder of HTML slides into one editable deck. Chromium lays each
  * slide out at 1280 by 720 in the project's tokens, `walkSlide` reads what it
  * placed, `planSlide` maps the records onto shapes, and an element whose CSS has
  * no mapping lands as a screenshot of itself. The first slide's computed tokens
- * build the masters, and `deck.json` sets the bands they carry.
+ * build the masters, and `deck.json` sets the bands they carry. Once pptxgenjs
+ * has written the package, `src/slides/package/` adds the transitions,
+ * entrances, and embedded faces it declares nothing for.
  *
  * Every browser reference this feature adds lives here, and the command reaches
  * it through a dynamic import so no other command resolves the engine.
@@ -94,6 +104,10 @@ export type ExportResult =
       readonly fallbacks: readonly SlideFallback[]
       readonly refusedLinks: readonly SlideRefusedLink[]
       readonly refusedCharts: readonly RefusedChart[]
+      /** Transitions and entrances left out, each with the reason. */
+      readonly refusedMotion: readonly MotionNotice[]
+      /** Faces `deck.json` lists that the deck does not carry, with the reason. */
+      readonly refusedFonts: readonly FontNotice[]
       /** What the deck master could not take from the project's tokens. */
       readonly notices: readonly string[]
     }
@@ -172,6 +186,7 @@ export async function exportHtmlDeck(
   const refusedLinks: SlideRefusedLink[] = []
   const refusedCharts: RefusedChart[] = []
   const patches: Patch[] = []
+  const motions: SlideMotionEdit[] = []
   const notices: string[] = []
 
   try {
@@ -227,9 +242,8 @@ export async function exportHtmlDeck(
         slide.background = { color: walked.background.hex }
       }
       if (walked.meta.isHidden) slide.hidden = true
-      for (const [opIndex, op] of plan.ops.entries()) {
-        const name = `canon-${slideNumber}-${opIndex + 1}`
-        await draw(page, slide, { slide: slideNumber, name }, op, patches)
+      for (const op of plan.ops) {
+        await draw(page, slide, slideNumber, op, patches)
       }
       for (const record of walked.charts) {
         const chart = planChart(record, chartTheme)
@@ -241,6 +255,24 @@ export async function exportHtmlDeck(
       }
       drawOverrides(slide, deck, theme, walked.meta)
       if (walked.meta.notes) slide.addNotes(walked.meta.notes)
+      const { transition } = walked.meta
+      const roots = new Set(
+        walked.entrances.flatMap(({ record }) =>
+          record === null ? [] : [record],
+        ),
+      )
+      const entrances = walked.entrances.map(
+        ({ record, ...spec }): EntranceSpec => ({
+          ...spec,
+          shapes: entranceShapes(record, walked.records, plan.names, roots),
+        }),
+      )
+      if (transition || entrances.length > 0) {
+        motions.push({
+          slide: slideNumber,
+          motion: { ...(transition ? { transition } : {}), entrances },
+        })
+      }
     }
     if (drifted.length > 0) {
       const noun = drifted.length === 1 ? 'slide' : 'slides'
@@ -262,12 +294,32 @@ export async function exportHtmlDeck(
   if (!(written instanceof Uint8Array)) {
     return refused('export-failed', 'pptxgenjs returned no buffer')
   }
-  const patched = await applyPatches(written, patches)
+  // A deck needing no edit keeps the bytes pptxgenjs wrote.
+  let packaged: Uint8Array = written
+  const refusedMotion: MotionNotice[] = []
+  const refusedFonts: FontNotice[] = []
+  if (patches.length > 0 || motions.length > 0 || deck.fonts.length > 0) {
+    const zip = await JSZip.loadAsync(written)
+    await applyPatches(zip, patches)
+    refusedMotion.push(...(await writeMotion(zip, motions)))
+    const faces = deck.fonts.map((font) => ({
+      family: font.family,
+      weight: font.weight,
+      style: font.style,
+      path: font.source,
+      bytes: readFileSync(font.path),
+    }))
+    refusedFonts.push(...(await embedFonts(zip, faces)))
+    packaged = await zip.generateAsync({
+      type: 'nodebuffer',
+      compression: 'DEFLATE',
+    })
+  }
 
   mkdirSync(outDir, { recursive: true })
   const fileName = `${basename(sourceDir)}.pptx`
   const pptxPath = join(outDir, fileName)
-  writeFileSync(pptxPath, patched)
+  writeFileSync(pptxPath, packaged)
 
   let mirrorPath: string | undefined
   if (options.mirror) {
@@ -284,6 +336,8 @@ export async function exportHtmlDeck(
     fallbacks,
     refusedLinks,
     refusedCharts,
+    refusedMotion,
+    refusedFonts,
     notices,
   }
 }
@@ -437,10 +491,11 @@ const base64 = (bytes: Buffer | string): string =>
 async function draw(
   page: Page,
   slide: PptxGenJS.Slide,
-  target: { readonly slide: number; readonly name: string },
+  slideNumber: number,
   op: DrawOp,
   patches: Patch[],
 ): Promise<void> {
+  const target = { slide: slideNumber, name: op.options.objectName ?? '' }
   if (op.kind === 'shape') {
     slide.addShape(op.shape, op.options)
   } else if (op.kind === 'text') {
@@ -448,18 +503,13 @@ async function draw(
   } else if (op.kind === 'table') {
     slide.addTable(op.rows, op.options)
   } else if (op.kind === 'image') {
-    slide.addImage({
-      ...op.options,
-      ...imageSource(op.src),
-      objectName: target.name,
-    })
+    slide.addImage({ ...op.options, ...imageSource(op.src) })
     if (op.radius > 0) patches.push({ ...target, radius: op.radius })
     if (op.frame) slide.addShape(op.radius > 0 ? 'roundRect' : 'rect', op.frame)
   } else if (op.kind === 'svg') {
     slide.addImage({
       ...op.options,
       data: `image/svg+xml;base64,${base64(op.markup)}`,
-      objectName: target.name,
     })
     patches.push({ ...target, png: await screenshot(page, op.id) })
   } else {
@@ -472,14 +522,13 @@ async function draw(
  * Two things pptxgenjs cannot write, fixed in the package it wrote. An SVG's
  * PNG fallback comes out as the SVG's own bytes under a `.png` name in Node, so
  * a viewer that cannot draw SVG gets a broken image, and a picture takes no
- * corner radius. Each patched picture is found by the object name `draw` gave
- * it, which is the only handle the written XML keeps.
+ * corner radius. Each patched picture is found by the object name `planSlide`
+ * gave it, which is the only handle the written XML keeps.
  */
 async function applyPatches(
-  deck: Uint8Array,
+  zip: JSZip,
   patches: readonly Patch[],
-): Promise<Buffer> {
-  const zip = await JSZip.loadAsync(deck)
+): Promise<void> {
   const bySlide = Map.groupBy(patches, (patch) => patch.slide)
   for (const [slideNumber, slidePatches] of bySlide) {
     const slidePath = `ppt/slides/slide${slideNumber}.xml`
@@ -504,7 +553,6 @@ async function applyPatches(
     }
     zip.file(slidePath, xml)
   }
-  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' })
 }
 
 function pictureXml(xml: string, name: string): string | undefined {

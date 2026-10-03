@@ -7,7 +7,7 @@ description: What each git hook runs, the five post-merge steps and their order,
 
 ## The hooks
 
-- `pre-commit` runs `lint-staged` (prettier, cspell, shfmt, shellcheck on staged files)
+- `pre-commit` runs `lint-staged`: prettier and cspell on staged `.json`, `.md`, and `.mdc` files, and shfmt and shellcheck on staged `.sh` files. A `.ts` commit runs neither prettier nor cspell, so an unknown word in code passes the commit and fails `check:spell` at `bun run check` or pre-push. Add a new term to `.cspell/tech-stack.txt` or `.cspell/project-terms.txt` in the commit that introduces it.
 - `commit-msg` runs `commitlint` against the conventional commit format
 - `pre-push` runs `bun run check`. After pushing, run `git status`. If files changed, commit the diff as `style(<scope>):` and push again.
 - `post-merge` runs five steps in order through `canon hooks post-merge`, covered below

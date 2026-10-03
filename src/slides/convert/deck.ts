@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, statSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
+import { basename, isAbsolute, join, relative, resolve } from 'node:path'
 
 /**
  * What belongs to the deck rather than to one slide, read from `deck.json`
@@ -27,6 +27,18 @@ export interface DeckConfig {
   readonly slideNumbers: boolean
   /** Absolute, resolved against the deck folder. */
   readonly mark?: string
+  /** The faces the package step embeds, in the order the deck lists them. */
+  readonly fonts: readonly DeckFont[]
+}
+
+export interface DeckFont {
+  readonly family: string
+  readonly weight: number
+  readonly style: 'normal' | 'italic'
+  /** Absolute, resolved against the deck folder and kept inside it. */
+  readonly path: string
+  /** The path as `deck.json` wrote it, which a refusal names. */
+  readonly source: string
 }
 
 export type DeckRead =
@@ -43,8 +55,10 @@ const DECK_FIELDS = new Set([
   'footer',
   'slideNumbers',
   'mark',
+  'fonts',
 ])
 const BAND_FIELDS = new Set<string>(['show', ...BAND_SLOTS])
+const FONT_FIELDS = new Set(['family', 'weight', 'style', 'path'])
 
 class FieldError extends Error {
   constructor(
@@ -133,7 +147,73 @@ function parse(raw: unknown, folder: string): DeckConfig {
       throw new FieldError('mark', `mark ${mark} does not exist`)
     }
   }
-  return { title, header, footer, slideNumbers, mark }
+  const fonts = fontList(raw.fonts, folder)
+  return { title, header, footer, slideNumbers, mark, fonts }
+}
+
+function isWithin(folder: string, path: string): boolean {
+  const inside = relative(folder, path)
+  return inside !== '' && !inside.startsWith('..') && !isAbsolute(inside)
+}
+
+/**
+ * A face is read from the deck folder only, so a `deck.json` cannot point the
+ * export at a file elsewhere on the machine and carry it out inside the deck.
+ */
+function fontList(value: unknown, folder: string): DeckFont[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) {
+    throw new FieldError('fonts', 'fonts must be a list')
+  }
+  return value.map((entry: unknown, index): DeckFont => {
+    const field = `fonts[${index}]`
+    if (!isRecord(entry)) {
+      throw new FieldError(field, `${field} must be an object`)
+    }
+    rejectUnknown(entry, FONT_FIELDS, `${field}.`)
+    const family = stringField(entry.family, `${field}.family`)
+    if (!family) {
+      throw new FieldError(`${field}.family`, `${field}.family is required`)
+    }
+    const weight = entry.weight ?? 400
+    if (
+      typeof weight !== 'number' ||
+      !Number.isInteger(weight) ||
+      weight < 1 ||
+      weight > 1000
+    ) {
+      throw new FieldError(
+        `${field}.weight`,
+        `${field}.weight must be a whole number from 1 to 1000`,
+      )
+    }
+    const style = entry.style ?? 'normal'
+    if (style !== 'normal' && style !== 'italic') {
+      throw new FieldError(
+        `${field}.style`,
+        `${field}.style must be normal or italic`,
+      )
+    }
+    const source = stringField(entry.path, `${field}.path`)
+    if (!source) {
+      throw new FieldError(`${field}.path`, `${field}.path is required`)
+    }
+    const path = resolve(folder, source)
+    const outside = new FieldError(
+      `${field}.path`,
+      `${field}.path ${source} lies outside the deck folder`,
+    )
+    if (!isWithin(folder, path)) throw outside
+    if (!existsSync(path) || !statSync(path).isFile()) {
+      throw new FieldError(
+        `${field}.path`,
+        `${field}.path ${path} does not exist`,
+      )
+    }
+    // A link inside the folder can still lead out of it.
+    if (!isWithin(realpathSync(folder), realpathSync(path))) throw outside
+    return { family, weight, style, path, source }
+  })
 }
 
 export function readDeck(folder: string): DeckRead {

@@ -15,6 +15,7 @@ function deck(overrides: Partial<DeckConfig> = {}): DeckConfig {
     header: { show: false },
     footer: { show: true, left: 'Q3 review' },
     slideNumbers: true,
+    fonts: [],
     ...overrides,
   }
 }

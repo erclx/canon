@@ -623,3 +623,51 @@ describe('UNMAPPED_PROPERTIES', () => {
     ])
   })
 })
+
+describe('planSlide object names', () => {
+  it('should name a shape after the record it came from', () => {
+    const record = boxRecord({
+      ...base(7),
+      style: style({ background: color('F4F1EC') }),
+    })
+
+    const plan = planSlide([record], CONTEXT)
+
+    expect(plan.names).toEqual([{ record: 7, name: 'canon-7' }])
+  })
+
+  it('should carry the name on the op options', () => {
+    const op = only([textRecord({ ...base(3) })])
+
+    expect(op.options.objectName).toBe('canon-3')
+  })
+
+  it('should name an image frame apart from its picture', () => {
+    const record = imageRecord({
+      style: style({
+        borderWidth: edges(1),
+        borderColor: color('D6D3CE'),
+        borderStyle: 'solid',
+      }),
+    })
+
+    const names = planSlide([record], CONTEXT).names.map((each) => each.name)
+
+    expect(names).toEqual(['canon-1', 'canon-1-frame'])
+  })
+
+  it('should name a fallback picture after the element it stands in for', () => {
+    const parent = boxRecord({
+      style: style({ raw: raw({ filter: 'blur(4px)' }) }),
+    })
+    const child = textRecord({ ...base(2), parent: 1 })
+
+    const plan = planSlide([parent, child], CONTEXT)
+
+    expect(plan.names).toEqual([{ record: 1, name: 'canon-1' }])
+  })
+
+  it('should name nothing for a box that draws nothing', () => {
+    expect(planSlide([boxRecord()], CONTEXT).names).toEqual([])
+  })
+})
