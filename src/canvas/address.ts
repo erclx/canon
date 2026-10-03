@@ -62,7 +62,7 @@ export function addressOf(
 /** The element an address names, or nothing once the tag there differs. */
 export function elementAt(
   doc: Document,
-  address: ElementAddress,
+  address: Pick<ElementAddress, 'index' | 'tag'>,
 ): Element | undefined {
   const element = documentElements(doc)[address.index]
   return element?.tagName.toLowerCase() === address.tag ? element : undefined

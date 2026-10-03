@@ -1,9 +1,12 @@
 import { computed, signal } from '@preact/signals'
+import type { ElementAddress } from '@/canvas/address'
 import type { Frame, Page } from '@/canvas/content'
 
 /**
  * Everything the panels read. Type imports only from outside `client/`, since
  * this runs in the browser and a Node or Bun module would not bundle there.
+ * `@/canvas/address` is the one exception the client imports for values, since
+ * it imports nothing itself.
  */
 
 export type Theme = 'light' | 'dark'
@@ -19,11 +22,22 @@ export interface FrameRef {
   readonly frame: string
 }
 
+export interface ElementRef {
+  readonly index: number
+  readonly tag: string
+  /** Set by the server once the frame file changed since the pick. */
+  readonly stale?: boolean
+}
+
+export interface SelectionRef extends FrameRef {
+  readonly element?: ElementRef
+}
+
 export interface PagesRecord {
   readonly pages: readonly Page[]
   readonly tokens: TokenSource
   /** Absent when nothing is selected or the selected frame is gone. */
-  readonly selection?: FrameRef | null
+  readonly selection?: SelectionRef | null
 }
 
 export interface ChangeEvent {
@@ -61,8 +75,22 @@ export const frameVersions = signal<ReadonlyMap<string, number>>(new Map())
 
 export const view = signal<View>({ x: 0, y: 0, zoom: 0.5 })
 
-/** The one frame the operator pointed at, which Claude reads as "this one". */
-export const selection = signal<FrameRef | undefined>(undefined)
+/**
+ * The one frame, or element in it, the operator pointed at, which Claude reads
+ * as "this one".
+ */
+export const selection = signal<SelectionRef | undefined>(undefined)
+
+/** Each loaded frame's document by frame key, replaced on every reload. */
+export const frameDocuments = signal<ReadonlyMap<string, Document>>(new Map())
+
+/** The element under the pointer, in a frame or in the layers tree. */
+export const hoveredElement = signal<
+  { readonly key: string; readonly index: number } | undefined
+>(undefined)
+
+/** Frame keys whose layers are open in the pages panel. */
+export const expandedFrames = signal<ReadonlySet<string>>(new Set())
 
 /** Set while a frame follows the pointer, so the surface can style it. */
 export const draggingFrame = signal<string | undefined>(undefined)
@@ -83,6 +111,15 @@ export const selectedFrame = computed<Frame | undefined>(() => {
   return page.frames.find((frame) => frame.name === chosen.frame)
 })
 
+/** The selected element when its frame is on the page being shown. */
+export const selectedElement = computed<
+  { readonly frame: Frame; readonly element: ElementRef } | undefined
+>(() => {
+  const frame = selectedFrame.value
+  const element = selection.value?.element
+  return frame && element ? { frame, element } : undefined
+})
+
 export function frameKey(page: string, frame: Pick<Frame, 'file'>): string {
   return `${page}/${frame.file}`
 }
@@ -99,6 +136,18 @@ export function toggleFrameTheme(key: string): void {
   const next = new Map(frameThemes.value)
   next.set(key, frameTheme(key) === 'dark' ? 'light' : 'dark')
   frameThemes.value = next
+}
+
+export function registerFrameDocument(key: string, doc: Document): void {
+  const next = new Map(frameDocuments.value)
+  next.set(key, doc)
+  frameDocuments.value = next
+}
+
+export function toggleLayers(key: string): void {
+  const next = new Set(expandedFrames.value)
+  if (!next.delete(key)) next.add(key)
+  expandedFrames.value = next
 }
 
 export function applyRecord(record: PagesRecord): void {
@@ -140,6 +189,20 @@ export async function applyChange(
   await loadPages(fetchImpl)
 }
 
+const MISMATCH_NOTICE =
+  'Could not select that element, since the browser and the file count the elements of this frame differently, as with a table written without its tbody.'
+
+async function refusalReason(response: Response): Promise<string | undefined> {
+  try {
+    const body: unknown = await response.json()
+    return typeof body === 'object' && body !== null && 'reason' in body
+      ? String(body.reason)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * Posts one write and reports a refusal in the panel rather than failing
  * silently. A refusal also rereads the page list, so a position the server
@@ -156,7 +219,14 @@ async function write(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (!response.ok) throw new Error(`status ${response.status}`)
+    if (!response.ok) {
+      writeError.value =
+        (await refusalReason(response)) === 'address-mismatch'
+          ? MISMATCH_NOTICE
+          : `Could not save (status ${response.status}). Check canon canvas serve is still running.`
+      await loadPages(fetchImpl)
+      return
+    }
     writeError.value = undefined
   } catch (error) {
     writeError.value = `Could not save (${error instanceof Error ? error.message : 'unknown'}). Check canon canvas serve is still running.`
@@ -171,6 +241,25 @@ export async function selectFrame(
 ): Promise<void> {
   selection.value = ref
   await write('/api/selection', ref ?? {}, fetchImpl)
+}
+
+/**
+ * Selects one element of a frame, opens that frame's layers so the tree shows
+ * the pick, and records it where Claude reads it. The server checks the
+ * address against the file and refuses one it cannot match.
+ */
+export async function selectElement(
+  ref: FrameRef,
+  key: string,
+  address: ElementAddress,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  selection.value = {
+    ...ref,
+    element: { index: address.index, tag: address.tag },
+  }
+  if (!expandedFrames.value.has(key)) toggleLayers(key)
+  await write('/api/selection', { ...ref, element: address }, fetchImpl)
 }
 
 /**
@@ -270,6 +359,9 @@ export function resetState(): void {
   frameVersions.value = new Map()
   view.value = { x: 0, y: 0, zoom: 0.5 }
   selection.value = undefined
+  frameDocuments.value = new Map()
+  hoveredElement.value = undefined
+  expandedFrames.value = new Set()
   draggingFrame.value = undefined
   writeError.value = undefined
 }

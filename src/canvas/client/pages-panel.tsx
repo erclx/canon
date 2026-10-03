@@ -1,8 +1,11 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
+import { Layers } from '@/canvas/client/layers'
 import type { Frame } from '@/canvas/content'
 import {
   currentPage,
+  expandedFrames,
+  frameKey,
   isLoaded,
   loadError,
   pages,
@@ -10,6 +13,7 @@ import {
   selectedPage,
   selectFrame,
   theme,
+  toggleLayers,
   toggleTheme,
 } from '@/canvas/client/state'
 
@@ -78,25 +82,47 @@ function FrameList({ onFocusFrame }: PagesPanelProps): JSX.Element | null {
   }
   return (
     <ul class="list" aria-label="Frames">
-      {page.frames.map((frame) => (
-        <li key={frame.name}>
-          <button
-            type="button"
-            class="row"
-            title={frame.name}
-            aria-current={
-              frame.name === selectedFrame.value?.name ? 'true' : undefined
-            }
-            onClick={() => {
-              onFocusFrame(frame)
-              void selectFrame({ page: page.name, frame: frame.name })
-            }}
-          >
-            <span class="row-label">{frame.name}</span>
-            <span class="row-meta">{frame.width}</span>
-          </button>
-        </li>
-      ))}
+      {page.frames.map((frame) => {
+        const key = frameKey(page.name, frame)
+        const isOpen = expandedFrames.value.has(key)
+        return (
+          <li key={frame.name}>
+            <div class="frame-row">
+              <button
+                type="button"
+                class="disclosure"
+                aria-expanded={isOpen}
+                aria-label={`${isOpen ? 'Hide' : 'Show'} layers of ${frame.name}`}
+                title={`${isOpen ? 'Hide' : 'Show'} layers`}
+                onClick={() => toggleLayers(key)}
+              >
+                <span aria-hidden="true">{isOpen ? '▾' : '▸'}</span>
+              </button>
+              <button
+                type="button"
+                class="row"
+                title={frame.name}
+                aria-current={
+                  frame.name === selectedFrame.value?.name ? 'true' : undefined
+                }
+                onClick={() => {
+                  onFocusFrame(frame)
+                  void selectFrame({ page: page.name, frame: frame.name })
+                }}
+              >
+                <span class="row-label">{frame.name}</span>
+                <span class="row-meta">{frame.width}</span>
+              </button>
+            </div>
+            {isOpen ? (
+              <Layers
+                frame={{ page: page.name, frame: frame.name }}
+                frameKey={key}
+              />
+            ) : null}
+          </li>
+        )
+      })}
     </ul>
   )
 }

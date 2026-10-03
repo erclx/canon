@@ -2,6 +2,7 @@
 /** @jsxImportSource preact */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { Window } from 'happy-dom'
 import { render } from 'preact'
 import { act } from 'preact/test-utils'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -17,6 +18,9 @@ import {
 import type { Frame, Page } from '@/canvas/content'
 
 let mount: HTMLDivElement
+
+/** The windows `loadFrame` takes a document from, closed after each case. */
+const frameHosts: Window[] = []
 
 function frame(name: string, overrides: Partial<Frame> = {}): Frame {
   return {
@@ -133,6 +137,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => render(null, mount))
   mount.remove()
+  for (const host of frameHosts.splice(0)) void host.happyDOM.close()
   globalThis.fetch = realFetch
 })
 
@@ -286,10 +291,55 @@ function figureFor(name: string): HTMLElement {
   return element
 }
 
-function shieldFor(name: string): HTMLElement {
-  const element = figureFor(name).querySelector<HTMLElement>('.frame-shield')
-  if (!element) throw new Error(`no shield on ${name}`)
+/** The frame's handle: pressing it selects the frame and dragging moves it. */
+function labelFor(name: string): HTMLElement {
+  const element = figureFor(name).querySelector<HTMLElement>('figcaption')
+  if (!element) throw new Error(`no label on ${name}`)
   return element
+}
+
+/**
+ * Stands in for the server serving a frame: writes the frame's markup into its
+ * document and fires the load the shell waits on.
+ */
+function loadFrame(name: string, body: string): Document {
+  const iframe = iframeFor(name)
+  /*
+   * Page loading is off, so the frame has no document until one is given. A
+   * separate window stands in for the frame's own, which computed style reads
+   * through.
+   */
+  const host = new Window()
+  frameHosts.push(host)
+  const doc = host.document as unknown as Document
+  doc.body.innerHTML = body
+  Object.defineProperty(iframe, 'contentDocument', {
+    configurable: true,
+    get: () => doc,
+  })
+  act(() => {
+    iframe.dispatchEvent(new Event('load'))
+  })
+  return doc
+}
+
+function indexIn(doc: Document, selector: string): number {
+  const target = doc.querySelector(selector)
+  return target ? [...doc.querySelectorAll('*')].indexOf(target) : -1
+}
+
+function clickIn(doc: Document, selector: string): void {
+  const target = doc.querySelector(selector)
+  if (!target) throw new Error(`no ${selector} in the frame`)
+  act(() => {
+    target.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true }),
+    )
+  })
+}
+
+function layersFor(name: string): HTMLElement | null {
+  return mount.querySelector<HTMLElement>(`[aria-label="Layers of ${name}"]`)
 }
 
 function pointer(
@@ -319,8 +369,8 @@ describe('selection', () => {
   it('should outline a frame the operator presses and record it', () => {
     renderApp([page('drafts', [frame('hero'), frame('phone')])])
 
-    pointer('pointerdown', shieldFor('hero'), 10, 10)
-    pointer('pointerup', shieldFor('hero'), 10, 10)
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
 
     expect(figureFor('hero').dataset.selected).toBe('true')
     expect(figureFor('phone').dataset.selected).toBeUndefined()
@@ -343,8 +393,8 @@ describe('selection', () => {
   it('should mark in the list the frame picked on the surface', () => {
     renderApp([page('drafts', [frame('hero'), frame('phone')])])
 
-    pointer('pointerdown', shieldFor('phone'), 10, 10)
-    pointer('pointerup', shieldFor('phone'), 10, 10)
+    pointer('pointerdown', labelFor('phone'), 10, 10)
+    pointer('pointerup', labelFor('phone'), 10, 10)
 
     expect(buttonNamed('phone1440').getAttribute('aria-current')).toBe('true')
     expect(buttonNamed('hero1440').getAttribute('aria-current')).toBeNull()
@@ -364,8 +414,8 @@ describe('selection', () => {
 
   it('should outline nothing when the reread names no frame', () => {
     renderApp([page('drafts', [frame('hero')])])
-    pointer('pointerdown', shieldFor('hero'), 10, 10)
-    pointer('pointerup', shieldFor('hero'), 10, 10)
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
 
     act(() => applyRecord(record([page('drafts', [frame('hero')])])))
 
@@ -376,13 +426,13 @@ describe('selection', () => {
 describe('drag', () => {
   it('should follow the pointer in surface units and write the new position on release', () => {
     renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
-    const shield = shieldFor('hero')
+    const label = labelFor('hero')
 
-    pointer('pointerdown', shield, 100, 100)
-    pointer('pointermove', shield, 150, 130)
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointermove', label, 150, 130)
     expect(figureFor('hero').style.left).toBe('140px')
     expect(figureFor('hero').style.top).toBe('120px')
-    pointer('pointerup', shield, 150, 130)
+    pointer('pointerup', label, 150, 130)
 
     expect(sentTo('/api/frames/move')).toEqual([
       { page: 'drafts', frame: 'hero', x: 140, y: 120 },
@@ -391,10 +441,10 @@ describe('drag', () => {
 
   it('should write nothing for a press that never moved', () => {
     renderApp([page('drafts', [frame('hero')])])
-    const shield = shieldFor('hero')
+    const label = labelFor('hero')
 
-    pointer('pointerdown', shield, 100, 100)
-    pointer('pointerup', shield, 100, 100)
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointerup', label, 100, 100)
 
     expect(sentTo('/api/frames/move')).toEqual([])
   })
@@ -402,19 +452,19 @@ describe('drag', () => {
   it('should not pan the surface while a frame is dragged', () => {
     renderApp([page('drafts', [frame('hero')])])
     const before = view.value
-    const shield = shieldFor('hero')
+    const label = labelFor('hero')
 
-    pointer('pointerdown', shield, 100, 100)
-    pointer('pointermove', shield, 180, 160)
-    pointer('pointerup', shield, 180, 160)
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointermove', label, 180, 160)
+    pointer('pointerup', label, 180, 160)
 
     expect(view.value).toEqual(before)
   })
 
   it('should move the selected frame with the arrow keys', () => {
     renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
-    pointer('pointerdown', shieldFor('hero'), 10, 10)
-    pointer('pointerup', shieldFor('hero'), 10, 10)
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
 
     press(figureFor('hero'), 'ArrowRight')
     press(figureFor('hero'), 'ArrowDown')
@@ -437,12 +487,12 @@ describe('drag', () => {
     const pages = [page('drafts', [frame('hero', { x: 0, y: 0 })])]
     renderApp(pages)
     failWrites(pages)
-    const shield = shieldFor('hero')
+    const label = labelFor('hero')
 
-    pointer('pointerdown', shield, 100, 100)
-    pointer('pointermove', shield, 150, 130)
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointermove', label, 150, 130)
     await act(async () => {
-      shield.dispatchEvent(
+      label.dispatchEvent(
         new PointerEvent('pointerup', {
           bubbles: true,
           clientX: 150,
@@ -470,8 +520,8 @@ describe('Inspector', () => {
       ]),
     ])
 
-    pointer('pointerdown', shieldFor('hero'), 10, 10)
-    pointer('pointerup', shieldFor('hero'), 10, 10)
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
 
     const text = mount.querySelector('[aria-label="Frame"]')?.textContent
     expect(text).toContain('hero')
@@ -483,10 +533,10 @@ describe('Inspector', () => {
 
   it('should show the new position while the frame is dragged', () => {
     renderApp([page('drafts', [frame('hero', { x: 0, y: 0 })])])
-    const shield = shieldFor('hero')
+    const label = labelFor('hero')
 
-    pointer('pointerdown', shield, 100, 100)
-    pointer('pointermove', shield, 150, 100)
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointermove', label, 150, 100)
 
     expect(mount.querySelector('[aria-label="Frame"]')?.textContent).toMatch(
       /x\s*100/,
@@ -503,13 +553,191 @@ describe('Inspector', () => {
 
   it('should offer no editable field in this slice', () => {
     renderApp([page('drafts', [frame('hero')])])
-    pointer('pointerdown', shieldFor('hero'), 10, 10)
-    pointer('pointerup', shieldFor('hero'), 10, 10)
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
 
     expect(
       mount.querySelector(
         '[aria-label="Frame"] input, [aria-label="Frame"] textarea',
       ),
+    ).toBeNull()
+  })
+})
+
+const HERO_BODY =
+  '<main><h1 class="title">Hero</h1><button class="cta" style="color: rgb(255, 0, 0); font-size: 20px; font-weight: 700">Start</button></main>'
+
+describe('Layers', () => {
+  it('should stay closed until the operator opens a frame', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    loadFrame('hero', HERO_BODY)
+
+    expect(layersFor('hero')).toBeNull()
+  })
+
+  it('should build the element tree of a loaded frame from its document', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    loadFrame('hero', HERO_BODY)
+
+    act(() => buttonNamed('Show layers of hero').click())
+
+    const tree = layersFor('hero')
+    expect(tree?.textContent).toContain('main')
+    expect(tree?.textContent).toContain('h1.title')
+    expect(tree?.textContent).toContain('button.cta')
+    expect(tree?.querySelector('ul ul ul')).not.toBeNull()
+  })
+
+  it('should select the element picked in the tree and outline it on the surface', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    act(() => buttonNamed('Show layers of hero').click())
+
+    act(() => {
+      const row = [
+        ...(layersFor('hero')?.querySelectorAll('button') ?? []),
+      ].find((candidate) => candidate.textContent?.startsWith('button.cta'))
+      row?.click()
+    })
+
+    const count = doc.querySelectorAll('*').length
+    expect(sentTo('/api/selection')).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        element: { index: indexIn(doc, 'button'), tag: 'button', count },
+      },
+    ])
+    expect(
+      figureFor('hero').querySelector('[data-outline="selected"]'),
+    ).not.toBeNull()
+  })
+})
+
+describe('element selection', () => {
+  it('should select the element clicked inside a frame and record its address', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    const count = doc.querySelectorAll('*').length
+    expect(sentTo('/api/selection')).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        element: { index: indexIn(doc, 'h1'), tag: 'h1', count },
+      },
+    ])
+    expect(figureFor('hero').dataset.selected).toBe('true')
+  })
+
+  it('should mark in the tree the element clicked on the surface', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    const current = layersFor('hero')?.querySelector('[aria-current="true"]')
+    expect(current?.textContent).toContain('button.cta')
+  })
+
+  it('should keep a click inside a frame from following a link', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<a href="/elsewhere">Go</a>')
+    const link = doc.querySelector('a')
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+
+    act(() => {
+      link?.dispatchEvent(click)
+    })
+
+    expect(click.defaultPrevented).toBe(true)
+  })
+
+  it('should move no frame when an element is clicked', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    expect(sentTo('/api/frames/move')).toEqual([])
+  })
+
+  it('should still move the frame dragged by its label after an element is selected', () => {
+    renderApp([page('drafts', [frame('hero', { x: 0, y: 0 })])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+    const label = labelFor('hero')
+
+    pointer('pointerdown', label, 100, 100)
+    pointer('pointermove', label, 140, 100)
+    pointer('pointerup', label, 140, 100)
+
+    expect(sentTo('/api/frames/move')).toEqual([
+      { page: 'drafts', frame: 'hero', x: 80, y: 0 },
+    ])
+  })
+
+  it('should tell the operator when the server cannot match the element', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderApp(pages)
+    const doc = loadFrame('hero', HERO_BODY)
+    globalThis.fetch = (async (_url: unknown, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? new Response(
+            '{"ok":false,"reason":"address-mismatch","detail":"counts differ"}',
+            { status: 409, headers: { 'content-type': 'application/json' } },
+          )
+        : new Response(JSON.stringify(record(pages)), {
+            headers: { 'content-type': 'application/json' },
+          })) as typeof fetch
+
+    await act(async () => {
+      clickIn(doc, 'button')
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(
+      mount.querySelector('[aria-label="Details"] [role="alert"]')?.textContent,
+    ).toContain('count the elements of this frame differently')
+  })
+})
+
+describe('Inspector element', () => {
+  it('should show the selected element tag and computed style, read-only', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    const panel = mount.querySelector('[aria-label="Element"]')
+    expect(panel?.textContent).toContain('button.cta')
+    expect(panel?.textContent).toMatch(/color\s*rgb\(255, 0, 0\)/)
+    expect(panel?.textContent).toMatch(/size\s*20px/)
+    expect(panel?.textContent).toMatch(/weight\s*700/)
+    expect(panel?.querySelector('input, textarea')).toBeNull()
+  })
+
+  it('should say the pick may have moved once the server reports it stale', () => {
+    act(() => {
+      applyRecord({
+        ...record([page('drafts', [frame('hero')])]),
+        selection: {
+          page: 'drafts',
+          frame: 'hero',
+          element: { index: 6, tag: 'button', stale: true },
+        },
+      })
+      render(<App />, mount)
+    })
+    loadFrame('hero', HERO_BODY)
+
+    expect(
+      mount.querySelector('[aria-label="Element"]')?.textContent,
+    ).toContain('changed since')
+    expect(
+      figureFor('hero').querySelector('[data-outline="selected"]'),
     ).toBeNull()
   })
 })

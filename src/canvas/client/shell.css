@@ -276,16 +276,33 @@ code {
   border-radius: 2px;
 }
 
-/* Over the frame, so a press selects and drags rather than reaching its page. */
-.frame-shield {
-  position: absolute;
-  inset: 0;
+/* The frame's handle, since a press inside the frame picks an element. */
+.frame-label {
   cursor: move;
   touch-action: none;
 }
 
-.frame[data-dragging='true'] .frame-shield {
+.frame[data-dragging='true'] .frame-label {
   cursor: grabbing;
+}
+
+.frame-body {
+  position: relative;
+}
+
+/* Inset by the iframe border, so a box lines up with the element it marks. */
+.element-outline {
+  position: absolute;
+  translate: 1px 1px;
+  pointer-events: none;
+}
+
+.element-outline[data-outline='hover'] {
+  outline: 1px dashed var(--color-accent);
+}
+
+.element-outline[data-outline='selected'] {
+  outline: 2px solid var(--color-accent);
 }
 
 /* Above its neighbors, so a frame dragged over another stays whole. */
@@ -367,4 +384,66 @@ code {
     border-right: 0;
     border-bottom: 1px solid var(--color-border);
   }
+}
+
+.frame-row {
+  display: flex;
+  align-items: center;
+}
+
+.frame-row .row {
+  flex: 1;
+  min-width: 0;
+}
+
+.disclosure {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: none;
+  color: var(--color-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.disclosure:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.layers {
+  margin: 0;
+  padding: 0 0 0 var(--space-sm);
+  list-style: none;
+}
+
+.layers-root {
+  padding-left: var(--space-lg);
+}
+
+.layer {
+  min-height: 24px;
+}
+
+.row-meta.layer-text {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One property a row, since a computed color or font stack outgrows a half. */
+.styles {
+  grid-template-columns: 1fr;
+}
+
+.styles dd {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -1,18 +1,23 @@
 /** @jsxImportSource preact */
 import type { JSX, RefObject } from 'preact'
-import { useEffect, useRef } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
+import { addressOf, documentElements, elementAt } from '@/canvas/address'
 import type { Frame } from '@/canvas/content'
 import {
   currentPage,
   draggingFrame,
   fitView,
   type FrameRef,
+  frameDocuments,
   frameKey,
   frameTheme,
   frameVersions,
+  hoveredElement,
   moveFrameTo,
   panBy,
   previewMove,
+  registerFrameDocument,
+  selectElement,
   selectFrame,
   selection,
   type Theme,
@@ -52,6 +57,48 @@ export interface SurfaceProps {
   readonly viewportRef: RefObject<HTMLDivElement | null>
 }
 
+/** A wheel turn in shell coordinates, wherever the pointer sat. */
+interface WheelTurn {
+  readonly deltaX: number
+  readonly deltaY: number
+  readonly isZoom: boolean
+  readonly clientX: number
+  readonly clientY: number
+}
+
+/**
+ * The frame's own document is a separate window, so an element in it fails an
+ * `instanceof Element` against the shell's window. The node type is the test
+ * that holds across both.
+ */
+function asElement(target: EventTarget | null): Element | undefined {
+  const node = target as Node | null
+  return node?.nodeType === 1 ? (node as Element) : undefined
+}
+
+function ElementOutline({
+  element,
+  kind,
+}: {
+  readonly element: Element
+  readonly kind: 'hover' | 'selected'
+}): JSX.Element {
+  const rect = element.getBoundingClientRect()
+  return (
+    <div
+      class="element-outline"
+      data-outline={kind}
+      aria-hidden="true"
+      style={{
+        left: `${rect.left}px`,
+        top: `${rect.top}px`,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+      }}
+    />
+  )
+}
+
 export function frameSrc(page: string, frame: Frame, version: number): string {
   const path = `/frames/${encodeURIComponent(page)}/${encodeURIComponent(frame.file)}`
   return version === 0 ? path : `${path}?v=${version}`
@@ -71,9 +118,11 @@ function applyFrameTheme(iframe: HTMLIFrameElement | null, value: Theme): void {
 function FrameView({
   page,
   frame,
+  onWheelTurn,
 }: {
   readonly page: string
   readonly frame: Frame
+  readonly onWheelTurn: (turn: WheelTurn) => void
 }): JSX.Element {
   const key = frameKey(page, frame)
   const version = frameVersions.value.get(key) ?? 0
@@ -83,10 +132,72 @@ function FrameView({
   const ref: FrameRef = { page, frame: frame.name }
   const isSelected =
     selection.value?.page === page && selection.value.frame === frame.name
+  /* Bumped when the frame document scrolls, so the outlines follow it. */
+  const [, setScrolled] = useState(0)
+  const doc = frameDocuments.value.get(key)
 
   useEffect(() => {
     applyFrameTheme(iframe.current, value)
   }, [value])
+
+  /*
+   * The frame shares the shell's origin, so its document takes listeners
+   * directly. A click selects the element under it and goes no further, so a
+   * link or a submit button in a draft never navigates the frame away.
+   */
+  const handleLoad = () => {
+    const element = iframe.current
+    const loaded = element?.contentDocument
+    applyFrameTheme(element, frameTheme(key))
+    if (!element || !loaded) return
+    registerFrameDocument(key, loaded)
+
+    loaded.addEventListener('click', (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      const target = asElement(event.target)
+      const address = target && addressOf(loaded, target)
+      if (address) void selectElement(ref, key, address)
+    })
+    loaded.addEventListener('submit', (event) => event.preventDefault())
+    loaded.addEventListener('mouseover', (event) => {
+      const target = asElement(event.target)
+      const index = target ? documentElements(loaded).indexOf(target) : -1
+      hoveredElement.value = index === -1 ? undefined : { key, index }
+    })
+    loaded.addEventListener('mouseleave', () => {
+      if (hoveredElement.value?.key === key) hoveredElement.value = undefined
+    })
+    loaded.addEventListener('scroll', () => setScrolled((n) => n + 1))
+    loaded.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault()
+        const rect = element.getBoundingClientRect()
+        const { zoom } = view.value
+        onWheelTurn({
+          deltaX: event.deltaX,
+          deltaY: event.deltaY,
+          isZoom: event.ctrlKey || event.metaKey,
+          clientX: rect.left + event.clientX * zoom,
+          clientY: rect.top + event.clientY * zoom,
+        })
+      },
+      { passive: false },
+    )
+  }
+
+  const picked =
+    isSelected && doc && selection.value?.element
+      ? selection.value.element
+      : undefined
+  const selectedNode =
+    doc && picked && !picked.stale ? elementAt(doc, picked) : undefined
+  const hovered = hoveredElement.value
+  const hoveredNode =
+    doc && hovered?.key === key
+      ? documentElements(doc)[hovered.index]
+      : undefined
 
   const select = () => {
     if (!isSelected) void selectFrame(ref)
@@ -94,6 +205,7 @@ function FrameView({
 
   const handlePointerDown = (event: PointerEvent) => {
     if (event.button !== 0) return
+    if ((event.target as HTMLElement | null)?.closest('.frame-theme')) return
     gesture.current = {
       startX: event.clientX,
       startY: event.clientY,
@@ -170,7 +282,14 @@ function FrameView({
         width: `${frame.width}px`,
       }}
     >
-      <figcaption class="frame-label">
+      {/* The frame's handle, since a press inside the frame picks an element. */}
+      <figcaption
+        class="frame-label"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+      >
         <span class="frame-name" title={frame.name}>
           {frame.name}
         </span>
@@ -187,23 +306,23 @@ function FrameView({
           {value === 'dark' ? 'Dark' : 'Light'}
         </button>
       </figcaption>
-      <iframe
-        ref={iframe}
-        title={frame.name}
-        src={frameSrc(page, frame, version)}
-        width={frame.width}
-        height={frame.height}
-        style={{ height: `${frame.height}px` }}
-        onLoad={() => applyFrameTheme(iframe.current, frameTheme(key))}
-      />
-      {/* Catches the pointer the frame's own document would otherwise take. */}
-      <div
-        class="frame-shield"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
-      />
+      <div class="frame-body">
+        <iframe
+          ref={iframe}
+          title={frame.name}
+          src={frameSrc(page, frame, version)}
+          width={frame.width}
+          height={frame.height}
+          style={{ height: `${frame.height}px` }}
+          onLoad={handleLoad}
+        />
+        {hoveredNode && hoveredNode !== selectedNode ? (
+          <ElementOutline element={hoveredNode} kind="hover" />
+        ) : null}
+        {selectedNode ? (
+          <ElementOutline element={selectedNode} kind="selected" />
+        ) : null}
+      </div>
     </figure>
   )
 }
@@ -266,19 +385,29 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     fitView(width, height)
   }, [page?.name])
 
-  const handleWheel = (event: WheelEvent) => {
-    event.preventDefault()
-    if (event.ctrlKey || event.metaKey) {
+  const handleWheelTurn = (turn: WheelTurn) => {
+    if (turn.isZoom) {
       const rect = viewportRef.current?.getBoundingClientRect()
-      const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+      const factor = turn.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP
       zoomAt(
         factor,
-        event.clientX - (rect?.left ?? 0),
-        event.clientY - (rect?.top ?? 0),
+        turn.clientX - (rect?.left ?? 0),
+        turn.clientY - (rect?.top ?? 0),
       )
       return
     }
-    panBy(-event.deltaX, -event.deltaY)
+    panBy(-turn.deltaX, -turn.deltaY)
+  }
+
+  const handleWheel = (event: WheelEvent) => {
+    event.preventDefault()
+    handleWheelTurn({
+      deltaX: event.deltaX,
+      deltaY: event.deltaY,
+      isZoom: event.ctrlKey || event.metaKey,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    })
   }
 
   const handlePointerDown = (event: PointerEvent) => {
@@ -316,7 +445,12 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
           style={{ transform: `translate(${x}px, ${y}px) scale(${zoom})` }}
         >
           {page?.frames.map((frame) => (
-            <FrameView key={frame.name} page={page.name} frame={frame} />
+            <FrameView
+              key={frame.name}
+              page={page.name}
+              frame={frame}
+              onWheelTurn={handleWheelTurn}
+            />
           ))}
         </div>
       </div>
