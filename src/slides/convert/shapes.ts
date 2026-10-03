@@ -1,5 +1,5 @@
 import type PptxGenJS from 'pptxgenjs'
-import type { SvgColors } from '@/slides/convert/svg'
+import { resolveSvgColors, type SvgColors } from '@/slides/convert/svg'
 
 /**
  * The contract between the walk, which runs inside the laid-out page, and the
@@ -548,7 +548,7 @@ function svgOp(record: Extract<ElementRecord, { kind: 'svg' }>): DrawOp {
   return {
     kind: 'svg',
     id: record.id,
-    markup: record.markup,
+    markup: resolveSvgColors(record.markup, record.colors),
     options: { ...position(record.box), altText: record.alt || record.text },
   }
 }
