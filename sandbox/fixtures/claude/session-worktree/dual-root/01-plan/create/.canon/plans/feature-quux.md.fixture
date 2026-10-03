@@ -1,0 +1,3 @@
+# Feature: quux
+
+Stub plan seeded for the dual-root dependency report. The project declares both a node manifest and a python manifest, neither installed against.

@@ -1,0 +1,3 @@
+# Feature: corge
+
+Stub plan seeded for the port report. The project carries the web layer's port helper, so Step 6 reads a number out of it rather than naming the stack default.

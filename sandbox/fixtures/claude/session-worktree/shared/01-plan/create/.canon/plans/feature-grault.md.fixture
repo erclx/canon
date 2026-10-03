@@ -1,0 +1,3 @@
+# Feature: grault
+
+Stub plan seeded for the submodule guard. It sits at the superproject root, which is the copy a session inside the submodule cannot reach.
