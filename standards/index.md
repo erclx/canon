@@ -10,6 +10,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Architecture reference](architecture.md): Shape and content rules for canon/ARCHITECTURE.md
 - [Board reference](board.md): Readiness groups, row cells, and ordering for priority.md, the unordered backlog.md beside it, and the generated index under .canon/tasks/
 - [Branch reference](branch.md): Branch naming format and type conventions
+- [Canvas reference](canvas.md): Page folders, frame files, the layout.json shape, token resolution, and what a frame must not assume on a local design canvas
 - [Commit reference](commit.md): Commit message format and type conventions
 - [Context entry reference](context.md): Shape and content rules for canon/context/<domain>.md entries
 - [Design reference](design.md): Shape and content rules for canon/DESIGN.md
