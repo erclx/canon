@@ -1,0 +1,7 @@
+export function pad(value: string, width: number): string {
+  return value.padStart(width, ' ')
+}
+
+export function legacyPad(value: string): string {
+  return '  ' + value
+}

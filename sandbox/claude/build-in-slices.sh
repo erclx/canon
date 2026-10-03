@@ -8,60 +8,13 @@ use_config() {
 }
 
 stage_stats() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-build-in-slices",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "bun test"
-  }
-}
-EOF
-
-  cat <<'EOF' >>CLAUDE.md
-
-# Text stats
-
-Run `bun test` to verify.
-EOF
-
-  mkdir -p src
-
   # Two behaviors, so a run that builds both in one pass leaves one commit
   # where the skill asks for at least two.
-  cat <<'EOF' >PLAN.md
-# Plan: text stats
-
-Add `src/stats.ts` with two functions and a test for each.
-
-1. `wordCount(text: string): number` counts runs of non-space characters.
-2. `lineCount(text: string): number` counts lines, where an empty string has zero.
-
-Files to touch: `src/stats.ts`, `src/stats.test.ts`.
-EOF
-
   # The out-of-scope defect. `legacyPad` is exported and imported nowhere, in
   # a file the plan does not name, so a run that removes it widened the branch.
-  cat <<'EOF' >src/format.ts
-export function pad(value: string, width: number): string {
-  return value.padStart(width, ' ')
-}
+  stage_fixtures claude build-in-slices stats 01-initial
 
-export function legacyPad(value: string): string {
-  return '  ' + value
-}
-EOF
-
-  cat <<'EOF' >src/format.test.ts
-import { expect, test } from 'bun:test'
-import { pad } from './format'
-
-test('pads to the width', () => {
-  expect(pad('a', 3)).toBe('  a')
-})
-EOF
+  mkdir -p src
 }
 
 stage_setup() {

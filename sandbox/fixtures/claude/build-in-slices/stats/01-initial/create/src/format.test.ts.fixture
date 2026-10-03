@@ -1,0 +1,6 @@
+import { expect, test } from 'bun:test'
+import { pad } from './format'
+
+test('pads to the width', () => {
+  expect(pad('a', 3)).toBe('  a')
+})
