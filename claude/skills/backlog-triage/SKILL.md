@@ -45,18 +45,27 @@ A row whose link resolves to no file gets an item anyway, carrying `decline` and
 
 Measure every claim the task makes against the tree and `git log` during this pass. Grep for the construct its defect names and count the sites, check whether each open outcome's behavior exists, and search the log for a commit or pull request that shipped it under another task. Never carry a figure from the task file forward as current, since the task states what was true when it was filed.
 
+Then gather the evidence Step 5 reads for each row that reproduces. Check whether its origin line or `## Findings` names an issue, a run, or a person it bit. Search the log for a commit or pull request that worked around it rather than fixing it. For a defect in something the project ships to other repositories, such as a rule, a seed, a scaffold, or a verb, name the shipped path it sits on. Record each one that is absent as absent rather than inferring it.
+
 Name the commit the pass measured against in the overview body.
 
 ### Step 5: pick the verdict
 
-Keep and promote carry the burden of proof. A row nobody can argue for from this pass's measurement is declined.
+Keep and promote carry the burden of proof, and a defect that still exists does not meet it. A row filed against the tree nearly always still reproduces, so a test of reproduction alone keeps almost every row.
 
-- **keep**: the defect or gap reproduces this pass, stated with a count or a path.
-- **promote**: it reproduces, and the thing it was waiting on has cleared, naming what cleared it.
+A row earns keep or promote only by naming one of two things from the evidence Step 4 gathered:
+
+- **A cost**: the defect gives a wrong result that this pass observed, by running the verb that carries it or reading the committed output that shows it, or that the row's evidence shows an issue, a run, or a person hit. A hit counts only while the pass does not measure it as fixed or as no longer recurring.
+- **A reach**: the defect sits on a shipped path, and every target that copies or runs that path receives it as a wrong instruction, a broken or unbounded step, or a wrong output.
+
+A plausible cost names nothing. A row arguing what could go wrong, with no observed output and no hit, is declined however likely the argument sounds. A missing improvement to a shipped surface is not a reach, and neither is a defect that shows only in this repository's own config, workflows, scripts, or fixtures.
+
+- **keep**: the defect reproduces this pass, stated with a count or a path, and the row names a cost or a reach, stated with the observation, the hit, or the shipped path.
+- **promote**: it qualifies for keep, and the thing it was waiting on has cleared, naming what cleared it.
 - **archive**: every open outcome is measured shipped, naming the commit or pull request per outcome position.
-- **decline**: anything else, including a defect the tree no longer holds, work superseded by another task, and a row whose argument rests only on its original filing.
+- **decline**: anything else, including a defect that reproduces but names no cost and no reach, a defect the tree no longer holds, work superseded by another task, and a row whose argument rests only on its original filing.
 
-Age is evidence in neither direction. A row untouched for months is not more declinable than one filed yesterday, and a row filed yesterday is not more worth keeping.
+Age is evidence in neither direction. A row untouched for months is not more declinable than one filed yesterday, and a row filed yesterday is not more worth keeping. An old hit is read the same way as a new one, by whether the pass measures it as still able to recur.
 
 ### Step 6: write the items
 
@@ -64,7 +73,7 @@ Write one item per row in the intake item format, one cluster file per domain th
 
 - `Problem:` states what this pass measured, with the count, path, or commit behind it
 - `Fix:` states what applying the verdict does to the board
-- `Worth it:` carries the verdict's reason in one clause
+- `Worth it:` names the cost or the reach the verdict rests on in one clause, or says the row names neither. A `yes` or a `later` carries no verdict on its own, so a decline can follow either word
 - `Open:` reads `decline, archive, keep, or promote?` on every item
 - `Suggested:` opens with exactly one of the four verdict tokens, then the reason. An archive suggestion lists every outcome position it closes, as `archive 1, 3: shipped in #NNN`
 - `Overlaps:` names a live board task that already carries the work, where one does
