@@ -7,6 +7,10 @@ set -o pipefail
 # past the Pick step. Run each under a permission mode that denies every tool
 # outside the read set, which is what keeps the session off any account rather
 # than the prompt asking it to stop.
+#
+# No arm stages both hosts or neither. That branch ends in the structured
+# question, which `dontAsk` denies and a `claude -p` run has nobody to answer,
+# so an arm there would score a denial rather than the ask.
 use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"
 }
