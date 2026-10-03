@@ -28,6 +28,11 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'sketch-design',
   },
   {
+    prompt:
+      'Draw the signup screen as a frame on the canvas, then restyle the element I just selected there.',
+    expect: 'canvas',
+  },
+  {
     prompt: 'Fire up the dev server the way this project documents it.',
     expect: 'project-commands',
   },
