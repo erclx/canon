@@ -23,6 +23,7 @@ import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
 import { register as intake } from '@/commands/intake'
 import { register as teach } from '@/commands/teach'
+import { register as canvas } from '@/commands/canvas'
 import { register as comments } from '@/commands/comments'
 import { register as context } from '@/commands/context'
 import { register as markdown } from '@/commands/markdown'
@@ -84,6 +85,7 @@ transcripts(program)
 tasks(program)
 intake(program)
 teach(program)
+canvas(program)
 comments(program)
 context(program)
 markdown(program)
