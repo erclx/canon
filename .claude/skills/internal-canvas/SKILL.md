@@ -10,7 +10,7 @@ Read `canon/context/features/canvas.md` for the layout, the content format, toke
 ## Working against the canvas
 
 - Pass `--root <provisioned dir>` to every verb and never point at `.canon/canvas/`. Selecting an element writes a real selection, so a test run against the live root changes what the operator has open.
-- Install dependencies in a fresh worktree before serving. The shell is bundled from `src/canvas/client/` at serve time, and a missing client dependency serves a blank shell with a `200`. Check the live shell as well as the captures, since a capture passes while the shell is blank.
+- Expect `canvas serve` to refuse with `missing-client-deps` in a fresh worktree, and run the `bun install` its detail names. Check the live shell as well as the captures, since a shell that builds wrong still passes every capture.
 - Drive the shell through `src/canvas/shell.e2e.test.ts` and wait on `load`, never `networkidle`. The page holds a connection open, so `networkidle` never settles. The suite skips where no browser binary exists, so run it locally before a shell change ships.
 
 ## Editing

@@ -11,7 +11,7 @@ Without this skill, a session editing canvas code:
 
 - Loads `internal-scripts`, whose body never mentions the canvas, and rediscovers each gotcha from a failing run.
 - Runs a verb against `.canon/canvas/` and writes a real selection into the operator's open canvas.
-- Verifies from captures alone while a missing client dependency serves a blank shell, since every capture still passes.
+- Verifies from captures alone while a shell that builds wrong serves a blank page, since every capture still passes.
 - Waits on `networkidle` in a browser walk and hangs on the connection the page holds open.
 - Adds a second write path for a property, skipping the hash check that refuses a stale address.
 - Binds a single-letter key without a focus check, so a letter typed into a field fires an action.
