@@ -194,6 +194,72 @@ describe('reading counts out of each record shape', () => {
     expect(counts).not.toHaveProperty('recordMissingRevisit')
   })
 
+  it('should count decisions past the word cap the record states', () => {
+    const record = {
+      ...contextRecord,
+      architecture: {
+        ...contextRecord.architecture,
+        wordCap: 150,
+        decisions: contextRecord.architecture.decisions.map((entry, index) => ({
+          ...entry,
+          words: index === 0 ? 151 : 150,
+        })),
+      },
+    }
+
+    expect(countsFor(specFor('context'), record)?.recordOverWords).toBe(1)
+  })
+
+  it('should omit the word key for a record stating no word cap', () => {
+    const counts = countsFor(specFor('context'), contextRecord)
+
+    expect(counts).not.toHaveProperty('recordOverWords')
+  })
+
+  it('should count a Risks section past the bullet cap the record states', () => {
+    const record = {
+      ...contextRecord,
+      architecture: {
+        ...contextRecord.architecture,
+        riskCap: 6,
+        risksBullets: 7,
+      },
+    }
+
+    expect(countsFor(specFor('context'), record)?.recordOverRisks).toBe(1)
+  })
+
+  it('should omit the risk key for a record stating no bullet cap', () => {
+    const record = {
+      ...contextRecord,
+      architecture: { ...contextRecord.architecture, risksBullets: 9 },
+    }
+
+    expect(countsFor(specFor('context'), record)).not.toHaveProperty(
+      'recordOverRisks',
+    )
+  })
+
+  it('should count a requirements record past its own word cap', () => {
+    const record = {
+      ...contextRecord,
+      requirements: { rel: 'canon/REQUIREMENTS.md', words: 601, wordCap: 600 },
+    }
+
+    expect(countsFor(specFor('context'), record)?.requirementsOverWords).toBe(1)
+  })
+
+  it('should omit the requirements key for a record stating no word cap', () => {
+    const record = {
+      ...contextRecord,
+      requirements: { rel: 'canon/REQUIREMENTS.md', words: 601 },
+    }
+
+    expect(countsFor(specFor('context'), record)).not.toHaveProperty(
+      'requirementsOverWords',
+    )
+  })
+
   /**
    * Zero here would read as a record measured against a ceiling and found
    * conforming, where the truth is that it declared none to measure against.

@@ -24,8 +24,10 @@ import {
   coveredCount,
   isOverCount,
   isOverLength,
+  isOverRisks,
   measureArchitecture,
   missingRevisit,
+  overWords,
   testableCount,
 } from '@/context/architecture'
 import { auditCitations, type CitationReport } from '@/context/citations'
@@ -56,6 +58,12 @@ import {
   resolveFolders,
 } from '@/context/folders'
 import { isGating } from '@/context/gate'
+import {
+  isOverWordCap,
+  measureRequirements,
+  requirementsRel,
+  type RequirementsReport,
+} from '@/context/requirements'
 import { auditIndexes, type FolderDrift } from '@/context/index-drift'
 import {
   measureWireframeFolder,
@@ -96,7 +104,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, its own entry cap, and its word weight, and wireframe states against their evidence folders',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, entry cap, word cap, and risk cap, the requirements record against its own word cap, and wireframe states against their evidence folders',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -125,8 +133,10 @@ export function register(program: Command): void {
         'measures it. A record stating an entry cap gates the same way when',
         'it holds more decisions than the cap, and a record stating that',
         'every decision closes with a revisit sentence gates when one lacks',
-        'it. A record stating none of the three is reported and never',
-        'gated. --gate widens the gate to the other two',
+        'it. A record stating a word cap a decision or a risk bullet cap',
+        'gates past either, and a requirements record stating a word cap',
+        'gates past it. A record stating none of these is reported and',
+        'never gated. --gate widens the gate to the other two',
         'findings that are facts rather than judgments: a missing required',
         'section and index drift. A context entry requires Overview and',
         'Layout, and a wireframe requires Regions, States, Copy, and Not on',
@@ -658,6 +668,7 @@ async function runAudit(
   // record. A run that never looked and a project with nothing to look at are
   // different answers, and one value for both reports the second as the first.
   const record = gateOnly ? undefined : await measureArchitecture(root)
+  const requirements = gateOnly ? undefined : await measureRequirements(root)
   const wireframes = gateOnly
     ? []
     : (
@@ -681,6 +692,7 @@ async function runAudit(
     reportProvenance(entries, folders)
     reportDrift(drift)
     reportRecord(record, root)
+    reportRequirements(requirements, root)
     reportWireframeStates(wireframes)
     outro()
   }
@@ -719,6 +731,8 @@ async function runAudit(
         // target that never wrote one is entitled to. Absent says the run
         // never looked, which is `--citations-only`.
         architecture: gateOnly ? undefined : (record ?? null),
+        // The same three states for the requirements record.
+        requirements: gateOnly ? undefined : (requirements ?? null),
         // Absent under `--citations-only`, for the same reason as above. An
         // empty array under the ordinary run says the project carries no
         // wireframes folder or no entry carrying a States table, which is a
@@ -744,6 +758,10 @@ async function runAudit(
     recordOverCount: record !== undefined && isOverCount(record),
     recordMissingRevisit:
       record !== undefined && missingRevisit(record).length > 0,
+    recordOverWords: record !== undefined && overWords(record).length > 0,
+    recordOverRisks: record !== undefined && isOverRisks(record),
+    requirementsOverWords:
+      requirements !== undefined && isOverWordCap(requirements),
     sections,
     drift,
     wireframes,
@@ -1152,11 +1170,44 @@ function reportRecord(
   const { allowances } = report
 
   logInfo(
-    `${plural(report.words, 'word')} across ${plural(report.lines, 'line')}, read alongside the weight judgment a session makes by reading the file. This never gates.`,
+    `${plural(report.words, 'word')} across ${plural(report.lines, 'line')}. The whole file's count never gates.`,
   )
   if (report.risksWords !== undefined) {
     logInfo(
-      `\`## Risks / open questions\` holds ${plural(report.risksWords, 'word')}, weighed the same way and read alongside the same judgment.`,
+      `\`## Risks / open questions\` holds ${plural(report.risksWords, 'word')}.`,
+    )
+  }
+
+  const longDecisions = overWords(report)
+  if (report.wordCap === undefined) {
+    logInfo(
+      'No word cap a decision stated, so each decision word count is reported and never gated.',
+    )
+  } else if (longDecisions.length > 0) {
+    for (const entry of longDecisions) {
+      logError(
+        `"${entry.heading}" holds ${entry.words} words against a cap of ${report.wordCap} a decision.`,
+      )
+    }
+  } else {
+    logInfo(
+      `Every decision fits the cap of ${report.wordCap} words a decision.`,
+    )
+  }
+
+  if (report.riskCap === undefined) {
+    logInfo('No risk bullet cap stated, so the Risks section is never gated.')
+  } else if (report.risksBullets === undefined) {
+    logWarn(
+      `The record states a cap of ${report.riskCap} risk bullets and carries no \`## Risks / open questions\` section to count.`,
+    )
+  } else if (isOverRisks(report)) {
+    logError(
+      `${plural(report.risksBullets, 'risk bullet')} against a cap of ${report.riskCap}, nested bullets counted.`,
+    )
+  } else {
+    logInfo(
+      `${plural(report.risksBullets, 'risk bullet')} against a cap of ${report.riskCap}, nested bullets counted.`,
     )
   }
 
@@ -1255,6 +1306,35 @@ function reportRecord(
       })
       .join('\n'),
   )
+}
+
+/** Reports the requirements record against the word cap it states, if any. */
+function reportRequirements(
+  report: RequirementsReport | undefined,
+  root: string,
+): void {
+  logStep('Requirements record')
+
+  if (report === undefined) {
+    logInfo(
+      `Out of scope. The project carries no ${requirementsRel(root)}, so there was no record to measure.`,
+    )
+    return
+  }
+
+  if (report.wordCap === undefined) {
+    logInfo(
+      `${plural(report.words, 'word')} in ${report.rel} and no word cap stated, so the count is reported and never gated.`,
+    )
+  } else if (isOverWordCap(report)) {
+    logError(
+      `${plural(report.words, 'word')} against a cap of ${report.wordCap} in ${report.rel}.`,
+    )
+  } else {
+    logInfo(
+      `${plural(report.words, 'word')} against a cap of ${report.wordCap} in ${report.rel}.`,
+    )
+  }
 }
 
 function reportDrift(drift: readonly FolderDrift[]): void {

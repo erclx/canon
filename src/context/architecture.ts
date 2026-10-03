@@ -1,7 +1,7 @@
 import { access, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
-import { bodyLines } from '@/markdown/scan'
+import { type BodyLine, bodyLines } from '@/markdown/scan'
 import { surfaceDir } from '@/surface-root'
 
 /**
@@ -58,9 +58,9 @@ export interface DecisionReport {
    */
   readonly checks: readonly string[]
   /**
-   * The entry's own word count, read alongside the weight judgment the
-   * standard asks a session to make by reading the file rather than counting
-   * it. Never gates, per `standards/architecture.md`'s `## Length` section.
+   * The entry's prose word count, its heading and fenced lines left out. Gates
+   * only against a per-decision cap the record states, so the report and the
+   * stage read one number.
    */
   readonly words: number
   /**
@@ -82,6 +82,12 @@ export interface ArchitectureReport {
    * only what is still open, so its weight is read the same way the file's is.
    */
   readonly risksWords?: number
+  /**
+   * List items in the Risks section, nested ones included, since a nested
+   * bullet is weight the reader pays for. Absent alongside `risksWords`, so a
+   * record with no section never reads as one holding zero bullets.
+   */
+  readonly risksBullets?: number
   /** What the record declared, absent when it states no length rule. */
   readonly allowances?: Allowances
   /** The frame plus the per-decision allowance, absent alongside it. */
@@ -92,6 +98,10 @@ export interface ArchitectureReport {
    * project that never adopted a cap is measured and never gated.
    */
   readonly entryCap?: number
+  /** The most words a decision may hold, absent when the record states none. */
+  readonly wordCap?: number
+  /** The most Risks bullets the record allows, absent when it states none. */
+  readonly riskCap?: number
   /**
    * Whether the record states that every decision closes with a revisit
    * sentence. Declared by the record for the reason the cap is, so a record
@@ -103,7 +113,9 @@ export interface ArchitectureReport {
 
 const DECISION_HEADING = /^###\s+(.+?)\s*$/
 const SECTION_HEADING = /^##\s+\S/
-/** The one H2 the standard's `## Length` section asks to be weighed by words. */
+/** A markdown list item at any depth, which is what a risk bullet is. */
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+\S/
+/** The H2 whose bullets the standard's `## Caps` section counts. */
 const RISKS_HEADING = /^##\s+Risks\s*\/\s*open questions\s*$/i
 const CODE_SPAN = /`[^`]*`/g
 /** Dropped ahead of the figure scan, since an anchor date is not a claim. */
@@ -291,13 +303,12 @@ export function splitDecisions(source: string): RawDecision[] {
 }
 
 /**
- * Counts whitespace-delimited tokens, which is the unit the standard's
- * `## Length` section reads alongside the weight judgment a session makes by
- * reading the file. It is a report figure rather than a gate, so a fenced
- * example or a code span inflating the count costs nothing a reader corrects
- * for by reading, the same trade the line count above it already takes.
+ * Counts whitespace-delimited tokens, the unit a record's word caps are stated
+ * in. A code span counts as the tokens it holds, so a decision citing a long
+ * path pays for it the way a reader does. A caller gating on the count hands
+ * in prose with fenced lines already dropped.
  */
-function wordCount(text: string): number {
+export function wordCount(text: string): number {
   return text.match(/\S+/g)?.length ?? 0
 }
 
@@ -310,14 +321,30 @@ function wordCount(text: string): number {
  * when the section is last, which is where the standard's template puts it.
  */
 export function risksSection(source: string): string | undefined {
-  const lines = bodyLines(source)
-  const body: string[] = []
+  return risksLines(source)
+    ?.map((line) => line.text)
+    .join('\n')
+}
+
+/**
+ * Counts the list items in the Risks section, nested ones included, or
+ * nothing when the record carries no such heading. A fenced line is skipped,
+ * since a template bullet is not a risk.
+ */
+export function riskBullets(source: string): number | undefined {
+  return risksLines(source)?.filter(
+    (line) => !line.fenced && LIST_ITEM.test(line.text),
+  ).length
+}
+
+function risksLines(source: string): BodyLine[] | undefined {
+  const body: BodyLine[] = []
   let capturing = false
   let found = false
 
-  for (const line of lines) {
+  for (const line of bodyLines(source)) {
     if (line.fenced) {
-      if (capturing) body.push(line.text)
+      if (capturing) body.push(line)
       continue
     }
 
@@ -332,10 +359,10 @@ export function risksSection(source: string): string | undefined {
       continue
     }
 
-    if (capturing) body.push(line.text)
+    if (capturing) body.push(line)
   }
 
-  return found ? body.join('\n') : undefined
+  return found ? body : undefined
 }
 
 /** Cardinals a record spells rather than writes, which the corpus does for both. */
@@ -376,6 +403,14 @@ const ENTRY_CAP_CLAUSE = new RegExp(
   String.raw`\bat\s+most\s+${CARDINAL}\s+decisions?\b`,
   'i',
 )
+const WORD_CAP_CLAUSE = new RegExp(
+  String.raw`\bat\s+most\s+${CARDINAL}\s+words\s+a\s+decision\b`,
+  'i',
+)
+const RISK_CAP_CLAUSE = new RegExp(
+  String.raw`\bat\s+most\s+${CARDINAL}\s+risk\s+bullets?\b`,
+  'i',
+)
 
 function readCardinal(token: string | undefined): number | undefined {
   if (token === undefined) return undefined
@@ -411,6 +446,20 @@ export function readAllowances(source: string): Allowances | undefined {
  */
 export function readEntryCap(source: string): number | undefined {
   return readCardinal(source.match(ENTRY_CAP_CLAUSE)?.[1])
+}
+
+/**
+ * Reads the per-decision word cap a record declares, spelled `at most <n>
+ * words a decision`, or nothing. One spelling, the way the line allowance
+ * reads `<n> lines a decision`, so a drift falls back to reporting.
+ */
+export function readWordCap(source: string): number | undefined {
+  return readCardinal(source.match(WORD_CAP_CLAUSE)?.[1])
+}
+
+/** Reads the Risks cap a record declares, spelled `at most <n> risk bullets`. */
+export function readRiskCap(source: string): number | undefined {
+  return readCardinal(source.match(RISK_CAP_CLAUSE)?.[1])
 }
 
 const REVISIT_CLAUSE =
@@ -486,6 +535,8 @@ export async function measureArchitecture(
 
   const allowances = readAllowances(source)
   const entryCap = readEntryCap(source)
+  const wordCap = readWordCap(source)
+  const riskCap = readRiskCap(source)
   const revisitRequired = readRevisitRule(source)
   const raw = splitDecisions(source)
   const decisions = await Promise.all(
@@ -498,13 +549,14 @@ export async function measureArchitecture(
         figures,
         ...(quantified !== undefined && { quantified }),
         checks: await namedChecks(root, entry.body),
-        words: wordCount(entry.body),
+        words: wordCount(entry.prose),
         revisit: hasRevisitSentence(entry.prose),
       }
     }),
   )
 
   const risks = risksSection(source)
+  const bullets = riskBullets(source)
 
   return {
     rel,
@@ -515,11 +567,14 @@ export async function measureArchitecture(
         .join('\n'),
     ),
     ...(risks !== undefined && { risksWords: wordCount(risks) }),
+    ...(bullets !== undefined && { risksBullets: bullets }),
     ...(allowances !== undefined && {
       allowances,
       ceiling: ceilingFor(allowances, raw.length),
     }),
     ...(entryCap !== undefined && { entryCap }),
+    ...(wordCap !== undefined && { wordCap }),
+    ...(riskCap !== undefined && { riskCap }),
     revisitRequired,
     decisions,
   }
@@ -535,6 +590,31 @@ export async function measureArchitecture(
 export function isOverCount(report: ArchitectureReport): boolean {
   return (
     report.entryCap !== undefined && report.decisions.length > report.entryCap
+  )
+}
+
+/**
+ * The decisions holding more prose words than the cap the record states.
+ *
+ * Empty for a record stating no word cap, for the reason `isOverCount` gives.
+ */
+export function overWords(report: ArchitectureReport): DecisionReport[] {
+  const cap = report.wordCap
+  if (cap === undefined) return []
+  return report.decisions.filter((entry) => entry.words > cap)
+}
+
+/**
+ * Whether the Risks section holds more bullets than the cap the record states.
+ *
+ * False for a record stating no cap, and false for one carrying no Risks
+ * section, which the stage reports as absent rather than as zero bullets.
+ */
+export function isOverRisks(report: ArchitectureReport): boolean {
+  return (
+    report.riskCap !== undefined &&
+    report.risksBullets !== undefined &&
+    report.risksBullets > report.riskCap
   )
 }
 

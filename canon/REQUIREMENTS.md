@@ -2,6 +2,8 @@
 
 Authoring guidance: `standards/requirements.md`.
 
+This record holds at most 600 words.
+
 ## Worldview
 
 - Code is free. Context and human attention are scarce.

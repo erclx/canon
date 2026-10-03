@@ -73,18 +73,24 @@ A decision says why it won and rarely says when that reason stops holding, so an
 - Draft it from the harm the decision prevents, never from the mechanism it uses. A mechanism can keep working long after the reason for choosing it is gone, so re-checking it confirms the wrong fact.
 - Place the sentence after the reasoning and before any verification anchor, so the anchor stays the entry's last sentence.
 - Give a heading holding several principles one sentence, for the premise they share, rather than one per principle.
-- Adopt the requirement by stating the clause `Every decision closes with a revisit sentence.` in the record itself. The clause is the record's own, like the cap, so a checker reads it from the file and gates only a record that states it. A record stating none is reported and never gated.
+- Adopt the requirement by stating the clause `Every decision closes with a revisit sentence.` in the record itself. The clause is the record's own, like the caps, so a checker reads it from the file and gates only a record that states it. A record stating none is reported and never gated.
 - A checker reads presence alone. A vacuous sentence passes it, so the sentence is only as useful as the finding it names.
 
-## Entry cap
+## Caps
 
-Every session pays for this file before any work starts, so a heavy read is a real cost. A file that reads heavy is carrying too many decisions, not decisions written too long, so the bound is a count of decisions rather than of words.
+Every session pays for this file before any work starts, so a heavy read is a real cost. Weight comes from two places, too many decisions and decisions written too long, so the record caps both, and caps the open risks beside them.
 
-- State the cap in the record itself as a clause of the form `This record holds at most <n> decisions.` The cap is the record's own, so a checker reads it from the file, and a record stating none is measured and never gated.
-- Set the cap near one decision per slot plus a small margin.
-- At the cap, merge two decisions or retire one before adding another, and name which in the change that does it. Never compress a decision's prose to fit, and never pack two decisions under one heading, which the count cannot see.
+- State each cap in the record itself. A checker reads only these spellings, so a clause worded another way is reported and never gated:
+  - `This record holds at most <n> decisions.`
+  - `at most <n> words a decision`, counting a decision's prose below its heading, fenced lines left out
+  - `at most <n> risk bullets`, counting every list item under `## Risks / open questions`, nested ones included
+- The three can share one sentence, such as `This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets.` Each cap is the record's own, so a record stating none is measured and never gated, and the template states the entry cap alone so the other two are adopted on purpose.
+- Set the decision cap near one decision per slot plus a small margin, the word cap near what one trade takes to state, about 150, and the risk cap at what a reader holds in mind at once, about 6.
+- At the decision cap, merge two decisions or retire one before adding another, and name which in the change that does it. Never pack two decisions under one heading, which the count cannot see.
+- At the word cap, cut a decision to the choice, the alternative that lost, the reason, and the revisit sentence. What it sheds is a mechanism or a measurement, which goes to the domain context entry it constrains, never under a second heading.
+- At the risk cap, drop what is no longer open before adding a risk.
 - Retire a decision by moving it to the domain context entry it constrains, not by deleting its reasoning.
-- A word count, for the file and for each decision, is read alongside the judgment when one is available, and it never gates.
+- The whole file's word count stays a report, read alongside the judgment, and never gates.
 - Yield to the paragraph weight checkpoint in `markdown.md`. A paragraph past the checkpoint is a defect no length guideline licenses.
 
 ## Template

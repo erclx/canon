@@ -25,6 +25,19 @@ export interface GateInput {
    * same two cases, plus a record stating no such clause.
    */
   readonly recordMissingRevisit: boolean
+  /**
+   * Whether a decision holds more words than the cap the record states, which
+   * gates under the same two modes and is false in the same two cases, plus a
+   * record stating no word cap.
+   */
+  readonly recordOverWords: boolean
+  /** The same reading for the Risks section's bullet cap. */
+  readonly recordOverRisks: boolean
+  /**
+   * Whether the requirements record holds more words than the cap it states,
+   * which gates for the reason the architecture record's caps do.
+   */
+  readonly requirementsOverWords: boolean
   readonly sections: readonly SectionFinding[]
   readonly drift: readonly FolderDrift[]
   /**
@@ -79,8 +92,10 @@ export function hasSketchWithEvidence(
  * Whether the audit found something that should fail the caller.
  *
  * An unresolved citation is a broken pointer and gates unconditionally, and so
- * does a record past its own ceiling or its own entry cap, or missing a
- * revisit sentence it requires: the record states each rule for itself, which makes those the measures here that are facts
+ * does a record past its own ceiling, entry cap, word cap, or bullet cap, or
+ * missing a revisit sentence it requires, and a requirements record past its
+ * own word cap: each record states its rules for itself, which makes those the
+ * measures here that are facts
  * rather than thresholds a reader weighs. The findings `--gate` adds are
  * the ones answerable from the file itself: a required section it does not
  * declare, an index disagreeing with its folder, and a wireframe's States
@@ -95,13 +110,25 @@ export function isGating({
   recordOverLength,
   recordOverCount,
   recordMissingRevisit,
+  recordOverWords,
+  recordOverRisks,
+  requirementsOverWords,
   sections,
   drift,
   wireframes,
   widened,
 }: GateInput): boolean {
   if (unresolvedCitations > 0) return true
-  if (recordOverLength || recordOverCount || recordMissingRevisit) return true
+  if (
+    recordOverLength ||
+    recordOverCount ||
+    recordMissingRevisit ||
+    recordOverWords ||
+    recordOverRisks ||
+    requirementsOverWords
+  ) {
+    return true
+  }
   if (!widened) return false
 
   return sections.length > 0 || hasDrift(drift) || hasStatesMismatch(wireframes)

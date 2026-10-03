@@ -35,6 +35,12 @@ Firing is one axis of three. The second is conditional presence, which a rule bu
 
 The test ships as `governance/rules/claude/592-claude-md.md`, attached to an edit of the root file in every target that installed governance. A project scaffolding without governance is reached by neither surface, since the seed does not state the test.
 
+### What bounds the eager tier
+
+`canon/ARCHITECTURE.md` holds the slot rule. Reach always passes as a test, since nearly every decision touches two domains, which is how the record once grew to forty entries and about 15k tokens loaded into every session. A numeric ceiling on the file's length was tried first and dropped, since nothing enforced it and every merge drifted past it. The entry cap held where that ceiling did not because a gate stage fails a push on it, and the per-decision word cap and risk bullet cap are gated the same way for the same reason.
+
+A decision moved out of the record to a context entry leaves a pointer behind with no check on it, since nothing compares a slot entry against the entry it defers to.
+
 ### What each root holds
 
 The project root splits three ways: `.claude/` holds what Claude Code reads by path, `canon/` holds what the toolkit authors and commits, and `.canon/` holds every gitignored session record. One ignore line covers `.canon/`, so a record folder added later needs no row here, no ignore entry, and no manifest edit. `canon/ARCHITECTURE.md` carries the two tests and the alternatives they beat.

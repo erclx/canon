@@ -41,6 +41,9 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     recordOverLength: false,
     recordOverCount: false,
     recordMissingRevisit: false,
+    recordOverWords: false,
+    recordOverRisks: false,
+    requirementsOverWords: false,
     sections: [],
     drift: [],
     wireframes: [],
@@ -110,6 +113,18 @@ describe('isGating', () => {
 
   it('should fail a record missing a revisit sentence it requires under the narrow gate', () => {
     expect(isGating(makeInput({ recordMissingRevisit: true }))).toBe(true)
+  })
+
+  it('should fail a decision past the word cap the record states under the narrow gate', () => {
+    expect(isGating(makeInput({ recordOverWords: true }))).toBe(true)
+  })
+
+  it('should fail a Risks section past the bullet cap the record states under the narrow gate', () => {
+    expect(isGating(makeInput({ recordOverRisks: true }))).toBe(true)
+  })
+
+  it('should fail a requirements record past its own word cap under the narrow gate', () => {
+    expect(isGating(makeInput({ requirementsOverWords: true }))).toBe(true)
   })
 
   it('should leave a missing required section advisory under the narrow gate', () => {

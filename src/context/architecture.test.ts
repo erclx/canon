@@ -11,11 +11,16 @@ import {
   isOverCount,
   isOverLength,
   hasRevisitSentence,
+  isOverRisks,
   measureArchitecture,
   missingRevisit,
+  overWords,
   readAllowances,
   readEntryCap,
   readRevisitRule,
+  readRiskCap,
+  readWordCap,
+  riskBullets,
   risksSection,
   splitDecisions,
   testableCount,
@@ -718,5 +723,158 @@ describe('coverage across the classified entries', () => {
     })
 
     expect(coveredCount(report)).toBe(0)
+  })
+})
+
+describe('reading the word and risk caps a record states for itself', () => {
+  const clause =
+    'This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets.'
+
+  it('should read the per-decision word cap', () => {
+    expect(readWordCap(clause)).toBe(150)
+  })
+
+  it('should read the risk-bullet cap', () => {
+    expect(readRiskCap(clause)).toBe(6)
+  })
+
+  it('should leave the entry cap reading unchanged beside both', () => {
+    expect(readEntryCap(clause)).toBe(12)
+  })
+
+  it('should read neither from a record stating no such clause', () => {
+    const source = '# Architecture\n\nThis record holds at most 12 decisions.\n'
+
+    expect(readWordCap(source)).toBeUndefined()
+    expect(readRiskCap(source)).toBeUndefined()
+  })
+})
+
+describe('counting risk bullets', () => {
+  it('should count nested bullets alongside top-level ones', () => {
+    const source = [
+      '## Risks / open questions',
+      '',
+      '- First.',
+      '  - Nested under the first.',
+      '- Second.',
+      '',
+    ].join('\n')
+
+    expect(riskBullets(source)).toBe(3)
+  })
+
+  it('should not count a bullet inside a fenced block', () => {
+    const source = [
+      '## Risks / open questions',
+      '',
+      '- Real.',
+      '',
+      '```markdown',
+      '- Template.',
+      '```',
+      '',
+    ].join('\n')
+
+    expect(riskBullets(source)).toBe(1)
+  })
+
+  it('should read nothing from a record carrying no Risks heading', () => {
+    expect(riskBullets('# Architecture\n\n## Overview\n')).toBeUndefined()
+  })
+})
+
+describe('the decision word count against the cap', () => {
+  it('should pass a decision of exactly the cap', () => {
+    const report = makeReport({
+      wordCap: 150,
+      decisions: [makeDecision({ words: 150 })],
+    })
+
+    expect(overWords(report)).toEqual([])
+  })
+
+  it('should fail a decision one word past the cap', () => {
+    const report = makeReport({
+      wordCap: 150,
+      decisions: [makeDecision({ heading: 'Long', words: 151 })],
+    })
+
+    expect(overWords(report).map((entry) => entry.heading)).toEqual(['Long'])
+  })
+
+  it('should never fail a record that states no word cap', () => {
+    const report = makeReport({ decisions: [makeDecision({ words: 900 })] })
+
+    expect(overWords(report)).toEqual([])
+  })
+})
+
+describe('the risk bullet count against the cap', () => {
+  it('should pass a section holding exactly the cap', () => {
+    const report = makeReport({ riskCap: 6, risksBullets: 6 })
+
+    expect(isOverRisks(report)).toBe(false)
+  })
+
+  it('should fail a section holding one bullet past the cap', () => {
+    const report = makeReport({ riskCap: 6, risksBullets: 7 })
+
+    expect(isOverRisks(report)).toBe(true)
+  })
+
+  it('should never fail a record that states no risk cap', () => {
+    const report = makeReport({ risksBullets: 40 })
+
+    expect(isOverRisks(report)).toBe(false)
+  })
+
+  it('should not read an absent Risks section as over the cap', () => {
+    const report = makeReport({ riskCap: 6 })
+
+    expect(isOverRisks(report)).toBe(false)
+  })
+})
+
+describe('measuring the word and risk caps', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-architecture-'))
+    mkdirSync(join(root, 'canon'), { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('should count a decision in prose words, leaving its heading and fenced lines out', async () => {
+    const source = [
+      '# Architecture',
+      '',
+      'At most 4 words a decision and at most 2 risk bullets.',
+      '',
+      '### A heading of several words',
+      '',
+      'Three words here.',
+      '',
+      '```markdown',
+      'fenced words that never count',
+      '```',
+      '',
+      '## Risks / open questions',
+      '',
+      '- One.',
+      '  - Two.',
+      '',
+    ].join('\n')
+    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
+
+    const report = await measureArchitecture(root)
+
+    expect(report?.decisions[0]?.words).toBe(3)
+    expect(report?.wordCap).toBe(4)
+    expect(report?.riskCap).toBe(2)
+    expect(report?.risksBullets).toBe(2)
   })
 })

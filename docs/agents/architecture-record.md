@@ -1,11 +1,11 @@
 ---
 title: Architecture record
-description: The five findings canon context audit reads off the architecture record, being the entry cap, revisit sentence, and length gates the record states for itself, the claim coverage report, and the word counts
+description: The findings canon context audit reads off the architecture record, being the entry cap, revisit sentence, length, decision word, and risk bullet gates the record states for itself, the claim coverage report, and the word counts, plus the requirements record's word cap
 ---
 
 # Architecture record
 
-Five findings from `canon context audit` read `canon/ARCHITECTURE.md` rather than a folder, and only the first three are facts. The other checks the audit runs are in `context-audit-checks.md`.
+Seven findings from `canon context audit` read `canon/ARCHITECTURE.md` rather than a folder, and only the first five are facts. One more reads `canon/REQUIREMENTS.md`. The other checks the audit runs are in `context-audit-checks.md`.
 
 The entry cap check counts the record's decisions against the cap it states for itself, in a clause of the form `This record holds at most 12 decisions.` Like the length check, the cap belongs to the record rather than to the toolkit, so a record stating none is measured and never gated. A decision is a `###` heading outside a fenced block, so the template a standard shows does not count, and a heading carrying two decisions counts once. The JSON record carries what it read as `architecture.entryCap`, absent where the record states no cap, and the audit catalog counts a record past it as `recordOverCount`.
 
@@ -17,12 +17,20 @@ A record stating no such rule is measured and reported and never gated, which is
 
 What the derivation costs where it does apply is that the ceiling rises when a decision is added and falls for nothing, so the check passes exactly when the file grew. It gates anyway, because a record that states a limit for itself and makes it computable from a count has turned it into a fact, which is what separates it from every judgment the audit reports. A rewrite of the declaring sentence past the clauses the check reads falls back to reporting rather than to a stale ceiling, so the failure shows up in the run's own output.
 
+The decision word check counts each decision's prose against the cap the record states in a clause of the form `at most 150 words a decision`. The count runs below the `###` heading with fenced lines dropped, so neither the heading nor a template block inside a decision counts, and the report and the gate read the same number. The JSON record carries the clause as `architecture.wordCap`, and the audit catalog counts the decisions past it as `recordOverWords`, absent where the record states no clause.
+
+The risk bullet check counts every list item under `## Risks / open questions`, nested ones included, against a clause of the form `at most 6 risk bullets`, since a nested bullet is weight the reader pays for like any other. Both clauses can share the entry cap's sentence, and each gates only a record stating it, for the reason the cap does. A record stating a risk cap and carrying no Risks section is reported as absent rather than passed as zero bullets. The JSON record carries the clause as `architecture.riskCap` and the count as `architecture.risksBullets`, and the audit catalog counts a section past its cap as `recordOverRisks`, absent where the record states no clause.
+
 The coverage report classifies each decision as carrying a countable claim, a structural invariant, or neither, then reports each testable entry against whether it names a check that exists. A countable claim carries a figure a run could recompute, and an invariant quantifies over a named tree closely enough that a walk could falsify it. A check is a `scripts/**.sh` path the entry spells that is on disk, or a `canon` invocation matching a registered audit, so coverage reads the entry rather than the tree and a claim some check happens to cover without the entry saying so reads as unchecked.
 
 Three limits are stated on every run rather than hidden. The countable signal reads digits alone, so a measured claim written in words reads as uncounted. Entries are counted by heading, and one heading holding several decisions counts once. Nothing is stored, so an entry rewritten tomorrow is classified afresh the next time the verb runs and no verdict goes stale.
 
 The report gates nothing. Deciding whether a sentence states a claim is a judgment no parser settles, so the output names candidates for a reader. This answers a different question from the verification anchors `standards/architecture.md` describes, which record that one cited number was re-read. That mechanism says whether a marked figure held, and this one says how much of the record could be checked at all.
 
-The fifth finding is a word count, measured in words rather than lines: one figure for the whole record and one per decision. `standards/architecture.md` asks a session to judge the file's weight by reading it rather than by counting it, and reads the word figure alongside that judgment when one is available. A paragraph written one source line to a paragraph passes the rendered-line measure other checks use while still reading heavy, which is the gap a word count closes without turning into a second cap.
+The seventh finding is a word count for the whole record, measured in words rather than lines. A paragraph written one source line to a paragraph passes the rendered-line measure other checks use while still reading heavy, which is the gap a word count closes. The whole-record figure gates nothing under any mode, since the per-decision cap above already bounds what a decision adds.
 
-The `## Risks / open questions` section is weighed the same way, reported apart from the whole-record figure since the standard singles it out for holding only what is still open. This finding gates nothing under any mode. The JSON record carries the whole-record figure as `architecture.words`, the section figure as `architecture.risksWords` where the record carries the heading, and the per-decision figure as `architecture.decisions[].words`.
+The `## Risks / open questions` section is weighed the same way, reported apart from the whole-record figure. The JSON record carries the whole-record figure as `architecture.words`, the section figure as `architecture.risksWords` where the record carries the heading, and the per-decision figure as `architecture.decisions[].words`.
+
+## The requirements record
+
+The audit reads `canon/REQUIREMENTS.md` under its own step and counts every word below the frontmatter against the cap the record states in a clause of the form `This record holds at most 600 words.` The cap is the record's own, so a record stating none is measured and never gated, and a project with no record is reported as out of scope. The JSON record carries the reading as `requirements`, null where the project carries no record and absent under `--citations-only`, and the audit catalog counts a record past its cap as `requirementsOverWords`.

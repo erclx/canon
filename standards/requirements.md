@@ -36,6 +36,10 @@ Does not govern:
 
 Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, and `## Constraints`. Add `## Distribution` when the rule below applies. Add `## Worldview` when the project holds beliefs that shape every decision, and keep a belief there only when it changes a decision, since a padded worldview turns into a second goals list. Add `## Premise` when the project exists to answer a question, stated as the question and what would count as an answer, never as the answer measured so far. Drop a section rather than pad it with filler.
 
+## Length
+
+This file loads into every session, so its weight is paid before any work starts. Cap it by stating the clause `This record holds at most <n> words.` in the record itself, where a checker reads it and counts every word below the frontmatter. The cap is the record's own, so a record stating none is measured and never gated. Set it near 600, and at the cap cut a goal or a constraint that no longer changes a decision before adding one.
+
 ## Lifecycle
 
 Once every entry in the MVP list, or in a later scope section, has shipped, delete the section. Git keeps the old text, and the document states the project as it stands. Do not annotate an entry as shipped and leave it in place. While any entry is unshipped, do not renumber the list or append to it.
