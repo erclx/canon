@@ -27,6 +27,7 @@ The last failure is a section no route reaches. `## Route` maps an intent or a d
 - Run the CLI non-interactively and report the command run, what changed, and the full path of anything written
 - Read the overwrite contract from the body before any install or sync, and name each surface it lists as overwritten before running one
 - Read the reverse walk beside the forward sections, so a folder the toolkit stopped shipping reaches the user
+- Read `unmovedSurfaces` from the report itself, since the drift status ignores it by design, and name `canon migrate surface-roots` without running either form
 - Name an unmigrated domain's root and install path for the user to move themselves, since no skill covers the move
 - Route a measurement intent to the audit offers from the route table itself, rather than leaving the section reachable only by reading past the table
 - Rank a lifecycle row against the audit offers where the route table itself states it, so a session acting on the lifecycle row reads the ranking without opening the section being ranked
