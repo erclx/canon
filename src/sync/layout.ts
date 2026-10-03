@@ -2,7 +2,7 @@ import { existsSync, statSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
 import { SUBDIRS } from '@/claude/seeds'
 import { creationRel, isRecordEntry } from '@/record-root'
-import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
+import { SURFACE_ENTRIES, spell, surfaceDir } from '@/surface-root'
 import type { StampDomain } from '@/sync/stamp'
 
 const CLAUDE_DIR = '.claude'
@@ -120,6 +120,32 @@ export function detectUnmigrated(
   }
 
   return found
+}
+
+/**
+ * A tracked surface the target still reads at its `.claude/` spelling, with
+ * nothing at the `canon/` one, and where `canon migrate surface-roots` moves it.
+ */
+export interface UnmovedSurface {
+  readonly rel: string
+  readonly movesTo: string
+}
+
+/**
+ * Surfaces a target holds only at the root the surface move retired. Kept
+ * apart from `detectUnmigrated`, which models a domain stranded at the project
+ * root under a stamp domain, while a surface carries neither. A rule names the
+ * current layout only, so a target here stops loading the rules scoped to these
+ * files, and this report is what points it at the verb.
+ */
+export function detectUnmovedSurfaces(target: string): UnmovedSurface[] {
+  return SURFACE_ENTRIES.filter(
+    (entry) =>
+      relative(target, surfaceDir(target, entry)) === join(CLAUDE_DIR, entry),
+  ).map((entry) => ({
+    rel: join(CLAUDE_DIR, entry),
+    movesTo: join('canon', spell('canon', entry)),
+  }))
 }
 
 /**

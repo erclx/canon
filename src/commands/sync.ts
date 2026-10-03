@@ -168,6 +168,16 @@ function renderCheck(report: CheckReport): void {
     logInfo('Move the content yourself. No sync command touches these.')
   }
 
+  if (report.unmovedSurfaces.length > 0) {
+    logStep('Surfaces at the old .claude/ root')
+    for (const entry of report.unmovedSurfaces) {
+      logWarn(`${entry.rel} (moves to ${entry.movesTo})`)
+    }
+    logInfo(
+      'Rules glob the canon/ spelling only. Run `canon migrate surface-roots` to move these.',
+    )
+  }
+
   renderSeeds(report)
 
   if (report.superseded.length > 0) {

@@ -2,7 +2,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { collectSuperseded, detectUnmigrated } from '@/sync/layout'
+import {
+  collectSuperseded,
+  detectUnmigrated,
+  detectUnmovedSurfaces,
+} from '@/sync/layout'
 
 let TARGET: string
 let TOOLKIT: string
@@ -102,5 +106,38 @@ describe('detectUnmigrated', () => {
     writeFixture(join('snippets', 'diff.md'))
 
     expect(detectUnmigrated(TOOLKIT, TARGET)).toEqual([])
+  })
+})
+
+describe('detectUnmovedSurfaces', () => {
+  it('should name a surface held only at its .claude/ spelling', () => {
+    writeFixture(join('.claude', 'REQUIREMENTS.md'))
+    writeFixture(join('.claude', 'context', 'cli.md'))
+
+    expect(detectUnmovedSurfaces(TARGET)).toEqual([
+      { rel: '.claude/REQUIREMENTS.md', movesTo: 'canon/REQUIREMENTS.md' },
+      { rel: '.claude/context', movesTo: 'canon/context' },
+    ])
+  })
+
+  it('should spell the stamp folder at its canon/config destination', () => {
+    writeFixture(join('.claude', 'canon', 'config.json'), '{}\n')
+
+    expect(detectUnmovedSurfaces(TARGET)).toEqual([
+      { rel: '.claude/canon', movesTo: 'canon/config' },
+    ])
+  })
+
+  it('should pass a surface that already sits under canon/', () => {
+    writeFixture(join('.claude', 'DESIGN.md'))
+    writeFixture(join('canon', 'DESIGN.md'))
+
+    expect(detectUnmovedSurfaces(TARGET)).toEqual([])
+  })
+
+  it('should return nothing for a target holding no surface', () => {
+    writeFixture(join('.claude', 'rules', 'canon', 'x.md'))
+
+    expect(detectUnmovedSurfaces(TARGET)).toEqual([])
   })
 })

@@ -48,6 +48,7 @@ function buildReport(
     seeds: { entries: [], historyUnavailable: false },
     superseded: [],
     unmigrated: [],
+    unmovedSurfaces: [],
     newSkills: [],
     newRules: [],
     reverse: emptyReverseReport(),
@@ -416,6 +417,16 @@ describe('hasDrift', () => {
           rel: join('.claude', 'TASKS.md'),
           replacedBy: join('.claude', 'tasks'),
         },
+      ],
+    })
+
+    expect(hasDrift(report)).toBe(false)
+  })
+
+  it('should not report drift for a surface left at its .claude/ spelling', () => {
+    const report = buildReport([{ state: 'matching', rel: 'a.md' }], {
+      unmovedSurfaces: [
+        { rel: '.claude/REQUIREMENTS.md', movesTo: 'canon/REQUIREMENTS.md' },
       ],
     })
 

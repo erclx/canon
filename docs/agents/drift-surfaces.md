@@ -1,19 +1,19 @@
 ---
 title: Drift surfaces
-description: The six sections canon sync --check reports beside the per-domain scan, being seeds, superseded artifacts, unmigrated domains, new rules and skills, and the reverse walk, with the managed-target gate and what counts toward the exit code
+description: The seven sections canon sync --check reports beside the per-domain scan, being seeds, superseded artifacts, unmigrated domains, surfaces at the old root, new rules and skills, and the reverse walk, with the managed-target gate and what counts toward the exit code
 ---
 
 # Drift surfaces
 
-`canon sync --check` reports six sections outside the per-domain scan that
+`canon sync --check` reports seven sections outside the per-domain scan that
 `install-and-sync.md` describes, because each names something
-that walk cannot see: `seeds`, `superseded`, `unmigrated`, `newSkills`,
-`newRules`, and `reverse`. None of them produces a change, and no sync command
-applies any of them. The headings below group the first three together and give
-`newSkills` its description under `newRules`, which answers the same question
-about a different corpus.
+that walk cannot see: `seeds`, `superseded`, `unmigrated`, `unmovedSurfaces`,
+`newSkills`, `newRules`, and `reverse`. None of them produces a change, and no
+sync command applies any of them. The headings below group the first four
+together and give `newSkills` its description under `newRules`, which answers the
+same question about a different corpus.
 
-All six report only against a toolkit-managed target, which is one carrying a
+All seven report only against a toolkit-managed target, which is one carrying a
 `.claude/` directory, a `CLAUDE.md`, or a domain still at the root layout. The
 report says so through `managed` in the JSON and routes an unmanaged directory to
 `canon init`. Seeds are why the gate exists, since they enumerate from the toolkit
@@ -26,7 +26,7 @@ toolkit installed. When `managed` is false every section comes back empty rather
 than the render alone going quiet, so a consumer reading `--json` never acts on a
 finding the rendered half withheld.
 
-## Seeds, superseded artifacts, and unmigrated domains
+## Seeds, superseded artifacts, unmigrated domains, and old-root surfaces
 
 `seeds` classifies every seed the toolkit ships against the target's copy, as
 `matching`, `stale`, `drifted`, or `missing`. `missing` has no per-domain
@@ -67,6 +67,13 @@ folder is carrying its own authoring surface rather than an unfinished install.
 Nothing proposes moving it, and no command relocates the content. Move it
 yourself. A leftover `snippets/` folder reports under the reverse walk instead,
 where `docs/target/sync.md` says what to do with it.
+
+`unmovedSurfaces` names a tracked surface the target still holds at its `.claude/`
+spelling with nothing at the `canon/` one, such as `.claude/REQUIREMENTS.md` or
+`.claude/context/`. Each entry carries `rel` and `movesTo`, and the render names
+`canon migrate surface-roots`, the verb that moves them. Rules glob the `canon/`
+spelling alone, so a target on the old root stops loading the rules scoped to
+those files until it moves. <!-- canon-keep-surface-root -->
 
 ## Rules the target never received
 
@@ -181,6 +188,10 @@ toolkit shipped and the target renamed goes unmatched, the same limit the
 `superseded` and every seed state are excluded, for the reason `orphaned` already
 is: only the user can move content they wrote, so failing a job on it leaves the
 job red with no mechanical remedy.
+
+`unmovedSurfaces` is excluded although `canon migrate surface-roots` closes it.
+The move rewrites citations across the project, so it is a change the project
+schedules, and a job counting it would go red the day a target updated the CLI.
 
 `newRules` is excluded on a different ground, since a command does close it. What
 excludes it is that installing a rule changes what a project is governed by, so
