@@ -916,12 +916,12 @@ function withoutLeads(text: string, urls: ReadonlySet<string>): string {
   const section = sectionRange(unfenced(text), LEADS_HEADING, lines.length)
   if (!section) return text
 
-  const kept = bulletBlocks(lines.slice(section.start, section.end)).filter(
-    (block) => ![...urls].some((url) => block[0].includes(`(${url})`)),
-  )
-
   const bullets = bulletRange(unfenced(text), section)
   if (!bullets) return text
+
+  const kept = bulletBlocks(lines.slice(bullets.start, bullets.end)).filter(
+    (block) => ![...urls].some((url) => block[0].includes(`(${url})`)),
+  )
 
   return [
     ...lines.slice(0, bullets.start),

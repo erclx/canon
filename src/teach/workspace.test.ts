@@ -443,6 +443,37 @@ describe('recordSources', () => {
     expect(text).not.toContain('RE2 lead')
   })
 
+  it('leaves the rest of the file unchanged when one of two leads moves', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await recordSources(
+      ROOT,
+      'regular-expressions',
+      [],
+      [
+        { title: 'A', url: 'https://example.test/a' },
+        { title: 'B', url: 'https://example.test/b' },
+      ],
+    )
+    const path = join(workspaceDir('01-regular-expressions'), 'RESOURCES.md')
+    const before = await readFile(path, 'utf8')
+
+    await recordSources(
+      ROOT,
+      'regular-expressions',
+      [{ title: 'A read', url: 'https://example.test/a' }],
+      [],
+    )
+
+    const expected = before
+      .replace('- [A](https://example.test/a)\n', '')
+      .replace(
+        '## Read\n\n- None yet.',
+        '## Read\n\n- [A read](https://example.test/a)',
+      )
+
+    expect(await readFile(path, 'utf8')).toBe(expected)
+  })
+
   it('moves a lead whose url carries parentheses', async () => {
     const url = 'https://example.test/wiki/Regex_(computing)'
     await openWorkspace(ROOT, REQUEST)
