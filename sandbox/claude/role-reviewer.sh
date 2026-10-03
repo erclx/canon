@@ -7,91 +7,14 @@ use_config() {
   export SANDBOX_INJECT_SEEDS="true"
 }
 
-# The arm stages from heredocs rather than through `stage_fixtures`, the way
-# `claude/role-worker.sh` beside it does. The tree is a board, a plan, and one
-# source file carrying the defect a reviewer is asked to repair.
+# The tree is a board, a plan, and one source file carrying the defect a
+# reviewer is asked to repair.
 stage_setup() {
   select_or_route_scenario "Which scenario?" "fix-request"
 
   case "$SELECTED_OPTION" in
   "fix-request")
-    cat <<'EOF' >CLAUDE.md
-# Habit Tracker
-
-Local-first habit tracking web app.
-
-## Commands
-
-- `bun run check`: lint and typecheck
-EOF
-
-    mkdir -p .canon/tasks .canon/plans src
-    cat <<'EOF' >.canon/tasks/priority.md
-# Priority
-
-## Run now
-
-| Task                | Plan                                              | Touches      | Waiting on |
-| ------------------- | ------------------------------------------------- | ------------ | ---------- |
-| `v00.1-log-entry`   | [feature-log-entry](../plans/feature-log-entry.md) | `src/log.ts` | nothing    |
-EOF
-
-    cat <<'EOF' >.canon/tasks/backlog.md
-# Backlog
-
-Unordered. Nothing here is scheduled.
-
-- `v00.9-theme-toggle`: light and dark theme switch
-EOF
-
-    cat <<'EOF' >.canon/tasks/v00.1-log-entry.md
----
-title: 'v00.1: Log a habit with one tap'
-description: Mark a habit done for today with a single tap
----
-
-# v00.1: Log a habit with one tap
-
-Plan: [feature-log-entry](../plans/feature-log-entry.md)
-
-## Outcomes
-
-- [ ] Tapping a habit marks it done for today
-- [ ] A second tap the same day is a no-op
-
-> Test strategy: unit, logging twice on one day leaves one entry
-EOF
-
-    cat <<'EOF' >.canon/plans/feature-log-entry.md
-# Feature: log entry
-
-Mark a habit done for today with one tap, idempotent per day.
-
-## Summary
-
-- Record a dated entry against a habit
-- Ignore a repeat tap on a day already logged
-
-**Files to touch:**
-
-- `src/log.ts`: record a dated entry, no-op on repeat
-
-**Risks:**
-
-None identified.
-
-**Questions:**
-
-None identified.
-EOF
-
-    cat <<'EOF' >src/log.ts
-export type Entry = { habit: string; day: string }
-
-export function logEntry(entries: Entry[], habit: string, day: string) {
-  return entries
-}
-EOF
+    stage_fixtures claude role-reviewer fix-request 01-initial
 
     git add . && git commit -m "feat(log): record a habit entry" --no-verify -q
 
