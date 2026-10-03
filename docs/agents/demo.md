@@ -26,7 +26,7 @@ Each demo owns a folder, `demos/<slug>/`, and `compile` writes the plan into it.
 | `plan.json`  | yes       | The compiled plan, with its hand-tuned timing         |
 | `index.html` | yes       | The HyperFrames composition, when the demo is wrapped |
 | `demo.gif`   | yes       | The one deliverable a README embeds                   |
-| `take/`      | no        | The raw recording and its still, written by `run`     |
+| `take/`      | no        | The raw recording, its still, and its timeline        |
 | `renders/`   | no        | The composed mp4, written by the render               |
 
 A project carries `demos/*/take/` and `demos/*/renders/` in its `.gitignore`, since both are one command away and a webm is large. A plan compiled before this layout, at `demos/<slug>.json`, still runs by path, because only the default moved.
@@ -57,6 +57,8 @@ A recording that has to match both themes takes one plan per scheme, committed s
 `canon demo run` reads the plan, refuses if a field is still empty, and drives the application the plan's URL names. It records the whole run to `webm` and writes the still from the beat the draft calls the hero, falling back to the last beat, since a demo's final state is the payoff and a cold open is usually an empty screen.
 
 A step's caption from the draft renders as an overlay while its hold plays, so the narration a person wrote is what shows on screen rather than the name of the action the engine performed.
+
+Beside the webm, the run writes `<video-basename>.timeline.json`, so a composition can aim a zoom at the moment and the place of an action rather than adding up holds by hand. It holds an `entries` array with one entry per step, each carrying the step's `index`, its `kind`, and `startMs` and `endMs` counted from the recording's first frame. A step ends once its hold has played. A click, fill, or hover entry also carries `box`, the target's `x`, `y`, `width`, and `height` in viewport pixels, which are the video frame's own coordinates. A navigate, scroll, wait, or hold entry carries no `box`, and the file is still written. A run under `--no-video` writes no timeline, since there is no video for it to sit beside. The `--json` record names the file under `timeline`, and `null` when none was written.
 
 When `ffmpeg` is on PATH, the run also writes an mp4 beside the webm, since webm plays in a `<video>` tag but nothing else accepts it. A target without `ffmpeg` still gets the webm and a line naming what to install, and the run does not fail over the missing converter.
 
