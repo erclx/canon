@@ -6,7 +6,7 @@ import {
   skillPaths,
 } from '@/gate/boundaries'
 import {
-  architectureRecord,
+  canonicalRecords,
   auditSet,
   captureStamps,
   clientCommandCitations,
@@ -346,11 +346,11 @@ export const STAGES: readonly Stage[] = [
     success: 'Context citations resolve',
   },
   {
-    // The record's three rules are facts it states about itself, unlike the
+    // Each record's caps are facts it states about itself, unlike the
     // judgment thresholds the stage above leaves out, so they gate here.
-    id: 'architecture-record',
-    label: 'Architecture record',
-    checks: [{ kind: 'measure', measure: architectureRecord }],
+    id: 'canonical-records',
+    label: 'Canonical records',
+    checks: [{ kind: 'measure', measure: canonicalRecords }],
   },
   {
     // Unscoped, since any branch can grow any document. A document past the
