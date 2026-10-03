@@ -13,6 +13,7 @@ description: The canvas server, the page and frame content format, token resolut
 
 - `src/canvas/` owns the server, the content reader and writers, element addressing, the inline-style editor, token resolution, and capture
 - `src/canvas/client/` owns the browser shell, built by Bun's HTML bundler when the server starts
+- `src/canvas/client/inspector/` owns the inspector's field, section, value formatting, and its own stylesheet, composed by `inspector.tsx`
 - `claude/skills/canvas/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
 
@@ -44,3 +45,5 @@ The server injects one stylesheet first in each frame's `head`, so a frame drawn
 
 - `canon records push` does not back `.canon/canvas/`, so a lost checkout loses every page. The skill promises nothing about survival until the backup covers it.
 - The shell is bundled from `src/canvas/client/` at serve time, so a dependency missing from `node_modules` serves a blank shell rather than refusing. Run the install in a fresh worktree before serving.
+- A stylesheet a client module imports reaches the served shell through the bundler with no `<link>` in `index.html`, as `inspector/fields.css` does. Happy-dom ignores stylesheets, so only the browser walk in `src/canvas/shell.e2e.test.ts` proves a rule applies.
+- The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.
