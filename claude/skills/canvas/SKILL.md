@@ -27,7 +27,7 @@ canon canvas list --json
 
 The record carries `content`, the folder every page lives in. It sits at the main worktree root whichever worktree the session runs in, so write through that path rather than one composed from the current directory.
 
-Start the server in the background when no canvas is serving for this project, since it runs until interrupted:
+Start the server in the background unless the operator named an address that already answers, since it runs until interrupted. No verb reports a running server, and a second one is harmless, since it walks to the next free port and serves the same folder:
 
 ```bash
 canon canvas serve --json
