@@ -1,0 +1,9 @@
+
+# Sample app
+
+Vite and React task board. UI lives in `src/components/`.
+
+## Commands
+
+- `bun run test`: Vitest component and unit tests
+- `bun run test:e2e`: Playwright end to end tests

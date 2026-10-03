@@ -7,65 +7,12 @@ use_config() {
   export SANDBOX_INJECT_SEEDS="true"
 }
 
-# A rendered lesson page rather than markdown, since the in-page capture needs a
-# page to load. The stylesheet defines the custom properties a figure colors
-# through, and the hand font is what Mermaid cannot measure. The body face is
-# one every machine resolves, since `canon capture` refuses a page whose figure
-# inherits a family the machine lacks.
-seed_lesson() {
-  local file="$1"
-
-  mkdir -p "$(dirname "$file")"
-  cat <<'EOF' >"$file"
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Order states</title>
-    <style>
-      :root { --ink: #1f1d1a; --paper: #fbf8f1; --muted: #6b665c; --accent: #b4532a; }
-      body { background: var(--paper); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.6; }
-      main { max-width: 68ch; margin: 0 auto; padding: 2rem 1rem; }
-      figure { margin: 2rem -4rem; }
-      figure svg text { font-family: Virgil, Excalifont, cursive; }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Order states</h1>
-      <p>An order moves through four states: placed, paid, shipped, and delivered.
-      It only moves forward, and each move has one trigger. Payment clearing moves
-      a placed order to paid, the carrier scan moves it to shipped, and the
-      delivery scan moves it to delivered.</p>
-      <p>One branch leaves the path. A paid order that has not shipped can be
-      refunded, which ends it in the refunded state instead of delivered.</p>
-      <div class="quiz">
-        <h2>Quiz</h2>
-        <div class="q">
-          <p>Which state can a refund start from?</p>
-          <label><input type="radio" name="q1" /> Paid, before the carrier scan</label>
-          <label><input type="radio" name="q1" /> Shipped, before delivery scan</label>
-        </div>
-      </div>
-    </main>
-  </body>
-</html>
-EOF
-}
-
 stage_setup() {
   select_or_route_scenario "Which scenario?" "graph-shaped" "not-graph-shaped" "teach-lesson"
 
   case "$SELECTED_OPTION" in
   "graph-shaped")
-    mkdir -p docs
-    cat <<'EOF' >docs/onboarding.md
-# Onboarding
-
-A new account moves through three states before it can place an order:
-signup, verification, and active. Nothing in this document draws that path
-yet.
-EOF
+    stage_fixtures claude draft-figure graph-shaped 01-initial
 
     git add . && git commit -m "docs: add onboarding page with no figure" --no-verify -q
 
@@ -79,14 +26,7 @@ EOF
     log_info "Manual leg: whether the rendered picture actually matches the three-state path cannot be asserted here"
     ;;
   "not-graph-shaped")
-    mkdir -p docs
-    cat <<'EOF' >docs/layout.md
-# Card layout
-
-The dashboard arranges four cards in a two-by-two grid, each card offset by
-a small rotation to read as hand-placed rather than gridded. Nothing in this
-document shows that arrangement yet.
-EOF
+    stage_fixtures claude draft-figure not-graph-shaped 01-initial
 
     git add . && git commit -m "docs: add layout page with no figure" --no-verify -q
 
@@ -100,7 +40,12 @@ EOF
     log_info "Manual leg: whether the freehand drawing actually reads as the intended layout cannot be asserted here"
     ;;
   "teach-lesson")
-    seed_lesson ".canon/teach/01-orders/lessons/0001-order-states.html"
+    # A rendered lesson page rather than markdown, since the in-page capture needs a
+    # page to load. The stylesheet defines the custom properties a figure colors
+    # through, and the hand font is what Mermaid cannot measure. The body face is
+    # one every machine resolves, since `canon capture` refuses a page whose figure
+    # inherits a family the machine lacks.
+    stage_fixtures claude draft-figure teach-lesson 01-initial
 
     git add . && git commit -m "docs: add order states lesson with no figure" --no-verify -q
 

@@ -1,0 +1,27 @@
+
+# Architecture
+
+## Overview
+
+Two folders: `web/` runs Next.js with the agent loop in the browser via the Vercel AI SDK, and `api/` runs FastAPI wrapping retrieval and ranking tools. SQLite holds the shared corpus with FTS5 for keywords and a numpy cosine scan for vectors.
+
+Four layers, in request-flow order:
+
+1. Web shell (Next.js plus chat components)
+2. Agent shell (Vercel AI SDK, registers tools and runs the loop)
+3. Backend (FastAPI HTTP layer)
+4. Tools implementation (Python: retriever, ranker) plus storage (SQLite)
+
+## Key technical decisions
+
+### Hybrid retrieval
+
+BM25 over FTS5 for exact terms, dense embeddings for semantics, reciprocal rank fusion to combine. Optional cross-encoder rerank when precision matters.
+
+### SQLite over an external vector DB
+
+One file, no extra service, ships embedded in the deploy image.
+
+### BYOK
+
+The deployed app does not carry an LLM key. Users supply their own at chat time, held in browser sessionStorage.

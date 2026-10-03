@@ -1,0 +1,10 @@
+services:
+  web:
+    build: ./web
+    ports: ["3000:3000"]
+  api:
+    build: ./api
+    ports: ["8000:8000"]
+  worker:
+    build: ./api
+    command: python -m api.jobs.reindex

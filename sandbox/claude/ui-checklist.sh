@@ -2,8 +2,6 @@
 set -e
 set -o pipefail
 
-# cspell:ignore esbuild
-
 # No project copy of the corpus, for the same reason `claude/review-branch.sh` carries
 # none. The absent project copy forces `ui-checklist` onto the
 # `${CLAUDE_SKILL_DIR}/../../standards/skill.md` fallback, and the branch name
@@ -17,80 +15,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-ui-checklist",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "vitest run",
-    "test:e2e": "playwright test"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "@testing-library/react": "^16.0.0",
-    "jsdom": "^25.0.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "react-router-dom": "^6.26.0",
-    "vitest": "^2.1.0"
-  }
-}
-EOF
-
-  cat <<'EOF' >playwright.config.ts
-import { defineConfig } from '@playwright/test'
-
-export default defineConfig({
-  testDir: './e2e',
-  use: { baseURL: 'http://localhost:5173' },
-})
-EOF
-
-  cat <<'EOF' >>CLAUDE.md
-
-# Sample app
-
-Vite and React task board. UI lives in `src/components/`.
-
-## Commands
-
-- `bun run test`: Vitest component and unit tests
-- `bun run test:e2e`: Playwright end to end tests
-EOF
-
-  mkdir -p src/components e2e
-
-  cat <<'EOF' >vitest.config.ts
-import { defineConfig } from 'vitest/config'
-
-export default defineConfig({
-  esbuild: { jsx: 'automatic' },
-  test: { environment: 'jsdom', include: ['src/**/*.test.{ts,tsx}'] },
-})
-EOF
-
-  cat <<'EOF' >src/components/TaskList.tsx
-export function TaskList({ tasks }: { tasks: string[] }) {
-  return (
-    <ul className="task-list">
-      {tasks.map((task) => (
-        <li key={task}>{task}</li>
-      ))}
-    </ul>
-  )
-}
-EOF
-
-  cat <<'EOF' >e2e/task-list.spec.ts
-import { expect, test } from '@playwright/test'
-
-test('task list renders the seeded tasks', async ({ page }) => {
-  await page.goto('/')
-  await expect(page.getByRole('listitem')).toHaveCount(2)
-})
-EOF
+  stage_fixtures claude ui-checklist shared 01-initial
 
   git add . && git commit -m "feat(ui): task list" --no-verify -q
 
@@ -107,73 +32,7 @@ EOF
   # alone would unmount it and strand a user who filtered to no matches with no
   # way to clear the filter, and a skill reading that diff reviews the fixture's
   # own defect instead of the change under test.
-  cat <<'EOF' >src/components/TaskList.tsx
-import { useState } from 'react'
-
-export function TaskList({
-  tasks,
-  isLoading = false,
-}: {
-  tasks: string[]
-  isLoading?: boolean
-}) {
-  const [filter, setFilter] = useState('')
-  const visible = tasks.filter((task) => task.includes(filter))
-
-  if (isLoading) {
-    return <p className="task-list-loading">Loading tasks</p>
-  }
-
-  return (
-    <div>
-      <a href="/archive">View archive</a>
-      <input
-        aria-label="Filter tasks"
-        onChange={(event) => setFilter(event.target.value)}
-        value={filter}
-      />
-      {visible.length === 0 ? (
-        <p className="task-list-empty">No tasks match that filter.</p>
-      ) : (
-        <ul className="task-list">
-          {visible.map((task) => (
-            <li key={task}>{task}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-EOF
-
-  cat <<'EOF' >src/components/task-list.css
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-}
-
-.task-list-empty {
-  color: #6b7280;
-  padding: 24px 16px;
-}
-EOF
-
-  cat <<'EOF' >src/App.tsx
-import { Route, Routes } from 'react-router-dom'
-
-import { TaskList } from './components/TaskList'
-
-export function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<TaskList tasks={['write', 'review']} />} />
-      <Route path="/archive" element={<h1>Archive</h1>} />
-    </Routes>
-  )
-}
-EOF
+  stage_fixtures claude ui-checklist shared 02-task-filter
 
   git add . && git commit -m "feat(ui): filter tasks and handle the empty state" --no-verify -q
 

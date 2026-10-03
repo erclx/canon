@@ -1,0 +1,9 @@
+
+# Requirements
+
+- Users can view, add, and complete tasks
+- The task list always communicates its state (loading, empty, populated, error)
+
+## Non-goals
+
+- No filtering, sorting, or search in this iteration

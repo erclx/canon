@@ -1,0 +1,44 @@
+---
+title: Design
+description: Tokens for the focus timer
+---
+
+# Design
+
+## Personality
+
+Quiet and disciplined. Warm paper tones, a single confident accent for the
+active state. No decoration, no motion.
+
+## Color
+
+| Role   | Intent               | Value     |
+| ------ | --------------------- | --------- |
+| Ground | warm paper page       | `#faf6f0` |
+| Ink    | primary text          | `#2b241c` |
+| Accent | the active timer state | `#b5502e` |
+
+## Typography
+
+| Role  | Family                    | Weight | Size | Line height |
+| ----- | ------------------------- | ------ | ---- | ----------- |
+| Body  | system-ui, sans-serif     | 400    | 16px | 1.5         |
+| Heavy | system-ui, sans-serif     | 700    | 28px | 1.2         |
+
+## Spacing
+
+- Base unit: `8px`
+
+## Borders
+
+| Role    | Radius | Width |
+| ------- | ------ | ----- |
+| Default | 4px    | 1px   |
+
+## Motion
+
+No animation.
+
+## Iconography
+
+No custom icons.

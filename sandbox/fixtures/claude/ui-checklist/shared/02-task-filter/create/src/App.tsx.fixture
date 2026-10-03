@@ -1,0 +1,12 @@
+import { Route, Routes } from 'react-router-dom'
+
+import { TaskList } from './components/TaskList'
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<TaskList tasks={['write', 'review']} />} />
+      <Route path="/archive" element={<h1>Archive</h1>} />
+    </Routes>
+  )
+}

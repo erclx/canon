@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">
+  <rect width="320" height="180" fill="#faf3e8"/>
+  <rect x="24" y="24" width="120" height="40" fill="#b5502e"/>
+  <text x="24" y="100" font-family="Georgia, serif" font-size="20" fill="#2b241c">Warm paper</text>
+</svg>

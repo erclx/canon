@@ -35,6 +35,7 @@ elif
 enotdir
 errexit
 errorf
+esbuild
 excalidraw
 excalifont
 execa

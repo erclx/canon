@@ -1,0 +1,44 @@
+{
+  "slug": "cold-open",
+  "title": "Cold open demo",
+  "url": "http://localhost:4173/board.html",
+  "viewport": { "width": 1280, "height": 720 },
+  "output": { "video": "demos/cold-open/take/cold-open.webm", "still": "demos/cold-open/take/cold-open.png" },
+  "pointer": { "travelMs": 400, "typeDelayMs": 110 },
+  "annotations": { "durationMs": 900, "position": "bottom-right", "fontSize": 22 },
+  "steps": [
+    {
+      "beat": 1,
+      "name": "Cold open",
+      "kind": "navigate",
+      "target": "",
+      "text": "",
+      "waitFor": "h1",
+      "holdMs": 600,
+      "caption": "An empty board",
+      "still": false
+    },
+    {
+      "beat": 2,
+      "name": "Hero moment",
+      "kind": "fill",
+      "target": "#title",
+      "text": "Ship the recorder",
+      "waitFor": "#title",
+      "holdMs": 600,
+      "caption": "Name the card",
+      "still": false
+    },
+    {
+      "beat": 3,
+      "name": "Payoff",
+      "kind": "click",
+      "target": "#add",
+      "text": "",
+      "waitFor": "#output",
+      "holdMs": 1200,
+      "caption": "And it lands",
+      "still": true
+    }
+  ]
+}

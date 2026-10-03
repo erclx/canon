@@ -1,0 +1,20 @@
+---
+title: Design
+description: Tokens, typography, and the treatments still unresolved
+---
+
+# Design
+
+## Tokens
+
+- Ground: `#ffffff`
+- Ink: `#18181b`
+- Muted ground: `#f4f4f5`
+
+## Unresolved
+
+The callout on `index.html` reads as a flat grey block and carries no signal
+that it is a warning rather than an aside. How it should separate from the
+prose around it is undecided, and the decision is taste rather than
+correctness: a border, a ground shift, and a rule down one edge are all
+defensible and nobody has looked at them side by side.

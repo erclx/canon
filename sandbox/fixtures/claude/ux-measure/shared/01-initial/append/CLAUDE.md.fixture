@@ -1,0 +1,9 @@
+
+# My App
+
+Vite + React task list served by vite preview on port 4173.
+
+## Commands
+
+- `bun run dev`: start vite dev server
+- `bun run preview`: serve the production build on port 4173

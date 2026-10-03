@@ -1,0 +1,36 @@
+import { useState } from 'react'
+
+export function TaskList({
+  tasks,
+  isLoading = false,
+}: {
+  tasks: string[]
+  isLoading?: boolean
+}) {
+  const [filter, setFilter] = useState('')
+  const visible = tasks.filter((task) => task.includes(filter))
+
+  if (isLoading) {
+    return <p className="task-list-loading">Loading tasks</p>
+  }
+
+  return (
+    <div>
+      <a href="/archive">View archive</a>
+      <input
+        aria-label="Filter tasks"
+        onChange={(event) => setFilter(event.target.value)}
+        value={filter}
+      />
+      {visible.length === 0 ? (
+        <p className="task-list-empty">No tasks match that filter.</p>
+      ) : (
+        <ul className="task-list">
+          {visible.map((task) => (
+            <li key={task}>{task}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}

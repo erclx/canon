@@ -8,70 +8,9 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-draft-identity",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  cat <<'EOF' >>CLAUDE.md
-
-# Focus timer
-
-A single-screen focus timer for writers. Voice is calm and disciplined.
-EOF
+  stage_fixtures claude draft-identity shared 01-initial
 
   mkdir -p .claude
-  cat <<'EOF' >canon/DESIGN.md
----
-title: Design
-description: Tokens for the focus timer
----
-
-# Design
-
-## Personality
-
-Quiet and disciplined. Warm paper tones, a single confident accent for the
-active state. No decoration, no motion.
-
-## Color
-
-| Role   | Intent               | Value     |
-| ------ | --------------------- | --------- |
-| Ground | warm paper page       | `#faf6f0` |
-| Ink    | primary text          | `#2b241c` |
-| Accent | the active timer state | `#b5502e` |
-
-## Typography
-
-| Role  | Family                    | Weight | Size | Line height |
-| ----- | ------------------------- | ------ | ---- | ----------- |
-| Body  | system-ui, sans-serif     | 400    | 16px | 1.5         |
-| Heavy | system-ui, sans-serif     | 700    | 28px | 1.2         |
-
-## Spacing
-
-- Base unit: `8px`
-
-## Borders
-
-| Role    | Radius | Width |
-| ------- | ------ | ----- |
-| Default | 4px    | 1px   |
-
-## Motion
-
-No animation.
-
-## Iconography
-
-No custom icons.
-EOF
-
   git add . && git commit -m "feat(project): seed a focus timer with DESIGN.md tokens" --no-verify -q
 
   log_step "Scenario ready: a project with DESIGN.md tokens and no logo, favicon, or manifest yet"

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Release notes</title>
+    <style>
+      body {
+        font: 16px/1.5 system-ui, sans-serif;
+        margin: 0 auto;
+        max-width: 40rem;
+        padding: 3rem 1rem;
+      }
+      .callout {
+        background: #f4f4f5;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Release notes</h1>
+    <p>Every change since the last tag, grouped by the surface it reaches.</p>
+    <div class="callout">
+      <p>Upgrading from 3.x needs one manual step. Read the migration note first.</p>
+    </div>
+    <p>Nothing else on this page has an unresolved treatment.</p>
+  </body>
+</html>

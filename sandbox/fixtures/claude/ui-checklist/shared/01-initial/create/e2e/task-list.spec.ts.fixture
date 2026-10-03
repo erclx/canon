@@ -1,0 +1,6 @@
+import { expect, test } from '@playwright/test'
+
+test('task list renders the seeded tasks', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('listitem')).toHaveCount(2)
+})

@@ -1,0 +1,8 @@
+
+## Problem
+
+Ad reviewers open one ticket at a time and search a policy corpus by hand.
+
+## Tech stack
+
+Next.js browser client, FastAPI service, SQLite corpus. Reviewers reach it from a browser. It calls an LLM provider with a key the reviewer supplies, and pulls policy documents from an internal compliance export.
