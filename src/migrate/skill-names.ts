@@ -40,6 +40,11 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * from where the document lands. Every retired name lands on the one skill, so
  * a target citing any of them resolves after a single sweep.
  *
+ * `draft-diagram` merged into `draft-figure` the same way, its architecture
+ * views becoming one reference the figure skill reads. `claude-diagram` is
+ * retargeted onto `draft-figure` rather than left on the retired name, for the
+ * same reason `claude-ui-test` was.
+ *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
  * substring of ordinary prose with no token left for a later sweep to find.
@@ -58,7 +63,7 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-address-review': 'review-address',
   'claude-autoship': 'auto-ship',
   'claude-design-extract': 'design-extract',
-  'claude-diagram': 'draft-diagram',
+  'claude-diagram': 'draft-figure',
   'claude-docs': 'context-fold',
   'docs-fold': 'context-fold',
   'claude-feature': 'plan-feature',
@@ -91,6 +96,7 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'draft-wireframes': 'draft-doc',
   'draft-readme': 'draft-doc',
   'draft-wiki': 'draft-doc',
+  'draft-diagram': 'draft-figure',
 }
 
 /**

@@ -43,7 +43,7 @@ What it reads is bounded four ways, each a shape the corpus already writes:
 
 Two classes resolve to nothing and are correct to, and both are reported by name rather than dropped:
 
-- **Governed.** A path the citing rule spells exactly in its own frontmatter `paths:` names an artifact a target holds rather than a file here. No shipped rule declares one since the retired `.claude/DIAGRAMS.md` glob left `diagrams.md`, so `src/gov/citations.test.ts` carries the only instance. The class stays for the next rule declaring a target-held path, which would otherwise draw the false finding it exists to prevent. Only an exact declaration excuses, never a glob match, so a typo under `.canon/diagrams/**` is still a finding.
+- **Governed.** A path the citing rule spells exactly in its own frontmatter `paths:` names an artifact a target holds rather than a file here. No shipped rule declares one, so `src/gov/citations.test.ts` carries the only instance. The class stays for the next rule declaring a target-held path, which would otherwise draw the false finding it exists to prevent. Only an exact declaration excuses, never a glob match, so a typo under a globbed folder is still a finding.
 - **Ignored.** A path git ignores is session scratch no clone holds. `governance/rules/standards/tasks.md` cites `.canon/tasks/index.md`, which is real at the main root and absent from a fresh clone and from every linked worktree. Without this the verdict would depend on which tree the stage ran in.
 
 The ignored class makes the counts tree-dependent. From the main worktree that path resolves and the ignored count is zero, and from a linked worktree it is one. The verdict is the same either way, so a count quoted from one tree names which tree it came from.
@@ -70,8 +70,6 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 - `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
 - `governance/rules/standards/tasks.md` → `canon standards tasks` and `canon standards board`, without restating the origin-line, outcome-sizing, heading, no-implementation-detail, or archiving rules.
 - `governance/rules/standards/memory.md` → `canon standards memory`, without restating the routing or pen rules.
-- `governance/rules/standards/diagrams.md` → `canon standards diagrams`, without restating the refresh-only-changed-entries rule. It routes at `governance/rules/standards/mermaid.md` rather than citing `mermaid.md`, since that rule's own glob already reaches an entry under `.canon/diagrams/`.
-- `governance/rules/standards/mermaid.md` → `canon standards mermaid`, carrying as its first operative bullet the condition its glob cannot express, since a path match cannot read whether the file holds a fence.
 - `governance/rules/standards/session.md` → `canon standards session`, without restating the own-file, worktree-root, compaction-only, or citation rules, and keeps the routing bullet pointing at `governance/rules/standards/tasks.md`.
 - `governance/rules/standards/ready.md` → `canon standards ready`, without restating the folder-name, overview-frontmatter, mirrored-tree, or thin-plan rules. Not moot: no plugin skill creates the folder, so a governance-only target reaches it by hand-authoring against the standard.
 - `governance/rules/standards/skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
@@ -112,4 +110,4 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 
 ### Standards corpus, examined and excluded
 
-Every other standard names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts. `diagrams.md` and `wireframes.md` each carry one further mention, a sentence naming the voice yield a sibling standard grants the surface. That sentence describes a cross-standard relationship rather than instructing the reader to load anything, which is why it takes no verdict while `markdown.md`'s routing sentence does.
+Every other standard names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts. `wireframes.md` carries one further mention, a sentence naming the voice yield a sibling standard grants the surface. That sentence describes a cross-standard relationship rather than instructing the reader to load anything, which is why it takes no verdict while `markdown.md`'s routing sentence does.

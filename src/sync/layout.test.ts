@@ -66,14 +66,18 @@ describe('collectSuperseded', () => {
 
   it('should report every retired artifact the target still holds', () => {
     writeFixture(join('.claude', 'TASKS.md'))
-    writeFixture(join('.claude', 'DIAGRAMS.md'))
     writeFixture(join('.claude', 'WIREFRAMES.md'))
 
     expect(collectSuperseded(TARGET).map((entry) => entry.rel)).toEqual([
-      join('.claude', 'DIAGRAMS.md'),
       join('.claude', 'TASKS.md'),
       join('.claude', 'WIREFRAMES.md'),
     ])
+  })
+
+  it('should not report a flat diagrams file, since no seeded folder replaces it', () => {
+    writeFixture(join('.claude', 'DIAGRAMS.md'))
+
+    expect(collectSuperseded(TARGET)).toEqual([])
   })
 
   it('should not match a suffixed variant of a retired artifact', () => {

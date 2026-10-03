@@ -69,7 +69,6 @@ context = [
   "canon/ARCHITECTURE.md",
   "canon/REQUIREMENTS.md",
   "canon/DESIGN.md",
-  ".canon/diagrams/",
   "CLAUDE.md",
   "assets/brand/",
 ]

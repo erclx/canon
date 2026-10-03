@@ -1,4 +1,0 @@
-
-# Ad triage
-
-Two-folder app. `web/` runs a Next.js chat surface. `api/` runs FastAPI tools backed by SQLite.

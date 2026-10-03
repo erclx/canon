@@ -73,14 +73,14 @@ Scaffold installs tooling and seeds. It does not fill the planning docs or the d
 
 1. Fill `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`. The seed provides the files, the scope and decisions are yours to write. Each seed states its own caps, 12 decisions of at most 150 words and 6 risk bullets for the architecture record and 600 words for the requirements, and `canon context audit` gates on them. Edit a number in the record to loosen it.
 2. For a UI project, invoke `canon:design-extract` to draft `canon/DESIGN.md`. With no UI code yet it takes the greenfield path and proposes tokens from the requirements and a `## Personality` section. Skip for non-UI projects.
-3. Optionally invoke `canon:draft-diagram` to draft entries under `.canon/diagrams/` from the architecture and the requirements. One file per diagram kind, so a later refresh of one kind leaves the others untouched. It renders each diagram it writes to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
+3. Optionally invoke `canon:draft-figure` naming an architecture view, such as system context or components, and the document it belongs in. It draws the view from the architecture and the requirements and renders it to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
 4. Start the feature loop. See [AI workflow](../workflow/ai-workflow.md) for the per-feature sequence.
 
-A machine without a renderer still gets the diagrams and is told which check was skipped.
+A machine without a renderer still gets the figure and is told which check was skipped.
 
-Each diagram entry records the commit and date it was last verified against, and nothing maintains that record for you. The folder is redrawn on demand rather than swept on every ship, so `verified` carries the whole signal: an entry whose date sits far behind your branch is due a read, and no pass will name which one. Run `canon:draft-diagram` again when the code a kind is drawn from moves.
+Nothing watches a figure once it is drawn. Run `canon:draft-figure` again when the code a view is drawn from moves.
 
-`canon/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:context-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
+`canon/ARCHITECTURE.md` is watched where a figure is not. `canon:context-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
 
 ### Stack decision
 

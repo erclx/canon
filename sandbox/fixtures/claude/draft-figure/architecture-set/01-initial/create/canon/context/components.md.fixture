@@ -1,0 +1,10 @@
+---
+title: Components
+description: The four layers between the reviewer's browser and the policy corpus, and which one owns each tool
+---
+
+# Components
+
+A request crosses four layers on its way to the corpus. The web shell renders the chat, the agent shell runs the tool loop in the browser, the backend exposes the tools over HTTP, and the tools read SQLite.
+
+The agent loop lives in `web/src/agent/loop.ts` and the retrieval tools in `api/src/retrieval/hybrid.py`.

@@ -7,6 +7,7 @@ rule:
   - 'Read it before a substantial markdown edit. Do not work the banned characters from memory.'
   - 'Run `canon markdown audit <path>` after the edit, and rewrite the sentence carrying a hit rather than swapping the token for a near-synonym.'
   - 'Voice, rhythm, and sentence construction are a separate topic. `800-prose` routes them.'
+  - 'Load the `canon:draft-figure` skill before drafting or revising a Mermaid fence or a figure, and report it rather than proceeding silently when it does not resolve.'
 ---
 
 # Markdown reference

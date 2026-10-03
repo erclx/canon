@@ -1,7 +1,0 @@
-services:
-  web:
-    build: ./web
-    ports: ["3000:3000"]
-  api:
-    build: ./api
-    ports: ["8000:8000"]

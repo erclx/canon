@@ -23,7 +23,6 @@ canon/
 
 .canon/
 ├── tasks/             ← seeded. One file per task plus a generated index.md, local scratch only. `archive/` holds the tasks that shipped.
-├── diagrams/          ← seeded. Per-kind Mermaid views. `index.md` is the discovery anchor. `<kind>.md` files hold one diagram each, grouped by the `category` frontmatter field.
 ├── plans/             ← execution detail for multi-step tasks. `feature-*.md` entries swept by context-fold into `archive/`.
 ├── review/            ← one subfolder per producer. `branch/` for review-branch, `feedback/` for canon feedback, `memory/` for memory-review with its own `archive/`, `design/` for canon design render.
 ├── tmp/               ← ephemeral scratch space, safe to delete without loss
@@ -59,10 +58,6 @@ Convert by hand, once per project:
 1. Rewrite each entry's `name` key to `title` and its `type` key to a sentence-case `category`, quoting any `description` that opens with a backtick or a colon so the frontmatter parses.
 2. Replace `MEMORY.md` with an `index.md` carrying `title` and `subtitle` frontmatter and nothing else.
 3. Run `canon indexes regen --no-stage --root . .canon/memory/index.md` to build the catalog, and compare its entry count against the file count before deleting anything.
-
-## Upgrading from a single-file diagram set
-
-A project installed before the diagram surface became a folder still holds `.claude/DIAGRAMS.md`. Unlike the board, this one migrates itself. The `draft-diagram` skill reads the flat file when `.canon/diagrams/` holds no entries, splits it by kind into the folder, and reports what it wrote. The old file stays on disk so the split can be compared against its source, and deleting it is a manual step once that check passes.
 
 ## Gitignore
 

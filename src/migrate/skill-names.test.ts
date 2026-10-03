@@ -4,7 +4,7 @@ import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(36)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(37)
   })
 
   it('should retire the prefix on every row', () => {
@@ -40,6 +40,7 @@ describe('SKILL_NAME_MAP', () => {
     const shared = [...byName.values()].filter((keys) => keys.length > 1)
 
     expect(shared).toEqual([
+      ['claude-diagram', 'draft-diagram'],
       ['claude-docs', 'docs-fold'],
       ['claude-ui-test', 'ui-test'],
       [
@@ -170,6 +171,15 @@ describe('renameText under the skill preset', () => {
         SKILL_NAME_RULES,
       ),
     ).toBe('canon:draft-doc, draft-doc, draft-doc, draft-doc, draft-doc')
+  })
+
+  it('should land both diagram spellings on the figure skill that absorbed them', () => {
+    expect(
+      renameText(
+        'canon:claude-diagram and canon:draft-diagram',
+        SKILL_NAME_RULES,
+      ),
+    ).toBe('canon:draft-figure and canon:draft-figure')
   })
 
   it('should rewrite the two canon- names that take a standalone verb-first name', () => {

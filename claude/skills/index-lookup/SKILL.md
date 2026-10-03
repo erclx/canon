@@ -1,6 +1,6 @@
 ---
 name: index-lookup
-description: Answers a topic search over every tracked index.md catalog in the project by running `canon indexes list --json` and matching the topic against each entry's title, description, and path, then reports the hits or names why there are none. Names the gitignored task, memory, and diagram catalogs and the groundwork and intake record folders as pointers outside its walked corpus, so it never claims a topic is undocumented when the topic only sits there. Use when asked "where is X documented", "is there a page about X", "search the docs for X", "find the index entry for X", or "what covers X". Do NOT use to grep source code, browse a file whose path is already known, or regenerate an index, which is `canon indexes regen`.
+description: Answers a topic search over every tracked index.md catalog in the project by running `canon indexes list --json` and matching the topic against each entry's title, description, and path, then reports the hits or names why there are none. Names the gitignored task and memory catalogs and the groundwork and intake record folders as pointers outside its walked corpus, so it never claims a topic is undocumented when the topic only sits there. Use when asked "where is X documented", "is there a page about X", "search the docs for X", "find the index entry for X", or "what covers X". Do NOT use to grep source code, browse a file whose path is already known, or regenerate an index, which is `canon indexes regen`.
 ---
 
 # Index lookup
@@ -13,7 +13,7 @@ Answers a topic search over the project's tracked `index.md` catalogs, not a tex
 2. Run `canon indexes list --json` from that root.
 3. Read `errors` first. A folder failing frontmatter validation drops out of `entries` and lands its message in `errors` instead, per the verb's own per-folder isolation, so report an error alongside the match rather than reading it as a reason to stop.
 4. Match the topic case-insensitively as a substring against each entry's `title`, `description`, and `path`. Report every match. A lookup with no ranking is honest about what it found, and a single best guess is not.
-5. Check whether the project carries a gitignored indexed folder or a README-based record catalog outside `list`'s walk: `.canon/tasks/`, `.canon/memory/`, `.canon/diagrams/`, `.canon/groundwork/`, `.canon/intake/`. Test each for existence and at least one file inside it before naming it. A folder absent from this project names nothing.
+5. Check whether the project carries a gitignored indexed folder or a README-based record catalog outside `list`'s walk: `.canon/tasks/`, `.canon/memory/`, `.canon/groundwork/`, `.canon/intake/`. Test each for existence and at least one file inside it before naming it. A folder absent from this project names nothing.
 6. Report the hits, plus a pointer to any outside-the-walk folder found present, per Output below.
 
 ## Rules

@@ -39,7 +39,7 @@ An entry describing a cross-cutting rule never refreshes from the diff. `context
 
 ### A trigger keyed on a signal entering the tree
 
-`context-fold` carries no diagram sweep: `.canon/diagrams/` is redrawn on demand by `draft-diagram` rather than watched on every ship. The shape is worth recording for any later trigger of that kind. An uncovered-kinds trigger fires only when a diff adds a signal and no entry covers that kind, so an entry already drawn from something weaker is never told its real source now exists. A components diagram drawn from a code scan before `canon/ARCHITECTURE.md` existed would go untold the day that file entered the tree, which is the source `standards/diagrams.md` specifies.
+`context-fold` carries no figure sweep: an architecture view is redrawn on demand by `draft-figure` rather than watched on every ship. The shape is worth recording for any later trigger of that kind. An uncovered-kinds trigger fires only when a diff adds a signal and no figure covers that view, so a figure already drawn from something weaker is never told its real source now exists. A components view drawn from a code scan before `canon/ARCHITECTURE.md` existed would go untold the day that file entered the tree, which is the source the architecture set names for it.
 
 ### A format change strands the predicates routing on it
 

@@ -9,7 +9,7 @@ description: How the length, depth, provenance, and reference-form measures coun
 
 The length measure counts rendered lines at 80 columns, the unit the depth checkpoint uses in the sibling command. Entries are authored one line per bullet, so a block of fifteen paragraph-bullets occupies fifteen source lines and renders past sixty, which source counting cannot see. The two share `renderedHeight` across the domain boundary rather than each keeping a count of its own, since they sit in one section of the standard and a reader compares them.
 
-That shared helper measures what renders, so a link counts as its anchor text in both and a code span is counted whole. The rendered count therefore parts from a source count wherever an entry cites a path in backticks rather than as a link, across the 60 entries the audit measures, 51 of them under `canon/context/` and 9 under `.canon/diagrams/`.
+That shared helper measures what renders, so a link counts as its anchor text in both and a code span is counted whole. The rendered count therefore parts from a source count wherever an entry cites a path in backticks rather than as a link, across the 60 entries the audit measured, 51 of them under `canon/context/` and 9 under `.canon/diagrams/`.
 
 `longestRun` in `src/context/audit.ts` keeps one result per entry, so a file carrying two blocks past the depth checkpoint reports the longer one and hides the rest, which makes a task scoped from the report a floor rather than the set: a shorter run can sit behind a longer run in the same file and go unreported until the longer one clears. Reuse the audit's own exclusions for fenced blocks and the peer-list exemption so the numbers match, and re-measure after each entry.
 

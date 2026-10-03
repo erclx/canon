@@ -21,7 +21,8 @@ Does not govern:
 - Decisions filling a stack, delivery, boundary, layout, or build-principle slot, and system-wide risks: `architecture.md`
 - Product scope, goals, and non-goals: `requirements.md`
 - Path-scoped coding rules: `rule.md`
-- Diagrams and wireframes, which answer structure and layout questions an entry hands off: `diagrams.md` and `wireframes.md`
+- Wireframes, which answer layout questions an entry hands off: `wireframes.md`
+- Figures and architecture views, which answer structure questions an entry hands off: the `draft-figure` skill
 - The consumer-facing reference under `docs/`, whose reader is operating the project without the source open: `docs.md`
 
 ## Organizing principle

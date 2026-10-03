@@ -1,0 +1,60 @@
+# What a correct `/canon:draft-figure` run leaves behind when the request names
+# an architecture view. Read by `canon sandbox check`. Patterns use TOML literal
+# strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and asserts nothing.
+#
+# The request names the components view and a destination entry. What this arm
+# asserts is the merge: the view lands in the document the user named and goes
+# through the Mermaid path, and nothing reaches the retired diagrams folder.
+
+max_turns = 30
+
+# The Mermaid source stays under the figure scratch folder after the checks
+# confirm, since a later refresh redraws from it. Its presence is what shows
+# the run took the Mermaid path rather than drawing by hand.
+paths = ["canon/context/components.md", ".canon/tmp/figures/*.mmd"]
+
+# The retired per-kind folder. A run that fell back to it wrote here instead of
+# the named destination.
+absent = [".canon/diagrams/**"]
+
+# The destination and the Mermaid scratch the render writes.
+write_scope = ["canon/context/components.md", ".canon/tmp/figures/**"]
+
+# The output template's first line names the destination, and the render path
+# line spells the decided path.
+reply = ["canon/context/components.md", "architecture"]
+
+manual = [
+  "The rendered PNG was read back before confirming. Unwired: the skill deletes the PNG once the checks confirm, so a conforming run leaves no file to assert.",
+  "The drawing reads as the four layers the architecture names, inside the boundary. Semantic: whether the boxes say what the record says is a judgment over the picture.",
+]
+
+# The figure landed in the named entry, wrapped and captioned.
+[[content]]
+path = "canon/context/components.md"
+pattern = '<figure'
+
+[[content]]
+path = "canon/context/components.md"
+pattern = '<figcaption'
+
+# The shipped drawing is the rendered SVG with an accessible name, not a fence
+# left as source.
+[[content]]
+path = "canon/context/components.md"
+pattern = '<svg'
+
+# Colors were rewritten into custom properties rather than left as the hex
+# values Mermaid writes.
+[[content]]
+path = "canon/context/components.md"
+pattern = 'var\(--'
+
+# The seeded prose survives the write.
+[[content]]
+path = "canon/context/components.md"
+pattern = 'A request crosses four layers'

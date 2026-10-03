@@ -26,7 +26,6 @@ canon/
 └── rules/           ← path-scoped governance rules, written by canon gov install
 
 .canon/
-├── diagrams/        ← one Mermaid entry per diagram kind with a generated index.md, redrawn on demand
 ├── tasks/           ← one file per task with a generated index.md, local scratch
 ├── plans/           ← one plan per feature, archived inside itself once it ships
 ├── memory/          ← durable session facts no context entry owns
