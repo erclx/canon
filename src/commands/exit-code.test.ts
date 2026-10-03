@@ -195,6 +195,24 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain(`${source} holds no .html slides`)
   })
 
+  it('should exit 1 when slides render reads a malformed deck file', async () => {
+    const source = join(workDir, 'malformed-deck')
+    await mkdir(source, { recursive: true })
+    await writeFile(join(source, '01.html'), '<p>one</p>\n', 'utf8')
+    await writeFile(
+      join(source, 'deck.json'),
+      JSON.stringify({ slideNumbers: 'on' }),
+      'utf8',
+    )
+
+    const result = await runCli(['slides', 'render', '--source', source], {
+      cwd: workDir,
+    })
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toContain('slideNumbers must be true or false')
+  })
+
   it('should exit 1 when slides render is given a variant with a folder', async () => {
     const source = join(workDir, 'variant-deck')
     await mkdir(source, { recursive: true })
