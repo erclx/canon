@@ -82,14 +82,35 @@ function inlineValue(element: Element, property: string): string {
     : ''
 }
 
+/** Values that defer to something else, so they follow the theme as it does. */
+const DEFERRING = new Set([
+  'currentcolor',
+  'inherit',
+  'initial',
+  'unset',
+  'revert',
+  'revert-layer',
+])
+
 /**
- * A value set inline that names no token, which stays put when the theme
- * changes. Inherited and stylesheet values are not the element's own, so they
- * never count.
+ * A color that stays put when the theme changes: one naming no token anywhere
+ * in it and deferring to nothing, so `color-mix()` over a `var()` is not raw.
+ */
+export function isRawValue(value: string): boolean {
+  const normalized = value.trim().toLowerCase()
+  return (
+    normalized !== '' &&
+    !normalized.includes('var(') &&
+    !DEFERRING.has(normalized)
+  )
+}
+
+/**
+ * Inherited and stylesheet values are not the element's own, so only an
+ * inline value counts.
  */
 function isRawInline(element: Element, property: string): boolean {
-  const inline = inlineValue(element, property).trim()
-  return inline !== '' && !inline.startsWith('var(')
+  return isRawValue(inlineValue(element, property))
 }
 
 /**

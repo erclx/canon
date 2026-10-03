@@ -8,6 +8,7 @@ import { act } from 'preact/test-utils'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { documentElements } from '@/canvas/address'
 import { App } from '@/canvas/client/app'
+import { isRawValue } from '@/canvas/client/inspector'
 import {
   applyChange,
   applyRecord,
@@ -849,6 +850,26 @@ function rowOf(name: string): Element {
   return row
 }
 
+describe('isRawValue', () => {
+  it('should read a literal color as raw', () => {
+    expect(isRawValue('rgb(0, 0, 0)')).toBe(true)
+  })
+
+  it('should not read a color mixed from a token as raw', () => {
+    expect(
+      isRawValue('color-mix(in srgb, var(--color-accent) 50%, white)'),
+    ).toBe(false)
+  })
+
+  it('should not read currentColor in any casing as raw', () => {
+    expect(isRawValue('CurrentColor')).toBe(false)
+  })
+
+  it('should not read a CSS-wide keyword as raw', () => {
+    expect(isRawValue('revert-layer')).toBe(false)
+  })
+})
+
 describe('Inspector raw marker', () => {
   it('should mark a color set inline as a raw value in text', () => {
     renderApp([page('drafts', [frame('hero')])])
@@ -880,6 +901,27 @@ describe('Inspector raw marker', () => {
     clickIn(doc, 'h1')
 
     expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a color set inline to inherit', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="color: inherit">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a background set inline to currentColor', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: currentColor">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('background').querySelector('.raw')).toBeNull()
   })
 
   it('should not mark a color the element only inherits', () => {

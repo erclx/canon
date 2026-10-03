@@ -41,7 +41,7 @@ A pick is refused as `address-mismatch` when the browser builds elements the fil
 
 The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. A color picked from the project's tokens is written as `var(--<name>)`. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
 
-Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. The inspector marks a color or background set inline to anything but a `var()` with the word `raw`, since that value stays fixed when the theme changes. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
+Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. The inspector marks a color or background set inline with the word `raw` when its value names no `var()` and is not `currentColor` or a CSS-wide keyword, since that value stays fixed when the theme changes. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
 
 The Theme tab in the shell lists what the token stylesheet defines, grouped as color, spacing, radius, font family, font size, and other. The page record at `/api/pages` carries the same list as `tokens.groups`.
 
