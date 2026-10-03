@@ -49,6 +49,8 @@ The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because
 
 `detectUnmigrated` covers a state the drift walk alone reads as clean: `installedStampDomains` lists only domains whose install marker exists, so a project holding `standards/` at its root would otherwise report zero entries for a real problem. It counts toward `--exit-code` because the relocation closes it, while superseded artifacts and seed drift are excluded for the reason `orphaned` already is. `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty, since standards closed the install channel that put it at risk of sitting unmigrated at a project root, so the section currently names no domain. The section stays rather than being cut, since the next domain to retire an install channel this way reoccupies it.
 
+A target still holding a surface at its pre-`canon/` spelling, such as `.claude/REQUIREMENTS.md`, never reaches this section, since `ROOT_LAYOUTS` covers install domains rather than surface roots. The `seeds` section is what names it, resolving the seed `canon/REQUIREMENTS.md` through the old-root fallback and reporting `.claude/REQUIREMENTS.md (drifted)`. No section names `canon migrate surface-roots`, the verb that moves it. <!-- canon-keep-surface-root -->
+
 ### Rules the target never received
 
 `readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `800-prose` citing `governance/rules/standards/markdown.md`, which needs a hand repair once discovered.
