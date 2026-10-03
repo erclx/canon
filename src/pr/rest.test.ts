@@ -87,7 +87,7 @@ describe('reviewRowOf', () => {
     })
   })
 
-  it('should read a pending review with no stamp as unsubmitted', () => {
+  it('should read a pending review with no stamp as not yet submitted', () => {
     expect(reviewRowOf({ body: '', commit_id: HEAD }).submittedAt).toBeNull()
   })
 })
