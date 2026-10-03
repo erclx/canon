@@ -40,7 +40,7 @@ Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, and `## Constra
 
 ## Length
 
-This file loads into every session, so its weight is paid before any work starts. Cap it by stating the clause `This record holds at most <n> words.` in the record itself, where a checker reads it and counts every word below the frontmatter. The cap is the record's own, so a record stating none is measured and never gated. Set it near 600, and at the cap cut a goal or a constraint that no longer changes a decision before adding one.
+This file loads into every session, so its weight is paid before any work starts. Cap it by stating the clause `This record holds at most <n> words.` in the record itself, where a checker reads it and counts every word below the frontmatter. The cap is the record's own, so a record stating none is measured and never gated. The template and the seed a new project installs state it at 600, and a project loosens it by editing the number in its own record. At the cap, cut a goal or a constraint that no longer changes a decision before adding one.
 
 ## Lifecycle
 
@@ -58,6 +58,8 @@ State each entry as an outcome the consumer reaches, never as the mechanism that
 
 ```markdown
 # Requirements
+
+This record holds at most 600 words.
 
 ## Problem
 
