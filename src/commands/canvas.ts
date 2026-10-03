@@ -8,8 +8,12 @@ import {
   canvasDir,
   DEFAULT_FRAME,
   listPages,
+  moveFrame,
+  readPage,
+  readSelection,
   renamePage,
 } from '@/canvas/content'
+import { captureCanvas } from '@/canvas/capture'
 import { CANVAS_PORT, startCanvas } from '@/canvas/server'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
@@ -94,7 +98,7 @@ export function register(program: Command): void {
     .command('canvas')
     .helpOption('-h, --help', 'Show this help message')
     .description(
-      'Local canvas of pages and HTML frames (serve, list, page, frame)',
+      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, capture)',
     )
     .addHelpText(
       'after',
@@ -108,6 +112,9 @@ export function register(program: Command): void {
         '  canon canvas serve',
         '  canon canvas page add drafts',
         '  canon canvas frame add drafts hero --width 1440 --height 900',
+        '  canon canvas frame move drafts hero --x 200 --y 120',
+        '  canon canvas selection --json',
+        '  canon canvas capture drafts/hero',
         '  canon canvas list --json',
         '',
       ].join('\n'),
@@ -212,7 +219,7 @@ export function register(program: Command): void {
   const frame = canvas
     .command('frame')
     .helpOption('-h, --help', 'Show this help message')
-    .description('Add a frame to a page')
+    .description('Add a frame to a page, or move one')
 
   withRoot(
     frame
@@ -256,6 +263,184 @@ export function register(program: Command): void {
       outro()
     },
   )
+
+  withRoot(
+    frame
+      .command('move')
+      .description('Move a frame, keeping its size')
+      .argument('<page>', 'Page the frame is on')
+      .argument('<name>', 'Frame name')
+      .option('--x <px>', 'New x, defaulting to where the frame is')
+      .option('--y <px>', 'New y, defaulting to where the frame is'),
+  ).action(
+    async (
+      pageName: string,
+      name: string,
+      opts: RootOptions & { x?: string; y?: string },
+    ) => {
+      const resolved = await resolveRoot(opts)
+      if (!resolved.ok) {
+        process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      const { root } = resolved
+      const current = readPage(root, pageName)?.frames.find(
+        (candidate) => candidate.name === name,
+      )
+      const outcome = moveFrame(root, pageName, name, {
+        x: parsePosition(opts.x, current?.x ?? 0),
+        y: parsePosition(opts.y, current?.y ?? 0),
+      })
+      if (!outcome.ok) {
+        process.exitCode = refuse(outcome, opts.json ?? false)
+        return
+      }
+      if (opts.json) writeJson(outcome)
+      intro(BANNER)
+      logAdd(`${outcome.page}/${outcome.file}`)
+      logInfo(`at ${outcome.box.x}, ${outcome.box.y}`)
+      outro()
+    },
+  )
+
+  withRoot(
+    canvas
+      .command('selection')
+      .description('Report the frame the operator selected on the canvas'),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Reports none when nothing is selected or when the selected frame has',
+        'since been removed. Read this when the operator says "this one".',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RootOptions) => {
+      const resolved = await resolveRoot(opts)
+      if (!resolved.ok) {
+        process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      const { root } = resolved
+      const selected = readSelection(root)
+      if (opts.json) {
+        writeJson({
+          ok: true,
+          selection: selected
+            ? {
+                ...selected,
+                path: resolve(canvasDir(root), selected.page, selected.file),
+              }
+            : null,
+        })
+      }
+      intro(BANNER)
+      if (!selected) {
+        logStep('Nothing selected')
+      } else {
+        logStep(`${selected.page}/${selected.frame}`)
+        const { box } = selected
+        logInfo(`${box.width} × ${box.height} at ${box.x}, ${box.y}`)
+      }
+      outro()
+    })
+
+  withRoot(
+    canvas
+      .command('capture')
+      .description('Capture a frame, or every frame of a page, as a PNG')
+      .argument('<target>', '<page>/<frame> for one frame, <page> for all')
+      .option(
+        '-o, --out <path>',
+        'The PNG for a frame, or the folder for a page; defaults to session scratch',
+      ),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Serves the canvas for the call and captures through that address, so',
+        'the injected tokens are in the PNG and each frame renders at its own',
+        'width. The raw file on disk is never captured.',
+        '',
+        'Exit codes:',
+        '  0  every frame rendered',
+        '  1  refused or a frame failed, with the reason on stderr or in the JSON record',
+        '',
+      ].join('\n'),
+    )
+    .action(async (target: string, opts: RootOptions & { out?: string }) => {
+      const resolved = await resolveRoot(opts)
+      if (!resolved.ok) {
+        process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      let outcome: Awaited<ReturnType<typeof captureCanvas>>
+      try {
+        outcome = await captureCanvas(
+          resolved.root,
+          target,
+          opts.out ? resolve(process.cwd(), opts.out) : undefined,
+        )
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error)
+        process.exitCode = refuse(
+          { ok: false, reason: 'no-root', detail },
+          opts.json ?? false,
+        )
+        return
+      }
+      if (!outcome.ok) {
+        process.exitCode = refuse(
+          {
+            ok: false,
+            reason: outcome.reason === 'no-server' ? 'no-root' : outcome.reason,
+            detail: outcome.detail,
+          },
+          opts.json ?? false,
+        )
+        return
+      }
+
+      const rows = outcome.captures.map(({ target: item, result }) =>
+        result.status === 'rendered'
+          ? {
+              page: item.page,
+              frame: item.frame,
+              status: result.status,
+              path: result.pngPath,
+              width: result.width,
+              height: result.height,
+            }
+          : {
+              page: item.page,
+              frame: item.frame,
+              status: result.status,
+              reason: result.reason,
+            },
+      )
+      const failed = rows.some((row) => row.status === 'failed')
+      if (opts.json) writeJson({ ok: !failed, captures: rows })
+      intro(BANNER)
+      for (const row of rows) {
+        if (row.status === 'rendered') {
+          logAdd(`${row.page}/${row.frame}`)
+          logInfo(`${displayPath(row.path)} ${row.width}x${row.height}`)
+        } else {
+          logError(`${row.page}/${row.frame}: ${row.reason}`)
+        }
+      }
+      outro()
+      if (failed) process.exitCode = 1
+    })
+}
+
+/** NaN for a value that is not a number, which the content module refuses. */
+function parsePosition(raw: string | undefined, fallback: number): number {
+  if (raw === undefined) return fallback
+  return raw.trim() === '' ? Number.NaN : Number(raw)
 }
 
 async function runServe(
