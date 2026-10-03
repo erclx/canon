@@ -46,3 +46,12 @@ Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit ref
 - Image generation, which makes a picture rather than finding a source
 - Loading on every web search rather than on a research-shaped request: a hook matching `WebSearch`, planned on its own
 - Whether a session already scopes searches without the skill, which only a run on a fresh research request without it would show
+
+## Measured
+
+2026-10-03, one Sonnet run of the toolkit's own sandbox scenario for this skill, a housing brief asking for linked notes and a prompt for the strongest evidence on whether rent control reduces housing supply. The skill sat in the project's skill folder and the run was allowed the skill, search, and fetch tools.
+
+- No `Skill` call fired, so the description did not route a plain research request to the body.
+- The run searched four times with no domain filter, naming authors and journals from recall, then fetched the papers' own pages. It never named the field, so the scenario's field pattern failed and the arm went red on one of its assertions.
+
+The arm shows the trigger is the gap rather than the body: a session that never loads the skill cannot follow it. The pointers from `plan-groundwork` and `draft-wiki` reach only those procedures, and the hook matching `WebSearch` is the route for every other search. One run on one model shows the miss exists and does not size it.
