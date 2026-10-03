@@ -14,7 +14,7 @@ Run these steps once the body's Pick step resolves to Vercel. Read `vercel <comm
 
 ## Step 1: create and link the project
 
-Skip the create when `.vercel/project.json` already names a project, and report the link as found instead.
+Skip the `project add` when `.vercel/project.json` already exists, and run the link anyway. A file left from a deleted or renamed project still counts as a signal, so the link is what judges it, failing on a project that is gone and rewriting the file against the one that answers.
 
 ```bash
 vercel project add <project-name>
@@ -33,7 +33,13 @@ Vercel deploys on push only once the project is connected to the repository, so 
 
 ## Step 3: set the org and project IDs
 
-Read both IDs from `.vercel/project.json`, which the link just wrote, rather than asking the operator to copy them from the dashboard. Pipe each straight into its secret rather than printing it first:
+Read both IDs from `.vercel/project.json`, which the link just wrote, rather than asking the operator to copy them from the dashboard. Confirm the file carries both before setting anything, since `jq -r` prints `null` for a missing key and exits zero, and `gh secret list` in Step 5 reads names rather than values:
+
+```bash
+jq -e '(.orgId | type == "string" and length > 0) and (.projectId | type == "string" and length > 0)' .vercel/project.json >/dev/null
+```
+
+On a non-zero exit, stop: `❌ .vercel/project.json carries no orgId or projectId. Delete it and re-invoke so the link writes it again.` Otherwise pipe each ID straight into its secret rather than printing it first:
 
 ```bash
 jq -r .orgId .vercel/project.json | gh secret set VERCEL_ORG_ID
