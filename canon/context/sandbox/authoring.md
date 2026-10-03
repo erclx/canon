@@ -31,7 +31,7 @@ A failed install aborts provisioning with the installer's own stderr, since a sa
 
 ### The anchor remote
 
-`use_sandbox_anchor` in `scripts/lib/sandbox-git.sh` holds the repository name, `aitk-sandbox`, in one place, and every declaring scenario delegates to it with no argument. `ANCHOR_REPO` carries no default, since a fallback would sit permanently unreached. The library exports `use_sandbox_anchor` rather than declaring `use_anchor` itself, because `manage-sandbox.sh` keys off `type -t use_anchor` to decide between staging the anchor fixture and starting empty, and a hook declared at source time would hand an anchor to every scenario sourcing the file for its identity helpers.
+`use_sandbox_anchor` in `scripts/lib/sandbox-git.sh` holds the repository name, `canon-sandbox`, in one place, and every declaring scenario delegates to it with no argument. `ANCHOR_REPO` carries no default, since a fallback would sit permanently unreached. The library exports `use_sandbox_anchor` rather than declaring `use_anchor` itself, because `manage-sandbox.sh` keys off `type -t use_anchor` to decide between staging the anchor fixture and starting empty, and a hook declared at source time would hand an anchor to every scenario sourcing the file for its identity helpers.
 
 - The anchor URL is built once by `sandbox_anchor_url` and reaches GitHub over HTTPS rather than SSH, since an agent cannot answer a passphrase prompt and a machine carrying only `gh` credentials has none to offer SSH.
 - The harness sets `credential.helper` to `!gh auth git-credential` on the sandbox repo rather than expecting the operator to run `gh auth setup-git`. `gh auth login` leaves git without a credential, and scoping the helper to the throwaway repo keeps the operator's global config unwritten while covering the pushes the agent makes from inside the sandbox.
@@ -105,7 +105,7 @@ use_anchor() {
 }
 ```
 
-The repository at `${GITHUB_ORG}/aitk-sandbox` exists for `gh`-dependent skills (open PRs, push branches, merge, edit PR bodies) and is fully disposable. Each scenario owns its own reset:
+The repository at `${GITHUB_ORG}/canon-sandbox` exists for `gh`-dependent skills (open PRs, push branches, merge, edit PR bodies) and is fully disposable. Each scenario owns its own reset:
 
 1. Close any open PRs it will recreate (`gh pr close <branch> 2>/dev/null || true`)
 2. Delete any remote branches it will recreate (`git push origin --delete <branch> -q 2>/dev/null || true`)

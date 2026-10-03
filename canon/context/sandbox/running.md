@@ -18,7 +18,7 @@ description: Prerequisites, the command surface, and the toolkit-only refusal an
 
 ## Prerequisites
 
-The anchor scenarios push to a real GitHub remote. They need an authenticated `gh` and membership in the org that owns `aitk-sandbox`, which is private. Everything else runs offline against an empty sandbox.
+The anchor scenarios push to a real GitHub remote. They need an authenticated `gh` and membership in the org that owns `canon-sandbox`, which is private. Everything else runs offline against an empty sandbox.
 
 ```bash
 gh auth login   # required for any scenario declaring use_anchor

@@ -168,10 +168,11 @@ const AITK_ARTICLE = /\b([Aa])n(\s+`?)(canon|CANON|Canon)(?![A-Za-z])/g
 /**
  * The `aitk` to `canon` rename.
  *
- * `aitk-sandbox` is a separate repository that is not being renamed. It has to
- * win against the bare token, and it also has to win against the owner-scoped
- * spelling, since `erclx/aitk-sandbox` would otherwise rewrite to
- * `erclx/canon-sandbox` and name a repository that does not exist.
+ * `aitk-sandbox` is the retired spelling of a repository that was later renamed
+ * `canon-sandbox`, and GitHub still resolves the old name through a redirect.
+ * It has to win against the bare token, and it also has to win against the
+ * owner-scoped spelling, so a consumer's text naming `erclx/aitk-sandbox` keeps
+ * the form that resolves rather than being rewritten.
  *
  * Case is carried in the map rather than derived, because the uppercase form
  * is an environment variable prefix and the title-case form is a heading word,

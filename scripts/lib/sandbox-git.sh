@@ -43,7 +43,7 @@ resolve_sandbox_git_identity() {
   SANDBOX_GIT_NAME="${SANDBOX_GIT_NAME:-$(git config --global user.name 2>/dev/null || true)}"
   SANDBOX_GIT_EMAIL="${SANDBOX_GIT_EMAIL:-$(git config --global user.email 2>/dev/null || true)}"
 
-  : "${SANDBOX_GIT_NAME:=aitk-sandbox}"
+  : "${SANDBOX_GIT_NAME:=canon-sandbox}"
   : "${SANDBOX_GIT_EMAIL:=sandbox@example.com}"
 
   export SANDBOX_GIT_NAME SANDBOX_GIT_EMAIL
@@ -57,7 +57,7 @@ configure_sandbox_git_identity() {
 
 # Every scenario that needs a remote points at the same throwaway repository, so
 # the name lives here rather than in each one.
-SANDBOX_ANCHOR_REPO="aitk-sandbox"
+SANDBOX_ANCHOR_REPO="canon-sandbox"
 
 # A scenario calls this from its own use_anchor hook rather than this file
 # defining the hook. manage-sandbox.sh keys off `type -t use_anchor`, so

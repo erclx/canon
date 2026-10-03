@@ -1222,7 +1222,7 @@ export function register(program: Command): void {
         '',
         'The changelog is never rewritten. Its entries record what shipped',
         'under the old name, and GitHub redirects the links they carry.',
-        'aitk-sandbox is a separate repository and is left alone.',
+        'aitk-sandbox, the old name of erclx/canon-sandbox, is left alone.',
         '',
         'Examples:',
         '  canon migrate rename',

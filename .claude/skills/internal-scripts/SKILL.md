@@ -26,7 +26,7 @@ Read `canon/context/scripts/index.md` for structure, file inventory, and lib res
 - When testing uncommitted script edits from a linked worktree, invoke the script via its worktree-local path like `./scripts/manage-sandbox.sh <cat>:<cmd>`. Global `canon` resolves to the main repo's scripts and cannot see worktree changes until they land on main.
 - After refactoring a sandbox scenario, do not claim verified from a green run alone. Diff `.sandbox/` contents, file list, and `git log` against the pre-refactor behavior or spec, and report the comparison in the done message.
 - A sandbox scenario validates a skill change only when its environment reproduces the bug's trigger. Standalone-repo scenarios cannot exercise host-conditional behavior like linked-worktree locks or remote-state failures. Mark the scenario extension as a follow-up rather than treating a green run as proof.
-- `github.com/erclx/aitk-sandbox` is a pre-authorized destructive-ops playground. Sandbox scenarios that force-push to its `main` or delete `chore/canon-sync*` remote branches run without confirmation. Treat any other `erclx/*` repo as production where destructive ops still need explicit approval.
+- `github.com/erclx/canon-sandbox` is a pre-authorized destructive-ops playground. Sandbox scenarios that force-push to its `main` or delete `chore/canon-sync*` remote branches run without confirmation. Treat any other `erclx/*` repo as production where destructive ops still need explicit approval.
 
 ## Sync checklist
 
