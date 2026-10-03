@@ -177,6 +177,7 @@ subfolders
 succ
 taylorwilsdon
 testdesiderata
+tidewell
 timonwong
 toolname
 toolsets
