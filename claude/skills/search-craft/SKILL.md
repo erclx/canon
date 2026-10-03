@@ -5,7 +5,7 @@ description: Carries the thinking step a session takes before it searches outsid
 
 # Search craft
 
-A session reaching outside the project tends to run one generic search and take whatever ranks highest. Ranking rewards pages written to rank, so a field's thin "complete guide" pages and its advocates crowd out its reference material, and one search gives nothing to check them against. In the measured case that single search reported a browser version the field's own compatibility tables contradicted. This skill carries the step before the search: work out where the field's authoritative material lives, search there, and search openly beside it.
+A session reaching outside the project tends to run one generic search and take whatever ranks highest. Ranking rewards pages written to rank, so a field's thin "complete guide" pages and its advocates crowd out its reference material, and one search gives nothing to check a wrong fact against. This skill carries the step before the search: work out where the field's authoritative material lives, search there, and search openly beside it.
 
 The procedure that loaded this skill owns what the result is for and where it is written. Nothing here formats a citation or decides what a finding means.
 
@@ -50,13 +50,13 @@ Each line is a claim measured once, and `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` rec
 
 ## Excuses and rebuttals
 
-| Excuse                                   | Rebuttal                                                                                                                                             |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The model already knows the good sites   | It does, and it does not use that knowledge unprompted. A generic search ranked third-party guides over the field's reference pages.                 |
-| One search was enough                    | In the measured case the open search's summary stated a version the field's compatibility tables contradicted, and only the scoped search caught it. |
-| The open results look authoritative      | Ranking rewards pages written to rank. An open set mixed journals with advocacy groups and leaned one way where the scoped set showed both sides.    |
-| I scoped it, so every result is in scope | The domain filter is not strict. A scoped run returned results from outside its own list.                                                            |
-| The summary already answers it           | A summary paraphrases. Fetch the page when two summaries disagree, since that is where the error sits.                                               |
+| Excuse                                   | Rebuttal                                                                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| The model already knows the good sites   | It does, and it does not use that knowledge unprompted. Left to rank, a search puts guides written to rank above a field's reference pages. |
+| One search was enough                    | One search gives nothing to check a wrong fact against. The scoped search is what catches the open summary's error.                         |
+| The open results look authoritative      | Ranking rewards pages written to rank, so advocates and thin guides sit beside the field's own record and tilt the summary.                 |
+| I scoped it, so every result is in scope | The domain filter is not strict, so a scoped search can return results from outside its list.                                               |
+| The summary already answers it           | A summary paraphrases. Fetch the page when two summaries disagree, since that is where the error sits.                                      |
 
 ## Red flags
 
