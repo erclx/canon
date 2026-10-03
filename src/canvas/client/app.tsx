@@ -1,0 +1,85 @@
+/** @jsxImportSource preact */
+import type { JSX } from 'preact'
+import { useRef } from 'preact/hooks'
+import { PagesPanel } from '@/canvas/client/pages-panel'
+import { currentPage, focusFrame, tokens } from '@/canvas/client/state'
+import { Surface } from '@/canvas/client/surface'
+
+const SOURCE_LABEL = {
+  toolkit: 'This toolkit',
+  installed: 'Installed design',
+  none: 'None',
+} as const
+
+function TokenDetails(): JSX.Element | null {
+  const value = tokens.value
+  if (!value) return null
+  return (
+    <section aria-labelledby="tokens-heading">
+      <h2 id="tokens-heading" class="section-label">
+        Tokens
+      </h2>
+      <p class="detail">{SOURCE_LABEL[value.source]}</p>
+      {value.files && value.files.length > 0 ? (
+        <ul class="files">
+          {value.files.map((file) => (
+            <li key={file} title={file}>
+              <code>{file}</code>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {value.notice ? <p class="notice">{value.notice}</p> : null}
+    </section>
+  )
+}
+
+function PageDetails(): JSX.Element | null {
+  const page = currentPage.value
+  if (!page) return null
+  const unplaced = page.frames.filter((frame) => !frame.placed).length
+  return (
+    <section aria-labelledby="page-heading">
+      <h2 id="page-heading" class="section-label">
+        Page
+      </h2>
+      <p class="detail" title={page.name}>
+        {page.name}
+      </p>
+      <p class="detail-meta">
+        {page.frames.length} {page.frames.length === 1 ? 'frame' : 'frames'}
+      </p>
+      {unplaced > 0 ? (
+        <p class="notice">
+          {unplaced} {unplaced === 1 ? 'frame has' : 'frames have'} no box in
+          layout.json and sit in a default row.
+        </p>
+      ) : null}
+      {page.layoutIssue === 'malformed' ? (
+        <p class="notice" role="alert">
+          layout.json does not parse, so every frame sits in a default row. Fix
+          the file to restore their places.
+        </p>
+      ) : null}
+    </section>
+  )
+}
+
+export function App(): JSX.Element {
+  const viewportRef = useRef<HTMLDivElement>(null)
+  return (
+    <div class="shell">
+      <PagesPanel
+        onFocusFrame={(frame) => {
+          const rect = viewportRef.current?.getBoundingClientRect()
+          focusFrame(frame, rect?.width ?? 0, rect?.height ?? 0)
+        }}
+      />
+      <Surface viewportRef={viewportRef} />
+      <aside class="panel panel-right" aria-label="Details">
+        <PageDetails />
+        <TokenDetails />
+      </aside>
+    </div>
+  )
+}
