@@ -114,8 +114,8 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr',
         '',
         'Examples:',
-        '  canon demo run demos/inline-edit.json',
-        '  canon demo run demos/inline-edit.json --cursor ~/cursors/theme',
+        '  canon demo run demos/inline-edit/plan.json',
+        '  canon demo run demos/inline-edit/plan.json --cursor ~/cursors/theme',
         '',
       ].join('\n'),
     )
@@ -146,8 +146,8 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr',
         '',
         'Examples:',
-        '  canon demo frames demos/inline-edit.webm',
-        '  canon demo frames demos/inline-edit.webm --fps 2 --out frames',
+        '  canon demo frames demos/inline-edit/take/inline-edit.webm',
+        '  canon demo frames demos/inline-edit/take/inline-edit.webm --fps 2 --out frames',
         '',
       ].join('\n'),
     )
@@ -182,7 +182,7 @@ function runCompile(draftPath: string, opts: CompileOptions): number {
   }
 
   const slug = opts.slug ?? basename(source, extname(source))
-  const target = resolve(process.cwd(), opts.out, `${slug}.json`)
+  const target = resolve(process.cwd(), opts.out, slug, 'plan.json')
 
   if (existsSync(target) && !opts.force) {
     logStep('Plan')

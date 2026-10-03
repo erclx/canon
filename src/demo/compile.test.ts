@@ -33,8 +33,8 @@ describe('compilePlan', () => {
     const plan = compilePlan(draft([beat(1)]), OPTIONS)
 
     expect(plan.output).toEqual({
-      video: 'demos/inline-edit-launch.webm',
-      still: 'demos/inline-edit-launch.png',
+      video: 'demos/inline-edit-launch/take/inline-edit-launch.webm',
+      still: 'demos/inline-edit-launch/take/inline-edit-launch.png',
     })
   })
 

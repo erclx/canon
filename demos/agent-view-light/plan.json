@@ -8,8 +8,8 @@
   },
   "colorScheme": "light",
   "output": {
-    "video": "demos/agent-view-light.webm",
-    "still": "demos/agent-view-light.png"
+    "video": "demos/agent-view-light/take/agent-view-light.webm",
+    "still": "demos/agent-view-light/take/agent-view-light.png"
   },
   "pointer": {
     "travelMs": 400,
