@@ -178,6 +178,17 @@ describe('PagesPanel', () => {
 })
 
 describe('Surface', () => {
+  it('should scale element outlines against the zoom so they keep their screen weight', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => {
+      view.value = { x: 0, y: 0, zoom: 0.25 }
+    })
+
+    const plane = mount.querySelector<HTMLElement>('.plane')
+    expect(plane?.style.getPropertyValue('--outline-scale')).toBe('4')
+  })
+
   it('should place each frame at its box with its name above it', () => {
     renderApp([
       page('drafts', [

@@ -443,7 +443,11 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
       >
         <div
           class="plane"
-          style={{ transform: `translate(${x}px, ${y}px) scale(${zoom})` }}
+          style={{
+            transform: `translate(${x}px, ${y}px) scale(${zoom})`,
+            /* Lets an outline inside the plane hold its screen weight at any zoom. */
+            '--outline-scale': String(1 / zoom),
+          }}
         >
           {page?.frames.map((frame) => (
             <FrameView

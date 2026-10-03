@@ -298,11 +298,11 @@ code {
 }
 
 .element-outline[data-outline='hover'] {
-  outline: 1px dashed var(--color-accent);
+  outline: calc(1px * var(--outline-scale, 1)) dashed var(--color-accent);
 }
 
 .element-outline[data-outline='selected'] {
-  outline: 2px solid var(--color-accent);
+  outline: calc(2px * var(--outline-scale, 1)) solid var(--color-accent);
 }
 
 /* Above its neighbors, so a frame dragged over another stays whole. */
