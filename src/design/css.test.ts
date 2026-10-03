@@ -29,6 +29,46 @@ const minimal = (overrides: Partial<DesignTokens> = {}): DesignTokens => ({
   ...overrides,
 })
 
+const declarationsOf = (css: string, selector: string): string => {
+  const bodies = [
+    ...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g),
+  ]
+    .filter((match) => match[1].trim().split('\n').pop()?.trim() === selector)
+    .map((match) => match[2])
+
+  if (bodies.length === 0) throw new Error(`no rule matches "${selector}"`)
+
+  return bodies.join('\n')
+}
+
+describe('declarationsOf', () => {
+  it('should read a rule indented inside a media query', () => {
+    const css = '@media (max-width: 1px) {\n  .a {\n    color: red;\n  }\n}'
+
+    expect(declarationsOf(css, '.a')).toContain('color: red')
+  })
+
+  it('should read a rule with a comment line above its selector', () => {
+    const css =
+      '/* why */\n.a {\n  color: red;\n}\n@media (x) {\n  /* in */\n  .b {\n    top: 0;\n  }\n}'
+
+    expect(declarationsOf(css, '.a')).toContain('color: red')
+    expect(declarationsOf(css, '.b')).toContain('top: 0')
+  })
+
+  it('should read a grouped selector as one string', () => {
+    const css = '.a, .b {\n  color: red;\n}'
+
+    expect(declarationsOf(css, '.a, .b')).toContain('color: red')
+  })
+
+  it('should throw naming the selector when no rule matches', () => {
+    expect(() => declarationsOf('.a { color: red; }', '.missing')).toThrow(
+      '.missing',
+    )
+  })
+})
+
 describe('slug', () => {
   it('reduces a role to the name a custom property carries', () => {
     expect(slug('Line height')).toBe('line-height')
