@@ -17,51 +17,12 @@ stage_setup() {
 
   configure_sandbox_anchor_remote
 
-  cat <<'EOF' >README.md
-# My App
-
-## Setup
-
-Run on port `8080`.
-
-## Commands
-
-- `start`: start the server
-EOF
+  stage_fixtures git ship shared 01-init
 
   mkdir -p src
   echo 'export const PORT = 8080;' >src/server.js
 
   printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n' >.gitignore
-
-  mkdir -p .canon/memory
-  cat <<'EOF' >.canon/memory/feedback-port-from-env.md
----
-title: Read PORT from the environment
-description: Resolve the listen port from env with a fallback, not a hardcoded constant
-category: Feedback
----
-
-The server reads its listen port from `process.env.PORT` with a fallback, never a hardcoded literal.
-
-**Why:** A past deploy bound the wrong port because the value was hardcoded in source.
-
-**How to apply:** When touching server startup, resolve the port from the environment and keep the literal only as a fallback.
-EOF
-  cat <<'EOF' >.canon/memory/index.md
----
-title: Memory
-subtitle: Session facts with no owning surface, grouped by kind.
----
-
-# Memory
-
-Session facts with no owning surface, grouped by kind.
-
-## Feedback
-
-- [Read PORT from the environment](feedback-port-from-env.md): Resolve the listen port from env with a fallback, not a hardcoded constant
-EOF
 
   git add . && git commit -m "chore(project): init" -q
 
@@ -70,10 +31,7 @@ EOF
 
   git checkout -b draft/init -q
 
-  cat <<'EOF' >src/server.js
-export const PORT = 3000;
-export function healthCheck() { return { status: "ok" }; }
-EOF
+  stage_fixtures git ship shared 02-draft
 
   mkdir -p src/routes
   echo 'export function register(app) { app.get("/health", () => healthCheck()); }' >src/routes/health.js
