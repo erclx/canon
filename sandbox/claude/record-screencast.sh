@@ -12,8 +12,8 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "resolved")
-    mkdir -p .canon/tmp/screencast demos
-    cat <<'EOF' >.canon/tmp/screencast/cold-open.md
+    mkdir -p demos/cold-open
+    cat <<'EOF' >demos/cold-open/beats.md
 # Screencast: Cold open demo
 
 ## 1. Header
@@ -72,13 +72,13 @@ EOF
 </html>
 EOF
 
-    cat <<'EOF' >demos/cold-open.json
+    cat <<'EOF' >demos/cold-open/plan.json
 {
   "slug": "cold-open",
   "title": "Cold open demo",
   "url": "http://localhost:4173/board.html",
   "viewport": { "width": 1280, "height": 720 },
-  "output": { "video": "demos/cold-open.webm", "still": "demos/cold-open.png" },
+  "output": { "video": "demos/cold-open/take/cold-open.webm", "still": "demos/cold-open/take/cold-open.png" },
   "pointer": { "travelMs": 400, "typeDelayMs": 110 },
   "annotations": { "durationMs": 900, "position": "bottom-right", "fontSize": 22 },
   "steps": [
@@ -122,16 +122,16 @@ EOF
     git add . && git commit -m "feat(demo): cold-open draft and a resolved plan" --no-verify -q
 
     log_step "Scenario ready: run a resolved plan (record-screencast)"
-    log_info "Context: .canon/tmp/screencast/cold-open.md paired with demos/cold-open.json, already compiled and fully filled"
+    log_info "Context: demos/cold-open/beats.md paired with demos/cold-open/plan.json, already compiled and fully filled"
     log_info "Before:  bun install, then bunx playwright install chromium. Neither is seeded, since a sandbox provisions files and cannot fetch a browser."
     log_info "Before:  serve board.html on port 4173, e.g. python3 -m http.server 4173, since the plan's url points there"
-    log_info "Action:  /canon:record-screencast .canon/tmp/screencast/cold-open.md"
-    log_info "Expect:  demos/cold-open.json already exists, so the session skips canon demo compile entirely and never touches the plan"
+    log_info "Action:  /canon:record-screencast demos/cold-open/beats.md"
+    log_info "Expect:  demos/cold-open/plan.json already exists, so the session skips canon demo compile entirely and never touches the plan"
     log_info "Expect:  canon demo run drives the page and reports the webm, the mp4 if ffmpeg is on PATH, and the still, each on its own line"
     ;;
   "refused")
-    mkdir -p .canon/tmp/screencast demos
-    cat <<'EOF' >.canon/tmp/screencast/empty-state-tour.md
+    mkdir -p demos/empty-state-tour
+    cat <<'EOF' >demos/empty-state-tour/beats.md
 # Screencast: Empty state tour
 
 ## 1. Header
@@ -160,13 +160,13 @@ EOF
 - Caption: Add the first card
 EOF
 
-    cat <<'EOF' >demos/empty-state-tour.json
+    cat <<'EOF' >demos/empty-state-tour/plan.json
 {
   "slug": "empty-state-tour",
   "title": "Empty state tour",
   "url": "",
   "viewport": { "width": 1280, "height": 720 },
-  "output": { "video": "demos/empty-state-tour.webm", "still": "demos/empty-state-tour.png" },
+  "output": { "video": "demos/empty-state-tour/take/empty-state-tour.webm", "still": "demos/empty-state-tour/take/empty-state-tour.png" },
   "pointer": { "travelMs": 400, "typeDelayMs": 110 },
   "annotations": { "durationMs": 900, "position": "bottom-right", "fontSize": 22 },
   "steps": [
@@ -199,11 +199,11 @@ EOF
     git add . && git commit -m "feat(demo): empty-state-tour draft and a plan missing its url" --no-verify -q
 
     log_step "Scenario ready: refuse an unresolved plan (record-screencast)"
-    log_info "Context: .canon/tmp/screencast/empty-state-tour.md paired with demos/empty-state-tour.json, already compiled but url is still empty"
-    log_info "Action:  /canon:record-screencast .canon/tmp/screencast/empty-state-tour.md"
-    log_info "Expect:  demos/empty-state-tour.json already exists, so the session skips canon demo compile and calls canon demo run directly"
+    log_info "Context: demos/empty-state-tour/beats.md paired with demos/empty-state-tour/plan.json, already compiled but url is still empty"
+    log_info "Action:  /canon:record-screencast demos/empty-state-tour/beats.md"
+    log_info "Expect:  demos/empty-state-tour/plan.json already exists, so the session skips canon demo compile and calls canon demo run directly"
     log_info "Expect:  the run refuses with reason plan-unresolved, the session reports url as the missing field, and it stops"
-    log_info "Expect:  no browser launch, no guessed url, and no edit to demos/empty-state-tour.json"
+    log_info "Expect:  no browser launch, no guessed url, and no edit to demos/empty-state-tour/plan.json"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

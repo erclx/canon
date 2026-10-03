@@ -66,7 +66,7 @@ EOF
     log_step "Scenario ready: screencast draft (with project context)"
     log_info "Context: notes app v2 launch with REQUIREMENTS, .canon/tasks/, and CLAUDE.md present"
     log_info "Action:  /canon:draft-screencast 'v2 inline edit launch'"
-    log_info "Expect:  4 discovery questions with seeded defaults, then draft to .canon/tmp/screencast/<slug>.md with 8 sections and 5 pre-seeded beats"
+    log_info "Expect:  4 discovery questions with seeded defaults, then draft to demos/<slug>/beats.md with 9 sections and 5 pre-seeded beats"
     log_info "Expect:  the closing block names canon demo compile as the next step and the session stops there rather than compiling or recording"
     ;;
   "bare")
