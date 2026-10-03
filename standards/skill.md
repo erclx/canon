@@ -32,7 +32,7 @@ Does not govern:
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
 - The transform from a branch name to a slug a skill carries in a filename: `slug.md`
-- Whether a new skill earns its place: the three-question test in the `create-skill` skill and the clause in `570-skill.md`
+- Whether a new skill earns its place: the three-question test in the `create-skill` skill and the creation-time bullet in this standard's own `rule` frontmatter
 
 ## Changing a skill
 

@@ -67,7 +67,7 @@ The four share one premise, that a model follows a prose rule only when a sessio
 
 - Skills and the CLI ship at two speeds. A skill merged to `main` reaches a `--plugin-dir` session at once, while the CLI reaches users only on release, so a skill calling an unpublished verb fails in a target, and `canon sync --check` reports the version gap but not the missing verb.
 - A marketplace install is a cached copy, the same skew in the other direction, and nothing detects either.
-- `800-prose`, `661-teach`, and `605-worktrees` point at a plugin skill that a project installing governance alone does not have. Each rule tells the session to say so, which reports the gap without closing it.
+- `800-prose`, the teach rule, and `605-worktrees` point at a plugin skill that a project installing governance alone does not have. Each rule tells the session to say so, which reports the gap without closing it.
 - An exit code says nothing about a `canon` call here, since a shell profile may wrap the binary, so every task verb tells a caller to branch on the record's `reason`.
 - Verification anchors are re-checked only when a diff touches the decision they mark.
 - A Windows checkout without symlink support turns `claude/standards` into a plain file, so the plugin ships no standards and no stage notices.

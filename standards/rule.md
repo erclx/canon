@@ -40,7 +40,8 @@ Write both when both apply. A rule stating the directive and a skill stating how
 - `<n>` is a number from the band reserved for the rule's source and `<slug>` is a one-to-three-word kebab topic
 - A rule the project authored itself lives at `.claude/rules/project/<subdirectory>/<n>-<slug>.md`, a sibling of `canon/` rather than nested inside it, keeping the same subdirectory names
 - This repository's own toolkit-only rules, which never ship to a target, live at `.claude/rules/internal/<subdirectory>/<n>-<slug>.md`, a second sibling of `canon/`. See "Two sources numbering into one folder" below.
-- Give every rule a numeric prefix. A bare-word filename reads as a folder name where a stack names its rules, so a rule without one is unreachable from a stack entry.
+- Give every authored rule a numeric prefix. A bare-word filename reads as a folder name where a stack names its rules, so a rule without one is unreachable from a stack entry.
+- A rule that only routes a path to a standard is generated, not authored. It lives at `governance/rules/standards/<standard>.md` under the standard's name, carries no number, and installs to `.claude/rules/canon/standards/`. Never hand-edit one. Change its globs and bullets in the standard's `paths` and `rule` frontmatter, and `canon gov regen` rewrites it. The generator refuses a standard named like a band folder, which keeps the bare-word name reachable.
 
 ## Reserved numbers
 
