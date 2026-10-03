@@ -1,3 +1,5 @@
+import type JSZip from 'jszip'
+
 /**
  * Slide transitions and entrance animations, written into a slide's XML after
  * pptxgenjs has written it, since pptxgenjs declares neither. A slide states
@@ -29,6 +31,17 @@ export interface SlideMotion {
 export interface MotionResult {
   readonly xml: string
   readonly notices: readonly string[]
+}
+
+/** A slide's motion, numbered as the package numbers its slide parts. */
+export interface SlideMotionEdit {
+  readonly slide: number
+  readonly motion: SlideMotion
+}
+
+export interface MotionNotice {
+  readonly slide: number
+  readonly message: string
 }
 
 /** The child element `<p:transition>` holds, each in its default direction. */
@@ -223,4 +236,24 @@ export function addMotion(xml: string, motion: SlideMotion): MotionResult {
     xml: xml.replace(ANCHOR, `${ANCHOR}${transition}${timing}`),
     notices,
   }
+}
+
+/** Writes each slide's motion into the opened package and returns its notices. */
+export async function writeMotion(
+  zip: JSZip,
+  edits: readonly SlideMotionEdit[],
+): Promise<MotionNotice[]> {
+  const notices: MotionNotice[] = []
+  for (const { slide, motion } of edits) {
+    const path = `ppt/slides/slide${slide}.xml`
+    const xml = await zip.file(path)?.async('string')
+    if (xml === undefined) {
+      notices.push({ slide, message: `no ${path} in the written deck` })
+      continue
+    }
+    const result = addMotion(xml, motion)
+    if (result.xml !== xml) zip.file(path, result.xml)
+    notices.push(...result.notices.map((message) => ({ slide, message })))
+  }
+  return notices
 }

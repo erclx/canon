@@ -119,10 +119,10 @@ export function register(program: Command): void {
 
 /**
  * The converter loads on demand, so no other command resolves pptxgenjs,
- * jszip, or the token module at startup. A fallback, a refused link or chart,
- * or a token the master fell back on reports one line each and keeps the exit
- * at 0, as an unrecognized layout does on the markdown path, since the deck is
- * written either way. A malformed `deck.json` refuses before any slide is laid
+ * jszip, or the token module at startup. A fallback, a refused link, chart, or
+ * effect, or a token the master fell back on reports one line each and keeps
+ * the exit at 0, as an unrecognized layout does on the markdown path, since the
+ * deck is written either way. A malformed `deck.json` refuses before any slide is laid
  * out and exits 1.
  */
 async function renderHtmlFolder(
@@ -161,6 +161,11 @@ async function renderHtmlFolder(
   for (const { slide, selector, message } of result.refusedCharts) {
     process.stderr.write(
       `${GREY}│${NC} ${RED}✗${NC} slide ${slide} ${selector} chart left out: ${message}\n`,
+    )
+  }
+  for (const { slide, message } of result.refusedMotion) {
+    process.stderr.write(
+      `${GREY}│${NC} ${RED}✗${NC} slide ${slide} motion left out: ${message}\n`,
     )
   }
   for (const notice of result.notices) {

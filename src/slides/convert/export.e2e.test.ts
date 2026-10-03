@@ -101,8 +101,15 @@ const SLIDES: Record<string, string> = {
   '03-backup.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-hidden data-footer="off" style="--color-text: #FFFFFF">
     <h1>Backup</h1>
   </body></html>`,
-  '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-footer-center="Appendix only">
+  '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}
+    .second { position: absolute; left: 96px; top: 200px; margin: 0; }
+    .first { position: absolute; left: 96px; top: 300px; width: 240px; height: 80px; margin: 0; background-image: linear-gradient(90deg, #B45309, #0F766E); color: #FFFFFF; }
+    .spun { position: absolute; left: 96px; top: 420px; margin: 0; }
+  </style></head><body data-footer-center="Appendix only" data-transition="push" data-transition-duration="1s">
     <h1>Appendix</h1>
+    <p class="second" data-enter="fly" data-enter-order="2">Second in</p>
+    <div class="first" data-enter="fade" data-enter-order="1">First in</div>
+    <p class="spun" data-enter="spin">Never in</p>
   </body></html>`,
 }
 
@@ -389,6 +396,48 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     expect(result.status === 'written' && result.fallbacks).toContainEqual(
       expect.objectContaining({ selector: 'p.soft', properties: ['filter'] }),
     )
+  })
+
+  const shapeId = (index: number, text: string): string | undefined => {
+    const xml = slideXml[index] ?? ''
+    const at = xml.indexOf(text)
+    const shapes = [
+      ...xml.slice(0, at).matchAll(/<p:cNvPr id="(\d+)" name="canon-/g),
+    ]
+    return shapes.at(-1)?.[1]
+  }
+  const pictureId = (index: number, alt: string): string | undefined =>
+    new RegExp(`<p:cNvPr id="(\\d+)" name="canon-[^"]*" descr="${alt}"`).exec(
+      slideXml[index] ?? '',
+    )?.[1]
+
+  it('should write the declared transition at the nearest speed', () => {
+    expect(slideXml[3]).toContain(
+      '<p:transition spd="slow"><p:push/></p:transition>',
+    )
+  })
+
+  it('should leave a slide declaring no motion without a transition', () => {
+    expect(slideXml[0]).not.toContain('<p:transition')
+  })
+
+  it('should target the two entrances in their declared order', () => {
+    const targets = [
+      ...(slideXml[3] ?? '').matchAll(
+        /nodeType="clickEffect">.*?<p:spTgt spid="(\d+)"\/>/g,
+      ),
+    ].map((match) => match[1])
+
+    expect(targets).toEqual([pictureId(3, 'First in'), shapeId(3, 'Second in')])
+  })
+
+  it('should report an unknown entrance by its element', () => {
+    expect(result.status === 'written' && result.refusedMotion).toEqual([
+      {
+        slide: 4,
+        message: 'p.spun: unknown entrance spin. Use fade, fly, wipe, or zoom',
+      },
+    ])
   })
 
   it.skipIf(!hasOffice)(

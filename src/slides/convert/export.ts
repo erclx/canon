@@ -30,18 +30,27 @@ import {
 } from '@/slides/convert/master'
 import {
   type DrawOp,
+  type ElementRecord,
   type Fallback,
+  type NamedShape,
   planSlide,
   type RefusedLink,
 } from '@/slides/convert/shapes'
 import {
   type BandOverride,
+  type EntranceRecord,
   ID_ATTRIBUTE,
   readTheme,
   type SlideMeta,
   type WalkedSlide,
   walkSlide,
 } from '@/slides/convert/walk'
+import {
+  type EntranceSpec,
+  type MotionNotice,
+  type SlideMotionEdit,
+  writeMotion,
+} from '@/slides/package/motion'
 
 /**
  * Turns a folder of HTML slides into one editable deck. Chromium lays each
@@ -94,6 +103,8 @@ export type ExportResult =
       readonly fallbacks: readonly SlideFallback[]
       readonly refusedLinks: readonly SlideRefusedLink[]
       readonly refusedCharts: readonly RefusedChart[]
+      /** Transitions and entrances left out, each with the reason. */
+      readonly refusedMotion: readonly MotionNotice[]
       /** What the deck master could not take from the project's tokens. */
       readonly notices: readonly string[]
     }
@@ -172,6 +183,7 @@ export async function exportHtmlDeck(
   const refusedLinks: SlideRefusedLink[] = []
   const refusedCharts: RefusedChart[] = []
   const patches: Patch[] = []
+  const motions: SlideMotionEdit[] = []
   const notices: string[] = []
 
   try {
@@ -240,6 +252,16 @@ export async function exportHtmlDeck(
       }
       drawOverrides(slide, deck, theme, walked.meta)
       if (walked.meta.notes) slide.addNotes(walked.meta.notes)
+      const { transition } = walked.meta
+      const entrances = walked.entrances.map((entrance) =>
+        entranceSpec(entrance, walked.records, plan.names),
+      )
+      if (transition || entrances.length > 0) {
+        motions.push({
+          slide: slideNumber,
+          motion: { ...(transition ? { transition } : {}), entrances },
+        })
+      }
     }
     if (drifted.length > 0) {
       const noun = drifted.length === 1 ? 'slide' : 'slides'
@@ -261,12 +283,23 @@ export async function exportHtmlDeck(
   if (!(written instanceof Uint8Array)) {
     return refused('export-failed', 'pptxgenjs returned no buffer')
   }
-  const patched = await applyPatches(written, patches)
+  // A deck needing no edit keeps the bytes pptxgenjs wrote.
+  let packaged: Uint8Array = written
+  const refusedMotion: MotionNotice[] = []
+  if (patches.length > 0 || motions.length > 0) {
+    const zip = await JSZip.loadAsync(written)
+    await applyPatches(zip, patches)
+    refusedMotion.push(...(await writeMotion(zip, motions)))
+    packaged = await zip.generateAsync({
+      type: 'nodebuffer',
+      compression: 'DEFLATE',
+    })
+  }
 
   mkdirSync(outDir, { recursive: true })
   const fileName = `${basename(sourceDir)}.pptx`
   const pptxPath = join(outDir, fileName)
-  writeFileSync(pptxPath, patched)
+  writeFileSync(pptxPath, packaged)
 
   let mirrorPath: string | undefined
   if (options.mirror) {
@@ -283,7 +316,34 @@ export async function exportHtmlDeck(
     fallbacks,
     refusedLinks,
     refusedCharts,
+    refusedMotion,
     notices,
+  }
+}
+
+/**
+ * An entrance animates every shape drawn from its element and from the
+ * elements inside it, so a card's box and its text come in together. A record
+ * follows its parent in document order, which lets one pass collect the subtree.
+ */
+function entranceSpec(
+  entrance: EntranceRecord,
+  records: readonly ElementRecord[],
+  names: readonly NamedShape[],
+): EntranceSpec {
+  const subtree = new Set<number>()
+  if (entrance.record !== null) subtree.add(entrance.record)
+  for (const record of records) {
+    if (record.parent !== null && subtree.has(record.parent)) {
+      subtree.add(record.id)
+    }
+  }
+  const { record: _record, ...spec } = entrance
+  return {
+    ...spec,
+    shapes: names
+      .filter((named) => subtree.has(named.record))
+      .map((named) => named.name),
   }
 }
 
@@ -471,10 +531,9 @@ async function draw(
  * gave it, which is the only handle the written XML keeps.
  */
 async function applyPatches(
-  deck: Uint8Array,
+  zip: JSZip,
   patches: readonly Patch[],
-): Promise<Buffer> {
-  const zip = await JSZip.loadAsync(deck)
+): Promise<void> {
   const bySlide = Map.groupBy(patches, (patch) => patch.slide)
   for (const [slideNumber, slidePatches] of bySlide) {
     const slidePath = `ppt/slides/slide${slideNumber}.xml`
@@ -499,7 +558,6 @@ async function applyPatches(
     }
     zip.file(slidePath, xml)
   }
-  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' })
 }
 
 function pictureXml(xml: string, name: string): string | undefined {

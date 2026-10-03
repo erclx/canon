@@ -1,5 +1,6 @@
 import type { ChartRecord } from '@/slides/convert/chart'
 import type { ThemeReading } from '@/slides/convert/master'
+import type { TransitionSpec } from '@/slides/package/motion'
 import type {
   BoxStyle,
   ElementRecord,
@@ -31,6 +32,20 @@ export interface SlideMeta {
   readonly footer: BandOverride
   /** The `--color-text` the slide's `<body>` computes, as hex. */
   readonly textToken?: string
+  /** `data-transition` and `data-transition-duration` on `<body>`. */
+  readonly transition?: TransitionSpec
+}
+
+/**
+ * An element's `data-enter`, with the record it was walked as, or null when it
+ * was folded into another record's text or never drawn.
+ */
+export interface EntranceRecord {
+  readonly record: number | null
+  readonly selector: string
+  readonly effect: string
+  readonly order?: string
+  readonly duration?: string
 }
 
 /** What one laid-out slide hands back across `page.evaluate`. */
@@ -38,6 +53,7 @@ export interface WalkedSlide {
   readonly background: Rgba
   readonly records: ElementRecord[]
   readonly charts: ChartRecord[]
+  readonly entrances: EntranceRecord[]
   readonly meta: SlideMeta
 }
 
@@ -532,6 +548,10 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       : { kind: 'master' }
   }
   const section = body.getAttribute('data-section')?.trim()
+  const attribute = (element: Element, name: string): string | undefined =>
+    element.getAttribute(name)?.trim() || undefined
+  const transitionEffect = attribute(body, 'data-transition')
+  const transitionDuration = attribute(body, 'data-transition-duration')
   const textValue = getComputedStyle(body)
     .getPropertyValue('--color-text')
     .trim()
@@ -544,9 +564,31 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       body.getAttribute('data-hidden') !== 'false',
     header: band('header'),
     footer: band('footer'),
+    ...(transitionEffect
+      ? {
+          transition: {
+            effect: transitionEffect,
+            ...(transitionDuration ? { duration: transitionDuration } : {}),
+          },
+        }
+      : {}),
   }
 
-  return { background, records, charts, meta }
+  const entrances: EntranceRecord[] = Array.from(
+    body.querySelectorAll('[data-enter]'),
+  ).map((element) => {
+    const order = attribute(element, 'data-enter-order')
+    const duration = attribute(element, 'data-enter-duration')
+    return {
+      record: ids.get(element) ?? null,
+      selector: describe(element),
+      effect: attribute(element, 'data-enter') ?? '',
+      ...(order ? { order } : {}),
+      ...(duration ? { duration } : {}),
+    }
+  })
+
+  return { background, records, charts, entrances, meta }
 }
 
 /**
