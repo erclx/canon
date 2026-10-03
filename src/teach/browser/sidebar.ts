@@ -163,7 +163,8 @@ export function sidebar(breakpoint: number): void {
         .forEach(function (li) {
           li.classList.toggle(
             'hide',
-            q !== '' && (li.textContent as string).toLowerCase().indexOf(q) === -1,
+            q !== '' &&
+              (li.textContent as string).toLowerCase().indexOf(q) === -1,
           )
         })
     })
