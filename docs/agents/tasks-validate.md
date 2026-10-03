@@ -61,7 +61,7 @@ The blocker check re-takes a measurement the board records once and never repeat
 }
 ```
 
-A closed outcome is not the fact the dependency half needs. The ship chain marks outcomes as its first step and opens the pull request several steps later, so a check reading the checkbox reports the row settled while the branch is still in review. A live task therefore settles the row only once it closed every outcome and carries a `Pull request:` line the trunk holds. One that names no pull request, and one whose number no trunk ref could answer for, land in the untested array below rather than being settled or left silent.
+A closed outcome is not the fact the dependency half needs. The ship chain marks outcomes as its first step and opens the pull request several steps later, so a check reading the checkbox reports the row settled while the branch is still in review. A live task therefore settles the row only once it closed every outcome and carries a `Pull request:` line the trunk holds. One that carries a `Pending branch:` line, one that names no pull request, and one whose number no trunk ref could answer for, land in the untested array below rather than being settled or left silent.
 
 The trunk is read as the clone already holds it, `origin/main` first and local `main` behind it, and no run fetches. A validate runs several times a sweep and a fetch per run is a cost this command does not carry, so a clone behind its remote under-reports rather than claiming work landed.
 

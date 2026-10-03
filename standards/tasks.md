@@ -141,7 +141,7 @@ One plan per task, or one per slice, which the board check reads as distinct pla
 
 `Pull request:` records which pull requests carry the task's work, each as a bare `#NNN` the way `Issue:` does. It lists every pull request that shipped part of the task, oldest first and separated by commas, as in `Pull request: #NNN, #NNN`, and a task shipped whole lists one. It is not an origin, so a task without one is well-formed. `git-pr` appends to it when a pull request opens.
 
-The line is what lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving. `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number, since `canon tasks outcome` writes it and `canon tasks pull-request` clears it.
+The line is what lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving. `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number, since `canon tasks outcome` writes it and `canon tasks pull-request` clears it. `canon tasks outcome` skips the write when the branch's own pull request is already on the line.
 
 ## What goes in
 
