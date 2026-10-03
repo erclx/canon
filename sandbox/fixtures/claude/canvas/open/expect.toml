@@ -1,0 +1,67 @@
+# What a correct `/canvas` run leaves behind on the open arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# The canvas folder is gitignored in every target, so nothing in a repository
+# checks a frame's shape. This arm asserts the content format the canvas
+# standard fixes rather than only that a file appeared.
+
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so a `manual` array written at the bottom
+# parses clean and asserts nothing.
+
+# Unmeasured. No headless run of this arm has been taken yet, so the ceiling
+# is the teach open arm's, which drives a comparable number of verbs.
+max_turns = 30
+
+# The page and frame names are pinned by the invocation, so a run that drew
+# the frame under a name of its own fails here rather than passing on any
+# spelling. The capture is asserted through a glob, since its folder is the
+# CLI's default and the arm does not pin it.
+paths = [
+  ".canon/canvas/drafts/pricing.html",
+  ".canon/canvas/drafts/layout.json",
+  ".canon/tmp/canvas-capture/drafts/pricing.png",
+]
+
+# A frame written beside the page rather than inside it, and a page created
+# under the old record root, are the two wrong turns the seeded tree invites.
+absent = [
+  ".canon/canvas/pricing.html",
+  ".claude/canvas",
+]
+
+# The skill draws on the canvas and captures into session scratch, and nothing
+# else. A run that drafted the pricing page into the project source fails here.
+write_scope = [".canon/canvas/**", ".canon/tmp/**"]
+
+# The reply hands over the address the server printed. A reply fragment is a
+# literal substring, and the port is whatever the server walked to, so the
+# fragment pins the loopback host and stops before the port.
+reply = ["http://127.0.0.1:"]
+
+manual = [
+  "The server was started before the frame was written, and the shell was fetched at the printed address rather than trusted from a capture. Unwired: the envelope does not carry which commands ran in which order, so a run that wrote the frame first and started the server after passes every assertion above.",
+  "The frame draws the three tiers src/index.ts names. Semantic: the tier names could be asserted by pattern, but a frame naming them in a comment and drawing nothing passes that pattern too.",
+  "The reply does not present the frame as the project's design. Semantic: the claim is about how the reply frames the canvas, which no pattern over it separates from a reply that merely mentions the design document.",
+]
+
+# A whole document, which the standard requires so an element pick resolves
+# against the file the browser built.
+[[content]]
+path = ".canon/canvas/drafts/pricing.html"
+pattern = '^<!(doctype|DOCTYPE) html>'
+
+# Drawn with the project's tokens rather than literals copied from them.
+[[content]]
+path = ".canon/canvas/drafts/pricing.html"
+pattern = 'var\(--(color|space)-'
+
+# The box keyed by the frame's name under the one top-level `frames` object.
+[[content]]
+path = ".canon/canvas/drafts/layout.json"
+pattern = '"frames"'
+
+[[content]]
+path = ".canon/canvas/drafts/layout.json"
+pattern = '"pricing"\s*:'
