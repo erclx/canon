@@ -90,6 +90,20 @@ export interface FolderClaim {
 }
 
 /**
+ * A code span in a board cell that the markdown preview cannot break, so it
+ * pushes the table past the pane and makes it scroll sideways. Either the
+ * longest whitespace-free run is wider than `WIDE_LIMIT`, or the span is a
+ * brace-glob, which is written out as separate paths. The limit is a heuristic
+ * over one pane, which is why it reports beside the findings and moves no exit
+ * code.
+ */
+export interface WideToken {
+  readonly group: BoardGroup
+  readonly subject: string
+  readonly message: string
+}
+
+/**
  * A task file neither surface names. That is the normal state between a
  * session filing it and a live orchestrator placing it, so it reports beside
  * the findings and moves no exit code. It is still the only local detector for
@@ -124,6 +138,8 @@ export interface BoardRow {
   readonly ordinal: OrdinalWord | 'last' | undefined
   /** Whether a `Waiting on` cell ranks its row against a sibling row or a class of rows, false when the group fixes no such column. */
   readonly ranked: boolean
+  /** Every cell of the row as `splitCells` read it, which the wide-token scan walks. */
+  readonly cells: readonly string[]
 }
 
 export interface ValidateReport {
@@ -135,6 +151,7 @@ export interface ValidateReport {
   readonly findings: readonly Finding[]
   readonly untested: readonly Untested[]
   readonly claims: readonly FolderClaim[]
+  readonly wide: readonly WideToken[]
   readonly unplaced: readonly Unplaced[]
 }
 
@@ -461,6 +478,7 @@ export function readBoard(text: string): {
       waiting,
       ordinal: waiting ? readOrdinal(waiting) : undefined,
       ranked: waiting ? readRank(waiting) : false,
+      cells,
     })
   }
 
@@ -993,6 +1011,52 @@ function checkFolderClaims(
 }
 
 /**
+ * The widest the longest unbroken run in a code span may be before a table
+ * scrolls in the preview pane. A 57-character span fit and a 78-character one
+ * did not, so the limit sits at the nearest round number above the first.
+ */
+const WIDE_LIMIT = 60
+
+/**
+ * Reports a code span a table cell cannot wrap. A span breaks only at
+ * whitespace, so the longest whitespace-free run is what is measured, and a
+ * link target is stripped first because only its label renders. Every group is
+ * scanned, since the overflow this exists for happened under `## Up next`,
+ * where the folder-claim scan would not have looked. Prose breaks at spaces
+ * and bare words at hyphens, so only a span is read.
+ */
+function checkWideTokens(rows: readonly BoardRow[]): WideToken[] {
+  const wide: WideToken[] = []
+
+  for (const row of rows) {
+    for (const cell of row.cells) {
+      const spans = cell.replace(/\]\([^)]*\)/g, ']').match(/`[^`]+`/g) ?? []
+
+      for (const span of spans) {
+        const text = span.slice(1, -1)
+        const run = Math.max(...text.split(/\s+/).map((part) => part.length))
+
+        if (/\{[^}]*,[^}]*\}/.test(text)) {
+          wide.push({
+            group: row.group,
+            subject: subjectOf(row),
+            message: `holds the brace-glob ${span}, which renders as one unbroken token. Write it out as separate paths.`,
+          })
+        } else if (run > WIDE_LIMIT) {
+          wide.push({
+            group: row.group,
+            subject: subjectOf(row),
+            message: `holds a ${run}-character token, ${span}, past the ${WIDE_LIMIT} a preview pane fits, so its table scrolls sideways.`,
+          })
+        }
+      }
+    }
+  }
+
+  return wide
+}
+
+/**
  * Reports a task file neither the board nor the backlog names. Under the
  * roster-checked hand-off, filing a task and placing its row are two acts a
  * different session each may perform, so this state is ordinary rather than
@@ -1327,6 +1391,7 @@ export async function validateBoard(
     findings,
     untested: parked.untested,
     claims: checkFolderClaims(rows, root),
+    wide: checkWideTokens(rows),
     unplaced: checkUnplaced(rows, backlog, stems),
   }
 }

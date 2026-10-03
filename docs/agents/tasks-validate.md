@@ -1,6 +1,6 @@
 ---
 title: Tasks validate
-description: Validating the board against the tree, the seven checks, the untested, claims, and unplaced arrays, the exit codes, and the refusal reasons
+description: Validating the board against the tree, the seven checks, the untested, claims, wide, and unplaced arrays, the exit codes, and the refusal reasons
 ---
 
 # Tasks validate
@@ -103,7 +103,9 @@ That claim collides with every row a later session writes under the folder, and 
 
 The scan reaches `## Run now` and stops, where the collision check stops. A cell in another group describes work nobody has planned, written as a sentence and rewritten once a plan exists, so a claim read off one reports on prose rather than on a file set. A parked folder claim surfaces when its row is promoted, which is when the cell becomes something a dispatcher can act on.
 
-A task file neither surface names lands in a fourth array, on the same reasoning:
+A code span in any cell that the preview cannot break lands in a fourth array, `wide`, with the same `group`, `subject`, and `message` fields. The scan measures a span's longest whitespace-free run and flags one past 60 characters, or a brace-glob at any width. A 57-character span fit the pane and a 78-character one did not, so the limit is a heuristic and the array moves no exit code. A link target is skipped, since only its label renders, and the scan reaches every group, since the overflow it exists for sat under `## Up next`.
+
+A task file neither surface names lands in a fifth array, on the same reasoning:
 
 ```json
 {
