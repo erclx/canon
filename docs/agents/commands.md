@@ -34,7 +34,7 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon drive <url> <run>`   | Walk a page through named interactions and measure each state                   |
 | `canon transcripts <url>`   | Fetch a YouTube transcript with metadata frontmatter (needs `yt-dlp`)           |
 | `canon teach <verb>`        | Open and author learning workspaces                                             |
-| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, arrange them, and capture them   |
+| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, arrange, edit, and capture them  |
 | `canon sandbox [cat:cmd]`   | Run sandbox scenarios, toolkit-only like the tree it reads                      |
 | `canon tasks <verb>`        | Read and write the task board, the plans it cites, and its archive              |
 | `canon intake <verb>`       | Report intake folders and write answers into them                               |
@@ -96,7 +96,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`
 - `teach`, in `teach.md`: `list`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
-- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `selection`, `capture`
+- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `selection`, `edit`, `capture`
 - `sandbox`, in `sandbox.md`: `reset`, `clean`, `check`, `coverage`
 - `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
 - `intake`, in `intake.md`: `list`, `answer`
