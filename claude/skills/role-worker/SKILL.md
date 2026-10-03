@@ -37,7 +37,8 @@ which `auto-ship` Step 2 loads.
 ## The board is read-only
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. The controlling session is their only writer apart from `canon tasks archive`, and both are gitignored, so an overwrite drops a row with no history to recover it from.
-- Report a row this build turns up rather than adding it. Picking a free label means reading every task file and every archive entry, which this session has not done, so a label it invents collides with one already taken.
+- Create no file under `.canon/tasks/`, including through `task-board`, when this build turns up new work. A task file with no row is a dropped task, and where the row lands is the controlling session's call, so a file this session writes is either orphaned or a placement it had no standing to make.
+- Report the row upward instead, carrying its title, its origin, and the surface it would take. Carry it in the pull request announcement when a build is in hand, and send it on its own through `canon:session-relay` only when the session will end before a pull request opens.
 - Write the task file this build closes and the plan it ran under. The ban covers the shared board rather than the artifacts of the row in hand.
 
 ## The channel
