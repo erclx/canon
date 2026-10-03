@@ -37,7 +37,7 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 ## Music, silence, and a voice
 
 - Choose silence over a music bed that competes with a voiceover. A bed earns its place on a video with no voice, where it carries the pacing between beats.
-- Sit music at least 20 dB under the voice. HyperFrames' `media-use` bed default sits about 18 dB under, so lower it rather than take it as given. The mechanism, a carve rather than a flat duck, is `hyperframes-audio`'s.
+- Sit music at least 20 dB under the voice. Check `media-use`'s narrated bed default against that floor rather than take it as given, since it has sat short of it. The mechanism, a carve rather than a flat duck, is `hyperframes-audio`'s.
 - Keep a captioned voiceover at or under 160 words a minute, since captions follow the voice and a faster voice forces captions past their reading limit. `hyperframes-creative`'s narration pace sits under that ceiling.
 - Give a sound effect to a click only when the click changes something the viewer should notice. An effect on every click flattens the one that matters.
 
