@@ -66,6 +66,7 @@ EOF
     log_info "Action:  /canon:search-craft The two result sets in research/ are one"
     log_info "         query run scoped and open. Which release first shipped"
     log_info "         streaming export? Write the answer to notes/research.md."
+    log_info "         The recorded sets are the whole evidence, so fetch nothing."
     log_info "Tools:   CANON_SKILL_TEST_TOOLS=Read,Glob,Grep,Edit,Write,Skill"
     log_info "         CANON_SKILL_TEST_PERMISSION_MODE=dontAsk"
     log_info "Expect:  declared in fixtures/claude/search-craft/conflict/expect.toml"
