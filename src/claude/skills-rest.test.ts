@@ -23,7 +23,7 @@ const TIERS: readonly {
   readonly pattern: RegExp
 }[] = [
   { skills: [], pattern: ANY_GRAPHQL },
-  { skills: ['git-split'], pattern: GRAPHQL_READS },
+  { skills: ['review-ui', 'git-split'], pattern: GRAPHQL_READS },
 ]
 
 function filesUnder(dir: string): string[] {
