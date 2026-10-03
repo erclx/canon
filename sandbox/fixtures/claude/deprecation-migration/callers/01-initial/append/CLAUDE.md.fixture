@@ -1,0 +1,5 @@
+
+# Reports
+
+Date helpers live in `src/dates.ts`. `src/report.ts` renders the daily report,
+and `src/jobs.ts` runs the scheduled jobs listed in `config/jobs.json`.

@@ -1,0 +1,31 @@
+import { useEffect, useState } from 'react'
+
+import { formatPrice } from '../lib/price'
+
+interface Order {
+  id: string
+  totalCents: number
+}
+
+export function OrderList({ load }: { load: () => Promise<Order[]> }) {
+  const [orders, setOrders] = useState<Order[] | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    load().then(setOrders, () => setFailed(true))
+  }, [load])
+
+  if (failed) return <p role="alert">Orders could not be loaded.</p>
+  if (orders === null) return <p role="status">Loading orders…</p>
+  if (orders.length === 0) return <p>No orders yet.</p>
+
+  return (
+    <ul aria-label="Orders">
+      {orders.map((order) => (
+        <li key={order.id}>
+          {order.id}: {formatPrice(order.totalCents)}
+        </li>
+      ))}
+    </ul>
+  )
+}

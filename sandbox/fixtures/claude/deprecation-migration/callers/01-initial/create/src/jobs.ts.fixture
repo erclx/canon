@@ -1,0 +1,11 @@
+import * as dates from './dates'
+import jobs from '../config/jobs.json'
+
+type Formatter = (date: Date) => string
+
+export function runJobs(now: Date): string[] {
+  return jobs.map((job) => {
+    const format = (dates as Record<string, Formatter>)[job.formatter]
+    return `${job.name}: ${format(now)}`
+  })
+}

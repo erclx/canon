@@ -1,0 +1,8 @@
+export function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+/** @deprecated Use formatDate. */
+export function formatLegacy(date: Date): string {
+  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
+}

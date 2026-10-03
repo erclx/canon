@@ -1,0 +1,25 @@
+import { useEffect, useState } from 'react'
+
+interface Order {
+  id: string
+  label: string
+}
+
+export function Orders({ load }: { load: () => Promise<Order[]> }) {
+  const [orders, setOrders] = useState<Order[]>([])
+
+  useEffect(() => {
+    load().then(setOrders)
+  }, [load])
+
+  return (
+    <main>
+      <h1>Orders</h1>
+      <ul aria-label="Orders">
+        {orders.map((order) => (
+          <li key={order.id}>{order.label}</li>
+        ))}
+      </ul>
+    </main>
+  )
+}
