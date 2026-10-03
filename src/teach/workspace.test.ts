@@ -409,6 +409,69 @@ describe('recordSources', () => {
     ).toMatchObject({ ok: false, reason: 'listed' })
   })
 
+  it('moves a listed lead to read under the new title', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await recordSources(
+      ROOT,
+      'regular-expressions',
+      [],
+      [{ title: 'RE2 lead', url: 'https://example.test/b' }],
+    )
+
+    const outcome = await recordSources(
+      ROOT,
+      'regular-expressions',
+      [
+        {
+          title: 'RE2 backs the linear-time claim',
+          url: 'https://example.test/b',
+        },
+      ],
+      [],
+    )
+
+    const text = await readFile(
+      join(workspaceDir('01-regular-expressions'), 'RESOURCES.md'),
+      'utf8',
+    )
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(text).toContain(
+      '## Read\n\n- [RE2 backs the linear-time claim](https://example.test/b)',
+    )
+    expect(text).toContain('## Leads\n\n- None yet.')
+    expect(text).not.toContain('RE2 lead')
+  })
+
+  it('refuses the whole batch when one url is already read', async () => {
+    await openWorkspace(ROOT, REQUEST)
+    await recordSources(
+      ROOT,
+      'regular-expressions',
+      [{ title: 'MDN', url: 'https://example.test/a' }],
+      [{ title: 'RE2', url: 'https://example.test/b' }],
+    )
+    const path = join(workspaceDir('01-regular-expressions'), 'RESOURCES.md')
+    const before = await readFile(path, 'utf8')
+
+    const outcome = await recordSources(
+      ROOT,
+      'regular-expressions',
+      [
+        { title: 'RE2 read', url: 'https://example.test/b' },
+        { title: 'MDN again', url: 'https://example.test/a' },
+      ],
+      [],
+    )
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      reason: 'listed',
+      detail: ['https://example.test/a'],
+    })
+    expect(await readFile(path, 'utf8')).toBe(before)
+  })
+
   it('refuses a workspace carrying no resources file', async () => {
     await seed('01-pointers', { 'MISSION.md': '# Pointers' })
 
