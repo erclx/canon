@@ -11,8 +11,6 @@ covers a failure that ships looking correct. A build passes, a browser renders,
 and the defect reaches a reader who has no way to spot it. That is why they are
 a rule rather than a note in a context entry.
 
-Two conventions were rewritten against the current composition, the motion test and the accent set. The other three describe how a page is built rather than how it looks, and each is gated by something real, so their anchors were retargeted to the current page and their conventions left as written.
-
 ## Every count is read, never typed
 
 - Read a count from the CLI at build time, the way `web/src/lib/counts.ts` reads `canon gov counts --json`. Never write a literal.

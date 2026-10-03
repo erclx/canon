@@ -21,7 +21,7 @@ The two index hooks run with `canon` dropped from `PATH`, which pins them to the
 
 It reads the worktree branch off `file_path` itself, a `*/.claude/worktrees/*` segment, rather than shelling out to `git rev-parse`, since that call would answer for whatever directory the hook's own process happens to run in rather than the worktree the write came from. `tasks-index.sh` and `memory-index.sh` derive their main root the same way, off a path suffix rather than the session. It exits quietly on a path with no such segment and resolves `realpath` on one that has it.
 
-The entrypoint branch of the same rule, bare against a `file://` link, stays prose rather than moving into this hook. Claude Code's own hook documentation lists `CLAUDE_PROJECT_DIR`, `CLAUDE_PLUGIN_ROOT`, and `CLAUDE_PLUGIN_DATA` among the environment a hook subprocess inherits and does not list `CLAUDE_CODE_ENTRYPOINT`. It also documents `OTEL_*` variables as deliberately stripped from every spawned subprocess, so the same curation could apply to a variable it never names as passed through. A live spike inside a running session cannot confirm either way, since `.claude/settings.json` loads once at session start and a hook added mid-session never fires until the next one begins.
+The output rule once branched on `CLAUDE_CODE_ENTRYPOINT` to pick a bare path or a `file://` link. That branch retired onto the harness's own link instruction, which Claude Code gives per surface, so neither the rule nor this hook decides the link form.
 
 The companion outcome, reporting a turn that wrote files and named none of them, is `silent-turn.sh`, covered in `canon/context/development/hooks/compaction.md`.
 
