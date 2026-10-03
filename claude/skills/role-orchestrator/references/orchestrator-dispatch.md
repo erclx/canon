@@ -54,6 +54,20 @@ Reading `claimed` off the record is what keeps this a check rather than a rule a
 
 What the ref read cannot see is a branch pushed from another machine since the last fetch, because it reads the remote-tracking ref rather than the remote. Nobody has hit that, and a `git ls-remote` per dispatch costs 0.438s against 0.001s, so the gap is recorded rather than closed.
 
+### A cloud worker's claim
+
+A cloud worker never appears in `canon sessions list` and never pushes the derived branch, since the cloud assigns it a `claude/` branch of its own. So the roster and the refs read clear on a row a cloud worker is already building. Run the local check above anyway, since a local worker on the same row still collides, then read the two places a cloud worker does show:
+
+```bash
+gh api 'repos/{owner}/{repo}/pulls?state=open&per_page=100' --jq '.[] | select(.head.ref | startswith("claude/")) | select((.title + " " + (.body // "")) | contains("<slug>")) | .number'
+```
+
+- Any number printed: a cloud worker's pull request names the plan slug. Treat the row as claimed and report the number.
+- Nothing printed, and this pass's launched record holds no cloud session for the row: the row is clear of cloud workers.
+- The call fails: treat the candidate as unverified and fall back to the human-launch line, the same as a refused local check.
+
+The launched record covers the minutes before the pull request opens, when nothing on GitHub names the row yet. It is this session's alone, so a second dispatcher sees only the pull request list, which is the window `## Hold what this pass already launched` already states for local workers.
+
 ## Hold what this pass already launched
 
 A worker registers with `branch: main` and the main worktree as its `cwd` until `auto-ship` Step 0 moves it, which took several seconds on both measured runs. Neither the roster nor the refs name the candidate during that window, so a second check inside it reads clear.
@@ -82,9 +96,15 @@ A `claude --bg` session inherits the model of whatever launched it rather than r
 
 Name `<model>` on the launch, and pick it against the task rather than copying whatever this session happens to run. Sizing the model to the row is the dispatcher's call, the same call it already makes on the branch. A mechanical row moving files under a written plan is not the row that needs the largest model, and one whose plan carries an open judgment is.
 
+## Pick local or cloud
+
+Dispatch to a cloud worker only on the operator's explicit pick for that dispatch, until three cloud rows have merged. Whether a cloud session is worth its cost is the operator's account to judge, and the review load a cloud pull request adds is unmeasured, so the pick stays a person's until that count gives a reading.
+
+A row qualifies for that pick when its plan carries no open question and touches no surface needing local state, such as the sandbox, the records remote, or a browser. A cloud worker cannot reach any of the three, and it cannot ask the operator mid-build except through a draft pull request.
+
 ## Dispatch
 
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template. It also holds the review-address and planning shapes, which skip the checks above.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template. That runbook also holds the review-address and planning shapes, which skip the checks above. A row the operator picked for cloud launches from `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` instead, since the cloud VM shares neither the plugin nor the board with this machine.
 
 ## Fall back to the human
 
