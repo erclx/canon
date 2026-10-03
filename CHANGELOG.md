@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.22.0](https://github.com/erclx/canon/compare/v5.21.0...v5.22.0) (2026-10-03)
+
+
+### Features
+
+* **claude:** dispatch rows to cloud workers and move git-pr to rest ([#2158](https://github.com/erclx/canon/issues/2158)) ([8ac889f](https://github.com/erclx/canon/commit/8ac889feada784bf9e53bab84263ecba0d7a4f80))
+* **claude:** merge the five doc drafters into one draft-doc skill ([#2159](https://github.com/erclx/canon/issues/2159)) ([0659c1c](https://github.com/erclx/canon/commit/0659c1c17b13d4e3fdd52bfda9e12ea04f08377d))
+* **gov:** drop retired layout spellings from shipped rules ([#2157](https://github.com/erclx/canon/issues/2157)) ([b0de8a6](https://github.com/erclx/canon/commit/b0de8a6f8241fb19e41120b5c4a617488d055844))
+* **sandbox:** seed a sandbox arm through canon claude init ([#2148](https://github.com/erclx/canon/issues/2148)) ([2c33dfa](https://github.com/erclx/canon/commit/2c33dfa097f14a554fac1ff341335bd7445435bc))
+* **slides:** play slide motion and embed deck faces in the export ([#2160](https://github.com/erclx/canon/issues/2160)) ([e1a9bcf](https://github.com/erclx/canon/commit/e1a9bcf54e5bbcf4abac43ffa0382eb1b44a1f75))
+
 ## [5.21.0](https://github.com/erclx/canon/compare/v5.20.0...v5.21.0) (2026-10-03)
 
 
