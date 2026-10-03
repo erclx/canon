@@ -1,0 +1,14 @@
+---
+name: deploy-check
+description: Verifies a release candidate before promotion. Use when asked to "check the deploy" or "verify the candidate".
+---
+
+# Deploy check
+
+## Step 1: read the candidate
+
+Read the tag the release job wrote.
+
+## Step 2: report
+
+Report the tag and stop. Do not promote.

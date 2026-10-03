@@ -1,0 +1,11 @@
+---
+title: Export utilities from src/index.ts
+description: Public helpers re-export from the package entry point
+category: Feedback
+---
+
+Every public helper in `src/` re-exports from `src/index.ts` so callers import from one entry point.
+
+**Why:** A past session shipped a helper that callers could not import because it was never re-exported.
+
+**How to apply:** When adding a public function under `src/`, add its `export` to `src/index.ts` in the same change.

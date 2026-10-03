@@ -1,0 +1,15 @@
+# Feature: tighten the deploy-check skill
+
+Give `deploy-check` a stop condition when no tag resolves, so the skill reports the miss rather than reading an empty value as a pass.
+
+**Files to touch:**
+
+- `.claude/skills/deploy-check/SKILL.md`: add the stop condition to Step 1
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

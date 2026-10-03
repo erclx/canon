@@ -1,0 +1,7 @@
+# Harbor site
+
+Static marketing site. Markup and styles live in `src/`.
+
+## Commands
+
+- `bun run check`: lint

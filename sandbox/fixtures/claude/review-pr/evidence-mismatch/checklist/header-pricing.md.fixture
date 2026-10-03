@@ -1,0 +1,6 @@
+**What to verify visually:**
+
+**Header**
+
+- [x] Narrow the window below 600px → the navigation links collapse into the Menu button
+- [x] Widen the window to 1280px → Pricing sits between Changelog and About

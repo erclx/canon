@@ -1,0 +1,9 @@
+{
+  "name": "sandbox-address-review",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "bash scripts/regen-index.sh && echo 'lint ok' && echo 'typecheck ok'"
+  }
+}

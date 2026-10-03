@@ -1,0 +1,7 @@
+# My App
+
+Greeting utility library.
+
+## Commands
+
+- `bun run check`: lint and typecheck

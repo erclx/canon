@@ -1,0 +1,16 @@
+# Feature: add whisper utility
+
+Add a `whisper` function returning a lower-cased greeting, in its own module beside the others, and cover it with a test.
+
+**Files to touch:**
+
+- `src/whisper.ts`: new `whisper` function returning `hello, <name>.`
+- `src/whisper.test.ts`: the case covering it
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

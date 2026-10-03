@@ -1,0 +1,7 @@
+## Summary
+
+Adds the POST /tasks handler for v0.1, taking any title with no validation.
+
+## Testing
+
+- [x] `bun run check` passes.

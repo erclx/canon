@@ -1,0 +1,8 @@
+---
+title: Limits
+description: Per-client request ceiling the task endpoints enforce
+---
+
+# Limits
+
+The task endpoints cap a client at 100 requests per minute.

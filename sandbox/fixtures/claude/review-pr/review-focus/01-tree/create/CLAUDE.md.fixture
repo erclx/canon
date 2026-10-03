@@ -1,0 +1,7 @@
+# My App
+
+Task API. Route handlers live in `src/`.
+
+## Commands
+
+- `bun run check`: lint and typecheck

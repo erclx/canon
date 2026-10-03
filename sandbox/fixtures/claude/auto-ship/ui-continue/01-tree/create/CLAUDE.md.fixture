@@ -1,0 +1,7 @@
+# My App
+
+Small React component library.
+
+## Commands
+
+- `bun run check`: lint and typecheck

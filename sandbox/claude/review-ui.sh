@@ -27,11 +27,7 @@ seed_trunk() {
 
   printf 'node_modules\n.canon/\n' >.gitignore
 
-  cat <<'EOF' >CLAUDE.md
-# Harbor site
-
-Static marketing site. Pages live in `site/`.
-EOF
+  stage_fixtures claude review-ui shared 01-trunk-claude
 
   mkdir -p site evidence/header
   cp "$EVIDENCE_RENDER/base/390.png" "$EVIDENCE_RENDER/base/1280.png" evidence/header/

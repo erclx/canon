@@ -1,0 +1,8 @@
+---
+title: API
+description: Task creation endpoint and handlers in src/tasks.ts
+---
+
+# API
+
+Route handlers live in `src/tasks.ts`. `handleCreate` builds a task from the request body and returns it, behind the rate limiter described in `limits.md`. No input validation runs before creation.

@@ -17,70 +17,7 @@ seed_base_tree() {
 
   printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
 
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-address-review",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "check": "bash scripts/regen-index.sh && echo 'lint ok' && echo 'typecheck ok'"
-  }
-}
-EOF
-
-  cat <<'EOF' >CLAUDE.md
-# My App
-
-Task API. Route handlers live in `src/`.
-
-## Commands
-
-- `bun run check`: regenerate `canon/context/index.md`, then lint and typecheck
-
-## Indexes
-
-- Never hand-edit `canon/context/index.md`. `bun run check` regenerates it from sibling frontmatter.
-EOF
-
-  mkdir -p scripts
-  cat <<'EOF' >scripts/regen-index.sh
-#!/usr/bin/env bash
-set -e
-
-out="canon/context/index.md"
-
-{
-  printf -- '---\ntitle: Context\ndescription: Per-domain narrative loaded on demand\n---\n\n# Context\n\n'
-  for entry in canon/context/*.md; do
-    if [ "$entry" = "$out" ]; then
-      continue
-    fi
-    title=$(grep -m1 '^title: ' "$entry" | cut -d' ' -f2-)
-    description=$(grep -m1 '^description: ' "$entry" | cut -d' ' -f2-)
-    printf -- '- [%s](%s): %s\n' "$title" "$(basename "$entry")" "$description"
-  done
-} >"$out"
-EOF
-
-  mkdir -p src
-  cat <<'EOF' >src/tasks.ts
-export function createTask(title: string) {
-  return { id: crypto.randomUUID(), title };
-}
-EOF
-
-  mkdir -p canon/context
-  cat <<'EOF' >canon/context/api.md
----
-title: API
-description: Task creation endpoint and handlers in src/tasks.ts
----
-
-# API
-
-Route handlers live in `src/tasks.ts`. `handleCreate` builds a task from the request body and returns it. No input validation runs before creation.
-EOF
+  stage_fixtures claude review-address shared 01-base-tree
 
   bash scripts/regen-index.sh
 }
@@ -89,15 +26,7 @@ start_feature_branch() {
   git push origin --delete feat/create-endpoint -q 2>/dev/null || true
   git checkout -b feat/create-endpoint -q
 
-  cat <<'EOF' >src/tasks.ts
-export function createTask(title: string) {
-  return { id: crypto.randomUUID(), title };
-}
-
-export function handleCreate(body: { title: string }) {
-  return createTask(body.title);
-}
-EOF
+  stage_fixtures claude review-address shared 02-create-handler
 
   git add . && git commit -m "feat(api): add create handler" --no-verify -q
 }
@@ -153,29 +82,11 @@ stage_setup() {
   "stale")
     start_feature_branch
 
-    cat <<'EOF' >canon/context/handlers.md
----
-title: Handlers
-description: Request shape each route handler in src/tasks.ts accepts
----
-
-# Handlers
-
-`handleCreate` takes a body carrying a `title` and returns the created task.
-EOF
+    stage_fixtures claude review-address stale 01-handlers
 
     bash scripts/regen-index.sh
 
-    cat <<'EOF' >canon/context/api.md
----
-title: API
-description: Task creation endpoint and handlers in src/tasks.ts
----
-
-# API
-
-Route handlers live in `src/tasks.ts`. `handleCreate` builds a task from the request body and returns it, under the request shape described in `handlers.md`. No input validation runs before creation.
-EOF
+    stage_fixtures claude review-address stale 02-api-link
 
     git add . && git commit -m "docs(context): record the handler request shape" --no-verify -q
 
@@ -184,29 +95,11 @@ EOF
     # The sibling lands on main after the PR opens, which is what makes the branch stale.
     git checkout -q -B sibling "$base_commit"
 
-    cat <<'EOF' >canon/context/limits.md
----
-title: Limits
-description: Per-client request ceiling the task endpoints enforce
----
-
-# Limits
-
-The task endpoints cap a client at 100 requests per minute.
-EOF
+    stage_fixtures claude review-address stale 03-limits
 
     bash scripts/regen-index.sh
 
-    cat <<'EOF' >canon/context/api.md
----
-title: API
-description: Task creation endpoint and handlers in src/tasks.ts
----
-
-# API
-
-Route handlers live in `src/tasks.ts`. `handleCreate` builds a task from the request body and returns it, behind the rate limiter described in `limits.md`. No input validation runs before creation.
-EOF
+    stage_fixtures claude review-address stale 04-api-limiter
 
     git add . && git commit -m "feat(api): rate limit the task endpoints" --no-verify -q
     git push --force origin HEAD:main
@@ -228,17 +121,7 @@ EOF
   "body-sync")
     start_feature_branch
 
-    stale_body=$(
-      cat <<'BODY'
-## Summary
-
-Adds the POST /tasks handler for v0.1, taking any title with no validation.
-
-## Testing
-
-- [x] `bun run check` passes.
-BODY
-    )
+    stale_body=$(cat "$(fixture_stage_dir claude review-address body-sync stdin)/pr-body.md.fixture")
 
     open_pull_request "$stale_body"
 
@@ -259,19 +142,7 @@ BODY
     # A second commit pushed after the pull request opened. The object keeps
     # naming the commit it was created against for up to a minute, which is the
     # window every head-sensitive read here has to survive.
-    cat <<'EOF' >src/tasks.ts
-export function createTask(title: string) {
-  return { id: crypto.randomUUID(), title };
-}
-
-export function handleCreate(body: { title: string }) {
-  return createTask(body.title);
-}
-
-export function handleList() {
-  return [];
-}
-EOF
+    stage_fixtures claude review-address stale-head 01-list-handler
 
     git add . && git commit -m "feat(api): add list handler" --no-verify -q
     git push --force origin HEAD -q

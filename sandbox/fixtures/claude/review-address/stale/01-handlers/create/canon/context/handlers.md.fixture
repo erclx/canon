@@ -1,0 +1,8 @@
+---
+title: Handlers
+description: Request shape each route handler in src/tasks.ts accepts
+---
+
+# Handlers
+
+`handleCreate` takes a body carrying a `title` and returns the created task.

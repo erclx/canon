@@ -1,0 +1,28 @@
+# Feature: Create handler
+
+Adds the POST /tasks handler.
+
+## Summary
+
+- A handler that validates the title before creating a task
+
+**Files to touch:**
+
+- `src/tasks.ts`: add `handleCreate`
+
+**Verification:**
+
+- The handler rejects a bad title: `bun run check`
+
+**Risks:**
+
+None identified.
+
+**Review focus:**
+
+- An empty or whitespace-only title: `handleCreate` must reject it before `createTask` runs
+- A title longer than 200 characters: `handleCreate` must reject it before `createTask` runs
+
+**Questions:**
+
+None identified.
