@@ -1,0 +1,72 @@
+# What a correct `/canon:draft-figure` run leaves behind when the destination is
+# a teach lesson. Read by `canon sandbox check`. Patterns use TOML literal
+# strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and asserts nothing.
+#
+# The subject is graph-shaped, so outside a lesson the run would take the
+# Mermaid path. What this arm asserts is the carve-out: a lesson figure comes
+# out hand-written, and the run never drafts Mermaid source for it.
+
+max_turns = 30
+
+paths = [".canon/teach/01-orders/lessons/0001-order-states.html"]
+
+# The Mermaid path writes its source and its config under `.canon/tmp/figures/`
+# before it renders anything, so a run that took it leaves both behind or
+# deletes them after writing, and either way the write scope below sees it.
+# These two catch the run that kept them.
+absent = [".canon/tmp/figures/*.mmd", ".canon/tmp/figures/*.json"]
+
+# The lesson and the in-page capture. The capture lands under the figure
+# scratch folder, and the Mermaid source and config would land there too, which
+# is why the two `absent` globs above carry that half of the check.
+write_scope = [
+  ".canon/teach/01-orders/lessons/0001-order-states.html",
+  ".canon/tmp/figures/**",
+]
+
+# The output template's first line names the destination, and the render path
+# line spells the decided path. Both are fixed by the body and the fixture.
+reply = [".canon/teach/01-orders/lessons/0001-order-states.html", "freehand"]
+
+manual = [
+  "The figure was captured inside the lesson with `canon capture --selector figure` and that capture was read. Unwired: the claim is about which commands ran, which the envelope does not carry, and a capture written elsewhere or deleted after reading leaves no file to assert.",
+  "The drawing reads as the four-state path with its refund branch. Semantic: whether hand-placed shapes and arrows say what the prose says is a judgment over the picture.",
+  "No label clips or overlaps in the capture. Semantic: the capture is an image, and no pattern over the markup measures rendered text.",
+]
+
+# The figure landed in the lesson, wrapped and captioned.
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = '<figure'
+
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = '<figcaption'
+
+# The drawing is inline SVG with an accessible name rather than an image link.
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = '<svg[^>]*(role="img"|aria-label)'
+
+# Colors reach the drawing through the lesson's own custom properties. The
+# seeded stylesheet is the only other place a `var(--` sits, inside `<style>`,
+# so the pin anchors on a stroke or fill carrying one, as an attribute or as an
+# inline style declaration.
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = '(stroke|fill)(="|:\s*)var\(--'
+
+# The figure sits ahead of the quiz rather than inside it or after it, which is
+# what the stepper's gating needs.
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = '</figure>[\s\S]*<div class="quiz">'
+
+# The seeded prose survives the write.
+[[content]]
+path = ".canon/teach/01-orders/lessons/0001-order-states.html"
+pattern = 'One branch leaves the path'
