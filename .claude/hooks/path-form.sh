@@ -12,8 +12,8 @@
 # its surface, not from this hook or the output rule.
 #
 # The worktree branch comes from the path rather than from `git rev-parse`,
-# the way `tasks-index.sh` and `memory-index.sh` already derive their main
-# root from a path suffix instead of the session. A git call would answer for
+# the way `records-index.sh` already derives its main root from a path suffix
+# instead of the session. A git call would answer for
 # whatever directory the hook's own process happens to run in, which is not
 # necessarily the worktree the write came from.
 

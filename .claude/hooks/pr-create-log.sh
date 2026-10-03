@@ -39,8 +39,8 @@ url=$(printf '%s' "$stdout" | grep -Eo 'https://github\.com/[^[:space:]]+/pull/[
 # CLAUDE_PROJECT_DIR is the session's own worktree rather than the main root,
 # so a worker building in a linked worktree would log into a folder that dies
 # with the worktree. The log is a denominator across a wave rather than a
-# per-session record, so strip back to the main root the way tasks-index.sh
-# and memory-index.sh already derive theirs, off a path suffix.
+# per-session record, so strip back to the main root the way
+# records-index.sh already derives its own, off a path suffix.
 root="${CLAUDE_PROJECT_DIR:-.}"
 case "$root" in
 */.claude/worktrees/*) root="${root%/.claude/worktrees/*}" ;;
