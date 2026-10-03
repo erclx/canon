@@ -370,4 +370,34 @@ describe('canon canvas capture', () => {
     expect(run.status).toBe(1)
     expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
   })
+
+  it('should refuse --composite on a frame address rather than capture the frame', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas('capture', 'drafts/hero', '--composite', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: false,
+      reason: 'invalid-name',
+    })
+    expect(run.stderr).toContain('--composite takes a page')
+  })
+
+  it('should refuse --composite on a page that does not exist', () => {
+    const run = canvas('capture', 'missing', '--composite', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-page' })
+  })
+
+  it('should refuse --composite on a page with no frames', () => {
+    canvas('page', 'add', 'drafts')
+
+    const run = canvas('capture', 'drafts', '--composite', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
+  })
 })

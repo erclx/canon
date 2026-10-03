@@ -13,7 +13,7 @@ import {
   readSelection,
   renamePage,
 } from '@/canvas/content'
-import { captureCanvas } from '@/canvas/capture'
+import { captureCanvas, captureComposite } from '@/canvas/capture'
 import {
   type EditRefused,
   editFrameAtIndex,
@@ -468,6 +468,10 @@ export function register(program: Command): void {
       .option(
         '-o, --out <path>',
         'The PNG for a frame, or the folder for a page; defaults to session scratch',
+      )
+      .option(
+        '--composite',
+        'Capture a page as one PNG with every frame at its layout position; --out is then the PNG',
       ),
   )
     .addHelpText(
@@ -478,16 +482,23 @@ export function register(program: Command): void {
         'the injected tokens are in the PNG and each frame renders at its own',
         'width. The raw file on disk is never captured.',
         '',
+        'With --composite, each frame is clipped to its box as on the board and',
+        'shows in its default theme, with no captions or selection outline.',
+        '',
         'Exit codes:',
         '  0  every frame rendered',
         '  1  refused or a frame failed, with the reason on stderr or in the JSON record',
         '',
       ].join('\n'),
     )
-    .action(async (target: string, opts: RootOptions & { out?: string }) => {
+    .action(async (target: string, opts: CaptureOptions) => {
       const resolved = await resolveRoot(opts)
       if (!resolved.ok) {
         process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      if (opts.composite) {
+        process.exitCode = await runComposite(resolved.root, target, opts)
         return
       }
       let outcome: Awaited<ReturnType<typeof captureCanvas>>
@@ -541,6 +552,69 @@ export function register(program: Command): void {
       outro()
       if (failed) process.exitCode = 1
     })
+}
+
+interface CaptureOptions extends RootOptions {
+  readonly out?: string
+  readonly composite?: boolean
+}
+
+async function runComposite(
+  root: string,
+  target: string,
+  opts: CaptureOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  let outcome: Awaited<ReturnType<typeof captureComposite>>
+  try {
+    outcome = await captureComposite(
+      root,
+      target,
+      opts.out ? resolve(process.cwd(), opts.out) : undefined,
+    )
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    return refuse({ ok: false, reason: 'capture-failed', detail }, emitJson)
+  }
+  if (!outcome.ok) return refuse(outcome, emitJson)
+
+  const { target: item, result } = outcome.composite
+  if (result.status === 'failed') {
+    if (emitJson) {
+      writeJson({
+        ok: false,
+        composite: {
+          page: item.page,
+          status: result.status,
+          reason: result.reason,
+        },
+      })
+    }
+    intro(BANNER)
+    logError(`${item.page}: ${result.reason}`)
+    outro()
+    return 1
+  }
+
+  if (emitJson) {
+    writeJson({
+      ok: true,
+      composite: {
+        page: item.page,
+        status: result.status,
+        path: result.pngPath,
+        width: result.width,
+        height: result.height,
+      },
+    })
+  }
+  intro(BANNER)
+  logAdd(
+    `${item.page} composite of ${plural(item.composite.placements.length, 'frame')}`,
+  )
+  logInfo(`${displayPath(result.pngPath)} ${result.width}x${result.height}`)
+  outro()
+  return 0
 }
 
 /** NaN for a value that is not a number, which the content module refuses. */

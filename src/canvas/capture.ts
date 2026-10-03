@@ -1,6 +1,12 @@
-import { join } from 'node:path'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { CaptureResult } from '@/capture/render'
-import { type ContentRefused, type Frame, readPage } from '@/canvas/content'
+import {
+  type ContentRefused,
+  canvasDir,
+  type Frame,
+  readPage,
+} from '@/canvas/content'
 import {
   type CanvasOptions,
   type CanvasOutcome,
@@ -134,6 +140,34 @@ export async function captureCanvas(
   const early = resolveCaptureTargets(root, spec, '')
   if (!early.ok) return early
 
+  return serveFor(root, deps, async (base, capture) => {
+    const resolved = resolveCaptureTargets(root, spec, base, out)
+    if (!resolved.ok) return resolved
+
+    const captures: { target: CaptureTarget; result: CaptureResult }[] = []
+    for (const target of resolved.targets) {
+      const [result] = await capture(target.url, {
+        selector: CAPTURE_SELECTOR,
+        width: target.width,
+        outDir: target.pngPath,
+      })
+      if (result) captures.push({ target, result })
+    }
+    return { ok: true, captures }
+  })
+}
+
+type ServeRefused = {
+  readonly ok: false
+  readonly reason: 'no-server' | 'capture-failed'
+  readonly detail: string
+}
+
+async function serveFor<T>(
+  root: string,
+  deps: CaptureDeps,
+  run: (base: string, capture: CaptureEngine) => Promise<T>,
+): Promise<T | ServeRefused> {
   const start = deps.start ?? startCanvas
   const server = start(root, { port: 0, shell: new Response('') })
   if (!server.ok) {
@@ -145,21 +179,9 @@ export async function captureCanvas(
   }
 
   try {
-    const resolved = resolveCaptureTargets(root, spec, server.url, out)
-    if (!resolved.ok) return resolved
-
     const capture =
       deps.capture ?? (await import('@/capture/render')).captureSources
-    const captures: { target: CaptureTarget; result: CaptureResult }[] = []
-    for (const target of resolved.targets) {
-      const [result] = await capture(target.url, {
-        selector: CAPTURE_SELECTOR,
-        width: target.width,
-        outDir: target.pngPath,
-      })
-      if (result) captures.push({ target, result })
-    }
-    return { ok: true, captures }
+    return await run(server.url, capture)
   } catch (error) {
     return {
       ok: false,
@@ -169,4 +191,195 @@ export async function captureCanvas(
   } finally {
     await server.stop()
   }
+}
+
+/** The element a composite is captured by, holding every frame and no chrome. */
+export const COMPOSITE_SELECTOR = '#canvas-composite'
+
+/**
+ * The container holds no text, so its family exists only for the engine's
+ * font probe, which rejects a family the machine lacks. The browser default is
+ * Times New Roman, which a Linux runner often lacks, and `system-ui` is the one
+ * every platform maps. Each frame keeps its own fonts inside its iframe.
+ */
+const COMPOSITE_FONT = 'system-ui'
+
+export interface Placement {
+  readonly frame: string
+  readonly url: string
+  readonly left: number
+  readonly top: number
+  readonly width: number
+  readonly height: number
+}
+
+export interface Composite {
+  readonly placements: readonly Placement[]
+  readonly width: number
+  readonly height: number
+  readonly html: string
+}
+
+/**
+ * One document showing every frame of a page at its layout position. Offsets
+ * run from the top left of the union of the boxes, so a negative coordinate
+ * never clips and a lone frame fills the container exactly. Each iframe takes
+ * its box, so a document taller than its frame clips as it does on the board,
+ * and frames paint in the order given, which is the board's.
+ */
+export function buildComposite(
+  page: string,
+  frames: readonly Frame[],
+  base: string,
+): Composite {
+  const left = Math.min(...frames.map((frame) => frame.x))
+  const top = Math.min(...frames.map((frame) => frame.y))
+  const right = Math.max(...frames.map((frame) => frame.x + frame.width))
+  const bottom = Math.max(...frames.map((frame) => frame.y + frame.height))
+  const width = right - left
+  const height = bottom - top
+
+  const placements = frames.map((frame) => ({
+    frame: frame.name,
+    url: frameUrl(base, page, frame),
+    left: frame.x - left,
+    top: frame.y - top,
+    width: frame.width,
+    height: frame.height,
+  }))
+
+  const iframes = placements.map(
+    (p) =>
+      `<iframe title="${escapeAttribute(p.frame)}" src="${escapeAttribute(p.url)}" style="left:${p.left}px;top:${p.top}px;width:${p.width}px;height:${p.height}px"></iframe>`,
+  )
+  const html = [
+    '<!doctype html>',
+    '<html><head><meta charset="utf-8">',
+    `<style>html,body{margin:0;background:transparent}#canvas-composite{position:relative;font-family:${COMPOSITE_FONT}}#canvas-composite iframe{position:absolute;display:block;border:0;background:transparent}</style>`,
+    '</head><body>',
+    `<div id="canvas-composite" style="width:${width}px;height:${height}px">`,
+    ...iframes,
+    '</div></body></html>',
+    '',
+  ].join('\n')
+
+  return { placements, width, height, html }
+}
+
+function escapeAttribute(value: string): string {
+  return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
+}
+
+/**
+ * Where the generated document is served from, inside the canvas folder so it
+ * shares the frames' origin. Chromium skips painting a cross-origin iframe
+ * outside the viewport, and the engine's viewport is 720 pixels tall, so a
+ * document on another origin captured every frame below that line blank. A dot
+ * folder is no page name, so the board never lists it.
+ */
+const COMPOSITE_FOLDER = '.composite'
+
+export interface CompositeTarget {
+  readonly page: string
+  readonly composite: Composite
+  readonly htmlPath: string
+  /** The served address of the document at `htmlPath`. */
+  readonly url: string
+  readonly pngPath: string
+}
+
+export type CompositeTargetOutcome =
+  | { readonly ok: true; readonly target: CompositeTarget }
+  | ContentRefused
+
+/**
+ * Turns `<page>` into one composite. `out` is the PNG, and without it the PNG
+ * lands at `<page>.png` beside the per-frame folder of the same name, so the
+ * two captures of one page never collide.
+ */
+export function resolveCompositeTarget(
+  root: string,
+  spec: string,
+  base: string,
+  out?: string,
+): CompositeTargetOutcome {
+  if (spec.includes('/')) {
+    return refuse(
+      'invalid-name',
+      `--composite takes a page, not ${spec}, so capture <page> or drop the flag`,
+    )
+  }
+
+  const page = readPage(root, spec)
+  if (!page) return refuse('no-page', `page ${spec} does not exist`)
+  if (page.frames.length === 0) {
+    return refuse('no-frame', `page ${spec} has no frames`)
+  }
+
+  const file = `${spec}.html`
+  return {
+    ok: true,
+    target: {
+      page: spec,
+      composite: buildComposite(spec, page.frames, base),
+      htmlPath: join(canvasDir(root), COMPOSITE_FOLDER, file),
+      url: `${base}${FRAMES_PREFIX.slice(1)}${COMPOSITE_FOLDER}/${encodeURIComponent(file)}`,
+      pngPath:
+        out ?? join(recordDir(root, 'tmp', 'canvas-capture'), `${spec}.png`),
+    },
+  }
+}
+
+export type CompositeOutcome =
+  | {
+      readonly ok: true
+      readonly composite: {
+        readonly target: CompositeTarget
+        readonly result: CaptureResult
+      }
+    }
+  | ContentRefused
+  | ServeRefused
+
+/**
+ * Captures a page as one PNG through the served canvas, the way `captureCanvas`
+ * captures each frame. The viewport is the container's width, so no frame's
+ * media query resolves against a window narrower than the frame itself. The
+ * page load the engine waits on waits on every iframe.
+ */
+export async function captureComposite(
+  root: string,
+  spec: string,
+  out?: string,
+  deps: CaptureDeps = {},
+): Promise<CompositeOutcome> {
+  const early = resolveCompositeTarget(root, spec, '')
+  if (!early.ok) return early
+
+  return serveFor(root, deps, async (base, capture) => {
+    const resolved = resolveCompositeTarget(root, spec, base, out)
+    if (!resolved.ok) return resolved
+
+    const { target } = resolved
+    mkdirSync(dirname(target.htmlPath), { recursive: true })
+    writeFileSync(target.htmlPath, target.composite.html)
+    let result: CaptureResult | undefined
+    try {
+      ;[result] = await capture(target.url, {
+        selector: COMPOSITE_SELECTOR,
+        width: target.composite.width,
+        outDir: target.pngPath,
+      })
+    } finally {
+      rmSync(target.htmlPath, { force: true })
+    }
+    if (!result) {
+      return {
+        ok: false,
+        reason: 'capture-failed',
+        detail: `the engine rendered nothing for ${spec}`,
+      }
+    }
+    return { ok: true, composite: { target, result } }
+  })
 }
