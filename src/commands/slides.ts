@@ -1,6 +1,7 @@
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
+import { INSTALL_BROWSER } from '@/browser/engine'
 import { creationRel, SCRATCH } from '@/record-root'
 import { LAYOUTS } from '@/slides/layouts'
 import { openDeck } from '@/slides/open'
@@ -17,8 +18,14 @@ export function register(program: Command): void {
   slides
     .command('render')
     .helpOption('-h, --help', 'Show this help message')
-    .description('Render a SLIDES.md source into a PowerPoint deck')
-    .option('-s, --source <path>', 'Source SLIDES.md path', '.claude/SLIDES.md')
+    .description(
+      'Render a SLIDES.md source, or a folder of HTML slides, into a PowerPoint deck',
+    )
+    .option(
+      '-s, --source <path>',
+      'Source SLIDES.md file, or a folder of .html slides read in filename order',
+      '.claude/SLIDES.md',
+    )
     .option(
       '-o, --out <path>',
       'Output directory',
@@ -44,8 +51,15 @@ export function register(program: Command): void {
           if (!existsSync(sourcePath)) {
             fail(`${opts.source} not found`)
           }
-          const variant = parseVariant(opts.variant)
           const mirror = resolveMirror(opts.mirror)
+          if (statSync(sourcePath).isDirectory()) {
+            if (opts.variant !== undefined) {
+              fail('--variant applies to a SLIDES.md source, not a folder')
+            }
+            await renderHtmlFolder(sourcePath, outDir, mirror, opts.open)
+            return
+          }
+          const variant = parseVariant(opts.variant)
           const { GREEN, GREY, NC, RED } = palette(process.stderr)
           intro('Render slides')
           const result = await renderSlidesDoc(sourcePath, outDir, {
@@ -101,6 +115,61 @@ export function register(program: Command): void {
       }
       outro()
     })
+}
+
+/**
+ * The converter loads on demand, so no other command resolves pptxgenjs,
+ * jszip, or the token module at startup. A fallback or a refused link reports
+ * one line each and keeps the exit at 0, as an unrecognized layout does on the
+ * markdown path, since the deck is written either way.
+ */
+async function renderHtmlFolder(
+  sourceDir: string,
+  outDir: string,
+  mirror: string | undefined,
+  shouldOpen: boolean | undefined,
+): Promise<void> {
+  const { exportHtmlDeck } = await import('@/slides/convert/export')
+  const { GREEN, GREY, NC, RED } = palette(process.stderr)
+  const result = await exportHtmlDeck(sourceDir, outDir, {
+    root: process.cwd(),
+    mirror,
+  })
+  if (result.status === 'refused') {
+    fail(
+      result.reason === 'browser-missing'
+        ? `Chromium is not installed. Run ${INSTALL_BROWSER}`
+        : result.message,
+    )
+  }
+  intro('Render slides')
+  process.stderr.write(
+    `${GREY}│${NC} ${GREEN}✓${NC} ${result.slideCount} slides\n${GREY}│${NC} ${GREEN}✓${NC} ${result.pptxPath}\n`,
+  )
+  for (const { slide, selector, properties } of result.fallbacks) {
+    process.stderr.write(
+      `${GREY}│${NC} ${RED}✗${NC} slide ${slide} ${selector} drawn as a picture for ${properties.join(', ')}\n`,
+    )
+  }
+  for (const { slide, selector, href, reason } of result.refusedLinks) {
+    process.stderr.write(
+      `${GREY}│${NC} ${RED}✗${NC} slide ${slide} ${selector} link "${href}" left out: ${reason}\n`,
+    )
+  }
+  if (result.mirrorPath) {
+    process.stderr.write(
+      `${GREY}│${NC} ${GREEN}✓${NC} mirrored to ${result.mirrorPath}\n`,
+    )
+  }
+  if (shouldOpen) {
+    const target = result.mirrorPath ?? result.pptxPath
+    const opened = await openDeck(target)
+    const mark = opened ? `${GREEN}✓${NC}` : `${RED}✗${NC}`
+    process.stderr.write(
+      `${GREY}│${NC} ${mark} ${opened ? 'opened' : 'could not open'} ${target}\n`,
+    )
+  }
+  outro()
 }
 
 function parseVariant(value: string | undefined): Variant | undefined {
