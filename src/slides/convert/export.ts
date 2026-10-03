@@ -1,4 +1,10 @@
-import { copyFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import {
+  copyFileSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import { basename, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import JSZip from 'jszip'
@@ -7,13 +13,32 @@ import PptxGenJS from 'pptxgenjs'
 import { isBrowserMissing, isEngineMissing } from '@/browser/engine'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import {
+  type ChartTheme,
+  planChart,
+  seriesColors,
+} from '@/slides/convert/chart'
+import { type DeckConfig, readDeck } from '@/slides/convert/deck'
+import {
+  bandTexts,
+  buildMaster,
+  type DeckTheme,
+  deckTheme,
+  type MarkSize,
+  type MasterBands,
+  masterName,
+  slideNumberProps,
+} from '@/slides/convert/master'
+import {
   type DrawOp,
   type Fallback,
   planSlide,
   type RefusedLink,
 } from '@/slides/convert/shapes'
 import {
+  type BandOverride,
   ID_ATTRIBUTE,
+  readTheme,
+  type SlideMeta,
   type WalkedSlide,
   walkSlide,
 } from '@/slides/convert/walk'
@@ -22,7 +47,8 @@ import {
  * Turns a folder of HTML slides into one editable deck. Chromium lays each
  * slide out at 1280 by 720 in the project's tokens, `walkSlide` reads what it
  * placed, `planSlide` maps the records onto shapes, and an element whose CSS has
- * no mapping lands as a screenshot of itself.
+ * no mapping lands as a screenshot of itself. The first slide's computed tokens
+ * build the masters, and `deck.json` sets the bands they carry.
  *
  * Every browser reference this feature adds lives here, and the command reaches
  * it through a dynamic import so no other command resolves the engine.
@@ -45,8 +71,16 @@ export interface SlideRefusedLink extends RefusedLink {
   readonly slide: number
 }
 
+/** A chart left out of the deck, with the reason the report prints. */
+export interface RefusedChart {
+  readonly slide: number
+  readonly selector: string
+  readonly message: string
+}
+
 export type ExportRefusal =
   | 'empty-source'
+  | 'deck-invalid'
   | 'engine-missing'
   | 'browser-missing'
   | 'export-failed'
@@ -59,6 +93,9 @@ export type ExportResult =
       readonly slideCount: number
       readonly fallbacks: readonly SlideFallback[]
       readonly refusedLinks: readonly SlideRefusedLink[]
+      readonly refusedCharts: readonly RefusedChart[]
+      /** What the deck master could not take from the project's tokens. */
+      readonly notices: readonly string[]
     }
   | {
       readonly status: 'refused'
@@ -102,6 +139,11 @@ export async function exportHtmlDeck(
   if (files.length === 0) {
     return refused('empty-source', `${sourceDir} holds no .html slides`)
   }
+  const deckRead = readDeck(sourceDir)
+  if (deckRead.status === 'refused') {
+    return refused('deck-invalid', deckRead.message)
+  }
+  const deck = deckRead.deck
 
   let chromium: typeof import('playwright-core').chromium
   try {
@@ -125,15 +167,35 @@ export async function exportHtmlDeck(
   const tokens = resolveFrameTokens(options.root).css
   const pptx = new PptxGenJS()
   pptx.layout = 'LAYOUT_WIDE'
+  pptx.title = deck.title
   const fallbacks: SlideFallback[] = []
   const refusedLinks: SlideRefusedLink[] = []
+  const refusedCharts: RefusedChart[] = []
   const patches: Patch[] = []
+  const notices: string[] = []
 
   try {
     const page = await browser.newPage({
       viewport: { width: SLIDE_WIDTH, height: SLIDE_HEIGHT },
       deviceScaleFactor: SCREENSHOT_SCALE,
     })
+    await prepare(page, files[0] ?? '', tokens)
+    const reading = await page.evaluate(readTheme)
+    const read = deckTheme(reading)
+    const theme = read.theme
+    notices.push(...read.notices)
+    const drifted: number[] = []
+    const chartTheme: ChartTheme = {
+      colors: seriesColors(theme.accent, reading.roles),
+      ink: theme.ink,
+      muted: theme.muted,
+      face: theme.face,
+    }
+    pptx.theme = { headFontFace: theme.face, bodyFontFace: theme.face }
+    const markSize = deck.mark ? await measure(page, deck.mark) : undefined
+    const masters = new Set<string>()
+    const sections = new Sections(deck.title, declaresSections(files))
+
     for (const [index, file] of files.entries()) {
       const slideNumber = index + 1
       const walked = await layOut(page, file, tokens)
@@ -144,12 +206,48 @@ export async function exportHtmlDeck(
       refusedLinks.push(
         ...plan.refusedLinks.map((each) => ({ ...each, slide: slideNumber })),
       )
-      const slide = pptx.addSlide()
-      slide.background = { color: walked.background.hex }
+      const { textToken } = walked.meta
+      if (textToken !== undefined && textToken !== theme.ink) {
+        drifted.push(slideNumber)
+      }
+      // pptxgenjs binds a slide to its master at creation, so the bands this
+      // slide keeps decide the master before any shape is added.
+      const bands = masterBands(deck, walked.meta)
+      const master = masterName(bands)
+      if (!masters.has(master)) {
+        pptx.defineSlideMaster(buildMaster(deck, theme, bands, markSize))
+        masters.add(master)
+      }
+      const sectionTitle = sections.titleFor(walked.meta, pptx)
+      const slide = pptx.addSlide({
+        masterName: master,
+        ...(sectionTitle ? { sectionTitle } : {}),
+      })
+      if (walked.background.hex !== theme.background) {
+        slide.background = { color: walked.background.hex }
+      }
+      if (walked.meta.isHidden) slide.hidden = true
       for (const [opIndex, op] of plan.ops.entries()) {
         const name = `canon-${slideNumber}-${opIndex + 1}`
         await draw(page, slide, { slide: slideNumber, name }, op, patches)
       }
+      for (const record of walked.charts) {
+        const chart = planChart(record, chartTheme)
+        if (chart.status === 'refused') {
+          refusedCharts.push({ ...chart, slide: slideNumber })
+          continue
+        }
+        slide.addChart(chart.type, [...chart.data], chart.options)
+      }
+      drawOverrides(slide, deck, theme, walked.meta)
+      if (walked.meta.notes) slide.addNotes(walked.meta.notes)
+    }
+    if (drifted.length > 0) {
+      const noun = drifted.length === 1 ? 'slide' : 'slides'
+      const verb = drifted.length === 1 ? 'sets' : 'set'
+      notices.push(
+        `${noun} ${drifted.join(', ')} ${verb} a --color-text apart from the master, so ${drifted.length === 1 ? 'its' : 'their'} bands keep the master colors`,
+      )
     }
   } catch (error) {
     return refused(
@@ -164,12 +262,12 @@ export async function exportHtmlDeck(
   if (!(written instanceof Uint8Array)) {
     return refused('export-failed', 'pptxgenjs returned no buffer')
   }
-  const deck = await applyPatches(written, patches)
+  const patched = await applyPatches(written, patches)
 
   mkdirSync(outDir, { recursive: true })
   const fileName = `${basename(sourceDir)}.pptx`
   const pptxPath = join(outDir, fileName)
-  writeFileSync(pptxPath, deck)
+  writeFileSync(pptxPath, patched)
 
   let mirrorPath: string | undefined
   if (options.mirror) {
@@ -185,7 +283,111 @@ export async function exportHtmlDeck(
     slideCount: files.length,
     fallbacks,
     refusedLinks,
+    refusedCharts,
+    notices,
   }
+}
+
+/**
+ * A band stays on the master unless the deck has it off anyway, so a slide
+ * hiding only the header keeps the master's footer and numbers.
+ */
+function masterBands(deck: DeckConfig, meta: SlideMeta): MasterBands {
+  return {
+    header: deck.header.show && meta.header.kind === 'master',
+    footer: deck.footer.show && meta.footer.kind === 'master',
+  }
+}
+
+type Override = Extract<BandOverride, { readonly kind: 'override' }>
+
+/** The slide's slots over the deck's, so overriding the center keeps the title. */
+function mergeBand(override: Override, base: DeckConfig['header']) {
+  return {
+    left: override.left ?? base.left,
+    center: override.center ?? base.center,
+    right: override.right ?? base.right,
+  }
+}
+
+function drawOverrides(
+  slide: PptxGenJS.Slide,
+  deck: DeckConfig,
+  theme: DeckTheme,
+  meta: SlideMeta,
+): void {
+  if (meta.header.kind === 'override') {
+    const band = mergeBand(meta.header, deck.header)
+    const hasMark = deck.mark !== undefined
+    for (const text of bandTexts(band, 'header', theme, { hasMark })) {
+      slide.addText(text.text, text.options)
+    }
+  }
+  if (meta.footer.kind === 'override') {
+    const band = mergeBand(meta.footer, deck.footer)
+    for (const text of bandTexts(band, 'footer', theme)) {
+      slide.addText(text.text, text.options)
+    }
+    if (deck.slideNumbers && band.right === undefined) {
+      slide.slideNumber = slideNumberProps(theme)
+    }
+  }
+}
+
+/**
+ * A slide's `data-section` opens a section the slides after it stay in.
+ * PowerPoint wants every slide in a section once any exists, so slides ahead of
+ * the first declared one open a section named after the deck.
+ *
+ * pptxgenjs files a slide under the first section carrying its title, so a
+ * title the deck returns to takes a numbered suffix rather than sending the
+ * slide back into the earlier section, which PowerPoint reads as a broken list.
+ */
+export class Sections {
+  /** The title as declared, and as written once a repeat is numbered. */
+  private declared: string | undefined
+  private current: string | undefined
+  private readonly opened = new Map<string, number>()
+
+  constructor(
+    private readonly deckTitle: string,
+    private readonly isUsed: boolean,
+  ) {}
+
+  titleFor(meta: SlideMeta, pptx: PptxGenJS): string | undefined {
+    if (!this.isUsed) return undefined
+    const isContinuing =
+      meta.section === undefined || meta.section === this.declared
+    if (isContinuing && this.current !== undefined) return this.current
+    const title = meta.section ?? this.deckTitle
+    const count = (this.opened.get(title) ?? 0) + 1
+    this.opened.set(title, count)
+    this.declared = title
+    this.current = count === 1 ? title : `${title} (${count})`
+    pptx.addSection({ title: this.current })
+    return this.current
+  }
+}
+
+/**
+ * Whether any slide declares a section, read from the source ahead of layout,
+ * since the first slide is placed before the last is laid out.
+ */
+function declaresSections(files: readonly string[]): boolean {
+  return files.some((file) =>
+    /<body\b[^>]*\sdata-section\s*=/i.test(readFileSync(file, 'utf8')),
+  )
+}
+
+/** The mark's intrinsic size as Chromium decodes it, square where unknown. */
+async function measure(page: Page, path: string): Promise<MarkSize> {
+  const size = await page.evaluate(async (src) => {
+    const image = new Image()
+    image.src = src
+    await image.decode().catch(() => undefined)
+    return { width: image.naturalWidth, height: image.naturalHeight }
+  }, pathToFileURL(path).href)
+  return size.width > 0 && size.height > 0 ? size : { width: 1, height: 1 }
 }
 
 /**
@@ -197,6 +399,15 @@ async function layOut(
   file: string,
   tokens: string,
 ): Promise<WalkedSlide> {
+  await prepare(page, file, tokens)
+  return page.evaluate(walkSlide, ID_ATTRIBUTE)
+}
+
+async function prepare(
+  page: Page,
+  file: string,
+  tokens: string,
+): Promise<void> {
   await page.goto(pathToFileURL(file).href, { waitUntil: 'load' })
   if (tokens) {
     await page.evaluate((css) => {
@@ -206,7 +417,6 @@ async function layOut(
     }, tokens)
   }
   await page.evaluate(() => document.fonts.ready.then(() => undefined))
-  return page.evaluate(walkSlide, ID_ATTRIBUTE)
 }
 
 async function screenshot(page: Page, id: number): Promise<Buffer> {

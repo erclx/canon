@@ -68,6 +68,18 @@ An element computing any property in `UNMAPPED_PROPERTIES` becomes one picture o
 
 Links that would go nowhere are left out, being a `#slide-N` past the deck's end or a target in no accepted form. Each fallback and each refused link prints one `✗` line on stderr, and the exit stays 0, as with an unrecognized layout. An empty folder refuses with a message naming it.
 
+## Deck master
+
+What belongs to the deck rather than to one slide lives in two places. `deck.json` beside the slides holds the title, the header and footer bands, slide numbers, and the mark, read by `deck.ts` with a structured refusal per field. A slide declares its section, whether it is hidden, and any band it drops or overrides as `data-*` attributes on its own `<body>`, so a slide file stays self-describing.
+
+- `master.ts` builds the master from `--color-background`, `--color-text`, `--color-muted`, and `--color-accent` as the first slide's `<html>` computes them, and from its body face, never from `@/design/tokens`, which is Canon's own palette. Reading `<html>` rather than `<body>` keeps a dark cover's body theme off the footer every other slide shares, and a slide whose body `--color-text` departs from the master's is named on stderr. A role with no token falls back to the slide body's color and says so on stderr. `src/slides/styles.ts` keeps its own mapping for the markdown path until deck folders retire it.
+- pptxgenjs binds a slide to its master at `addSlide`, so the bands a slide keeps pick its master before any shape lands. Each band combination is its own master, defined on first use, so a slide hiding only the header keeps the master's footer and numbers.
+- A slide overriding a band draws its own text over a master without that band, merged over the deck's slots. Editing the footer once in PowerPoint reaches every slide except those.
+- Slide numbers belong to the footer band and hold its right slot. pptxgenjs writes a master as a `slideLayout` part, so the band text, the mark, and the number field land there rather than in `slideMaster1.xml`.
+- A chart reads its table in the page and maps it in `chart.ts`. Series take the accent, then every other declared `--color-*` role in sheet order except the background and surface, each color once, repeating past the last.
+- Sections need every slide in one once any exists, so slides ahead of the first `data-section` open a section named after the deck. Whether any slide declares one is read from the source files before layout. pptxgenjs files a slide under the first section carrying its title, so a returning title gets a numbered suffix rather than a slide filed out of order.
+- The mark sits top right at its own aspect inside a 1.2 by 0.4 inch box. An SVG mark gets pptxgenjs's broken PNG fallback, since the screenshot patch reaches slides and not layouts, so a raster mark is the safe choice.
+
 pptxgenjs 4 reads a text margin as left, right, bottom, top in points, while a table cell margin reads as top, right, bottom, left in inches. The half-leading lift was measured in LibreOffice rather than PowerPoint, and single-line text there lands about 4 to 6 pixels above the browser.
 
 ## Draft skill

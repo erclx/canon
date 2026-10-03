@@ -12,10 +12,16 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import JSZip from 'jszip'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { type ExportResult, exportHtmlDeck } from '@/slides/convert/export'
+import PptxGenJS from 'pptxgenjs'
+import {
+  type ExportResult,
+  exportHtmlDeck,
+  Sections,
+} from '@/slides/convert/export'
+import type { SlideMeta } from '@/slides/convert/walk'
 
 /**
- * Exports a two-slide fixture deck through a real Chromium and reads the XML
+ * Exports a four-slide fixture deck through a real Chromium and reads the XML
  * the package holds, since every rule the converter carries is a claim about
  * what lands in that XML.
  *
@@ -26,8 +32,21 @@ import { type ExportResult, exportHtmlDeck } from '@/slides/convert/export'
 
 const PHOTO = resolve('examples/slides/evidence/showcase-light-04.png')
 
+/** A palette and face apart from Canon's, so a master taking them proves the source. */
+const TOKENS = `:root {
+  --color-background: #F0F9FF;
+  --color-surface: #E0F2FE;
+  --color-text: #0C4A6E;
+  --color-muted: #475569;
+  --color-accent: #0F766E;
+  --color-success: #7C3AED;
+  --type-body-family: "Fixture Sans Variable", sans-serif;
+}`
+
+const DECK = { title: 'Fixture deck', mark: 'photo.png' }
+
 const STYLE = `
-  body { margin: 0; width: 1280px; height: 720px; background: #FBFAF8; color: #2C2C29; font: 24px/32px system-ui, sans-serif; }
+  body { margin: 0; width: 1280px; height: 720px; background: #FBFAF8; color: #2C2C29; font: 24px/32px var(--type-body-family, system-ui); }
   h1 { position: absolute; left: 96px; top: 64px; margin: 0; font-size: 56px; line-height: 64px; letter-spacing: 1px; }
 `
 
@@ -37,8 +56,9 @@ const SLIDES: Record<string, string> = {
     .thumb { position: absolute; left: 1140px; top: 48px; width: 96px; height: 54px; }
     .photo { position: absolute; left: 640px; top: 176px; width: 480px; height: 270px; border: 1px solid #D6D3CE; border-radius: 12px; object-fit: cover; }
     body > ul { position: absolute; left: 96px; top: 400px; margin: 0; }
-  </style></head><body>
+  </style></head><body data-section="Overview">
     <h1>Quarterly review</h1>
+    <aside class="notes"><p>Open with the <strong>headline</strong>.</p><p>Then pause.</p></aside>
     <p class="note">Revenue grew <strong>eighteen percent</strong> on the year.</p>
     <img class="thumb" src="photo.png" alt="Thumbnail">
     <img class="photo" src="photo.png" alt="The team at the launch event">
@@ -59,8 +79,12 @@ const SLIDES: Record<string, string> = {
     .card { position: absolute; left: 720px; top: 176px; width: 320px; height: 120px; padding: 16px; background: #FFFFFF; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
     .mark { position: absolute; left: 720px; top: 360px; color: #B45309; }
     .gradient { position: absolute; left: 960px; top: 360px; width: 200px; height: 120px; background-image: linear-gradient(90deg, #B45309, #0F766E); color: #FFFFFF; }
-  </style></head><body>
+    figure { position: absolute; left: 96px; top: 250px; width: 500px; height: 150px; margin: 0; background: #FEF3C7; }
+  </style></head><body data-section="Detail">
     <h1>Detail</h1>
+    <figure data-chart="bar" data-labels>
+      <table><tr><th>Region</th><th>Q1</th><th>Q2</th></tr><tr><td>North</td><td>12</td><td>16</td></tr><tr><td>South</td><td></td><td>11</td></tr></table>
+    </figure>
     <table>
       <tr><th>Region</th><th>Q1</th><th>Q2</th></tr>
       <tr><td rowspan="2">North</td><td>Merged quarter</td><td>12</td></tr>
@@ -73,6 +97,12 @@ const SLIDES: Record<string, string> = {
     <p class="soft" style="position: absolute; left: 96px; top: 520px; margin: 0">Plain then <span style="filter: blur(1px)">softened</span></p>
     <p class="under" style="position: absolute; left: 96px; top: 580px; margin: 0; text-decoration: underline">Under <strong>lined</strong></p>
     <blockquote class="rule" style="position: absolute; left: 720px; top: 520px; margin: 0; padding-left: 16px; border-left: 4px solid #B45309">Left-rule quote</blockquote>
+  </body></html>`,
+  '03-backup.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-hidden data-footer="off" style="--color-text: #FFFFFF">
+    <h1>Backup</h1>
+  </body></html>`,
+  '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-footer-center="Appendix only">
+    <h1>Appendix</h1>
   </body></html>`,
 }
 
@@ -113,6 +143,9 @@ function writeFixture(root: string): string {
   }
   copyFileSync(PHOTO, join(source, 'photo.png'))
   writeFileSync(join(source, 'notes.txt'), 'not a slide')
+  writeFileSync(join(source, 'deck.json'), JSON.stringify(DECK))
+  mkdirSync(join(root, '.claude', 'design'), { recursive: true })
+  writeFileSync(join(root, '.claude', 'design', 'base.css'), TOKENS)
   return source
 }
 
@@ -123,6 +156,9 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   let slideXml: string[]
   let slideRels: string[]
 
+  const part = async (path: string): Promise<string> =>
+    (await zip.file(path)?.async('string')) ?? ''
+
   beforeAll(async () => {
     root = mkdtempSync(join(tmpdir(), 'canon-slides-e2e-'))
     const source = writeFixture(root)
@@ -130,18 +166,10 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     if (result.status !== 'written') throw new Error(result.message)
     zip = await JSZip.loadAsync(readFileSync(result.pptxPath))
     slideXml = await Promise.all(
-      [1, 2].map(
-        async (n) =>
-          (await zip.file(`ppt/slides/slide${n}.xml`)?.async('string')) ?? '',
-      ),
+      [1, 2, 3, 4].map((n) => part(`ppt/slides/slide${n}.xml`)),
     )
     slideRels = await Promise.all(
-      [1, 2].map(
-        async (n) =>
-          (await zip
-            .file(`ppt/slides/_rels/slide${n}.xml.rels`)
-            ?.async('string')) ?? '',
-      ),
+      [1, 2, 3, 4].map((n) => part(`ppt/slides/_rels/slide${n}.xml.rels`)),
     )
   }, 60_000)
 
@@ -150,6 +178,14 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   })
 
   const allXml = (): string => slideXml.join('\n')
+  const layoutOf = (index: number): Promise<string> => {
+    const target = /Target="\.\.\/slideLayouts\/(slideLayout\d+\.xml)"/.exec(
+      slideRels[index] ?? '',
+    )?.[1]
+    return part(`ppt/slideLayouts/${target}`)
+  }
+  const layoutName = async (index: number): Promise<string | undefined> =>
+    /<p:cSld name="([^"]*)"/.exec(await layoutOf(index))?.[1]
   const picture = (index: number, alt: string): string => {
     const xml = slideXml[index] ?? ''
     const at = xml.indexOf(`descr="${alt}"`)
@@ -164,7 +200,94 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     )
 
   it('should write one slide per html file and ignore the rest', () => {
-    expect(result).toMatchObject({ status: 'written', slideCount: 2 })
+    expect(result).toMatchObject({ status: 'written', slideCount: 4 })
+  })
+
+  it('should give the master the injected background', async () => {
+    expect(await layoutOf(0)).toMatch(/<p:bg>.*srgbClr val="F0F9FF"/s)
+  })
+
+  it('should report a slide whose text token departs from the master', () => {
+    expect(result.status === 'written' && result.notices).toEqual([
+      'slide 3 sets a --color-text apart from the master, so its bands keep the master colors',
+    ])
+  })
+
+  it('should set the theme face from the slide body font', async () => {
+    expect(await part('ppt/theme/theme1.xml')).toContain(
+      'typeface="Fixture Sans"',
+    )
+  })
+
+  it('should draw the footer title and slide number on the master', async () => {
+    const layout = await layoutOf(0)
+
+    expect([
+      layout.includes('<a:t>Fixture deck</a:t>'),
+      layout.includes('type="slidenum"'),
+    ]).toEqual([true, true])
+  })
+
+  it('should place the mark on the master', async () => {
+    expect(await layoutOf(0)).toContain('<p:pic>')
+  })
+
+  it('should put the footer-off slide on the bare master', async () => {
+    expect(await layoutName(2)).toBe('canon-bare')
+  })
+
+  it('should give the override slide its own footer text', () => {
+    expect(slideXml[3]).toContain('<a:t>Appendix only</a:t>')
+  })
+
+  it('should keep the deck title beside the override slot', () => {
+    expect(slideXml[3]).toContain('<a:t>Fixture deck</a:t>')
+  })
+
+  it('should keep the slide number on the override slide', () => {
+    expect(slideXml[3]).toContain('type="slidenum"')
+  })
+
+  it('should land the chart as a native chart part', async () => {
+    expect(await part('ppt/charts/chart1.xml')).toContain('<c:barChart>')
+  })
+
+  it('should color the first series with the injected accent', async () => {
+    const chart = await part('ppt/charts/chart1.xml')
+    const series = chart.slice(chart.indexOf('<c:ser>'))
+
+    expect(/srgbClr val="([0-9A-F]{6})"/.exec(series)?.[1]).toBe('0F766E')
+  })
+
+  it('should keep the chart figure own background as a shape', () => {
+    expect(slideXml[1]).toContain('srgbClr val="FEF3C7"')
+  })
+
+  it('should leave the chart table out of the shapes', () => {
+    expect(runs()).not.toContain('South')
+  })
+
+  it('should write the notes without their tags', async () => {
+    const notes = await part('ppt/notesSlides/notesSlide1.xml')
+
+    expect([
+      notes.includes('Open with the headline.'),
+      notes.includes('strong'),
+    ]).toEqual([true, false])
+  })
+
+  it('should leave the notes out of the shapes', () => {
+    expect(runs()).not.toContain('Then pause.')
+  })
+
+  it('should write two sections', async () => {
+    const presentation = await part('ppt/presentation.xml')
+
+    expect(presentation.match(/<p14:section /g)).toHaveLength(2)
+  })
+
+  it('should hide the hidden slide', () => {
+    expect(slideXml[2]).toMatch(/<p:sld [^>]*show="0"/)
   })
 
   it('should land every fixture text run as a native text element', () => {
@@ -289,10 +412,65 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
         name.endsWith('.png'),
       )
 
-      expect(images).toHaveLength(2)
+      expect(images).toHaveLength(3)
     },
     60_000,
   )
+})
+
+describe('Sections', () => {
+  const meta = (section?: string): SlideMeta => ({
+    ...(section ? { section } : {}),
+    isHidden: false,
+    header: { kind: 'master' },
+    footer: { kind: 'master' },
+  })
+
+  it('should give a returning section title its own section', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', true)
+
+    const titles = ['Intro', 'Body', 'Intro'].map((title) =>
+      sections.titleFor(meta(title), pptx),
+    )
+
+    expect(titles).toEqual(['Intro', 'Body', 'Intro (2)'])
+  })
+
+  it('should open a section named after the deck ahead of the first one', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', true)
+
+    const titles = [undefined, 'Body', undefined].map((title) =>
+      sections.titleFor(meta(title), pptx),
+    )
+
+    expect(titles).toEqual(['Deck', 'Body', 'Body'])
+  })
+
+  it('should open no section for a deck that declares none', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', false)
+
+    expect(sections.titleFor(meta(), pptx)).toBeUndefined()
+  })
+})
+
+describe('exportHtmlDeck with a malformed deck file', () => {
+  it('should refuse and name the field', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'canon-slides-deck-'))
+    writeFileSync(join(root, '01.html'), '<p>one</p>')
+    writeFileSync(join(root, 'deck.json'), JSON.stringify({ title: 3 }))
+
+    const result = await exportHtmlDeck(root, join(root, 'out'), { root })
+
+    rmSync(root, { recursive: true, force: true })
+    expect(result).toEqual({
+      status: 'refused',
+      reason: 'deck-invalid',
+      message: `${join(root, 'deck.json')}: title must be a string`,
+    })
+  })
 })
 
 describe('exportHtmlDeck on an empty folder', () => {

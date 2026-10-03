@@ -1,3 +1,5 @@
+import type { ChartRecord } from '@/slides/convert/chart'
+import type { ThemeReading } from '@/slides/convert/master'
 import type {
   BoxStyle,
   ElementRecord,
@@ -9,10 +11,34 @@ import type {
   TextRun,
 } from '@/slides/convert/shapes'
 
+/** How one slide treats a band the deck master draws. */
+export type BandOverride =
+  | { readonly kind: 'master' }
+  | { readonly kind: 'off' }
+  | {
+      readonly kind: 'override'
+      readonly left?: string
+      readonly center?: string
+      readonly right?: string
+    }
+
+/** What a slide declares about itself on `<body>` and in its notes. */
+export interface SlideMeta {
+  readonly notes?: string
+  readonly section?: string
+  readonly isHidden: boolean
+  readonly header: BandOverride
+  readonly footer: BandOverride
+  /** The `--color-text` the slide's `<body>` computes, as hex. */
+  readonly textToken?: string
+}
+
 /** What one laid-out slide hands back across `page.evaluate`. */
 export interface WalkedSlide {
   readonly background: Rgba
   readonly records: ElementRecord[]
+  readonly charts: ChartRecord[]
+  readonly meta: SlideMeta
 }
 
 /** Set on every walked element, so a screenshot finds the one a record names. */
@@ -27,7 +53,8 @@ export const ID_ATTRIBUTE = 'data-canon-id'
  * Text gathers along the inline flow. A block holding text takes every run its
  * inline descendants carry, so `<strong>` inside `<p>` is one shape with two
  * runs, while a block-level child is walked on its own. Images, SVGs, and
- * tables consume their whole subtree.
+ * tables consume their whole subtree. Speaker notes in `<aside class="notes">`
+ * and a chart's `<figure data-chart>` are read whole and never drawn as shapes.
  *
  * Each walked element is tagged with `idAttribute` set to its record id.
  */
@@ -293,10 +320,41 @@ export function walkSlide(idAttribute: string): WalkedSlide {
 
   const SKIPPED = new Set(['script', 'style', 'template', 'noscript', 'link'])
 
+  const cellText = (element: Element): string =>
+    (element.textContent ?? '').replace(/\s+/g, ' ').trim()
+
+  /** One line per block, so a paragraph break survives and no tag does. */
+  const notesText = (element: Element): string => {
+    const clone = element.cloneNode(true)
+    if (!(clone instanceof Element)) return ''
+    for (const br of Array.from(clone.querySelectorAll('br'))) {
+      br.replaceWith('\n')
+    }
+    for (const block of Array.from(
+      clone.querySelectorAll('p, li, div, blockquote, h1, h2, h3, h4, h5, h6'),
+    )) {
+      block.append('\n')
+    }
+    return (clone.textContent ?? '')
+      .split('\n')
+      .map((line) => line.replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n')
+  }
+
+  const notes: string[] = []
+  const charts: ChartRecord[] = []
+
   for (const element of Array.from(document.body.querySelectorAll('*'))) {
     if (consumed.has(element)) continue
     const tag = element.tagName.toLowerCase()
     if (SKIPPED.has(tag)) continue
+    if (tag === 'aside' && element.classList.contains('notes')) {
+      consumeSubtree(element)
+      const text = notesText(element)
+      if (text) notes.push(text)
+      continue
+    }
     if (!element.checkVisibility({ visibilityProperty: true })) continue
 
     const id = records.length + 1
@@ -312,6 +370,27 @@ export function walkSlide(idAttribute: string): WalkedSlide {
     }
     ids.set(element, id)
     element.setAttribute(idAttribute, String(id))
+
+    if (tag === 'figure' && element.hasAttribute('data-chart')) {
+      consumeSubtree(element)
+      records.push({ ...base, kind: 'box' })
+      const table = element.querySelector('table')
+      const caption = element.querySelector('figcaption')
+      const title = caption ? cellText(caption) : ''
+      charts.push({
+        selector: base.selector,
+        box: bounds,
+        type: element.getAttribute('data-chart') ?? '',
+        hasLabels: element.hasAttribute('data-labels'),
+        ...(title ? { title } : {}),
+        rows: table
+          ? Array.from(table.rows).map((row) =>
+              Array.from(row.cells).map(cellText),
+            )
+          : [],
+      })
+      continue
+    }
 
     if (element instanceof HTMLImageElement) {
       records.push({
@@ -440,5 +519,111 @@ export function walkSlide(idAttribute: string): WalkedSlide {
         ? htmlGround
         : { hex: 'FFFFFF', alpha: 1 }
 
-  return { background, records }
+  const body = document.body
+  const band = (kind: 'header' | 'footer'): BandOverride => {
+    if (body.getAttribute(`data-${kind}`) === 'off') return { kind: 'off' }
+    const slots: { left?: string; center?: string; right?: string } = {}
+    for (const slot of ['left', 'center', 'right'] as const) {
+      const value = body.getAttribute(`data-${kind}-${slot}`)
+      if (value !== null) slots[slot] = value
+    }
+    return Object.keys(slots).length > 0
+      ? { kind: 'override', ...slots }
+      : { kind: 'master' }
+  }
+  const section = body.getAttribute('data-section')?.trim()
+  const textValue = getComputedStyle(body)
+    .getPropertyValue('--color-text')
+    .trim()
+  const meta: SlideMeta = {
+    ...(textValue ? { textToken: rgba(textValue).hex } : {}),
+    ...(notes.length > 0 ? { notes: notes.join('\n\n') } : {}),
+    ...(section ? { section } : {}),
+    isHidden:
+      body.hasAttribute('data-hidden') &&
+      body.getAttribute('data-hidden') !== 'false',
+    header: band('header'),
+    footer: band('footer'),
+  }
+
+  return { background, records, charts, meta }
+}
+
+/**
+ * Runs inside the laid-out page and reads the colors and face the deck master
+ * takes. Tokens come from `<html>`'s computed style, so a slide that switches
+ * theme on its own `<body>`, such as a dark cover, leaves the master on the
+ * project's root theme. The body supplies the fallback colors and the face.
+ * Serialized to source like `walkSlide`, so its helpers sit in its own body.
+ */
+export function readTheme(): ThemeReading {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1
+  canvas.height = 1
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  const hex = (value: string): string | undefined => {
+    if (!context || !value || value === 'transparent') return undefined
+    context.clearRect(0, 0, 1, 1)
+    context.fillStyle = '#000000'
+    context.fillStyle = value
+    context.fillRect(0, 0, 1, 1)
+    const [r = 0, g = 0, b = 0, a = 0] = context.getImageData(0, 0, 1, 1).data
+    if (a === 0) return undefined
+    return [r, g, b]
+      .map((channel) => channel.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase()
+  }
+
+  const style = getComputedStyle(document.body)
+  const rootStyle = getComputedStyle(document.documentElement)
+  const token = (name: string): string | undefined => {
+    const value = rootStyle.getPropertyValue(name).trim()
+    return value ? hex(value) : undefined
+  }
+
+  const names: string[] = []
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList
+    try {
+      rules = sheet.cssRules
+    } catch {
+      continue
+    }
+    for (const rule of Array.from(rules)) {
+      if (!(rule instanceof CSSStyleRule)) continue
+      for (const name of Array.from(rule.style)) {
+        if (name.startsWith('--color-') && !names.includes(name)) {
+          names.push(name)
+        }
+      }
+    }
+  }
+
+  const tokens: {
+    background?: string
+    text?: string
+    muted?: string
+    accent?: string
+  } = {}
+  for (const role of ['background', 'text', 'muted', 'accent'] as const) {
+    const value = token(`--color-${role}`)
+    if (value) tokens[role] = value
+  }
+
+  return {
+    tokens,
+    body: {
+      background:
+        hex(style.backgroundColor) ??
+        hex(getComputedStyle(document.documentElement).backgroundColor) ??
+        'FFFFFF',
+      color: hex(style.color) ?? '000000',
+    },
+    fontFamily: style.fontFamily,
+    roles: names.flatMap((name) => {
+      const value = token(name)
+      return value ? [{ name, hex: value }] : []
+    }),
+  }
 }
