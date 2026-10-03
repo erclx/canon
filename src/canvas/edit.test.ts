@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { type ElementAddress, sourceElements } from '@/canvas/address'
 import { contentHash, readSelection, writeSelection } from '@/canvas/content'
-import { applyEdit, editFrame } from '@/canvas/edit'
+import { applyEdit, editFrame, editFrameAtIndex } from '@/canvas/edit'
 
 let ROOT = ''
 
@@ -257,6 +257,32 @@ describe('editFrame', () => {
       index: address.index,
       stale: false,
     })
+  })
+
+  it('should edit by index alone the element the file holds there', () => {
+    seedFrame()
+    const { index } = addressOf(FRAME, 'h1')
+
+    const outcome = editFrameAtIndex(ROOT, 'drafts', 'hero', index, {
+      property: 'color',
+      value: 'blue',
+    })
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(readFileSync(framePath(), 'utf8')).toContain(
+      '<h1 style="color: blue">',
+    )
+  })
+
+  it('should refuse an index past the elements the file holds', () => {
+    seedFrame()
+
+    const outcome = editFrameAtIndex(ROOT, 'drafts', 'hero', 400, {
+      property: 'color',
+      value: 'blue',
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'invalid-address' })
   })
 
   it('should leave a stale selection stale', () => {

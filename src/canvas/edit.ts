@@ -273,7 +273,7 @@ export function editFrame(
   }
 
   const path = join(canvasDir(root), page, found.file)
-  const outcome = withFileLock(path, (): FrameEdit => {
+  return withFileLock(path, (): FrameEdit => {
     const bytes = readFileSync(path)
     if (address.hash !== undefined && address.hash !== contentHash(bytes)) {
       return refuse(
@@ -314,5 +314,47 @@ export function editFrame(
       hash: contentHash(applied.html),
     }
   })
-  return outcome
+}
+
+/**
+ * Edits the element at an index of the file as it stands, for a caller that
+ * holds no served frame to take an address from. The address it builds
+ * carries the hash it read, so a write landing between the read and the lock
+ * still refuses.
+ */
+export function editFrameAtIndex(
+  root: string,
+  page: string,
+  frame: string,
+  index: number,
+  change: EditChange,
+): FrameEdit {
+  const onPage = readPage(root, page)
+  if (!onPage) return refuse('no-page', `page ${page} does not exist`)
+  const found = onPage.frames.find((candidate) => candidate.name === frame)
+  if (!found) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  const bytes = readFileSync(join(canvasDir(root), page, found.file))
+  const elements = sourceElements(bytes.toString('utf8'))
+  const element = Number.isInteger(index) ? elements[index] : undefined
+  if (!element) {
+    return refuse(
+      'invalid-address',
+      `${page}/${frame} holds elements 0 to ${elements.length - 1}, so ${index} names none`,
+    )
+  }
+  return editFrame(
+    root,
+    page,
+    frame,
+    {
+      index,
+      tag: element.tag,
+      count: elements.length,
+      hash: contentHash(bytes),
+    },
+    change,
+  )
 }
