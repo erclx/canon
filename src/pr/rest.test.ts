@@ -35,11 +35,12 @@ describe('mergeStateOf', () => {
 })
 
 describe('identityOf', () => {
-  it('should read the number, branch, head, and merge state off one pull row', () => {
+  it('should read the number, branch, head, base, and merge state off one pull row', () => {
     expect(identityOf(pull({ mergeable_state: 'dirty' }))).toEqual({
       number: 7,
       branch: 'feat/x',
       head: HEAD,
+      base: 'main',
       mergeState: 'DIRTY',
     })
   })

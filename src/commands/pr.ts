@@ -70,24 +70,24 @@ import {
   type RunRow,
   type WorkflowFile,
 } from '@/pr/preview'
-import { type ReviewListing, resolveReviewScope } from '@/pr/review-scope'
+import {
+  commentRowOf,
+  identityOf,
+  type PullIdentity,
+  parseJsonLines,
+  type RestComment,
+  type RestPull,
+  type RestReview,
+  reviewRowOf,
+  selectBranchPull,
+} from '@/pr/rest'
+import { resolveReviewScope } from '@/pr/review-scope'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
 
 const GH_TIMEOUT_MS = 30_000
 
 /** How many unnamed files the frame prints before it names a count instead. */
 const UNNAMED_PRINT_LIMIT = 10
-
-/**
- * Where `gh pr view --json files` stops.
- *
- * It pages the underlying query once and returns at most this many rows with
- * nothing on the record saying so, which was measured against `#1250`: the
- * pull request carries 101 files and the view reports 100. A set silently one
- * short is the worst input this comparison can take, since the missing file is
- * exactly what a claim would then be accused of inventing.
- */
-const GH_VIEW_FILE_CAP = 100
 
 interface KeyChangesOptions {
   readonly body?: string
@@ -112,6 +112,10 @@ interface LocalOptions extends ReadOptions {
   readonly remove?: boolean
   readonly note?: string
 }
+
+/** Shared by every verb that resolves a pull request from the checkout's branch. */
+const AMBIGUOUS_PULL =
+  'More than one pull request is open on this branch, each against another base. Name the pull request number.'
 
 /** What replaces the local address line once the pull request closes. */
 const LOCAL_REMOVED_NOTE =
@@ -226,6 +230,7 @@ const PREVIEW_HEAD_NOTES: Record<PreviewHeadReason, string> = {
 type PullRefusal =
   | 'gh-missing'
   | 'gh-failed'
+  | 'ambiguous-pull'
   | 'no-branch'
   | 'runs-unreadable'
   | 'reviews-unreadable'
@@ -236,6 +241,7 @@ const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
     'gh is not on the path, so no pull request could be resolved. Name the branch through a checkout that carries one.',
   'gh-failed':
     'gh could not answer for this branch. Name the pull request number instead.',
+  'ambiguous-pull': AMBIGUOUS_PULL,
   'no-branch':
     'The pull request carries no head branch name, so no ref could be read for it.',
   'unresolvable-ref':
@@ -282,7 +288,7 @@ const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
 type SourceRefusal =
   | 'gh-missing'
   | 'gh-failed'
-  | 'gh-truncated'
+  | 'ambiguous-pull'
   | 'unreadable-body'
   | 'unreadable-tree'
   | 'no-base'
@@ -297,7 +303,7 @@ const REFUSALS: Record<Refusal, string> = {
     'gh is not on the path, so no pull request body could be read. Pass --body <path> to read one off disk instead.',
   'gh-failed':
     'gh could not answer for this branch. Name the pull request number, or pass --body <path>.',
-  'gh-truncated': `gh returned the first ${GH_VIEW_FILE_CAP} changed files and the paginated read that would complete the set failed, so a claim could be accused of naming a file this read never saw.`,
+  'ambiguous-pull': AMBIGUOUS_PULL,
   'unreadable-body': 'The file named by --body could not be read.',
   'unreadable-tree':
     'git could not list this repository, so no path could be judged whole rather than partial.',
@@ -817,11 +823,11 @@ type SourceRead =
  * Reads the body and the changed set from the pull request the caller named,
  * or from the one open on this branch.
  *
- * One call wherever the file list fits inside it. The body and the file list
- * have to describe the same head, and reading them separately leaves a window
- * where a push between them compares a body against another commit's files. A
- * pull request at the view's cap takes the second read anyway, because a set
- * short by an unknown number is worse than a set read a moment later.
+ * The body comes off the pull read and the files off the paginated files
+ * endpoint, since GraphQL is the only route that returns both in one call and
+ * a cloud session's proxy refuses it. A push between the two reads can compare
+ * a body against the next commit's files, which the paginated read already
+ * risked for any pull request past the old view's cap of 100 files.
  */
 async function readFromApi(
   cwd: string,
@@ -831,63 +837,31 @@ async function readFromApi(
     return { kind: 'refused', reason: 'gh-missing' }
   }
 
-  const args = ['pr', 'view']
-  if (number !== undefined) args.push(number)
-  args.push('--json', 'body,files,headRefOid,number')
+  const pull = await readPull(cwd, number)
+  if (pull.kind === 'refused') return pull
 
-  try {
-    // See src/worktrees/reclaim.ts for why gh needs the stripped environment:
-    // it resolves its repository through the same variables git does and they
-    // beat `cwd`, so a run from inside a hook would answer for another
-    // repository and compare this branch's claims against its files.
-    const result = await execa('gh', args, {
-      cwd,
-      timeout: GH_TIMEOUT_MS,
-      env: gitEnv(),
-      extendEnv: false,
-    })
+  const { row } = pull
+  if (row.number === undefined) return { kind: 'refused', reason: 'gh-failed' }
 
-    const row = JSON.parse(result.stdout) as {
-      body?: string
-      files?: readonly { path: string }[]
-      headRefOid?: string
-      number?: number
-    }
+  const changed = await listFilesByPage(cwd, row.number)
+  if (changed === undefined) return { kind: 'refused', reason: 'gh-failed' }
 
-    const viewed = (row.files ?? []).map((file) => file.path)
-    const changed =
-      viewed.length < GH_VIEW_FILE_CAP || row.number === undefined
-        ? viewed
-        : await listFilesByPage(cwd, row.number)
+  const body = row.body ?? ''
+  const head = row.head?.sha
+  const sorted = [...changed].sort()
+  const evidence = await resolveApiEvidence(cwd, body, sorted, head, row.number)
 
-    if (changed === undefined) {
-      return { kind: 'refused', reason: 'gh-truncated' }
-    }
-
-    const body = row.body ?? ''
-    const sorted = [...changed].sort()
-    const evidence = await resolveApiEvidence(
-      cwd,
+  return {
+    kind: 'read',
+    source: {
       body,
-      sorted,
-      row.headRefOid,
-      row.number,
-    )
-
-    return {
-      kind: 'read',
-      source: {
-        body,
-        changed: sorted,
-        head: row.headRefOid,
-        number: row.number,
-        renames: evidence.renames,
-        ignoreAdditions: evidence.ignoreAdditions,
-        evidenceUnread: evidence.unread,
-      },
-    }
-  } catch {
-    return { kind: 'refused', reason: 'gh-failed' }
+      changed: sorted,
+      head,
+      number: row.number,
+      renames: evidence.renames,
+      ignoreAdditions: evidence.ignoreAdditions,
+      evidenceUnread: evidence.unread,
+    },
   }
 }
 
@@ -896,9 +870,8 @@ async function readFromApi(
  * first pass with neither already reports an unmet claim.
  *
  * The probe pays for a repository listing this read takes again a moment
- * later in `runKeyChanges`, and the `gh api …/files` call besides it only on
- * the pass that already has something to double-check, the same trade the
- * `gh-truncated` pagination fallback makes.
+ * later in `runKeyChanges`, and the full-row `gh api …/files` call besides it
+ * only on the pass that already has something to double-check.
  *
  * `unread` separates a read that failed from one that succeeded and found
  * neither, which an empty `renames`/`ignoreAdditions` cannot do on its own.
@@ -983,11 +956,9 @@ async function resolveApiEvidence(
 /**
  * Every file a pull request changed, read through the paginated endpoint.
  *
- * Only reached when the view came back at the cap, since it costs a request per
- * page and nearly every pull request here fits in one view. Returns undefined
- * when the follow-up fails, which refuses rather than falling back to the
- * capped set: a comparison run against a set known to be short would accuse a
- * correct bullet of naming a file nobody changed.
+ * Returns undefined when any page fails, which refuses rather than comparing
+ * the pages that arrived: a comparison run against a set known to be short
+ * would accuse a correct bullet of naming a file nobody changed.
  */
 async function listFilesByPage(
   cwd: string,
@@ -1182,14 +1153,6 @@ async function runKeyChanges(
   return report.unmet.length === 0 ? 0 : 2
 }
 
-/** The head branch and reported head of the pull request a caller named. */
-interface PullIdentity {
-  readonly number: number | undefined
-  readonly branch: string
-  readonly head?: string
-  readonly mergeState?: string
-}
-
 type IdentityRead =
   | { readonly kind: 'read'; readonly identity: PullIdentity }
   | { readonly kind: 'refused'; readonly reason: PullRefusal }
@@ -1218,6 +1181,131 @@ async function gh(
   }
 }
 
+type PullNumber =
+  | { readonly kind: 'found'; readonly number: string }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'gh-failed' | 'ambiguous-pull'
+    }
+
+/**
+ * The number the caller named, or the one open pull request on the branch the
+ * checkout at `cwd` holds.
+ *
+ * `{owner}` in the head filter is the base repository's owner, which is the
+ * head owner for every pull request opened from a branch of this repository.
+ */
+async function resolvePullNumber(
+  cwd: string,
+  number: string | undefined,
+): Promise<PullNumber> {
+  if (number !== undefined) return { kind: 'found', number }
+
+  const branch = await $`git -C ${cwd} symbolic-ref --short -q HEAD`
+    .env(gitEnv())
+    .quiet()
+    .nothrow()
+  const name = branch.exitCode === 0 ? branch.text().trim() : ''
+  if (name === '') return { kind: 'refused', reason: 'gh-failed' }
+
+  const stdout = await gh(cwd, [
+    'api',
+    `repos/{owner}/{repo}/pulls?head={owner}:${encodeURIComponent(name)}&state=open&per_page=100`,
+  ])
+  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
+
+  let rows: readonly RestPull[]
+  try {
+    rows = JSON.parse(stdout)
+  } catch {
+    return { kind: 'refused', reason: 'gh-failed' }
+  }
+  const selected = selectBranchPull(rows)
+  return selected.kind === 'found'
+    ? { kind: 'found', number: String(selected.number) }
+    : selected
+}
+
+type PullRead =
+  | { readonly kind: 'read'; readonly row: RestPull }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'gh-failed' | 'ambiguous-pull'
+    }
+
+/**
+ * The pull request object off the REST pull endpoint, which a cloud session's
+ * proxy serves where it refuses the GraphQL every `gh pr view` runs on.
+ */
+async function readPull(
+  cwd: string,
+  number: string | undefined,
+): Promise<PullRead> {
+  const resolved = await resolvePullNumber(cwd, number)
+  if (resolved.kind === 'refused') return resolved
+
+  const stdout = await gh(cwd, [
+    'api',
+    `repos/{owner}/{repo}/pulls/${resolved.number}`,
+  ])
+  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
+  try {
+    return { kind: 'read', row: JSON.parse(stdout) as RestPull }
+  } catch {
+    return { kind: 'refused', reason: 'gh-failed' }
+  }
+}
+
+type PagesRead<T> =
+  | { readonly kind: 'read'; readonly rows: readonly T[] }
+  | { readonly kind: 'refused'; readonly reason: 'gh-failed' | 'unparsed' }
+
+/**
+ * Every row of a paginated listing, or a refusal when any page failed.
+ *
+ * A refusal rather than an empty list, since a refused read that reads as no
+ * reviews routes the next pass to the whole change.
+ */
+async function listPages<T>(
+  cwd: string,
+  path: string,
+  fields: string,
+): Promise<PagesRead<T>> {
+  const stdout = await gh(cwd, [
+    'api',
+    '--paginate',
+    `${path}?per_page=100`,
+    '--jq',
+    `.[] | {${fields}} | @json`,
+  ])
+  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
+  const rows = parseJsonLines<T>(stdout)
+  return rows === undefined
+    ? { kind: 'refused', reason: 'unparsed' }
+    : { kind: 'read', rows }
+}
+
+async function listReviews(cwd: string, number: string) {
+  return listPages<RestReview>(
+    cwd,
+    `repos/{owner}/{repo}/pulls/${number}/reviews`,
+    'body, commit_id, submitted_at',
+  )
+}
+
+/** The issue comments on a pull request, or undefined when the thread is unread. */
+async function listComments(
+  cwd: string,
+  number: string,
+): Promise<readonly { url?: string; body: string }[] | undefined> {
+  const read = await listPages<RestComment>(
+    cwd,
+    `repos/{owner}/{repo}/issues/${number}/comments`,
+    'html_url, body',
+  )
+  return read.kind === 'read' ? read.rows.map(commentRowOf) : undefined
+}
+
 /**
  * Reads the head branch and the head the pull request object reports.
  *
@@ -1232,40 +1320,13 @@ async function readIdentity(
     return { kind: 'refused', reason: 'gh-missing' }
   }
 
-  const args = ['pr', 'view']
-  if (number !== undefined) args.push(number)
-  args.push('--json', 'number,headRefName,headRefOid,mergeStateStatus')
+  const pull = await readPull(cwd, number)
+  if (pull.kind === 'refused') return pull
 
-  const stdout = await gh(cwd, args)
-  if (stdout === null) return { kind: 'refused', reason: 'gh-failed' }
+  const identity: PullIdentity = identityOf(pull.row)
+  if (identity.branch === '') return { kind: 'refused', reason: 'no-branch' }
 
-  let row: {
-    number?: number
-    headRefName?: string
-    headRefOid?: string
-    mergeStateStatus?: string
-  }
-  try {
-    row = JSON.parse(stdout)
-  } catch {
-    return { kind: 'refused', reason: 'gh-failed' }
-  }
-
-  if (row.headRefName === undefined || row.headRefName === '') {
-    return { kind: 'refused', reason: 'no-branch' }
-  }
-
-  return {
-    kind: 'read',
-    identity: {
-      number: row.number,
-      branch: row.headRefName,
-      ...(row.headRefOid !== undefined && { head: row.headRefOid }),
-      ...(row.mergeStateStatus !== undefined && {
-        mergeState: row.mergeStateStatus,
-      }),
-    },
-  }
+  return { kind: 'read', identity }
 }
 
 /**
@@ -1476,39 +1537,32 @@ async function runReviewState(
     return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
   }
 
-  const args = ['pr', 'view']
-  if (number !== undefined) args.push(number)
-  // `number` rides along so the record names the pull request a caller that
-  // passed no argument was answered about. The comment families the poll reads
-  // stay out of the query, since nothing here parses one and a listing the
-  // caller discards is a payload paid for twice.
-  args.push('--json', 'number,reviews')
-
-  const stdout = await gh(root, args)
-  if (stdout === null) {
-    return refuseWith('gh-failed', PULL_REFUSALS['gh-failed'], emitJson, root)
-  }
-
-  let listing: ReviewListing & { number?: number }
-  try {
-    listing = JSON.parse(stdout)
-  } catch {
+  // The number is resolved up front so the record names the pull request a
+  // caller that passed no argument was answered about.
+  const resolved = await resolvePullNumber(root, number)
+  if (resolved.kind === 'refused') {
     return refuseWith(
-      'reviews-unreadable',
-      PULL_REFUSALS['reviews-unreadable'],
+      resolved.reason,
+      PULL_REFUSALS[resolved.reason],
       emitJson,
       root,
     )
   }
 
-  const scope = resolveReviewScope(listing)
+  const reviews = await listReviews(root, resolved.number)
+  if (reviews.kind === 'refused') {
+    const reason =
+      reviews.reason === 'gh-failed' ? 'gh-failed' : 'reviews-unreadable'
+    return refuseWith(reason, PULL_REFUSALS[reason], emitJson, root)
+  }
+
+  const listing = { number: Number(resolved.number) }
+  const scope = resolveReviewScope({
+    reviews: reviews.rows.map(reviewRowOf),
+  })
 
   logStep('Scope')
-  logInfo(
-    listing.number === undefined
-      ? 'the pull request on this branch'
-      : `#${listing.number}`,
-  )
+  logInfo(`#${listing.number}`)
 
   if (scope.source === 'none') {
     logStep('First pass')
@@ -1534,7 +1588,7 @@ async function runReviewState(
     process.stdout.write(
       `${JSON.stringify({
         root,
-        ...(listing.number !== undefined && { number: listing.number }),
+        number: listing.number,
         ...scope,
       })}\n`,
     )
@@ -1581,22 +1635,13 @@ async function listPullFiles(
  */
 async function readPullMergeBase(
   cwd: string,
-  number: number,
+  baseRef: string | undefined,
   head: string,
 ): Promise<string | undefined> {
-  const baseRef = await gh(cwd, [
-    'pr',
-    'view',
-    String(number),
-    '--json',
-    'baseRefName',
-    '--jq',
-    '.baseRefName',
-  ])
-  if (baseRef === null || baseRef.trim() === '') return undefined
+  if (baseRef === undefined || baseRef === '') return undefined
   const sha = await gh(cwd, [
     'api',
-    `repos/{owner}/{repo}/compare/${baseRef.trim()}...${head}`,
+    `repos/{owner}/{repo}/compare/${baseRef}...${head}`,
     '--jq',
     '.merge_base_commit.sha',
   ])
@@ -1672,9 +1717,7 @@ async function runEvidence(
   // a failed one cannot hold a draft lift for a reason the check never had.
   const [pullFiles, base] = await Promise.all([
     listPullFiles(root, identity.number),
-    isCheck
-      ? undefined
-      : readPullMergeBase(root, identity.number, identity.head),
+    isCheck ? undefined : readPullMergeBase(root, identity.base, identity.head),
   ])
   if (pullFiles === undefined) {
     return refuseWith(
@@ -1695,30 +1738,12 @@ async function runEvidence(
   let carriedPreview: string | undefined
   let carriedChecklist: string | undefined
   let carriedLocal: string | undefined
-  const commentsRow = await gh(root, [
-    'pr',
-    'view',
-    String(identity.number),
-    '--json',
-    'comments',
-  ])
   // An unread thread refuses rather than rendering, since a body built
   // without it knows neither the comment to edit nor the preview address
   // to carry, and posting it would duplicate the comment and drop the link.
   // It refuses ahead of no-evidence too, so that record never reports an
   // absent field it did not read.
-  let comments: readonly { url?: string; body: string }[] | undefined
-  if (commentsRow !== null) {
-    try {
-      comments = (
-        JSON.parse(commentsRow) as {
-          comments?: readonly { url?: string; body: string }[]
-        }
-      ).comments
-    } catch {
-      comments = undefined
-    }
-  }
+  const comments = await listComments(root, String(identity.number))
   if (comments === undefined) {
     return refuseWith(
       'gh-failed',
@@ -1803,12 +1828,7 @@ async function runEvidence(
     return 0
   }
 
-  const repoRow = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
-  const repo =
-    repoRow === null
-      ? undefined
-      : (JSON.parse(repoRow) as { nameWithOwner?: string }).nameWithOwner
-
+  const repo = await readRepoName(root)
   if (repo === undefined) {
     return refuseWith(
       'gh-failed',
@@ -2278,23 +2298,19 @@ async function runLocalRemove(
     return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
   }
 
-  const args = ['pr', 'view']
-  if (number !== undefined) args.push(number)
-  args.push('--json', 'comments')
-  const row = await gh(root, args)
-  let comments: readonly { url?: string; body: string }[] | undefined
-  try {
-    comments =
-      row === null
-        ? undefined
-        : (
-            JSON.parse(row) as {
-              comments?: readonly { url?: string; body: string }[]
-            }
-          ).comments
-  } catch {
-    comments = undefined
+  const resolved = await resolvePullNumber(root, number)
+  if (resolved.kind === 'refused') {
+    const reason = resolved.reason
+    return refuseWith(
+      reason,
+      reason === 'ambiguous-pull'
+        ? PULL_REFUSALS[reason]
+        : LOCAL_REFUSALS[reason],
+      emitJson,
+      root,
+    )
   }
+  const comments = await listComments(root, resolved.number)
   if (comments === undefined) {
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
   }
@@ -2531,11 +2547,12 @@ function framesArgumentRefusal(
   return undefined
 }
 
+/** `owner/repo` off the REST repository read, since `gh repo view` runs on GraphQL. */
 async function readRepoName(root: string): Promise<string | undefined> {
-  const row = await gh(root, ['repo', 'view', '--json', 'nameWithOwner'])
+  const row = await gh(root, ['api', 'repos/{owner}/{repo}'])
   if (row === null) return undefined
   try {
-    const name = (JSON.parse(row) as { nameWithOwner?: unknown }).nameWithOwner
+    const name = (JSON.parse(row) as { full_name?: unknown }).full_name
     return typeof name === 'string' ? name : undefined
   } catch {
     return undefined

@@ -183,7 +183,7 @@ describe('canon pr preview', () => {
         `#!/bin/sh
 echo "$*" >> "$FAKE_LOG"
 case "$1 $2" in
-  "pr view") printf '{"number":1,"headRefName":"feat/x","headRefOid":"%s"}' "$FAKE_TIP" ;;
+  "api repos/{owner}/{repo}/pulls/1") printf '{"number":1,"head":{"ref":"feat/x","sha":"%s"}}' "$FAKE_TIP" ;;
   "run list") printf '[{"databaseId":7,"status":"completed","conclusion":"success","headSha":"%s","createdAt":"2026-10-02T10:00:00Z"}]' "$FAKE_TIP" ;;
   *) exit 0 ;;
 esac
@@ -388,15 +388,17 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
   const fx = dirname(apiLog)
   const script = [
     '#!/usr/bin/env bash',
+    'set -o pipefail',
     `fx='${fx}'`,
+    'f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done',
     'case "$*" in',
-    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; f=; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
+    '  *graphql*|"pr "*|"repo view"*) exit 1 ;;',
+    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
+    `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
+    '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; echo "{\\"number\\":7,\\"head\\":{\\"ref\\":\\"feat/x\\",\\"sha\\":\\"$h\\"},\\"base\\":{\\"ref\\":\\"main\\"},\\"mergeable_state\\":\\"clean\\"}" ;;',
+    '  "api repos/{owner}/{repo}") echo "{\\"full_name\\":\\"o/r\\"}" ;;',
     `  api*) printf '%s' "\${@: -1}" > '${apiLog}'; echo "{}" ;;`,
-    '  *baseRefName*) echo main ;;',
-    '  *headRefOid*) if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; echo "{\\"number\\":7,\\"headRefName\\":\\"feat/x\\",\\"headRefOid\\":\\"$h\\",\\"mergeStateStatus\\":\\"CLEAN\\"}" ;;',
-    '  *nameWithOwner*) echo "{\\"nameWithOwner\\":\\"o/r\\"}" ;;',
-    `  *comments*) cat '${comments}' ;;`,
     '  *) exit 1 ;;',
     'esac',
     '',
@@ -1180,7 +1182,7 @@ describe('canon pr frames', () => {
         '#!/usr/bin/env bash',
         `echo "$*" >> '${callLog}'`,
         'case "$*" in',
-        '  *nameWithOwner*) echo \'{"nameWithOwner":"o/r"}\' ;;',
+        '  "api repos/{owner}/{repo}") echo \'{"full_name":"o/r"}\' ;;',
         '  "api -X GET "*) echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;',
         '  "api -X "*) echo "gh: Resource not accessible by integration (HTTP 403)" >&2; exit 1 ;;',
         '  *) exit 1 ;;',
@@ -1377,5 +1379,192 @@ describe('canon pr frames', () => {
         'bad-pass',
       ].filter((reason) => !result.stdout.includes(reason)),
     ).toEqual([])
+  })
+})
+
+/**
+ * A `gh` standing in for the GitHub proxy a cloud session runs behind, which
+ * serves REST and refuses GraphQL with a 403. Every `pr` subcommand, every
+ * `repo view`, and every `graphql` call runs on GraphQL, so each one fails
+ * here and a verb that reintroduces one fails the test that drives it.
+ *
+ * Fixtures live in `FAKE_DIR`: `pull.json` answers the single pull read,
+ * `listing.json` the branch lookup, `reviews.json` the reviews read (a stream
+ * of arrays stands for several pages), and `reviews-fail` makes that read 403.
+ * The caller's `--jq` filter runs over each answer, as gh runs it.
+ */
+const PROXY_GH = `#!/usr/bin/env bash
+set -o pipefail
+fx="$FAKE_DIR"
+echo "$*" >> "$fx/gh.log"
+f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done
+case "$*" in
+  *graphql*|"pr "*|"repo view"*) echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1 ;;
+  *"/pulls?head="*) jq -r "$f" "$fx/listing.json" ;;
+  *"/pulls/7/reviews"*) [ -f "$fx/reviews-fail" ] && { echo "gh: (HTTP 403)" >&2; exit 1; }; jq -r "$f" "$fx/reviews.json" ;;
+  *"/pulls/7/files"*) echo '[{"filename":"src/a.ts","status":"added"}]' | jq -r "$f" ;;
+  *"/check-runs"*) echo '{"total_count":0,"check_runs":[]}' ;;
+  *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
+  *) exit 1 ;;
+esac
+`
+
+describe('canon pr reads through REST alone', () => {
+  let tempDir: string
+  let repoRoot: string
+  let tip: string
+
+  function git(...args: string[]): string {
+    return execaSync('git', ['-C', repoRoot, ...args], {
+      env: {
+        GIT_AUTHOR_NAME: 't',
+        GIT_AUTHOR_EMAIL: 't@t',
+        GIT_COMMITTER_NAME: 't',
+        GIT_COMMITTER_EMAIL: 't@t',
+      },
+    }).stdout
+  }
+
+  function writeFixture(name: string, value: unknown): void {
+    writeFileSync(
+      join(tempDir, name),
+      typeof value === 'string' ? value : JSON.stringify(value),
+    )
+  }
+
+  function pullRow(overrides: Record<string, unknown> = {}) {
+    return {
+      number: 7,
+      body: '## Key Changes\n\n- Add `src/a.ts`.\n',
+      head: { ref: 'feat/x', sha: tip },
+      base: { ref: 'main' },
+      mergeable_state: 'clean',
+      ...overrides,
+    }
+  }
+
+  function markedReview(commit: string, submittedAt: string) {
+    return {
+      body: `## Review\n\nbody\n\n<!-- review-pr: commit=${commit} read-at=2026-10-03T10:00:00Z -->`,
+      commit_id: 'f'.repeat(40),
+      submitted_at: submittedAt,
+    }
+  }
+
+  async function runVerb(
+    verb: string,
+    args: string[],
+  ): Promise<Record<string, unknown>> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', verb, ...args, '--json', '--root', repoRoot],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: {
+          PATH: `${join(tempDir, 'bin')}:${process.env.PATH}`,
+          FAKE_DIR: tempDir,
+        },
+      },
+    )
+    return JSON.parse(result.stdout)
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-rest-'))
+    repoRoot = join(tempDir, 'repo')
+    mkdirSync(repoRoot)
+    mkdirSync(join(tempDir, 'bin'))
+    writeFileSync(join(tempDir, 'bin', 'gh'), PROXY_GH, { mode: 0o755 })
+    git('init', '-q', '-b', 'feat/x')
+    writeFileSync(join(repoRoot, 'a.txt'), 'a')
+    git('add', 'a.txt')
+    git('commit', '-q', '-m', 'init')
+    const bare = join(tempDir, 'origin.git')
+    execaSync('git', ['init', '-q', '--bare', bare])
+    git('remote', 'add', 'origin', bare)
+    git('push', '-q', 'origin', 'feat/x')
+    tip = git('rev-parse', 'HEAD').trim()
+    writeFixture('pull.json', pullRow())
+    writeFixture('listing.json', [pullRow()])
+    writeFixture('reviews.json', [])
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should read the head of a named pull request', async () => {
+    const record = await runVerb('head', ['7'])
+
+    expect(record).toMatchObject({ number: 7, state: 'fresh', tip })
+  })
+
+  it('should resolve the pull request open on the checkout branch', async () => {
+    const record = await runVerb('head', [])
+
+    expect(record).toMatchObject({ number: 7, branch: 'feat/x' })
+  })
+
+  it('should refuse as ambiguous-pull when two open pull requests share the branch', async () => {
+    writeFixture('listing.json', [
+      pullRow(),
+      pullRow({ number: 8, base: { ref: 'release' } }),
+    ])
+
+    const record = await runVerb('head', [])
+
+    expect(record.reason).toBe('ambiguous-pull')
+  })
+
+  it('should read a dirty pull request with no run as conflicted', async () => {
+    writeFixture('pull.json', pullRow({ mergeable_state: 'dirty' }))
+
+    const record = await runVerb('checks', ['7'])
+
+    expect(record).toMatchObject({ conflicted: true, mergeState: 'DIRTY' })
+  })
+
+  it('should not read an unknown merge state as conflicted', async () => {
+    writeFixture('pull.json', pullRow({ mergeable_state: 'unknown' }))
+
+    const record = await runVerb('checks', ['7'])
+
+    expect(record).toMatchObject({ conflicted: false, mergeState: 'UNKNOWN' })
+  })
+
+  it('should take the covered range from the newest marker across pages', async () => {
+    const pages = [
+      [markedReview('aaaaaaa', '2026-10-03T09:00:00Z')],
+      [markedReview('bbbbbbb', '2026-10-03T10:01:00Z')],
+    ]
+    writeFixture(
+      'reviews.json',
+      pages.map((page) => JSON.stringify(page)).join('\n'),
+    )
+
+    const record = await runVerb('review-state', ['7'])
+
+    expect(record).toMatchObject({
+      number: 7,
+      state: 'open',
+      commit: 'bbbbbbb',
+      source: 'marker',
+    })
+  })
+
+  it('should refuse rather than report a first pass when the reviews read is refused', async () => {
+    writeFixture('reviews-fail', '')
+
+    const record = await runVerb('review-state', ['7'])
+
+    expect(record.reason).toBe('gh-failed')
+  })
+
+  it('should compare a live pull request body against its files', async () => {
+    const record = await runVerb('key-changes', ['7'])
+
+    expect(record).toMatchObject({ unmet: [] })
   })
 })

@@ -32,16 +32,21 @@ export interface RestComment {
   readonly body?: string | null
 }
 
+/** The head branch, reported head, and base of the pull request a caller named. */
 export interface PullIdentity {
   readonly number: number | undefined
   readonly branch: string
   readonly head?: string
+  readonly base?: string
   readonly mergeState?: string
 }
 
 export type BranchPull =
   | { readonly kind: 'found'; readonly number: number }
-  | { readonly kind: 'refused'; readonly reason: 'gh-failed' | 'ambiguous-pull' }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'gh-failed' | 'ambiguous-pull'
+    }
 
 /**
  * Spells `mergeable_state` the way GraphQL's `mergeStateStatus` spells it.
@@ -60,6 +65,7 @@ export function identityOf(row: RestPull): PullIdentity {
     number: row.number,
     branch: row.head?.ref ?? '',
     ...(row.head?.sha !== undefined && { head: row.head.sha }),
+    ...(row.base?.ref !== undefined && { base: row.base.ref }),
     ...(mergeState !== undefined && { mergeState }),
   }
 }
