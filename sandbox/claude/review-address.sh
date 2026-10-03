@@ -154,6 +154,7 @@ stage_setup() {
     log_info ""
     log_info "Action:  /review-address"
     log_info "Expect:  reads CI with canon pr checks --json rather than gh pr checks"
+    log_info "         reads the review over gh api reviews and issues/comments, posts the reply with an issues/comments POST, no gh pr call"
     log_info "         the record's tip is the remote's head, not the object's headRefOid"
     log_info "         reports pending while the runs read belong to a different sha"
     log_info "         does NOT claim CI green off a run that belongs to the earlier commit"
