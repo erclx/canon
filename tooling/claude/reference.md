@@ -91,6 +91,6 @@ The first entry covers the whole record root, so a record folder added later nee
 
 ## settings.json
 
-- Project seed at `tooling/claude/seeds/.claude/settings.json` ships two PreToolUse hooks (pairing with `.claude/hooks/index-reminder.sh` and `.claude/hooks/scratch-guard.sh`) and a PostToolUse hook (pairs with `.claude/hooks/standards-audit.sh`). Project settings layer over user settings, so per-project files only carry what is genuinely project-specific.
+- Project seed at `tooling/claude/seeds/.claude/settings.json` ships three PreToolUse hooks (pairing with `.claude/hooks/index-reminder.sh`, `.claude/hooks/search-reminder.sh`, and `.claude/hooks/scratch-guard.sh`) and a PostToolUse hook (pairs with `.claude/hooks/standards-audit.sh`). Project settings layer over user settings, so per-project files only carry what is genuinely project-specific.
 - User-level template at `tooling/claude/user/settings.template.json` carries `attribution.commit` and `attribution.pr` (empty strings to suppress co-author tags), `permissions.allow` with `Bash(bun run *)`, and `permissions.deny` with `Read(**/.env)` and `Read(**/.env.*)` to block accidental secret exposure across any project. Installed once per machine via `canon claude setup`.
 - The deprecated `includeCoAuthoredBy` key is not used.

@@ -310,6 +310,15 @@ beforeAll(() => {
           tool_name: 'Write',
         }),
     },
+    'search-reminder.sh': {
+      expect: 'canon:search-craft',
+      payload: (nonce) =>
+        payloadFor({
+          session_id: nonce,
+          tool_input: { query: 'bun test runner' },
+          tool_name: 'WebSearch',
+        }),
+    },
     'silent-turn.sh': {
       code: 2,
       expect: 'did not name:',
@@ -477,6 +486,60 @@ describe('tasks-index.sh archive exclusion', () => {
 
         expect(result.stdout).toBe('')
         expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+  }
+})
+
+// The reminder fires on a search and nothing else, once per session, and never
+// on a key it had to invent. The acting case above proves it still fires, which
+// is what makes each silence below mean something.
+describe('search-reminder.sh firing conditions', () => {
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'search-reminder.sh')
+    const search = (session?: string) =>
+      payloadFor({
+        session_id: session,
+        tool_input: { query: 'bun test runner' },
+        tool_name: 'WebSearch',
+      })
+
+    it.concurrent(
+      `should leave ${tree.label} silent on a fetch`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          payloadFor({
+            session_id: `${tree.label}-fetch`,
+            tool_input: { url: 'https://example.com' },
+            tool_name: 'WebFetch',
+          }),
+        )
+
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should fire once per session on ${tree.label}`,
+      async ({ expect }) => {
+        const session = `${tree.label}-repeat`
+        const first = await run(hook, search(session))
+        const second = await run(hook, search(session))
+
+        expect(first.stdout).toContain('canon:search-craft')
+        expect(second.stdout).toBe('')
+      },
+    )
+
+    it.concurrent(
+      `should leave ${tree.label} silent on a search with no session id`,
+      async ({ expect }) => {
+        const result = await run(hook, search())
+
+        expect(result.stdout).toBe('')
         expect(result.code).toBe(0)
       },
     )
