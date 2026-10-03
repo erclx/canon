@@ -106,4 +106,8 @@ export const MISC_CASES: readonly SkillCase[] = [
     prompt: 'Connect this repo to Cloudflare Pages and set up the deploy.',
     expect: 'deploy-app',
   },
+  {
+    prompt: 'Set up a Vercel project for this app and wire up its secrets.',
+    expect: 'deploy-app',
+  },
 ]

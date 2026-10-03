@@ -1,0 +1,25 @@
+# What a correct pick-only `/canon:deploy-app` run leaves behind on the vercel
+# arm. Read by `canon sandbox check`. The arm runs with no shell, so the run
+# reads the tree, picks a host, and stops at the first CLI call it is denied.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and asserts nothing.
+
+max_turns = 30
+
+paths = ["vercel.json"]
+
+# The Pick step's own output line, which the body fixes, so a run that picked the
+# other host or skipped the line goes red here.
+reply = ["Host: vercel"]
+
+# A pick-only run writes nothing. The signal file is admitted so the scope has a
+# member, since an empty scope asserts nothing, and any write past the pick, such
+# as the `.vercel/` folder a link writes, lands outside it.
+write_scope = ["vercel.json"]
+
+manual = [
+  "Semantic: whether the run stopped because the shell was denied or because it chose to stop is not readable from the tree or the reply.",
+  "Unwired: that no wrangler, vercel, or gh call ran rests on the permission mode the run was driven under, which the checker does not read.",
+]
