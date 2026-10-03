@@ -20,32 +20,15 @@ stage_setup() {
   log_info "vercel     : a vercel.json and nothing for Cloudflare, skill picks vercel"
   select_or_route_scenario "Which scenario?" "cloudflare" "vercel"
 
-  cat <<'EOF' >package.json
-{
-  "name": "pick-host",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "vite build"
-  }
-}
-EOF
+  stage_fixtures claude deploy-app shared 01-package
 
   case "$SELECTED_OPTION" in
   "cloudflare")
-    cat <<'EOF' >wrangler.toml
-name = "pick-host"
-pages_build_output_dir = "dist"
-EOF
+    stage_fixtures claude deploy-app cloudflare 01-host
     git add . && git commit -m "chore(deploy): add the wrangler config" --no-verify -q
     ;;
   "vercel")
-    cat <<'EOF' >vercel.json
-{
-  "buildCommand": "vite build",
-  "outputDirectory": "dist"
-}
-EOF
+    stage_fixtures claude deploy-app vercel 01-host
     git add . && git commit -m "chore(deploy): add the vercel config" --no-verify -q
     ;;
   esac
