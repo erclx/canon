@@ -48,9 +48,9 @@ or a path that no longer resolves is reported rather than repaired, since the
 task file and the board stay the orchestrator's to write.
 
 A worker that halts on a plan question it may not answer, or argues back against
-an instruction the tree contradicts, is working correctly. It never writes
-`.canon/tasks/priority.md` or the backlog beside it, and reports the row it
-needs for the orchestrator to write. `role-worker` carries the reason for each.
+an instruction the tree contradicts, is working correctly. It writes neither
+`.canon/tasks/priority.md`, the backlog, nor a task file for work it turns up,
+and hands the row to the orchestrator. `role-worker` gives the reason for each.
 
 The orchestrator's cell reads every tracked file rather than every feature, and
 it offers no exception for a small one. A correction found while orchestrating
@@ -116,12 +116,12 @@ delta against, and `canon pr checks` reports the runs belonging to that tip, so 
 follow-up push cannot be read as green off the predecessor's completed run. See
 [Head-sensitive pull request reads](../agents/pr-reads.md).
 
-Three messages travel from the worker to its controller, and `role-worker`
-states each with its reason: the worker's pull request as it opens, the end of
-each address-review pass with the new CI state, and a block before it becomes an
-interactive prompt. Nothing is sent on progress. An open pull request is what
-starts the controller's review poll, with a dispatch still silent after thirty
-minutes kept as a fallback.
+Three messages travel from the worker to its controller, each stated with its
+reason in `role-worker`: the pull request as it opens, carrying any row the
+build turned up, the end of each address-review pass with the new CI state, and
+a block before it becomes an interactive prompt. Nothing is sent on progress. An
+open pull request is what starts the controller's review poll, with a dispatch
+still silent after thirty minutes kept as a fallback.
 
 What the session channel carries is the handback instruction and the worker's
 reply to it, which is a notification layer over a record that stays on the PR. A

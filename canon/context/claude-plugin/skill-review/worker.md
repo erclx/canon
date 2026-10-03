@@ -43,7 +43,7 @@ The body stays thin by construction, since it has three readers who need differe
 
 Each half is stated where its sender reads it. The worker's obligations sit in `role-worker` and the orchestrator's handback stays in `orchestrator-poll.md`. One shared section would put a worker's duties in a file no worker loads, which is the defect the split avoids. The orchestrator's step 6 points at the worker skill rather than holding its own copy.
 
-Three messages are owed and no more. One announces the pull request when it opens, carrying the number, the branch, and the task it closes. One announces when an address-review pass finishes, carrying what was addressed and the pull request's new CI state. One reports a block before it becomes an interactive prompt.
+Three messages are owed on an ordinary build, and a fourth only on a build that turned up a row and ends before a pull request opens. One announces the pull request when it opens, carrying the number, the branch, the task it closes, and any row the build turned up, since a worker files no task file of its own and the channel is the row's only route. One announces when an address-review pass finishes, carrying what was addressed and the pull request's new CI state. One reports a block before it becomes an interactive prompt.
 
 That ordering matters: a queued message drains at the next tool round, and a session already waiting on input never reaches one, so an answer relayed to an open prompt renders beneath the question and changes nothing. Nothing is sent on progress, since a worker reporting progress rebuilds the poll on the other side of the channel.
 
