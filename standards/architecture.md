@@ -84,7 +84,7 @@ Every session pays for this file before any work starts, so a heavy read is a re
   - `This record holds at most <n> decisions.`
   - `at most <n> words a decision`, counting a decision's prose below its heading, fenced lines left out
   - `at most <n> risk bullets`, counting every list item under `## Risks / open questions`, nested ones included
-- The three can share one sentence, as the template's overview shows. Each cap is the record's own, so a record stating none is measured and never gated.
+- The three can share one sentence, such as `This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets.` Each cap is the record's own, so a record stating none is measured and never gated, and the template states the entry cap alone so the other two are adopted on purpose.
 - Set the decision cap near one decision per slot plus a small margin, the word cap near what one trade takes to state, about 150, and the risk cap at what a reader holds in mind at once, about 6.
 - At the decision cap, merge two decisions or retire one before adding another, and name which in the change that does it. Never pack two decisions under one heading, which the count cannot see.
 - At the word cap, cut a decision to the choice, the alternative that lost, the reason, and the revisit sentence. What it sheds is a mechanism or a measurement, which goes to the domain context entry it constrains, never under a second heading.
@@ -102,7 +102,7 @@ The revisit sentence closes the reasoning of every decision. The anchor sentence
 
 ## Overview
 
-This record holds at most 12 decisions, at most 150 words a decision, and at most 6 risk bullets. Every decision closes with a revisit sentence.
+This record holds at most 12 decisions. Every decision closes with a revisit sentence.
 
 ## Key technical decisions
 
