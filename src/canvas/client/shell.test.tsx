@@ -1175,6 +1175,63 @@ describe('Inspector edit', () => {
     })
   })
 
+  /** The glyph drawn inside the field of that name, which a scrub drags. */
+  function glyphOf(name: string): HTMLElement {
+    const glyph = fieldNamed(name)
+      .closest('.glyph-field')
+      ?.querySelector<HTMLElement>('.glyph')
+    if (!glyph) throw new Error(`no glyph on ${name}`)
+    return glyph
+  }
+
+  async function drag(
+    type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel',
+    target: HTMLElement,
+    x: number,
+  ) {
+    await act(async () => {
+      target.dispatchEvent(
+        new PointerEvent(type, { bubbles: true, clientX: x, pointerId: 1 }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  it('should preview a scrubbed length in the frame and post it once on release', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 12)
+    await drag('pointermove', glyph, 15)
+    const preview = doc.querySelector<HTMLElement>('h1')?.style.width
+    await drag('pointerup', glyph, 15)
+
+    expect(preview).toBe('105px')
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '105px' }),
+    ])
+  })
+
+  it('should post nothing and restore the frame when a scrub is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 40)
+    await drag('pointercancel', glyph, 40)
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
+    expect(fieldNamed('width').value).toBe('100')
+  })
+
   it('should say the edit was refused and reload the frame when the file moved', async () => {
     const pages = [page('drafts', [frame('hero')])]
     renderApp(pages)

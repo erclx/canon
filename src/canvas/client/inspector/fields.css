@@ -72,6 +72,12 @@
   user-select: none;
 }
 
+/* A number field's glyph scrubs its value, so a drag must not pan or scroll. */
+.glyph.is-scrub {
+  cursor: ew-resize;
+  touch-action: none;
+}
+
 .glyph-field-input {
   flex: 1;
   min-width: 0;

@@ -1,7 +1,11 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
-import { Field, ReadOnlyField } from '@/canvas/client/inspector/field'
+import {
+  Field,
+  ReadOnlyField,
+  type Scrub,
+} from '@/canvas/client/inspector/field'
 import { Section } from '@/canvas/client/inspector/section'
 import { displayValue, toCssValue } from '@/canvas/client/inspector/values'
 import {
@@ -199,6 +203,28 @@ function ElementFields({
   const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
 
+  /**
+   * Previews into the frame's own inline style and writes through the same
+   * edit as typing. A reload mid-drag replaces the document, so a release
+   * against one no longer on screen posts nothing.
+   */
+  const scrubOf = (property: string): Scrub => {
+    const original = inlineValue(node, property)
+    const style = (node as HTMLElement).style
+    return {
+      preview: (shown) =>
+        style.setProperty(property, toCssValue(property, shown)),
+      restore: () =>
+        original
+          ? style.setProperty(property, original)
+          : style.removeProperty(property),
+      commit: (shown) => {
+        if (frameDocuments.value.get(key) !== doc || !node.isConnected) return
+        commit(property)(toCssValue(property, shown))
+      },
+    }
+  }
+
   const styleField = (field: StyleField): JSX.Element => (
     <Field
       key={field.property}
@@ -211,6 +237,7 @@ function ElementFields({
       onCommit={(typed) =>
         commit(field.property)(toCssValue(field.property, typed))
       }
+      scrub={'style' in node ? scrubOf(field.property) : undefined}
     />
   )
 
