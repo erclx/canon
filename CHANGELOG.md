@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.15.0](https://github.com/erclx/canon/compare/v5.14.1...v5.15.0) (2026-10-03)
+
+
+### Features
+
+* **canvas:** add a local canvas of pages and HTML frames ([#2095](https://github.com/erclx/canon/issues/2095)) ([f6d687a](https://github.com/erclx/canon/commit/f6d687a3a94d4740149f84a743c87c78e27f1492))
+* **demo:** compose a screencast in a per-demo folder ([#2092](https://github.com/erclx/canon/issues/2092)) ([34c3291](https://github.com/erclx/canon/commit/34c3291df871e200fb2c8c16230521dd7df1d485))
+* **sandbox:** add the equivalence check for provisioned trees ([#2094](https://github.com/erclx/canon/issues/2094)) ([507a361](https://github.com/erclx/canon/commit/507a361ecbfd013abdef9a1183b172485bfd15b9))
+
+
+### Bug Fixes
+
+* **sandbox:** repair the four red claude arms ([#2088](https://github.com/erclx/canon/issues/2088)) ([29e33bc](https://github.com/erclx/canon/commit/29e33bcd71d53cb99c68885eb7156c5f1b66ea62))
+
 ## [5.14.1](https://github.com/erclx/canon/compare/v5.14.0...v5.14.1) (2026-10-02)
 
 
