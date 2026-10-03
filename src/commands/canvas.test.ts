@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { writeSelection } from '@/canvas/content'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 
@@ -131,5 +132,137 @@ describe('canon canvas', () => {
       reason: 'no-root',
     })
     expect(existsSync(missing)).toBe(false)
+  })
+})
+
+describe('canon canvas frame move', () => {
+  it('should move a frame and report the box as one JSON record', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero', '--width', '390')
+
+    const run = canvas(
+      'frame',
+      'move',
+      'drafts',
+      'hero',
+      '--x',
+      '200',
+      '--y',
+      '120',
+      '--json',
+    )
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: true,
+      frame: 'hero',
+      box: { x: 200, y: 120, width: 390 },
+    })
+  })
+
+  it('should leave the other axis where the frame is', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+    canvas('frame', 'move', 'drafts', 'hero', '--x', '30', '--y', '40')
+
+    const run = canvas('frame', 'move', 'drafts', 'hero', '--x', '90', '--json')
+
+    expect(JSON.parse(run.stdout).box).toMatchObject({ x: 90, y: 40 })
+  })
+
+  it('should refuse a frame that does not exist with exit 1 and a reason', () => {
+    canvas('page', 'add', 'drafts')
+
+    const run = canvas('frame', 'move', 'drafts', 'hero', '--x', '1', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: false,
+      reason: 'no-frame',
+    })
+  })
+
+  it('should refuse a position that is not a number', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas(
+      'frame',
+      'move',
+      'drafts',
+      'hero',
+      '--x',
+      'left',
+      '--json',
+    )
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      reason: 'invalid-position',
+    })
+  })
+})
+
+describe('canon canvas selection', () => {
+  it('should report none when nothing is selected', () => {
+    const run = canvas('selection', '--json')
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toEqual({ ok: true, selection: null })
+  })
+
+  it('should report the selected frame with its box and path', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero', '--width', '390')
+    writeSelection(ROOT, { page: 'drafts', frame: 'hero' })
+
+    const run = canvas('selection', '--json')
+
+    const { selection } = JSON.parse(run.stdout)
+    expect(selection).toMatchObject({
+      page: 'drafts',
+      frame: 'hero',
+      box: { width: 390 },
+    })
+    expect(existsSync(selection.path)).toBe(true)
+  })
+
+  it('should report none once the selected frame is removed', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+    writeSelection(ROOT, { page: 'drafts', frame: 'hero' })
+    rmSync(join(ROOT, '.canon', 'canvas', 'drafts', 'hero.html'))
+
+    const run = canvas('selection', '--json')
+
+    expect(JSON.parse(run.stdout)).toEqual({ ok: true, selection: null })
+  })
+
+  it('should keep stdout to the one record', () => {
+    const run = canvas('selection', '--json')
+
+    expect(run.stdout.trim().split('\n')).toHaveLength(1)
+  })
+})
+
+describe('canon canvas capture', () => {
+  it('should refuse a page that does not exist before starting a browser', () => {
+    const run = canvas('capture', 'missing', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: false,
+      reason: 'no-page',
+    })
+  })
+
+  it('should refuse a frame that does not exist', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas('capture', 'drafts/nope', '--json')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
   })
 })
