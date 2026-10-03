@@ -50,6 +50,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:deprecation-migration` | When deleting or replacing code something may still call, to migrate its callers and prove none remain     |
 | `canon:code-craft`            | Before writing a function, class, or module, to pick the shape the next change needs                       |
 | `canon:review-craft`          | When reviewing a change, for what to look for and how much evidence a finding needs                        |
+| `canon:search-craft`          | Before searching outside the project, to derive where the field's authorities publish and search there too |
 | `canon:systematic-debugging`  | When a test fails or a bug surfaces, to force root cause first                                             |
 | `canon:design-taste`          | When drafting or judging an interface, or when output reads generic, to settle which decision comes first  |
 | `canon:ui-checklist`          | After a UI change, to write what to look at and name what ships untested                                   |
