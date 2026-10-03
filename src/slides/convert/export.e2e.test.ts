@@ -70,6 +70,7 @@ const SLIDES: Record<string, string> = {
     <div class="card"><p style="margin:0">Shadowed card</p></div>
     <div class="mark"><svg width="96" height="96" viewBox="0 0 10 10" aria-label="Brand mark"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg></div>
     <div class="gradient">Gradient box</div>
+    <p class="soft" style="position: absolute; left: 96px; top: 520px; margin: 0">Plain then <span style="filter: blur(1px)">softened</span></p>
   </body></html>`,
 }
 
@@ -233,13 +234,19 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   })
 
   it('should report the gradient box with background-image', () => {
-    expect(result.status === 'written' && result.fallbacks).toEqual([
+    expect(result.status === 'written' && result.fallbacks).toContainEqual(
       expect.objectContaining({
         slide: 2,
         selector: 'div.gradient',
         properties: ['background-image'],
       }),
-    ])
+    )
+  })
+
+  it('should report a paragraph whose inline run carries a filter', () => {
+    expect(result.status === 'written' && result.fallbacks).toContainEqual(
+      expect.objectContaining({ selector: 'p.soft', properties: ['filter'] }),
+    )
   })
 
   it.skipIf(!hasOffice)(

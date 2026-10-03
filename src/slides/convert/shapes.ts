@@ -118,6 +118,8 @@ export type ElementRecord =
       readonly kind: 'text'
       readonly content: TextContent
       readonly list?: ListMarker
+      /** The style of each inline element the runs were gathered through. */
+      readonly inlines: readonly BoxStyle[]
     })
   | (RecordBase & {
       readonly kind: 'image'
@@ -186,9 +188,8 @@ export function rotationOf(transform: string): number | undefined {
   return Math.round(((degrees % 360) + 360) % 360)
 }
 
-/** Every unmapped property the record computes, in the order listed above. */
-export function unmappedProperties(record: ElementRecord): UnmappedProperty[] {
-  const { raw, shadows } = record.style
+function isUnmapped(style: BoxStyle, property: UnmappedProperty): boolean {
+  const { raw, shadows } = style
   const found: Record<UnmappedProperty, boolean> = {
     'background-image': raw.backgroundImage !== 'none',
     transform: rotationOf(raw.transform) === undefined,
@@ -199,7 +200,26 @@ export function unmappedProperties(record: ElementRecord): UnmappedProperty[] {
     'backdrop-filter': raw.backdropFilter !== 'none',
     'box-shadow': shadows.length > 1,
   }
-  return UNMAPPED_PROPERTIES.filter((property) => found[property])
+  return found[property]
+}
+
+/**
+ * Every unmapped property the record computes, in the order listed above. A
+ * text block counts the inline elements its runs came from, and a table counts
+ * its cells, since neither is drawn as a shape of its own and a property on one
+ * would otherwise vanish unreported.
+ */
+export function unmappedProperties(record: ElementRecord): UnmappedProperty[] {
+  const styles = [
+    record.style,
+    ...(record.kind === 'text' ? record.inlines : []),
+    ...(record.kind === 'table'
+      ? record.rows.flat().map((cell) => cell.style)
+      : []),
+  ]
+  return UNMAPPED_PROPERTIES.filter((property) =>
+    styles.some((style) => isUnmapped(style, property)),
+  )
 }
 
 function transparency(color: Rgba): number | undefined {

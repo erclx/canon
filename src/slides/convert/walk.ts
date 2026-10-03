@@ -345,7 +345,9 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       continue
     }
 
-    const runs = gatherRuns(element, consumed, false)
+    const gathered = new Set<Element>()
+    const runs = gatherRuns(element, gathered, false)
+    for (const inline of gathered) consumed.add(inline)
     if (runs.length === 0) {
       records.push({ ...base, kind: 'box' })
       continue
@@ -398,6 +400,11 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       kind: 'text',
       content: textContent(element, runs),
       list,
+      inlines: Array.from(gathered)
+        .filter((inline) => inline.tagName !== 'BR')
+        .map((inline) =>
+          boxStyle(inline, rectOf(inline.getBoundingClientRect())),
+        ),
     })
   }
 

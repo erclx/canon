@@ -92,7 +92,13 @@ function base(id: number) {
 }
 
 function textRecord(overrides: Partial<Kind<'text'>> = {}): Kind<'text'> {
-  return { ...base(1), kind: 'text', content: content(), ...overrides }
+  return {
+    ...base(1),
+    kind: 'text',
+    content: content(),
+    inlines: [],
+    ...overrides,
+  }
 }
 
 function boxRecord(overrides: Partial<Kind<'box'>> = {}): Kind<'box'> {
@@ -412,6 +418,40 @@ describe('planSlide', () => {
     )
 
     expect(kinds).toEqual(['fallback'])
+  })
+
+  it('should send a text block to a picture when an inline run is unmapped', () => {
+    const record = textRecord({
+      inlines: [style({ raw: raw({ filter: 'blur(4px)' }) })],
+    })
+
+    const plan = planSlide([record], CONTEXT)
+
+    expect(plan.fallbacks).toEqual([
+      expect.objectContaining({ properties: ['filter'] }),
+    ])
+  })
+
+  it('should send a table to a picture when a cell is unmapped', () => {
+    const record: Kind<'table'> = {
+      ...base(1),
+      kind: 'table',
+      rows: [
+        [
+          cell({
+            style: style({
+              raw: raw({ backgroundImage: 'linear-gradient(red, blue)' }),
+            }),
+          }),
+        ],
+      ],
+    }
+
+    const plan = planSlide([record], CONTEXT)
+
+    expect(plan.fallbacks).toEqual([
+      expect.objectContaining({ properties: ['background-image'] }),
+    ])
   })
 
   it('should give a fallback picture the element text as alt text', () => {
