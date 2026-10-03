@@ -88,24 +88,32 @@ const writeThread = (
   comments: Comment[],
   head = HEAD,
 ): void => {
+  const lines = (rows: unknown[]): string =>
+    rows.map((row) => `${JSON.stringify(row)}\n`).join('')
+
   writeFileSync(
-    join(root, 'fixtures', 'pr-7.json'),
-    JSON.stringify({
-      comments: comments.map((comment) => ({
-        body: `${comment.heading}\n\nbody`,
-        createdAt: comment.createdAt,
-      })),
-      headRefOid: head,
-      reviews: reviews.map((review) => ({
+    join(root, 'fixtures', 'reviews-7.jsonl'),
+    lines(
+      reviews.map((review) => ({
         body:
           review.marker === undefined
             ? `${review.heading}\n\nbody`
             : `${review.heading}\n\nbody\n\n<!-- review-ui: head=${review.marker} -->`,
-        commit: { oid: head },
-        submittedAt: review.submittedAt,
+        commit_id: head,
+        submitted_at: review.submittedAt,
       })),
-    }),
+    ),
   )
+  writeFileSync(
+    join(root, 'fixtures', 'comments-7.jsonl'),
+    lines(
+      comments.map((comment) => ({
+        body: `${comment.heading}\n\nbody`,
+        created_at: comment.createdAt,
+      })),
+    ),
+  )
+  writeFileSync(join(root, 'fixtures', 'head-7.txt'), `${head}\n`)
 
   // The verb reads the code family alone, so a UI pass posted after the code
   // pass leaves the scope where the code pass put it.
@@ -146,10 +154,16 @@ const poll = (): PollResult => {
   return { status: run.status, stderr: run.stderr, stdout: run.stdout.trim() }
 }
 
-// The stub refuses `pr view` while this file exists, which is how a run reaches
-// the carry-forward path without needing the network to fail.
+// The stub refuses the reviews and comments reads while this file exists, which
+// is how a run reaches the carry-forward path without needing the network to
+// fail.
 const breakView = (): void => {
   writeFileSync(join(root, 'fixtures', 'unreadable'), '')
+}
+
+// The stub refuses the comments read alone, leaving the reviews read healthy.
+const breakComments = (): void => {
+  writeFileSync(join(root, 'fixtures', 'comments-unreadable'), '')
 }
 
 beforeEach(() => {
@@ -159,19 +173,31 @@ beforeEach(() => {
   sh('git init -q repo')
   sh('git -C repo commit -q --allow-empty -m init')
 
-  // The stub answers the three `gh` calls the script makes and nothing else.
-  // `repo view` is what supplies the base branch, since the fixture has no
-  // remote for `origin/HEAD` to resolve against.
+  // The stub answers the REST reads the script makes and refuses everything
+  // else. `pr`, `repo view`, and `graphql` exit non-zero, which is a host that
+  // blocks GraphQL, so a script still reaching one fails every case below.
   const stub = join(root, 'bin', 'gh')
+  const fixtures = join(root, 'fixtures')
   writeFileSync(
     stub,
     [
       '#!/usr/bin/env bash',
-      'if [ "$1 $2" = "pr list" ]; then echo 7; exit 0; fi',
-      `if [ -f "${join(root, 'fixtures')}/unreadable" ]; then exit 1; fi`,
-      `if [ "$1 $2" = "pr view" ]; then cat "${join(root, 'fixtures')}/pr-$3.json"; exit 0; fi`,
-      'if [ "$1 $2" = "repo view" ]; then echo main; exit 0; fi',
-      'exit 0',
+      'if [ "$1" != "api" ]; then exit 1; fi',
+      'for arg in "$@"; do',
+      '  case "$arg" in',
+      '    graphql) exit 1 ;;',
+      '    "repos/{owner}/{repo}/pulls?state=open"*) echo 7; exit 0 ;;',
+      '    "repos/{owner}/{repo}/pulls/7/reviews"*)',
+      `      if [ -f "${fixtures}/unreadable" ]; then exit 1; fi`,
+      `      cat "${fixtures}/reviews-7.jsonl"; exit 0 ;;`,
+      '    "repos/{owner}/{repo}/issues/7/comments"*)',
+      `      if [ -f "${fixtures}/unreadable" ] || [ -f "${fixtures}/comments-unreadable" ]; then exit 1; fi`,
+      `      cat "${fixtures}/comments-7.jsonl"; exit 0 ;;`,
+      `    "repos/{owner}/{repo}/pulls/7") cat "${fixtures}/head-7.txt"; exit 0 ;;`,
+      '    "repos/{owner}/{repo}") echo main; exit 0 ;;',
+      '  esac',
+      'done',
+      'exit 1',
       '',
     ].join('\n'),
   )
@@ -180,7 +206,7 @@ beforeEach(() => {
   // `pr review-state` answers from the fixture the thread was written with, and
   // every other verb refuses. `pr head` refusing is what the fixture already
   // produced without a stub, since it has no remote for `git ls-remote` to
-  // reach, so the head still falls back to the object's own field.
+  // reach, so the head still falls back to the pull read.
   const canon = join(root, 'bin', 'canon')
   writeFileSync(
     canon,
@@ -363,6 +389,35 @@ describe('poll', () => {
     )
 
     expect(poll().stdout).toBe('No movement.')
+  })
+
+  // Two reads feed one payload. A comments read that fails beside a reviews
+  // read that succeeds must not read as a thread with no replies, which would
+  // report the pull request as new or drop its RESPONSE.
+  it('should carry a pull request forward when only the comments read fails', () => {
+    writeThread(
+      [{ heading: '## Review', submittedAt: FIRST_PASS }],
+      [{ createdAt: RESPONSE_AT, heading: '## Review response' }],
+    )
+    expect(poll().stdout).toContain('SEEN')
+
+    breakComments()
+    const carried = poll()
+
+    expect(carried.status).toBe(0)
+    expect(carried.stdout).toBe('No movement.')
+    expect(carried.stderr).toContain('#7 could not be read')
+  })
+
+  it('should read a review with no submission stamp as a pass with no age', () => {
+    writeThread([], [])
+    writeFileSync(
+      join(root, 'fixtures', 'reviews-7.jsonl'),
+      `${JSON.stringify({ body: '## Review\n\nbody', commit_id: HEAD, submitted_at: null })}\n`,
+    )
+    writeScope({ reason: 'no-marker' })
+
+    expect(poll().stdout).toContain('SEEN      #7 at 1111111')
   })
 
   // A regression that blanks the count on a carry makes the next healthy run
