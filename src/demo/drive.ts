@@ -8,6 +8,8 @@ import { deriveSteps } from '@/demo/compile'
 import type { DemoPlan, DemoStep } from '@/demo/compile'
 import type { CursorSet } from '@/demo/pointer'
 import { pointerSource } from '@/demo/pointer'
+import type { StepTiming, TargetBox } from '@/demo/timeline'
+import { timelineEntry, timelinePath, writeTimeline } from '@/demo/timeline'
 
 declare global {
   interface Window {
@@ -84,6 +86,7 @@ export type DriveResult =
       status: 'recorded'
       videoPath?: string
       stillPath?: string
+      timelinePath?: string
       steps: number
       durationMs: number
     }
@@ -150,6 +153,7 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
 
   let stillPath: string | undefined
   let videoPath: string | undefined
+  let timeline: string | undefined
 
   try {
     await context.addInitScript({
@@ -157,7 +161,12 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
     })
     await context.addInitScript({ content: captionInitScript() })
     const page = await context.newPage()
+    // The recording begins with the page, so this is the instant a frame of
+    // the take is zero. Taking it at the first step instead would drift every
+    // entry by the opening page load.
+    const recordingStart = performance.now()
     const video = page.video()
+    const timings: StepTiming[] = []
     const pace: PointerPace = {}
 
     // The opening navigate is skipped when the plan already starts with one,
@@ -170,8 +179,16 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
       }
     }
 
-    for (const step of plan.steps) {
-      await runStep(page, plan, step, pace)
+    for (const [index, step] of plan.steps.entries()) {
+      const startedAt = performance.now()
+      const box = await runStep(page, plan, step, pace)
+      timings.push({
+        index,
+        kind: step.kind,
+        startedAt,
+        endedAt: performance.now(),
+        ...(box ? { box } : {}),
+      })
       // The first marked step wins. One file holds one frame, so a plan a
       // person edited to mark several would otherwise write each over the last
       // and keep whichever ran last, with nothing saying so.
@@ -191,6 +208,11 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
       // The engine keeps the auto-named recording beside the saved copy, so a
       // run that skipped this would leave two files for every demo.
       await video.delete()
+      timeline = timelinePath(videoPath)
+      writeTimeline(
+        timeline,
+        timings.map((timing) => timelineEntry(timing, recordingStart)),
+      )
     }
   } catch (error) {
     return failed('drive-failed', error)
@@ -203,6 +225,7 @@ export async function drive(options: DriveOptions): Promise<DriveResult> {
     status: 'recorded',
     ...(videoPath ? { videoPath } : {}),
     ...(stillPath ? { stillPath } : {}),
+    ...(timeline ? { timelinePath: timeline } : {}),
     steps: plan.steps.length,
     durationMs: Date.now() - started,
   }
@@ -237,13 +260,17 @@ export interface PointerPace {
  * Exported so `drive.e2e.test.ts` can drive one real step against a real
  * caption and read it back, which is the integration a full `drive()` call
  * cannot assert without decoding the video it writes.
+ *
+ * Returns the box the pointer travelled to, for the timeline, and nothing for
+ * a step that points at no target.
  */
 export async function runStep(
   page: Page,
   plan: DemoPlan,
   step: DemoStep,
   pace: PointerPace,
-): Promise<void> {
+): Promise<TargetBox | undefined> {
+  let box: TargetBox | undefined
   switch (step.kind) {
     case 'navigate':
       await page.goto(step.target || plan.url)
@@ -252,18 +279,18 @@ export async function runStep(
       }
       break
     case 'click':
-      await moveTo(page, plan, step, pace)
+      box = await moveTo(page, plan, step, pace)
       await page.mouse.down()
       await page.mouse.up()
       break
     case 'fill':
-      await moveTo(page, plan, step, pace)
+      box = await moveTo(page, plan, step, pace)
       await page.mouse.down()
       await page.mouse.up()
       await page.keyboard.type(step.text, { delay: plan.pointer.typeDelayMs })
       break
     case 'hover':
-      await moveTo(page, plan, step, pace)
+      box = await moveTo(page, plan, step, pace)
       break
     case 'scroll':
       // Centred rather than `scrollIntoViewIfNeeded`, which scrolls the least
@@ -307,6 +334,7 @@ export async function runStep(
   await setCaption(page, step.caption)
   if (step.waitFor) await page.locator(step.waitFor).first().waitFor()
   await page.waitForTimeout(step.holdMs)
+  return box
 }
 
 /**
@@ -333,7 +361,7 @@ async function moveTo(
   plan: DemoPlan,
   step: DemoStep,
   pace: PointerPace,
-): Promise<void> {
+): Promise<TargetBox> {
   pace.roundTripMs ??= await calibrateRoundTrip(page)
   const locator = page.locator(step.target).first()
   await locator.waitFor()
@@ -342,6 +370,7 @@ async function moveTo(
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
     steps: deriveSteps(plan.pointer.travelMs, pace.roundTripMs),
   })
+  return box
 }
 
 /**
