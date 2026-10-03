@@ -193,11 +193,11 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
   })
 
   it('should give the svg a real png fallback', async () => {
-    const pngs = Object.keys(zip.files).filter((path) =>
+    const images = Object.keys(zip.files).filter((path) =>
       /^ppt\/media\/.*\.png$/.test(path),
     )
     const heads = await Promise.all(
-      pngs.map(async (path) =>
+      images.map(async (path) =>
         (await zip.file(path)?.async('nodebuffer'))?.subarray(0, 8),
       ),
     )
@@ -245,9 +245,11 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
       const pdf = join(renders, 'deck.pdf')
       spawnSync('pdftoppm', ['-png', '-r', '96', pdf, join(renders, 'slide')])
 
-      const pngs = readdirSync(renders).filter((name) => name.endsWith('.png'))
+      const images = readdirSync(renders).filter((name) =>
+        name.endsWith('.png'),
+      )
 
-      expect(pngs).toHaveLength(2)
+      expect(images).toHaveLength(2)
     },
     60_000,
   )

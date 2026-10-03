@@ -5,7 +5,7 @@ import { resolveSvgColors, type SvgColors } from '@/slides/convert/svg'
  * The contract between the walk, which runs inside the laid-out page, and the
  * mapping below, which runs here. Every record is plain data, since it crosses
  * `page.evaluate`. Lengths are CSS pixels and colors are already normalized by
- * the browser, so nothing on this side reparses a color the page computed.
+ * the browser, so nothing on this side parses a color the page computed a second time.
  */
 
 export interface Rgba {
