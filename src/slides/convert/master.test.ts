@@ -86,6 +86,14 @@ describe('deckTheme', () => {
     })
   })
 
+  it('should take the body color for a missing role even when text is declared', () => {
+    const { theme: read } = deckTheme(
+      reading({ tokens: { background: 'F8FAFC', text: '0F172A' } }),
+    )
+
+    expect([read.muted, read.accent]).toEqual(['111111', '111111'])
+  })
+
   it('should say which roles fell back', () => {
     const { notices } = deckTheme(
       reading({ tokens: { background: 'F8FAFC', text: '0F172A' } }),

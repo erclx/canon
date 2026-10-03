@@ -77,13 +77,12 @@ export function deckTheme(reading: ThemeReading): {
   )
     .filter(([, value]) => value === undefined)
     .map(([role]) => `--color-${role}`)
-  const ink = tokens.text ?? body.color
   return {
     theme: {
       background: tokens.background ?? body.background,
-      ink,
-      muted: tokens.muted ?? ink,
-      accent: tokens.accent ?? ink,
+      ink: tokens.text ?? body.color,
+      muted: tokens.muted ?? body.color,
+      accent: tokens.accent ?? body.color,
       face: fontFace(reading.fontFamily),
     },
     notices:
