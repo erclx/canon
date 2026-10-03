@@ -9,10 +9,10 @@ Part of Step 4 of `review-pr`, reached only on the branch `post.md` names. Every
 
 When `<prior-heading>` from Step 2 reads `## Review closed` and this pass carries nothing owed, the thread already holds this verdict. Replace the standing close-out rather than posting a second one beside it.
 
-Resolve its numeric id. `gh pr view --json reviews` carries a GraphQL node id under `id`, which no REST route accepts, so read the id off the REST listing instead:
+Resolve its numeric id off the REST listing, keeping the newest match across every page:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/<number>/reviews --jq '[.[] | select((.body // "") | split("\n")[0] | rtrimstr("\r") == "## Review closed")] | last | .id'
+gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --jq '.[] | select((.body // "") | split("\n")[0] | rtrimstr("\r") == "## Review closed") | .id' | tail -n 1
 ```
 
 Write the replacement body to `<body-file>`, the name `post.md` already derived at the top of Step 4, keeping the heading and the footer and naming what this pass covered on the scope line in place of what the old one covered. Derive that name the same way whichever path reached here, since the guard reads `<prior-heading>` alone and a repeated head resolves the third segment as usual. The folder then gains a record of every covered head rather than losing the one the standing comment named. Then replace the comment:
