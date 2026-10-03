@@ -1,6 +1,6 @@
 ---
 title: Orchestrator cloud launch
-description: The cloud build shape, being the launch prompt that carries the plan as text and announces over GitHub, the create under a pseudo-terminal with its trust keys, and the readout that fails loudly on a missing session id
+description: The cloud build and review shapes, being the launch prompt that carries the plan as text and announces over GitHub, the reviewer prompt whose posted review is its announcement, the create under a pseudo-terminal with its trust keys, and the readout that fails loudly on a missing session id
 ---
 
 # Orchestrator cloud launch
@@ -74,3 +74,32 @@ gh api 'repos/{owner}/{repo}/pulls/<number>/commits' --jq '.[].commit.message' |
 ```
 
 A count above zero matches the row. A count of zero is someone else's pull request, whatever its title says. Once it matches, record the number on the row's task yourself with `canon tasks pull-request <number> <task>`, since `git-pr` on the VM has no task file to write, then review it the way step 5 reviews any worker's pull request.
+
+## Dispatch a review to a cloud reviewer
+
+Run this once `orchestrator-review-dispatch.md` has sent a code review to a dispatched reviewer and the operator picked cloud for it. The reviewer needs the same `SessionStart` hook as the build shape, and a `canon` on the VM whose `pr` reads run on REST, since the proxy refuses GraphQL. A UI review never takes this shape, because it drives a browser the VM does not have.
+
+Confirm the VM's `canon` reads over REST before dispatching. In this repository the setup hook links the checkout's own CLI, so a pushed branch carries the reads. Any other repository's VM installs `canon` from npm, so its `pr` reads run on REST only once a release carrying them is published, and its copied skills carry the REST lookups only once that repository's skills are re-scaffolded from that release.
+
+Read `npm view @erclx/canon version` against the first release whose changelog names the REST reads, and check the target's copied `review-pr` the same way, by running `grep -rnE 'gh pr (list|view|review|diff|comment)'` over it and expecting no output. A version short of that release, or a hit, dispatches a reviewer that fails on its first GraphQL call, so take the local shape instead.
+
+Check this pass's launched record for a cloud reviewer already holding the number, and run `canon pr review-state <number> --json` for a pass already posted. A cloud reviewer never appears in `canon sessions list`, so the live-session check the local shape runs reads clear on a pull request one already holds.
+
+The create targets whichever repository the checkout it runs from names as `origin`. For a pull request in this repository, write the prompt to `.canon/tmp/cloud-review-<number>/prompt.md` at the main worktree root and run the create there. For a pull request in another repository, run the create from a checkout of that repository and write the prompt under that checkout's own `.canon/tmp/cloud-review-<number>/`, which its `.gitignore` has to cover before the create runs. A fresh clone made for this is untrusted, so the create takes the trust-prompt key variant under `## The create`:
+
+```plaintext
+/role-reviewer
+Then run /review-pr <number> on <owner>/<repo>.
+Your controller cannot receive a message from this session. The review you post is the announcement, so post nothing else for it. If you stop on a question before the review posts, comment on the pull request starting with QUESTION: review <number>.
+<the cross-branch facts>
+```
+
+The cross-branch facts are the ones `### What the brief may carry` in `orchestrator-launch.md` allows a reviewer brief, and nothing of this session's own read. Neither skill carries the invocation flag, so no position-zero expansion is at stake and the bare names reach the copied project skills.
+
+Create the session with the wrapper under `## The create`, setting `dir` to that prompt's folder, and keep its readout rule: no `session_` id means nothing was dispatched. Record the session id beside the number in this pass's launched record, and name the number, the repository, and the session id in the dispatch report.
+
+`poll.ts` lists every open pull request from this machine and reads each one's review state, so the posted `## Review` reaches the next poll like a local reviewer's. Start the poll when the dispatch goes out rather than at its fallback. A `QUESTION: review <number>` comment reaches the same poll as an unclassified reply, so answer it on the pull request.
+
+The pull request is the record to act on, and the transcript is read back only to check for a refused call. Run `claude --teleport <session>` under `script` from a throwaway clone of the target outside this repository, answer its trust prompt with the same piped keys, and set the terminal to 500 rows first, since only the screen tail is captured otherwise. Search the capture for `HTTP 403` and `graphql`. A hit names a call still on GraphQL, so report it as a finding rather than reading the posted review as clean.
+
+A cloud reviewer cannot be messaged after it posts. A re-review after a worker's address pass is a fresh dispatch, local or cloud by the same pick, rather than the message `orchestrator-handback.md` sends a live reviewer.

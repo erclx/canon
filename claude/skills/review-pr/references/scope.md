@@ -17,27 +17,29 @@ The fields are `<prior-oid>` off `commit`, `<prior-heading>` off `heading`, and 
 
 `source` says which stamp answered. `marker` is the pass's own read-time record and is the authority. `fallback` is a pass posted before this mechanism shipped, so its commit is whatever the head was when GitHub recorded the review rather than what that session read, and a push inside its compose window is invisible. `none` is a thread carrying no pass at all.
 
-Do not read `commit.oid` or `submittedAt` off `gh pr view --json reviews` here. Both are stamped at submission, so a push landing between a pass's read and its post moves them onto a commit that pass never saw, and this step then scopes the delta past it and reports it covered.
+Do not read `commit_id` or `submitted_at` off the reviews listing here. Both are stamped at submission, so a push landing between a pass's read and its post moves them onto a commit that pass never saw, and this step then scopes the delta past it and reports it covered.
 
-A target whose CLI predates the verb meets a missing subcommand rather than a record. Fall back there to the jq below, which reads the stamps and carries the defect above, and say the fallback answered so a reader can tell a marker read from a stamped one:
+A target whose CLI predates the verb meets a missing subcommand rather than a record. Fall back there to the REST read below, which reads the stamps and carries the defect above, and say the fallback answered so a reader can tell a marker read from a stamped one:
 
 ```bash
-gh pr view <number> --json reviews --jq '[.reviews[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review" or . == "## Review closed")] | last | select(. != null) | ((.commit.oid // "") + "\t" + (.body | split("\n")[0] | rtrimstr("\r")) + "\t" + (.submittedAt // ""))'
+gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --jq '.[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review" or . == "## Review closed") | ((.commit_id // "") + "\t" + (.body | split("\n")[0] | rtrimstr("\r")) + "\t" + (.submitted_at // ""))' | tail -n 1
 ```
 
-The three fields are `<prior-oid>`, `<prior-heading>`, and `<prior-at>`. Keep the `select(. != null)` guard, since the string concatenation aborts jq on the null an empty selection returns, and an aborted command reaches the session as an error rather than as the empty result the first-pass branch reads.
+The three fields are `<prior-oid>`, `<prior-heading>`, and `<prior-at>`. The filter emits one line per matching review and `tail` keeps the newest, since `--paginate` runs the filter once per page and a `last` inside it would answer for each page rather than for the thread.
 
 Match the first line for equality against the two headings this skill posts. A prefix test also matches `## Review response` and any heading merely starting with those words, which would scope the pass to whatever commit that comment carried. The `\r` trim covers a body composed in the GitHub web editor, which stores CRLF.
 
 A `source` of `none`, or an empty result from the fallback, is a first pass. Read the whole change:
 
 ```bash
-gh pr diff <number>
+gh api 'repos/{owner}/{repo}/pulls/<number>' -H 'Accept: application/vnd.github.diff'
 ```
 
 ```bash
-gh pr diff <number> --name-only
+gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/files?per_page=100' --jq '.[].filename'
 ```
+
+Both reads go through REST, since the `gh pr` diff subcommand runs on GraphQL and a cloud session's GitHub proxy refuses it. The diff media type returns the same unified diff, and the paginated files listing returns every path rather than the first page.
 
 A commit is a later pass. Fetch the pull request head so both commits are local:
 
@@ -58,14 +60,14 @@ On exit zero, review `<prior-oid>..<headRefOid>` and nothing else. `git diff` an
 A commit is its own ancestor, so an unchanged head passes that test too, with an empty range. When `<prior-oid>` equals `<headRefOid>`, decide whether this pass has anything to add before reading anything else, since the empty range itself cannot answer that:
 
 ```bash
-gh pr view <number> --json comments --jq '[.comments[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review response" or . == "## Rebase" or . == "## Post-review findings") | select(.createdAt > "<prior-at>")] | last | .url // empty | split("-") | last'
+gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' --jq '.[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review response" or . == "## Rebase" or . == "## Post-review findings") | select(.created_at > "<prior-at>") | .id' | tail -n 1
 ```
 
 `<prior-at>` is the instant Step 2 resolved above, which is the prior pass's `readAt` where it wrote one. Reading `submittedAt` off the thread here instead is the same submission-time defect on the time axis: a reply posted inside that pass's compose window sorts before the stamp and reads as already answered, when in fact the pass had stopped reading before it landed.
 
 Scope the replies to those newer than the prior pass, never to every reply the thread carries. A pass answering the newest reply and a pass answering an older one derive the same third segment (Step 4), so an unscoped read hands a re-run after a close-out the name its own prior pass already wrote. That is the collision this case exists to prevent, reached without a rebase or an error.
 
-Read the number off `.url`. The `id` field carries a GraphQL node id, which the thread never displays. Keep the `// empty` guard, since `split` aborts jq on the null an empty selection returns, and an aborted command reaches the session as an error rather than as the empty result the stop below reads.
+The REST `id` is the number the thread displays in each comment's anchor. Keep `tail` outside the filter for the same per-page reason as the reviews read above.
 
 An empty result means no reply arrived since the prior pass, so the head is unchanged and this pass has nothing new to add. Stop here, before Step 3 or Step 4 run: `❌ The head is unchanged since the prior pass on <short-sha>. Nothing new to review.` This is the earliest point every path crosses, which is why the check sits here rather than inside Step 4's filename derivation. A path that decides there is nothing to add never reaches a step reached only when composing a body, so a stop written there is a stop a shortcut path can route around.
 

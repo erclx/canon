@@ -30,7 +30,7 @@ reader scanning the thread finds the current verdict where the last one sat.
 
 ## Guards
 
-- If no open PR resolves for the target branch via `gh pr view`, stop: `❌ No open PR to review. Open one first, or use /review-branch for local changes.`
+- If no open PR resolves for the target branch via `canon pr head --json`, stop: `❌ No open PR to review. Open one first, or use /review-branch for local changes.`
 - Review and post. Do not merge. Merging is the human's gate.
 
 ## Step 1: resolve the PR and read context
@@ -43,7 +43,13 @@ date -u +%Y-%m-%dT%H:%M:%SZ
 
 Everything from that line to the post is the compose window, and a commit pushed inside it is one this pass never saw. Stamping the body with the instant the window opened is what leaves that commit outside the covered range, so the next pass reads it rather than assuming it covered. Taking the stamp later, at the head resolution below or at Step 4 where the body is composed, claims a stretch this pass had already stopped reading through.
 
-Then resolve the PR: `gh pr view --json number,headRefName,headRefOid,title,body` for the current branch, or use a PR number the user names. Take `<headRefOid>` from `canon pr head <number> --json`, off that record's `tip`, and fall back to the `headRefOid` field above when no record comes back, which is a target whose CLI predates the verb. The first seven characters are `<short-sha>`, which names the body file in Step 4.
+Then resolve the PR through `canon pr head --json` for the current branch, or `canon pr head <number> --json` for a number the user names. Take `<number>` off the record's `number` and `<headRefOid>` off its `tip`. The first seven characters are `<short-sha>`, which names the body file in Step 4. Read the title and body over REST:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha}'
+```
+
+Every read in this skill runs on REST, since the `gh pr` lookups run on GraphQL and a cloud session's GitHub proxy refuses it. A target whose CLI predates the verb gets no record back. Fall back there to the `head` field above for `<headRefOid>`, and to `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'` for a branch with no number named, stopping on the guard above when that prints anything but one number.
 
 `<headRefOid>` and `<read-at>` travel together into Step 4's marker, and neither is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
 

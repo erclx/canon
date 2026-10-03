@@ -33,3 +33,9 @@ Hand what it finds to each reviewer as facts in the brief, per `### What the bri
 ## Launching the reviewer
 
 Take the reviewer shape in `orchestrator-launch.md`, or its UI reviewer shape for the UI trigger. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
+
+## Local or cloud
+
+A code review goes to a cloud reviewer rather than `claude --bg` only on the operator's explicit pick for that dispatch, the same standing the build shape's pick holds in `orchestrator-dispatch.md`. The cloud session costs no local context and no machine slot, which matters when the load trigger fired. It also reads nothing this machine holds, so a review that needs the board, a local preview, or a sandbox stays local.
+
+This session hears a cloud reviewer through `poll.ts` alone, which already lists every open pull request from this machine, so the posted review is the announcement and no message arrives. `orchestrator-cloud-launch.md` carries the shape under `## Dispatch a review to a cloud reviewer`. A UI review always stays local.

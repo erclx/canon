@@ -26,9 +26,9 @@ The positional is the pull request to read, defaulting to the one open on this b
 
 `--base` names the far side of that range and never the commit the comparison runs against directly. The reader resolves the merge base between `HEAD` and the ref, so `--base origin/main` measures what the branch wrote rather than what the trunk gained while the branch was open. Passing the trunk as it stands today is therefore safe on a branch of any age, and a ref sharing no history with `HEAD` refuses as `bad-base`.
 
-Without `--body` the body, the file list, and the head commit come back from one `gh pr view` call, because the three have to describe the same commit and reading them apart leaves a window where a push between them compares a body against another head's files.
+Without `--body` the body and the head commit come off the REST pull read and the file list off the paginated files endpoint. Every read runs on REST, since a cloud session's GitHub proxy refuses the GraphQL that `gh pr view` runs on. A push landing between the two reads compares a body against the next head's files, a window the verb accepts for the cloud reach.
 
-That view caps its file list at 100 rows and says nothing about having done so, measured against a pull request carrying 101 files where the view reported 100. A pull request at the cap therefore takes a second read through the paginated endpoint, and a failure there refuses with `gh-truncated` rather than comparing against a set known to be short. A set silently one file short is the worst input this takes, since the missing file is exactly what a correct bullet would then be accused of inventing.
+A failed page refuses as `gh-failed` rather than comparing against a set known to be short. A set silently one file short is the worst input this takes, since the missing file is exactly what a correct bullet would then be accused of inventing. With no number named, the verb reads the one pull request open on the checkout's branch, and refuses as `ambiguous-pull` when two are open against different bases.
 
 ## The two directions
 
@@ -91,7 +91,7 @@ Three refusals separate a clean pass from a read that produced nothing:
 
 An empty extraction read as a clean pass is the failure shape this repository has recorded twice, which is why the middle one is its own reason rather than a zero count.
 
-`gh-missing`, `gh-failed`, `gh-truncated`, `unreadable-body`, `unreadable-tree`, `no-base`, `bad-base`, and `unreadable-changes` cover the reads that never reached a comparison.
+`gh-missing`, `gh-failed`, `ambiguous-pull`, `unreadable-body`, `unreadable-tree`, `no-base`, `bad-base`, and `unreadable-changes` cover the reads that never reached a comparison.
 
 ## What it was measured against
 
