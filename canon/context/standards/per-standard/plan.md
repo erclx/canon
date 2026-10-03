@@ -7,7 +7,7 @@ description: What the plan standard fixes and why its section markers are mixed,
 
 ## Sections
 
-`standards/plan.md` fixes the section list, the suggested-and-answer contract, and the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. `plan-feature`, `auto-ship`, and `context-fold` each cite the half they read rather than restating it.
+`standards/plan.md` fixes the section list and the suggested-and-answer contract, and `standards/plan-lifecycle.md` fixes the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. The lifecycle was split out when the generated rule's frontmatter pushed `plan.md` past the document ceiling. `plan-feature`, `auto-ship`, and `context-fold` each cite the half they read rather than restating it.
 
 The section markers are mixed on purpose, `## Summary` as a heading and the other six as bold labels, because that is what the corpus writes. Across the plan archive, `Summary` is nearly always a heading and never a label, while `Files to touch` and the sections the archive already carried mostly take the bold-label form.
 
@@ -17,7 +17,7 @@ Measure a format claim against the archive rather than the live folder, since th
 
 The check accepts either spelling for a section and names the table's form in the finding. A plan carrying `## Risks` has stated its risks, so failing it teaches a reader to skip the output on the rule they are least served by, which is the same failure as a gate whose findings are all whitelisted.
 
-`658-plan` routes `.canon/plans/**` and joins `base`, following `656-groundwork` and `657-intake`. That one glob covers the archive as well. It carries the three directives that ship silently when violated, a filled answer slot, a deleted plan, and a deviation from a suggestion recorded off the plan, and points at the standard for the rest.
+`governance/rules/standards/plan.md` routes `.canon/plans/**` and joins `base`, following `governance/rules/standards/groundwork.md` and `governance/rules/standards/intake.md`. That one glob covers the archive as well. It carries the three directives that ship silently when violated, a filled answer slot, a deleted plan, and a deviation from a suggestion recorded off the plan, and points at the standard for the rest.
 
 ## Answer contract
 
@@ -31,7 +31,7 @@ Reading the phrase also means reading the `Questions` section rather than the fi
 
 ## Execution-time deviations
 
-`standards/plan.md` bars filling the answer slot and requires amending the plan in place when a decision changes. `658-plan` carries the pair under separate headings, so the prohibition could read as covering the whole question block. The contract states that it covers the answer line alone, and that amending the `- Suggested:` line is the route an executing session takes when it picks other than the suggestion.
+`standards/plan.md` bars filling the answer slot and requires amending the plan in place when a decision changes. `governance/rules/standards/plan.md` carries the pair as two separate bullets, so the prohibition could read as covering the whole question block. The contract states that it covers the answer line alone, and that amending the `- Suggested:` line is the route an executing session takes when it picks other than the suggestion.
 
 The route reaches an unanswered question alone. A deviation from a filled slot goes back to whoever filled it, because a suggestion rewritten under an answer leaves the plan holding two picks with no default resolving them.
 

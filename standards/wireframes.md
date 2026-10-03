@@ -1,6 +1,11 @@
 ---
 title: Wireframe reference
 description: Shape and content rules for canon/wireframes/<surface>.md files
+paths:
+  - 'canon/wireframes/**'
+  - '.claude/wireframes/**'
+rule:
+  - 'Read it before adding or revising a surface.'
 ---
 
 # Wireframe reference

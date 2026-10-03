@@ -1,6 +1,10 @@
 ---
 title: Session map reference
 description: Filename and location, the sections a handoff carries, the write and read procedures, and how a role extends it
+paths:
+  - '.canon/tasks/session-*.md'
+rule:
+  - 'Follow this rule rather than the tasks rule for a `session-` file. A handoff is not a task and carries neither `## Outcomes` nor `## Findings`.'
 ---
 
 # Session map reference

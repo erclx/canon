@@ -7,7 +7,7 @@ description: Learning workspace implementation, the committed fixture, and the t
 
 Read `canon/context/features/teach.md` for structure, the render pipeline, and the decisions behind the surface before editing, and `canon/context/features/teach-chrome.md` before editing the chrome, its styles, or `src/teach/browser/`.
 
-`governance/rules/canon/661-teach.md` already routes a `.canon/teach/**` edit to both standards, and it ships to targets. This skill covers the implementation and the fixture, which that rule does not reach.
+`governance/rules/standards/teach.md` already routes a `.canon/teach/**` edit to both standards, and it ships to targets. This skill covers the implementation and the fixture, which that rule does not reach.
 
 ## Authoring a lesson
 

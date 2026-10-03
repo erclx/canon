@@ -1,20 +1,30 @@
 ---
 title: Plan reference
-description: Filename and slug, required sections, the suggested-and-answer contract, and the lifecycle from the live folder to the archive
+description: Filename and slug, the required sections, and the suggested-and-answer contract for a feature plan
+paths:
+  - '.canon/plans/**'
+rule:
+  - 'Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.'
+  - 'Never ship a question without a `- Suggested:` line. Write `- Suggested: needs your call, <why>` where the answer turns on preference.'
+  - "Rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates from an unanswered question, leaving the slot blank. Put the same deviation in one line under the open task's `## Findings`."
+  - 'Move a shipped plan to `.canon/plans/archive/`. Never delete one.'
+  - 'Amend a plan in place when a decision changes. Do not append a second passage narrating the change.'
+  - 'Follow the plan lifecycle standard for when a plan is written, how it is amended, and its move to the archive. Read it with `canon standards plan-lifecycle`.'
 ---
 
 # Plan reference
 
 Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds one concern, written before implementation starts and read by whatever executes it, so it has to carry the scope without the conversation that produced it.
 
-The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs a plan deleted before a push, which is why the archive step below is a move rather than a cleanup.
+The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs a plan deleted before a push, which is why the archive step is a move rather than a cleanup.
 
 ## Scope
 
-Governs a feature plan under `.canon/plans/feature-<slug>.md`: the filename, the required sections, what each holds, the suggested-and-answer contract, and the lifecycle from the live folder to the archive.
+Governs a feature plan under `.canon/plans/feature-<slug>.md`: the filename, the required sections, what each holds, and the suggested-and-answer contract.
 
 Does not govern:
 
+- When a plan is written, how it is amended, and its move to the archive: `plan-lifecycle.md`
 - One question measured in depth before anyone can plan against it: `groundwork.md`
 - A dump of many findings filed by domain, each carrying its own verdict: `intake.md`
 - The task file a plan is linked from, and the origin line pointing back at it: `tasks.md`
@@ -134,14 +144,6 @@ An execution that deviates rewrites the suggestion into the form below, leaving 
 The plan is archived at ship, so the same deviation takes one line in the open task's `## Findings` naming what shipped. The plan holds why the pick moved and the task holds what the tree now has.
 
 This contract inverts the one an intake folder keeps, where an empty slot means unread and acceptance is typed out. A plan is written and read in one sitting with every question already surfaced, so silence is a usable default here and is not one there.
-
-## Lifecycle
-
-- Write the plan before implementation starts, and treat it as the scope of the run that executes it. A subject that has to be measured before anyone can plan against it takes a measurement track first.
-- Keep every plan at one root. A plan copied into each parallel working tree forks, and the copies answer the same question differently.
-- Amend the plan in place when a decision changes mid-flight. Do not append a second passage narrating the change, which leaves a reader to work out which of two answers is current. An execution-time deviation from a suggestion is one such amendment, and the contract above fixes which line takes it.
-- Move the plan to `.canon/plans/archive/` when the work it describes ships or is declined. Never delete it, because the plan is where the rejected alternative is written down. A flat `.claude/plans-archive/` sibling is the older layout.
-- Write the plan in the same session that opens the task it serves. The session executing it later inherits reasoning it would otherwise re-derive.
 
 ## Template
 

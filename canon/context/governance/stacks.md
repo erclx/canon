@@ -7,16 +7,16 @@ description: How a stack resolves its rule set, why an entry may name a whole fo
 
 Each stack declares an optional `extends` chain and a `rules` list. An entry names a rule or a whole rule folder. The chain resolves recursively, so `react` resolves through `node` to `base` and the full deduplicated set installs.
 
-| Stack            | Extends | Adds                                                                       |
-| ---------------- | ------- | -------------------------------------------------------------------------- |
-| `base`           | -       | the `canon`, `claude`, `tooling`, and `writing` folders whole, plus bash   |
-| `node`           | base    | the `code` folder whole, TypeScript                                        |
-| `node-server`    | node    | the server pair: server security and database                              |
-| `react`          | node    | React, Tailwind, TypeScript testing, Zod, web security, the UI band        |
-| `nextjs`         | react   | Next.js                                                                    |
-| `astro`          | node    | Astro, TypeScript testing, web security, the UI band                       |
-| `python`         | base    | the `code` folder whole, Python, Python testing, Pydantic, the server pair |
-| `python-fastapi` | python  | FastAPI                                                                    |
+| Stack            | Extends | Adds                                                                                  |
+| ---------------- | ------- | ------------------------------------------------------------------------------------- |
+| `base`           | -       | the `canon`, `claude`, `standards`, `tooling`, and `writing` folders whole, plus bash |
+| `node`           | base    | the `code` folder whole, TypeScript                                                   |
+| `node-server`    | node    | the server pair: server security and database                                         |
+| `react`          | node    | React, Tailwind, TypeScript testing, Zod, web security, the UI band                   |
+| `nextjs`         | react   | Next.js                                                                               |
+| `astro`          | node    | Astro, TypeScript testing, web security, the UI band                                  |
+| `python`         | base    | the `code` folder whole, Python, Python testing, Pydantic, the server pair            |
+| `python-fastapi` | python  | FastAPI                                                                               |
 
 The table stays a table because it grows a row per stack rather than per rule. Each row names what the stack adds rather than listing rule names, and `canon gov list --json` reports the resolved set.
 
@@ -26,9 +26,9 @@ The table stays a table because it grows a row per stack rather than per rule. E
 
 `expandStackEntry` in `src/gov/stacks.ts` resolves one entry. A name matching a directory under `governance/rules/` yields every rule inside it, and anything else yields itself, so a folder and a slug leave the resolver as one shape. Dedupe runs on the expanded names, which lets a stack name a folder while an ancestor names a rule inside it without installing that rule twice.
 
-`base` takes its four folders whole because its list was always exactly those folders, and enumerating them made adding a rule a second edit nothing prompted. `node` and `python` take `code` whole for the same reason, since every stack that writes code extends one of them. Every other stack stays enumerated, since taking some rules from a folder is a selection a folder entry cannot express.
+`base` takes its five folders whole because its list was always exactly those folders, and enumerating them made adding a rule a second edit nothing prompted. `node` and `python` take `code` whole for the same reason, since every stack that writes code extends one of them. Every other stack stays enumerated, since taking some rules from a folder is a selection a folder entry cannot express.
 
-The consequence is that those five folders are opt-out. A rule authored into `governance/rules/claude/` ships to every `base` consumer by existing, so the decision sits in whether the file belongs in that folder rather than in the stack file. `runInstall` expands before printing, so the operator still reads every rule name.
+The consequence is that those six folders are opt-out. A rule authored into `governance/rules/claude/` ships to every `base` consumer by existing, so the decision sits in whether the file belongs in that folder rather than in the stack file. `runInstall` expands before printing, so the operator still reads every rule name.
 
 ### A Node backend takes a sibling stack where Python takes none
 

@@ -194,9 +194,15 @@ export const STAGES: readonly Stage[] = [
       },
       {
         kind: 'drift',
+        pathspec: 'governance/rules/standards',
+        failure:
+          'Standard-pointer rules drifted. Run bun run check and commit governance/rules/standards and .claude/rules.',
+      },
+      {
+        kind: 'drift',
         pathspec: '.claude/rules',
         failure:
-          'Consumed copies drifted. Run bun run check and commit .claude/rules.',
+          'Consumed copies drifted. Run bun run check and commit governance/rules/standards and .claude/rules.',
       },
     ],
     success: 'Consumed copies clean',

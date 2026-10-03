@@ -1,6 +1,12 @@
 ---
 title: Context entry reference
 description: Shape and content rules for canon/context/<domain>.md entries
+paths:
+  - 'canon/context/**'
+  - '.claude/context/**'
+rule:
+  - 'Before non-trivial work in a domain, read its `canon/context/<domain>.md` entry. Use `canon/context/index.md` to find it.'
+  - 'Leave the entry conforming when work in its domain changes what it describes.'
 ---
 
 # Context entry reference

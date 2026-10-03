@@ -1,6 +1,10 @@
 ---
 title: Standard reference
 description: Shape and content rules for authoring a standard
+paths:
+  - 'standards/**/*.md'
+rule:
+  - 'Read it before writing or editing a standard. Do not work the shape from memory.'
 ---
 
 # Standard reference
@@ -64,7 +68,9 @@ A standard failing these questions is non-conforming even when it satisfies ever
 
 - Start the file with a frontmatter block carrying at least `title` and `description`. A consuming surface may require more.
 - `title`: names the doc type in sentence case, suffixed `reference` (`Commit reference`, `Branch reference`)
-- `description`: one line naming what the standard covers. It becomes the index link label on install.
+- `description`: one line naming what the standard covers. It becomes the index link label on install, and the generated rule's description and pointer bullet.
+- `paths` (optional): the globs where the standard applies, one per entry, copied verbatim into the rule `canon gov regen` generates for it. Omit it when no path should route to the standard, and no rule is generated.
+- `rule` (optional): operative bullets the generated rule carries after its pointer bullet, one per entry, each a full sentence. Quote an entry holding a backtick, a colon, or a leading `-`.
 
 ## Structure
 

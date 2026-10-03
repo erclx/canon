@@ -25,7 +25,16 @@ installs the rule under its new name and deletes the old file, whether or not
 the target's stamp records a stack. Local edits to the old file are not
 carried, and the sync says so. The sync lists each change by path before it
 applies, and the target's git diff is the record afterwards. `canon sync
---check` lists the same file as `retired` or `renamed` before any sync runs. A project's own rules belong under `.claude/rules/project/`, where
+--check` lists the same file as `retired` or `renamed` before any sync runs.
+
+The `standards` band is the largest such move. Each rule that only routed a
+path to a standard now ships under that standard's name at
+`.claude/rules/canon/standards/<standard>.md`, so a target holding
+`canon/658-plan.md` or `writing/801-markdown.md` syncs onto `standards/plan.md`
+and `standards/markdown.md`. Those rules carry no number, and their globs and
+bullets come from the standard's own frontmatter.
+
+A project's own rules belong under `.claude/rules/project/`, where
 `canon standards rule` reserves `900-999` for them, and a rule placed under
 `canon/` instead is lost on the next sync.
 
@@ -130,7 +139,12 @@ runs the verb again for that name.
 
 `canon gov regen` is the one governance verb that runs against the toolkit root,
 because the `.claude/rules/` it writes there is produced output rather than an
-operator's working copy. It reads the stack recorded in `internal/governance.toml`
+operator's working copy. It first writes `governance/rules/standards/`, one rule
+per standard under `standards/` whose frontmatter carries `paths:`, clearing the
+folder so a standard that drops the field loses its rule. A standard named like
+a band folder or an authored rule, or a `paths:` or `rule:` that is not a list
+of strings, refuses the whole run before anything is written. It then reads the
+stack recorded in `internal/governance.toml`
 into `.claude/rules/canon/`, installs anything under `internal/rules/` into a
 separate `.claude/rules/internal/`, and clears both destinations first so a
 rule the record stopped naming disappears. `internal/` is what this repository
@@ -140,7 +154,7 @@ since a target has no rule source of its own that ships nowhere.
 It takes `--root <path>` and defaults to the toolkit root, prints nothing on success, and
 reports the reason on stderr with exit 1 when the record names a stack or rule
 that does not resolve. The Consumed copies stage of `bun run check` calls it and
-asserts the result is committed.
+asserts both the generated band and the consumed copy are committed.
 
 ## Whole-project sync
 

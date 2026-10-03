@@ -7,7 +7,7 @@ description: Whether a skill earns its place, how to read a usage census, the ev
 
 ## Whether a skill earns its place
 
-The redundancy audit in `canon/context/claude-plugin/skill-strategy/redundancy-audit.md` runs outward, against community counterparts. Inward, against the catalog's own two zero-cost tells, a folder wrapping something already reachable and a folder nobody calls, `create-skill` asks the first two before a folder exists, and `570-skill.md` carries the same check for whatever creates a `SKILL.md` some other way.
+The redundancy audit in `canon/context/claude-plugin/skill-strategy/redundancy-audit.md` runs outward, against community counterparts. Inward, against the catalog's own two zero-cost tells, a folder wrapping something already reachable and a folder nobody calls, `create-skill` asks the first two before a folder exists, and `governance/rules/standards/skill.md` carries the same check for whatever creates a `SKILL.md` some other way.
 
 The third question, whether anything invokes the skill beyond the author typing its name, has no answer at creation time. It ships in the skill's own `REQUIREMENT.md` as a review criterion, read against a usage census rather than gated on up front.
 

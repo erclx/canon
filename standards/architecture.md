@@ -1,6 +1,11 @@
 ---
 title: Architecture reference
 description: Shape and content rules for canon/ARCHITECTURE.md
+paths:
+  - 'canon/ARCHITECTURE.md'
+  - '.claude/ARCHITECTURE.md'
+rule:
+  - "Add a decision here only when it fills one of the standard's slots, and write any other decision into the context entry for the domain it constrains. At the record's stated cap, merge or retire an entry before adding one."
 ---
 
 # Architecture reference

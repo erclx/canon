@@ -33,7 +33,7 @@ Read `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md` before writing any file
 A track may run an experiment to settle an open question without stopping to ask. What it takes depends on what the experiment does.
 
 - Reading or computing: run it. Unrestricted reading already covers this, and it is what most spikes turn out to be.
-- Anything that processes an input: start against a sample and scale up after it works, per the sample rule in the standard's spikes section, which bounds it on size, duration, and spend.
+- Anything that processes an input: start against a sample and scale up after it works, per the sample rule in `${CLAUDE_SKILL_DIR}/../../standards/groundwork-spikes.md`, which bounds it on size, duration, and spend.
 - Writing a fixture this session reads or provisions itself: run it, under the fixtures path above. Provisioning is the usual blocker rather than spend, and it costs nothing.
 - Spawning a billed headless session: run up to three, then ask before spawning more. The bound is a run count rather than a budget, because a headless run reports its total cost only after it finishes, so a dollar ceiling is reportable and not enforceable while a run count is checkable before spawning.
 

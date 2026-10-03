@@ -19,17 +19,17 @@ Record a rejection by which half failed rather than by judgment:
 - The husky re-drop on a monorepo subtree fails the first half too, firing when a command runs rather than when a path is edited.
 - The stale-copy failure on a widened source rule fails the second half, since that gate is closed and loud.
 
-One candidate passes both halves and stays deferred. A child folder carrying no `index.md` drops out of every catalog silently, and closing it means widening `610-context`, which ships to every `base` consumer and would carry an invariant about a system a target may not run. It needs a shipped rule and a stack decision first.
+One candidate passes both halves and stays deferred. A child folder carrying no `index.md` drops out of every catalog silently, and closing it means widening `governance/rules/standards/context.md`, which ships to every `base` consumer and would carry an invariant about a system a target may not run. It needs a shipped rule and a stack decision first.
 
 ### Every file-path standard has a routing rule
 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
 - `595-tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
-- `610-context` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
-- `656-groundwork` and `657-intake` route the two track folders and sit beside `655-tasks` in `base`, so the three workflow surfaces share one roster. A skill-local reference would load only with its skill, never when a returning session opens the folder directly.
+- `governance/rules/standards/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
+- `governance/rules/standards/groundwork.md` and `governance/rules/standards/intake.md` route the two track folders and sit beside `governance/rules/standards/tasks.md` in `base`, so the three workflow surfaces share one roster. A skill-local reference would load only with its skill, never when a returning session opens the folder directly.
 - Each of those two carries the directives that ship silently when violated, the answer contract and the re-measure floor, and points at its standard for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
-- `661-teach` globs `.canon/teach/**`, a folder most targets never open, and its frontmatter says so. `662-session` globs `.canon/tasks/session-*.md` alone inside the folder `655-tasks` globs whole, because the board and the handoff are two shapes and one rule over both would carry two.
+- `governance/rules/standards/teach.md` globs `.canon/teach/**`, a folder most targets never open, so it costs nothing where no workspace exists. `governance/rules/standards/session.md` globs `.canon/tasks/session-*.md` alone inside the folder `governance/rules/standards/tasks.md` globs whole, because the board and the handoff are two shapes and one rule over both would carry two.
 
 ### Directives beside the pointer
 
@@ -37,17 +37,17 @@ A claude rule carries operative directives beside its pointer, since a rule arri
 
 `592-claude-md` carries directives and no pointer. No standard governs the root file, so there is no structure to reproduce, and the seed and `seed-sync` hold the role a standard would.
 
-`800-prose` and `801-markdown` stay pointer-only for two different reasons. `801-markdown` points at a standard whose bans ship as package data, so restating part of the list puts a second copy beside the one `canon markdown audit` reads. `800-prose` points at the `write-human` skill and carries the instruction to load it rather than a compressed sample, since the compressible half of that guidance does the least work.
+`800-prose` and `governance/rules/standards/markdown.md` stay pointer-only for two different reasons. `governance/rules/standards/markdown.md` points at a standard whose bans ship as package data, so restating part of the list puts a second copy beside the one `canon markdown audit` reads. `800-prose` points at the `write-human` skill and carries the instruction to load it rather than a compressed sample, since the compressible half of that guidance does the least work.
 
 ### A rule cites a standard through the read verb
 
 A rule citing a standard names `canon standards <name>`, whose resolver falls through to the corpus the package ships. A rule loads on a glob match with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the plugin-root path a skill body spells is unavailable. Spelled in prose, that path also reads ambiguously against the project-root `standards/` folder.
 
-The verb ships with the CLI and so does the rule, so the two never arrive apart and a verb citation owes no report-the-gap bullet. The bullet is owed only where the carrier ships on the other channel, which is why `661-teach` keeps one on its glossary bullet.
+The verb ships with the CLI and so does the rule, so the two never arrive apart and a verb citation owes no report-the-gap bullet. The bullet is owed only where the carrier ships on the other channel, which is why `governance/rules/standards/teach.md` keeps one on its glossary bullet.
 
 Test the target for a guard before writing `Load` into a rule. `write-human` is advisory, with no guard and nothing it starts, so `800-prose` can say load. `teach-workspace` runs a workspace, stops on a missing subject, and resumes a matching one, so a rule telling a session to load it for a glossary shape gets a refusal or a workspace.
 
-`661-teach` names `references/glossary.md` to read and says not to invoke the skill. `canon/context/standards/scope.md` carries what this narrows on the standards side.
+`governance/rules/standards/teach.md` names `references/glossary.md` to read and says not to invoke the skill. `canon/context/standards/scope.md` carries what this narrows on the standards side.
 
 ### Surfaces reached by something other than a glob
 
@@ -57,7 +57,7 @@ Test the target for a guard before writing `Load` into a rule. `write-human` is 
 
 #### A missing file
 
-A rule with a file to match still cannot reach the moment that file is missing. `662-session`'s glob excludes the no-map case by definition, so a bullet about what to do when no session map exists could never fire from it. The absent-file response belongs to the standard, which a session reaches without a glob.
+A rule with a file to match still cannot reach the moment that file is missing. `governance/rules/standards/session.md`'s glob excludes the no-map case by definition, so a bullet about what to do when no session map exists could never fire from it. The absent-file response belongs to the standard, which a session reaches without a glob.
 
 #### Citations from `CLAUDE.md`
 
@@ -93,7 +93,7 @@ An always-loaded bullet is cut only where another surface a governed target actu
 
 Three always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
 
-- `565-behavior.md` keeps "answer from the artifact rather than re-asking". `658-plan.md` carries the plan answer contract, but it loads only for a plan, and the sentence also covers intake and groundwork `- Suggested:` lines. It is the fix the question-surface decision above records.
+- `565-behavior.md` keeps "answer from the artifact rather than re-asking". `governance/rules/standards/plan.md` carries the plan answer contract, but it loads only for a plan, and the sentence also covers intake and groundwork `- Suggested:` lines. It is the fix the question-surface decision above records.
 - `606-git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
 - `602-tasks.md` keeps the act of writing the plan in the same session and linking it. `standards/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
 

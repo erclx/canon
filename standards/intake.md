@@ -1,6 +1,8 @@
 ---
 title: Intake reference
 description: Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
+paths:
+  - '.canon/intake/**'
 ---
 
 # Intake reference

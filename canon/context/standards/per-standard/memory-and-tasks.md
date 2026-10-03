@@ -11,7 +11,7 @@ description: Where the memory standard's delete prohibition lives and why, the s
 
 `governance/rules/canon/603-memory.md` loads every session and carries three bullets rather than pointing at the standard for everything: the write location, because `.canon/memory/` rather than `~/.claude/projects/` is project policy, the routing rule, because it has to fire before an entry is written at all, and the delete prohibition.
 
-The delete prohibition sits in the always-loaded rule on purpose. A path-scoped rule fires when a session edits a file the glob matches, and a bulk retire runs through the shell as a `mv`, so `659-memory.md`, which globs `.canon/memory/**` and routes to the standard's lifecycle, is never loaded at the moment the irreversible act happens. `603-memory.md` is what reaches the shell path. The tier test in `canon/context/context-model/overview.md` asks whether a rule fires on a path being edited, and this is the case where the answer is no because the violating action is not an edit.
+The delete prohibition sits in the always-loaded rule on purpose. A path-scoped rule fires when a session edits a file the glob matches, and a bulk retire runs through the shell as a `mv`, so `governance/rules/standards/memory.md`, which globs `.canon/memory/**` and routes to the standard's lifecycle, is never loaded at the moment the irreversible act happens. `603-memory.md` is what reaches the shell path. The tier test in `canon/context/context-model/overview.md` asks whether a rule fires on a path being edited, and this is the case where the answer is no because the violating action is not an edit.
 
 ## Memory pen shape
 
@@ -49,7 +49,7 @@ The `## Needs a plan` cell takes the same treatment. It states why the row sits 
 
 ## Board split from tasks
 
-`standards/board.md` carries `priority.md`, `backlog.md`, and the generated index, and `standards/tasks.md` keeps the task file. The two govern different documents with their own templates, and cutting the ordering and backlog rules down inside one file would have cut live rules to fit the length ceiling. `655-tasks.md` globs the whole folder, so it routes to both.
+`standards/board.md` carries `priority.md`, `backlog.md`, and the generated index, and `standards/tasks.md` keeps the task file. The two govern different documents with their own templates, and cutting the ordering and backlog rules down inside one file would have cut live rules to fit the length ceiling. `governance/rules/standards/tasks.md` globs the whole folder, so it routes to both.
 
 ## Tasks origin and archiving
 

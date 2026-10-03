@@ -5,7 +5,7 @@ description: The numbering bands and their two sources, the frontmatter contract
 
 # Rules
 
-A rule is a `.md` file carrying the Claude shape directly, so nothing generates it and install is a passthrough copy. Rules sit in subdirectories by domain and install preserves that layout, since a flat folder would leave the numbering bands as the only grouping signal.
+A rule is a `.md` file carrying the Claude shape directly, so install is a passthrough copy. Every authored rule is written by hand, and the `standards/` band alone is generated. Rules sit in subdirectories by domain and install preserves that layout, since a flat folder would leave the numbering bands as the only grouping signal.
 
 What earns a rule in the first place, and which standard each one routes to, is `canon/context/governance/routing.md`.
 
@@ -31,7 +31,7 @@ The table stays a table because it grows a row per band rather than per rule, an
 
 Every band from `000` to `899` now holds a group, so a new group has no free band and joins an existing one or retires one. `900-999` is reserved for rules a target authors itself, which no shipped rule takes.
 
-`claude/` kept the `500` band rather than `canon/`, since its resident rules kept their numbers and `internal/rules/claude/593` to `599` stay inside their own group's band. The moved session-conduct rules took `565` to `567`, below `570-skill`, so no number a moved rule held is reused in the band. The workflow rules opened `canon/` at `601`, and the canonical-doc rules kept their last two digits, so `561-teach` became `661-teach`.
+`claude/` kept the `500` band rather than `canon/`, since its resident rules kept their numbers and `internal/rules/claude/593` to `599` stay inside their own group's band. The moved session-conduct rules took `565` to `567`, below the `570` the skill rule then held, so no number a moved rule held is reused in the band. The workflow rules opened `canon/` at `601`, and the canonical-doc rules kept their last two digits until the `standards/` band took them by name.
 
 The leading digit restates the folder, so what the number uniquely supplies is read order rather than routing. Nothing precedence-orders rules at load, and renumbering would reach every installed target and buy nothing.
 
@@ -45,11 +45,19 @@ Each source also installs into its own folder: `.claude/rules/canon/`, `.claude/
 
 ### Rules group by the audience they serve
 
-A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, `tooling/` for dev setup, and `writing/` for prose and document shape. `base` takes the last four whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
+A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, `tooling/` for dev setup, `writing/` for prose and document shape, and `standards/` for the generated rules routing a path to its standard. `base` takes the last five whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
 
 Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, was the alternative, and it left two groups with no honest home: the generic code rules are not tooling, and the prose rules are not about Claude.
 
 An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` keeps only the bullets a model does not follow by default.
+
+### A rule that only routes to a standard is generated from it
+
+`canon gov regen` writes `governance/rules/standards/<standard>.md` from each standard carrying `paths:` in its frontmatter, with a pointer bullet built from the standard's `description` and any `rule:` bullets after it. The standard owns its glob, so adding one or changing its scope is one file. These rules carry no number, since the band holds no read order worth stating, and the generator refuses a standard named like a band folder or an authored rule.
+
+The output is committed rather than produced inside `canon gov install` and `canon gov sync`. Install, sync, `canon sync --check`, `canon gov list`, the citation and restated stages, and the bash sandbox helpers all read rules as files under `governance/rules/`, and `readNewRules` needs a file in git history to see a new rule at all. Generating at install would thread a virtual source through each of them for the same output a target receives. The Consumed copies stage asserts the band is committed.
+
+A rule pointing at a skill rather than a standard stays authored, as do `800-prose`, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
 
 ## Gotchas
 
