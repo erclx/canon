@@ -1,6 +1,6 @@
 ---
 title: Worker
-description: The rebase stage the worker's return leg carries, the worker role holding its own half of the channel, the relay serving a session holding neither role, and what the pull request announcement buys
+description: The rebase stage the worker's return leg carries, the worker role holding its own half of the channel, the relay serving a session holding neither role, what the pull request announcement buys, and why the return leg runs on REST
 ---
 
 # Worker
@@ -30,6 +30,14 @@ The rules are stated where the stage runs, which is what makes it safe. A wholes
 No comment channel exists for a conflict. Both sides of every hunk sit in the conflict itself, `main` is what the operator approved, and `git log origin/main` names what landed, so a per-conflict comment would only restate the diff and add a surface the worker waits on. A hunk the tree does not settle stops instead and reaches the operator as an ordinary finding on the next pass, which holds only because the stage forbids guessing rather than leaving it to judgment.
 
 `git-followup` absorbs the consequence at its push, forcing under a lease when the tracking branch no longer reaches the head, since a plain `git push` is rejected on a rewritten branch. The close-out's ancestry test already covers the re-read this produces, falling back to a full pass on exactly this branch shape.
+
+## The return leg runs on REST
+
+A cloud worker answering a review runs `review-address`, which calls `git-followup`, and the cloud's GitHub proxy refuses GraphQL. Every `gh pr` subcommand runs on GraphQL, so both bodies resolve the pull request through `canon pr head --json` and read, post, and edit through `gh api` alone. An early cloud run posted its reply only because the worker reached for REST unprompted, and the contract turns that improvisation into the path.
+
+The writes moved with the reads on this leg, since a reply posted through `gh pr comment` and a body synced through `gh pr edit` fail there as surely as a read does. Step 6 keeps the `id` the issue-comments POST answers with, which is the number Step 7's edit takes, so no comment id is cut out of a URL. The fallback lookup for a CLI predating `canon pr head` encodes the branch into the pulls query and refuses on two open pull requests rather than taking the first, matching the verb's `ambiguous-pull`.
+
+`review-ui` and `git-split` moved their reads only. Their writes sit off this leg and stay for a later slice, and `src/claude/skills-rest.test.ts` holds the two tiers apart until then: any `gh pr` subcommand fails it in the two leg bodies, and only a read fails it in the other two. The leg also reaches `git-pr/references/evidence.md`, since `git-followup` mints a preview through it, so that one file sits in the strict tier while the rest of `git-pr` does not.
 
 ## The worker's own half
 

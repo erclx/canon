@@ -26,15 +26,23 @@ rather than inside it, so the two passes finish on their own clocks.
 
 ## Step 1: resolve the pull request
 
-Resolve the number with `gh pr view --json number,headRefName,headRefOid`, or take the one the launch names. Take `<head>` off `canon pr head <number> --json`, reading its `tip`, and fall back to `headRefOid` when no record comes back. The first seven characters are `<short-sha>`. Record `<pass>` once, as the instant this pass starts, with `date -u +%Y%m%dT%H%M%SZ`. Every frame Step 5 pushes files under it, so a later pass at the same head never replaces an image this one's comment shows.
+Resolve the number and the head through `canon pr head <number> --json` for the number the launch names, or `canon pr head --json` for the current branch when it names none. Take `<number>` off the record's `number` and `<head>` off its `tip`. The first seven characters are `<short-sha>`. Record `<pass>` once, as the instant this pass starts, with `date -u +%Y%m%dT%H%M%SZ`. Every frame Step 5 pushes files under it, so a later pass at the same head never replaces an image this one's comment shows.
 
-Read the newest UI verdict for the head guard:
+Every read in this step runs on REST, since the `gh pr` lookups run on GraphQL and a cloud session's GitHub proxy refuses it. A target whose CLI predates the verb gets no record back. When the launch named no number, fall back there to the open pull requests on the current branch, encoding it so a `/` in its name reaches the query as `%2F`, and stop when that prints anything but one number. Two open pull requests on one head against different bases leave nothing to say which one the launch meant. A named number skips that lookup, since this checkout's branch need not be the pull request's. Either way, read the head off the pull request itself:
 
 ```bash
-gh pr view <number> --json reviews,comments --jq '([.reviews[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | startswith("## UI review"))] | last) as $v | [($v.body // ""), ($v.submittedAt // ""), ([.comments[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review response" or . == "## Post-review findings") | .createdAt] | max // "")]'
+gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'
+gh api repos/{owner}/{repo}/pulls/<number> --jq .head.sha
 ```
 
-The three values are the verdict's body, when it was posted, and when the newest reply was. Take the sha off the body's last-line `<!-- review-ui: head=<sha> -->` marker. A body carrying none covers no head this pass can trust, so drive.
+Read the newest UI verdict for the head guard, and the newest reply:
+
+```bash
+gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --jq '.[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | startswith("## UI review")) | {body, submitted_at} | @json' | tail -n 1
+gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' --jq '.[] | select(.body // "" | split("\n")[0] | rtrimstr("\r") | . == "## Review response" or . == "## Post-review findings") | .created_at' | tail -n 1
+```
+
+The first read prints the verdict's body and when it was posted as one JSON line, and the second prints when the newest reply was. `--paginate` runs the filter once per page, so `tail` outside it keeps the newest row in the thread rather than the newest on each page. The verdict goes out as JSON because its body spans many lines, and `tail` over the raw body would keep only its last one. An empty first read is a pull request carrying no verdict yet. Take the sha off the body's last-line `<!-- review-ui: head=<sha> -->` marker. A body carrying none covers no head this pass can trust, so drive.
 
 Read nothing else about the change. The diff, the plan, the task, and the description's Summary and Technical Context all carry the author's argument for it, and a pass that has heard it drives towards what it expects.
 
