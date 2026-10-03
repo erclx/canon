@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.24.0](https://github.com/erclx/canon/compare/v5.23.0...v5.24.0) (2026-10-03)
+
+
+### Features
+
+* **claude:** draft a readme from one template per project type ([#2167](https://github.com/erclx/canon/issues/2167)) ([749a1c1](https://github.com/erclx/canon/commit/749a1c1a84ceeb0ff4c78fb48e67daae0ddd308e))
+* **claude:** read unmovedSurfaces in canon-operator ([#2181](https://github.com/erclx/canon/issues/2181)) ([92d080d](https://github.com/erclx/canon/commit/92d080da2d07b757deb6c337dbeecd7c2c8aead4))
+* **design:** render DESIGN.md as tables and gate its prose budget ([#2172](https://github.com/erclx/canon/issues/2172)) ([f8256ce](https://github.com/erclx/canon/commit/f8256cea00aa5bc506d0d2d808b698682b245e1a))
+
+
+### Bug Fixes
+
+* **canvas:** repair first-use serve, frame fonts, and raw colors ([#2176](https://github.com/erclx/canon/issues/2176)) ([05a01a3](https://github.com/erclx/canon/commit/05a01a32253ccd751f563774bf8cc1e312db52c3))
+* **hooks:** name only .canon/tmp in the scratch guard warning ([#2180](https://github.com/erclx/canon/issues/2180)) ([e39620e](https://github.com/erclx/canon/commit/e39620e9e23946bb5c15c493c822a5ea277f2273))
+* **sandbox:** stage claude fixtures at the roots skills read ([#2163](https://github.com/erclx/canon/issues/2163)) ([512860b](https://github.com/erclx/canon/commit/512860be81417fbb309c5ecd0ab3331db60abda6))
+
 ## [5.23.0](https://github.com/erclx/canon/compare/v5.22.0...v5.23.0) (2026-10-03)
 
 
