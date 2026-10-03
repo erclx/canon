@@ -1,0 +1,15 @@
+---
+title: 'v00.1: Log a habit with one tap'
+description: Mark a habit done for today with a single tap
+---
+
+# v00.1: Log a habit with one tap
+
+Plan: [feature-log-entry](../plans/feature-log-entry.md)
+
+## Outcomes
+
+- [ ] Tapping a habit marks it done for today
+- [ ] A second tap the same day is a no-op
+
+> Test strategy: unit, logging twice on one day leaves one entry

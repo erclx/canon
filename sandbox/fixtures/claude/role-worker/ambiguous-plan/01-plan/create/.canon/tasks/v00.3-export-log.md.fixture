@@ -1,0 +1,15 @@
+---
+title: 'v00.3: Export the habit log'
+description: Serialize every logged entry to a file the user downloads
+---
+
+# v00.3: Export the habit log
+
+Plan: [feature-export-format](../plans/feature-export-format.md)
+
+## Outcomes
+
+- [ ] Every logged entry reaches the exported file
+- [ ] The file downloads from the habit list screen
+
+> Test strategy: unit, round-trip a seeded entry list through the serializer

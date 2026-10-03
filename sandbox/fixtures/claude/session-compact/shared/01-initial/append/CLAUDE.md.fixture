@@ -1,0 +1,8 @@
+
+# My App
+
+Task management API.
+
+## Commands
+
+- `bun run check`: lint and typecheck

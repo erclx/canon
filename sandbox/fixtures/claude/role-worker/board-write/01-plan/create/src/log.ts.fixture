@@ -1,0 +1,5 @@
+export type Entry = { habit: string; day: string }
+
+export function logEntry(entries: Entry[], habit: string, day: string) {
+  return entries
+}

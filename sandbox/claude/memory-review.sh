@@ -14,146 +14,12 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >>CLAUDE.md
-
-# Sample Project
-
-Task API used as the fixture for /canon:memory-review.
-
-## Behavior
-
-- Run `bun run check` before opening a PR.
-
-## Memory
-
-- Write all memory files to `.canon/memory/`, not `~/.claude/projects/`.
-- Save a feedback memory only when the same mistake happens twice or when the user explicitly corrects you.
-- Keep feedback memories to 3 lines: the rule, a one-line Why, and a one-line How to apply.
-
-## Tasks
-
-- Track work in `.canon/tasks/`, one file per task.
-EOF
-
-  mkdir -p .claude/skills/canon-sample
-  cat <<'EOF' >.claude/skills/canon-sample/SKILL.md
----
-name: canon-sample
-description: Guide edits under src/.
----
-
-# Sample skill
-
-## When to load
-
-When editing anything under `src/`.
-
-## Conventions
-
-- Route handlers live in `src/routes/`.
-EOF
-
-  mkdir -p .canon/memory
-
-  cat <<'EOF' >.canon/memory/feedback-confirm-destructive-commands.md
----
-title: Confirm destructive commands before running
-description: Pause for user approval before rm, force-push, or branch deletion
-category: Feedback
----
-
-Before running a destructive shell command, state the command and wait for user approval.
-
-**Why:** User lost work last session when a `git reset --hard` ran without confirmation.
-
-**How to apply:** On any command that deletes data or rewrites shared history, print the exact command in chat and pause.
-EOF
-
-  cat <<'EOF' >.canon/memory/feedback-zod-in-src-routes.md
----
-title: Use Zod for request validation in src/routes
-description: Parse request bodies with Zod schemas at the handler boundary
-category: Feedback
----
-
-Route handlers in `src/routes/` must parse request bodies with Zod before touching the db layer.
-
-**Why:** A past incident landed unchecked input into SQLite and corrupted the tasks table.
-
-**How to apply:** When editing or adding a handler under `src/routes/`, co-locate the Zod schema in the same file and parse before any db call.
-EOF
-
-  cat <<'EOF' >.canon/memory/feedback-no-obvious-comments.md
----
-title: Do not add obvious comments
-description: Skip comments that restate what the code already says
-category: Feedback
----
-
-Do not write comments that describe what the code does when the identifiers already state it.
-
-**Why:** Obvious comments rot as code evolves and create review noise.
-
-**How to apply:** Before writing a comment, ask whether removing it would confuse a reader. If no, skip it.
-EOF
-
-  cat <<'EOF' >.canon/memory/feedback-comments-explain-why.md
----
-title: Comments should explain why, not what
-description: Reserve comments for non-obvious rationale, hidden constraints, and workarounds
-category: Feedback
----
-
-When a comment is warranted, it explains why the code is shaped this way, not what it does.
-
-**Why:** "What" comments duplicate code. "Why" comments capture invariants the code cannot express.
-
-**How to apply:** If a comment starts with a verb describing the code's action, rewrite it to name the constraint or reason instead.
-EOF
-
-  cat <<'EOF' >.canon/memory/feedback-memory-location.md
----
-title: Write memories to .canon/memory/
-description: Memory files belong under .canon/memory/, not ~/.claude/projects/
-category: Feedback
----
-
-All memory files land in `.canon/memory/` at the project root, never in `~/.claude/projects/`.
-
-**Why:** Per-project memory must be tracked alongside the repo it applies to.
-
-**How to apply:** Before writing a memory file, verify the path starts with `.canon/memory/`.
-EOF
-
-  cat <<'EOF' >.canon/memory/feedback-be-careful.md
----
-title: Be careful
-description: Think before acting
-category: Feedback
----
-
-Be thoughtful about changes.
-
-**Why:** Mistakes are costly.
-
-**How to apply:** Consider impact before editing.
-EOF
-
-  # Cites a file the fixture never holds, so `canon records stale memory` lists
-  # it first and the batch has to open on it.
-  cat <<'EOF' >.canon/memory/feedback-legacy-handlers-own-auth.md
----
-title: Auth checks live in the legacy handler module
-description: Put every auth check in the legacy handler module before a route runs
-category: Feedback
----
-
-Run every auth check in `src/legacy/handlers.ts` before a route handler executes.
-
-**Why:** Two routes once shipped with no auth check because each assumed the other layer ran it.
-
-**How to apply:** When adding a route, call the legacy auth guard first.
-EOF
+  # `feedback-legacy-handlers-own-auth` cites a file the stage never holds, so
+  # `canon records stale memory` lists it first and the batch has to open on it.
+  # The index is stored in the shape `canon indexes regen` produces, so it
+  # matches what the memory-index hook would have written. A hand-shaped index
+  # would drift from the renderer and teach the arm the wrong contract.
+  stage_fixtures claude memory-review shared 01-initial
 
   # Reviewed today, so the verb reads it as not due and a correct batch leaves
   # it out whatever room remains.
@@ -191,30 +57,6 @@ Keep habit ${pad} in mind while working.
 EOF
   done
 
-  # Seeded in the shape `canon indexes regen` produces, so the fixture matches
-  # what the memory-index hook would have written. A hand-shaped index here
-  # would drift from the renderer and teach the arm the wrong contract.
-  cat <<'EOF' >.canon/memory/index.md
----
-title: Memory
-subtitle: Session facts with no owning surface, grouped by kind.
----
-
-# Memory
-
-Session facts with no owning surface, grouped by kind.
-
-## Feedback
-
-- [Be careful](feedback-be-careful.md): Think before acting
-- [Comments should explain why, not what](feedback-comments-explain-why.md): Reserve comments for non-obvious rationale, hidden constraints, and workarounds
-- [Confirm destructive commands before running](feedback-confirm-destructive-commands.md): Pause for user approval before rm, force-push, or branch deletion
-- [Auth checks live in the legacy handler module](feedback-legacy-handlers-own-auth.md): Put every auth check in the legacy handler module before a route runs
-- [Write memories to .canon/memory/](feedback-memory-location.md): Memory files belong under .canon/memory/, not ~/.claude/projects/
-- [Do not add obvious comments](feedback-no-obvious-comments.md): Skip comments that restate what the code already says
-- [Keep pull requests under one concern](feedback-small-pull-requests.md): Split a change touching two concerns into two pull requests
-- [Use Zod for request validation in src/routes](feedback-zod-in-src-routes.md): Parse request bodies with Zod schemas at the handler boundary
-EOF
   for pad in $(seq -w 1 20); do
     echo "- [Padding habit ${pad}](feedback-zz-pad-${pad}.md): Stay mindful of habit ${pad}" >>.canon/memory/index.md
   done

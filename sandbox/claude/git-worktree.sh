@@ -49,20 +49,7 @@ EOF
 stage_setup() {
   select_or_route_scenario "Which scenario?" "cleanup" "list"
 
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-git-worktree",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  cat <<'EOF' >CLAUDE.md
-# Sandbox
-
-Disposable repo for exercising the `git-worktree` skill.
-EOF
+  stage_fixtures claude git-worktree shared 01-initial
 
   mkdir -p src
   echo 'export const name = "sandbox";' >src/index.ts

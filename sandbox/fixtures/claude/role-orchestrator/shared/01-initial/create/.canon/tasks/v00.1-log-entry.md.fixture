@@ -1,0 +1,11 @@
+---
+title: 'v00.1: Log a habit with one tap'
+description: Mark a habit done for today with a single tap
+---
+
+# v00.1: Log a habit with one tap
+
+- [ ] Outcome: tapping a habit marks it done for today
+- [ ] Outcome: a second tap the same day is a no-op
+
+> Test strategy: component, tap toggles done state once per day

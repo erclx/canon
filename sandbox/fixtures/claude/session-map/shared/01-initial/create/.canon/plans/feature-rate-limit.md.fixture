@@ -1,0 +1,4 @@
+# Feature: rate limit the task API
+
+Reject a client that exceeds the request budget for a window, and reset the
+budget on a rolling window rather than on a fixed one.

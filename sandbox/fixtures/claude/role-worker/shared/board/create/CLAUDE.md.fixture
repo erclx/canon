@@ -1,0 +1,7 @@
+# Habit Tracker
+
+Local-first habit tracking web app.
+
+## Commands
+
+- `bun run check`: lint and typecheck

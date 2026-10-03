@@ -1,0 +1,13 @@
+---
+title: 'v03.0: Export the task list as CSV'
+description: Serve the collection as a downloadable CSV file
+---
+
+# v03.0: Export the task list as CSV
+
+Plan: [feature-csv-export](../plans/feature-csv-export.md)
+
+- [ ] Outcome: a request for the CSV form returns every task as a row
+- [ ] Outcome: a title carrying a comma survives the round trip
+
+> Test strategy: integration, request the CSV form and parse the rows back.

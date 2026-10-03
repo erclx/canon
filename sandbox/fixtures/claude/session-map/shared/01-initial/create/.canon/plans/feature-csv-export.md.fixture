@@ -1,0 +1,8 @@
+# Feature: export the task list as CSV
+
+Serve the collection as CSV from the existing list route, quoting a title that
+carries a comma so the rows parse back.
+
+**Files to touch:**
+
+- `src/routes/export.ts`: the CSV serializer and the route that serves it

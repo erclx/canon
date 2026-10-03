@@ -1,0 +1,11 @@
+---
+title: Use Zod for request validation in src/routes
+description: Parse request bodies with Zod schemas at the handler boundary
+category: Feedback
+---
+
+Route handlers in `src/routes/` must parse request bodies with Zod before touching the db layer.
+
+**Why:** A past incident landed unchecked input into SQLite and corrupted the tasks table.
+
+**How to apply:** When editing or adding a handler under `src/routes/`, co-locate the Zod schema in the same file and parse before any db call.

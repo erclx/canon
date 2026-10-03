@@ -23,11 +23,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "matched-plan")
-    cat <<'EOF' >.canon/plans/feature-foo.md
-# Feature: foo
-
-Stub plan seeded for the matched-plan tier. Exercises name derivation when the current branch has a same-name plan file.
-EOF
+    stage_fixtures claude session-worktree matched-plan 01-plan
 
     git add . && git commit -m "feat(plans): seed foo plan" --no-verify -q
     git checkout -b foo -q
@@ -40,17 +36,7 @@ EOF
     log_info "         worktree at .claude/worktrees/foo/, branch feat/foo post-rename"
     ;;
   "multi-plan")
-    cat <<'EOF' >.canon/plans/feature-alpha.md
-# Feature: alpha
-
-Stub plan A. Seeded for the multi-plan tier.
-EOF
-
-    cat <<'EOF' >.canon/plans/feature-bravo.md
-# Feature: bravo
-
-Stub plan B. Seeded for the multi-plan tier.
-EOF
+    stage_fixtures claude session-worktree multi-plan 01-plan
 
     git add . && git commit -m "feat(plans): seed alpha and bravo plans" --no-verify -q
 
@@ -72,11 +58,7 @@ EOF
     log_info "         worktree at .claude/worktrees/bar/, branch feat/bar post-rename"
     ;;
   "typed-branch")
-    cat <<'EOF' >.canon/plans/feature-baz.md
-# Feature: baz
-
-Stub plan seeded for the collision arm. The branch executing it already exists under its conventional name.
-EOF
+    stage_fixtures claude session-worktree typed-branch 01-plan
 
     git add . && git commit -m "feat(plans): seed baz plan" --no-verify -q
     git checkout -b feat/baz -q
@@ -90,19 +72,7 @@ EOF
     log_info "         no worktree is created and the existing branch is left alone"
     ;;
   "no-deps")
-    cat <<'EOF' >.canon/plans/feature-qux.md
-# Feature: qux
-
-Stub plan seeded for the dependency report. The project declares a manifest and has never installed against it.
-EOF
-
-    cat <<'EOF' >package.json
-{
-  "name": "qux",
-  "version": "0.1.0",
-  "private": true
-}
-EOF
+    stage_fixtures claude session-worktree no-deps 01-plan
 
     git add . && git commit -m "feat(plans): seed qux plan and manifest" --no-verify -q
     git checkout -b qux -q
@@ -117,25 +87,7 @@ EOF
     log_info "         nothing is installed, since the step reports rather than runs"
     ;;
   "dual-root")
-    cat <<'EOF' >.canon/plans/feature-quux.md
-# Feature: quux
-
-Stub plan seeded for the dual-root dependency report. The project declares both a node manifest and a python manifest, neither installed against.
-EOF
-
-    cat <<'EOF' >package.json
-{
-  "name": "quux",
-  "version": "0.1.0",
-  "private": true
-}
-EOF
-
-    cat <<'EOF' >pyproject.toml
-[project]
-name = "quux"
-version = "0.1.0"
-EOF
+    stage_fixtures claude session-worktree dual-root 01-plan
 
     git add . && git commit -m "feat(plans): seed quux plan and both manifests" --no-verify -q
     git checkout -b quux -q
@@ -151,11 +103,7 @@ EOF
     log_info "Headless: sandbox/run.sh claude:session-worktree \"/canon:session-worktree\" dual-root"
     ;;
   "port-offset")
-    cat <<'EOF' >.canon/plans/feature-corge.md
-# Feature: corge
-
-Stub plan seeded for the port report. The project carries the web layer's port helper, so Step 6 reads a number out of it rather than naming the stack default.
-EOF
+    stage_fixtures claude session-worktree port-offset 01-plan
 
     mkdir -p scripts
     cp "$PROJECT_ROOT/tooling/web/configs/scripts/worktree-port.sh" scripts/worktree-port.sh
@@ -168,14 +116,7 @@ EOF
     # A folder left behind after its worktree was removed, which is the state
     # the helper refuses. It is a sibling rather than the entry target, since
     # Step 4 registers whatever it creates and a fresh entry never lands on one.
-    mkdir -p .claude/worktrees/stale
-    cat <<'EOF' >.claude/worktrees/stale/package.json
-{
-  "name": "stale",
-  "version": "0.1.0",
-  "private": true
-}
-EOF
+    stage_fixtures claude session-worktree port-offset 02-stale
 
     log_step "Scenario ready: port report (Step 6)"
     log_info "Branch: corge"
@@ -184,11 +125,7 @@ EOF
     log_info "Expect:  declared in fixtures/claude/session-worktree/port-offset/expect.toml"
     ;;
   "submodule" | "submodule-root")
-    cat <<'EOF' >.canon/plans/feature-grault.md
-# Feature: grault
-
-Stub plan seeded for the submodule guard. It sits at the superproject root, which is the copy a session inside the submodule cannot reach.
-EOF
+    stage_fixtures claude session-worktree shared 01-plan
 
     # The origin the submodule is added from stays on disk for later fetches
     # and is ignored, since an untracked nested repository inside the fixture

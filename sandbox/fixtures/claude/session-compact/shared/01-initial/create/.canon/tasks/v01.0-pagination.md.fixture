@@ -1,0 +1,10 @@
+---
+title: 'v01.0: Paginate the task list'
+description: Return a bounded page of tasks instead of the whole collection
+---
+
+# v01.0: Paginate the task list
+
+- [ ] Outcome: a list request accepts a page size and an offset
+
+> Test strategy: integration, request successive pages and verify no overlap.

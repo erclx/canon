@@ -1,0 +1,11 @@
+---
+title: Do not add obvious comments
+description: Skip comments that restate what the code already says
+category: Feedback
+---
+
+Do not write comments that describe what the code does when the identifiers already state it.
+
+**Why:** Obvious comments rot as code evolves and create review noise.
+
+**How to apply:** Before writing a comment, ask whether removing it would confuse a reader. If no, skip it.

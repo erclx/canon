@@ -1,0 +1,13 @@
+---
+title: 'v02.0: Paginate the task list'
+description: Return a bounded page of tasks instead of the whole collection
+---
+
+# v02.0: Paginate the task list
+
+Plan: [feature-pagination](../plans/feature-pagination.md)
+
+- [ ] Outcome: a list request accepts a page size and an offset
+- [ ] Outcome: a response reports the total count alongside the page
+
+> Test strategy: integration, request successive pages and verify no overlap.

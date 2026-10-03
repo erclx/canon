@@ -1,0 +1,4 @@
+# Feature: paginate the task list
+
+Return a bounded page of tasks from the list route, and report the total count
+alongside the page so a caller can size the rest.
