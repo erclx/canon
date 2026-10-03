@@ -13,7 +13,6 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Commit reference](commit.md): Commit message format and type conventions
 - [Context entry reference](context.md): Shape and content rules for canon/context/<domain>.md entries
 - [Design reference](design.md): Shape and content rules for canon/DESIGN.md
-- [Diagram reference](diagrams.md): Shape and content rules for .canon/diagrams/<kind>.md files
 - [Docs reference](docs.md): Reader and jurisdiction, frontmatter, page structure, what a page links out to, the diagram permission, and when a category earns a subfolder
 - [Figure reference](figures.md): When a figure earns its place, the render-first policy for a graph-shaped subject, freehand SVG as the escape hatch, and its wrapping, color, and accessibility rules
 - [Glossary reference](glossary.md): Frontmatter, entry shape, ordering, and the rules deciding which terms a glossary carries

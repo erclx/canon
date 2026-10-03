@@ -14,7 +14,6 @@ Governs a hand-drawn figure wherever one is authored, naming no path because an 
 Does not govern:
 
 - Direction, layout, node and edge budgets, labels, and render verification for the Mermaid path: `mermaid.md`
-- The toolkit's own architecture-diagram surface at `.canon/diagrams/`, which shares no code, font, or visual language with this convention: `diagrams.md`
 - Language, word choice, punctuation, and formatting in the caption or surrounding prose: `markdown.md`
 - Voice, rhythm, and sentence construction in that prose: the `write-human` skill
 - Which document types may carry a figure, and what else they require: that document type's own standard

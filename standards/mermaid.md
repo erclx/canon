@@ -1,12 +1,6 @@
 ---
 title: Mermaid reference
 description: Direction and layout, node and edge budgets, accessibility fields, label punctuation, and render verification for a Mermaid diagram
-paths:
-  - '**/*.md'
-rule:
-  - 'Apply this rule only when the edit drafts or revises a Mermaid fence. Skip it on a markdown edit carrying no diagram.'
-  - 'Read it before drafting the fence. Do not work the layout or the budgets from memory.'
-  - 'Which diagram a document carries and what question it answers is a separate topic. The diagrams standard routes it.'
 ---
 
 # Mermaid reference
@@ -19,7 +13,7 @@ Governs the Mermaid attribute wherever a fence is written, naming no path becaus
 
 Does not govern:
 
-- Which diagram a document carries, what question it answers, its frontmatter, and the explanation prose beneath it: `diagrams.md`
+- Which architecture view a figure draws and what question it answers: the `draft-figure` skill's architecture set
 - Language, word choice, punctuation, and formatting in the prose around a fence: `markdown.md`
 - Voice, rhythm, and sentence construction in that prose: the `write-human` skill
 - The mechanism behind any component a diagram draws: `context.md`
