@@ -32,12 +32,14 @@ Match the first line for equality against the two headings this skill posts. A p
 A `source` of `none`, or an empty result from the fallback, is a first pass. Read the whole change:
 
 ```bash
-gh pr diff <number>
+gh api 'repos/{owner}/{repo}/pulls/<number>' -H 'Accept: application/vnd.github.diff'
 ```
 
 ```bash
-gh pr diff <number> --name-only
+gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/files?per_page=100' --jq '.[].filename'
 ```
+
+Both reads go through REST, since the `gh pr` diff subcommand runs on GraphQL and a cloud session's GitHub proxy refuses it. The diff media type returns the same unified diff, and the paginated files listing returns every path rather than the first page.
 
 A commit is a later pass. Fetch the pull request head so both commits are local:
 

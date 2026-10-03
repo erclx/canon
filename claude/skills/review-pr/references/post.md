@@ -117,8 +117,10 @@ Before posting, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md`
 Do not run the command below when `<prior-heading>` from Step 2 reads `## Review closed` and this pass carries nothing owed. That pass replaces the standing comment rather than adding one, so read `${CLAUDE_SKILL_DIR}/references/close-out.md` instead of posting. Posting first and reaching that section afterward leaves two close-outs both naming the new head, which is worse than the pair the guard exists against.
 
 ```bash
-gh pr review <number> --comment --body-file .canon/tmp/pr/review/body-<number>-<short-sha>.md
+gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F body=@.canon/tmp/pr/review/body-<number>-<short-sha>.md --jq .html_url
 ```
+
+The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `event=COMMENT` submits the review as a comment, the same state the old `--comment` flag produced.
 
 A pass carrying nothing at all takes `## Review closed` and a short body, with the footer line included either way. On a first pass, post `✅ No findings. Reviewed against project docs and the board.` On a later pass, post `✅ Prior findings addressed. Re-reviewed <short-sha>, N commits since the prior pass.`
 

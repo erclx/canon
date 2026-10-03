@@ -19,7 +19,7 @@ So a repeated head takes a third segment off the `## Review response` comment th
 
 ### Resolving the response comment
 
-The number sits only in the comment `url`. `gh pr view --json comments` returns a GraphQL node id under `id`, which names the same comment in a form the thread does not show, and extracting it needs a null guard, since the jq that splits the url aborts on an empty selection.
+The number is the REST `id` off the paginated issue-comments listing, the same number each comment's anchor shows in the thread. The read runs on REST because a cloud session's GitHub proxy refuses the GraphQL that `gh pr view` runs on, and the filter emits one id per match with `tail` keeping the newest, since `--paginate` runs the filter once per page.
 
 Selecting the response is scoped by the prior pass's `submittedAt` rather than by the heading alone, since a heading match alone takes the newest response in the thread whatever its age, which resolves the id a close-out already used on a re-run and rebuilds the collision the third segment exists to prevent. Testing whether the derived name is already on disk was the other candidate, and it is weaker: the scratch folder is gitignored, so a second machine holds none of it and the test passes exactly where the record it consults is missing.
 
@@ -27,7 +27,7 @@ An empty derivation is a head repeating with no response behind it, so the pass 
 
 ## Where the unchanged-head stop sits
 
-A check placed only inside the filename derivation reaches only the path that composes a body, so a pass reading the head as unchanged and taking no other action skips it entirely. Step 2 instead runs the same response query the moment the ancestor test reports an unchanged head, ahead of the diff read and ahead of Step 3's review, and stops there when it comes back empty. That is the earliest point every path through the skill crosses, so a pass with nothing to add cannot reach a `gh pr review --comment` call.
+A check placed only inside the filename derivation reaches only the path that composes a body, so a pass reading the head as unchanged and taking no other action skips it entirely. Step 2 instead runs the same response query the moment the ancestor test reports an unchanged head, ahead of the diff read and ahead of Step 3's review, and stops there when it comes back empty. That is the earliest point every path through the skill crosses, so a pass with nothing to add cannot reach the review post.
 
 Step 4 still derives the third filename segment for a pass that does proceed, off the comment id Step 2 already resolved, since collision avoidance in the name is still owed once posting is decided.
 
