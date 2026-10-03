@@ -64,6 +64,7 @@ export const RECORD_ENTRIES: readonly string[] = [
   '.records.git',
   SCRATCH,
   'README.md',
+  'canvas',
   'diagrams',
   'evidence',
   'feedback',
