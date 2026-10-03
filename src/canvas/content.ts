@@ -5,6 +5,7 @@ import {
   readFileSync,
   renameSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { join } from 'node:path'
@@ -20,6 +21,12 @@ import { recordDir } from '@/record-root'
 export const CANVAS_FOLDER = 'canvas'
 
 export const LAYOUT_FILE = 'layout.json'
+
+/** The one frame the operator pointed at, beside the pages it names. */
+export const SELECTION_FILE = 'selection.json'
+
+/** Suffix of the file a write goes through before it replaces its target. */
+export const TEMP_SUFFIX = '.tmp'
 
 const FRAME_EXTENSION = '.html'
 
@@ -62,6 +69,8 @@ export type ContentRefusal =
   | 'invalid-size'
   | 'exists'
   | 'no-page'
+  | 'no-frame'
+  | 'invalid-position'
   | 'malformed-layout'
 
 export interface ContentRefused {
@@ -155,12 +164,18 @@ function readLayout(dir: string): LayoutRead {
   return { boxes, malformed: false }
 }
 
+/**
+ * Replaces the file in one rename, so the shell reading while a CLI verb writes
+ * never sees half a layout and reports it as malformed. Every writer reads,
+ * merges, and calls this in one synchronous step, which is what keeps two of
+ * them from losing each other's frame.
+ */
 function writeLayout(dir: string, boxes: ReadonlyMap<string, Box>): void {
   const frames = Object.fromEntries(boxes)
-  writeFileSync(
-    join(dir, LAYOUT_FILE),
-    `${JSON.stringify({ frames }, null, 2)}\n`,
-  )
+  const target = join(dir, LAYOUT_FILE)
+  const temp = `${target}.${process.pid}${TEMP_SUFFIX}`
+  writeFileSync(temp, `${JSON.stringify({ frames }, null, 2)}\n`)
+  renameSync(temp, target)
 }
 
 function frameNames(dir: string): string[] {
@@ -323,4 +338,121 @@ export function addFrame(
   writeFileSync(join(dir, file), frameScaffold(frame))
   writeLayout(dir, new Map([...boxes, [frame, box]]))
   return { ok: true, page, frame, file, box }
+}
+
+export interface Position {
+  readonly x: number
+  readonly y: number
+}
+
+/**
+ * Moves one frame and keeps its size. A frame the layout never named takes the
+ * default size it was already drawn at, so the move does not resize it.
+ */
+export function moveFrame(
+  root: string,
+  page: string,
+  frame: string,
+  to: Position,
+): FrameOutcome {
+  if (!isValidName(page)) {
+    return refuse('invalid-name', `${page} is not a valid page name`)
+  }
+  if (!isValidName(frame)) {
+    return refuse('invalid-name', `${frame} is not a valid frame name`)
+  }
+  if (!Number.isFinite(to.x) || !Number.isFinite(to.y)) {
+    return refuse('invalid-position', 'x and y must be numbers')
+  }
+
+  const dir = pagePath(root, page)
+  if (!isDirectory(dir)) return refuse('no-page', `page ${page} does not exist`)
+  const file = `${frame}${FRAME_EXTENSION}`
+  if (!existsSync(join(dir, file))) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  const { boxes, malformed } = readLayout(dir)
+  if (malformed) {
+    return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+  }
+  const size = boxes.get(frame) ?? DEFAULT_FRAME
+  const box: Box = { x: to.x, y: to.y, width: size.width, height: size.height }
+
+  writeLayout(dir, new Map([...boxes, [frame, box]]))
+  return { ok: true, page, frame, file, box }
+}
+
+export interface Selection {
+  readonly page: string
+  readonly frame: string
+}
+
+export interface SelectedFrame extends Selection {
+  readonly file: string
+  readonly box: Box
+}
+
+export type SelectionOutcome = { readonly ok: true } | ContentRefused
+
+function selectionPath(root: string): string {
+  return join(canvasDir(root), SELECTION_FILE)
+}
+
+/**
+ * Records which frame "this one" means, or clears it. Only a frame on disk can
+ * be recorded, so the file never names something a reader would have to guess
+ * about.
+ */
+export function writeSelection(
+  root: string,
+  selection: Selection | undefined,
+): SelectionOutcome {
+  if (selection === undefined) {
+    if (existsSync(selectionPath(root))) unlinkSync(selectionPath(root))
+    return { ok: true }
+  }
+
+  const { page, frame } = selection
+  if (!isValidName(page) || !isValidName(frame)) {
+    return refuse('invalid-name', `${page}/${frame} is not a valid frame`)
+  }
+  const found = readPage(root, page)
+  if (!found) return refuse('no-page', `page ${page} does not exist`)
+  if (!found.frames.some((candidate) => candidate.name === frame)) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  const target = selectionPath(root)
+  const temp = `${target}.${process.pid}${TEMP_SUFFIX}`
+  writeFileSync(temp, `${JSON.stringify({ page, frame })}\n`)
+  renameSync(temp, target)
+  return { ok: true }
+}
+
+/**
+ * The selected frame with its box, or undefined when nothing is selected, the
+ * file does not parse, or the frame it names has since been removed, so a
+ * reader never gets a stale name back.
+ */
+export function readSelection(root: string): SelectedFrame | undefined {
+  const path = selectionPath(root)
+  if (!existsSync(path)) return undefined
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return undefined
+  }
+  if (typeof parsed !== 'object' || parsed === null) return undefined
+  const { page, frame } = parsed as Record<string, unknown>
+  if (typeof page !== 'string' || typeof frame !== 'string') return undefined
+
+  const found = readPage(root, page)?.frames.find(
+    (candidate) => candidate.name === frame,
+  )
+  if (!found) return undefined
+  const { x, y, width, height } = found
+  return { page, frame, file: found.file, box: { x, y, width, height } }
 }

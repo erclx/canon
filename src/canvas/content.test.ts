@@ -16,8 +16,11 @@ import {
   DEFAULT_FRAME,
   FRAME_GAP,
   listPages,
+  moveFrame,
   readPage,
+  readSelection,
   renamePage,
+  writeSelection,
 } from '@/canvas/content'
 
 let ROOT = ''
@@ -278,5 +281,177 @@ describe('addFrame', () => {
     expect(
       addFrame(ROOT, 'drafts', 'hero', { width: 0, height: 300 }),
     ).toMatchObject({ ok: false, reason: 'invalid-size' })
+  })
+})
+
+describe('moveFrame', () => {
+  it('should write the new position and keep the size', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 1440, height: 900 })
+
+    const outcome = moveFrame(ROOT, 'drafts', 'hero', { x: 200, y: 120 })
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      frame: 'hero',
+      box: { x: 200, y: 120, width: 1440, height: 900 },
+    })
+    expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject({
+      x: 200,
+      y: 120,
+      width: 1440,
+    })
+  })
+
+  it('should leave the other frames boxes as they were', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'a', { width: 400, height: 300 })
+    addFrame(ROOT, 'drafts', 'b', { width: 400, height: 300 })
+
+    moveFrame(ROOT, 'drafts', 'a', { x: 5, y: 6 })
+
+    expect(
+      readPage(ROOT, 'drafts')?.frames.find((frame) => frame.name === 'b'),
+    ).toMatchObject({ x: 400 + FRAME_GAP, y: 0 })
+  })
+
+  it('should keep both positions when two moves land one after the other', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'a', { width: 400, height: 300 })
+    addFrame(ROOT, 'drafts', 'b', { width: 400, height: 300 })
+
+    moveFrame(ROOT, 'drafts', 'a', { x: 10, y: 10 })
+    moveFrame(ROOT, 'drafts', 'b', { x: 20, y: 20 })
+
+    const frames = readPage(ROOT, 'drafts')?.frames ?? []
+    expect(frames.map((frame) => [frame.name, frame.x, frame.y])).toEqual([
+      ['a', 10, 10],
+      ['b', 20, 20],
+    ])
+  })
+
+  it('should place a frame the layout has not named at its default size', () => {
+    seedPage('drafts', ['hero'])
+
+    const outcome = moveFrame(ROOT, 'drafts', 'hero', { x: 30, y: 40 })
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      box: { x: 30, y: 40, ...DEFAULT_FRAME },
+    })
+    expect(readPage(ROOT, 'drafts')?.frames[0]?.placed).toBe(true)
+  })
+
+  it('should refuse a frame that does not exist', () => {
+    seedPage('drafts', [])
+
+    expect(moveFrame(ROOT, 'drafts', 'hero', { x: 0, y: 0 })).toMatchObject({
+      ok: false,
+      reason: 'no-frame',
+    })
+  })
+
+  it('should refuse a page that does not exist', () => {
+    expect(moveFrame(ROOT, 'missing', 'hero', { x: 0, y: 0 })).toMatchObject({
+      ok: false,
+      reason: 'no-page',
+    })
+  })
+
+  it('should refuse a position that is not a finite number', () => {
+    seedPage('drafts', ['hero'])
+
+    expect(
+      moveFrame(ROOT, 'drafts', 'hero', { x: Number.NaN, y: 0 }),
+    ).toMatchObject({ ok: false, reason: 'invalid-position' })
+  })
+
+  it('should refuse rather than overwrite a malformed layout', () => {
+    seedPage('drafts', ['hero'], '{ not json')
+
+    expect(moveFrame(ROOT, 'drafts', 'hero', { x: 1, y: 1 })).toMatchObject({
+      ok: false,
+      reason: 'malformed-layout',
+    })
+    expect(readFileSync(join(pageDir('drafts'), 'layout.json'), 'utf8')).toBe(
+      '{ not json',
+    )
+  })
+})
+
+describe('selection', () => {
+  it('should read none before anything is selected', () => {
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should read back the frame written, with its box', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 1440, height: 900 })
+
+    const outcome = writeSelection(ROOT, { page: 'drafts', frame: 'hero' })
+
+    expect(outcome).toEqual({ ok: true })
+    expect(readSelection(ROOT)).toMatchObject({
+      page: 'drafts',
+      frame: 'hero',
+      file: 'hero.html',
+      box: { x: 0, y: 0, width: 1440, height: 900 },
+    })
+  })
+
+  it('should replace the earlier selection', () => {
+    seedPage('drafts', ['a', 'b'])
+    writeSelection(ROOT, { page: 'drafts', frame: 'a' })
+
+    writeSelection(ROOT, { page: 'drafts', frame: 'b' })
+
+    expect(readSelection(ROOT)?.frame).toBe('b')
+  })
+
+  it('should clear the selection', () => {
+    seedPage('drafts', ['a'])
+    writeSelection(ROOT, { page: 'drafts', frame: 'a' })
+
+    writeSelection(ROOT, undefined)
+
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should read none when the selected frame has been removed', () => {
+    seedPage('drafts', ['a'])
+    writeSelection(ROOT, { page: 'drafts', frame: 'a' })
+    rmSync(join(pageDir('drafts'), 'a.html'))
+
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should read none when the selected page has been removed', () => {
+    seedPage('drafts', ['a'])
+    writeSelection(ROOT, { page: 'drafts', frame: 'a' })
+    rmSync(pageDir('drafts'), { recursive: true })
+
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should read none when the selection file does not parse', () => {
+    seedPage('drafts', ['a'])
+    writeFileSync(join(canvasDir(ROOT), 'selection.json'), '{ not json')
+
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should refuse to select a frame that does not exist', () => {
+    seedPage('drafts', [])
+
+    expect(
+      writeSelection(ROOT, { page: 'drafts', frame: 'hero' }),
+    ).toMatchObject({ ok: false, reason: 'no-frame' })
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should refuse to select on a page that does not exist', () => {
+    expect(
+      writeSelection(ROOT, { page: 'missing', frame: 'a' }),
+    ).toMatchObject({ ok: false, reason: 'no-page' })
   })
 })
