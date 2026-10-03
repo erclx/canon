@@ -26,6 +26,6 @@ canon capture <destination> --selector figure --out .canon/tmp/figures/
 - Fix a clipped label, a misaligned shape, or an arrow that misses its target in the destination and capture again. Stop after two correction passes.
 - When the capture fails, keep the figure and name the skipped check in the output.
 
-A Mermaid figure bound for a rendered page takes this same capture, since its standalone PNG is measured in the renderer's own fonts and can read clean while the page clips it. A clipped group title there takes the scoped overflow style `mermaid.md` states.
+A Mermaid figure bound for a rendered page takes this same capture, since its standalone PNG is measured in the renderer's own fonts and can read clean while the page clips it. A clipped group title there takes the scoped overflow style `${CLAUDE_SKILL_DIR}/references/mermaid.md` states.
 
 A markdown destination has no page to load, so the read of the markup, or of the standalone render on the Mermaid path, is the whole check there.

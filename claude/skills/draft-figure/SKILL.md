@@ -48,15 +48,17 @@ Read the reference for the path Step 3 picked and follow it:
 - Wrap the drawing in a `<figure>` element with a `<figcaption>` naming what to take from the figure, never what it shows. Let it run wider than the surrounding prose column.
 - On the Mermaid path, run the read-back `mermaid.md` states before confirming.
 - On every path, confirm the figure still reads once every color and font it depends on is stripped to its fallback, per the standard's own working-figure bar.
-- When the destination is a rendered page, an HTML file a browser loads, the check that counts is the figure inside that page, which the in-page capture in `hand-drawn.md` runs once the figure is written, on either path. A markdown destination has no page to load, so the checks above are the whole check there.
+- When the destination is a rendered page, an HTML file a browser loads, the check that counts is the figure inside that page, which Step 6 captures once the figure is written, on either path. A markdown destination has no page to load, so the checks above are the whole check there.
 
 ## Step 6: confirm and write
 
 Show the destination path, the decided path, and the full `<figure>` markup before writing. Confirm with the user, since the path decision and the render verdict are judgment calls with no diff to preview either against.
 
-Write the figure into the destination document at the location the user named. Then run the in-page capture when the destination is a rendered page, within the same two correction passes the read-back allows.
+Write the figure into the destination document at the location the user named.
 
-Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs, the stamps the capture writes beside them, the Mermaid source, and the JSON config are deleted once the checks confirm, since only the SVG ships.
+When the destination is a rendered page, read the `## Capture in the page` section of `${CLAUDE_SKILL_DIR}/references/hand-drawn.md` and run it, on the Mermaid path as well as the hand-drawn one, within the same two correction passes the read-back allows.
+
+Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs, the stamps the capture writes beside them, and the JSON config are deleted once the checks confirm, since only the SVG ships. Keep the `.mmd` source, which is what a later refresh redraws from.
 
 ## Output
 

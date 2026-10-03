@@ -50,6 +50,6 @@ Check whether the project ran `canon design css --figures`. The figure and figca
 
 ## Read the render back
 
-- Read the rendered PNG and judge it against what the figure means to say, applying the verification properties in `mermaid.md`. A source satisfying every rule there can still render as a picture asserting something false, so the image is what gets judged.
+- Read the rendered PNG and judge it against what the figure means to say, applying the verification properties in the mermaid standard. A source satisfying every rule there can still render as a picture asserting something false, so the image is what gets judged.
 - Fix the Mermaid source and re-render on a defect. Stop after two correction passes. When a defect survives, keep the figure and name the defect in the output rather than reporting a false verification.
 - When the render fails for any reason, no browser engine, no network, no package manager, continue to the confirm step and name the skipped check. A missing renderer degrades the loop rather than failing it.

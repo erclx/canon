@@ -12,15 +12,16 @@
 
 max_turns = 30
 
-paths = ["canon/context/components.md"]
+# The Mermaid source stays under the figure scratch folder after the checks
+# confirm, since a later refresh redraws from it. Its presence is what shows
+# the run took the Mermaid path rather than drawing by hand.
+paths = ["canon/context/components.md", ".canon/tmp/figures/*.mmd"]
 
 # The retired per-kind folder. A run that fell back to it wrote here instead of
 # the named destination.
 absent = [".canon/diagrams/**"]
 
-# The destination and the Mermaid scratch the render writes. The skill deletes
-# its scratch once the checks confirm, so the glob allows it without requiring
-# it.
+# The destination and the Mermaid scratch the render writes.
 write_scope = ["canon/context/components.md", ".canon/tmp/figures/**"]
 
 # The output template's first line names the destination, and the render path
@@ -28,7 +29,7 @@ write_scope = ["canon/context/components.md", ".canon/tmp/figures/**"]
 reply = ["canon/context/components.md", "architecture"]
 
 manual = [
-  "A Mermaid source was drafted under `.canon/tmp/figures/` and its PNG read back before confirming. Unwired: the skill deletes the scratch once the checks confirm, so a conforming run leaves no file to assert.",
+  "The rendered PNG was read back before confirming. Unwired: the skill deletes the PNG once the checks confirm, so a conforming run leaves no file to assert.",
   "The drawing reads as the four layers the architecture names, inside the boundary. Semantic: whether the boxes say what the record says is a judgment over the picture.",
 ]
 
