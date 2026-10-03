@@ -353,7 +353,10 @@ export function walkSlide(idAttribute: string): WalkedSlide {
 
     const blockChild = Array.from(element.children).find(
       (child) =>
-        !consumed.has(child) && !SKIPPED.has(child.tagName.toLowerCase()),
+        !consumed.has(child) &&
+        !SKIPPED.has(child.tagName.toLowerCase()) &&
+        child.checkVisibility() &&
+        !getComputedStyle(child).display.startsWith('inline'),
     )
     const box = blockChild
       ? {
