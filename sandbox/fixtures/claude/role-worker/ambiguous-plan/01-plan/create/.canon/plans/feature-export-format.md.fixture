@@ -1,0 +1,21 @@
+# Feature: export the habit log
+
+Write the habit log out so a person can read it outside the app.
+
+## Summary
+
+- Serialize every logged entry to a file the user downloads
+
+**Files to touch:**
+
+- `src/export.ts`: serialize the entry list
+
+**Risks:**
+
+- The format decides what a reader can do with the file afterwards, and nothing in the tree fixes it.
+
+**Questions:**
+
+1. Which format does the export write?
+   - Suggested: needs your call
+   - Answer:

@@ -1,0 +1,11 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v00.1: Log a habit with one tap](v00.1-log-entry.md): Mark a habit done for today with a single tap
+- [v00.2: Show the current and longest streak](v00.2-streak-view.md): Read the logged entries and report both streaks per habit

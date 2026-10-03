@@ -1,0 +1,20 @@
+# Feature: log entry
+
+Mark a habit done for today with one tap, idempotent per day.
+
+## Summary
+
+- Record a dated entry against a habit
+- Ignore a repeat tap on a day already logged
+
+**Files to touch:**
+
+- `src/log.ts`: record a dated entry, no-op on repeat
+
+**Risks:**
+
+None identified.
+
+**Questions:**
+
+None identified.

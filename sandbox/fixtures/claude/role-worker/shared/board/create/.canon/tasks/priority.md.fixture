@@ -1,0 +1,13 @@
+# Priority
+
+## Run now
+
+| Task                | Plan                                              | Touches      | Waiting on |
+| ------------------- | ------------------------------------------------- | ------------ | ---------- |
+| `v00.1-log-entry`   | [feature-log-entry](../plans/feature-log-entry.md) | `src/log.ts` | nothing    |
+
+## Needs a plan
+
+| Task                 | Plan | Touches         | Waiting on       |
+| -------------------- | ---- | --------------- | ---------------- |
+| `v00.2-streak-view`  | none | `src/streak.ts` | v00.1 landing    |
