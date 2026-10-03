@@ -47,7 +47,8 @@ function LayerNode({
   const isCurrent =
     chosen?.page === props.frame.page &&
     chosen.frame === props.frame.frame &&
-    chosen.element?.index === index
+    chosen.element?.index === index &&
+    !chosen.element.stale
   const { name, text } = layerLabel(element)
   const children = [...element.children].filter(
     (child) => !HIDDEN.has(child.tagName.toLowerCase()),

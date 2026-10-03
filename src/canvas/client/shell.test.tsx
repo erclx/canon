@@ -822,6 +822,24 @@ describe('Inspector element', () => {
       figureFor('hero').querySelector('[data-outline="selected"]'),
     ).toBeNull()
   })
+
+  it('should mark no layer row for a stale pick', () => {
+    act(() => {
+      applyRecord({
+        ...record([page('drafts', [frame('hero')])]),
+        selection: {
+          page: 'drafts',
+          frame: 'hero',
+          element: { index: 5, tag: 'button', stale: true },
+        },
+      })
+      render(<App />, mount)
+    })
+    loadFrame('hero', HERO_BODY)
+    act(() => buttonNamed('Show layers of hero').click())
+
+    expect(layersFor('hero')?.querySelector('[aria-current="true"]')).toBeNull()
+  })
 })
 
 describe('index.html', () => {
