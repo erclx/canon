@@ -57,7 +57,7 @@ Two more sit under `.claude/` as the harness's rather than the toolkit's. `.clau
 
 The toolkit's committed surfaces sit under `canon/`: `canon/context/`, read on demand through its catalog, `canon/config/`, holding `baseline.json` for `canon audits` and `pr-labels.toml` for the pull request label map, the two eager documents, `canon/DESIGN.md`, read by `canon design render`, `canon design board`, and the design skills, and `canon/wireframes/`, audited by `canon context` in a project that carries one. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
 
-`.tmp/`, when it exists, is the scratch rule's gitignored fallback spelling, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
+`.tmp/`, when it exists, is the old gitignored scratch spelling, which the scratch rule no longer names, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
 
 ### Migrating a project onto the roots
 

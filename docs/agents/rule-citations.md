@@ -59,7 +59,7 @@ The extension test is what carries most of the separation, and it costs one real
 
 Two classes resolve to nothing and are right to. Both are reported by name rather than dropped, so a reader can see what the verdict declined to judge.
 
-**Governed.** A rule spelling a path in its own frontmatter `paths:` is naming an artifact a target holds rather than a file here. `governance/rules/standards/diagrams.md` declares `.claude/DIAGRAMS.md` and then tells its reader to convert one an older install left behind, so the file is correctly absent from this tree and correctly named in the rule.
+**Governed.** A rule spelling a path in its own frontmatter `paths:` is naming an artifact a target holds rather than a file here, so the file is correctly absent from this tree and correctly named in the rule. No shipped rule declares one today, and the stage's test fixtures carry the instance that keeps the class exercised.
 
 Only an exact declaration exempts, never a glob match against one. A glob declares a shape, so a body path sitting inside it is still a citation and a stale one is still a defect. A rule scoped at `docs/**` citing a `docs/agents/renamed.md` that moved is exactly the class this stage exists to catch, and matching the glob would excuse it.
 
