@@ -10,19 +10,13 @@ the PR from an independent session. This skill consumes them: fix, reply, push.
 
 ## Guards
 
-- If no open PR resolves for the current branch via `gh pr view`, stop: `❌ No open PR. Nothing to address.`
+- Resolve `<number>` and `<tip>` off `canon pr head --json`. An `ambiguous-pull` refusal stops: `❌ Two open PRs on this branch. Name the one to address.` A record with no `number` takes the lookup in `${CLAUDE_SKILL_DIR}/references/rest-reads.md`. Nothing resolving stops: `❌ No open PR. Nothing to address.`
 - If the PR has no review comments or threads, run step 5's staleness test before deciding. A branch that still merges stops here: `✅ No review findings to address.` One that does not skips steps 1 through 4 and runs step 5 onward, since a branch goes stale from `main` moving and a closed review says nothing about whether it still merges.
 - Fix findings. Do not merge.
 
 ## Step 1: pull the review findings and CI status
 
-Read the review comments and threads on the PR:
-
-```bash
-gh pr view --json number,reviews,comments
-```
-
-For inline review comments, read them via `gh api` on the PR's review comments. Collect each finding with its file, location, and body.
+Read the reviews, the thread's comments, and the inline review comments through the three reads in `${CLAUDE_SKILL_DIR}/references/rest-reads.md`. Collect each finding with its file, location, and body.
 
 Also read the CI check status so the fixes cover failing checks, not only review comments:
 
@@ -30,7 +24,7 @@ Also read the CI check status so the fixes cover failing checks, not only review
 canon pr checks <number> --json
 ```
 
-Read the verdict off the record's `state` rather than off the exit. Treat `failing` as a finding to resolve alongside the review comments. A `pending` covers a tip whose runs have yet to conclude and a tip carrying no run at all, which the record separates on `matched`, and neither is a green to continue on. A record carrying `conflicted: true` is a third case: the branch conflicts with its base, so no run will start and the wait never ends. Stop and report it, since a rebase is the repair. Fall back to `gh pr checks <number>` when no record comes back at all, which is a target whose CLI predates the verb.
+Read the verdict off the record's `state` rather than off the exit. Treat `failing` as a finding to resolve alongside the review comments. A `pending` covers a tip whose runs have yet to conclude and a tip carrying no run at all, which the record separates on `matched`, and neither is a green to continue on. A record carrying `conflicted: true` is a third case: the branch conflicts with its base, so no run will start and the wait never ends. Stop and report it, since a rebase is the repair. When no record comes back at all, read the check runs on the tip through `${CLAUDE_SKILL_DIR}/references/rest-reads.md`.
 
 ## Step 2: address each finding
 
@@ -160,12 +154,11 @@ canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md
 
 The hook skips `.canon/tmp/`, so this scan is the only gate on the published
 reply. Fix any hit the standard names, then post the reply to the PR and
-capture the posted comment's id, since Step 7 edits this exact comment rather
+keep the `id` the POST answers with, since Step 7 edits this exact comment rather
 than trusting whichever one `gh` considers last:
 
 ```bash
-comment_url=$(gh pr comment <number> --body-file .canon/tmp/pr/reply/reply-<number>.md)
-echo "${comment_url##*issuecomment-}" > .canon/tmp/pr/reply/reply-<number>.id
+gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/tmp/pr/reply/reply-<number>.md --jq .id > .canon/tmp/pr/reply/reply-<number>.id
 ```
 
 ## Step 7: confirm resolution
@@ -252,5 +245,5 @@ Not everything worth reaching the reviewing session surfaces inside the numbered
 Open with `## Post-review findings` rather than `## Review response`, since nothing on the thread is being answered. `review-pr` states the full heading set this belongs to and routes it the same as a response: `role-orchestrator`'s poll picks it up and sends the reviewing session back for a pass. Close the body with `🤖 Addressed by Claude Code` on its own line, matching the reply's footer.
 
 ```bash
-gh pr comment <number> --body-file .canon/tmp/pr/reply/reply-<number>.md
+gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/tmp/pr/reply/reply-<number>.md --silent
 ```

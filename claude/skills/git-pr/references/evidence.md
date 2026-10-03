@@ -53,8 +53,10 @@ Read `reason` on the record rather than the exit code.
 - `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
 
 ```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/pr/evidence/body-<number>.md
+gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent
 ```
+
+Both posts in this file go through the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` mints a preview through this file, so a GraphQL post here would break the cloud review-address leg.
 
 When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`, which needs the typed-field flag `-F` because the raw-string flag `-f` posts the path itself as the body:
 
@@ -71,7 +73,7 @@ Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed
 Run this step only as the fallback, when the evidence step above reported one of the git refusals and a checklist file exists, since every other branch with a checklist rendered `ok` and carried it. The comment this posts carries no marker, so a later `canon pr evidence` call reports no `checklist` for it. Post it as its own comment on `<number>`:
 
 ```bash
-gh pr comment <number> --body-file <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
+gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --silent
 ```
 
 Run the cleanup below only once the call that carried the checklist reports success, whichever of the two steps that was. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.

@@ -153,7 +153,7 @@ When the user signals the previous stacked PR has merged, restack the next one.
 
 1. Rebase and push. The own-commit-count comes from the original split table.
    `git fetch origin main && git checkout <branch> && git rebase --onto origin/main HEAD~<own-commit-count> && git push --force-with-lease`
-2. Verify the PR's base auto-retargeted to main with `gh pr view <num> --json baseRefName`. If not, `gh pr edit <num> --base main`.
+2. Verify the PR's base auto-retargeted to main with `gh api repos/{owner}/{repo}/pulls/<num> --jq .base.ref`, a REST read a cloud session's GitHub proxy serves where it refuses GraphQL. If not, `gh pr edit <num> --base main`.
 3. Reply: `✅ <branch> rebased onto main. Ready for squash-merge.`
 
 Edge cases:
