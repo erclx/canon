@@ -47,8 +47,6 @@ The toolkit's own record is rendered from `src/design/tokens.ts` rather than aut
 4. Open `.canon/tmp/render/design/index.html` in a browser
 5. Iterate on `DESIGN.md` until the preview matches intent
 
-The Stitch integration, being `canon design sync`, `generate`, `edit`, `variants`, and `list`, sits on top of the same file, consuming its tables through MCP. Stitch is Google's Gemini-powered design product, addressed through a remote MCP server at `stitch.googleapis.com/mcp` exposing project, screen, generation, and design-system tools. `DesignTheme`, the theme schema those tools read and write, sits beside the same object's free-text `designMd` field.
-
 ## Related
 
 - `docs/agents/commands.md`: CLI flags and invocation contract for `canon design`

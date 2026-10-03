@@ -141,25 +141,15 @@ Skip Claude Design when:
 - **Design system re-extraction**: updating the stored design system means re-running onboarding. There is no incremental token update surface.
 - **Enterprise gating**: admins must enable the feature per organization. New users see nothing until that switch flips.
 
-## Cost tradeoffs versus alternatives
+## Cost tradeoffs
 
-Claude Design's per-action cost makes it a ceiling tool. On a Max 5x plan, one full design system plus one artifact through to handoff and exports lands near 55 percent of the weekly Claude Design quota. That caps usable cycles at roughly two per week. Daily iteration needs a cheaper companion to handle the bulk of prompt-to-prototype work.
+Claude Design's per-action cost makes it a ceiling tool. On a Max 5x plan, one full design system plus one artifact through to handoff and exports lands near 55 percent of the weekly Claude Design quota. That caps usable cycles at roughly two per week, which rules it out for daily iteration.
 
-Direct comparison against Stitch, Google's Gemini-powered design product, on the same landing-page prompt with no uploads:
-
-|                           | Claude Design                                       | Stitch                                        |
-| ------------------------- | --------------------------------------------------- | --------------------------------------------- |
-| First-pass brand fidelity | On-brand after codebase onboarding                  | Generic, invents a design system              |
-| Cost per generation       | 10 to 20 percent of the weekly quota                | 5 of 400 daily credits                        |
-| Codebase extraction       | Deep, reads prose and shell scripts                 | None, context must be prose in the prompt     |
-| Agent addressable         | No MCP, no API                                      | MCP at `stitch.googleapis.com/mcp`            |
-| Handoff to Claude Code    | URL pointing to a gzipped tarball with chat history | Export to coding agents, details vary by mode |
-
-Reach for Claude Design when codebase extraction or the richly annotated handoff tarball is the whole point. Use Stitch when visual iteration is agent-driven or frequent. For projects that only need prose design docs, the toolkit's tier 0 is still enough, see [visual design workflow](../../docs/workflow/visual-design-workflow.md).
+Reach for Claude Design when codebase extraction or the richly annotated handoff tarball is the whole point. For projects that only need prose design docs, the toolkit's tier 0 is still enough, see [visual design workflow](../../docs/workflow/visual-design-workflow.md).
 
 ## References
 
 - [Introducing Claude Design by Anthropic Labs](https://www.anthropic.com/news/claude-design-anthropic-labs)
 - [TechCrunch launch coverage](https://techcrunch.com/2026/04/17/anthropic-launches-claude-design-a-new-product-for-creating-quick-visuals/)
 - [VentureBeat on the Figma comparison](https://venturebeat.com/technology/anthropic-just-launched-claude-design-an-ai-tool-that-turns-prompts-into-prototypes-and-challenges-figma)
-- [Visual design workflow](../../docs/workflow/visual-design-workflow.md): tier framework that places Claude Design against Figma, Stitch, and Excalidraw
+- [Visual design workflow](../../docs/workflow/visual-design-workflow.md): tier framework that places Claude Design against Figma and Excalidraw
