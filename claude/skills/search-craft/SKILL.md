@@ -42,10 +42,10 @@ The procedure that loaded this skill owns what the result is for and where it is
 
 ## Access note
 
-Each line is a claim measured on its date. Re-check one before relying on it, and add a line only for a failure a session actually hit, with the date it hit.
+Each line is a claim measured once, and `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` records the date under its Gap. Sites change their blocking without notice, so re-check a line before relying on it. Add a line only for a failure a session actually hit, and record the date it hit in the requirement beside it.
 
-- 2026-10-02: Reddit answers its RSS feed and refuses its JSON search with a 403. `WebFetch` is refused for the site.
-- 2026-10-02: X answers nothing without paying or a login. `curl` redirects to a login page and `WebFetch` returns 402.
+- Reddit answers its RSS feed and refuses its JSON search with a 403. `WebFetch` is refused for the site.
+- X answers nothing without paying or a login. `curl` redirects to a login page and `WebFetch` returns 402.
 - Stop and ask the operator before any route that pays, logs in, or works around a refusal. Never suggest scraping behind a login.
 
 ## Excuses and rebuttals
