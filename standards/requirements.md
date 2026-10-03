@@ -3,7 +3,6 @@ title: Requirements reference
 description: Shape and content rules for canon/REQUIREMENTS.md
 paths:
   - 'canon/REQUIREMENTS.md'
-  - '.claude/REQUIREMENTS.md'
 ---
 
 # Requirements reference

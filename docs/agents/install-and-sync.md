@@ -233,9 +233,9 @@ edit and a job counting those stays red with no remedy.
 
 ### Surfaces reported beside the domains
 
-Six sections sit outside the per-domain scan, because each names something
-that walk cannot see: `seeds`, `superseded`, `unmigrated`, `newSkills`,
-`newRules`, and `reverse`. None of them produces a change, and no sync command
+Seven sections sit outside the per-domain scan, because each names something
+that walk cannot see: `seeds`, `superseded`, `unmigrated`, `unmovedSurfaces`,
+`newSkills`, `newRules`, and `reverse`. None of them produces a change, and no sync command
 applies any of them. What each reports, the managed-target gate they share, and
 which count toward `--exit-code` are in `drift-surfaces.md`.
 

@@ -29,9 +29,9 @@ History is absent exactly where the stamp is, since a registry install ships `sr
 
 ## Surfaces reported without a change
 
-Six report sections sit outside the domain scan in `src/sync/check.ts`, being `seeds`, `superseded`, `unmigrated`, `newSkills`, `newRules`, and `reverse`, each covering something `planSync` structurally cannot. The headings below carry five of them, since `newSkills` is described under the section built from it. All six are report-only, and the reason holds for the four built on installed files: the engine turns a difference into a `copy` and a retired surface into a `delete`, and those files hold content the project wrote. `newRules` and `newSkills` are report-only on the opposite ground, since both name files the target does not hold at all. Installing a rule changes what the project is governed by, and a skill loads live from the plugin directory with nothing to install.
+Seven report sections sit outside the domain scan in `src/sync/check.ts`, being `seeds`, `superseded`, `unmigrated`, `unmovedSurfaces`, `newSkills`, `newRules`, and `reverse`, each covering something `planSync` structurally cannot. The headings below carry six of them, since `newSkills` is described under the section built from it. All seven are report-only, and the reason holds for the five built on installed files: the engine turns a difference into a `copy` and a retired surface into a `delete`, and those files hold content the project wrote. `newRules` and `newSkills` are report-only on the opposite ground, since both name files the target does not hold at all. Installing a rule changes what the project is governed by, and a skill loads live from the plugin directory with nothing to install.
 
-All six are gated on `isManagedTarget`, which reads a `.claude/` directory, a `CLAUDE.md`, or a detected unmigrated domain. Seeds motivate the gate: they enumerate from the source rather than from what a target installed, so without it an unmanaged directory would report every seed as `missing` and route to a section-merge skill, while the three scanned domains would correctly stay quiet regardless, since `installedStampDomains` already gates them on an install marker.
+All seven are gated on `isManagedTarget`, which reads a `.claude/` directory, a `CLAUDE.md`, or a detected unmigrated domain. Seeds motivate the gate: they enumerate from the source rather than from what a target installed, so without it an unmanaged directory would report every seed as `missing` and route to a section-merge skill, while the three scanned domains would correctly stay quiet regardless, since `installedStampDomains` already gates them on an install marker.
 
 An unmigrated domain counts as a marker because `detectUnmigrated` fires only on root files whose basename the toolkit ships, so it firing proves the toolkit installed there before the layout moved. An unmanaged target returns every section empty rather than only suppressing the render, so no consumer, `canon-operator` reading the JSON directly included, can act on a finding the render withheld.
 
@@ -48,6 +48,12 @@ The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because
 ### Unmigrated domains
 
 `detectUnmigrated` covers a state the drift walk alone reads as clean: `installedStampDomains` lists only domains whose install marker exists, so a project holding `standards/` at its root would otherwise report zero entries for a real problem. It counts toward `--exit-code` because the relocation closes it, while superseded artifacts and seed drift are excluded for the reason `orphaned` already is. `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty, since standards closed the install channel that put it at risk of sitting unmigrated at a project root, so the section currently names no domain. The section stays rather than being cut, since the next domain to retire an install channel this way reoccupies it.
+
+### Surfaces at the old root
+
+`detectUnmovedSurfaces` in `src/sync/layout.ts` names each entry of `SURFACE_ENTRIES` that `surfaceDir` still resolves under `.claude/`, which happens only when the `.claude/` copy exists and the `canon/` one does not, and the render points at `canon migrate surface-roots`. A rule globs the `canon/` spelling alone, so a target on the old root stops loading the rules scoped to those files, and this section is what tells it. `unmigrated` could not carry it, since `ROOT_LAYOUTS` models a domain stranded at the project root under a stamp domain and a surface has neither. Without the section the only signal was the `seeds` line reporting `.claude/REQUIREMENTS.md (drifted)`, which reads as content to refresh rather than a layout to move. <!-- canon-keep-surface-root -->
+
+It stays out of `--exit-code`, the same as `superseded`. The verb closes it, but a target gating CI on the count would go red on a move nobody scheduled, and the line is a prompt rather than a gate.
 
 ### Rules the target never received
 

@@ -3,7 +3,6 @@
 description: Shape and content rules for canon/wireframes/<surface>.md files
 paths:
   - 'canon/wireframes/**'
-  - '.claude/wireframes/**'
 ---
 
 # Wireframe standards

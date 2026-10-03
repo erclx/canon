@@ -10,8 +10,10 @@ import { planSync, type ScanEntry, type SyncAdapter } from '@/sync/engine'
 import {
   collectSuperseded,
   detectUnmigrated,
+  detectUnmovedSurfaces,
   type SupersededEntry,
   type UnmigratedDomain,
+  type UnmovedSurface,
 } from '@/sync/layout'
 import {
   buildReverseReport,
@@ -178,6 +180,11 @@ export interface CheckReport {
   readonly seeds: SeedsReport
   readonly superseded: readonly SupersededEntry[]
   readonly unmigrated: readonly UnmigratedDomain[]
+  /**
+   * Report-only like `superseded`, since a target's CI gating on `--exit-code`
+   * would otherwise start failing on a layout nobody asked it to move yet.
+   */
+  readonly unmovedSurfaces: readonly UnmovedSurface[]
   readonly newSkills: readonly string[]
   /**
    * Rules the toolkit authored after this target's governance anchor, filtered
@@ -440,6 +447,7 @@ export async function buildCheckReport(
       seeds: { entries: [], historyUnavailable: false },
       superseded: [],
       unmigrated: [],
+      unmovedSurfaces: [],
       newSkills: [],
       newRules: [],
       reverse: emptyReverseReport(),
@@ -456,6 +464,7 @@ export async function buildCheckReport(
     seeds: buildSeedsReport(toolkitRoot, target),
     superseded: collectSuperseded(target),
     unmigrated,
+    unmovedSurfaces: detectUnmovedSurfaces(target),
     newSkills: await readNewSkills(toolkitRoot, anchors),
     newRules: await readNewRules(toolkitRoot, target, stamp),
     reverse: buildReverseReport(toolkitRoot, target),

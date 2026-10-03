@@ -266,8 +266,7 @@ export function collectCitations(text: string): RawCitation[] {
  *
  * A rule spelling a whole path there is declaring that exact artifact, and a
  * body line naming it again is naming what the rule governs rather than
- * pointing a reader somewhere. `governance/rules/standards/diagrams.md` tells
- * its reader to convert a `.claude/DIAGRAMS.md` left by an older install, which
+ * pointing a reader somewhere. Such a path names a file a target holds, so it
  * is correctly absent from this tree and correctly named in the rule.
  */
 function governedPaths(text: string): string[] {

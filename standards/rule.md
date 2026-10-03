@@ -89,6 +89,7 @@ paths:
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - Keep the file to one topic. A second topic is a second rule file.
 - Do not restate a rule that a sibling rule or `CLAUDE.md` already owns. Point once, never duplicate.
+- Name the current layout only, in a glob and in the body alike. A layout change ships a migration verb, as `canon migrate surface-roots` and `canon migrate records` did, rather than a rule line or a glob that keeps the old spelling loading.
 
 ## Examples
 
