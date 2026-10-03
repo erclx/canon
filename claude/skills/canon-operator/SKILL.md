@@ -22,10 +22,11 @@ Load a domain doc with `canon docs <topic>` only when the intent touches that do
 
 Run `canon sync --check . --json` before routing. It reports what a target is behind on across every surface, so the intent comes from the project state rather than from the user having to know it already. Skip only when the user named a single operation to run.
 
-Read seven fields off the report and carry each to `## Route`:
+Read eight fields off the report and carry each to `## Route`:
 
 - `unmigrated`: a domain sitting at the root layout with nothing under `.claude/`. The most urgent finding, because that domain reports no drift of its own while being entirely behind
 - `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own, so this routes to `canon:target-check` for the full per-domain reading rather than ending at the report
+- `unmovedSurfaces`: a surface held only at its `.claude/` spelling, each entry carrying `rel` and `movesTo`. Every other field reads clean for such a target, and the report's drift status ignores it by design, so read the array itself rather than an exit status
 - `seeds`: entries are `matching`, `stale`, `drifted`, or `missing`. Anything but `matching` needs the seed handoff
 - `domains[].entries`: per-file `stale`, `customized`, `stranded`, and `orphaned` as before, plus `retired` for a rule the toolkit no longer ships, which the next sync deletes
 - `reverse`: what the target holds that no live catalog claims. `unclaimed` lists folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`. Act on the first two and leave `project` alone, which history proved the project owns
@@ -33,6 +34,8 @@ Read seven fields off the report and carry each to `## Route`:
 - `tooling`: read `measured` first. Every count under it is zero when it is false, which is an absence of measurement rather than a measured zero. Past that, `chain` names the stacks the install resolved, nearest first, and `counts.gitignore` counts the managed ignore entries the target is missing.
 
 State what the report found in one line per finding before acting on any of it.
+
+An `unmovedSurfaces` key the report does not carry at all is likewise a CLI predating the field rather than a target with nothing to move. Say the section was unread and name the installed CLI version as the cause.
 
 A `reverse` key the report does not carry at all is a CLI predating the field rather than a target with nothing unclaimed. Say the walk did not run and name the CLI version as the cause. Reading the absent key as an empty answer reports a clean target to a project nobody has looked at, and answering it from a filesystem walk of your own is worse, since that reaches a verdict the attribution the field carries is the only thing entitled to make.
 
@@ -44,6 +47,7 @@ The two can name different rows, and a reply answers both rather than picking on
 
 - A domain in `unmigrated`: name it, the root path, and the install path. No command moves it, so the user runs the relocation themselves
 - Anything in `superseded`: name which files and what replaced them, then hand off to `canon:target-check`, which reports and never moves or deletes the file
+- Anything in `unmovedSurfaces`: name `canon migrate surface-roots`, which only reports its plan until `--write` is passed, with each entry's `rel` and `movesTo`, and run neither form, since the move rewrites tracked paths
 - A folder in `unclaimed`: name it and the attribution it carries. No command moves it and the content may be the project's own, so the decision is the user's
 
 - First-time scaffold of a fresh project: hand off to `target-setup`
