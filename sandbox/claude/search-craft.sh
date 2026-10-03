@@ -22,26 +22,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "open")
-    cat <<'EOF' >>CLAUDE.md
-
-# Housing brief
-
-A policy brief on local housing. Research lives in `notes/`, and the brief is
-drafted from it later.
-
-## Research notes
-
-- Write research notes to `notes/research.md`, one section per question.
-- Link every source a claim rests on.
-EOF
-
-    mkdir -p notes
-    cat <<'EOF' >notes/README.md
-# Notes
-
-Research notes for the housing brief. `research.md` holds one section per
-question, each claim linked to its source.
-EOF
+    stage_fixtures claude search-craft open 01-project
 
     git add . && git commit -m "docs(notes): set up the research notes folder" --no-verify -q
 
