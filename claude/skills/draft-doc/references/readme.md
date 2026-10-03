@@ -26,7 +26,7 @@ The target path is the placement. A README keeps no catalog, so there is no coll
 
 Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) and the tree, then test each type on its own signal. Note every type that matches rather than stopping at the first, since a project is often several at once.
 
-- Library: an installable package name, counted only when no other type below matches, since a named package is also what a site, a CLI, or a plugin carries.
+- Library: an installable package name, counted only when no application, CLI, or plugin signal matches, since a named package is also what a site, a CLI, or a plugin carries. An agent-facing match leaves it in place, so a library with a `CLAUDE.md` still gets its quickstart.
 - CLI: a `bin` field, a `[project.scripts]` table in `pyproject.toml`, a `[[bin]]` table in `Cargo.toml`, or a CLI entry point.
 - Application: a site framework dependency, a site config file, or an app entry point.
 - Agent-facing: a `.claude/skills/` folder, or a file an agent loads such as `CLAUDE.md`.
