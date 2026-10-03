@@ -5,7 +5,7 @@
  * a heading with under 120px after it permanently unmarked, since its top never
  * fell below the line even at max scroll.
  *
- * The sidebar script inlines this function's own source, so a test exercises
+ * The sidebar script embeds this function's own source, so a test exercises
  * what the browser runs.
  */
 export function focusLine(
