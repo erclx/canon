@@ -65,10 +65,12 @@ The constraint is stated twice on purpose: `markdown.md` carries a one-line note
 
 A second reader takes prose rather than a list. `appliesTo` in `src/standards/scope.ts` reads a standard's `## Scope` line, bounded to the first sentence, per the shape rules in `standards/standard.md` that require the governed path there. Ship the parser's span rule as a shape rule in the standard governing the prose, in the same change, since a silently unparsed entry is indistinguishable from a conforming one downstream.
 
+A third reader takes frontmatter. `src/gov/standard-rules.ts` reads `paths:` and `rule:` from every standard and writes the rule routing those globs to it, so both fields stay lists of strings in block form. Prettier reflows a flow sequence in frontmatter onto several lines once it passes 80 columns, so a one-line `paths: [...]` survives formatting only behind a `# prettier-ignore` comment. Measured on the four standards these fields pushed past the ceiling, flow form with that comment saved one to four rendered lines each, which is why those four split rather than compacting.
+
 ## Authoring a new standard
 
 Follow `standards/standard.md`. It is the meta-standard: the success criterion, the scope rules, the frontmatter contract, heading and structure conventions, imperative rule bullets, and when to include examples. It governs itself, so it is also the worked example. `governance/rules/standards/standard.md` routes any edit under `standards/` to it.
 
-Create the `.md` file in `standards/` with `title` and `description` frontmatter, then run `bun run check` to regenerate `standards/index.md` and commit both. No consumed copy follows it.
+Create the `.md` file in `standards/` with `title` and `description` frontmatter, then run `bun run check` to regenerate `standards/index.md` and commit both. A standard carrying `paths:` also gains a generated rule under `governance/rules/standards/` and its consumed copy, which the same run writes and the commit carries.
 
 The `create-standard` skill has one write surface, `standards/` at the working root, in the toolkit and in a target alike. That is the root the resolver reads first, so an author never picks between two spellings.
