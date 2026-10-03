@@ -25,17 +25,15 @@ Field: subtitling and captioning. Authorities: broadcasters' and streamers' publ
 
 Fields: interface motion design, and screen recording practice. Authorities: design systems that publish motion specs, and the reference documentation of a screen recording tool.
 
-**450 to 600 ms for a push onto an action, never past 1 second.** Material Design 3's [easing and duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) set the long band at 450 to 600 ms for large expressive transitions, and reserve the extra-long band, up to 1000 ms, for ambient transitions that involve no user input. Nielsen Norman Group's [animation duration article](https://www.nngroup.com/articles/animation-duration/) puts 400 ms as "very slow, to be used only for big movements across large screens" and says 500 ms "start[s] to feel like a real drag".
+**A push onto an action no faster than HyperFrames' floor, never past 1 second.** HyperFrames' `viewport-change` rule states a zoom of 1.0 to 2.0 seconds and gives its reason beside the value: "under 0.8s teleports, over 2.5s drags". The body keeps that floor by pointing at the rule rather than restating it. The 1 second ceiling has two grounds. Measured: an unguided render pushed in over 2.2 seconds and a second over 1.4 seconds, and the operator judged both slow, so the range's lower half already reads slow on a push onto a click. Published: Material Design 3's [easing and duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) end their scale at 1000 ms, the top of the extra-long band they reserve for ambient transitions, so no input-driven transition in that system runs longer.
 
 **Zoom on a click.** Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions and zooms nowhere a click did not occur.
 
-**Conflict, and the pick.** HyperFrames' `viewport-change` rule states 1.0 to 2.0 seconds for a zoom, with no source given, and the design systems above put a large transition at 450 to 600 ms. The body takes the design systems' band for a push onto an action and leaves HyperFrames' range to an ambient reveal, which matches Material's own split between input-driven and ambient motion. The pick is also measured: an unguided render pushed in over 2.2 seconds and a second over 1.4 seconds, and the operator judged both slow. The interface-motion sources are written for an interface a user waits on, which a video viewer is not, so the pick is the design-system band rather than the 400 ms ceiling.
+**Conflict, and the pick.** HyperFrames' range and the measured renders disagree on the push onto an action, and the body takes the overlap: HyperFrames' teleport floor below, and 1 second above, which sits inside HyperFrames' range at its fast end. HyperFrames' full range stays with an ambient reveal, which matches Material's own split between input-driven and ambient motion. A tighter band was considered and declined. Material puts large expressive transitions at 450 to 600 ms, and Nielsen Norman Group's [animation duration article](https://www.nngroup.com/articles/animation-duration/) calls 400 ms "very slow", but both write for an interface a user waits on, which a video viewer is not, and that band sits below HyperFrames' stated teleport floor with nothing measured to show it reads right. Narrow the band once a composed demo is compared against the unguided renders.
 
 ## Pointer
 
-Field: screen recording practice. Authority: the reference documentation of a screen recording tool, read open, since no standards body publishes on pointer behavior.
-
-**Smooth the path, turn smoothing off where it must land exactly, hide it at rest.** Screen Studio's [cursor guide](https://screen.studio/guide/cursor) smooths the pointer by default and hides it when it is not moving, and its [guide to disabling smooth movement](https://screen.studio/guide/disable-smooth-mouse-movement) turns smoothing off for a fragment such as a dropdown menu.
+The two pointer rules in the body carry no number. One pointer on a frame and a click landing inside its recorded box both follow from the take recording the real pointer and the timeline recording each target's box.
 
 ## Audio
 
@@ -60,5 +58,9 @@ Narration has no standards body for pace, and the scoped search found none, so t
 **Restating HyperFrames' motion rules.** Ease variety, anchoring, click timing, the scale and dwell of a zoom, and title-safe margins are stated in HyperFrames' own skills, which update on their own cadence. A copy here goes stale on theirs.
 
 **A loudness target in the body.** See Audio above.
+
+**Pointer smoothing and hiding at rest.** Screen Studio's [cursor guide](https://screen.studio/guide/cursor) smooths the pointer and hides it when idle, and its [guide to disabling smooth movement](https://screen.studio/guide/disable-smooth-mouse-movement) turns smoothing off for a dropdown menu. Declined because both are recorder settings. A take is composed with its pointer already baked into the frames, so a session composing from it cannot change either. They belong to whatever records the take.
+
+**Zoom out before a cut, and a sound effect only on a click that changes something.** Neither has a source, and no operator read stands behind either, so both stay out until one does.
 
 **Vertical 9:16 framing.** Every video measured when this skill was written was landscape. Add it when a project asks for vertical video, with its safe areas sourced from the platform's own creator documentation.

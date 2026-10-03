@@ -17,7 +17,7 @@ Numbers from recall are the second gap. HyperFrames' zoom rule states 1.0 to 2.0
 
 - State that a caption names only what its frame shows, with its on-screen time, line count, line length, and reading rate traced to published subtitle guidelines
 - State which moment earns a zoom, aim it from the timeline `canon demo run` writes beside the take, and give a sourced duration for a push onto an action
-- State how a recorded pointer behaves on a real interface: one pointer, a smoothed path except where it must land exactly, hidden at rest, and each click inside its recorded target
+- State how a recorded pointer behaves on a real interface: one pointer, and each click inside its recorded target. Smoothing and hiding the pointer are recorder settings a composition cannot change, so they stay out
 - Cover choosing music or silence, the level music sits under a voice, and the pace of a captioned voiceover, each number sourced
 - State that a checker finding is dismissed only after the frame it names is read
 - Record the source behind every number in `references/adopted.md`, and name each conflict between sources with its pick rather than averaging

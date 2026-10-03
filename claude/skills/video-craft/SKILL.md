@@ -23,15 +23,12 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 
 - Zoom only on a click, fill, or hover whose result is too small to read at full frame. A navigate, a wait, or a hold has nothing to aim at.
 - Aim the zoom at the action's own place and moment. `canon demo run` writes a timeline beside the take carrying each step's start, end, and target box, so read the zoom's target and its start off that file rather than adding up holds by hand.
-- Run a push that lands on an action in 450 to 600 ms, and never past 1 second. HyperFrames' `viewport-change` rule states 1.0 to 2.0 seconds. That range suits an ambient reveal with no action to land on, and reads slow on a push onto a click.
-- Zoom out before a cut, so the next beat opens on the whole interface the viewer has to orient in.
+- Run a push that lands on an action no faster than the floor HyperFrames' `viewport-change` rule states, and never past 1 second. That rule's own range suits an ambient reveal with no action to land on, and reads slow on a push onto a click.
 - Leave the scale and the dwell after a zoom settles to the `viewport-change` rule, which states both.
 
 ## A real pointer on a real interface
 
 - Keep the pointer the take recorded. Never draw a second, synthetic cursor over a real interface, since two pointers on one frame leave the viewer guessing which one acted.
-- Smooth the pointer's path between actions, and turn smoothing off where the pointer has to land exactly, such as a dropdown menu, where a smoothed path visibly misses its target.
-- Hide the pointer while it rests, so a still frame shows the interface rather than an idle arrow.
 - Check that each click lands inside the target box the timeline records for it. A pointer arriving beside the button it claims to press reads as a fake.
 
 ## Music, silence, and a voice
@@ -39,7 +36,6 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 - Choose silence over a music bed that competes with a voiceover. A bed earns its place on a video with no voice, where it carries the pacing between beats.
 - Sit music at least 20 dB under the voice. Check `media-use`'s narrated bed default against that floor rather than take it as given, since it has sat short of it. The mechanism, a carve rather than a flat duck, is `hyperframes-audio`'s.
 - Keep a captioned voiceover at or under 160 words a minute, since captions follow the voice and a faster voice forces captions past their reading limit. `hyperframes-creative`'s narration pace sits under that ceiling.
-- Give a sound effect to a click only when the click changes something the viewer should notice. An effect on every click flattens the one that matters.
 
 ## Read the frame before dismissing a finding
 
@@ -69,7 +65,7 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 ## Before handing over
 
 - Every caption names what its frame shows, starts on its action's first frame, and holds within its time and length limits.
-- Every zoom aims at a click, fill, or hover read from the timeline, lands within its duration, and zooms out before a cut.
+- Every zoom aims at a click, fill, or hover read from the timeline, and lands within its duration.
 - One pointer is on screen, and each click lands inside its recorded box.
 - Music, when present, sits at least 20 dB under any voice, and a captioned voice stays at or under 160 words a minute.
 - Every checker finding was either fixed or dismissed with the frame it names read and reported.

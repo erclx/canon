@@ -53,7 +53,7 @@ The command's purpose is running in someone else's project, so `src/demo/` ships
 
 ### Composing
 
-- **Composition craft lives in `video-craft`, which overrides two of HyperFrames' own defaults on sourced grounds.** A push onto an action runs 450 to 600 ms rather than the 1.0 to 2.0 seconds HyperFrames' zoom rule states, and music sits at least 20 dB under a voice, the WCAG 1.4.7 floor, where `media-use`'s narrated bed default sat about 18 dB under. `claude/skills/video-craft/references/adopted.md` records each conflict beside its source, so a later change to either default argues there rather than in the skill body. Restating a rule HyperFrames already carries was rejected, since their skills update on their own cadence and a copy goes stale on it.
+- **Composition craft lives in `video-craft`, which overrides two of HyperFrames' own defaults on sourced grounds.** A push onto an action stays above the teleport floor HyperFrames' zoom rule states and never runs past 1 second, the fast end of that rule's 1.0 to 2.0 second range, since two renders pushing in over 2.2 and 1.4 seconds were both judged slow. Music sits at least 20 dB under a voice, the WCAG 1.4.7 floor, where `media-use`'s narrated bed default sat about 18 dB under. `claude/skills/video-craft/references/adopted.md` records each conflict beside its source, so a later change to either default argues there rather than in the skill body. Restating a rule HyperFrames already carries was rejected, since their skills update on their own cadence and a copy goes stale on it.
 
 ## Gotchas
 
