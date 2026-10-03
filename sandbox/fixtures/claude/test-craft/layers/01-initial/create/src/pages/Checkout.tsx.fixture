@@ -1,0 +1,17 @@
+import { useNavigate } from 'react-router-dom'
+
+export function Checkout() {
+  const navigate = useNavigate()
+  return (
+    <main>
+      <h1>Checkout</h1>
+      <form onSubmit={(event) => { event.preventDefault(); navigate('/confirmation') }}>
+        <label>
+          Email
+          <input name="email" type="email" required />
+        </label>
+        <button type="submit">Place order</button>
+      </form>
+    </main>
+  )
+}

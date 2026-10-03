@@ -1,0 +1,8 @@
+
+# My Workspace
+
+Three-package workspace. Each package owns its own build and lint config.
+
+## Commands
+
+- `bun run check`: lint and typecheck every package

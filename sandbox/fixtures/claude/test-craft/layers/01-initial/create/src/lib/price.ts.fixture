@@ -1,0 +1,8 @@
+export function formatPrice(cents: number): string {
+  if (!Number.isInteger(cents) || cents < 0) {
+    throw new RangeError(`Invalid price: ${cents}`)
+  }
+  const dollars = Math.floor(cents / 100)
+  const rest = String(cents % 100).padStart(2, '0')
+  return `$${dollars.toLocaleString('en-US')}.${rest}`
+}

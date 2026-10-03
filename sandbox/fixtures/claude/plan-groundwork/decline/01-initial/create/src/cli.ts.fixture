@@ -1,0 +1,7 @@
+export function run(args: string[]) {
+  if (args.includes("--version")) {
+    console.log("1.0.0");
+    return;
+  }
+  console.log("usage: cli [--version]");
+}

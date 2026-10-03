@@ -1,0 +1,13 @@
+import { Route, Routes } from 'react-router-dom'
+
+import { Orders } from './pages/Orders'
+
+const loadOrders = () => fetch('/api/orders').then((response) => response.json())
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/orders" element={<Orders load={loadOrders} />} />
+    </Routes>
+  )
+}

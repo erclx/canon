@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+for id in "$@"; do
+  bun src/cli.ts show "$id" | jq -r '"\(.id) \(.buyer) \(.total)"'
+done

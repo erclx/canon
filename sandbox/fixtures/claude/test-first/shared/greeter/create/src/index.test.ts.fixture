@@ -1,0 +1,9 @@
+import { describe, expect, it } from 'bun:test'
+
+import { greet } from './index'
+
+describe('greet', () => {
+  it('should address the name it was given', () => {
+    expect(greet('Ada')).toBe('Hello, Ada!')
+  })
+})

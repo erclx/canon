@@ -1,0 +1,11 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Add pagination to GET /users](v01.0-users-pagination.md): Page the user list with limit and offset query params
+- [v02.0: Tighten the docs intro paragraph](v02.0-docs-intro.md): Break the run-on docs opening into two short paragraphs

@@ -1,0 +1,5 @@
+
+# Shop pricing
+
+Totals for a small shop. `src/cart.ts` prices the cart a buyer sees, and
+`src/invoice.ts` prices the invoice sent after checkout. Both must agree.

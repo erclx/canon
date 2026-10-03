@@ -1,0 +1,7 @@
+import { test, expect } from '@playwright/test'
+import { seedCart } from './seed-cart'
+
+test('shows the cart total', async ({ page }) => {
+  await seedCart(page)
+  await expect(page.getByText('Total')).toBeVisible()
+})

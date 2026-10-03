@@ -1,0 +1,7 @@
+export function Confirmation() {
+  return (
+    <main>
+      <h1>Order placed</h1>
+    </main>
+  )
+}

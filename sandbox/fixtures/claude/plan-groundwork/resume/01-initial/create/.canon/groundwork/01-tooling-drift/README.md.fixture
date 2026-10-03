@@ -1,0 +1,31 @@
+---
+title: Tooling drift
+description: Whether the three packages should share a tooling preset, and how far their configs have drifted
+date: 2026-07-20
+---
+
+# Tooling drift
+
+Groundwork phase. Nothing here is a feature plan.
+
+Whether the three packages should share a tooling preset.
+
+## Why
+
+Each package was scaffolded separately. A change to a lint rule currently has to be
+made three times, and nobody has measured how far the configs have actually drifted.
+
+## Files
+
+| File | Holds |
+| ---- | ----- |
+| `01-current-state.md` | Measured config drift across the three packages |
+
+## Method
+
+Internal: direct read of every `eslint.config.js` and `tsconfig.json` under `packages/`.
+External: not yet done. Shared-preset patterns from comparable workspaces are unread.
+
+## Prior art
+
+None. This is the first pass at the question.

@@ -1,0 +1,8 @@
+---
+title: Decoy surface
+description: Sentinel surface that should not be read for prose-only changes.
+---
+
+# Decoy surface
+
+SENTINEL: this file should NOT be read for prose-only changes.

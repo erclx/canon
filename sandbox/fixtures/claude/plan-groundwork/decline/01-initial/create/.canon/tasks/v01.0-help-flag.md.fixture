@@ -1,0 +1,10 @@
+---
+title: 'v01.0: Add a --help flag to the CLI'
+description: Print the usage line explicitly behind a --help flag
+---
+
+# v01.0: Add a --help flag to the CLI
+
+The CLI already prints a usage line for unknown input. Add a `--help` flag that prints the same usage line explicitly. Decided: mirror the existing `--version` branch in `src/cli.ts`.
+
+- [ ] Outcome: `cli --help` prints the usage line

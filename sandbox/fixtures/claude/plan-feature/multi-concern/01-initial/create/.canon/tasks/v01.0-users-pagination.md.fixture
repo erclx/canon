@@ -1,0 +1,9 @@
+---
+title: 'v01.0: Add pagination to GET /users'
+description: Page the user list with limit and offset query params
+---
+
+# v01.0: Add pagination to GET /users
+
+- [ ] Outcome: GET /users supports limit and offset query params
+- [ ] Outcome: defaults applied when params omitted

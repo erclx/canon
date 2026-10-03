@@ -1,0 +1,9 @@
+import { expect, test } from '@playwright/test'
+
+test('the orders page lists each order the API returns', async ({ page }) => {
+  await page.route('**/api/orders', (route) =>
+    route.fulfill({ json: [{ id: 'A-1', label: 'Order A-1' }] }),
+  )
+  await page.goto('/orders')
+  await expect(page.getByRole('list', { name: 'Orders' })).toContainText('Order A-1')
+})

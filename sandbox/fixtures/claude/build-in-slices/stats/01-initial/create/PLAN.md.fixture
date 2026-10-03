@@ -1,0 +1,8 @@
+# Plan: text stats
+
+Add `src/stats.ts` with two functions and a test for each.
+
+1. `wordCount(text: string): number` counts runs of non-space characters.
+2. `lineCount(text: string): number` counts lines, where an empty string has zero.
+
+Files to touch: `src/stats.ts`, `src/stats.test.ts`.

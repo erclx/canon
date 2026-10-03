@@ -1,0 +1,10 @@
+
+# Shop
+
+React storefront with a Playwright end to end suite.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+- `bun run test`: unit and component tests
+- `bun run e2e`: Playwright suite

@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { getTasks } from "../db";
+
+const router = Router();
+
+router.get("/", (req, res) => {
+  res.json(getTasks(String(req.query.owner)));
+});
+
+export default router;

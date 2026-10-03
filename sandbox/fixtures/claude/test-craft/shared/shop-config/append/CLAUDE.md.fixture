@@ -1,0 +1,9 @@
+
+# Sample shop
+
+Vite and React storefront. Routes live in `src/App.tsx`, components in `src/components/`, and pure helpers in `src/lib/`.
+
+## Commands
+
+- `bun run test`: Vitest unit and component tests, beside their subject
+- `bun run test:e2e`: Playwright end to end tests under `e2e/`

@@ -1,0 +1,17 @@
+#!/usr/bin/env bun
+import { getOrder } from './orders'
+
+const [command, id] = process.argv.slice(2)
+
+if (command !== 'show' || id === undefined) {
+  console.error('usage: orders show <id>')
+  process.exit(2)
+}
+
+const order = getOrder(id)
+if (order === undefined) {
+  console.error(`no order ${id}`)
+  process.exit(1)
+}
+
+console.log(JSON.stringify({ id: order.id, buyer: order.buyer, total: order.total_cents }))

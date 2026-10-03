@@ -1,0 +1,5 @@
+import { formatLegacy } from './dates'
+
+export function reportHeader(date: Date): string {
+  return `Daily report for ${formatLegacy(date)}`
+}

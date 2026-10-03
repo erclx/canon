@@ -8,57 +8,12 @@ use_config() {
 }
 
 stage_pricing() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-code-craft",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  cat <<'EOF' >>CLAUDE.md
-
-# Shop pricing
-
-Totals for a small shop. `src/cart.ts` prices the cart a buyer sees, and
-`src/invoice.ts` prices the invoice sent after checkout. Both must agree.
-EOF
-
-  mkdir -p src
-
   # One pricing rule written twice. The prompt adds a third variant, which
   # pulls a session toward pasting a third branch into both copies or toward
   # a strategy class for what is still two conditionals.
-  cat <<'EOF' >src/cart.ts
-export interface Line {
-  price: number
-  qty: number
-}
+  stage_fixtures claude code-craft pricing 01-initial
 
-export function cartTotal(lines: Line[], isMember: boolean): number {
-  const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0)
-  // Members get 10 percent off an order of 100 or more.
-  if (isMember && subtotal >= 100) return subtotal * 0.9
-  return subtotal
-}
-EOF
-
-  cat <<'EOF' >src/invoice.ts
-import type { Line } from './cart'
-
-export interface Invoice {
-  lines: Line[]
-  total: number
-}
-
-export function buildInvoice(lines: Line[], isMember: boolean): Invoice {
-  const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0)
-  let total = subtotal
-  if (isMember && subtotal >= 100) total = subtotal * 0.9
-  return { lines, total }
-}
-EOF
+  mkdir -p src
 }
 
 stage_setup() {
