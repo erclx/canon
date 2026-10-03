@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.23.0](https://github.com/erclx/canon/compare/v5.22.0...v5.23.0) (2026-10-03)
+
+
+### Features
+
+* **claude:** read unmovedSurfaces in target-check ([#2164](https://github.com/erclx/canon/issues/2164)) ([fc47b7e](https://github.com/erclx/canon/commit/fc47b7e77605985b1307ba2721369ba6805d5258))
+* **claude:** seed the word and risk caps into new targets ([#2169](https://github.com/erclx/canon/issues/2169)) ([045b268](https://github.com/erclx/canon/commit/045b26866577bf7484d4d0b88caf608717e2283d))
+* **demo:** render the agent-view demo as a composed mp4 ([#2166](https://github.com/erclx/canon/issues/2166)) ([fbd1eaa](https://github.com/erclx/canon/commit/fbd1eaadcf7ab522169fa95962071cc874ecda4b))
+* **hooks:** merge tasks and memory index hooks into records-index ([#2170](https://github.com/erclx/canon/issues/2170)) ([fb62ad0](https://github.com/erclx/canon/commit/fb62ad0b718fc1854aaad2ebc2ef73da7ba8fd26))
+* **tasks:** report board code spans too wide for the preview ([#2165](https://github.com/erclx/canon/issues/2165)) ([4794cf0](https://github.com/erclx/canon/commit/4794cf0a0e054866cbd5ee2f9646d1fa30e322f6))
+
 ## [5.22.0](https://github.com/erclx/canon/compare/v5.21.0...v5.22.0) (2026-10-03)
 
 
