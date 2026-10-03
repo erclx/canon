@@ -49,8 +49,8 @@ task file and the board stay the orchestrator's to write.
 
 A worker that halts on a plan question it may not answer, or argues back against
 an instruction the tree contradicts, is working correctly. It never writes
-`.canon/tasks/priority.md` or the backlog beside it, and reports the row it
-needs for the orchestrator to write. `role-worker` carries the reason for each.
+`.canon/tasks/priority.md` or the backlog beside it, files no task file for work
+it turns up, and reports the row it needs for the orchestrator to write. `role-worker` carries the reason for each.
 
 The orchestrator's cell reads every tracked file rather than every feature, and
 it offers no exception for a small one. A correction found while orchestrating
