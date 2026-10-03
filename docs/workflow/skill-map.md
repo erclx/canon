@@ -18,7 +18,6 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                       |
 | `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
 | `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
-| `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                        |
 | `canon:deploy-app`     | Once a project is ready to publish, to set up its Cloudflare or Vercel deploy and stop for token and domain |
 | `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
 
@@ -125,7 +124,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:create-standard`   | For a new authoring convention                                                                                                                 |
 | `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wireframe surface, wiki reference page, or `README.md`, drafted against the standard for its kind |
 | `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                                      |
-| `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` in Mermaid or freehand SVG                              |
+| `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                                     |
 | `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                                                 |
 | `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
 | `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                                                          |

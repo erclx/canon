@@ -26,7 +26,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Draw me a diagram of how the pieces of this system connect.',
-    expect: 'draft-diagram',
+    expect: 'draft-figure',
   },
   {
     prompt:
