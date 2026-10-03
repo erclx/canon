@@ -19,6 +19,7 @@ import {
   Sections,
 } from '@/slides/convert/export'
 import type { SlideMeta } from '@/slides/convert/walk'
+import { testFace } from '@/slides/package/test-face'
 
 /**
  * Exports a four-slide fixture deck through a real Chromium and reads the XML
@@ -43,7 +44,14 @@ const TOKENS = `:root {
   --type-body-family: "Fixture Sans Variable", sans-serif;
 }`
 
-const DECK = { title: 'Fixture deck', mark: 'photo.png' }
+const DECK = {
+  title: 'Fixture deck',
+  mark: 'photo.png',
+  fonts: [
+    { family: 'Fixture Sans', path: 'fonts/fixture.ttf' },
+    { family: 'Fixture Sans', weight: 700, path: 'fonts/locked.ttf' },
+  ],
+}
 
 const STYLE = `
   body { margin: 0; width: 1280px; height: 720px; background: #FBFAF8; color: #2C2C29; font: 24px/32px var(--type-body-family, system-ui); }
@@ -151,6 +159,12 @@ function writeFixture(root: string): string {
   copyFileSync(PHOTO, join(source, 'photo.png'))
   writeFileSync(join(source, 'notes.txt'), 'not a slide')
   writeFileSync(join(source, 'deck.json'), JSON.stringify(DECK))
+  mkdirSync(join(source, 'fonts'))
+  writeFileSync(join(source, 'fonts', 'fixture.ttf'), testFace())
+  writeFileSync(
+    join(source, 'fonts', 'locked.ttf'),
+    testFace({ weight: 700, fsType: 0x0002 }),
+  )
   mkdirSync(join(root, '.claude', 'design'), { recursive: true })
   writeFileSync(join(root, '.claude', 'design', 'base.css'), TOKENS)
   return source
@@ -436,6 +450,37 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
       {
         slide: 4,
         message: 'p.spun: unknown entrance spin. Use fade, fly, wipe, or zoom',
+      },
+    ])
+  })
+
+  it('should embed the allowed face as a font part', () => {
+    expect(zip.file('ppt/fonts/font1.fntdata')).not.toBeNull()
+  })
+
+  it('should register the font part and its content type', async () => {
+    expect(await part('ppt/_rels/presentation.xml.rels')).toContain(
+      'Target="fonts/font1.fntdata"',
+    )
+    expect(await part('[Content_Types].xml')).toContain(
+      '<Default Extension="fntdata" ContentType="application/x-fontdata"/>',
+    )
+  })
+
+  it('should list the face and turn embedding on', async () => {
+    const presentation = await part('ppt/presentation.xml')
+
+    expect(presentation).toContain('embedTrueTypeFonts="1"')
+    expect(presentation).toContain(
+      '<p:embeddedFont><p:font typeface="Fixture Sans"/><p:regular r:id="rIdCanonFont1"/></p:embeddedFont>',
+    )
+  })
+
+  it('should refuse the restricted face by its path', () => {
+    expect(result.status === 'written' && result.refusedFonts).toEqual([
+      {
+        path: 'fonts/locked.ttf',
+        message: 'its license forbids embedding (fsType restricted)',
       },
     ])
   })

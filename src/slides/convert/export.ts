@@ -45,6 +45,7 @@ import {
   type WalkedSlide,
   walkSlide,
 } from '@/slides/convert/walk'
+import { embedFonts, type FontNotice } from '@/slides/package/fonts'
 import {
   type EntranceSpec,
   type MotionNotice,
@@ -57,7 +58,9 @@ import {
  * slide out at 1280 by 720 in the project's tokens, `walkSlide` reads what it
  * placed, `planSlide` maps the records onto shapes, and an element whose CSS has
  * no mapping lands as a screenshot of itself. The first slide's computed tokens
- * build the masters, and `deck.json` sets the bands they carry.
+ * build the masters, and `deck.json` sets the bands they carry. Once pptxgenjs
+ * has written the package, `src/slides/package/` adds the transitions,
+ * entrances, and embedded faces it declares nothing for.
  *
  * Every browser reference this feature adds lives here, and the command reaches
  * it through a dynamic import so no other command resolves the engine.
@@ -105,6 +108,8 @@ export type ExportResult =
       readonly refusedCharts: readonly RefusedChart[]
       /** Transitions and entrances left out, each with the reason. */
       readonly refusedMotion: readonly MotionNotice[]
+      /** Faces `deck.json` lists that the deck does not carry, with the reason. */
+      readonly refusedFonts: readonly FontNotice[]
       /** What the deck master could not take from the project's tokens. */
       readonly notices: readonly string[]
     }
@@ -286,10 +291,19 @@ export async function exportHtmlDeck(
   // A deck needing no edit keeps the bytes pptxgenjs wrote.
   let packaged: Uint8Array = written
   const refusedMotion: MotionNotice[] = []
-  if (patches.length > 0 || motions.length > 0) {
+  const refusedFonts: FontNotice[] = []
+  if (patches.length > 0 || motions.length > 0 || deck.fonts.length > 0) {
     const zip = await JSZip.loadAsync(written)
     await applyPatches(zip, patches)
     refusedMotion.push(...(await writeMotion(zip, motions)))
+    const faces = deck.fonts.map((font) => ({
+      family: font.family,
+      weight: font.weight,
+      style: font.style,
+      path: font.source,
+      bytes: readFileSync(font.path),
+    }))
+    refusedFonts.push(...(await embedFonts(zip, faces)))
     packaged = await zip.generateAsync({
       type: 'nodebuffer',
       compression: 'DEFLATE',
@@ -317,6 +331,7 @@ export async function exportHtmlDeck(
     refusedLinks,
     refusedCharts,
     refusedMotion,
+    refusedFonts,
     notices,
   }
 }

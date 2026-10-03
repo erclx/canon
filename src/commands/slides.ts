@@ -168,6 +168,11 @@ async function renderHtmlFolder(
       `${GREY}│${NC} ${RED}✗${NC} slide ${slide} motion left out: ${message}\n`,
     )
   }
+  for (const { path, message } of result.refusedFonts) {
+    process.stderr.write(
+      `${GREY}│${NC} ${RED}✗${NC} font ${path} not embedded: ${message}\n`,
+    )
+  }
   for (const notice of result.notices) {
     process.stderr.write(`${GREY}│${NC} ${RED}✗${NC} ${notice}\n`)
   }
