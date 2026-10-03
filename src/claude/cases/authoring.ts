@@ -31,7 +31,7 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Write a brand-new docs page for the capture command, nothing under docs/ covers it yet.',
-    expect: 'draft-docs',
+    expect: 'draft-doc',
   },
   {
     prompt:
@@ -40,22 +40,22 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'This project has no README.md at all, write one from scratch.',
-    expect: 'draft-readme',
+    expect: 'draft-doc',
   },
   {
     prompt:
       'Write a context entry for the payments domain, there is no canon/context page for it yet.',
-    expect: 'draft-context',
+    expect: 'draft-doc',
   },
   {
     prompt:
       'Draft a wireframe for the settings panel, nothing under canon/wireframes covers that surface yet.',
-    expect: 'draft-wireframes',
+    expect: 'draft-doc',
   },
   {
     prompt:
       'Write a wiki reference page for Claude Code output styles, no page covers that subject yet.',
-    expect: 'draft-wiki',
+    expect: 'draft-doc',
   },
   {
     prompt: 'Say what that dense answer actually means in plain terms.',

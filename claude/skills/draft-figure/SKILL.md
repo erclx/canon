@@ -1,6 +1,6 @@
 ---
 name: draft-figure
-description: Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped or needs freehand SVG, then draws it. Renders the Mermaid path through Mermaid's own hand-drawn look, reads the render back, and fixes what it exposes. Wraps either path in the figure standard's caption, color, and accessibility rules. Use when asked to "draw a figure", "add a hand-drawn diagram", "draft a figure for this doc", or "draw this relationship as a figure". Do NOT use for the toolkit's own `.canon/diagrams/` architecture surface, which is `draft-diagram`, or for a UI wireframe, which is `draft-wireframes`.
+description: Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped or needs freehand SVG, then draws it. Renders the Mermaid path through Mermaid's own hand-drawn look, reads the render back, and fixes what it exposes. Wraps either path in the figure standard's caption, color, and accessibility rules. Use when asked to "draw a figure", "add a hand-drawn diagram", "draft a figure for this doc", or "draw this relationship as a figure". Do NOT use for the toolkit's own `.canon/diagrams/` architecture surface, which is `draft-diagram`, or for a UI wireframe, which is `draft-doc`.
 ---
 
 # Draft figure

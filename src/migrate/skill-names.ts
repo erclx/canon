@@ -33,6 +33,13 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * its name collided with `docs-sync`, which owns `docs/`. `claude-docs` is
  * retargeted onto `context-fold` for the same reason `claude-ui-test` was.
  *
+ * Five rows merge skills rather than rename one. `draft-docs`,
+ * `draft-context`, `draft-wireframes`, `draft-readme`, and `draft-wiki` ran
+ * one procedure five times over, differing only in the standard each read and
+ * the catalog each checked, so they became `draft-doc`, which picks the kind
+ * from where the document lands. Every retired name lands on the one skill, so
+ * a target citing any of them resolves after a single sweep.
+ *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
  * substring of ordinary prose with no token left for a later sweep to find.
@@ -79,6 +86,11 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'canon-slides-draft': 'draft-slides',
   'canon-record': 'record-screencast',
   'canon-frames-read': 'read-frames',
+  'draft-docs': 'draft-doc',
+  'draft-context': 'draft-doc',
+  'draft-wireframes': 'draft-doc',
+  'draft-readme': 'draft-doc',
+  'draft-wiki': 'draft-doc',
 }
 
 /**

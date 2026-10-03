@@ -118,24 +118,20 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## Generate an artifact on demand
 
-| Skill                     | When to use                                                                                                       |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                  |
-| `canon:create-skill`      | For a new `SKILL.md`                                                                                              |
-| `canon:create-standard`   | For a new authoring convention                                                                                    |
-| `canon:draft-docs`        | For a brand-new `docs/*.md` page, drafted against `standards/docs.md`                                             |
-| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task         |
-| `canon:draft-context`     | For a brand-new `canon/context/<domain>.md` entry, drafted against `standards/context.md`                         |
-| `canon:draft-wireframes`  | For a brand-new `canon/wireframes/<surface>.md` file, drafted against `standards/wireframes.md`                   |
-| `canon:draft-wiki`        | For a brand-new wiki reference page on a subject owned outside the project, drafted against `standards/wiki.md`   |
-| `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` in Mermaid or freehand SVG |
-| `canon:draft-readme`      | For a project's `README.md`, drafted against `standards/readme.md`                                                |
-| `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                    |
-| `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                |
-| `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                             |
-| `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                     |
-| `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap      |
-| `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                       |
+| Skill                     | When to use                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                                               |
+| `canon:create-skill`      | For a new `SKILL.md`                                                                                                                           |
+| `canon:create-standard`   | For a new authoring convention                                                                                                                 |
+| `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wireframe surface, wiki reference page, or `README.md`, drafted against the standard for its kind |
+| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                                      |
+| `canon:draft-figure`      | For a hand-drawn figure inside an existing doc, drafted against `standards/figures.md` in Mermaid or freehand SVG                              |
+| `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                                                 |
+| `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
+| `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                                                          |
+| `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                                                  |
+| `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap                                   |
+| `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                                                    |
 
 ## Answer a question at any point
 

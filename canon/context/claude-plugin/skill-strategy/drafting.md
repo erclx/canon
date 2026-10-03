@@ -1,6 +1,6 @@
 ---
 title: Drafting
-description: The proposal, candidate, docs, context, and wireframe draft surfaces, the identity surface, and the walkthrough surface, with the boundary each holds against its neighbors
+description: The proposal, candidate, and document draft surfaces, the identity surface, and the walkthrough surface, with the boundary each holds against its neighbors
 ---
 
 # Drafting
@@ -49,25 +49,36 @@ What the arm cannot reach is the loop, the pick, and the hand-off, and that is a
 
 A close records the decision wherever it was stated as open, in the same step that writes the design note, a path the write scope admits. The losing arms are deleted by the next step, so a pick that records nothing about why leaves the next reader re-deriving it from a diff.
 
-## The docs draft surface
+## The document draft surface
 
-`draft-docs` covers a page under `docs/` that does not exist yet, which is the gap `docs-sync` was never built to close: that skill classifies and rewrites existing sections against a diff since main, and a page with no prior version has no diff to classify. Reaching for it on a brand-new topic reports the page as unrelated to any change, which reads as a clean pass over a request nobody served.
+`draft-doc` covers a document that does not exist yet, in any of five kinds: a `docs/` page, a `canon/context/` entry, a `canon/wireframes/` surface, a wiki reference page, and a `README.md`. Each kind sits beside a surface that rewrites or refreshes an existing document and was never built to originate one.
 
-The two skills stay separate rather than widening `docs-sync` to cover both, keeping a drafting branch out of a skill whose contract already reads as a rewrite. The split is by whether a diff exists to classify, the same axis `standards/docs.md` already sits behind `standards/context.md` and `standards/readme.md` on.
+`docs-sync` classifies and rewrites existing sections against a diff since main, and `context-fold` refreshes context entries and only stubs a wireframe a diff touched. A document with no prior version has no diff to classify, so reaching for either on a brand-new subject reports it as unrelated to any change, which reads as a clean pass over a request nobody served.
 
-What it borrows from `create-standard` rather than from its nearer neighbor is the confirm step. `docs-sync` writes immediately after its preview, since the tool permission dialog is confirmation enough over a rewrite bounded by a diff. A new page carries no such bound, since placement is a judgment call weighed against the catalog's existing shelves rather than a change the branch already made, so the skill confirms the resolved path and the full content with the user before writing, the way `create-standard` confirms a slug and a body against no diff of its own.
+### One skill rather than five
 
-Placement reads the catalog rather than assuming a folder. A `category` value already carried by a sibling page is reused verbatim, since a near-miss spelling opens a second shelf holding one page, and a topic matching no shelf lands at the `docs/` root, since a subfolder earns itself only once a shelf of pages already sits there. The guard against redrafting a covered topic runs the derived slug through `canon docs <slug>` and points at `docs-sync` on a hit, which is a heuristic gate rather than an exhaustive one, since the slug is guessed from the topic phrase rather than confirmed against every page's frontmatter.
+The five kinds ran one procedure: read the owning standard, check for a name or topic collision, place the file, draft against the template, confirm, write. They shipped as five skills sharing that shape by convention, and that was the alternative this one beat. Each restated the shared steps, so a fix to one drifted from the other four, and five descriptions competed for the one trigger of writing a new document.
 
-## The context and wireframe draft surfaces
+The body now holds the shared procedure, and each kind carries one reference under `references/`, loaded alone once the kind resolves from the destination the request names. A request naming no destination is asked rather than defaulted to `docs/`.
 
-`draft-context` and `draft-wireframes` close the same gap `draft-docs` closes, for the two surfaces `context-fold` refreshes but never originates. That skill declines outright to create a new `canon/context/` entry, and its wireframe sweep only writes a bare `TODO` stub for a surface a diff touched. Neither is a draft, so a domain or a surface with no file yet is reached by nothing that reads the owning standard, checks the catalog for a name collision, or confirms a placement judgment before writing.
+The merge was measured against `canon claude skills rank` before it shipped, since one description now covers five triggers. Against trunk, rank one held at 85 of 105 cases and top three rose from 95 to 96, with all five former drafter cases still at rank one.
 
-Both skills take `draft-docs`'s shape whole rather than inventing a second one: read the owning standard, check for a name-or-topic collision, decide placement, draft against the template, confirm, write. `draft-context` defaults every new domain to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder. `draft-wireframes` walks the whole `canon/wireframes/` tree rather than its top level alone, since a collision can sit nested inside a grouped surface's own subfolder.
+The gain was `index-lookup`, which the retired docs drafter had pushed to rank 5 and `draft-doc` pushes only to rank 3. A trial description ending "where no file covers it yet" pulled the `test-first` case, which says "nothing covers it yet", so the shipped description keeps that phrase out.
 
-`standards/wireframes.md` documents only the per-surface ASCII shape. A three-tier framework deciding ASCII-only, ASCII-plus-render, or visual-as-source-of-truth lives in the project-wide visual design workflow guide instead, a once-per-project four-question call rather than a per-draft decision, and `draft-wireframes` reads it from there rather than from the wireframe standard.
+The measure is TF-IDF over descriptions rather than Claude Code's own router, and one case per kind is a thin sample, so a real routing loss would show only as a session that never loads the skill.
 
-`draft-wireframes` reads `canon/DESIGN.md` and the wireframes tree for an existing tier signal and reports what it finds, since no shipped mechanism turns a detected tier 1 or tier 2 into a companion render. Detecting and reporting is the ceiling for a skill mirroring `draft-docs` rather than a scoped-down version of something more ambitious.
+### The confirm step
+
+`draft-doc` borrows its confirm step from `create-standard` rather than from `docs-sync`. `docs-sync` writes at once after its preview, since the tool permission dialog is confirmation enough over a rewrite bounded by a diff. A new document carries no such bound, because its kind, its placement, and every detection a kind runs are judgment calls weighed against the catalog rather than a change the branch already made. The skill waits for the user to confirm the path and the full content, the way `create-standard` confirms a slug and a body against no diff of its own.
+
+### What each kind settles
+
+- Docs placement reads the catalog rather than assuming a folder. A `category` a sibling page carries is reused verbatim, and a topic matching no shelf lands at the `docs/` root.
+- The docs `canon docs <slug>` guard is a heuristic, since the slug is guessed from the topic phrase, so the title and description check behind it catches the wider case.
+- A context entry defaults to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder.
+- A wireframe check walks the whole tree rather than its top level, since a collision can sit nested inside a grouped surface's own subfolder.
+- `standards/wireframes.md` documents only the per-surface ASCII shape. The three-tier call between ASCII only, ASCII plus a render, and visual as the source of truth is made once per project in the visual design workflow guide. The wireframes kind reads `canon/DESIGN.md` and the tree for a tier signal and reports it, since no shipped mechanism turns a detected tier into a companion render.
+- The wiki kind's ownership refusal offers the docs or context kind of the same skill, so a subject this project owns is redirected without leaving the skill.
 
 ## The identity surface
 

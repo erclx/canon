@@ -62,6 +62,8 @@ The first line reports the plan and the second applies it, relocating each rule 
 
 Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. A project that installed governance or tooling before that release holds files naming the old ones, and the plugin answers to none of them. A later release renamed `docs-fold` to `context-fold`, since the skill folds a session into the context entries and the task board rather than into `docs/`, and the same sweep carries a project across that rename too. The pointer that answered under the old name no longer ships, so a citation the sweep has not reached names nothing. <!-- canon-keep-retired -->
 
+The same sweep carries the merge of the five per-kind document drafters into `draft-doc`, so a citation of any one of them lands on `canon:draft-doc`.
+
 Two of those files run rather than sit there. `.husky/post-merge` runs the `canon hooks post-merge` verb, so a stale copy of the hook calls a binary that may lack it, and `.claude/hooks/pr-create-log.sh` hands a session a message naming a skill, so a stale copy tells someone to invoke something that no longer exists. A rule under `.claude/rules/canon/core/` names skills too, though a rule is read rather than run.
 
 Resync what the toolkit owns, then sweep what the project wrote:
