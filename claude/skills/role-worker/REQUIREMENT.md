@@ -27,6 +27,7 @@ The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pu
 - State that session scratch resolves at the main worktree root, since a linked worktree holds none of those folders and their absence reads as a missing artifact rather than as a wrong vantage
 - State the shared board as read-only for a building session and name what it does instead when a row is owed, since a task file with no row is a dropped task and placing the row is the controlling session's call
 - Owe an announcement the moment the pull request opens, carrying the number, the branch, and the task, since that transition is the one interval only the worker can observe
+- Carry a row the build turned up in the pull request announcement, and send it alone only when the session ends before a pull request opens, since the worker files no task file of its own and the channel is the row's only route
 - Owe a message before a block becomes an interactive prompt, since a session already waiting on input never reaches the tool round an inbound message drains at
 - Defer the addressee resolution to `session-relay` and keep only the operator ask and the last-rung inference, which discriminates here because a worker holds a feature branch and a controller does not, and which falls back to the roster and says so, since an operator's own launch names nobody
 - Keep refusing a dispatcher a first-class move carrying its evidence, since the halts measured so far were correct and the cost of each fell where it belonged

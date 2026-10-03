@@ -38,16 +38,17 @@ which `auto-ship` Step 2 loads.
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. The controlling session is their only writer apart from `canon tasks archive`, and both are gitignored, so an overwrite drops a row with no history to recover it from.
 - Create no file under `.canon/tasks/`, including through `task-board`, when this build turns up new work. A task file with no row is a dropped task, and where the row lands is the controlling session's call, so a file this session writes is either orphaned or a placement it had no standing to make.
-- Report the row upward instead, carrying its title, its origin, and the surface it would take. Carry it in the pull request announcement when a build is in hand, and send it on its own through `canon:session-relay` only when the session will end before a pull request opens.
+- Report the row upward instead, through the channel below.
 - Write the task file this build closes and the plan it ran under. The ban covers the shared board rather than the artifacts of the row in hand.
 
 ## The channel
 
-The controlling session cannot watch this one build, so three messages are owed
-and nothing else.
+The controlling session cannot watch this one build, so the messages below are
+owed and nothing else.
 
 - Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, and the task it closes. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch because of it.
 - Carry the reach in that same message: the paths this branch wrote that another live plan or `## Run now` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`. The gate cleared this branch against a prediction it has since outgrown, so the controller holds a disjointness reading that stopped being true hours ago and nothing else tells it. Say the reach was unread rather than clear when the installed binary carries no such subcommand, and leave the undeclared list to the pull request.
+- Carry a row this build turned up in that same message, with its title, its origin, and the surface it would take. Send it as its own message only when the session will end before a pull request opens, since the row has no other way to reach the controller.
 - Announce when an address-review pass finishes, as `review-address` Step 8 returns, carrying what was addressed and the PR's new CI state. That transition is the other moment only this session knows, and it is what tells the controller to re-review rather than leaving it to poll for an answer nothing marks as landed.
 - Send a block out as a message before it becomes an interactive prompt.
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
