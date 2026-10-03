@@ -31,13 +31,15 @@ Read these in parallel before writing:
 
 Read `<main-root>/.canon/ready/` and `<main-root>/.canon/ready/archive/` together and take the highest `<nn>` across both, plus one. A folder set with no entry takes `01`. Keep this skill-local. No verb allocates a ready ordinal, and two writers running at once can claim one number, so re-read the folder immediately before Step 3 writes.
 
-Take the label from the verb rather than from a scan:
+Claim the label through the verb rather than reading it bare or scanning for it:
 
 ```bash
-canon tasks next-label --json
+canon tasks next-label --claim --json
 ```
 
-Branch on the record's `label` rather than on the exit code. Report the verb as unavailable and stop when the installed binary carries no `next-label` subcommand, since a label picked by hand is the collision the verb exists to prevent.
+The claim reserves the label under `.canon/ordinal-locks/`, so a second session allocating at the same moment gets the next one. A bare read reserves nothing and can return a label a live claim already holds.
+
+Branch on the record's `reason` rather than on the exit code, taking `label` from a record that carries one. `label-contended` means re-run the claim. Report the verb as unavailable and stop when the installed binary carries no `next-label` subcommand, or when an unknown `--claim` prints no record, since that binary predates the flag. Never fall back to a bare read or a label picked by hand, which reopens the collision the claim exists to prevent.
 
 ## Step 3: write the overview
 
@@ -67,7 +69,7 @@ Run the match check in `${CLAUDE_SKILL_DIR}/references/assembly.md` before going
 
 ## Step 6: write the task
 
-Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label Step 2 read. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
+Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label Step 2 claimed, without calling the verb again, since a second call would claim a different label. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
 
 ```bash
 canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json

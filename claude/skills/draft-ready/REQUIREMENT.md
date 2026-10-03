@@ -13,6 +13,7 @@ Without this skill, a session holding finished files that hands them to a worker
 - Lists a destination in the overview that the plan's `**Files to touch:**` omits, or the reverse. The omitted path is invisible to `plan-reach`, so a second track writes the same file and neither side finds out.
 - Picks the next ordinal by reading only the live folder, and reuses a number an archived folder already spent, which the pull request that shipped it cites by name.
 - Picks a phase label by scanning the live board alone, which is the scan that let two sessions hand out one label within minutes of each other.
+- Reads the label bare, which reserves nothing and returns one a live claim already holds until that claim's task file lands.
 - Leaves the plan's `**Constraints:**` without a line naming the folder as the verbatim source, so the worker reads the files as inspiration and writes its own version.
 - Leaves a note, an alternate, or a draft passage in the folder beside the real files, so the worker guesses which one is the source.
 - Writes into the main worktree root from a linked worktree with `Edit` or `Write`, which the isolation guard refuses, and takes the refusal's redirect into a second gitignored copy no later session reads.
@@ -22,7 +23,7 @@ Without this skill, a session holding finished files that hands them to a worker
 
 - Refuse before writing when the operator has named no finished file, since a folder assembled from a description is a plan with extra steps.
 - Read the ordinal from the live folder and its archive together, so a spent number is never reused.
-- Take the phase label from `canon tasks next-label` rather than from a scan of its own.
+- Take the phase label from `canon tasks next-label --claim` rather than from a scan of its own or a bare read, and stop on a binary that predates the flag rather than falling back.
 - Derive the overview's `destinations` and the plan's `**Files to touch:**` from one list, and compare the two before reporting, so neither can name a path the other lacks.
 - Write the plan's `**Constraints:**` line naming the folder as the verbatim source.
 - Copy each finished file whole to its destination path inside the folder, and carry nothing else into it.
