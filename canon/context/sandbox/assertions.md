@@ -50,7 +50,7 @@ An entry leaves `manual` only once it is verified against a real run's output ra
 - `content`: array of tables, each a `path` and a `pattern` it must match, the path taking either form
 - `write_scope`: globs bounding where the session may write
 - `escape_scope`: globs bounding what the escape watch may find, per `canon/context/sandbox/isolation.md`
-- `reply`: substrings the run's reply text must carry
+- `reply`: literal substrings the run's reply text must carry, never patterns, so a fragment stops before a part the run varies, such as a port
 - `manual`: prose the checker cannot assert, reported as unchecked
 - `max_turns`: turn ceiling, above which the run fails
 
