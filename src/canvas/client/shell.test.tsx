@@ -1250,6 +1250,47 @@ describe('Inspector edit', () => {
     expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
   })
 
+  it('should hold a scrubbed length at zero when dragged past it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 10px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 100)
+    await drag('pointermove', glyph, 70)
+    await drag('pointerup', glyph, 70)
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '0px' }),
+    ])
+  })
+
+  it('should not offer a scrub on a field holding no number', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    expect(glyphOf('color').classList.contains('is-scrub')).toBe(false)
+  })
+
+  it('should scrub an empty gap from its placeholder', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('gap')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 14)
+    await drag('pointerup', glyph, 14)
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'gap', value: '4px' }),
+    ])
+  })
+
   it('should say the edit was refused and reload the frame when the file moved', async () => {
     const pages = [page('drafts', [frame('hero')])]
     renderApp(pages)

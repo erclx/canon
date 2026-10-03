@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  clampScrub,
   displayValue,
   isNoFill,
   scrubStep,
@@ -85,6 +86,24 @@ describe('toCssValue', () => {
 
   it('should leave a value with its own unit as typed', () => {
     expect(toCssValue('width', '2rem')).toBe('2rem')
+  })
+})
+
+describe('clampScrub', () => {
+  it('should hold a length at zero', () => {
+    expect(clampScrub('width', -20)).toBe(0)
+  })
+
+  it('should hold a weight at one', () => {
+    expect(clampScrub('font-weight', -5)).toBe(1)
+  })
+
+  it('should hold a weight at a thousand', () => {
+    expect(clampScrub('font-weight', 1200)).toBe(1000)
+  })
+
+  it('should leave a value inside its range as it is', () => {
+    expect(clampScrub('padding', 12)).toBe(12)
   })
 })
 

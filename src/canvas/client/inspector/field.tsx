@@ -19,6 +19,8 @@ export interface ScrubSession {
  */
 export interface Scrub {
   readonly begin: () => ScrubSession
+  /** Holds a scrubbed number inside what the property accepts. */
+  readonly clamp: (value: number) => number
 }
 
 interface FieldProps {
@@ -39,6 +41,9 @@ const NUMBER = /^-?\d*\.?\d+$/
 
 interface Drag {
   readonly pointerId: number
+  /** What the input held at press, which a cancel puts back. */
+  readonly typed: string
+  /** The number the drag started from, an empty field's placeholder included. */
   readonly start: string
   readonly session: ScrubSession
   lastX: number
@@ -76,11 +81,16 @@ export function Field({
     return held
   }
 
-  const handlers = scrub
+  /* An empty field scrubs from the number its placeholder shows. */
+  const scrubFrom = (value: string): string =>
+    value.trim() || placeholder?.trim() || ''
+  const isScrubbable = scrub !== undefined && NUMBER.test(scrubFrom(initial))
+
+  const handlers = isScrubbable
     ? {
         onPointerDown: (event: PointerEvent) => {
-          const field = input.current
-          const start = field?.value.trim() ?? ''
+          const typed = input.current?.value ?? ''
+          const start = scrubFrom(typed)
           if (isBusy || !NUMBER.test(start)) return
           event.preventDefault()
           /*
@@ -94,6 +104,7 @@ export function Field({
           }
           drag.current = {
             pointerId: event.pointerId,
+            typed,
             start,
             session: scrub.begin(),
             lastX: event.clientX,
@@ -105,9 +116,10 @@ export function Field({
           if (!held || held.pointerId !== event.pointerId) return
           const moved = event.clientX - held.lastX
           held.lastX = event.clientX
-          held.value =
+          held.value = scrub.clamp(
             Math.round((held.value + moved * scrubStep(event.shiftKey)) * 10) /
-            10
+              10,
+          )
           const shown = String(held.value)
           if (input.current) input.current.value = shown
           held.session.preview(shown)
@@ -122,7 +134,7 @@ export function Field({
         onPointerCancel: (event: PointerEvent) => {
           const held = end(event.pointerId)
           if (!held) return
-          if (input.current) input.current.value = held.start
+          if (input.current) input.current.value = held.typed
           held.session.restore()
         },
       }
@@ -132,7 +144,7 @@ export function Field({
     <div class={fieldClass(isWide)}>
       <span
         ref={handle}
-        class={scrub ? 'glyph is-scrub' : 'glyph'}
+        class={isScrubbable ? 'glyph is-scrub' : 'glyph'}
         aria-hidden="true"
         title={label}
         {...handlers}

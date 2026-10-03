@@ -43,6 +43,17 @@ export function toCssValue(property: string, typed: string): string {
     .join(' ')
 }
 
+/**
+ * Holds a scrubbed number inside what the property accepts. The writer takes
+ * any declaration that does not break the rule, so a negative length or a
+ * weight past 1000 would reach the file and the browser would drop it there.
+ */
+export function clampScrub(property: string, value: number): number {
+  if (property === 'font-weight') return Math.min(1000, Math.max(1, value))
+  if (LENGTHS.has(property)) return Math.max(0, value)
+  return value
+}
+
 /** Units a scrub moves for each pixel the pointer travels. */
 export function scrubStep(isCoarse: boolean): number {
   return isCoarse ? 10 : 1

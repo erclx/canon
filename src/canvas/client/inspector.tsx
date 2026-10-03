@@ -7,7 +7,11 @@ import {
   type Scrub,
 } from '@/canvas/client/inspector/field'
 import { Section } from '@/canvas/client/inspector/section'
-import { displayValue, toCssValue } from '@/canvas/client/inspector/values'
+import {
+  clampScrub,
+  displayValue,
+  toCssValue,
+} from '@/canvas/client/inspector/values'
 import {
   currentPage,
   editElement,
@@ -209,6 +213,7 @@ function ElementFields({
    * against one no longer on screen posts nothing.
    */
   const scrubOf = (property: string): Scrub => ({
+    clamp: (value) => clampScrub(property, value),
     begin: () => {
       const original = inlineValue(node, property)
       const style = (node as HTMLElement).style
