@@ -885,27 +885,26 @@ async function openFile(
   return path
 }
 
-/** The URLs listed as entries, across the file or under one heading. */
-function listedUrls(text: string, heading?: string): Set<string> {
+/** The entry lines of the file, or of one heading's section. */
+function listedEntries(text: string, heading?: string): string[] {
   const body = unfenced(text)
   const section = heading
     ? sectionRange(body, heading, text.split('\n').length)
     : undefined
-  if (heading && !section) return new Set()
+  if (heading && !section) return []
 
-  return new Set(
-    body
-      .filter(
-        (line) =>
-          isEntry(line.text) &&
-          (!section ||
-            (line.number - 1 >= section.start &&
-              line.number - 1 < section.end)),
-      )
-      .flatMap((line) =>
-        [...line.text.matchAll(/\]\(([^)\s]+)\)/g)].map((match) => match[1]),
-      ),
-  )
+  return body
+    .filter(
+      (line) =>
+        isEntry(line.text) &&
+        (!section ||
+          (line.number - 1 >= section.start && line.number - 1 < section.end)),
+    )
+    .map((line) => line.text)
+}
+
+function lists(entries: readonly string[], source: Source): boolean {
+  return entries.some((line) => line.includes(`(${source.url})`))
 }
 
 /**
@@ -954,16 +953,16 @@ export async function recordSources(
   if (typeof path !== 'string') return path
 
   let text = await readFile(path, 'utf8')
-  const listed = listedUrls(text)
-  const leadUrls = listedUrls(text, LEADS_HEADING)
+  const listed = listedEntries(text)
+  const leadEntries = listedEntries(text, LEADS_HEADING)
 
-  const isPromotion = (source: Source) => leadUrls.has(source.url)
+  const isPromotion = (source: Source) => lists(leadEntries, source)
   const promoted = read.filter(isPromotion)
 
   const repeated = [
     ...read.filter((source) => !isPromotion(source)),
     ...leads,
-  ].filter((source) => listed.has(source.url))
+  ].filter((source) => lists(listed, source))
 
   if (repeated.length > 0) {
     return refuse(

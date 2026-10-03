@@ -443,6 +443,33 @@ describe('recordSources', () => {
     expect(text).not.toContain('RE2 lead')
   })
 
+  it('moves a lead whose url carries parentheses', async () => {
+    const url = 'https://example.test/wiki/Regex_(computing)'
+    await openWorkspace(ROOT, REQUEST)
+    await recordSources(
+      ROOT,
+      'regular-expressions',
+      [],
+      [{ title: 'Wiki', url }],
+    )
+
+    const outcome = await recordSources(
+      ROOT,
+      'regular-expressions',
+      [{ title: 'Wiki read', url }],
+      [],
+    )
+
+    const text = await readFile(
+      join(workspaceDir('01-regular-expressions'), 'RESOURCES.md'),
+      'utf8',
+    )
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(text).toContain(`## Read\n\n- [Wiki read](${url})`)
+    expect(text).toContain('## Leads\n\n- None yet.')
+  })
+
   it('refuses the whole batch when one url is already read', async () => {
     await openWorkspace(ROOT, REQUEST)
     await recordSources(
