@@ -48,7 +48,6 @@ Each rule or knowledge item lives in exactly one surface. Other surfaces point, 
 - Behavior that fires on a path being edited rather than every session: `governance/rules/`
 - Behavior triggered only when editing domain X: `.claude/skills/internal-<X>/SKILL.md`
 - Per-domain internal narrative about domain X (structure, decisions, gotchas): `canon/context/<X>.md`
-- Decision history behind a canonical doc, never loaded eagerly: `canon/decisions/`
 - Consumer-facing reference (AI workflow, target-project integration): `docs/`
 - CLI command surface or invocation contract: `docs/agents/`
 

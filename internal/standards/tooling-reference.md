@@ -25,7 +25,7 @@ The symmetry runs in both directions, and the direction that breaks is the manif
 - Capture decisions, not descriptions. Write `Use semi: false`, not `Prettier is configured with semi set to false`.
 - Omit anything that is a tool default. Document explicit choices only.
 - Omit a section entirely when its config is empty or carries only defaults.
-- Never include full file contents, code blocks, or script bodies. The config is the source, the reference is the decision log.
+- Never include full file contents, code blocks, or script bodies. The config is the source, the reference is the rationale.
 - Skip rationale unless a decision is non-obvious. One inline note is the cap in that case.
 
 ## Structure

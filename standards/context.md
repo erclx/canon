@@ -100,7 +100,7 @@ Only the `development` entry carries this section. It is not a general-purpose h
 - Anything already in `canon/REQUIREMENTS.md` or `canon/ARCHITECTURE.md`.
 - The history of how the domain reached its current shape. An entry describes the repository as it stands, so a change number, release label, or date attached to a change goes wherever the project tracks work.
 - A rejected alternative's provenance, which is the same rule at the one place the section above admits history. Keep what was tried and why it lost. Cut who tried it and when.
-- The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. The route goes to the decision log or the change that introduced it.
+- The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. Cut the route. Git and the change that introduced it keep it.
 - Measured results a generated file already carries. Point at the file instead of copying the figure, so a re-run cannot leave the entry behind.
 
 ## Length

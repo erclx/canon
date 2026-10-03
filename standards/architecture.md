@@ -40,7 +40,7 @@ The slots come from a scale test. Ask whether the decision would still be in thi
 - A decision that fills no slot. It lives in the domain context entry it constrains, and this file carries at most one line pointing at it.
 - A measurement paragraph specific to one domain's own mechanism, even behind a slot decision. Route it to that domain's context entry and keep the choice, the alternative that lost, and one reason here.
 - The instances of a build principle. The principle takes one sentence here, and each instance lives in the domain entry where it applies.
-- The history of how a decision was reached or revised: rounds of candidates, a figure followed by its correction, a branch or change that moved a number. That trail goes to the decision log or the change that introduced it.
+- The history of how a decision was reached or revised: rounds of candidates, a figure followed by its correction, a branch or change that moved a number. Cut it. Git and the change that introduced it keep the trail.
 
 ## Sections
 
