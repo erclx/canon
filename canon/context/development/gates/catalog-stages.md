@@ -39,6 +39,12 @@ The Canonical records stage calls `measureArchitecture` and `measureRequirements
 
 It reads both records directly because the Context citations stage runs `--citations-only`, which never opens them. The decision count is by `###` heading outside a fence, so a heading carrying two decisions counts once, which is the undercount a writer at the cap is asked not to exploit. A decision's words are its prose below the heading with fenced lines dropped, and a risk bullet is every list item under `## Risks / open questions`, nested ones included. A record stating a risk cap and carrying no Risks section is reported as absent rather than passed as zero bullets.
 
+## Design prose
+
+The Design stage regenerates `canon/DESIGN.md` and asserts it for drift, and then runs the `designProse` measure over that record and `examples/design/DESIGN.md`. The measure counts each against the limits in `src/design/budget.ts`, which `standards/design.md` states: a one-paragraph Personality, at most three rules a section, a word cap on each rule, and a short lead. A drift assert cannot see this, since a regenerated paragraph agrees with its source however long it grows.
+
+A record that is absent is skipped, a tree holding neither passes and says so, and a path it cannot read reports unmeasured rather than passing.
+
 ## Document ceiling
 
 The Document ceiling stage reads every markdown file git lists, sums `documentHeight` over the whole source, and names each one past `CHECKPOINTS.ceiling`, 300 rendered lines. Frontmatter and fenced blocks count, since a session pays for every line it loads. A file named `CHANGELOG.md` is exempt by name, because the release tool rewrites it and would drop a marker, and any other file is exempt only through a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence. A committed list of exempt paths was the alternative, and every rename would have made it a second edit with nothing checking it.

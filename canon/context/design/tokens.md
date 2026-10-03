@@ -9,6 +9,8 @@ description: The modules under src/design and what each owns, the three surfaces
 
 `src/design/tokens.ts` holds this repository's design values, and every generated stylesheet, the slide theme, and the capture frames read them from there. `canon/context/design/overview.md` states why the record is generated rather than authored.
 
+The module's prose slots are lists of one-line rules, so the record carries values and rules and this entry carries the reasons behind them. A value whose why needs a paragraph adds it here, never to the module.
+
 ## Decisions
 
 ### Three surfaces read the module
@@ -36,7 +38,9 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 ### Type and space scales
 
 - The seven type steps and the roles are separate sets. `typeScale` holds `t0` through `t6`, emitted as `--t0` to `--t6`, while each role's size is one of those values. A step scheme answers what sizes exist and a role scheme answers what a stylesheet asks for, so collapsing them would force every consumer to know which step its text is. The steps stay out of the `Typography` table because `table()` in `src/design/parse.ts` reads every pipe row in a section as one table. `t3` and `t6` have no role.
+- The steps paint at 50.8, 38, 22, 18, 15, 13, and 11 pixels. The hero headline alone takes `t0`, since a headline set at the display cap reads as an opening rather than as a section heading.
 - The space steps are `xs` through `3xl` at 0.25, 0.5, 0.875, 1.5, 2.5, 4, and 6 rem, and no frame register exists since no consumer read one. The capture templates hardcode their own sizes and padding.
+- The space scale is not a grid of one base. The 14 pixels between 8 and 24 is the step a control needs and no multiple of four supplies it, so the multiplier column counts quarter rems rather than claiming a unit.
 - `tokenProperties` in `src/design/css.ts` emits `--type-<role>-family` beside `--type-<role>-size` and `--type-<role>-lh`, so a rendered surface consumes the font identity rather than restating it.
 
 ### Font families
@@ -46,10 +50,22 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 - The vendored Geist subset has no box-drawing, arrow, check, or diamond glyphs, which teach and terminal copy print. The stack names `DejaVu Sans` second, which carries all four ranges, and a larger subset would grow the base64 every embedding stylesheet ships. Revisit if a surface shows the fallback mismatching Geist in weight.
 - `src/design/base.css` has two writers that disagree past 80 columns. `canon design regen` writes each declaration flat and prettier wraps anything longer, so the `design` stage fails on the drift between them. Any value added to the module has to render inside that width, which is why the proportional stack for `page-display` stops at two names and a generic.
 
-### Color
+### Color derivation
 
-- The accent anchors carry two chroma steps, 0.13 light and 0.12 dark for a mark and 0.095 light and 0.09 dark for a fill. Only the mark step is a token, as `accent`, which also does fill duty in `assets/captures/hero.html`'s `.cmd` button. The fill step sits in the module's `colorNote` as an anchor with no token of its own.
-- A role declaring more than one ground solves its OKLCH derivation against the tighter of the two. `muted` and `light-muted` each declare `background` and `surface`, and a lightness solved against `background` alone read 4.40 dark and 4.24 light against `surface`, which `src/design/contrast.test.ts` catches since it measures every declared ground.
+- Every role but `success` is derived rather than picked, solved in OKLCH by binary search for the lightness that hits a target contrast against its ground. Six anchors are the whole system: ground lightness 0.985 light and 0.165 dark, neutral chroma 0.003 light and 0.004 dark, neutral hue 90 both, accent hue 22 light and 28 dark, and the two accent chroma steps below. Dark is its own anchor set rather than an inversion of light.
+- The accent anchors carry two chroma steps, 0.13 light and 0.12 dark for a mark and 0.095 light and 0.09 dark for a fill. Only the mark step is a token, as `accent`, which also does fill duty in `assets/captures/hero.html`'s `.cmd` button. The fill step is an anchor with no token of its own, so a lower-saturation `accent-fill` would recolor that button rather than reach a new consumer.
+- The contrast targets are inputs rather than results: text 13.5, body 8.6, secondary 5.6, muted 4.6, and accent 5.2. `src/design/contrast.test.ts` asserts every role clears WCAG AA at 4.5:1 against each ground it declares.
+- A role declaring more than one ground solves its OKLCH derivation against the tighter of the two. `muted` and `light-muted` each declare `background` and `surface`, and a lightness solved against `background` alone read 4.40 dark and 4.24 light against `surface`, which `src/design/contrast.test.ts` catches since it measures every declared ground. Solved against `surface` for the same 4.6 target, they read 4.58 dark and 4.56 light there, and 4.80 dark and 4.95 light against `background`.
+
+### Color roles
+
+- The accent is a quiet red at hue 22 light and 28 dark. A vivid red read as an error state on a page reporting success, indigo at hue 280 reads as generic in tooling already dominated by that hue, and rust at hue 42 shifted temperature further than the problem asked. The cost is that `error` and `warning` share a register with the accent, so both need telling apart by lightness or by an icon rather than by hue.
+- `success` is the one role picked rather than derived, and the one terminal role carrying a hex. `assets/captures/install.html` marks every confirmed step with it while the shell writes `ANSI 32`, so the two are one role in two registers. It declares `background` alone as its ground, the only role it is drawn on.
+- `warning` and `error` hold ANSI codes because that is what `scripts/lib/ui.sh` writes and no rendered surface implements an equivalent. A hex for either would invent a mapping no file has, so neither carries a contrast reading.
+
+### Color consumers
+
+- The terminal framing keeps its own values on purpose. `scripts/lib/ui.sh` and `src/ui.ts` each spell six escape constants, and `canon/context/scripts/framing.md` records one color source per language with a check behind each, so a third spelling generated from the module would break the rule those checks hold. `WHITE` and `GREY` name no role, so the record describes the terminal palette in part.
 - The slide theme and the two rendered captures agree by construction. `scripts/core/regen-hero.ts` fills a `{{TOKENS}}` placeholder in each `assets/captures/*.html.tmpl` with what `canon design css --no-components` emits, so a value moved in the module moves both frames. The component half is left out on purpose, since a static capture renders neither the status marker nor the webkit scrollbar.
 - `src/design/css.test.ts` cannot cover `TEACH_STYLESHEET_COMPONENTS` through each component's `reads` array alone, which is self-satisfying for a name a component both declares and reads. `TEACH_CHROME` declares seven legacy alias properties, `--panel`, `--rule`, `--ink`, `--ink-soft`, `--ink-faint`, `--accent`, and `--accent-bg`, that a hand-authored lesson diagram consumes by name. A second test derives its required names from a fixture shaped like a lesson diagram's `var(--name)` references.
 

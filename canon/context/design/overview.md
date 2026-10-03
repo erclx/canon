@@ -7,9 +7,9 @@ description: What the design domain owns, the generated record against a target'
 
 ## Overview
 
-`canon/DESIGN.md` holds visual intent as prose and token tables. The toolkit treats it as the tool-agnostic source of truth for any project's design system. A Claude Code skill drafts the file from existing project signals, and a CLI command renders a token preview for human inspection.
+`canon/DESIGN.md` holds visual intent as token tables, a one-paragraph Personality, and a few one-line rules per section. The toolkit treats it as the tool-agnostic source of truth for any project's design system. A Claude Code skill drafts the file from existing project signals, and a CLI command renders a token preview for human inspection.
 
-This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
+This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. The same stage counts this record and `examples/design/DESIGN.md` against the prose budget `standards/design.md` sets, through `src/design/budget.ts`. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
 
 ## Layout
 
@@ -29,7 +29,7 @@ This repository's own record is generated rather than authored. `src/design/toke
 
 ### The toolkit's record renders from a module
 
-The toolkit's own record is rendered from `src/design/tokens.ts` rather than authored. Leaving the document as the source was the alternative, and it costs more: a table a person edits is one a parser has to be taught to read back, where a module is checked by the compiler. The cost is two artifacts from one source, and the `design` gate stage is the only thing that catches them disagreeing.
+The toolkit's own record is rendered from `src/design/tokens.ts` rather than authored. Leaving the document as the source was the alternative, and it costs more: a table a person edits is one a parser has to be taught to read back, where a module is checked by the compiler. The cost is two artifacts from one source, and the `design` gate stage is the only thing that catches them disagreeing. The module's prose slots are rule lists rather than strings, so a bullet is the unit the renderer emits and the budget counts, and a paragraph of why goes to `canon/context/design/tokens.md`.
 
 ### A target inherits a neutral base
 
