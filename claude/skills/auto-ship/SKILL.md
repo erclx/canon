@@ -156,7 +156,7 @@ Respond with up to six lines:
 <the review line memory-capture returned>
 ```
 
-`<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the undo asked for.
+`<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the mark asked for.
 
 Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if there were no minor findings, and the fourth if nothing routed. Omit the fifth if `memory-capture` wrote no memory file this session, and the sixth if it returned no review line. Pass that line through verbatim, since a dispatched worker's controller relays it to the operator.
 

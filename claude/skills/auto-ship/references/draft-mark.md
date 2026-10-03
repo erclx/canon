@@ -10,14 +10,16 @@ Step 8 of `auto-ship`. The session reads this file as `git-ship`'s pull request 
 Run the mark as one command, where the shell proves the target before the mark and reads the flag back after it:
 
 ```bash
-target=$(gh pr view <number> --json headRefName,state --jq '"\(.headRefName) \(.state)"') || exit 1
-if [ "$target" != "$(git branch --show-current) OPEN" ]; then
-  printf '❌ #%s reads "%s", not "%s OPEN". The draft mark was not written.\n' "<number>" "$target" "$(git branch --show-current)" >&2
+target=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '"\(.head.ref) \(.state) \(.node_id)"') || exit 1
+if [ "${target% *}" != "$(git branch --show-current) open" ]; then
+  printf '❌ #%s reads "%s", not "%s open". The draft mark was not written.\n' "<number>" "${target% *}" "$(git branch --show-current)" >&2
   exit 1
 fi
-gh pr ready --undo <number>
-gh pr view <number> --json isDraft
+gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { clientMutationId } }' -f id="${target##* }" --silent
+gh api repos/{owner}/{repo}/pulls/<number> --jq '{isDraft: .draft}'
 ```
+
+The target check and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field, so the mark is local-only: a cloud session's GitHub access blocks GraphQL, the mutation fails there, and the read-back reports `false`. A cloud worker's pull request therefore opens ready, and its chain stops at this step with the pull request already open.
 
 Name the number `git-ship`'s pull request step returned in every position rather than leaving any to resolve by branch. `${CLAUDE_SKILL_DIR}/../git-pr/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
 
@@ -25,6 +27,6 @@ A refusal is a stop. Report the line the shell printed, then resolve the number 
 
 The number crosses from that step's output into a command this session types, which is the one place a number gets authored rather than derived. A number misread there, or inferred from the newest pull request in view, would draft a stranger's pull request. A release pull request is the worst such target, since the mark holds the release and this role may not lift it again.
 
-Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state. A `true` reports a draft. A `false` reports the pull request as opened ready and unsupervised, and the chain stops there. Never re-issue the undo on a disagreeing read, which fights whoever readied it instead of guarding anything.
+Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state. A `true` reports a draft. A `false` reports the pull request as opened ready and unsupervised, and the chain stops there. Never re-issue the mark on a disagreeing read, which fights whoever readied it instead of guarding anything.
 
 Placement is why the call sits ahead of the watch rather than after it. Marking afterwards leaves the pull request unmarked for the whole CI run, which is the stretch an unattended worker's branch is least supervised. What the mark buys is a reader learning the pull request has had no review yet. It buys no bound on that stretch: readying a pull request to merge lifts the mark, GitHub requires it before a merge, and the act belongs to the operator or to the controlling session that closed the review, whichever it is, taken directly on the pull request rather than delegated to a worker. `role-worker` states the mirroring refusal.
