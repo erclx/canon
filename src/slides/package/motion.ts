@@ -130,6 +130,28 @@ export function millisecondsOf(value: string | undefined): number | undefined {
   return Math.round(match[2] === 's' ? amount * 1000 : amount)
 }
 
+/**
+ * pptxgenjs numbers a table `n * slideNumber + 1` and every other shape by its
+ * index plus two, so a table can share an id with a shape beside it. A timing
+ * target has to name one shape, so each repeat after the first takes a fresh id.
+ */
+function uniqueIds(xml: string): string {
+  const pattern = /<p:cNvPr id="(\d+)"/g
+  let highest = Math.max(
+    0,
+    ...[...xml.matchAll(pattern)].map((match) => Number(match[1])),
+  )
+  const seen = new Set<string>()
+  return xml.replace(pattern, (whole, id: string) => {
+    if (!seen.has(id)) {
+      seen.add(id)
+      return whole
+    }
+    highest += 1
+    return `<p:cNvPr id="${highest}"`
+  })
+}
+
 function shapeIds(xml: string): Map<string, string> {
   const ids = new Map<string, string>()
   for (const [, id, name] of xml.matchAll(
@@ -197,7 +219,8 @@ export function addMotion(xml: string, motion: SlideMotion): MotionResult {
     }
   }
 
-  const ids = shapeIds(xml)
+  const numbered = uniqueIds(xml)
+  const ids = shapeIds(numbered)
   const clicks: Click[] = []
   for (const entrance of ordered(motion.entrances)) {
     const preset = ENTRANCES[entrance.effect]
@@ -233,7 +256,10 @@ export function addMotion(xml: string, motion: SlideMotion): MotionResult {
     }
   }
   return {
-    xml: xml.replace(ANCHOR, `${ANCHOR}${transition}${timing}`),
+    xml: (timing ? numbered : xml).replace(
+      ANCHOR,
+      `${ANCHOR}${transition}${timing}`,
+    ),
     notices,
   }
 }

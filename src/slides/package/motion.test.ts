@@ -35,6 +35,18 @@ const clickTargets = (xml: string): string[] =>
   )
 
 describe('addMotion', () => {
+  it('should give a target sharing its id with another shape an id of its own', () => {
+    const xml = `<p:sld><p:cSld><p:spTree>${shape(2, 'canon-1')}${shape(3, 'canon-2')}${shape(2, 'canon-3')}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`
+
+    const result = addMotion(
+      xml,
+      motion({ entrances: [entrance({ shapes: ['canon-3'] })] }),
+    )
+
+    expect(result.xml).toContain('<p:cNvPr id="4" name="canon-3"/>')
+    expect(spTargets(result.xml)).toEqual(['4', '4'])
+  })
+
   it('should leave a slide with no motion untouched', () => {
     const xml = slideXml()
 
