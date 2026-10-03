@@ -83,9 +83,9 @@ When the destination is a rendered page, capture the figure inside it and read t
 canon capture <destination> --selector figure --out .canon/tmp/figures/
 ```
 
-Narrow the selector to this figure, such as by an id on its `<figure>`, when the page carries more than one. Fix a clipped label, a misaligned shape, or an arrow that misses its target in the destination and capture again, within the same two correction passes Step 6 allows. When the capture fails, keep the figure and name the skipped check in the output, the same way Step 6 treats a failed render.
+Narrow the selector to this figure, such as by an id on its `<figure>`, when the page carries more than one. Fix a clipped label, a misaligned shape, or an arrow that misses its target in the destination and capture again, within the same two correction passes Step 6 allows. A clipped group title on the Mermaid path takes the scoped overflow style Step 4 states. When the capture fails, keep the figure and name the skipped check in the output, the same way Step 6 treats a failed render.
 
-Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs and JSON config are deleted once the checks confirm, since only the SVG ships.
+Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs, the stamps the capture writes beside them, and the JSON config are deleted once the checks confirm, since only the SVG ships.
 
 ## Output
 
