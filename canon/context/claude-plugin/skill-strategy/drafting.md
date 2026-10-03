@@ -1,6 +1,6 @@
 ---
 title: Drafting
-description: The proposal, candidate, and document draft surfaces, the identity surface, and the walkthrough surface, with the boundary each holds against its neighbors
+description: The proposal, candidate, and document draft surfaces, the identity surface, the walkthrough surface, and the canvas surface, with the boundary each holds against its neighbors
 ---
 
 # Drafting
@@ -105,3 +105,11 @@ The boundary against `ux-audit` runs on where the judgment happens. `ux-audit` r
 The boundary against `plan-feature` and a worker runs on who builds. `ux-walkthrough` records a pick with the arms it beat and the numbers behind it. Turning that record into a plan and code belongs to `plan-feature` and a worker, never to this skill.
 
 No redundancy audit entry names it, because it carries no plausible community counterpart. Pairing an operator's live look at a running build against a recorded batch of picks is a shape `canon/context/claude-plugin/skill-strategy/catalog-health.md` skips outright rather than one that was compared and cleared.
+
+## The canvas surface
+
+`canvas` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
+
+What outlives the pick separates it from `draft-and-pick`, which writes its candidates to scratch, takes one pick through the question surface, and deletes the losers. Every canvas frame stays in its gitignored folder until somebody removes it, and the pick reaches the project through its design document or wireframes rather than through the canvas itself. `draft-and-pick`, `draft-identity`, and `sketch-design` keep their own render path for now, and moving them onto the canvas waits until this surface has shipped.
+
+The boundary against `sketch-design` and `design-extract` runs on direction. Both read something that already exists, a reference image or the project's code, into design values. The canvas draws what does not exist yet.
