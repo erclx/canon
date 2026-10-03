@@ -70,6 +70,8 @@ export interface TextRun {
   readonly fontFamily: string
   /** Zero where the computed value is `normal`. */
   readonly letterSpacing: number
+  /** The background of the inline element carrying the run, where it paints one. */
+  readonly highlight?: Rgba
   readonly href?: string
   /** Set on the run a `<br>` precedes. */
   readonly breakBefore?: boolean
@@ -347,6 +349,7 @@ function runProps(
   }
   if (run.underline) options.underline = { style: 'sng' }
   if (run.letterSpacing !== 0) options.charSpacing = points(run.letterSpacing)
+  if (run.highlight) options.highlight = run.highlight.hex
   if (run.breakBefore) options.softBreakBefore = true
   if (run.href) {
     const link = linkOf(run.href, context)

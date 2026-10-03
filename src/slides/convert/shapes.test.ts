@@ -280,6 +280,16 @@ describe('planSlide', () => {
     expect(options.x).toBeCloseTo((96 - 32) / 96)
   })
 
+  it('should map an inline background to a run highlight', () => {
+    const record = textRecord({
+      content: content({ runs: [run({ highlight: color('FDE68A') })] }),
+    })
+
+    const op = textOf([record])
+
+    expect(op.runs[0]?.options?.highlight).toBe('FDE68A')
+  })
+
   it('should map letter-spacing to character spacing in points', () => {
     const record = textRecord({
       content: content({ runs: [run({ letterSpacing: 2 })] }),

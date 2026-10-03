@@ -175,6 +175,11 @@ export function walkSlide(idAttribute: string): WalkedSlide {
           if (!text.trim() && !runs.length) continue
           if (!text) continue
           const spacing = style.letterSpacing
+          const highlightOf = (inline: Element): Rgba | undefined => {
+            if (inline === root) return undefined
+            const ground = rgba(getComputedStyle(inline).backgroundColor)
+            return ground.alpha > 0 ? ground : undefined
+          }
           runs.push({
             text: transformText(text, style.textTransform),
             color: rgba(style.color),
@@ -184,6 +189,7 @@ export function walkSlide(idAttribute: string): WalkedSlide {
             underline: style.textDecorationLine.includes('underline'),
             fontFamily: style.fontFamily,
             letterSpacing: spacing === 'normal' ? 0 : px(spacing),
+            highlight: highlightOf(parent),
             href: parent.closest('a[href]')?.getAttribute('href') ?? undefined,
             breakBefore: breakPending || undefined,
           })
