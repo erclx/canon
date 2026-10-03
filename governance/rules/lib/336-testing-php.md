@@ -1,7 +1,7 @@
 ---
 description: Enforce PHPUnit test classes, attributes, and strict assertions for PHP tests
 paths:
-  - 'tests/**/*.php'
+  - '**/tests/**/*.php'
   - '**/*Test.php'
 ---
 

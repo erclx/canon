@@ -1,7 +1,7 @@
 ---
 description: Enforce pytest fixtures, parametrize, and async patterns for Python tests
 paths:
-  - 'tests/**/*.py'
+  - '**/tests/**/*.py'
   - '**/test_*.py'
   - '**/*_test.py'
 ---
