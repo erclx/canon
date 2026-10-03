@@ -65,7 +65,17 @@ describe('the stub remote', () => {
     execFileSync('git', ['init', '-q', '-b', 'main', work], { env })
     writeFileSync(join(work, 'a.txt'), 'a')
     git('add', '.')
-    git('commit', '-q', '-m', 'first', '--no-verify')
+    git(
+      '-c',
+      'user.name=t',
+      '-c',
+      'user.email=t@t',
+      'commit',
+      '-q',
+      '-m',
+      'first',
+      '--no-verify',
+    )
 
     git('push', '-q', STUB_ANCHOR_URL, 'HEAD:main')
 
@@ -76,7 +86,14 @@ describe('the stub remote', () => {
   })
 
   it('should send any real HTTPS attempt to a dead local port', () => {
-    expect(env.HTTPS_PROXY).toBe('http://127.0.0.1:9')
+    const result = spawnSync(
+      'git',
+      ['ls-remote', 'https://example.invalid/some/repo.git'],
+      { env: { ...env, GIT_TERMINAL_PROMPT: '0' }, encoding: 'utf8' },
+    )
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toMatch(/127\.0\.0\.1.*port 9|proxy/i)
   })
 
   it('should put the stub ahead of any real gh on PATH', () => {
