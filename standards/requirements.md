@@ -9,7 +9,7 @@ Applies to `canon/REQUIREMENTS.md`. Describes what the product does and why, not
 
 ## Scope
 
-Governs the product-scope document at `canon/REQUIREMENTS.md`: problem, goals, non-goals, MVP features, distribution, stack, and constraints.
+Governs the product-scope document at `canon/REQUIREMENTS.md`: problem, goals, non-goals, MVP features, distribution, and constraints.
 
 Does not govern:
 
@@ -23,7 +23,6 @@ Does not govern:
 - User-facing goals stated as outcomes, not implementation
 - Explicit non-goals that prevent feature creep. Mark deferred items "(deferred)" so they read as paused, not excluded. A non-goal resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence, and a non-goal resting on scope alone takes none.
 - MVP features as a numbered list: feature name and one-line description
-- Tech stack as a plain list of tools
 - Hard constraints that shape every decision
 
 ## What does not go in
@@ -31,14 +30,15 @@ Does not govern:
 - Implementation details, API names, or internal component references
 - Anything that describes how a feature is built rather than what it does
 - Measured results, such as scores, benchmark figures, or token counts. They move on every run and this file changes least. Name where the results live instead.
+- Content another canonical doc owns, such as the stack list, which the stack-and-runtime slot of `canon/ARCHITECTURE.md` holds, or the rules of this standard itself
 
 ## Sections
 
-Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, `## Tech stack`, and `## Constraints`. Add `## Distribution` when the rule below applies. Add `## Premise` when the project exists to answer a question, stated as the question and what would count as an answer, never as the answer measured so far. Drop a section rather than pad it with filler.
+Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, and `## Constraints`. Add `## Distribution` when the rule below applies. Add `## Worldview` when the project holds beliefs that shape every decision, and keep a belief there only when it changes a decision, since a padded worldview turns into a second goals list. Add `## Premise` when the project exists to answer a question, stated as the question and what would count as an answer, never as the answer measured so far. Drop a section rather than pad it with filler.
 
 ## Lifecycle
 
-The MVP list is a historical record of the original scope. Once those features ship it stays as written. Do not renumber it, do not append to it, and do not annotate entries with status. A reader telling the original scope apart from what followed depends on the first one staying legible.
+Once every entry in the MVP list, or in a later scope section, has shipped, delete the section. Git keeps the old text, and the document states the project as it stands. Do not annotate an entry as shipped and leave it in place. While any entry is unshipped, do not renumber the list or append to it.
 
 Later scope arrives as a new section rather than as an extension of the MVP list. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Nothing sequences either list into versions. Work reaches the board as discrete tasks under `tasks.md`, and `board.md` orders them by readiness, so a section here states what is wanted and never when it lands.
 
@@ -64,8 +64,6 @@ State each entry as an outcome the consumer reaches, never as the mechanism that
 1. Feature: description
 
 <!-- ## Distribution: include only when shipping outside the repository -->
-
-## Tech stack
 
 ## Constraints
 ```
