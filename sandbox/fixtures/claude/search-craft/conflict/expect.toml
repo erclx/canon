@@ -1,0 +1,33 @@
+# What a correct `/canon:search-craft` run leaves behind when the scoped and the
+# open result sets disagree. Read by `canon sandbox check`. Patterns use TOML
+# literal strings so a regex needs no backslash escaping.
+#
+# The arm replays two recorded result sets and never searches, so it proves the
+# body's reconciliation rules once the skill is loaded and nothing about whether
+# a session scopes a search. Which side was kept and why is semantic, so it sits
+# under `manual`.
+#
+# Every top-level key sits above the first `[[content]]` header, since a bare
+# key below one binds to that table and asserts nothing.
+
+paths = ["notes/research.md"]
+
+write_scope = ["notes/**", ".claude/**", ".canon/**"]
+
+max_turns = 30
+
+manual = [
+  "The notes say the scoped and open results disagreed and name the side kept. Semantic: a disagreement is worded many ways, and a substring cannot tell stating it from restating one answer.",
+  "The kept answer rests on the field's own record, its reference docs and changelog, rather than on the count of results. Semantic: the open side outnumbers the scoped side, so a run that counted would keep 3.9.0 and the version alone shows only the outcome.",
+  "The result outside the scoped domain list is discarded or flagged as unverified, not cited as support. Semantic: whether a source supports a claim is a judgment the file's links do not carry.",
+]
+
+# The kept version is the one the field's own record states.
+[[content]]
+path = "notes/research.md"
+pattern = '4\.2\.0'
+
+# At least one claim carries a link to its source.
+[[content]]
+path = "notes/research.md"
+pattern = 'https?://[^\s)]+'
