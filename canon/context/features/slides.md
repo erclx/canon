@@ -13,6 +13,7 @@ description: SLIDES.md source shape, layout catalog, render command, HTML conver
 
 - `src/slides/` owns the parser, the layout functions, the design tokens, and the render
 - `src/slides/convert/` owns the HTML converter, kept apart from the markdown engine it replaces
+- `src/slides/package/` owns edits to the package pptxgenjs wrote, being slide motion and embedded faces, kept apart from the conversion that produces it
 - `examples/slides/` owns the reference deck that exercises every layout
 - `.canon/tmp/render/slides/` owns rendered decks, gitignored
 
@@ -21,7 +22,7 @@ description: SLIDES.md source shape, layout catalog, render command, HTML conver
 - The engine is a fresh general-purpose layer, not a port of any single project's deck modes. It ships one source format with a per-slide layout, so any repo writes its own `SLIDES.md` and renders with the same command.
 - The source is committed. The rendered `.pptx` lands in the gitignored `.canon/tmp/render/slides/` and can be regenerated at any time.
 - The palette is a paper background with a rust accent, deliberately not blue. The five theme colors are read from the design module by role rather than restated, so a deck moves when the decided system does. Each variant takes its own accent, a lighter rust on dark and a deeper one on light, since the module tunes each for its ground.
-- The face is read from the design module too, as Geist. A `.pptx` cannot embed it, so the first family is taken with the ` Variable` suffix dropped to the installed name `Geist` and a viewer without the face sees PowerPoint's own substitute. Point sizes stay a deck-owned scale in `TYPE`, since the module's `t0` to `t6` steps are screen pixels and a literal mapping would shrink the cover to 38 pt and the body to 11 pt.
+- The face is read from the design module too, as Geist, with the ` Variable` suffix dropped to the installed name `Geist`. The markdown path embeds nothing, so a viewer without the face sees PowerPoint's own substitute. The HTML path embeds the faces `deck.json` lists, described under Package step. Point sizes stay a deck-owned scale in `TYPE`, since the module's `t0` to `t6` steps are screen pixels and a literal mapping would shrink the cover to 38 pt and the body to 11 pt.
 
 ## Source shape
 
@@ -62,7 +63,8 @@ A folder passed as `--source` takes a second path. Chromium lays out each `.html
 - `shapes.ts` maps records to shapes and holds the rules: padding plus border width as the text inset, a uniform border and radius on boxes and pictures, the first line lifted by half the leading, a bullet glyph from the computed `list-style-type`, and `letter-spacing` as character spacing.
 - `shapes.ts` also writes `#slide-N` links plus `http:`, `https:`, and `mailto:` URLs, the first `box-shadow`, `alt` text, and tables sized from their cell edges with spans kept.
 - `svg.ts` resolves `currentColor` and `var(--*)` to the colors the browser computed, since inside a slide nothing supplies either and the vector draws black.
-- `export.ts` drives the browser, writes the package, then patches two things pptxgenjs cannot write. It swaps a real screenshot into each SVG's PNG fallback, which pptxgenjs fills with the SVG's own bytes in Node, and it rounds a picture's corners, which pptxgenjs has no option for. It finds each patched picture by the object name it assigned, through `jszip`.
+- `shapes.ts` names every shape `canon-<record>` after the element it came from, and an image frame `canon-<record>-frame`. pptxgenjs numbers shape ids itself, so the name is the only handle a later pass over the written XML has, and it survives a fallback picture shifting the id order.
+- `export.ts` drives the browser, writes the package, then patches two things pptxgenjs cannot write. It swaps a real screenshot into each SVG's PNG fallback, which pptxgenjs fills with the SVG's own bytes in Node, and it rounds a picture's corners, which pptxgenjs has no option for. It finds each patched picture by its object name, through `jszip`. A deck needing no patch, motion, or face keeps the bytes pptxgenjs wrote.
 
 An element computing any property in `UNMAPPED_PROPERTIES` becomes one picture of itself carrying its text as alt text, while its parent and siblings stay native and nothing beneath it is drawn twice. Text blocks count the inline elements their runs came from, and tables count their cells, since neither is drawn as a shape of its own. Three entries flag a shape rather than a bare property: `box-shadow` flags a second shadow, `border` flags sides that differ or are missing, and `border-radius` flags corners that differ. Cells write each edge on their own, so only their drawn edges have to agree in color and style.
 
@@ -79,6 +81,21 @@ What belongs to the deck rather than to one slide lives in two places. `deck.jso
 - A chart reads its table in the page and maps it in `chart.ts`. Series take the accent, then every other declared `--color-*` role in sheet order except the background and surface, each color once, repeating past the last.
 - Sections need every slide in one once any exists, so slides ahead of the first `data-section` open a section named after the deck. Whether any slide declares one is read from the source files before layout. pptxgenjs files a slide under the first section carrying its title, so a returning title gets a numbered suffix rather than a slide filed out of order.
 - The mark sits top right at its own aspect inside a 1.2 by 0.4 inch box. An SVG mark gets pptxgenjs's broken PNG fallback, since the screenshot patch reaches slides and not layouts, so a raster mark is the safe choice.
+
+## Package step
+
+pptxgenjs declares nothing for transitions, animations, or font embedding, so `src/slides/package/` writes all three into the package after it, an approach two spikes proved in LibreOffice before this step was built.
+
+- `motion.ts` takes `data-transition` on `<body>` and `data-enter` on an element, both read by `walk.ts`, and inserts `<p:transition>` and an on-click `<p:timing>` main sequence after `</p:clrMapOvr>`. A slide missing that anchor is refused rather than patched elsewhere.
+- Each effect is a row naming PowerPoint's own preset id, so it shows by name in the animation pane and a new effect costs one row.
+- An entrance animates every shape drawn from its element's subtree on one click, resolved from object names to the shape ids the written XML holds. An element folded into another record's text, or drawing nothing, reports rather than animating a neighbor.
+- A transition length rounds to `fast`, `med`, or `slow`, since the strict schema states no milliseconds and `p14:dur` needs the PowerPoint 2010 extension namespace.
+- `fonts.ts` wraps each face `deck.json` lists in an Embedded OpenType 2.2 header built from its `OS/2`, `head`, and `name` tables, writes `ppt/fonts/fontN.fntdata`, registers the relationship and content type, lists the family after `<p:notesSz>`, and sets `embedTrueTypeFonts="1"`.
+- The header follows the W3C EOT submission, which puts one padding field before the family name where the spike script wrote two. LibreOffice read either, and a real face decodes under the spec's layout.
+- A face is refused by path, with the deck still written, when `fsType` sets the restricted or bitmap-only bit, when it carries an `fvar` table, when it is `woff`, `woff2`, or a collection, or when its slot is taken.
+- Faces ship to the page as base64 `woff2`, and decoding one is a new dependency for a case no deck has hit, so the deck lists TrueType or OpenType files instead. Canon's own face is variable, so Canon's own deck embeds nothing until static instances are supplied.
+- A face path is read only from inside the deck folder, so a `deck.json` cannot carry a file from elsewhere on the machine out inside the deck.
+- Both outcomes are confirmed in LibreOffice only. Whether PowerPoint plays the motion and renders the embedded face, rather than refusing the package, is an operator check the e2e test cannot make. The e2e face is a synthetic sfnt from `test-face.ts` holding only the three header tables, so it embeds and never renders.
 
 pptxgenjs 4 reads a text margin as left, right, bottom, top in points, while a table cell margin reads as top, right, bottom, left in inches. The half-leading lift was measured in LibreOffice rather than PowerPoint, and single-line text there lands about 4 to 6 pixels above the browser.
 
