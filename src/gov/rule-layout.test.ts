@@ -27,7 +27,9 @@ const CURRENT_CLAUDE_ROOTS = [
 ]
 
 const SEED_ROOT = 'tooling/claude/seeds/'
-const CLAUDE_PATH = /\.claude\/([^/\s`'"*)]+)/g
+// `*` stays in the segment, so a wildcard-first glob such as `.claude/*.md`
+// reads as a root the allow-list never names and fails.
+const CLAUDE_PATH = /\.claude\/([^/\s`'")]+)/g
 
 let root: string
 
@@ -84,13 +86,15 @@ describe('rule layout', () => {
   it('should flag a retired root in a glob and in a body line', () => {
     seedRule(
       'canon/610-context.md',
-      "---\npaths:\n  - '.claude/context/**'\n---\n\n- Read `.claude/REQUIREMENTS.md` first\n",
+      "---\npaths:\n  - '.claude/context/**'\n  - '.claude/*.md'\n  - '.claude/**/DESIGN.md'\n---\n\n- Read `.claude/REQUIREMENTS.md` first\n",
     )
 
     const findings = layoutFindings(root)
 
     expect(findings).toEqual([
       'canon/610-context.md: .claude/context is outside the current layout (rules, skills, hooks, settings.json, worktrees, projects)',
+      'canon/610-context.md: .claude/*.md is outside the current layout (rules, skills, hooks, settings.json, worktrees, projects)',
+      'canon/610-context.md: .claude/** is outside the current layout (rules, skills, hooks, settings.json, worktrees, projects)',
       'canon/610-context.md: .claude/REQUIREMENTS.md is outside the current layout (rules, skills, hooks, settings.json, worktrees, projects)',
     ])
   })
