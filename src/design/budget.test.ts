@@ -56,6 +56,15 @@ describe('measureDesignProse', () => {
     expect(measureDesignProse(source)).toEqual([])
   })
 
+  it('never counts an HTML comment or a fenced block', () => {
+    const fence = ['```plaintext', ...Array(5).fill(words(30)), '```']
+    const source = record({
+      Motion: ['<!-- a note the preview drops -->', ...fence].join('\n'),
+    })
+
+    expect(measureDesignProse(source)).toEqual([])
+  })
+
   it('passes a rule at the word cap', () => {
     const source = record({ Motion: rules(1, DESIGN_BUDGET.ruleWords) })
 
