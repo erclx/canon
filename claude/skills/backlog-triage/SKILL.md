@@ -45,7 +45,7 @@ A row whose link resolves to no file gets an item anyway, carrying `decline` and
 
 Measure every claim the task makes against the tree and `git log` during this pass. Grep for the construct its defect names and count the sites, check whether each open outcome's behavior exists, and search the log for a commit or pull request that shipped it under another task. Never carry a figure from the task file forward as current, since the task states what was true when it was filed.
 
-Then gather the evidence Step 5 reads for each row that reproduces. Check whether its origin line or `## Findings` names an issue, a run, or a person it bit. Search the log for a commit or pull request that worked around it rather than fixing it. For a defect in something the project ships to other repositories, such as a rule, a seed, a scaffold, or a verb, name the shipped path it sits on. Record each one that is absent as absent rather than inferring it.
+Then gather the evidence Step 5 reads for each row that reproduces. Check whether its origin line or `## Findings` names an issue, a run, or a person it bit. Search the log for a commit or pull request that worked around it rather than fixing it. For a defect in something the project ships, whether a route or a page its users call or a rule, a seed, a scaffold, or a verb other repositories copy or run, name the shipped path it sits on. Record each one that is absent as absent rather than inferring it.
 
 Name the commit the pass measured against in the overview body.
 
@@ -56,9 +56,9 @@ Keep and promote carry the burden of proof, and a defect that still exists does 
 A row earns keep or promote only by naming one of two things from the evidence Step 4 gathered:
 
 - **A cost**: the defect gives a wrong result that this pass observed, by running the verb that carries it or reading the committed output that shows it, or that the row's evidence shows an issue, a run, or a person hit, a workaround commit included. A hit counts only while the pass does not measure it as fixed or as no longer recurring.
-- **A reach**: the defect sits on a shipped path, and every target that copies or runs that path receives it as a wrong instruction, a broken or unbounded step, or a wrong output.
+- **A reach**: the defect sits on a path the project ships, and everyone who reaches that path, whether a user calling it or a target copying or running it, receives the defect as a wrong instruction, a broken, failing, or unbounded behavior, or a wrong output. Reach needs no hit, since the path's users meet the defect whether or not anyone reported it.
 
-A plausible cost names nothing. A row arguing what could go wrong, with no observed output and no hit, is declined however likely the argument sounds. A missing improvement to a shipped surface is not a reach, and neither is a defect that shows only in this repository's own config, workflows, scripts, or fixtures.
+A plausible cost names nothing. A row arguing what could go wrong off a shipped path, with no observed output and no hit, is declined however likely the argument sounds. Three things are not a reach: a missing improvement to a shipped surface, a defect that changes nothing a user or a target receives, such as dead code on a shipped path, and a defect that shows only in this repository's own config, workflows, scripts, or fixtures.
 
 - **keep**: the defect reproduces this pass, stated with a count or a path, and the row names a cost or a reach, stated with the observation, the hit, or the shipped path.
 - **promote**: it qualifies for keep, and the thing it was waiting on has cleared, naming what cleared it.

@@ -35,7 +35,7 @@ stage_setup() {
     log_info "  one control row, v07.0, that a triage never files"
     log_info "  v01.0 names console.log calls the tree no longer holds"
     log_info "  v02.0's outcomes shipped in #58 under other work"
-    log_info "  v03.0's missing rate limit still reproduces"
+    log_info "  v03.0's missing rate limit reproduces on routes every client calls"
     log_info "  v04.0 waited on pagination, which landed in #61"
     log_info "  v05.0 and v06.0 carry no argument, since no interface or webhook exists"
     log_info "  v08.0's unused export reproduces but names no cost"
