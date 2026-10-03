@@ -81,6 +81,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Find me the strongest evidence on whether rent control reduces housing supply. Where should I look?',
+    expect: 'search-craft',
+  },
+  {
+    prompt:
       "I've got the plan approved and it touches the parser, the command, and the docs. How should I build it so I don't end up with one giant diff?",
     expect: 'build-in-slices',
   },
