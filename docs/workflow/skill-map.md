@@ -6,7 +6,7 @@ category: Workflow
 
 # Skill map
 
-Groups run in the order a project meets them, so a reader at a known point scans to that group and reads across. The set reconciles the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target/projects.md) describes, rather than inventing a third vocabulary beside those two, so a group name matches neither source exactly and every moment either one names has a group. Each row says when to reach for the skill. What it does is the skill's own description.
+Groups run in the order a project meets them. They reconcile the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target/projects.md) describes, so every moment either one names has a group. Each row says when to reach for a skill, and its description says what it does.
 
 This page is the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row here. A skill serving two moments sits at the earlier one, and a mention on any other page is prose rather than routing. The landing page's skills field renders from this page, so its build refuses a skill with no row and a row naming no skill.
 
@@ -32,6 +32,7 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:plan-groundwork`    | When the state is unmeasured and more than one approach is live                   |
 | `canon:decision-escalate`  | When open decisions turn on your preference and want batching into one set        |
 | `canon:draft-and-pick`     | When the call is taste and wants several candidates rendered side by side         |
+| `canon:canvas`             | When a direction should be drawn as frames the operator can see, select, and edit |
 | `canon:task-board`         | When a decided item needs a file on the board, or a shipped one needs archiving   |
 | `canon:plan-feature`       | When the approach is settled and the next step is a plan                          |
 | `canon:codebase-layout`    | When a plan or change adds a file and you need to decide which folder holds it    |
