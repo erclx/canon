@@ -14,9 +14,16 @@ export interface TokenSource {
   readonly notice?: string
 }
 
+export interface FrameRef {
+  readonly page: string
+  readonly frame: string
+}
+
 export interface PagesRecord {
   readonly pages: readonly Page[]
   readonly tokens: TokenSource
+  /** Absent when nothing is selected or the selected frame is gone. */
+  readonly selection?: FrameRef | null
 }
 
 export interface ChangeEvent {
@@ -54,9 +61,26 @@ export const frameVersions = signal<ReadonlyMap<string, number>>(new Map())
 
 export const view = signal<View>({ x: 0, y: 0, zoom: 0.5 })
 
+/** The one frame the operator pointed at, which Claude reads as "this one". */
+export const selection = signal<FrameRef | undefined>(undefined)
+
+/** Set while a frame follows the pointer, so the surface can style it. */
+export const draggingFrame = signal<string | undefined>(undefined)
+
+/** Why the last write to the canvas failed, until the next one succeeds. */
+export const writeError = signal<string | undefined>(undefined)
+
 export const currentPage = computed<Page | undefined>(() => {
   const all = pages.value
   return all.find((page) => page.name === selectedPage.value) ?? all[0]
+})
+
+/** The selected frame when it is on the page being shown. */
+export const selectedFrame = computed<Frame | undefined>(() => {
+  const page = currentPage.value
+  const chosen = selection.value
+  if (!page || chosen?.page !== page.name) return undefined
+  return page.frames.find((frame) => frame.name === chosen.frame)
 })
 
 export function frameKey(page: string, frame: Pick<Frame, 'file'>): string {
@@ -80,6 +104,7 @@ export function toggleFrameTheme(key: string): void {
 export function applyRecord(record: PagesRecord): void {
   pages.value = record.pages
   tokens.value = record.tokens
+  selection.value = record.selection ?? undefined
   loadError.value = undefined
   isLoaded.value = true
 }
@@ -113,6 +138,67 @@ export async function applyChange(
     frameVersions.value = next
   }
   await loadPages(fetchImpl)
+}
+
+/**
+ * Posts one write and reports a refusal in the panel rather than failing
+ * silently. A refusal also rereads the page list, so a position the server
+ * would not take does not stay on the surface.
+ */
+async function write(
+  path: string,
+  body: unknown,
+  fetchImpl: typeof fetch,
+): Promise<void> {
+  try {
+    const response = await fetchImpl(path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) throw new Error(`status ${response.status}`)
+    writeError.value = undefined
+  } catch (error) {
+    writeError.value = `Could not save (${error instanceof Error ? error.message : 'unknown'}). Check canon canvas serve is still running.`
+    await loadPages(fetchImpl)
+  }
+}
+
+/** Selects a frame here at once and records it where Claude reads it. */
+export async function selectFrame(
+  ref: FrameRef | undefined,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  selection.value = ref
+  await write('/api/selection', ref ?? {}, fetchImpl)
+}
+
+/**
+ * Moves a frame on the surface without writing, which a drag calls on every
+ * pointer move. The next reread replaces it with what the layout holds.
+ */
+export function previewMove(ref: FrameRef, x: number, y: number): void {
+  pages.value = pages.value.map((candidate) =>
+    candidate.name === ref.page
+      ? {
+          ...candidate,
+          frames: candidate.frames.map((frame) =>
+            frame.name === ref.frame ? { ...frame, x, y, placed: true } : frame,
+          ),
+        }
+      : candidate,
+  )
+}
+
+/** Shows the move and writes it through the server's shared layout writer. */
+export async function moveFrameTo(
+  ref: FrameRef,
+  x: number,
+  y: number,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  previewMove(ref, x, y)
+  await write('/api/frames/move', { ...ref, x, y }, fetchImpl)
 }
 
 export function clampZoom(zoom: number): number {
@@ -183,4 +269,7 @@ export function resetState(): void {
   frameThemes.value = new Map()
   frameVersions.value = new Map()
   view.value = { x: 0, y: 0, zoom: 0.5 }
+  selection.value = undefined
+  draggingFrame.value = undefined
+  writeError.value = undefined
 }
