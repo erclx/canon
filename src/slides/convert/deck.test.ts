@@ -210,3 +210,113 @@ describe('readDeck', () => {
     expect(result).toMatchObject({ status: 'refused', field: 'footer.middle' })
   })
 })
+
+describe('readDeck fonts', () => {
+  const writeFace = (path: string): void => {
+    mkdirSync(join(folder, 'fonts'), { recursive: true })
+    writeFileSync(join(folder, path), 'face')
+  }
+
+  it('should default to no fonts', () => {
+    expect(readDeck(folder)).toMatchObject({ deck: { fonts: [] } })
+  })
+
+  it('should resolve a face against the folder and keep the path as written', () => {
+    writeFace('fonts/sans-bold.ttf')
+    writeDeck({
+      fonts: [{ family: 'Sans', weight: 700, path: 'fonts/sans-bold.ttf' }],
+    })
+
+    const result = readDeck(folder)
+
+    expect(result).toMatchObject({
+      status: 'read',
+      deck: {
+        fonts: [
+          {
+            family: 'Sans',
+            weight: 700,
+            style: 'normal',
+            path: join(folder, 'fonts', 'sans-bold.ttf'),
+            source: 'fonts/sans-bold.ttf',
+          },
+        ],
+      },
+    })
+  })
+
+  it('should default a face to weight 400', () => {
+    writeFace('fonts/sans.ttf')
+    writeDeck({ fonts: [{ family: 'Sans', path: 'fonts/sans.ttf' }] })
+
+    expect(readDeck(folder)).toMatchObject({
+      deck: { fonts: [{ weight: 400 }] },
+    })
+  })
+
+  it('should refuse a face path outside the deck folder', () => {
+    writeFileSync(join(folder, '..', 'outside.ttf'), 'face')
+    writeDeck({ fonts: [{ family: 'Sans', path: '../outside.ttf' }] })
+
+    const result = readDeck(folder)
+
+    expect(result).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].path',
+      message: `${join(folder, DECK_FILE)}: fonts[0].path ../outside.ttf lies outside the deck folder`,
+    })
+  })
+
+  it('should refuse a face that does not exist', () => {
+    writeDeck({ fonts: [{ family: 'Sans', path: 'fonts/missing.ttf' }] })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].path',
+    })
+  })
+
+  it('should refuse a face with no family', () => {
+    writeFace('fonts/sans.ttf')
+    writeDeck({ fonts: [{ path: 'fonts/sans.ttf' }] })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].family',
+    })
+  })
+
+  it('should refuse a style other than normal or italic', () => {
+    writeFace('fonts/sans.ttf')
+    writeDeck({
+      fonts: [{ family: 'Sans', style: 'oblique', path: 'fonts/sans.ttf' }],
+    })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].style',
+    })
+  })
+
+  it('should refuse a weight outside 1 to 1000', () => {
+    writeFace('fonts/sans.ttf')
+    writeDeck({
+      fonts: [{ family: 'Sans', weight: 1200, path: 'fonts/sans.ttf' }],
+    })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].weight',
+    })
+  })
+
+  it('should refuse an unknown face field and name it', () => {
+    writeFace('fonts/sans.ttf')
+    writeDeck({ fonts: [{ family: 'Sans', path: 'fonts/sans.ttf', size: 1 }] })
+
+    expect(readDeck(folder)).toMatchObject({
+      status: 'refused',
+      field: 'fonts[0].size',
+    })
+  })
+})
