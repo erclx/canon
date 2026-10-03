@@ -23,9 +23,11 @@ coreutils
 coveragerc
 crxjs
 cspell
+currentcolor
 dataclass
 dataclasses
 dedupe
+descr
 describedby
 doctag
 domcontentloaded
@@ -46,6 +48,7 @@ faststart
 fatalf
 firecrawl
 flowchart
+fmla
 friendsofphp
 fromdateiso
 getline
@@ -55,6 +58,7 @@ gitlink
 glama
 golangci
 gsub
+hlinksldjump
 hyperframes
 heredoc
 hljs
@@ -89,6 +93,7 @@ namerefs
 nbsp
 networkidle
 nextjs
+nodebuffer
 noopener
 noreferrer
 nothrow
@@ -114,9 +119,11 @@ phpstan
 phpunit
 pip
 pnpm
+ppaction
 pptx
 pptxgenjs
 precompact
+prst
 pycache
 pydantic
 pyproject
@@ -129,11 +136,13 @@ readlink
 realpath
 rects
 reflog
+rels
 repr
 rerank
 reranker
 respawn
 rlength
+rowspan
 rstart
 rtrimstr
 segoe
@@ -141,6 +150,7 @@ scrollend
 semgrep
 setattr
 setsid
+shdw
 shiki
 sidepanel
 sigpipe

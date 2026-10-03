@@ -1,6 +1,6 @@
 ---
 title: Slides
-description: SLIDES.md source shape, layout catalog, render command, draft skill
+description: SLIDES.md source shape, layout catalog, render command, HTML converter, draft skill
 ---
 
 # Slides
@@ -12,6 +12,7 @@ description: SLIDES.md source shape, layout catalog, render command, draft skill
 ## Layout
 
 - `src/slides/` owns the parser, the layout functions, the design tokens, and the render
+- `src/slides/convert/` owns the HTML converter, kept apart from the markdown engine it replaces
 - `examples/slides/` owns the reference deck that exercises every layout
 - `.canon/tmp/render/slides/` owns rendered decks, gitignored
 
@@ -53,6 +54,22 @@ A `toc` slide renders a clickable contents list. The render builds the navigatio
 
 `--mirror <dir>` copies the rendered deck into another directory after writing, and the `CANON_SLIDES_MIRROR` environment variable sets a default mirror so the path stays out of the repo. `--open` opens the deck after writing, targeting the mirror copy when present. On WSL it opens through the Windows shell, elsewhere through the platform opener.
 
+## HTML converter
+
+A folder passed as `--source` takes a second path. Chromium lays out each `.html` file in filename order at 1280 by 720 CSS pixels with `resolveFrameTokens` injected ahead of the slide's own styles, and the converter rebuilds what the browser placed as native pptxgenjs shapes. The markdown path stays as it was until deck folders retire it, so the two engines share only the command.
+
+- `walk.ts` runs inside the page and returns one plain record per element. Playwright serializes it to source, so every helper sits inside its body. Text gathers along the inline flow, which makes `<strong>` inside `<p>` one shape with two runs, and a block-level child is walked on its own.
+- `shapes.ts` maps records to shapes and holds the rules: padding plus border width as the text inset, a uniform border and radius on boxes and pictures, the first line lifted by half the leading, a bullet glyph from the computed `list-style-type`, and `letter-spacing` as character spacing.
+- `shapes.ts` also writes `#slide-N` links plus `http:`, `https:`, and `mailto:` URLs, the first `box-shadow`, `alt` text, and tables sized from their cell edges with spans kept.
+- `svg.ts` resolves `currentColor` and `var(--*)` to the colors the browser computed, since inside a slide nothing supplies either and the vector draws black.
+- `export.ts` drives the browser, writes the package, then patches two things pptxgenjs cannot write. It swaps a real screenshot into each SVG's PNG fallback, which pptxgenjs fills with the SVG's own bytes in Node, and it rounds a picture's corners, which pptxgenjs has no option for. It finds each patched picture by the object name it assigned, through `jszip`.
+
+An element computing any property in `UNMAPPED_PROPERTIES` becomes one picture of itself carrying its text as alt text, while its parent and siblings stay native and nothing beneath it is drawn twice. Text blocks count the inline elements their runs came from, and tables count their cells, since neither is drawn as a shape of its own. Three entries flag a shape rather than a bare property: `box-shadow` flags a second shadow, `border` flags sides that differ or are missing, and `border-radius` flags corners that differ. Cells write each edge on their own, so only their drawn edges have to agree in color and style.
+
+Links that would go nowhere are left out, being a `#slide-N` past the deck's end or a target in no accepted form. Each fallback and each refused link prints one `✗` line on stderr, and the exit stays 0, as with an unrecognized layout. An empty folder refuses with a message naming it.
+
+pptxgenjs 4 reads a text margin as left, right, bottom, top in points, while a table cell margin reads as top, right, bottom, left in inches. The half-leading lift was measured in LibreOffice rather than PowerPoint, and single-line text there lands about 4 to 6 pixels above the browser.
+
 ## Draft skill
 
 `canon:draft-slides` drafts `.claude/SLIDES.md` from a topic, picks a layout per slide from the catalog, and shells out to the render command. The skill owns the deck content and the design choices encoded in the source. It never reimplements layout or styling, which live in the CLI.
@@ -61,4 +78,4 @@ After the first render it runs a one-pass quality check: convert the deck to ima
 
 ## Reference deck
 
-`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `evidence/` holds a screenshot of both variants, set in Geist through the design module's face and rendered from the deck as `c5079cea` left it, by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass. It sits under the segment `canon pr evidence` compares, so a later deck change shows a before and after in review. Nothing regenerates it when the source changes, and no command renders it. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web/assets.md`, since nothing outside this folder depends on the screenshot staying current, and the folder carries no stamps for the same reason.
+`examples/slides/showcase.md` exercises every layout in one deck. Render it to inspect the design system end to end and to verify a styling change visually. `evidence/` holds a screenshot of both variants, set in Geist through the design module's face and rendered from the deck as `c5079cea` left it, by hand with `canon slides render` followed by a `soffice --headless --convert-to pdf` and `pdftoppm -png` pass. It sits under the segment `canon pr evidence` compares, so a later deck change shows a before and after in review. Nothing regenerates it when the source changes, and no command renders it. That absence is deliberate rather than an omission: `examples/` carries no gate under the `assets/` and `examples/` boundary decision in `canon/context/web/assets.md`, since nothing outside this folder depends on the screenshot staying current, and `examples/slides/evidence/` carries no stamps for the same reason, unlike `examples/teach/evidence/`, whose five screenshots each sit beside one.

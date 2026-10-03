@@ -68,7 +68,7 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Standards      | Authoring conventions for commits, branches, plans, tasks, and markdown                                                  | Opened by name, read by name with `canon standards <name>`      |
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
-| Slides         | A `SLIDES.md` source format with a layout catalog                                                                        | `canon slides render` writes PowerPoint                         |
+| Slides         | A `SLIDES.md` source format with a layout catalog, or a folder of HTML slides rebuilt as editable shapes                 | `canon slides render` writes PowerPoint                         |
 | Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                              | `canon teach`                                                   |
 | Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                         | `canon canvas serve`                                            |
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |

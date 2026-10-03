@@ -182,6 +182,32 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain('Invalid variant "sideways"')
   })
 
+  it('should exit 1 when slides render is given a folder holding no html slides', async () => {
+    const source = join(workDir, 'empty-deck')
+    await mkdir(source, { recursive: true })
+    await writeFile(join(source, 'notes.md'), '# not a slide\n', 'utf8')
+
+    const result = await runCli(['slides', 'render', '--source', source], {
+      cwd: workDir,
+    })
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toContain(`${source} holds no .html slides`)
+  })
+
+  it('should exit 1 when slides render is given a variant with a folder', async () => {
+    const source = join(workDir, 'variant-deck')
+    await mkdir(source, { recursive: true })
+
+    const result = await runCli(
+      ['slides', 'render', '--source', source, '--variant', 'dark'],
+      { cwd: workDir },
+    )
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toContain('--variant applies to a SLIDES.md source')
+  })
+
   it('should exit 1 when feedback receives an empty body on stdin', async () => {
     const result = await runCli(['feedback'], { cwd: workDir, input: '   \n' })
 
