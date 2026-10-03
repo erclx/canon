@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.17.0](https://github.com/erclx/canon/compare/v5.16.0...v5.17.0) (2026-10-03)
+
+
+### Features
+
+* **claude:** draw teach lesson figures by hand, checked in the page ([#2114](https://github.com/erclx/canon/issues/2114)) ([bfbcf59](https://github.com/erclx/canon/commit/bfbcf59c91e476b59db7e0bc4323fa4f48a76533))
+* **claude:** remind a session to load search-craft on search ([#2112](https://github.com/erclx/canon/issues/2112)) ([1e9e532](https://github.com/erclx/canon/commit/1e9e5323f7717b100113274fe3c984e670f14227))
+* **demo:** write a step timeline beside each recorded take ([#2111](https://github.com/erclx/canon/issues/2111)) ([45c749b](https://github.com/erclx/canon/commit/45c749be6f02c22b1c7f81f4105145db3b31eb42))
+* **design:** add a worked design example ([#2107](https://github.com/erclx/canon/issues/2107)) ([d5069ad](https://github.com/erclx/canon/commit/d5069adacd975d1a71479dd50c3b752cc4640f8a))
+* **teach:** promote an opened lead to read ([#2115](https://github.com/erclx/canon/issues/2115)) ([d1ebad5](https://github.com/erclx/canon/commit/d1ebad53b91a824fb59276601464334a5880980e))
+
 ## [5.16.0](https://github.com/erclx/canon/compare/v5.15.0...v5.16.0) (2026-10-03)
 
 
