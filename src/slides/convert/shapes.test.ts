@@ -35,6 +35,10 @@ function raw(overrides: Partial<RawStyle> = {}): RawStyle {
     mask: 'none',
     mixBlendMode: 'normal',
     backdropFilter: 'none',
+    borderWidth: '0px',
+    borderColor: 'rgb(0, 0, 0)',
+    borderStyle: 'none',
+    borderRadius: '0px',
     ...overrides,
   }
 }
@@ -501,6 +505,13 @@ const UNMAPPED_STYLES: Readonly<Record<UnmappedProperty, Partial<BoxStyle>>> = {
   mask: { raw: raw({ mask: 'url("#m")' }) },
   'mix-blend-mode': { raw: raw({ mixBlendMode: 'multiply' }) },
   'backdrop-filter': { raw: raw({ backdropFilter: 'blur(8px)' }) },
+  border: {
+    raw: raw({
+      borderWidth: '0px 0px 0px 4px',
+      borderStyle: 'none none none solid',
+    }),
+  },
+  'border-radius': { raw: raw({ borderRadius: '12px 12px 0px 0px' }) },
   'box-shadow': {
     shadows: [
       { x: 0, y: 2, blur: 4, color: color('000000', 0.2), inset: false },
@@ -557,5 +568,58 @@ describe('UNMAPPED_PROPERTIES', () => {
 
   it('should name a second box-shadow in the fallback reason', () => {
     expect(fallbackFor('box-shadow')?.properties).toEqual(['box-shadow'])
+  })
+
+  it('should name a one-sided border in the fallback reason', () => {
+    expect(fallbackFor('border')?.properties).toEqual(['border'])
+  })
+
+  it('should name corners of differing radius in the fallback reason', () => {
+    expect(fallbackFor('border-radius')?.properties).toEqual(['border-radius'])
+  })
+
+  it('should keep a table native when a cell draws only its bottom edge', () => {
+    const record: Kind<'table'> = {
+      ...base(1),
+      kind: 'table',
+      rows: [
+        [
+          cell({
+            style: style({
+              raw: raw({
+                borderWidth: '0px 0px 1px',
+                borderStyle: 'none none solid',
+              }),
+            }),
+          }),
+        ],
+      ],
+    }
+
+    expect(planSlide([record], CONTEXT).fallbacks).toEqual([])
+  })
+
+  it('should send a table to a picture when its cell edges differ in color', () => {
+    const record: Kind<'table'> = {
+      ...base(1),
+      kind: 'table',
+      rows: [
+        [
+          cell({
+            style: style({
+              raw: raw({
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: 'rgb(255, 0, 0) rgb(0, 0, 255)',
+              }),
+            }),
+          }),
+        ],
+      ],
+    }
+
+    expect(planSlide([record], CONTEXT).fallbacks[0]?.properties).toEqual([
+      'border',
+    ])
   })
 })

@@ -127,6 +127,10 @@ export function walkSlide(idAttribute: string): WalkedSlide {
         mask: style.maskImage || 'none',
         mixBlendMode: style.mixBlendMode,
         backdropFilter: style.backdropFilter || 'none',
+        borderWidth: style.borderWidth,
+        borderColor: style.borderColor,
+        borderStyle: style.borderStyle,
+        borderRadius: style.borderRadius,
       },
     }
   }

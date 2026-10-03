@@ -72,6 +72,7 @@ const SLIDES: Record<string, string> = {
     <div class="gradient">Gradient box</div>
     <p class="soft" style="position: absolute; left: 96px; top: 520px; margin: 0">Plain then <span style="filter: blur(1px)">softened</span></p>
     <p class="under" style="position: absolute; left: 96px; top: 580px; margin: 0; text-decoration: underline">Under <strong>lined</strong></p>
+    <blockquote class="rule" style="position: absolute; left: 720px; top: 520px; margin: 0; padding-left: 16px; border-left: 4px solid #B45309">Left-rule quote</blockquote>
   </body></html>`,
 }
 
@@ -248,6 +249,15 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
         slide: 2,
         selector: 'div.gradient',
         properties: ['background-image'],
+      }),
+    )
+  })
+
+  it('should report a quote drawing only its left border', () => {
+    expect(result.status === 'written' && result.fallbacks).toContainEqual(
+      expect.objectContaining({
+        selector: 'blockquote.rule',
+        properties: ['border'],
       }),
     )
   })

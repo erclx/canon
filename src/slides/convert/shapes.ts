@@ -45,15 +45,20 @@ export interface RawStyle {
   readonly mask: string
   readonly mixBlendMode: string
   readonly backdropFilter: string
+  /** The four-side shorthands, which say whether the sides agree. */
+  readonly borderWidth: string
+  readonly borderColor: string
+  readonly borderStyle: string
+  readonly borderRadius: string
 }
 
 export interface BoxStyle {
   readonly background: Rgba
   readonly borderWidth: Edges
-  /** The top edge's color and style, read as the whole border's. */
+  /** The top edge's color and style. A border whose sides differ is unmapped. */
   readonly borderColor: Rgba
   readonly borderStyle: string
-  /** The top-left radius, read as every corner's. */
+  /** The top-left radius. Corners that differ are unmapped. */
   readonly radius: number
   readonly padding: Edges
   readonly shadows: readonly ShadowRecord[]
@@ -157,6 +162,8 @@ function position(box: Rect): PptxGenJS.PositionProps {
 /**
  * The CSS this converter has no shape for. An element computing any of them
  * becomes one picture of itself rather than a shape that drops the effect.
+ * `box-shadow` flags a second shadow, since the first one maps, and `border`
+ * and `border-radius` flag sides or corners that differ from each other.
  */
 export const UNMAPPED_PROPERTIES = [
   'background-image',
@@ -167,6 +174,8 @@ export const UNMAPPED_PROPERTIES = [
   'mix-blend-mode',
   'backdrop-filter',
   'box-shadow',
+  'border',
+  'border-radius',
 ] as const
 
 export type UnmappedProperty = (typeof UNMAPPED_PROPERTIES)[number]
@@ -190,7 +199,56 @@ export function rotationOf(transform: string): number | undefined {
   return Math.round(((degrees % 360) + 360) % 360)
 }
 
-function isUnmapped(style: BoxStyle, property: UnmappedProperty): boolean {
+/** A computed shorthand's top, right, bottom, and left values. */
+function fourSides(value: string): string[] {
+  const tokens: string[] = []
+  let depth = 0
+  let current = ''
+  for (const char of value.trim()) {
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (char === ' ' && depth === 0) {
+      if (current) tokens.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  if (current) tokens.push(current)
+  const [top = '', right = top, bottom = top, left = right] = tokens
+  return [top, right, bottom, left]
+}
+
+const isSame = (values: readonly string[]): boolean => new Set(values).size <= 1
+
+/**
+ * A shape takes one line for all four edges, so a border mapping needs every
+ * drawn side alike and no side left off. A table cell writes each edge's width
+ * on its own, so only the color and style of its drawn sides have to agree.
+ */
+function isBorderUnmapped(raw: RawStyle, isCell: boolean): boolean {
+  const widths = fourSides(raw.borderWidth)
+  const colors = fourSides(raw.borderColor)
+  const styles = fourSides(raw.borderStyle)
+  const drawn = [0, 1, 2, 3].filter(
+    (side) =>
+      Number.parseFloat(widths[side] ?? '0') > 0 &&
+      styles[side] !== 'none' &&
+      styles[side] !== 'hidden',
+  )
+  if (drawn.length === 0) return false
+  const pick = (values: string[]): string[] =>
+    drawn.map((side) => values[side] ?? '')
+  const agree = isSame(pick(colors)) && isSame(pick(styles))
+  if (isCell) return !agree
+  return drawn.length < 4 || !agree || !isSame(pick(widths))
+}
+
+function isUnmapped(
+  style: BoxStyle,
+  property: UnmappedProperty,
+  isCell: boolean,
+): boolean {
   const { raw, shadows } = style
   const found: Record<UnmappedProperty, boolean> = {
     'background-image': raw.backgroundImage !== 'none',
@@ -201,6 +259,9 @@ function isUnmapped(style: BoxStyle, property: UnmappedProperty): boolean {
     'mix-blend-mode': raw.mixBlendMode !== 'normal',
     'backdrop-filter': raw.backdropFilter !== 'none',
     'box-shadow': shadows.length > 1,
+    border: isBorderUnmapped(raw, isCell),
+    'border-radius':
+      raw.borderRadius.includes('/') || !isSame(fourSides(raw.borderRadius)),
   }
   return found[property]
 }
@@ -215,12 +276,13 @@ export function unmappedProperties(record: ElementRecord): UnmappedProperty[] {
   const styles = [
     record.style,
     ...(record.kind === 'text' ? record.inlineStyles : []),
-    ...(record.kind === 'table'
-      ? record.rows.flat().map((cell) => cell.style)
-      : []),
   ]
-  return UNMAPPED_PROPERTIES.filter((property) =>
-    styles.some((style) => isUnmapped(style, property)),
+  const cells =
+    record.kind === 'table' ? record.rows.flat().map((cell) => cell.style) : []
+  return UNMAPPED_PROPERTIES.filter(
+    (property) =>
+      styles.some((style) => isUnmapped(style, property, false)) ||
+      cells.some((style) => isUnmapped(style, property, true)),
   )
 }
 
