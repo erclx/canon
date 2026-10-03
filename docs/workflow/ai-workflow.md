@@ -97,7 +97,7 @@ Review findings split by origin before severity is read. One the branch inherite
 
 Review is skipped when the diff is prose that only informs: every changed file matches `*.md` or `*.txt`, and none sits under a behavior path. Behavior paths cover skills and rules in both the authoring and the installed spelling, so the list matches whether a repository authors those surfaces or consumed them from the toolkit. Standards, `internal/`, and `tooling/` carry the authoring spelling alone, since none of the three reaches a session through a `.claude/` copy, and root `CLAUDE.md` is named as a file because a path prefix reaches nothing sitting in no folder.
 
-Markdown under one states what an agent does, so a branch touching it reaches review while `docs/` and `wiki/` still skip and stay gated by `docs-sync`, `standards-audit`, and pre-push hooks.
+Markdown under one states what an agent does, so a branch touching it reaches review while `docs/` and `wiki/` still skip and stay gated by `docs-sync`, `canon markdown audit`, and pre-push hooks.
 
 An empty changed-file list stops the chain rather than counting as prose-only. The filename test passes vacuously on an empty set, which routed a branch past review instead of through it.
 

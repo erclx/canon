@@ -29,7 +29,7 @@ Behavior paths carry two spellings, the one a surface authors at and the one it 
 
 Markdown under one of them states what an agent does, so a change there is a behavior change wearing a prose extension. Everything outside them is informational, which keeps `docs/`, `README.md`, and `CHANGELOG.md` skipping without naming them. One behavior file sends the whole branch to review, since documentation shipped beside a behavior change does not cancel it.
 
-Informational prose is already gated by `docs-sync`, `standards-audit`, and pre-push hooks. Running a code-style review on it burns tokens with no signal.
+Informational prose is already gated by `docs-sync`, `canon markdown audit`, and pre-push hooks. Running a code-style review on it burns tokens with no signal.
 
 The list covers this toolkit's authoring layout and the layout it installs, which is not every layout. A project keeping executable prose where neither spelling reaches adds the path, and until it does every branch touching it skips review silently.
 

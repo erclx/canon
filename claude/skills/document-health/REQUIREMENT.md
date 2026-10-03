@@ -40,7 +40,7 @@ The third is silence on an unread axis. Both measured verbs resolve their folder
 ## Out of scope
 
 - Whether a document exists or holds its required sections, which is the structural question `target-check` answers across six domains
-- Conformance of changed markdown to the authoring standards declaring jurisdiction over its paths, which is `standards-audit`. That skill is diff-scoped and standard-declared, taking a changed file and reporting which stated rule it breaks with a line number. This one is corpus-scoped and reads rot in documents nobody changed, which is the case a diff-scoped audit never reaches. The two sit beside each other rather than one absorbing the other.
+- Banned tokens and structural checkpoints in markdown, which `canon markdown audit` measures from package data. This skill reads rot a ban set cannot state.
 - Rewriting a stale claim once this run has named it, which is `markdown-propose`
 - Running the toolkit's own checks as one gating set over its own corpus, which is `canon audits run`. That set gates a push and this reports to a reader.
 - Repairing anything an axis names. Each routes to the command or skill that owns it.

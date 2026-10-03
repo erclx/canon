@@ -27,8 +27,7 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 - When handing off a plugin skill test from a linked worktree, print the two-line invocation block: `cd` to the sandbox path, then `claude --plugin-dir <worktree-root>/claude --model sonnet`. Without `--plugin-dir`, Claude loads main's stale copy. Default to `--model sonnet` for skill testing.
 - For unconditional pre-push or per-edit automation (formatters, audits, scaffold checks), propose a husky hook instead of a CLAUDE.md or skill bullet. CLAUDE.md only fires when Claude is acting. A hook fires for everyone.
 - When extending PostToolUse hooks (`standards-audit` and similar), ship punctuation bans and closed-set wordlists, reading the list out of the standard at runtime rather than hardcoding a second copy
-  - Defer structural checks such as negative parallelism, hollow openers, and paragraph length to the end-of-cycle `standards-audit` skill, since regex detection on those fires against legitimate prose
-  - State the two-layer split when proposing hook scope changes
+  - Keep structural checks such as negative parallelism, hollow openers, and paragraph length out of the hook, since regex detection on those fires against legitimate prose. Nothing performs them since the end-of-cycle audit skill was retired
 - Default cross-project Claude behavior rules (output formatting, path-printing, etc.) to the seeded `CLAUDE.md` plus the toolkit's own `CLAUDE.md`. Reserve `~/.claude/` for environment-specific config (terminal capability, machine specifics).
 
 ## Plugin variables

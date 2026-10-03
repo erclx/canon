@@ -29,7 +29,7 @@ Delivering a standard and reaching it are separate problems. Each citing body na
 
 Only `${CLAUDE_SKILL_DIR}` survives to the model as an already-expanded path. Measured across three probe skills in a project with no `.claude/`, the body arrived with that variable already expanded to an absolute path, while `${CLAUDE_PLUGIN_ROOT}` reached the model as a literal string and a bare `../../` arrived unresolved, working only because the model inferred a base, which is the inference `standards/skill.md` bans a bare relative path to avoid. All three probes reported the standard's sentinel, so the content read looked the same across them. Ask a probe for the path it resolved rather than the content it read, since content alone cannot separate expansion from a lucky guess.
 
-A guard on a standard's presence names the file under the plugin root rather than a directory in the target. `create-skill` and `standards-audit` each carry that guard.
+A guard on a standard's presence names the file under the plugin root rather than a directory in the target. `create-skill` carries that guard.
 
 ### The first executable in a skill
 
@@ -61,9 +61,9 @@ A marketplace entry's `skills` array adds to the conventional `<plugin-root>/ski
 
 Removing `plugin.json` from the subdirectory changes none of it. The manifest governs name and version and leaves component discovery to the root's own layout, so whether that root carries `skills/` is what decides.
 
-The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. The full entry loads 64 skills at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks the way it does `claude/standards`, so the cache holds real directories at 104K against 964K for the full plugin.
+The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. Measured when the plugin shipped 64 skills, the full entry loaded all of them at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks the way it does `claude/standards`, so the cache holds real directories at 104K against 964K for the full plugin.
 
-What that shape drops is the standards fallback. Install copies the named skill directories alone, so no `standards/` sibling arrives, and a skill sitting one level under the curated root rather than two under the plugin root resolves `${CLAUDE_SKILL_DIR}/../../standards/X.md` to nothing. That reaches 40 of the 64 shipped bodies, which all lose their fallback at once, and a curated entry has to answer it before one ships.
+What that shape drops is the standards fallback. Install copies the named skill directories alone, so no `standards/` sibling arrives, and a skill sitting one level under the curated root rather than two under the plugin root resolves `${CLAUDE_SKILL_DIR}/../../standards/X.md` to nothing. That reached 40 of the 64 bodies shipping at that measurement, which all lose their fallback at once, and a curated entry has to answer it before one ships.
 
 ### The install ref reads as malformed
 

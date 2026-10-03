@@ -1,6 +1,6 @@
 ---
 title: Document health
-description: The three axes the document health check reports, why staleness ships on a reading, and where the skill sits against standards-audit and the target check
+description: The three axes the document health check reports, why staleness ships on a reading, and where the skill sits against the target check and its other neighbors
 ---
 
 # Document health
@@ -43,13 +43,11 @@ Both are the same rule `target-check` states as "unread is not current", taken o
 
 ## Where it sits against the neighbors
 
-- `standards-audit` is diff-scoped and standard-declared. It maps a changed file to the authoring standards that declare jurisdiction over its path and reports which stated rule it breaks, with a line. This skill is corpus-scoped and reads rot in documents nobody changed, which is the case a diff-scoped audit never reaches. The two sit beside each other, and the plan's first question was whether one absorbed the other. What the build showed is that the standards mapping is a fourth thing rather than one of the three axes, which is the evidence the question asked for.
 - `target-check` asks the structural question across six domains and names document health as out of scope by design. This is the surface that scope was left for.
 - `markdown-propose` rewrites a claim once a finding has named it. This reports and stops.
 - `canon audits run` runs the toolkit's own checks as one gating set over its own corpus. It gates a push, and this reports to a reader in a project that may hold none of those gates. It carries the classifier sweep too, pinned to the regex layer so its retained tally reads the same on every clone, which leaves this skill as the one surface reading sections with the model layer when a project has it configured.
 
 ## Open
 
-- The skill and `standards-audit` are still two entries a session picks between on description alone. The boundary is stated in both requirements and nothing checks that the two descriptions stay disjoint as either is edited.
 - Nothing checks that the axis list in the body, the reference, and this entry stay the same three. An axis added to one and not the others drifts silently, which is the gap `canon/context/claude-plugin/target-check.md` records against its own six domains.
 - The staleness axis has no sandbox assertion that can fail on a wrong reading, since the reading is the thing under test. The scenario seeds a document carrying a path that resolves to nothing, which tests that the axis fires rather than that its judgment is sound.
