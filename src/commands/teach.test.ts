@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa, type ResultPromise } from 'execa'
 import { afterEach, describe, expect, it } from 'vitest'
+import { LIVE_EVENTS_PATH } from '@/serve/static'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -50,6 +51,7 @@ interface UpRecord {
   readonly port?: number
   readonly entry?: string
   readonly url?: string
+  readonly host?: string
 }
 
 /**
@@ -84,6 +86,72 @@ function copyFixture(): string {
   const root = join(dir, 'teach')
   cpSync(FIXTURE_ROOT, root, { recursive: true })
   return root
+}
+
+/** A lesson carrying the four chrome marker pairs `nav` splices into. */
+function addLesson(root: string, file: string, title: string): void {
+  writeFileSync(
+    join(root, '00-fixture', 'lessons', file),
+    `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${title}</title>
+<!-- canon:teach:style -->
+<!-- /canon:teach:style -->
+</head>
+<body>
+<!-- canon:teach:header -->
+<!-- /canon:teach:header -->
+<h1>${title}</h1>
+<p class="lede">Added while the workspace was served.</p>
+<!-- canon:teach:footnav -->
+<!-- /canon:teach:footnav -->
+<!-- canon:teach:scripts -->
+<!-- /canon:teach:scripts -->
+</body>
+</html>
+`,
+  )
+}
+
+interface EventReader {
+  /** Everything read so far once it carries the needle, or at the deadline. */
+  readonly until: (needle: string) => Promise<string>
+}
+
+const openReaders: ReadableStreamDefaultReader<Uint8Array>[] = []
+
+/** Opens the live event stream of a running `up` and reads it on demand. */
+async function openEvents(
+  record: UpRecord,
+  timeoutMs = 10_000,
+): Promise<EventReader> {
+  const response = await fetch(
+    `http://${record.host}:${record.port}${LIVE_EVENTS_PATH}`,
+  )
+  if (!response.body) throw new Error('expected an event stream body')
+  const reader = response.body.getReader()
+  openReaders.push(reader)
+  const decoder = new TextDecoder()
+  const deadline = Date.now() + timeoutMs
+  let seen = ''
+
+  return {
+    until: async (needle) => {
+      while (!seen.includes(needle) && Date.now() < deadline) {
+        const next = await Promise.race([
+          reader.read(),
+          new Promise<undefined>((settle) =>
+            setTimeout(() => settle(undefined), deadline - Date.now()),
+          ),
+        ])
+        if (next === undefined || next.done) break
+        seen += decoder.decode(next.value)
+      }
+      return seen
+    },
+  }
 }
 
 function holdPort(): Promise<Server> {
@@ -165,6 +233,12 @@ describe('canon teach up', () => {
   const servers: Server[] = []
 
   afterEach(async () => {
+    // A stream the child already closed on its way out rejects the cancel.
+    await Promise.all(
+      openReaders
+        .splice(0)
+        .map((reader) => reader.cancel().catch(() => undefined)),
+    )
     for (const child of children.splice(0)) {
       child.kill('SIGTERM')
       await child
@@ -216,9 +290,25 @@ describe('canon teach up', () => {
       await launch(['00-fixture', '--root', root, '--json']),
     ) as UpRecord
     const served = await (await fetch(record.url ?? '')).text()
+    const onDisk = readFileSync(contents, 'utf8')
 
-    expect(served).toBe(readFileSync(contents, 'utf8'))
-    expect(served).not.toBe('stale\n')
+    expect(onDisk).not.toBe('stale\n')
+    expect(served.replace(/<script>[^<]*<\/script>(?=<\/body>)/, '')).toBe(
+      onDisk,
+    )
+  })
+
+  it('should splice the reload script into a served page and never onto disk', async () => {
+    const root = fixtureRoot()
+    const contents = join(root, '00-fixture', 'index.html')
+
+    const record = JSON.parse(
+      await launch(['00-fixture', '--root', root, '--json']),
+    ) as UpRecord
+    const served = await (await fetch(record.url ?? '')).text()
+
+    expect(served).toContain('EventSource')
+    expect(readFileSync(contents, 'utf8')).not.toContain('EventSource')
   })
 
   it('should take the next free port when the requested one is held', async () => {
@@ -259,6 +349,36 @@ describe('canon teach up', () => {
       'unresolved',
       'url',
     ])
+  })
+
+  it('should list a lesson added while serving and tell the page to reload', async () => {
+    const root = fixtureRoot()
+    const record = JSON.parse(
+      await launch(['00-fixture', '--root', root, '--json']),
+    ) as UpRecord
+    const events = await openEvents(record)
+    await events.until(': open')
+
+    addLesson(root, '0004-delta-element.html', 'Delta element')
+
+    expect(await events.until('data: ')).toContain('"reload":true')
+    const contents = await (await fetch(record.url ?? '')).text()
+    expect(contents).toContain('Delta element')
+  })
+
+  it('should keep stdout to the one record after a refresh', async () => {
+    const root = fixtureRoot()
+    const { child, firstLine } = startUp(['--root', root, '--json'])
+    children.push(child)
+    const events = await openEvents(JSON.parse(await firstLine) as UpRecord)
+    await events.until(': open')
+    addLesson(root, '0004-delta-element.html', 'Delta element')
+    await events.until('data: ')
+    child.kill('SIGTERM')
+
+    const result = await child
+
+    expect(String(result.stdout).trim().split('\n')).toHaveLength(1)
   })
 
   it('should refuse a topic naming no workspace without serving', async () => {

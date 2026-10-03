@@ -83,7 +83,7 @@ export type ServeOutcome = ServeStarted | ServeRefused
 export const LIVE_EVENTS_PATH = '/__live'
 
 export interface LiveServe {
-  readonly stream: LiveStream<unknown>
+  readonly stream: Pick<LiveStream<unknown>, 'answer'>
   /**
    * The `<script>` element spliced into every page served, built by the caller
    * so this module stays free of what a reload means to any one surface.
