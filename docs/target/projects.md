@@ -80,7 +80,7 @@ A machine without a renderer still gets the figure and is told which check was s
 
 Nothing watches a figure once it is drawn. Run `canon:draft-figure` again when the code a view is drawn from moves.
 
-`canon/ARCHITECTURE.md` carries the same mechanism on the same ship. `canon:context-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
+`canon/ARCHITECTURE.md` is watched where a figure is not. `canon:context-fold` anchors a decision it amends to the paths that decision cites, and reports an anchored decision whose cited path the branch touched.
 
 ### Stack decision
 
