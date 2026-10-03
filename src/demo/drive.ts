@@ -261,7 +261,7 @@ export interface PointerPace {
  * caption and read it back, which is the integration a full `drive()` call
  * cannot assert without decoding the video it writes.
  *
- * Returns the box the pointer travelled to, for the timeline, and nothing for
+ * Returns the box the pointer moved to, for the timeline, and nothing for
  * a step that points at no target.
  */
 export async function runStep(
