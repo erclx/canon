@@ -12,15 +12,15 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## Set up a project
 
-| Skill                     | When to use                                                                                                 |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `canon:target-setup`      | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone       |
-| `canon:canon-operator`    | On a project that already exists, to read what it carries before an install is picked                       |
-| `canon:sketch-design`     | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
-| `canon:design-extract`    | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
-| `canon:draft-diagram`     | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                        |
-| `canon:deploy-cloudflare` | Once a project is ready to publish, to set up its Cloudflare Pages deploy and stop for the token and domain |
-| `canon:repo-metadata`     | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
+| Skill                  | When to use                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `canon:target-setup`   | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone       |
+| `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                       |
+| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
+| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
+| `canon:draft-diagram`  | Once the architecture is written, to draft per-kind entries under `.canon/diagrams/`                        |
+| `canon:deploy-app`     | Once a project is ready to publish, to set up its Cloudflare or Vercel deploy and stop for token and domain |
+| `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
 
 ## Decide what to build
 

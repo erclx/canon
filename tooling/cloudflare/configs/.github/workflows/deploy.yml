@@ -75,7 +75,7 @@ jobs:
 
       - name: Skip notice
         if: steps.secrets-check.outputs.skip == 'true'
-        run: echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Run the deploy-cloudflare skill to finish setup."
+        run: echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, skipping deploy. Run the deploy-app skill to finish setup."
 
       # This job builds nothing and still needs a toolchain. The checkout
       # below brings bun.lock, wrangler-action reads it, picks bun on the
@@ -110,7 +110,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '3.90.0'
           # Fill in this project's Pages project name, set when the
-          # deploy-cloudflare skill runs wrangler pages project create.
+          # deploy-app skill runs wrangler pages project create.
           command: pages deploy dist --project-name=REPLACE_WITH_PROJECT_NAME --branch=${{ github.ref_name }}
 
       # `canon pr preview` reads this line out of the run log, so the marker is

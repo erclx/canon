@@ -20,7 +20,7 @@ Three values in the seeded file have no generic default and are set once, right 
 
 - The `paths:` filter under the `push` trigger. The shipped default is a single `src/**` glob. Widen it to cover every path the build reads when the build draws on catalogs or generated content living outside `src/`.
 - The `concurrency.group` name. The shipped default is `deploy-${{ github.ref_name }}`, which is enough for a single-deploy project. Give the `deploy` prefix a project-specific name only if the project runs more than one deploy workflow, and keep the ref suffix.
-- The Pages project name, written twice as `REPLACE_WITH_PROJECT_NAME`: once in the `--project-name` flag on the `wrangler pages deploy` command and once as `PROJECT_NAME` in the cleanup job. Set both to the name the `deploy-cloudflare` skill creates the Pages project under.
+- The Pages project name, written twice as `REPLACE_WITH_PROJECT_NAME`: once in the `--project-name` flag on the `wrangler pages deploy` command and once as `PROJECT_NAME` in the cleanup job. Set both to the name the `deploy-app` skill creates the Pages project under.
 
 ## Re-sync
 
