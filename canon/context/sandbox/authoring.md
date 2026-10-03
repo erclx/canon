@@ -88,12 +88,12 @@ log_info "list     : read-only catalog dump, no target needed"
 ```bash
 use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"  # skip auto-commit after stage_setup
-  export SANDBOX_INJECT_SEEDS="true"      # inject tooling/claude/seeds/ into sandbox root
+  export SANDBOX_INJECT_SEEDS="true"      # run canon claude init into the sandbox
   export SANDBOX_INJECT_GOV="true"        # run canon gov install into the sandbox
 }
 ```
 
-`SANDBOX_INJECT_SEEDS` is a raw copy of `tooling/claude/seeds/.` into the sandbox root, not a run of `canon claude init`. It drops `CLAUDE.md` and the `.claude/` seed files before `stage_setup` runs. There is no standards injection.
+`SANDBOX_INJECT_SEEDS` runs `canon claude init` into the sandbox, so the arm holds `CLAUDE.md` and each seed at the root the installer places it under before `stage_setup` runs. The install merges `.canon/` into the sandbox `.gitignore`, so a record staged there stays untracked and a `git add .` over it commits nothing. There is no standards injection.
 
 ## use_anchor
 

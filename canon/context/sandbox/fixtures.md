@@ -78,6 +78,12 @@ Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/
 - A helper building a work list from `git diff --name-only` or `git ls-files` treats every path as present unless it skips one no longer in the tree, so a delete-only branch is where a missing existence check surfaces. The copy fails with `cp: cannot stat` while provisioning completes. Fix the guard in the same branch as any deletion-shaped change, and treat a non-fatal error printed mid-run as a defect.
 - A fixture modelling a timed heuristic outlasts the check window by a wide margin. Two sleeps of equal length finish in whichever order machine load puts them, so a fixture sleeping exactly the window the skill waits makes the arm flaky on the axis it exists to prove. The `dev` and `preview` fixtures on `claude:target-setup`'s `smoke-pass` and `smoke-fail` arms sleep three times the skill's five-second window.
 
+### Ignored and unpinned paths
+
+- With `SANDBOX_INJECT_SEEDS` on, the install writes `.canon/` into the sandbox `.gitignore`, so a stage holding only records under `.canon/` leaves `git add .` nothing to commit and `set -e` aborts the provision. Drop the commit, since a target never tracks those records either. `claude:session-worktree` and the `teach-lesson` arm of `claude:draft-figure` stage their records untracked for this reason.
+- The root `.gitignore` carries `.env.*` beside `.env`, so a stored `.env.fixture` or `.env.local.fixture` never reaches the index. A scenario needing an env file writes it inline in `stage_setup`.
+- `canon sandbox check` mints a fresh run id when nothing pins one, so it never finds a tree provisioned by hand or by an earlier call. Set `CANON_SANDBOX_DIR` to that tree's path for the check, as `canon/context/sandbox/isolation.md` states for the general case.
+
 ### Matching a real install
 
 - An injector that reproduces by hand what a real CLI verb installs drifts silently. The cheap proof is running the verb into a scratch target and diffing the two trees. Where the artifact is a git repository, diff `git ls-files -s` for modes and blob hashes, the commit subjects in order, the checked-out branch, and `git status --porcelain`, since commit SHAs carry timestamps that never match.
