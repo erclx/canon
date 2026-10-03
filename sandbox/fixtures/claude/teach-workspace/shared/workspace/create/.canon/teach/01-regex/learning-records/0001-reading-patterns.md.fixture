@@ -1,0 +1,27 @@
+---
+title: First pass on reading patterns
+description: What the learner retrieved unaided and what they got wrong
+---
+
+# First pass on reading patterns
+
+## Covered
+
+- Lesson `0001-reading-patterns`
+
+## Retrieved unaided
+
+- Named what `^` and `$` match
+- Read a character class aloud correctly
+
+## Wrong
+
+- Asked what `a+?` matches, answered "one or more a, then a literal question
+  mark". The lazy quantifier was read as a separate token.
+- Asked what `(ab)*` captures after three repeats, answered "ab ab ab". Only the
+  last repetition is captured.
+
+## Revisit
+
+- Lazy quantifiers, next session
+- Capture group semantics, within a week

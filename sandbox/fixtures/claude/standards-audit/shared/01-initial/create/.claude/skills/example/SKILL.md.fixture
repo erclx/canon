@@ -1,0 +1,10 @@
+---
+name: example
+description: Do an example thing. Use when asked to "example".
+---
+
+# Example
+
+## Step 1
+
+Run the example command against the current file.

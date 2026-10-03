@@ -1,0 +1,10 @@
+{
+  "name": "sandbox-review-craft",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "tag-formatter": "^1.4.0",
+    "range-parser": "^3.2.1"
+  }
+}

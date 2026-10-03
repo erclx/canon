@@ -8,19 +8,11 @@ use_config() {
 }
 
 # One arm, so the declaration sits at the command root and reports as
-# `(default)`. `stage_fixtures` takes a four-segment path ending in an arm name
-# and there is no segment to pass, which is why the tree below is staged from
-# heredocs the way `claude/review` and `claude/session-map` stage theirs.
+# `(default)`. The stages sit under `shared`, since `stage_fixtures` takes a
+# four-segment path ending in an arm name and an unnamed arm has no segment to
+# pass.
 stage_setup() {
-  cat <<'EOF' >CLAUDE.md
-# Toolkit
-
-CLI toolkit for managing AI workflows across repositories.
-
-## Commands
-
-- `bun run check`: lint and typecheck
-EOF
+  stage_fixtures claude canon-rollout shared 01-initial
 
   git add . && git commit -m "docs(project): name the sandbox root as a toolkit checkout" --no-verify -q
 
@@ -37,16 +29,10 @@ EOF
   git -C targets/seed config user.name "Sandbox"
 
   mkdir -p targets/seed/canon/config targets/seed/.claude/rules/canon/claude
-  cat <<'EOF' >targets/seed/canon/config/config.json
-{
-  "syncedAt": "2026-08-01T00:00:00.000Z",
-  "domains": {
-    "governance": {
-      ".claude/rules/canon/claude/565-behavior.md": "0000000000000000000000000000000000000000000000000000000000000000"
-    }
-  }
-}
-EOF
+  # Stored under a name the folder gate accepts and moved into place, since a
+  # stored `config/config.json` repeats its folder.
+  stage_fixtures claude canon-rollout shared 02-seed
+  mv targets/seed/consumer-config.json targets/seed/canon/config/config.json
   echo "# Behavior standards" >targets/seed/.claude/rules/canon/claude/565-behavior.md
   echo "# Kestrel" >targets/seed/README.md
 

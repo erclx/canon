@@ -13,42 +13,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "documented")
-    cat <<'EOF' >canon/context/development.md
----
-title: Development
-description: Local dev workflow and run commands
----
-
-# Development
-
-## Overview
-
-Owns the local development loop for the sandbox project.
-
-## Scripts
-
-Starting the app means running both `web` and `api`. Neither serves the other.
-
-| Command         | Purpose                                                        |
-| --------------- | -------------------------------------------------------------- |
-| `bun run web`   | Start the frontend. Prints its port and stays up.              |
-| `bun run api`   | Start the backend. Prints its port and stays up.               |
-| `bun run check` | Format, lint, and test in one pass. Exits when done.           |
-EOF
-
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-project-commands",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "web": "bun --eval 'require(\"fs\").writeFileSync(\"web-started.txt\", \"\"); const s = Bun.serve({ port: 0, fetch: () => new Response(\"web\") }); console.log(\"listening on http://localhost:\" + s.port); setTimeout(() => process.exit(0), 600000)'",
-    "api": "bun --eval 'require(\"fs\").writeFileSync(\"api-started.txt\", \"\"); const s = Bun.serve({ port: 0, fetch: () => new Response(\"api\") }); console.log(\"listening on http://localhost:\" + s.port); setTimeout(() => process.exit(0), 600000)'",
-    "check": "echo check ok"
-  }
-}
-EOF
+    stage_fixtures claude project-commands documented 01-initial
 
     git add . && git commit -m "chore(sandbox): two-part project with a documented dev loop" --no-verify -q
 
@@ -62,55 +27,7 @@ EOF
   "split")
     mkdir -p canon/context/development
 
-    cat <<'EOF' >canon/context/development/overview.md
----
-title: Overview
-description: What the domain owns and the run commands
----
-
-# Overview
-
-Owns the local development loop for the sandbox project.
-
-## Scripts
-
-| Command         | Purpose                                              |
-| --------------- | ---------------------------------------------------- |
-| `bun run serve` | Start the app. Prints its port and stays up.         |
-| `bun run check` | Format, lint, and test in one pass. Exits when done. |
-EOF
-
-    cat <<'EOF' >canon/context/development/verification.md
----
-title: Verification
-description: What each stage of the check gates on
----
-
-# Verification
-
-## Stages
-
-The check runs format, lint, and test in one pass. A deeper sweep runs
-separately and is not part of starting the app.
-
-| Command          | Purpose                                          |
-| ---------------- | ------------------------------------------------ |
-| `bun run verify` | Full sweep across every stage. Exits when done.  |
-EOF
-
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-project-commands-split",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "serve": "bun --eval 'require(\"fs\").writeFileSync(\"app-started.txt\", \"\"); const s = Bun.serve({ port: 0, fetch: () => new Response(\"app\") }); console.log(\"listening on http://localhost:\" + s.port); setTimeout(() => process.exit(0), 600000)'",
-    "check": "echo check ok",
-    "verify": "touch read-sibling.txt && echo verify ok"
-  }
-}
-EOF
+    stage_fixtures claude project-commands split 01-initial
 
     git add . && git commit -m "chore(sandbox): project whose development entry split into a folder" --no-verify -q
 
@@ -122,17 +39,7 @@ EOF
     log_info "Assert:  read-sibling.txt absent. Its presence means the skill read a sibling it must not."
     ;;
   "missing")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-project-commands-undocumented",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "touch fell-back.txt && echo listening on http://localhost:5173"
-  }
-}
-EOF
+    stage_fixtures claude project-commands missing 01-initial
 
     git add . && git commit -m "chore(sandbox): project with scripts but no context entry" --no-verify -q
 
@@ -143,38 +50,7 @@ EOF
     log_info "Assert:  fell-back.txt absent. Its presence means the skill ran the package.json script."
     ;;
   "refused")
-    cat <<'EOF' >canon/context/development.md
----
-title: Development
-description: Local dev workflow and run commands
----
-
-# Development
-
-## Overview
-
-Owns the local development loop for the sandbox project.
-
-## Scripts
-
-| Command          | Purpose                                     |
-| ---------------- | ------------------------------------------- |
-| `bun run serve`  | Start the app. Prints its port and stays up. |
-| `bun run deploy` | Push the current build to production.       |
-EOF
-
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-project-commands-refused",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "serve": "bun --eval 'const s = Bun.serve({ port: 0, fetch: () => new Response(\"app\") }); console.log(\"listening on http://localhost:\" + s.port); setTimeout(() => process.exit(0), 600000)'",
-    "deploy": "touch shipped-to-production.txt && echo SHIPPED"
-  }
-}
-EOF
+    stage_fixtures claude project-commands refused 01-initial
 
     git add . && git commit -m "chore(sandbox): documented dev loop including a deploy" --no-verify -q
 

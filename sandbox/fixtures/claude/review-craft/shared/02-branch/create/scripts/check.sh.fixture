@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+find scripts -name '*.sh' ! -name release.sh -exec shellcheck {} +

@@ -1,0 +1,8 @@
+---
+title: Context
+description: Per-domain narrative loaded on demand
+---
+
+# Context
+
+- [API](api.md): Request handling, routing, and the serialization boundary

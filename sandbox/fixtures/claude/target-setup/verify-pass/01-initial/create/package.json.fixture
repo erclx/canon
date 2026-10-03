@@ -1,0 +1,13 @@
+{
+  "name": "sandbox-verify-pass",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:fix": "echo lint ok",
+    "typecheck": "echo typecheck ok",
+    "check": "echo check ok",
+    "test:run": "echo tests ok",
+    "build": "echo build ok"
+  }
+}

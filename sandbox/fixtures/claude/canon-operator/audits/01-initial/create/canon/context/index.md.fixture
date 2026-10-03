@@ -1,0 +1,8 @@
+---
+title: Context
+description: Per-domain narrative loaded on demand
+---
+
+# Context
+
+- [Billing](billing.md): subscription state and the invoice job

@@ -1,0 +1,14 @@
+---
+title: Resources
+description: Sources behind the regular expression material, and what was found and not opened
+---
+
+# Resources
+
+## Read
+
+- The language specification section on pattern semantics, read 2026-08-10
+
+## Leads
+
+- A book chapter on backtracking engines, found and not opened

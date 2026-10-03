@@ -1,0 +1,13 @@
+---
+title: Reading a pattern aloud
+description: Turning a regular expression into a sentence, token by token
+---
+
+# Reading a pattern aloud
+
+A pattern reads left to right as a sequence of claims about the text.
+
+## Anchors
+
+`^` claims the position at the start of the input. `$` claims the position at
+the end. Neither consumes a character.

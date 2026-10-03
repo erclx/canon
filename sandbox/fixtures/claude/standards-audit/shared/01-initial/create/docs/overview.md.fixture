@@ -1,0 +1,13 @@
+---
+title: Overview
+description: High-level project overview
+---
+
+# Overview
+
+Short reference for how the pieces fit together.
+
+## Structure
+
+- Source lives under `src/`
+- Docs live under `docs/`

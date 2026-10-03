@@ -8,49 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >>CLAUDE.md
-
-# My App
-
-## About
-
-This toolkit supports every popular language and framework out of the box.
-
-## Commands
-
-- `bun run check`: lint and typecheck
-EOF
-
-  mkdir -p docs
-  cat <<'EOF' >docs/overview.md
----
-title: Overview
-description: Supports every popular language and framework out of the box.
----
-
-# Overview
-
-The `description` field above is required by the docs index and can never be
-left blank, so a wrong claim there is corrected to a different one rather
-than deleted.
-
-## Tagline
-
-The line below is quoted verbatim by the release notes template and is
-required there. It can only be replaced with a different line, never
-deleted or left blank:
-
-> It is the fastest way to ship production-grade software.
-
-See `docs/limitations.md` for what is actually installed today.
-EOF
-
-  cat <<'EOF' >docs/limitations.md
-# Limitations
-
-The toolkit supports TypeScript and Python projects. Every other stack needs
-a hand-written stack config before the toolkit can install anything into it.
-EOF
+  stage_fixtures claude markdown-propose shared 01-initial
 
   git add . && git commit -m "docs: add overview and limitations pages" --no-verify -q
 

@@ -1,0 +1,19 @@
+---
+title: Cache
+description: How the response cache stores entries and when it evicts them
+---
+
+# Cache
+
+The cache stores responses. The cache is fast, simple, and reliable. The store
+holds each entry under a key. The buffer evicts the oldest entry when full. The
+layer significantly improves response time. A real win for the read path.
+
+The handler writes to the cache. The callback reads from the cache. The listener
+clears the cache on a write. Dramatically fewer round trips. The cache covers
+everything from lookups to deployments.
+
+## Configuration
+
+Set `maxEntries` in the config. Set `ttl` in the config. Set `mode` in the
+config. The defaults work for most projects.

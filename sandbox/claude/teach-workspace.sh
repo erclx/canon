@@ -8,21 +8,7 @@ use_config() {
 }
 
 seed_project() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-teach",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  mkdir -p src
-  cat <<'EOF' >src/index.ts
-export function slugify(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-}
-EOF
+  stage_fixtures claude teach-workspace shared project
 }
 
 # Stubbed rather than left empty. The sandbox has no network, so the skill's
@@ -33,115 +19,7 @@ seed_workspace() {
 
   mkdir -p "$dir/reference" "$dir/learning-records" "$dir/lessons" "$dir/assets"
 
-  cat <<'EOF' >"$dir/MISSION.md"
----
-title: Regular expressions
-description: Reading and writing regular expressions, up to catastrophic backtracking
-date: 2026-08-10
----
-
-# Regular expressions
-
-Reading and writing regular expressions well enough to review someone else's.
-
-## Starting point
-
-Comfortable with character classes, anchors, and simple quantifiers. Has never
-written a capture group by hand and has not met backtracking.
-
-## Success looks like
-
-- Read a regular expression aloud as a sentence describing what it matches
-- Write a capture group and name what each group captures
-- Spot a nested quantifier that can backtrack catastrophically
-- Rewrite a vulnerable pattern so it cannot backtrack
-
-## Out of scope
-
-- Regular expression engines other than the one in JavaScript
-- Lookbehind, which the target engine supports unevenly
-EOF
-
-  cat <<'EOF' >"$dir/RESOURCES.md"
----
-title: Resources
-description: Sources behind the regular expression material, and what was found and not opened
----
-
-# Resources
-
-## Read
-
-- The language specification section on pattern semantics, read 2026-08-10
-
-## Leads
-
-- A book chapter on backtracking engines, found and not opened
-EOF
-
-  cat <<'EOF' >"$dir/GLOSSARY.md"
----
-title: Glossary
-description: Terms the regular expression material defines
----
-
-# Glossary
-
-- **Anchor**: a token matching a position rather than a character. First appears
-  in `0001-reading-patterns`.
-- **Quantifier**: a token stating how many times the thing before it may repeat.
-  First appears in `0001-reading-patterns`.
-EOF
-
-  cat <<'EOF' >"$dir/learning-records/0001-reading-patterns.md"
----
-title: First pass on reading patterns
-description: What the learner retrieved unaided and what they got wrong
----
-
-# First pass on reading patterns
-
-## Covered
-
-- Lesson `0001-reading-patterns`
-
-## Retrieved unaided
-
-- Named what `^` and `$` match
-- Read a character class aloud correctly
-
-## Wrong
-
-- Asked what `a+?` matches, answered "one or more a, then a literal question
-  mark". The lazy quantifier was read as a separate token.
-- Asked what `(ab)*` captures after three repeats, answered "ab ab ab". Only the
-  last repetition is captured.
-
-## Revisit
-
-- Lazy quantifiers, next session
-- Capture group semantics, within a week
-EOF
-
-  cat <<'EOF' >"$dir/reference/reading-patterns.md"
----
-title: Reading a pattern aloud
-description: Turning a regular expression into a sentence, token by token
----
-
-# Reading a pattern aloud
-
-A pattern reads left to right as a sequence of claims about the text.
-
-## Anchors
-
-`^` claims the position at the start of the input. `$` claims the position at
-the end. Neither consumes a character.
-EOF
-
-  cat <<'EOF' >"$dir/lessons/0001-reading-patterns.html"
-<article><h1>Reading a pattern aloud</h1><p>Generated lesson body.</p></article>
-EOF
+  stage_fixtures claude teach-workspace shared workspace
 
 }
 
@@ -149,9 +27,7 @@ EOF
 # is the one that has to find this file absent, since writing it is what the
 # first lesson in a workspace does and a seeded copy makes that step vacuous.
 seed_stylesheet() {
-  cat <<'EOF' >"$1/assets/course.css"
-body { font-family: system-ui; line-height: 1.6; max-width: 68ch; }
-EOF
+  stage_fixtures claude teach-workspace shared stylesheet
 }
 
 # The promote arm alone. A project with no wiki folder gets a refusal from the
@@ -163,16 +39,7 @@ EOF
 seed_wiki() {
   mkdir -p .claude/wiki
 
-  cat <<'EOF' >.claude/wiki/index.md
----
-title: Wiki
-subtitle: Reference pages for tools, workflows, and concepts
----
-
-# Wiki
-
-Reference pages for tools, workflows, and concepts.
-EOF
+  stage_fixtures claude teach-workspace promote 01-wiki
 }
 
 stage_setup() {
@@ -215,7 +82,7 @@ stage_setup() {
   "resume")
     seed_project
     seed_workspace ".canon/teach/01-regex"
-    seed_stylesheet ".canon/teach/01-regex"
+    seed_stylesheet
 
     git add . && git commit -m "feat(cli): slugify helper" --no-verify -q
 
@@ -245,7 +112,7 @@ stage_setup() {
   "promote")
     seed_project
     seed_workspace ".canon/teach/01-regex"
-    seed_stylesheet ".canon/teach/01-regex"
+    seed_stylesheet
     seed_wiki
 
     git add . && git commit -m "feat(cli): slugify helper" --no-verify -q

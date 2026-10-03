@@ -1,0 +1,11 @@
+const store = new Map<string, { value: unknown; expires: number }>();
+
+export function remember(key: string, value: unknown, ttlMs: number) {
+  store.set(key, { value, expires: Date.now() + ttlMs });
+}
+
+export function recall(key: string) {
+  const hit = store.get(key);
+  if (!hit) return undefined;
+  return hit.value;
+}

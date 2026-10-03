@@ -1,0 +1,16 @@
+---
+title: API
+description: Request handling, routing, and the serialization boundary
+---
+
+# API
+
+## Overview
+
+Owns request handling and the serialization boundary — everything below the handler belongs to the data domain.
+
+## Layout
+
+- `src/api/router.ts` builds the route table from the handler registry
+- `src/api/serialize.ts` converts a domain record into a wire payload
+- `src/api/errors.ts` maps a thrown error onto a status code

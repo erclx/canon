@@ -1,0 +1,10 @@
+{
+  "name": "sandbox-project-commands-refused",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "bun --eval 'const s = Bun.serve({ port: 0, fetch: () => new Response(\"app\") }); console.log(\"listening on http://localhost:\" + s.port); setTimeout(() => process.exit(0), 600000)'",
+    "deploy": "touch shipped-to-production.txt && echo SHIPPED"
+  }
+}

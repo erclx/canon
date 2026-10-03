@@ -8,40 +8,8 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-youtube-transcripts",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures claude youtube-transcripts shared 01-initial
 
-  mkdir -p bin
-  cat <<'EOF' >bin/yt-dlp
-#!/usr/bin/env bash
-out_template=""
-prev=""
-for arg in "$@"; do
-  if [ "$prev" = "-o" ]; then out_template="$arg"; fi
-  prev="$arg"
-done
-work_dir=$(dirname "$out_template")
-video_id="sandboxVid01"
-cat >"$work_dir/$video_id.en.vtt" <<'VTT'
-WEBVTT
-
-00:00:00.000 --> 00:00:02.000
-attention lets the model
-
-00:00:02.000 --> 00:00:04.000
-attention lets the model weigh tokens
-
-00:00:04.000 --> 00:00:06.000
-weigh tokens against each other
-VTT
-echo '{"id":"sandboxVid01","title":"How Attention Works","channel":"Deep Learning Daily","duration":372,"upload_date":"20260114","webpage_url":"https://www.youtube.com/watch?v=sandboxVid01"}'
-EOF
   chmod +x bin/yt-dlp
 
   git add . && git commit -m "chore(sandbox): scaffold transcripts fixture and yt-dlp shim" --no-verify -q
