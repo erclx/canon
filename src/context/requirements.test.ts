@@ -21,9 +21,9 @@ function makeReport(
 
 describe('reading the word cap a record states for itself', () => {
   it('should read a cap written in digits', () => {
-    expect(readRequirementsWordCap('This record holds at most 600 words.')).toBe(
-      600,
-    )
+    expect(
+      readRequirementsWordCap('This record holds at most 600 words.'),
+    ).toBe(600)
   })
 
   it('should read nothing from a record stating no cap', () => {
