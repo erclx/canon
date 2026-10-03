@@ -13,6 +13,10 @@
 # resolves A only while both links stay. A key must name no live rule and every
 # chain must end on one, which `src/gov/renames.test.ts` checks against this
 # file.
+#
+# A numbered rule replaced by the rule `canon gov regen` generates from its
+# standard is a rename too: the generated rule keeps every glob and bullet, so
+# the pair is one-to-one identity under the standard's name.
 [renamed]
 "005-behavior" = "565-behavior"
 "015-output" = "566-output"
@@ -47,3 +51,4 @@
 "075-dependencies" = "775-dependencies"
 "080-config-comments" = "780-config-comments"
 "090-code-comments" = "790-code-comments"
+"658-plan" = "plan"
