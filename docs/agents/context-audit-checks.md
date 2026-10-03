@@ -65,7 +65,7 @@ Fenced blocks are excluded, which keeps a pinned version in an install command f
 
 ## The architecture record
 
-Five findings read `canon/ARCHITECTURE.md` rather than a folder: an entry cap, a revisit sentence closing each decision, and a length ceiling, each gating only where the record states it for itself, a claim coverage report, and a word count. What each reads and why the last two gate nothing are in `architecture-record.md`.
+Seven findings read `canon/ARCHITECTURE.md` rather than a folder: an entry cap, a revisit sentence closing each decision, a length ceiling, a word cap a decision, and a risk bullet cap, each gating only where the record states it for itself, a claim coverage report, and a word count. One more reads `canon/REQUIREMENTS.md` against the word cap it states. What each reads and why the last two architecture findings gate nothing are in `architecture-record.md`.
 
 ## Wireframe states
 
