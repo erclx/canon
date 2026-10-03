@@ -1356,6 +1356,30 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['blocker-settled'])
   })
 
+  it('should leave a row untested when the cited task carries a pending branch', async () => {
+    await seedTask('v1.0-first', '- [x] shipped\n\nPending branch: feat/a', 673)
+    await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', touches: '`src/a.ts`' }]),
+        parkedTable([
+          '| [v2.0-second](v2.0-second.md) | `src/a.ts` | [v1.0-first](v1.0-first.md) |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, trunkHolding(673))
+
+    expect(outcome.ok && kinds(outcome.findings)).not.toContain(
+      'blocker-settled',
+    )
+    expect(outcome.ok && outcome.untested).toMatchObject([
+      { group: 'Up next', subject: 'v2.0-second' },
+    ])
+  })
+
   it('should read no task out of a blocker cell pointing at a plan', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
