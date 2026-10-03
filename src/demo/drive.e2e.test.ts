@@ -13,6 +13,7 @@ import type { DemoPlan } from '@/demo/compile'
 import { compilePlan } from '@/demo/compile'
 import { DEFAULT_CURSORS } from '@/demo/cursors'
 import { CAPTION_ID, captionInitScript, drive, runStep } from '@/demo/drive'
+import type { TimelineEntry } from '@/demo/timeline'
 
 /**
  * Every spike behind this feature drove a file on disk, which left a port, a
@@ -170,6 +171,37 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     ).toEqual(['board.webm'])
   }, 180_000)
 
+  it('should write a timeline beside the recording with one entry per step', async () => {
+    const parsed = parseDraft(DRAFT)
+    if (parsed.status !== 'parsed') return
+
+    const plan = quicken(
+      compilePlan(parsed.draft, { slug: 'timed', outDir: 'demos' }),
+      `http://127.0.0.1:${server.port}/`,
+      ['', '#title', '#add'],
+    )
+
+    const result = await drive({
+      plan,
+      cursors: DEFAULT_CURSORS,
+      videoPath: join(root, 'timed', 'take', 'timed.webm'),
+    })
+
+    expect(result).toMatchObject({
+      status: 'recorded',
+      timelinePath: join(root, 'timed', 'take', 'timed.timeline.json'),
+    })
+    if (result.status !== 'recorded') return
+    const { entries } = JSON.parse(
+      readFileSync(result.timelinePath ?? '', 'utf8'),
+    ) as { entries: TimelineEntry[] }
+    expect(entries.map((entry) => [entry.kind, Boolean(entry.box)])).toEqual([
+      ['navigate', false],
+      ['fill', true],
+      ['click', true],
+    ])
+  }, 180_000)
+
   it('should write a still on its own when the run is asked for no video', async () => {
     const parsed = parseDraft(DRAFT)
     if (parsed.status !== 'parsed') return
@@ -189,6 +221,7 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     expect(result).toMatchObject({ status: 'recorded' })
     if (result.status !== 'recorded') return
     expect(result.videoPath).toBeUndefined()
+    expect(result.timelinePath).toBeUndefined()
     expect(readFileSync(result.stillPath ?? '').byteLength).toBeGreaterThan(
       1000,
     )

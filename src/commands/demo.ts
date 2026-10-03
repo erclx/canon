@@ -333,6 +333,7 @@ async function runDrive(planPath: string, opts: RunOptions): Promise<number> {
 
   if (result.videoPath) logInfo(display(result.videoPath))
   if (result.stillPath) logInfo(`${display(result.stillPath)}  still`)
+  if (result.timelinePath) logInfo(`${display(result.timelinePath)}  timeline`)
   logInfo(
     `${result.steps} steps in ${Math.round(result.durationMs / 100) / 10}s`,
   )
@@ -380,6 +381,7 @@ async function runDrive(planPath: string, opts: RunOptions): Promise<number> {
     mp4: mp4Path ?? null,
     gif: gifPath ?? null,
     still: result.stillPath ?? null,
+    timeline: result.timelinePath ?? null,
     steps: result.steps,
     durationMs: result.durationMs,
     ...(mp4Reason ? { mp4Reason } : {}),
