@@ -26,7 +26,7 @@ The target path is the placement. A README keeps no catalog, so there is no coll
 
 Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) and the tree, then test each type on its own signal. Note every type that matches rather than stopping at the first, since a project is often several at once.
 
-- Library: an installable package name and no CLI signal.
+- Library: an installable package name, counted only when no other type below matches, since a named package is also what a site, a CLI, or a plugin carries.
 - CLI: a `bin` field, a `[project.scripts]` table in `pyproject.toml`, a `[[bin]]` table in `Cargo.toml`, or a CLI entry point.
 - Application: a site framework dependency, a site config file, or an app entry point.
 - Agent-facing: a `.claude/skills/` folder, or a file an agent loads such as `CLAUDE.md`.
@@ -57,7 +57,7 @@ A project matching one type drafts from that template. A project matching severa
 - Add each extra type's usage or install subsection under the shared `## Installation` or `## Usage` H2, never as a second H2 of the same name.
 - Drop a template section the page already carries rather than repeating it.
 
-An agent-facing repository with no plugin manifest takes only the agent-facing template. A plugin that is not agent-facing in its own repository takes only the plugin template.
+Between agent-facing and plugin alone, a repository with no plugin manifest takes only the agent-facing template, and a plugin that is not agent-facing in its own repository takes only the plugin template. A CLI or an application that also matches agent-facing keeps its own template beside it.
 
 ## Draft
 
