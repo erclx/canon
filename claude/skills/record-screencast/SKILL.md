@@ -55,16 +55,16 @@ The take lands in `demos/<slug>/take/`, which git ignores.
 
 Read the draft's `## Wrap` section. When intro, outro, and music all say `none`, or the section is absent, stop at the take and go to Step 6. Composing an empty video adds a render that says nothing the take does not.
 
-Otherwise confirm HyperFrames' `hyperframes` skill resolves. `npx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test. When it does not resolve, stop and report the install command, `npx hyperframes init`, with the warning that init installs its skills machine-wide without asking. Never install it from here.
+Otherwise confirm HyperFrames' `hyperframes` skill resolves. `bunx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test. When it does not resolve, stop and report the install command, `bunx -y hyperframes init`, with the warning that init installs its skills machine-wide without asking, and report the take's paths as Step 6 does so the operator still holds the recording the run wrote. Never install it from here.
 
 When it resolves, load it and build `demos/<slug>/index.html` around the take, with the intro, outro, and music the wrap section names. That skill owns the composition rules, so this body states none of them. Then run both from `demos/<slug>/`:
 
 ```bash
-npx hyperframes check
-npx hyperframes render --quality delivery --output renders/<slug>.mp4
+bunx -y hyperframes check
+bunx -y hyperframes render --quality delivery --output renders/<slug>.mp4
 ```
 
-Report a failing check and stop rather than rendering past it. The render sits in `demos/<slug>/renders/`, which git ignores.
+Report a failing check, with the take's paths, and stop rather than rendering past it. The render sits in `demos/<slug>/renders/`, which git ignores.
 
 ## Step 5: read the render
 

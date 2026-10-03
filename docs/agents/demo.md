@@ -25,7 +25,7 @@ Each demo owns a folder, `demos/<slug>/`, and `compile` writes the plan into it.
 | `beats.md`   | yes       | The draft `draft-screencast` wrote                    |
 | `plan.json`  | yes       | The compiled plan, with its hand-tuned timing         |
 | `index.html` | yes       | The HyperFrames composition, when the demo is wrapped |
-| `<slug>.gif` | yes       | The one deliverable a README embeds                   |
+| `demo.gif`   | yes       | The one deliverable a README embeds                   |
 | `take/`      | no        | The raw recording and its still, written by `run`     |
 | `renders/`   | no        | The composed mp4, written by the render               |
 
@@ -121,12 +121,12 @@ The cost is stated rather than hidden: the browser binary installs separately, s
 
 ## Composing the take into a finished video
 
-The take is raw. When the draft's `## Wrap` section asks for an intro, an outro, or music, `record-screencast` composes the take into `demos/<slug>/index.html` through [HyperFrames](https://hyperframes.heygen.com) and renders `renders/<slug>.mp4`, the deliverable. The skill loads HyperFrames' own `hyperframes` skill for the composition rules and runs `npx hyperframes check` and `render`, then hands the render to `read-frames`. A wrap section reading `none` throughout stops at the take. The webm is only the raw take, and a gif is for a host that strips video.
+The take is raw. When the draft's `## Wrap` section asks for an intro, an outro, or music, `record-screencast` composes the take into `demos/<slug>/index.html` through [HyperFrames](https://hyperframes.heygen.com) and renders `renders/<slug>.mp4`, the deliverable. The skill loads HyperFrames' own `hyperframes` skill for the composition rules and runs `bunx -y hyperframes check` and `render`, then hands the render to `read-frames`. A wrap section reading `none` throughout stops at the take. The webm is only the raw take, and a gif is for a host that strips video.
 
 Canon neither ships nor installs HyperFrames, and there is no `canon` verb for composing, since the render is one command already. The operator installs it once per machine:
 
 ```bash
-npx hyperframes init
+bunx -y hyperframes init
 ```
 
 `hyperframes init` installs its skills machine-wide without asking, so run it knowing that. A machine without it stops the skill with this command and nothing else.
