@@ -7,7 +7,8 @@
  *
  * A row is excluded on the same test `table()` in `@/design/parse` reads one
  * by, a line opening with a pipe, so a code span carrying a pipe or a cell
- * carrying the uncertainty tag never reaches the count.
+ * carrying the uncertainty tag never reaches the count. A line opening with
+ * `<` is dropped the way `prose()` drops it, and so is a fenced block.
  */
 export const DESIGN_BUDGET = {
   /** Words before the first `##` section, the title excluded. */
@@ -102,10 +103,22 @@ function splitSections(source: string): Section[] {
 function readRules(lines: readonly string[]): number[] {
   const rules: number[] = []
   let isOpen = false
+  let isFenced = false
 
   for (const line of lines) {
     const trimmed = line.trim()
-    if (trimmed === '' || trimmed.startsWith('|') || trimmed.startsWith('#')) {
+    if (trimmed.startsWith('```')) {
+      isFenced = !isFenced
+      isOpen = false
+      continue
+    }
+    if (
+      isFenced ||
+      trimmed === '' ||
+      trimmed.startsWith('|') ||
+      trimmed.startsWith('#') ||
+      trimmed.startsWith('<')
+    ) {
       isOpen = false
       continue
     }
