@@ -18,7 +18,8 @@ A draft that names the recording software, the editing software, or the window m
 - Wait for answers rather than reading silence as acceptance
 - Pre-seed every section with concrete content so the draft is shippable as written and the user edits down
 - Derive the slug from the topic and the discovery answers
-- Write to the gitignored scratch path at the main worktree root and print that path on its own line
+- Write to `demos/<slug>/beats.md` at the project root, the committed folder the rest of the demo lives in, and print that path on its own line
+- Seed a wrap section naming intro, outro, and music with a default each, so the choice of what surrounds the take is made at draft time rather than discovered at compose time
 
 ## Must not
 

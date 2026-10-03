@@ -134,8 +134,8 @@ export function compilePlan(draft: Draft, options: CompileOptions): DemoPlan {
     url: '',
     viewport: VIEWPORT,
     output: {
-      video: `${options.outDir}/${options.slug}.webm`,
-      still: `${options.outDir}/${options.slug}.png`,
+      video: `${options.outDir}/${options.slug}/take/${options.slug}.webm`,
+      still: `${options.outDir}/${options.slug}/take/${options.slug}.png`,
     },
     pointer: { travelMs: POINTER_TRAVEL_MS, typeDelayMs: TYPE_DELAY_MS },
     annotations: ANNOTATIONS,
@@ -252,8 +252,12 @@ export function parsePlan(text: string): PlanParse {
       },
       ...(colorScheme.value && { colorScheme: colorScheme.value }),
       output: {
-        video: asText(output.video) || `demos/${slug || 'demo'}.webm`,
-        still: asText(output.still) || `demos/${slug || 'demo'}.png`,
+        video:
+          asText(output.video) ||
+          `demos/${slug || 'demo'}/take/${slug || 'demo'}.webm`,
+        still:
+          asText(output.still) ||
+          `demos/${slug || 'demo'}/take/${slug || 'demo'}.png`,
       },
       pointer: {
         travelMs: asNumber(pointer.travelMs, POINTER_TRAVEL_MS),

@@ -10,11 +10,26 @@ description: Compiling a screencast draft into a runnable plan, driving a served
 Two verbs, and they are separate because the artifact between them is edited.
 
 ```bash
-canon demo compile .canon/tmp/screencast/inline-edit.md
-canon demo run demos/inline-edit.json
-canon demo run demos/inline-edit.json --cursor ~/cursors/theme --out assets
-canon demo frames demos/inline-edit.webm --fps 2
+canon demo compile demos/inline-edit/beats.md --slug inline-edit
+canon demo run demos/inline-edit/plan.json
+canon demo run demos/inline-edit/plan.json --cursor ~/cursors/theme --out assets
+canon demo frames demos/inline-edit/take/inline-edit.webm --fps 2
 ```
+
+## One folder per demo
+
+Each demo owns a folder, `demos/<slug>/`, and `compile` writes the plan into it.
+
+| Path         | Committed | Holds                                                 |
+| ------------ | --------- | ----------------------------------------------------- |
+| `beats.md`   | yes       | The draft `draft-screencast` wrote                    |
+| `plan.json`  | yes       | The compiled plan, with its hand-tuned timing         |
+| `index.html` | yes       | The HyperFrames composition, when the demo is wrapped |
+| `demo.gif`   | yes       | The one deliverable a README embeds                   |
+| `take/`      | no        | The raw recording and its still, written by `run`     |
+| `renders/`   | no        | The composed mp4, written by the render               |
+
+A project carries `demos/*/take/` and `demos/*/renders/` in its `.gitignore`, since both are one command away and a webm is large. A plan compiled before this layout, at `demos/<slug>.json`, still runs by path, because only the default moved.
 
 ## The draft and the plan are different files
 
@@ -33,7 +48,7 @@ A recording that has to match both themes takes one plan per scheme, committed s
 | Option          | Behavior                                                          |
 | --------------- | ----------------------------------------------------------------- |
 | `--out <dir>`   | Directory the plan and its output paths point at, default `demos` |
-| `--slug <slug>` | Plan name, defaulting to the draft filename                       |
+| `--slug <slug>` | Demo folder name, defaulting to the draft filename                |
 | `--force`       | Overwrite an existing plan, losing any field set by hand          |
 | `--json`        | Add a record on stdout carrying the beats and what is unfilled    |
 
@@ -60,7 +75,7 @@ A step waits on its `waitFor` selector becoming visible and then holds for its o
 
 ## What frames does
 
-`canon demo frames` pulls numbered PNG stills back out of a recorded video through the same `ffmpeg` binary the mp4 and gif conversion already shells to. Nothing reads a recording back today, so a broken one ships until a person opens it, and this verb is what a skill calls to read one instead. It writes one frame a second by default, sampling at a rate matched to how long a tuned recording runs rather than at a rate tuned for any one clip. Frames land beside the video by default, named `<video-basename>-frame-<NNN>.png`, so they fall under the same `demos/*.png` gitignore entry the still already uses.
+`canon demo frames` pulls numbered PNG stills back out of a recorded video through the same `ffmpeg` binary the mp4 and gif conversion already shells to. Nothing reads a recording back today, so a broken one ships until a person opens it, and this verb is what a skill calls to read one instead. It writes one frame a second by default, sampling at a rate matched to how long a tuned recording runs rather than at a rate tuned for any one clip. Frames land beside the video by default, named `<video-basename>-frame-<NNN>.png`, so they fall under the same `take/` ignore entry the still already uses.
 
 | Option            | Behavior                                                 |
 | ----------------- | -------------------------------------------------------- |
@@ -104,8 +119,20 @@ This command was the first browser command to ship, and `canon capture` has sinc
 
 The cost is stated rather than hidden: the browser binary installs separately, so a target runs `bunx playwright install chromium` once before a recording works at all. A run that cannot launch reports that command inside the frame and exits 1.
 
+## Composing the take into a finished video
+
+The take is raw. When the draft's `## Wrap` section asks for an intro, an outro, or music, `record-screencast` composes the take into `demos/<slug>/index.html` through [HyperFrames](https://hyperframes.heygen.com) and renders `renders/<slug>.mp4`, the deliverable. The skill loads HyperFrames' own `hyperframes` skill for the composition rules and runs `bunx -y hyperframes check` and `render`, then hands the render to `read-frames`. A wrap section reading `none` throughout stops at the take. The webm is only the raw take, and a gif is for a host that strips video.
+
+Canon neither ships nor installs HyperFrames, and there is no `canon` verb for composing, since the render is one command already. The operator installs it once per machine:
+
+```bash
+bunx -y hyperframes init
+```
+
+`hyperframes init` installs its skills machine-wide without asking, so run it knowing that. A machine without it stops the skill with this command and nothing else.
+
 ## What it does not do
 
-A generated recording is a raw take. Nothing trims it or scores it beyond the caption each beat already carries.
+Nothing in `canon demo` itself trims a take or scores it beyond the caption each beat already carries. Composing is the skill's step and HyperFrames' work.
 
 It also does not replace a narrated screencast. That has a hero moment, a cut list, and a voice, none of which survives being generated. This answers the case where the alternative is recording nothing.

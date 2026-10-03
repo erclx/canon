@@ -15,7 +15,8 @@ The browser engine already in this repository can produce a video from a driven 
 
 - `src/demo/` owns the beats reader, the compiler, the pointer and its bundled cursors, the cursor theme reader, the browser driver, and the container post-steps
 - `src/browser/` owns the engine helpers shared with `canon inventory` and `canon drive`
-- `demos/` owns the committed plans and the recordings they produce
+- `demos/<slug>/` owns one demo: the committed `beats.md`, `plan.json`, an optional HyperFrames `index.html`, and the one gif a README embeds, named `demo.gif` because the folder-echoed filename gate rejects a repeated folder name. The raw take lands in the ignored `take/` and a composed render in the ignored `renders/`
+- `record-screencast` passes `--slug` to `compile`, since the default slug reads the draft filename and would name every demo `beats`. Ignoring `take/` in a target is open, since no tooling stack carries a gitignore seed
 
 ## Decisions
 
@@ -25,7 +26,7 @@ The browser engine already in this repository can produce a video from a driven 
 - **The plan is committed, not scratch.** Scratch under `.canon/tmp/` fails the deletable test on its timing: the numbers are tuned by watching a recording, and the draft cannot reproduce a tuned value. That is also why `compile` refuses to overwrite an existing plan without `--force`, since a recompile is the same loss by another route.
 - **`--out` names a directory in both verbs and never a root.** A root on `run` and a directory on `compile` would resolve the plan's own directory a second time and nest the output path inside itself, so `drive` takes resolved paths rather than a root plus a relative path.
 - **The plan's `colorScheme` rides the context's own preference path rather than seeding a page's stored theme.** `drive.ts` passes it to `newContext` only when the plan sets it, so the page's `prefers-color-scheme` query answers and no page-specific storage key is written. Seeding storage was the alternative, and it would tie a plan to one site's theme key. The cost is that a page keyed on a stored theme ignores the field, and a plan whose earlier beat clicks a toggle overrides it. It accepts `light` and `dark` only, and `compile` leaves it unset so a recompile does not change a recording.
-- **A second theme is a second plan rather than a flag on the recording run.** A run-time scheme override would be a new option on `canon demo run` with one caller, while two plans stay committed and diffable. The cost is beats copied between `demos/agent-view.json` and `demos/agent-view-light.json`, which nothing keeps in step.
+- **A second theme is a second plan rather than a flag on the recording run.** A run-time scheme override would be a new option on `canon demo run` with one caller, while two plans stay committed and diffable. The cost is beats copied between `demos/agent-view/plan.json` and `demos/agent-view-light/plan.json`, which nothing keeps in step.
 
 ### Shipping to targets
 

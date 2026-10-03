@@ -30,11 +30,13 @@ web/screenshots/
 web/evidence/
 
 # Demos
-# `canon demo run` writes four files beside the plan it drove. The plan is
-# committed because its timing is hand-tuned and a recompile refuses to
-# overwrite it, and the gif is committed because README.md embeds it. The other
-# three are what one command writes again on demand, and the webm and mp4
-# are the two GitHub will not render anyway.
+# One folder per demo. `canon demo run` writes the raw take into `take/` and a
+# composed render lands in `renders/`, both of which one command writes again
+# on demand. The plan, the beats draft, the composition, and the gif README.md
+# embeds are committed, since the plan's timing is hand-tuned and a recompile
+# refuses to overwrite it.
+demos/*/take/
+demos/*/renders/
 demos/*.webm
 demos/*.mp4
 demos/*.png

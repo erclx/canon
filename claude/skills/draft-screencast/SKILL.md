@@ -1,6 +1,6 @@
 ---
 name: draft-screencast
-description: Drafts a screencast script with pre-seeded beats, defaults, and decisions to `.canon/tmp/screencast/<slug>.md`. Reads project context, asks four discovery questions with proposed defaults, then writes a shippable draft. Use when asked to "draft a screencast", "write a recording script", "plan a demo video", or "scaffold a screencast for X". Do NOT re-invoke to refine an existing draft. Re-running overwrites. Edit the draft file directly.
+description: Drafts a screencast script with pre-seeded beats, defaults, and decisions to `demos/<slug>/beats.md`. Reads project context, asks four discovery questions with proposed defaults, then writes a shippable draft. Use when asked to "draft a screencast", "write a recording script", "plan a demo video", or "scaffold a screencast for X". Do NOT re-invoke to refine an existing draft. Re-running overwrites. Edit the draft file directly.
 ---
 
 # Draft screencast
@@ -41,11 +41,9 @@ Build a 2-to-4-word kebab-case slug from the topic and discovery answers. Exampl
 
 ## Step 4: write the draft
 
-Create `.canon/tmp/screencast/<slug>.md` at the main worktree root. Create the directory if it does not exist. The file is gitignored.
+Create `demos/<slug>/beats.md` at the project root, creating the folder if it does not exist. The file is committed with the rest of the demo's sources, so a recording can be rebuilt from the folder alone.
 
-The draft is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
-
-Write all eight sections. Pre-seed every section with concrete content so the draft is shippable as-is. The user edits down rather than fills blanks.
+Write all nine sections. Pre-seed every section with concrete content so the draft is shippable as-is. The user edits down rather than fills blanks.
 
 ```markdown
 # Screencast: <short title>
@@ -143,10 +141,17 @@ Where the recording ships. Strike rows that do not apply.
 Pre-seeded with the common picks. Strike or rewrite as needed.
 
 - Audio: silent plus captions
-- Music: none
 - Language: English
 - Chip order: <leave for user, derived from beats>
 - Thumbnail: hero-moment frame
+
+## 9. Wrap
+
+What surrounds the take in the finished video. Each row carries a proposed default. Write `none` on every row to ship the raw take.
+
+- Intro: <proposed title card of two to three seconds naming the subject, or `none`>
+- Outro: <proposed closing card naming where to go next, or `none`>
+- Music: none
 ```
 
 ## Step 5: output
@@ -154,12 +159,12 @@ Pre-seeded with the common picks. Strike or rewrite as needed.
 Print the file path on its own line and a one-line summary. Do not paraphrase the path into prose.
 
 ```markdown
-📝 Wrote .canon/tmp/screencast/<slug>.md
+📝 Wrote demos/<slug>/beats.md
 
-Draft has 5 beats and pre-seeded defaults. Edit the beats and the resolved decisions.
+Draft has 5 beats and pre-seeded defaults. Edit the beats, the resolved decisions, and the wrap.
 
 To record it rather than shoot it by hand:
-record-screencast .canon/tmp/screencast/<slug>.md
+record-screencast demos/<slug>/beats.md
 ```
 
 Name the skill and stop there. Do not compile the draft, do not run it, and do not generate captions. The operator edits the beats first, and the compiler reports which selectors and URLs they still owe it.

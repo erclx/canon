@@ -135,7 +135,7 @@ export async function convertToGif(
 
 /**
  * Written beside the video by default, so frames fall under the same
- * `demos/*.png` gitignore entry the still already uses with no new rule
+ * `take` folder gitignore entry the still already uses with no new rule
  * needed. One frame a second by default, matched to the seconds-to-tens-of-
  * seconds length a tuned recording runs, without a smarter sampling strategy
  * nobody has asked for.

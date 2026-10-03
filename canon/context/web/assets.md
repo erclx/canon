@@ -48,7 +48,7 @@ The `teach-workspace` preview copies only rendered HTML and CSS, never a workspa
 
 ### README images
 
-The README carries three images: the mark, the install frame, and `demos/agent-view.gif`. Stills of the landing page's first screen, the catalog ledger, a slide, and the teach listing are left out, because two stated different counts for the same catalogs and the first duplicated the recording's opening frame. The deck and the teach workspace are reached through the `Teach` and `Slides` rows of the domain table.
+The README carries three images: the mark, the install frame, and `demos/agent-view/demo.gif`. Stills of the landing page's first screen, the catalog ledger, a slide, and the teach listing are left out, because two stated different counts for the same catalogs and the first duplicated the recording's opening frame. The deck and the teach workspace are reached through the `Teach` and `Slides` rows of the domain table.
 
 Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>` on `prefers-color-scheme`. The gif stays dark, clicks `.theme-toggle` in its second beat, and is recorded against `#dispatch` and `#workers`. `assets/brand/mark-accent.svg` and `mark-accent-light.svg` bake each accent in, because `mark.svg` uses `currentColor` and renders black inside an `<img>`. `assets/evidence/arrival.png` stays committed and is retaken by hand in dark mode when the first screen changes, since it has no template, though no README shows it.
 
