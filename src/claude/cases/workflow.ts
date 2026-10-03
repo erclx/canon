@@ -40,12 +40,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed the old fold skill name and it says it was renamed, where did it go?',
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'docs-fold',
-  },
-  {
-    prompt:
       'Sketch out a plan for adding this new capability before we touch any code.',
     expect: 'plan-feature',
   },

@@ -70,18 +70,17 @@ This page is the corpus the coverage claim is measured against: every name `cano
 
 ## Ship it
 
-| Skill                  | When to use                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `canon:git-ship`       | To run the whole post-feature chain from the verify gate through open PR                          |
-| `canon:memory-capture` | First skill in that chain, to route what the session learned to the surface owning it             |
-| `canon:context-fold`   | When decisions diverged from the plan, or a shipped task needs its outcomes marked                |
-| `canon:docs-fold`      | Never on purpose. A pointer at the old name that names `context-fold` <!-- canon-keep-retired --> |
-| `canon:docs-sync`      | When a change since main left `README.md` or `docs/` stale                                        |
-| `canon:git-stage`      | When the staged set spans several concerns and wants one commit each                              |
-| `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                                    |
-| `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                              |
-| `canon:git-pr`         | When a pull request needs a title and body written from the diff                                  |
-| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                                       |
+| Skill                  | When to use                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| `canon:git-ship`       | To run the whole post-feature chain from the verify gate through open PR              |
+| `canon:memory-capture` | First skill in that chain, to route what the session learned to the surface owning it |
+| `canon:context-fold`   | When decisions diverged from the plan, or a shipped task needs its outcomes marked    |
+| `canon:docs-sync`      | When a change since main left `README.md` or `docs/` stale                            |
+| `canon:git-stage`      | When the staged set spans several concerns and wants one commit each                  |
+| `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                        |
+| `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                  |
+| `canon:git-pr`         | When a pull request needs a title and body written from the diff                      |
+| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                           |
 
 ## After the pull request opens
 

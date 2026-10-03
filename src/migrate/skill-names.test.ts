@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { planRename } from '@/migrate/plan'
 import { isExcludedPath, renamePath, renameText } from '@/migrate/rename'
 import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
 
@@ -229,21 +228,6 @@ describe('isExcludedPath under the skill preset', () => {
     expect(
       isExcludedPath('claude/skills/claude-docs/SKILL.md', SKILL_NAME_RULES),
     ).toBe(false)
-  })
-
-  it('should leave the pointer at the old fold name unplanned, so a later run never moves it onto the survivor', () => {
-    const plan = planRename(
-      [
-        { path: 'claude/skills/docs-fold/SKILL.md', text: 'name: docs-fold' },
-        {
-          path: 'claude/skills/docs-fold/REQUIREMENT.md',
-          text: '# docs-fold',
-        },
-      ],
-      SKILL_NAME_RULES,
-    )
-
-    expect(plan.entries).toEqual([])
   })
 
   it('should not exclude the aitk token map, which carries no skill name', () => {
