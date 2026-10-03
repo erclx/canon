@@ -64,6 +64,7 @@ gitdir
 gitlink
 glama
 golangci
+gsap
 gsub
 hlinksldjump
 hyperframes
