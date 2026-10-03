@@ -123,7 +123,7 @@ The cost is stated rather than hidden: the browser binary installs separately, s
 
 ## Composing the take into a finished video
 
-The take is raw. When the draft's `## Wrap` section asks for an intro, an outro, or music, `record-screencast` composes the take into `demos/<slug>/index.html` through [HyperFrames](https://hyperframes.heygen.com) and renders `renders/<slug>.mp4`, the deliverable. The skill loads HyperFrames' own `hyperframes` skill for the composition rules and runs `bunx -y hyperframes check` and `render`, then hands the render to `read-frames`. A wrap section reading `none` throughout stops at the take. The webm is only the raw take, and a gif is for a host that strips video.
+The take is raw. When the draft's `## Wrap` section asks for an intro, an outro, or music, `record-screencast` composes the take into `demos/<slug>/index.html` through [HyperFrames](https://hyperframes.heygen.com) and renders `renders/<slug>.mp4`, the deliverable. The skill loads HyperFrames' own `hyperframes` skill for the composition rules and `canon:video-craft` for the captions, zoom, pointer, and audio judgment a video of software needs, aims each zoom from the take's timeline, and runs `bunx -y hyperframes check` and `render`, then hands the render to `read-frames`. A wrap section reading `none` throughout stops at the take. The webm is only the raw take, and a gif is for a host that strips video.
 
 Canon neither ships nor installs HyperFrames, and there is no `canon` verb for composing, since the render is one command already. The operator installs it once per machine:
 
