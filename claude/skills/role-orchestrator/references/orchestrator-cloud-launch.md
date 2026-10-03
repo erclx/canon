@@ -14,16 +14,22 @@ The shape needs a `SessionStart` hook in the repository that, on the VM alone, c
 A cloud worker never appears in `canon sessions list` and never pushes the derived branch, since the cloud assigns it a `claude/` branch of its own. So the roster and the refs read clear on a row a cloud worker is already building. Run the local check in `orchestrator-dispatch.md` anyway, since a local worker on the same row still collides, then read the two places a cloud worker does show:
 
 ```bash
-for n in $(gh api 'repos/{owner}/{repo}/pulls?state=open&per_page=100' --jq '.[] | select(.head.ref | startswith("claude/")) | .number'); do
-  gh api "repos/{owner}/{repo}/issues/$n/comments" --jq '.[].body' | grep -qE '^(ANNOUNCE|QUESTION): plan <slug>([^a-z0-9-]|$)' && echo "$n"
-done
+prs=$(gh api 'repos/{owner}/{repo}/pulls?state=open&per_page=100' --jq '.[] | select(.head.ref | startswith("claude/")) | .number') || { echo 'unreadable: the open pull request list'; exit 1; }
+found=$(printf '%s\n' "$prs" | while IFS= read -r n; do
+  [ -n "$n" ] || continue
+  bodies=$(gh api "repos/{owner}/{repo}/issues/$n/comments" --jq '.[].body') || { echo "unreadable: the comments on #$n"; exit 1; }
+  if printf '%s\n' "$bodies" | grep -qE '^(ANNOUNCE|QUESTION): plan <slug>([^a-z0-9-]|$)'; then echo "claimed: #$n"; fi
+done) || { printf '%s\n' "$found" | grep '^unreadable'; exit 1; }
+printf '%s\n' "${found:-clear}"
 ```
 
 The prompt below has the worker open its `ANNOUNCE:` and `QUESTION:` comments with `plan <slug>`, so the comment is where a cloud pull request names its row. A title or body cannot, since `git-pr` writes both from the diff. Ending the match at a character no slug carries keeps `log` from claiming `log-entry`.
 
-- Any number printed: a cloud worker's pull request names the plan slug. Treat the row as claimed and report the number.
-- Nothing printed, and this pass's launched record holds no cloud session for the row: the row is clear of cloud workers.
-- The call fails: treat the candidate as unverified and fall back to the human-launch line, the same as a refused local check in `orchestrator-dispatch.md`.
+Branch on the line it prints rather than on the exit, which a shell function wrapping a command can flatten to zero:
+
+- `claimed: #<n>`: a cloud worker's pull request names the plan slug. Treat the row as claimed and report each number.
+- `clear`, and this pass's launched record holds no cloud session for the row: the row is clear of cloud workers.
+- `unreadable: <what>`: the list or a comment read failed, so nothing was checked. Treat the candidate as unverified and fall back to the human-launch line, the same as a refused local check in `orchestrator-dispatch.md`. Never read it as clear, since an empty answer from a failed read is the collision this check exists to catch.
 
 The launched record covers the minutes before the pull request opens, when nothing on GitHub names the row yet. It is this session's alone, so a second dispatcher sees only the pull request list, which is the window `orchestrator-dispatch.md` already states for local workers under `## Hold what this pass already launched`.
 
