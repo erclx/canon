@@ -24,7 +24,7 @@ This skill stays fully independent of `context-fold`'s wireframe coverage sweep,
 
 ## Tier detection
 
-- Read `canon/DESIGN.md` and every existing `canon/wireframes/` file for a tier signal: a Stitch, Excalidraw, or Figma reference, or a marker naming one of them.
+- Read `canon/DESIGN.md` and every existing `canon/wireframes/` file for a tier signal: an Excalidraw or Figma reference, or a marker naming one of them.
 - State the detected tier at the confirm step. Always draft the regions-and-states shape regardless of what is detected, since that is the only shape this skill or any other shipped mechanism produces, adding the ASCII sketch fence only when the layout is not built yet. Report a higher tier rather than attempting a companion render for it.
 - Default silently to tier 0 when nothing is detected.
 
