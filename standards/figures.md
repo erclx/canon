@@ -38,7 +38,7 @@ A figure failing these is non-conforming even when it satisfies every shape rule
 
 - Route a graph-shaped subject, one whose relationship, boundary, or path a flowchart already expresses, through Mermaid's own hand-drawn look rather than through model-authored SVG coordinates. `mermaid.md` governs the fence itself.
 - Reserve freehand inline SVG, plain shapes and lines authored directly in the markup, for a subject that is not graph-shaped. A figure that cannot express its subject through the deterministic path is a worse failure than an inconsistent one drawn by hand, so the hatch stays open rather than forcing every figure through the renderer.
-- Draw a figure in a teach lesson freehand whatever its shape. A lesson letters its figures in a hand font the renderer cannot load, so Mermaid measures every label in a narrower fallback face, and the page then clips the wider text it actually shows. Every Mermaid figure in one measured lesson workspace clipped its group titles this way, and the same figures drawn by hand fit and came out about a hundredth of the size.
+- Draw a figure in a teach lesson freehand whatever its shape. A lesson letters its figures in a hand font the renderer cannot load, so Mermaid measures every label in a narrower fallback face, and the page then clips the wider text it actually shows.
 - State this as a render-first policy rather than a ban on a tool-exported drawing. Routing a graph-shaped figure through Mermaid is itself running it through an external tool, so a rule banning any diagram "exported from a diagramming tool" would forbid the path this policy requires.
 
 ## Wrapping and captioning
