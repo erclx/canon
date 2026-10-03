@@ -131,8 +131,9 @@ export function evidenceMarker(head: string): string {
  * Every state opens while the comment carries at most `EVIDENCE_OPEN_LIMIT`
  * images, one per row for the head plus one per row not added, and every state
  * closes past it, so a comment is never half open. A visible line under
- * `## Evidence` names the base and head as short shas. Every image URL is pinned to a commit sha rather than a branch,
- * so the comment keeps showing what it claimed even after the branch moves.
+ * `## Evidence` names the base and head as short shas. Every image URL is
+ * pinned to a commit sha rather than a branch, so the comment keeps showing
+ * what it claimed even after the branch moves.
  *
  * A preview address opens the body, and with no states it is the whole body
  * apart from the marker, so a pull request whose screenshots did not change
