@@ -51,7 +51,7 @@ gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha, 
 
 Every read in this skill runs on REST, since the `gh pr` lookups run on GraphQL and a cloud session's GitHub proxy refuses it. A target whose CLI predates the verb gets no record back. Fall back there to the `head` field above for `<headRefOid>`, and to `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'` for a branch with no number named, stopping on the guard above when that prints anything but one number.
 
-`<headRefOid>`, `<read-at>`, and the `repo` field as `<repo-url>` travel together into Step 4's marker and finding links, and none is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
+`<headRefOid>` and `<read-at>` travel into Step 4's marker, and `<headRefOid>` with the `repo` field as `<repo-url>` into its finding links. None is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
 
 Read these in parallel from the project root, skipping any that do not exist:
 

@@ -36,8 +36,10 @@ pattern = '^\*\*Review focus\*\*'
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '\*\*should-fix\*\*'
 
-# The should-fix sits under `src/tasks.ts`, so it links to its line at the
-# reviewed head. A plain bullet fails this.
+# The should-fix sits under `src/tasks.ts`, so its own bullet links to its line
+# at the reviewed head. The pattern opens on the should-fix bullet, so a plain
+# bullet fails it and a link inside a minor or a `**Review focus**` bullet does
+# not satisfy it.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
-pattern = 'blob/[0-9a-f]{40}/src/tasks\.ts#L[0-9]+'
+pattern = '\*\*should-fix\*\* \(\[lines? [0-9-]+\]\([^)]*blob/[0-9a-f]{40}/src/tasks\.ts#L[0-9]+'
