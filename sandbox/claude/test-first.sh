@@ -8,41 +8,13 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-test-first",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "bun test"
-  }
-}
-EOF
-
-  mkdir -p src
-
   # One function with the test that covers it, both already committed. The
   # pairing convention is the one the loop reads: a subject at `foo.ts` takes
   # its test at `foo.test.ts` beside it. Seeding the pair rather than
   # describing it leaves the run a shape to copy instead of a rule to recall.
-  cat <<'EOF' >src/index.ts
-export function greet(name: string): string {
-  return `Hello, ${name}!`
-}
-EOF
+  stage_fixtures claude test-first shared greeter
 
-  cat <<'EOF' >src/index.test.ts
-import { describe, expect, it } from 'bun:test'
-
-import { greet } from './index'
-
-describe('greet', () => {
-  it('should address the name it was given', () => {
-    expect(greet('Ada')).toBe('Hello, Ada!')
-  })
-})
-EOF
+  mkdir -p src
 
   git add .
   git commit -m "feat(greeting): add the greet helper and its test" --no-verify -q
