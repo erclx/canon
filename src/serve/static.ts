@@ -13,7 +13,7 @@ export const SERVE_HOST = '127.0.0.1'
 export const DEFAULT_PORT = 8787
 
 /** How far past the requested port to look before refusing. */
-const PORT_ATTEMPTS = 20
+export const PORT_ATTEMPTS = 20
 
 const DEFAULT_ENTRY = 'index.html'
 
@@ -216,23 +216,23 @@ export function shouldWalkPast(error: unknown): boolean {
   return (error as NodeJS.ErrnoException | null)?.code === 'EADDRINUSE'
 }
 
+type BoundServer = ReturnType<typeof Bun.serve>
+
 /**
  * Picks a listening port, starting at the requested one and walking forward.
  * A busy port is the ordinary case rather than a failure, since a preview of
  * one workspace is routinely open while another is started.
+ *
+ * Takes the bind as a parameter so every surface that serves walks ports the
+ * same way, whatever routes it binds.
  */
-function listen(
-  root: string,
+export function bindFirstFree(
   first: number,
-  index: boolean,
-): { server: ReturnType<typeof Bun.serve>; port: number } | undefined {
+  bind: (port: number) => BoundServer,
+): { server: BoundServer; port: number } | undefined {
   for (let port = first; port < first + PORT_ATTEMPTS; port++) {
     try {
-      const server = Bun.serve({
-        hostname: SERVE_HOST,
-        port,
-        fetch: (request) => respond(root, request, index),
-      })
+      const server = bind(port)
       /**
        * The bound port rather than the requested one. Port 0 asks the OS to
        * choose, so reporting the request builds a URL pointing at nothing.
@@ -245,12 +245,26 @@ function listen(
        * Contention is the one cause worth walking past. A permission failure
        * or an unavailable interface swallowed here would be retried twenty
        * times and then reported as a port range being full, which names a
-       * cause nothing checked. `startServer` turns the rethrow into a refusal.
+       * cause nothing checked. The caller turns the rethrow into a refusal.
        */
       if (!shouldWalkPast(error)) throw error
     }
   }
   return undefined
+}
+
+function listen(
+  root: string,
+  first: number,
+  index: boolean,
+): { server: BoundServer; port: number } | undefined {
+  return bindFirstFree(first, (port) =>
+    Bun.serve({
+      hostname: SERVE_HOST,
+      port,
+      fetch: (request) => respond(root, request, index),
+    }),
+  )
 }
 
 export async function respond(
