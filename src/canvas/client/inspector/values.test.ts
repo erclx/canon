@@ -75,7 +75,7 @@ describe('toCssValue', () => {
     expect(toCssValue('padding', '8 16')).toBe('8px 16px')
   })
 
-  it('should leave a bare number unitless for a weight', () => {
+  it('should leave a bare number without a unit for a weight', () => {
     expect(toCssValue('font-weight', '600')).toBe('600')
   })
 
