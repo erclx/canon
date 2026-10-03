@@ -68,7 +68,7 @@ What it leaves unmeasured is a prefix reaching no path, so a row left behind by 
 
 ## Applying
 
-Apply labels after the pull request resolves, never as a flag on the create. `gh pr create --label` fails whole on a label the remote does not carry, so a name the map got wrong opens no pull request at all and the run stops with the branch pushed and nothing to review. A `gh pr edit --add-label` against a pull request that already exists costs a warning instead, and it is one command across both the create and the edit path rather than two flags that have to stay in step.
+Apply labels after the pull request resolves, never as a field on the create. A create carrying a label the remote lacks either fails whole or creates the label, depending on the surface, and neither is the map's call. One step against a pull request that already exists covers the create and the edit path alike. It runs over REST, so it works where GraphQL is blocked, and the REST endpoint creates any label it is handed that the remote lacks, so the step reads each name off the remote first and warns on a missing one rather than adding it.
 
 Labelling runs whenever this skill runs and at no other time. Nothing else computes the set, so a push made any other way leaves the labels exactly as the last run left them. Any caller invoking this skill again reaches the step again, and it recomputes over the whole branch diff rather than over the new commits.
 
@@ -76,7 +76,7 @@ An ordinary branch therefore labels once, when the pull request opens. The retur
 
 A follow-up push reaching a surface the earlier ones did not merges under-labelled, with nothing to report the miss. Keeping the step in one skill is worth that cost, since a review fix lands in the files the review named and rarely opens a surface the branch had not already touched.
 
-`--add-label` adds and never removes. A label a person applied by hand is not this skill's to strip, and a re-run over a branch that has since dropped a surface keeps the label that surface earned.
+The add endpoint adds and never removes. A label a person applied by hand is not this skill's to strip, and a re-run over a branch that has since dropped a surface keeps the label that surface earned.
 
 ## A label the remote does not carry
 
