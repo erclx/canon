@@ -1721,14 +1721,14 @@ describe('checkWideTokens', () => {
     return outcome.ok ? outcome.wide : undefined
   }
 
-  it('should flag a 78-character span and name the row and the token', async () => {
+  it('should flag a 77-character span and name the row and the token', async () => {
     const wide = await wideFor('Run now', wideSpan)
 
     expect(wide).toMatchObject([{ group: 'Run now', subject: 'v1.0-first' }])
     expect(wide?.[0]?.message).toContain('a'.repeat(74))
   })
 
-  it('should not flag a 54-character span', async () => {
+  it('should not flag a 53-character span', async () => {
     expect(await wideFor('Run now', fitSpan)).toEqual([])
   })
 
