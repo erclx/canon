@@ -23,11 +23,11 @@ Owns the Claude Code hooks this repository runs on itself and the husky git hook
 
 All `.sh` files live under `scripts/`, except Claude Code hooks, which live in `.claude/hooks/`. Do not place shell scripts anywhere else.
 
-### Nine hooks share a name with the seed
+### Eight hooks share a name with the seed
 
-Nine hooks carry the same names as the hooks `canon claude init` seeds from `tooling/claude/seeds/.claude/hooks/`: `index-reminder.sh`, `memory-index.sh`, `path-form.sh`, `pr-create-log.sh`, `scratch-guard.sh`, `search-reminder.sh`, `silent-turn.sh`, `standards-audit.sh`, and `tasks-index.sh`. Eight stay byte-identical to their seeded copies, checked by a hand diff rather than assumed. `standards-audit.sh` is the one pair that diverges on purpose, covered under the audit hook below.
+Eight hooks carry the same names as the hooks `canon claude init` seeds from `tooling/claude/seeds/.claude/hooks/`: `index-reminder.sh`, `path-form.sh`, `pr-create-log.sh`, `records-index.sh`, `scratch-guard.sh`, `search-reminder.sh`, `silent-turn.sh`, and `standards-audit.sh`. Seven stay byte-identical to their seeded copies, checked by a hand diff rather than assumed. `standards-audit.sh` is the one pair that diverges on purpose, covered under the audit hook below.
 
-Five of the nine, `index-reminder.sh`, `memory-index.sh`, `scratch-guard.sh`, `standards-audit.sh`, and `tasks-index.sh`, match on the edited file's own path rather than resolving a root. Each matches both the current `.canon/` root and the retired `.claude/` root, spelling the scratch folder `tmp` under the first and `.tmp` under the second. A hook fixed at one spelling alone stops matching the moment a target sits on the other, and the index goes stale with nothing said.
+Four of the eight, `index-reminder.sh`, `records-index.sh`, `scratch-guard.sh`, and `standards-audit.sh`, match on the edited file's own path rather than resolving a root. Each matches both the current `.canon/` root and the retired `.claude/` root, spelling the scratch folder `tmp` under the first and `.tmp` under the second. A hook fixed at one spelling alone stops matching the moment a target sits on the other, and the index goes stale with nothing said.
 
 ### What the audit hook could not read
 
