@@ -76,11 +76,11 @@ Both fields feed `canon/wireframes/index.md` when regenerated.
 ## Not on this surface
 
 - State what was deliberately left off, one bullet per exclusion, as a present-tense rule: `- No navigation rail`. This is the section that stops a draft from proposing what was already ruled out.
-- Keep the reason to a clause where one is needed. The rounds that ruled it out go to the decision log.
+- Keep the reason to a clause where one is needed. Cut the rounds that ruled it out.
 
 ## What moves out
 
-- Which candidate beat which, and when: the decision log
+- Which candidate beat which, and when: nowhere. Cut it, since git keeps the old text
 - Measurements such as contrast ratios and timings: `canon/DESIGN.md` for tokens and floors, the surface's context entry for the rest
 
 ## What moves to canon/context/

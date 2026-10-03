@@ -6,10 +6,13 @@
 # An entry declares one-to-one identity and nothing else. A fold of several
 # rules into one, or a split of one into several, is a retirement plus an
 # addition and takes no entry here. Add the entry in the same change as the
-# rename or renumber, and never prune one: a target can sit any number of
-# releases behind, and a chain A to B to C resolves A only while both links
-# stay. A key must name no live rule and every chain must end on one, which
-# `src/gov/renames.test.ts` checks against this file.
+# rename or renumber. Prune an entry only once its target rule is retired and
+# the retire path covers it, since a chain ending on a rule nothing ships
+# resolves to nothing and a sync deletes the held file instead. Otherwise leave
+# it: a target can sit any number of releases behind, and a chain A to B to C
+# resolves A only while both links stay. A key must name no live rule and every
+# chain must end on one, which `src/gov/renames.test.ts` checks against this
+# file.
 [renamed]
 "005-behavior" = "565-behavior"
 "015-output" = "566-output"
@@ -25,7 +28,6 @@
 "520-wireframes" = "620-wireframes"
 "530-requirements" = "630-requirements"
 "540-architecture" = "640-architecture"
-"545-decisions" = "645-decisions"
 "550-design" = "650-design"
 "555-tasks" = "655-tasks"
 "556-groundwork" = "656-groundwork"

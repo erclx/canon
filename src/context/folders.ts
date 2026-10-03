@@ -19,7 +19,6 @@ import { SURFACE_ROOTS } from '@/surface-root'
  */
 export const DEFAULT_FOLDERS: readonly string[] = [
   'context',
-  'decisions',
   'diagrams',
   'wireframes',
 ]

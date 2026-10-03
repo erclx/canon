@@ -23,10 +23,10 @@ describe('seededDirPath', () => {
     )
   })
 
-  it('should resolve decisions under canon/ for a migrated target holding only that root', () => {
+  it('should not resolve a retired decisions folder under canon/', () => {
     mkdirSync(join(root, 'canon', 'decisions'), { recursive: true })
 
-    expect(seededDirPath(root, 'decisions')).toBe(
+    expect(seededDirPath(root, 'decisions')).not.toBe(
       join(root, 'canon', 'decisions'),
     )
   })

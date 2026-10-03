@@ -153,21 +153,16 @@ const SEEDED_FILES: readonly string[] = [
   'REQUIREMENTS.md',
   'DESIGN.md',
 ]
-const SEEDED_DIRS: readonly string[] = [
-  'decisions',
-  'memory',
-  'tasks',
-  'wireframes',
-]
+const SEEDED_DIRS: readonly string[] = ['memory', 'tasks', 'wireframes']
 
 /**
  * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
  *
- * `wireframes` and `decisions` are tracked surface entries, resolved under
- * `canon/` ahead of `.claude/`, while `memory` and `tasks` are session records
- * resolved under `.canon/` ahead of `.claude/`. Routing every name through
- * `recordDir` reported a migrated target's `canon/wireframes/` or
- * `canon/decisions/` as missing, since that resolver never checks `canon/`.
+ * `wireframes` is a tracked surface entry, resolved under `canon/` ahead of
+ * `.claude/`, while `memory` and `tasks` are session records resolved under
+ * `.canon/` ahead of `.claude/`. Routing every name through `recordDir`
+ * reported a migrated target's `canon/wireframes/` as missing, since that
+ * resolver never checks `canon/`.
  */
 export function seededDirPath(resolved: string, name: string): string {
   return SURFACE_ENTRIES.includes(name)
@@ -605,9 +600,9 @@ async function runSync(target: string): Promise<number> {
 
   // A record folder resolves at either root, so a migrated target is reported as
   // seeded rather than sent to `canon claude init` to re-create records it
-  // already holds. `wireframes` and `decisions` are tracked surface entries
-  // instead, resolved through `surfaceDir`, since a migrated target holds them
-  // at `canon/` rather than under either record root.
+  // already holds. `wireframes` is a tracked surface entry instead, resolved
+  // through `surfaceDir`, since a migrated target holds it at `canon/` rather
+  // than under either record root.
   logStep('Seeded')
   for (const name of SEEDED_FILES) {
     if (existsSync(join(resolved, '.claude', name))) logInfo(name)

@@ -27,7 +27,7 @@ Does not govern:
 
 - CSS classes and prop names. Those live in code.
 - Anything that needs updating every time the code is refactored
-- The history of how a value or a mark was chosen: the candidates, the rounds, the date of a pick. State the rule and the current value. The trail goes to the decision log.
+- The history of how a value or a mark was chosen: the candidates, the rounds, the date of a pick. State the rule and the current value, and cut the trail. Git keeps it.
 
 ## Format
 

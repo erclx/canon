@@ -6,6 +6,7 @@ import {
   CREATION_ROOT,
   resolveSurfacePath,
   spell,
+  SURFACE_ENTRIES,
   SURFACE_ROOTS,
   surfaceDir,
   surfaceDirs,
@@ -152,11 +153,7 @@ describe('surface-root', () => {
     )
   })
 
-  it('resolves the decisions entry the same way as context', () => {
-    mkdirSync(join(root, '.claude', 'decisions'), { recursive: true })
-
-    expect(surfaceDir(root, 'decisions')).toBe(
-      join(root, '.claude', 'decisions'),
-    )
+  it('does not carry a retired decisions entry', () => {
+    expect(SURFACE_ENTRIES).not.toContain('decisions')
   })
 })

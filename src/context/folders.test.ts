@@ -4,6 +4,7 @@ import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { presentNames, resolveFolders } from '@/context/folders'
 
+const RETIRED = 'decisions'
 let ROOT: string
 
 beforeEach(() => {
@@ -49,12 +50,12 @@ describe('resolveFolders', () => {
     expect((await resolveFolders(ROOT)).folders).toHaveLength(1)
   })
 
-  it('should resolve decisions as a default folder', async () => {
-    seed('canon/decisions', ['01-example.md'])
+  it('should not resolve a retired decisions folder as a default folder', async () => {
+    seed(`canon/${RETIRED}`, ['01-example.md'])
 
     const { folders } = await resolveFolders(ROOT)
 
-    expect(folders.map((folder) => folder.rel)).toEqual(['canon/decisions'])
+    expect(folders).toEqual([])
   })
 
   it('should audit a split domain as its own folder', async () => {
