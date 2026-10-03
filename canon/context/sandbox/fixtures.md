@@ -39,7 +39,7 @@ A heredoc with a quoted delimiter is a literal body, so it leaves the scenario a
 - A body fed to a command's stdin rather than written to a path. `infra/feedback.sh` reads `refusal/stdin/report.md.fixture` through `fixture_stage_dir`, so the staged tree gains no file.
 - A body whose path interpolates a root. `infra/record-root.sh` stores its records under a neutral `seed-records/` folder and moves them to the root the arm names, which keeps a stored `.canon/` path out of the ignore rule and a stored `.claude/` path from pinning the fallback.
 
-The `claude` scenarios that reach the GitHub anchor or the network, and the `git` scenarios, still stage from heredocs inside `stage_setup` and move in later slices.
+`claude/auto-ship`, `claude/deploy-app`, `claude/review-address`, `claude/review-pr`, `claude/review-ui`, `claude/search-craft`, and the `git` scenarios still stage from heredocs inside `stage_setup` and move in later slices.
 
 ### The anchor tree
 
