@@ -11,6 +11,8 @@ description: The canon design render preview, how the parser carries the verify 
 
 The output sits under `.canon/tmp/render/`, gitignored scratch the command regenerates and `canon records push` never carries. Do not stage the preview.
 
+`examples/design/DESIGN.md` is the committed authored record for an invented project, with its capture under `examples/design/evidence/`. Rebuild the capture by rendering it with `-s examples/design/DESIGN.md -o .canon/tmp/render/design-example` and running `canon capture` on the `index.html` there, as `examples/index.md` states. No gate reads it.
+
 ## Decisions
 
 ### The parser carries the uncertainty tag
