@@ -1,0 +1,11 @@
+---
+title: 'v01.0: Split the reference doc into a folder'
+description: Break docs/reference.md into one file per stage under docs/reference/
+---
+
+# v01.0: Split the reference doc into a folder
+
+Break `docs/reference.md` into `docs/reference/` with one file per stage and an `index.md`. Two files cite the old path.
+
+- [ ] Outcome: docs/reference/ carries one file per stage
+- [ ] Outcome: no file cites the deleted docs/reference.md

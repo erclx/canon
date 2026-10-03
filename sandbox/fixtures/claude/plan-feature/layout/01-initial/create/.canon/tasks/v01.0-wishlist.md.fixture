@@ -1,0 +1,12 @@
+---
+title: 'v01.0: Add a wishlist'
+description: Let a shopper save products to a wishlist and move them into the cart
+---
+
+# v01.0: Add a wishlist
+
+A shopper saves a product to a wishlist from its page, sees the saved list on a wishlist screen, and moves an item into the cart. The screen needs a wishlist line, a wishlist summary, and an empty state. The end to end suite needs a helper that seeds a wishlist and a spec for the save-then-move journey.
+
+- [ ] Outcome: a shopper can save a product and see it on the wishlist screen
+- [ ] Outcome: a wishlist item moves into the cart
+- [ ] Outcome: the save-then-move journey has an end to end spec

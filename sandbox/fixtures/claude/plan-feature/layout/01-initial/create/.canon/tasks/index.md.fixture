@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Add a wishlist](v01.0-wishlist.md): Let a shopper save products to a wishlist and move them into the cart

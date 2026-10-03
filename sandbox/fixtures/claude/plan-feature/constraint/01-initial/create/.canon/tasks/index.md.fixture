@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Split the reference doc into a folder](v01.0-reference-split.md): Break docs/reference.md into one file per stage under docs/reference/

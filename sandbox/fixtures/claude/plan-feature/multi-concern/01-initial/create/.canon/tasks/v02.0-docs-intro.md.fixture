@@ -1,0 +1,8 @@
+---
+title: 'v02.0: Tighten the docs intro paragraph'
+description: Break the run-on docs opening into two short paragraphs
+---
+
+# v02.0: Tighten the docs intro paragraph
+
+- [ ] Outcome: intro reads as two short paragraphs instead of one run-on

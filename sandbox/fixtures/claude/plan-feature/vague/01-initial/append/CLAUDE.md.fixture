@@ -1,0 +1,10 @@
+
+# Tasks
+
+Task list API with SQLite storage.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+- `bun run test`: run tests
+- `bun run bench`: time the list endpoint against the seeded data set

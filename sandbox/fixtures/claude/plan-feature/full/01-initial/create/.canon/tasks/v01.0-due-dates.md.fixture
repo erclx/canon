@@ -1,0 +1,12 @@
+---
+title: 'v01.0: Add due dates and priority to tasks'
+description: Persist and expose a due date and a priority on every task
+---
+
+# v01.0: Add due dates and priority to tasks
+
+Add a `due` (ISO date string, nullable) and `priority` (enum: low, medium, high, default medium) column to the tasks table. Expose both fields in the create and list endpoints. Validate with Zod.
+
+- [ ] Outcome: tasks table has `due` and `priority` columns
+- [ ] Outcome: POST /tasks accepts and persists both fields
+- [ ] Outcome: GET /tasks returns both fields

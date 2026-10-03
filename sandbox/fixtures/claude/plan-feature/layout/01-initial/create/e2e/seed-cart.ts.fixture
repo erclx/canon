@@ -1,0 +1,5 @@
+import type { Page } from '@playwright/test'
+
+export async function seedCart(page: Page) {
+  await page.goto('/cart?seed=two-items')
+}

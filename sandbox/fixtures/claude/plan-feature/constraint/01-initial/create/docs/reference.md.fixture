@@ -1,0 +1,13 @@
+# Reference
+
+## Ingest
+
+Rows arrive on the queue and land in the staging table.
+
+## Transform
+
+Staging rows are normalized and written to the warehouse.
+
+## Export
+
+Warehouse rows are published to the reporting bucket.

@@ -1,0 +1,8 @@
+---
+title: Pipeline
+description: Stage boundaries and where each transform runs
+---
+
+# Pipeline
+
+Stage boundaries are stated in `docs/reference.md`. The transform stage is the one carrying retries, and `docs/reference.md` covers the retry budget.

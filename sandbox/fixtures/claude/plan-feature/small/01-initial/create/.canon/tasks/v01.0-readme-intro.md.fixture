@@ -1,0 +1,10 @@
+---
+title: 'v01.0: Tighten the README intro paragraph'
+description: Break the run-on opening paragraph into shorter sentences
+---
+
+# v01.0: Tighten the README intro paragraph
+
+The opening paragraph in `README.md` is one long run-on sentence. Break it into two or three shorter sentences with clearer structure.
+
+- [ ] Outcome: README intro reads as 2-3 sentences instead of one run-on
