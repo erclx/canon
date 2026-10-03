@@ -1,12 +1,16 @@
-import { isAbsolute, relative, resolve, sep } from 'node:path'
+import { readdirSync, statSync } from 'node:fs'
+import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import type { Command } from 'commander'
+import { LiveStream } from '@/serve/live'
 import {
   logServing,
   parsePort,
   serveFields,
   waitForInterrupt,
 } from '@/serve/report'
-import { DEFAULT_PORT, startServer } from '@/serve/static'
+import { DEFAULT_PORT, LIVE_EVENTS_PATH, startServer } from '@/serve/static'
+import { compileScript } from '@/teach/browser/compile'
+import { reload } from '@/teach/browser/reload'
 import { type LessonOutcome, planLesson } from '@/teach/lesson'
 import { type NavGenerated, type NavOutcome, generateNav } from '@/teach/nav'
 import type { RenderOutcome } from '@/teach/render'
@@ -942,8 +946,17 @@ async function runUp(
       ? 'index.html'
       : relative(dir, resolve(root, contents)).split(sep).join('/')
 
-  const served = startServer(dir, { port, entry })
+  const stream = refreshOnChange(root, dir, topic, emitJson)
+  const served = startServer(dir, {
+    port,
+    entry,
+    live: {
+      stream,
+      script: compileScript(reload, [LIVE_EVENTS_PATH]),
+    },
+  })
   if (!served.ok) {
+    stream.close()
     // A serve refusal carries a reason the teach refusals do not list, so it
     // is written here in the teach record's shape rather than through one.
     if (emitJson) {
@@ -970,8 +983,103 @@ async function runUp(
     logServing(served)
   }
 
-  await waitForInterrupt(served.stop)
+  await waitForInterrupt(async () => {
+    stream.close()
+    await served.stop()
+  })
   return 0
+}
+
+/**
+ * An editor's swap or backup file, or anything under a dot folder. It changes
+ * nothing a page shows, so it neither starts a pass nor counts as served.
+ */
+function isScratch(path: string): boolean {
+  return path
+    .split(/[\\/]/)
+    .some((segment) => segment.startsWith('.') || segment.endsWith('~'))
+}
+
+/**
+ * What the served folder holds, as each file's path, size, and mtime. A pass
+ * whose `nav` wrote nothing leaves it unchanged, which is how the echo of a
+ * pass's own writes settles without a second reload.
+ */
+function servedState(dir: string): string {
+  return readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => relative(dir, join(entry.parentPath, entry.name)))
+    .filter((path) => !isScratch(path))
+    .sort()
+    .map((path) => {
+      const stat = statSync(join(dir, path), { throwIfNoEntry: false })
+      return `${path}:${stat?.size}:${stat?.mtimeMs}`
+    })
+    .join('\n')
+}
+
+/**
+ * Re-runs `nav` on each settled change under the teach folder and tells every
+ * open page to reload once a pass changed what is served. Passes run one at a
+ * time, since `nav` is not reentrant over the files it rewrites, and a change
+ * arriving mid-pass is coalesced into exactly one more. A refused or failed
+ * pass sends no reload, so a page never reloads onto a half-written state.
+ */
+function refreshOnChange(
+  root: string,
+  dir: string,
+  topic: string | undefined,
+  emitJson: boolean,
+): LiveStream<string> {
+  let isRunning = false
+  let isDirty = false
+  let state = servedState(dir)
+
+  const report = (message: string, isWarning: boolean) => {
+    if (emitJson) process.stderr.write(`${message}\n`)
+    else if (isWarning) logWarn(message)
+    else logInfo(message)
+  }
+
+  const pass = async (): Promise<void> => {
+    const nav = await generateNav(root, topic)
+    if (!nav.ok) {
+      report(`Refresh refused: ${nav.message}`, true)
+      return
+    }
+    const next = servedState(dir)
+    if (next === state) return
+    state = next
+    stream.send({ reload: true })
+    report(`Refreshed ${nav.lessons} lessons, reloading open pages`, false)
+  }
+
+  const schedule = async (): Promise<void> => {
+    if (isRunning) {
+      isDirty = true
+      return
+    }
+    isRunning = true
+    do {
+      isDirty = false
+      // A throw, such as the teach folder removed mid-pass, is reported and
+      // the loop carries on, since a rejection left here would end the
+      // process and a stuck flag would end every later refresh.
+      try {
+        await pass()
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code ?? String(error)
+        report(`Refresh failed: ${code}`, true)
+      }
+    } while (isDirty)
+    isRunning = false
+  }
+
+  const stream = new LiveStream<string>(dir, {
+    map: (path) => (isScratch(path) ? undefined : path),
+    onChange: () => void schedule(),
+  })
+  return stream
 }
 
 function reportRefusal(

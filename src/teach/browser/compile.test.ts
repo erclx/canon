@@ -5,6 +5,7 @@ import { focusLine } from '@/teach/browser/focus-line'
 import { glossaryFilter } from '@/teach/browser/glossary-filter'
 import { head } from '@/teach/browser/head'
 import { quiz } from '@/teach/browser/quiz'
+import { reload } from '@/teach/browser/reload'
 import { sidebar } from '@/teach/browser/sidebar'
 import { theme } from '@/teach/browser/theme'
 
@@ -57,6 +58,7 @@ describe('compileScript', () => {
     ['dismiss', dismiss],
     ['glossaryFilter', glossaryFilter],
     ['quiz', quiz],
+    ['reload', reload],
   ])('should emit %s with no module syntax', (_name, run) => {
     expect(body(compileScript(run))).not.toMatch(/^\s*(import|export)\b/m)
   })

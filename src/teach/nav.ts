@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { readdir, readFile, rm } from 'node:fs/promises'
 import { join, posix, relative } from 'node:path'
 import {
   TEACH_SIDEBAR_BREAKPOINT,
@@ -37,6 +37,7 @@ import {
   type WorkspaceSummary,
   writeStylesheet,
 } from '@/teach/workspace'
+import { writeIfChanged } from '@/teach/write-if-changed'
 
 const BRAND_MARK = 'assets/brand/mark.svg'
 
@@ -1162,7 +1163,7 @@ async function rewriteLesson(
   }
 
   const linked = linkAuthoredRegion(wrapMain(html), targets, file)
-  await writeFile(path, linked.html)
+  await writeIfChanged(path, linked.html)
   return { ok: true, file, unresolved: linked.unresolved }
 }
 
@@ -1234,9 +1235,9 @@ export async function generateNav(
 
   const dir = teachDir(root)
   const rootPath = join(dir, 'index.html')
-  await writeFile(rootPath, renderRootPage(listed.workspaces))
+  await writeIfChanged(rootPath, renderRootPage(listed.workspaces))
 
-  await writeFile(
+  await writeIfChanged(
     join(dir, TEACH_STYLESHEET),
     buildDesignCss(undefined, {
       embedFonts: TEACH_FONT_FACES,
@@ -1273,7 +1274,7 @@ export async function generateNav(
     }
 
     const contentsPath = join(root, detail.path, 'index.html')
-    await writeFile(
+    await writeIfChanged(
       contentsPath,
       await renderContentsPage(
         root,
@@ -1292,7 +1293,7 @@ export async function generateNav(
         continue
       }
 
-      await writeFile(
+      await writeIfChanged(
         join(root, detail.path, TEACH_REFERENCE, renderedReferenceName(file)),
         await renderReferencePage(root, listed.workspaces, detail, metas, file),
       )

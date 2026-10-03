@@ -126,9 +126,15 @@ The link opens the named workspace's contents page, or the root listing when no 
 
 The JSON record is one line carrying the `nav` fields, then `served`, the absolute folder, and the server's `host`, `port`, `entry`, `url`, and `entryExists`. A lesson `nav` skips lands in `skipped` and the server still starts, since a partial refresh is still worth viewing. A `nav` refusal starts no server.
 
+While it runs, `up` watches the teach root. A change there, such as a lesson, a workspace, a glossary term, or a reference page added by hand or by another `teach` verb, runs the `nav` pass again, and every open page reloads once that pass changes what is served. Passes run one at a time, so a burst of saves costs one more pass rather than several at once. A pass `nav` refuses, such as one over a workspace deleted while it was served, is reported on stderr, the server keeps running, and no page reloads.
+
+Each refresh is logged to stderr, so stdout stays the one record line. Dotfiles and editor backups ending in `~` start no pass.
+
+The reload script is added to each page as the server sends it and never written to disk, so a page saved from the browser, a promoted lesson, and a committed fixture carry no trace of it. The script listens on `/__live`, which answers only a request naming the server by its loopback address or `localhost`.
+
 Viewing writes. Every page and generated stylesheet `nav` owns is rewritten first, which on a committed fixture shows as a diff. To serve without rewriting anything, `canon teach list <topic>` ends its human output with a `canon serve` line for that workspace, with the teach folder written relative to the cwd, or absolute when it sits outside it. The JSON record of `list` carries no such field.
 
-`canon serve` itself stays general, since nothing about serving a directory is specific to a learning workspace and the same verb carries a slide render and a design preview. What `up` adds in front of it is the refresh, which is teach-specific, and it serves through the same server rather than a second one.
+`canon serve` itself stays general, since nothing about serving a directory is specific to a learning workspace and the same verb carries a slide render and a design preview. What `up` adds in front of it is the refresh and the watch that repeats it, both teach-specific, and it serves through the same server rather than a second one.
 
 Read `url` off the record rather than building one from the port that was asked for. The verb walks forward past a port already in use, which is routine when a second workspace is already open, and the port it took is the one thing a composed URL gets wrong.
 

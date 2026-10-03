@@ -11,15 +11,27 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   DEFAULT_PORT,
+  LIVE_EVENTS_PATH,
   resolveWithin,
   SERVE_HOST,
+  type ServeOptions,
   type ServeStarted,
   shouldWalkPast,
   startServer,
 } from '@/serve/static'
+import { LiveStream } from '@/serve/live'
 
 let ROOT: string
 const running: ServeStarted[] = []
+const streams: LiveStream<unknown>[] = []
+
+const LIVE_SCRIPT = '<script>/* live */</script>'
+
+function startLive(): ServeStarted {
+  const stream = new LiveStream<unknown>(ROOT, { map: () => undefined })
+  streams.push(stream)
+  return start(ROOT, { port: 0, live: { stream, script: LIVE_SCRIPT } })
+}
 
 function seed(relativePath: string, body: string): string {
   const full = join(ROOT, relativePath)
@@ -33,11 +45,15 @@ function seed(relativePath: string, body: string): string {
  * and decodes `%2e%2e` before the request leaves, so a traversal sent through
  * it arrives already collapsed and tests the client rather than the server.
  */
-function rawRequest(port: number, path: string): Promise<number> {
+function rawRequest(
+  port: number,
+  path: string,
+  host = SERVE_HOST,
+): Promise<number> {
   return new Promise((settle, fail) => {
     const socket = connect(port, SERVE_HOST, () => {
       socket.write(
-        `GET ${path} HTTP/1.1\r\nHost: ${SERVE_HOST}\r\nConnection: close\r\n\r\n`,
+        `GET ${path} HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n`,
       )
     })
     let received = ''
@@ -57,10 +73,7 @@ function rawRequest(port: number, path: string): Promise<number> {
 }
 
 /** Starts a server and registers it for teardown, so no test leaks a port. */
-function start(
-  dir: string,
-  options?: { port?: number; entry?: string; index?: boolean },
-): ServeStarted {
+function start(dir: string, options?: ServeOptions): ServeStarted {
   const outcome = startServer(dir, options)
   if (!outcome.ok)
     throw new Error(`expected a started server, got ${outcome.reason}`)
@@ -73,6 +86,7 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
+  for (const stream of streams.splice(0)) stream.close()
   await Promise.all(running.splice(0).map((server) => server.stop()))
   rmSync(ROOT, { recursive: true, force: true })
 })
@@ -538,5 +552,94 @@ describe('startServer with index', () => {
     const server = start(ROOT, { port: 0, index: true, entry: 'gone.html' })
 
     expect(server.entryExists).toBe(false)
+  })
+})
+
+describe('startServer with live', () => {
+  it('should splice the script in before the closing body tag of a page', async () => {
+    seed('index.html', '<body><h1>root</h1></body>\n')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe(`<body><h1>root</h1>${LIVE_SCRIPT}</body>\n`)
+  })
+
+  it('should splice whole when a character ahead of the tag lowercases longer', async () => {
+    seed('index.html', '<body>İ<p></p></body>\n')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe(`<body>İ<p></p>${LIVE_SCRIPT}</body>\n`)
+  })
+
+  it('should splice before an uppercase closing body tag', async () => {
+    seed('index.html', '<BODY><h1>root</h1></BODY>\n')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe(`<BODY><h1>root</h1>${LIVE_SCRIPT}</BODY>\n`)
+  })
+
+  it('should leave a page with no closing body tag as it is on disk', async () => {
+    seed('index.html', '<h1>root</h1>')
+    const server = startLive()
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe('<h1>root</h1>')
+  })
+
+  it('should leave a stylesheet alone', async () => {
+    seed('course.css', 'body { color: red } /* </body> */')
+    const server = startLive()
+
+    const body = await fetch(
+      `http://${SERVE_HOST}:${server.port}/course.css`,
+    ).then((r) => r.text())
+
+    expect(body).toBe('body { color: red } /* </body> */')
+  })
+
+  it('should answer the events route with an event stream', async () => {
+    const server = startLive()
+
+    const response = await fetch(
+      `http://${SERVE_HOST}:${server.port}${LIVE_EVENTS_PATH}`,
+    )
+    await response.body?.cancel()
+
+    expect(response.headers.get('content-type')).toBe('text/event-stream')
+  })
+
+  it('should refuse the events route for a Host naming another domain', async () => {
+    const server = startLive()
+
+    const status = await rawRequest(
+      server.port,
+      LIVE_EVENTS_PATH,
+      `evil.example:${server.port}`,
+    )
+
+    expect(status).toBe(403)
+  })
+
+  it('should serve a page byte for byte without the option', async () => {
+    seed('index.html', '<body><h1>root</h1></body>\n')
+    const server = start(ROOT, { port: 0 })
+
+    const body = await fetch(server.url).then((r) => r.text())
+
+    expect(body).toBe('<body><h1>root</h1></body>\n')
+  })
+
+  it('should answer 404 on the events route without the option', async () => {
+    const server = start(ROOT, { port: 0 })
+
+    const status = await rawRequest(server.port, LIVE_EVENTS_PATH)
+
+    expect(status).toBe(404)
   })
 })

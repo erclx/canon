@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
+import type { LiveStream } from '@/serve/live'
 
 /**
  * The loopback interface, never a wildcard bind. A preview serves whatever
@@ -78,11 +79,25 @@ export interface ServeStarted {
 
 export type ServeOutcome = ServeStarted | ServeRefused
 
+/** The route a live page's script opens its event stream on. */
+export const LIVE_EVENTS_PATH = '/__live'
+
+export interface LiveServe {
+  readonly stream: Pick<LiveStream<unknown>, 'answer'>
+  /**
+   * The `<script>` element spliced into every page served, built by the caller
+   * so this module stays free of what a reload means to any one surface.
+   */
+  readonly script: string
+}
+
 export interface ServeOptions {
   readonly port?: number
   readonly entry?: string
   /** Answers a directory request with no index page by listing it. Off by default. */
   readonly index?: boolean
+  /** Answers the events route and splices a script into each page. Off by default. */
+  readonly live?: LiveServe
 }
 
 function escapeHtml(text: string): string {
@@ -253,16 +268,59 @@ export function bindFirstFree(
   return undefined
 }
 
+/**
+ * Splices the script in before the last closing body tag of a page. A page
+ * carrying none goes out as the bytes on disk, since guessing a place for it
+ * risks breaking markup the author wrote. The splice happens per response and
+ * never on disk, so a page the reader saves or commits carries no hook.
+ */
+export async function injectLive(
+  response: Response,
+  script: string,
+): Promise<Response> {
+  const type = response.headers.get('content-type') ?? ''
+  if (response.status !== 200 || !type.startsWith('text/html')) return response
+
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  const html = new TextDecoder().decode(bytes)
+  /*
+   * Searched in the original rather than a lowercased copy, since lowercasing
+   * changes the length of some characters, such as İ, and an index read off
+   * the copy would cut the original inside the tag.
+   */
+  const at = [...html.matchAll(/<\/body>/gi)].at(-1)?.index
+  const init = { status: response.status, headers: response.headers }
+  if (at === undefined) return new Response(bytes, init)
+  return new Response(`${html.slice(0, at)}${script}${html.slice(at)}`, init)
+}
+
 function listen(
   root: string,
   first: number,
   index: boolean,
+  live: LiveServe | undefined,
 ): { server: BoundServer; port: number } | undefined {
+  if (!live) {
+    return bindFirstFree(first, (port) =>
+      Bun.serve({
+        hostname: SERVE_HOST,
+        port,
+        fetch: (request) => respond(root, request, index),
+      }),
+    )
+  }
   return bindFirstFree(first, (port) =>
     Bun.serve({
       hostname: SERVE_HOST,
       port,
-      fetch: (request) => respond(root, request, index),
+      /* The event stream stays open for as long as the page does. */
+      idleTimeout: 0,
+      fetch: async (request, server) => {
+        if (new URL(request.url).pathname === LIVE_EVENTS_PATH) {
+          return live.stream.answer(request, server.port ?? 0)
+        }
+        return injectLive(await respond(root, request, index), live.script)
+      },
     }),
   )
 }
@@ -378,7 +436,7 @@ export function startServer(
    */
   let bound: ReturnType<typeof listen>
   try {
-    bound = listen(root, first, options.index ?? false)
+    bound = listen(root, first, options.index ?? false, options.live)
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code ?? 'unknown'
     return refuse(
