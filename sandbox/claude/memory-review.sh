@@ -17,7 +17,7 @@ stage_setup() {
   # `feedback-legacy-handlers-own-auth` cites a file the stage never holds, so
   # `canon records stale memory` lists it first and the batch has to open on it.
   # The index is stored in the shape `canon indexes regen` produces, so it
-  # matches what the memory-index hook would have written. A hand-shaped index
+  # matches what the records-index hook would have written. A hand-shaped index
   # would drift from the renderer and teach the arm the wrong contract.
   stage_fixtures claude memory-review shared 01-initial
 

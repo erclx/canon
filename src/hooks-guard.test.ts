@@ -77,7 +77,7 @@ let hookPath: string
 let readOnlyRoot: string
 let acting: Record<string, ActingCase>
 
-// `canon indexes regen` succeeds on the index hooks where the CLI is installed
+// `canon indexes regen` succeeds on the index hook where the CLI is installed
 // and is absent on a CI runner, so the acting output would differ by machine.
 // Removing it from PATH pins both to the branch that reports a stale index,
 // which fires only after the payload parsed and the path guard matched.
@@ -262,14 +262,6 @@ beforeAll(() => {
           tool_name: 'Grep',
         }),
     },
-    'memory-index.sh': {
-      expect: '.claude/memory/index.md',
-      payload: () =>
-        payloadFor({
-          tool_input: { file_path: join(project, '.claude/memory/sample.md') },
-          tool_name: 'Write',
-        }),
-    },
     'path-form.sh': {
       expect: 'This write is from a linked worktree',
       payload: () =>
@@ -300,6 +292,14 @@ beforeAll(() => {
           session_id: nonce,
         }),
       stream: 'stderr',
+    },
+    'records-index.sh': {
+      expect: '.claude/tasks/index.md',
+      payload: () =>
+        payloadFor({
+          tool_input: { file_path: join(project, '.claude/tasks/sample.md') },
+          tool_name: 'Write',
+        }),
     },
     'scratch-guard.sh': {
       expect: 'Temporary file write outside',
@@ -362,14 +362,6 @@ beforeAll(() => {
       payload: () =>
         payloadFor({
           tool_input: { file_path: join(project, 'doc.md') },
-          tool_name: 'Write',
-        }),
-    },
-    'tasks-index.sh': {
-      expect: '.claude/tasks/index.md',
-      payload: () =>
-        payloadFor({
-          tool_input: { file_path: join(project, '.claude/tasks/sample.md') },
           tool_name: 'Write',
         }),
     },
@@ -456,39 +448,77 @@ for (const tree of TREES) {
   })
 }
 
-// The archive sits inside the folder it archives, and the path guard is a shell
-// pattern whose wildcard crosses a separator, so `*/.claude/tasks/*.md` reaches
-// an archived task as readily as a live one. A regen fired on the archive
-// rebuilds the live index off a folder the archive was taken out of.
-//
-// Silence alone would also be the reading if the hook stopped working, and the
-// acting case above is what separates the two: it proves a live task still
-// carries through to a verdict on the same tree.
-describe('tasks-index.sh archive exclusion', () => {
+const writeOf = (relative: string): string =>
+  payloadFor({
+    tool_input: { file_path: join(fixture, 'project', relative) },
+    tool_name: 'Write',
+  })
+
+// Each folder under each root must name its own index. A merged hook that
+// resolved one folder's spelling for every write would pass a single acting case.
+describe('records-index.sh folders and roots', () => {
   for (const tree of TREES) {
-    const hook = join(tree.dir, 'tasks-index.sh')
+    const hook = join(tree.dir, 'records-index.sh')
+
+    for (const folder of ['tasks', 'memory']) {
+      for (const root of ['.canon', '.claude']) {
+        it.concurrent(
+          `should name ${root}/${folder}/index.md on ${tree.label}`,
+          async ({ expect }) => {
+            const result = await run(hook, writeOf(`${root}/${folder}/x.md`))
+
+            expect(result.stdout).toContain(`${root}/${folder}/index.md`)
+            expect(result.code).toBe(0)
+          },
+        )
+      }
+    }
 
     it.concurrent(
-      `should leave ${tree.label} silent on an archived task`,
+      `should index a task under a review folder on ${tree.label}`,
       async ({ expect }) => {
-        const result = await run(
-          hook,
-          payloadFor({
-            tool_input: {
-              file_path: join(
-                fixture,
-                'project/.claude/tasks/archive/v01.0-shipped.md',
-              ),
-            },
-            tool_name: 'Write',
-          }),
-        )
+        const result = await run(hook, writeOf('.canon/tasks/review/x.md'))
 
-        expect(result.stdout).toBe('')
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
+        expect(result.stdout).toContain('.canon/tasks/index.md')
       },
     )
+  }
+})
+
+// A folder sits inside the one it archives, and the path guard is a shell
+// pattern whose wildcard crosses a separator, so `*/.claude/tasks/*.md` reaches
+// an archived task as readily as a live one. A regen fired on it rebuilds the
+// live index off a folder it was taken out of.
+//
+// Silence alone would also be the reading if the hook stopped working, and the
+// cases above are what separate the two.
+describe('records-index.sh exclusions', () => {
+  const excluded = [
+    ['tasks', 'archive/v01.0-shipped.md'],
+    ['tasks', 'declined/idea.md'],
+    ['tasks', 'index.md'],
+    ['memory', 'review/receipt.md'],
+    ['memory', 'archive/retired.md'],
+    ['memory', 'index.md'],
+  ]
+
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'records-index.sh')
+
+    for (const [folder, rest] of excluded) {
+      for (const root of ['.canon', '.claude']) {
+        it.concurrent(
+          `should leave ${tree.label} silent on ${root}/${folder}/${rest}`,
+          async ({ expect }) => {
+            const result = await run(hook, writeOf(`${root}/${folder}/${rest}`))
+
+            expect(result.stdout).toBe('')
+            expect(result.stderr).toBe('')
+            expect(result.code).toBe(0)
+          },
+        )
+      }
+    }
   }
 })
 
@@ -550,7 +580,7 @@ describe('search-reminder.sh firing conditions', () => {
 // so a naive read would log a pull request opened from a linked worktree into
 // a folder that dies with the worktree, losing exactly the row the log exists
 // to keep. The hook strips the worktree segment back to the main root before
-// writing, the way tasks-index.sh and memory-index.sh already derive theirs.
+// writing, the way records-index.sh already derives its own.
 describe('pr-create-log.sh root resolution', () => {
   const hook = join(ROOT, '.claude/hooks/pr-create-log.sh')
 

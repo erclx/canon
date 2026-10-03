@@ -15,7 +15,7 @@ The guard uses `read` rather than `timeout cat`, because macOS ships no `timeout
 
 The acting payload is what a mangled read fails. A corrupted payload reaches the same quiet exit as one naming a tool the hook filters out, so a test built on the filtered case passes whatever the read did to the bytes. Each hook therefore carries a payload reaching the branch that does its work, paired with a string only that branch emits, and a hook added without one fails rather than passing on the refusal alone.
 
-The two index hooks run with `canon` dropped from `PATH`, which pins them to the branch reporting a stale index instead of leaving the assertion to depend on whether the CLI is installed.
+The index hook runs with `canon` dropped from `PATH`, which pins it to the branch reporting a stale index instead of leaving the assertion to depend on whether the CLI is installed.
 
 `cloud-setup.sh` run with `CLAUDE_CODE_REMOTE=true` anywhere but a cloud VM runs a real `bun link`, which repoints the machine's global `@erclx/canon` at that checkout. Exercise it with a stub `bun` on `PATH`, as `src/hooks-guard.test.ts` does, and restore a relinked machine with `bun add -g @erclx/canon@<version>`.
 
@@ -23,7 +23,7 @@ The two index hooks run with `canon` dropped from `PATH`, which pins them to the
 
 `path-form.sh` shares the `Edit|Write|MultiEdit` matcher and hands back the absolute form of a path written from a linked worktree, so a session prefers that form over computing it. `governance/rules/claude/566-output.md` keeps the instruction as a self-sufficient fallback rather than a branch the hook replaced. The hook reaches a project only through `tooling/claude/seeds/` at scaffold time while the rule reaches one through `canon gov sync`, and a target that synced governance without ever scaffolding through the seed would otherwise read a line naming a source it does not have.
 
-It reads the worktree branch off `file_path` itself, a `*/.claude/worktrees/*` segment, rather than shelling out to `git rev-parse`, since that call would answer for whatever directory the hook's own process happens to run in rather than the worktree the write came from. `tasks-index.sh` and `memory-index.sh` derive their main root the same way, off a path suffix rather than the session. It exits quietly on a path with no such segment and resolves `realpath` on one that has it.
+It reads the worktree branch off `file_path` itself, a `*/.claude/worktrees/*` segment, rather than shelling out to `git rev-parse`, since that call would answer for whatever directory the hook's own process happens to run in rather than the worktree the write came from. `records-index.sh` derives its main root the same way, off a path suffix rather than the session. It exits quietly on a path with no such segment and resolves `realpath` on one that has it.
 
 The output rule once branched on `CLAUDE_CODE_ENTRYPOINT` to pick a bare path or a `file://` link. That branch retired onto the harness's own link instruction, which Claude Code gives per surface, so neither the rule nor this hook decides the link form.
 
@@ -45,7 +45,7 @@ The second form is `git-pr`'s, which opens a pull request over REST and prints t
 
 The hook cannot know whether a session sent the announcement, only that a pull request now exists to announce, so the log is a denominator for the next wave's miss rate rather than a record of the send itself.
 
-The log resolves off `CLAUDE_PROJECT_DIR`, and that value is the session's own worktree rather than the main root, so a naive read would write a wave's denominator into a folder that dies the moment the worktree it was built in gets reclaimed. The hook strips a trailing `.claude/worktrees/*` segment before writing, the way `tasks-index.sh` and `memory-index.sh` derive their main root off a path suffix.
+The log resolves off `CLAUDE_PROJECT_DIR`, and that value is the session's own worktree rather than the main root, so a naive read would write a wave's denominator into a folder that dies the moment the worktree it was built in gets reclaimed. The hook strips a trailing `.claude/worktrees/*` segment before writing, the way `records-index.sh` derives its main root off a path suffix.
 
 ## The unattended agent guard
 

@@ -43,7 +43,7 @@ Banning a token is blunt, and the alternative is a judgment no stage can make. T
 
 ### What the walk covers
 
-The walk is scoped by extension rather than by path. Three seed hooks, `tasks-index.sh`, `memory-index.sh`, and `standards-audit.sh`, call the CLI deliberately and each reports by name when the binary is absent, so they keep the dependency and the extension scope leaves them outside the walk with no exemption list to maintain against them.
+The walk is scoped by extension rather than by path. Two seed hooks, `records-index.sh` and `standards-audit.sh`, call the CLI deliberately and each reports by name when the binary is absent, so they keep the dependency and the extension scope leaves them outside the walk with no exemption list to maintain against them.
 
 Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Seed standards stage, so a stack seeding `.claude/` later is covered with no edit to either caller.
 
