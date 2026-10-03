@@ -416,17 +416,23 @@ const parseJson = (text: string): unknown => {
 }
 
 /**
- * One JSON object per line, which is what `--jq '.[] | @json'` prints across
- * every page. A failed read and a line that does not parse both return null, so
- * neither reads as a thread with nothing on it.
+ * One JSON object per line, which is what `.[] | <projection> | @json` prints
+ * across every page. The projection keeps stdout to the fields the mappers
+ * read, since a whole REST row carries user objects and links and a long thread
+ * could overrun the spawn buffer and read as unreadable. A failed read and a
+ * line that does not parse both return null, so neither reads as a thread with
+ * nothing on it.
  */
-const readRows = (path: string): null | Record<string, unknown>[] => {
+const readRows = (
+  path: string,
+  fields: string,
+): null | Record<string, unknown>[] => {
   const read = run('gh', [
     'api',
     '--paginate',
     `repos/{owner}/{repo}/${path}`,
     '--jq',
-    '.[] | @json',
+    `.[] | {${fields}} | @json`,
   ])
   if (!read.isOk) return null
 
@@ -465,8 +471,14 @@ export const toComment = (row: Record<string, unknown>): Comment => ({
  * unreadable rather than a thread missing half its rows.
  */
 const readPayload = (number: string): null | Payload => {
-  const reviews = readRows(`pulls/${number}/reviews?per_page=100`)
-  const comments = readRows(`issues/${number}/comments?per_page=100`)
+  const reviews = readRows(
+    `pulls/${number}/reviews?per_page=100`,
+    'body, commit_id, submitted_at',
+  )
+  const comments = readRows(
+    `issues/${number}/comments?per_page=100`,
+    'body, created_at',
+  )
   if (reviews === null || comments === null) return null
 
   return { comments: comments.map(toComment), reviews: reviews.map(toReview) }
