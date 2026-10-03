@@ -22,7 +22,7 @@ const TIERS: readonly {
   readonly skills: readonly string[]
   readonly pattern: RegExp
 }[] = [
-  { skills: [], pattern: ANY_GRAPHQL },
+  { skills: ['git-followup'], pattern: ANY_GRAPHQL },
   { skills: ['review-ui', 'git-split'], pattern: GRAPHQL_READS },
 ]
 
