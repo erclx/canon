@@ -1,0 +1,9 @@
+
+# My App
+
+Vite + React task list. Uses CSS modules and a small token system.
+
+## Commands
+
+- `bun run dev`: start vite dev server
+- `bun run check`: lint and typecheck

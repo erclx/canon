@@ -1,0 +1,27 @@
+---
+title: Components
+description: Layered structure inside the boundary, drawn from ARCHITECTURE.md
+category: Components
+---
+
+# Components
+
+How the four layers sit relative to each other.
+
+```mermaid
+flowchart TB
+  accTitle: The four layers of the ad triage app
+  accDescr: A browser tier feeds an HTTP tier, which feeds tools and storage.
+  subgraph Browser
+    A["Web shell"]
+    B["Agent loop"]
+  end
+  subgraph Server
+    C["FastAPI layer"]
+    D["Retriever"]
+  end
+  E["SQLite corpus"]
+  A --> B --> C --> D --> E
+```
+
+The browser holds the agent loop, so the server stays a plain tool host. Open `web/src/agent/loop.ts` for the loop and `api/src/retrieval/hybrid.py` for the retriever.

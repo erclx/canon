@@ -1,0 +1,9 @@
+export function TaskList({ tasks }: { tasks: string[] }) {
+  return (
+    <ul className="task-list">
+      {tasks.map((task) => (
+        <li key={task}>{task}</li>
+      ))}
+    </ul>
+  )
+}

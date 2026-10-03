@@ -1,0 +1,11 @@
+# Requirements
+
+## Audience
+
+Engineers tracking personal spend from the terminal.
+
+## v1 scope
+
+- Budgets per category with rollover
+- Recurring transaction rules
+- A monthly report with category totals and trend

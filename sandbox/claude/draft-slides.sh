@@ -12,27 +12,9 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "with-context")
-    cat <<'EOF' >CLAUDE.md
-# Ledger
-
-Personal finance CLI. v1 ships budgets, recurring rules, and a monthly report.
-EOF
+    stage_fixtures claude draft-slides with-context 01-initial
 
     mkdir -p .claude
-    cat <<'EOF' >canon/REQUIREMENTS.md
-# Requirements
-
-## Audience
-
-Engineers tracking personal spend from the terminal.
-
-## v1 scope
-
-- Budgets per category with rollover
-- Recurring transaction rules
-- A monthly report with category totals and trend
-EOF
-
     git add . && git commit -m "feat(ledger): v1 scope notes" --no-verify -q
 
     log_step "Scenario ready: slides draft (with project context)"
@@ -41,11 +23,7 @@ EOF
     log_info "Expect:  .claude/SLIDES.md drafted with a bold non-blue palette and varied layouts, then rendered to .canon/tmp/render/slides/, with a one-pass QA check"
     ;;
   "bare")
-    cat <<'EOF' >README.md
-# Toolbox
-
-A small CLI for batch image work.
-EOF
+    stage_fixtures claude draft-slides bare 01-initial
 
     git add . && git commit -m "chore: initial state" --no-verify -q
 

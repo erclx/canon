@@ -1,0 +1,22 @@
+import { useState } from "react";
+import { Button } from "./Button";
+
+export function AddTaskModal({ onClose }: { onClose: () => void }) {
+  const [title, setTitle] = useState("");
+
+  return (
+    <div className="modal">
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Task name"
+      />
+      <Button variant="primary" onClick={onClose}>
+        Add
+      </Button>
+      <Button variant="primary" onClick={onClose}>
+        Cancel
+      </Button>
+    </div>
+  );
+}

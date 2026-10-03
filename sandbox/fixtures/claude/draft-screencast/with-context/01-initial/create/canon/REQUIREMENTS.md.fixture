@@ -1,0 +1,11 @@
+# Requirements
+
+## Audience
+
+Power users evaluating note-taking tools.
+
+## v2 scope
+
+- Inline edit on click, no modal
+- Save indicator per note
+- Keyboard nav across the note list

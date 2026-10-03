@@ -1,0 +1,6 @@
+
+# Architecture
+
+## Overview
+
+`web/` runs Next.js with the agent loop in the browser. `api/` runs FastAPI wrapping retrieval tools. SQLite holds the corpus.

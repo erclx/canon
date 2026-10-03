@@ -1,0 +1,29 @@
+import { useEffect, useState } from "react";
+
+type Task = { id: string; title: string };
+
+const SEEDED: Task[] = [
+  { id: "1", title: "Measure the preview build" },
+  { id: "2", title: "Compare against the threshold" },
+];
+
+export function TaskList() {
+  const [tasks, setTasks] = useState<Task[] | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTasks(SEEDED), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div>
+      <h2>Tasks</h2>
+      <ul>
+        {(tasks ?? []).map((t) => (
+          <li key={t.id}>{t.title}</li>
+        ))}
+      </ul>
+      <img src="/banner.svg" alt="" />
+    </div>
+  );
+}

@@ -1,0 +1,14 @@
+
+# Requirements
+
+A focus timer for writers. Single-screen app. Start a session, see elapsed time, end and log the run.
+
+## Personality
+
+Quiet and disciplined. The app should feel like a clean desk at dawn: uncluttered, warm paper tones, a single confident accent for the active state. No decoration, no motion, no sound. The reader should trust the timer is running without needing reassurance from the interface.
+
+## Non-goals
+
+- No team features
+- No statistics dashboard
+- No motion or transitions

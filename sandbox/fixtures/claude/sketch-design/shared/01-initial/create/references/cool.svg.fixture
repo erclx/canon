@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">
+  <rect width="320" height="180" fill="#eef2f6"/>
+  <rect x="24" y="24" width="120" height="40" fill="#2f5fae"/>
+  <text x="24" y="100" font-family="system-ui, sans-serif" font-size="20" fill="#1a2331">Cool slate</text>
+</svg>

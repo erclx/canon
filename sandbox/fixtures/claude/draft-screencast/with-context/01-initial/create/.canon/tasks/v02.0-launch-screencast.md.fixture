@@ -1,0 +1,11 @@
+---
+title: 'v02.0: Record v2 launch screencast'
+description: Walk the inline edit flow end to end for the v2 launch
+---
+
+# v02.0: Record v2 launch screencast
+
+Walk through the inline edit flow end to end. The hero moment is save-on-blur with the indicator updating in place under 400ms.
+
+- [ ] Outcome: 75-90s recording covering click -> edit -> save indicator
+- [ ] Outcome: distribution to social and canonical hosts

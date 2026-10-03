@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Polish task list before review](v01.0-task-list-polish.md): Tidy the task list and add modal ahead of review

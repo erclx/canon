@@ -1,0 +1,6 @@
+
+# Architecture
+
+- Vite plus React single-page app
+- Local storage for session history
+- No backend, no auth, no network calls

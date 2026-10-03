@@ -1,0 +1,15 @@
+---
+title: Task list surface
+description: Vertical list of task rows on the home view.
+---
+
+# Task list surface
+
+A vertical list of task rows. Each row shows the task title and a checkbox.
+
+States:
+
+- **Loading**: skeleton rows
+- **Empty**: centered illustration with copy "No tasks yet. Add one to get started." and a primary button "Add task"
+- **Populated**: list of rows
+- **Error**: inline error banner above the list with a retry button

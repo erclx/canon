@@ -8,46 +8,11 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-sketch-design",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  mkdir -p .claude references
-  cat <<'EOF' >>canon/REQUIREMENTS.md
-
-# Requirements
-
-A single-screen focus timer for writers.
-
-## Personality
-
-Quiet and disciplined, and undecided on one axis: whether the page should
-read warm or cool. Two reference images sit in references/ for that call.
-EOF
-
   # Two flat SVG swatches stand in for reference screenshots, so the scenario
   # needs no network render and no browser binary to exercise the pick.
-  cat <<'EOF' >references/warm.svg
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">
-  <rect width="320" height="180" fill="#faf3e8"/>
-  <rect x="24" y="24" width="120" height="40" fill="#b5502e"/>
-  <text x="24" y="100" font-family="Georgia, serif" font-size="20" fill="#2b241c">Warm paper</text>
-</svg>
-EOF
+  stage_fixtures claude sketch-design shared 01-initial
 
-  cat <<'EOF' >references/cool.svg
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">
-  <rect width="320" height="180" fill="#eef2f6"/>
-  <rect x="24" y="24" width="120" height="40" fill="#2f5fae"/>
-  <text x="24" y="100" font-family="system-ui, sans-serif" font-size="20" fill="#1a2331">Cool slate</text>
-</svg>
-EOF
-
+  mkdir -p .claude
   git add . && git commit -m "chore(project): seed a focus timer undecided between two reference swatches" --no-verify -q
 
   log_step "Scenario ready: two local reference images with no DESIGN.md yet"

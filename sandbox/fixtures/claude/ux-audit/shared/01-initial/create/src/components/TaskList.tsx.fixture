@@ -1,0 +1,46 @@
+import { useEffect, useState } from "react";
+import { Check, Trash2 } from "lucide-react";
+import * as MaterialIcons from "@mui/icons-material";
+import { Button } from "./Button";
+
+type Task = { id: string; title: string; done: boolean };
+
+export function TaskList() {
+  const [tasks, setTasks] = useState<Task[] | null>(null);
+
+  useEffect(() => {
+    fetch("/api/tasks")
+      .then((r) => r.json())
+      .then(setTasks);
+  }, []);
+
+  if (tasks === null) {
+    return null;
+  }
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2 style={{ marginBottom: 14 }}>Tasks</h2>
+      <ul style={{ listStyle: "none", padding: 0 }}>
+        {tasks.map((t) => (
+          <li
+            key={t.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "8px 0",
+            }}
+          >
+            <Check size={16} />
+            <span>{t.title}</span>
+            <MaterialIcons.Delete fontSize="small" />
+          </li>
+        ))}
+      </ul>
+      <Button variant="ghost" onClick={() => {}}>
+        Add task
+      </Button>
+    </div>
+  );
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "empty-state-tour",
+  "title": "Empty state tour",
+  "url": "",
+  "viewport": { "width": 1280, "height": 720 },
+  "output": { "video": "demos/empty-state-tour/take/empty-state-tour.webm", "still": "demos/empty-state-tour/take/empty-state-tour.png" },
+  "pointer": { "travelMs": 400, "typeDelayMs": 110 },
+  "annotations": { "durationMs": 900, "position": "bottom-right", "fontSize": 22 },
+  "steps": [
+    {
+      "beat": 1,
+      "name": "Cold open",
+      "kind": "navigate",
+      "target": "",
+      "text": "",
+      "waitFor": "h1",
+      "holdMs": 600,
+      "caption": "An empty board",
+      "still": false
+    },
+    {
+      "beat": 2,
+      "name": "Hero moment",
+      "kind": "click",
+      "target": "#add",
+      "text": "",
+      "waitFor": "#output",
+      "holdMs": 1200,
+      "caption": "Add the first card",
+      "still": true
+    }
+  ]
+}

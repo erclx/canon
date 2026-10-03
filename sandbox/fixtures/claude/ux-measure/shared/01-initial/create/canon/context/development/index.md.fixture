@@ -1,0 +1,11 @@
+---
+title: Development
+subtitle: Local run commands and the ports they serve
+---
+
+# Development
+
+Local run commands and the ports they serve
+
+- `bun run dev`: vite dev server on port 5173, unminified modules
+- `bun run preview`: production build on port 4173, the shape a user receives

@@ -1,0 +1,5 @@
+# Card layout
+
+The dashboard arranges four cards in a two-by-two grid, each card offset by
+a small rotation to read as hand-placed rather than gridded. Nothing in this
+document shows that arrangement yet.
