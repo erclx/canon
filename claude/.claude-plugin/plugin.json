@@ -1,7 +1,7 @@
 {
   "name": "canon",
   "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
-  "version": "5.23.0",
+  "version": "5.24.0",
   "author": {
     "name": "Eric Le",
     "url": "https://github.com/erclx"
