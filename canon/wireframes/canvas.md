@@ -42,21 +42,21 @@ The sketch stays until a capture of the canvas exists.
 
 ## States
 
-| State          | Reached when                                           | Shows                                                                      | Evidence     |
-| -------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- | ------------ |
-| filled         | The current page holds at least one frame              | Every frame at its box, the page selected in the list                      | not captured |
-| no-pages       | The canvas folder holds no page                        | The page list replaced by the add-a-page line, no frame list               | not captured |
-| empty-page     | The current page holds no frame                        | The frame list replaced by the add-a-frame line, an empty surface          | not captured |
-| unplaced       | A frame file has no box in the page's layout           | That frame in a row after the placed ones, and a count of them at right    | not captured |
-| malformed      | The page's layout file does not parse                  | Every frame in a default row, and an alert at right naming the file        | not captured |
-| no-tokens      | No token stylesheet resolves for the project           | Frames unstyled, and the details panel naming where tokens would go        | not captured |
-| unreachable    | The page list cannot be read from the server           | The panel replaced by one line saying to check the server is running       | not captured |
-| light          | The system prefers light, or the operator picks light  | The chrome on the light ground                                             | not captured |
-| dark           | The system prefers dark, or the operator picks dark    | The chrome on the dark ground                                              | not captured |
-| frame-switched | The operator switches one frame's theme from its label | That frame in the other theme while the chrome and the rest stay put       | not captured |
-| selected       | The operator presses a frame, or picks it in the list  | That frame outlined, its list row marked, and its box in the inspector     | not captured |
-| dragging       | The operator moves a pressed frame                     | The frame following the pointer, and its x and y updating in the inspector | not captured |
-| write-failed   | The server refuses a move or a selection               | The frame back at its stored place and an alert in the details panel       | not captured |
+| State          | Reached when                                           | Shows                                                                      | Evidence                                           |
+| -------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------- |
+| filled         | The current page holds at least one frame              | Every frame at its box, the page selected in the list                      | not captured                                       |
+| no-pages       | The canvas folder holds no page                        | The page list replaced by the add-a-page line, no frame list               | not captured                                       |
+| empty-page     | The current page holds no frame                        | The frame list replaced by the add-a-frame line, an empty surface          | not captured                                       |
+| unplaced       | A frame file has no box in the page's layout           | That frame in a row after the placed ones, and a count of them at right    | not captured                                       |
+| malformed      | The page's layout file does not parse                  | Every frame in a default row, and an alert at right naming the file        | not captured                                       |
+| no-tokens      | No token stylesheet resolves for the project           | Frames unstyled, and the details panel naming where tokens would go        | not captured                                       |
+| unreachable    | The page list cannot be read from the server           | The panel replaced by one line saying to check the server is running       | not captured                                       |
+| light          | The system prefers light, or the operator picks light  | The chrome on the light ground                                             | not captured                                       |
+| dark           | The system prefers dark, or the operator picks dark    | The chrome on the dark ground                                              | not captured                                       |
+| frame-switched | The operator switches one frame's theme from its label | That frame in the other theme while the chrome and the rest stay put       | not captured                                       |
+| selected       | The operator presses a frame, or picks it in the list  | That frame outlined, its list row marked, and its box in the inspector     | `assets/evidence/canvas-arrange/selected-1440.png` |
+| dragging       | The operator moves a pressed frame                     | The frame following the pointer, and its x and y updating in the inspector | `assets/evidence/canvas-arrange/dragged-1440.png`  |
+| write-failed   | The server refuses a move or a selection               | The frame back at its stored place and an alert in the details panel       | not captured                                       |
 
 ## Copy
 

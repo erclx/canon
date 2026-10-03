@@ -1,7 +1,12 @@
 import { join } from 'node:path'
 import type { CaptureResult } from '@/capture/render'
 import { type ContentRefused, type Frame, readPage } from '@/canvas/content'
-import { FRAMES_PREFIX, startCanvas } from '@/canvas/server'
+import {
+  type CanvasOptions,
+  type CanvasOutcome,
+  FRAMES_PREFIX,
+  startCanvas,
+} from '@/canvas/server'
 import { recordDir } from '@/record-root'
 
 /**
@@ -96,19 +101,31 @@ export type CaptureOutcome =
   | ContentRefused
   | {
       readonly ok: false
-      readonly reason: 'no-server'
+      readonly reason: 'no-server' | 'capture-failed'
       readonly detail: string
     }
+
+type CaptureEngine = (typeof import('@/capture/render'))['captureSources']
+
+/** What a test stands in for, which the command never passes. */
+export interface CaptureDeps {
+  readonly start?: (root: string, options: CanvasOptions) => CanvasOutcome
+  readonly capture?: CaptureEngine
+}
 
 /**
  * Serves the canvas for the length of the call and captures through it, so the
  * run needs no `canon canvas serve` and still never reads the raw file. The
  * port is whatever is free, which keeps it clear of a canvas already running.
+ * An error the engine throws, such as a browser that will not launch, comes
+ * back as `capture-failed` rather than escaping, so a caller reading the record
+ * can tell it from a root that is wrong.
  */
 export async function captureCanvas(
   root: string,
   spec: string,
   out?: string,
+  deps: CaptureDeps = {},
 ): Promise<CaptureOutcome> {
   /*
    * Refused before the server starts, since starting it creates the canvas
@@ -117,7 +134,8 @@ export async function captureCanvas(
   const early = resolveCaptureTargets(root, spec, '')
   if (!early.ok) return early
 
-  const server = startCanvas(root, { port: 0, shell: new Response('') })
+  const start = deps.start ?? startCanvas
+  const server = start(root, { port: 0, shell: new Response('') })
   if (!server.ok) {
     return {
       ok: false,
@@ -130,10 +148,11 @@ export async function captureCanvas(
     const resolved = resolveCaptureTargets(root, spec, server.url, out)
     if (!resolved.ok) return resolved
 
-    const { captureSources } = await import('@/capture/render')
+    const capture =
+      deps.capture ?? (await import('@/capture/render')).captureSources
     const captures: { target: CaptureTarget; result: CaptureResult }[] = []
     for (const target of resolved.targets) {
-      const [result] = await captureSources(target.url, {
+      const [result] = await capture(target.url, {
         selector: CAPTURE_SELECTOR,
         width: target.width,
         outDir: target.pngPath,
@@ -141,6 +160,12 @@ export async function captureCanvas(
       if (result) captures.push({ target, result })
     }
     return { ok: true, captures }
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'capture-failed',
+      detail: error instanceof Error ? error.message : String(error),
+    }
   } finally {
     await server.stop()
   }

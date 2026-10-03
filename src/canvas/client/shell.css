@@ -288,6 +288,11 @@ code {
   cursor: grabbing;
 }
 
+/* Above its neighbors, so a frame dragged over another stays whole. */
+.frame[data-selected='true'] {
+  z-index: 1;
+}
+
 .frame[data-selected='true'] iframe {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;

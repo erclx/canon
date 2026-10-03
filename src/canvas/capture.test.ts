@@ -37,6 +37,92 @@ function seedFrame(page: string, frame: string, width?: number): void {
   addFrame(ROOT, page, frame, { width, height: 700 })
 }
 
+describe('captureCanvas with the server and engine stood in', () => {
+  function fakeServer(stopped: string[]) {
+    return () =>
+      ({
+        ok: true,
+        root: ROOT,
+        content: '',
+        host: '127.0.0.1',
+        port: 1,
+        url: 'http://127.0.0.1:1/',
+        stop: async () => {
+          stopped.push('stopped')
+        },
+      }) as const
+  }
+
+  it('should report a server that will not start as no-server', async () => {
+    seedFrame('drafts', 'hero')
+
+    const outcome = await captureCanvas(ROOT, 'drafts/hero', undefined, {
+      start: () => ({
+        ok: false,
+        reason: 'no-port',
+        detail: 'no free port between 1 and 2',
+      }),
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-server' })
+    expect(outcome.ok === false && outcome.detail).toContain(
+      'no free port between 1 and 2',
+    )
+  })
+
+  it('should report an error thrown inside the capture as capture-failed', async () => {
+    seedFrame('drafts', 'hero')
+    const stopped: string[] = []
+
+    const outcome = await captureCanvas(ROOT, 'drafts/hero', undefined, {
+      start: fakeServer(stopped),
+      capture: async () => {
+        throw new Error('browser would not launch')
+      },
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'capture-failed' })
+    expect(outcome.ok === false && outcome.detail).toContain(
+      'browser would not launch',
+    )
+  })
+
+  it('should stop the server it started after a failed capture', async () => {
+    seedFrame('drafts', 'hero')
+    const stopped: string[] = []
+
+    await captureCanvas(ROOT, 'drafts/hero', undefined, {
+      start: fakeServer(stopped),
+      capture: async () => {
+        throw new Error('boom')
+      },
+    })
+
+    expect(stopped).toEqual(['stopped'])
+  })
+
+  it('should hand the engine the served address, the frame width, and the PNG path', async () => {
+    seedFrame('drafts', 'phone', 390)
+    const calls: unknown[] = []
+
+    const outcome = await captureCanvas(ROOT, 'drafts/phone', '/out/p.png', {
+      start: fakeServer([]),
+      capture: async (source, options) => {
+        calls.push([source, options])
+        return []
+      },
+    })
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(calls).toEqual([
+      [
+        'http://127.0.0.1:1/frames/drafts/phone.html',
+        { selector: 'html', width: 390, outDir: '/out/p.png' },
+      ],
+    ])
+  })
+})
+
 describe('captureCanvas', () => {
   it('should refuse a missing page without creating the canvas folder', async () => {
     const outcome = await captureCanvas(ROOT, 'missing')

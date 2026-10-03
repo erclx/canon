@@ -38,7 +38,11 @@ interface RootOptions {
 
 interface Refused {
   readonly ok: false
-  readonly reason: ContentRefused['reason'] | 'no-root'
+  readonly reason:
+    | ContentRefused['reason']
+    | 'no-root'
+    | 'no-server'
+    | 'capture-failed'
   readonly detail: string
 }
 
@@ -387,20 +391,13 @@ export function register(program: Command): void {
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error)
         process.exitCode = refuse(
-          { ok: false, reason: 'no-root', detail },
+          { ok: false, reason: 'capture-failed', detail },
           opts.json ?? false,
         )
         return
       }
       if (!outcome.ok) {
-        process.exitCode = refuse(
-          {
-            ok: false,
-            reason: outcome.reason === 'no-server' ? 'no-root' : outcome.reason,
-            detail: outcome.detail,
-          },
-          opts.json ?? false,
-        )
+        process.exitCode = refuse(outcome, opts.json ?? false)
         return
       }
 
