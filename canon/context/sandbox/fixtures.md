@@ -41,7 +41,7 @@ A heredoc with a quoted delimiter is a literal body, so it leaves the scenario a
 - A body fed to a command's stdin rather than written to a path. `infra/feedback.sh` reads `refusal/stdin/report.md.fixture` through `fixture_stage_dir`, so the staged tree gains no file.
 - A body whose path interpolates a root. `infra/record-root.sh` stores its records under a neutral `seed-records/` folder and moves them to the root the arm names, which keeps a stored `.canon/` path out of the ignore rule and a stored `.claude/` path from pinning the fallback.
 
-`claude/deploy-app` and `claude/search-craft` still stage from heredocs inside `stage_setup` and move in a later slice.
+No quoted heredoc is left in the catalog. The four kinds above are all that stays inline, and the unquoted heredocs in `git-worktree`, `memory-review`, `plan-feature`, `plan-groundwork`, and `infra/context` each interpolate a variable or a `$(...)`.
 
 ### The anchor tree
 
