@@ -9,6 +9,10 @@ description: Where a plugin skill lives, the catalog command, the consumer map, 
 
 Plugin skills live in `claude/skills/` and are auto-discovered from the plugin root, whether that root is a marketplace install or a `--plugin-dir` pointed at a checkout. No registration is needed, since folder presence is enough. Each skill is a kebab-case folder containing `SKILL.md`. This folder holds why a skill exists and where its boundary sits, which no listing recovers.
 
+A skill one folder deeper, at `skills/<category>/<name>/SKILL.md`, is not discovered. Measured on 2026-10-03 against Claude Code 2.1.288 with `--plugin-dir` only, so an installed marketplace copy is unmeasured. This records a measurement and takes no side on whether to nest skills.
+
+Fixture: a `plugin.json` with no `skills` key, `skills/flat/SKILL.md` as the control, and `skills/cat/deep/SKILL.md`. Command, run from the fixture root: `claude -p "/spike:deep" --plugin-dir "$F" --model sonnet --output-format stream-json --verbose --max-turns 3`. Its `init` event listed `spike:flat` and no `spike:deep`, and the reply said `/spike:deep` was not available. Because the control was listed in that same run, the absence belongs to the nesting. Only the deep skill was asked for, so the control was listed but never invoked.
+
 ## Layout
 
 - `claude/skills/` owns the plugin skills a target project loads live
