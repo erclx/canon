@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.21.0](https://github.com/erclx/canon/compare/v5.20.0...v5.21.0) (2026-10-03)
+
+
+### Features
+
+* **slides:** build the deck master, charts, and notes from tokens ([#2144](https://github.com/erclx/canon/issues/2144)) ([071dfb2](https://github.com/erclx/canon/commit/071dfb211c184317e2f78f541dec1748958173ea))
+
+
+### Bug Fixes
+
+* **claude:** claim the label in draft-ready ([#2149](https://github.com/erclx/canon/issues/2149)) ([1d26b2f](https://github.com/erclx/canon/commit/1d26b2f1d3674f319d00b118aa289db845e6b173))
+* **governance:** match a tests folder at any depth in test rules ([#2147](https://github.com/erclx/canon/issues/2147)) ([efc0d5f](https://github.com/erclx/canon/commit/efc0d5f20340471c30277a9f0ec88d30b9857acb))
+* **sandbox:** repair the search-craft conflict and refused arms ([#2143](https://github.com/erclx/canon/issues/2143)) ([0e2bb1e](https://github.com/erclx/canon/commit/0e2bb1ecbdc515bb5ff98f35b142974dc57f2172))
+* **tasks:** skip the pending marker once the branch pull is recorded ([#2154](https://github.com/erclx/canon/issues/2154)) ([0fcef99](https://github.com/erclx/canon/commit/0fcef99f9d9caf9b4a80d0467c5ca7919d227288))
+* **tooling:** keep astro card stylesheet note above its import ([#2151](https://github.com/erclx/canon/issues/2151)) ([3a9aa43](https://github.com/erclx/canon/commit/3a9aa4380ffa42a7bbdc76b084f6a9626dfd2262))
+
 ## [5.20.0](https://github.com/erclx/canon/compare/v5.19.0...v5.20.0) (2026-10-03)
 
 
