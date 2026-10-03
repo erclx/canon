@@ -86,6 +86,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'The composed demo video looks generic and the zoom drags. What should the captions say, and how fast should the push-in be?',
+    expect: 'video-craft',
+  },
+  {
+    prompt:
       "I've got the plan approved and it touches the parser, the command, and the docs. How should I build it so I don't end up with one giant diff?",
     expect: 'build-in-slices',
   },
