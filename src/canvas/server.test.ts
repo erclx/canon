@@ -429,6 +429,55 @@ describe('POST /api/selection', () => {
     expect(record.selection).toBeUndefined()
   })
 
+  it('should record an element and report it in the page list', async () => {
+    seed(
+      'drafts/hero.html',
+      '<html><head></head><body><button>Go</button></body></html>',
+    )
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 3, tag: 'button', count: 4 },
+    })
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(response.status).toBe(200)
+    expect(record.selection).toEqual({
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 3, tag: 'button', stale: false },
+    })
+  })
+
+  it('should answer 409 for an element the file does not hold', async () => {
+    seed('drafts/hero.html', '<table><tr><td>a</td></tr></table>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: { index: 6, tag: 'td', count: 7 },
+    })
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ reason: 'address-mismatch' })
+  })
+
+  it('should answer 400 for an element that is not an address', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+      element: 'the button',
+    })
+
+    expect(response.status).toBe(400)
+  })
+
   it('should answer 404 for a frame that does not exist', async () => {
     seed('drafts/hero.html', '<p>hero</p>')
     const server = start()

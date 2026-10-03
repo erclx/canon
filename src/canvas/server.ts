@@ -1,4 +1,5 @@
 import { type FSWatcher, mkdirSync, watch } from 'node:fs'
+import { type ElementAddress, TOKENS_ATTRIBUTE } from '@/canvas/address'
 import {
   type ContentRefused,
   canvasDir,
@@ -72,7 +73,7 @@ export interface ChangeEvent {
 
 /** Escapes the one sequence that would end the injected element early. */
 function styleElement(css: string): string {
-  return `<style data-canvas-tokens>${css.replaceAll('</style', '<\\/style')}</style>`
+  return `<style ${TOKENS_ATTRIBUTE}>${css.replaceAll('</style', '<\\/style')}</style>`
 }
 
 /**
@@ -133,6 +134,8 @@ const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
   exists: 409,
   'malformed-layout': 409,
   busy: 409,
+  'invalid-address': 400,
+  'address-mismatch': 409,
 }
 
 function refusal(refused: ContentRefused): Response {
@@ -182,6 +185,15 @@ function isLoopbackOrigin(origin: string, port: number): boolean {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
+}
+
+function isAddressShape(value: unknown): value is ElementAddress {
+  return (
+    isRecord(value) &&
+    typeof value.index === 'number' &&
+    typeof value.tag === 'string' &&
+    typeof value.count === 'number'
+  )
 }
 
 async function serveFrame(
@@ -324,6 +336,13 @@ export function startCanvas(
               selection: selected && {
                 page: selected.page,
                 frame: selected.frame,
+                ...(selected.element && {
+                  element: {
+                    index: selected.element.index,
+                    tag: selected.element.tag,
+                    stale: selected.element.stale,
+                  },
+                }),
               },
             })
           }),
@@ -359,7 +378,14 @@ export function startCanvas(
                 if (target === undefined && (page != null || frame != null)) {
                   return badBody('send both page and frame, or neither')
                 }
-                const outcome = writeSelection(root, target)
+                const { element } = body
+                if (element != null && !isAddressShape(element)) {
+                  return badBody('send an element as index, tag, and count')
+                }
+                const outcome = writeSelection(
+                  root,
+                  target && element != null ? { ...target, element } : target,
+                )
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),
             ),

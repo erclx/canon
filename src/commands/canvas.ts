@@ -310,7 +310,9 @@ export function register(program: Command): void {
   withRoot(
     canvas
       .command('selection')
-      .description('Report the frame the operator selected on the canvas'),
+      .description(
+        'Report the frame, or the element in it, the operator selected',
+      ),
   )
     .addHelpText(
       'after',
@@ -318,6 +320,10 @@ export function register(program: Command): void {
         '',
         'Reports none when nothing is selected or when the selected frame has',
         'since been removed. Read this when the operator says "this one".',
+        '',
+        'An element is named by its index in document order, with the tag,',
+        'classes, and text it had when picked. stale is true once the frame',
+        'file changed since, since the index may then name another element.',
         '',
       ].join('\n'),
     )
@@ -345,8 +351,17 @@ export function register(program: Command): void {
         logStep('Nothing selected')
       } else {
         logStep(`${selected.page}/${selected.frame}`)
-        const { box } = selected
+        const { box, element } = selected
         logInfo(`${box.width} × ${box.height} at ${box.x}, ${box.y}`)
+        if (element) {
+          const classes = element.classes.map((name) => `.${name}`).join('')
+          logInfo(
+            `<${element.tag}${classes}> at index ${element.index}: ${element.text}`,
+          )
+          if (element.stale) {
+            logWarn('The frame changed since, so the index may have moved')
+          }
+        }
       }
       outro()
     })
