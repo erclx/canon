@@ -13,6 +13,4 @@ Authoring guidance: the requirements standard.
 1. Feature: description
 2. Feature: description
 
-## Tech stack
-
 ## Constraints
