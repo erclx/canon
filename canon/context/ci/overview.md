@@ -67,7 +67,7 @@ A shields.io badge URL returns HTTP 200 whether or not the query resolves, so ve
 
 An exit-code flag counts only states some documented action can drive to zero, since a permanent condition makes the gate unpassable rather than informative. `canon sync --check --exit-code` excludes `orphaned` from the count, since a single local rule in `.claude/rules/` would otherwise return 1 on every run with no remedy. For each state a gate counts, name the action that clears it, and where there is none, exclude it and report it separately.
 
-The runner installs no browser binary, so a test needing one skips rather than fails, and a green pipeline is not evidence that test ran. `src/demo/drive.e2e.test.ts` guards itself with a launch probe and reports the skip in its own header. Adding the install would slow every run for one suite, so the gap stays open and a change to the demo driver is verified locally. The plugin CLI install in `canon/context/ci/checks.md` is the precedent for closing it if the count of such tests grows.
+The runner installs no browser binary, so a test needing one skips rather than fails, and a green pipeline is not evidence that test ran. Each `*.e2e.test.ts` under `src/` guards itself with a launch probe and reports the skip in its own header, among them the demo and driver drives, the inventory walk, the slides export, and the canvas shell walk. Adding the install would slow every run, so the gap stays open and a change under any of them is verified locally. The plugin CLI install in `canon/context/ci/checks.md` is the precedent for closing it as the count of such tests grows.
 
 ## Running CI locally
 
