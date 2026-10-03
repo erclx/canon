@@ -110,7 +110,7 @@ describe('startCanvas', () => {
   })
 
   it('should inject the token stylesheet into the head of a frame', async () => {
-    seedTokens(':root { --color-text: rebeccapurple; }')
+    seedTokens(':root { --color-text: teal; }')
     seed(
       'drafts/hero.html',
       '<!doctype html><html><head><title>x</title></head><body>hero</body></html>',
@@ -120,18 +120,18 @@ describe('startCanvas', () => {
     const body = await (await get(server, '/frames/drafts/hero.html')).text()
 
     expect(body).toMatch(
-      /<head><style data-canvas-tokens>[^<]*rebeccapurple[^<]*<\/style><title>/,
+      /<head><style data-canvas-tokens>[^<]*teal[^<]*<\/style><title>/,
     )
   })
 
   it('should inject into a frame that carries no head', async () => {
-    seedTokens(':root { --color-text: rebeccapurple; }')
+    seedTokens(':root { --color-text: teal; }')
     seed('drafts/bare.html', '<p>bare</p>')
     const server = start()
 
     const body = await (await get(server, '/frames/drafts/bare.html')).text()
 
-    expect(body.indexOf('rebeccapurple')).toBeLessThan(body.indexOf('<p>bare'))
+    expect(body.indexOf('teal')).toBeLessThan(body.indexOf('<p>bare'))
   })
 
   it('should serve a frame asset without touching it', async () => {
