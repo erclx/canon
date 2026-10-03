@@ -51,7 +51,7 @@ Hand the operator the address as a markdown link carrying the URL as its text an
 
 ## Step 3: edit a frame through its file
 
-Write the frame's whole document to the `file` path the add verb reported, inside `content`. The open canvas reloads the frame when its file changes.
+Write the frame's whole document to the `path` the add verb reported. The open canvas reloads the frame when its file changes.
 
 - From a linked worktree, `Edit` and `Write` refuse a main-root path. Write the whole file through one plain `Bash` heredoc instead, the route `session-worktree` states for a main-root write, and never take the redirect to a worktree copy.
 - Change one property of one element with `canon canvas edit <page>/<frame> --element <index> --set <property>=<value> --json` when the set it accepts covers the change, since it leaves every other byte as it was.
@@ -83,6 +83,7 @@ The operator restyles elements from the inspector, and each edit lands as inline
 - Capture a whole page once its frames are finished: `canon canvas capture <page> --composite --json`. The image shows each frame clipped to its box at its layout position.
 - Capture once per finished frame or page, not after every edit. The live canvas is the working view, and a capture is the record handed on.
 - Read each `path` off the record rather than composing one.
+- A capture refused because a font is not installed names the family it read off the frame's `html` element. Set that element's `font-family` to a family the machine has and capture again, rather than reporting the frame as captured.
 
 ## Step 7: carry a picked direction back
 
