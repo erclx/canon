@@ -40,7 +40,7 @@ Decide the figure once per lesson, before writing the body.
 
 1. Name the one relationship, boundary, path, or before-and-after the lesson is about. A lesson about none ends here, with `Figure: none, <why it names no structure>` on the reply.
 2. Hold it against the bar in `${CLAUDE_SKILL_DIR}/../../standards/figures.md`, which also carries the drawing rules.
-3. Draw it through `canon:draft-figure` into a `raw` block in the body, before the quiz entry and never inside it or after its feedback, which breaks the stepper's gating. Report it, never hand-draw, when that skill does not resolve.
+3. Draw it hand-written through `canon:draft-figure` into a `raw` block before the quiz, never inside it or after its feedback, which breaks the stepper's gating. Report it, never draw it yourself, if the skill does not resolve.
 4. Or write one line on why prose carries it better, such as a structure an earlier lesson gave.
 
 A structure lesson takes step 3 or 4, never neither. Put the outcome on the reply's `Figure:` line, off the lesson page. Never draw to satisfy the step, or on every section (`## Restraint`).
