@@ -57,7 +57,7 @@ A slide dropping one band keeps the other from the master. A slide replacing a s
 
 ## The master
 
-The master takes its colors from the first slide as Chromium laid it out with the project's token stylesheet injected:
+The master takes its colors from the `<html>` element of the first slide as Chromium laid it out with the project's token stylesheet injected, so a theme switched on one slide's `<body>`, such as a dark cover, stays on that slide:
 
 - `--color-background`: the slide ground
 - `--color-text`: the header text
@@ -67,7 +67,7 @@ The master takes its colors from the first slide as Chromium laid it out with th
 
 A role the project declares no token for falls back to the slide body's own color and prints one `✗` line naming it. It never falls back to the toolkit's palette.
 
-A slide whose `<body>` background differs from the master's keeps its own.
+A slide whose `<body>` background differs from the master's keeps its own. A slide whose `<body>` computes a `--color-text` apart from the master's prints one `✗` line naming it, since its bands keep the master's colors and may not read against its ground.
 
 ## Speaker notes
 
@@ -115,5 +115,6 @@ A `<figure data-chart="...">` holding a `<table>` becomes a native, editable cha
 | chart cell not a number                | `✗` naming the slide, the figure, and the cell | 0    |
 | `data-chart` outside the five types    | `✗` naming the value                           | 0    |
 | token role not declared                | `✗` naming the role                            | 0    |
+| slide body sets its own `--color-text` | `✗` naming the slides                          | 0    |
 
 A refused chart is left out and the rest of the deck is written.

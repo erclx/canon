@@ -29,6 +29,8 @@ export interface SlideMeta {
   readonly isHidden: boolean
   readonly header: BandOverride
   readonly footer: BandOverride
+  /** The `--color-text` the slide's `<body>` computes, as hex. */
+  readonly textToken?: string
 }
 
 /** What one laid-out slide hands back across `page.evaluate`. */
@@ -530,7 +532,11 @@ export function walkSlide(idAttribute: string): WalkedSlide {
       : { kind: 'master' }
   }
   const section = body.getAttribute('data-section')?.trim()
+  const textValue = getComputedStyle(body)
+    .getPropertyValue('--color-text')
+    .trim()
   const meta: SlideMeta = {
+    ...(textValue ? { textToken: rgba(textValue).hex } : {}),
     ...(notes.length > 0 ? { notes: notes.join('\n\n') } : {}),
     ...(section ? { section } : {}),
     isHidden:
@@ -545,9 +551,10 @@ export function walkSlide(idAttribute: string): WalkedSlide {
 
 /**
  * Runs inside the laid-out page and reads the colors and face the deck master
- * takes. Values come from `<body>`'s computed style, so a slide that switches
- * theme on `<html>` or `<body>` hands back that theme's tokens. Serialized to
- * source like `walkSlide`, so its helpers sit in its own body.
+ * takes. Tokens come from `<html>`'s computed style, so a slide that switches
+ * theme on its own `<body>`, such as a dark cover, leaves the master on the
+ * project's root theme. The body supplies the fallback colors and the face.
+ * Serialized to source like `walkSlide`, so its helpers sit in its own body.
  */
 export function readTheme(): ThemeReading {
   const canvas = document.createElement('canvas')
@@ -569,8 +576,9 @@ export function readTheme(): ThemeReading {
   }
 
   const style = getComputedStyle(document.body)
+  const rootStyle = getComputedStyle(document.documentElement)
   const token = (name: string): string | undefined => {
-    const value = style.getPropertyValue(name).trim()
+    const value = rootStyle.getPropertyValue(name).trim()
     return value ? hex(value) : undefined
   }
 

@@ -98,7 +98,7 @@ const SLIDES: Record<string, string> = {
     <p class="under" style="position: absolute; left: 96px; top: 580px; margin: 0; text-decoration: underline">Under <strong>lined</strong></p>
     <blockquote class="rule" style="position: absolute; left: 720px; top: 520px; margin: 0; padding-left: 16px; border-left: 4px solid #B45309">Left-rule quote</blockquote>
   </body></html>`,
-  '03-backup.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-hidden data-footer="off">
+  '03-backup.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-hidden data-footer="off" style="--color-text: #FFFFFF">
     <h1>Backup</h1>
   </body></html>`,
   '04-appendix.html': `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body data-footer-center="Appendix only">
@@ -205,6 +205,12 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
 
   it('should give the master the injected background', async () => {
     expect(await layoutOf(0)).toMatch(/<p:bg>.*srgbClr val="F0F9FF"/s)
+  })
+
+  it('should report a slide whose text token departs from the master', () => {
+    expect(result.status === 'written' && result.notices).toEqual([
+      'slide 3 sets a --color-text apart from the master, so its bands keep the master colors',
+    ])
   })
 
   it('should set the theme face from the slide body font', async () => {

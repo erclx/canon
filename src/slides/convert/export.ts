@@ -172,7 +172,7 @@ export async function exportHtmlDeck(
   const refusedLinks: SlideRefusedLink[] = []
   const refusedCharts: RefusedChart[] = []
   const patches: Patch[] = []
-  let notices: readonly string[] = []
+  const notices: string[] = []
 
   try {
     const page = await browser.newPage({
@@ -183,7 +183,8 @@ export async function exportHtmlDeck(
     const reading = await page.evaluate(readTheme)
     const read = deckTheme(reading)
     const theme = read.theme
-    notices = read.notices
+    notices.push(...read.notices)
+    const drifted: number[] = []
     const chartTheme: ChartTheme = {
       colors: seriesColors(theme.accent, reading.roles),
       ink: theme.ink,
@@ -205,6 +206,10 @@ export async function exportHtmlDeck(
       refusedLinks.push(
         ...plan.refusedLinks.map((each) => ({ ...each, slide: slideNumber })),
       )
+      const { textToken } = walked.meta
+      if (textToken !== undefined && textToken !== theme.ink) {
+        drifted.push(slideNumber)
+      }
       // pptxgenjs binds a slide to its master at creation, so the bands this
       // slide keeps decide the master before any shape is added.
       const bands = masterBands(deck, walked.meta)
@@ -236,6 +241,13 @@ export async function exportHtmlDeck(
       }
       drawOverrides(slide, deck, theme, walked.meta)
       if (walked.meta.notes) slide.addNotes(walked.meta.notes)
+    }
+    if (drifted.length > 0) {
+      const noun = drifted.length === 1 ? 'slide' : 'slides'
+      const verb = drifted.length === 1 ? 'sets' : 'set'
+      notices.push(
+        `${noun} ${drifted.join(', ')} ${verb} a --color-text apart from the master, so ${drifted.length === 1 ? 'its' : 'their'} bands keep the master colors`,
+      )
     }
   } catch (error) {
     return refused(
