@@ -1,0 +1,319 @@
+/*
+ * The canvas chrome. Every value reads a custom property from this toolkit's
+ * own token module, served at /api/chrome.css, which maps dark onto :root and
+ * light onto [data-theme='light']. A frame reads the project's tokens inside
+ * its own iframe, so the two sets of names never meet.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--type-body-family);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+}
+
+#app {
+  height: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+code {
+  font-family: var(--type-code-family);
+  font-size: var(--type-code-size);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) 13rem;
+  height: 100%;
+}
+
+.panel {
+  overflow-y: auto;
+  padding: var(--space-md);
+  background: var(--color-chrome);
+  min-width: 0;
+}
+
+.panel-left {
+  border-right: 1px solid var(--color-border);
+}
+
+.panel-right {
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.section-label {
+  margin: var(--space-md) 0 var(--space-xs);
+  font-size: var(--type-label-size);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.panel-right .section-label {
+  margin-top: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 28px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-text-body);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.row:active {
+  background: var(--color-border);
+}
+
+.row[aria-current='page'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: inset 2px 0 0 var(--color-accent);
+}
+
+.row-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-meta {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty,
+.notice {
+  margin: var(--space-xs) 0;
+  color: var(--color-text-secondary);
+}
+
+.notice {
+  border-left: 2px solid var(--color-accent);
+  padding-left: var(--space-sm);
+}
+
+.detail {
+  margin: 0;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-meta {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.files {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+}
+
+.files li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-body);
+}
+
+.icon-button,
+.text-button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.icon-button:hover,
+.text-button:hover {
+  border-color: var(--color-text-secondary);
+}
+
+.icon-button:active,
+.text-button:active {
+  background: var(--color-border);
+}
+
+.surface {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--color-background);
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.viewport:active {
+  cursor: grabbing;
+}
+
+.plane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.frame {
+  position: absolute;
+  margin: 0;
+  cursor: default;
+}
+
+.frame-label {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.frame-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+.frame-size {
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.frame-theme {
+  margin-left: auto;
+  padding: 2px var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.frame-theme:hover {
+  color: var(--color-text);
+}
+
+.frame iframe {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+}
+
+.toolbar {
+  position: absolute;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-chrome);
+}
+
+.zoom {
+  min-width: 3.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+
+  .panel-right {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .panel-left {
+    max-height: 40vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+}

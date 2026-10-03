@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   CREATION_ROOT,
   creationRel,
+  isRecordEntry,
   RECORD_ROOTS,
   recordDir,
   recordDirs,
@@ -154,5 +155,11 @@ describe('recordRoot', () => {
 
   it('should fall back to the creation default when neither exists', () => {
     expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
+  })
+})
+
+describe('isRecordEntry', () => {
+  it('should claim the canvas content folder for the record root', () => {
+    expect(isRecordEntry('canvas')).toBe(true)
   })
 })

@@ -45,6 +45,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['drive <url> <run>', 'Walk a page through interactions, measure each'],
       ['transcripts <url>', 'Fetch a YouTube transcript with frontmatter'],
       ['teach [cmd]', 'Learning workspaces (list, open, resource, glossary)'],
+      ['canvas [cmd]', 'Local canvas of pages and frames (serve, list)'],
     ],
   },
   {
