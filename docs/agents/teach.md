@@ -83,7 +83,7 @@ canon teach resource regular-expressions \
 
 The pair splits on the first `=`, so a URL carrying its own separator survives intact. Say in the title which claims rest on the source, since the entry is the only place a later session reads that from. Which sources qualify is the source ladder in `canon standards teach`, and a source below its first two rungs also names why no higher one covers the claim.
 
-A URL either heading already lists is refused rather than written twice. Two entries for one source split what rests on it across two lines, and a reader checking a claim then finds half of the answer.
+A URL either heading already lists is refused rather than written twice. Two entries for one source split what rests on it across two lines, and a reader checking a claim then finds half of the answer. The exception is a `--read` URL already under `## Leads`, which moves to `## Read` under the title the call carries, since opening a lead is how it becomes read. A `--read` URL already under `## Read`, and any `--lead` URL already listed, stays refused, and a refusal leaves the whole batch unwritten.
 
 A URL a file displays inside a fence does not count as listed, which is how a workspace quoting the entry format in its own prose is read as the sample it is.
 
@@ -142,7 +142,7 @@ Read `url` off the record rather than building one from the port that was asked 
 | `exists`       | A workspace already covers the topic an open names              |
 | `no-file`      | The workspace carries no file the verb writes into              |
 | `no-section`   | `RESOURCES.md` carries no heading the entries belong under      |
-| `listed`       | A URL is already listed under either heading                    |
+| `listed`       | A URL is already read, or a lead is offered as listed           |
 | `defined`      | A term already carries a glossary entry                         |
 | `bad-input`    | The command line is malformed, before any folder is read        |
 
