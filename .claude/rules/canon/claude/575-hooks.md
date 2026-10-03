@@ -9,7 +9,7 @@ paths:
 
 ## Reading a payload
 
-- Open a hook that reads a payload with a bounded `IFS= read -r -d '' -t 2 input`, exiting non-zero on an empty payload. An unbounded `cat` blocks forever against a hand run or an open socket, holding the session open with it. A test already checks this per file across both hook trees, but the rule stops the pattern being rediscovered rather than caught only after the fact.
+- Open a hook that reads a payload with a bounded `IFS= read -r -d '' -t 2 input`, exiting non-zero on an empty payload. An unbounded `cat` blocks forever against a hand run or an open socket, holding the session open with it.
 
 ## Silencing output
 
