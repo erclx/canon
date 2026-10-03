@@ -9,7 +9,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { addFrame, type Frame } from '@/canvas/content'
+import { addFrame, type Frame, listPages } from '@/canvas/content'
 import {
   buildComposite,
   CAPTURE_SELECTOR,
@@ -466,22 +466,25 @@ describe('captureComposite with the server and engine stood in', () => {
         result: { status: 'rendered' },
       },
     })
-    expect(calls[0]?.[1]).toEqual({
-      selector: '#canvas-composite',
-      width: 1910,
-      outDir: '/out',
-    })
-    expect(calls[0]?.[0]).toMatch(/b\.html$/)
+    expect(calls).toEqual([
+      [
+        'http://127.0.0.1:1/frames/.composite/drafts.html',
+        { selector: '#canvas-composite', width: 1910, outDir: '/out/b.png' },
+      ],
+    ])
   })
 
-  it('should write a document whose frames load from the served address', async () => {
+  it('should serve the document from the frames origin so no frame is throttled offscreen', async () => {
     seedFrame('drafts', 'hero', 1440)
     let written = ''
 
     await captureComposite(ROOT, 'drafts', undefined, {
       start: server,
-      capture: async (source) => {
-        written = readFileSync(source, 'utf8')
+      capture: async () => {
+        written = readFileSync(
+          join(ROOT, '.canon', 'canvas', '.composite', 'drafts.html'),
+          'utf8',
+        )
         return []
       },
     })
@@ -489,6 +492,34 @@ describe('captureComposite with the server and engine stood in', () => {
     expect(written).toContain(
       'src="http://127.0.0.1:1/frames/drafts/hero.html"',
     )
+  })
+
+  it('should remove the document once the capture returns', async () => {
+    seedFrame('drafts', 'hero')
+
+    await captureComposite(ROOT, 'drafts', undefined, {
+      start: server,
+      capture: async () => [],
+    })
+
+    expect(
+      existsSync(join(ROOT, '.canon', 'canvas', '.composite', 'drafts.html')),
+    ).toBe(false)
+  })
+
+  it('should keep the document out of the page list', async () => {
+    seedFrame('drafts', 'hero')
+    let pages: string[] = []
+
+    await captureComposite(ROOT, 'drafts', undefined, {
+      start: server,
+      capture: async () => {
+        pages = listPages(ROOT).map((page) => page.name)
+        return []
+      },
+    })
+
+    expect(pages).toEqual(['drafts'])
   })
 
   it('should report an engine that renders nothing as capture-failed', async () => {

@@ -1,7 +1,12 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { basename, dirname, join } from 'node:path'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { CaptureResult } from '@/capture/render'
-import { type ContentRefused, type Frame, readPage } from '@/canvas/content'
+import {
+  type ContentRefused,
+  canvasDir,
+  type Frame,
+  readPage,
+} from '@/canvas/content'
 import {
   type CanvasOptions,
   type CanvasOutcome,
@@ -265,11 +270,21 @@ function escapeAttribute(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
 }
 
+/**
+ * Where the generated document is served from, inside the canvas folder so it
+ * shares the frames' origin. Chromium skips painting a cross-origin iframe
+ * outside the viewport, and the engine's viewport is 720 pixels tall, so a
+ * document on another origin captured every frame below that line blank. A dot
+ * folder is no page name, so the board never lists it.
+ */
+const COMPOSITE_FOLDER = '.composite'
+
 export interface CompositeTarget {
   readonly page: string
   readonly composite: Composite
-  /** The generated document, kept in scratch rather than beside the PNG. */
   readonly htmlPath: string
+  /** The served address of the document at `htmlPath`. */
+  readonly url: string
   readonly pngPath: string
 }
 
@@ -280,9 +295,7 @@ export type CompositeTargetOutcome =
 /**
  * Turns `<page>` into one composite. `out` is the PNG, and without it the PNG
  * lands at `<page>.png` beside the per-frame folder of the same name, so the
- * two captures of one page never collide. The engine names a file source's PNG
- * after the document, so the document takes the PNG's stem inside a dot folder
- * no page name can match.
+ * two captures of one page never collide.
  */
 export function resolveCompositeTarget(
   root: string,
@@ -303,19 +316,16 @@ export function resolveCompositeTarget(
     return refuse('no-frame', `page ${spec} has no frames`)
   }
 
-  const scratch = recordDir(root, 'tmp', 'canvas-capture')
-  const pngPath = out ?? join(scratch, `${spec}.png`)
+  const file = `${spec}.html`
   return {
     ok: true,
     target: {
       page: spec,
       composite: buildComposite(spec, page.frames, base),
-      htmlPath: join(
-        scratch,
-        '.composite',
-        `${basename(pngPath, '.png')}.html`,
-      ),
-      pngPath,
+      htmlPath: join(canvasDir(root), COMPOSITE_FOLDER, file),
+      url: `${base}${FRAMES_PREFIX.slice(1)}${COMPOSITE_FOLDER}/${encodeURIComponent(file)}`,
+      pngPath:
+        out ?? join(recordDir(root, 'tmp', 'canvas-capture'), `${spec}.png`),
     },
   }
 }
@@ -353,11 +363,16 @@ export async function captureComposite(
     const { target } = resolved
     mkdirSync(dirname(target.htmlPath), { recursive: true })
     writeFileSync(target.htmlPath, target.composite.html)
-    const [result] = await capture(target.htmlPath, {
-      selector: COMPOSITE_SELECTOR,
-      width: target.composite.width,
-      outDir: dirname(target.pngPath),
-    })
+    let result: CaptureResult | undefined
+    try {
+      ;[result] = await capture(target.url, {
+        selector: COMPOSITE_SELECTOR,
+        width: target.composite.width,
+        outDir: target.pngPath,
+      })
+    } finally {
+      rmSync(target.htmlPath, { force: true })
+    }
     if (!result) {
       return {
         ok: false,
