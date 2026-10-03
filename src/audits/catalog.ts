@@ -173,10 +173,17 @@ function architectureCounts(
     typeof record.entryCap === 'number' ? record.entryCap : undefined
 
   const revisitRequired = record.revisitRequired === true
+  const wordCap =
+    typeof record.wordCap === 'number' ? record.wordCap : undefined
+  const riskCap =
+    typeof record.riskCap === 'number' ? record.riskCap : undefined
+  const risksBullets =
+    typeof record.risksBullets === 'number' ? record.risksBullets : undefined
 
   let unverifiable = 0
   let unchecked = 0
   let lackingRevisit = 0
+  let overWords = 0
   for (const raw of decisions) {
     const entry = asObject(raw)
     const claim = entry?.claim
@@ -186,6 +193,13 @@ function architectureCounts(
     if (claim === 'neither') unverifiable += 1
     else if (checks === 0) unchecked += 1
     if (revisitRequired && entry?.revisit !== true) lackingRevisit += 1
+    if (
+      wordCap !== undefined &&
+      typeof entry?.words === 'number' &&
+      entry.words > wordCap
+    ) {
+      overWords += 1
+    }
   }
 
   return {
@@ -201,9 +215,37 @@ function architectureCounts(
     }),
     // Absent on a record stating no revisit clause, for the same reason.
     ...(revisitRequired && { recordMissingRevisit: lackingRevisit }),
+    // Absent on a record stating no word cap or no bullet cap, for the same
+    // reason, and the bullet key absent too on a record with no Risks section.
+    ...(wordCap !== undefined && { recordOverWords: overWords }),
+    ...(riskCap !== undefined &&
+      risksBullets !== undefined && {
+        recordOverRisks: risksBullets > riskCap ? 1 : 0,
+      }),
     recordUnverifiable: unverifiable,
     recordUnchecked: unchecked,
   }
+}
+
+/**
+ * Reads the requirements record's one cap, or nothing when the record is
+ * absent, states no cap, or the run never opened it.
+ *
+ * The key is optional rather than required the way `architecture` is, so a
+ * record from a binary predating it still counts its other findings.
+ */
+function requirementsCounts(
+  root: Record<string, unknown>,
+): Record<string, number> {
+  const record = asObject(root.requirements)
+  if (
+    record === undefined ||
+    typeof record.words !== 'number' ||
+    typeof record.wordCap !== 'number'
+  ) {
+    return {}
+  }
+  return { requirementsOverWords: record.words > record.wordCap ? 1 : 0 }
 }
 
 /**
@@ -261,6 +303,7 @@ function contextCounts(record: unknown): Record<string, number> | undefined {
 
   const architecture = architectureCounts(root)
   if (architecture === undefined) return undefined
+  const requirements = requirementsCounts(root)
 
   const counts = allOf({
     unresolvedCitations: lengthOf(asObject(root.citations)?.unresolved),
@@ -271,7 +314,9 @@ function contextCounts(record: unknown): Record<string, number> | undefined {
   })
 
   if (counts === undefined) return undefined
-  return architecture === 'absent' ? counts : { ...counts, ...architecture }
+  return architecture === 'absent'
+    ? { ...counts, ...requirements }
+    : { ...counts, ...architecture, ...requirements }
 }
 
 function markdownCounts(record: unknown): Record<string, number> | undefined {
