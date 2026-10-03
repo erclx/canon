@@ -1,3 +1,8 @@
+---
+title: Priority
+description: Execution order by readiness, with the blocker named on every row that carries one
+---
+
 # Priority
 
 ## Run now
