@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.19.0](https://github.com/erclx/canon/compare/v5.18.0...v5.19.0) (2026-10-03)
+
+
+### Features
+
+* **slides:** export html slides to editable powerpoint shapes ([#2123](https://github.com/erclx/canon/issues/2123)) ([d34330d](https://github.com/erclx/canon/commit/d34330d2dc7b869cad4e5ad0d5afaf0a58e0461d))
+* **teach:** reload open pages while teach up runs ([#2129](https://github.com/erclx/canon/issues/2129)) ([81cf7db](https://github.com/erclx/canon/commit/81cf7dba9c7e0d2a134ba6d960eb4a8a3a042d16))
+
 ## [5.18.0](https://github.com/erclx/canon/compare/v5.17.0...v5.18.0) (2026-10-03)
 
 
