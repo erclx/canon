@@ -22,7 +22,7 @@ stage_setup() {
     log_info "Before:  serve board.html on port 4173, e.g. python3 -m http.server 4173, since the plan's url points there"
     log_info "Action:  /canon:record-screencast demos/cold-open/beats.md"
     log_info "Expect:  demos/cold-open/plan.json already exists, so the session skips canon demo compile entirely and never touches the plan"
-    log_info "Expect:  canon demo run drives the page and reports the webm, the mp4 if ffmpeg is on PATH, and the still, each on its own line"
+    log_info "Expect:  canon demo run drives the page and reports the webm, the mp4 if ffmpeg is on PATH, the still, and the timeline, each on its own line"
     ;;
   "refused")
     stage_fixtures claude record-screencast refused 01-initial
