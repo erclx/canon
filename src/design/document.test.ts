@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { measureDesignProse } from '@/design/budget'
 import { formatTable, renderDesignDocument } from '@/design/document'
 import { parseDesignDoc } from '@/design/parse'
 import { TOKENS } from '@/design/tokens'
@@ -55,8 +56,27 @@ describe('renderDesignDocument', () => {
 
   it('says the module is the source and this file is not', () => {
     expect(renderDesignDocument()).toContain(
-      'rendered from `src/design/tokens.ts`',
+      'Rendered from `src/design/tokens.ts`',
     )
+  })
+
+  it('renders each rule list as bullets under its section', () => {
+    const document = renderDesignDocument({
+      ...TOKENS,
+      motion: ['None.', 'Not even a fade.'],
+    })
+
+    expect(document).toContain('## Motion\n\n- None.\n- Not even a fade.')
+  })
+
+  it('renders a section with no rules as its table alone', () => {
+    const document = renderDesignDocument({ ...TOKENS, spacingRules: [] })
+
+    expect(document).toContain('## Spacing\n\n| Step')
+  })
+
+  it('holds every section inside the prose budget', () => {
+    expect(measureDesignProse(renderDesignDocument())).toEqual([])
   })
 
   it('tags a cell the record marks and leaves the rest bare', () => {
