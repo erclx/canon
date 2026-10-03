@@ -36,9 +36,9 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 ### What a sandbox is provisioned with
 
-- Gov rules provision through the real installer rather than a hand-built copy. A copy reimplementing an installer's selection rules drifts from what the installer does and from the stamp it writes, and a sandbox carrying what a target carries is what makes a rule change observable to a run.
+- Gov rules and seeds provision through the real installer rather than a hand-built copy, `canon gov install` for the first and `canon claude init` for the second. A copy reimplementing an installer's selection rules drifts from what the installer does and from the stamp it writes, and a sandbox carrying what a target carries is what makes a rule change observable to a run.
 - No standards folder provisions at all, since nothing installs the corpus into a project. A skill reading a standard exercises the resolve a real target takes.
-- Seeds stay a raw copy. `canon claude init` does more than drop files, and the scenarios depending on the current shape outnumber the drift the copy risks. Hooks ship inside the seed tree, so a hook change reaches any scenario declaring `SANDBOX_INJECT_SEEDS`.
+- Seeds install rather than copy. Copying `tooling/claude/seeds/` as it sits left every seeded arm holding records at retired paths and missing the folders `planSeeds` re-roots, so each arm started from a tree no target holds. The install also merges `.canon/` into the sandbox `.gitignore`, so a record a scenario stages under `.canon/` stays untracked, as it does in a target, and a scenario does not commit it. Hooks ship inside the seed tree, so a hook change reaches any scenario declaring `SANDBOX_INJECT_SEEDS`.
 
 ### Naming and staging a scenario
 

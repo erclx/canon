@@ -190,10 +190,10 @@ provision_sandbox() {
   (cd "$SANDBOX" && configure_sandbox_git_credentials)
 }
 
-# Runs the real installer rather than copying the source tree. The two copies
-# these replaced each reimplemented an installer's selection rules, so a change
-# to what install produces left the sandbox provisioning the old shape and no
-# scenario could observe the difference.
+# Runs the real installer rather than copying the source tree. The copies these
+# replaced, for gov rules and for seeds, each reimplemented an installer's
+# selection rules, so a change to what install produces left the sandbox
+# provisioning the old shape and no scenario could observe the difference.
 run_sandbox_install() {
   local label="$1"
   shift
@@ -223,10 +223,9 @@ inject_gov_rules() {
 }
 
 inject_seeds() {
-  local seeds_source="$PROJECT_ROOT/tooling/claude/seeds"
-  if [ -d "$seeds_source" ]; then
-    cp -r "$seeds_source/." "$SANDBOX/"
-  fi
+  [ ! -d "$PROJECT_ROOT/tooling/claude/seeds" ] && return
+
+  run_sandbox_install "seeds" claude init "$SANDBOX"
 }
 
 commit_environment_setup() {

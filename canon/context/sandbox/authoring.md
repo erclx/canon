@@ -55,7 +55,7 @@ Refusing is the default because every anchor scenario force-pushes to `main`, so
 - A refusal arm that stages nothing still owes its commit call a check. `stage_setup` runs after the seed-injection commit, so an arm changing nothing on disk hits an empty diff, which exits 1 under `set -e` and aborts before the `log_step` lines print. Skip the commit call on an arm whose fixture is the absence of a file.
 - A failure arm naming its expected cause still fires for causes nobody anticipated. A `gh` call carrying an unsupported flag fails straight into a fallback log line with no pull request created, while the scenario reports ready. Give a fallback a message naming the failure rather than a guess at its cause, and follow any precondition step with a read proving the artifact exists.
 - An anchor arm that declares `use_anchor` and never calls `configure_sandbox_anchor_remote` runs the full anchor provisioning path with no network call and no force-push to the shared remote. `provision_sandbox` dispatches on `type -t use_anchor` alone, so a throwaway scenario declaring it with a no-op `stage_setup` checks provisioning, and a pushing arm is worth spending only on the run that has to prove the remote path. The second way to run an anchor arm without a force-push is `canon sandbox equivalence <category> --stub-remote`, which points the arm at a local bare repository and a stub `gh`. `canon/context/sandbox/fixtures.md` covers what it compares.
-- A scenario that wipes the tree or skips `SANDBOX_INJECT_SEEDS` owns creating every parent folder it writes into. The seed copy is the only thing that puts `canon/` on disk, so a redirect into `canon/REQUIREMENTS.md` under `set -e` stops `stage_setup` before the arm reaches its skill. A surface move rechecks the `mkdir` above each rewritten redirect, since seeded scenarios hide the break.
+- A scenario that wipes the tree or skips `SANDBOX_INJECT_SEEDS` owns creating every parent folder it writes into. The seed install is the only thing that puts `canon/` on disk, so a redirect into `canon/REQUIREMENTS.md` under `set -e` stops `stage_setup` before the arm reaches its skill. A surface move rechecks the `mkdir` above each rewritten redirect, since seeded scenarios hide the break.
 
 ## stage_setup
 
@@ -88,12 +88,12 @@ log_info "list     : read-only catalog dump, no target needed"
 ```bash
 use_config() {
   export SANDBOX_SKIP_AUTO_COMMIT="true"  # skip auto-commit after stage_setup
-  export SANDBOX_INJECT_SEEDS="true"      # inject tooling/claude/seeds/ into sandbox root
+  export SANDBOX_INJECT_SEEDS="true"      # run canon claude init into the sandbox
   export SANDBOX_INJECT_GOV="true"        # run canon gov install into the sandbox
 }
 ```
 
-`SANDBOX_INJECT_SEEDS` is a raw copy of `tooling/claude/seeds/.` into the sandbox root, not a run of `canon claude init`. It drops `CLAUDE.md` and the `.claude/` seed files before `stage_setup` runs. There is no standards injection.
+`SANDBOX_INJECT_SEEDS` runs `canon claude init` into the sandbox, so the arm holds `CLAUDE.md` and each seed at the root the installer places it under before `stage_setup` runs. The install merges `.canon/` into the sandbox `.gitignore`, so a record staged there stays untracked and a `git add .` over it commits nothing. There is no standards injection.
 
 ## use_anchor
 
