@@ -1,6 +1,6 @@
 ---
 name: record-screencast
-description: Drives a screencast draft through to a recording. Compiles it with `canon demo compile` when no plan exists yet at the default path, skipping compile when one is already there, then runs `canon demo run` once nothing is unresolved. Reports every unresolved field from the compile or run record and stops rather than guessing one. Use when asked to "record the screencast", "run the demo", "compile and record this draft", or right after `draft-screencast` prints its next-step line. Do NOT use to draft the beats, which is `draft-screencast`, or to fill in a plan's target or URL, which is the operator's own edit.
+description: Drives a screencast draft through to a recording. Compiles it with `canon demo compile` when no plan exists yet at the default path, skipping compile when one is already there, runs `canon demo run` once nothing is unresolved, then composes the take into a finished mp4 through HyperFrames when the draft's wrap section asks for anything. Reports every unresolved field from the compile or run record and stops rather than guessing one. Use when asked to "record the screencast", "run the demo", "compile and record this draft", or right after `draft-screencast` prints its next-step line. Do NOT use to draft the beats, which is `draft-screencast`, or to fill in a plan's target or URL, which is the operator's own edit.
 ---
 
 # Record screencast
@@ -14,7 +14,9 @@ description: Drives a screencast draft through to a recording. Compiles it with 
 
 ## Step 1: resolve the plan path
 
-Derive the default plan path the same way `canon demo compile` does: `<out>/<slug>.json`, where `<out>` defaults to `demos` and `<slug>` defaults to the draft's filename with its extension stripped. `.canon/tmp/screencast/inline-edit.md` resolves to `demos/inline-edit.json`.
+A draft lives at `demos/<slug>/beats.md`, so `<slug>` is the name of the folder holding it, and the plan sits beside it at `demos/<slug>/plan.json`. `demos/inline-edit/beats.md` resolves to `demos/inline-edit/plan.json`. Pass `--slug <slug>` to compile, since its default reads the draft's filename and would name every demo `beats`.
+
+A plan compiled before the folder layout sits at `demos/<slug>.json`. Pass it to Step 3 by path when the caller names it, since only the default moved.
 
 ## Step 2: compile only when no plan exists yet
 
@@ -24,7 +26,7 @@ Check whether the resolved plan path already exists.
 - **It does not exist.** Run:
 
   ```bash
-  canon demo compile <draft> --json
+  canon demo compile <draft> --slug <slug> --json
   ```
 
   Branch on the record rather than the exit code:
@@ -47,8 +49,29 @@ Branch on the record's `reason`:
 - Any other reason (`plan-missing`, `plan-unreadable`, `no-output-requested`, `cursor-unreadable`, `engine-missing`, `browser-missing`): report the reason, plus the record's `message` or `install` line when it carries one, and stop.
 - No `reason` key, meaning the run wrote its output: continue to Step 4.
 
-## Step 4: output
+The take lands in `demos/<slug>/take/`, which git ignores.
 
-The record carries `video`, `mp4`, `gif`, and `still`, each a path or `null`. Report each one that is not `null`, one per line, skipping the rest.
+## Step 4: compose when the draft asks for it
+
+Read the draft's `## Wrap` section. When intro, outro, and music all say `none`, or the section is absent, stop at the take and go to Step 6. Composing an empty video adds a render that says nothing the take does not.
+
+Otherwise confirm HyperFrames' `hyperframes` skill resolves. `npx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test. When it does not resolve, stop and report the install command, `npx hyperframes init`, with the warning that init installs its skills machine-wide without asking. Never install it from here.
+
+When it resolves, load it and build `demos/<slug>/index.html` around the take, with the intro, outro, and music the wrap section names. That skill owns the composition rules, so this body states none of them. Then run both from `demos/<slug>/`:
+
+```bash
+npx hyperframes check
+npx hyperframes render --quality delivery --output renders/<slug>.mp4
+```
+
+Report a failing check and stop rather than rendering past it. The render sits in `demos/<slug>/renders/`, which git ignores.
+
+## Step 5: read the render
+
+Hand the render to `read-frames` as its video path, so the composed result is checked rather than only the raw take.
+
+## Step 6: output
+
+The record carries `video`, `mp4`, `gif`, and `still`, each a path or `null`. Report each one that is not `null`, one per line, skipping the rest, and add the render path when Step 4 wrote one. Name the mp4 as the deliverable, the webm as the raw take, and the gif as the form for a host that strips video.
 
 Say so plainly if `canon demo compile` or `canon demo run` is not available, rather than driving the application some other way. Both ship with the CLI and this skill ships with the plugin, so a project carrying one and not the other is a real state.
