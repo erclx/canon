@@ -250,12 +250,6 @@ describe('buildDesignCss', () => {
     const teachCss = (): string =>
       buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
 
-    const declarationsOf = (css: string, selector: string): string =>
-      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-        .filter((match) => match[1].trim().split('\n').pop() === selector)
-        .map((match) => match[2])
-        .join('\n')
-
     it('caps the footer nav to the page measure and centres it', () => {
       const nav = declarationsOf(teachCss(), '.nav')
 
@@ -302,12 +296,6 @@ describe('buildDesignCss', () => {
   describe('teach course sidebar', () => {
     const teachCss = (): string =>
       buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
-
-    const declarationsOf = (css: string, selector: string): string =>
-      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-        .filter((match) => match[1].trim().split('\n').pop() === selector)
-        .map((match) => match[2])
-        .join('\n')
 
     it('should lay the sidebar and the content pane out as one flex row', () => {
       const css = teachCss()
@@ -374,9 +362,7 @@ describe('buildDesignCss', () => {
       const narrow = /@media \(max-width: 1100px\) \{([\s\S]*?)\n\}/.exec(css)
       expect(narrow).not.toBeNull()
 
-      // `declarationsOf` keys on the selector's own line untrimmed, so a rule
-      // indented inside a query is invisible to it until the indent is dropped.
-      const inQuery = (narrow?.[1] ?? '').replace(/^ {2}/gm, '')
+      const inQuery = narrow?.[1] ?? ''
       expect(declarationsOf(inQuery, '.sb-close')).toContain(
         'display: inline-flex',
       )
@@ -415,17 +401,10 @@ describe('buildDesignCss', () => {
     const teachCss = (): string =>
       buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
 
-    const declarationsOf = (css: string, selector: string): string =>
-      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-        .filter((match) => match[1].trim().split('\n').pop() === selector)
-        .map((match) => match[2])
-        .join('\n')
-
     const phoneRules = (css: string): string =>
       [...css.matchAll(/@media \(max-width: 640px\) \{([\s\S]*?)\n\}/g)]
         .map((match) => match[1])
         .join('\n')
-        .replace(/^ +/gm, '')
 
     it('should set the bar height to 3.5rem', () => {
       expect(declarationsOf(teachCss(), ':root')).toContain(
@@ -593,12 +572,6 @@ describe('buildDesignCss', () => {
   describe('teach type scale', () => {
     const teachCss = (): string =>
       buildDesignCss(undefined, { components: TEACH_STYLESHEET_COMPONENTS })
-
-    const declarationsOf = (css: string, selector: string): string =>
-      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-        .filter((match) => match[1].trim().split('\n').pop() === selector)
-        .map((match) => match[2])
-        .join('\n')
 
     it.each([
       ['h1', '--t1', '1.1'],
