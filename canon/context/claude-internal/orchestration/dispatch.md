@@ -11,6 +11,8 @@ Step 4 of the loop can launch a background `claude --bg` worker itself for a `##
 
 Spawning a worker with the Agent tool stays forbidden, since an in-process subagent cannot be steered or reached independently. The `claude --bg` dispatch is a separate process with its own worktree and its own pull request, which is the property the boundary protects rather than the mechanism it happens to name.
 
+A cloud session can take the build instead of a local worker, and `canon/context/claude-internal/orchestration/cloud-dispatch.md` carries that shape.
+
 ## The plan-answer gate
 
 The plan-answer gate runs ahead of the other two, and it is the only one of the three reading the row rather than the tree. `canon tasks plan-answers` reports `launchable`, and where that is false it names every question still open with the label identifying it and the reason its suggestion gave for needing a person. It closes from the other end the failure `canon/context/claude-internal/orchestration/planning.md` records under a blank answer: a guard testing only for the plan file admits a plan whose open question needed a person.

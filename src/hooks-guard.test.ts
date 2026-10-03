@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import {
   chmodSync,
   existsSync,
@@ -26,8 +26,8 @@ const TREES = [
   },
 ]
 
-// The one hook that reads no payload, and so carries no guard to assert on.
-const UNGUARDED = 'bare-flag-repair.sh'
+// The hooks that read no payload, and so carry no guard to assert on.
+const UNGUARDED = new Set(['bare-flag-repair.sh', 'cloud-setup.sh'])
 
 // A tool name no hook acts on, so every guarded hook falls through to a quiet
 // exit 0. This covers the tool filter and nothing else: a mangled payload
@@ -401,7 +401,7 @@ afterAll(() => {
 
 for (const tree of TREES) {
   const hooks = readdirSync(tree.dir).filter(
-    (name) => name.endsWith('.sh') && name !== UNGUARDED,
+    (name) => name.endsWith('.sh') && !UNGUARDED.has(name),
   )
 
   describe(tree.label, () => {
@@ -581,6 +581,51 @@ describe('pr-create-log.sh root resolution', () => {
       ).toContain('pr=https://github.com/example/repo/pull/99')
     },
   )
+})
+
+// git-pr opens a pull request over REST rather than through `gh pr create`, so
+// the command string carries no subcommand to match. Its output says which
+// path ran, and an edit prints a URL too, so that line is what separates an
+// opening from a rewrite of one that already existed.
+describe('pr-create-log.sh REST create', () => {
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'pr-create-log.sh')
+    const payload = (nonce: string, opened: boolean): string =>
+      payloadFor({
+        session_id: nonce,
+        tool_input: {
+          command: "gh api -X POST 'repos/{owner}/{repo}/pulls' -f title=x",
+        },
+        tool_response: {
+          stdout: `number=7\nurl=https://github.com/example/repo/pull/7\nhead=feat/x\nopened=${opened}\n`,
+        },
+      })
+
+    it.concurrent(
+      `should remind on ${tree.label} when the run opened a pull request`,
+      async ({ expect }) => {
+        const result = await run(hook, payload(`${tree.label}-rest-open`, true))
+
+        expect(result.stdout).toContain(
+          'Pull request https://github.com/example/repo/pull/7 just opened',
+        )
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should stay silent on ${tree.label} when the run edited one`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          payload(`${tree.label}-rest-edit`, false),
+        )
+
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+  }
 })
 
 // A bare basename match reads as covering both when two written paths share
@@ -1026,6 +1071,156 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
 
       expect(result.stdout).toBe('')
       expect(result.code).toBe(0)
+    },
+  )
+})
+
+// The cloud VM loads no plugin, so the hook stages the checkout's own skills
+// and CLI where a project session reads them. Locally it must write nothing,
+// since the same settings file runs it on every session start here.
+describe('.claude/hooks/cloud-setup.sh', () => {
+  const hook = join(ROOT, '.claude/hooks/cloud-setup.sh')
+  const made: string[] = []
+
+  afterAll(() => {
+    for (const dir of made) rmSync(dir, { force: true, recursive: true })
+  })
+  const git = (cwd: string, ...args: string[]): string =>
+    execFileSync(
+      'git',
+      ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args],
+      { cwd, encoding: 'utf8' },
+    )
+
+  const makeCheckout = (): string => {
+    const dir = mkdtempSync(join(tmpdir(), 'cloud-setup-'))
+    made.push(dir)
+    for (const [path, body] of [
+      ['claude/skills/demo/SKILL.md', '# Demo\n'],
+      ['claude/skills/demo/references/notes.md', 'notes\n'],
+      ['standards/plan.md', '# Plan\n'],
+      ['.claude/skills/internal-demo/SKILL.md', '# Internal\n'],
+    ] as const) {
+      mkdirSync(join(dir, path, '..'), { recursive: true })
+      writeFileSync(join(dir, path), body)
+    }
+    git(dir, 'init', '-q')
+    git(dir, 'add', '.')
+    git(dir, 'commit', '-q', '-m', 'init')
+    return dir
+  }
+
+  // A stub runner that records each call, so the install is observable without
+  // a network and the failure branch is reachable on demand.
+  const makeBun = (
+    exitCode: number,
+    base: string = process.env.PATH ?? '',
+  ): { log: string; path: string } => {
+    const bin = mkdtempSync(join(tmpdir(), 'cloud-setup-bin-'))
+    made.push(bin)
+    const log = join(bin, 'calls.log')
+    writeFileSync(
+      join(bin, 'bun'),
+      `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> '${log}'\nexit ${exitCode}\n`,
+    )
+    chmodSync(join(bin, 'bun'), 0o755)
+    return { log, path: [bin, base].join(delimiter) }
+  }
+
+  const status = (dir: string): string => git(dir, 'status', '--porcelain')
+
+  it.concurrent(
+    'should write nothing outside a cloud VM',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(0)
+
+      const result = await run(hook, '{}', bun.path, dir, {
+        CLAUDE_CODE_REMOTE: undefined,
+      })
+
+      expect(result.code).toBe(0)
+      expect(result.stdout).toBe('')
+      expect(existsSync(join(dir, '.claude/skills/demo'))).toBe(false)
+      expect(existsSync(bun.log)).toBe(false)
+      expect(status(dir)).toBe('')
+    },
+  )
+
+  it.concurrent(
+    'should stage the skills, the standards link, and the CLI on a cloud VM',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(0)
+
+      const result = await run(hook, '{}', bun.path, dir, {
+        CLAUDE_CODE_REMOTE: 'true',
+      })
+
+      expect(result.code).toBe(0)
+      expect(
+        readFileSync(
+          join(dir, '.claude/skills/demo/references/notes.md'),
+          'utf8',
+        ),
+      ).toBe('notes\n')
+      expect(readFileSync(join(dir, '.claude/standards/plan.md'), 'utf8')).toBe(
+        '# Plan\n',
+      )
+      expect(readFileSync(bun.log, 'utf8')).toBe('install\nlink\n')
+      expect(status(dir)).toBe('')
+    },
+  )
+
+  it.concurrent(
+    'should add each exclude line once when run twice',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(0)
+      const env = { CLAUDE_CODE_REMOTE: 'true' }
+
+      await run(hook, '{}', bun.path, dir, env)
+      const second = await run(hook, '{}', bun.path, dir, env)
+
+      const exclude = readFileSync(join(dir, '.git/info/exclude'), 'utf8')
+        .split('\n')
+        .filter((line) => line.startsWith('/.claude/'))
+      expect(second.code).toBe(0)
+      expect(exclude).toEqual(['/.claude/skills/demo/', '/.claude/standards'])
+      expect(status(dir)).toBe('')
+    },
+  )
+
+  it.concurrent(
+    'should say the CLI is missing when the install fails',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(1)
+
+      const result = await run(hook, '{}', bun.path, dir, {
+        CLAUDE_CODE_REMOTE: 'true',
+      })
+
+      expect(result.code).toBe(0)
+      expect(result.stdout).toContain('canon is not installed')
+      expect(existsSync(join(dir, '.claude/skills/demo/SKILL.md'))).toBe(true)
+    },
+  )
+
+  // A link can succeed into a bin folder the session's PATH never reads, which
+  // leaves every skill calling a verb that is not there and nothing saying so.
+  it.concurrent(
+    'should say canon is off the PATH when the link succeeds but nothing resolves it',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(0, hookPath)
+
+      const result = await run(hook, '{}', bun.path, dir, {
+        CLAUDE_CODE_REMOTE: 'true',
+      })
+
+      expect(result.code).toBe(0)
+      expect(result.stdout).toContain('canon is not on PATH')
     },
   )
 })

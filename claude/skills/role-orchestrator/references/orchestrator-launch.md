@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, review-address, planning, reviewer, and UI reviewer templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, cloud build, review-address, planning, reviewer, and UI reviewer templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning, review-address, or reviewer shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
@@ -48,6 +48,10 @@ The prompt carries pointers and standing context, and stops there. The branch an
 - On a reviewer launch, carry the sibling pull requests in flight, the files each shares with this one, the merge order, and a constraint settled in conversation, all as facts. Leave out this session's own read of the change, the author's argument for it, and any list of what to look for, since the first two cost the independence the dispatch pays for and the third is `review-craft`'s.
 
 Report the dispatch as loudly as the human-launch line it replaces: name the branch, the model, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
+
+## Dispatch to a cloud worker
+
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when `orchestrator-dispatch.md` picked cloud for the row. It holds the prompt that carries the plan as text and announces over GitHub, the create under `script`, and the readout that refuses to record a missing session id.
 
 ## Dispatch to address a review
 

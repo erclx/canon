@@ -27,7 +27,7 @@ What is left uncovered is recorded in the file itself rather than covered: paths
 
 ## Labelling runs at open and nowhere else
 
-Labelling runs after the pull request resolves rather than as a flag on the create. `gh pr create --label` fails whole on a label the remote lacks, so a mistyped row opens no pull request at all and the branch is left pushed with nothing to review. `gh pr edit --add-label` afterward degrades to a warning naming `gh label create` on failure, and it covers both the create and the edit branch with one call, earning a second output line since a refusal reaching nobody is the failure the fallback exists to prevent.
+Labelling runs after the pull request resolves rather than as a field on the create, so one step covers both the create and the edit branch. It runs over REST, since a cloud session's GitHub access blocks GraphQL. The REST endpoint creates any label it is handed that the remote lacks, so the step reads each name off the remote first and degrades a missing one to a warning naming `gh label create`, earning a second output line since a refusal reaching nobody is the failure the fallback exists to prevent.
 
 The step stays in `git-pr` alone, which makes the label set a description of the branch at the moment the pull request opened. `review-address` delegates its push to `git-followup`, which stages, commits, pushes, and refreshes the body without invoking `git-pr`, so no follow-up push reaches the labelling step whatever the branch touched.
 

@@ -64,7 +64,7 @@ Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so 
 
 The same sweep carries the merge of the five per-kind document drafters into `draft-doc`, so a citation of any one of them lands on `canon:draft-doc`.
 
-Two of those files run rather than sit there. `.husky/post-merge` runs the `canon hooks post-merge` verb, so a stale copy of the hook calls a binary that may lack it, and `.claude/hooks/pr-create-log.sh` hands a session a message naming a skill, so a stale copy tells someone to invoke something that no longer exists. A rule under `.claude/rules/canon/core/` names skills too, though a rule is read rather than run.
+Two of those files run rather than sit there. `.husky/post-merge` runs the `canon hooks post-merge` verb, so a stale copy of the hook calls a binary that may lack it, and `.claude/hooks/pr-create-log.sh` hands a session a message naming a skill, so a stale copy tells someone to invoke something that no longer exists. A copy older than `git-pr`'s move to REST also matches only `gh pr create`, so it stays silent on every pull request `git-pr` opens. A rule under `.claude/rules/canon/core/` names skills too, though a rule is read rather than run.
 
 Resync what the toolkit owns, then sweep what the project wrote:
 

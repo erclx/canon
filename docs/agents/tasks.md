@@ -64,7 +64,7 @@ Run from a branch other than `main` or `master`, the verb also drops that branch
 
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, or `ambiguous`. `git-pr` skips silently on those three, because each is a case where a guessed write would archive the wrong task once the branch merges.
 
-A malformed argument refuses as `bad-input` instead, which sits outside that set on purpose. `git-pr` derives the number by slicing whatever `gh pr create` printed, so a non-numeric value is reachable, and folding it into the swallowed set would lose the number with nothing reporting it.
+A malformed argument refuses as `bad-input` instead, which sits outside that set on purpose. `git-pr` derives the number by slicing the address the create call returned, so a non-numeric value is reachable, and folding it into the swallowed set would lose the number with nothing reporting it.
 
 ## Outcome
 
