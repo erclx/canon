@@ -31,6 +31,10 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
   - State the two-layer split when proposing hook scope changes
 - Default cross-project Claude behavior rules (output formatting, path-printing, etc.) to the seeded `CLAUDE.md` plus the toolkit's own `CLAUDE.md`. Reserve `~/.claude/` for environment-specific config (terminal capability, machine specifics).
 
+## Plugin variables
+
+- `$CLAUDE_PLUGIN_ROOT` and `$CLAUDE_PROJECT_DIR` are empty in model Bash. Resolve a plugin or project path another way when a skill or hook step runs through the Bash tool.
+
 ## Couplings
 
 Before shipping any change to the seed, a plugin skill, or a `.claude/` state doc, grep for the identifier you are changing. Check plugin skills for quoted seed section headings and the Claude context entries for skill descriptions.

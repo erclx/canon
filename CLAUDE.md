@@ -1,93 +1,73 @@
-# Toolkit Context
+# Canon
 
-CLI toolkit for managing AI workflows, developer standards, and project tooling across repositories.
-
-## Design principles
-
-The toolkit is agent-first. Every surface is designed so a Claude Code skill or other agent can orchestrate it as well as a human. When adding or changing a CLI command, verify each of these holds.
-
-Worldview and goals live in `canon/REQUIREMENTS.md`. The rules below derive from it.
-
-- Every command has a non-interactive path via args or `CANON_NON_INTERACTIVE=1`. Never require a TTY.
-- Data goes to stdout. UI and logs go to stderr. JSON output must pipe clean through any wrapper.
-- Extend existing commands with flags over creating bespoke variants. Prefer `--add` and similar composition over stack explosion.
-- A session reading toolkit state prefers a CLI verb over its own inspection wherever one exists, since the verb is the surface under test and a hand-rolled read of the same files is not.
-- This repo is behavior-heavy. Planning and review are the work here, so a higher supervision ratio than a typical app repo is expected.
-- Toolkit surfaces stay general-purpose. Map to external-tool schemas in a thin sync adapter rather than adopting them as the canonical shape.
+A CLI and Claude Code plugin. What it is for, its goals, and its constraints are in `canon/REQUIREMENTS.md`, imported below.
 
 ## Behavior
 
-### Before editing
-
-- When directing the user to invoke a skill, give the exact command with args, or state explicitly that it runs bare
-
-### Scope discipline
-
-- When a fix has a natural mirror in a template or seed, flag it as a follow-up rather than silently extending the PR.
-- Before queuing or starting a new feature, confirm a concrete project or use case drives it. If precedent exists, lift patterns from that project rather than writing from scratch.
-
-### Choices and mechanics
-
-- Default to `bunx -y <pkg>` for one-shot package execution. Mention `npx` only as a fallback for environments without bun.
-- Prefer a single-path layout over dual-mode toggles or migration shims when one path works for both greenfield and grown projects. Skill complexity from branching read paths costs more than the extra folder or index file in the simple case.
-- When a fix could plausibly live in either a skill body or a seed, default to skill-local. Wait for a second concrete case before lifting the helper into shared infrastructure.
-- When encoding a fix into a skill, standard, or seed, lift the principle from target-project specifics. Strip reporter-named filenames, framework names, deploy targets, and project-specific label values. Keep canonical format specs and generic illustrations that teach the structure without overfitting.
-- When triaging a multi-topic request or scoping a rule, enumerate every concern or surface and account for each. Do not silently drop the non-obvious ones.
-- `$CLAUDE_PLUGIN_ROOT` and `$CLAUDE_PROJECT_DIR` are empty in model Bash.
-
-## Conventions
-
-- Update affected consumer docs in `docs/` as part of the change, through the `canon:docs-sync` skill. No rule is scoped to that folder.
+- When reading toolkit state, prefer a CLI verb over inspecting the files yourself, since the verb is the surface under test.
+- When directing the user to a skill, give the exact command with its arguments, or say it runs bare.
+- When a fix has a natural mirror in a template or seed, flag it as a follow-up rather than silently widening the change.
+- Before starting a new feature, confirm a concrete project or use case drives it, and lift patterns from that project where precedent exists.
+- Default to `bunx -y <pkg>` for one-shot package execution. Mention `npx` only as a fallback.
+- Prefer one layout that serves both a new and a grown project over dual-mode toggles or migration shims.
+- When a fix could live in a skill body or a seed, default to the skill. Lift it into shared infrastructure on the second concrete case.
+- When encoding a fix into a skill, standard, or seed, keep the principle and strip the reporting project's specifics: its filenames, frameworks, deploy targets, and label values.
+- When triaging a multi-topic request, list every concern and account for each one.
+- Update affected pages under `docs/` in the same change, through `canon:docs-sync`.
 
 ## Content ownership
 
-Each rule or knowledge item lives in exactly one surface. Other surfaces point, never duplicate.
+Each rule or fact lives in one surface. Others point at it. `canon/context/context-model/overview.md` carries the test that sorts a fact between surfaces.
 
-- Cross-domain behavior or design principle: `CLAUDE.md`
-- Decision filling an architecture slot (stack and runtime, delivery, enforced boundaries, layout, build principles), with its rejected alternative: `canon/ARCHITECTURE.md`
-- Behavior that fires on a path being edited rather than every session: `governance/rules/`
-- Behavior triggered only when editing domain X: `.claude/skills/internal-<X>/SKILL.md`
-- Per-domain internal narrative about domain X (structure, decisions, gotchas): `canon/context/<X>.md`
-- Consumer-facing reference (AI workflow, target-project integration): `docs/`
-- CLI command surface or invocation contract: `docs/agents/`
+| Kind of content                                                        | Owner                                                               |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Identity, goals, non-goals, constraints                                | `canon/REQUIREMENTS.md`                                             |
+| A decision filling an architecture slot, with its rejected alternative | `canon/ARCHITECTURE.md`                                             |
+| Behavior every session needs                                           | `CLAUDE.md`                                                         |
+| Behavior that fires on a path being edited                             | `governance/rules/`, or `internal/rules/` for this repository alone |
+| Shape of an artifact many sessions edit                                | `standards/`                                                        |
+| What a session needs when editing domain X                             | `.claude/skills/internal-<X>/SKILL.md`                              |
+| Narrative, decisions, and gotchas for one domain                       | `canon/context/<X>/`                                                |
+| Consumer-facing reference                                              | `docs/`, with the CLI contract in `docs/agents/`                    |
 
-When adding new content, place it in the canonical owner. If another surface needs awareness, add a one-line pointer.
+A fact more than one domain reads is canonical. A fact one domain reads belongs to that domain, however important.
 
-The test between a canonical row and the per-domain one is how many domains read the fact. More than one makes it canonical. Exactly one makes it per-domain, even when the fact is important, because importance is not reach. A decision is the exception: it goes to the domain entry it constrains unless it fills an architecture slot, since nearly every decision reaches a second domain.
+## Domains
 
-## System overview
+Load the skill before editing anything in its domain.
 
-The toolkit has the following domains. Each maps to a skill. Load the skill before editing anything in that domain.
+| Task type                                               | Skill                 |
+| ------------------------------------------------------- | --------------------- |
+| `src/`, `scripts/`, `sandbox/`, `lib/`, `assets/`       | `internal-scripts`    |
+| `tooling/`, manifests, golden configs, seeds            | `internal-tooling`    |
+| `standards/`, `docs/`, `canon/context/`                 | `internal-standards`  |
+| `governance/rules/`, `governance/stacks/`               | `internal-governance` |
+| `claude/skills/`, `claude/README.md`, `.claude/skills/` | `internal-claude`     |
+| `web/`, `assets/`, the landing page                     | `internal-web`        |
+| `src/teach/`, `examples/teach/`, `standards/teach.md`   | `internal-teach`      |
 
-| Task type                                                                         | Skill to load         |
-| --------------------------------------------------------------------------------- | --------------------- |
-| Modifying `src/`, `scripts/`, sandbox scenarios, `manage-*.sh`, `lib/`, `assets/` | `internal-scripts`    |
-| Modifying `tooling/`, manifests, golden configs, seeds                            | `internal-tooling`    |
-| Modifying `standards/`, `docs/`, `canon/context/`                                 | `internal-standards`  |
-| Modifying `governance/rules/`, `governance/stacks/`                               | `internal-governance` |
-| Modifying `claude/skills/`, `claude/README.md`, `.claude/skills/`                 | `internal-claude`     |
-| Modifying `web/`, `assets/`, the landing page                                     | `internal-web`        |
-| Modifying `src/teach/`, `examples/teach/`, `standards/teach.md`                   | `internal-teach`      |
-
+@canon/REQUIREMENTS.md
 @canon/ARCHITECTURE.md
 @canon/context/index.md
 
 ## Key paths
 
-- `governance/rules/`: governance rules
-- `internal/`: toolkit-internal standards and rules, plus the record of which governance stack this repo consumes, all outside every installable surface
-- `standards/`: authoring conventions, read through `canon standards <name>` rather than installed
-- `tooling/`: golden configs (base), references, and manifests per stack
+- `governance/rules/`: governance rules that ship to targets
+- `internal/`: toolkit-only rules and standards, outside every installable surface
+- `standards/`: authoring conventions, read through `canon standards <name>`
+- `tooling/`: golden configs, references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
-- `src/`: TypeScript CLI entry point, commander subcommands, exec helper
-- `scripts/`: bash domain scripts, core maintenance, and prompt generation
-- `sandbox/`: scenarios that provision isolated project states, their fixtures, and the headless runner
-- `wiki/`: reference pages for Anthropic-owned subjects, under `wiki/claude/`
+- `src/`: the TypeScript CLI, including the product verbs
+- `scripts/`: remaining bash and maintenance scripts
+- `sandbox/`: scenarios, fixtures, and the headless runner
+- `web/`: the landing page, deployed on its own
+- `examples/`: worked examples of the product outputs
+- `wiki/`: reference pages for Anthropic-owned subjects
 
 ## Commands
 
-- Run `bun run check` to verify and `bun run format` to auto-fix before committing. The pre-push hook runs `check` and may reformat files, so after `git push` run `git status` and commit any diff as `style(<scope>):`. Full script and hook reference in `canon/context/development/index.md`.
+- Run `bun run check` to verify and `bun run format` to fix before committing. The pre-push hook runs `check` and may reformat files, so after `git push` run `git status` and commit any diff as `style(<scope>):`. Full reference in `canon/context/development/index.md`.
 
 ## Wiki
 
-- Before answering a how-to question about an external tool or a Claude Code concept, scan `wiki/index.md`, then open the matching role catalog it links to reach the page titles. Workflow method, shell environment, and target-project questions are answered from `docs/index.md` instead.
+- Before answering a how-to question about an external tool or a Claude Code concept, scan `wiki/index.md`, then the role catalog it links. Workflow, shell, and target-project questions are answered from `docs/index.md`.
