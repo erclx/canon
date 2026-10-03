@@ -103,6 +103,10 @@ claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-re
 
 Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message that session instead when one holds the pull request.
 
+## Dispatch a review to a cloud reviewer
+
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the operator picked cloud for a code review. Its prompt opens with `/role-reviewer`, carries the cross-branch facts, and makes the posted review the announcement.
+
 ## Dispatch to drive a pull request's checklist
 
 `review-ui` is the second pass `role-reviewer` may run, so this shape reaches the role first the way the code reviewer's does. `orchestrator-review-dispatch.md` decides whether a pull request takes it, and it runs beside the code reviewer rather than after it.

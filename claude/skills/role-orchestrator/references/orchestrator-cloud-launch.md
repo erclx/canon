@@ -1,6 +1,6 @@
 ---
 title: Orchestrator cloud launch
-description: The cloud build shape, being the launch prompt that carries the plan as text and announces over GitHub, the create under a pseudo-terminal with its trust keys, and the readout that fails loudly on a missing session id
+description: The cloud build and review shapes, being the launch prompt that carries the plan as text and announces over GitHub, the reviewer prompt whose posted review is its announcement, the create under a pseudo-terminal with its trust keys, and the readout that fails loudly on a missing session id
 ---
 
 # Orchestrator cloud launch
@@ -74,3 +74,26 @@ gh api 'repos/{owner}/{repo}/pulls/<number>/commits' --jq '.[].commit.message' |
 ```
 
 A count above zero matches the row. A count of zero is someone else's pull request, whatever its title says. Once it matches, record the number on the row's task yourself with `canon tasks pull-request <number> <task>`, since `git-pr` on the VM has no task file to write, then review it the way step 5 reviews any worker's pull request.
+
+## Dispatch a review to a cloud reviewer
+
+Run this once `orchestrator-review-dispatch.md` has sent a code review to a dispatched reviewer and the operator picked cloud for it. The reviewer needs the same `SessionStart` hook as the build shape, and a `canon` on the VM whose `pr` reads run on REST, since the proxy refuses GraphQL. A UI review never takes this shape, because it drives a browser the VM does not have.
+
+Check this pass's launched record for a cloud reviewer already holding the number, and run `canon pr review-state <number> --json` for a pass already posted. A cloud reviewer never appears in `canon sessions list`, so the live-session check the local shape runs reads clear on a pull request one already holds.
+
+Write the prompt to `.canon/tmp/cloud-review-<number>/prompt.md` at the main worktree root:
+
+```plaintext
+/role-reviewer
+Then run /review-pr <number> on <owner>/<repo>.
+Your controller cannot receive a message from this session. The review you post is the announcement, so post nothing else for it. If you stop on a question before the review posts, comment on the pull request starting with QUESTION: review <number>.
+<the cross-branch facts>
+```
+
+The cross-branch facts are the ones `### What the brief may carry` in `orchestrator-launch.md` allows a reviewer brief, and nothing of this session's own read. Neither skill carries the invocation flag, so no position-zero expansion is at stake and the bare names reach the copied project skills.
+
+Create the session with the wrapper under `## The create`, setting `dir=.canon/tmp/cloud-review-<number>`, and keep its readout rule: no `session_` id means nothing was dispatched. Record the session id beside the number in this pass's launched record, and name the number, the repository, and the session id in the dispatch report.
+
+`poll.ts` lists every open pull request from this machine and reads each one's review state, so the posted `## Review` reaches the next poll like a local reviewer's. Start the poll when the dispatch goes out rather than at its fallback. A `QUESTION: review <number>` comment reaches the same poll as an unclassified reply, so answer it on the pull request.
+
+A cloud reviewer cannot be messaged after it posts. A re-review after a worker's address pass is a fresh dispatch, local or cloud by the same pick, rather than the message `orchestrator-handback.md` sends a live reviewer.
