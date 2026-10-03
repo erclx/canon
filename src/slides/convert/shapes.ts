@@ -150,7 +150,7 @@ const PT_PER_PX = 0.75
 const inches = (px: number): number => px / PX_PER_INCH
 const points = (px: number): number => px * PT_PER_PX
 
-function position(box: Rect): PptxGenJS.PositionProps {
+export function position(box: Rect): PptxGenJS.PositionProps {
   return {
     x: inches(box.x),
     y: inches(box.y),
