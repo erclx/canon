@@ -61,7 +61,7 @@ stage_setup() {
     log_step "Scenario ready: no README exists"
     log_info "Context: package.json declares a bin entry, no README.md anywhere"
     log_info "Action:  /canon:draft-doc write the project README"
-    log_info "Expect:  drafted at README.md, CLI content covered, confirmed before write"
+    log_info "Expect:  drafted at README.md from the CLI template, confirmed before write"
     ;;
   "readme-scaffold")
     stage_fixtures docs draft-doc readme-scaffold 01-readme
@@ -88,7 +88,7 @@ stage_setup() {
     log_step "Scenario ready: a project with a page, a mark, and a product image"
     log_info "Context: package.json declares a site framework and a homepage, public/ holds logo.svg and screenshot.svg"
     log_info "Action:  /canon:draft-doc write the project README"
-    log_info "Expect:  header fills mark, title, claim, live link, and screenshot, each read off the repository"
+    log_info "Expect:  drafted from the application template, header fills mark, title, claim, live link, and screenshot, each read off the repository"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

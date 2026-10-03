@@ -24,16 +24,44 @@ The target path is the placement. A README keeps no catalog, so there is no coll
 
 ## Detect
 
-- Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) for a `bin` field or CLI entry point, an installable package name, and its declared dependencies.
-- Check for a `claude/skills/` or `.claude/skills/` folder, a `plugin.json`, or a marketplace manifest, each naming an agent-facing or marketplace-distributed surface.
-- Note every type that applies rather than stopping at the first match, since a project is often several at once and the draft covers each one.
+Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) and the tree, then test each type on its own signal. Note every type that matches rather than stopping at the first, since a project is often several at once.
+
+- Library: an installable package name, counted only when no application, CLI, or plugin signal matches, since a named package is also what a site, a CLI, or a plugin carries. An agent-facing match leaves it in place, so a library with a `CLAUDE.md` still gets its quickstart.
+- CLI: a `bin` field, a `[project.scripts]` table in `pyproject.toml`, a `[[bin]]` table in `Cargo.toml`, or a CLI entry point.
+- Application: a site framework dependency, a site config file, or an app entry point.
+- Agent-facing: a `.claude/skills/` folder, or a file an agent loads such as `CLAUDE.md`.
+- Plugin: a `plugin.json` or a marketplace manifest.
+
+A match on no type falls back to the standard's generic template. Say so in the preview, and never force the nearest type.
+
 - Check for a page. A dependency on a site framework or a site config file in the manifest or the tree marks a project as having one. Read a live URL separately, from a `homepage` field or a deploy config, since a project can have a page and no known URL.
 - A monorepo can carry a page in one package and a CLI in another, so both signals may fire. Report each rather than picking one.
 - Look for the mark and the screenshot among images the project already commits: scan the existing README for image references, then the asset and public folders.
 
+## Pick
+
+Read the template for each detected type from `readme/`, beside this file:
+
+- `readme/library.md`
+- `readme/cli.md`
+- `readme/application.md`
+- `readme/agent-facing.md`
+- `readme/plugin.md`
+
+Each is a whole page of slots and structure, so fill it from the manifest and the tree rather than from memory. The standard still owns voice and content, and a template carries no rule of its own.
+
+A project matching one type drafts from that template. A project matching several combines them:
+
+- Keep one H1, one header block, and one description.
+- Order the sections as the standard orders them.
+- Add each extra type's usage or install subsection under the shared `## Installation` or `## Usage` H2, never as a second H2 of the same name.
+- Drop a template section the page already carries rather than repeating it.
+
+Between agent-facing and plugin alone, a repository with no plugin manifest takes only the agent-facing template, and a plugin that is not agent-facing in its own repository takes only the plugin template. A CLI or an application that also matches agent-facing keeps its own template beside it.
+
 ## Draft
 
-- Draft the H1, a 2-3 sentence description in plain text, then the required sections, then whichever optional sections and per-type content Detect found. A README takes no frontmatter.
+- Start from the picked or combined template. Draft the H1, a 2-3 sentence description in plain text, then the required sections, then whichever optional sections and per-type content Detect found. A README takes no frontmatter.
 - Open the page with the standard's header block, filling each slot from what Detect found: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot.
 - Fill the screenshot slot only with an image the project already commits, referenced with alt text naming what it depicts. This kind cannot capture one. Omit the slot when no such image exists and say so in the preview. Never write a placeholder path or invent a mark.
 - Omit the link and the screenshot for a project with no page, and the mark for a project with none, without a note in the drafted page. A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link.
@@ -48,6 +76,7 @@ Add these lines, then confirm them with the path:
 
 - `**Target:** <root | nested>`
 - `**Detected:** <project types>`
+- `**Templates:** <each template read, or the generic fallback>`
 - `**Header:** <each slot as filled (source) or skipped (reason)>`
 - `**Badges:** <candidates and what backs each one, or none>`
 
