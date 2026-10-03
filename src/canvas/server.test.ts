@@ -5,6 +5,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -160,8 +161,19 @@ describe('startCanvas', () => {
     const body = await (await get(server, '/frames/drafts/hero.html')).text()
 
     expect(body).toMatch(
-      /<head><style data-canvas-tokens>[^<]*teal[^<]*<\/style><title>/,
+      /<head><style data-canvas-tokens[^>]*>[^<]*teal[^<]*<\/style><title>/,
     )
+  })
+
+  it('should stamp a frame with the hash of its file, tokens or none', async () => {
+    const file = '<!doctype html><html><head></head><body>hero</body></html>'
+    seed('drafts/hero.html', file)
+    const server = start()
+
+    const body = await (await get(server, '/frames/drafts/hero.html')).text()
+
+    const hash = createHash('sha256').update(file).digest('hex')
+    expect(body).toContain(`data-canvas-hash="${hash}"`)
   })
 
   it('should inject into a frame that carries no head', async () => {

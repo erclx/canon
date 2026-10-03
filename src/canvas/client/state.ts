@@ -189,8 +189,13 @@ export async function applyChange(
   await loadPages(fetchImpl)
 }
 
-const MISMATCH_NOTICE =
-  'Could not select that element, since the browser and the file count the elements of this frame differently, as with a table written without its tbody.'
+/** What a refused element pick tells the operator, by the server's reason. */
+const PICK_NOTICES: Readonly<Record<string, string | undefined>> = {
+  'address-mismatch':
+    'Could not select that element, since the browser and the file count the elements of this frame differently, as when the browser builds an element the file does not state.',
+  'stale-address':
+    'Could not select that element, since the frame changed before the pick arrived. Pick it again once the frame reloads.',
+}
 
 async function refusalReason(response: Response): Promise<string | undefined> {
   try {
@@ -220,10 +225,10 @@ async function write(
       body: JSON.stringify(body),
     })
     if (!response.ok) {
+      const reason = await refusalReason(response)
       writeError.value =
-        (await refusalReason(response)) === 'address-mismatch'
-          ? MISMATCH_NOTICE
-          : `Could not save (status ${response.status}). Check canon canvas serve is still running.`
+        (reason && PICK_NOTICES[reason]) ??
+        `Could not save (status ${response.status}). Check canon canvas serve is still running.`
       await loadPages(fetchImpl)
       return
     }

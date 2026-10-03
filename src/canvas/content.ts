@@ -95,6 +95,7 @@ export type ContentRefusal =
   | 'busy'
   | 'invalid-address'
   | 'address-mismatch'
+  | 'stale-address'
 
 export interface ContentRefused {
   readonly ok: false
@@ -487,7 +488,7 @@ function selectionPath(root: string): string {
   return join(canvasDir(root), SELECTION_FILE)
 }
 
-function contentHash(html: string): string {
+export function contentHash(html: string): string {
   return createHash('sha256').update(html).digest('hex')
 }
 
@@ -537,9 +538,16 @@ export function writeSelection(
       )
     }
     const html = readFileSync(join(pagePath(root, page), found.file), 'utf8')
+    const hash = contentHash(html)
+    if (element.hash !== undefined && element.hash !== hash) {
+      return refuse(
+        'stale-address',
+        `${page}/${frame} changed after the pick was made, so pick it again`,
+      )
+    }
     const check = resolveAddress(html, element)
     if (!check.ok) return refuse(check.reason, check.detail)
-    stored = { index: element.index, ...check.element, hash: contentHash(html) }
+    stored = { index: element.index, ...check.element, hash }
   }
 
   const target = selectionPath(root)

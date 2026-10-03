@@ -14,6 +14,7 @@ import {
   addFrame,
   addPage,
   canvasDir,
+  contentHash,
   DEFAULT_FRAME,
   FRAME_GAP,
   listPages,
@@ -573,6 +574,31 @@ describe('element selection', () => {
 
     expect(outcome).toMatchObject({ ok: false, reason: 'address-mismatch' })
     expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should refuse a pick made against an earlier version of the file', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: 'a-hash-of-another-version' },
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'stale-address' })
+    expect(readSelection(ROOT)).toBeUndefined()
+  })
+
+  it('should take a pick made against the file as it stands', () => {
+    seedButtonFrame()
+
+    const outcome = writeSelection(ROOT, {
+      page: 'drafts',
+      frame: 'hero',
+      element: { ...BUTTON, hash: contentHash(BUTTON_FRAME) },
+    })
+
+    expect(outcome).toEqual({ ok: true })
   })
 
   it('should refuse an address that is not a whole number', () => {

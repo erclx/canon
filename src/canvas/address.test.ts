@@ -5,6 +5,7 @@ import {
   documentElements,
   elementAt,
   excerpt,
+  HASH_ATTRIBUTE,
   resolveAddress,
   sourceElements,
   TOKENS_ATTRIBUTE,
@@ -95,6 +96,19 @@ describe('documentElements', () => {
     const source = page('<p>a</p>')
 
     expect(browserTags(served)).toEqual(serverTags(source))
+  })
+})
+
+describe('addressOf', () => {
+  it('should carry the file hash the server stamped on the frame', () => {
+    const served = page(
+      '<p>a</p>',
+      `<style ${TOKENS_ATTRIBUTE} ${HASH_ATTRIBUTE}="abc123"></style><title>t</title>`,
+    )
+    const doc = new DOMParser().parseFromString(served, 'text/html')
+    const paragraph = doc.querySelector('p')
+
+    expect(paragraph && addressOf(doc, paragraph)?.hash).toBe('abc123')
   })
 })
 

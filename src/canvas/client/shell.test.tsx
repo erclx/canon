@@ -732,6 +732,49 @@ describe('element selection', () => {
   })
 })
 
+describe('element hash', () => {
+  it('should send the file hash the served frame carries with the pick', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    const marker = doc.createElement('style')
+    marker.setAttribute('data-canvas-tokens', '')
+    marker.setAttribute('data-canvas-hash', 'abc123')
+    doc.head.append(marker)
+
+    clickIn(doc, 'button')
+
+    expect(sentTo('/api/selection')).toEqual([
+      expect.objectContaining({
+        element: expect.objectContaining({ tag: 'button', hash: 'abc123' }),
+      }),
+    ])
+  })
+
+  it('should tell the operator when the frame changed before the pick arrived', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderApp(pages)
+    const doc = loadFrame('hero', HERO_BODY)
+    globalThis.fetch = (async (_url: unknown, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? new Response(
+            '{"ok":false,"reason":"stale-address","detail":"changed"}',
+            { status: 409, headers: { 'content-type': 'application/json' } },
+          )
+        : new Response(JSON.stringify(record(pages)), {
+            headers: { 'content-type': 'application/json' },
+          })) as typeof fetch
+
+    await act(async () => {
+      clickIn(doc, 'button')
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(
+      mount.querySelector('[aria-label="Details"] [role="alert"]')?.textContent,
+    ).toContain('changed before the pick arrived')
+  })
+})
+
 describe('Inspector element', () => {
   it('should show the selected element tag and computed style, read-only', () => {
     renderApp([page('drafts', [frame('hero')])])

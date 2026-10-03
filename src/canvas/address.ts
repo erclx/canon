@@ -9,6 +9,9 @@
 /** Marks the token stylesheet the server injects, which the file never holds. */
 export const TOKENS_ATTRIBUTE = 'data-canvas-tokens'
 
+/** On that same element, the hash of the file the frame was served from. */
+export const HASH_ATTRIBUTE = 'data-canvas-hash'
+
 const EXCERPT_LENGTH = 80
 
 /** Elements whose content is raw text, which a browser never parses as markup. */
@@ -23,6 +26,11 @@ export interface ElementAddress {
    * count, so a total that differs from the server's is what exposes it.
    */
   readonly count: number
+  /**
+   * The served file's hash, so the server can refuse a pick made against a
+   * version of the frame the file has since moved past.
+   */
+  readonly hash?: string
 }
 
 export interface SourceElement {
@@ -56,7 +64,15 @@ export function addressOf(
   const all = documentElements(doc)
   const index = all.indexOf(element)
   if (index === -1) return undefined
-  return { index, tag: element.tagName.toLowerCase(), count: all.length }
+  const address = {
+    index,
+    tag: element.tagName.toLowerCase(),
+    count: all.length,
+  }
+  const hash = doc
+    .querySelector(`[${TOKENS_ATTRIBUTE}]`)
+    ?.getAttribute(HASH_ATTRIBUTE)
+  return hash ? { ...address, hash } : address
 }
 
 /** The element an address names, or nothing once the tag there differs. */
