@@ -83,6 +83,8 @@ export function sourceElements(html: string): SourceElement[] {
   const elements: Collected[] = []
   const open: number[] = []
   let rawDepth = 0
+  /* A template's content is a fragment `querySelectorAll` never reaches. */
+  let templateDepth = 0
 
   const appendText = (text: string) => {
     for (const index of open) {
@@ -97,6 +99,15 @@ export function sourceElements(html: string): SourceElement[] {
     .on('*', {
       element(element) {
         const tag = element.tagName.toLowerCase()
+        if (templateDepth > 0) {
+          if (tag === 'template') {
+            templateDepth += 1
+            element.onEndTag(() => {
+              templateDepth -= 1
+            })
+          }
+          return
+        }
         const index = elements.length
         /* A tag boundary separates words the way a rendered block would. */
         appendText(' ')
@@ -109,12 +120,15 @@ export function sourceElements(html: string): SourceElement[] {
         })
         if (!element.canHaveContent || element.selfClosing) return
         const isRaw = RAW_TEXT.has(tag)
+        const isTemplate = tag === 'template'
         open.push(index)
         if (isRaw) rawDepth += 1
+        if (isTemplate) templateDepth += 1
         element.onEndTag(() => {
           const at = open.lastIndexOf(index)
           if (at !== -1) open.splice(at, 1)
           if (isRaw) rawDepth -= 1
+          if (isTemplate) templateDepth -= 1
           appendText(' ')
         })
       },

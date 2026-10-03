@@ -37,6 +37,9 @@ const COMMENTS = page(
 const RAW_TEXT = page(
   '<script>const tag = "<div><p>";</script><style>p > a { color: red }</style><p>after</p>',
 )
+const TEMPLATE = page(
+  '<template id="row"><li><span>item</span></li></template><ul><li>One</li></ul>',
+)
 const BARE_TABLE = page('<table><tr><td>a</td></tr></table>')
 const EXPLICIT_TABLE = page('<table><tbody><tr><td>a</td></tr></tbody></table>')
 
@@ -55,6 +58,10 @@ describe('sourceElements', () => {
 
   it('should skip markup inside script and style the way the browser does', () => {
     expect(serverTags(RAW_TEXT)).toEqual(browserTags(RAW_TEXT))
+  })
+
+  it('should skip the content of a template the way the browser does', () => {
+    expect(serverTags(TEMPLATE)).toEqual(browserTags(TEMPLATE))
   })
 
   it('should agree on a table that states its tbody', () => {
