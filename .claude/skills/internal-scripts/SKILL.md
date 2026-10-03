@@ -7,6 +7,11 @@ description: CLI entry point, bash scripts, sandbox scenarios, and lib functions
 
 Read `canon/context/scripts/index.md` for structure, file inventory, and lib responsibilities before editing.
 
+## CLI design
+
+- Extend an existing command with a flag rather than adding a bespoke variant. Prefer `--add` and similar composition over stack explosion.
+- Keep toolkit surfaces general-purpose. Map an external tool's schema in a thin sync adapter rather than adopting it as the canonical shape.
+
 ## Lib rules
 
 - Each lib file owns one concern. Read `canon/context/scripts/lib.md` for responsibilities before adding or modifying.
