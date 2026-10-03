@@ -20,12 +20,12 @@
  * `scripts/check-card-exclusion.sh` fails a build that carries the marker
  * below, which is what keeps the route out of the published site.
  */
-import '@/styles/global.css'
 
-// Retarget the import above when this project keeps its global stylesheet
+// Point the import below at this project's global stylesheet when it lives
 // somewhere else. An unresolved path refuses the card server by name, which is
 // the loud direction: a card captured against no stylesheet renders as an
 // unstyled box and reports success.
+import '@/styles/global.css'
 ---
 
 <html lang="en">
