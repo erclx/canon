@@ -62,6 +62,8 @@ A plausible cost names nothing. A row arguing what could go wrong off a shipped 
 
 A missing protection is a defect, not a missing feature. Read a row as a missing protection when the shipped path lacks a bound, a check, or a guard on what it does at run time, such as a limit, a timeout, or input validation, so that the path can fail, run unbounded, or return a wrong output for every user who reaches it. That is a reach. A missing feature leaves the path working as it does today and adds a capability, a document kind, or a sentence of guidance, and it is not a reach.
 
+A missing feature can still earn keep or promote through the cost arm. A user asking for it in an issue or a report, or working around its absence on their side, is a case someone hit, so that row is never declined for being a feature. A feature nobody asked for is declined. A passing mention is not a request, and neither is one the project's own planning records filed with no user behind it.
+
 - **keep**: the defect reproduces this pass, stated with a count or a path, and the row names a cost or a reach, stated with the observation, the hit, or the shipped path.
 - **promote**: it qualifies for keep, and the thing it was waiting on has cleared, naming what cleared it.
 - **archive**: every open outcome is measured shipped, naming the commit or pull request per outcome position.

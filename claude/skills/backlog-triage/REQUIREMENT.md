@@ -14,7 +14,7 @@ Four failure modes cost more than the rest. A pass that judges a row by what its
 ## Must
 
 - Measure every row against the tree and the log during the pass, carrying a count, a path, or a commit rather than the task file's own claim
-- Suggest keep or promote only for a row that names a cost, being a wrong result the pass observed or someone hit, or a reach, being a defect on a path the project ships that changes what its users or targets receive, hit or not, and suggest decline for a row whose defect merely still exists
+- Suggest keep or promote only for a row that names a cost, being a wrong result the pass observed or a case someone hit, including a user asking for a feature or working around its absence, or a reach, being a defect on a path the project ships that changes what its users or targets receive, hit or not, and suggest decline for a row whose defect merely still exists
 - Name the commit or pull request per outcome position before suggesting archive
 - File into an ordinary intake folder, so the intake list and answer verbs read and write it unchanged
 - Carry the verdict in the suggestion line and the task stem in the item heading, rather than in new fields
