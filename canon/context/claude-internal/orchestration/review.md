@@ -11,6 +11,10 @@ description: The review trigger and its poll and watch loops, how the poll class
 
 `review-pr` posts its findings as a comment on the pull request rather than returning them to the session that asked, since a finding posted there survives either session ending, and neither the orchestrator nor the worker is sure to outlive the review. `review-branch` still runs locally before a push, so the local pass catches what it can and the pull request holds the durable record.
 
+### The cloud reviewer
+
+On the operator's pick, a dispatched code review runs on a cloud session through the cloud build's create. The posted review is its announcement, since the session cannot message the orchestrator, and `poll.ts` already lists every open pull request locally. Spike 5 posted a review in about 64 s only because the reviewer fell back to REST when the proxy refused GraphQL, so every `canon pr` read and `review-pr` lookup now runs on REST. A UI review stays local, and a re-review is a fresh dispatch, since a cloud session is absent from `canon sessions list`.
+
 Only an open pull request starts it, since the script reads pull requests while a building worker has none, so a dispatch alone would cost a run every interval between launch and push and return nothing. The worker announces its own pull request instead, per `role-worker`, which is the one transition only that session can observe. The dispatch survives as a fallback the orchestrator applies to a worker still out after thirty minutes with no announcement, since nothing reports a silent failure of the announcement.
 
 ### The watch loop
@@ -91,7 +95,7 @@ The runbook holds the routing and the skill body points at it. Correcting a runn
 
 A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so `SEEN` can fire on a head still awaiting its first look at a real delta, when a pass written against an earlier commit lands stamped with a later head and the delta it skipped is a real fix.
 
-A pass writes the commit it read and the instant it read it as a marker in its own body, and both `poll.ts` and `review-pr` resolve the covered state through `canon pr review-state`, so a commit pushed inside a compose window reads as `MOVED`. The same risk still holds on a record whose `source` reads `fallback`, which is a pass posted before that marker shipped or a target whose CLI predates the verb. Treat a `SEEN` under `fallback` as worth one `gh pr view --json reviews` before believing it.
+A pass writes the commit it read and the instant it read it as a marker in its own body, and both `poll.ts` and `review-pr` resolve the covered state through `canon pr review-state`, so a commit pushed inside a compose window reads as `MOVED`. The same risk still holds on a record whose `source` reads `fallback`, which is a pass posted before that marker shipped or a target whose CLI predates the verb. Treat a `SEEN` under `fallback` as worth one read of `gh api repos/{owner}/{repo}/pulls/<number>/reviews` before believing it.
 
 ### A pull request's draft flag can read ready mid-undo
 
