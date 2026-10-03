@@ -51,7 +51,7 @@ A canvas failing these is non-conforming even when it satisfies every shape rule
 
 - Keep one `layout.json` per page, beside its frames. It holds each frame's box and nothing else, so moving a frame never rewrites its markup.
 - Key each box by the frame's name, under one top-level `frames` object.
-- Give every box four finite numbers in pixels: `x` and `y` for its top-left corner on the page, `width` for the width the frame renders at, and `height` for the height it shows on the board.
+- Give every box four finite numbers in pixels: `x` and `y` for its top-left corner on the page, `width` for the width the frame renders at, and `height` for the height it shows on the canvas.
 - Leave a frame out of the layout only when its position does not matter yet. A reader places an unnamed frame in a row after the others, at the default size of 1440 by 900.
 - Never write the file while a writer holds its lock, which is the same name with `.lock` appended. Two writers each replacing the whole file lose one of the two edits.
 - Treat a layout that does not parse as a defect to repair, never as an empty one to overwrite. Writing over it erases every box it held.
@@ -75,8 +75,8 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 
 ## What a frame must not assume
 
-- Do not assume a viewport. A frame renders at its layout width on the board and in a capture alike, so size it with media queries against that width rather than against the operator's window.
-- Do not assume the theme. The board's theme toggle is the operator's own state, and a capture shows each frame in its default theme.
+- Do not assume a viewport. A frame renders at its layout width on the canvas and in a capture alike, so size it with media queries against that width rather than against the operator's window.
+- Do not assume the theme. The canvas theme toggle is the operator's own state, and a capture shows each frame in its default theme.
 - Do not assume a network. Name only fonts the machine has, or ship the font beside the frame, since a capture refuses a frame naming a font it cannot find.
 - Do not assume a default font. Set `font-family` on the `html` element with an installed family first, since a capture checks the root's first family and the browser's default serif is absent from many machines.
 - Do not assume the frame is the source. A picked direction is carried into the project's design document or its wireframes, and the frame is deleted once it has been.

@@ -45,7 +45,7 @@ Hand the operator the address as a markdown link carrying the URL as its text an
 ## Step 2: make pages and frames
 
 - Add a page for each decision being drafted: `canon canvas page add <page> --json`.
-- Add each frame through the verb, which writes the starting file and its box in one locked step: `canon canvas frame add <page> <frame> --width <px> --height <px> --json`. Give the width the frame should render at, since a capture and the board both render at it.
+- Add each frame through the verb, which writes the starting file and its box in one locked step: `canon canvas frame add <page> <frame> --width <px> --height <px> --json`. Give the width the frame should render at, since a capture and the canvas both render at it.
 - Lay frames out with `canon canvas frame move <page> <frame> --x <px> --y <px> --json` rather than writing `layout.json` by hand, since the operator's drags write the same file under a lock.
 - Name pages and frames for what they hold, such as `pricing` and `pricing-dense`, so the operator can say which one by name.
 
