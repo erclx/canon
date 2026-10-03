@@ -41,5 +41,5 @@ The same procedure ran as five skills, one per kind, each restating the read, th
 - Rewriting or syncing an existing `docs/` page or an authored README against a diff: `docs-sync`
 - Refreshing an existing context entry or wireframe, or stubbing a surface a diff touched: `context-fold`
 - Drafting a standard or a governance rule: `create-standard`, `create-rule`
-- Drawing a figure or a diagram for a document: `draft-figure`, `draft-diagram`
+- Drawing a figure or a diagram for a document: `draft-figure`
 - Voice, rhythm, punctuation, and formatting in the drafted document: the `write-human` skill and the markdown standard

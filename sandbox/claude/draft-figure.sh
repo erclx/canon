@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "graph-shaped" "not-graph-shaped" "teach-lesson"
+  select_or_route_scenario "Which scenario?" "graph-shaped" "not-graph-shaped" "teach-lesson" "architecture-set"
 
   case "$SELECTED_OPTION" in
   "graph-shaped")
@@ -62,6 +62,28 @@ stage_setup() {
     log_info "         The figure captured inside the lesson with canon capture --selector figure"
     log_info "         <figure>, <figcaption>, and an inline SVG colored through the lesson's"
     log_info "         custom properties, placed ahead of the quiz"
+    ;;
+  "architecture-set")
+    # A small two-folder project with both planning records and one context
+    # entry to draw into. The request names an architecture view, so the run
+    # shapes it through the architecture set and renders it through Mermaid,
+    # landing it in the entry rather than in a per-kind diagrams folder.
+    stage_fixtures claude draft-figure architecture-set 01-initial
+
+    git add . && git commit -m "docs: add components entry with no figure" --no-verify -q
+
+    log_step "Scenario ready: draft an architecture view into a named entry"
+    log_info "Context: canon/REQUIREMENTS.md and canon/ARCHITECTURE.md describe a"
+    log_info "  four-layer web, agent, API, and SQLite app"
+    log_info "  canon/context/components.md states the layers in prose and draws nothing"
+    log_info ""
+    log_info "Action:  /canon:draft-figure the components view in canon/context/components.md,"
+    log_info "         below the opening paragraph. Write it without waiting for a confirmation."
+    log_info "Expect:  declared in fixtures/claude/draft-figure/architecture-set/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:draft-figure architecture-set"
+    log_info "         Render path decided as architecture, drawn from canon/ARCHITECTURE.md"
+    log_info "         A rendered SVG inside <figure> and <figcaption> in the entry"
+    log_info "         Nothing written under .canon/diagrams/"
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

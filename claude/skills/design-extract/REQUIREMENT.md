@@ -39,4 +39,4 @@ The greenfield case is the one that fails quietly. A project with no UI code sti
 - Mutating an existing design system, which is a direct edit of the file rather than a skill
 - Producing the HTML and CSS preview, which `canon design render` owns
 - Auditing the implemented UI against the tokens, which `ux-audit` owns
-- Architecture and flow diagrams, which `draft-diagram` owns
+- Architecture and flow diagrams, which `draft-figure` owns
