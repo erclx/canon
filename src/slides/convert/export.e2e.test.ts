@@ -442,7 +442,7 @@ describe('Sections', () => {
     expect(titles).toEqual(['Deck', 'Body', 'Body'])
   })
 
-  it('should leave a deck that declares no section unsectioned', () => {
+  it('should open no section for a deck that declares none', () => {
     const pptx = new PptxGenJS()
     const sections = new Sections('Deck', false)
 
