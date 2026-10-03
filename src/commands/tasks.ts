@@ -65,6 +65,7 @@ const EXIT_FINDINGS = 2
 
 /** Matches `trunk.ts`'s bound on a git subprocess this verb also shells out to. */
 const GIT_TIMEOUT_MS = 10_000
+const GH_TIMEOUT_MS = 10_000
 
 const TRUNK_BRANCHES: readonly string[] = ['main', 'master']
 
@@ -522,7 +523,9 @@ export function register(program: Command): void {
         'Run from a branch other than main or master, a close that ticks a new',
         'box names that branch on a Pending branch: line, which holds the task',
         'against a merge-time archive until canon tasks pull-request records',
-        "the branch's own number.",
+        "the branch's own number. The marker is skipped once gh lists a pull",
+        "request for the branch whose number is already on the task's Pull",
+        'request: line, and a failed gh lookup writes it.',
         '',
         'Examples:',
         '  canon tasks outcome v28.1-trigger-escalation --close 1 --close 3',
@@ -728,6 +731,45 @@ async function workingBranch(): Promise<string | undefined> {
   return branch
 }
 
+/**
+ * The pull request numbers whose head is `branch`, open or not. A failed run,
+ * an unreadable answer, or no `gh` at all returns an empty list, which writes
+ * the marker, the direction that holds a task open rather than archiving it.
+ */
+async function branchPullNumbers(
+  branch: string | undefined,
+): Promise<readonly number[]> {
+  if (branch === undefined) return []
+
+  const result = await execa(
+    'gh',
+    ['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number'],
+    {
+      cwd: process.cwd(),
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (result.exitCode !== 0) return []
+
+  try {
+    const rows: unknown = JSON.parse(result.stdout)
+    if (!Array.isArray(rows)) return []
+
+    return rows
+      .map((row: unknown) =>
+        typeof row === 'object' && row !== null && 'number' in row
+          ? row.number
+          : undefined,
+      )
+      .filter((number): number is number => Number.isInteger(number))
+  } catch {
+    return []
+  }
+}
+
 async function runPlanLink(
   task: string,
   plan: string,
@@ -789,11 +831,13 @@ async function runOutcome(
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
+  const branch = await workingBranch()
   const outcome = await closeOutcomes(
     root,
     selector,
     raw.map(Number),
-    await workingBranch(),
+    branch,
+    await branchPullNumbers(branch),
   )
 
   return reportOutcome(outcome, emitJson, root)
