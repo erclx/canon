@@ -175,7 +175,10 @@ describe('renameText under the skill preset', () => {
 
   it('should land both diagram spellings on the figure skill that absorbed them', () => {
     expect(
-      renameText('canon:claude-diagram and canon:draft-diagram', SKILL_NAME_RULES),
+      renameText(
+        'canon:claude-diagram and canon:draft-diagram',
+        SKILL_NAME_RULES,
+      ),
     ).toBe('canon:draft-figure and canon:draft-figure')
   })
 
