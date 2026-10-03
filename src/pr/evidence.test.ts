@@ -6,6 +6,7 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
+  type EvidenceState,
   hasMarkedEvidenceComment,
   type OwedInput,
   readOwed,
@@ -303,6 +304,121 @@ describe('renderEvidenceBody', () => {
         { url: 'https://github.com/o/r/pull/1#issuecomment-222', body },
       ]),
     ).toBe(checklist)
+  })
+
+  describe('open by default', () => {
+    function stateOf(
+      name: string,
+      count: number,
+      added: boolean,
+    ): EvidenceState {
+      return {
+        state: name,
+        items: Array.from({ length: count }, (_, index) => ({
+          path: `evidence/${name}/case-${index}.png`,
+          stem: `case-${index}`,
+          added,
+        })),
+      }
+    }
+
+    it('should open every state when the comment carries exactly six images', () => {
+      const body = renderEvidenceBody(
+        [stateOf('dark', 2, false), stateOf('light', 1, false)],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body.match(/^<details open>$/gm)).toHaveLength(2)
+      expect(body).not.toContain('<details>')
+    })
+
+    it('should close every state at seven images, counting an added row once', () => {
+      const body = renderEvidenceBody(
+        [stateOf('dark', 3, false), stateOf('light', 1, true)],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body.match(/^<details>$/gm)).toHaveLength(2)
+      expect(body).not.toContain('<details open>')
+    })
+
+    it('should open a comment of added rows whose image count is at the limit', () => {
+      const body = renderEvidenceBody(
+        [stateOf('dark', 6, true)],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('<details open>')
+    })
+  })
+
+  describe('commit line', () => {
+    const states = [
+      {
+        state: 'dark',
+        items: [{ path: 'evidence/dark/hero.png', stem: 'hero', added: false }],
+      },
+    ]
+
+    it('should name both commits as short shas right after the heading', () => {
+      const body = renderEvidenceBody(states, 'o/r', 'aaaa000', 'bbbb111')
+
+      const lines = body.split('\n')
+      expect(lines.slice(0, 3)).toEqual([
+        '## Evidence',
+        '',
+        '**Base:** `aaaa000` · **Head:** `bbbb111`',
+      ])
+    })
+
+    it('should show seven characters while the image urls keep the full sha', () => {
+      const base = 'a'.repeat(40)
+      const head = 'b'.repeat(40)
+
+      const body = renderEvidenceBody(states, 'o/r', base, head)
+
+      expect(body).toContain('**Base:** `aaaaaaa` · **Head:** `bbbbbbb`')
+      expect(body).toContain(`/blob/${head}/evidence/dark/hero.png?raw=true`)
+    })
+
+    it('should keep the preview on line one and the line out of the opening block', () => {
+      const body = renderEvidenceBody(
+        states,
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        'https://x.dev',
+        '- [ ] look',
+        'http://localhost:5173',
+      )
+
+      const comments = [
+        { url: 'https://github.com/o/r/pull/1#issuecomment-9', body },
+      ]
+      expect(body.split('\n')[0]).toBe('**Preview:** https://x.dev')
+      expect(findEvidencePreview(comments)).toBe('https://x.dev')
+      expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
+      expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
+      expect(countEvidenceCases(body)).toBe(1)
+    })
+
+    it('should carry no commit line when there are no states', () => {
+      const body = renderEvidenceBody(
+        [],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        'https://x.dev',
+      )
+
+      expect(body).not.toContain('**Base:**')
+    })
   })
 })
 
