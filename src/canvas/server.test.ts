@@ -1,4 +1,5 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -38,32 +39,64 @@ function get(server: CanvasStarted, path: string): Promise<Response> {
   return fetch(`http://${SERVE_HOST}:${server.port}${path}`)
 }
 
-/** Reads the event stream until a chunk carries the needle, or times out. */
-async function waitForEvent(
-  body: ReadableStream<Uint8Array>,
-  needle: string,
+interface EventReader {
+  /** Everything read so far once it carries the needle, or at the deadline. */
+  readonly until: (needle: string) => Promise<string>
+}
+
+const openReaders: ReadableStreamDefaultReader<Uint8Array>[] = []
+
+/**
+ * Opens the change stream and reads it on demand. One reader serves every
+ * wait, so a test can wait for the open preamble and then for an event
+ * without a pause between them.
+ */
+async function openEvents(
+  server: CanvasStarted,
   timeoutMs = 3000,
-): Promise<string> {
-  const reader = body.getReader()
+): Promise<EventReader> {
+  const response = await get(server, '/api/events')
+  if (!response.body) throw new Error('expected an event stream body')
+  const reader = response.body.getReader()
+  openReaders.push(reader)
   const decoder = new TextDecoder()
-  let seen = ''
   const deadline = Date.now() + timeoutMs
-  try {
-    while (Date.now() < deadline) {
-      const next = await Promise.race([
-        reader.read(),
-        new Promise<undefined>((settle) =>
-          setTimeout(() => settle(undefined), deadline - Date.now()),
-        ),
-      ])
-      if (next === undefined || next.done) break
-      seen += decoder.decode(next.value)
-      if (seen.includes(needle)) return seen
-    }
-    return seen
-  } finally {
-    await reader.cancel()
+  let seen = ''
+
+  return {
+    until: async (needle) => {
+      while (!seen.includes(needle) && Date.now() < deadline) {
+        const next = await Promise.race([
+          reader.read(),
+          new Promise<undefined>((settle) =>
+            setTimeout(() => settle(undefined), deadline - Date.now()),
+          ),
+        ])
+        if (next === undefined || next.done) break
+        seen += decoder.decode(next.value)
+      }
+      return seen
+    },
   }
+}
+
+/** Sends a request line verbatim, so the Host header is the one written here. */
+function statusWithHost(port: number, host: string): Promise<number> {
+  return new Promise((settle, fail) => {
+    const socket = connect(port, SERVE_HOST, () => {
+      socket.write(
+        `GET /api/pages HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n`,
+      )
+    })
+    let received = ''
+    socket.on('data', (chunk) => {
+      received += chunk.toString()
+    })
+    socket.on('error', fail)
+    socket.on('close', () => {
+      settle(Number(received.match(/^HTTP\/1\.[01] (\d{3})/)?.[1]))
+    })
+  })
 }
 
 beforeEach(() => {
@@ -71,6 +104,7 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
+  await Promise.all(openReaders.splice(0).map((reader) => reader.cancel()))
   await Promise.all(running.splice(0).map((server) => server.stop()))
   rmSync(ROOT, { recursive: true, force: true })
 })
@@ -163,16 +197,52 @@ describe('startCanvas', () => {
   it('should send a change event when a frame file is written', async () => {
     seed('drafts/hero.html', '<p>one</p>')
     const server = start()
-    const response = await get(server, '/api/events')
-    const body = response.body
-    if (!body) throw new Error('expected an event stream body')
+    const events = await openEvents(server)
+    await events.until(': open')
 
-    const pending = waitForEvent(body, 'hero.html')
-    await new Promise((settle) => setTimeout(settle, 100))
     seed('drafts/hero.html', '<p>two</p>')
 
-    const seen = await pending
+    const seen = await events.until('hero.html')
     expect(seen).toContain('"page":"drafts"')
     expect(seen).toContain('"file":"hero.html"')
+  })
+
+  it('should send a change event when a page folder is added', async () => {
+    const server = start()
+    const events = await openEvents(server)
+    await events.until(': open')
+
+    mkdirSync(join(ROOT, '.canon', 'canvas', 'approved'))
+
+    expect(await events.until('approved')).toContain(
+      '{"page":"approved","file":""}',
+    )
+  })
+
+  it('should refuse a request whose Host is not the loopback address', async () => {
+    const server = start()
+
+    const status = await statusWithHost(
+      server.port,
+      `evil.example:${server.port}`,
+    )
+
+    expect(status).toBe(403)
+  })
+
+  it('should answer a request addressed to localhost on its own port', async () => {
+    const server = start()
+
+    const status = await statusWithHost(server.port, `localhost:${server.port}`)
+
+    expect(status).toBe(200)
+  })
+
+  it('should declare the vendored chrome font so it renders without an install', async () => {
+    const server = start()
+
+    const css = await (await get(server, '/api/chrome.css')).text()
+
+    expect(css).toMatch(/@font-face\s*{[^}]*font-family:\s*['"]?Geist Variable/)
   })
 })

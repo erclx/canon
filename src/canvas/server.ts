@@ -75,6 +75,31 @@ export function injectTokens(html: string, css: string): string {
   return `${html.slice(0, at)}${element}${html.slice(at)}`
 }
 
+/**
+ * Whether a request names this server by a loopback name and its own port.
+ * The bind keeps other machines out, and this keeps out a page the operator
+ * visits whose domain was rebound to 127.0.0.1, which reaches the socket with
+ * its own name in the Host header.
+ */
+export function isLoopbackHost(host: string | null, port: number): boolean {
+  return host === `${SERVE_HOST}:${port}` || host === `localhost:${port}`
+}
+
+type Handler = (
+  request: Request,
+  server: Bun.Server<undefined>,
+) => Response | Promise<Response>
+
+function guarded(handler: Handler): Handler {
+  return (request, server) =>
+    isLoopbackHost(request.headers.get('host'), server.port ?? 0)
+      ? handler(request, server)
+      : new Response('Forbidden\n', {
+          status: 403,
+          headers: { 'content-type': 'text/plain; charset=utf-8' },
+        })
+}
+
 function json(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     headers: {
@@ -119,9 +144,15 @@ class ChangeStream {
     })
   }
 
+  /**
+   * A path one segment deep is a page folder appearing, going, or being
+   * renamed, which the recursive watch reports under its bare name with
+   * nothing beneath it. It goes out with an empty file, so the shell rereads
+   * the page list without reloading a frame.
+   */
   private queue(path: string): void {
     const [page, ...rest] = path.split(/[\\/]/)
-    if (page === undefined || rest.length === 0) return
+    if (page === undefined || page === '') return
     clearTimeout(this.pending.get(path))
     this.pending.set(
       path,
@@ -180,7 +211,14 @@ export function startCanvas(
   mkdirSync(content, { recursive: true })
 
   const tokens = options.tokens ?? {}
-  const chromeCss = buildDesignCss(undefined, { components: false })
+  /*
+   * Fonts embedded, so the chrome renders in its own face on a machine that
+   * never installed it rather than in whatever the fallback stack finds.
+   */
+  const chromeCss = buildDesignCss(undefined, {
+    components: false,
+    embedFonts: true,
+  })
   const changes = new ChangeStream(content)
   const first = options.port ?? CANVAS_PORT
 
@@ -194,28 +232,34 @@ export function startCanvas(
         /* The change stream stays open for as long as the shell does. */
         idleTimeout: 0,
         routes: {
+          /*
+           * The shell and the chunks it bundles carry toolkit code and no
+           * project content, so they are the one route left unguarded.
+           */
           '/': options.shell,
-          '/api/pages': () => {
+          '/api/pages': guarded(() => {
             const resolved = resolveFrameTokens(root, tokens)
             const { css: _css, ...source } = resolved
             return json({ pages: listPages(root), tokens: source })
-          },
-          '/api/chrome.css': () =>
-            new Response(chromeCss, {
-              headers: {
-                'content-type': 'text/css; charset=utf-8',
-                'cache-control': 'no-store',
-              },
-            }),
-          '/api/events': () => changes.open(),
+          }),
+          '/api/chrome.css': guarded(
+            () =>
+              new Response(chromeCss, {
+                headers: {
+                  'content-type': 'text/css; charset=utf-8',
+                  'cache-control': 'no-store',
+                },
+              }),
+          ),
+          '/api/events': guarded(() => changes.open()),
         },
-        fetch: (request) => {
+        fetch: guarded((request) => {
           const { pathname } = new URL(request.url)
           if (pathname.startsWith(FRAMES_PREFIX)) {
             return serveFrame(root, content, request, tokens)
           }
           return new Response('Not found\n', { status: 404 })
-        },
+        }),
       }),
     )
   } catch (error) {
