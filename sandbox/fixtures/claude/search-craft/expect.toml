@@ -1,0 +1,33 @@
+# What a correct run leaves behind once `search-craft` loads on a research
+# request. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# The arm runs live web search, so it is neither deterministic nor free, and the
+# content patterns check shape only: the notes exist, name the field, and cite a
+# source. Which domains count as the field's authorities is semantic, so the
+# scoping judgment sits under `manual`.
+
+paths = ["notes/research.md"]
+
+write_scope = ["notes/**", ".claude/**", ".canon/**"]
+
+manual = [
+  "The notes name the field the question was searched in, economics or housing policy, as the run's own framing rather than only as a topic word. Semantic: a field named is a claim about where the search ran, which a substring cannot tell from the word appearing in a source title.",
+  "At least one search was scoped to authorities the run derived itself, such as the field's working papers, its professional society's journals, or an official statistics or budget office, and the run says so. Semantic: which domains count as authoritative is a judgment, and the envelope does not carry the search tool's arguments.",
+  "Where the scoped and open results disagreed, the notes say so and name the side kept. Semantic: a disagreement is worded many ways, and a run whose two searches agreed has nothing to state.",
+  "No source in the notes was reached by paying, logging in, or scraping behind a login. Semantic: the route a fetch took is not in the written file.",
+]
+
+# Every key above this line is top level. A bare key written below a
+# `[[content]]` header belongs to that table in TOML, so anything moved down
+# here would parse clean and assert nothing.
+
+# The notes name the field the question sits in.
+[[content]]
+path = "notes/research.md"
+pattern = 'economic|Economic'
+
+# At least one claim carries a link to its source.
+[[content]]
+path = "notes/research.md"
+pattern = 'https?://[^\s)]+'
