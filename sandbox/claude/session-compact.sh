@@ -8,61 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-session-compact",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  [ -f CLAUDE.md ] || log_error "No CLAUDE.md to append to. SANDBOX_INJECT_SEEDS provisions one."
-
-  cat <<'EOF' >>CLAUDE.md
-
-# My App
-
-Task management API.
-
-## Commands
-
-- `bun run check`: lint and typecheck
-EOF
-
-  mkdir -p src/routes .canon/tasks
-
-  cat <<'EOF' >src/routes/tasks.ts
-export function listTasks(): string[] {
-  return []
-}
-EOF
-
-  cat <<'EOF' >.canon/tasks/index.md
----
-title: Tasks
-subtitle: One file per task, ordered by phase label
----
-
-# Tasks
-
-One file per task, ordered by phase label
-
-- [v01.0: Paginate the task list](v01.0-pagination.md): Return a bounded page of tasks instead of the whole collection
-EOF
-
-  cat <<'EOF' >.canon/tasks/v01.0-pagination.md
----
-title: 'v01.0: Paginate the task list'
-description: Return a bounded page of tasks instead of the whole collection
----
-
-# v01.0: Paginate the task list
-
-- [ ] Outcome: a list request accepts a page size and an offset
-
-> Test strategy: integration, request successive pages and verify no overlap.
-EOF
+  stage_fixtures claude session-compact shared 01-initial
 
   git add . && git commit -m "feat(api): scaffold the task API and its board" --no-verify -q
 
