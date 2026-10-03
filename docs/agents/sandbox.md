@@ -45,6 +45,31 @@ An envelope that parses but carries no `result` field skips the reply assertion 
 
 Exit 0 means `pass` or `unchecked`. Exit 1 means `fail`, or a caller error: a malformed target, or a sandbox that was never provisioned. A missing sandbox reports as an error rather than a failed verdict, because failing every path assertion would read as a skill that did nothing. `--strict` moves `unchecked` to exit 1 for a caller that has finished arming its scenarios.
 
+## Provisioning equivalence
+
+`canon sandbox equivalence` proves a change moved nothing in what scenarios provision. It provisions every arm of the named targets on a base ref and on the working checkout, builds a manifest of each tree, and names what differs. It runs offline and never calls `sandbox/run.sh` or a `claude` binary, so no arm it runs bills a model.
+
+```bash
+canon sandbox equivalence claude --base origin/main --json
+canon sandbox equivalence claude:plan-feature/full --base HEAD
+```
+
+A target is `<category>`, `<category>:<command>`, or `<category>:<command>/<arm>`, defaulting to every category.
+
+| Flag               | Effect                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| `--base <ref>`     | Ref the baseline is provisioned from, `main` by default                                     |
+| `--include-anchor` | Also run the arms that push to the shared GitHub anchor, one at a time, for an attended run |
+| `--out <dir>`      | Keep the provisioned trees, logs, and per-side manifests in this folder                     |
+| `--no-masks`       | Compare every path, which lists what each mask would hide                                   |
+| `--json`           | Emit the record on stdout                                                                   |
+
+The baseline is a detached worktree with full history, removed on exit including after `SIGINT`. Each arm provisions on the base side, is read into a manifest, is deleted, then provisions on the head side at the same path with the run id pinned. A manifest holds every file's mode and hash, every symlink's target, the exit status, the narration, and for the outer repository and each nested one the commit subjects, the staged index, and the branch.
+
+The record lists per arm `identical`, `differs` with the manifest keys that differ, `red-on-base` when both sides fail the same way, or `skipped-anchor`. It also carries `canonVersion`, `baseCommit`, `masksApplied`, `errors`, and `counts`. A declared arm adds a `check` entry from `canon sandbox check` on the head tree, whose `asserted` count shows its `expect.toml` resolved from `sandbox/fixtures/`.
+
+Exit 0 means every compared arm is identical or red the same way on both sides. Exit 1 means any `differs`, a base and head exit that disagree, or an armed arm that `canon sandbox coverage` lists and enumeration lacks.
+
 ## Scenario coverage
 
 `canon sandbox coverage` reports which scenarios declare expectations and which only provision a state. It reads the fixture tree, so it needs no provisioned sandbox and runs nothing. Where that tree does not ship it exits 1 and prints no percentage, since a denominator nobody looked at is not a coverage result. A tree that is present and holds no scenarios is a real zero and still reports one.

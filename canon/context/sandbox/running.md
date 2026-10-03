@@ -37,6 +37,7 @@ canon sandbox reset                  # restore sandbox to baseline
 canon sandbox clean                  # wipe sandbox entirely
 canon sandbox check <cat:cmd> [arm]  # assert an arm against the provisioned tree
 canon sandbox coverage               # report which scenarios declare expectations
+canon sandbox equivalence [target]   # diff every arm's provisioned tree against a base ref
 ```
 
 `docs/agents/sandbox.md` carries the flags and JSON shapes. `canon/context/sandbox/headless.md` covers driving a skill through `sandbox/run.sh`.
