@@ -1,6 +1,11 @@
 ---
 title: Tasks reference
 description: Folder layout, filename convention, file format, origin lines, and archiving for task files under .canon/tasks/
+paths:
+  - '.canon/tasks/**'
+rule:
+  - 'Follow the board standard for `priority.md` and `backlog.md`, their readiness groups, and row order. Read it with `canon standards board`.'
+  - 'Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter.'
 ---
 
 # Tasks reference

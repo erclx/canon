@@ -1,6 +1,17 @@
 ---
 title: Claude skill reference
-description: Claude skill structure and authoring rules
+description: Skill structure and authoring rules for Claude Code
+paths:
+  - '.claude/skills/**/SKILL.md'
+  - 'claude/skills/**/SKILL.md'
+  - '.claude/skills/**/REQUIREMENT.md'
+  - 'claude/skills/**/REQUIREMENT.md'
+rule:
+  - "Confirm `canon:create-skill`'s two creation-time questions are answered before a new `SKILL.md` lands, whether drafted by hand, by another skill, or by `canon:create-skill` itself. Carry the third question into the sibling `REQUIREMENT.md`'s `Must not` section as a review criterion rather than a gate."
+  - 'Report it rather than proceeding silently when `canon:create-skill` does not resolve. It ships with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have it.'
+  - 'Re-read a skill body this session edited before invoking that skill again in the same session'
+  - 'Do not read a resolved file path in a held body as evidence the body is current'
+  - 'Follow the skill requirement standard for the shape a `REQUIREMENT.md` states. Read it with `canon standards skill-requirement`.'
 ---
 
 # Claude skill reference

@@ -1,6 +1,8 @@
 ---
 title: Groundwork reference
 description: Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
+paths:
+  - '.canon/groundwork/**'
 ---
 
 # Groundwork reference

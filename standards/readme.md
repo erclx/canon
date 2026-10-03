@@ -1,6 +1,8 @@
 ---
 title: Readme reference
 description: Readme voice, structure, and content conventions
+paths:
+  - '**/README.md'
 ---
 
 # Readme reference

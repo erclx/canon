@@ -1,6 +1,14 @@
 ---
 title: Diagram reference
 description: Shape and content rules for .canon/diagrams/<kind>.md files
+paths:
+  - '.canon/diagrams/**'
+  - '.claude/DIAGRAMS.md'
+rule:
+  - 'Layout, budgets, accessibility, labels, and render verification inside the fence are a separate topic. The mermaid standard routes them.'
+  - 'A diagram entry carries structure and flow, not implementation. Read the standard before adding or revising a kind.'
+  - 'Write a new diagram to `.canon/diagrams/<kind>.md`, never to `.claude/DIAGRAMS.md`'
+  - 'Convert a `.claude/DIAGRAMS.md` left by an older install into per-kind entries before editing it'
 ---
 
 # Diagram reference

@@ -1,6 +1,10 @@
 ---
 title: Governance rule reference
 description: Rule frontmatter, body shape, and voice for .claude/rules files
+paths:
+  - '.claude/rules/**/*.md'
+rule:
+  - 'Read it before writing or editing a rule. Do not work the shape from memory.'
 ---
 
 # Governance rule reference

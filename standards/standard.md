@@ -1,6 +1,10 @@
 ---
 title: Standard reference
 description: Shape and content rules for authoring a standard
+paths:
+  - 'standards/**/*.md'
+rule:
+  - 'Read it before writing or editing a standard. Do not work the shape from memory.'
 ---
 
 # Standard reference

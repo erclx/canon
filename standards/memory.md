@@ -1,6 +1,8 @@
 ---
 title: Memory reference
 description: Filename and type prefix, frontmatter, the body shape per type, links between entries, and the lifecycle from write to retire
+paths:
+  - '.canon/memory/**'
 ---
 
 # Memory reference

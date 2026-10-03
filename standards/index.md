@@ -32,7 +32,7 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Session map reference](session.md): Filename and location, the sections a handoff carries, the write and read procedures, and how a role extends it
 - [Practice skill reference](skill-practice.md): Closing sections and source ledger for a skill carrying engineering practice
 - [Skill requirement reference](skill-requirement.md): Shape and content rules for the REQUIREMENT.md beside a skill
-- [Claude skill reference](skill.md): Claude skill structure and authoring rules
+- [Claude skill reference](skill.md): Skill structure and authoring rules for Claude Code
 - [Slug reference](slug.md): Transform from a git branch name to a slug, and the three responses to an empty result
 - [Standard reference](standard.md): Shape and content rules for authoring a standard
 - [Tasks reference](tasks.md): Folder layout, filename convention, file format, origin lines, and archiving for task files under .canon/tasks/
