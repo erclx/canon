@@ -1,6 +1,12 @@
 /** The path segment that marks an image as evidence a pull request should compare. */
 const EVIDENCE_SEGMENT = 'evidence'
 
+/** The most images a comment carries and still opens its states, since past it the page is a wall of screenshots. */
+const EVIDENCE_OPEN_LIMIT = 6
+
+/** Length of the commit names the visible line shows, the width `git` abbreviates to. */
+const SHORT_SHA_LENGTH = 7
+
 /** Prefix of the trailing marker this module writes and reads back. */
 const MARKER_PREFIX = '<!-- pr-evidence:'
 
@@ -120,9 +126,12 @@ export function evidenceMarker(head: string): string {
 }
 
 /**
- * Renders the whole comment body: one collapsed `<details>` block per state,
- * a Base/Head row per case, and the trailing marker naming the head this body
- * describes. Every image URL is pinned to a commit sha rather than a branch,
+ * Renders the whole comment body: one `<details>` block per state, a Base/Head
+ * row per case, and the trailing marker naming the head this body describes.
+ * Every state opens while the comment carries at most `EVIDENCE_OPEN_LIMIT`
+ * images, one per row for the head plus one per row not added, and every state
+ * closes past it, so a comment is never half open. A visible line under
+ * `## Evidence` names the base and head as short shas. Every image URL is pinned to a commit sha rather than a branch,
  * so the comment keeps showing what it claimed even after the branch moves.
  *
  * A preview address opens the body, and with no states it is the whole body
@@ -157,6 +166,14 @@ export function renderEvidenceBody(
     return [...opening, ...closing, evidenceMarker(head)].join('\n')
   }
 
+  const imageCount = states.reduce(
+    (total, entry) =>
+      total + entry.items.reduce((sum, item) => sum + (item.added ? 1 : 2), 0),
+    0,
+  )
+  const opener =
+    imageCount <= EVIDENCE_OPEN_LIMIT ? '<details open>' : '<details>'
+
   const sections = states.map((entry) => {
     const rows = entry.items.map((item) => {
       const before = item.added
@@ -167,7 +184,7 @@ export function renderEvidenceBody(
     })
 
     return [
-      '<details>',
+      opener,
       `<summary>${entry.state === '' ? 'evidence' : entry.state} (${entry.items.length})</summary>`,
       '',
       '| Case | Base | Head |',
@@ -181,6 +198,8 @@ export function renderEvidenceBody(
   return [
     ...opening,
     '## Evidence',
+    '',
+    `**Base:** \`${base.slice(0, SHORT_SHA_LENGTH)}\` · **Head:** \`${head.slice(0, SHORT_SHA_LENGTH)}\``,
     '',
     ...sections,
     '',
