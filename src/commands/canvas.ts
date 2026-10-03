@@ -14,6 +14,11 @@ import {
   renamePage,
 } from '@/canvas/content'
 import { captureCanvas } from '@/canvas/capture'
+import {
+  type EditRefused,
+  editFrameAtIndex,
+  STYLE_PROPERTIES,
+} from '@/canvas/edit'
 import { CANVAS_PORT, startCanvas } from '@/canvas/server'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
@@ -40,6 +45,7 @@ interface Refused {
   readonly ok: false
   readonly reason:
     | ContentRefused['reason']
+    | EditRefused['reason']
     | 'no-root'
     | 'no-server'
     | 'capture-failed'
@@ -102,7 +108,7 @@ export function register(program: Command): void {
     .command('canvas')
     .helpOption('-h, --help', 'Show this help message')
     .description(
-      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, capture)',
+      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, edit, capture)',
     )
     .addHelpText(
       'after',
@@ -118,6 +124,7 @@ export function register(program: Command): void {
         '  canon canvas frame add drafts hero --width 1440 --height 900',
         '  canon canvas frame move drafts hero --x 200 --y 120',
         '  canon canvas selection --json',
+        '  canon canvas edit drafts/hero --element 4 --set color=var(--color-accent)',
         '  canon canvas capture drafts/hero',
         '  canon canvas list --json',
         '',
@@ -365,6 +372,93 @@ export function register(program: Command): void {
       }
       outro()
     })
+
+  withRoot(
+    canvas
+      .command('edit')
+      .description(
+        'Set one property of an element in a frame, the writer the inspector uses',
+      )
+      .argument('<target>', '<page>/<frame>')
+      .requiredOption(
+        '--element <index>',
+        'The element by its index in document order, as canvas selection reports it',
+      )
+      .requiredOption(
+        '--set <property=value>',
+        'The property and its value, where an empty value drops a style property',
+      ),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        `Properties: text, ${STYLE_PROPERTIES.join(', ')}.`,
+        'A style property is written into the element inline style and',
+        'leaves its other properties as they were. text replaces the text of',
+        'an element holding text alone, and refuses one holding elements.',
+        'Every byte outside the element stays as it was.',
+        '',
+      ].join('\n'),
+    )
+    .action(
+      async (
+        target: string,
+        opts: RootOptions & { element: string; set: string },
+      ) => {
+        const emitJson = opts.json ?? false
+        const resolved = await resolveRoot(opts)
+        if (!resolved.ok) {
+          process.exitCode = refuse(resolved, emitJson)
+          return
+        }
+        const { root } = resolved
+        const [pageName, frameName, ...rest] = target.split('/')
+        if (!pageName || !frameName || rest.length > 0) {
+          process.exitCode = refuse(
+            {
+              ok: false,
+              reason: 'invalid-name',
+              detail: `${target} is not <page>/<frame>`,
+            },
+            emitJson,
+          )
+          return
+        }
+        const split = opts.set.indexOf('=')
+        if (split <= 0) {
+          process.exitCode = refuse(
+            {
+              ok: false,
+              reason: 'invalid-edit',
+              detail: `${opts.set} is not <property>=<value>`,
+            },
+            emitJson,
+          )
+          return
+        }
+        const property = opts.set.slice(0, split).trim()
+        const value = opts.set.slice(split + 1)
+        const index =
+          opts.element.trim() === '' ? Number.NaN : Number(opts.element)
+        const outcome = editFrameAtIndex(root, pageName, frameName, index, {
+          property,
+          value,
+        })
+        if (!outcome.ok) {
+          process.exitCode = refuse(outcome, emitJson)
+          return
+        }
+        const path = resolve(canvasDir(root), outcome.page, outcome.file)
+        if (emitJson) writeJson({ ...outcome, property, value, path })
+        intro(BANNER)
+        logAdd(`${outcome.page}/${outcome.file}`)
+        logInfo(
+          `element ${index}: ${property} ${value === '' ? 'dropped' : `= ${value}`}`,
+        )
+        outro()
+      },
+    )
 
   withRoot(
     canvas
