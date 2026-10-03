@@ -12,7 +12,13 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import JSZip from 'jszip'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { type ExportResult, exportHtmlDeck } from '@/slides/convert/export'
+import PptxGenJS from 'pptxgenjs'
+import {
+  type ExportResult,
+  exportHtmlDeck,
+  Sections,
+} from '@/slides/convert/export'
+import type { SlideMeta } from '@/slides/convert/walk'
 
 /**
  * Exports a four-slide fixture deck through a real Chromium and reads the XML
@@ -400,6 +406,44 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     },
     60_000,
   )
+})
+
+describe('Sections', () => {
+  const meta = (section?: string): SlideMeta => ({
+    ...(section ? { section } : {}),
+    isHidden: false,
+    header: { kind: 'master' },
+    footer: { kind: 'master' },
+  })
+
+  it('should give a returning section title its own section', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', true)
+
+    const titles = ['Intro', 'Body', 'Intro'].map((title) =>
+      sections.titleFor(meta(title), pptx),
+    )
+
+    expect(titles).toEqual(['Intro', 'Body', 'Intro (2)'])
+  })
+
+  it('should open a section named after the deck ahead of the first one', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', true)
+
+    const titles = [undefined, 'Body', undefined].map((title) =>
+      sections.titleFor(meta(title), pptx),
+    )
+
+    expect(titles).toEqual(['Deck', 'Body', 'Body'])
+  })
+
+  it('should leave a deck that declares no section unsectioned', () => {
+    const pptx = new PptxGenJS()
+    const sections = new Sections('Deck', false)
+
+    expect(sections.titleFor(meta(), pptx)).toBeUndefined()
+  })
 })
 
 describe('exportHtmlDeck with a malformed deck file', () => {

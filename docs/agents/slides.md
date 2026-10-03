@@ -51,7 +51,7 @@ A slide sets its own place in the deck through attributes on `<body>`.
 | `data-footer-left`, `-center`, `-right` | replaces that footer slot on this slide alone |
 | `data-header-left`, `-center`, `-right` | replaces that header slot on this slide alone |
 
-Once any slide opens a section, slides ahead of the first one sit in a section named after the deck, since PowerPoint wants every slide in one.
+Once any slide opens a section, slides ahead of the first one sit in a section named after the deck, since PowerPoint wants every slide in one. A title the deck returns to after another section opens a new section numbered `Intro (2)`, so each section stays one run of slides.
 
 A slide dropping one band keeps the other from the master. A slide replacing a slot draws its band as its own text, so editing that band once in PowerPoint's master view reaches every slide except the ones that replaced it.
 

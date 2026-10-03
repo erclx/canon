@@ -193,7 +193,7 @@ export async function exportHtmlDeck(
     pptx.theme = { headFontFace: theme.face, bodyFontFace: theme.face }
     const markSize = deck.mark ? await measure(page, deck.mark) : undefined
     const masters = new Set<string>()
-    const sections = new Sections(deck.title, files)
+    const sections = new Sections(deck.title, declaresSections(files))
 
     for (const [index, file] of files.entries()) {
       const slideNumber = index + 1
@@ -325,32 +325,46 @@ function drawOverrides(
 /**
  * A slide's `data-section` opens a section the slides after it stay in.
  * PowerPoint wants every slide in a section once any exists, so slides ahead of
- * the first declared one open a section named after the deck. Whether any slide
- * declares one is read from the source ahead of layout, since the first slide
- * is placed before the last is laid out.
+ * the first declared one open a section named after the deck.
+ *
+ * pptxgenjs files a slide under the first section carrying its title, so a
+ * title the deck returns to takes a numbered suffix rather than sending the
+ * slide back into the earlier section, which PowerPoint reads as a broken list.
  */
-class Sections {
+export class Sections {
+  /** The title as declared, and as written once a repeat is numbered. */
+  private declared: string | undefined
   private current: string | undefined
-  private readonly isUsed: boolean
+  private readonly opened = new Map<string, number>()
 
   constructor(
     private readonly deckTitle: string,
-    files: readonly string[],
-  ) {
-    this.isUsed = files.some((file) =>
-      /<body\b[^>]*\sdata-section\s*=/i.test(readFileSync(file, 'utf8')),
-    )
-  }
+    private readonly isUsed: boolean,
+  ) {}
 
   titleFor(meta: SlideMeta, pptx: PptxGenJS): string | undefined {
     if (!this.isUsed) return undefined
-    const title = meta.section ?? this.current ?? this.deckTitle
-    if (title !== this.current) {
-      pptx.addSection({ title })
-      this.current = title
-    }
-    return title
+    const isContinuing =
+      meta.section === undefined || meta.section === this.declared
+    if (isContinuing && this.current !== undefined) return this.current
+    const title = meta.section ?? this.deckTitle
+    const count = (this.opened.get(title) ?? 0) + 1
+    this.opened.set(title, count)
+    this.declared = title
+    this.current = count === 1 ? title : `${title} (${count})`
+    pptx.addSection({ title: this.current })
+    return this.current
   }
+}
+
+/**
+ * Whether any slide declares a section, read from the source ahead of layout,
+ * since the first slide is placed before the last is laid out.
+ */
+function declaresSections(files: readonly string[]): boolean {
+  return files.some((file) =>
+    /<body\b[^>]*\sdata-section\s*=/i.test(readFileSync(file, 'utf8')),
+  )
 }
 
 /** The mark's intrinsic size as Chromium decodes it, square where unknown. */
