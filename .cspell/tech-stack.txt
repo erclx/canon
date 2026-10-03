@@ -154,6 +154,7 @@ shdw
 shiki
 sidepanel
 sigpipe
+slidenum
 soffice
 stackr
 startswith

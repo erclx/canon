@@ -195,11 +195,11 @@ describe('readDeck', () => {
   })
 
   it('should refuse an unknown field and name it', () => {
-    writeDeck({ sildeNumbers: false })
+    writeDeck({ slideNumber: false })
 
     const result = readDeck(folder)
 
-    expect(result).toMatchObject({ status: 'refused', field: 'sildeNumbers' })
+    expect(result).toMatchObject({ status: 'refused', field: 'slideNumber' })
   })
 
   it('should refuse an unknown band field and name it', () => {
