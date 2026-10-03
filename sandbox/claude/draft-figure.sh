@@ -47,8 +47,6 @@ stage_setup() {
     # inherits a family the machine lacks.
     stage_fixtures claude draft-figure teach-lesson 01-initial
 
-    git add . && git commit -m "docs: add order states lesson with no figure" --no-verify -q
-
     log_step "Scenario ready: draft a graph-shaped figure into a teach lesson"
     log_info "Context: .canon/teach/01-orders/lessons/0001-order-states.html states a"
     log_info "  four-state order path in prose, with a refund branch, and draws nothing"

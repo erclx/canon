@@ -24,8 +24,6 @@ stage_setup() {
   case "$SELECTED_OPTION" in
   "matched-plan")
     stage_fixtures claude session-worktree matched-plan 01-plan
-
-    git add . && git commit -m "feat(plans): seed foo plan" --no-verify -q
     git checkout -b foo -q
 
     log_step "Scenario ready: matched-plan tier (Step 2, tier 1)"
@@ -37,8 +35,6 @@ stage_setup() {
     ;;
   "multi-plan")
     stage_fixtures claude session-worktree multi-plan 01-plan
-
-    git add . && git commit -m "feat(plans): seed alpha and bravo plans" --no-verify -q
 
     log_step "Scenario ready: multi-plan tier (Step 2, tier 3)"
     log_info "Branch: default"
@@ -59,8 +55,6 @@ stage_setup() {
     ;;
   "typed-branch")
     stage_fixtures claude session-worktree typed-branch 01-plan
-
-    git add . && git commit -m "feat(plans): seed baz plan" --no-verify -q
     git checkout -b feat/baz -q
 
     log_step "Scenario ready: target collision (Step 2)"
