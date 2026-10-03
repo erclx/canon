@@ -10,10 +10,7 @@ import { buildDesignCss } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { renderDesignDoc } from '@/design/render'
 import { DESIGN_BASE_CSS, DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
-import {
-  checkoutMismatchWarning,
-  PROJECT_ROOT,
-} from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel, SCRATCH } from '@/record-root'
 import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
@@ -24,9 +21,7 @@ export function register(program: Command): void {
   const design = program
     .command('design')
     .helpOption('-h, --help', 'Show this help message')
-    .description(
-      'Design system commands (regen, css, render, install, sync)',
-    )
+    .description('Design system commands (regen, css, render, install, sync)')
 
   design
     .command('regen')
