@@ -14,6 +14,7 @@ import {
   applyRecord,
   type PagesRecord,
   resetState,
+  savedEdit,
   theme,
   view,
 } from '@/canvas/client/state'
@@ -526,6 +527,12 @@ describe('drag', () => {
 })
 
 describe('Inspector', () => {
+  /** A read-only frame field's value, found by its accessible name. */
+  function frameValue(name: string): string | null | undefined {
+    return mount.querySelector(`[aria-label="Frame"] [aria-label="${name}"]`)
+      ?.textContent
+  }
+
   it('should show the selected frame name, position, and size', () => {
     renderApp([
       page('drafts', [
@@ -536,12 +543,12 @@ describe('Inspector', () => {
     pointer('pointerdown', labelFor('hero'), 10, 10)
     pointer('pointerup', labelFor('hero'), 10, 10)
 
-    const text = mount.querySelector('[aria-label="Frame"]')?.textContent
-    expect(text).toContain('hero')
-    expect(text).toMatch(/x\s*40/)
-    expect(text).toMatch(/y\s*60/)
-    expect(text).toMatch(/width\s*390/)
-    expect(text).toMatch(/height\s*844/)
+    expect(mount.querySelector('[aria-label="Frame"]')?.textContent).toContain(
+      'hero',
+    )
+    expect(
+      ['x', 'y', 'width', 'height'].map((name) => frameValue(name)),
+    ).toEqual(['40', '60', '390', '844'])
   })
 
   it('should show the new position while the frame is dragged', () => {
@@ -551,9 +558,7 @@ describe('Inspector', () => {
     pointer('pointerdown', label, 100, 100)
     pointer('pointermove', label, 150, 100)
 
-    expect(mount.querySelector('[aria-label="Frame"]')?.textContent).toMatch(
-      /x\s*100/,
-    )
+    expect(frameValue('x')).toBe('100')
   })
 
   it('should say how to select a frame when none is', () => {
@@ -798,8 +803,53 @@ describe('Inspector element', () => {
     const panel = mount.querySelector('[aria-label="Element"]')
     expect(panel?.textContent).toContain('button.cta')
     expect(fieldNamed('color').value).toBe('rgb(255, 0, 0)')
-    expect(fieldNamed('size').value).toBe('20px')
+    expect(fieldNamed('size').value).toBe('20')
     expect(fieldNamed('weight').value).toBe('700')
+  })
+
+  it('should group the element fields under titled sections', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    expect(
+      [...mount.querySelectorAll('[aria-label="Element"] section h3')].map(
+        (heading) => heading.textContent,
+      ),
+    ).toEqual(['Layout', 'Flex', 'Typography', 'Fill', 'Text'])
+  })
+
+  it('should show a computed length rounded to a whole number', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 240.891px">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('width').value).toBe('241')
+  })
+
+  it('should show a transparent background as no fill', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: rgba(0, 0, 0, 0)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('background').value).toBe('')
+  })
+
+  it('should keep the element position read-only', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    expect(
+      mount.querySelector('[aria-label="Element"] [aria-label="x"]')?.tagName,
+    ).toBe('OUTPUT')
   })
 
   it('should say the pick may have moved once the server reports it stale', () => {
@@ -845,7 +895,7 @@ describe('Inspector element', () => {
 
 /** The inspector row holding the field of that accessible name. */
 function rowOf(name: string): Element {
-  const row = fieldNamed(name).closest('.box-row')
+  const row = fieldNamed(name).closest('.fill-row')
   if (!row) throw new Error(`no row for ${name}`)
   return row
 }
@@ -1028,9 +1078,33 @@ describe('Inspector edit', () => {
     stampHash(doc, 'abc123')
     clickIn(doc, 'button')
 
-    await commit(fieldNamed('size'), '20px')
+    await commit(fieldNamed('size'), '20')
 
     expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should post nothing for a rounded length committed unchanged', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 240.891px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width'), '241')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should write a bare number typed into a length as pixels', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width'), '300')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '300px' }),
+    ])
   })
 
   it('should offer the project color tokens and write the one picked as var()', async () => {
@@ -1100,6 +1174,121 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit').at(-1)).toMatchObject({
       element: { hash: 'def456' },
     })
+  })
+
+  /** The glyph drawn inside the field of that name, which a scrub drags. */
+  function glyphOf(name: string): HTMLElement {
+    const glyph = fieldNamed(name)
+      .closest('.glyph-field')
+      ?.querySelector<HTMLElement>('.glyph')
+    if (!glyph) throw new Error(`no glyph on ${name}`)
+    return glyph
+  }
+
+  async function drag(
+    type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel',
+    target: HTMLElement,
+    x: number,
+  ) {
+    await act(async () => {
+      target.dispatchEvent(
+        new PointerEvent(type, { bubbles: true, clientX: x, pointerId: 1 }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  it('should preview a scrubbed length in the frame and post it once on release', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 12)
+    await drag('pointermove', glyph, 15)
+    const preview = doc.querySelector<HTMLElement>('h1')?.style.width
+    await drag('pointerup', glyph, 15)
+
+    expect(preview).toBe('105px')
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '105px' }),
+    ])
+  })
+
+  it('should post nothing and restore the frame when a scrub is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 40)
+    await drag('pointercancel', glyph, 40)
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
+    expect(fieldNamed('width').value).toBe('100')
+  })
+
+  it('should restore the value from before the press when the panel rerenders mid-scrub', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 40)
+
+    act(() => {
+      savedEdit.value = { key: 'elsewhere', index: 0, property: 'color' }
+    })
+    await drag('pointercancel', glyph, 40)
+
+    expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
+  })
+
+  it('should hold a scrubbed length at zero when dragged past it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 10px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+
+    await drag('pointerdown', glyph, 100)
+    await drag('pointermove', glyph, 70)
+    await drag('pointerup', glyph, 70)
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '0px' }),
+    ])
+  })
+
+  it('should not offer a scrub on a field holding no number', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'button')
+
+    expect(glyphOf('color').classList.contains('is-scrub')).toBe(false)
+  })
+
+  it('should scrub an empty gap from its placeholder', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('gap')
+
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 14)
+    await drag('pointerup', glyph, 14)
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'gap', value: '4px' }),
+    ])
   })
 
   it('should say the edit was refused and reload the frame when the file moved', async () => {

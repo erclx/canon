@@ -1,0 +1,151 @@
+/*
+ * The inspector's own rules. Every value reads a chrome token, the same set
+ * shell.css reads. Each field's glyph sits inside its box, so two fields share
+ * a row without a label column eating the width.
+ */
+
+.inspector-section {
+  margin-top: var(--space-sm);
+}
+
+.inspector-section-head {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.inspector-section-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--type-label-size);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.inspector-section-action {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 24px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.glyph-field {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+}
+
+.glyph-field:hover {
+  border-color: var(--color-muted);
+}
+
+.glyph-field.is-readonly {
+  background: transparent;
+}
+
+.glyph-field.is-readonly:hover {
+  border-color: var(--color-border);
+}
+
+.is-wide {
+  grid-column: 1 / -1;
+}
+
+.glyph {
+  flex: none;
+  min-width: 1.75rem;
+  padding: 0 var(--space-xs);
+  color: var(--color-muted);
+  text-align: center;
+  user-select: none;
+}
+
+/* A number field's glyph scrubs its value, so a drag must not pan or scroll. */
+.glyph.is-scrub {
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.glyph-field-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px var(--space-xs) 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph-field-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fill-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.fill-row .glyph-field {
+  flex: 1;
+}
+
+.token-picker {
+  flex: none;
+  width: 4.5rem;
+  min-height: 24px;
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.token-picker:hover {
+  border-color: var(--color-muted);
+}
+
+.token-picker:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.raw {
+  flex: none;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+
+.text-excerpt {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved {
+  margin-left: var(--space-sm);
+  color: var(--color-success);
+  font-weight: 400;
+}
