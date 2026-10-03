@@ -54,6 +54,7 @@ gitlink
 glama
 golangci
 gsub
+hyperframes
 heredoc
 hljs
 httptest
