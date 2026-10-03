@@ -551,3 +551,123 @@ describe('POST /api/selection', () => {
     expect(response.status).toBe(403)
   })
 })
+
+const EDIT_FRAME = '<html><head></head><body><h1>Hero</h1></body></html>'
+
+function hashOf(body: string): string {
+  return createHash('sha256').update(body).digest('hex')
+}
+
+function frameFile(page: string, frame: string): string {
+  return readFileSync(
+    join(ROOT, '.canon', 'canvas', page, `${frame}.html`),
+    'utf8',
+  )
+}
+
+function editBody(overrides: Record<string, unknown> = {}): unknown {
+  return {
+    page: 'drafts',
+    frame: 'hero',
+    element: { index: 3, tag: 'h1', count: 4, hash: hashOf(EDIT_FRAME) },
+    property: 'color',
+    value: 'blue',
+    ...overrides,
+  }
+}
+
+describe('POST /api/frames/edit', () => {
+  it('should write the change into the frame file and answer its new hash', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/edit',
+      editBody({ value: 'var(--color-accent)' }),
+    )
+
+    const written = frameFile('drafts', 'hero')
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      ok: true,
+      hash: hashOf(written),
+    })
+    expect(written).toContain('<h1 style="color: var(--color-accent)">')
+  })
+
+  it('should answer 409 and write nothing for an edit made before the file changed', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/edit',
+      editBody({
+        element: { index: 3, tag: 'h1', count: 4, hash: hashOf('older') },
+      }),
+    )
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ reason: 'stale-address' })
+    expect(frameFile('drafts', 'hero')).toBe(EDIT_FRAME)
+  })
+
+  it('should answer 400 for an element sent without the hash it was served with', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/edit',
+      editBody({ element: { index: 3, tag: 'h1', count: 4 } }),
+    )
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should answer 400 for a property outside the basic set', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/edit',
+      editBody({ property: 'box-shadow', value: 'none' }),
+    )
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({ reason: 'invalid-edit' })
+  })
+
+  it('should answer 409 for text on an element holding other elements', async () => {
+    const nested = '<html><head></head><body><p>a <b>b</b></p></body></html>'
+    seed('drafts/hero.html', nested)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/edit',
+      editBody({
+        element: { index: 3, tag: 'p', count: 5, hash: hashOf(nested) },
+        property: 'text',
+        value: 'flat',
+      }),
+    )
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ reason: 'not-text-only' })
+  })
+
+  it('should refuse a request another origin sent', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(server, '/api/frames/edit', editBody(), {
+      origin: 'https://evil.example',
+    })
+
+    expect(response.status).toBe(403)
+    expect(frameFile('drafts', 'hero')).toBe(EDIT_FRAME)
+  })
+})
