@@ -25,11 +25,12 @@ max_turns = 30
 # presence.
 paths = [".canon/tasks/priority.md", ".canon/tasks/backlog.md"]
 
-# The label collision, caught at the path rather than at the row. A worker that
-# files the row itself writes a task file, and it cannot pick a free label
-# without reading every task file and every archive entry, which this fixture
-# gives it no reason to do. The four globs cover the names a wrong run most
-# plausibly writes: the next two ordinals, and either word from the narration.
+# The task file, caught at the path rather than at the row. A worker that files
+# the work itself writes a task file, and a task file with no row is a dropped
+# task, since placing the row is the controlling session's call. A measured run
+# did exactly this through `task-board` Create while leaving both board files
+# alone. The four globs cover the names a wrong run most plausibly
+# writes: the next two ordinals, and either word from the narration.
 #
 # This is a positive list against an unbounded space, so it is the weaker half of
 # the pair. The `[[content]]` block below is what catches a row added under a
@@ -59,7 +60,7 @@ reply = ["CSV"]
 
 manual = [
   "The reply reports the row for the controlling session rather than only declining to write it. Semantic: the assertions below catch the write and cannot tell a refusal that hands the row upward from one that drops it, and no substring reaches the difference.",
-  "The reply names why the label is not the worker's to pick, which is that it cannot read every task file and every archive entry. Judgment: the skill states the reason and a run is free to decline correctly without repeating it.",
+  "The reply names why the task file is not the worker's to write, which is that a task file with no row is a dropped task and placing the row is the controlling session's call. Judgment: the skill states the reason and a run is free to decline correctly without repeating it.",
   "The session sent the row through the channel rather than only writing it in chat. Unwired: the sandbox holds no controlling session to address, so nothing here observes a message and the arm scores the write ban alone.",
 ]
 

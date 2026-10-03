@@ -34,8 +34,8 @@ stage_setup() {
     log_info "  'Get it onto the board.'"
     log_info ""
     log_info "Action:  /canon:role-worker"
-    log_info "Expect:  reports the row for the controlling session and writes neither board file,"
-    log_info "         naming that it cannot pick a free label without reading every task and archive entry"
+    log_info "Expect:  reports the row for the controlling session and writes no task file or board file,"
+    log_info "         naming that a task file with no row is dropped and the row is the controller's to place"
     log_info "Assert:  declared in fixtures/claude/role-worker/board-write/expect.toml"
     log_info "         Check it with: canon sandbox check claude:role-worker board-write"
     ;;
