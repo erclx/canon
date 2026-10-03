@@ -355,26 +355,6 @@ export function walkSlide(idAttribute: string): WalkedSlide {
     }
     if (!element.checkVisibility({ visibilityProperty: true })) continue
 
-    if (tag === 'figure' && element.hasAttribute('data-chart')) {
-      consumeSubtree(element)
-      const table = element.querySelector('table')
-      const caption = element.querySelector('figcaption')
-      const title = caption ? cellText(caption) : ''
-      charts.push({
-        selector: describe(element),
-        box: rectOf(element.getBoundingClientRect()),
-        type: element.getAttribute('data-chart') ?? '',
-        hasLabels: element.hasAttribute('data-labels'),
-        ...(title ? { title } : {}),
-        rows: table
-          ? Array.from(table.rows).map((row) =>
-              Array.from(row.cells).map(cellText),
-            )
-          : [],
-      })
-      continue
-    }
-
     const id = records.length + 1
     const bounds = rectOf(element.getBoundingClientRect())
     const base = {
@@ -388,6 +368,27 @@ export function walkSlide(idAttribute: string): WalkedSlide {
     }
     ids.set(element, id)
     element.setAttribute(idAttribute, String(id))
+
+    if (tag === 'figure' && element.hasAttribute('data-chart')) {
+      consumeSubtree(element)
+      records.push({ ...base, kind: 'box' })
+      const table = element.querySelector('table')
+      const caption = element.querySelector('figcaption')
+      const title = caption ? cellText(caption) : ''
+      charts.push({
+        selector: base.selector,
+        box: bounds,
+        type: element.getAttribute('data-chart') ?? '',
+        hasLabels: element.hasAttribute('data-labels'),
+        ...(title ? { title } : {}),
+        rows: table
+          ? Array.from(table.rows).map((row) =>
+              Array.from(row.cells).map(cellText),
+            )
+          : [],
+      })
+      continue
+    }
 
     if (element instanceof HTMLImageElement) {
       records.push({

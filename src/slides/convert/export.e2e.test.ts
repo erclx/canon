@@ -79,7 +79,7 @@ const SLIDES: Record<string, string> = {
     .card { position: absolute; left: 720px; top: 176px; width: 320px; height: 120px; padding: 16px; background: #FFFFFF; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
     .mark { position: absolute; left: 720px; top: 360px; color: #B45309; }
     .gradient { position: absolute; left: 960px; top: 360px; width: 200px; height: 120px; background-image: linear-gradient(90deg, #B45309, #0F766E); color: #FFFFFF; }
-    figure { position: absolute; left: 96px; top: 250px; width: 500px; height: 150px; margin: 0; }
+    figure { position: absolute; left: 96px; top: 250px; width: 500px; height: 150px; margin: 0; background: #FEF3C7; }
   </style></head><body data-section="Detail">
     <h1>Detail</h1>
     <figure data-chart="bar" data-labels>
@@ -251,6 +251,10 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
     const series = chart.slice(chart.indexOf('<c:ser>'))
 
     expect(/srgbClr val="([0-9A-F]{6})"/.exec(series)?.[1]).toBe('0F766E')
+  })
+
+  it('should keep the chart figure own background as a shape', () => {
+    expect(slideXml[1]).toContain('srgbClr val="FEF3C7"')
   })
 
   it('should leave the chart table out of the shapes', () => {
