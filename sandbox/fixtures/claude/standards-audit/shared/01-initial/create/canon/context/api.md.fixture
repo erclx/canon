@@ -1,0 +1,14 @@
+---
+title: API
+description: Request handling, routing, and the serialization boundary
+---
+
+# API
+
+## Overview
+
+Owns request handling and the serialization boundary. Everything below the handler belongs to the data domain.
+
+## Layout
+
+- `src/api/` owns handlers and the router

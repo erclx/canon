@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+version="$1"
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Working tree has uncommitted changes. Commit or stash first." >&2
+  exit 1
+fi
+
+git tag -a "v$version" -m "Release $version"
+git push origin "v$version"

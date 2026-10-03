@@ -1,0 +1,12 @@
+{
+  "name": "sandbox-smoke-pass",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "mkdir -p .smoke && touch .smoke/dev-started && sleep 15",
+    "preview": "mkdir -p .smoke && touch .smoke/preview-started && sleep 15",
+    "test:e2e": "mkdir -p .smoke && touch .smoke/e2e-ran && echo e2e ok",
+    "screenshot": "mkdir -p .smoke && touch .smoke/screenshot-ran && echo screenshot ok"
+  }
+}

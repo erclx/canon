@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+version="$1"
+dry_run="${DRY_RUN:-0}"
+
+previous="$(git describe --tags --abbrev=0)"
+notes="$(npx -y release-notes-writer@latest --from "$previous")"
+
+git tag -a "v$version" -m "Release $version" -m "$notes"
+git push origin "v$version"

@@ -8,14 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-seed-sync",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+  stage_fixtures claude seed-sync shared 01-initial
 
   git add . && git commit -m "chore(project): init" --no-verify -q
 

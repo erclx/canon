@@ -11,14 +11,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "fresh")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-fresh",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+    stage_fixtures claude target-setup fresh 01-initial
 
     git add . && git commit -m "chore(sandbox): fresh empty project" --no-verify -q
 
@@ -28,17 +21,7 @@ EOF
     log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "no-stack")
-    cat <<'EOF' >go.mod
-module example.com/sandbox
-
-go 1.23
-EOF
-
-    cat <<'EOF' >main.go
-package main
-
-func main() {}
-EOF
+    stage_fixtures claude target-setup no-stack 01-initial
 
     git add . && git commit -m "chore(sandbox): go project the toolkit ships no governance stack for" --no-verify -q
 
@@ -48,57 +31,7 @@ EOF
     log_info "Expect:  the governance stack resolves to 'base' and the preview marks it a fallback, with the Go language rule passed through --add. The tooling stack resolves to 'go' on a canon whose catalog carries it, and the preview names it with no fallback mark. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names repo-metadata and git-commit as outside the chain."
     ;;
   "monorepo")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-monorepo",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-    mkdir -p web api svc
-
-    cat <<'EOF' >web/package.json
-{
-  "name": "sandbox-monorepo-web",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "vite": "^7.0.0"
-  }
-}
-EOF
-
-    cat <<'EOF' >web/vite.config.ts
-import { defineConfig } from 'vite'
-
-export default defineConfig({})
-EOF
-
-    cat <<'EOF' >api/pyproject.toml
-[project]
-name = "sandbox-monorepo-api"
-version = "0.1.0"
-requires-python = ">=3.12"
-EOF
-
-    cat <<'EOF' >svc/go.mod
-module example.com/svc
-
-go 1.23
-EOF
-
-    cat <<'EOF' >svc/main.go
-package main
-
-func main() {}
-EOF
+    stage_fixtures claude target-setup monorepo 01-initial
 
     git add . && git commit -m "chore(sandbox): monorepo with web, api, and svc language roots" --no-verify -q
 
@@ -142,21 +75,7 @@ EOF
     log_info "Expect:  governance stack 'astro', tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
     ;;
   "verify-pass")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-verify-pass",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "lint:fix": "echo lint ok",
-    "typecheck": "echo typecheck ok",
-    "check": "echo check ok",
-    "test:run": "echo tests ok",
-    "build": "echo build ok"
-  }
-}
-EOF
+    stage_fixtures claude target-setup verify-pass 01-initial
 
     git add . && git commit -m "chore(sandbox): scaffolded project with passing scripts" --no-verify -q
 
@@ -166,21 +85,7 @@ EOF
     log_info "Expect:  five green checks, summary 'Scaffold verified' naming the default depth"
     ;;
   "verify-fail")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-verify-fail",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "lint:fix": "echo lint ok",
-    "typecheck": "echo typecheck error >&2 && exit 1",
-    "check": "echo check ok",
-    "test:run": "echo tests ok",
-    "build": "echo build ok"
-  }
-}
-EOF
+    stage_fixtures claude target-setup verify-fail 01-initial
 
     git add . && git commit -m "chore(sandbox): scaffolded project with failing typecheck" --no-verify -q
 
@@ -190,20 +95,7 @@ EOF
     log_info "Expect:  lint passes, typecheck fails, run stops before check/test/build, failing output surfaced"
     ;;
   "smoke-pass")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-smoke-pass",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "mkdir -p .smoke && touch .smoke/dev-started && sleep 15",
-    "preview": "mkdir -p .smoke && touch .smoke/preview-started && sleep 15",
-    "test:e2e": "mkdir -p .smoke && touch .smoke/e2e-ran && echo e2e ok",
-    "screenshot": "mkdir -p .smoke && touch .smoke/screenshot-ran && echo screenshot ok"
-  }
-}
-EOF
+    stage_fixtures claude target-setup smoke-pass 01-initial
 
     git add . && git commit -m "chore(sandbox): scaffolded project with passing smoke scripts" --no-verify -q
 
@@ -213,20 +105,7 @@ EOF
     log_info "Expect:  four green checks, summary 'Scaffold verified' naming the deep depth"
     ;;
   "smoke-fail")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-smoke-fail",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "mkdir -p .smoke && touch .smoke/dev-started && sleep 15",
-    "preview": "mkdir -p .smoke && touch .smoke/preview-started && sleep 15",
-    "test:e2e": "mkdir -p .smoke && touch .smoke/e2e-ran && echo e2e error >&2 && exit 1",
-    "screenshot": "mkdir -p .smoke && touch .smoke/screenshot-ran && echo screenshot ok"
-  }
-}
-EOF
+    stage_fixtures claude target-setup smoke-fail 01-initial
 
     git add . && git commit -m "chore(sandbox): scaffolded project with failing end-to-end suite" --no-verify -q
 

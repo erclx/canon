@@ -13,14 +13,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "fresh")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-operator-fresh",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+    stage_fixtures claude canon-operator fresh 01-initial
     git add . && git commit -m "chore(sandbox): fresh empty project for canon-operator" --no-verify -q
 
     log_step "Scenario ready: canon-operator skill on an empty repo"
@@ -31,45 +24,7 @@ EOF
     ;;
   "audits")
     mkdir -p canon/context .canon/plans
-    cat <<'EOF' >canon/context/billing.md
----
-title: Billing
-description: Subscription state, the invoice job, and the two retry paths
----
-
-# Billing
-
-## Overview
-
-Subscriptions renew nightly and the invoice job writes one row per renewal.
-EOF
-    cat <<'EOF' >canon/context/index.md
----
-title: Context
-description: Per-domain narrative loaded on demand
----
-
-# Context
-
-- [Billing](billing.md): subscription state and the invoice job
-EOF
-    cat <<'EOF' >.canon/plans/feature-invoice-retry.md
-# Feature: Invoice retry
-
-The invoice job drops a renewal when the payment provider times out.
-
-## Summary
-
-- Retry a timed-out renewal once before the job records it as failed.
-EOF
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-operator-audits",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+    stage_fixtures claude canon-operator audits 01-initial
 
     # The arm scores which audits are offered, so it stages the surfaces two of
     # the four read and none of the surface the third reads. A tree carrying
@@ -93,14 +48,7 @@ EOF
     log_info "Assert:  declared in fixtures/claude/canon-operator/audits/expect.toml"
     ;;
   "gitignore")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-operator-gitignore",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+    stage_fixtures claude canon-operator gitignore 01-initial
     cp .gitignore .gitignore.pre
     CANON_NON_INTERACTIVE=1 bun "$PROJECT_ROOT/src/cli.ts" tooling inject base . >/dev/null
 
@@ -128,14 +76,7 @@ EOF
     log_info "Assert:  declared in fixtures/claude/canon-operator/gitignore/expect.toml"
     ;;
   "unclaimed")
-    cat <<'EOF' >package.json
-{
-  "name": "sandbox-operator-unclaimed",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
+    stage_fixtures claude canon-operator unclaimed 01-package
 
     # Every section including the reverse walk is gated on `isManagedTarget`,
     # which reads a `.claude/` directory, a `CLAUDE.md`, or an unmigrated domain.
@@ -144,11 +85,7 @@ EOF
     # would inherit its managed status from a step that runs only when the branch
     # changed this skill. Kept short, since a file past 250 lines carried a
     # second candidate here, since retired, and the arm would score two decisions.
-    cat <<'EOF' >CLAUDE.md
-# Sandbox operator target
-
-A project with one folder left over from a toolkit root that no longer ships.
-EOF
+    stage_fixtures claude canon-operator unclaimed 02-claude
 
     # The declaration names `prompts`, so the arm takes the preferred root rather
     # than whichever one history offers first. A root that has come back is a

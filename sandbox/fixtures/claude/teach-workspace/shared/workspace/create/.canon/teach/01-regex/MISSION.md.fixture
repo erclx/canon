@@ -1,0 +1,26 @@
+---
+title: Regular expressions
+description: Reading and writing regular expressions, up to catastrophic backtracking
+date: 2026-08-10
+---
+
+# Regular expressions
+
+Reading and writing regular expressions well enough to review someone else's.
+
+## Starting point
+
+Comfortable with character classes, anchors, and simple quantifiers. Has never
+written a capture group by hand and has not met backtracking.
+
+## Success looks like
+
+- Read a regular expression aloud as a sentence describing what it matches
+- Write a capture group and name what each group captures
+- Spot a nested quantifier that can backtrack catastrophically
+- Rewrite a vulnerable pattern so it cannot backtrack
+
+## Out of scope
+
+- Regular expression engines other than the one in JavaScript
+- Lookbehind, which the target engine supports unevenly

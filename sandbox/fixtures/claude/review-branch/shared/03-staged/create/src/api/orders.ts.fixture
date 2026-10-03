@@ -1,0 +1,8 @@
+export async function cancelOrder(id: string) {
+  try {
+    await fetch(`/api/orders/${id}`, { method: "DELETE" });
+  } catch {
+    return true;
+  }
+  return true;
+}

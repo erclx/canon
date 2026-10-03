@@ -8,43 +8,13 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-write-human",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  mkdir -p docs
-
-  # Every sentence below clears the ban scan. The defect is distribution: nine
-  # sentences within a few words of each other, four openings on the same shape,
-  # two verbless fragments standing as sentences, one triad, one thing named
-  # four ways, and two adverbs standing in for a measurement. A run that reports
-  # a clean audit here has read the words rather than the passage.
-  cat <<'EOF' >docs/cache.md
----
-title: Cache
-description: How the response cache stores entries and when it evicts them
----
-
-# Cache
-
-The cache stores responses. The cache is fast, simple, and reliable. The store
-holds each entry under a key. The buffer evicts the oldest entry when full. The
-layer significantly improves response time. A real win for the read path.
-
-The handler writes to the cache. The callback reads from the cache. The listener
-clears the cache on a write. Dramatically fewer round trips. The cache covers
-everything from lookups to deployments.
-
-## Configuration
-
-Set `maxEntries` in the config. Set `ttl` in the config. Set `mode` in the
-config. The defaults work for most projects.
-EOF
+  # Every sentence in docs/cache.md clears the ban scan. The defect is
+  # distribution: nine sentences within a few words of each other, four openings
+  # on the same shape, two verbless fragments standing as sentences, one triad,
+  # one thing named four ways, and two adverbs standing in for a measurement. A
+  # run that reports a clean audit here has read the words rather than the
+  # passage.
+  stage_fixtures claude write-human shared 01-initial
 
   git add . && git commit -m "docs(cache): describe the response cache" --no-verify -q
 

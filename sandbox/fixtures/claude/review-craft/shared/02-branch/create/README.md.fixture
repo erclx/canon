@@ -1,0 +1,16 @@
+# Release tool
+
+## Usage
+
+Run `scripts/release.sh <version>` to tag the current commit and push the tag.
+The tag message carries release notes generated from the commits since the
+previous tag.
+
+## Tags
+
+Every tag is annotated and named `v<version>`.
+
+## Safety
+
+`release.sh` refuses to run while the working tree has uncommitted changes, so a
+tag always points at work that is committed.

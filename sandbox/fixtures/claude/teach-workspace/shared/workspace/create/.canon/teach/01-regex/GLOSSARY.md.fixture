@@ -1,0 +1,11 @@
+---
+title: Glossary
+description: Terms the regular expression material defines
+---
+
+# Glossary
+
+- **Anchor**: a token matching a position rather than a character. First appears
+  in `0001-reading-patterns`.
+- **Quantifier**: a token stating how many times the thing before it may repeat.
+  First appears in `0001-reading-patterns`.

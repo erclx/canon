@@ -8,130 +8,13 @@ use_config() {
 }
 
 stage_setup() {
-  cat <<'EOF' >package.json
-{
-  "name": "sandbox-standards-audit",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
-EOF
-
-  cat <<'EOF' >README.md
-# Sandbox project
-
-A tiny reference project used to exercise the standards audit skill.
-
-## Commands
-
-- `bun run check`: lint and typecheck
-EOF
-
-  mkdir -p docs .claude/skills/example canon/context
-  cat <<'EOF' >canon/context/api.md
----
-title: API
-description: Request handling, routing, and the serialization boundary
----
-
-# API
-
-## Overview
-
-Owns request handling and the serialization boundary. Everything below the handler belongs to the data domain.
-
-## Layout
-
-- `src/api/` owns handlers and the router
-EOF
-
-  cat <<'EOF' >docs/overview.md
----
-title: Overview
-description: High-level project overview
----
-
-# Overview
-
-Short reference for how the pieces fit together.
-
-## Structure
-
-- Source lives under `src/`
-- Docs live under `docs/`
-EOF
-
-  cat <<'EOF' >.claude/skills/example/SKILL.md
----
-name: example
-description: Do an example thing. Use when asked to "example".
----
-
-# Example
-
-## Step 1
-
-Run the example command against the current file.
-EOF
+  stage_fixtures claude standards-audit shared 01-initial
 
   git add . && git commit -m "docs(project): initial project scaffold" --no-verify -q
 
   git checkout -b feat/docs-pass -q
 
-  cat <<'EOF' >docs/overview.md
----
-title: Overview
-description: High-level project overview
----
-
-# Overview
-
-Short reference for how the pieces fit together — the layout is simple.
-
-## Structure
-
-Here are the directories:
-
-- Source lives under `src/`; tests sit alongside each module.
-- Docs live under `docs/`.
-- The `scripts/` folder holds helpers.
-EOF
-
-  cat <<'EOF' >.claude/skills/example/SKILL.md
----
-name: example
-description: Do an example thing. Use when asked to "example".
----
-
-# Example
-
-## Step 1
-
-The skill provides a comprehensive way to handle example workflows — it offers flexibility across many different scenarios that you might encounter.
-
-## Step 2
-
-You should probably try to run the example command if you think it might help.
-EOF
-
-  cat <<'EOF' >canon/context/api.md
----
-title: API
-description: Request handling, routing, and the serialization boundary
----
-
-# API
-
-## Overview
-
-Owns request handling and the serialization boundary — everything below the handler belongs to the data domain.
-
-## Layout
-
-- `src/api/router.ts` builds the route table from the handler registry
-- `src/api/serialize.ts` converts a domain record into a wire payload
-- `src/api/errors.ts` maps a thrown error onto a status code
-EOF
+  stage_fixtures claude standards-audit shared 02-docs-pass
 
   git add . && git commit -m "docs(overview): expand structure section and skill body" --no-verify -q
 

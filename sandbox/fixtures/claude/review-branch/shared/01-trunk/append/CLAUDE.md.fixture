@@ -1,0 +1,8 @@
+
+# My App
+
+REST API for user management.
+
+## Commands
+
+- `bun run check`: lint and typecheck

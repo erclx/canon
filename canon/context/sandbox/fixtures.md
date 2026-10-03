@@ -68,6 +68,7 @@ Staging at `.canon/` takes one extra file. The root `.gitignore`'s bare `.canon/
 
 ### Staged content
 
+- A stored path repeating its parent folder, such as `canon/config/config.json`, fails the Folder-echoed filenames stage, which has no exemption. Store the file under a neutral name beside its folder and `mv` it into place after `stage_fixtures`, as `claude/canon-rollout` does for its consumer config.
 - A stage leaves the tree coherent with what the scenario claims it staged. A stage that changes a module's signature carries its callers, or a skill reading the diff correctly sees a half-migration and the arm tests the fixture's incoherence rather than the skill.
 - A scenario picking fixture files positionally with `find ... | sort | head -n N` stops testing anything once the source tree grows, and keeps exiting 0 until the picked path no longer exists. Select by the property the scenario needs, and when a sandbox gate fails mid-migration, run it on unmodified `main` before assuming the branch caused it.
 - A trigger keyed to a file entering the tree never fires when the seed already put it there. With `SANDBOX_INJECT_SEEDS` on, the setup commit carries `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md`, so a later fixture writing one produces `M` rather than `A`. Run `git show --name-status --format="" HEAD` inside the tree after provisioning a new arm, and `rm -f` a seeded path before the initial commit whenever the arm depends on it being added later.

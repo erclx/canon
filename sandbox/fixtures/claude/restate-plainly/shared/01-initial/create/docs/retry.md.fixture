@@ -1,0 +1,28 @@
+---
+title: Retry
+description: How the request layer retries a failed call and what it refuses to retry
+---
+
+# Retry
+
+The request layer applies bounded exponential backoff with full jitter across
+the idempotent surface, and the non-idempotent surface is excluded from the
+policy envelope by construction rather than by configuration. Attempt budgets
+are per-call rather than per-connection, so a pooled connection carries no
+residual attempt state between callers.
+
+Backoff is computed from a base interval of 200 milliseconds doubling per
+attempt to a ceiling of 4 seconds, with the actual delay drawn uniformly from
+zero to the computed value. The ceiling was chosen against the upstream read
+timeout and has not been revalidated since that timeout moved, so the two may
+no longer be aligned.
+
+A call is retried at most three times. Retries are attempted on connection
+failures and on 502, 503, and 504. A 429 carrying `Retry-After` honors the
+header instead of the backoff schedule. Every other status terminates the call.
+
+## Operational notes
+
+The layer emits a counter per terminal outcome and a histogram of total
+elapsed time inclusive of backoff. Neither is sampled. The counter cardinality
+is bounded by the status set above.

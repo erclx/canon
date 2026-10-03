@@ -1,0 +1,17 @@
+---
+title: Development
+description: Local dev workflow and run commands
+---
+
+# Development
+
+## Overview
+
+Owns the local development loop for the sandbox project.
+
+## Scripts
+
+| Command          | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| `bun run serve`  | Start the app. Prints its port and stays up. |
+| `bun run deploy` | Push the current build to production.       |

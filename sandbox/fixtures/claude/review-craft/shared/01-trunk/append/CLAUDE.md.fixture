@@ -1,0 +1,9 @@
+
+# Release tool
+
+Shell helpers that tag and publish a release. Scripts live in `scripts/`.
+
+## Commands
+
+- `bash scripts/release.sh <version>`: tag the current commit and push the tag
+- `bash scripts/check.sh`: lint every script before a commit

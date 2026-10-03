@@ -1,0 +1,7 @@
+# Toolkit
+
+CLI toolkit for managing AI workflows across repositories.
+
+## Commands
+
+- `bun run check`: lint and typecheck
