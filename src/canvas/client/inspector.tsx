@@ -76,15 +76,28 @@ function positionRows(element: Element): Row[] {
   ]
 }
 
+function inlineValue(element: Element, property: string): string {
+  return 'style' in element
+    ? (element as HTMLElement).style.getPropertyValue(property)
+    : ''
+}
+
+/**
+ * A value set inline that names no token, which stays put when the theme
+ * changes. Inherited and stylesheet values are not the element's own, so they
+ * never count.
+ */
+function isRawInline(element: Element, property: string): boolean {
+  const inline = inlineValue(element, property).trim()
+  return inline !== '' && !inline.startsWith('var(')
+}
+
 /**
  * What the element states inline, else the value the browser settled on, so
  * an edit starts from what the operator sees.
  */
 function currentValue(element: Element, property: string): string {
-  const inline =
-    'style' in element
-      ? (element as HTMLElement).style.getPropertyValue(property)
-      : ''
+  const inline = inlineValue(element, property)
   if (inline) return inline
   return (
     element.ownerDocument.defaultView
@@ -223,6 +236,14 @@ function ElementFields({
                 isBusy={isBusy}
                 onCommit={commit(field.property)}
               />
+              {field.isColor && isRawInline(node, field.property) ? (
+                <span
+                  class="raw"
+                  title="Set as a raw value, so it will not follow the theme. Pick a token to fix it"
+                >
+                  raw
+                </span>
+              ) : null}
               {field.isColor ? (
                 <TokenPicker
                   label={field.label}

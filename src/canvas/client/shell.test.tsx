@@ -842,6 +842,56 @@ describe('Inspector element', () => {
   })
 })
 
+/** The inspector row holding the field of that accessible name. */
+function rowOf(name: string): Element {
+  const row = fieldNamed(name).closest('.box-row')
+  if (!row) throw new Error(`no row for ${name}`)
+  return row
+}
+
+describe('Inspector raw marker', () => {
+  it('should mark a color set inline as a raw value in text', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="color: rgb(0, 0, 0)">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    const marker = rowOf('color').querySelector('.raw')
+    expect(marker?.textContent).toBe('raw')
+    expect(marker?.getAttribute('title')).toContain('theme')
+  })
+
+  it('should mark a background set inline as a raw value', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="background-color: #fff">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('background').textContent).toContain('raw')
+  })
+
+  it('should not mark a color set inline to a token', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="color: var(--color-accent)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+
+  it('should not mark a color the element only inherits', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    expect(rowOf('color').querySelector('.raw')).toBeNull()
+  })
+})
+
 /** An inspector field by its accessible name. */
 function fieldNamed(name: string): HTMLInputElement {
   const field = mount.querySelector<HTMLInputElement>(
