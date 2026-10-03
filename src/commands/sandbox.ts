@@ -14,6 +14,11 @@ import {
   type CoverageReport,
 } from '@/sandbox/coverage'
 import {
+  equivalenceExitCode,
+  runEquivalence as collectEquivalence,
+  type EquivalenceRecord,
+} from '@/sandbox/equivalence'
+import {
   expectFilePath,
   parseTarget,
   resolveVerdict,
@@ -338,6 +343,71 @@ function runCoverage(options: CoverageOptions): void {
   process.exitCode = wrongExemption || rolloutIncomplete ? 1 : 0
 }
 
+interface EquivalenceOptions {
+  readonly base: string
+  readonly includeAnchor?: boolean
+  readonly out?: string
+  readonly masks: boolean
+  readonly json?: boolean
+}
+
+/**
+ * Provisions every arm on a base ref and on this checkout, then names what
+ * differs. The record is the only thing on stdout, and a red arm that is red the
+ * same way on both sides is reported without failing the run, since it proves
+ * nothing either way.
+ */
+async function runEquivalence(
+  targets: string[],
+  options: EquivalenceOptions,
+): Promise<void> {
+  if (reportAbsentScenarioTree()) return
+
+  intro('canon sandbox equivalence')
+
+  let record: EquivalenceRecord
+  try {
+    record = await collectEquivalence({
+      root: PROJECT_ROOT,
+      targets,
+      base: options.base,
+      includeAnchor: options.includeAnchor === true,
+      useMasks: options.masks,
+      out: options.out,
+    })
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error)
+    logError(`Cannot provision the baseline ${options.base}: ${reason}`)
+    outro()
+    process.exitCode = 1
+
+    return
+  }
+
+  logStep(`Base ${record.base} (${record.baseCommit.slice(0, 8)})`)
+  logInfo(`canon ${record.canonVersion}`)
+
+  for (const arm of record.arms) {
+    if (arm.state === 'identical' || arm.state === 'skipped-anchor') continue
+    const detail = arm.differs.length > 0 ? `: ${arm.differs.join(', ')}` : ''
+    if (arm.state === 'differs') logRemove(`${arm.arm} differs${detail}`)
+    else logWarn(`${arm.arm} is ${arm.state}`)
+  }
+  for (const line of record.masksApplied) logInfo(`masked ${line}`)
+  for (const error of record.errors) logError(error)
+
+  const { counts } = record
+  logStep('Equivalence')
+  const summary = `${counts.identical} identical, ${counts.differs} differs, ${counts['red-on-base']} red-on-base, ${counts['skipped-anchor']} skipped-anchor`
+  if (equivalenceExitCode(record) === 0) logInfo(summary)
+  else logWarn(summary)
+
+  if (options.json === true) process.stdout.write(`${JSON.stringify(record)}\n`)
+
+  outro()
+  process.exitCode = equivalenceExitCode(record)
+}
+
 function runCheck(
   target: string,
   arm: string | undefined,
@@ -482,4 +552,42 @@ export function register(program: Command): void {
     .action((options: CoverageOptions) => {
       runCoverage(options)
     })
+
+  sandbox
+    .command('equivalence')
+    .description(
+      'Provision every arm on a base ref and on this checkout, and diff the trees',
+    )
+    .argument(
+      '[target...]',
+      'Category or <category>:<command>, defaulting to every category',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--base <ref>', 'Ref the baseline is provisioned from', 'main')
+    .option(
+      '--include-anchor',
+      'Also run the arms that push to the shared GitHub anchor, one at a time (attended)',
+    )
+    .option('--out <dir>', 'Keep the provisioned trees and logs in this folder')
+    .option(
+      '--no-masks',
+      'Compare every path, listing what each mask would hide',
+    )
+    .option('--json', 'Emit the record as JSON on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Examples:',
+        '  canon sandbox equivalence claude --json',
+        '  canon sandbox equivalence claude:plan-feature --base origin/main',
+        '',
+        'Provisions offline only and never runs sandbox/run.sh or a claude binary.',
+        'Exit codes: 0 when every compared arm is identical or red the same way',
+        'on both sides, 1 on any difference, exit mismatch, or enumeration error.',
+      ].join('\n'),
+    )
+    .action((targets: string[], options: EquivalenceOptions) =>
+      runEquivalence(targets, options),
+    )
 }
