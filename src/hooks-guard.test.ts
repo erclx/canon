@@ -583,6 +583,51 @@ describe('pr-create-log.sh root resolution', () => {
   )
 })
 
+// git-pr opens a pull request over REST rather than through `gh pr create`, so
+// the command string carries no subcommand to match. Its output says which
+// path ran, and an edit prints a URL too, so that line is what separates an
+// opening from a rewrite of one that already existed.
+describe('pr-create-log.sh REST create', () => {
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'pr-create-log.sh')
+    const payload = (nonce: string, opened: boolean): string =>
+      payloadFor({
+        session_id: nonce,
+        tool_input: {
+          command: "gh api -X POST 'repos/{owner}/{repo}/pulls' -f title=x",
+        },
+        tool_response: {
+          stdout: `number=7\nurl=https://github.com/example/repo/pull/7\nhead=feat/x\nopened=${opened}\n`,
+        },
+      })
+
+    it.concurrent(
+      `should remind on ${tree.label} when the run opened a pull request`,
+      async ({ expect }) => {
+        const result = await run(hook, payload(`${tree.label}-rest-open`, true))
+
+        expect(result.stdout).toContain(
+          'Pull request https://github.com/example/repo/pull/7 just opened',
+        )
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should stay silent on ${tree.label} when the run edited one`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          payload(`${tree.label}-rest-edit`, false),
+        )
+
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+  }
+})
+
 // A bare basename match reads as covering both when two written paths share
 // one, since a single mention of the shared name would otherwise clear the
 // pair. The acting case above never exercises this, since its fixture writes
@@ -1067,7 +1112,10 @@ describe('.claude/hooks/cloud-setup.sh', () => {
 
   // A stub runner that records each call, so the install is observable without
   // a network and the failure branch is reachable on demand.
-  const makeBun = (exitCode: number): { log: string; path: string } => {
+  const makeBun = (
+    exitCode: number,
+    base: string = process.env.PATH ?? '',
+  ): { log: string; path: string } => {
     const bin = mkdtempSync(join(tmpdir(), 'cloud-setup-bin-'))
     made.push(bin)
     const log = join(bin, 'calls.log')
@@ -1076,7 +1124,7 @@ describe('.claude/hooks/cloud-setup.sh', () => {
       `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> '${log}'\nexit ${exitCode}\n`,
     )
     chmodSync(join(bin, 'bun'), 0o755)
-    return { log, path: [bin, process.env.PATH ?? ''].join(delimiter) }
+    return { log, path: [bin, base].join(delimiter) }
   }
 
   const status = (dir: string): string => git(dir, 'status', '--porcelain')
@@ -1156,6 +1204,23 @@ describe('.claude/hooks/cloud-setup.sh', () => {
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('canon is not installed')
       expect(existsSync(join(dir, '.claude/skills/demo/SKILL.md'))).toBe(true)
+    },
+  )
+
+  // A link can succeed into a bin folder the session's PATH never reads, which
+  // leaves every skill calling a verb that is not there and nothing saying so.
+  it.concurrent(
+    'should say canon is off the PATH when the link succeeds but nothing resolves it',
+    async ({ expect }) => {
+      const dir = makeCheckout()
+      const bun = makeBun(0, hookPath)
+
+      const result = await run(hook, '{}', bun.path, dir, {
+        CLAUDE_CODE_REMOTE: 'true',
+      })
+
+      expect(result.code).toBe(0)
+      expect(result.stdout).toContain('canon is not on PATH')
     },
   )
 })

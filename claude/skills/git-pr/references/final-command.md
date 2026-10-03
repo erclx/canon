@@ -31,6 +31,7 @@ assert_own_pr() {
     exit 1
   fi
 }
+opened=false
 pr_number=$(gh api "repos/{owner}/{repo}/pulls?head=$owner:$head_branch&base=$base_branch&state=open" --jq '.[0].number // empty') || exit 1
 if [ -n "$pr_number" ]; then
   assert_own_pr "$pr_number"
@@ -39,6 +40,7 @@ else
   pr_url=$(gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head="$head_branch" -f base="$base_branch" -F body=@.canon/tmp/pr/body.md --jq .html_url) || exit 1
   pr_number=${pr_url##*/}
   assert_own_pr "$pr_number"
+  opened=true
 fi
 gh api "repos/{owner}/{repo}/pulls/$pr_number" --jq .body >.canon/tmp/pr/live.md || exit 1
 links=$(canon labels scan --title "<title>" --body-file .canon/tmp/pr/live.md --head "$head_branch" --json 2>/dev/null | tail -n 1 | jq -r '.sessionLinks | length')
@@ -61,7 +63,7 @@ printf '%s\n' "$pr_labels" | tr ',' '\n' | while IFS= read -r label; do
   fi
 done
 rm -rf .canon/tmp/pr/body .canon/tmp/pr/live.md .canon/tmp/pr/clean.md
-printf 'number=%s\nurl=%s\nhead=%s\n' "$pr_number" "$pr_url" "$head_branch"
+printf 'number=%s\nurl=%s\nhead=%s\nopened=%s\n' "$pr_number" "$pr_url" "$head_branch" "$opened"
 ```
 
 ## Binding every write to this branch's pull request
@@ -70,4 +72,4 @@ printf 'number=%s\nurl=%s\nhead=%s\n' "$pr_number" "$pr_url" "$head_branch"
 
 The check compares a number against a branch and never derives a number from one, so it adds no lookup of the kind the skill body's `### Resolving the pull request` retired. It holds whichever way a wrong number arrives. A number a session retyped by hand, or inferred from the newest pull request in view, reads as a foreign head here and stops.
 
-The last output line carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison in the shell first, reading `gh api repos/{owner}/{repo}/pulls/<number> --jq '"\(.head.ref) \(.state)"'` and refusing unless it matches `head` and `open`.
+The output carries `head=` so a caller relaying the number holds a branch to compare it against rather than a bare integer. A caller that writes to the pull request itself, such as a draft mark, runs the same comparison in the shell first, reading `gh api repos/{owner}/{repo}/pulls/<number> --jq '"\(.head.ref) \(.state)"'` and refusing unless it matches `head` and `open`.

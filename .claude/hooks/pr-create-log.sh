@@ -19,15 +19,20 @@ IFS= read -r -d '' -t 2 input
   exit 1
 }
 
+# Two shapes open a pull request. `gh pr create` names itself in the command.
+# git-pr opens one over REST and prints `opened=true` only on that path, since
+# its edit path prints a URL as well and is not an opening.
 command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
+stdout=$(printf '%s' "$input" | jq -r '.tool_response.stdout // empty')
 case "$command" in
 *"gh pr create"*) ;;
-*) exit 0 ;;
+*)
+  printf '%s\n' "$stdout" | grep -qx 'opened=true' || exit 0
+  ;;
 esac
 
-# gh pr create prints the new pull request's URL to stdout on success, so
+# Either shape prints the new pull request's URL to stdout on success, so
 # matching it is what tells a creation apart from a failed or refused call.
-stdout=$(printf '%s' "$input" | jq -r '.tool_response.stdout // empty')
 url=$(printf '%s' "$stdout" | grep -Eo 'https://github\.com/[^[:space:]]+/pull/[0-9]+' | tail -1)
 [ -n "$url" ] || exit 0
 

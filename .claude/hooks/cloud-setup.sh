@@ -47,5 +47,7 @@ exclude_once '/.claude/standards'
 if ! output=$({ bun install && bun link; } 2>&1); then
   printf '%s\n' 'cloud-setup.sh copied the plugin skills, but bun install or bun link failed, so canon is not installed and every skill calling it will fail.'
   printf '%s\n' "$output" | tail -n 20
+elif ! command -v canon >/dev/null 2>&1; then
+  printf '%s\n' "cloud-setup.sh linked the CLI, but canon is not on PATH, so every skill calling it will fail. Add bun's global bin folder to PATH, or call bun src/cli.ts in its place."
 fi
 exit 0
