@@ -74,6 +74,14 @@ for (const tree of TREES) {
       expect(patterns.length).toBeGreaterThan(0)
     })
 
+    it('names the current scratch root alone in its warning', () => {
+      const source = readFileSync(hookPath, 'utf8')
+      const msg = source.match(/^msg='(.+)'$/m)?.[1] ?? ''
+
+      expect(msg).toContain('.canon/tmp/')
+      expect(msg).not.toContain('.claude/.tmp')
+    })
+
     it.each(patterns)(
       'git ignores a write the hook accepts under %s',
       (pattern) => {
