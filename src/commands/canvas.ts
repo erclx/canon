@@ -124,7 +124,7 @@ export function register(program: Command): void {
         '  canon canvas frame add drafts hero --width 1440 --height 900',
         '  canon canvas frame move drafts hero --x 200 --y 120',
         '  canon canvas selection --json',
-        '  canon canvas edit drafts/hero --element 4 --set color=var(--color-accent)',
+        "  canon canvas edit drafts/hero --element 4 --set 'color=var(--color-accent)'",
         '  canon canvas capture drafts/hero',
         '  canon canvas list --json',
         '',
