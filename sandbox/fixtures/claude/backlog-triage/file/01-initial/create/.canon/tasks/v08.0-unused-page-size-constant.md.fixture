@@ -1,0 +1,18 @@
+---
+title: 'v08.0: An unused page size constant'
+description: The store exports a page size constant that nothing imports
+---
+
+# v08.0: An unused page size constant
+
+`src/store.ts` exports `DEFAULT_PAGE_SIZE`, and no file imports it.
+
+## Outcomes
+
+- [ ] Outcome: `src/store.ts` exports nothing that no file imports
+
+## Findings
+
+- Noticed while reading the store.
+
+> Test strategy: none, delete the export and let the typecheck confirm.

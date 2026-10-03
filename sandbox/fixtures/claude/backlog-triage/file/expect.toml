@@ -20,9 +20,10 @@ reply = [".canon/intake/01-backlog-triage/"]
 
 manual = [
   "v03.0 is suggested keep and v05.0 is suggested decline. Semantic: which cluster file holds each item is the run's call, so a pattern cannot anchor the verdict to its row.",
+  "v08.0 is suggested decline although its unused export reproduces, since the row names no cost and no reach. Semantic: same reason.",
   "v02.0 is suggested archive naming positions 1 and 2 and #58, and v04.0 is suggested promote naming the pagination in #61. Semantic: same reason.",
   "Every problem line carries a count, a path, or a commit measured this pass. Semantic: any digit in the file would satisfy a pattern.",
-  "No `You:` slot is filled. Unwired: `canon intake list 01-backlog-triage --unread --json` reports six unread items when it holds.",
+  "No `You:` slot is filled. Unwired: `canon intake list 01-backlog-triage --unread --json` reports seven unread items when it holds.",
 ]
 
 [[content]]
