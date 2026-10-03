@@ -369,7 +369,8 @@ export const designProse: Measure = async (ctx) => {
       failure: `${failures.join(' ')} Cut to the budget in standards/design.md, moving the why to the context entry.`,
     }
   }
-  if (emissions.length === 0) emissions.push(info('No design record to measure'))
+  if (emissions.length === 0)
+    emissions.push(info('No design record to measure'))
   return { emissions }
 }
 
