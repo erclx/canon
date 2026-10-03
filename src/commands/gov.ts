@@ -12,6 +12,7 @@ import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel, SCRATCH } from '@/record-root'
 import { createGovAdapter } from '@/gov/adapter'
 import { regenConsumedRules } from '@/gov/consumed'
+import { regenStandardRules } from '@/gov/standard-rules'
 import { installRules, lookupRules } from '@/gov/install'
 import { buildGovCatalog, describeRule, describeStack } from '@/gov/list'
 import { buildRulesPayload, listRuleFiles } from '@/gov/payload'
@@ -190,15 +191,19 @@ export function register(program: Command): void {
 
   gov
     .command('regen')
-    .description("Rebuild a repository's own .claude/rules/ from its record")
+    .description(
+      "Rebuild the standard-pointer rules and a repository's own .claude/rules/",
+    )
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Repository root to regenerate', PROJECT_ROOT)
     .addHelpText(
       'after',
       [
         '',
-        'Reads internal/governance.toml and installs the stack it names, plus',
-        'any rules under internal/rules/. Unlike install and sync, this runs',
+        'First writes governance/rules/standards/ from the paths: and rule:',
+        'fields in each standard under standards/. Then reads',
+        'internal/governance.toml and installs the stack it names, plus any',
+        'rules under internal/rules/. Unlike install and sync, this runs',
         'against the toolkit root, whose .claude/rules/ is produced output.',
         '',
       ].join('\n'),
@@ -1114,7 +1119,17 @@ async function runRegen(
     if (mismatch !== undefined) logWarn(mismatch)
   }
 
-  const result = await regenConsumedRules(resolve(opts.root ?? PROJECT_ROOT))
+  const root = resolve(opts.root ?? PROJECT_ROOT)
+
+  // The consumed copy installs from `governance/rules/`, so the band this
+  // writes has to be fresh before that copy is built from it.
+  const generated = await regenStandardRules(root)
+  if (!generated.ok) {
+    process.stderr.write(`Standard-rules regen failed: ${generated.reason}\n`)
+    return 1
+  }
+
+  const result = await regenConsumedRules(root)
 
   if (!result.ok) {
     process.stderr.write(`Consumed-rules regen failed: ${result.reason}\n`)
