@@ -38,7 +38,7 @@ The procedure that loaded this skill owns what the result is for and where it is
 ## Prefer a structured source
 
 - Prefer a source's public API over a fetched and summarized HTML page where one exists. An API returns the dates, authors, and identifiers a citation needs, and a summary of the page can drop or blur them.
-- Reach the API with a plain request when it needs no key. Never write a script into the project to wrap it, since access code belongs in a `canon` verb.
+- Reach the API with a plain request when it needs no key, rather than writing a wrapper for one search.
 
 ## Access note
 
