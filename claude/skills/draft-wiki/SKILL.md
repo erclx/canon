@@ -40,7 +40,7 @@ Do not widen the split to admit a subject. Adding a sibling folder is a change t
 The standard forbids working from training knowledge, so the draft is built on a read rather than on recall.
 
 - Fetch current information through the `claude-code-guide` agent for any subject that agent covers. Its answer is the source the page is written from.
-- Reach a subject the agent does not cover through the owner's own published documentation.
+- Reach a subject the agent does not cover through the owner's own published documentation. Invoke `canon:search-craft` with the skill tool before searching for it, since finding the owner's documentation is the field-and-authority step that skill carries, and report it rather than proceeding silently when the skill does not resolve.
 - Say the fetch failed and stop rather than substituting recall. A page sourced from memory is the failure the rule exists to prevent, and it ships looking identical to one that was checked.
 - Close the intro with the `Source:` sentence the standard requires, linking the canonical page where one exists and naming the owner alone where the subject has no single URL.
 - Stamp the read date on a source revised without notice, as `read <date>`. A claim traced to an undated read cannot be checked against what was actually read.
