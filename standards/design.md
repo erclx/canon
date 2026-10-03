@@ -33,9 +33,19 @@ Does not govern:
 
 ## Format
 
-- Use tables for token systems, one row per token. Use short bullets for component rules, one decision per line.
+- Use tables for token systems, one row per token. Write every other rule as a short bullet, one decision per line, within `## Prose budget`.
 - Plain English over technical notation. If a section could be removed and the developer would still build correctly from wireframes and code alone, remove it.
 - Keep table headers and role names intact so the render tooling can parse the token tables.
+
+## Prose budget
+
+The record is a lookup, so its prose stays short enough to scan beside the tables. Why a value was chosen belongs in the project's context entry for design, never here.
+
+- Personality: one paragraph of at most 60 words
+- Any other section: at most 3 rules beside its table, each at most 25 words. A bullet is one rule, and so is a paragraph.
+- The lead before the first section: at most 40 words
+
+Headings and table rows are never counted, and a section holding a table and no rules is within budget. A bullet wrapping over several lines counts as one rule, and a nested bullet counts as its own.
 
 ## The uncertainty tag
 
@@ -93,9 +103,9 @@ The column headers are the strings the renderer parses, read by exact key, so th
 
 ## Motion
 
-<whether motion is used at all, and if so the default duration and easing>
+- <whether motion is used at all, and if so the default duration and easing>
 
 ## Iconography
 
-<style, source library, and whether custom icons are allowed>
+- <style, source library, and whether custom icons are allowed>
 ```
