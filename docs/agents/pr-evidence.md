@@ -232,7 +232,7 @@ render needs, so it never refuses `no-base`. The orchestrator's draft lift is
 the caller, and lifts only on `settled`, so a refusal holds it the same as
 `owed` does.
 
-## What the comment still leaves to GitHub
+## When the comment opens
 
 The comment opens every state while it carries six images or fewer, counting one
 per row for the head plus one per row that is not new, and closes every state
@@ -240,6 +240,8 @@ past that, so the whole comment is open or closed together. A line under
 `## Evidence` names the compared base and head as short shas, which tells a
 reader whether the images match the latest push. The base is the merge base the
 compare endpoint returns, not trunk's tip.
+
+## What the comment still leaves to GitHub
 
 GitHub already draws its own before-and-after comparison on the Files Changed
 tab for any tracked image that changed. This comment does not make that view
