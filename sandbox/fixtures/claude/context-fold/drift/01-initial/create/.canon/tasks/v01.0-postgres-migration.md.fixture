@@ -1,0 +1,13 @@
+---
+title: 'v01.0: Migrate storage to Postgres'
+description: Persist tasks in Postgres instead of SQLite
+---
+
+# v01.0: Migrate storage to Postgres
+
+Plan: [feature-postgres-migration](../plans/feature-postgres-migration.md)
+
+- [ ] Outcome: tasks persist in Postgres instead of SQLite
+- [ ] Outcome: connection config reads from environment
+
+> Test strategy: integration, run the API against a local Postgres and verify round-trip.

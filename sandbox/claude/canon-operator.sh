@@ -183,6 +183,10 @@ EOF
     # Attribution rather than the bare key, so the guard proves the walk reached
     # the folder just staged instead of proving only that the field exists.
     case "$report" in
+    *'"historyUnavailable": true'* | *'"historyUnavailable":true'*)
+      log_error "The canon on PATH has no git history to walk, which is what a published install carries. Put a checkout canon first on PATH, such as a shim that execs 'bun <checkout>/src/cli.ts', and re-run."
+      return 1
+      ;;
     *'"attribution"'*) ;;
     *)
       log_error "The canon on PATH attributes no unclaimed folder. Either the binary predates the reverse walk added at 0.70.0, or the walk ran and did not reach $root/. Check canon --version against the first, and the staged tree against the second."

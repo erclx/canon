@@ -1,0 +1,3 @@
+# Feature: Postgres migration
+
+Plan linked from the "Migrate storage to Postgres" task block. The claude-docs skill should sweep this file after marking the task [x].

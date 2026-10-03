@@ -1,0 +1,13 @@
+---
+title: 'v03.0: Search tasks by title'
+description: Match a query against task titles and return the hits
+---
+
+# v03.0: Search tasks by title
+
+Plan: [feature-search](../plans/feature-search.md)
+
+- [ ] Outcome: a query matches against task titles
+- [ ] Outcome: an empty query returns the unfiltered list
+
+> Test strategy: unit, query a seeded collection and check the hits.
