@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.20.0](https://github.com/erclx/canon/compare/v5.19.0...v5.20.0) (2026-10-03)
+
+
+### Features
+
+* **canvas:** capture a page as one composite PNG ([#2134](https://github.com/erclx/canon/issues/2134)) ([a81cbc8](https://github.com/erclx/canon/commit/a81cbc8381da819b4f1ec9b8117ae4cbb641361e))
+* **claude:** add video-craft knowledge skill ([#2133](https://github.com/erclx/canon/issues/2133)) ([ef1e0eb](https://github.com/erclx/canon/commit/ef1e0ebd7ab329bab77da8d92a77fb608bf637db))
+* **gov:** generate standard-pointer rules from standard frontmatter ([#2141](https://github.com/erclx/canon/issues/2141)) ([226073b](https://github.com/erclx/canon/commit/226073b7a0e4ed6420420358215c2424809e9d05))
+* **sandbox:** add conflict and refused arms to claude:search-craft ([#2135](https://github.com/erclx/canon/issues/2135)) ([48e4eb0](https://github.com/erclx/canon/commit/48e4eb01bef7b672efe6bba971fe1bc1afb381e9))
+
+
+### Bug Fixes
+
+* **claude:** stop a worker from filing a task file for new work ([#2136](https://github.com/erclx/canon/issues/2136)) ([a45bf09](https://github.com/erclx/canon/commit/a45bf09664f471c814010cf44e5f3f81d5fb2514))
+
 ## [5.19.0](https://github.com/erclx/canon/compare/v5.18.0...v5.19.0) (2026-10-03)
 
 
