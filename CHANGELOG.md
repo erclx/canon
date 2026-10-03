@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.16.0](https://github.com/erclx/canon/compare/v5.15.0...v5.16.0) (2026-10-03)
+
+
+### Features
+
+* **canvas:** arrange, select, and capture frames ([#2097](https://github.com/erclx/canon/issues/2097)) ([59c1e06](https://github.com/erclx/canon/commit/59c1e063430470c317dc7382763c58c36c3ec4dd))
+* **canvas:** select elements in a frame and list each frame's layers ([#2104](https://github.com/erclx/canon/issues/2104)) ([bb398c1](https://github.com/erclx/canon/commit/bb398c101aab29627cac16ccf0045db9d23349c7))
+* **claude:** add search-craft for sourcing outside the project ([#2103](https://github.com/erclx/canon/issues/2103)) ([bb7d3ab](https://github.com/erclx/canon/commit/bb7d3ab6f5d6cbfad94e04a3f47252a69d161952))
+
 ## [5.15.0](https://github.com/erclx/canon/compare/v5.14.1...v5.15.0) (2026-10-03)
 
 
