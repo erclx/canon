@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -244,5 +250,208 @@ describe('startCanvas', () => {
     const css = await (await get(server, '/api/chrome.css')).text()
 
     expect(css).toMatch(/@font-face\s*{[^}]*font-family:\s*['"]?Geist Variable/)
+  })
+})
+
+function post(
+  server: CanvasStarted,
+  path: string,
+  body: unknown,
+  headers: Record<string, string> = {},
+): Promise<Response> {
+  return fetch(`http://${SERVE_HOST}:${server.port}${path}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...headers },
+    body: JSON.stringify(body),
+  })
+}
+
+function layoutOf(page: string): { frames: Record<string, unknown> } {
+  return JSON.parse(
+    readFileSync(join(ROOT, '.canon', 'canvas', page, 'layout.json'), 'utf8'),
+  )
+}
+
+describe('POST /api/frames/move', () => {
+  it('should write the position through the shared layout writer', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/move', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 200,
+      y: 120,
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      ok: true,
+      box: { x: 200, y: 120 },
+    })
+    expect(layoutOf('drafts').frames.hero).toMatchObject({ x: 200, y: 120 })
+  })
+
+  it('should keep a box another writer stored for a different frame', async () => {
+    seed('drafts/a.html', '<p>a</p>')
+    seed('drafts/b.html', '<p>b</p>')
+    seed(
+      'drafts/layout.json',
+      JSON.stringify({
+        frames: {
+          a: { x: 0, y: 0, width: 400, height: 300 },
+          b: { x: 9, y: 9, width: 400, height: 300 },
+        },
+      }),
+    )
+    const server = start()
+
+    await post(server, '/api/frames/move', {
+      page: 'drafts',
+      frame: 'a',
+      x: 50,
+      y: 60,
+    })
+
+    expect(layoutOf('drafts').frames).toMatchObject({
+      a: { x: 50, y: 60 },
+      b: { x: 9, y: 9 },
+    })
+  })
+
+  it('should answer 404 naming the reason for a frame that does not exist', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/move', {
+      page: 'drafts',
+      frame: 'missing',
+      x: 0,
+      y: 0,
+    })
+
+    expect(response.status).toBe(404)
+    expect(await response.json()).toMatchObject({
+      ok: false,
+      reason: 'no-frame',
+    })
+  })
+
+  it('should answer 400 for a body that is not a position', async () => {
+    const server = start()
+
+    const response = await post(server, '/api/frames/move', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 'left',
+    })
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should answer 415 for a body that is not JSON', async () => {
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/move',
+      {},
+      { 'content-type': 'text/plain' },
+    )
+
+    expect(response.status).toBe(415)
+  })
+
+  it('should refuse a request another origin sent', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/move',
+      { page: 'drafts', frame: 'hero', x: 1, y: 1 },
+      { origin: 'https://evil.example' },
+    )
+
+    expect(response.status).toBe(403)
+  })
+})
+
+describe('POST /api/selection', () => {
+  it('should record the frame and report it in the page list', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'hero',
+    })
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(response.status).toBe(200)
+    expect(record.selection).toEqual({ page: 'drafts', frame: 'hero' })
+  })
+
+  it('should clear the selection when the body names no frame', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+    await post(server, '/api/selection', { page: 'drafts', frame: 'hero' })
+
+    await post(server, '/api/selection', {})
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(record.selection).toBeUndefined()
+  })
+
+  it('should clear the selection when both fields are null', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+    await post(server, '/api/selection', { page: 'drafts', frame: 'hero' })
+
+    const response = await post(server, '/api/selection', {
+      page: null,
+      frame: null,
+    })
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(response.status).toBe(200)
+    expect(record.selection).toBeUndefined()
+  })
+
+  it('should report no selection once the selected frame is removed', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+    await post(server, '/api/selection', { page: 'drafts', frame: 'hero' })
+    rmSync(join(ROOT, '.canon', 'canvas', 'drafts', 'hero.html'))
+
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(record.selection).toBeUndefined()
+  })
+
+  it('should answer 404 for a frame that does not exist', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/selection', {
+      page: 'drafts',
+      frame: 'missing',
+    })
+
+    expect(response.status).toBe(404)
+  })
+
+  it('should refuse a request another origin sent', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/selection',
+      { page: 'drafts', frame: 'hero' },
+      { origin: 'https://evil.example' },
+    )
+
+    expect(response.status).toBe(403)
   })
 })

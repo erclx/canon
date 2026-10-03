@@ -6,7 +6,9 @@ import {
   isLoaded,
   loadError,
   pages,
+  selectedFrame,
   selectedPage,
+  selectFrame,
   theme,
   toggleTheme,
 } from '@/canvas/client/state'
@@ -82,7 +84,13 @@ function FrameList({ onFocusFrame }: PagesPanelProps): JSX.Element | null {
             type="button"
             class="row"
             title={frame.name}
-            onClick={() => onFocusFrame(frame)}
+            aria-current={
+              frame.name === selectedFrame.value?.name ? 'true' : undefined
+            }
+            onClick={() => {
+              onFocusFrame(frame)
+              void selectFrame({ page: page.name, frame: frame.name })
+            }}
           >
             <span class="row-label">{frame.name}</span>
             <span class="row-meta">{frame.width}</span>

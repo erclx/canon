@@ -1,10 +1,14 @@
 import {
+  closeSync,
   existsSync,
   mkdirSync,
+  openSync,
   readdirSync,
   readFileSync,
   renameSync,
+  rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { join } from 'node:path'
@@ -20,6 +24,23 @@ import { recordDir } from '@/record-root'
 export const CANVAS_FOLDER = 'canvas'
 
 export const LAYOUT_FILE = 'layout.json'
+
+/** The one frame the operator pointed at, beside the pages it names. */
+export const SELECTION_FILE = 'selection.json'
+
+/** Suffix of the file a write goes through before it replaces its target. */
+export const TEMP_SUFFIX = '.tmp'
+
+/** Suffix of the file a writer holds while it reads, merges, and replaces. */
+export const LOCK_SUFFIX = '.lock'
+
+/** A lock older than this was left by a writer that died holding it. */
+const LOCK_STALE_MS = 10_000
+
+/** How long a writer waits on another's lock before it refuses. */
+const LOCK_WAIT_MS = 2_000
+
+const LOCK_POLL_MS = 5
 
 const FRAME_EXTENSION = '.html'
 
@@ -62,7 +83,10 @@ export type ContentRefusal =
   | 'invalid-size'
   | 'exists'
   | 'no-page'
+  | 'no-frame'
+  | 'invalid-position'
   | 'malformed-layout'
+  | 'busy'
 
 export interface ContentRefused {
   readonly ok: false
@@ -155,12 +179,55 @@ function readLayout(dir: string): LayoutRead {
   return { boxes, malformed: false }
 }
 
+function sleep(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
+/**
+ * Holds an exclusive lock file for the length of a read, merge, and write. The
+ * server and a CLI verb are two processes, so a synchronous step inside either
+ * does not keep them from reading the same layout and each replacing it with
+ * its own edit, which loses the other's. A refused call leaves the file as it
+ * found it.
+ */
+function withLayoutLock(dir: string, run: () => FrameOutcome): FrameOutcome {
+  const lock = join(dir, `${LAYOUT_FILE}${LOCK_SUFFIX}`)
+  const deadline = Date.now() + LOCK_WAIT_MS
+  for (;;) {
+    try {
+      closeSync(openSync(lock, 'wx'))
+      break
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      const modified = statSync(lock, { throwIfNoEntry: false })?.mtimeMs
+      if (modified !== undefined && Date.now() - modified > LOCK_STALE_MS) {
+        rmSync(lock, { force: true })
+        continue
+      }
+      if (Date.now() >= deadline) {
+        return refuse('busy', `${LAYOUT_FILE} is being written, try again`)
+      }
+      sleep(LOCK_POLL_MS)
+    }
+  }
+  try {
+    return run()
+  } finally {
+    rmSync(lock, { force: true })
+  }
+}
+
+/**
+ * Replaces the file in one rename, so the shell reading while a CLI verb writes
+ * never sees half a layout and reports it as malformed. The caller holds
+ * `withLayoutLock`, which is what keeps two writers from losing each other.
+ */
 function writeLayout(dir: string, boxes: ReadonlyMap<string, Box>): void {
   const frames = Object.fromEntries(boxes)
-  writeFileSync(
-    join(dir, LAYOUT_FILE),
-    `${JSON.stringify({ frames }, null, 2)}\n`,
-  )
+  const target = join(dir, LAYOUT_FILE)
+  const temp = `${target}.${process.pid}${TEMP_SUFFIX}`
+  writeFileSync(temp, `${JSON.stringify({ frames }, null, 2)}\n`)
+  renameSync(temp, target)
 }
 
 function frameNames(dir: string): string[] {
@@ -308,19 +375,145 @@ export function addFrame(
     return refuse('exists', `frame ${frame} already exists on ${page}`)
   }
 
-  /*
-   * Placed against the boxes a reader would draw, unplaced frames included, so
-   * a new frame never lands under one the layout has yet to name.
-   */
-  const current = readPage(root, page)?.frames ?? []
-  const { boxes, malformed } = readLayout(dir)
-  /* Writing over a layout that does not parse would erase every box in it. */
-  if (malformed) {
-    return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
-  }
-  const box: Box = { x: nextX(current), y: 0, ...size }
+  return withLayoutLock(dir, () => {
+    /*
+     * Placed against the boxes a reader would draw, unplaced frames included,
+     * so a new frame never lands under one the layout has yet to name.
+     */
+    const current = readPage(root, page)?.frames ?? []
+    const { boxes, malformed } = readLayout(dir)
+    /* Writing over a layout that does not parse would erase every box in it. */
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const box: Box = { x: nextX(current), y: 0, ...size }
 
-  writeFileSync(join(dir, file), frameScaffold(frame))
-  writeLayout(dir, new Map([...boxes, [frame, box]]))
-  return { ok: true, page, frame, file, box }
+    writeFileSync(join(dir, file), frameScaffold(frame))
+    writeLayout(dir, new Map([...boxes, [frame, box]]))
+    return { ok: true, page, frame, file, box }
+  })
+}
+
+export interface Position {
+  readonly x: number
+  readonly y: number
+}
+
+/**
+ * Moves one frame and keeps its size. A frame the layout never named takes the
+ * default size it was already drawn at, so the move does not resize it.
+ */
+export function moveFrame(
+  root: string,
+  page: string,
+  frame: string,
+  to: Position,
+): FrameOutcome {
+  if (!isValidName(page)) {
+    return refuse('invalid-name', `${page} is not a valid page name`)
+  }
+  if (!isValidName(frame)) {
+    return refuse('invalid-name', `${frame} is not a valid frame name`)
+  }
+  if (!Number.isFinite(to.x) || !Number.isFinite(to.y)) {
+    return refuse('invalid-position', 'x and y must be numbers')
+  }
+
+  const dir = pagePath(root, page)
+  if (!isDirectory(dir)) return refuse('no-page', `page ${page} does not exist`)
+  const file = `${frame}${FRAME_EXTENSION}`
+  if (!existsSync(join(dir, file))) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  return withLayoutLock(dir, () => {
+    const { boxes, malformed } = readLayout(dir)
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const size = boxes.get(frame) ?? DEFAULT_FRAME
+    const box: Box = {
+      x: to.x,
+      y: to.y,
+      width: size.width,
+      height: size.height,
+    }
+
+    writeLayout(dir, new Map([...boxes, [frame, box]]))
+    return { ok: true, page, frame, file, box }
+  })
+}
+
+export interface Selection {
+  readonly page: string
+  readonly frame: string
+}
+
+export interface SelectedFrame extends Selection {
+  readonly file: string
+  readonly box: Box
+}
+
+export type SelectionOutcome = { readonly ok: true } | ContentRefused
+
+function selectionPath(root: string): string {
+  return join(canvasDir(root), SELECTION_FILE)
+}
+
+/**
+ * Records which frame "this one" means, or clears it. Only a frame on disk can
+ * be recorded, so the file never names something a reader would have to guess
+ * about.
+ */
+export function writeSelection(
+  root: string,
+  selection: Selection | undefined,
+): SelectionOutcome {
+  if (selection === undefined) {
+    if (existsSync(selectionPath(root))) unlinkSync(selectionPath(root))
+    return { ok: true }
+  }
+
+  const { page, frame } = selection
+  if (!isValidName(page) || !isValidName(frame)) {
+    return refuse('invalid-name', `${page}/${frame} is not a valid frame`)
+  }
+  const found = readPage(root, page)
+  if (!found) return refuse('no-page', `page ${page} does not exist`)
+  if (!found.frames.some((candidate) => candidate.name === frame)) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  const target = selectionPath(root)
+  const temp = `${target}.${process.pid}${TEMP_SUFFIX}`
+  writeFileSync(temp, `${JSON.stringify({ page, frame })}\n`)
+  renameSync(temp, target)
+  return { ok: true }
+}
+
+/**
+ * The selected frame with its box, or undefined when nothing is selected, the
+ * file does not parse, or the frame it names has since been removed, so a
+ * reader never gets a stale name back.
+ */
+export function readSelection(root: string): SelectedFrame | undefined {
+  const path = selectionPath(root)
+  if (!existsSync(path)) return undefined
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return undefined
+  }
+  if (typeof parsed !== 'object' || parsed === null) return undefined
+  const { page, frame } = parsed as Record<string, unknown>
+  if (typeof page !== 'string' || typeof frame !== 'string') return undefined
+
+  const found = readPage(root, page)?.frames.find(
+    (candidate) => candidate.name === frame,
+  )
+  if (!found) return undefined
+  const { x, y, width, height } = found
+  return { page, frame, file: found.file, box: { x, y, width, height } }
 }

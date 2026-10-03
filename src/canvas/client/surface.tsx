@@ -4,11 +4,17 @@ import { useEffect, useRef } from 'preact/hooks'
 import type { Frame } from '@/canvas/content'
 import {
   currentPage,
+  draggingFrame,
   fitView,
+  type FrameRef,
   frameKey,
   frameTheme,
   frameVersions,
+  moveFrameTo,
   panBy,
+  previewMove,
+  selectFrame,
+  selection,
   type Theme,
   toggleFrameTheme,
   view,
@@ -17,6 +23,30 @@ import {
 
 /** One wheel notch or one button press. */
 const ZOOM_STEP = 1.2
+
+/** Screen pixels a press travels before it reads as a drag and not a click. */
+const DRAG_THRESHOLD = 3
+
+/** Surface units one arrow press moves a frame, and one with Shift held. */
+const NUDGE = 10
+const NUDGE_LARGE = 50
+
+const ARROWS: Readonly<Record<string, { x: number; y: number } | undefined>> = {
+  ArrowLeft: { x: -1, y: 0 },
+  ArrowRight: { x: 1, y: 0 },
+  ArrowUp: { x: 0, y: -1 },
+  ArrowDown: { x: 0, y: 1 },
+}
+
+interface Gesture {
+  readonly startX: number
+  readonly startY: number
+  readonly originX: number
+  readonly originY: number
+  x: number
+  y: number
+  moved: boolean
+}
 
 export interface SurfaceProps {
   readonly viewportRef: RefObject<HTMLDivElement | null>
@@ -49,16 +79,91 @@ function FrameView({
   const version = frameVersions.value.get(key) ?? 0
   const value = frameTheme(key)
   const iframe = useRef<HTMLIFrameElement>(null)
+  const gesture = useRef<Gesture | undefined>(undefined)
+  const ref: FrameRef = { page, frame: frame.name }
+  const isSelected =
+    selection.value?.page === page && selection.value.frame === frame.name
 
   useEffect(() => {
     applyFrameTheme(iframe.current, value)
   }, [value])
+
+  const select = () => {
+    if (!isSelected) void selectFrame(ref)
+  }
+
+  const handlePointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) return
+    gesture.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: frame.x,
+      originY: frame.y,
+      x: frame.x,
+      y: frame.y,
+      moved: false,
+    }
+    ;(event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId)
+    select()
+  }
+
+  const handlePointerMove = (event: PointerEvent) => {
+    const current = gesture.current
+    if (!current) return
+    const dx = event.clientX - current.startX
+    const dy = event.clientY - current.startY
+    if (!current.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
+    const { zoom } = view.value
+    current.moved = true
+    current.x = Math.round(current.originX + dx / zoom)
+    current.y = Math.round(current.originY + dy / zoom)
+    draggingFrame.value = frame.name
+    previewMove(ref, current.x, current.y)
+  }
+
+  const handlePointerUp = () => {
+    const current = gesture.current
+    gesture.current = undefined
+    draggingFrame.value = undefined
+    if (current?.moved) void moveFrameTo(ref, current.x, current.y)
+  }
+
+  const handlePointerCancel = () => {
+    const current = gesture.current
+    gesture.current = undefined
+    draggingFrame.value = undefined
+    if (current?.moved) previewMove(ref, current.originX, current.originY)
+  }
+
+  /*
+   * The keyboard path for a drag, since a pointer gesture alone leaves a
+   * frame unmovable without a mouse.
+   */
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.target !== event.currentTarget) return
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      select()
+      return
+    }
+    const step = event.shiftKey ? NUDGE_LARGE : NUDGE
+    const delta = ARROWS[event.key]
+    if (!delta || !isSelected) return
+    event.preventDefault()
+    void moveFrameTo(ref, frame.x + delta.x * step, frame.y + delta.y * step)
+  }
 
   const next = value === 'dark' ? 'light' : 'dark'
   return (
     <figure
       class="frame"
       data-frame={frame.name}
+      data-selected={isSelected ? 'true' : undefined}
+      data-dragging={draggingFrame.value === frame.name ? 'true' : undefined}
+      tabIndex={0}
+      aria-label={`${frame.name}, ${frame.width} by ${frame.height}`}
+      aria-current={isSelected ? 'true' : undefined}
+      onKeyDown={handleKeyDown}
       style={{
         left: `${frame.x}px`,
         top: `${frame.y}px`,
@@ -90,6 +195,14 @@ function FrameView({
         height={frame.height}
         style={{ height: `${frame.height}px` }}
         onLoad={() => applyFrameTheme(iframe.current, frameTheme(key))}
+      />
+      {/* Catches the pointer the frame's own document would otherwise take. */}
+      <div
+        class="frame-shield"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
       />
     </figure>
   )

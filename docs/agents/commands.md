@@ -34,7 +34,7 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon drive <url> <run>`   | Walk a page through named interactions and measure each state                   |
 | `canon transcripts <url>`   | Fetch a YouTube transcript with metadata frontmatter (needs `yt-dlp`)           |
 | `canon teach <verb>`        | Open and author learning workspaces                                             |
-| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, and add pages and frames to it   |
+| `canon canvas <verb>`       | Serve a local canvas of pages and HTML frames, arrange them, and capture them   |
 | `canon sandbox [cat:cmd]`   | Run sandbox scenarios, toolkit-only like the tree it reads                      |
 | `canon tasks <verb>`        | Read and write the task board, the plans it cites, and its archive              |
 | `canon intake <verb>`       | Report intake folders and write answers into them                               |
@@ -96,7 +96,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`
 - `teach`, in `teach.md`: `list`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
-- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`
+- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `selection`, `capture`
 - `sandbox`, in `sandbox.md`: `reset`, `clean`, `check`, `coverage`
 - `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
 - `intake`, in `intake.md`: `list`, `answer`
@@ -129,7 +129,7 @@ Subcommands no other page describes:
 - `claude skills rank` scores either skill corpus's descriptions against a case corpus by TF-IDF cosine similarity, reporting rank-one and top-three (`--cases <path>`).
 - `design regen` rewrites this repository's `canon/DESIGN.md` from `src/design/tokens.ts` and `src/design/base.css` from `src/design/neutral.ts`. `design css` emits the tokens and components as CSS on stdout, with `--no-components` for properties alone, and `design render` declares each vendored face the typography table names under `--embed-fonts`.
 - `slides render` renders a `.claude/SLIDES.md` source into a PowerPoint deck and reports any unrecognized layout name on stderr, and `slides list --json` emits the layout catalog.
-- `canvas serve` serves the canvas on `127.0.0.1`, walks ports like `canon serve`, refuses a `Host` other than loopback on its own port, and runs until interrupted. A page is a folder under `.canon/canvas/`, a frame is one HTML file in it, and `layout.json` beside them holds each frame's box. Each frame gets the project's token stylesheet injected, being this toolkit's tokens in its own checkout, else `.claude/design/base.css` plus anything under `.claude/design/project/`, else none with a notice. An open canvas reloads a frame whose file changes. `canvas list --json` emits every page with its frames, and `page add`, `page rename`, and `frame add` (`--width`, `--height`) each emit one record under `--json`, refusing a name that is not one path segment, a page that already exists, or a root that is not a directory, with the reason on stderr.
+- `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
 - `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a title word no dictionary holds, or a title breaking `standards/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
 - `repo metadata propose` compares a description, homepage, and topic set computed from the README and `package.json` against what the remote carries, writing nothing, and `repo metadata apply` writes an explicitly supplied set through `gh repo edit` (`--description`, `--homepage`, `--topics`).
 

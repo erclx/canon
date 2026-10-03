@@ -1,5 +1,14 @@
 import { type FSWatcher, mkdirSync, watch } from 'node:fs'
-import { canvasDir, listPages } from '@/canvas/content'
+import {
+  type ContentRefused,
+  canvasDir,
+  listPages,
+  LOCK_SUFFIX,
+  moveFrame,
+  readSelection,
+  TEMP_SUFFIX,
+  writeSelection,
+} from '@/canvas/content'
 import { resolveFrameTokens, type TokenOptions } from '@/canvas/tokens'
 import { buildDesignCss } from '@/design/css'
 import {
@@ -105,13 +114,74 @@ function guarded(handler: Handler): Handler {
         })
 }
 
-function json(body: unknown): Response {
+function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
+    status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': 'no-store',
     },
   })
+}
+
+const REFUSAL_STATUS: Record<ContentRefused['reason'], number> = {
+  'invalid-name': 400,
+  'invalid-size': 400,
+  'invalid-position': 400,
+  'no-page': 404,
+  'no-frame': 404,
+  exists: 409,
+  'malformed-layout': 409,
+  busy: 409,
+}
+
+function refusal(refused: ContentRefused): Response {
+  return json(refused, REFUSAL_STATUS[refused.reason])
+}
+
+function badBody(detail: string): Response {
+  return json({ ok: false, reason: 'invalid-body', detail }, 400)
+}
+
+/**
+ * The Host guard cannot tell the shell from a page on another origin that
+ * reaches this socket, since a browser sends the loopback Host either way. A
+ * write also carries an Origin when a page sent it, so one naming any other
+ * origin is refused, and a JSON content type forces that page through a
+ * preflight this server never answers.
+ */
+function mutation(handler: (body: unknown) => Response): Handler {
+  return async (request, server) => {
+    const origin = request.headers.get('origin')
+    if (origin !== null && !isLoopbackOrigin(origin, server.port ?? 0)) {
+      return new Response('Forbidden\n', { status: 403 })
+    }
+    const type = request.headers.get('content-type') ?? ''
+    if (!type.startsWith('application/json')) {
+      return json(
+        { ok: false, reason: 'invalid-body', detail: 'send application/json' },
+        415,
+      )
+    }
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return badBody('the body is not JSON')
+    }
+    return handler(body)
+  }
+}
+
+function isLoopbackOrigin(origin: string, port: number): boolean {
+  return (
+    origin === `http://${SERVE_HOST}:${port}` ||
+    origin === `http://localhost:${port}`
+  )
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
 async function serveFrame(
@@ -158,6 +228,8 @@ class ChangeStream {
   private queue(path: string): void {
     const [page, ...rest] = path.split(/[\\/]/)
     if (page === undefined || page === '') return
+    /* A write's staging or lock file, gone a moment later. */
+    if (path.endsWith(TEMP_SUFFIX) || path.endsWith(LOCK_SUFFIX)) return
     clearTimeout(this.pending.get(path))
     this.pending.set(
       path,
@@ -245,8 +317,53 @@ export function startCanvas(
           '/api/pages': guarded(() => {
             const resolved = resolveFrameTokens(root, tokens)
             const { css: _css, ...source } = resolved
-            return json({ pages: listPages(root), tokens: source })
+            const selected = readSelection(root)
+            return json({
+              pages: listPages(root),
+              tokens: source,
+              selection: selected && {
+                page: selected.page,
+                frame: selected.frame,
+              },
+            })
           }),
+          '/api/frames/move': {
+            POST: guarded(
+              mutation((body) => {
+                if (
+                  !isRecord(body) ||
+                  typeof body.page !== 'string' ||
+                  typeof body.frame !== 'string' ||
+                  typeof body.x !== 'number' ||
+                  typeof body.y !== 'number'
+                ) {
+                  return badBody('send page, frame, x, and y')
+                }
+                const outcome = moveFrame(root, body.page, body.frame, {
+                  x: body.x,
+                  y: body.y,
+                })
+                return outcome.ok ? json(outcome) : refusal(outcome)
+              }),
+            ),
+          },
+          '/api/selection': {
+            POST: guarded(
+              mutation((body) => {
+                if (!isRecord(body)) return badBody('send a frame or {}')
+                const { page, frame } = body
+                const target =
+                  typeof page === 'string' && typeof frame === 'string'
+                    ? { page, frame }
+                    : undefined
+                if (target === undefined && (page != null || frame != null)) {
+                  return badBody('send both page and frame, or neither')
+                }
+                const outcome = writeSelection(root, target)
+                return outcome.ok ? json(outcome) : refusal(outcome)
+              }),
+            ),
+          },
           '/api/chrome.css': guarded(
             () =>
               new Response(chromeCss, {

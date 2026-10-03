@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { useRef } from 'preact/hooks'
+import { Inspector } from '@/canvas/client/inspector'
 import { PagesPanel } from '@/canvas/client/pages-panel'
 import { currentPage, focusFrame, tokens } from '@/canvas/client/state'
 import { Surface } from '@/canvas/client/surface'
@@ -77,6 +78,7 @@ export function App(): JSX.Element {
       />
       <Surface viewportRef={viewportRef} />
       <aside class="panel panel-right" aria-label="Details">
+        <Inspector />
         <PageDetails />
         <TokenDetails />
       </aside>
