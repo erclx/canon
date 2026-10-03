@@ -7,7 +7,9 @@ description: The bounded stdin read every payload hook opens with, the path form
 
 ## The stdin guard
 
-Every hook that reads a payload opens with `IFS= read -r -d '' -t 2 input` and exits non-zero with a usage line on an empty payload. Under Claude Code the payload arrives and stdin closes, so the read returns at once and the bound is never paid. An unbounded `cat` instead blocks forever when a caller runs the hook by hand or from a tool call whose stdin is an open socket, which holds the background task open and with it the session. Only `bare-flag-repair.sh` is exempt, and it is exempt because it reads no payload.
+Every hook that reads a payload opens with `IFS= read -r -d '' -t 2 input` and exits non-zero with a usage line on an empty payload. Under Claude Code the payload arrives and stdin closes, so the read returns at once and the bound is never paid. An unbounded `cat` instead blocks forever when a caller runs the hook by hand or from a tool call whose stdin is an open socket, which holds the background task open and with it the session. Only `bare-flag-repair.sh` and `cloud-setup.sh` are exempt, and both are exempt because they read no payload.
+
+`cloud-setup.sh` still drains stdin with the same bounded read, since a `SessionStart` writer meeting a closed pipe fails, and it skips the read on a terminal so a run by hand does not wait.
 
 The guard uses `read` rather than `timeout cat`, because macOS ships no `timeout` and a missing one empties every payload and refuses every legitimate call. The obvious descriptor test `[ -t 0 ]` is the wrong one, since it reports false on an open socket, which is where the hang came from. Nothing else compares the two hook trees, so a guard landing in one leaves the other broken with every stage still passing. `src/hooks-guard.test.ts` walks both directories rather than a fixed list, asserting per file a bounded refusal, silence on a payload the hook ignores, and the real verdict on one it acts on.
 
@@ -35,7 +37,9 @@ The flag read comes first and costs one process, ahead of the payload parse, bec
 
 ## The pull-request creation log
 
-`pr-create-log.sh` registers on `PostToolUse` for the `Bash` matcher, where `dev-command-reminder.sh` and `bare-flag-repair.sh` sit on `PreToolUse` instead. It filters for a command containing `gh pr create` rather than narrowing at the matcher, the same shape those two take for testing the command string over the tool name. On a match it greps `tool_response.stdout` for the pull request URL `gh pr create` prints on success, which is what tells a creation apart from a failed or refused call. It then appends a line to `.canon/tmp/pr/log/log.md` and hands back an `additionalContext` reminder naming the channel obligation `role-worker` states.
+`pr-create-log.sh` registers on `PostToolUse` for the `Bash` matcher, where `dev-command-reminder.sh` and `bare-flag-repair.sh` sit on `PreToolUse` instead. It filters for a command containing `gh pr create`, or for an `opened=true` line in the output, rather than narrowing at the matcher, the same shape those two take for testing the command string over the tool name.
+
+The second form is `git-pr`'s, which opens a pull request over REST and prints that line only on its create path, since its edit path prints a URL as well. On a match it greps `tool_response.stdout` for the pull request URL either form prints on success, which is what tells a creation apart from a failed or refused call. It then appends a line to `.canon/tmp/pr/log/log.md` and hands back an `additionalContext` reminder naming the channel obligation `role-worker` states.
 
 The hook cannot know whether a session sent the announcement, only that a pull request now exists to announce, so the log is a denominator for the next wave's miss rate rather than a record of the send itself.
 
