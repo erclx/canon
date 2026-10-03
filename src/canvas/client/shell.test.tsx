@@ -14,6 +14,7 @@ import {
   applyRecord,
   type PagesRecord,
   resetState,
+  savedEdit,
   theme,
   view,
 } from '@/canvas/client/state'
@@ -1230,6 +1231,23 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit')).toEqual([])
     expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
     expect(fieldNamed('width').value).toBe('100')
+  })
+
+  it('should restore the value from before the press when the panel rerenders mid-scrub', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100px">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const glyph = glyphOf('width')
+    await drag('pointerdown', glyph, 10)
+    await drag('pointermove', glyph, 40)
+
+    act(() => {
+      savedEdit.value = { key: 'elsewhere', index: 0, property: 'color' }
+    })
+    await drag('pointercancel', glyph, 40)
+
+    expect(doc.querySelector<HTMLElement>('h1')?.style.width).toBe('100px')
   })
 
   it('should say the edit was refused and reload the frame when the file moved', async () => {

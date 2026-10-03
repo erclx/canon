@@ -4,13 +4,21 @@ import { useRef } from 'preact/hooks'
 import { scrubStep } from '@/canvas/client/inspector/values'
 
 /**
- * What a number field's glyph does while dragged. Each takes the value as the
- * field shows it. Only `commit` writes, so a drag posts one edit at most.
+ * One drag of a number field's glyph. Each call takes the value as the field
+ * shows it. Only `commit` writes, so a drag posts one edit at most.
  */
-export interface Scrub {
+export interface ScrubSession {
   readonly preview: (value: string) => void
   readonly restore: () => void
   readonly commit: (value: string) => void
+}
+
+/**
+ * Opens a session at press, so what `restore` returns to is read before any
+ * preview, however often the panel renders during the drag.
+ */
+export interface Scrub {
+  readonly begin: () => ScrubSession
 }
 
 interface FieldProps {
@@ -32,6 +40,7 @@ const NUMBER = /^-?\d*\.?\d+$/
 interface Drag {
   readonly pointerId: number
   readonly start: string
+  readonly session: ScrubSession
   lastX: number
   value: number
 }
@@ -86,6 +95,7 @@ export function Field({
           drag.current = {
             pointerId: event.pointerId,
             start,
+            session: scrub.begin(),
             lastX: event.clientX,
             value: Number(start),
           }
@@ -100,20 +110,20 @@ export function Field({
             10
           const shown = String(held.value)
           if (input.current) input.current.value = shown
-          scrub.preview(shown)
+          held.session.preview(shown)
         },
         onPointerUp: (event: PointerEvent) => {
           const held = end(event.pointerId)
           if (!held) return
           const shown = String(held.value)
-          if (shown === held.start) scrub.restore()
-          else scrub.commit(shown)
+          if (shown === held.start) held.session.restore()
+          else held.session.commit(shown)
         },
         onPointerCancel: (event: PointerEvent) => {
           const held = end(event.pointerId)
           if (!held) return
           if (input.current) input.current.value = held.start
-          scrub.restore()
+          held.session.restore()
         },
       }
     : {}

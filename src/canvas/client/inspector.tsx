@@ -208,22 +208,24 @@ function ElementFields({
    * edit as typing. A reload mid-drag replaces the document, so a release
    * against one no longer on screen posts nothing.
    */
-  const scrubOf = (property: string): Scrub => {
-    const original = inlineValue(node, property)
-    const style = (node as HTMLElement).style
-    return {
-      preview: (shown) =>
-        style.setProperty(property, toCssValue(property, shown)),
-      restore: () =>
-        original
-          ? style.setProperty(property, original)
-          : style.removeProperty(property),
-      commit: (shown) => {
-        if (frameDocuments.value.get(key) !== doc || !node.isConnected) return
-        commit(property)(toCssValue(property, shown))
-      },
-    }
-  }
+  const scrubOf = (property: string): Scrub => ({
+    begin: () => {
+      const original = inlineValue(node, property)
+      const style = (node as HTMLElement).style
+      return {
+        preview: (shown) =>
+          style.setProperty(property, toCssValue(property, shown)),
+        restore: () =>
+          original
+            ? style.setProperty(property, original)
+            : style.removeProperty(property),
+        commit: (shown) => {
+          if (frameDocuments.value.get(key) !== doc || !node.isConnected) return
+          commit(property)(toCssValue(property, shown))
+        },
+      }
+    },
+  })
 
   const styleField = (field: StyleField): JSX.Element => (
     <Field
