@@ -80,6 +80,12 @@ The measure is TF-IDF over descriptions rather than Claude Code's own router, an
 - `standards/wireframes.md` documents only the per-surface ASCII shape. The three-tier call between ASCII only, ASCII plus a render, and visual as the source of truth is made once per project in the visual design workflow guide. The wireframes kind reads `canon/DESIGN.md` and the tree for a tier signal and reports it, since no shipped mechanism turns a detected tier into a companion render.
 - The wiki kind's ownership refusal offers the docs or context kind of the same skill, so a subject this project owns is redirected without leaving the skill.
 
+### Why the readme templates sit in the skill
+
+The readme kind carries one whole template per project type under `references/readme/`, in the skill and not in `standards/readme.md`. `docs-sync` reads the standard to rewrite a section and never needs a whole page, so a template there would load for every README edit to serve only the drafting one. The templates hold slots and structure and no rule of their own, which leaves the standard the one owner of per-type content.
+
+The template types are the standard's five: library, CLI, application, agent-facing, and plugin. The intake that prompted them listed an internal service type. The standard carries none and the skill has no signal that detects one, so it waits for the first target that needs it, as a standard change. A project matching several types combines their templates under one header block and one description, and a project matching none falls back to the standard's generic template.
+
 ## The identity surface
 
 `draft-identity` covers a project's logo mark and the social card composed from it, reached through `draft-and-pick`'s own render-and-pick loop rather than a second implementation of one. Without it, a project reaching for either output redoes the work by hand each time. `canon/context/claude-plugin/social-card-route.md` covers the card route it writes.
