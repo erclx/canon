@@ -328,7 +328,17 @@ function sectionBorders(rows: Row[]): string {
   return `<h2>Borders</h2>\n<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody>${body}</tbody></table>`
 }
 
+/** A section the record writes as one-line rules draws them as a list. */
+const BULLET = /^[-*+]\s+/
+
 function sectionLine(title: string, text: string): string {
   if (!text) return ''
-  return `<h2>${title}</h2>\n<p>${escape(text)}</p>`
+  const lines = text.split('\n')
+  if (!lines.every((line) => BULLET.test(line))) {
+    return `<h2>${title}</h2>\n<p>${escape(text)}</p>`
+  }
+  const items = lines
+    .map((line) => `<li>${escape(line.replace(BULLET, ''))}</li>`)
+    .join('')
+  return `<h2>${title}</h2>\n<ul>${items}</ul>`
 }
