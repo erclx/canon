@@ -54,7 +54,7 @@ A plan write is a no-op for every one of the five: `standards-audit.sh` exits on
 
 `604-scratch.md` states the mixed default alone and names no writer, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `598-authoring-layout.md`. The census lives here instead. Read the current writer set with `git grep -l '.canon/tmp/' claude/skills .claude/skills` before trusting the split below.
 
-Most writers hold throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite, such as `git-pr`'s pull request body, `review-address`'s reply body, and `draft-diagram`'s verification renders. None of those needs a root, since nothing outside the run that wrote it ever opens the file.
+Most writers hold throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite, such as `git-pr`'s pull request body, `review-address`'s reply body, and `draft-figure`'s verification renders. None of those needs a root, since nothing outside the run that wrote it ever opens the file.
 
 Six write material a later run or a different worktree reads back, and each states the main root. `memory-capture` states it for `.canon/tmp/handoff/memory-routing/<slug>.md`, and `memory-review`'s append to that file relies on the location capture put it at rather than restating the root. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
 

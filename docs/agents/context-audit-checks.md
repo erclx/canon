@@ -85,9 +85,9 @@ All three wireframe findings are printed under a bare run. The states-mismatch f
 
 The provenance check covers `canon/context/` alone, the reference-form check covers the split folders inside it, the required-section check covers `canon/context/` and `canon/wireframes/`, length and the table finding reach every audited folder, and the wireframe states check covers `canon/wireframes/` alone.
 
-What narrows the provenance check is stated in `standards/context.md`, which opens its scope by handing diagrams and wireframes to `diagrams.md` and `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
+What narrows the provenance check is stated in `standards/context.md`, which opens its scope by handing figures to the `draft-figure` skill and wireframes to `wireframes.md`, and the sibling standards do not restate it. A marker reported in a diagram or wireframe entry would cite a rule that entry's own standard routes elsewhere. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
 
-Length and the table finding generalize as judgments about how far a reader travels, so both reach wherever the audit is pointed. Required sections narrow for a plainer reason: each list is one standard's own, so it reaches the folder that standard governs. The context and wireframe standards each state a set, and the diagram standard states none.
+Length and the table finding generalize as judgments about how far a reader travels, so both reach wherever the audit is pointed. Required sections narrow for a plainer reason: each list is one standard's own, so it reaches the folder that standard governs. The context and wireframe standards each state a set, and an older install's diagrams folder has no standard to state one.
 
 The same test is what moved depth and bullet weight out of this command entirely. A rule stated at the attribute tier reaches every markdown file, and a check reaching every markdown file has no reason to require a folder that resolves.
 

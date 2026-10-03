@@ -25,9 +25,9 @@ A session loads a skill body once and keeps it, so an edit made this session is 
 
 `canon claude skills drift <ref>` names which shipped bodies moved between a ref and `HEAD`, and `standards/session.md` runs it while a session map is written. Comparing the bytes a session holds cannot be built, since a session cannot read its own loaded body back, so the substitute reports a file moving rather than a held copy differing. `governance/rules/standards/skill.md` carries the instruction on the body being edited, since telling a session to re-invoke the skill fixes nothing and a re-read step in the ship chain was declined on cost. Measured at `34ce48e6` on 2026-08-20.
 
-## The diagram folder
+## Diagrams as figures
 
-`.canon/diagrams/` holds an entry per kind under a fixed filename, chosen over a single `DIAGRAMS.md`. The kinds drift at rates spanning roughly an order of magnitude, so a deploy change rewrites one entry and leaves the others untouched, and fixed filenames are what let a session refreshing a kind find the file it is meant to overwrite rather than writing a second one beside it. A kind carrying a second question takes a suffixed name and repeats its category, which is how the folder reaches nine entries across five kinds.
+The architecture views are one reference inside `draft-figure` rather than a skill writing a `.canon/diagrams/` folder of per-kind entries. The folder skill had no recorded use, and its per-kind filenames, `verified` marker, and regenerated catalog served only the folder. A view now lands in a document the user names and goes through the same Mermaid render and read-back as every other figure. The cost is the staleness signal: nothing records the commit a view was checked against. The record-root lists still back up and audit a `.canon/diagrams/` an older install left, so a target's existing entries are not orphaned.
 
 ## The task board split
 

@@ -49,9 +49,9 @@ Shipping a dependency beside its consumer connects them only when the consumer's
 
 ## Destinations
 
-Thirty-two standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
+Thirty-one standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
 
-The corpus stands at 35, so four standards carry no row. `mermaid.md` reaches a session through `governance/rules/standards/mermaid.md`, which globs a fence rather than a document type. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `governance/rules/standards/wiki.md` globs `wiki/**/*.md` and points at it. It ships through `base` like every generated rule, since the standard and `draft-doc` already reach targets and the glob matches nothing where no `wiki/` exists.
+The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a session through the `draft-figure` skill, which the generated markdown rule names, since no glob can read whether a file holds a fence. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `governance/rules/standards/wiki.md` globs `wiki/**/*.md` and points at it. It ships through `base` like every generated rule, since the standard and `draft-doc` already reach targets and the glob matches nothing where no `wiki/` exists.
 
 `figures.md` is a fragment standard with no document type of its own to glob, so no rule carries it. It reaches a session through the citation each caller's own body writes, the fallback form a flat standard takes when nothing globs it.
 
@@ -67,7 +67,6 @@ The corpus stands at 35, so four standards carry no row. `mermaid.md` reaches a 
 - `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `governance/rules/standards/tasks.md`, which already globs the whole folder.
 - `context.md` fixes the per-domain narrative entry. `governance/rules/standards/context.md`.
 - `design.md` fixes visual intent and the token tables. `governance/rules/standards/design.md`.
-- `diagrams.md` fixes the per-kind Mermaid entry. `governance/rules/standards/diagrams.md`.
 - `groundwork.md` fixes the measurement track a topic gets before anyone plans it. `governance/rules/standards/groundwork.md`.
 - `groundwork-spikes.md` fixes a track's `08-spikes.md`, the sample rule, and the folders holding what a spike produced. `governance/rules/standards/groundwork.md`, through a pointer bullet. It was split from `groundwork.md` when the generated rule's frontmatter pushed that standard past the 300 rendered line ceiling.
 - `intake.md` fixes the folder a raw dump is filed into. `governance/rules/standards/intake.md`.
