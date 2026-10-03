@@ -27,7 +27,7 @@ The shell writes through the same writer when the operator drags a frame. Both t
 
 The operator can also pick one element inside a frame, by clicking it on the surface or in the frame's layers tree. The selection then carries `element`, recording the `index` in document order, `tag`, `classes`, and `text` excerpt as they were at the pick. An edit to the frame since can shift that index onto another element, so `stale` turns true once the file's content no longer matches what the pick was made against. Check it before acting on the index.
 
-A pick is refused as `address-mismatch` when the browser builds elements the file never states, such as a `tbody` a table leaves out or the document wrapper around a fragment. The shell sends its own element count beside the index, so a frame the two sides count differently is reported rather than recorded against the wrong element.
+A pick is refused as `address-mismatch` when the browser builds elements the file never states, such as a `tbody` a table leaves out or the document wrapper around a fragment. The shell sends its own element count beside the index, so a frame the two sides count differently is reported rather than recorded against the wrong element. A pick is refused as `stale-address` when the frame file changed between the frame being served and the pick arriving, since every served frame carries the hash of its file and the shell sends that hash back.
 
 ## Capture
 
