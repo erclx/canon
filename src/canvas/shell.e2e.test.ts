@@ -239,6 +239,43 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(overflow).toBeLessThanOrEqual(0)
   })
 
+  it('should keep long values inside the details panel in both themes', async () => {
+    // A long class list, a long font stack, and a width wider than any panel.
+    const stress = HELLO.replace(
+      '<h1 class="title">',
+      `<h1 class="title ${'very-long-utility-class '.repeat(6)}" style="width: 2000.75px; font-family: 'A Very Long Display Family', 'Another Long Fallback Family', system-ui, sans-serif">`,
+    )
+    writeFileSync(join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`), stress)
+    const width = page.getByRole('textbox', { name: 'width', exact: true })
+    await expect
+      .poll(
+        async () => {
+          await page
+            .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
+            .locator('button.layer', { hasText: /^h1/ })
+            .click()
+          return width.inputValue().catch(() => '')
+        },
+        { timeout: 15_000 },
+      )
+      .toBe('2001')
+
+    const panel = page.locator('.panel-right')
+    const overflowIn = () =>
+      panel.evaluate((element) => element.scrollWidth - element.clientWidth)
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    const first = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'inspector-a.png') })
+    await toggle.click()
+    const second = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'inspector-b.png') })
+    await toggle.click()
+
+    expect([first, second]).toEqual([0, 0])
+  })
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
