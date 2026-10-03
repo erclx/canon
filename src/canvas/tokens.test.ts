@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { resolveFrameTokens, tokenGroups } from '@/canvas/tokens'
+import { primaryFontFamily } from '@/capture/sources'
 import { buildDesignCss } from '@/design/css'
 
 let ROOT = ''
@@ -19,6 +20,12 @@ function seedDesign(file: string, css: string): void {
   const path = join(ROOT, '.claude', 'design', file)
   mkdirSync(join(path, '..'), { recursive: true })
   writeFileSync(path, css)
+}
+
+function faceFamilies(css: string): string[] {
+  return [...css.matchAll(/@font-face\s*{[^}]*font-family:\s*'([^']+)'/g)].map(
+    (match) => match[1] ?? '',
+  )
 }
 
 describe('tokenGroups', () => {
@@ -93,7 +100,29 @@ describe('resolveFrameTokens', () => {
 
     const tokens = resolveFrameTokens(ROOT, { isOwnCheckout: true })
 
-    expect(tokens).toEqual({ source: 'toolkit', css: buildDesignCss() })
+    expect(tokens).toEqual({
+      source: 'toolkit',
+      css: buildDesignCss(undefined, { embedFonts: true }),
+    })
+  })
+
+  it('should carry a font face for each family the toolkit type tokens name', () => {
+    const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: true })
+
+    const named = tokenGroups(css)
+      .filter((group) => group.kind === 'font-family')
+      .flatMap((group) => group.tokens)
+      .map((token) => primaryFontFamily(token.value))
+    expect(named.length).toBeGreaterThan(0)
+    expect(faceFamilies(css)).toEqual(expect.arrayContaining(named))
+  })
+
+  it('should inject no toolkit font face for an installed base', () => {
+    seedDesign('base.css', ':root { --type-body-family: Geist, sans-serif; }')
+
+    const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
+
+    expect(css).not.toContain('@font-face')
   })
 
   it('should take the installed base followed by the project overrides', () => {

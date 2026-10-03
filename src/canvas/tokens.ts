@@ -138,7 +138,15 @@ export function resolveFrameTokens(
   options: TokenOptions = {},
 ): FrameTokens {
   if (options.isOwnCheckout ?? isOwnCheckout(root)) {
-    return { source: 'toolkit', css: buildDesignCss() }
+    /*
+     * Faces embedded, since the type tokens name `Geist Variable` and a
+     * machine with only static Geist installed renders every frame in the
+     * fallback. An installed base owns its fonts, so that branch gets none.
+     */
+    return {
+      source: 'toolkit',
+      css: buildDesignCss(undefined, { embedFonts: true }),
+    }
   }
 
   const files = installedFiles(root)
