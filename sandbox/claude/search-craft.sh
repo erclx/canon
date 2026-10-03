@@ -41,6 +41,8 @@ EOF
   log_info "  notes at notes/research.md and says nothing about where to search."
   log_info "Action:  Find me the strongest evidence on whether rent control reduces"
   log_info "         housing supply, and write it up in the research notes."
+  log_info "Tools:   sandbox/run.sh allows no search by default, so drive it with"
+  log_info "         CANON_SKILL_TEST_TOOLS=Bash,Read,Glob,Grep,Edit,Write,Skill,WebSearch,WebFetch"
   log_info "Expect:  declared in fixtures/claude/search-craft/expect.toml"
   log_info "         Check it with: canon sandbox check claude:search-craft"
 }
