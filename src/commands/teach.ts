@@ -1042,13 +1042,7 @@ function refreshOnChange(
   }
 
   const pass = async (): Promise<void> => {
-    const nav = await generateNav(root, topic).catch(
-      (error: unknown) =>
-        ({
-          ok: false,
-          message: (error as NodeJS.ErrnoException).code ?? String(error),
-        }) as const,
-    )
+    const nav = await generateNav(root, topic)
     if (!nav.ok) {
       report(`Refresh refused: ${nav.message}`, true)
       return
@@ -1068,7 +1062,15 @@ function refreshOnChange(
     isRunning = true
     do {
       isDirty = false
-      await pass()
+      // A throw, such as the teach folder removed mid-pass, is reported and
+      // the loop carries on, since a rejection left here would end the
+      // process and a stuck flag would end every later refresh.
+      try {
+        await pass()
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code ?? String(error)
+        report(`Refresh failed: ${code}`, true)
+      }
     } while (isDirty)
     isRunning = false
   }
