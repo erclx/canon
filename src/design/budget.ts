@@ -8,7 +8,8 @@
  * A row is excluded on the same test `table()` in `@/design/parse` reads one
  * by, a line opening with a pipe, so a code span carrying a pipe or a cell
  * carrying the uncertainty tag never reaches the count. A line opening with
- * `<` is dropped the way `prose()` drops it, and so is a fenced block. A
+ * `<` is dropped the way `prose()` drops it, and so is a fenced block or an
+ * HTML comment spanning several lines, which `prose()` would read in part. A
  * `###` subsection counts toward the `##` section holding it, since the
  * standard fixes the sections and a subheading is no way past the cap.
  */
@@ -106,9 +107,19 @@ function readRules(lines: readonly string[]): number[] {
   const rules: number[] = []
   let isOpen = false
   let isFenced = false
+  let isCommented = false
 
   for (const line of lines) {
     const trimmed = line.trim()
+    if (isCommented) {
+      isCommented = !trimmed.includes('-->')
+      continue
+    }
+    if (trimmed.startsWith('<!--')) {
+      isCommented = !trimmed.includes('-->', 4)
+      isOpen = false
+      continue
+    }
     if (trimmed.startsWith('```')) {
       isFenced = !isFenced
       isOpen = false
