@@ -29,7 +29,7 @@ Accept work whose origin is the conversation itself only when the user says so e
 
 ### Stop a worker before it claims a label
 
-A session that asserted `canon:role-worker` this run, or whose name starts with `worker-`, stops here. It claims no label and writes no file. Report the row's title, its origin, and the surface it would take to the controlling session instead, since a task file with no row is a dropped task and placing the row is that session's call.
+A session that asserted `canon:role-worker` this run, or whose own name in `canon sessions list --self --json` starts with `worker-`, stops here. It claims no label and writes no file. Report the row's title, its origin, and the surface it would take to the controlling session instead, since a task file with no row is a dropped task and placing the row is that session's call.
 
 The guard sits ahead of Step 2 because `--claim` reserves a label on disk, so a stop after it leaves a reservation nothing uses. It names the worker role alone. A planner closing a groundwork track still writes its task file here and reaches Step 4's roster check as before.
 
