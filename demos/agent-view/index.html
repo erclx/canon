@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Agent view demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: #0b0f14;
+        color: #f4f6f8;
+        font-family: sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      .card {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+      .card-inner {
+        display: block;
+      }
+      .card h1 {
+        margin: 0;
+        font-size: 120px;
+        font-weight: 700;
+      }
+      .card p {
+        margin: 24px 0 0;
+        font-size: 44px;
+        color: #9aa7b5;
+      }
+      #take {
+        position: absolute;
+        top: 0;
+        left: 225px;
+        width: 1470px;
+        height: 1080px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="agent-view"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="10.8"
+    >
+      <section id="intro" class="card clip" data-start="0" data-duration="2">
+        <div id="intro-inner" class="card-inner">
+          <h1>canon</h1>
+          <p>Four sessions, four branches</p>
+        </div>
+      </section>
+
+      <video
+        id="take"
+        class="clip"
+        src="take/agent-view.mp4"
+        muted
+        playsinline
+        data-start="2"
+        data-duration="6.8"
+        data-track-index="0"
+      ></video>
+
+      <section id="outro" class="card clip" data-start="8.8" data-duration="2">
+        <div id="outro-inner" class="card-inner">
+          <h1>canon.erclx.dev</h1>
+        </div>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true })
+      tl.from(
+        '#intro-inner',
+        { y: 40, opacity: 0, duration: 0.6, ease: 'power3.out' },
+        0.1,
+      )
+      tl.to(
+        '#intro-inner',
+        { opacity: 0, duration: 0.3, ease: 'power1.in' },
+        1.7,
+      )
+      tl.from(
+        '#outro-inner',
+        { y: 24, opacity: 0, duration: 0.5, ease: 'power2.out' },
+        8.9,
+      )
+      window.__timelines['agent-view'] = tl
+    </script>
+  </body>
+</html>
