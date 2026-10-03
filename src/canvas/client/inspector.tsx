@@ -1,6 +1,9 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
+import { Field, ReadOnlyField } from '@/canvas/client/inspector/field'
+import { Section } from '@/canvas/client/inspector/section'
+import { displayValue, toCssValue } from '@/canvas/client/inspector/values'
 import {
   currentPage,
   editElement,
@@ -16,8 +19,7 @@ import {
   tokens,
   writeError,
 } from '@/canvas/client/state'
-
-const FIELDS = ['x', 'y', 'width', 'height'] as const
+import '@/canvas/client/inspector/fields.css'
 
 /** Elements the parser never gives content, so they hold no text to edit. */
 const VOID = new Set([
@@ -37,44 +39,43 @@ const VOID = new Set([
 ])
 
 interface StyleField {
+  /** The full word, which names the field. */
   readonly label: string
+  readonly glyph: string
   readonly property: string
-  readonly isColor?: boolean
+  readonly isWide?: boolean
+  readonly placeholder?: string
 }
 
 /**
- * The basic set, in the order the panel lists it. The writer refuses any
- * property outside it, so this list and the writer's have to agree.
+ * The basic set, grouped as the panel lists it. The writer refuses any
+ * property outside it, so these lists and the writer's have to agree.
  */
-const STYLE_FIELDS: readonly StyleField[] = [
-  { label: 'color', property: 'color', isColor: true },
-  { label: 'background', property: 'background-color', isColor: true },
-  { label: 'size', property: 'font-size' },
-  { label: 'weight', property: 'font-weight' },
-  { label: 'width', property: 'width' },
-  { label: 'height', property: 'height' },
-  { label: 'padding', property: 'padding' },
-  { label: 'gap', property: 'gap' },
-  { label: 'direction', property: 'flex-direction' },
+const SIZE_FIELDS: readonly StyleField[] = [
+  { label: 'width', glyph: 'W', property: 'width' },
+  { label: 'height', glyph: 'H', property: 'height' },
 ]
 
-interface Row {
-  readonly name: string
-  readonly value: string
-}
+const FLEX_FIELDS: readonly StyleField[] = [
+  { label: 'direction', glyph: 'Dir', property: 'flex-direction' },
+  { label: 'gap', glyph: 'Gap', property: 'gap', placeholder: '0' },
+  { label: 'padding', glyph: 'Pad', property: 'padding', isWide: true },
+]
 
-/** Where the element sits in its frame, which the panel shows and never edits. */
-function positionRows(element: Element): Row[] {
-  const rect = element.getBoundingClientRect()
-  const font = element.ownerDocument.defaultView
-    ?.getComputedStyle(element)
-    .getPropertyValue('font-family')
-  return [
-    { name: 'x', value: String(Math.round(rect.left)) },
-    { name: 'y', value: String(Math.round(rect.top)) },
-    ...(font ? [{ name: 'font', value: font }] : []),
-  ]
-}
+const TYPE_FIELDS: readonly StyleField[] = [
+  { label: 'size', glyph: 'Size', property: 'font-size' },
+  { label: 'weight', glyph: 'Wt', property: 'font-weight' },
+]
+
+const FILL_FIELDS: readonly StyleField[] = [
+  { label: 'color', glyph: 'Fg', property: 'color' },
+  {
+    label: 'background',
+    glyph: 'Bg',
+    property: 'background-color',
+    placeholder: 'None',
+  },
+]
 
 function inlineValue(element: Element, property: string): string {
   return 'style' in element
@@ -137,36 +138,11 @@ function elementName(element: Element): string {
   return [tag, ...element.classList].join('.')
 }
 
-interface FieldProps {
+interface TokenPickerProps {
   readonly label: string
   readonly initial: string
   readonly isBusy: boolean
   readonly onCommit: (value: string) => void
-}
-
-/**
- * Commits on change, which a text input fires on Enter or on leaving it, and
- * sends nothing when the value is what it started at. Escape puts it back.
- */
-function Field({ label, initial, isBusy, onCommit }: FieldProps): JSX.Element {
-  return (
-    <input
-      class="field"
-      type="text"
-      aria-label={label}
-      title={initial}
-      defaultValue={initial}
-      disabled={isBusy}
-      spellcheck={false}
-      onChange={(event) => {
-        const value = event.currentTarget.value.trim()
-        if (value !== initial.trim()) onCommit(value)
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') event.currentTarget.value = initial
-      }}
-    />
-  )
 }
 
 function TokenPicker({
@@ -174,7 +150,7 @@ function TokenPicker({
   initial,
   isBusy,
   onCommit,
-}: FieldProps): JSX.Element | null {
+}: TokenPickerProps): JSX.Element | null {
   const colors =
     tokens.value?.groups?.find((group) => group.kind === 'color')?.tokens ?? []
   if (colors.length === 0) return null
@@ -219,45 +195,54 @@ function ElementFields({
   const commit = (property: string) => (value: string) => {
     if (address) void editElement(frameRef, key, address, property, value)
   }
-  const isTextOnly = holdsTextAlone(node)
+  const rect = node.getBoundingClientRect()
+  const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
 
+  const styleField = (field: StyleField): JSX.Element => (
+    <Field
+      key={field.property}
+      label={field.label}
+      glyph={field.glyph}
+      initial={displayValue(field.property, currentValue(node, field.property))}
+      isBusy={isBusy}
+      isWide={field.isWide}
+      placeholder={field.placeholder}
+      onCommit={(typed) =>
+        commit(field.property)(toCssValue(field.property, typed))
+      }
+    />
+  )
+
   return (
-    <dl class="box styles">
-      {positionRows(node).map((row) => (
-        <div key={row.name} class="box-row">
-          <dt>{row.name}</dt>
-          <dd title={row.value}>{row.value}</dd>
-        </div>
-      ))}
-      <div class="box-row">
-        <dt>text</dt>
-        <dd title={excerpt(text)}>
-          {isTextOnly ? (
-            <Field
-              label="text"
-              initial={text}
-              isBusy={isBusy}
-              onCommit={commit('text')}
-            />
-          ) : (
-            excerpt(text)
-          )}
-        </dd>
-      </div>
-      {STYLE_FIELDS.map((field) => {
-        const initial = currentValue(node, field.property)
-        return (
-          <div key={field.property} class="box-row">
-            <dt>{field.label}</dt>
-            <dd class="field-cell">
-              <Field
-                label={field.label}
-                initial={initial}
-                isBusy={isBusy}
-                onCommit={commit(field.property)}
-              />
-              {field.isColor && isRawInline(node, field.property) ? (
+    <>
+      <Section title="Layout">
+        <ReadOnlyField
+          label="x"
+          glyph="X"
+          value={String(Math.round(rect.left))}
+        />
+        <ReadOnlyField
+          label="y"
+          glyph="Y"
+          value={String(Math.round(rect.top))}
+        />
+        {SIZE_FIELDS.map(styleField)}
+      </Section>
+      <Section title="Flex">{FLEX_FIELDS.map(styleField)}</Section>
+      <Section title="Typography">
+        {TYPE_FIELDS.map(styleField)}
+        {font ? (
+          <ReadOnlyField label="font" glyph="Font" value={font} isWide />
+        ) : null}
+      </Section>
+      <Section title="Fill">
+        {FILL_FIELDS.map((field) => {
+          const initial = currentValue(node, field.property)
+          return (
+            <div key={field.property} class="fill-row is-wide">
+              {styleField(field)}
+              {isRawInline(node, field.property) ? (
                 <span
                   class="raw"
                   title="Set as a raw value, so it will not follow the theme. Pick a token to fix it"
@@ -265,19 +250,33 @@ function ElementFields({
                   raw
                 </span>
               ) : null}
-              {field.isColor ? (
-                <TokenPicker
-                  label={field.label}
-                  initial={initial}
-                  isBusy={isBusy}
-                  onCommit={commit(field.property)}
-                />
-              ) : null}
-            </dd>
-          </div>
-        )
-      })}
-    </dl>
+              <TokenPicker
+                label={field.label}
+                initial={initial}
+                isBusy={isBusy}
+                onCommit={commit(field.property)}
+              />
+            </div>
+          )
+        })}
+      </Section>
+      <Section title="Text">
+        {holdsTextAlone(node) ? (
+          <Field
+            label="text"
+            glyph="T"
+            initial={text}
+            isBusy={isBusy}
+            isWide
+            onCommit={commit('text')}
+          />
+        ) : (
+          <p class="text-excerpt is-wide" title={excerpt(text)}>
+            {excerpt(text)}
+          </p>
+        )}
+      </Section>
+    </>
   )
 }
 
@@ -342,14 +341,20 @@ export function Inspector(): JSX.Element {
             <p class="detail" title={frame.name}>
               {frame.name}
             </p>
-            <dl class="box">
-              {FIELDS.map((field) => (
-                <div key={field} class="box-row">
-                  <dt>{field}</dt>
-                  <dd>{frame[field]}</dd>
-                </div>
-              ))}
-            </dl>
+            <div class="field-grid">
+              <ReadOnlyField label="x" glyph="X" value={String(frame.x)} />
+              <ReadOnlyField label="y" glyph="Y" value={String(frame.y)} />
+              <ReadOnlyField
+                label="width"
+                glyph="W"
+                value={String(frame.width)}
+              />
+              <ReadOnlyField
+                label="height"
+                glyph="H"
+                value={String(frame.height)}
+              />
+            </div>
           </>
         ) : (
           <p class="empty">Select a frame to see its box</p>
