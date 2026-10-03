@@ -71,6 +71,7 @@ const SLIDES: Record<string, string> = {
     <div class="mark"><svg width="96" height="96" viewBox="0 0 10 10" aria-label="Brand mark"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg></div>
     <div class="gradient">Gradient box</div>
     <p class="soft" style="position: absolute; left: 96px; top: 520px; margin: 0">Plain then <span style="filter: blur(1px)">softened</span></p>
+    <p class="under" style="position: absolute; left: 96px; top: 580px; margin: 0; text-decoration: underline">Under <strong>lined</strong></p>
   </body></html>`,
 }
 
@@ -183,6 +184,14 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
 
   it('should write a slide link', () => {
     expect(slideXml[1]).toContain('action="ppaction://hlinksldjump"')
+  })
+
+  it('should underline an inline run inside an underlined block', () => {
+    const run = /<a:r><a:rPr([^>]*)>(?:(?!<\/a:r>).)*<a:t>lined<\/a:t>/s.exec(
+      slideXml[1] ?? '',
+    )
+
+    expect(run?.[1]).toContain('u="sng"')
   })
 
   it('should write the card shadow as an outer shadow', () => {
