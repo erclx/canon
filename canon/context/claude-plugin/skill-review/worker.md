@@ -37,7 +37,7 @@ A cloud worker answering a review runs `review-address`, which calls `git-follow
 
 The writes moved with the reads on this leg, since a reply posted through `gh pr comment` and a body synced through `gh pr edit` fail there as surely as a read does. Step 6 keeps the `id` the issue-comments POST answers with, which is the number Step 7's edit takes, so no comment id is cut out of a URL. The fallback lookup for a CLI predating `canon pr head` encodes the branch into the pulls query and refuses on two open pull requests rather than taking the first, matching the verb's `ambiguous-pull`.
 
-`review-ui` and `git-split` moved their reads only. Their writes sit off this leg and stay for a later slice, and `src/claude/skills-rest.test.ts` holds the two tiers apart until then: any `gh pr` subcommand fails it in the two leg bodies, and only a read fails it in the other two.
+`review-ui` and `git-split` moved their reads only. Their writes sit off this leg and stay for a later slice, and `src/claude/skills-rest.test.ts` holds the two tiers apart until then: any `gh pr` subcommand fails it in the two leg bodies, and only a read fails it in the other two. The leg also reaches `git-pr/references/evidence.md`, since `git-followup` mints a preview through it, so that one file sits in the strict tier while the rest of `git-pr` does not.
 
 ## The worker's own half
 
