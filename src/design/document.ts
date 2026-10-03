@@ -88,6 +88,20 @@ function borderRows(tokens: readonly BorderToken[]): string[][] {
   })
 }
 
+/**
+ * The lead a reader meets before the first section. It points at the module
+ * and at the context entry, since the record carries values and one-line rules
+ * and every reason behind them lives in the entry.
+ */
+const LEAD = [
+  'Authoring guidance: `standards/design.md`. Rendered from `src/design/tokens.ts` by `canon design regen`, so edit the module and never this file.',
+  'Why each value was chosen lives in `canon/context/design/tokens.md`.',
+].join(' ')
+
+function bullets(rules: readonly string[]): string {
+  return rules.map((rule) => `- ${rule}`).join('\n')
+}
+
 function section(heading: string, ...blocks: string[]): string {
   return [`## ${heading}`, ...blocks.filter((block) => block !== '')].join(
     '\n\n',
@@ -98,21 +112,19 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
   const body = [
     '# Design',
     '',
-    'Authoring guidance: `standards/design.md`.',
-    '',
-    tokens.preamble,
+    LEAD,
     '',
     section('Personality', tokens.personality),
     '',
     section(
       'Color',
-      tokens.colorNote,
+      bullets(tokens.colorRules),
       formatTable(['Role', 'Intent', 'Value'], colorRows(tokens.color)),
     ),
     '',
     section(
       'Typography',
-      tokens.typographyNote,
+      bullets(tokens.typographyRules),
       formatTable(
         ['Role', 'Family', 'Weight', 'Size', 'Line height'],
         typeRows(tokens.typography),
@@ -121,24 +133,24 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
     '',
     section(
       'Spacing',
-      tokens.spacingNote,
+      bullets(tokens.spacingRules),
       formatTable(['Step', 'Multiplier', 'Value'], spaceRows(tokens.spacing)),
     ),
     '',
     section(
       'Borders',
-      tokens.bordersNote,
+      bullets(tokens.bordersRules),
       formatTable(
         ['Role', 'Radius', 'Width', 'When used'],
         borderRows(tokens.borders),
       ),
     ),
     '',
-    section('Layout', tokens.layout),
+    section('Layout', bullets(tokens.layout)),
     '',
-    section('Motion', tokens.motion),
+    section('Motion', bullets(tokens.motion)),
     '',
-    section('Iconography', tokens.iconography),
+    section('Iconography', bullets(tokens.iconography)),
   ]
 
   return `${body.join('\n')}\n`

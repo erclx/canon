@@ -14,7 +14,7 @@ The tier framework sits alongside [Claude Design](../../wiki/claude/design.md), 
 
 ## Tier 0: prose only
 
-The default. `canon/DESIGN.md` holds visual intent as prose plus token tables for color, typography, spacing, borders, motion, and iconography. `.claude/WIREFRAMES.md` holds each surface's regions and states.
+The default. `canon/DESIGN.md` holds visual intent as token tables for color, typography, spacing, and borders, with one Personality paragraph and at most three one-line rules a section, motion and iconography included. `.claude/WIREFRAMES.md` holds each surface's regions and states.
 
 Claude Code reads both and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
 

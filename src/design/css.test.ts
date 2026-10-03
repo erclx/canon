@@ -13,19 +13,18 @@ import { TOKENS } from '@/design/tokens'
 
 const minimal = (overrides: Partial<DesignTokens> = {}): DesignTokens => ({
   personality: '',
-  preamble: '',
   color: [],
-  colorNote: '',
+  colorRules: [],
   typeScale: [],
   typography: [],
-  typographyNote: '',
+  typographyRules: [],
   spacing: [],
-  spacingNote: '',
+  spacingRules: [],
   borders: [],
-  bordersNote: '',
-  layout: '',
-  motion: '',
-  iconography: '',
+  bordersRules: [],
+  layout: [],
+  motion: [],
+  iconography: [],
   ...overrides,
 })
 
@@ -804,11 +803,12 @@ describe('capture widths', () => {
 
   it('names the declared widths and the range check in the layout record', () => {
     const widths = readCaptureWidths()
-    const named = [...TOKENS.layout.matchAll(/\b(\d{3,4})\b/g)]
+    const layout = TOKENS.layout.join('\n')
+    const named = [...layout.matchAll(/\b(\d{3,4})\b/g)]
       .map((match) => Number(match[1]))
       .filter((width) => widths.includes(width))
 
     expect([...new Set(named)]).toEqual(widths)
-    expect(TOKENS.layout).toContain('a range none of them reaches')
+    expect(layout).toContain('opens a range one of these widths reaches')
   })
 })

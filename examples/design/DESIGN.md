@@ -2,13 +2,13 @@
 
 ## Personality
 
-Tidewell is a tide-table app for people who walk a shoreline and need one number fast: when the water turns. The voice is calm and plain, and the interface reads like a printed chart, with pale sand grounds, deep sea ink for text and one teal accent for the current tide. Nothing flashes. A rising or falling tide is shown by position and a label, never by a loud color.
-
-The warning and error roles stay distinct from the accent in hue, so a storm surge alert never reads as an ordinary tide marker. The brand wordmark is not set yet, so the page carries no mark and the tagged cells below are proposals for the first build to confirm.
+Tidewell is a tide-table app for people on a shoreline who need one number fast: when the water turns. It reads like a printed chart, calm and plain, with pale sand grounds, deep sea ink, and one teal accent for the current tide. Nothing flashes.
 
 ## Color
 
-Every text role is drawn on `background` and on `surface`.
+- Every text role is drawn on `background` and on `surface`.
+- `warning` and `error` stay apart from the accent in hue, so a surge alert never reads as a tide marker.
+- A rising or falling tide shows by position and a label, never by color.
 
 | Role           | Intent                                         | Value            |
 | -------------- | ---------------------------------------------- | ---------------- |
@@ -26,7 +26,9 @@ Every text role is drawn on `background` and on `surface`.
 
 ## Typography
 
-Two families carry the page. A humanist sans sets every role but `tide`, and a tabular monospace sets `tide` so heights align in a column. The render declares no face, so each Family cell names a stack a target replaces with its own faces.
+- A humanist sans sets every role but `tide`.
+- `tide` takes a tabular monospace so heights align in a column.
+- The render declares no face, so a target replaces each Family stack with its own.
 
 | Role    | Family                                 | Weight       | Size      | Line height  |
 | ------- | -------------------------------------- | ------------ | --------- | ------------ |
@@ -38,7 +40,7 @@ Two families carry the page. A humanist sans sets every role but `tide`, and a t
 
 ## Spacing
 
-Six steps run from a quarter rem to four. The first four double, and the last two add one rem each.
+- Six steps. The first four double, and the last two add one rem each.
 
 | Step | Multiplier | Value         |
 | ---- | ---------- | ------------- |
@@ -51,7 +53,7 @@ Six steps run from a quarter rem to four. The first four double, and the last tw
 
 ## Borders
 
-Every border is one pixel solid at the `border` role.
+- Every border is one pixel solid at the `border` role.
 
 | Role  | Radius         | Width         | When used                      |
 | ----- | -------------- | ------------- | ------------------------------ |
@@ -62,12 +64,16 @@ Every border is one pixel solid at the `border` role.
 
 ## Layout
 
-The page is one column up to 40rem, then two columns, a day list beside the chart. The chart never drops below 20rem wide, so the 320 pixel reflow floor scrolls the day list rather than the chart.
+- One column up to 40rem, then two: a day list beside the chart.
+- The chart never drops below 20rem wide.
+- At the 320 pixel reflow floor the day list scrolls, never the chart.
 
 ## Motion
 
-Motion is not used. The tide marker jumps to a new position on a data refresh, with no transition.
+- None. The tide marker jumps to its new position on a data refresh.
 
 ## Iconography
 
-Icons are outlined at a 1.5 pixel stroke and drawn from Lucide. Custom icons are not allowed, so a station or an advisory takes the nearest library glyph.
+- Lucide, outlined at a 1.5 pixel stroke.
+- No custom icons. A station or an advisory takes the nearest library glyph.
+- No brand mark yet, so the page carries none.

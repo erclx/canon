@@ -200,6 +200,22 @@ describe('renderDesignDoc', () => {
     expect(html).toContain('The other 2 carry <code>? verify</code>')
   })
 
+  it('should draw a section of bullets as a list', () => {
+    const { html } = render(
+      doc(['## Iconography', '', '- No library.', '- No custom icons.']),
+    )
+
+    expect(html).toContain(
+      '<h2>Iconography</h2>\n<ul><li>No library.</li><li>No custom icons.</li></ul>',
+    )
+  })
+
+  it('should draw a section of prose as a paragraph', () => {
+    const { html } = render(doc(['## Motion', '', 'Motion is not used.']))
+
+    expect(html).toContain('<h2>Motion</h2>\n<p>Motion is not used.</p>')
+  })
+
   it('should add nothing to a record where no cell carries a tag', () => {
     const { css, html } = render(
       doc([

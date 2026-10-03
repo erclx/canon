@@ -10,6 +10,7 @@ import {
   auditSet,
   captureStamps,
   clientCommandCitations,
+  designProse,
   documentCeiling,
   folderEchoedNames,
   markdownBans,
@@ -234,7 +235,9 @@ export const STAGES: readonly Stage[] = [
     // from `src/design/tokens.ts`, the base stylesheet from
     // `src/design/neutral.ts`, and none is edited by hand. Four artifacts
     // from two token sources is the cost of the token move, and a render step that has to run is only safe while something fails
-    // when it did not, which is this.
+    // when it did not, which is this. The record and the worked example are
+    // then counted against the prose budget, which the drift asserts cannot
+    // see since a regenerated paragraph agrees with its source.
     id: 'design',
     label: 'Design',
     checks: [
@@ -277,6 +280,7 @@ export const STAGES: readonly Stage[] = [
         failure:
           'The tab icon drifted from the token source. Run bun run check and commit web/public/favicon.svg.',
       },
+      { kind: 'measure', measure: designProse },
     ],
     success: 'Design source clean',
   },

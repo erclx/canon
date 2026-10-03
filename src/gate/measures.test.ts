@@ -14,6 +14,7 @@ import {
   auditsBaselineRel,
   captureStamps,
   clientCommandCitations,
+  designProse,
   documentCeiling,
   folderEchoedNames,
   isFolderEchoedName,
@@ -1085,6 +1086,79 @@ describe('canonicalRecords', () => {
     const report = await canonicalRecords(context())
 
     expect(report.failure).toBeUndefined()
+  })
+})
+
+describe('designProse', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('designProse reads the record and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const write = (rel: string, source: string): void => {
+    mkdirSync(join(root, rel, '..'), { recursive: true })
+    writeFileSync(join(root, rel), source)
+  }
+
+  const WITHIN = '# Design\n\n## Personality\n\nCalm and plain.\n'
+  const OVER = '# Design\n\n## Motion\n\n- a\n- b\n- c\n- d\n'
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-design-prose-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a record within the budget', async () => {
+    write('canon/DESIGN.md', WITHIN)
+
+    const report = await designProse(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('fails a record over the budget and names it', async () => {
+    write('canon/DESIGN.md', OVER)
+
+    const report = await designProse(context())
+
+    expect(report.failure).toContain(
+      'Motion holds 4 rules against a cap of 3 in canon/DESIGN.md',
+    )
+  })
+
+  it('passes a tree holding no design record', async () => {
+    const report = await designProse(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('reads the worked example when present', async () => {
+    write('canon/DESIGN.md', WITHIN)
+    write('examples/design/DESIGN.md', OVER)
+
+    const report = await designProse(context())
+
+    expect(report.failure).toContain('in examples/design/DESIGN.md')
+  })
+
+  it('reports unmeasured on a record it cannot read', async () => {
+    mkdirSync(join(root, 'canon', 'DESIGN.md'), { recursive: true })
+
+    const report = await designProse(context())
+
+    expect(report.unmeasured).toContain('canon/DESIGN.md')
   })
 })
 

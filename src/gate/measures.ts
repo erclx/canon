@@ -22,6 +22,8 @@ import {
   PRACTICE_SKILLS,
   SHIPPED_CORPUS,
 } from '@/claude/skills-audit'
+import { measureDesignProse } from '@/design/budget'
+import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git-files'
 import { ceilingFindings } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
@@ -322,6 +324,53 @@ export const canonicalRecords: Measure = async (ctx) => {
   }
 
   if (failures.length > 0) return { emissions: [], failure: failures.join(' ') }
+  return { emissions }
+}
+
+/**
+ * The design records this repository holds, each read against the prose
+ * budget in `@/design/budget`. The worked example is read beside the record,
+ * since it is the one a target copies its shape from.
+ */
+const DESIGN_RECORDS = [
+  DESIGN_DOCUMENT,
+  join('examples', 'design', 'DESIGN.md'),
+] as const
+
+export const designProse: Measure = async (ctx) => {
+  const failures: string[] = []
+  const emissions: Emission[] = []
+
+  for (const rel of DESIGN_RECORDS) {
+    const path = join(ctx.root, rel)
+    if (!existsSync(path)) continue
+    let source: string
+    try {
+      source = readFileSync(path, 'utf8')
+    } catch {
+      return {
+        emissions: [],
+        unmeasured: `${rel} could not be read, so its prose was not counted.`,
+      }
+    }
+    const findings = measureDesignProse(source)
+    if (findings.length > 0) {
+      failures.push(
+        `${findings.map((finding) => `${finding} in ${rel}`).join('. ')}.`,
+      )
+    } else {
+      emissions.push(info(`${rel} within the prose budget`))
+    }
+  }
+
+  if (failures.length > 0) {
+    return {
+      emissions: [],
+      failure: `${failures.join(' ')} Cut to the budget in standards/design.md, moving the why to the context entry.`,
+    }
+  }
+  if (emissions.length === 0)
+    emissions.push(info('No design record to measure'))
   return { emissions }
 }
 

@@ -11,7 +11,7 @@ description: The canon design render preview, how the parser carries the verify 
 
 The output sits under `.canon/tmp/render/`, gitignored scratch the command regenerates and `canon records push` never carries. Do not stage the preview.
 
-`examples/design/DESIGN.md` is the committed authored record for an invented project, with its capture under `examples/design/evidence/`. Rebuild the capture by rendering it with `-s examples/design/DESIGN.md -o .canon/tmp/render/design-example` and running `canon capture` on the `index.html` there, as `examples/index.md` states. No gate reads it.
+`examples/design/DESIGN.md` is the committed authored record for an invented project, with its capture under `examples/design/evidence/`. Rebuild the capture by rendering it with `-s examples/design/DESIGN.md -o .canon/tmp/render/design-example` and running `canon capture` on the `index.html` there, as `examples/index.md` states. The `design` gate stage reads it against the prose budget, and nothing regenerates the capture.
 
 ## Decisions
 
@@ -31,6 +31,7 @@ A record with no tagged cell gets neither the count nor the marker style, so not
 
 ## Gotchas
 
+- Motion and Iconography draw as a list when every line of the section is a bullet, and as one paragraph otherwise. Personality always draws as a paragraph, and a rule under a token table never reaches the preview, since `prose()` reads only those three sections.
 - The preview declares no face by default. It emits a system stack and no `@font-face`, so a typography cell naming a face nothing defines falls through to whatever the machine resolves. `--embed-fonts` declares each vendored face a `Family` cell names, with `font-display: block` and a data URI, and sets the body in the `body` role's stack. The landing page opts in through `scripts/core/regen-web-previews.ts`, and a target's render stays byte-identical, since the faces add about 126 KB to `design.css`.
 - A code-span cell still emits its backticks. `` `#E4DCD0` `` reaches `design.css` and the `style` attribute intact, so that swatch paints nothing whether or not it carries a tag. Write a token cell as a bare value, which is what the seed shows.
 - Two terminal color rows emit a token no consumer resolves. `--color-warning: ANSI 33` is not a color, so its `style` attribute is dropped and those swatches paint nothing. Recording the ANSI code is still right for those two, since no rendered surface implements an equivalent, and the gap is that the render has no answer for a non-hex token.
