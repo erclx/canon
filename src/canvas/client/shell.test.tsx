@@ -5,7 +5,15 @@ import { join } from 'node:path'
 import { Window } from 'happy-dom'
 import { render } from 'preact'
 import { act } from 'preact/test-utils'
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import { documentElements } from '@/canvas/address'
 import { App } from '@/canvas/client/app'
 import { isRawValue } from '@/canvas/client/inspector'
@@ -438,6 +446,138 @@ describe('selection', () => {
     act(() => applyRecord(record([page('drafts', [frame('hero')])])))
 
     expect(figureFor('hero').dataset.selected).toBeUndefined()
+  })
+})
+
+describe('editing badge', () => {
+  function marked(
+    frames: Frame[],
+    editing: PagesRecord['editing'],
+  ): PagesRecord {
+    return { ...record([page('drafts', frames)]), editing }
+  }
+
+  /** A mark expiring `ttlMs` from now, which a negative value puts past. */
+  function mark(frameName: string, by: string, ttlMs = 60_000) {
+    return {
+      page: 'drafts',
+      frame: frameName,
+      by,
+      until: new Date(Date.now() + ttlMs).toISOString(),
+    }
+  }
+
+  /* Only the expiry cases fake the clock, since a timer drops the mark. */
+  function fakeClock(): void {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+  }
+
+  function badgeText(name: string): string {
+    return figureFor(name).querySelector('.frame-editing')?.textContent ?? ''
+  }
+
+  function renderMarked(body: PagesRecord): void {
+    act(() => {
+      applyRecord(body)
+      render(<App />, mount)
+    })
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should name the session editing on the marked frame alone', () => {
+    renderMarked(
+      marked([frame('hero'), frame('phone')], [mark('hero', 'worker-a')]),
+    )
+
+    expect(badgeText('hero')).toBe('worker-a editing')
+    expect(figureFor('hero').dataset.editing).toBe('true')
+    expect(badgeText('phone')).toBe('')
+    expect(figureFor('phone').dataset.editing).toBeUndefined()
+  })
+
+  it('should name each session on the frame it marked', () => {
+    renderMarked(
+      marked(
+        [frame('hero'), frame('phone')],
+        [mark('hero', 'worker-a'), mark('phone', 'worker-b')],
+      ),
+    )
+
+    expect(badgeText('hero')).toBe('worker-a editing')
+    expect(badgeText('phone')).toBe('worker-b editing')
+  })
+
+  it('should announce the mark from a live region', () => {
+    renderMarked(marked([frame('hero')], [mark('hero', 'worker-a')]))
+
+    const badge = figureFor('hero').querySelector('.frame-editing')
+    expect(badge?.getAttribute('aria-live')).toBe('polite')
+  })
+
+  it('should clear the badge when a reread carries no mark', async () => {
+    const frames = [frame('hero')]
+    renderMarked(marked(frames, [mark('hero', 'worker-a')]))
+
+    await act(async () => {
+      await applyChange(
+        { page: 'drafts', file: 'layout.json' },
+        fetchReturning(marked(frames, [])),
+      )
+    })
+
+    expect(badgeText('hero')).toBe('')
+    expect(figureFor('hero').dataset.editing).toBeUndefined()
+  })
+
+  it('should clear the badge at its expiry with no reread', () => {
+    fakeClock()
+    renderMarked(marked([frame('hero')], [mark('hero', 'worker-a', 30_000)]))
+
+    act(() => {
+      vi.advanceTimersByTime(30_000)
+    })
+
+    expect(badgeText('hero')).toBe('')
+  })
+
+  it('should keep a later mark when an earlier one expires', () => {
+    fakeClock()
+    renderMarked(
+      marked(
+        [frame('hero'), frame('phone')],
+        [mark('hero', 'worker-a', 30_000), mark('phone', 'worker-b', 90_000)],
+      ),
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(30_000)
+    })
+
+    expect(badgeText('hero')).toBe('')
+    expect(badgeText('phone')).toBe('worker-b editing')
+  })
+
+  it('should draw no badge for a mark already past its expiry', () => {
+    renderMarked(marked([frame('hero')], [mark('hero', 'worker-a', -1_000)]))
+
+    expect(badgeText('hero')).toBe('')
+  })
+
+  it('should keep the selection when the mark on a selected frame clears', () => {
+    fakeClock()
+    renderMarked({
+      ...marked([frame('hero')], [mark('hero', 'worker-a', 30_000)]),
+      selection: { page: 'drafts', frame: 'hero' },
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(30_000)
+    })
+
+    expect(figureFor('hero').dataset.selected).toBe('true')
   })
 })
 
