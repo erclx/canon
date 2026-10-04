@@ -30,7 +30,6 @@ function initRepo(path: string): void {
   git(path, 'init', '-q', '-b', 'main')
   git(path, 'config', 'user.name', 'test')
   git(path, 'config', 'user.email', 'test@example.com')
-  git(path, 'config', 'commit.gpgsign', 'false')
 }
 
 function commitAll(path: string, message: string): void {
