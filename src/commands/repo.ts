@@ -17,7 +17,7 @@ import {
   logStep,
   logWarn,
   outro,
-} from '@/ui'
+} from '@/cli/ui'
 
 const GH_TIMEOUT_MS = 30_000
 

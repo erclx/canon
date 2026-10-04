@@ -22,7 +22,7 @@ import {
   palette,
   pipeOutput,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 
 const PROTECTED_BRANCHES: readonly string[] = ['main', 'master']
 

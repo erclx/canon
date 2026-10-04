@@ -68,7 +68,7 @@ describe('isToolkitOwned', () => {
   })
 
   it('should disown a path outside every authoring root', () => {
-    expect(isToolkitOwned('src/ui.ts', new Set())).toBe(false)
+    expect(isToolkitOwned('src/cli/ui.ts', new Set())).toBe(false)
   })
 
   it('should disown a context entry when the roots exclude it', () => {

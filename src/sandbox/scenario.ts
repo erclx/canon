@@ -11,7 +11,7 @@ import {
 } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, relative } from 'node:path'
-import { logError, logInfo, logStep, logWarn, palette, select } from '@/ui'
+import { logError, logInfo, logStep, logWarn, palette, select } from '@/cli/ui'
 
 /**
  * The TypeScript form of a sandbox scenario: `sandbox/<category>/<command>.ts`,

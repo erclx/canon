@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { renderHelp } from '@/help'
+import { renderHelp } from '@/cli/help'
 
 const FRAME_GLYPHS = /[┌├│└]/
 

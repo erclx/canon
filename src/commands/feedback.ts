@@ -12,7 +12,7 @@ import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { creationRel } from '@/roots/record'
 import { createGithubIssue } from '@/feedback/github'
 import { issueFailureMessage } from '@/feedback/github-format'
-import { frameError, frameSuccess, logWarn, palette } from '@/ui'
+import { frameError, frameSuccess, logWarn, palette } from '@/cli/ui'
 
 function readStdin(): Promise<string> {
   return new Promise((resolveStream, rejectStream) => {

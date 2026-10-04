@@ -29,7 +29,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 
 const EXIT_REFUSED = 1
 const EXIT_GATE = 2

@@ -22,7 +22,7 @@ import {
   palette,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 import { repairBareFlag } from '@/worktrees/bare-flag'
 
 interface RunCommandOptions {

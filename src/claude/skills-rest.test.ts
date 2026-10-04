@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-/** The repository root, resolved the way `src/ui.test.ts` resolves it. */
+/** The repository root, resolved the way `src/cli/ui.test.ts` resolves it. */
 const ROOT = join(import.meta.dirname, '..', '..')
 
 /**

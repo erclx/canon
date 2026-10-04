@@ -2,7 +2,7 @@ import { basename } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import type { SyncDomain } from '@/sync/target'
-import { pipeOutput } from '@/ui'
+import { pipeOutput } from '@/cli/ui'
 
 const FILE_LIST_MAX = 3
 

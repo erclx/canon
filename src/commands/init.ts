@@ -1,12 +1,20 @@
 import type { Command } from 'commander'
-import { cliPath, cliRun } from '@/cli-run'
+import { cliPath, cliRun } from '@/cli/run'
 import { PROJECT_ROOT } from '@/roots/project'
 import { applyInitOptions, flagsProvided } from '@/init/flags'
 import { type InitFlags, parseSkip, planInit } from '@/init/plan'
 import { runDomains } from '@/init/run'
 import { buildSteps } from '@/init/steps'
 import { resolveTarget } from '@/targets/validate'
-import { intro, logInfo, logStep, logWarn, outro, palette, select } from '@/ui'
+import {
+  intro,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  palette,
+  select,
+} from '@/cli/ui'
 
 interface InitOptions {
   /** Always present: the option falls back to `DEFAULT_STACK`. */

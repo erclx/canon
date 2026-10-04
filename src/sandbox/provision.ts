@@ -30,7 +30,7 @@ import {
   outro,
   palette,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 
 /**
  * Provisions one scenario into the sandbox tree, and resets or cleans that tree.

@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { execa, type Options } from 'execa'
 import { isStackExcluded, loadManifest } from '@/tooling/manifest'
-import { intro, logError, logInfo, logStep, logWarn, outro } from '@/ui'
+import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
 const SCREENSHOT_TIMEOUT_MS = 60_000
 const TAIL_LINES = 20

@@ -11,7 +11,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 
 ## Layout
 
-- `src/` owns the entry point (`cli.ts`), the exec helper that spawns bash (`exec.ts`), the shared terminal UI matching `lib/ui.sh` style (`ui.ts`), and the cross-domain file helpers
+- `src/` root holds the entry point (`cli.ts`) alone, since `bin`, scripts, workflows, and hooks name it. `src/cli/` holds the terminal and process layer: `ui.ts` matching `lib/ui.sh`, `help.ts`, `run.ts`, and the bash helper `exec.ts`
 - `src/roots/` groups the four resolvers answering where something lives, `PROJECT_ROOT` among them
 - `src/commands/` owns one file per `canon` subcommand, each one not yet migrated a thin pass-through to a `manage-*.sh` script
 - `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/features/slides.md`, and `canon/context/features/transcripts.md`
@@ -54,8 +54,8 @@ The CLI does not run under Node at all. `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` s
 ### Wiring and output
 
 - Exit and stream discipline moved to `internal/rules/core/095-cli-output.md`, which globs `src/**/*.ts` so it loads on an edit here rather than waiting to be looked up. It holds the `process.exitCode` requirement and the stderr-in-every-mode rule.
-- Color goes through `palette(stream)` in `src/ui.ts`, which reads `NO_COLOR` and the stream's `isTTY` at write time and hands back a blank set when either says no. Ask about the stream being written to rather than about the process, since `showHelp` in `src/cli.ts` frames on stdout while every other writer frames on stderr, and `process.stdin.isTTY` is a third question about prompting.
-- No file outside `src/ui.ts` defines an escape constant. `src/ui.test.ts` walks the tree and fails the build on one, because sixteen files each spelling their own grey is what made color impossible to turn off in the first place.
+- Color goes through `palette(stream)` in `src/cli/ui.ts`, which reads `NO_COLOR` and the stream's `isTTY` at write time and hands back a blank set when either says no. Ask about the stream being written to rather than about the process, since `showHelp` in `src/cli.ts` frames on stdout while every other writer frames on stderr, and `process.stdin.isTTY` is a third question about prompting.
+- No file outside `src/cli/ui.ts` defines an escape constant. `src/cli/ui.test.ts` walks the tree and fails the build on one, because sixteen files each spelling their own grey is what made color impossible to turn off in the first place.
 - Exit-code coverage spawns the CLI from `src/commands/exit-code.test.ts`, because an action imported in process would set the code on the test runner. The two `feedback.ts` branches gated on `isToolkitSource` need a copy of `src/` under a temp root, since `PROJECT_ROOT` resolves from the CLI's own location rather than from the working directory.
 - A linked worktree carries an empty `node_modules` and resolves packages from an ancestor, so a fixture symlinking `node_modules` walks up for the populated one rather than naming the repository root.
 - `Bun.resolveSync` and `createRequire(...).resolve` fall back to Bun's global install cache when no ancestor of the starting directory holds a `node_modules`, so a presence check reads a pass there. The bundler takes no such fallback, so a check predicting what the bundler finds starts from a directory under a `node_modules`, which the CLI's own package root always is. `missingClientDeps` in `src/commands/canvas.ts` resolves from `PROJECT_ROOT` for that reason, and its test seeds an empty `node_modules`.
@@ -84,7 +84,7 @@ The CLI does not run under Node at all. `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` s
 
 ### A catalog command reads the installation, not the branch
 
-Every `canon` command taking `PROJECT_ROOT` reads the installation the CLI was linked from rather than `pwd`, because `src/exec.ts` sets it to `resolve(import.meta.dir, '..')`. A catalog run inside a linked worktree therefore reports that installation's tree rather than the branch's: during a requirement-coverage batch `canon claude skills list --json` reported 30 skills lacking a file while the branch already held 16. A registry-installed binary is staler again, answering 56 skills with published descriptions while the checkout held 59, dropping the three most recently merged. Verify a branch's own tree by walking the filesystem, and treat any task or plan whose test strategy names a catalog command as untestable from a worktree.
+Every `canon` command taking `PROJECT_ROOT` reads the installation the CLI was linked from rather than `pwd`, because `src/cli/exec.ts` sets it to `resolve(import.meta.dir, '..')`. A catalog run inside a linked worktree therefore reports that installation's tree rather than the branch's: during a requirement-coverage batch `canon claude skills list --json` reported 30 skills lacking a file while the branch already held 16. A registry-installed binary is staler again, answering 56 skills with published descriptions while the checkout held 59, dropping the three most recently merged. Verify a branch's own tree by walking the filesystem, and treat any task or plan whose test strategy names a catalog command as untestable from a worktree.
 
 ### The checkout-mismatch warning sits at the chokepoints
 

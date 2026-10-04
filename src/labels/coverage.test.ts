@@ -24,7 +24,7 @@ describe('resolveCoverage', () => {
     const coverage = resolveCoverage(fixtureMap(), [
       'docs/index.md',
       'src/cli.ts',
-      'src/ui.ts',
+      'src/cli/ui.ts',
     ])
 
     expect(coverage.labels).toEqual(['cli', 'docs'])

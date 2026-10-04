@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 type Registration = { register?: (program: Command) => void }
 
-const COMMANDS_DIR = join(import.meta.dirname, 'commands')
+const COMMANDS_DIR = join(import.meta.dirname, '../commands')
 
 const MODULES: Registration[] = await Promise.all(
   [...new Bun.Glob('*.ts').scanSync(COMMANDS_DIR)]
@@ -62,7 +62,7 @@ const ANSI = /\u001b\[[0-9;]*m/g
 
 function readListing(): string[] {
   const { stdout } = Bun.spawnSync(
-    ['bun', join(import.meta.dirname, 'cli.ts'), '--help'],
+    ['bun', join(import.meta.dirname, '../cli.ts'), '--help'],
     { env: { ...process.env, NO_COLOR: '1' } },
   )
   const lines = stdout.toString().replace(ANSI, '').split('\n')

@@ -46,7 +46,7 @@ import {
 } from '@/migrate/scratch-evidence'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { readStamp, stampedHashes } from '@/sync/stamp'
-import { logError, logInfo, logStep, logWarn, plural } from '@/ui'
+import { logError, logInfo, logStep, logWarn, plural } from '@/cli/ui'
 
 interface SweepOptions {
   readonly json?: boolean

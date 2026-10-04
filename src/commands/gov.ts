@@ -65,7 +65,7 @@ import {
   outro,
   palette,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 
 /**
  * Where the rules payload lands, resolved per target rather than once at import.

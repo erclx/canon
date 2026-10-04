@@ -45,7 +45,7 @@ import {
   logWarn,
   outro,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 const BANNER = 'canon canvas'

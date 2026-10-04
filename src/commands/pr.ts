@@ -87,7 +87,7 @@ import {
   selectBranchPull,
 } from '@/pr/rest'
 import { resolveReviewScope } from '@/pr/review-scope'
-import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 const GH_TIMEOUT_MS = 30_000
 

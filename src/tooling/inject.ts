@@ -27,7 +27,7 @@ import {
   SUBFOLDER_SPELL_CONFIG,
   subfolderSpellConfig,
 } from '@/tooling/subfolder'
-import { logAdd, logRemove, logStep, logWarn } from '@/ui'
+import { logAdd, logRemove, logStep, logWarn } from '@/cli/ui'
 
 export async function injectConfigs(
   chain: readonly Manifest[],

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
-import { cliPath, cliRun } from '@/cli-run'
+import { cliPath, cliRun } from '@/cli/run'
 import { PROJECT_ROOT } from '@/roots/project'
 import {
   buildCheckReport,
@@ -30,7 +30,7 @@ import {
   logWarn,
   outro,
   palette,
-} from '@/ui'
+} from '@/cli/ui'
 import { describeSkew } from '@/version/skew'
 
 const SYNC_ARGS: Record<SyncDomain, readonly string[]> = {

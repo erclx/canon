@@ -40,7 +40,7 @@ import {
   outro,
   palette,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 
 const SANDBOX_DIR = join(PROJECT_ROOT, 'sandbox')
 

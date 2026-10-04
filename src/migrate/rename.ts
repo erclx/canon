@@ -211,7 +211,7 @@ export const AITK_RULES: RenameRules = defineRenameRules({
     'src/sync/stamp.test.ts',
     'src/targets/registry.test.ts',
     'src/targets/sweep.test.ts',
-    'src/ui.test.ts',
+    'src/cli/ui.test.ts',
   ],
   articleFixups: [{ pattern: AITK_ARTICLE, replacement: '$1$2$3' }],
 })

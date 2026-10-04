@@ -37,7 +37,7 @@ import {
   logStep,
   logWarn,
   outro,
-} from '@/ui'
+} from '@/cli/ui'
 
 /**
  * The flags and budget every run takes, each overridable through its

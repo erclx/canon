@@ -11,9 +11,9 @@ import {
   outro,
   palette,
   supportsColor,
-} from '@/ui'
+} from '@/cli/ui'
 
-const ROOT = join(import.meta.dirname, '..')
+const ROOT = join(import.meta.dirname, '../..')
 
 /** Any SGR sequence. The cursor and key sequences end in a letter instead. */
 const SGR = /\x1b\[[\d;]*m/
@@ -256,7 +256,7 @@ describe('the source tree', () => {
     const offenders = readdirSync(join(ROOT, 'src'), { recursive: true })
       .map(String)
       .filter((rel) => rel.endsWith('.ts'))
-      .filter((rel) => rel !== 'ui.ts' && rel !== 'ui.test.ts')
+      .filter((rel) => rel !== 'cli/ui.ts' && rel !== 'cli/ui.test.ts')
       .filter((rel) =>
         SGR_LITERAL.test(readFileSync(join(ROOT, 'src', rel), 'utf8')),
       )

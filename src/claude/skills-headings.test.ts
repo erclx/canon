@@ -6,7 +6,7 @@ import {
   headingCitationsIn,
 } from '@/claude/skills-headings'
 
-/** The repository root, resolved the way `src/ui.test.ts` resolves it. */
+/** The repository root, resolved the way `src/cli/ui.test.ts` resolves it. */
 const ROOT = join(import.meta.dirname, '..', '..')
 
 /** The tree that installs into a target, which is the whole corpus at risk. */

@@ -11,7 +11,7 @@ import {
   outro,
   palette,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 import {
   applyWikiInit,
   isWikiTarget,

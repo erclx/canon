@@ -27,7 +27,7 @@ Plugin skills that shell out to the CLI follow a consistent pattern: read the to
 
 ### The non-interactive variable answers a prompt rather than refusing it
 
-`CANON_NON_INTERACTIVE=1` skips a prompt by resolving it, not by declining to proceed. `select` in `src/ui.ts` returns the first option under that variable, so a verb whose argument a prompt would have asked for takes whatever sorts first in its catalog. A body that both mandates the variable and calls such a verb bare therefore runs against a value nothing about the target produced, and it reports the difference as a finding.
+`CANON_NON_INTERACTIVE=1` skips a prompt by resolving it, not by declining to proceed. `select` in `src/cli/ui.ts` returns the first option under that variable, so a verb whose argument a prompt would have asked for takes whatever sorts first in its catalog. A body that both mandates the variable and calls such a verb bare therefore runs against a value nothing about the target produced, and it reports the difference as a finding.
 
 `canon tooling sync --check` with no stack is the worked case. The stack catalog sorts `astro` first, so a target reached that way compares against `astro` and the tooling section reports drift that is an artifact of the comparison. `target-check` takes the stack from the drift report's own `tooling.chain` instead, which the same step already reads, and refuses the domain when that field names none.
 

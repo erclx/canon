@@ -55,7 +55,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 import { currentWorktreeRoot, mainWorktreeRoot } from '@/git/worktree'
 
 /** Returned when a record carries a finding, which is the gating result. */

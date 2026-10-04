@@ -6,7 +6,15 @@ import type { DriverRefusal } from '@/driver/drive'
 import { describeViewport } from '@/driver/probes/viewport'
 import { PROBE_NAMES, readDriverPlan } from '@/driver/steps'
 import type { PlanRefusal } from '@/driver/steps'
-import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
 
 /**
  * Holds wiring only. Every browser reference sits behind `loadDriver`, because
