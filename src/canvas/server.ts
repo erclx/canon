@@ -34,6 +34,7 @@ import {
   tokenGroups,
 } from '@/canvas/tokens'
 import { buildDesignCss } from '@/design/css'
+import { brandFavicon } from '@/design/favicon'
 import {
   bindFirstFree,
   PORT_ATTEMPTS,
@@ -711,6 +712,12 @@ export function startCanvas(
                   'content-type': 'text/css; charset=utf-8',
                   'cache-control': 'no-store',
                 },
+              }),
+          ),
+          '/api/icon.svg': guarded(
+            () =>
+              new Response(brandFavicon(), {
+                headers: { 'content-type': 'image/svg+xml' },
               }),
           ),
           '/api/events': guarded(() => changes.open()),
