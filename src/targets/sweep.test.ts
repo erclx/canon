@@ -9,7 +9,7 @@ import {
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { originOf, sweepTargets } from '@/targets/sweep'
 
 let ROOT: string

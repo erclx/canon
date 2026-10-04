@@ -1,5 +1,5 @@
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { isDirectory } from '@/targets/validate'
 
 const GH_TIMEOUT_MS = 30_000

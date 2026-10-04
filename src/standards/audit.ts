@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
-import { resolveBaseRef } from '@/git-files'
+import { gitEnv } from '@/git/env'
+import { resolveBaseRef } from '@/git/files'
 import { INDEX_FILE, standardsSourceDir } from '@/standards/read'
 
 /** Returned when a standard new to this branch states no success criterion under either heading `CRITERION_HEADING` accepts, the gating check. */

@@ -1,7 +1,7 @@
 import { relative } from 'node:path'
 import type { Command } from 'commander'
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { type AnswersOutcome, planAnswers } from '@/tasks/answers'
 import { type BranchOutcome, planBranch } from '@/tasks/branch'
 import {
@@ -59,7 +59,7 @@ import {
   outro,
   pipeOutput,
 } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 /** Returned when the board carries a finding, which is the gating result. */
 const EXIT_FINDINGS = 2

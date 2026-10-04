@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { isBinary } from '@/sweep/binary'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 
 export type CensusRefusal = 'no-git'
 

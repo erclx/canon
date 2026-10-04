@@ -10,7 +10,7 @@ import {
 } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative } from 'node:path'
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { recordDir, recordRoot, SCRATCH } from '@/record-root'
 import { remoteIdentity } from '@/records/backup'
 import {

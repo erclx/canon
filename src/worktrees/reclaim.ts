@@ -1,7 +1,7 @@
 import { $ } from 'bun'
 import { execa } from 'execa'
 import { existsSync } from 'node:fs'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import {
   repositoryOf,
   type ResolvedSession,
@@ -12,7 +12,7 @@ import {
   currentWorktreeRoot,
   listWorktrees,
   type WorktreeEntry,
-} from '@/worktree'
+} from '@/git/worktree'
 
 const GH_TIMEOUT_MS = 30_000
 

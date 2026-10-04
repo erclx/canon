@@ -9,7 +9,7 @@ import {
   listWorktrees,
   type RefReport,
   type WorktreeEntry,
-} from '@/worktree'
+} from '@/git/worktree'
 
 export interface ClaimReport {
   readonly claimed: boolean

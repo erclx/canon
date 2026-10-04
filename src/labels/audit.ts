@@ -1,4 +1,4 @@
-import { listChangedFiles, resolveBaseRef } from '@/git-files'
+import { listChangedFiles, resolveBaseRef } from '@/git/files'
 import { type Coverage, resolveCoverage } from '@/labels/coverage'
 import { type MapRefusal, readLabelMap } from '@/labels/map'
 

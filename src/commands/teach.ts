@@ -43,7 +43,7 @@ import {
   outro,
   pipeOutput,
 } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 /**
  * A pair as the command line spells it, split on the first `=` so a value

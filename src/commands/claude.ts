@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { execa } from 'execa'
 import { singleLine } from '@/commands/upgrade'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { claudeChain, pendingEntries, planGitignore } from '@/claude/gitignore'
 import {
   matchInstall,

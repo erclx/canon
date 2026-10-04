@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { isBinary } from '@/sweep/binary'
 import { isMarked } from '@/sweep/exempt-marker'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 
 /**
  * The inline token exempting one line from this sweep, shaped on the

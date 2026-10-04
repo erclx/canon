@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
-import { listChangedFiles, resolveBaseRef } from '@/git-files'
+import { listChangedFiles, resolveBaseRef } from '@/git/files'
 import { recordDir } from '@/record-root'
 import { splitPlanSections } from '@/records/validate'
 import { type AnswersRefused, resolvePlanReference } from '@/tasks/answers'

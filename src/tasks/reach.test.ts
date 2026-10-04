@@ -10,7 +10,7 @@ import { orderingPath } from '@/tasks/validate'
 const changed = vi.hoisted(() => vi.fn())
 const base = vi.hoisted(() => vi.fn())
 
-vi.mock('@/git-files', () => ({
+vi.mock('@/git/files', () => ({
   listChangedFiles: changed,
   resolveBaseRef: base,
 }))

@@ -21,7 +21,7 @@ import {
   outro,
   pipeOutput,
 } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 /**
  * A selection as the command line spells it, splitting on the first `=`. The

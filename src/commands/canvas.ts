@@ -45,7 +45,7 @@ import {
   outro,
   plural,
 } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 const BANNER = 'canon canvas'
 
