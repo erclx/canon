@@ -32,7 +32,7 @@ A constraint naming a track in flight carries the same problem past the handoff,
 
 ## Records at the main root
 
-`.canon/plans/`, `.canon/review/`, and `.canon/memory/` all resolve at the main worktree root, so artifacts created in any session are visible from any sibling worktree. A session inside a worktree reads them directly, since the file-editing tools refuse a main-root path but `Read` resolves normally. It writes a whole file through the shell and makes a change inside an existing file through a `canon` verb, which resolves the main root in-process. See [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the full rule and the domain-level fan-out guidance.
+`.canon/plans/`, `.canon/review/`, and `.canon/memory/` all resolve at the main worktree root, so artifacts created in any session are visible from any sibling worktree. A session inside a worktree reads them directly, since the file-editing tools refuse a main-root path but `Read` resolves normally. It writes a whole file through the shell and makes a change inside an existing file through a `canon` verb, which resolves the main root in-process. See [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for why the tool refuses the write, and the fan-out section below for the domain-level guidance.
 
 The plan's shape is fixed by `standards/plan.md`: the section list, the filename, and the contract its questions keep. Its lifecycle, from the session that writes it to the archive, is `standards/plan-lifecycle.md`. Every question carries a `- Suggested:` line and an empty `- Answer:` slot, and a blank answer accepts the suggestion at execution time. That default is what makes a plan decision-ready in one pass, and it is the opposite of the contract an intake folder keeps, where an empty slot means nobody reached the item.
 
@@ -55,6 +55,27 @@ A plan that ships is archived, never deleted. `canon tasks archive` moves it to 
 A branch review report takes the other route and is swept rather than archived. `review-branch` writes it flat into `.canon/review/` as `branch-<slug>.md`, the session addressing it reads it once, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so `context-fold` deletes any report whose branch is gone. The body that writes a report owns how long it lives, which leaves the shipping branch's own report on disk through the run that cites it and collects it a branch later. What that loses is a local-only review on a branch that never opened a pull request, which is why the report says so where a reader meets it.
 
 `canon:context-fold` decides which task closed by reading the diff rather than the conversation. It resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. A task that shipped without ever being discussed still gets marked. Architecture and design stay session-sourced, because a diff cannot carry a judgment, and an architecture write further needs a folded plan naming the slot decision. The requirements record is never folded. A direction change gets one report line naming `canon:document-health`, which reviews that record only when asked.
+
+## Shipping a fan-out
+
+A fan-out of N worktrees produces N pull requests. The order they merge in matters only when two branches touch the same file.
+
+**Collision profile.** Work confined to one domain directory, such as a new skill under its own folder or independent fixes in different subtrees of `scripts/`, rarely collides. These paths are shared hotspots, so a branch touching one serializes rather than fans out, because parallel edits almost always produce a conflict or a stale regenerated file:
+
+- `CLAUDE.md`, since cross-domain behavior lives there
+- `tooling/**`, since stack manifests, golden configs, and seeds are tightly coupled
+- `canon/context/context-model/overview.md` and `docs/agents/`, which several domains cross-reference
+- Any folder's `index.md`, since `canon indexes regen` rewrites it and two worktrees adding files to a regen-covered folder race on it
+
+Land any in-flight edit to a hotspot on `main` before fanning out. A worktree on a stale `CLAUDE.md` costs more to rebase than it saved.
+
+**Merge order.** Merge the branch with the smallest hotspot footprint first. A branch touching `CLAUDE.md`, a context entry, or a regenerated `index.md` merges last, and its siblings rebase on the new `main` once it lands.
+
+**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. Run `git fetch origin && git rebase origin/main` in the sibling, resolve any conflict in the worktree, push, then merge. Never force-merge a stale branch.
+
+**Clean up after merge.** Run `/git-worktree cleanup` to remove worktrees whose branches merged on GitHub and prune the local branches. The skill reads merge state through `gh pr view`. To start a fresh feature from a stale worktree, `ExitWorktree(action: "keep")` back to main, then `/session-worktree <new-name>`.
+
+**When fan-out was the wrong call.** If every sibling needs a rebase and every rebase conflicts on the same file, the branches should have serialized. Land one, wait, then start the next. The cleanup skill only tidies a flow that already worked.
 
 ## The task board
 
