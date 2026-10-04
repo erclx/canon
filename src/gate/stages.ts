@@ -88,6 +88,11 @@ export interface Stage {
    */
   readonly when?: (options: { readonly write: boolean }) => boolean
   readonly checks: readonly Check[]
+  /**
+   * The machine lock this stage holds while its checks run, so one box runs it
+   * for one worktree at a time. Absent means the stage never queues.
+   */
+  readonly lock?: string
   /** The line a clean stage prints, where the checks emit none of their own. */
   readonly success?: string
 }
@@ -579,6 +584,9 @@ export const STAGES: readonly Stage[] = [
     label: 'Tests',
     scope: TESTS_SCOPE,
     skipped: 'Skipped, no TypeScript or asserted-corpus changes',
+    // Concurrent suites from a wave of worktrees starve each other's spawn
+    // and browser tests past their timeouts, so the box runs one at a time.
+    lock: 'tests',
     checks: [
       {
         kind: 'command',

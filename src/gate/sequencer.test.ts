@@ -1,7 +1,15 @@
 import { createHash } from 'node:crypto'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   assertStampField,
@@ -20,6 +28,8 @@ import {
   summarize,
 } from '@/gate/sequencer'
 import { type Stage, STAGES } from '@/gate/stages'
+import { machineLockPath } from '@/gate/suite-lock'
+import { SYSTEM_PROBES } from '@/sessions/live'
 
 function result(overrides: Partial<CommandResult> = {}): CommandResult {
   return { exitCode: 0, stdout: '', stderr: '', all: '', ...overrides }
@@ -151,6 +161,118 @@ describe('changed-file scoping', () => {
     expect(outcome.emissions).toEqual([
       { kind: 'info', text: 'Skipped, no shell changes' },
     ])
+  })
+})
+
+describe('a stage holding a machine lock', () => {
+  const lockPath = () => machineLockPath('suite')
+
+  /** A holder this test process answers for, so the lock reads it as live. */
+  function placeLiveHolder(root: string): void {
+    mkdirSync(dirname(lockPath()), { recursive: true })
+    writeFileSync(
+      lockPath(),
+      JSON.stringify({
+        pid: process.pid,
+        procStart: SYSTEM_PROBES.procStartOf(process.pid) ?? undefined,
+        root,
+      }),
+    )
+  }
+
+  function probing(seen: boolean[]): Measure {
+    return async () => {
+      seen.push(existsSync(lockPath()))
+      return { emissions: [] }
+    }
+  }
+
+  afterEach(() => {
+    rmSync(dirname(lockPath()), { recursive: true, force: true })
+  })
+
+  it('should hold the lock while its checks run', async () => {
+    const seen: boolean[] = []
+
+    await runStage(
+      stage('suite', {
+        lock: 'suite',
+        checks: [{ kind: 'measure', measure: probing(seen) }],
+      }),
+      contextWith(),
+    )
+
+    expect(seen).toEqual([true])
+  })
+
+  it('should release the lock once its checks finish', async () => {
+    await runStage(stage('suite', { lock: 'suite' }), contextWith())
+
+    expect(existsSync(lockPath())).toBe(false)
+  })
+
+  it('should release the lock when a check fails', async () => {
+    const ctx = contextWith({
+      run: runnerFor({ 'true suite': result({ exitCode: 1 }) }),
+    })
+
+    const outcome = await runStage(stage('suite', { lock: 'suite' }), ctx)
+
+    expect(outcome.status).toBe('failed')
+    expect(existsSync(lockPath())).toBe(false)
+  })
+
+  it('should release the lock when a check throws', async () => {
+    const throwing: Measure = () => Promise.reject(new Error('spawn failed'))
+
+    const running = runStage(
+      stage('suite', {
+        lock: 'suite',
+        checks: [{ kind: 'measure', measure: throwing }],
+      }),
+      contextWith(),
+    )
+
+    await expect(running).rejects.toThrow('spawn failed')
+    expect(existsSync(lockPath())).toBe(false)
+  })
+
+  it('should not queue a stage the changed set skips', async () => {
+    placeLiveHolder('/worktrees/other')
+
+    const outcome = await runStage(
+      stage('suite', { lock: 'suite', scope: /\.ts$/ }),
+      contextWith({ changed: ['docs/index.md'] }),
+    )
+
+    expect(outcome.status).toBe('skipped')
+    expect(readFileSync(lockPath(), 'utf8')).toContain('/worktrees/other')
+  })
+
+  it('should not take the lock under CI', async () => {
+    placeLiveHolder('/worktrees/other')
+
+    const outcome = await runStage(
+      stage('suite', { lock: 'suite' }),
+      contextWith({ ci: true }),
+    )
+
+    expect(outcome.status).toBe('passed')
+  })
+
+  it('should name the worktree it queued behind', async () => {
+    placeLiveHolder('/worktrees/other')
+    setTimeout(() => unlinkSync(lockPath()), 50)
+
+    const outcome = await runStage(
+      stage('suite', { lock: 'suite' }),
+      contextWith(),
+    )
+
+    expect(outcome.emissions[0]).toMatchObject({
+      kind: 'info',
+      text: expect.stringContaining('/worktrees/other'),
+    })
   })
 })
 
@@ -321,6 +443,14 @@ describe('the shipped stage table', () => {
     const ids = STAGES.map((entry) => entry.id)
 
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('should hold a machine lock on the tests stage alone', () => {
+    const locked = STAGES.filter((entry) => entry.lock !== undefined)
+
+    expect(locked.map((entry) => [entry.id, entry.lock])).toEqual([
+      ['tests', 'tests'],
+    ])
   })
 
   it('should scope the tests stage to the corpora a src test asserts over', () => {

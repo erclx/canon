@@ -7,6 +7,7 @@ import type {
   RunCommand,
 } from '@/gate/measures'
 import type { Check, Stage } from '@/gate/stages'
+import { acquireSuiteLock, machineLockPath } from '@/gate/suite-lock'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
 
@@ -157,7 +158,36 @@ async function executeStage(
     }
   }
 
-  const emissions: Emission[] = []
+  // CI runs one suite per runner, so a lock there queues behind nothing.
+  if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [])
+
+  const held = await acquireSuiteLock({
+    path: machineLockPath(stage.lock),
+    root: ctx.root,
+  })
+  const queued: Emission[] =
+    held.waitedOn === undefined
+      ? []
+      : [
+          {
+            kind: 'info',
+            text: `Waited ${Math.round(held.waitedMs / 1000)}s for the ${stage.label} stage another worktree held, at ${held.waitedOn.root}`,
+          },
+        ]
+
+  try {
+    return await runChecks(stage, ctx, queued)
+  } finally {
+    held.release()
+  }
+}
+
+async function runChecks(
+  stage: Stage,
+  ctx: GateContext,
+  leading: readonly Emission[],
+): Promise<StageOutcome> {
+  const emissions: Emission[] = [...leading]
 
   for (const check of stage.checks) {
     const outcome = await runCheck(check, ctx)
