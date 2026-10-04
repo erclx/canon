@@ -680,7 +680,7 @@ export function register(program: Command): void {
         '  canon sandbox equivalence claude --json',
         '  canon sandbox equivalence claude:plan-feature --base origin/main',
         '',
-        'Provisions offline only and never runs sandbox/run.sh or a claude binary.',
+        'Provisions offline only and never runs canon sandbox run or a claude binary.',
         '--stub-remote also runs the anchor arms, and wins over --include-anchor.',
         'Exit codes: 0 when every compared arm is identical or red the same way',
         'on both sides, 1 on any difference, exit mismatch, or enumeration error.',

@@ -71,7 +71,7 @@ Exit codes follow whichever step stopped the run. Provisioning's code ends a run
 
 ## Provisioning equivalence
 
-`canon sandbox equivalence` proves a change moved nothing in what scenarios provision. It provisions every arm of the named targets on a base ref and on the working checkout, builds a manifest of each tree, and names what differs. It runs offline and never calls `sandbox/run.sh` or a `claude` binary, so no arm it runs bills a model.
+`canon sandbox equivalence` proves a change moved nothing in what scenarios provision. It provisions every arm of the named targets on a base ref and on the working checkout, builds a manifest of each tree, and names what differs. It runs offline and never calls `canon sandbox run` or a `claude` binary, so no arm it runs bills a model.
 
 ```bash
 canon sandbox equivalence claude --base origin/main --json
