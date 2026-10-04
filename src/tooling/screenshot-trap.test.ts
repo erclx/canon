@@ -1,5 +1,6 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -12,6 +13,19 @@ const SCRIPT = join(
 let fixture: string
 let bin: string
 let readyMarker: string
+let previewPort: string
+
+/** Asks the kernel for a free port, so no case shares one with another run. */
+const freePort = (): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const probe = createServer()
+    probe.once('error', reject)
+    probe.listen(0, '127.0.0.1', () => {
+      const address = probe.address()
+      const port = typeof address === 'object' && address ? address.port : 0
+      probe.close(() => resolve(String(port)))
+    })
+  })
 
 const stubBin = (name: string, body: string): void => {
   writeFileSync(join(bin, name), `#!/usr/bin/env bash\n${body}\n`, {
@@ -19,7 +33,8 @@ const stubBin = (name: string, body: string): void => {
   })
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  previewPort = await freePort()
   fixture = mkdtempSync(join(tmpdir(), 'screenshot-trap-'))
   bin = join(fixture, 'bin')
   mkdirSync(bin, { recursive: true })
@@ -58,7 +73,7 @@ const runScript = (captureExitCode: number): SpawnSyncReturns<string> => {
     env: {
       ...process.env,
       PATH: `${bin}:${process.env.PATH}`,
-      PREVIEW_PORT: '4173',
+      PREVIEW_PORT: previewPort,
     },
     timeout: 10_000,
   })
@@ -84,7 +99,7 @@ describe('screenshot.sh EXIT trap', () => {
       )
     }
 
-    const port = '4173'
+    const port = previewPort
     stubBin(
       'bun',
       [
