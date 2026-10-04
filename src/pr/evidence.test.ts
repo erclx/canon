@@ -786,7 +786,7 @@ describe('settleChecklist', () => {
     expect(settleChecklist(stamped, 'aaaa000ffff', 'aaaa000ffff')).toBe(stamped)
   })
 
-  it('should clear and unstamp a tick stamped at another head', () => {
+  it('should clear a tick and drop its stamp stamped at another head', () => {
     expect(settleChecklist(stamped, 'bbbb111ffff', 'aaaa000ffff')).toBe(
       '- [ ] hero settles',
     )
@@ -804,7 +804,7 @@ describe('settleChecklist', () => {
     )
   })
 
-  it('should leave unticked boxes and other lines as they are', () => {
+  it('should leave empty boxes and other lines as they are', () => {
     const text = '### Group\n- [ ] one\nplain'
 
     expect(settleChecklist(text, 'bbbb111', 'aaaa000')).toBe(text)

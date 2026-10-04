@@ -11,7 +11,7 @@ box that passed at the head it drove, so the person merging reads a checklist
 a driver worked through instead of one that stays empty.
 
 ```bash
-canon pr tick 1341 --boxes 1,2,4 --head 1a2b3c4 --json
+canon pr tick 1341 --boxes 1,2,4 --head <sha> --json
 ```
 
 Box numbers come from the `boxes` field of `canon pr evidence --json`, which
@@ -22,7 +22,7 @@ numbers the checklist's box lines in order. A caller never counts lines itself.
 A ticked box ends in the commit it passed at, visible on the comment:
 
 ```markdown
-- [x] click "Pricing" in the header → the pricing page opens · passed at `1a2b3c4`
+- [x] click "Pricing" in the header → the pricing page opens · passed at `<short-sha>`
 ```
 
 The stamp is visible rather than an HTML comment because the person it is for
@@ -36,7 +36,7 @@ A tick is a claim about one commit, so a render at another commit does not
 carry it forward. `canon pr evidence` settles the checklist before it renders:
 
 - A tick stamped for the render's head stays.
-- A tick stamped for any other head is unticked and loses its stamp.
+- A tick stamped for any other head is cleared and loses its stamp.
 - A tick with no stamp, such as one an author or the operator added by hand,
   stays only when the comment it came from described the render's head.
 

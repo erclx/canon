@@ -68,12 +68,12 @@ than a gap.
 Both `ok` and `no-evidence` also report what the marked comment already
 shows a reviewer, each field present only when that comment holds it:
 
-| Field       | What it carries                                                         |
-| ----------- | ----------------------------------------------------------------------- |
-| `preview`   | The hosted `**Preview:**` address on the comment's address line.        |
-| `local`     | The `**Local preview:**` address beside it.                             |
-| `checklist` | The checklist between its delimiters, with any ticked boxes kept.       |
-| `boxes`     | Each box with its `number`, `text`, `isTicked`, `stamp`, and `isTaste`. |
+| Field       | What it carries                                                   |
+| ----------- | ----------------------------------------------------------------- |
+| `preview`   | The hosted `**Preview:**` address on the comment's address line.  |
+| `local`     | The `**Local preview:**` address beside it.                       |
+| `checklist` | The checklist between its delimiters, with any ticked boxes kept. |
+| `boxes`     | Each box's `number`, `text`, tick, `stamp`, and `isTaste`.        |
 
 These come from the comment already posted, never from the flags the call
 passed, so a skill driving a review reads which address and which checklist a
@@ -184,14 +184,7 @@ A run without the option carries forward whatever checklist the marked comment
 already holds, the same way the preview address is carried. That is what keeps
 `git-followup`'s re-render after a push from dropping the checklist, since
 `git-pr` deletes the handoff once the first post reports success and no later
-call has a file to pass. A tick is carried only while the head it names is the
-render's head, and a render at a newer head clears it. `canon docs pr-tick`
-covers the stamp and the verb that writes it.
-
-A checklist the marked comment carries opens a body the same as a supplied one,
-so a push to a branch with a checklist and no evidence image renders `ok` and
-edits the comment rather than reporting `no-evidence`. `boxes` is the numbering
-`canon pr tick` takes, read off the settled checklist on `ok`.
+call has a file to pass. `canon docs pr-tick` covers what a tick carries.
 
 The option decides `no-evidence` on its own. A branch with a checklist and no
 changed evidence image renders `ok` with a marked body holding the checklist,

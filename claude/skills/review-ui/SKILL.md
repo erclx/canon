@@ -24,7 +24,7 @@ rather than inside it, so the two passes finish on their own clocks.
 - The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
 - The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.` An open verdict at the head stops the same way only when nothing has arrived since it: drive again when a `## Review response` or `## Post-review findings` comment is newer than the verdict, or the launch names an address.
 - The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher. A verdict posted against an older build carries a marker naming a head nobody drove.
-- Post and stop. Never merge, never lift the draft mark, and tick a box on the evidence comment only through `canon pr tick`, only for a box that passed at the head this pass drove. Never hand-edit the comment body.
+- Post and stop. Never merge, never lift the draft mark, and never edit the evidence comment except through `canon pr tick`.
 
 ## Step 1: resolve the pull request
 
@@ -54,7 +54,7 @@ Read nothing else about the change. The diff, the plan, the task, and the descri
 canon pr evidence <number> --json
 ```
 
-Take four fields off the record, each present only when the posted evidence comment holds it: `checklist`, `boxes`, `preview`, and `local`. Number every box off `boxes`, the numbering `canon pr tick` takes, rather than counting lines in `checklist`. They come from the comment already on the thread, so `reason` reading `ok` or `no-evidence` makes no difference here, and the rendered `body` is not this pass's to read. Keep `states` as well when `reason` reads `ok`, being each evidence state's name and the stems under it, which Step 5 matches a frame against. A record carrying no `states`, on `no-evidence` or from an older binary, covers no state, so every frame is pushed. Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Only `ok` and `no-evidence` read the thread. Every other `reason` is a refusal that never reached the comment, so report it verbatim and stop rather than reading the missing fields as an absent checklist.
+Take four fields off the record, each present only when the posted evidence comment holds it: `checklist`, `boxes`, `preview`, and `local`. Number boxes off `boxes`, never off `checklist`. They come from the comment already on the thread, so `reason` reading `ok` or `no-evidence` makes no difference here, and the rendered `body` is not this pass's to read. Keep `states` as well when `reason` reads `ok`, being each evidence state's name and the stems under it, which Step 5 matches a frame against. A record carrying no `states`, on `no-evidence` or from an older binary, covers no state, so every frame is pushed. Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Only `ok` and `no-evidence` read the thread. Every other `reason` is a refusal that never reached the comment, so report it verbatim and stop rather than reading the missing fields as an absent checklist.
 
 A binary older than 5.4.0 reports none of these fields whatever the thread holds, so a record carrying none is ambiguous. Read `canon --version` before taking the no-checklist stop, and on an older release report the release this pass needs and stop rather than parsing the comment by hand.
 
@@ -94,7 +94,7 @@ Read `${CLAUDE_SKILL_DIR}/references/driving.md` on reaching this step for how a
 
 Give every box exactly one verdict, in checklist order. A box the pass could not place on a route or a width is still driven, from the opened address at 1440 wide, and the verdict names the guess. Skipping a box silently reads the same as passing it.
 
-Never judge a box ending in `(taste)`. Drive to the state, capture the frame, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is a claim this pass exists to check. A tick stamped `passed at` the current head is a pass already recorded, and it still gets driven.
+Never judge a box ending in `(taste)`. Drive to the state, capture the frame, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is a claim this pass exists to check. A tick stamped at the current head still gets driven.
 
 A frame the verdict rests on is published only when the worker's evidence lacks it. Compare the box's route, width, and theme against the `states` Step 2 kept, and when a state and stem show the same thing, cite that stem and push nothing. The match is this pass's judgment over the box's wording, so the verb never makes it. Otherwise push the frame and keep the `link` the record returns:
 
@@ -122,13 +122,7 @@ Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body sha
 
 ## Step 8: tick the passed boxes
 
-Once the verdict has posted, tick every box that took a `pass` verdict, whatever the heading, so a partly passed checklist shows its progress:
-
-```bash
-canon pr tick <number> --boxes <n,...> --head <head> --json
-```
-
-Leave a box that failed, needs eyes, or was not driven empty. The verb refuses a taste box and a head that is no longer the remote tip, writing nothing in either case. Branch on the record's `reason`, which reads `ticked` on success. A `stale-head` means a push landed while this pass drove, so report it in the result line and never retry at the new tip, since the boxes were driven at the old one. A binary whose `canon pr` lacks `tick` predates the verb, so report that and tick nothing. Post the verdict first, so the ticks and the verdict name the same head.
+Read `${CLAUDE_SKILL_DIR}/references/tick.md` once the verdict has posted, for how every box that passed is ticked through `canon pr tick` at the head this pass drove, and what a refusal reports.
 
 ## Step 9: read the review-event checks
 

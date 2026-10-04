@@ -428,7 +428,7 @@ export interface ChecklistBox {
   /** The box text with any stamp removed. */
   readonly text: string
   readonly isTicked: boolean
-  /** The short sha a tick names, absent on an unticked box or a tick nothing stamped. */
+  /** The short sha a tick names, absent on an empty box or a tick nothing stamped. */
   readonly stamp?: string
   /** Whether the box ends in `(taste)`, which no driver ticks. */
   readonly isTaste: boolean
