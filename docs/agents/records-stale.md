@@ -1,25 +1,26 @@
 ---
 title: Records stale
-description: Reading the memory pen as a review queue, what makes an entry due, how a cited path is read and resolved, the order entries come back in, and the exit codes and refusals
+description: Reading the memory pen as a review queue, what makes an entry due, how a cited path is read and resolved, the order entries come back in, counting the releases since the requirements and architecture records were last reviewed, and the exit codes and refusals
 ---
 
 # Records stale
 
-`canon records stale memory` reports each memory entry's review state and every backticked path it cites that the project no longer holds. It answers what a review of the pen should read next, so a skill takes the queue from the verb rather than re-deriving it by grep.
+`canon records stale memory` reports each memory entry's review state and every backticked path it cites that the project no longer holds. It answers what a review of the pen should read next, so a skill takes the queue from the verb rather than re-deriving it by grep. `canon records stale canonical` reports when the requirements and architecture records were last reviewed and how many releases have shipped since.
 
 ```bash
 canon records stale memory
 canon records stale memory --json
 canon records stale memory --days 60 --json
+canon records stale canonical --json
 ```
 
-| Option          | Behavior                                                      |
-| --------------- | ------------------------------------------------------------- |
-| `--json`        | Add a machine-readable record on stdout                       |
-| `--days <n>`    | Days after a review before an entry is due again (default 30) |
-| `--root <path>` | Project root, defaulting to the main worktree                 |
+| Option          | Behavior                                                                                            |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| `--json`        | Add a machine-readable record on stdout                                                             |
+| `--days <n>`    | Days after a review before a memory entry is due again (default 30)                                 |
+| `--root <path>` | Project root, defaulting to the main worktree for `memory` and the current worktree for `canonical` |
 
-`memory` is the only kind it reads, since a memory entry is the one record carrying a review date. Any other argument refuses as `unknown-kind`.
+`memory` and `canonical` are the two kinds it reads, since each is a record carrying a review date. Any other argument refuses as `unknown-kind`.
 
 It reports and never writes. It moves, archives, and rewrites no entry, matching `validate` and `size`.
 
@@ -53,10 +54,22 @@ canon records stale memory --json | jq -r '[.entries[] | select(.due)][0:20][] |
 
 The record carries `total`, `due`, `days`, the `folder` read relative to the root, and one `entries` row per entry with `name`, `category`, `reviewed`, `due`, and `unresolved`.
 
+## Canonical records
+
+`canonical` reads `REQUIREMENTS.md` and `ARCHITECTURE.md` at whichever surface root carries each, `canon/` ahead of `.claude/`, and omits one the project does not hold. Both are tracked, so `--root` defaults to the worktree the caller stands in rather than the main one, and a stamp a branch just wrote reads back from that branch.
+
+Each doc's review point is an optional `reviewed: YYYY-MM-DD` frontmatter field, set by whoever finishes a review, per `canon standards requirements` and `canon standards architecture`. It is a date rather than a commit, since a commit written on a feature branch never reaches a trunk that squash-merges. The field is read the way the memory field is, so a value that is not a calendar date comes back as `invalidReviewed`.
+
+The count is every tag merged into `HEAD` whose creator date falls after the reviewed day. A lightweight tag's creator date is its commit's date and an annotated tag's is the tagging date, so a project mixing both counts by two clocks.
+
+The record carries `tagged`, false when `HEAD` has merged no tag, and one `docs` row per doc with `path`, `reviewed`, `releasesSince`, and `latestRelease`. `releasesSince` is null on a doc never reviewed and `0` on one reviewed after every tag. With no tags it is also `0`, which is why `tagged` travels beside it.
+
+It gates nothing, and no hook, gate stage, or workflow runs it. `canon:document-health` reads it when asked to review the two records.
+
 ## Exit codes and refusals
 
 Exit codes: `0` the reading completed, whatever it found, and `1` refused. A due entry is a queue position rather than a failure, so nothing here gates.
 
-A `reason` field carries which gate fired: `no-folder` when the project holds no memory folder at either record root, `unknown-kind` for any kind but `memory`, and `bad-days` when `--days` is not a positive whole number. An empty pen is not a refusal. It reports an empty list and exits `0`.
+A `reason` field carries which gate fired: `no-folder` when the project holds no memory folder at either record root, `unknown-kind` for any kind but `memory` or `canonical`, `bad-days` when `--days` is not a positive whole number or is passed to `canonical`, and `unreadable-tags` when `canonical` cannot read the tags. An empty pen is not a refusal. It reports an empty list and exits `0`.
 
 The pen is shared scratch at the main worktree root, so `--root` defaults there, the same default `validate memory` takes. A pen at the legacy `.claude/memory/` root resolves the way every record verb resolves it, per `records.md`. <!-- canon-keep-record-root -->
