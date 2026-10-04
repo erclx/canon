@@ -71,7 +71,7 @@ Asking sits above inferring on the worker's ladder. A session with an operator p
 
 ## What binds concurrency
 
-A row holds behind a track in flight only on a conflict a merge cannot settle, being a dependency, a contract one changes and the other consumes, a relocation, a sweep, or a stated reason, which `orchestrator-dispatch.md` states once with its sources. What binds past that is review attention. A shared file is not a hold: both build, and the branch merging second rebases in its own session after the first lands, which is how Fowler, DORA, and GitHub's merge queue run parallel work, testing at integration rather than serializing on a file.
+A row holds behind a track in flight only on a conflict a merge cannot settle, being a dependency, a contract one changes and the other consumes, a relocation, a sweep, or a stated reason, which `orchestrator-dispatch.md` states once with its sources. What binds past that is review attention. A shared file is not a hold: both build, and the branch merging second resolves any conflict in its own session after the first lands, which is how Fowler, DORA, and GitHub's merge queue run parallel work, testing at integration rather than serializing on a file.
 
 A file-set disjointness gate was the rejected alternative. It replaced a fixed cap of three workers at `83fc7fb5` on 2026-08-27, and on 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. A trial merge cannot replace it at dispatch, since a candidate has no commits, so `git merge-tree` stays at integration. The cost is more rebases and a contract hold that rests on the dispatcher reading a plan's Risks by hand.
 

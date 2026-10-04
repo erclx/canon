@@ -200,7 +200,7 @@ before another is carried nowhere at all.
 
 ## Parallelism
 
-Review attention binds, and no number caps worker tracks, so stop adding once you cannot review every output. A row waits only on a conflict a merge cannot settle, which the `role-orchestrator` dispatch runbook states once. A shared file is not one: both rows build, and the branch merging second rebases in its own session after the first lands, since no practice source serializes on a file. [Fowler](https://martinfowler.com/articles/branching-patterns.html) has whoever integrates second check health "even if it's a clean merge", and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to hours with no integration phase.
+Review attention binds, and no number caps worker tracks, so stop adding once you cannot review every output. A row waits only on a conflict a merge cannot settle, which the `role-orchestrator` dispatch runbook states once. A shared file is not one: both rows build, and the branch merging second resolves any conflict in its own session after the first lands, since no practice source serializes on a file. [Fowler](https://martinfowler.com/articles/branching-patterns.html) has whoever integrates second check health "even if it's a clean merge", and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to hours with no integration phase.
 
 Review splits by vantage. A reviewer under `role-reviewer` takes a pull
 request's read, first pass included, when three await one (a number set by

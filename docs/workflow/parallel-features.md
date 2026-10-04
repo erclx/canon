@@ -71,7 +71,7 @@ Land any in-flight edit to a hotspot on `main` before fanning out where you can.
 
 **Merge order.** Merge the branch with the smallest hotspot footprint first. A branch touching `CLAUDE.md`, a context entry, or a regenerated `index.md` merges last, and its siblings rebase on the new `main` once it lands.
 
-**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. The branch merging second resolves, in the session that built it and after the first lands, never against a sibling still building: run `/review-address` there, which trial-merges against `origin/main`, rebases, and leaves the gate to run over the result. Push, then merge. Never force-merge a stale branch.
+**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. The branch merging second resolves, in the session that built it and after the first lands, never against a sibling still building: run `/review-address` there, which trial-merges against `origin/main` and rebases a branch that no longer merges. Push, then merge. Never force-merge a stale branch.
 
 **Clean up after merge.** Run `/git-worktree cleanup` to remove worktrees whose branches merged on GitHub and prune the local branches. The skill reads merge state through `gh pr view`. To start a fresh feature from a stale worktree, `ExitWorktree(action: "keep")` back to main, then `/session-worktree <new-name>`.
 

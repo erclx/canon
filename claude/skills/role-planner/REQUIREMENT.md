@@ -89,4 +89,4 @@ four carried at least one, caught only because the planner ran
 - The mechanical addressee resolution, which `session-relay` owns for every session with or without a role
 - The branch, the build, and the pull request, which `role-worker` and `auto-ship` own
 - Deciding which rows run and in what order, which is the controlling session's call and stated in `role-orchestrator`
-- The dispatch itself, its collision check, and its disjointness gate, which `orchestrator-dispatch.md` holds
+- The dispatch itself, its collision check, and its conflict check, which `orchestrator-dispatch.md` holds
