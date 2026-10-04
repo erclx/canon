@@ -196,6 +196,7 @@ toupper
 tsconfig
 tsgolint
 turbopack
+unitless
 unpushed
 unstub
 uv
