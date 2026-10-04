@@ -56,6 +56,13 @@ An element resize is two edits through the inspector's writer, width then height
 - The skill starts the server before writing any frame, then fetches the printed address and checks the shell itself. Captures go through the frame route, so a shell that failed to build answers `/` with an empty `200` while every capture still passes, and only the shell check notices.
 - A picked direction leaves the canvas for the project's design document or wireframes. The canvas is a drafting surface, and its folder is gitignored, so nothing on it is citable from a tracked file.
 
+### Editing mark
+
+- A session marks the frame it is editing through `canvas editing`, and the server reads that record rather than inferring the state. A session writes a frame through its file, so the server sees nothing until the write lands, and a watch on the file only fires once the work is already there.
+- The marks share one `editing.json` beside `selection.json`, keyed by frame, and each write merges its one key under the file lock. Several sessions can hold different frames at once, and replacing the whole map would drop a mark another session wrote in between.
+- A mark lapses five minutes after it was last written. A session that crashes or compacts never clears its mark, so the expiry is the only thing that does, and its length bounds how long a dead mark misleads the operator. A frame rewrite takes seconds, so a long edit renews once.
+- The mark gates no write. The frame hash check already refuses an inspector edit made against a file the session rewrote, so a lock would refuse the same collision twice.
+
 ### The static board retired
 
 `canon design board` generated a static page set indexing six design surfaces, with a components panel framing a second Astro build of every site component. The canvas replaced it rather than joining it. That board only looked back at what the project already held, while the canvas is where an idea gets drawn before one is written into the design record. Keeping both meant one more generator to hold in step with every surface it indexed, for a page nobody drafted on.

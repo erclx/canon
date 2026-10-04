@@ -129,7 +129,7 @@ function refuse(reason: ContentRefusal, detail: string): ContentRefused {
   return { ok: false, reason, detail }
 }
 
-function isValidName(name: string): boolean {
+export function isValidName(name: string): boolean {
   return NAME_PATTERN.test(name) && !name.includes('..')
 }
 

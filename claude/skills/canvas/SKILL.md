@@ -57,6 +57,17 @@ Write the frame's whole document to the `path` the add verb reported. The open c
 - Change one property of one element with `canon canvas edit <page>/<frame> --element <index> --set <property>=<value> --json` when the set it accepts covers the change, since it leaves every other byte as it was.
 - Use the project's custom properties for every value the token stylesheet defines. The record from `serve` names the token source under `tokens`, and a `none` source means frames render unstyled, so say so rather than inventing values to cover it.
 
+Mark the frame before the first write, so the operator sees which frame is being worked on before anything lands, and clear the mark once the edits to it are done:
+
+```bash
+canon canvas editing <page>/<frame> --json
+canon canvas editing <page>/<frame> --done --json
+```
+
+- A mark lapses after five minutes, so mark the frame again during a longer edit.
+- Clear it on every exit from the edit, including one that stopped on a refusal. Clearing a frame that holds no mark succeeds.
+- When the mark call fails with `unknown command 'editing'`, the installed CLI predates the mark, so go on without it rather than stopping. Never run `canvas edit` in its place, whatever the error suggests, since that verb writes the frame.
+
 ## Step 4: read what the operator pointed at
 
 Read the selection when the operator says "this one", "the selected frame", or "that button":

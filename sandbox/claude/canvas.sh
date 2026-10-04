@@ -40,7 +40,9 @@ stage_setup() {
     log_info "         checks the shell at the address it printed. A frame at"
     log_info "         .canon/canvas/drafts/pricing.html drawn with var(--...)"
     log_info "         tokens, its box in drafts/layout.json, and the reply naming"
-    log_info "         the canvas address. Nothing written outside .canon/."
+    log_info "         the canvas address. The frame is marked as being edited"
+    log_info "         before the write and cleared after, leaving"
+    log_info "         .canon/canvas/editing.json empty. Nothing written outside .canon/."
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

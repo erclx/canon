@@ -20,10 +20,22 @@ import {
   editFrameAtIndex,
   STYLE_PROPERTIES,
 } from '@/canvas/edit'
+import {
+  clearEditing,
+  EDITING_TTL_MS,
+  markEditing,
+  readEditing,
+} from '@/canvas/editing'
 import { CANVAS_PORT, startCanvas } from '@/canvas/server'
 import { PROJECT_ROOT } from '@/project-root'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
+import {
+  callerIdentity,
+  type Located,
+  resolveSessions,
+  selfOf,
+} from '@/sessions/resolve'
 import {
   intro,
   logAdd,
@@ -136,7 +148,7 @@ export function register(program: Command): void {
     .command('canvas')
     .helpOption('-h, --help', 'Show this help message')
     .description(
-      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, edit, capture)',
+      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, edit, editing, capture)',
     )
     .addHelpText(
       'after',
@@ -153,6 +165,7 @@ export function register(program: Command): void {
         '  canon canvas frame move drafts hero --x 200 --y 120',
         '  canon canvas selection --json',
         "  canon canvas edit drafts/hero --element 4 --set 'color=var(--color-accent)'",
+        '  canon canvas editing drafts/hero',
         '  canon canvas capture drafts/hero',
         '  canon canvas list --json',
         '',
@@ -540,6 +553,91 @@ export function register(program: Command): void {
 
   withRoot(
     canvas
+      .command('editing')
+      .description('Mark a frame as being edited, clear it, or list the marks')
+      .argument('[target]', '<page>/<frame>, or none to list the marks')
+      .option('--done', 'Clear the mark once the edits are written')
+      .option('--by <name>', 'The label the mark shows, over the session name'),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Mark a frame before writing it and clear it with --done after, so an',
+        `open canvas shows who is editing it. A mark lapses after ${EDITING_TTL_MS / 60_000} minutes`,
+        'unless marked again, so re-mark during a long edit. A mark gates no',
+        'write, and --done on a frame holding no mark succeeds.',
+        '',
+      ].join('\n'),
+    )
+    .action(
+      async (
+        target: string | undefined,
+        opts: RootOptions & { done?: boolean; by?: string },
+      ) => {
+        const emitJson = opts.json ?? false
+        const resolved = await resolveRoot(opts)
+        if (!resolved.ok) {
+          process.exitCode = refuse(resolved, emitJson)
+          return
+        }
+        const { root } = resolved
+        const now = new Date()
+
+        if (target !== undefined) {
+          const [pageName, frameName, ...rest] = target.split('/')
+          if (!pageName || !frameName || rest.length > 0) {
+            process.exitCode = refuse(
+              {
+                ok: false,
+                reason: 'invalid-name',
+                detail: `${target} is not <page>/<frame>`,
+              },
+              emitJson,
+            )
+            return
+          }
+          const outcome = opts.done
+            ? clearEditing(root, pageName, frameName)
+            : markEditing(
+                root,
+                pageName,
+                frameName,
+                opts.by ?? (await sessionLabel()),
+                now,
+              )
+          if (!outcome.ok) {
+            process.exitCode = refuse(outcome, emitJson)
+            return
+          }
+        } else if (opts.done) {
+          process.exitCode = refuse(
+            {
+              ok: false,
+              reason: 'invalid-name',
+              detail: '--done needs the <page>/<frame> to clear',
+            },
+            emitJson,
+          )
+          return
+        }
+
+        const marks = readEditing(root, now)
+        if (emitJson) writeJson({ ok: true, editing: marks })
+        intro(BANNER)
+        if (target !== undefined) {
+          logStep(`${target} ${opts.done ? 'cleared' : 'marked'}`)
+        }
+        if (marks.length === 0) logInfo('No frame is marked as being edited')
+        for (const mark of marks) {
+          logInfo(`${mark.page}/${mark.frame}  ${mark.by} until ${mark.until}`)
+        }
+        outro()
+      },
+    )
+
+  withRoot(
+    canvas
       .command('capture')
       .description('Capture a frame, or every frame of a page, as a PNG')
       .argument('<target>', '<page>/<frame> for one frame, <page> for all')
@@ -693,6 +791,29 @@ async function runComposite(
   logInfo(`${displayPath(result.pngPath)} ${result.width}x${result.height}`)
   outro()
   return 0
+}
+
+async function unlocated(): Promise<Located> {
+  return {
+    repository: null,
+    worktree: null,
+    branch: null,
+    unresolved: 'git-unavailable',
+  }
+}
+
+/**
+ * The caller's roster name, or a generic label when the environment names no
+ * session or the roster holds no row for it, as in a sandbox or a CI run.
+ */
+async function sessionLabel(): Promise<string> {
+  const identity = callerIdentity()
+  if (identity.sessionId === null && identity.pid === null) return 'a session'
+  /* The label needs the name alone, so skip the git probe each row's branch costs. */
+  const report = await resolveSessions({ locate: unlocated })
+  if (report.kind === 'absent') return 'a session'
+  const self = selfOf(report.sessions, identity)
+  return self.kind === 'self' ? self.session.name : 'a session'
 }
 
 /** NaN for a value that is not a number, which the content module refuses. */

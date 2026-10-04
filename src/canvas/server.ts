@@ -17,6 +17,7 @@ import {
   writeSelection,
 } from '@/canvas/content'
 import { type EditRefused, editFrame } from '@/canvas/edit'
+import { readEditing } from '@/canvas/editing'
 import {
   resolveFrameTokens,
   type TokenOptions,
@@ -380,6 +381,9 @@ export function startCanvas(
                   },
                 }),
               },
+              editing: readEditing(root, new Date()).map(
+                ({ page, frame, by, until }) => ({ page, frame, by, until }),
+              ),
             })
           }),
           '/api/frames/move': {
