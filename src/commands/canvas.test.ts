@@ -267,7 +267,16 @@ describe('canon canvas frame resize', () => {
 
   it('should leave the other axis at the size the frame is', () => {
     canvas('page', 'add', 'drafts')
-    canvas('frame', 'add', 'drafts', 'hero', '--width', '390', '--height', '844')
+    canvas(
+      'frame',
+      'add',
+      'drafts',
+      'hero',
+      '--width',
+      '390',
+      '--height',
+      '844',
+    )
 
     const run = canvas(
       'frame',

@@ -376,10 +376,7 @@ export function register(program: Command): void {
         x: parsePosition(opts.x, current?.x ?? 0),
         y: parsePosition(opts.y, current?.y ?? 0),
         width: parseSize(opts.width, current?.width ?? DEFAULT_FRAME.width),
-        height: parseSize(
-          opts.height,
-          current?.height ?? DEFAULT_FRAME.height,
-        ),
+        height: parseSize(opts.height, current?.height ?? DEFAULT_FRAME.height),
       })
       if (!outcome.ok) {
         process.exitCode = refuse(outcome, opts.json ?? false)
