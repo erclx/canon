@@ -59,6 +59,16 @@ const exited = (child: ChildProcess): Promise<void> =>
     else child.once('exit', () => resolve())
   })
 
+// Settles on the script having passed its `trap` line rather than on a fixed
+// pause, which under load can land before the trap and let SIGTERM end it.
+const waitForFile = async (path: string): Promise<void> => {
+  const deadline = Date.now() + 10_000
+  while (!existsSync(path)) {
+    if (Date.now() > deadline) throw new Error(`${path} never appeared`)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+}
+
 const writeScript = (name: string, lines: string[]): string => {
   const path = join(root, name)
   writeFileSync(path, ['#!/usr/bin/env bash', ...lines].join('\n'), {
@@ -145,14 +155,16 @@ describe('reapProcessGroup', () => {
   // The measured detail behind the escalation. The dispatch this bound was
   // filed against needed SIGKILL, so a reap that sends one signal and reports
   // success would have left it running exactly as before.
-  it('should escalate to SIGKILL for a survivor that ignores SIGTERM', () => {
+  it('should escalate to SIGKILL for a survivor that ignores SIGTERM', async () => {
+    const ready = join(root, 'trap-installed')
     const stubborn = writeScript('stubborn', [
       "trap '' TERM",
+      `touch "${ready}"`,
       'sleep 30 &',
       'wait',
     ])
     const child = startGroup(stubborn)
-    Bun.sleepSync(500)
+    await waitForFile(ready)
 
     expect(reapProcessGroup(child.pid ?? 0)).toBe('reaped-kill')
   }, 30_000)
