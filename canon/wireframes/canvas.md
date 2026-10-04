@@ -17,8 +17,8 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
-- Element inspector: below the frame inspector when an element is selected, its `tag.class` name over five titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
-- Sections: Layout holds x and y read-only, then width and height. Flex holds direction, gap, and padding. Typography holds size, weight, and the font family read-only. Fill holds color and background as a swatch, hex, opacity, tokens icon, and eyedropper each. The swatch opens the full picker beside the panel. Text holds the text field, read-only on an element holding others
+- Element inspector: below the frame inspector when an element is selected, its `tag.class` name over six titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
+- Sections: Layout holds x and y read-only, then width and height as a number, Fill, or Fit. Flex holds alignment, direction, wrap, gap, and padding, else an add button. Appearance holds opacity and radius. Typography holds size, weight, and font read-only. Fill holds color and background as swatch, hex, opacity, tokens, and eyedropper. Text holds text, read-only over children
 - Field: a bordered box with a short glyph inside its left edge, such as `W`, and the value right of it. A section header keeps an empty lane at its right for later buttons
 
 ### Below 900 wide
@@ -90,8 +90,8 @@ The sketch stays until a capture of the canvas exists.
 - Frame label: `<name> <width> × <height>`, then the theme switch reading `Dark` or `Light`
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
-- Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Typography`, `Fill`, `Text`
-- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Size`, `Wt`, `Font`, `T`, each named for assistive technology by its full word
+- Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Appearance`, `Typography`, `Fill`, `Text`
+- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Op`, `R`, `TL` to `BL`, `Size`, `Wt`, `Font`, `T`, each short for its accessible name
 - Empty field placeholders: `0` for gap, `None` for background
 - Left panel tabs: `Pages`, `Theme`
 - Color field: the hex in capitals, or a token's name, then the opacity and `%`, named `<field>`, `<field> opacity`, `<field> picker` opening `<field> color`, `<field> tokens` opening `<field> token list`, and `<field> eyedropper`
