@@ -4,6 +4,9 @@
  * back through `toCssValue`, so rounding never writes a value nobody typed.
  */
 
+/** A length that runs below zero, so a bare number is pixels and unclamped. */
+const SIGNED_LENGTHS = new Set(['letter-spacing'])
+
 /** Properties whose bare numbers are pixel lengths. */
 const LENGTHS = new Set([
   'width',
@@ -26,6 +29,8 @@ const SIZE_MODES: Readonly<Record<string, string>> = {
 }
 
 const PX = /^(-?\d*\.?\d+)px$/
+const EM = /^(-?\d*\.?\d+)em$/
+const NUMBER = /^-?\d*\.?\d+$/
 
 function formatPx(token: string): string {
   const match = token.match(PX)
@@ -45,6 +50,11 @@ export function isNoFill(value: string): boolean {
 export function displayValue(property: string, raw: string): string {
   const value = raw.trim()
   if (property === 'gap' && (value === '' || value === 'normal')) return ''
+  if (property === 'letter-spacing') {
+    if (value === 'normal') return ''
+    const em = value.match(EM)
+    if (em) return `${Math.round(Number(em[1]) * 1000) / 1000}em`
+  }
   if (property === 'background-color' && isNoFill(value)) return ''
   if (property === 'opacity' && value !== '')
     return `${Math.round(Number(value) * 100)}%`
@@ -61,9 +71,11 @@ export function displayValue(property: string, raw: string): string {
 
 export function toCssValue(property: string, typed: string): string {
   const value = typed.trim()
+  /* A line height has no auto keyword, so the field's Auto is its normal. */
+  if (property === 'line-height' && value === 'Auto') return 'normal'
   if (value === 'Auto' || value === 'Normal') return value.toLowerCase()
   if (SIZES.has(property) && SIZE_MODES[value]) return SIZE_MODES[value]
-  if (!LENGTHS.has(property)) return value
+  if (!LENGTHS.has(property) && !SIGNED_LENGTHS.has(property)) return value
   return value
     .split(/\s+/)
     .map((token) => (/^-?\d*\.?\d+$/.test(token) ? `${token}px` : token))
@@ -92,8 +104,65 @@ export function sharedRadius(corners: readonly string[]): string | undefined {
  */
 export function clampScrub(property: string, value: number): number {
   if (property === 'font-weight') return Math.min(1000, Math.max(1, value))
-  if (LENGTHS.has(property)) return Math.max(0, value)
+  if (LENGTHS.has(property) || property === 'line-height') {
+    return Math.max(0, value)
+  }
   return value
+}
+
+/**
+ * A line height as the panel shows it: a ratio of the font size, the way a
+ * unitless value writes it. A browser computes a unitless value to pixels, so
+ * a pixel value reads back as its ratio when the font size is in pixels too.
+ */
+export function lineHeightValue(raw: string, fontSize: string): string {
+  const value = raw.trim()
+  if (value === 'normal') return 'Auto'
+  const ratio = (number: number): string =>
+    String(Math.round(number * 100) / 100)
+  if (NUMBER.test(value)) return ratio(Number(value))
+  const height = value.match(PX)
+  const size = fontSize.trim().match(PX)
+  if (height && size && Number(size[1]) > 0) {
+    return ratio(Number(height[1]) / Number(size[1]))
+  }
+  return value
+}
+
+/** The first family of a stack, unquoted, which is the one the field names. */
+export function firstFamily(stack: string): string {
+  const value = stack.trim()
+  if (value.startsWith('var(')) return value
+  const [first = ''] = value.split(',')
+  return first.trim().replace(/^(["'])(.*)\1$/, '$2')
+}
+
+/**
+ * Text alignment by the side it lands on. The logical keywords read as their
+ * left-to-right sides, which is the direction every frame here is written in.
+ */
+export function textAlignOf(computed: string): string {
+  const value = computed.trim()
+  if (value === 'start') return 'left'
+  if (value === 'end') return 'right'
+  return value
+}
+
+/**
+ * A value as the writer takes it. A whole declaration pasted from a
+ * stylesheet keeps its value alone, since the writer refuses the semicolon.
+ */
+export function declarationValue(property: string, typed: string): string {
+  const value = typed.trim().replace(/;\s*$/, '')
+  const prefix = `${property}:`
+  return value.toLowerCase().startsWith(prefix)
+    ? value.slice(prefix.length).trim()
+    : value
+}
+
+/** The token a value names when it is a bare `var()` and nothing else. */
+export function tokenOf(value: string): string | undefined {
+  return value.trim().match(VAR)?.[1]
 }
 
 /** Units a scrub moves for each pixel the pointer travels. */

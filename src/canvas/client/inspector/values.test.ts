@@ -2,15 +2,20 @@ import { describe, expect, it } from 'vitest'
 import {
   clampScrub,
   composeColor,
+  declarationValue,
   displayValue,
+  firstFamily,
   isNoFill,
+  lineHeightValue,
   opacityToCss,
   parseColor,
   readHex,
   readOpacity,
   sharedRadius,
   scrubStep,
+  textAlignOf,
   toCssValue,
+  tokenOf,
   type WrittenColor,
 } from '@/canvas/client/inspector/values'
 
@@ -324,5 +329,115 @@ describe('composeColor', () => {
     expect(written.map((color) => parseColor(composeColor(color)))).toEqual(
       written,
     )
+  })
+})
+
+describe('firstFamily', () => {
+  it('should read the first family of a quoted stack without its quotes', () => {
+    expect(firstFamily('"Geist Variable", Geist, sans-serif')).toBe(
+      'Geist Variable',
+    )
+  })
+
+  it('should read a single unquoted family as written', () => {
+    expect(firstFamily('serif')).toBe('serif')
+  })
+
+  it('should leave a token reference whole', () => {
+    expect(firstFamily('var(--type-body-family)')).toBe(
+      'var(--type-body-family)',
+    )
+  })
+})
+
+describe('lineHeightValue', () => {
+  it('should round a unitless line height to two decimals', () => {
+    expect(lineHeightValue('1.4567', '16px')).toBe('1.46')
+  })
+
+  it('should read normal as Auto', () => {
+    expect(lineHeightValue('normal', '16px')).toBe('Auto')
+  })
+
+  it('should read a pixel line height as its ratio to the font size', () => {
+    expect(lineHeightValue('24px', '16px')).toBe('1.5')
+  })
+
+  it('should leave a line height in another unit as written', () => {
+    expect(lineHeightValue('1.5em', '16px')).toBe('1.5em')
+  })
+})
+
+describe('letter spacing', () => {
+  it('should round an em letter spacing to three decimals', () => {
+    expect(displayValue('letter-spacing', '-0.0126em')).toBe('-0.013em')
+  })
+
+  it('should read normal as empty', () => {
+    expect(displayValue('letter-spacing', 'normal')).toBe('')
+  })
+
+  it('should read a pixel letter spacing as a bare number', () => {
+    expect(displayValue('letter-spacing', '-0.48px')).toBe('-0.5')
+  })
+
+  it('should write a bare negative number as pixels', () => {
+    expect(toCssValue('letter-spacing', '-1')).toBe('-1px')
+  })
+
+  it('should leave a negative scrub unclamped', () => {
+    expect(clampScrub('letter-spacing', -2)).toBe(-2)
+  })
+})
+
+describe('line height writes', () => {
+  it('should write Auto as normal', () => {
+    expect(toCssValue('line-height', 'Auto')).toBe('normal')
+  })
+
+  it('should leave a bare number unitless', () => {
+    expect(toCssValue('line-height', '1.5')).toBe('1.5')
+  })
+
+  it('should hold a scrubbed line height at zero', () => {
+    expect(clampScrub('line-height', -1)).toBe(0)
+  })
+})
+
+describe('textAlignOf', () => {
+  it('should read start as left', () => {
+    expect(textAlignOf('start')).toBe('left')
+  })
+
+  it('should read end as right', () => {
+    expect(textAlignOf('end')).toBe('right')
+  })
+
+  it('should leave a named side as it is', () => {
+    expect(textAlignOf('center')).toBe('center')
+  })
+})
+
+describe('declarationValue', () => {
+  it('should strip a pasted property name and trailing semicolon', () => {
+    expect(
+      declarationValue('font-family', 'font-family: Inter, sans-serif;'),
+    ).toBe('Inter, sans-serif')
+  })
+
+  it('should leave a bare value as typed', () => {
+    expect(declarationValue('font-family', '"Geist Variable"')).toBe(
+      '"Geist Variable"',
+    )
+  })
+})
+
+describe('tokenOf', () => {
+  it('should read the token a bare reference names', () => {
+    expect(tokenOf('var(--type-body-size)')).toBe('--type-body-size')
+  })
+
+  it('should read a literal as naming no token', () => {
+    expect(tokenOf('16px')).toBeUndefined()
   })
 })
