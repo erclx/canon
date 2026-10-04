@@ -84,7 +84,7 @@ The CLI does not run under Node at all. `Bun.Glob`, `Bun.TOML`, and `Bun.YAML` s
 
 ### A catalog command reads the installation, not the branch
 
-Every `canon` command taking `PROJECT_ROOT` reads the installation the CLI was linked from rather than `pwd`, because `src/cli/exec.ts` sets it to `resolve(import.meta.dir, '..')`. A catalog run inside a linked worktree therefore reports that installation's tree rather than the branch's: during a requirement-coverage batch `canon claude skills list --json` reported 30 skills lacking a file while the branch already held 16. A registry-installed binary is staler again, answering 56 skills with published descriptions while the checkout held 59, dropping the three most recently merged. Verify a branch's own tree by walking the filesystem, and treat any task or plan whose test strategy names a catalog command as untestable from a worktree.
+Every `canon` command taking `PROJECT_ROOT` reads the installation the CLI was linked from rather than `pwd`, because `src/roots/project.ts` derives it from `import.meta.url` and `src/cli/exec.ts` hands it to the script. A catalog run inside a linked worktree therefore reports that installation's tree rather than the branch's: during a requirement-coverage batch `canon claude skills list --json` reported 30 skills lacking a file while the branch already held 16. A registry-installed binary is staler again, answering 56 skills with published descriptions while the checkout held 59, dropping the three most recently merged. Verify a branch's own tree by walking the filesystem, and treat any task or plan whose test strategy names a catalog command as untestable from a worktree.
 
 ### The checkout-mismatch warning sits at the chokepoints
 
