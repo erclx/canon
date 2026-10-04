@@ -57,7 +57,7 @@ a tree the pull request never changed.
 - Restate a boundary `role-orchestrator`, `role-worker`, or `role-planner` states about itself
 - Report progress through the channel, which rebuilds on the sender's side the poll the announcement exists to retire
 - Post outside `review-pr` and `review-ui`, since every reader of the review headings breaks at once when one pass invents its own
-- Be a skill nothing invokes but its author typing the name. `orchestrator-launch.md` names it on the reviewer launch the way it names `role-planner` on a planning one, so a stretch where only a typed invocation reaches it is the signal that the role never took.
+- Be a skill nothing invokes but its author typing the name. `orchestrator-reviewer-launch.md` names it on the reviewer launch the way `orchestrator-launch.md` names `role-planner` on a planning one, so a stretch where only a typed invocation reaches it is the signal that the role never took.
 
 ## Guards
 

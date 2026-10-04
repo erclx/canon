@@ -32,7 +32,7 @@ Hand what it finds to each reviewer as facts in the brief, per `### What the bri
 
 ## Launching the reviewer
 
-Take the reviewer shape in `orchestrator-launch.md`, or its UI reviewer shape for the UI trigger. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
+Take the reviewer shape in `orchestrator-reviewer-launch.md`, or its UI reviewer shape for the UI trigger. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
 
 ## Local or cloud
 

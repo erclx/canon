@@ -1,9 +1,9 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, cloud build, review-address, planning, reviewer, and UI reviewer templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
-Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning, review-address, or reviewer shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
+Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
 
 ## Dispatch
 
@@ -34,7 +34,7 @@ Put a command whose skill carries `disable-model-invocation: true` at position z
 
 Never depend on the `Skill` tool route for a flagged skill. A refusal there tells the session not to replicate the workflow by other means, so a refused worker stops with a clean worktree, which is the correct outcome. The refusal is sticky inside a session, so recovery belongs to whoever writes the next prompt: re-dispatch onto the same branch with the build template above.
 
-The review-address, planning, and reviewer shapes below depend on no expansion at all. None of `role-worker`, `review-address`, `role-planner`, `plan-feature`, `role-reviewer`, or `review-pr` carries the flag, so all three correctly keep their leading word regardless of the delimiter or the position it sits at.
+The review-address and planning shapes below, and the reviewer shapes in `orchestrator-reviewer-launch.md`, depend on no expansion at all. None of `role-worker`, `review-address`, `role-planner`, `plan-feature`, `role-reviewer`, or `review-pr` carries the flag, so all three correctly keep their leading word regardless of the delimiter or the position it sits at.
 
 The same rule reaches a human relay. Hand an operator one message carrying one command at position zero, since two chained blocks pasted as separate messages can land as one, where everything after the first command's name reads as that command's argument and the second never fires.
 
@@ -89,34 +89,6 @@ What a planning dispatch owes instead is the reverse reading, because the plan i
 
 One row per dispatch. A session reused across a batch pays the context load once and ages its picture of the tree while it works, which is what puts the in-flight read on the task rather than on the batch, and one that compacts mid-batch loses the reasoning behind its earlier plans with nothing reporting it. Cap a reused session where the saving is worth it and say what the cap was.
 
-## Dispatch to review a pull request
+## Dispatch a reviewer
 
-`review-pr` is a single pass rather than a role, so a launch naming it alone reaches no `role-reviewer` and owes no message. Reach the role first on this launch, the way the planning shape reaches `role-planner`. `orchestrator-review-dispatch.md` decides whether a pull request takes this shape at all.
-
-No branch and no worktree are entered here. The reviewer reads the pull request at the head `review-pr` resolves and writes the comment and its body file alone.
-
-```bash
-claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-pr <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pass posts, carrying the heading and the count line, and message it again if you stop on a question."
-```
-
-`<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves the head itself and stamps the range it covered in its marker. `<dispatcher-id>`, `<model>`, and `<project>` resolve the same way they do above. Append the cross-branch facts after the controller clause, per `### What the brief may carry`.
-
-Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message that session instead when one holds the pull request.
-
-## Dispatch a review to a cloud reviewer
-
-Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the operator picked cloud for a code review. Its prompt opens with `/role-reviewer`, carries the cross-branch facts, and makes the posted review the announcement.
-
-## Dispatch to drive a pull request's checklist
-
-`review-ui` is the second pass `role-reviewer` may run, so this shape reaches the role first the way the code reviewer's does. `orchestrator-review-dispatch.md` decides whether a pull request takes it, and it runs beside the code reviewer rather than after it.
-
-```bash
-claude --bg --model sonnet -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pass posts, carrying the heading and the count line, and message it again if you stop on a question."
-```
-
-The model is fixed at Sonnet rather than taken from `## Pick the model`. A cheaper tier was measured on the same checklist and passed real defects as clean while judging the taste boxes it was told to leave, at a higher cost per run.
-
-Name an address in the brief only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record already holds is the one the pass reads first, and a second in the brief is a second source for one fact. Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise. Carry nothing else: the UI reviewer reads no diff and no code verdict, so the cross-branch facts the code brief carries stay out of this one.
-
-`<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do above. The prefix reads `reviewer-ui-` so a roster read for `reviewer-<project>-<number>` never matches the UI reviewer, and the two passes on one pull request stay two sessions.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-reviewer-launch.md` when `orchestrator-review-dispatch.md` sends a pull request to a dispatched reviewer, for the code, cloud, and UI reviewer shapes.
