@@ -10,7 +10,7 @@ Groups run in the order a project meets them. They reconcile the scenarios in [A
 
 This page and [skill map on request](skill-map-on-request.md) are the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row across the two. A skill serving two moments sits at the earlier one, this page counting as earlier than the sibling, and a mention on any other page is prose rather than routing. The sibling holds the groups that answer a request rather than mark a moment.
 
-Each row sits under the group its skill's `metadata.family` names. The landing page's skills field groups by that field and reads each row's text from both pages, so its build refuses a skill with no row, a row naming no skill, and a row filed under another group.
+Each row sits under the group its skill's `metadata.family` names. The landing page's skills field groups by that field and reads each row's text from both pages, so its build refuses a skill with no row, a row naming no skill, a row filed under another group, and a heading on either page naming no family group, even one with no rows under it. A new group takes its vocabulary entry in `src/claude/skills-families.ts` before its heading lands here.
 
 ## Set up a project
 
