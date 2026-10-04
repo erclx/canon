@@ -64,3 +64,13 @@ The branch standard's cap reads 2 words as the target with 4 as the ceiling, wid
 Two alternatives lost. Tightening `standards/plan.md` to three-word slugs moves the same problem onto roughly a sixth of existing plans, most of them at four words. Changing neither and letting the verb flag a non-conforming description leaves `git-branch` renaming a conforming slug anyway.
 
 Nothing can tell a plan-derived name from a hand-picked one, so the wider ceiling holds for every branch in every target that installed the standard. The standard says that plainly rather than scoping the sentence to a case no tool can detect.
+
+## Shared path beside hold
+
+A constraint on work in flight takes one of two forms, a hold or a shared path, because the dispatch conflict check stopped treating a shared file as a hold. On 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. The standard still told a plan to name each track as forbidding an act, and `role-worker` still had a worker concede a file a constraint named as held, so a shared path read as a hold at both ends.
+
+A shared-path line names the track, the path, and the branch merging second as the one that rebases, and forbids neither act. The sources are the ones the conflict check cites in `orchestrator-dispatch.md`, being Fowler's branching patterns and Semantic Conflict, DORA's trunk-based development, and GitHub's merge queue. The stamp and its re-test apply unchanged, since a shared-path line goes stale when the track merges just as a hold does.
+
+A contract change rides the existing consumer list in `**Risks:**` rather than a new marker. The standard already asked for the list on a resource with more than one consumer, and a new marker would change what `canon records validate plans` parses. The dispatcher reads that bullet for the contract hold.
+
+The standard carries a `canon-length-exempt` marker, since this change took it past the 300-line ceiling. Splitting the constraint forms into a second standard, as `plan-lifecycle.md` was split off, is the follow-up the marker names.
