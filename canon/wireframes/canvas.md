@@ -116,7 +116,8 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Dragging a selected frame's corner handle resizes it with the opposite corner held, and releasing writes the box to the layout in one write. Control or Command with an arrow resizes it by 10, or 50 with Shift, right and down growing it
 - Dragging a selected element's corner handle previews its size in the frame, then writes `width` and `height` in pixels, one edit per changed axis on the hash the last answered. Its inspector fields are the keyboard path
 - Picking a frame in the list selects it on the surface, and pressing one on the surface marks its row
-- A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected- An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
+- A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
+- An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
 - A field shows a pixel length rounded and with no unit, reads `auto` and `normal` as words, and shows a `normal` gap or a transparent background empty. A bare number typed into a length writes as pixels, and a rounded value left unchanged sends nothing
 - Dragging a number field's glyph scrubs it, one per pixel or ten with Shift, previewed in the frame and written once on release. A length stops at 0, a weight at 1 and 1000, and an empty gap scrubs from 0. A cancelled drag puts both back
 - A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it

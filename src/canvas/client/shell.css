@@ -239,8 +239,9 @@ code {
   align-items: center;
   /*
    * Sized against the zoom, so the label reads at one screen size at any zoom.
-   * A row too short for all three parts wraps the theme switch and then the
-   * size onto lines the clip hides, so the name keeps the row longest.
+   * A row too short for every part wraps the theme switch, then the editing
+   * badge, then the size onto lines the clip hides, so the name keeps the row
+   * longest.
    */
   flex-wrap: wrap;
   align-content: flex-start;
