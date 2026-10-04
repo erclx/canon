@@ -59,6 +59,7 @@ const SECOND = `<!doctype html>
 
 const BASE_CSS = `:root {
   --color-ink: #1a1a1a;
+  --color-clay: #c76b5f;
   --space-md: 16px;
 }
 `
@@ -277,6 +278,40 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await toggle.click()
 
     expect([first, second]).toEqual([0, 0])
+  }, 30_000)
+
+  it('should open the color picker inside the details panel in both themes', async () => {
+    const swatch = page.getByRole('button', { name: 'background picker' })
+    const picker = page.getByRole('dialog', { name: 'background colors' })
+    const panel = page.locator('.panel-right')
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    /* Opens the picker, captures it, and closes it from the keyboard. */
+    const capture = async (shot: string) => {
+      await swatch.click()
+      await expect
+        .poll(() => picker.getByRole('option').allInnerTexts())
+        .toEqual(['--color-ink', '--color-clay'])
+      const overflow = await panel.evaluate(
+        (element) => element.scrollWidth - element.clientWidth,
+      )
+      await panel.screenshot({ path: join(SHOTS, shot) })
+      await page.keyboard.press('Escape')
+      return overflow
+    }
+
+    const first = await capture('picker-a.png')
+    const isSwatchFocused = await swatch.evaluate(
+      (element) => element === document.activeElement,
+    )
+    await toggle.click()
+    const second = await capture('picker-b.png')
+    await toggle.click()
+
+    expect([first, second]).toEqual([0, 0])
+    expect(isSwatchFocused).toBe(true)
+    expect(await picker.count()).toBe(0)
   }, 30_000)
 
   it('should list tokens on the Theme tab', async () => {

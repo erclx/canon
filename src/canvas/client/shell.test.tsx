@@ -802,7 +802,8 @@ describe('Inspector element', () => {
 
     const panel = mount.querySelector('[aria-label="Element"]')
     expect(panel?.textContent).toContain('button.cta')
-    expect(fieldNamed('color').value).toBe('rgb(255, 0, 0)')
+    expect(fieldNamed('color').value).toBe('ff0000')
+    expect(fieldNamed('color opacity').value).toBe('100')
     expect(fieldNamed('size').value).toBe('20')
     expect(fieldNamed('weight').value).toBe('700')
   })
@@ -1107,26 +1108,215 @@ describe('Inspector edit', () => {
     ])
   })
 
-  it('should offer the project color tokens and write the one picked as var()', async () => {
+  /** Opens the color picker of the field of that name and returns it. */
+  function openPicker(name: string): HTMLElement {
+    const swatch = mount.querySelector<HTMLButtonElement>(
+      `[aria-label="Element"] [aria-label="${name} picker"]`,
+    )
+    if (!swatch) throw new Error(`no swatch on ${name}`)
+    act(() => swatch.click())
+    const picker = mount.querySelector<HTMLElement>(
+      `[aria-label="Element"] [role="dialog"][aria-label="${name} colors"]`,
+    )
+    if (!picker) throw new Error(`no picker on ${name}`)
+    return picker
+  }
+
+  function optionNamed(picker: HTMLElement, name: string): HTMLElement {
+    const option = [
+      ...picker.querySelectorAll<HTMLElement>('[role="option"]'),
+    ].find((candidate) => candidate.textContent?.includes(name))
+    if (!option) throw new Error(`no option ${name}`)
+    return option
+  }
+
+  it('should list the color tokens before the hex input', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+
+    const picker = openPicker('background')
+
+    const order = [
+      ...picker.querySelectorAll('[role="option"], [aria-label="hex"]'),
+    ].map((node) => node.getAttribute('aria-label') ?? node.textContent)
+    expect(order).toEqual(['--color-text', '--color-accent', 'hex'])
+  })
+
+  it('should write the token picked as var()', async () => {
     renderWithTokens([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
     stampHash(doc, 'abc123')
     clickIn(doc, 'h1')
-    const picker = mount.querySelector<HTMLSelectElement>(
-      '[aria-label="Element"] [aria-label="background token"]',
-    )
-    if (!picker) throw new Error('no token picker')
+    const picker = openPicker('background')
 
-    await commit(picker, 'var(--color-accent)')
+    await act(async () => {
+      optionNamed(picker, '--color-accent').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
 
-    expect([...picker.options].map((option) => option.textContent)).toContain(
-      '--color-accent',
-    )
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({
         property: 'background-color',
         value: 'var(--color-accent)',
       }),
+    ])
+  })
+
+  it('should write a token below full opacity as color-mix()', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: var(--color-accent)">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('background opacity'), '60')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'background-color',
+        value: 'color-mix(in srgb, var(--color-accent) 60%, transparent)',
+      }),
+    ])
+  })
+
+  it('should write a hex at half opacity as eight digits', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8800">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('background opacity'), '50')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'background-color',
+        value: '#ff880080',
+      }),
+    ])
+  })
+
+  it('should normalize a hex typed with a hash and three digits', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('background'), '#F80')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: '#ff8800' }),
+    ])
+  })
+
+  it('should post nothing for an opacity above 100', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8800">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('background opacity'), '120')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should post nothing for an opacity below 0', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8800">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('background opacity'), '-5')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should show a token value by its name with no raw marker', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: var(--color-accent)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('background').value).toBe('--color-accent')
+    expect(
+      fieldNamed('background').closest('.color-field')?.textContent,
+    ).not.toContain('raw')
+  })
+
+  it('should read a transparent background as no fill and post nothing on open and close', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    const picker = openPicker('background')
+    act(() => {
+      picker.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+      )
+    })
+
+    expect(fieldNamed('background').value).toBe('')
+    expect(fieldNamed('background opacity').value).toBe('')
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should close on Escape and return focus to the swatch', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    act(() => {
+      picker.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+      )
+    })
+
+    expect(
+      mount.querySelector('[aria-label="Element"] [role="dialog"]'),
+    ).toBeNull()
+    expect(document.activeElement?.getAttribute('aria-label')).toBe(
+      'background picker',
+    )
+  })
+
+  it('should pick the token the arrows reach on Enter', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const list =
+      openPicker('background').querySelector<HTMLElement>('[role="listbox"]')
+    if (!list) throw new Error('no token list')
+    const press = (key: string) =>
+      list.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+
+    await act(async () => {
+      press('ArrowDown')
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    await act(async () => {
+      press('Enter')
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: 'var(--color-accent)' }),
     ])
   })
 
@@ -1272,7 +1462,7 @@ describe('Inspector edit', () => {
 
     clickIn(doc, 'button')
 
-    expect(glyphOf('color').classList.contains('is-scrub')).toBe(false)
+    expect(glyphOf('direction').classList.contains('is-scrub')).toBe(false)
   })
 
   it('should scrub an empty gap from its placeholder', async () => {

@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
+import { ColorField } from '@/canvas/client/inspector/color-field'
 import {
   Field,
   ReadOnlyField,
@@ -10,6 +11,7 @@ import { Section } from '@/canvas/client/inspector/section'
 import {
   clampScrub,
   displayValue,
+  parseColor,
   toCssValue,
 } from '@/canvas/client/inspector/values'
 import {
@@ -75,15 +77,10 @@ const TYPE_FIELDS: readonly StyleField[] = [
   { label: 'weight', glyph: 'Wt', property: 'font-weight' },
 ]
 
-const FILL_FIELDS: readonly StyleField[] = [
-  { label: 'color', glyph: 'Fg', property: 'color' },
-  {
-    label: 'background',
-    glyph: 'Bg',
-    property: 'background-color',
-    placeholder: 'None',
-  },
-]
+const FILL_FIELDS = [
+  { label: 'color', property: 'color' },
+  { label: 'background', property: 'background-color' },
+] as const
 
 function inlineValue(element: Element, property: string): string {
   return 'style' in element
@@ -127,13 +124,28 @@ function isRawInline(element: Element, property: string): boolean {
  * an edit starts from what the operator sees.
  */
 function currentValue(element: Element, property: string): string {
-  const inline = inlineValue(element, property)
-  if (inline) return inline
+  return inlineValue(element, property) || computedValue(element, property)
+}
+
+function computedValue(element: Element, property: string): string {
   return (
     element.ownerDocument.defaultView
       ?.getComputedStyle(element)
       .getPropertyValue(property) ?? ''
   )
+}
+
+/**
+ * The color a token paints in the frame, read off a probe rather than the
+ * token's text, since a token's value may itself be a `var()` or a mix.
+ */
+function tokenPaint(doc: Document, name: string): string {
+  const probe = doc.createElement('span')
+  probe.style.setProperty('color', `var(${name})`)
+  ;(doc.body ?? doc.documentElement).append(probe)
+  const painted = computedValue(probe, 'color')
+  probe.remove()
+  return painted
 }
 
 function holdsTextAlone(element: Element): boolean {
@@ -206,6 +218,10 @@ function ElementFields({
   const rect = node.getBoundingClientRect()
   const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
+  const colorTokens =
+    tokens.value?.groups
+      ?.find((group) => group.kind === 'color')
+      ?.tokens.map((token) => token.name) ?? []
 
   /**
    * Previews into the frame's own inline style and writes through the same
@@ -272,25 +288,21 @@ function ElementFields({
       </Section>
       <Section title="Fill">
         {FILL_FIELDS.map((field) => {
-          const initial = currentValue(node, field.property)
+          const painted = computedValue(node, field.property)
+          const text = currentValue(node, field.property)
           return (
-            <div key={field.property} class="fill-row is-wide">
-              {styleField(field)}
-              {isRawInline(node, field.property) ? (
-                <span
-                  class="raw"
-                  title="Set as a raw value, so it will not follow the theme. Pick a token to fix it"
-                >
-                  raw
-                </span>
-              ) : null}
-              <TokenPicker
-                label={field.label}
-                initial={initial}
-                isBusy={isBusy}
-                onCommit={commit(field.property)}
-              />
-            </div>
+            <ColorField
+              key={field.property}
+              label={field.label}
+              color={parseColor(text) ?? parseColor(painted)}
+              text={text}
+              painted={painted}
+              tokens={colorTokens}
+              paint={(name) => tokenPaint(doc, name)}
+              isRaw={isRawInline(node, field.property)}
+              isBusy={isBusy}
+              onCommit={commit(field.property)}
+            />
           )
         })}
       </Section>

@@ -149,3 +149,164 @@
   color: var(--color-success);
   font-weight: 400;
 }
+
+/*
+ * A color is one field: a swatch leading in the glyph's lane, the hex, and the
+ * opacity right-aligned. The picker opens in the flow under it, so it can never
+ * reach past the panel's edge or scroll it sideways.
+ */
+.color-field {
+  min-width: 0;
+}
+
+.swatch {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.swatch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/*
+ * The paint is the top layer over a checker, so an opacity below full reads
+ * as one. `--paint` carries the color, since a background color sits under
+ * every image layer and the checker would cover it.
+ */
+.swatch-paint {
+  --paint: transparent;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  background-image:
+    linear-gradient(var(--paint), var(--paint)),
+    linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-border) 75%);
+  background-size:
+    auto,
+    6px 6px,
+    6px 6px,
+    6px 6px,
+    6px 6px;
+  background-position:
+    0 0,
+    0 0,
+    0 3px,
+    3px -3px,
+    -3px 0;
+}
+
+.swatch:hover .swatch-paint {
+  border-color: var(--color-muted);
+}
+
+/* No fill draws a slash rather than a color. */
+.swatch.is-none .swatch-paint {
+  background-image: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    var(--color-muted) calc(50% - 1px),
+    var(--color-muted) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  background-size: auto;
+}
+
+.color-field .glyph-field-input {
+  text-transform: uppercase;
+}
+
+.color-field .glyph-field-input::placeholder {
+  text-transform: none;
+}
+
+/* A token name is a name, so it keeps its own case. */
+.color-field .glyph-field-input.is-token {
+  flex: 0 1 auto;
+  margin-right: auto;
+  padding: 0 var(--space-xs);
+  border-radius: var(--radius-action);
+  background: var(--color-background);
+  text-transform: none;
+}
+
+.color-opacity {
+  flex: none;
+  width: 2.25rem;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.color-opacity:disabled {
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+.color-percent {
+  flex: none;
+  padding-right: var(--space-xs);
+  color: var(--color-muted);
+  user-select: none;
+}
+
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-chrome);
+}
+
+.token-list {
+  max-height: 12rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.token-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 24px;
+  padding: 0 var(--space-xs);
+  border-radius: var(--radius-action);
+  cursor: pointer;
+}
+
+.token-option:hover,
+.token-option.is-active {
+  background: var(--color-surface);
+}
+
+.token-option[aria-selected='true'] .token-name {
+  color: var(--color-accent);
+}
+
+.token-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
