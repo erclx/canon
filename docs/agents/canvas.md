@@ -47,6 +47,16 @@ Inline style beats a class, so an operator's edit masks a class change Claude ma
 
 The Theme tab in the shell lists what the token stylesheet defines, grouped as color, spacing, radius, font family, font size, and other. The page record at `/api/pages` carries the same list as `tokens.groups`.
 
+## Mark a frame being edited
+
+`canvas editing <page>/<frame>` marks a frame as being edited, so an open canvas can show who is working on it before the write lands. Run it before writing a frame and again with `--done` once the edits are written. A bare `canvas editing` lists the live marks, and `--json` emits `{ ok, editing }` after each of the three, with each mark carrying `page`, `frame`, `by`, `since`, and `until`.
+
+The label is `--by <name>` when given. Without it, the verb reads the caller's name off the session roster, and falls back to `a session` when the environment names no session or the roster holds none matching it.
+
+The marks live in `.canon/canvas/editing.json`, keyed by `<page>/<frame>`. Each write takes the record's lock and merges its one key, so two sessions marking two frames both keep their marks. A mark lapses five minutes after it was written, and marking the frame again renews it, so a session that never clears its mark misleads the operator for five minutes at most. A read leaves out a lapsed mark and a mark on a frame since removed, and a record that does not parse reads as holding none and is replaced by the next mark.
+
+A mark refuses `no-page` or `no-frame` for a target not on disk, and `invalid-name` for a target that is not `<page>/<frame>` or for `--done` with no target. `--done` on a frame holding no mark succeeds and writes nothing. The mark gates no write, so an inspector edit to a marked frame still lands, and the hash check still refuses one made against a file the session rewrote. The page record at `/api/pages` carries the live marks as `editing`, each with `page`, `frame`, `by`, and `until`.
+
 ## Capture
 
 `canvas capture <page>/<frame>` renders one frame as a PNG, and `canvas capture <page>` renders every frame on the page. Each goes through a server started for the call, so the injected tokens are in the image, and renders at the frame's own width from the layout, so a media query resolves there. It never captures the file on disk.
