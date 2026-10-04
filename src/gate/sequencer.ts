@@ -7,6 +7,11 @@ import type {
   RunCommand,
 } from '@/gate/measures'
 import type { Check, Stage } from '@/gate/stages'
+import {
+  acquireSuiteLock,
+  type LockHolder,
+  machineLockPath,
+} from '@/gate/suite-lock'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
 
@@ -27,8 +32,16 @@ export interface StageResult {
   readonly emissions: readonly Emission[]
   /** The remedy line a failed stage prints, naming what to do about it. */
   readonly failure?: string
-  /** Wall time the stage's checks took, including every process spawn. */
+  /**
+   * Wall time the stage took, including every process spawn and, on a stage
+   * holding a machine lock, the time it queued behind another worktree.
+   */
   readonly ms: number
+  /**
+   * The part of `ms` spent queued behind another worktree's hold on the stage's
+   * machine lock. Absent where the stage never waited.
+   */
+  readonly queuedMs?: number
 }
 
 export interface GateContext extends MeasureContext {
@@ -39,6 +52,12 @@ export interface GateContext extends MeasureContext {
    * scoping is off and every stage runs.
    */
   readonly changed?: readonly string[]
+  /**
+   * Told when a stage starts queuing on its machine lock. A stage prints only
+   * once it returns, so without this a queued gate is silent for the whole
+   * wait and reads as a hung suite.
+   */
+  readonly onQueue?: (label: string, holder: LockHolder) => void
 }
 
 export interface ChangedSet {
@@ -157,7 +176,40 @@ async function executeStage(
     }
   }
 
-  const emissions: Emission[] = []
+  // CI runs one suite per runner, so a lock there queues behind nothing.
+  if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [])
+
+  const held = await acquireSuiteLock({
+    path: machineLockPath(stage.lock),
+    root: ctx.root,
+    onWait: (holder) => ctx.onQueue?.(stage.label, holder),
+  })
+  const queued: Emission[] =
+    held.waitedOn === undefined
+      ? []
+      : [
+          {
+            kind: 'info',
+            text: `Waited ${Math.round(held.waitedMs / 1000)}s for the ${stage.label} stage another worktree held, at ${held.waitedOn.root}`,
+          },
+        ]
+
+  try {
+    const outcome = await runChecks(stage, ctx, queued)
+    return held.waitedOn === undefined
+      ? outcome
+      : { ...outcome, queuedMs: held.waitedMs }
+  } finally {
+    held.release()
+  }
+}
+
+async function runChecks(
+  stage: Stage,
+  ctx: GateContext,
+  leading: readonly Emission[],
+): Promise<StageOutcome> {
+  const emissions: Emission[] = [...leading]
 
   for (const check of stage.checks) {
     const outcome = await runCheck(check, ctx)

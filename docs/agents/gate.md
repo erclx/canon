@@ -86,4 +86,6 @@ One code for a failure, which is what a `bun run` caller and a git hook both rea
 
 A failing stage carries its remedy in `failure`, and the same line goes to stderr so a caller reading neither the record nor the frame is still told what to fix.
 
-`ms` carries the wall time each stage's checks took, including every process spawn, and the top-level `ms` sums them. Neither reading changes what a stage measures. Both exist so a slow run is attributable to a stage rather than read off a stopwatch held against the whole thing.
+`ms` carries the wall time each stage took, including every process spawn, and the top-level `ms` sums them. Neither reading changes what a stage measures. Both exist so a slow run is attributable to a stage rather than read off a stopwatch held against the whole thing.
+
+The Tests stage holds a machine lock so one box runs one suite at a time, and its `ms` includes any time it queued behind another worktree's suite. A stage that queued carries `queuedMs`, the part of `ms` spent waiting, which is how to separate a queue from a slow suite. The field is absent on a stage that never waited. The wait is also announced on stderr when it starts, naming the holder's pid and worktree, in every mode.

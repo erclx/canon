@@ -113,6 +113,12 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     cli: cliRunner(root),
     write,
     changed: changed.scoped ? changed.files : undefined,
+    onQueue: (label, holder) => {
+      const text = `${label} is waiting for the suite pid ${holder.pid} runs at ${holder.root}`
+      // stderr in both modes, so a JSON caller's stdout stays one record.
+      if (emitJson) process.stderr.write(`${text}\n`)
+      else logWarn(text)
+    },
   }
 
   const results = await runStages(
@@ -138,12 +144,13 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
         changed: changed.files.length,
         summary,
         ms: results.reduce((total, result) => total + result.ms, 0),
-        stages: results.map(({ id, label, status, failure, ms }) => ({
+        stages: results.map(({ id, label, status, failure, ms, queuedMs }) => ({
           id,
           label,
           status,
           failure,
           ms,
+          queuedMs,
         })),
       })}\n`,
     )

@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: What sequences the gate stages, the four check kinds, the unmeasured status, the report-only Audit set stage and its upstream corpus, and the gotchas of a regenerate-then-assert run
+description: What sequences the gate stages and which one queues behind another worktree, the four check kinds, the unmeasured status, the report-only Audit set stage and its upstream corpus, and the gotchas of a regenerate-then-assert run
 ---
 
 # Overview
@@ -23,6 +23,8 @@ Owns the stages that read a measure and fail a push on it rather than regenerati
 `bun run check` resolves to `canon gate run` and `bun run check:ci` to `canon gate run --all --no-write`. Three things live in `src/gate/`: the stage table in `stages.ts`, the changed-file scoping and the run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
 
 Three properties are load-bearing and each has a case in `src/gate/sequencer.test.ts`. Stages run in table order. A stage that finds a fact halts the run, which is what makes a regenerate-then-assert run reveal one surface at a time. A scoped stage that the changed set carries nothing for says so rather than printing a clean line.
+
+The Tests stage alone holds a machine lock while it runs, so a gate in one worktree queues behind another worktree's suite rather than running beside it. `canon/context/development/tests.md` carries why.
 
 A stage is a list of checks, and a check is one of four kinds:
 

@@ -61,9 +61,12 @@ export const SYSTEM_PROBES: LivenessProbes = { procStartOf, responds }
  * whose pid was reused and the record is discarded. Where it does not, the
  * probe alone stands, and every surviving row is marked so a caller never reads
  * a recycled pid as a confirmed identity.
+ *
+ * It reads two fields and asks for no more, so a record that is not a session,
+ * such as the gate's machine lock, carries the same proof.
  */
 export function liveness(
-  record: SessionRecord,
+  record: Pick<SessionRecord, 'pid' | 'procStart'>,
   probes: LivenessProbes = SYSTEM_PROBES,
 ): Liveness {
   const started = record.procStart

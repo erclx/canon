@@ -1,6 +1,6 @@
 ---
 title: Test scoping
-description: Which change runs which src/ test, the census of corpora a src/ test asserts over from outside src/, the vitest invocation forms and their failure signatures, and the include and unused-import gaps
+description: Which change runs which src/ test, the census of corpora a src/ test asserts over from outside src/, the machine lock that runs one suite per box at a time, the vitest invocation forms and their failure signatures, and the include and unused-import gaps
 ---
 
 # Test scoping
@@ -40,6 +40,36 @@ Tests admits the census and nothing wider. Widening to every change was the alte
 Types was left alone. Every census entry is a test asserting over a corpus, and a typecheck over unchanged TypeScript reports what it reported last run. Types therefore still skips a branch that fails a test through a corpus: dropping `'**/*.astro'` from the `paths:` list in `governance/rules/ui/450-link-behavior.md` fails `src/gov/list.test.ts`, and Types reports `Skipped, no TypeScript changes` while Tests catches it.
 
 The gap is narrowed to what the census names rather than closed, since a corpus the census has not named is unguarded until someone adds its prefix. It is a local gap alone, since `hasChanged` in `src/gate/sequencer.ts` returns true whenever scoping is off and `bun run check:ci` passes `--all`, so CI runs every stage on every change.
+
+## The Tests stage holds a machine lock
+
+The Tests stage holds a lock file under the machine state folder while its suite runs, so one box runs one suite at a time however many worktrees push at once. `lock: 'tests'` on the stage in `src/gate/stages.ts` names it, `executeStage` in `src/gate/sequencer.ts` takes it once the scope check passes and releases it in a `finally`, and `src/gate/suite-lock.ts` owns the file.
+
+A gate that starts queuing says so on stderr at once, naming the holder's pid and worktree, since a stage prints only after it returns and a silent wait reads as a hung suite. Once the suite has run, the stage repeats the wait in its own output with the seconds it took. The stage's `ms` stays wall time and includes the wait, and `queuedMs` in the `--json` record carries the queued part.
+
+### Why a lock rather than a worker cap
+
+vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts`, `cspell`, or a browser past their timeouts. A lone default run passed every case.
+
+| Concurrent full suites | Workers each | Wall | Failed tests per run       |
+| ---------------------- | ------------ | ---- | -------------------------- |
+| 4                      | default      | 171s | 48 to 58                   |
+| 4                      | 8            | 48s  | 0 to 1, all the fixed port |
+| 7, fixed port excluded | 8            | 102s | 9 to 14                    |
+
+A cap thins each run's load and leaves the sum growing with the wave, so seven capped suites still failed. Only bounding how many suites run at once removes the failure, and it costs a queued worktree about the 17 seconds one lone run takes. The lock never gives up on a live holder, since a deadline turns a long queue back into the intermittent failure the lock removes.
+
+### How a dead holder is taken over
+
+The file records the holder's pid, its start time from `/proc`, and its worktree root. An acquirer meeting the file asks `liveness` in `src/sessions/live.ts` whether that holder still runs, and takes over at once when it does not, so a gate killed with `SIGKILL` mid-suite never wedges the queue. Comparing start times catches a pid another process inherited. Where `/proc` is absent, as on macOS, the check falls back to a signal probe, which a reused pid fools.
+
+A takeover renames the stale file aside rather than deleting it, because two acquirers judging one stale file would both get through a delete followed by a create. The rename hands the file to one of them, and the moved file is compared against what was judged, so an acquirer that moved a file another one had just written puts it back and waits.
+
+### What the lock does not cover
+
+CI skips the lock, since each runner runs one suite. A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+
+The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.
 
 ## Gotchas
 
