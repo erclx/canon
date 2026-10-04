@@ -10,6 +10,7 @@ import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { EDITING_FILE, EDITING_TTL_MS, markEditing } from '@/canvas/editing'
 import { type CanvasStarted, startCanvas } from '@/canvas/server'
 import { SERVE_HOST } from '@/serve/static'
 
@@ -681,5 +682,54 @@ describe('POST /api/frames/edit', () => {
 
     expect(response.status).toBe(403)
     expect(frameFile('drafts', 'hero')).toBe(EDIT_FRAME)
+  })
+})
+
+describe('editing marks', () => {
+  it('should report a live mark in the page list', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const now = new Date()
+    markEditing(ROOT, 'drafts', 'hero', 'builder', now)
+    const server = start()
+
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(record.editing).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        by: 'builder',
+        until: new Date(now.getTime() + EDITING_TTL_MS).toISOString(),
+      },
+    ])
+  })
+
+  it('should leave an expired mark out of the page list', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    markEditing(
+      ROOT,
+      'drafts',
+      'hero',
+      'builder',
+      new Date(Date.now() - EDITING_TTL_MS - 1000),
+    )
+    const server = start()
+
+    const record = await (await get(server, '/api/pages')).json()
+
+    expect(record.editing).toEqual([])
+  })
+
+  it('should send a change event when a mark is written', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+    const events = await openEvents(server)
+    await events.until(': open')
+
+    markEditing(ROOT, 'drafts', 'hero', 'builder', new Date())
+
+    expect(await events.until(EDITING_FILE)).toContain(
+      `{"page":"${EDITING_FILE}","file":""}`,
+    )
   })
 })
