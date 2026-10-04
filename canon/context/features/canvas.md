@@ -34,7 +34,7 @@ The server injects one stylesheet first in each frame's `head`, so a frame drawn
 
 - A frame capture goes through a server started for the call, so the injected tokens are in the image, and renders at the frame's layout width so a media query resolves there. It never captures the file on disk.
 - A single-frame PNG is the frame's whole document, so its height follows the content. The composite page image places each frame at its layout position clipped to its box, so a frame's height there follows the box and can differ from its own PNG.
-- The font check reads the first family on the frame's `html` element. A frame that sets no root font inherits the browser's default serif, which many machines lack, so the capture refuses it. The standard requires a root font for that reason.
+- The font check reads the first family of each rendered text element in the frame, so a frame may set its font on `html`, `body`, or any ancestor of its text. A frame that sets no font inherits the browser's default serif, which many machines lack, so the capture refuses it. The standard forbids assuming a default font for that reason.
 
 ### Skill
 
@@ -50,6 +50,6 @@ The component gallery existed only for the board's components panel and retired 
 ## Gotchas
 
 - `canon records push` does not back `.canon/canvas/`, so a lost checkout loses every page. The skill promises nothing about survival until the backup covers it.
-- The shell is bundled from `src/canvas/client/` at serve time, so a dependency missing from `node_modules` serves a blank shell rather than refusing. Run the install in a fresh worktree before serving.
+- The shell is bundled from `src/canvas/client/` at serve time, so `canvas serve` refuses a dependency missing from `node_modules` as `missing-client-deps`. Run the install in a fresh worktree before serving.
 - A stylesheet a client module imports reaches the served shell through the bundler with no `<link>` in `index.html`, as `inspector/fields.css` does. Happy-dom ignores stylesheets, so only the browser walk in `src/canvas/shell.e2e.test.ts` proves a rule applies.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.
