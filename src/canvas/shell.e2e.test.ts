@@ -793,6 +793,121 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     ).toBe('true')
   }, 30_000)
 
+  /** The plane's transform, which moves with every pan and zoom. */
+  function planeTransform(): Promise<string> {
+    return page
+      .locator('.plane')
+      .evaluate((plane) => (plane as HTMLElement).style.transform)
+  }
+
+  it('should pan rather than pick when the pan tool drags over a frame', async () => {
+    await selectFrameAt(100)
+    const tools = page.getByRole('toolbar', { name: 'Tools' })
+    await tools.getByRole('button', { name: 'Pan (H)' }).click()
+    const body = await page
+      .locator(`.frame[data-frame="${FRAME}"] iframe`)
+      .boundingBox()
+    if (!body) throw new Error('no frame on screen')
+    const startX = body.x + body.width / 2
+    const startY = body.y + body.height / 2
+    const before = await planeTransform()
+    const picks: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/selection')) picks.push(sent.url())
+    })
+
+    // A frame under the pan tool takes no pointer, so the press lands behind it.
+    const hit = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.tagName,
+      [startX, startY],
+    )
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX + 80, startY + 40, { steps: 4 })
+    await page.mouse.up()
+
+    expect(hit).not.toBe('IFRAME')
+    expect(
+      await tools
+        .getByRole('button', { name: 'Pan (H)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(picks).toEqual([])
+    await page.screenshot({ path: join(SHOTS, 'pan-tool.png') })
+    await page.keyboard.press('v')
+    expect(
+      await tools
+        .getByRole('button', { name: 'Move (V)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  }, 30_000)
+
+  it('should pan with Space held after a pick moved focus into the frame', async () => {
+    const frameDoc = page.frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+    await frameDoc.locator('h1').click()
+    const body = await page
+      .locator(`.frame[data-frame="${FRAME}"] iframe`)
+      .boundingBox()
+    if (!body) throw new Error('no frame on screen')
+    const startX = body.x + body.width / 2
+    const startY = body.y + body.height / 2
+    const before = await planeTransform()
+    const picks: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/selection')) picks.push(sent.url())
+    })
+
+    await page.keyboard.down('Space')
+    await expect
+      .poll(() =>
+        page
+          .getByRole('button', { name: 'Pan (H)' })
+          .getAttribute('aria-pressed'),
+      )
+      .toBe('true')
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX - 60, startY - 30, { steps: 4 })
+    await page.mouse.up()
+    await page.keyboard.up('Space')
+
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(picks).toEqual([])
+    expect(
+      await page
+        .getByRole('button', { name: 'Move (V)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  }, 30_000)
+
+  it('should fit every frame on Shift+1', async () => {
+    await selectFrameAt(200)
+    await page.locator('main.surface').focus()
+
+    await page.keyboard.press('Shift+Digit1')
+
+    const viewport = await page.locator('.viewport').boundingBox()
+    const strip = await page
+      .getByRole('toolbar', { name: 'Tools' })
+      .boundingBox()
+    if (!viewport || !strip) throw new Error('no viewport on screen')
+    for (const name of [FRAME, 'second']) {
+      const box = await page
+        .locator(`.frame[data-frame="${name}"]`)
+        .boundingBox()
+      if (!box) throw new Error(`no ${name} on screen`)
+      // The label sits above the box, so the box clears the strip's right edge.
+      expect(box.x).toBeGreaterThanOrEqual(strip.x + strip.width)
+      expect(box.y).toBeGreaterThanOrEqual(viewport.y)
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.x + viewport.width)
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        viewport.y + viewport.height,
+      )
+    }
+    await page.screenshot({ path: join(SHOTS, 'fit.png') })
+  }, 30_000)
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
