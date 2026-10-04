@@ -906,9 +906,9 @@ function planPath(target: string, dir: string, root: string): string {
 }
 
 /**
- * The `## Run now` test a person cannot check by eye. The shared pairs are read
- * off the `Touches` column, the only place either set is written down, so a
- * row stating none leaves its merge order and its reach unreadable.
+ * Reports a `## Run now` row stating no file set. The `Touches` column is the
+ * only place a row's set is written down, so a row stating none drops out of
+ * every pair `checkSharedFiles` reads, and its merge order and reach go unread.
  */
 function checkTouches(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
