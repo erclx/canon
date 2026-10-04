@@ -211,6 +211,12 @@ export function toggleLayers(key: string): void {
  */
 let editingTimer: ReturnType<typeof setTimeout> | undefined
 
+/*
+ * The longest delay a timer holds. A longer one fires at once, so an `until`
+ * far out would reschedule on every tick rather than wait.
+ */
+const MAX_TIMER_MS = 2 ** 31 - 1
+
 function liveMarks(
   marks: Iterable<readonly [string, EditingRef]>,
   now: number,
@@ -230,7 +236,7 @@ function scheduleExpiry(): void {
       editingFrames.value = liveMarks(editingFrames.value, Date.now())
       scheduleExpiry()
     },
-    Math.max(0, next - Date.now()),
+    Math.min(MAX_TIMER_MS, Math.max(0, next - Date.now())),
   )
 }
 

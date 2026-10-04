@@ -22,6 +22,7 @@ import {
   applyChange,
   applyRecord,
   editedHashes,
+  editingFrames,
   type PagesRecord,
   resetState,
   savedEdit,
@@ -558,6 +559,25 @@ describe('editing badge', () => {
 
     expect(badgeText('hero')).toBe('')
     expect(badgeText('phone')).toBe('worker-b editing')
+  })
+
+  it('should not wake for a mark expiring past the longest timer delay', () => {
+    fakeClock()
+    renderMarked(
+      marked([frame('hero')], [mark('hero', 'worker-a', 60 * 86_400_000)]),
+    )
+    let writes = 0
+    const stop = editingFrames.subscribe(() => {
+      writes += 1
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(1_000)
+    })
+    stop()
+
+    expect(writes).toBe(1)
+    expect(badgeText('hero')).toBe('worker-a editing')
   })
 
   it('should draw no badge for a mark already past its expiry', () => {
