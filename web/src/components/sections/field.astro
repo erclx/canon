@@ -6,9 +6,10 @@ import { readSession, usedNames } from '../../lib/session'
  * Every command and every skill, with the ones the session used lit. The names
  * and both totals are build-time reads, the command names off `canon --help`
  * and the skills off `canon claude skills list`, so each heading's count is the
- * length of the list under it. The skills sit under the groups of the skill
- * map, each with its "When to use" text, and `skillGroups` refuses a skill the
- * map does not carry. The lit names are authored and checked against the
+ * length of the list under it. The skills sit under the group their
+ * `metadata.family` names, in the family vocabulary's order, each with its
+ * "When to use" text from the skill map, and `skillGroups` refuses a skill the
+ * map does not carry or files under another group. The lit names are authored and checked against the
  * catalog, so a rename fails the build rather than lighting nothing.
  */
 const session = readSession()

@@ -211,19 +211,91 @@ function mapOf(...groups: [string, [string, string][]][]) {
     .join('\n\n')
 }
 
+const FAMILIES = [
+  { key: 'first', group: 'First moment' },
+  { key: 'second', group: 'Second moment' },
+  { key: 'other', group: 'Moment' },
+]
+
+/** Catalog entries, each name filed under the family keyed in `family`. */
+function catalog(family: Record<string, string | null>) {
+  return Object.entries(family).map(([name, key]) => ({ name, family: key }))
+}
+
 describe('skillGroups', () => {
-  it('should return groups in file order with the prefix stripped', () => {
+  it('should return groups in vocabulary order rather than page order', () => {
     const markdown = mapOf(
       ['Second moment', [['beta', 'When b']]],
       ['First moment', [['alpha', 'When a']]],
     )
 
-    const groups = skillGroups(markdown, ['alpha', 'beta'])
+    const groups = skillGroups(
+      markdown,
+      catalog({ alpha: 'first', beta: 'second' }),
+      FAMILIES,
+    )
 
     expect(groups).toEqual([
-      { group: 'Second moment', skills: [{ name: 'beta', usage: 'When b' }] },
       { group: 'First moment', skills: [{ name: 'alpha', usage: 'When a' }] },
+      { group: 'Second moment', skills: [{ name: 'beta', usage: 'When b' }] },
     ])
+  })
+
+  it('should keep the page order of rows inside a group', () => {
+    const markdown = mapOf([
+      'Moment',
+      [
+        ['beta', 'When b'],
+        ['alpha', 'When a'],
+      ],
+    ])
+
+    const [group] = skillGroups(
+      markdown,
+      catalog({ alpha: 'other', beta: 'other' }),
+      FAMILIES,
+    )
+
+    expect(group?.skills.map((skill) => skill.name)).toEqual(['beta', 'alpha'])
+  })
+
+  it('should refuse a row filed under a heading that is not its family group, naming it', () => {
+    const markdown = mapOf(
+      ['First moment', [['alpha', 'When a']]],
+      ['Second moment', [['beta', 'When b']]],
+    )
+
+    expect(() =>
+      skillGroups(
+        markdown,
+        catalog({ alpha: 'second', beta: 'second' }),
+        FAMILIES,
+      ),
+    ).toThrow(/alpha under First moment, family group Second moment/)
+  })
+
+  it('should refuse a row whose skill declares no known family', () => {
+    const markdown = mapOf(['Moment', [['alpha', 'When a']]])
+
+    expect(() =>
+      skillGroups(markdown, catalog({ alpha: null }), FAMILIES),
+    ).toThrow(/alpha under Moment, no known family/)
+  })
+
+  it('should match a heading to its group exactly after trimming', () => {
+    const markdown = mapOf(['moment', [['alpha', 'When a']]])
+
+    expect(() =>
+      skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES),
+    ).toThrow(/headings naming no family group: moment/)
+  })
+
+  it('should accept a heading carrying trailing space', () => {
+    const markdown = mapOf(['Moment  ', [['alpha', 'When a']]])
+
+    const groups = skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES)
+
+    expect(groups.map((entry) => entry.group)).toEqual(['Moment'])
   })
 
   it('should remove an HTML comment and backticks from the usage text', () => {
@@ -232,7 +304,11 @@ describe('skillGroups', () => {
       [['alpha', 'Use `beta` first <!-- canon-keep-retired -->']],
     ])
 
-    const [group] = skillGroups(markdown, ['alpha'])
+    const [group] = skillGroups(
+      markdown,
+      catalog({ alpha: 'other' }),
+      FAMILIES,
+    )
 
     expect(group?.skills[0]?.usage).toBe('Use beta first')
   })
@@ -240,7 +316,13 @@ describe('skillGroups', () => {
   it('should refuse a catalog skill with no row, naming it', () => {
     const markdown = mapOf(['Moment', [['alpha', 'When a']]])
 
-    expect(() => skillGroups(markdown, ['alpha', 'gamma'])).toThrow(/gamma/)
+    expect(() =>
+      skillGroups(
+        markdown,
+        catalog({ alpha: 'other', gamma: 'other' }),
+        FAMILIES,
+      ),
+    ).toThrow(/gamma/)
   })
 
   it('should refuse a row naming no catalog skill, naming it', () => {
@@ -252,31 +334,44 @@ describe('skillGroups', () => {
       ],
     ])
 
-    expect(() => skillGroups(markdown, ['alpha'])).toThrow(/ghost/)
+    expect(() =>
+      skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES),
+    ).toThrow(/ghost/)
   })
 
   it('should refuse a skill listed twice', () => {
-    const markdown = mapOf(
-      ['One', [['alpha', 'When a']]],
-      ['Two', [['alpha', 'Again']]],
-    )
+    const markdown = mapOf(['Moment', [['alpha', 'When a']]], ['Moment', []])
+    const twice = `${markdown}\n| \`canon:alpha\` | Again |`
 
-    expect(() => skillGroups(markdown, ['alpha'])).toThrow(
-      /listed twice: alpha/,
-    )
+    expect(() =>
+      skillGroups(twice, catalog({ alpha: 'other' }), FAMILIES),
+    ).toThrow(/listed twice: alpha/)
   })
 
-  it('should render no group for a heading without skill rows', () => {
-    const markdown = `${mapOf(['Moment', [['alpha', 'When a']]])}\n\n## Notes\n\n| Term | Meaning |\n| --- | --- |\n| \`x\` | y |\n`
+  it('should render no group for a family heading without skill rows', () => {
+    const markdown = mapOf(
+      ['First moment', []],
+      ['Moment', [['alpha', 'When a']]],
+    )
 
-    const groups = skillGroups(markdown, ['alpha'])
+    const groups = skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES)
 
     expect(groups.map((entry) => entry.group)).toEqual(['Moment'])
+  })
+
+  it('should refuse a heading naming no family group even with no rows under it', () => {
+    const markdown = `${mapOf(['Moment', [['alpha', 'When a']]])}\n\n## Notes\n\n| Term | Meaning |\n| --- | --- |\n| \`x\` | y |\n`
+
+    expect(() =>
+      skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES),
+    ).toThrow(/headings naming no family group: Notes/)
   })
 
   it('should refuse a row it cannot read rather than skip it', () => {
     const markdown = '## Moment\n\n| `canon:alpha` | a \\| b |\n'
 
-    expect(() => skillGroups(markdown, ['alpha'])).toThrow(/alpha/)
+    expect(() =>
+      skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES),
+    ).toThrow(/alpha/)
   })
 })
