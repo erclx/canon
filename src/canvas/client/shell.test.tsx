@@ -13,6 +13,7 @@ import { releasePicker } from '@/canvas/client/inspector/color-picker'
 import {
   applyChange,
   applyRecord,
+  editedHashes,
   type PagesRecord,
   resetState,
   savedEdit,
@@ -1204,6 +1205,34 @@ describe('Inspector edit', () => {
       }),
       expect.objectContaining({ property: 'align-items', value: 'flex-start' }),
     ])
+  })
+
+  it('should send the second alignment edit on the hash the first answered across a reload', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({ url: String(url), body: JSON.parse(String(init?.body)) })
+      return new Response('{"ok":true,"hash":"def456"}', {
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+    /* A frame reload landing after the first edit clears the stored hash. */
+    const stopReloads = editedHashes.subscribe((hashes) => {
+      if (hashes.size > 0) editedHashes.value = new Map()
+    })
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    stopReloads()
+
+    expect(sentTo('/api/frames/edit').at(-1)).toMatchObject({
+      property: 'align-items',
+      element: { hash: 'def456' },
+    })
   })
 
   it('should swap the axes for a column when aligning top right', async () => {

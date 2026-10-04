@@ -210,16 +210,19 @@ function ElementFields({
   }
   /*
    * The writer takes one property an edit, so a control setting two posts
-   * them in turn, each carrying the hash the last answered with, and stops
-   * at the first refusal.
+   * them in turn and stops at the first refusal. Each carries the hash the
+   * last answered with in its own address, since a frame reloading between
+   * the two clears the stored one.
    */
   const commitAll = async (
     changes: readonly (readonly [string, string])[],
   ): Promise<void> => {
+    let current = address
     for (const [property, value] of changes) {
-      if (!address) return
-      await editElement(frameRef, key, address, property, value)
-      if (editRefusal.value) return
+      if (!current) return
+      const written = await editElement(frameRef, key, current, property, value)
+      if (!written) return
+      if (written.hash) current = { ...current, hash: written.hash }
     }
   }
   const corners = CORNER_FIELDS.map((field) =>
