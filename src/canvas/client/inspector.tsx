@@ -391,6 +391,7 @@ function ElementFields({
           glyph="Op"
           initial={displayValue('opacity', computedValue(node, 'opacity'))}
           isBusy={isBusy}
+          isWide={isPerCorner}
           onCommit={(typed) => {
             const value = opacityToCss(typed)
             if (value !== undefined) commit('opacity')(value)

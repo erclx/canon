@@ -1406,6 +1406,33 @@ describe('Inspector edit', () => {
     ])
   })
 
+  it('should give opacity its own row so the corners form two rows of two', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+
+    act(() => buttonNamed('Per-corner radius').click())
+
+    expect(
+      fieldNamed('opacity')
+        .closest('.glyph-field')
+        ?.classList.contains('is-wide'),
+    ).toBe(true)
+  })
+
+  it('should write a typed number over a Fill width as pixels', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100%">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width'), '320')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '320px' }),
+    ])
+  })
+
   it('should open per corner on an element whose corners differ', () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame(
