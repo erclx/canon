@@ -57,7 +57,7 @@ const CANON_SCRATCH = 'tmp'
  * record root, which is the rule the move ran on. `rules`, `skills`, and
  * `hooks` stay under `.claude/` because the vendor reads them there, while
  * `context`, `wireframes`, and the loose documents are tracked surfaces that
- * `surface-root.ts` resolves under `canon/` instead. A seed and a
+ * `surface.ts` resolves under `canon/` instead. A seed and a
  * superseded-layout report each ask this rather than assuming a root.
  */
 export const RECORD_ENTRIES: readonly string[] = [

@@ -80,8 +80,8 @@ function escape(value: string): string {
  *
  * The changelog is release history, and an eval result is a transcript of
  * paths a session actually opened; rewriting either makes it testify to
- * something that never happened. `src/surface-root.ts` and
- * `src/record-root.ts` are the two sources that spell the old root as data on
+ * something that never happened. `src/roots/surface.ts` and
+ * `src/roots/record.ts` are the two sources that spell the old root as data on
  * purpose, so sweeping either would turn the very literals this verb reads
  * into their own replacement. A hook is the third such source, guarding on a
  * `case` carrying an arm per root, so `.claude/hooks/` and the seed's copy of
@@ -380,7 +380,7 @@ export interface SurfaceRootsPlan {
  * moved entry, and whether its content cites one. Either alone is enough to
  * produce an entry, and a file excluded from the citation rewrite still moves
  * when its path itself is inside a moved entry, since the two entries excluded
- * today, `src/surface-root.ts` and `src/record-root.ts`, both sit outside
+ * today, `src/roots/surface.ts` and `src/roots/record.ts`, both sit outside
  * every moved entry and never take that branch in practice.
  */
 export function planSurfaceRootsMove(

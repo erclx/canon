@@ -114,7 +114,7 @@ const ROOT_READING: Record<RecordRoot, 'whole' | 'entries'> = {
  * `.claude/` is tracked and holds `rules`, `skills`, `hooks`, and `context`,
  * so a rule path resolves in any clone and is not a board reference, and only
  * the entries the record move relocated are unreadable there. Reading the
- * roots and the relocated entries from `src/record-root.ts` is what makes a
+ * roots and the relocated entries from `src/roots/record.ts` is what makes a
  * folder added there matched here without an edit, and the list above is what
  * covers the one thing that module deliberately does not carry.
  *

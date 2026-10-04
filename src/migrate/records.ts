@@ -26,7 +26,7 @@ const TO_ROOT: RecordRoot = '.canon'
 /**
  * Every entry the move relocates, at the name `.claude/` gave it.
  *
- * The list is `RECORD_ENTRIES`, which `record-root.ts` owns because a seed
+ * The list is `RECORD_ENTRIES`, which `roots/record.ts` owns because a seed
  * destination and a superseded-layout report ask the same question. Restating
  * it here would let the sweep and the resolver disagree about what moved.
  */
@@ -76,12 +76,12 @@ function escape(value: string): string {
  * paths a session actually opened. Rewriting either makes it testify to
  * something that never happened.
  *
- * This module and `src/record-root.ts` are two of the sources that state the old
- * root on purpose. Sweeping them turns every citation this expression is built
- * from into its own replacement, leaving a rewriter that maps `.canon/` to
- * `.canon/` and matches nothing. `src/surface-root.ts` joins the list a release
- * early, for the same reason: it spells `.claude` as data the moment it
- * exists, and excluding it later would leave one release where a records
+ * This module and `src/roots/record.ts` are two of the sources that state the
+ * old root on purpose. Sweeping them turns every citation this expression is
+ * built from into its own replacement, leaving a rewriter that maps `.canon/`
+ * to `.canon/` and matches nothing. `src/roots/surface.ts` joins the list a
+ * release early, for the same reason: it spells `.claude` as data the moment
+ * it exists, and excluding it later would leave one release where a records
  * migration in a target could rewrite the resolver that migration itself
  * depends on.
  *
@@ -171,7 +171,7 @@ export const RECORD_ONLY_ROOTS: readonly RecordRoot[] = RECORD_ROOTS.filter(
  * under `.claude/`, and a target's installed `.claude/rules/canon/core/035-tasks.md`
  * is the file the sweep exists to repoint, so a bare `.claude/` prefix strands
  * it silently. The old root is therefore entry-scoped, through `spell` so the
- * one naming variant stays decided in `record-root.ts`.
+ * one naming variant stays decided in `roots/record.ts`.
  *
  * Joined with a literal separator rather than through `join`, the way
  * `EXCLUDED_PREFIXES` already is. These are matched against what `git ls-files`
