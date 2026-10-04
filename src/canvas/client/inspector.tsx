@@ -79,8 +79,15 @@ const DIRECTION_FIELD: StyleField = {
 
 const FLEX_FIELDS: readonly StyleField[] = [
   { label: 'gap', glyph: 'Gap', property: 'gap', placeholder: '0' },
-  { label: 'padding', glyph: 'Pad', property: 'padding', isWide: true },
 ]
+
+/** Padding applies to any box, so it sits in Layout rather than Flex. */
+const PADDING_FIELD: StyleField = {
+  label: 'padding',
+  glyph: 'Pad',
+  property: 'padding',
+  isWide: true,
+}
 
 /** The corners in the order the radius shorthand lists them. */
 const CORNER_FIELDS: readonly StyleField[] = [
@@ -311,6 +318,7 @@ function ElementFields({
             scrub={'style' in node ? scrubOf(field.property) : undefined}
           />
         ))}
+        {styleField(PADDING_FIELD)}
       </Section>
       <Section
         title="Flex"

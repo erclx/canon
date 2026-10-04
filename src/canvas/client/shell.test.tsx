@@ -1137,6 +1137,19 @@ describe('Inspector edit', () => {
     expect(fieldNamed('height').value).toBe('Fit')
   })
 
+  it('should edit padding on a block element from the Layout section', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('padding'), '12')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'padding', value: '12px' }),
+    ])
+  })
+
   it('should show the Flex header alone with an add button on a block', () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
