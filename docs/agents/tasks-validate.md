@@ -1,6 +1,6 @@
 ---
 title: Tasks validate
-description: Validating the board against the tree, the seven checks, the untested, claims, wide, and unplaced arrays, the exit codes, and the refusal reasons
+description: Validating the board against the tree, the seven checks, the five report arrays, the exit codes, and the refusal reasons
 ---
 
 # Tasks validate
@@ -12,17 +12,17 @@ canon tasks validate
 canon tasks validate --json
 ```
 
-Seven checks run. Collisions reaches one half of the `## Run now` test the board standard states, and Plan reaches every group, reading the Plan column under `## Run now` and the task file's own line under the other two. Mapping and Grouping test the folder contract and hold for every group, and Shape holds for every group too, ahead of the four. Ordering reaches only the `## Needs a plan` rows, and Blockers reaches every row outside `## Run now`:
+Seven checks run. Touches reaches one half of the `## Run now` test the board standard states, and Plan reaches every group, reading the Plan column under `## Run now` and the task file's own line under the other two. Mapping and Grouping test the folder contract and hold for every group, and Shape holds for every group too, ahead of the four. Ordering reaches only the `## Needs a plan` rows, and Blockers reaches every row outside `## Run now`:
 
-| Check      | What it reports                                                                                                         |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Shape      | A row whose cell count disagrees with its table's header, or one stranded behind a table a blank line already closed    |
-| Plan       | A row whose plan citation disagrees with its group or its task file, or a task whose `Plan:` line lists one plan twice  |
-| Mapping    | A row or backlog line naming no task file                                                                               |
-| Grouping   | A task carrying a row in more than one readiness group, or on both surfaces                                             |
-| Ordering   | A `## Needs a plan` row whose stated position disagrees with where it actually sits, or which states no position at all |
-| Collisions | Two `## Run now` rows whose Touches columns name a path in common                                                       |
-| Blockers   | A parked row whose blocker has stopped holding, whose cited task resolves nowhere, or whose cited task was declined     |
+| Check    | What it reports                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Shape    | A row whose cell count disagrees with its table's header, or one stranded behind a table a blank line already closed    |
+| Plan     | A row whose plan citation disagrees with its group or its task file, or a task whose `Plan:` line lists one plan twice  |
+| Mapping  | A row or backlog line naming no task file                                                                               |
+| Grouping | A task carrying a row in more than one readiness group, or on both surfaces                                             |
+| Ordering | A `## Needs a plan` row whose stated position disagrees with where it actually sits, or which states no position at all |
+| Touches  | A `## Run now` row whose Touches column names no file                                                                   |
+| Blockers | A parked row whose blocker has stopped holding, whose cited task resolves nowhere, or whose cited task was declined     |
 
 Shape runs before any other check reads a row, since a row failing it carries no dependable fields for the rest to check. A blank or prose line closes the table above it, so the walk treats the next pipe line as a fresh header candidate rather than as a continuation. That candidate counts as a header only when the line behind it is a separator carrying the same cell count, and one that fails is `row-untabled`, stranded behind a table that already closed. Cell count still has to match the header on every row that clears that test, and a row whose count disagrees is `row-misshapen`, the shape a dropped pipe or a merged column produces.
 
@@ -42,9 +42,9 @@ The ordinal phrase is prose rather than data, searched for anywhere in the cell 
 
 The comparative phrase is bounded the same way and for the same reason. A closed verb list of `leads`, `heads`, `opens`, `closes`, `trails`, `precedes`, `follows`, `outranks`, and `sits under`, `above`, or `below` has to sit in one clause with a positional object, which is a `vNN.N` phase label, the word `group`, or `row` or `rows`. Both halves are needed, since a cell reading `it closes a gap the reference gate leaves open` carries the verb and claims no position, and the clause bound is what stops a verb in one half of the cell pairing with an object in the other. An ordinal exempts the row, being a comparative claim already. An unusual comparative phrasing reports as unranked, the safe direction for a check over prose, and a vocabulary verb reaching a positional object non-positionally reports as ranked, which only grading prose could separate.
 
-The collision check is the one a person cannot run by eye. Paths come from the backticked spans in the Touches column, a span naming no file is dropped, and a directory collides with any file beneath it. A `## Run now` row whose column parses to nothing is reported rather than skipped, since a row stating no file set makes a claim nothing can check.
+The Touches check is the one a person cannot run by eye. Paths come from the backticked spans in the Touches column, a span naming no file is dropped, and a directory shares any file beneath it. A `## Run now` row whose column parses to nothing is `touches-unstated`, since a row stating no file set makes a claim nothing can check.
 
-Where a directory holds the other row's file, the finding names the row that claimed it, reading `both touch src/tasks, which v2.0-second claims as a folder.` The shared strings alone leave an over-broad cell and a genuine overlap identical. <!-- canon-allow-reference: illustrates the finding's own sentence shape, not a citation of a real task -->
+Two `## Run now` rows naming a path in common land in a second array, `shared`, which moves no exit code since the branch merging second rebases. Merge order reads it, as does a dispatcher weighing a contract, relocation, or sweep hold. Where a directory holds the other row's file, the entry names the row that claimed it, reading `both touch src/tasks, which v2.0-second claims as a folder.` The shared strings alone leave an over-broad cell and a genuine overlap identical. <!-- canon-allow-reference: illustrates the entry's own sentence shape, not a citation of a real task -->
 
 The blocker check re-takes a measurement the board records once and never repeats. Two of the five blocker kinds put a fact on disk: a dependency is settled by the cited task being archived or by its work reaching the trunk, and a collision is settled by nothing under `## Run now` still holding the file the cell cites. A cited task resolving under `.canon/tasks/declined/` instead reports separately as `blocker-declined`, since a decided-against task is neither the shipped work `blocker-settled` reports nor the dangling pointer `blocker-unresolved` reports.
 
@@ -69,7 +69,7 @@ Both halves gate on a citation inside the `Waiting on` cell, never on the column
 
 A citation resolving in none of the board, the archive, or the declined folder is `blocker-unresolved` rather than a settled row. Reading an absent file as archived or declined states a specific fact about a file nobody ever wrote, which is what a renamed task or a typo produces, and only a task that genuinely closed or was genuinely declined releases the row waiting on it.
 
-The other three kinds rest on a person's judgment, so a row neither half reached lands in a second array rather than in the findings:
+The other three kinds rest on a person's judgment, so a row neither half reached lands in a third array rather than in the findings:
 
 ```json
 {
@@ -85,7 +85,7 @@ The other three kinds rest on a person's judgment, so a row neither half reached
 
 An untested row is not a finding and moves no exit code. Reading a clean findings list as a clean board is the failure the array exists to prevent, and `orchestrator-parked.md` is the pass that takes those rows by hand.
 
-A `## Run now` row whose Touches column names a bare folder lands in a third array on the same reasoning:
+A `## Run now` row whose Touches column names a bare folder lands in a fourth array on the same reasoning:
 
 ```json
 {
@@ -101,11 +101,11 @@ A `## Run now` row whose Touches column names a bare folder lands in a third arr
 
 That claim collides with every row a later session writes under the folder, and it is legitimate whenever the row does rewrite the directory, so the array states the reach and moves no exit code. A measure failing on a cell that is right teaches a reader to skip it. Folder against file is decided by asking the tree for a path that resolves, and by the extension only for a path the row has yet to create, since the name alone reads a file carrying no extension as a folder.
 
-The scan reaches `## Run now` and stops, where the collision check stops. A cell in another group describes work nobody has planned, written as a sentence and rewritten once a plan exists, so a claim read off one reports on prose rather than on a file set. A parked folder claim surfaces when its row is promoted, which is when the cell becomes something a dispatcher can act on.
+The scan reaches `## Run now` and stops, where the Touches check stops. A cell in another group describes work nobody has planned, written as a sentence and rewritten once a plan exists, so a claim read off one reports on prose rather than on a file set. A parked folder claim surfaces when its row is promoted, which is when the cell becomes something a dispatcher can act on.
 
-A code span in any cell that the preview cannot break lands in a fourth array, `wide`, with the same `group`, `subject`, and `message` fields. The scan measures a span's longest whitespace-free run and flags one past 60 characters, or a brace-glob at any width. A 57-character span fit the pane and a 78-character one did not, so the limit is a heuristic and the array moves no exit code. A link target is skipped, since only its label renders, and the scan reaches every group, since the overflow it exists for sat under `## Up next`.
+A code span in any cell that the preview cannot break lands in a fifth array, `wide`, with the same `group`, `subject`, and `message` fields. The scan measures a span's longest whitespace-free run and flags one past 60 characters, or a brace-glob at any width. A 57-character span fit the pane and a 78-character one did not, so the limit is a heuristic and the array moves no exit code. A link target is skipped, since only its label renders, and the scan reaches every group, since the overflow it exists for sat under `## Up next`.
 
-A task file neither surface names lands in a fifth array, on the same reasoning:
+A task file neither surface names lands in a sixth array, on the same reasoning:
 
 ```json
 {
