@@ -47,8 +47,8 @@ const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
 /**
  * The image extensions this module embeds. An `evidence/` folder holds
  * whatever else a project keeps beside its captures, such as a README, a
- * capture script, or a raw data file, and none of those render as
- * `![](url)` without producing a broken embed.
+ * capture script, or a raw data file, and none of those render as an
+ * `<img>` without producing a broken embed.
  */
 const IMAGE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg)$/i
 
@@ -139,6 +139,35 @@ function rawUrl(repo: string, sha: string, path: string): string {
   return `https://github.com/${repo}/blob/${sha}/${path}?raw=true`
 }
 
+/**
+ * The pixel width every screenshot asks for. GitHub sizes a comment table to
+ * its content and clamps an image to its cell, so a width past any comment
+ * fills the cell, where `width="100%"` leaves a narrow screenshot narrow.
+ */
+const IMAGE_WIDTH = 1000
+
+/** A table cell and an attribute value share one escape, since a stem is a path segment placed in both. */
+function escapeCell(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('|', '&#124;')
+}
+
+function evidenceImage(url: string, alt: string): string {
+  return `<img src="${url}" width="${IMAGE_WIDTH}" alt="${alt}">`
+}
+
+const EVIDENCE_IMAGE = String.raw`(?:!\[\]\([^)]*\)|<img [^>]*>)`
+
+/** A case row in any shape a render has posted: a Base cell before the head image, or the head image alone. */
+const EVIDENCE_ROW_PATTERN = new RegExp(
+  String.raw`^\| .+ \| (?:(?:\*\(new\)\*|${EVIDENCE_IMAGE}) \| )?${EVIDENCE_IMAGE} \|$`,
+  'gm',
+)
+
 export function evidenceMarker(head: string): string {
   return `${MARKER_PREFIX} head=${head} -->`
 }
@@ -198,20 +227,24 @@ export function renderEvidenceBody(
     imageCount <= EVIDENCE_OPEN_LIMIT ? '<details open>' : '<details>'
 
   const sections = states.map((entry) => {
+    const hasBase = entry.items.some((item) => !item.added)
     const rows = entry.items.map((item) => {
+      const stem = escapeCell(item.stem)
       const before = item.added
         ? '*(new)*'
-        : `![](${rawUrl(repo, base, item.path)})`
-      const after = `![](${rawUrl(repo, head, item.path)})`
-      return `| ${item.stem} | ${before} | ${after} |`
+        : evidenceImage(rawUrl(repo, base, item.path), `${stem} base`)
+      const after = evidenceImage(rawUrl(repo, head, item.path), `${stem} head`)
+      return hasBase
+        ? `| ${stem} | ${before} | ${after} |`
+        : `| ${stem} | ${after} |`
     })
 
     return [
       opener,
       `<summary>${entry.state === '' ? 'evidence' : entry.state} (${entry.items.length})</summary>`,
       '',
-      '| Case | Base | Head |',
-      '| --- | --- | --- |',
+      hasBase ? '| Case | Base | Head |' : '| Case | Head |',
+      hasBase ? '| --- | --- | --- |' : '| --- | --- |',
       ...rows,
       '',
       '</details>',
@@ -230,16 +263,14 @@ export function renderEvidenceBody(
 }
 
 /**
- * How many case rows a rendered body carries, read off the same row shape
+ * How many case rows a rendered body carries, read off the row shapes
  * `renderEvidenceBody` writes. A row always ends in a head image, which a
- * checklist line or a preview address never does.
+ * checklist line or a preview address never does. The pattern also reads the
+ * `![](url)` three-column shape an earlier render posted, so a comment posted
+ * before the change still counts its cases and the `would-empty` guard holds.
  */
 export function countEvidenceCases(body: string): number {
-  return (
-    body.match(
-      /^\| .+ \| (?:\*\(new\)\*|!\[\]\([^)]*\)) \| !\[\]\([^)]*\) \|$/gm,
-    )?.length ?? 0
-  )
+  return body.match(EVIDENCE_ROW_PATTERN)?.length ?? 0
 }
 
 export interface EvidenceComment {

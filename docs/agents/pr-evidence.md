@@ -33,16 +33,16 @@ its filename carries an image extension (`png`, `jpg`, `jpeg`, `gif`, `webp`,
 folder holds whatever else a project keeps beside its captures. This
 repository's own tree carries eight `.md` files, two `.sh` scripts, a `.tsv`,
 a `.json`, and an `.html` file against a single `.png`, and every one of them
-would render as a broken `![]()` embed without the extension filter.
+would render as a broken image embed without the extension filter.
 
 ## What the record carries
 
 The record groups every evidence path by state, the remainder of its
 directory under the `evidence/` segment, and within a state by filename stem,
 so a `before/hero.png` and an `after/hero.png` naming the same case group as
-one entry rather than two unrelated files. Each entry carries whether it
-existed at the base commit, which decides whether the comment shows a base
-image or marks the case new.
+one entry, not two files. Each entry carries whether it existed at the base
+commit, so the comment shows a base image or marks it new. All-new states drop
+the Base column and each image is an `<img width="1000">`.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
@@ -103,7 +103,7 @@ The trade is that the verb no longer sees evidence that is uncommitted or
 unpushed, which the comment's head-pinned image links could not show anyway.
 A path the pull request renamed or copied counts as added, since the new path
 has no counterpart at the merge base, so a rename loses its before image and
-renders `*(new)*`. A path the pull request removed is dropped, since it has no
+reads as new. A path the pull request removed is dropped, since it has no
 head image to show. A failed files read refuses as `unreadable-changes` rather
 than rendering a short set, and a missing merge base refuses as `no-base`.
 
