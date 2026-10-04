@@ -118,7 +118,7 @@ Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> 
 
 ## Step 7: post
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each Evidence cell embeds the `link` its Step 5 push returned, as given, or names the evidence stem it matched.
+Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each Evidence cell holds words and names the evidence stem it matched, and the `link` its Step 5 push returned goes as given into the Frames block below the table.
 
 ## Step 8: tick the passed boxes
 

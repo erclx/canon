@@ -28,8 +28,14 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 | Box                                | Verdict    | Evidence                                      |
 | ---------------------------------- | ---------- | --------------------------------------------- |
 | 1. <the box as written, shortened> | fail       | <the value read against what the box expects> |
-| 2. <box>                           | needs eyes | ![](link) <what the frame showed, in words>   |
+| 2. <box>                           | needs eyes | <what the frame showed, in words>             |
 | 3. <box>                           | pass       | Evidence `<stem>` <what it showed, in words>  |
+
+**Frames**
+
+- Box 2, needs eyes:
+
+  ![](link)
 
 **Sweep**
 
@@ -44,7 +50,9 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 <!-- review-ui: head=<head> -->
 ```
 
-An Evidence cell resting on a frame takes one of three forms. A frame Step 5 pushed embeds as `![](<link>)`, with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
+An Evidence cell resting on a frame holds words only, so the table's text columns keep the body's width. A frame Step 5 pushed goes in the Frames block below the table, one `Box <n>, <verdict>` label then the `![](<link>)` embed for each framed box, with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image.
+
+The row still says what the frame showed, so it reads without the image. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Omit the Frames block when no box pushed a frame. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
 
 A pass where every box needs eyes and nothing else is owed takes the closed heading:
 
