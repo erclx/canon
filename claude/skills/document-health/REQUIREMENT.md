@@ -23,6 +23,7 @@ The third is silence on an unread axis. Both measured verbs resolve their folder
 - Say which layer answered the classifier sweep, since its model layer being off narrows the read without refusing it
 - Take every checkpoint from the record the verb returns rather than from a number written into the skill
 - Run standalone, and stay callable from the structural check rather than reachable only through it
+- Read the requirements and architecture records for identity drift when the scope reaches them, and print one reminder line per doc from `canon records stale canonical`, since the fold no longer writes the first and only writes the second for a planned slot decision, so nothing else reads either whole
 
 ## Must not
 
@@ -30,6 +31,7 @@ The third is silence on an unread axis. Both measured verbs resolve their folder
 - Emit a verdict across the three axes, or a score across the documents. Two axes answer from verbs and one answers from a reading, so any roll-up is a figure that lies about the third.
 - Report a finding against a file nobody hand-authors. A generated index, a gitignored file, and a copied reference each name a file an author cannot fix.
 - Answer an axis by file inspection where a verb answers it. The verb is the surface under test and a hand-rolled read of the same files is not.
+- Trigger itself, or ask a hook, a gate stage, or CI to trigger the canonical review. The operator settled that it runs only when asked.
 - Read a document's modification time as its staleness. A file untouched beside code untouched is current, and the timestamp answers a different question.
 
 ## Guards
