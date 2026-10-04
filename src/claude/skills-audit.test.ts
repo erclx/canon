@@ -363,6 +363,87 @@ describe('auditSkills dated provenance', () => {
   })
 })
 
+describe('auditSkills reference contents', () => {
+  /** A reference of exactly `lines` lines, its body padded below `head`. */
+  function referenceOf(lines: number, head = '# Reference\n'): string {
+    const headLines = head.replace(/\n$/, '').split('\n').length
+    return `${head}${'- Line\n'.repeat(lines - headLines)}`
+  }
+
+  function skillWithReference(text: string): string {
+    const dir = conformingSkill('git-commit')
+    mkdirSync(join(dir, 'references'), { recursive: true })
+    writeFileSync(join(dir, 'references', 'long.md'), text)
+    return dir
+  }
+
+  const referenceRel = join(
+    'claude',
+    'skills',
+    'git-commit',
+    'references',
+    'long.md',
+  )
+
+  it('should report a reference over 100 lines carrying no contents list', async () => {
+    skillWithReference(referenceOf(101))
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toEqual([
+      { rel: referenceRel, detail: '101 lines, no ## Contents' },
+    ])
+  })
+
+  it('should stay silent on a long reference opening with a contents list', async () => {
+    skillWithReference(
+      referenceOf(101, '# Reference\n\n## Contents\n\n- [Part](#part)\n'),
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toEqual([])
+  })
+
+  it('should stay silent on a reference of exactly 100 lines', async () => {
+    skillWithReference(referenceOf(100))
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toEqual([])
+  })
+
+  it('should read a contents heading under H3 as absent', async () => {
+    skillWithReference(referenceOf(101, '# Reference\n\n### Contents\n'))
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toHaveLength(1)
+  })
+
+  it('should read a contents heading inside a fenced block as absent', async () => {
+    skillWithReference(
+      referenceOf(101, '# Reference\n\n```markdown\n## Contents\n```\n'),
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toHaveLength(1)
+  })
+
+  it('should stay silent on a long SKILL.md', async () => {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `${frontmatter('git-commit', 'Commits')}${'- Line\n'.repeat(120)}`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toEqual([])
+  })
+})
+
 const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
 
 const [varied = ''] = PRACTICE_SKILLS
@@ -547,6 +628,20 @@ describe('auditExitCode', () => {
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toHaveLength(PRACTICE_SECTIONS.length + 1)
+    expect(auditExitCode(report)).toBe(0)
+  })
+
+  it('should pass when only reference contents is reported', async () => {
+    const dir = conformingSkill('git-commit')
+    mkdirSync(join(dir, 'references'), { recursive: true })
+    writeFileSync(
+      join(dir, 'references', 'long.md'),
+      `# Reference\n${'- Line\n'.repeat(120)}`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.referenceContents).toHaveLength(1)
     expect(auditExitCode(report)).toBe(0)
   })
 

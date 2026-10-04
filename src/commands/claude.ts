@@ -24,6 +24,8 @@ import { listSeeds, readSeedContents } from '@/claude/seeds-list'
 import {
   auditExitCode,
   auditSkills,
+  CONTENTS_SECTION,
+  CONTENTS_THRESHOLD,
   CORPORA,
   DESCRIPTION_LIMIT,
   PRACTICE_LEDGER,
@@ -1398,6 +1400,7 @@ async function runSkillsAudit(
     reportRequirementShape(report)
     reportProvenance(report)
     reportPracticeShape(report)
+    reportReferenceContents(report)
     reportUnmeasured()
     outro()
   }
@@ -1421,6 +1424,7 @@ async function runSkillsAudit(
           requirementSections: report.requirementSections,
           datedProvenance: report.datedProvenance,
           practiceShape: report.practiceShape,
+          referenceContents: report.referenceContents,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
@@ -1428,6 +1432,7 @@ async function runSkillsAudit(
           corpora: CORPORA,
           practiceSkills: PRACTICE_SKILLS,
           practiceSections: PRACTICE_SECTIONS,
+          contentsThreshold: CONTENTS_THRESHOLD,
         },
       })}\n`,
     )
@@ -1641,6 +1646,24 @@ function reportPracticeShape(report: SkillsAudit): void {
     `${plural(report.practiceShape.length, 'missing part')} across the listed practice skills`,
   )
   reportFindings(report.practiceShape)
+}
+
+/** Reports without failing the run, the same judgment the practice shape is. */
+function reportReferenceContents(report: SkillsAudit): void {
+  logStep('Reference contents')
+  logInfo(
+    `A reference over ${CONTENTS_THRESHOLD} lines opens with a ## ${CONTENTS_SECTION} list, matched exactly outside fences.`,
+  )
+
+  if (report.referenceContents.length === 0) {
+    logInfo('Every long reference opens with a contents list.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.referenceContents.length, 'long reference')} with no contents list`,
+  )
+  reportFindings(report.referenceContents)
 }
 
 /**
