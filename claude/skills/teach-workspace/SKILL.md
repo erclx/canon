@@ -9,7 +9,7 @@ argument-hint: <subject to learn, or the topic of a workspace to resume or promo
 
 Run a learning workspace on one subject across sessions. The workspace holds what the learner has been through, so a session weeks later resumes from the folder rather than from the conversation.
 
-The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
+The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
 
 ## Guards
 
@@ -105,7 +105,7 @@ Write the correct option first, then present the options in the order `order` re
 
 ### The quiz, the teach-back block, and the lesson body
 
-Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. `## Building the lesson body` carries the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against composing any of them by hand when a verb does not resolve. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct. Decide the figure first, by `## Diagrams` there.
+Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. Then read `${CLAUDE_SKILL_DIR}/references/lesson-build.md` for the block list, the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against hand-composing any of them. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct. Decide the figure first, by `## Diagrams` in `lesson-craft.md`.
 
 ### Hand over a link, never a path
 

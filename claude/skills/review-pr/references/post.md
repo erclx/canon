@@ -1,11 +1,19 @@
 ---
 title: Post the review to the pull request
-description: Step 4 of review-pr, which names the body file, gives the body shape for each pass, places the Testing, reviewer, and PR body blocks, carries the read-time marker, and rewrites a repeated close-out in place
+description: Step 4 of review-pr, which names the body file, gives the body shape for a pass carrying findings, places the PR body block, carries the read-time marker, and runs the scans and the post
 ---
 
 # Post to the PR
 
 Step 4 of `review-pr`. The threshold that picks the heading and decides the dispatch sits in the skill body's opening, and this file applies it.
+
+## Contents
+
+- [The body file and finding links](#the-body-file-and-finding-links)
+- [The body shapes](#the-body-shapes)
+- [The marker, the scans, and the post](#the-marker-the-scans-and-the-post)
+
+## The body file and finding links
 
 Write the comment to `.canon/tmp/pr/review/body-<number>-<short-sha>.md` at the main worktree root, not the current worktree, which the rest of this step calls `<body-file>`. Resolve that root and send the write as a heredoc, both the way `session-worktree` states. The PR number stops two sessions reviewing different pull requests from overwriting each other between the write and the post, and the head commit stops a second pass overwriting the first one's body.
 
@@ -22,6 +30,8 @@ A finding bound to a line links to it, so a reader skips the hunt:
 A finding that spans lines anchors to the span as `#L12-L14`, with no spaces and no en dash, and a single-line finding anchors as `#L12`. Take the line number from the file read at `<headRefOid>`, `git show <headRefOid>:<path>`, never from another checkout. The URL carries the full 40-character `<headRefOid>`, never `<short-sha>`, `HEAD`, or the branch name, so the link survives a push. A later pass restating an open finding links it again at its own `<headRefOid>` rather than copying the old bullet.
 
 Four findings take the plain bullet with no link: a `**PR body**` entry, a finding on a file the head deleted, a finding on a line the diff removed from a file that survives, since the head holds no number for it, and a finding about a whole file with no one line. A path holding a character a URL needs encoded, such as a space or `#`, is percent-encoded in the link or keeps the plain bullet. Keep the file block header a bare backticked path, so the section-marker reading in `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` does not change.
+
+## The body shapes
 
 The comment is a rendered-for-human GitHub surface, so load the `write-human` skill for voice and word choice and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation: cut editorializing, and keep every sentence load-bearing. Match this shape on a first pass:
 
@@ -64,25 +74,7 @@ Re-reviewed `<short-sha>`, N commits since the prior pass. X critical, Y should-
 <!-- review-pr: commit=<headRefOid> read-at=<read-at> -->
 ```
 
-A Testing box the Step 3 check raised goes in a `**Testing**` block placed after the file blocks, one bullet per box, each quoting the box and naming what would drive it. It carries no severity and enters no count, and it is still something owed, so a pass carrying one takes `## Review` and the full body rather than either ✅ line. Say so on the summary line as `plus N testing question(s)`, since the three counts read as zero and would otherwise report the pass as silent.
-
-```markdown
-**Testing**
-
-- `- [ ] <the box as written>` names no capability the agent lacks. `sandbox/run.sh <arm>` drives it. Was there a reason to leave it?
-```
-
-Keep it to the boxes the check raised. Restating a box whose stated requirement holds teaches the branch author to skip the block.
-
-Every `## For the reviewer` bullet Step 3 read goes in a `**For the reviewer**` block placed after the Testing block, one bullet per request, each followed by its answer or, where the pass could not answer it, by what would settle it. It carries no severity and enters no count.
-
-An unanswered bullet is owed the same way an unanswered Testing box is, so a pass carrying one takes `## Review` and the full body rather than either ✅ line. A bullet the pass answered is not owed, since the answer is discharged in the same comment that carries it. A pass still posting a numeric summary line, because a finding, a Testing question, or an unanswered bullet already forces one, says so there as `plus N reviewer request(s)`. The all-answered close-out below carries the block in place of that line and needs no addition to it.
-
-```markdown
-**For the reviewer**
-
-- Confirm the 401 and 403 split reads correctly for the public API. Confirmed — `AuthService.authenticate()` returns 401 for an expired token and 403 for a missing scope, and both paths are covered under `## Testing`.
-```
+A Testing question or a `## For the reviewer` bullet Step 3 read takes its own block after the file blocks, per `${CLAUDE_SKILL_DIR}/references/body-variants.md`.
 
 Keying either half of the opening's threshold on the grade was measured wrong: across 8 findings on one archived pass, 3 were posted as minor and 2 of those were defects a worker fixed rather than recorded, so a floor at should-fix loses real fixes to a grade that runs low. Splitting the two halves so the dispatch fired lower than the heading was the other candidate, and it left a thread reading closed while work was owed on it. The Testing question was first written to sit outside both, which is that same split reached from the other side, and it left the one party who could answer the question with no route to it.
 
@@ -103,6 +95,8 @@ Omit files with no findings. Do not lecture on process. The integration, contrac
 The `What is right` section is optional, capped at three bullets, and included only when it changes the merge decision. Drop it otherwise and let the summary line carry the approval.
 
 Close the body with `🤖 Reviewed by Claude Code` on its own line so the review reads as an independent machine pass, not a human sign-off.
+
+## The marker, the scans, and the post
 
 ### The marker every body carries
 
@@ -132,26 +126,4 @@ gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F
 
 The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `event=COMMENT` submits the review as a comment, the same state the old `--comment` flag produced.
 
-A pass carrying nothing at all takes `## Review closed` and a short body, with the footer line included either way. On a first pass, post `✅ No findings. Reviewed against project docs and the board.` On a later pass, post `✅ Prior findings addressed. Re-reviewed <short-sha>, N commits since the prior pass.`
-
-A pass carrying only minors is an ordinary finding-carrying pass, so it takes the open heading and the full shape rather than either short line, since the minors have to be readable and neither line reports them. A pass carrying only Testing questions, or only an unanswered reviewer request, takes the same route for the same reason. Keep whichever scope sentence the pass owes on the summary line:
-
-```markdown
-## Review
-
-0 critical, 0 should-fix, Z minor. Reviewed against project docs and the board.
-
-**`path/to/file.ext`**
-
-- **minor** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): finding, and the fix it wants.
-
-🤖 Reviewed by Claude Code
-
-<!-- review-pr: commit=<headRefOid> read-at=<read-at> -->
-```
-
-A pass that closed by withdrawing a finding rather than by reading its fix takes neither ✅ line, per the withdrawal rule in Step 3. Both claim a fix landed, and the second names it, so posting either over a withdrawal credits work nobody did on the one comment a reader treats as the verdict. Write the withdrawal and the fact that settled it in place of the canned line, keeping the heading and the footer.
-
-A pass whose only content is a `## For the reviewer` block with every bullet answered, and that owes nothing else, takes the same shape: `## Review closed`, the block in place of the canned line, and the footer. The heading reports what the branch author still owes rather than what the pass did, and an answer discharged in the same comment owes nothing back.
-
-Post a close-out even when there is nothing to report. A review left with no closing comment reads as one nobody answered.
+A pass carrying nothing at all, a withdrawal, or only answered reviewer requests takes a close-out body, and a pass carrying only minors keeps the full shape, both per `${CLAUDE_SKILL_DIR}/references/body-variants.md`.

@@ -109,7 +109,7 @@ Use severity: `critical` (blocks merge), `should-fix` (fix before merge), `minor
 
 ## Step 4: post to the PR
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body shape for each pass, the Testing, reviewer, and PR body blocks, the marker every body carries, and the scans ahead of the post. That file sends a pass repeating a standing close-out on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the comment in place.
+Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body shape, the PR body block, the marker every body carries, and the scans ahead of the post, and `${CLAUDE_SKILL_DIR}/references/body-variants.md` for the Testing and reviewer blocks and the close-out bodies. That file sends a pass repeating a standing close-out on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the comment in place.
 
 ## Step 5: output
 
