@@ -1,10 +1,4 @@
-import {
-  copyFileSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import JSZip from 'jszip'
@@ -42,6 +36,7 @@ import {
   type WalkedSlide,
   walkSlide,
 } from '@/slides/convert/walk'
+import { slideFiles } from '@/slides/decks'
 import { embedFonts, type FontNotice } from '@/slides/package/fonts'
 import {
   type EntranceSpec,
@@ -125,15 +120,6 @@ export interface ExportOptions {
 
 function refused(reason: ExportRefusal, message: string): ExportResult {
   return { status: 'refused', reason, message }
-}
-
-/** Every `.html` file directly in the folder, in filename order. */
-export function slideFiles(sourceDir: string): string[] {
-  return readdirSync(sourceDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
-    .map((entry) => entry.name)
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-    .map((name) => join(sourceDir, name))
 }
 
 /** A picture whose bytes the post-write pass replaces or whose corners it rounds. */
