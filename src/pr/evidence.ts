@@ -29,8 +29,8 @@ const BASE_PREFIX = '**Base:**'
 const CHECKLIST_HEADING = '## What to look at'
 
 /** Delimiters around the checklist, so a re-render can read back what a reviewer has already ticked. */
-const CHECKLIST_START = '<!-- pr-checklist:start -->'
-const CHECKLIST_END = '<!-- pr-checklist:end -->'
+export const CHECKLIST_START = '<!-- pr-checklist:start -->'
+export const CHECKLIST_END = '<!-- pr-checklist:end -->'
 
 /** One checklist line, a list marker then a box that GitHub renders for `x` in either case. */
 const BOX_LINE = /^(\s*[-*+] \[)([ xX])(\] )(.*)$/
