@@ -13,7 +13,7 @@ the PR from an independent session. This skill consumes them: fix, reply, push.
 ## Guards
 
 - Resolve `<number>` and `<tip>` off `canon pr head --json`. An `ambiguous-pull` refusal stops: `❌ Two open PRs on this branch. Name the one to address.` A record with no `number` takes the lookup in `${CLAUDE_SKILL_DIR}/references/rest-reads.md`. Nothing resolving stops: `❌ No open PR. Nothing to address.`
-- If the PR has no review comments or threads, run step 5's staleness test before deciding. A branch that still merges stops here: `✅ No review findings to address.` One that does not skips steps 1 through 4 and runs step 5 onward, since a branch goes stale from `main` moving and a closed review says nothing about whether it still merges.
+- If the PR has no review comments or threads, run step 5's staleness test before deciding. A branch that passes both of its halves stops here: `✅ No review findings to address.` One that fails either skips steps 1 through 4 and runs step 5 onward, since a branch goes stale from `main` moving and a closed review says nothing about whether it still merges.
 - Fix findings. Do not merge.
 
 ## Step 1: pull the review findings and CI status
@@ -54,12 +54,20 @@ reports no conflict on a branch that has one.
 ```bash
 git fetch origin main
 git merge-tree --write-tree origin/main HEAD
+fork=$(git merge-base origin/main HEAD)
+git diff -z --name-only --no-renames "$fork" HEAD |
+  xargs -0 -r git --literal-pathspecs diff --name-only --no-renames "$fork" origin/main --
 ```
 
-A zero exit means the branch still merges. Skip to step 6, which is the ordinary
-run. A non-zero exit means it does not, so read
-`${CLAUDE_SKILL_DIR}/references/rebase-conflicts.md` for the stash-and-rebase
-sequence, the conflict resolution rules, and the check to re-run afterward.
+`merge-tree` exiting non-zero means the branch no longer merges, and a path the
+last command prints means `main` changed a file it writes after it branched, so
+its green run tested a merge nobody will make. Even a clean merge can hide
+semantic conflicts, per Fowler's [Mainline Integration](https://martinfowler.com/articles/branching-patterns.html#mainline-integration),
+so either one sends the branch to `${CLAUDE_SKILL_DIR}/references/rebase-conflicts.md`
+for the sequence, the conflict rules, and the check to re-run. When that check
+fails after a clean rebase, the failure is the semantic conflict, fixed on the
+branch like any other. Neither firing skips to step 6, which covers a `main` that
+moved only on files the branch does not write.
 
 `git merge-tree` reads committed history, so this test says nothing about the
 fixes still sitting in the working tree. A branch that merges clean as committed,
@@ -141,8 +149,9 @@ full pass rather than a delta, and the reader is owed the reason.
 A run the second guard sent straight to step 5 has no findings to map, so it
 takes a different body rather than an empty list. Open it with `## Rebase`, not
 `## Review response`, since nothing on the pull request is being responded to and
-that heading claims a review this run never read. State that the branch stopped
-merging, name what landed on `main`, name the files resolved by hand and those
+that heading claims a review this run never read. State which half of the test
+fired, being a branch that stopped merging or one `main` changed files under,
+name what landed on `main`, name the files resolved by hand and those
 the regen rebuilt, and close the same way. The heading stays outside the
 `## Review` family so the close-out's equality test on the first line never
 matches it.

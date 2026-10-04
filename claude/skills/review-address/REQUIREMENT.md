@@ -19,6 +19,8 @@ A declined finding fails on a third axis, which is where its reason ends up. A w
 - Handle each finding independently, so one unresolved item does not block the others
 - Verify before pushing, since a red follow-up costs the reviewer a second pass
 - Rebase onto `origin/main` when the branch no longer merges, after the findings are addressed and before the push, so one force-push carries both
+- Rebase as well when the branch still merges but `main` changed a file it writes since it branched, since a clean merge can hide a semantic conflict and the pull request's green run tested a `main` that no longer exists
+- Leave a branch alone when `main` moved only on files it does not write, since rebasing on every merge is a merge queue's cost without its batching
 - Test staleness on every invocation, including one carrying no findings, since a branch goes stale from `main` moving rather than from anything the review said
 - Re-test once the fixes are commits, since the first test reads committed history and cannot see a fix that touches lines `main` moved
 - Rebuild a generated file through the project check rather than resolving its conflict by hand
@@ -45,8 +47,8 @@ A declined finding fails on a third axis, which is where its reason ends up. A w
 ## Guards
 
 - No open pull request for the current branch: stop
-- The pull request carries no review comments or threads and the branch still merges: stop with a pass. A closed review says nothing about whether the branch still merges, so the staleness test decides this one rather than the finding count.
-- A conflict needing a decision the tree does not carry: stop with the branch left on its old base
+- The pull request carries no review comments or threads, the branch still merges, and `main` changed no file it writes: stop with a pass. A closed review says nothing about whether the branch still merges, so the staleness test decides this one rather than the finding count.
+- A conflict needing a decision the tree does not carry: stop with the branch left on its old base, and message the controlling session when the launch named one, since a stopped worker reaches nobody otherwise
 
 ## Out of scope
 
