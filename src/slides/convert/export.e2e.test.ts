@@ -1,6 +1,5 @@
 import { spawnSync } from 'node:child_process'
 import {
-  copyFileSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -9,7 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { join } from 'node:path'
 import JSZip from 'jszip'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import PptxGenJS from 'pptxgenjs'
@@ -31,7 +30,11 @@ import { testFace } from '@/slides/package/test-face'
  * it locally.
  */
 
-const PHOTO = resolve('examples/slides/evidence/showcase-light-04.png')
+/** A 16 by 9 solid PNG, since every rule here reads the picture's box and none its pixels. */
+const PHOTO = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAJCAIAAAC0SDtlAAAAFElEQVR42mPYEsxJEmIY1TAoNAAAMiWZAUrYBTAAAAAASUVORK5CYII=',
+  'base64',
+)
 
 /** A palette and face apart from Canon's, so a master taking them proves the source. */
 const TOKENS = `:root {
@@ -156,7 +159,7 @@ function writeFixture(root: string): string {
   for (const [name, html] of Object.entries(SLIDES)) {
     writeFileSync(join(source, name), html)
   }
-  copyFileSync(PHOTO, join(source, 'photo.png'))
+  writeFileSync(join(source, 'photo.png'), PHOTO)
   writeFileSync(join(source, 'notes.txt'), 'not a slide')
   writeFileSync(join(source, 'deck.json'), JSON.stringify(DECK))
   mkdirSync(join(source, 'fonts'))
