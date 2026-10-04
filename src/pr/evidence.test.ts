@@ -3,14 +3,17 @@ import {
   countEvidenceCases,
   findEvidenceChecklist,
   findEvidenceCommentId,
+  findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
   type EvidenceState,
   hasMarkedEvidenceComment,
   type OwedInput,
+  readChecklistBoxes,
   readOwed,
   renderEvidenceBody,
+  settleChecklist,
 } from '@/pr/evidence'
 
 describe('groupEvidence', () => {
@@ -300,7 +303,7 @@ describe('renderEvidenceBody', () => {
 
   it('should round trip a rendered checklist back through the reader unchanged', () => {
     const checklist =
-      '- [x] the hero settles without a jump\n- [ ] the nav wraps at 360px'
+      '- [x] the hero settles without a jump · passed at `bbbb111`\n- [ ] the nav wraps at 360px'
     const body = renderEvidenceBody(
       [],
       'erclx/annex',
@@ -736,5 +739,86 @@ describe('readOwed', () => {
     const owed = readOwed(owedInput({ deployServesChange: true }))
 
     expect(owed).toEqual([])
+  })
+})
+
+describe('checklist boxes', () => {
+  it('should number each box with its tick, stamp, and taste mark', () => {
+    const boxes = readChecklistBoxes(
+      [
+        '- [x] hero settles · passed at `abc1234`',
+        '- [ ] nav wraps',
+        '- [ ] type feels calm (taste)',
+      ].join('\n'),
+    )
+
+    expect(boxes.map((box) => [box.number, box.isTicked, box.stamp])).toEqual([
+      [1, true, 'abc1234'],
+      [2, false, undefined],
+      [3, false, undefined],
+    ])
+    expect(boxes.map((box) => box.isTaste)).toEqual([false, false, true])
+  })
+
+  it('should count an indented box and a capital X the way GitHub renders them', () => {
+    const boxes = readChecklistBoxes('### Hero\n  - [X] settles\n- [ ] wraps')
+
+    expect(boxes.map((box) => [box.number, box.isTicked])).toEqual([
+      [1, true],
+      [2, false],
+    ])
+  })
+
+  it('should read a stamp only as the trailing segment of a line', () => {
+    const [box] = readChecklistBoxes(
+      '- [x] the footer says passed at `abc1234` in its copy',
+    )
+
+    expect(box?.stamp).toBeUndefined()
+    expect(box?.text).toBe('the footer says passed at `abc1234` in its copy')
+  })
+})
+
+describe('settleChecklist', () => {
+  const stamped = '- [x] hero settles · passed at `aaaa000`'
+
+  it('should keep a tick stamped at the render head', () => {
+    expect(settleChecklist(stamped, 'aaaa000ffff', 'aaaa000ffff')).toBe(stamped)
+  })
+
+  it('should clear a tick and drop its stamp stamped at another head', () => {
+    expect(settleChecklist(stamped, 'bbbb111ffff', 'aaaa000ffff')).toBe(
+      '- [ ] hero settles',
+    )
+  })
+
+  it('should clear an unstamped tick when the comment described another head', () => {
+    expect(settleChecklist('- [x] by hand', 'bbbb111', 'aaaa000')).toBe(
+      '- [ ] by hand',
+    )
+  })
+
+  it('should keep an unstamped tick when the comment described this head', () => {
+    expect(settleChecklist('- [x] by hand', 'aaaa000', 'aaaa000')).toBe(
+      '- [x] by hand',
+    )
+  })
+
+  it('should leave empty boxes and other lines as they are', () => {
+    const text = '### Group\n- [ ] one\nplain'
+
+    expect(settleChecklist(text, 'bbbb111', 'aaaa000')).toBe(text)
+  })
+})
+
+describe('findEvidenceHead', () => {
+  it('should read the head the marker names', () => {
+    const body = renderEvidenceBody([], 'o/r', 'aaaa000', 'bbbb111')
+
+    expect(findEvidenceHead([{ body }])).toBe('bbbb111')
+  })
+
+  it('should be undefined when no comment is marked', () => {
+    expect(findEvidenceHead([{ body: 'hello' }])).toBeUndefined()
   })
 })

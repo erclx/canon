@@ -29,8 +29,17 @@ const BASE_PREFIX = '**Base:**'
 const CHECKLIST_HEADING = '## What to look at'
 
 /** Delimiters around the checklist, so a re-render can read back what a reviewer has already ticked. */
-const CHECKLIST_START = '<!-- pr-checklist:start -->'
-const CHECKLIST_END = '<!-- pr-checklist:end -->'
+export const CHECKLIST_START = '<!-- pr-checklist:start -->'
+export const CHECKLIST_END = '<!-- pr-checklist:end -->'
+
+/** One checklist line, a list marker then a box that GitHub renders for `x` in either case. */
+const BOX_LINE = /^(\s*[-*+] \[)([ xX])(\] )(.*)$/
+
+/** The trailing segment a tick carries, naming the commit the box passed at. Matched only at the end of a line, so a box whose own text says `passed at` is left alone. */
+const STAMP = / · passed at `([0-9a-f]{7,40})`$/
+
+/** What ends the text of a box that a person has to judge by eye. */
+const TASTE_SUFFIX = '(taste)'
 
 /** A `#issuecomment-<id>` suffix, which is the REST comment id `gh pr view` never returns directly. */
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
@@ -409,4 +418,102 @@ export function findEvidenceChecklist(
   return (
     marked.body.slice(start + CHECKLIST_START.length, end).trim() || undefined
   )
+}
+
+export interface ChecklistBox {
+  /** One-based position among the checklist's boxes, in the order they appear. */
+  readonly number: number
+  /** Index of the box's line within the checklist. */
+  readonly line: number
+  /** The box text with any stamp removed. */
+  readonly text: string
+  readonly isTicked: boolean
+  /** The short sha a tick names, absent on an empty box or a tick nothing stamped. */
+  readonly stamp?: string
+  /** Whether the box ends in `(taste)`, which no driver ticks. */
+  readonly isTaste: boolean
+}
+
+export interface BoxLine {
+  readonly before: string
+  readonly isTicked: boolean
+  readonly text: string
+  readonly stamp?: string
+}
+
+/** Splits one checklist line into its box parts, or undefined when the line is not a box. */
+export function parseBoxLine(line: string): BoxLine | undefined {
+  const match = BOX_LINE.exec(line)
+  if (match === null) return undefined
+  const rest = (match[4] ?? '').trimEnd()
+  const stamped = STAMP.exec(rest)
+  return {
+    before: match[1] ?? '',
+    isTicked: (match[2] ?? ' ') !== ' ',
+    text: stamped === null ? rest : rest.slice(0, stamped.index),
+    ...(stamped?.[1] !== undefined && { stamp: stamped[1] }),
+  }
+}
+
+/** The box line for the given parts, written back in the one shape the reader accepts. */
+export function writeBoxLine(
+  box: Pick<BoxLine, 'before' | 'text'>,
+  stampedAt?: string,
+): string {
+  return stampedAt === undefined
+    ? `${box.before} ] ${box.text}`
+    : `${box.before}x] ${box.text} · passed at \`${stampedAt.slice(0, SHORT_SHA_LENGTH)}\``
+}
+
+/** Every box of a checklist in order, numbered the way `canon pr tick` takes them. */
+export function readChecklistBoxes(checklist: string): ChecklistBox[] {
+  const boxes: ChecklistBox[] = []
+  checklist.split('\n').forEach((line, index) => {
+    const parsed = parseBoxLine(line)
+    if (parsed === undefined) return
+    boxes.push({
+      number: boxes.length + 1,
+      line: index,
+      text: parsed.text,
+      isTicked: parsed.isTicked,
+      ...(parsed.stamp !== undefined && { stamp: parsed.stamp }),
+      isTaste: parsed.text.endsWith(TASTE_SUFFIX),
+    })
+  })
+  return boxes
+}
+
+/** The head the marked comment's trailing marker names. */
+export function findEvidenceHead(
+  comments: readonly EvidenceComment[],
+): string | undefined {
+  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
+  if (marked === undefined) return undefined
+  const lines = marked.body.trimEnd().split('\n')
+  const match = /head=(\S+)/.exec(lines[lines.length - 1] ?? '')
+  return match?.[1]
+}
+
+/**
+ * Clears every tick the render's head has not earned. A stamped tick stays
+ * while its sha is a prefix of the head. An unstamped one names no head, so
+ * it stays only while the comment it came from described this same head.
+ */
+export function settleChecklist(
+  checklist: string,
+  head: string,
+  carriedHead: string | undefined,
+): string {
+  return checklist
+    .split('\n')
+    .map((line) => {
+      const parsed = parseBoxLine(line)
+      if (parsed === undefined || !parsed.isTicked) return line
+      const isEarned =
+        parsed.stamp === undefined
+          ? carriedHead === head
+          : head.startsWith(parsed.stamp)
+      return isEarned ? line : writeBoxLine(parsed)
+    })
+    .join('\n')
 }

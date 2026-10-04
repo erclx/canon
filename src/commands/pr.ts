@@ -29,12 +29,15 @@ import {
   findEvidenceCaseCount,
   findEvidenceChecklist,
   findEvidenceCommentId,
+  findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
   hasMarkedEvidenceComment,
+  readChecklistBoxes,
   readOwed,
   renderEvidenceBody,
+  settleChecklist,
 } from '@/pr/evidence'
 import {
   dropFrames,
@@ -71,6 +74,7 @@ import {
   servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
+import { type TickRefusal, tickBoxes } from '@/pr/tick'
 import {
   commentRowOf,
   identityOf,
@@ -111,6 +115,28 @@ interface EvidenceOptions extends ReadOptions {
 
 interface LocalOptions extends ReadOptions {
   readonly remove?: boolean
+}
+
+interface TickOptions extends ReadOptions {
+  readonly boxes?: string
+  readonly head?: string
+}
+
+type TickReason = TickRefusal | 'stale-head' | 'bad-boxes' | 'no-comment'
+
+const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
+  'stale-head':
+    'The head named is not the branch tip on the remote, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
+  'bad-boxes':
+    '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
+  'no-comment': 'No comment on this pull request carries the evidence marker.',
+  'no-checklist': 'The evidence comment carries no checklist to tick.',
+  'no-box':
+    'A named box is past the end of the checklist. Number boxes off `canon pr evidence --json`.',
+  'taste-box':
+    'A named box ends in (taste), which no driver passes. Nothing was written.',
+  'gh-failed':
+    'gh could not read or edit the marked comment on this pull request.',
 }
 
 /** Shared by every verb that resolves a pull request from the checkout's branch. */
@@ -563,10 +589,12 @@ export function register(program: Command): void {
         '--checklist closes the body with a visual checklist, below the',
         'comparison it annotates. A checklist the marked comment already',
         'carries is read back and carried forward the same way the preview',
-        'address is, which keeps a re-render from wiping ticked boxes. It',
-        'turns no-evidence into ok: a branch with a checklist and no evidence',
-        'image renders a marked body holding the checklist, so a later call',
-        'finds and edits that comment.',
+        'address is. A tick survives only a render at the head it names: one',
+        'stamped `passed at <sha>` for another head is cleared and unstamped,',
+        'and so is one carrying no stamp when the comment described another',
+        'head. A checklist, supplied or carried, turns no-evidence into ok: a',
+        'branch with a checklist and no evidence image renders a marked body',
+        'holding the checklist, so a later call finds and edits that comment.',
         '',
         '--local adds a **Local preview:** segment after any hosted one on the',
         'address line, or carries the line alone, and is carried forward the',
@@ -580,6 +608,8 @@ export function register(program: Command): void {
         '  preview    the hosted **Preview:** address the comment carries',
         '  local      the **Local preview:** address beside it',
         '  checklist  the checklist between its delimiters, ticks included',
+        '  boxes      each checklist box with its number, tick, stamp, and taste',
+        '             mark, the numbering `canon pr tick` takes',
         'These come from the comment already posted, never from the flags this',
         'call passed. A checklist the caller posted raw after a refused render',
         'carries no marker, so the record reports none of the three for it. An',
@@ -739,6 +769,51 @@ export function register(program: Command): void {
         opts.remove === true
           ? await runLocalRemove(number, opts)
           : await runLocal(opts)
+    })
+
+  pr.command('tick')
+    .description(
+      "Tick the checklist boxes a UI pass drove, stamping each with the commit it passed at, on the pull request's evidence comment",
+    )
+    .argument('[number]', 'Pull request to edit, defaulting to this branch')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .requiredOption(
+      '--boxes <list>',
+      'Box numbers to tick, comma-separated, as `canon pr evidence --json` numbers them',
+    )
+    .requiredOption('--head <sha>', 'The commit the boxes were driven at')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Edits the marked evidence comment in place, so a skill never',
+        'hand-edits a comment body. Each named box becomes',
+        '`- [x] <box> · passed at <short sha>`. Ticking a box again restamps',
+        'it. A later render at another head clears a tick whose stamp names',
+        'a different commit.',
+        '',
+        'Read `reason` on the JSON record:',
+        '  ticked       the boxes were ticked, with the tip in `head`',
+        '  stale-head   --head is not the remote branch tip, nothing written',
+        '  taste-box    a named box ends in (taste), nothing written',
+        '  no-box       a named number is past the checklist, nothing written',
+        '  no-checklist the evidence comment carries no checklist',
+        '  no-comment   no comment carries the evidence marker',
+        '  bad-boxes    --boxes or --head is malformed',
+        '',
+        'Exit codes:',
+        '  0  the boxes were ticked',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr tick 1341 --boxes 1,2,4 --head 1a2b3c4 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: TickOptions) => {
+      process.exitCode = await runTick(number, opts)
     })
 
   pr.command('frames')
@@ -1786,7 +1861,10 @@ async function runEvidence(
   const carried = {
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
-    ...(carriedChecklist !== undefined && { checklist: carriedChecklist }),
+    ...(carriedChecklist !== undefined && {
+      checklist: carriedChecklist,
+      boxes: readChecklistBoxes(carriedChecklist),
+    }),
   }
 
   // A deploy that resolves and does not build from any changed path makes a
@@ -1834,7 +1912,8 @@ async function runEvidence(
   // comment a later call edits. A local address rides on a checklist or a
   // hosted preview and never opens one alone, so a docs-only branch with a
   // server up posts nothing.
-  const hasChecklist = suppliedChecklist !== undefined
+  const hasChecklist =
+    suppliedChecklist !== undefined || carriedChecklist !== undefined
   if (
     grouped.kind === 'refused' &&
     opts.preview === undefined &&
@@ -1870,7 +1949,11 @@ async function runEvidence(
 
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
   const local = opts.local ?? carriedLocal
-  const checklist = suppliedChecklist ?? carriedChecklist
+  const unsettled = suppliedChecklist ?? carriedChecklist
+  const checklist =
+    unsettled === undefined
+      ? undefined
+      : settleChecklist(unsettled, identity.head, findEvidenceHead(comments))
   const states = grouped.kind === 'read' ? grouped.states : []
   const body = renderEvidenceBody(
     states,
@@ -2401,6 +2484,99 @@ async function runLocalRemove(
 }
 
 const POSITIVE_WHOLE = /^[1-9]\d*$/
+
+const MIN_TICK_HEAD_LENGTH = 7
+
+/**
+ * Ticks the named boxes on the marked comment. It refuses a head that is not
+ * the remote tip and a taste box before writing, so both rules hold as checks
+ * rather than as prose a driver can talk itself out of.
+ */
+async function runTick(
+  number: string | undefined,
+  opts: TickOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  intro('canon pr tick')
+
+  const refuseTick = (reason: TickReason | 'gh-failed'): number =>
+    refuseWith(reason, TICK_REFUSALS[reason], emitJson, root)
+
+  const numbers = (opts.boxes ?? '').split(',').map((part) => part.trim())
+  const head = (opts.head ?? '').trim()
+  if (
+    numbers.length === 0 ||
+    !numbers.every((part) => POSITIVE_WHOLE.test(part)) ||
+    !/^[0-9a-f]+$/.test(head) ||
+    head.length < MIN_TICK_HEAD_LENGTH
+  ) {
+    return refuseTick('bad-boxes')
+  }
+
+  const read = await readIdentity(root, number)
+  if (read.kind === 'refused') {
+    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
+  }
+  const { identity } = read
+  if (identity.number === undefined) return refuseTick('gh-failed')
+
+  const reading = await resolveTip(identity.branch, refReader(root))
+  if (reading.kind === 'refused') {
+    return refuseWith(
+      reading.reason,
+      PULL_REFUSALS[reading.reason],
+      emitJson,
+      root,
+    )
+  }
+  if (!reading.tip.startsWith(head)) return refuseTick('stale-head')
+
+  const comments = await listComments(root, String(identity.number))
+  if (comments === undefined) return refuseTick('gh-failed')
+  const commentId = findEvidenceCommentId(comments)
+  const marked = comments.find((comment) =>
+    comment.url?.endsWith(`#issuecomment-${commentId}`),
+  )
+  if (commentId === undefined || marked === undefined) {
+    return refuseTick('no-comment')
+  }
+
+  const result = tickBoxes(marked.body, numbers.map(Number), reading.tip)
+  if (result.kind === 'refused') return refuseTick(result.reason)
+
+  if (result.body !== marked.body) {
+    const patched = await gh(root, [
+      'api',
+      '-X',
+      'PATCH',
+      `repos/{owner}/{repo}/issues/comments/${commentId}`,
+      '-f',
+      `body=${result.body}`,
+    ])
+    if (patched === null) return refuseTick('gh-failed')
+  }
+
+  logStep('Ticked')
+  logInfo(
+    `${plural(numbers.length, 'box')} at ${reading.tip.slice(0, 7)} on comment ${commentId}`,
+  )
+  outro()
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        root,
+        number: identity.number,
+        reason: 'ticked',
+        head: reading.tip,
+        boxes: numbers.map(Number),
+        commentId,
+      })}\n`,
+    )
+  }
+  return 0
+}
 
 /** One `gh api` call, keeping the HTTP status of a failure so a refused write can be told from a missing ref. */
 type ApiCall =

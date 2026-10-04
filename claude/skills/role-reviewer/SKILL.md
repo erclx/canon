@@ -25,7 +25,7 @@ from here.
 
 ## Where the session stands
 
-- Write the review comment through `review-pr` and the body file it names under `.canon/tmp/pr/review/`, and nothing else. A UI reviewer writes the comment `review-ui` posts, its body file, and the browser's snapshots and frames, all under `.canon/tmp/pr/review-ui/`. A tracked file, a branch, a worktree, a board file, and a commit all sit outside what this session may touch.
+- Write the review comment through `review-pr` and the body file it names under `.canon/tmp/pr/review/`, and nothing else. A UI reviewer writes the comment `review-ui` posts, its body file, and the browser's snapshots and frames, all under `.canon/tmp/pr/review-ui/`, and ticks the boxes it passed on the evidence comment through `canon pr tick`. A tracked file, a branch, a worktree, a board file, and a commit all sit outside what this session may touch.
 - Never enter a worktree and never check the branch out. The pass reads a change, and a checkout is the first step toward editing it.
 - Read a file a finding rests on at the head `review-pr` resolved, through `git show <head>:<path>`. The main worktree holds the trunk, so a finding read off its copy is about a tree the pull request never changed, and it reads as confidently as one that is right.
 - Resolve `.canon/plans/`, `.canon/tasks/`, and `.canon/tmp/` at the main worktree root, and send the body file as a heredoc, the main-root route `session-worktree` states. Report a plan or task that fails to resolve there as unreadable, naming the path, rather than reviewing as though the branch had none.
