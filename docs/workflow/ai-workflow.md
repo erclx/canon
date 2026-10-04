@@ -136,7 +136,7 @@ Before the first feature session on a UI-heavy project, pick a design tier. The 
 
 ## Skills
 
-The [skill map](skill-map.md) gives every skill the plugin ships one row saying when to reach for it, grouped by the moment a project meets it.
+The [skill map](skill-map.md) and its sibling [skill map on request](skill-map-on-request.md) give every skill the plugin ships one row saying when to reach for it. The first groups rows by the moment a project meets them, and the sibling holds the skills that answer a request.
 
 ## Feedback routing
 
