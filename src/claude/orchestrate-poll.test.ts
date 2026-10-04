@@ -175,7 +175,9 @@ beforeEach(() => {
 
   // The stub answers the REST reads the script makes and refuses everything
   // else. `pr`, `repo view`, and `graphql` exit non-zero, which is a host that
-  // blocks GraphQL, so a script still reaching one fails every case below.
+  // blocks GraphQL, so a script still reaching one fails every case below. The
+  // open list is #7 alone unless a case writes `open.txt`, and every per-pull
+  // read answers from the fixture files carrying that number.
   const stub = join(root, 'bin', 'gh')
   const fixtures = join(root, 'fixtures')
   writeFileSync(
@@ -183,17 +185,24 @@ beforeEach(() => {
     [
       '#!/usr/bin/env bash',
       'if [ "$1" != "api" ]; then exit 1; fi',
+      "pulls='repos/{owner}/{repo}/pulls/'",
+      "issues='repos/{owner}/{repo}/issues/'",
       'for arg in "$@"; do',
       '  case "$arg" in',
       '    graphql) exit 1 ;;',
-      '    "repos/{owner}/{repo}/pulls?state=open"*) echo 7; exit 0 ;;',
-      '    "repos/{owner}/{repo}/pulls/7/reviews"*)',
+      '    "repos/{owner}/{repo}/pulls?state=open"*)',
+      `      if [ -f "${fixtures}/open.txt" ]; then cat "${fixtures}/open.txt"; else echo 7; fi; exit 0 ;;`,
+      '    "$pulls"*/reviews*)',
+      '      n=${arg#"$pulls"}; n=${n%%/*}',
       `      if [ -f "${fixtures}/unreadable" ]; then exit 1; fi`,
-      `      cat "${fixtures}/reviews-7.jsonl"; exit 0 ;;`,
-      '    "repos/{owner}/{repo}/issues/7/comments"*)',
+      `      cat "${fixtures}/reviews-$n.jsonl"; exit 0 ;;`,
+      '    "$issues"*/comments*)',
+      '      n=${arg#"$issues"}; n=${n%%/*}',
       `      if [ -f "${fixtures}/unreadable" ] || [ -f "${fixtures}/comments-unreadable" ]; then exit 1; fi`,
-      `      cat "${fixtures}/comments-7.jsonl"; exit 0 ;;`,
-      `    "repos/{owner}/{repo}/pulls/7") cat "${fixtures}/head-7.txt"; exit 0 ;;`,
+      `      cat "${fixtures}/comments-$n.jsonl"; exit 0 ;;`,
+      '    "$pulls"*)',
+      '      n=${arg#"$pulls"}',
+      `      cat "${fixtures}/head-$n.txt"; exit 0 ;;`,
       '    "repos/{owner}/{repo}") echo main; exit 0 ;;',
       '  esac',
       'done',
@@ -540,6 +549,124 @@ describe('poll', () => {
       expect(poll().stdout).toContain(
         'UI-STALE  #7 closed at 2222222, behind 1111111',
       )
+    })
+  })
+
+  // These cases need real commits on both sides, so the repository gets a bare
+  // origin carrying `main` and each pull request's head under the ref GitHub
+  // publishes it at. A five-line file lets two sides touch it without colliding.
+  describe('base movement', () => {
+    const LINES = ['one', 'two', 'three', 'four', 'five']
+
+    const fileWith = (line: number, text: string): string =>
+      LINES.map((original, index) => (index === line ? text : original)).join(
+        '\n',
+      )
+
+    /** Commits files onto a branch cut from `start` and returns its sha. */
+    const commit = (
+      start: string,
+      branch: string,
+      files: Record<string, string>,
+    ): string => {
+      sh(`git -C repo checkout -q -B ${branch} ${start}`)
+      for (const [path, content] of Object.entries(files)) {
+        writeFileSync(join(root, 'repo', path), `${content}\n`)
+      }
+      sh(`git -C repo add -A -- ${Object.keys(files).join(' ')}`)
+      sh(`git -C repo commit -q -m ${branch}`)
+
+      return sh('git -C repo rev-parse HEAD').trim()
+    }
+
+    const pushMain = (sha: string): void => {
+      sh(`git -C repo push -q -f origin ${sha}:refs/heads/main`)
+    }
+
+    /** Publishes a pull request at `head` with an empty thread. */
+    const openPull = (number: string, head: string): void => {
+      sh(`git -C repo push -q -f origin ${head}:refs/pull/${number}/head`)
+      writeFileSync(join(root, 'fixtures', `reviews-${number}.jsonl`), '')
+      writeFileSync(join(root, 'fixtures', `comments-${number}.jsonl`), '')
+      writeFileSync(join(root, 'fixtures', `head-${number}.txt`), `${head}\n`)
+      writeFileSync(
+        join(root, 'fixtures', `scope-${number}.json`),
+        JSON.stringify({ source: 'none', state: 'none' }),
+      )
+    }
+
+    const listOpen = (...numbers: string[]): void => {
+      writeFileSync(
+        join(root, 'fixtures', 'open.txt'),
+        `${numbers.join('\n')}\n`,
+      )
+    }
+
+    let base: string
+
+    beforeEach(() => {
+      sh('git init -q --bare origin.git')
+      sh(`git -C repo remote add origin "${join(root, 'origin.git')}"`)
+      base = commit('HEAD', 'base', {
+        'a.txt': LINES.join('\n'),
+        'b.txt': LINES.join('\n'),
+      })
+      pushMain(base)
+    })
+
+    it('should report a branch main moved under on a path it writes', () => {
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
+
+      const first = poll().stdout
+
+      expect(first).toContain(
+        'STALE     #7 main changed 1 file(s) it writes since its base: a.txt',
+      )
+      expect(poll().stdout).toBe('No movement.')
+    })
+
+    it('should not report a branch main moved under only on paths it does not write', () => {
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      pushMain(commit(base, 'main2', { 'b.txt': fileWith(4, 'theirs') }))
+
+      expect(poll().stdout).not.toContain('STALE')
+    })
+
+    it('should report a conflicted branch once rather than also as stale', () => {
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      pushMain(commit(base, 'main2', { 'a.txt': fileWith(0, 'theirs') }))
+
+      const run = poll().stdout
+
+      expect(run).toContain('conflict against main')
+      expect(run).not.toContain('STALE')
+    })
+
+    it('should report a branch that turns stale after its first sighting', () => {
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      expect(poll().stdout).toContain('OPENED    #7')
+
+      pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
+
+      expect(poll().stdout).toContain('STALE     #7')
+    })
+
+    it('should report nothing for two open pull requests that merge together cleanly', () => {
+      listOpen('7', '8')
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      openPull('8', commit(base, 'pr8', { 'a.txt': fileWith(4, 'yours') }))
+
+      expect(poll().stdout).not.toContain('OVERLAP')
+    })
+
+    it('should report two open pull requests that conflict on a shared path', () => {
+      listOpen('7', '8')
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      openPull('8', commit(base, 'pr8', { 'a.txt': fileWith(0, 'yours') }))
+
+      expect(poll().stdout).toContain('OVERLAP   #7 #8 conflict on a.txt')
+      expect(poll().stdout).toBe('No movement.')
     })
   })
 

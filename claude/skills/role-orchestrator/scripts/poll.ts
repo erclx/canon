@@ -40,19 +40,33 @@ export interface Row {
   passAt: number
   prior: string
   replyAt: number
+  /** What the pull request writes, null when its diff could not be read. */
+  paths: null | string[]
   resp: number
+  stale: Staleness
+  staleFiles: string[]
   ui: string
   unmatchedCount: number
   unmatchedHeading: string
 }
+
+/**
+ * Whether the base moved under a path the pull request writes since the commit
+ * it branched from. `unknown` is a written set this run could not read, which
+ * must never pass for `fresh`.
+ */
+export type Staleness = 'fresh' | 'stale' | 'unknown'
 
 /** One baseline line, kept as the strings it was written with. */
 export interface Baseline {
   head: string
   merges: string
   number: string
+  /** Open pull requests this one conflicts with, comma-separated, or `none`. */
+  overlaps: string
   prior: string
   resp: string
+  stale: string
   state: string
   ui: string
   unmatched: string
@@ -211,7 +225,7 @@ export const uiState = (payload: Payload, head: string): string => {
   return `${heading}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
 }
 
-/** Takes the first eight fields and ignores the rest, so a short or padded line still reads. */
+/** Takes the first ten fields and ignores the rest, so a short or padded line still reads. */
 export const parseBaseline = (line: string): Baseline => {
   const fields = line.split(' ')
 
@@ -219,14 +233,21 @@ export const parseBaseline = (line: string): Baseline => {
     head: fields[1] ?? '',
     merges: fields[4] ?? '',
     number: fields[0] ?? '',
+    overlaps: fields[9] ?? '',
     prior: fields[2] ?? '',
     resp: fields[3] ?? '',
+    stale: fields[8] ?? '',
     state: fields[5] ?? '',
     ui: fields[7] ?? '',
     unmatched: fields[6] ?? '',
   }
 }
 
+/**
+ * New fields append at the end, so every positional read of an older line still
+ * lands. A field an older line never carried stays empty and is not written
+ * back as a trailing space.
+ */
 export const formatBaseline = (entry: Baseline): string =>
   [
     entry.number,
@@ -237,9 +258,29 @@ export const formatBaseline = (entry: Baseline): string =>
     entry.state,
     entry.unmatched,
     entry.ui,
-  ].join(' ')
+    entry.stale,
+    entry.overlaps,
+  ]
+    .join(' ')
+    .trimEnd()
 
 const short = (head: string): string => head.slice(0, 7)
+
+const listFiles = (files: string[]): string =>
+  files.length > 3
+    ? `${files.slice(0, 3).join(', ')}, +${files.length - 3} more`
+    : files.join(', ')
+
+/**
+ * A conflict already sends the branch to its owner for a rebase, so a pull
+ * request reading both reports the conflict alone and earns one handback.
+ */
+const staleLine = (row: Row, base: string): string[] =>
+  row.stale === 'stale' && row.merges !== 'conflict'
+    ? [
+        `STALE     #${row.number} ${base} changed ${row.staleFiles.length} file(s) it writes since its base: ${listFiles(row.staleFiles)}`,
+      ]
+    : []
 
 export interface Classification {
   baseline: Baseline
@@ -266,8 +307,10 @@ const classifyFirstSighting = (
     head: row.head,
     merges: row.merges,
     number: row.number,
+    overlaps: 'none',
     prior: row.prior,
     resp: String(row.resp),
+    stale: row.stale,
     state: row.heading,
     ui: row.ui,
     unmatched: String(row.unmatchedCount),
@@ -280,7 +323,11 @@ const classifyFirstSighting = (
     line = `OPENED    #${row.number} at ${at}`
   }
 
-  return { baseline, isChanged: true, lines: [line] }
+  return {
+    baseline,
+    isChanged: true,
+    lines: [line, ...staleLine(row, context.base)],
+  }
 }
 
 const classifyUi = (row: Row, old: Baseline): string[] => {
@@ -316,6 +363,10 @@ export const classify = (
   if (row.merges === 'conflict' && old.merges !== 'conflict') {
     lines.push(`CONFLICT  #${row.number} no longer merges into ${context.base}`)
   }
+
+  // Staleness arrives the same way, and reports on its transition so a branch
+  // left behind across several runs earns one handback rather than one a run.
+  if (old.stale !== 'stale') lines.push(...staleLine(row, context.base))
 
   // A rising count is what is new here. It fires on a tracked pull request
   // only: a first sighting takes whatever already sits on the thread as its
@@ -386,8 +437,10 @@ export const classify = (
     head: row.head,
     merges: row.merges,
     number: row.number,
+    overlaps: old.overlaps,
     prior: row.prior,
     resp: String(row.resp),
+    stale: row.stale,
     state,
     ui: row.ui === '' ? old.ui : row.ui,
     unmatched: String(row.unmatchedCount),
@@ -532,6 +585,152 @@ const readMerges = (number: string, head: string, ref: string): string => {
     : 'conflict'
 }
 
+interface Written {
+  forkPoint: string
+  paths: string[]
+}
+
+const nonEmptyLines = (output: string): string[] =>
+  output.split('\n').filter((line) => line !== '')
+
+/**
+ * The paths a pull request writes, read from its own diff against the commit it
+ * branched from. `--no-renames` lists both sides of a rename, since a change on
+ * the base to either one is a change under the branch. A head or base that does
+ * not resolve, which a fork or a deleted head leaves, reads as null.
+ */
+const readWritten = (head: string, ref: string): null | Written => {
+  const forkPoint = run('git', ['merge-base', ref, head])
+  if (!forkPoint.isOk) return null
+  const point = forkPoint.stdout.trim()
+  const diff = run('git', ['diff', '--name-only', '--no-renames', point, head])
+  if (!diff.isOk) return null
+
+  return { forkPoint: point, paths: nonEmptyLines(diff.stdout) }
+}
+
+/**
+ * Re-testing after every merge to the base is a merge queue's cost without its
+ * batching, so only a change to a path the branch writes makes it stale. The
+ * net diff rather than the log is read, so a change the base made and then
+ * reverted moves nothing.
+ */
+const readStale = (
+  written: null | Written,
+  ref: string,
+): { files: string[]; stale: Staleness } => {
+  if (written === null) return { files: [], stale: 'unknown' }
+  if (written.paths.length === 0) return { files: [], stale: 'fresh' }
+
+  const moved = run('git', [
+    '--literal-pathspecs',
+    'diff',
+    '--name-only',
+    '--no-renames',
+    written.forkPoint,
+    ref,
+    '--',
+    ...written.paths,
+  ])
+  if (!moved.isOk) return { files: [], stale: 'unknown' }
+
+  const files = nonEmptyLines(moved.stdout)
+
+  return { files, stale: files.length > 0 ? 'stale' : 'fresh' }
+}
+
+export interface Overlap {
+  files: string[]
+  pair: readonly [string, string]
+}
+
+/**
+ * Pairwise merge-tree grows with the square of open pull requests, so only a
+ * pair sharing a written path is tested. Each pair comes lower number first,
+ * which fixes the order its line and its baseline entry are read in.
+ */
+export const sharedPairs = (rows: Row[]): [Row, Row][] => {
+  const readable = rows
+    .filter((row) => row.paths !== null && row.paths.length > 0)
+    .toSorted((a, b) => Number(a.number) - Number(b.number))
+  const pairs: [Row, Row][] = []
+  for (const [index, first] of readable.entries()) {
+    const written = new Set(first.paths)
+    for (const second of readable.slice(index + 1)) {
+      if ((second.paths ?? []).some((path) => written.has(path))) {
+        pairs.push([first, second])
+      }
+    }
+  }
+
+  return pairs
+}
+
+const partnersOf = (entry: Baseline | undefined): string[] =>
+  entry === undefined || entry.overlaps === '' || entry.overlaps === 'none'
+    ? []
+    : entry.overlaps.split(',')
+
+/**
+ * A partner this run could not read keeps its place, so a pull request that
+ * drops out of one run and returns does not report the same pair twice.
+ */
+export const overlapPartners = (
+  number: string,
+  overlaps: Overlap[],
+  old: Baseline | undefined,
+  carried: Set<string>,
+): string => {
+  const partners = new Set(
+    overlaps.flatMap(({ pair: [first, second] }) =>
+      first === number ? [second] : second === number ? [first] : [],
+    ),
+  )
+  for (const partner of partnersOf(old)) {
+    if (carried.has(partner)) partners.add(partner)
+  }
+  const sorted = [...partners].toSorted((a, b) => Number(a) - Number(b))
+
+  return sorted.length === 0 ? 'none' : sorted.join(',')
+}
+
+/** A pair reports once, read off the lower-numbered side's baseline entry. */
+export const overlapLines = (
+  overlaps: Overlap[],
+  known: Map<string, Baseline>,
+): string[] =>
+  overlaps
+    .filter(
+      ({ pair: [first, second] }) =>
+        !partnersOf(known.get(first)).includes(second),
+    )
+    .map(
+      ({ files, pair: [first, second] }) =>
+        `OVERLAP   #${first} #${second} conflict on ${listFiles(files)}`,
+    )
+
+/**
+ * Two pull request heads merged against each other, which is the merge the
+ * second to land will have to make. merge-tree exits 1 on a conflict and
+ * prints the tree then one conflicted path a line. Any other failure prints no
+ * tree, and reads as null beside a clean merge, since neither names a file.
+ */
+const readOverlap = (first: string, second: string): null | string[] => {
+  const merged = run('git', [
+    'merge-tree',
+    '--write-tree',
+    '--name-only',
+    '--no-messages',
+    first,
+    second,
+  ])
+  if (merged.isOk) return null
+  const lines = nonEmptyLines(merged.stdout)
+  if (lines.length < 2) return null
+
+  return [...new Set(lines.slice(1))]
+}
+
 const buildRow = (
   number: string,
   payload: Payload,
@@ -545,17 +744,23 @@ const buildRow = (
     run('canon', ['pr', 'review-state', number, '--json']).stdout,
   )
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
+  const merges = readMerges(number, head, ref)
+  const written = merges === 'unknown' ? null : readWritten(head, ref)
+  const stale = readStale(written, ref)
 
   return {
     age: scope.age,
     head,
     heading: scope.state,
-    merges: readMerges(number, head, ref),
+    merges,
     number,
     passAt: scope.readAt,
+    paths: written?.paths ?? null,
     prior: scope.commit,
     replyAt: replies.newestAt,
     resp: replies.count,
+    stale: stale.stale,
+    staleFiles: stale.files,
     ui: uiState(payload, head),
     unmatchedCount: unmatched.count,
     unmatchedHeading: unmatched.heading,
@@ -655,6 +860,22 @@ const main = (): number => {
     snapshots.push({ row: buildRow(number, payload, head, ref) })
   }
 
+  const rows = snapshots.flatMap((snapshot) =>
+    'row' in snapshot ? [snapshot.row] : [],
+  )
+  const carried = new Set(
+    snapshots.flatMap((snapshot) =>
+      'baseline' in snapshot ? [snapshot.baseline.number] : [],
+    ),
+  )
+  const overlaps = sharedPairs(rows).flatMap(([first, second]) => {
+    const files = readOverlap(first.head, second.head)
+
+    return files === null
+      ? []
+      : [{ files, pair: [first.number, second.number] as const }]
+  })
+
   let isChanged = false
   const final: string[] = []
   const seen = new Set<string>()
@@ -667,13 +888,24 @@ const main = (): number => {
 
     const { row } = snapshot
     seen.add(row.number)
-    const result = classify(row, known.get(row.number), {
+    const old = known.get(row.number)
+    const result = classify(row, old, {
       base,
       countSince: countSince(row.number),
     })
     for (const line of result.lines) console.log(line)
     if (result.isChanged) isChanged = true
-    final.push(formatBaseline(result.baseline))
+    final.push(
+      formatBaseline({
+        ...result.baseline,
+        overlaps: overlapPartners(row.number, overlaps, old, carried),
+      }),
+    )
+  }
+
+  for (const line of overlapLines(overlaps, known)) {
+    console.log(line)
+    isChanged = true
   }
 
   for (const entry of previous) {
