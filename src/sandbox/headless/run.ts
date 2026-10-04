@@ -27,7 +27,6 @@ import {
   snapshotRoot,
   snapshotTree,
   writesBetween,
-  type Manifest,
 } from '@/sandbox/headless/watch'
 import { mintSandboxRunId, sandboxTree } from '@/sandbox/tree'
 import {
