@@ -863,6 +863,7 @@ describe('canon pr evidence reads the pull request', () => {
       const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
       expect(record.body).toContain('width="1000" alt="hero head"')
+      expect(record.widthUnread).toEqual(['head:evidence/dark/hero.png'])
     })
 
     it('should render 1000 for an image that is not a PNG', async () => {
@@ -874,6 +875,7 @@ describe('canon pr evidence reads the pull request', () => {
       const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
       expect(record.body).toContain('width="1000" alt="photo head"')
+      expect(record).not.toHaveProperty('widthUnread')
     })
   })
 

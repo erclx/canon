@@ -1750,18 +1750,26 @@ async function readPullMergeBase(
   return sha === null || sha.trim() === '' ? undefined : sha.trim()
 }
 
+/** How many width reads run at once, since each downloads a whole image. */
+const WIDTH_READ_CONCURRENCY = 4
+
+type WidthRead =
+  | { readonly kind: 'read'; readonly width?: number }
+  | { readonly kind: 'failed' }
+
 /**
  * The pixel width of a PNG at `sha`, read over the contents API like every
  * other evidence read. The endpoint ignores a `Range` header, so the whole
- * file arrives and only its first bytes are read. Undefined for any other
- * format or a failed read, so the render keeps its ceiling width.
+ * file arrives and only its first bytes are read. A format other than PNG
+ * reads without a width, and a refused or timed-out call reads as failed, so
+ * the caller can keep the ceiling width and still report the cause.
  */
 async function readImageWidth(
   cwd: string,
   path: string,
   sha: string,
-): Promise<number | undefined> {
-  if (!/\.png$/i.test(path)) return undefined
+): Promise<WidthRead> {
+  if (!/\.png$/i.test(path)) return { kind: 'read' }
   try {
     const result = await execa(
       'gh',
@@ -1779,10 +1787,37 @@ async function readImageWidth(
         encoding: 'buffer',
       },
     )
-    return readPngWidth(result.stdout.subarray(0, PNG_HEADER_BYTES))
+    const width = readPngWidth(result.stdout.subarray(0, PNG_HEADER_BYTES))
+    return width === undefined ? { kind: 'read' } : { kind: 'read', width }
   } catch {
-    return undefined
+    return { kind: 'failed' }
   }
+}
+
+/** Runs `task` over `inputs` with at most `limit` in flight, keeping input order. */
+async function mapPool<T, R>(
+  inputs: readonly T[],
+  limit: number,
+  task: (input: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(inputs.length)
+  let next = 0
+  const lane = async (): Promise<void> => {
+    while (next < inputs.length) {
+      const index = next++
+      results[index] = await task(inputs[index] as T)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, inputs.length) }, lane),
+  )
+  return results
+}
+
+interface SizedEvidence {
+  readonly reading: EvidenceReading
+  /** Each image whose width read failed, as `head:<path>` or `base:<path>`, which rendered at the ceiling. */
+  readonly unread: readonly string[]
 }
 
 /** Each item with the pixel width of its head image and, when it has one, its base image. */
@@ -1791,29 +1826,56 @@ async function withImageWidths(
   reading: EvidenceReading,
   base: string | undefined,
   head: string,
-): Promise<EvidenceReading> {
-  if (reading.kind === 'refused') return reading
-  const states = await Promise.all(
-    reading.states.map(async (entry) => ({
-      ...entry,
-      items: await Promise.all(
-        entry.items.map(async (item): Promise<EvidenceItem> => {
-          const [width, baseWidth] = await Promise.all([
-            readImageWidth(cwd, item.path, head),
-            item.added || base === undefined
-              ? undefined
-              : readImageWidth(cwd, item.path, base),
-          ])
-          return {
-            ...item,
-            ...(width !== undefined && { width }),
-            ...(baseWidth !== undefined && { baseWidth }),
-          }
-        }),
-      ),
-    })),
+): Promise<SizedEvidence> {
+  if (reading.kind === 'refused') return { reading, unread: [] }
+  const jobs = reading.states.flatMap((entry, stateIndex) =>
+    entry.items.flatMap((item, itemIndex) => [
+      {
+        stateIndex,
+        itemIndex,
+        side: 'head' as const,
+        path: item.path,
+        sha: head,
+      },
+      ...(item.added || base === undefined
+        ? []
+        : [
+            {
+              stateIndex,
+              itemIndex,
+              side: 'base' as const,
+              path: item.path,
+              sha: base,
+            },
+          ]),
+    ]),
   )
-  return { kind: 'read', states }
+  const reads = await mapPool(jobs, WIDTH_READ_CONCURRENCY, (job) =>
+    readImageWidth(cwd, job.path, job.sha),
+  )
+  const unread: string[] = []
+  const states = reading.states.map((entry, stateIndex) => ({
+    ...entry,
+    items: entry.items.map((item, itemIndex): EvidenceItem => {
+      const widths: { width?: number; baseWidth?: number } = {}
+      jobs.forEach((job, index) => {
+        const read = reads[index]
+        if (
+          job.stateIndex !== stateIndex ||
+          job.itemIndex !== itemIndex ||
+          read === undefined
+        ) {
+          return
+        }
+        if (read.kind === 'failed') unread.push(`${job.side}:${job.path}`)
+        else if (read.width !== undefined) {
+          widths[job.side === 'head' ? 'width' : 'baseWidth'] = read.width
+        }
+      })
+      return { ...item, ...widths }
+    }),
+  }))
+  return { reading: { kind: 'read', states }, unread }
 }
 
 async function runEvidence(
@@ -2025,7 +2087,7 @@ async function runEvidence(
       ? undefined
       : settleChecklist(unsettled, identity.head, findEvidenceHead(comments))
   const sized = await withImageWidths(root, grouped, base, identity.head)
-  const states = sized.kind === 'read' ? sized.states : []
+  const states = sized.reading.kind === 'read' ? sized.reading.states : []
   const body = renderEvidenceBody(
     states,
     repo,
@@ -2064,6 +2126,11 @@ async function runEvidence(
   logInfo(
     `${plural(caseCount, 'case')} across ${plural(states.length, 'state')}`,
   )
+  if (sized.unread.length > 0) {
+    logWarn(
+      `width unread for ${plural(sized.unread.length, 'image')}, rendered at 1000: ${sized.unread.join(', ')}`,
+    )
+  }
   if (preview !== undefined) logInfo(`preview ${preview}`)
   if (local !== undefined) logInfo(`local preview ${local}`)
   if (checklist !== undefined) {
@@ -2086,6 +2153,7 @@ async function runEvidence(
         head: identity.head,
         body,
         states,
+        ...(sized.unread.length > 0 && { widthUnread: sized.unread }),
         ...(commentId !== undefined && { commentId }),
         ...carried,
       })}\n`,
