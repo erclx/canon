@@ -53,6 +53,10 @@ Hand the operator the address as a markdown link carrying the URL as its text an
 
 Write the frame's whole document to the `path` the add verb reported. The open canvas reloads the frame when its file changes.
 
+- From a linked worktree, `Edit` and `Write` refuse a main-root path. Write the whole file through one plain `Bash` heredoc instead, the route `session-worktree` states for a main-root write, and never take the redirect to a worktree copy.
+- Change one property of one element with `canon canvas edit <page>/<frame> --element <index> --set <property>=<value> --json` when the set it accepts covers the change, since it leaves every other byte as it was.
+- Use the project's custom properties for every value the token stylesheet defines. The record from `serve` names the token source under `tokens`, and a `none` source means frames render unstyled, so say so rather than inventing values to cover it.
+
 Mark the frame before the first write, so the operator sees which frame is being worked on before anything lands, and clear the mark once the edits to it are done:
 
 ```bash
@@ -62,11 +66,7 @@ canon canvas editing <page>/<frame> --done --json
 
 - A mark lapses after five minutes, so mark the frame again during a longer edit.
 - Clear it on every exit from the edit, including one that stopped on a refusal. Clearing a frame that holds no mark succeeds.
-- When `canon canvas editing --help` reports no such command, the installed CLI predates the mark, so go on without it rather than stopping.
-
-- From a linked worktree, `Edit` and `Write` refuse a main-root path. Write the whole file through one plain `Bash` heredoc instead, the route `session-worktree` states for a main-root write, and never take the redirect to a worktree copy.
-- Change one property of one element with `canon canvas edit <page>/<frame> --element <index> --set <property>=<value> --json` when the set it accepts covers the change, since it leaves every other byte as it was.
-- Use the project's custom properties for every value the token stylesheet defines. The record from `serve` names the token source under `tokens`, and a `none` source means frames render unstyled, so say so rather than inventing values to cover it.
+- When the mark call fails with `unknown command 'editing'`, the installed CLI predates the mark, so go on without it rather than stopping. Never run `canvas edit` in its place, whatever the error suggests, since that verb writes the frame.
 
 ## Step 4: read what the operator pointed at
 

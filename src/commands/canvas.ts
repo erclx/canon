@@ -742,11 +742,6 @@ async function runComposite(
   return 0
 }
 
-/** NaN for a value that is not a number, which the content module refuses. */
-/**
- * The caller's roster name, or a generic label when the environment names no
- * session or the roster holds no row for it, as in a sandbox or a CI run.
- */
 async function unlocated(): Promise<Located> {
   return {
     repository: null,
@@ -756,6 +751,10 @@ async function unlocated(): Promise<Located> {
   }
 }
 
+/**
+ * The caller's roster name, or a generic label when the environment names no
+ * session or the roster holds no row for it, as in a sandbox or a CI run.
+ */
 async function sessionLabel(): Promise<string> {
   const identity = callerIdentity()
   if (identity.sessionId === null && identity.pid === null) return 'a session'
@@ -766,6 +765,7 @@ async function sessionLabel(): Promise<string> {
   return self.kind === 'self' ? self.session.name : 'a session'
 }
 
+/** NaN for a value that is not a number, which the content module refuses. */
 function parsePosition(raw: string | undefined, fallback: number): number {
   if (raw === undefined) return fallback
   return raw.trim() === '' ? Number.NaN : Number(raw)
