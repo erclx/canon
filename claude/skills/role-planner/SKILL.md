@@ -42,7 +42,7 @@ Each item below is something a record needed and a launch string did not carry.
 - The task file, and its `## Findings` before deciding anything. A row can carry its own disproof under a title that still states the original claim, which is how one trial nearly planned against a premise the file had already recorded as dead.
 - The source files themselves, opened rather than summarized. Never a count quoted from the task file, which was wrong or stale in ten places across four plans.
 - `CLAUDE.md` and `canon/ARCHITECTURE.md`, for the decision and the alternative it was taken against rather than for the decision alone.
-- `.canon/tasks/priority.md` for the row's Touches column and its stated blocker. That column is the file set the dispatch conflict check already reads.
+- `.canon/tasks/priority.md` for the row's Touches column and its stated blocker. That column is the file set the dispatch conflict check already reads. Read it for the shared-path lines and the holds of the constraint block, never as a gate a plan must clear.
 
 Two reads belong to the `plan-feature` path alone, since neither a groundwork
 track nor an intake pass is sequenced behind another row or validated as a plan:
@@ -60,7 +60,7 @@ it.
 - Run `canon sessions list --json`, take the `branch` field of every session whose `repository` matches this one and whose branch is neither null nor the trunk branch, union that with every `headRefName` from `gh pr list --json number,headRefName`, dedupe by branch name, then diff each with `git diff --name-only main...<branch>` for its file set. That resolves locally whether or not a pull request exists, since every track in this repository shares one git directory across its worktrees.
 - A bare branch or worktree with neither a live session nor a pull request behind it is still not evidence, since this repository squash-merges and leaves both behind. The roster read is already filtered to live sessions, so what changed is the second source composed with it rather than a raw count. It still misses a live session that reached its worktree through the direct-path fallback rather than `EnterWorktree`, since that session's registered branch never moves off the trunk.
 - Run the read once per row rather than once per batch. A session working several rows ages its picture of the tree while it goes, and this read is what dates it.
-- Name each in-flight set as a constraint, say which act it forbids, and stamp the block with the commit the tree was read at. A bare path list leaves the reader guessing. The plan standard fixes that block for a feature plan, and a groundwork or intake record carries the same three parts in whatever shape its own standard states.
+- Name each in-flight set as a constraint, being a hold that says which act it forbids or a shared path that says which branch rebases, and stamp the block with the commit the tree was read at. A bare path list leaves the reader guessing. The plan standard fixes that block for a feature plan, and a groundwork or intake record carries the same three parts in whatever shape its own standard states.
 
 ## The board is read-only
 

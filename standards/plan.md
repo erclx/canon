@@ -18,6 +18,8 @@ Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds on
 
 The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs a plan deleted before a push, which is why the archive step is a move rather than a cleanup.
 
+<!-- canon-length-exempt: the constraint forms and the answer contract share one reader, and a split into a second standard is queued as its own change -->
+
 ## Scope
 
 Governs a feature plan under `.canon/plans/feature-<slug>.md`: the filename, the required sections, what each holds, and the suggested-and-answer contract.
@@ -40,7 +42,7 @@ A plan works when a session holding none of the conversation that produced it ca
 - What is being built, and which files does it change?
 - Which decisions are already settled, and which are still open?
 - For each open decision, what happens when nobody answers it?
-- What is likely to go wrong, and where does the work collide with something already in flight?
+- What is likely to go wrong, what does the work share with something already in flight, and what must it wait on?
 - How is each outcome proven, and which input would break it?
 
 A plan failing these is non-conforming even when it satisfies every shape rule below.
@@ -81,20 +83,22 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 
 ### Constraints
 
-A constraint naming a surface to leave alone says which of two acts it forbids, rather than leaving the executing session to guess.
+Work in flight reaches a plan as a hold or as a shared path. A hold leaves a surface alone and says which of two acts it forbids, rather than leaving the executing session to guess. Neither act is forbidden over a shared path.
 
+- Write a hold only for a dependency, a contract the other track consumes, a relocation, or a sweep, which a rebase cannot settle mechanically. A bare shared file is none of these, and forbidding it sends a worker to concede a file the change needs.
 - Forbid conforming that surface to whatever shape the change introduces, which keeps the branch to one concern.
 - Never forbid retargeting a pointer the change breaks. A rename, a split, or a deletion that leaves a citation behind ships a dangling reference, so repairing it is required work rather than scope creep.
-- Decide both acts for every surface the constraint names, not for one file among its siblings.
+- Decide both acts for every surface a hold names, not for one file among its siblings.
+- Write a shared path as the track, the path, and the branch that rebases, being the one merging second. The executing session edits the file and keeps both sides on the rebase.
 
-A constraint measured against work in flight expires when that work merges, so stamp the block with what it was measured against.
+A constraint measured against work in flight expires when that work merges, as a shared-path line does, so stamp the block with what it was measured against.
 
 - Give the stamp its own leading bullet, written as Measured against `<commit>` on <YYYY-MM-DD>. One stamp covers the whole block.
 - Stamp the commit rather than the track names or a date alone. The constraint already names each track, and a date does not separate two plans written on either side of a merge.
-- Re-test a stamped constraint before honoring it with `git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>`. Any commit it reports means the track landed and the constraint is dead. Fetch in the same command and scope the log to the paths, since a stale remote-tracking ref reads a dead constraint as live and a squashed subject names no track.
+- Re-test a stamped constraint before honoring it with `git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>`. Any commit it reports means the track landed and the constraint is dead. Fetch and scope the log to the paths in the same command, since a stale ref reads a dead constraint as live and a squashed subject names no track.
 - Read an unstamped constraint as unverified rather than as live, and confirm it against the open pull request list for the named paths.
 
-A constraint naming a `.canon/ready/` folder is a third shape beside the two above. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
+A constraint naming a `.canon/ready/` folder is a third shape beside the hold and the shared path. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
 
 ### Verification
 
@@ -106,6 +110,7 @@ A constraint naming a `.canon/ready/` folder is a third shape beside the two abo
 
 - Name the collision rather than the category. A risk a reader cannot act on is padding.
 - Where the work establishes a resource with more than one consumer, list the consumers and mark each one read or write. A policy stated over that resource has to hold for the writers and not only for the consumer that prompted it.
+- Where the work changes a contract another track consumes, such as an exported signature, a verb's flags or record, or a config key, name the contract and list each consumer. The dispatcher reads this bullet for the contract hold, so a change left out reaches it as a clean shared file.
 
 ### Review focus
 
@@ -161,7 +166,8 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 **Constraints:**
 
 - Measured against `<commit>` on <YYYY-MM-DD>
-- <the work in flight, its file set, and which of the two acts the constraint forbids>
+- <a hold: the work in flight, its file set, and which of the two acts the constraint forbids>
+- <a shared path: the work in flight, the path, and which branch rebases>
 - <durable rule the work must respect>
 
 **Files to touch:**
