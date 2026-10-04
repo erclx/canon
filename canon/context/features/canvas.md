@@ -70,6 +70,7 @@ Fill writes `100%` on either axis and Fit writes `fit-content`, one property per
 - The marks share one `editing.json` beside `selection.json`, keyed by frame, and each write merges its one key under the file lock. Several sessions can hold different frames at once, and replacing the whole map would drop a mark another session wrote in between.
 - A mark lapses five minutes after it was last written. A session that crashes or compacts never clears its mark, so the expiry is the only thing that does, and its length bounds how long a dead mark misleads the operator. A frame rewrite takes seconds, so a long edit renews once.
 - The mark gates no write. The frame hash check already refuses an inspector edit made against a file the session rewrote, so a lock would refuse the same collision twice.
+- The shell shows a mark on the frame's board label and outline, not in the pages panel, since a frame being edited is something the operator watches on the board. A reread drops a cleared mark, and a client timer set for the earliest `until` drops a lapsed one, because an expiry writes no file and raises no change event.
 
 ### The static board retired
 
