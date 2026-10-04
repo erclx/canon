@@ -633,7 +633,7 @@ describe('Layers', () => {
       },
     ])
     expect(
-      figureFor('hero').querySelector('[data-outline="selected"]'),
+      figureFor('hero').querySelector('[data-selection="element"]'),
     ).not.toBeNull()
   })
 })
@@ -877,7 +877,7 @@ describe('Inspector element', () => {
       mount.querySelector('[aria-label="Element"]')?.textContent,
     ).toContain('changed since')
     expect(
-      figureFor('hero').querySelector('[data-outline="selected"]'),
+      figureFor('hero').querySelector('[data-selection="element"]'),
     ).toBeNull()
   })
 
@@ -2206,6 +2206,423 @@ describe('ThemePanel', () => {
     act(() => buttonNamed('Pages').click())
 
     expect(mount.querySelector('[aria-label="Pages"]')).not.toBeNull()
+  })
+})
+
+describe('selection handles', () => {
+  function overlayIn(name: string): HTMLElement | null {
+    return figureFor(name).querySelector<HTMLElement>('.selection')
+  }
+
+  function handleOf(name: string, corner: string): HTMLElement {
+    const handle = overlayIn(name)?.querySelector<HTMLElement>(
+      `[data-handle="${corner}"]`,
+    )
+    if (!handle) throw new Error(`no ${corner} handle on ${name}`)
+    return handle
+  }
+
+  /** Stands in for layout, which the test document never runs. */
+  function placeElement(
+    doc: Document,
+    selector: string,
+    rect: { x: number; y: number; width: number; height: number },
+  ): void {
+    const target = doc.querySelector(selector)
+    if (!target) throw new Error(`no ${selector} in the frame`)
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        ...rect,
+        left: rect.x,
+        top: rect.y,
+        right: rect.x + rect.width,
+        bottom: rect.y + rect.height,
+      }),
+    })
+  }
+
+  async function dragHandle(
+    target: HTMLElement,
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+  ) {
+    await act(async () => {
+      const at = (type: string, point: { x: number; y: number }) =>
+        target.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: point.x,
+            clientY: point.y,
+            pointerId: 1,
+          }),
+        )
+      at('pointerdown', from)
+      at('pointermove', to)
+      at('pointerup', to)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  function selectLabel(name: string): void {
+    pointer('pointerdown', labelFor(name), 10, 10)
+    pointer('pointerup', labelFor(name), 10, 10)
+  }
+
+  function answerEditsWith(hashes: string[]): void {
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({ url: String(url), body: JSON.parse(String(init?.body)) })
+      return new Response(
+        JSON.stringify({ ok: true, hash: hashes.shift() ?? 'last' }),
+        { headers: { 'content-type': 'application/json' } },
+      )
+    }) as typeof fetch
+  }
+
+  it('should draw no handles while nothing is selected', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(overlayIn('hero')).toBeNull()
+  })
+
+  it('should draw four handles and no size chip on a selected frame', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    selectLabel('hero')
+
+    expect(overlayIn('hero')?.dataset.selection).toBe('frame')
+    expect(overlayIn('hero')?.querySelectorAll('[data-handle]')).toHaveLength(4)
+    expect(overlayIn('hero')?.querySelector('.selection-chip')).toBeNull()
+  })
+
+  it('should draw four handles and the size chip on a selected element', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 199.6, height: 50.2 })
+
+    clickIn(doc, 'h1')
+
+    const overlay = overlayIn('hero')
+    expect(overlay?.dataset.selection).toBe('element')
+    expect(overlay?.querySelectorAll('[data-handle]')).toHaveLength(4)
+    expect(overlay?.querySelector('.selection-chip')?.textContent).toBe(
+      '200 × 50',
+    )
+    expect(figureFor('hero').querySelectorAll('.selection')).toHaveLength(1)
+  })
+
+  it('should resize a frame by the drag in surface units at half zoom', async () => {
+    renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
+    act(() => {
+      view.value = { x: 0, y: 0, zoom: 0.5 }
+    })
+    selectLabel('hero')
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 200, y: 150 },
+    )
+
+    expect(sentTo('/api/frames/resize')).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        x: 40,
+        y: 60,
+        width: 1640,
+        height: 1000,
+      },
+    ])
+    expect(figureFor('hero').style.width).toBe('1640px')
+  })
+
+  it('should move a frame with its top left handle and keep the far corner', async () => {
+    renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
+    act(() => {
+      view.value = { x: 0, y: 0, zoom: 0.5 }
+    })
+    selectLabel('hero')
+
+    await dragHandle(
+      handleOf('hero', 'nw'),
+      { x: 100, y: 100 },
+      { x: 50, y: 80 },
+    )
+
+    expect(sentTo('/api/frames/resize')).toEqual([
+      {
+        page: 'drafts',
+        frame: 'hero',
+        x: -60,
+        y: 20,
+        width: 1540,
+        height: 940,
+      },
+    ])
+  })
+
+  it('should write nothing for a handle pressed and never moved', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    selectLabel('hero')
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 101, y: 101 },
+    )
+
+    expect(sentTo('/api/frames/resize')).toEqual([])
+  })
+
+  it('should resize the selected frame with Ctrl and an arrow key', () => {
+    renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
+    selectLabel('hero')
+
+    act(() => {
+      figureFor('hero').dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          ctrlKey: true,
+          bubbles: true,
+        }),
+      )
+    })
+
+    expect(sentTo('/api/frames/resize')).toEqual([
+      { page: 'drafts', frame: 'hero', x: 40, y: 60, width: 1450, height: 900 },
+    ])
+    expect(sentTo('/api/frames/move')).toEqual([])
+  })
+
+  it('should write an element resize as a width edit then a height edit on the hash the first answered', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="width: 200px; height: 50px">Hero</h1>',
+    )
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 0.5 }
+    })
+    answerEditsWith(['def456', 'ghi789'])
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 150, y: 110 },
+    )
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'width',
+        value: '300px',
+        element: expect.objectContaining({ hash: 'abc123' }),
+      }),
+      expect.objectContaining({
+        property: 'height',
+        value: '70px',
+        element: expect.objectContaining({ hash: 'def456' }),
+      }),
+    ])
+  })
+
+  it('should drop the preview when a handle drag comes back to where it started', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>Hero</h1>')
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+    const handle = handleOf('hero', 'se')
+
+    await act(async () => {
+      const at = (type: string, x: number) =>
+        handle.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: x,
+            clientY: 100,
+            pointerId: 1,
+          }),
+        )
+      at('pointerdown', 100)
+      at('pointermove', 140)
+      at('pointermove', 100)
+      at('pointerup', 100)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    const style = doc.querySelector<HTMLElement>('h1')?.style
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(style?.width).toBe('')
+    expect(style?.height).toBe('')
+  })
+
+  it('should keep an element overlay on the element while a top left handle drags', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 200px">Hero</h1>')
+    stampHash(doc, 'abc123')
+    const target = doc.querySelector<HTMLElement>('h1')
+    if (!target) throw new Error('no h1 in the frame')
+    /* The element grows from its own top left, so its box tracks the style. */
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => {
+        const width = Number.parseFloat(target.style.width) || 200
+        return { x: 10, y: 20, left: 10, top: 20, width, height: 50 }
+      },
+    })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+    const handle = handleOf('hero', 'nw')
+
+    await act(async () => {
+      handle.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 100,
+          pointerId: 1,
+        }),
+      )
+      handle.dispatchEvent(
+        new PointerEvent('pointermove', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 100,
+          pointerId: 1,
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    const overlay = figureFor('hero').querySelector<HTMLElement>(
+      '.selection[data-selection="element"]',
+    )
+    expect(overlay?.style.left).toBe('10px')
+    expect(overlay?.style.width).toBe('240px')
+    expect(overlay?.querySelector('.selection-chip')?.textContent).toBe(
+      '240 × 50',
+    )
+  })
+
+  it('should send one edit for an element dragged along one axis', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="width: 200px; height: 50px">Hero</h1>',
+    )
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 140, y: 100 },
+    )
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '240px' }),
+    ])
+  })
+
+  async function cancelDrag(
+    target: HTMLElement,
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+  ) {
+    await act(async () => {
+      const at = (type: string, point: { x: number; y: number }) =>
+        target.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: point.x,
+            clientY: point.y,
+            pointerId: 1,
+          }),
+        )
+      at('pointerdown', from)
+      at('pointermove', to)
+      at('pointercancel', to)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  it('should put a frame back at its box when a handle drag is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
+    selectLabel('hero')
+
+    await cancelDrag(
+      handleOf('hero', 'nw'),
+      { x: 100, y: 100 },
+      { x: 20, y: 30 },
+    )
+
+    expect(sentTo('/api/frames/resize')).toEqual([])
+    expect(figureFor('hero').style.left).toBe('40px')
+    expect(figureFor('hero').style.width).toBe('1440px')
+  })
+
+  it('should restore the element inline size when a handle drag is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 200px">Hero</h1>')
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+
+    await cancelDrag(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 160, y: 140 },
+    )
+
+    const style = doc.querySelector<HTMLElement>('h1')?.style
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(style?.width).toBe('200px')
+    expect(style?.height).toBe('')
+  })
+
+  it('should send no height edit once the width edit is refused', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="width: 200px; height: 50px">Hero</h1>',
+    )
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+    failWrites([page('drafts', [frame('hero')])])
+    let edits = 0
+    const refuse = globalThis.fetch
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      if (String(url) === '/api/frames/edit') edits += 1
+      return refuse(url as string, init)
+    }) as typeof fetch
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 140, y: 130 },
+    )
+
+    expect(edits).toBe(1)
   })
 })
 

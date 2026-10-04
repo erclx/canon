@@ -12,6 +12,7 @@ import {
   readPage,
   readSelection,
   renamePage,
+  resizeFrame,
 } from '@/canvas/content'
 import { captureCanvas, captureComposite } from '@/canvas/capture'
 import {
@@ -337,6 +338,56 @@ export function register(program: Command): void {
       intro(BANNER)
       logAdd(`${outcome.page}/${outcome.file}`)
       logInfo(`at ${outcome.box.x}, ${outcome.box.y}`)
+      outro()
+    },
+  )
+
+  withRoot(
+    frame
+      .command('resize')
+      .description('Resize a frame, and move it when given a position')
+      .argument('<page>', 'Page the frame is on')
+      .argument('<name>', 'Frame name')
+      .option('--width <px>', 'New width, defaulting to the frame width')
+      .option('--height <px>', 'New height, defaulting to the frame height')
+      .option('--x <px>', 'New x, defaulting to where the frame is')
+      .option('--y <px>', 'New y, defaulting to where the frame is'),
+  ).action(
+    async (
+      pageName: string,
+      name: string,
+      opts: RootOptions & {
+        width?: string
+        height?: string
+        x?: string
+        y?: string
+      },
+    ) => {
+      const resolved = await resolveRoot(opts)
+      if (!resolved.ok) {
+        process.exitCode = refuse(resolved, opts.json ?? false)
+        return
+      }
+      const { root } = resolved
+      const current = readPage(root, pageName)?.frames.find(
+        (candidate) => candidate.name === name,
+      )
+      const outcome = resizeFrame(root, pageName, name, {
+        x: parsePosition(opts.x, current?.x ?? 0),
+        y: parsePosition(opts.y, current?.y ?? 0),
+        width: parseSize(opts.width, current?.width ?? DEFAULT_FRAME.width),
+        height: parseSize(opts.height, current?.height ?? DEFAULT_FRAME.height),
+      })
+      if (!outcome.ok) {
+        process.exitCode = refuse(outcome, opts.json ?? false)
+        return
+      }
+      if (opts.json) writeJson(outcome)
+      intro(BANNER)
+      logAdd(`${outcome.page}/${outcome.file}`)
+      logInfo(
+        `${outcome.box.width} × ${outcome.box.height} at ${outcome.box.x}, ${outcome.box.y}`,
+      )
       outro()
     },
   )

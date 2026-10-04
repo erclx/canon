@@ -22,6 +22,7 @@ import {
   readPage,
   readSelection,
   renamePage,
+  resizeFrame,
   writeSelection,
 } from '@/canvas/content'
 
@@ -378,6 +379,133 @@ describe('moveFrame', () => {
     expect(readFileSync(join(pageDir('drafts'), 'layout.json'), 'utf8')).toBe(
       '{ not json',
     )
+  })
+})
+
+describe('resizeFrame', () => {
+  it('should write the whole box in one write', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 1440, height: 900 })
+
+    const outcome = resizeFrame(ROOT, 'drafts', 'hero', {
+      x: -20,
+      y: 10,
+      width: 800,
+      height: 600,
+    })
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      frame: 'hero',
+      box: { x: -20, y: 10, width: 800, height: 600 },
+    })
+    expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject({
+      x: -20,
+      y: 10,
+      width: 800,
+      height: 600,
+    })
+  })
+
+  it('should leave the other frames boxes as they were', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'a', { width: 400, height: 300 })
+    addFrame(ROOT, 'drafts', 'b', { width: 400, height: 300 })
+
+    resizeFrame(ROOT, 'drafts', 'a', { x: 0, y: 0, width: 200, height: 100 })
+
+    expect(
+      readPage(ROOT, 'drafts')?.frames.find((frame) => frame.name === 'b'),
+    ).toMatchObject({ x: 400 + FRAME_GAP, y: 0, width: 400, height: 300 })
+  })
+
+  it('should place a frame the layout has not named', () => {
+    seedPage('drafts', ['hero'])
+
+    const outcome = resizeFrame(ROOT, 'drafts', 'hero', {
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 480,
+    })
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      box: { x: 0, y: 0, width: 640, height: 480 },
+    })
+    expect(readPage(ROOT, 'drafts')?.frames[0]?.placed).toBe(true)
+  })
+
+  it('should refuse a zero width', () => {
+    seedPage('drafts', ['hero'])
+
+    expect(
+      resizeFrame(ROOT, 'drafts', 'hero', {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 300,
+      }),
+    ).toMatchObject({ ok: false, reason: 'invalid-size' })
+  })
+
+  it('should refuse a position that is not a finite number', () => {
+    seedPage('drafts', ['hero'])
+
+    expect(
+      resizeFrame(ROOT, 'drafts', 'hero', {
+        x: Number.NaN,
+        y: 0,
+        width: 400,
+        height: 300,
+      }),
+    ).toMatchObject({ ok: false, reason: 'invalid-position' })
+  })
+
+  it('should refuse a frame that does not exist', () => {
+    seedPage('drafts', [])
+
+    expect(
+      resizeFrame(ROOT, 'drafts', 'hero', {
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 300,
+      }),
+    ).toMatchObject({ ok: false, reason: 'no-frame' })
+  })
+
+  it('should refuse rather than overwrite a malformed layout', () => {
+    seedPage('drafts', ['hero'], '{ not json')
+
+    expect(
+      resizeFrame(ROOT, 'drafts', 'hero', {
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 300,
+      }),
+    ).toMatchObject({ ok: false, reason: 'malformed-layout' })
+    expect(readFileSync(join(pageDir('drafts'), 'layout.json'), 'utf8')).toBe(
+      '{ not json',
+    )
+  })
+
+  it('should keep a move and a resize landing one after the other', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'a', { width: 400, height: 300 })
+    addFrame(ROOT, 'drafts', 'b', { width: 400, height: 300 })
+
+    moveFrame(ROOT, 'drafts', 'a', { x: 10, y: 10 })
+    resizeFrame(ROOT, 'drafts', 'b', { x: 600, y: 0, width: 200, height: 100 })
+
+    const frames = readPage(ROOT, 'drafts')?.frames ?? []
+    expect(
+      frames.map((frame) => [frame.name, frame.x, frame.y, frame.width]),
+    ).toEqual([
+      ['a', 10, 10, 400],
+      ['b', 600, 0, 200],
+    ])
   })
 })
 
