@@ -11,5 +11,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "claude/skills/*/scripts/**/*.ts"]
+  "include": ["src", "claude/skills/*/scripts/**/*.ts", "sandbox/*/*.ts"]
 }

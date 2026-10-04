@@ -1,5 +1,10 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import {
+  FIXTURES_DIR,
+  listCategories,
+  listScenarioFiles,
+} from '@/sandbox/scenario'
 
 /**
  * The arm a scenario declares when it carries no named arm. `expectFilePath`
@@ -7,9 +12,6 @@ import { join } from 'node:path'
  * no name to print.
  */
 export const DEFAULT_ARM = '(default)'
-
-/** Holds fixture content rather than scenarios. Twin of the filter in `sandbox.ts`. */
-const FIXTURES_DIR = 'fixtures'
 
 export interface ScenarioCoverage {
   readonly category: string
@@ -41,15 +43,12 @@ function directories(path: string): string[] {
 function listScenarios(sandboxDir: string): ScenarioCoverage[] {
   const scenarios: ScenarioCoverage[] = []
 
-  for (const category of directories(sandboxDir)) {
-    if (category === FIXTURES_DIR) continue
-
-    const commands = readdirSync(join(sandboxDir, category), {
-      withFileTypes: true,
-    })
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.sh'))
-      .map((entry) => entry.name.replace(/\.sh$/, ''))
-      .sort()
+  for (const category of listCategories(sandboxDir)) {
+    // A stem in both forms counts once, and provisioning refuses it by name.
+    const { scenarios: files, ambiguous } = listScenarioFiles(
+      join(sandboxDir, category),
+    )
+    const commands = [...files.map((f) => f.command), ...ambiguous].sort()
 
     for (const command of commands) {
       scenarios.push({ category, command, armed: [] })

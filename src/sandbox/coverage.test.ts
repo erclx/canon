@@ -47,6 +47,15 @@ describe('collectCoverage', () => {
     expect(report.armedArms).toBe(0)
   })
 
+  it('should count a TypeScript scenario beside a bash one', () => {
+    scenario('git', 'commit')
+    write('sandbox/git/pr.ts', 'export default { arms: {} }\n')
+
+    const report = collectCoverage(root)
+
+    expect(report.scenarios.map((s) => s.command)).toEqual(['commit', 'pr'])
+  })
+
   it('should name each arm that carries a declaration', () => {
     scenario('claude', 'docs')
     declaration('claude', 'docs', 'drift')

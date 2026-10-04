@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
@@ -27,6 +27,7 @@ import {
 } from '@/sandbox/expect'
 import { runHeadless } from '@/sandbox/headless/run'
 import { runSandbox } from '@/sandbox/provision'
+import { listCategories, listScenarioFiles } from '@/sandbox/scenario'
 import { sandboxTree } from '@/sandbox/tree'
 import {
   frameError,
@@ -70,9 +71,6 @@ function reportAbsentScenarioTree(): boolean {
 
   return true
 }
-
-/** Holds fixture content for scenarios rather than scenarios of its own. */
-const FIXTURES_DIR = 'fixtures'
 
 /**
  * The provision verb takes positional words rather than options, since `reset`
@@ -125,17 +123,16 @@ interface CoverageOptions {
 }
 
 function getCategories(): string[] {
-  return readdirSync(SANDBOX_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name !== FIXTURES_DIR)
-    .map((d) => d.name)
-    .sort()
+  return listCategories(SANDBOX_DIR)
 }
 
+/** Lists a stem in both forms too, so picking it reaches the refusal that names it. */
 function getCommands(category: string): string[] {
-  return readdirSync(join(SANDBOX_DIR, category), { withFileTypes: true })
-    .filter((f) => f.isFile() && f.name.endsWith('.sh'))
-    .map((f) => f.name.replace(/\.sh$/, ''))
-    .sort()
+  const { scenarios, ambiguous } = listScenarioFiles(
+    join(SANDBOX_DIR, category),
+  )
+
+  return [...scenarios.map((s) => s.command), ...ambiguous].sort()
 }
 
 async function interactivePicker(): Promise<string> {
