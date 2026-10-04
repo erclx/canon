@@ -38,7 +38,7 @@ The inspector writes a token at full opacity as `var(--<name>)` and below it as 
 
 - A frame capture goes through a server started for the call, so the injected tokens are in the image, and renders at the frame's layout width so a media query resolves there. It never captures the file on disk.
 - A single-frame PNG is the frame's whole document, so its height follows the content. The composite page image places each frame at its layout position clipped to its box, so a frame's height there follows the box and can differ from its own PNG.
-- The font check reads the first family of each rendered text element in the frame, so a frame may set its font on `html`, `body`, or any ancestor of its text. A frame that sets no font inherits the browser's default serif, which many machines lack, so the capture refuses it. The standard forbids assuming a default font for that reason.
+- The font check reads the first family of each rendered text element in the frame, so a frame may set its font on `html`, `body`, or any ancestor of its text. A frame that sets no font inherits the browser's default serif, which many machines lack, so the capture refuses it. The standard forbids assuming a default font for that reason. A generic keyword as the first family, such as `monospace`, fails the check as well, since it resolves per machine. A composite container holds no text, so the check skips it and it carries no font of its own.
 
 ### Skill
 

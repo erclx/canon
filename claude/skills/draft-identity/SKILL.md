@@ -72,7 +72,7 @@ Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Steps 2 through 5 agains
 This step and Step 7 replace `draft-and-pick`'s own Step 6, since the pick here produces several final files rather than one applied surface.
 
 1. Extract the picked arm's `.mark` markup as the final vector source. Write it to `<write-folder>/favicon.svg`.
-2. Under `<dest>/render/`, write one `icon-<w>x<h>.html` page per Step 2 size, carrying the picked `.mark` markup. Give every page's captured element the shared class `.render`, so one capture call renders the whole batch regardless of the size spread. `canon capture` opens every page at a fixed 2x device scale factor and screenshots the element at that scale, so declare each `.render` element at half its target dimension, `<w>/2` by `<h>/2`, to land the captured PNG on the literal target size rather than double it. Declare a machine-resolved font stack (`system-ui` behind a generic fallback) on each, since `canon capture` refuses a page naming no font at all.
+2. Under `<dest>/render/`, write one `icon-<w>x<h>.html` page per Step 2 size, carrying the picked `.mark` markup. Give every page's captured element the shared class `.render`, so one capture call renders the whole batch regardless of the size spread. `canon capture` opens every page at a fixed 2x device scale factor and screenshots the element at that scale, so declare each `.render` element at half its target dimension, `<w>/2` by `<h>/2`, to land the captured PNG on the literal target size rather than double it. Declare no font on them, since each holds the mark alone and `canon capture` skips the font check on an element with no text. A generic family such as `system-ui` would be refused if text ever sat inside one.
 3. Render the batch:
 
    ```bash

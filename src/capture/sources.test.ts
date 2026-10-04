@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
+  isGenericFamily,
   primaryFontFamily,
   resolveCaptureSources,
   textFamilies,
@@ -102,6 +103,48 @@ describe('primaryFontFamily', () => {
 
   it('should return an empty string for an empty declaration', () => {
     expect(primaryFontFamily('')).toBe('')
+  })
+})
+
+describe('isGenericFamily', () => {
+  it.each([
+    'serif',
+    'sans-serif',
+    'monospace',
+    'cursive',
+    'fantasy',
+    'system-ui',
+    'ui-serif',
+    'ui-sans-serif',
+    'ui-monospace',
+    'ui-rounded',
+    'math',
+    'emoji',
+    'fangsong',
+  ])('should read %s as a generic keyword', (keyword) => {
+    expect(isGenericFamily(keyword)).toBe(true)
+  })
+
+  it('should read a keyword first in a stack as generic', () => {
+    expect(isGenericFamily('monospace, "Noto Sans Mono"')).toBe(true)
+  })
+
+  it('should match a keyword case-insensitively', () => {
+    expect(isGenericFamily('Monospace')).toBe(true)
+    expect(isGenericFamily('SANS-SERIF')).toBe(true)
+  })
+
+  it('should read a quoted keyword as a family name', () => {
+    expect(isGenericFamily('"monospace"')).toBe(false)
+    expect(isGenericFamily("'monospace', serif")).toBe(false)
+  })
+
+  it('should read a real family as not generic', () => {
+    expect(isGenericFamily('"Noto Sans Mono", monospace')).toBe(false)
+  })
+
+  it('should read an empty declaration as not generic', () => {
+    expect(isGenericFamily('')).toBe(false)
   })
 })
 

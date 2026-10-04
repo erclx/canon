@@ -4,7 +4,11 @@ import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright-core'
 import type { Browser, Locator, Page } from 'playwright-core'
 import type { CaptureSource } from '@/capture/sources'
-import { resolveCaptureSources, textFamilies } from '@/capture/sources'
+import {
+  isGenericFamily,
+  resolveCaptureSources,
+  textFamilies,
+} from '@/capture/sources'
 import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
 
 /**
@@ -97,7 +101,15 @@ async function captureOne(
     }
 
     await page.evaluate(() => document.fonts.ready.then(() => undefined))
-    for (const family of textFamilies(await renderedTextFamilies(element))) {
+    const declarations = await renderedTextFamilies(element)
+    const generic = declarations.find(isGenericFamily)
+    if (generic !== undefined) {
+      return failed(
+        source,
+        `${generic.split(',')[0]?.trim()} is a generic family that resolves differently per machine, so name a real font`,
+      )
+    }
+    for (const family of textFamilies(declarations)) {
       if (!(await resolvesFont(page, family))) {
         return failed(
           source,
@@ -178,8 +190,8 @@ function failed(source: CaptureSource, reason: string): CaptureResult {
  * styles a descendant rather than the root, and keeps in text directly inside a
  * `display: contents` element, which draws no box of its own.
  *
- * Falls back to the element's own family when nothing under it holds text, so
- * a container of iframes is still probed through the family it declares.
+ * Returns nothing when no element holds text, since a font cannot rewrap text
+ * that is not there, so a container of iframes skips the probe.
  */
 async function renderedTextFamilies(element: Locator): Promise<string[]> {
   return element.evaluate((root) => {
@@ -192,9 +204,7 @@ async function renderedTextFamilies(element: Locator): Promise<string[]> {
         return range.getClientRects().length > 0
       })
     const texts = [root, ...root.querySelectorAll('*')].filter(holdsText)
-    return (texts.length > 0 ? texts : [root]).map(
-      (node) => getComputedStyle(node).fontFamily,
-    )
+    return texts.map((node) => getComputedStyle(node).fontFamily)
   })
 }
 
