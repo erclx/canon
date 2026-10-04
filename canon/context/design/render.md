@@ -13,6 +13,8 @@ The output sits under `.canon/tmp/render/`, gitignored scratch the command regen
 
 `examples/design/DESIGN.md` is the committed authored record for an invented project, with its capture under `examples/design/evidence/`. Rebuild the capture by rendering it with `-s examples/design/DESIGN.md -o .canon/tmp/render/design-example` and running `canon capture` on the `index.html` there, as `examples/index.md` states. The `design` gate stage reads it against the prose budget, and nothing regenerates the capture.
 
+That capture is prod evidence, shown to a reader of the examples. No dev baseline of the preview exists, and one would sit at `assets/evidence/design/`. `canon/context/development/evidence.md` owns the boundary.
+
 ## Decisions
 
 ### The parser carries the uncertainty tag
