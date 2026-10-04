@@ -660,6 +660,8 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
   const handlePointerDown = (event: PointerEvent) => {
     const target = event.target as HTMLElement | null
     if (shownTool.value !== 'pan' && target?.closest('.frame')) return
+    /* A selection left over would paint over every frame the pan crosses. */
+    if (shownTool.value === 'pan') document.getSelection()?.removeAllRanges()
     drag.current = { x: event.clientX, y: event.clientY }
     viewportRef.current?.setPointerCapture?.(event.pointerId)
   }

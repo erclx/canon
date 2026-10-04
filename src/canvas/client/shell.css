@@ -225,8 +225,16 @@ code {
 /*
  * While panning, a frame takes no pointer, so a drag over one moves the view
  * rather than picking an element, and the cursor reads the viewport's grab.
+ * The descendants are named too, since a selection handle sets its own
+ * pointer events and would otherwise take the drag as a resize. Nothing in
+ * the viewport starts a text selection while a pan drags across it.
  */
-.surface[data-tool='pan'] .frame {
+.surface[data-tool='pan'] .viewport {
+  user-select: none;
+}
+
+.surface[data-tool='pan'] .frame,
+.surface[data-tool='pan'] .frame * {
   pointer-events: none;
 }
 

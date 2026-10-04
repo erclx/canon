@@ -846,12 +846,11 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
   it('should pan with Space held after a pick moved focus into the frame', async () => {
     const frameDoc = page.frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
     await frameDoc.locator('h1').click()
-    const body = await page
-      .locator(`.frame[data-frame="${FRAME}"] iframe`)
-      .boundingBox()
-    if (!body) throw new Error('no frame on screen')
-    const startX = body.x + body.width / 2
-    const startY = body.y + body.height / 2
+    // The drag starts on the heading, where a press would begin a text selection.
+    const heading = await frameDoc.locator('h1').boundingBox()
+    if (!heading) throw new Error('no heading on screen')
+    const startX = heading.x + heading.width / 2
+    const startY = heading.y + heading.height / 2
     const before = await planeTransform()
     const picks: string[] = []
     page.on('request', (sent) => {
@@ -879,6 +878,48 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
         .getByRole('button', { name: 'Move (V)' })
         .getAttribute('aria-pressed'),
     ).toBe('true')
+    // A pan leaves no text selection painting over the frames it crossed.
+    expect(
+      await page.evaluate(() => document.getSelection()?.isCollapsed ?? true),
+    ).toBe(true)
+  }, 30_000)
+
+  it('should pan from a picked element handle with Space held and leave no selection', async () => {
+    await selectFrameAt(100)
+    await page
+      .frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+      .locator('h1')
+      .click()
+    const handle = await page
+      .locator(
+        `.frame[data-frame="${FRAME}"] .selection[data-selection="element"] [data-handle="se"]`,
+      )
+      .boundingBox()
+    if (!handle) throw new Error('no handle on screen')
+    const startX = handle.x + handle.width / 2
+    const startY = handle.y + handle.height / 2
+    const before = await planeTransform()
+    const edits: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/frames/edit')) edits.push(sent.url())
+    })
+
+    await page.keyboard.down('Space')
+    await expect
+      .poll(() => page.locator('main.surface').getAttribute('data-tool'))
+      .toBe('pan')
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX + 120, startY + 80, { steps: 8 })
+    await page.mouse.up()
+    await page.keyboard.up('Space')
+
+    // A handle sets its own pointer events, so it must yield to a pan too.
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(edits).toEqual([])
+    expect(
+      await page.evaluate(() => document.getSelection()?.isCollapsed ?? true),
+    ).toBe(true)
   }, 30_000)
 
   it('should fit every frame on Shift+1', async () => {

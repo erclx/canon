@@ -2766,6 +2766,37 @@ describe('selection handles', () => {
     expect(figureFor('hero').querySelectorAll('.selection')).toHaveLength(1)
   })
 
+  it('should pan rather than resize when Space is held over a handle', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    const before = view.value
+    const surface = mount.querySelector('main.surface')
+    act(() => {
+      surface?.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: ' ',
+          code: 'Space',
+          bubbles: true,
+        }),
+      )
+    })
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 140, y: 130 },
+    )
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(view.value).toEqual({
+      ...before,
+      x: before.x + 40,
+      y: before.y + 30,
+    })
+  })
+
   it('should resize a frame by the drag in surface units at half zoom', async () => {
     renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
     act(() => {
@@ -3199,6 +3230,18 @@ describe('view tools', () => {
     expect(sentTo('/api/selection')).toEqual([
       { page: 'drafts', frame: 'hero' },
     ])
+  })
+
+  it('should clear a text selection when a pan drag starts', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const range = document.createRange()
+    range.selectNodeContents(figureFor('hero'))
+    document.getSelection()?.addRange(range)
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', viewportOf(), 100, 100)
+
+    expect(document.getSelection()?.isCollapsed ?? true).toBe(true)
   })
 
   it('should not select a focused frame when Space comes up after a drag', () => {

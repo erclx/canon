@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
-import { view } from '@/canvas/client/state'
+import { shownTool, view } from '@/canvas/client/state'
 
 /** Screen pixels a press travels before it reads as a drag and not a click. */
 export const DRAG_THRESHOLD = 3
@@ -97,6 +97,8 @@ export function SelectionOverlay({
 
   const handlePointerDown = (corner: Corner) => (event: PointerEvent) => {
     if (event.button !== 0) return
+    /* A pan drag starting on a handle belongs to the surface behind it. */
+    if (shownTool.value === 'pan') return
     event.preventDefault()
     event.stopPropagation()
     const origin = measure()
