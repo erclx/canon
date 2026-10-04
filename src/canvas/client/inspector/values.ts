@@ -58,3 +58,126 @@ export function clampScrub(property: string, value: number): number {
 export function scrubStep(isCoarse: boolean): number {
   return isCoarse ? 10 : 1
 }
+
+/** A color the picker can write: a token or a hex, each with an opacity. */
+export type WrittenColor =
+  | {
+      readonly kind: 'token'
+      /** The custom property name as the token sheet gives it. */
+      readonly name: string
+      readonly opacity: number
+    }
+  | { readonly kind: 'hex'; readonly hex: string; readonly opacity: number }
+
+export type ParsedColor = WrittenColor | { readonly kind: 'none' }
+
+const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
+const RGB =
+  /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i
+/** What a browser computes `color-mix()` in srgb to, channels 0 to 1. */
+const SRGB =
+  /^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/i
+const VAR = /^var\(\s*(--[\w-]+)\s*\)$/i
+const MIX =
+  /^color-mix\(\s*in\s+srgb\s*,\s*var\(\s*(--[\w-]+)\s*\)\s+([\d.]+)%\s*,\s*transparent\s*\)$/i
+
+function channel(value: number): string {
+  return Math.round(Math.min(255, Math.max(0, value)))
+    .toString(16)
+    .padStart(2, '0')
+}
+
+/**
+ * An alpha as a percent. A value past 1 clamps to full rather than reading as
+ * a 0 to 255 scale, since CSS clamps it the same way when it paints.
+ */
+function alphaPercent(alpha: string | undefined): number {
+  if (alpha === undefined) return 100
+  const fraction = alpha.endsWith('%')
+    ? Number(alpha.slice(0, -1)) / 100
+    : Number(alpha)
+  return Math.round(Math.min(1, Math.max(0, fraction)) * 100)
+}
+
+/** A typed hex in any of its lengths, normalized to six digits. */
+export function readHex(
+  typed: string,
+): { readonly hex: string; readonly opacity?: number } | undefined {
+  const match = typed.trim().match(HEX)
+  if (!match) return undefined
+  const digits = match[1].toLowerCase()
+  const full =
+    digits.length <= 4
+      ? [...digits].map((digit) => digit + digit).join('')
+      : digits
+  const hex = full.slice(0, 6)
+  if (full.length === 6) return { hex }
+  return {
+    hex,
+    opacity: Math.round((parseInt(full.slice(6), 16) / 255) * 100),
+  }
+}
+
+/** A typed opacity percent, refused outside 0 to 100. */
+export function readOpacity(typed: string): number | undefined {
+  const value = typed.trim().replace(/%$/, '')
+  if (!/^-?\d*\.?\d+$/.test(value)) return undefined
+  const percent = Number(value)
+  return percent >= 0 && percent <= 100 ? Math.round(percent) : undefined
+}
+
+/**
+ * Reads a computed or inline color into what the picker shows. A form it does
+ * not know, such as a named color, comes back undefined.
+ */
+export function parseColor(value: string): ParsedColor | undefined {
+  const text = value.trim()
+  if (isNoFill(text)) return { kind: 'none' }
+  const token = text.match(VAR)
+  if (token) return { kind: 'token', name: token[1], opacity: 100 }
+  const mix = text.match(MIX)
+  if (mix) {
+    return {
+      kind: 'token',
+      name: mix[1],
+      opacity: Math.round(Math.min(100, Number(mix[2]))),
+    }
+  }
+  const hex = text.startsWith('#') ? readHex(text) : undefined
+  if (hex) return painted(hex.hex, hex.opacity ?? 100)
+  const rgb = text.match(RGB)
+  if (rgb) {
+    return painted(
+      [rgb[1], rgb[2], rgb[3]].map((part) => channel(Number(part))).join(''),
+      alphaPercent(rgb[4]),
+    )
+  }
+  const srgb = text.match(SRGB)
+  if (!srgb) return undefined
+  return painted(
+    [srgb[1], srgb[2], srgb[3]]
+      .map((part) => channel(Number(part) * 255))
+      .join(''),
+    alphaPercent(srgb[4]),
+  )
+}
+
+/** A color at zero opacity paints nothing, whichever form wrote it. */
+function painted(hex: string, opacity: number): ParsedColor {
+  return opacity === 0 ? { kind: 'none' } : { kind: 'hex', hex, opacity }
+}
+
+/**
+ * The value a pick writes. A token below full opacity mixes with transparent
+ * rather than resolving to a hex, so it keeps following the theme.
+ */
+export function composeColor(color: WrittenColor): string {
+  if (color.kind === 'token') {
+    return color.opacity >= 100
+      ? `var(${color.name})`
+      : `color-mix(in srgb, var(${color.name}) ${color.opacity}%, transparent)`
+  }
+  return color.opacity >= 100
+    ? `#${color.hex}`
+    : `#${color.hex}${channel((color.opacity / 100) * 255)}`
+}

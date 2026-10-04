@@ -59,7 +59,12 @@ const SECOND = `<!doctype html>
 
 const BASE_CSS = `:root {
   --color-ink: #1a1a1a;
+  --color-clay: #c76b5f;
   --space-md: 16px;
+}
+
+[data-theme='light'] {
+  --color-clay: #f2c4bc;
 }
 `
 
@@ -278,6 +283,122 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
 
     expect([first, second]).toEqual([0, 0])
   }, 30_000)
+
+  it('should open the color picker inside the details panel in both themes', async () => {
+    const swatch = page.getByRole('button', { name: 'background picker' })
+    const picker = page.getByRole('dialog', { name: 'background colors' })
+    const panel = page.locator('.panel-right')
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    /* Opens the picker, captures it, and closes it from the keyboard. */
+    const capture = async (shot: string) => {
+      await swatch.click()
+      await expect
+        .poll(() => picker.getByRole('option').allInnerTexts())
+        .toEqual(['--color-ink', '--color-clay'])
+      const overflow = await panel.evaluate(
+        (element) => element.scrollWidth - element.clientWidth,
+      )
+      await panel.screenshot({ path: join(SHOTS, shot) })
+      await page.keyboard.press('Escape')
+      return overflow
+    }
+
+    const first = await capture('picker-a.png')
+    const isSwatchFocused = await swatch.evaluate(
+      (element) => element === document.activeElement,
+    )
+    await toggle.click()
+    const second = await capture('picker-b.png')
+    await toggle.click()
+
+    expect([first, second]).toEqual([0, 0])
+    expect(isSwatchFocused).toBe(true)
+    expect(await picker.count()).toBe(0)
+  }, 30_000)
+
+  it('should keep a picked token following the frame theme', async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/frames/edit') &&
+          sent.request().method() === 'POST',
+      ),
+      (async () => {
+        await page.getByRole('button', { name: 'background picker' }).click()
+        await page
+          .getByRole('dialog', { name: 'background colors' })
+          .getByRole('option', { name: '--color-clay' })
+          .click()
+      })(),
+    ])
+    expect(response.status()).toBe(200)
+
+    const heading = page
+      .locator(`.frame[data-frame="${FRAME}"] iframe`)
+      .contentFrame()
+      .locator('h1')
+    const background = () =>
+      heading
+        .evaluate((element) => getComputedStyle(element).backgroundColor, {
+          timeout: 2_000,
+        })
+        .catch(() => '')
+    // A read taken while the frame reloads comes back empty or stale, so each
+    // poll waits for one of the token's two values rather than any change.
+    const clay = /^rgb\((199, 107, 95|242, 196, 188)\)$/
+    await expect.poll(background, { timeout: 15_000 }).toMatch(clay)
+    const before = await background()
+    await page
+      .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
+      .click()
+    const settled = async () => {
+      const value = await background()
+      return value !== before && clay.test(value) ? value : ''
+    }
+    await expect.poll(settled, { timeout: 15_000 }).toMatch(clay)
+    const after = await settled()
+    await page
+      .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
+      .click()
+
+    expect(new Set([before, after])).toEqual(
+      new Set(['rgb(199, 107, 95)', 'rgb(242, 196, 188)']),
+    )
+  }, 45_000)
+
+  it('should keep focus on the swatch after a keyboard pick reloads the frame', async () => {
+    await page.getByRole('button', { name: 'background picker' }).focus()
+    // Pressed back to back with no wait, since a key typed straight after the
+    // one that opened the picker has to reach the list rather than the swatch.
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('ArrowUp')
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/frames/edit') &&
+          sent.request().method() === 'POST',
+      ),
+      page.keyboard.press('Enter'),
+    ])
+    expect(response.status()).toBe(200)
+
+    // The field reading the new token proves the inspector remounted on the
+    // reloaded frame, so focus read alongside it is focus after the reload.
+    const field = page.getByRole('textbox', { name: 'background', exact: true })
+    await expect
+      .poll(
+        async () => [
+          await field.inputValue({ timeout: 2_000 }).catch(() => ''),
+          await page.evaluate(() =>
+            document.activeElement?.getAttribute('aria-label'),
+          ),
+        ],
+        { timeout: 15_000 },
+      )
+      .toEqual(['--color-ink', 'background picker'])
+  }, 45_000)
 
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()

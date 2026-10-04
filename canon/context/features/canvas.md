@@ -13,7 +13,7 @@ description: The canvas server, the page and frame content format, token resolut
 
 - `src/canvas/` owns the server, the content reader and writers, element addressing, the inline-style editor, token resolution, and capture
 - `src/canvas/client/` owns the browser shell, built by Bun's HTML bundler when the server starts
-- `src/canvas/client/inspector/` owns the inspector's field, section, value formatting, and its own stylesheet, composed by `inspector.tsx`
+- `src/canvas/client/inspector/` owns the inspector's field, section, color field and picker, value formatting and color parsing, and its own stylesheet, composed by `inspector.tsx`
 - `claude/skills/canvas/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
 
@@ -29,6 +29,10 @@ description: The canvas server, the page and frame content format, token resolut
 ### Token resolution
 
 The server injects one stylesheet first in each frame's `head`, so a frame drawn with `var(--color-*)` shows the project's values and a stylesheet the frame links still wins the cascade. The source is this toolkit's own token module inside its own checkout, else `.claude/design/base.css` plus anything under `.claude/design/project/`, else none with a notice. Parsing a `DESIGN.md` into custom properties was left out, since no mapping from its prose to properties exists.
+
+### Color edits
+
+The inspector writes a token at full opacity as `var(--<name>)` and below it as a `color-mix()` of that `var()` with `transparent`, so a token at any opacity keeps following the theme. Resolving the token to an eight-digit hex was the alternative and freezes the color at the theme it was picked in. A hex writes six digits at full opacity and eight below it. The picker lists only the token sheet's color group, and reads each swatch off a probe element in the frame rather than the token's text, since a token's value may itself be a `var()` or a mix.
 
 ### Capture
 
@@ -52,4 +56,7 @@ The component gallery existed only for the board's components panel and retired 
 - `canon records push` does not back `.canon/canvas/`, so a lost checkout loses every page. The skill promises nothing about survival until the backup covers it.
 - The shell is bundled from `src/canvas/client/` at serve time, so `canvas serve` refuses a dependency missing from `node_modules` as `missing-client-deps`. Run the install in a fresh worktree before serving.
 - A stylesheet a client module imports reaches the served shell through the bundler with no `<link>` in `index.html`, as `inspector/fields.css` does. Happy-dom ignores stylesheets, so only the browser walk in `src/canvas/shell.e2e.test.ts` proves a rule applies.
+- Happy-dom also drops a `color-mix()` value from an inline style, so `shell.test.tsx` cannot start a case from one. A behavior that starts there is covered by the unit parse in `inspector/values.ts` and by the browser walk.
+- A saved edit reloads the frame twice, once on the edit's answer and once when the file watcher reports the write, and each reload remounts the inspector. A control that must keep focus across an edit takes it back on every mount until focus lands elsewhere, as the color field's swatch does, and moves focus in a layout effect so a key typed straight after the opening one is not lost.
+- The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.

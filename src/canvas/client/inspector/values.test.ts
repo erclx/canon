@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import {
   clampScrub,
+  composeColor,
   displayValue,
   isNoFill,
+  parseColor,
+  readHex,
+  readOpacity,
   scrubStep,
   toCssValue,
+  type WrittenColor,
 } from '@/canvas/client/inspector/values'
 
 describe('displayValue', () => {
@@ -114,5 +119,152 @@ describe('scrubStep', () => {
 
   it('should move ten units a pixel with Shift', () => {
     expect(scrubStep(true)).toBe(10)
+  })
+})
+
+describe('parseColor', () => {
+  it('should read rgb() as hex at full opacity', () => {
+    expect(parseColor('rgb(255, 0, 128)')).toEqual({
+      kind: 'hex',
+      hex: 'ff0080',
+      opacity: 100,
+    })
+  })
+
+  it('should read the alpha of rgba() as an opacity percent', () => {
+    expect(parseColor('rgba(0, 0, 0, 0.5)')).toEqual({
+      kind: 'hex',
+      hex: '000000',
+      opacity: 50,
+    })
+  })
+
+  it('should read the space-separated rgb() form', () => {
+    expect(parseColor('rgb(16 32 48 / 25%)')).toEqual({
+      kind: 'hex',
+      hex: '102030',
+      opacity: 25,
+    })
+  })
+
+  it('should read a fully transparent rgba() as no fill', () => {
+    expect(parseColor('rgba(0, 0, 0, 0)')).toEqual({ kind: 'none' })
+  })
+
+  it('should clamp an alpha typed on a 0 to 255 scale to full opacity', () => {
+    expect(parseColor('rgba(0, 0, 0, 255)')).toEqual({
+      kind: 'hex',
+      hex: '000000',
+      opacity: 100,
+    })
+  })
+
+  it('should read an eight digit hex as hex and opacity', () => {
+    expect(parseColor('#ff008080')).toEqual({
+      kind: 'hex',
+      hex: 'ff0080',
+      opacity: 50,
+    })
+  })
+
+  it('should read var() as a token at full opacity', () => {
+    expect(parseColor('var(--color-accent)')).toEqual({
+      kind: 'token',
+      name: '--color-accent',
+      opacity: 100,
+    })
+  })
+
+  it('should read the color-mix form as a token and its percent', () => {
+    expect(
+      parseColor('color-mix(in srgb, var(--color-accent) 60%, transparent)'),
+    ).toEqual({ kind: 'token', name: '--color-accent', opacity: 60 })
+  })
+
+  it('should read a hex at zero opacity as no fill', () => {
+    expect(parseColor('#ff880000')).toEqual({ kind: 'none' })
+  })
+
+  it('should read the srgb color() form a mix computes to', () => {
+    expect(parseColor('color(srgb 1 0.5 0 / 0.6)')).toEqual({
+      kind: 'hex',
+      hex: 'ff8000',
+      opacity: 60,
+    })
+  })
+
+  it('should leave a named color unread', () => {
+    expect(parseColor('blue')).toBeUndefined()
+  })
+})
+
+describe('readHex', () => {
+  it('should accept a hex with a leading #', () => {
+    expect(readHex('#C76B5F')).toEqual({ hex: 'c76b5f' })
+  })
+
+  it('should expand three digits', () => {
+    expect(readHex('f80')).toEqual({ hex: 'ff8800' })
+  })
+
+  it('should split eight digits into hex and opacity', () => {
+    expect(readHex('ff880080')).toEqual({ hex: 'ff8800', opacity: 50 })
+  })
+
+  it('should refuse a value that is not hex', () => {
+    expect(readHex('blue')).toBeUndefined()
+  })
+})
+
+describe('readOpacity', () => {
+  it('should read a percent with or without its sign', () => {
+    expect([readOpacity('60'), readOpacity('60%')]).toEqual([60, 60])
+  })
+
+  it('should refuse a percent above 100', () => {
+    expect(readOpacity('101')).toBeUndefined()
+  })
+
+  it('should refuse a percent below 0', () => {
+    expect(readOpacity('-1')).toBeUndefined()
+  })
+})
+
+describe('composeColor', () => {
+  it('should write a token at full opacity as var()', () => {
+    expect(
+      composeColor({ kind: 'token', name: '--color-accent', opacity: 100 }),
+    ).toBe('var(--color-accent)')
+  })
+
+  it('should write a token below full opacity as color-mix()', () => {
+    expect(
+      composeColor({ kind: 'token', name: '--color-accent', opacity: 60 }),
+    ).toBe('color-mix(in srgb, var(--color-accent) 60%, transparent)')
+  })
+
+  it('should write a hex at full opacity as six digits', () => {
+    expect(composeColor({ kind: 'hex', hex: 'ff8800', opacity: 100 })).toBe(
+      '#ff8800',
+    )
+  })
+
+  it('should write a hex below full opacity as eight digits', () => {
+    expect(composeColor({ kind: 'hex', hex: 'ff8800', opacity: 50 })).toBe(
+      '#ff880080',
+    )
+  })
+
+  it('should read back every form it writes', () => {
+    const written: readonly WrittenColor[] = [
+      { kind: 'token', name: '--color-accent', opacity: 100 },
+      { kind: 'token', name: '--color-accent', opacity: 60 },
+      { kind: 'hex', hex: 'ff8800', opacity: 100 },
+      { kind: 'hex', hex: 'ff8800', opacity: 50 },
+    ]
+
+    expect(written.map((color) => parseColor(composeColor(color)))).toEqual(
+      written,
+    )
   })
 })
