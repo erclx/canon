@@ -85,9 +85,10 @@ unreadable thread refuses as `gh-failed` on both reasons rather than
 reporting the fields absent.
 
 `ok` also carries `states`, the comparison the body renders as data: each
-state's name and its items, each with its `path`, `stem`, and whether it was
-`added`. `review-ui` matches a frame against it so it publishes no image the
+state's items with `path`, `stem`, `added`, and `width` and `baseWidth` when
+read. `review-ui` matches a frame against it so it publishes no image the
 worker's evidence already shows. `canon docs pr-frames` covers that store.
+`widthUnread` lists a failed read as `head:<path>` or `base:<path>`.
 
 ## What `[number]` selects, and what it does not
 
@@ -243,12 +244,11 @@ or `--checklist` with it refuses as `check-writes` before any `gh` call, since
 those ask a read to write.
 
 The thread cannot separate a skipped preview step from a failed one. A pull
-request whose deploy run failed or timed out reads as owing a preview, and the
+request whose deploy failed or timed out reads as owing a preview, and the
 session that ran it holds the cause. A checklist-only branch posts a marked
 comment, so it reads as owing a preview once that comment exists and a deploy
-workflow resolves. The deploy
-workflow is read from the checkout rather than the pull request's head, so a
-pull request that adds or removes its own deploy workflow reads against trunk's.
+workflow resolves. The deploy workflow is read from the checkout rather than
+the pull request's head, so one adding or removing its own reads trunk's.
 
 An unreadable thread refuses as `gh-failed` rather than reporting `settled` off
 a thread it never read. The check skips the merge base read, which only the
