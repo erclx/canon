@@ -113,4 +113,4 @@ One class stays open and is named rather than closed. A bullet can cite where so
 
 ## Where it runs
 
-`review-pr` Step 3 calls it and files an `unmet` path as a `should-fix` finding under the `**PR body**` block the stale ticked box already takes, since what both corrupt is the merge record rather than a file in the diff. A body is edited between pushes, so a finding names the head the comparison ran at. `unnamed` is read there and raised off no count, since the step's own history is a question sent over bullets that already answered it. `unresolved` and `incidental` are reported nowhere.
+`review-pr` Step 3 calls it through its `references/key-changes.md` and files an `unmet` path as a `should-fix` finding under the `**PR body**` block the stale ticked box already takes, since what both corrupt is the merge record rather than a file in the diff. A body is edited between pushes, so a finding names the head the comparison ran at. `unnamed` is read there and raised off no count, since the step's own history is a question sent over bullets that already answered it. `unresolved` and `incidental` are reported nowhere.
