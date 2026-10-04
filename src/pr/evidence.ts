@@ -260,7 +260,8 @@ export interface OwedInput {
   readonly hasEvidenceChange: boolean
   readonly hasMarkedComment: boolean
   readonly carriedPreview: boolean
-  readonly deployWorkflowFound: boolean
+  /** A deploy workflow resolves and its push filter matches a path the pull request changed. */
+  readonly deployServesChange: boolean
 }
 
 /**
@@ -273,7 +274,7 @@ export function readOwed(input: OwedInput): OwedStep[] {
   if (input.hasEvidenceChange && !input.hasMarkedComment) owed.push('evidence')
   if (
     (input.hasMarkedComment || input.hasEvidenceChange) &&
-    input.deployWorkflowFound &&
+    input.deployServesChange &&
     !input.carriedPreview
   ) {
     owed.push('preview')

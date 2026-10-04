@@ -68,6 +68,7 @@ import {
   type PreviewRefusal,
   type PreviewRunner,
   type RunRow,
+  servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
 import {
@@ -189,7 +190,7 @@ const PREVIEW_TIMEOUT_MINUTES = 15
 const PREVIEW_POLL_MS = 15_000
 
 const PREVIEW_REFUSALS: Record<
-  PreviewRefusal | 'bad-timeout' | 'check-timeout',
+  PreviewRefusal | 'bad-timeout' | 'check-timeout' | 'unreadable-changes',
   string
 > = {
   'bad-timeout': '--timeout takes a positive number of minutes.',
@@ -206,6 +207,8 @@ const PREVIEW_REFUSALS: Record<
     'The deploy never printed a canon-preview-alias line, so no address could be read. Add the alias step from the cloudflare stack reference to the workflow.',
   'gh-failed':
     'gh could not list or dispatch the deploy workflow for this branch.',
+  'unreadable-changes':
+    'GitHub could not list what this pull request changed, so whether the deploy serves it is unknown. Nothing was dispatched.',
   'run-failed':
     'The deploy run finished without succeeding, so no preview was published. Read the run log.',
   timeout:
@@ -505,7 +508,7 @@ export function register(program: Command): void {
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
       '--preview <url>',
-      'Open the body with this preview address, from canon pr preview',
+      'Put this preview address on the line under the heading, from canon pr preview',
     )
     .option(
       '--checklist <path>',
@@ -513,7 +516,7 @@ export function register(program: Command): void {
     )
     .option(
       '--local <url>',
-      "Add this worktree's running server under any preview line, from canon pr local",
+      "Add this worktree's running server to the address line, from canon pr local",
     )
     .option(
       '--check',
@@ -541,11 +544,21 @@ export function register(program: Command): void {
         '  would-empty  the render holds no cases and the marked comment holds',
         '               some, so no body is printed and a person edits the comment',
         '',
-        "--preview puts the address on the body's first line. With no evidence",
-        'in the diff, the body is that line and the marker alone, reported as',
-        'ok, so the preview still lands in one comment a later call can edit.',
-        'Without --preview, an address the marked comment already opens with',
-        'is carried into the new body, so a re-render after a push keeps it.',
+        'Every body opens with `## Evidence`, then one address line joining',
+        'the hosted and local previews with " · ", carrying whichever apply,',
+        'then the Base and Head line when there are screenshots.',
+        '',
+        '--preview puts the hosted address on that line. With no evidence in',
+        'the diff, the body is the heading, that line, and the marker alone,',
+        'reported as ok, so the preview still lands in one comment a later',
+        'call can edit. Without --preview, an address the marked comment',
+        'already carries is carried into the new body, so a re-render after a',
+        'push keeps it, unless a deploy workflow resolves and its push path',
+        'filter matches no path the pull request changed, in which case the',
+        'carried hosted address is dropped. An explicit --preview is always',
+        'kept. The address region above the comparison is read for each',
+        'prefix wherever it sits, so a comment that opens on the addresses',
+        'still carries them forward.',
         '',
         '--checklist closes the body with a visual checklist, below the',
         'comparison it annotates. A checklist the marked comment already',
@@ -555,17 +568,17 @@ export function register(program: Command): void {
         'image renders a marked body holding the checklist, so a later call',
         'finds and edits that comment.',
         '',
-        '--local adds a **Local preview:** line under the hosted preview line,',
-        'or opens the body with it when there is none, and is carried forward',
-        'the same way. It does not by itself turn no-evidence into ok, so a',
+        '--local adds a **Local preview:** segment after any hosted one on the',
+        'address line, or carries the line alone, and is carried forward the',
+        'same way. It does not by itself turn no-evidence into ok, so a',
         'branch with a server running and nothing to show posts no link-only',
         'comment. Together with --checklist the link and the checklist land in',
         'one comment.',
         '',
         'Both reasons carry what the marked comment already posted, each field',
         'present only when that comment holds it:',
-        '  preview    the hosted **Preview:** address the comment opens with',
-        '  local      the **Local preview:** address under it',
+        '  preview    the hosted **Preview:** address the comment carries',
+        '  local      the **Local preview:** address beside it',
         '  checklist  the checklist between its delimiters, ticks included',
         'These come from the comment already posted, never from the flags this',
         'call passed. A checklist the caller posted raw after a refused render',
@@ -579,8 +592,9 @@ export function register(program: Command): void {
         '  owed     `owed` lists evidence, preview, or both, in that order',
         'evidence is owed when an evidence image changed and no comment carries',
         'the marker. preview is owed when either holds, a deploy workflow in',
-        "this checkout resolves, and the marked comment's first line is no",
-        '**Preview:** line. A failed deploy reads the same as a skipped one.',
+        'this checkout resolves, its push path filter matches a path the pull',
+        'request changed, and the marked comment carries no **Preview:**',
+        'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
         'with --preview, --local, or --checklist as check-writes.',
         '',
@@ -633,9 +647,16 @@ export function register(program: Command): void {
         'A deploy without the --branch flag is refused before anything runs,',
         'because Pages publishes an unfenced deploy to production.',
         '',
+        "The pull request's changed paths are then matched against the",
+        "workflow's own on.push.paths or paths-ignore filter, since a dispatch",
+        'ignores that filter and would publish a site showing none of the',
+        'change. A workflow with neither filter serves every change.',
+        '',
         'Read `reason` on the JSON record:',
         '  ok          the preview was published, with its address in `url`',
         '  no-deploy   no dispatchable workflow runs pages deploy',
+        '  unserved    the push filter matches no changed path, so nothing was',
+        '              dispatched, and --check answers the same',
         '  unfenced    the deploy passes no --branch, so nothing was dispatched',
         '  no-alias    the workflow prints no canon-preview-alias line',
         '  run-failed  the deploy run finished without succeeding',
@@ -1758,13 +1779,20 @@ async function runEvidence(
     ...(carriedChecklist !== undefined && { checklist: carriedChecklist }),
   }
 
+  // A deploy that resolves and does not build from any changed path makes a
+  // carried hosted link point at a site that shows none of this change.
+  const deploy = findDeployWorkflow(await readWorkflows(root))
+  const deployServesChange =
+    deploy.kind === 'found' &&
+    servesChange(deploy.filter, [...pullFiles.keys()])
+  const isUnserved = deploy.kind === 'found' && !deployServesChange
+
   if (isCheck) {
     const owed = readOwed({
       hasEvidenceChange: grouped.kind === 'read',
       hasMarkedComment: hasMarkedEvidenceComment(comments),
       carriedPreview: carriedPreview !== undefined,
-      deployWorkflowFound:
-        findDeployWorkflow(await readWorkflows(root)).kind === 'found',
+      deployServesChange,
     })
     logStep(owed.length === 0 ? 'Settled' : 'Owed')
     logInfo(
@@ -1830,7 +1858,7 @@ async function runEvidence(
     )
   }
 
-  const preview = opts.preview ?? carriedPreview
+  const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
   const local = opts.local ?? carriedLocal
   const checklist = suppliedChecklist ?? carriedChecklist
   const states = grouped.kind === 'read' ? grouped.states : []
@@ -2028,6 +2056,24 @@ async function runPreview(
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
   const { identity } = read
+
+  // A dispatch ignores the workflow's own push filter, so the filter is read
+  // here, ahead of both the mint and the check, rather than left to GitHub.
+  const changed =
+    identity.number === undefined
+      ? undefined
+      : await listPullFiles(root, identity.number)
+  if (changed === undefined) {
+    return refuseWith(
+      'unreadable-changes',
+      PREVIEW_REFUSALS['unreadable-changes'],
+      emitJson,
+      root,
+    )
+  }
+  if (!servesChange(pick.filter, [...changed.keys()])) {
+    return refuseWith('unserved', PREVIEW_REFUSALS.unserved, emitJson, root)
+  }
 
   if (opts.check === true) {
     return runPreviewCheck(root, emitJson, pick.path, identity)

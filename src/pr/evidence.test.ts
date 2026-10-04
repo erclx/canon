@@ -676,14 +676,14 @@ describe('readOwed', () => {
       hasEvidenceChange: false,
       hasMarkedComment: false,
       carriedPreview: false,
-      deployWorkflowFound: false,
+      deployServesChange: false,
       ...overrides,
     }
   }
 
   it('should owe evidence and preview in that order when an evidence change has no comment and a deploy resolves', () => {
     const owed = readOwed(
-      owedInput({ hasEvidenceChange: true, deployWorkflowFound: true }),
+      owedInput({ hasEvidenceChange: true, deployServesChange: true }),
     )
 
     expect(owed).toEqual(['evidence', 'preview'])
@@ -697,7 +697,7 @@ describe('readOwed', () => {
 
   it('should owe a preview when a marked comment opens with no preview line', () => {
     const owed = readOwed(
-      owedInput({ hasMarkedComment: true, deployWorkflowFound: true }),
+      owedInput({ hasMarkedComment: true, deployServesChange: true }),
     )
 
     expect(owed).toEqual(['preview'])
@@ -712,7 +712,7 @@ describe('readOwed', () => {
             body: '<!-- pr-checklist:start -->\n- [ ] look\n<!-- pr-checklist:end -->\n\n<!-- pr-evidence: head=abc -->',
           },
         ]),
-        deployWorkflowFound: true,
+        deployServesChange: true,
       }),
     )
 
@@ -725,7 +725,7 @@ describe('readOwed', () => {
         hasEvidenceChange: true,
         hasMarkedComment: true,
         carriedPreview: true,
-        deployWorkflowFound: true,
+        deployServesChange: true,
       }),
     )
 
@@ -733,7 +733,7 @@ describe('readOwed', () => {
   })
 
   it('should owe nothing when the pull request has no evidence change and no marked comment', () => {
-    const owed = readOwed(owedInput({ deployWorkflowFound: true }))
+    const owed = readOwed(owedInput({ deployServesChange: true }))
 
     expect(owed).toEqual([])
   })
