@@ -27,7 +27,7 @@ import {
 /**
  * Provisions one scenario into the sandbox tree, and resets or cleans that tree.
  * Each scenario's hooks run in bash through `sandbox-hook.sh`, and everything
- * between them runs here, in the order the retired `manage-sandbox.sh` held.
+ * between them runs here, in the order the retired bash dispatcher held.
  *
  * Narration is part of the contract. `canon sandbox equivalence` compares the
  * log line for line against the bash harness, so every message, its frame
