@@ -2218,6 +2218,65 @@ describe('selection handles', () => {
     ])
   })
 
+  async function cancelDrag(
+    target: HTMLElement,
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+  ) {
+    await act(async () => {
+      const at = (type: string, point: { x: number; y: number }) =>
+        target.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: point.x,
+            clientY: point.y,
+            pointerId: 1,
+          }),
+        )
+      at('pointerdown', from)
+      at('pointermove', to)
+      at('pointercancel', to)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  it('should put a frame back at its box when a handle drag is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
+    selectLabel('hero')
+
+    await cancelDrag(
+      handleOf('hero', 'nw'),
+      { x: 100, y: 100 },
+      { x: 20, y: 30 },
+    )
+
+    expect(sentTo('/api/frames/resize')).toEqual([])
+    expect(figureFor('hero').style.left).toBe('40px')
+    expect(figureFor('hero').style.width).toBe('1440px')
+  })
+
+  it('should restore the element inline size when a handle drag is cancelled', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 200px">Hero</h1>')
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+
+    await cancelDrag(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 160, y: 140 },
+    )
+
+    const style = doc.querySelector<HTMLElement>('h1')?.style
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(style?.width).toBe('200px')
+    expect(style?.height).toBe('')
+  })
+
   it('should send no height edit once the width edit is refused', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame(
