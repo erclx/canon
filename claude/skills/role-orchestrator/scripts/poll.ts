@@ -2,13 +2,7 @@
 //
 // Run as `bun poll.ts`. The pure pieces are exported so a test drives the code
 // a loop runs, and `main` runs only when this file is the entry point.
-import {
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { baseBranch, baseRef, mainRoot, run } from './repo'
@@ -464,23 +458,26 @@ export const classify = (
 }
 
 /**
- * What the last run saw on one pull request's base movement, read off its
- * baseline entry. STALE and CONFLICT print as lines only on a transition or a
- * push, so a reader deciding a draft lift several runs later reads this
- * instead. A reading an older baseline never recorded is unknown, not clear.
+ * One pull request's base movement as a single line. STALE and CONFLICT print
+ * in the poll only on a transition or a push, so a reader deciding a draft
+ * lift reads this instead. A reading that could not be taken is unknown, never
+ * clear.
  */
-export const standingLine = (entry: Baseline): string => {
+export const standingLine = (
+  entry: Pick<Baseline, 'head' | 'merges' | 'number' | 'stale'>,
+): string => {
   const at = short(entry.head)
   if (entry.merges === 'conflict') {
     return `CONFLICT  #${entry.number} standing at ${at}`
   }
-  if (entry.stale === 'stale')
+  if (entry.stale === 'stale') {
     return `STALE     #${entry.number} standing at ${at}`
+  }
   if (entry.merges === 'clean' && entry.stale === 'fresh') {
     return `CLEAR     #${entry.number} at ${at}`
   }
 
-  return `UNKNOWN   #${entry.number} at ${at}, the last run could not read whether it merges or is current`
+  return `UNKNOWN   #${entry.number} at ${at}, whether it merges or is current could not be read`
 }
 
 /**
@@ -812,21 +809,32 @@ const countSince =
     return log.isOk ? log.stdout.split('\n').filter((l) => l !== '').length : 0
   }
 
-/** `--check <number>` reads the baseline alone and writes nothing. */
-const check = (statePath: string, number: string): number => {
-  const entry = (existsSync(statePath) ? readFileSync(statePath, 'utf8') : '')
-    .split('\n')
-    .filter((line) => line !== '')
-    .map(parseBaseline)
-    .find((candidate) => candidate.number === number)
-  if (entry === undefined) {
+/**
+ * `--check <number>` reads the base and the head at call time and writes
+ * nothing. The baseline is as old as the last full run, and a sibling merging
+ * after it would leave a stored reading claiming clear.
+ */
+const check = (number: string): number => {
+  const ref = baseRef()
+  run('git', ['fetch', '-q', 'origin', baseBranch(ref)])
+  const head = readHead(number)
+  if (head === '') {
     console.error(
-      `poll: #${number} has no baseline entry, so nothing is known about it`,
+      `poll: #${number} returned no head, so nothing is known about it`,
     )
 
     return 1
   }
-  console.log(standingLine(entry))
+  const merges = readMerges(number, head, ref)
+  const written = merges === 'unknown' ? null : readWritten(head, ref)
+  console.log(
+    standingLine({
+      head,
+      merges,
+      number,
+      stale: readStale(written, ref).stale,
+    }),
+  )
 
   return 0
 }
@@ -841,10 +849,10 @@ const main = (args: string[]): number => {
 
   // The baseline is per-machine mutable state, so it stays in gitignored
   // scratch even though the script is tracked.
+  if (args[0] === '--check') return check(args[1] ?? '')
   const stateDir = join(root, '.canon', 'tmp', 'pr', 'poll')
-  const statePath = join(stateDir, 'baseline.txt')
-  if (args[0] === '--check') return check(statePath, args[1] ?? '')
   mkdirSync(stateDir, { recursive: true })
+  const statePath = join(stateDir, 'baseline.txt')
   appendFileSync(statePath, '')
 
   const ref = baseRef()

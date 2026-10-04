@@ -701,8 +701,12 @@ describe('poll', () => {
     })
 
     // The draft lift reads a standing reading at lift time, which may be many
-    // runs after the line that reported it, so the check reads the baseline.
+    // runs after the line that reported it and after a sibling merged, so the
+    // check reads the base and the head live rather than the baseline.
     describe('standing check', () => {
+      const baselinePath = (): string =>
+        join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'baseline.txt')
+
       const check = (number: string): PollResult => {
         const run = spawnSync('bun', [SCRIPT, '--check', number], {
           cwd: join(root, 'repo'),
@@ -717,11 +721,9 @@ describe('poll', () => {
         }
       }
 
-      it('should report a stale branch as standing after its line has passed', () => {
+      it('should report a stale branch as standing', () => {
         openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
         pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
-        poll()
-        expect(poll().stdout).toBe('No movement.')
 
         expect(check('7').stdout).toMatch(
           /^STALE {5}#7 standing at [0-9a-f]{7}$/,
@@ -731,32 +733,38 @@ describe('poll', () => {
       it('should report a conflicted branch as standing', () => {
         openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
         pushMain(commit(base, 'main2', { 'a.txt': fileWith(0, 'theirs') }))
-        poll()
 
         expect(check('7').stdout).toMatch(/^CONFLICT {2}#7 standing at /)
       })
 
       it('should report a branch rebased onto main as clear', () => {
-        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
         const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })
         pushMain(main2)
-        poll()
         openPull(
           '7',
-          commit(main2, 'rebased', {
-            'a.txt': fileWith(0, 'mine').replace('five', 'theirs'),
-          }),
+          commit(main2, 'rebased', { 'a.txt': fileWith(0, 'mine') }),
         )
-        poll()
 
         expect(check('7').stdout).toMatch(/^CLEAR {5}#7 at /)
       })
 
-      it('should refuse a pull request the baseline does not hold', () => {
+      it('should report a branch main moved under since the last poll as stale', () => {
+        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+        expect(poll().stdout).toContain('OPENED    #7')
+        const written = readFileSync(baselinePath(), 'utf8')
+
+        pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
+        const run = check('7')
+
+        expect(run.stdout).toMatch(/^STALE {5}#7 standing at /)
+        expect(readFileSync(baselinePath(), 'utf8')).toBe(written)
+      })
+
+      it('should refuse a pull request whose head it cannot read', () => {
         const run = check('9')
 
         expect(run.status).toBe(1)
-        expect(run.stderr).toContain('#9 has no baseline entry')
+        expect(run.stderr).toContain('#9 returned no head')
       })
     })
 
