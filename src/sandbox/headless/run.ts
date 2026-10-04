@@ -80,7 +80,7 @@ export function runSettings(env: NodeJS.ProcessEnv): {
   }
 }
 
-/** Narrows the arguments to a startable run, or names why they cannot start one. */
+/** Narrows the arguments to a run that can start, or names why they cannot. */
 export function parseRunArgs(
   target: string,
   prompt: string | undefined,
