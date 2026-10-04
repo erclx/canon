@@ -9,6 +9,12 @@
 /** Marks the token stylesheet the server injects, which the file never holds. */
 export const TOKENS_ATTRIBUTE = 'data-canvas-tokens'
 
+/**
+ * Marks a document wrapper the server writes because the file leaves it to the
+ * browser to imply, so the shell counts only what the file states.
+ */
+export const IMPLIED_ATTRIBUTE = 'data-canvas-implied'
+
 /** On that same element, the hash of the file the frame was served from. */
 export const HASH_ATTRIBUTE = 'data-canvas-hash'
 
@@ -22,8 +28,9 @@ export interface ElementAddress {
   readonly tag: string
   /**
    * Every element the shell counted. A browser implies elements the file never
-   * states, such as a `tbody` or the document wrapper, and each one shifts the
-   * count, so a total that differs from the server's is what exposes it.
+   * states, such as a `tbody`, and each one shifts the count, so a total that
+   * differs from the server's is what exposes it. The server marks an implied
+   * document wrapper itself, so only the marked ones leave the count.
    */
   readonly count: number
   /**
@@ -53,7 +60,9 @@ export function excerpt(text: string): string {
 
 export function documentElements(doc: Document): Element[] {
   return [...doc.querySelectorAll('*')].filter(
-    (element) => !element.hasAttribute(TOKENS_ATTRIBUTE),
+    (element) =>
+      !element.hasAttribute(TOKENS_ATTRIBUTE) &&
+      !element.hasAttribute(IMPLIED_ATTRIBUTE),
   )
 }
 

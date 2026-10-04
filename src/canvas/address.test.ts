@@ -6,6 +6,7 @@ import {
   elementAt,
   excerpt,
   HASH_ATTRIBUTE,
+  IMPLIED_ATTRIBUTE,
   resolveAddress,
   sourceElements,
   TOKENS_ATTRIBUTE,
@@ -96,6 +97,12 @@ describe('documentElements', () => {
     const source = page('<p>a</p>')
 
     expect(browserTags(served)).toEqual(serverTags(source))
+  })
+
+  it('should skip a wrapper the server marked as implied', () => {
+    const served = `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}><style ${TOKENS_ATTRIBUTE}></style></head><body ${IMPLIED_ATTRIBUTE}><h1>Bare</h1>`
+
+    expect(browserTags(served)).toEqual(['h1'])
   })
 })
 
