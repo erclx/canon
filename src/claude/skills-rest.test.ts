@@ -28,10 +28,15 @@ const TIERS: readonly {
   readonly pattern: RegExp
 }[] = [
   {
-    paths: ['review-address', 'git-followup', 'git-pr/references/evidence.md'],
+    paths: [
+      'review-address',
+      'git-followup',
+      'git-pr/references/evidence.md',
+      'review-ui',
+    ],
     pattern: ANY_GRAPHQL,
   },
-  { paths: ['review-ui', 'git-split'], pattern: GRAPHQL_READS },
+  { paths: ['git-split'], pattern: GRAPHQL_READS },
 ]
 
 function filesUnder(dir: string): string[] {
