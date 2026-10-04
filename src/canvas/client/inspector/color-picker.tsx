@@ -119,24 +119,30 @@ interface NumberRowProps {
   readonly space: string
   readonly channels: readonly [Channel, Channel, Channel]
   readonly values: readonly [number, number, number]
+  readonly isBusy: boolean
   readonly onCommit: (values: readonly [number, number, number]) => void
 }
 
 /**
  * Three numbers for one space. Each commits on change, reading its two
- * neighbors as they stand, and a value that is not a number puts all three
- * back.
+ * neighbors as they stand, and a value that is not a number, or one typed
+ * while an edit is in flight, puts all three back.
  */
 function NumberRow({
   space,
   channels,
   values,
+  isBusy,
   onCommit,
 }: NumberRowProps): JSX.Element {
   const row = useRef<HTMLDivElement>(null)
   const shown = values.map((value) => String(Math.round(value)))
   const label = (channel: Channel) =>
     space === 'RGB' ? channel.name : `${space} ${channel.name}`
+  const putBack = () =>
+    row.current?.querySelectorAll('input').forEach((input, at) => {
+      input.value = shown[at] ?? ''
+    })
   return (
     <div ref={row} class="picker-row">
       {channels.map((channel, index) => (
@@ -147,9 +153,14 @@ function NumberRow({
             inputMode="decimal"
             aria-label={label(channel)}
             defaultValue={shown[index]}
+            readOnly={isBusy}
             spellcheck={false}
             onFocus={(event) => event.currentTarget.select()}
             onChange={() => {
+              if (isBusy) {
+                putBack()
+                return
+              }
               const inputs = [
                 ...(row.current?.querySelectorAll('input') ?? []),
               ].map((input) => Number(input.value.trim()))
@@ -160,9 +171,7 @@ function NumberRow({
                 third === undefined ||
                 inputs.some((value) => !Number.isFinite(value))
               ) {
-                row.current?.querySelectorAll('input').forEach((input, at) => {
-                  input.value = shown[at] ?? ''
-                })
+                putBack()
                 return
               }
               onCommit([first, second, third])
@@ -205,6 +214,8 @@ interface ColorPickerProps {
   readonly painted: string
   /** Opens a preview session at press, or undefined where none can preview. */
   readonly begin: (() => ScrubSession) | undefined
+  /** Set while an edit is in flight, when a second write would carry a stale hash. */
+  readonly isBusy: boolean
   readonly onCommit: (value: string) => void
 }
 
@@ -220,6 +231,10 @@ interface Pending {
  * area and the sliders preview into the frame and write once on release, while
  * a numeric row writes on change. Any change but the alpha writes a hex, since
  * a token's color cannot change from here without editing the token.
+ *
+ * While an edit is in flight every control holds, ignoring what it is handed
+ * rather than taking `disabled`, since a disabled control drops focus and the
+ * field closes the picker once focus leaves it.
  */
 export function ColorPicker({
   owner,
@@ -228,6 +243,7 @@ export function ColorPicker({
   inline,
   painted,
   begin,
+  isBusy,
   onCommit,
 }: ColorPickerProps): JSX.Element {
   const resumed = held?.owner === owner ? held : undefined
@@ -299,6 +315,7 @@ export function ColorPicker({
 
   /* Moves the color during a drag or a key step, previewing and posting nothing. */
   const move = (next: PickerState) => {
+    if (isBusy) return
     const session = start().session
     show(next)
     session.preview(valueOf(next))
@@ -310,7 +327,7 @@ export function ColorPicker({
     if (!open) return
     pending.current = null
     const value = valueOf(latest.current)
-    if (value === open.from) {
+    if (value === open.from || isBusy) {
       open.session.restore()
       return
     }
@@ -328,6 +345,7 @@ export function ColorPicker({
 
   /* Writes at once, for a row or the hex, which carry no preview. */
   const write = (next: PickerState, value = valueOf(next)) => {
+    if (isBusy) return
     cancel()
     show(next)
     if (value === valueOf(state)) return
@@ -357,12 +375,25 @@ export function ColorPicker({
   }
 
   const restorePrevious = () => {
+    if (isBusy) return
     cancel()
     show(opened.state)
     if (!hasCommitted.current) return
     hasCommitted.current = false
     hold(opened.state, 'previous color')
     onCommit(opened.inline)
+  }
+
+  /* A range moves natively on a key or a press, so it is stopped before it does. */
+  const holdWhileBusy = {
+    onKeyDown: (event: KeyboardEvent) => {
+      if (isBusy && event.key !== 'Tab' && event.key !== 'Escape') {
+        event.preventDefault()
+      }
+    },
+    onPointerDown: (event: PointerEvent) => {
+      if (isBusy) event.preventDefault()
+    },
   }
 
   const rgb = hsvToRgb(state.hsv)
@@ -396,9 +427,11 @@ export function ColorPicker({
         aria-valuemax={100}
         aria-valuenow={saturation}
         aria-valuetext={`Saturation ${saturation}%, brightness ${brightness}%`}
+        aria-disabled={isBusy}
         onPointerDown={(event) => {
           event.preventDefault()
           area.current?.focus()
+          if (isBusy) return
           try {
             area.current?.setPointerCapture(event.pointerId)
           } catch {
@@ -454,13 +487,19 @@ export function ColorPicker({
         step={1}
         aria-label="alpha"
         aria-orientation="vertical"
+        aria-disabled={isBusy}
         value={state.alpha}
-        onInput={(event) =>
+        {...holdWhileBusy}
+        onInput={(event) => {
+          if (isBusy) {
+            event.currentTarget.value = String(latest.current.alpha)
+            return
+          }
           move({
             ...latest.current,
             alpha: Number(event.currentTarget.value),
           })
-        }
+        }}
         onChange={() => settle()}
         onBlur={(event) => settle(nameOf(event.relatedTarget))}
       />
@@ -472,8 +511,14 @@ export function ColorPicker({
         step={1}
         aria-label="hue"
         aria-orientation="vertical"
+        aria-disabled={isBusy}
         value={Math.round(state.hsv.h)}
-        onInput={(event) =>
+        {...holdWhileBusy}
+        onInput={(event) => {
+          if (isBusy) {
+            event.currentTarget.value = String(Math.round(latest.current.hsv.h))
+            return
+          }
           move({
             ...latest.current,
             hsv: {
@@ -482,7 +527,7 @@ export function ColorPicker({
             },
             token: undefined,
           })
-        }
+        }}
         onChange={() => settle()}
         onBlur={(event) => settle(nameOf(event.relatedTarget))}
       />
@@ -493,6 +538,7 @@ export function ColorPicker({
             type="button"
             aria-label="previous color"
             title="Restore the color the picker opened on"
+            aria-disabled={isBusy}
             style={{ '--paint': opened.paint }}
             onClick={restorePrevious}
           />
@@ -512,6 +558,7 @@ export function ColorPicker({
           space="LCH"
           channels={LCH_CHANNELS}
           values={[lch.l, lch.c, lch.h]}
+          isBusy={isBusy}
           onCommit={([l, c, h]) => write(fromRgb(lchToRgb({ l, c, h }).rgb))}
         />
         <NumberRow
@@ -519,6 +566,7 @@ export function ColorPicker({
           space="HSL"
           channels={HSL_CHANNELS}
           values={[hsl.h, hsl.s, hsl.l]}
+          isBusy={isBusy}
           onCommit={([h, s, l]) =>
             write(
               fromRgb(
@@ -533,7 +581,16 @@ export function ColorPicker({
           space="RGB"
           channels={RGB_CHANNELS}
           values={[rgb.r, rgb.g, rgb.b]}
-          onCommit={([r, g, b]) => write(fromRgb({ r, g, b }))}
+          isBusy={isBusy}
+          onCommit={([r, g, b]) =>
+            write(
+              fromRgb({
+                r: clamp(r, 0, 255),
+                g: clamp(g, 0, 255),
+                b: clamp(b, 0, 255),
+              }),
+            )
+          }
         />
         <div class="glyph-field" key={valueOf(state)}>
           <span class="glyph" aria-hidden="true">
@@ -544,7 +601,8 @@ export function ColorPicker({
             opacityLabel="opacity"
             color={current}
             text={text}
-            isBusy={false}
+            isBusy={isBusy}
+            keepsFocus
             onCommit={(typed) => {
               const parsed = parseColor(typed)
               if (parsed?.kind === 'hex') {

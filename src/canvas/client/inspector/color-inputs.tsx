@@ -46,6 +46,11 @@ export interface ColorInputsProps {
   readonly color: ParsedColor | undefined
   readonly text: string
   readonly isBusy: boolean
+  /**
+   * Holds the inputs read-only rather than disabled while busy, for a
+   * popover that closes once focus leaves it and a disabled input drops focus.
+   */
+  readonly keepsFocus?: boolean
   readonly onCommit: (value: string) => void
 }
 
@@ -59,10 +64,13 @@ export function ColorInputs({
   color,
   text,
   isBusy,
+  keepsFocus = false,
   onCommit,
 }: ColorInputsProps): JSX.Element {
   const hex = shownHex(color, text)
   const opacity = shownOpacity(color)
+  const isDisabled = isBusy && !keepsFocus
+  const isReadOnly = isBusy && keepsFocus
   return (
     <>
       <input
@@ -78,10 +86,15 @@ export function ColorInputs({
         title={hex}
         defaultValue={hex}
         placeholder="None"
-        disabled={isBusy}
+        disabled={isDisabled}
+        readOnly={isReadOnly}
         spellcheck={false}
         onChange={(event) => {
           const typed = event.currentTarget.value.trim()
+          if (isBusy) {
+            event.currentTarget.value = hex
+            return
+          }
           if (typed === '' || typed === hex) return
           onCommit(fromTyped(typed, currentOpacity(color)))
         }}
@@ -95,11 +108,13 @@ export function ColorInputs({
         inputMode="numeric"
         aria-label={opacityLabel}
         defaultValue={opacity}
-        disabled={isBusy || !color || color.kind === 'none'}
+        disabled={isDisabled || !color || color.kind === 'none'}
+        readOnly={isReadOnly}
         spellcheck={false}
         onChange={(event) => {
           const percent = readOpacity(event.currentTarget.value)
           if (
+            isBusy ||
             percent === undefined ||
             !color ||
             color.kind === 'none' ||

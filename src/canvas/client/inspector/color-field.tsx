@@ -82,6 +82,21 @@ type Open = 'picker' | 'tokens' | undefined
 const GAP = 8
 
 /**
+ * The left edge of the scrolling panel holding the row, so a popover clears
+ * the panel's padding rather than overlapping it. The row's own edge stands in
+ * where no ancestor scrolls.
+ */
+function panelLeft(row: HTMLElement): number {
+  for (let node = row.parentElement; node; node = node.parentElement) {
+    const overflow = getComputedStyle(node).overflowY
+    if (overflow === 'auto' || overflow === 'scroll') {
+      return node.getBoundingClientRect().left
+    }
+  }
+  return row.getBoundingClientRect().left
+}
+
+/**
  * Places a popover beside the row, to the left of the panel, and holds it
  * inside the window. The panel scrolls and clips, so the popover sits in the
  * top layer where the browser has one and at fixed coordinates either way.
@@ -97,7 +112,7 @@ function place(popover: HTMLElement, row: HTMLElement): void {
   const anchor = row.getBoundingClientRect()
   const width = document.documentElement.clientWidth || window.innerWidth
   const height = document.documentElement.clientHeight || window.innerHeight
-  const before = anchor.left - GAP - box.width
+  const before = panelLeft(row) - GAP - box.width
   const left =
     before >= GAP
       ? before
@@ -321,6 +336,7 @@ export function ColorField({
               inline={inline}
               painted={painted}
               begin={preview}
+              isBusy={isBusy}
               onCommit={onCommit}
             />
           ) : tokens.length > 0 ? (

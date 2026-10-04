@@ -292,8 +292,9 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     })
     /*
      * Opens the picker, captures it, and closes it from the keyboard. Returns
-     * how far it reaches past the window on each side, and the page's own
-     * sideways scroll, all of which should be zero or less.
+     * how far it reaches past the window on each side, the page's own
+     * sideways scroll, and how far it covers the details panel, all of which
+     * should be zero or less.
      */
     const capture = async (shot: string) => {
       await swatch.click()
@@ -303,12 +304,14 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
       const reach = await picker.evaluate((element) => {
         const box = element.getBoundingClientRect()
         const root = document.documentElement
+        const panel = document.querySelector('.panel-right')
         return [
           -box.left,
           -box.top,
           box.right - root.clientWidth,
           box.bottom - root.clientHeight,
           root.scrollWidth - root.clientWidth,
+          box.right - (panel?.getBoundingClientRect().left ?? box.right),
         ].map((value) => Math.max(0, Math.ceil(value)))
       })
       await page.screenshot({ path: join(SHOTS, shot) })
@@ -325,8 +328,8 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await toggle.click()
 
     expect([first, second]).toEqual([
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
     ])
     expect(isSwatchFocused).toBe(true)
     expect(await picker.count()).toBe(0)

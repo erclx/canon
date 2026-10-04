@@ -1439,6 +1439,59 @@ describe('Inspector edit', () => {
     ])
   })
 
+  it('should hold the picker while an edit is in flight', async () => {
+    let release = () => {}
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({
+        url: String(url),
+        body: JSON.parse(String(init?.body ?? 'null')),
+      })
+      await new Promise<void>((resolve) => {
+        release = resolve
+      })
+      return new Response('{"ok":true}', {
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    await slide(controlIn(picker, 'hue'), '200')
+
+    await slide(controlIn(openedPicker('background'), 'hue'), '220')
+    await settle(() =>
+      key(areaOf(openedPicker('background')), 'ArrowDown', true),
+    )
+    await settle(() => key(areaOf(openedPicker('background')), 'Enter'))
+    await commit(controlIn(openedPicker('background'), 'red'), '10')
+
+    expect(sentTo('/api/frames/edit')).toHaveLength(1)
+    await settle(() => release())
+  })
+
+  it('should clamp an RGB row to the channel range it writes', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #000000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await commit(controlIn(picker, 'red'), '300')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: '#ff0000' }),
+    ])
+    expect(controlIn(openedPicker('background'), 'red').value).toBe('255')
+  })
+
   it('should hold the hue on a grey and post nothing for it', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame(
