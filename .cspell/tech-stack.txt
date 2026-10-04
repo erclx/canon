@@ -48,6 +48,7 @@ excalifont
 execa
 execdir
 execve
+fangsong
 fastapi
 faststart
 fatalf

@@ -68,6 +68,38 @@ export function primaryFontFamily(declaration: string): string {
 }
 
 /**
+ * The CSS generic family keywords. A generic names no font, so each machine
+ * maps it to whatever it has, and a capture measured against one cannot
+ * reproduce on another.
+ */
+export const GENERIC_FAMILIES: ReadonlySet<string> = new Set([
+  'serif',
+  'sans-serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+  'system-ui',
+  'ui-serif',
+  'ui-sans-serif',
+  'ui-monospace',
+  'ui-rounded',
+  'math',
+  'emoji',
+  'fangsong',
+])
+
+/**
+ * Whether the first family of a computed `font-family` is a generic keyword.
+ * Takes the raw declaration rather than `primaryFontFamily`'s result, since
+ * quoting is what separates the keyword from a family that happens to share its
+ * name, and the stripped form has lost it. Keywords match case-insensitively.
+ */
+export function isGenericFamily(declaration: string): boolean {
+  const first = declaration.split(',')[0]?.trim() ?? ''
+  return GENERIC_FAMILIES.has(first.toLowerCase())
+}
+
+/**
  * Reduces the computed `font-family` of each rendered text element to the
  * distinct families a capture has to prove resolved, in document order, so a
  * frame that sets its font on any ancestor of its text is checked against the

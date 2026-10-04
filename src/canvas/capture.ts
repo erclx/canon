@@ -196,14 +196,6 @@ async function serveFor<T>(
 /** The element a composite is captured by, holding every frame and no chrome. */
 export const COMPOSITE_SELECTOR = '#canvas-composite'
 
-/**
- * The container holds no text, so its family exists only for the engine's
- * font probe, which rejects a family the machine lacks. The browser default is
- * Times New Roman, which a Linux runner often lacks, and `system-ui` is the one
- * every platform maps. Each frame keeps its own fonts inside its iframe.
- */
-const COMPOSITE_FONT = 'system-ui'
-
 export interface Placement {
   readonly frame: string
   readonly url: string
@@ -255,7 +247,7 @@ export function buildComposite(
   const html = [
     '<!doctype html>',
     '<html><head><meta charset="utf-8">',
-    `<style>html,body{margin:0;background:transparent}#canvas-composite{position:relative;font-family:${COMPOSITE_FONT}}#canvas-composite iframe{position:absolute;display:block;border:0;background:transparent}</style>`,
+    `<style>html,body{margin:0;background:transparent}#canvas-composite{position:relative}#canvas-composite iframe{position:absolute;display:block;border:0;background:transparent}</style>`,
     '</head><body>',
     `<div id="canvas-composite" style="width:${width}px;height:${height}px">`,
     ...iframes,
