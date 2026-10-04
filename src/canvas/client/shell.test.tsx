@@ -98,13 +98,21 @@ function iframeFor(name: string): HTMLIFrameElement {
 }
 
 interface HappyDomWindow {
-  readonly happyDOM?: { settings: { disableIframePageLoading: boolean } }
+  readonly happyDOM?: {
+    settings: {
+      disableIframePageLoading: boolean
+      disableCSSFileLoading: boolean
+    }
+  }
 }
 
 beforeAll(() => {
   /* A frame's document is the server's to serve, and no server runs here. */
   const settings = (window as unknown as HappyDomWindow).happyDOM?.settings
-  if (settings) settings.disableIframePageLoading = true
+  if (settings) {
+    settings.disableIframePageLoading = true
+    settings.disableCSSFileLoading = true
+  }
 })
 
 interface SentRequest {
