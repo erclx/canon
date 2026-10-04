@@ -43,6 +43,7 @@ export const BACKED_FOLDERS = [
   'plans',
   'proposals',
   'review',
+  'slides',
   'tasks',
   'teach',
   'transcripts',

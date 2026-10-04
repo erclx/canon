@@ -1,15 +1,27 @@
 ---
 title: Slides
-description: What a folder of HTML slides declares for the whole deck in deck.json, the faces it embeds, what each slide declares on its own body, transitions and entrances, the master built from the project's tokens, speaker notes, charts, and what each refusal reports
+description: Where a deck folder lives and what it holds, what it declares for the whole deck in deck.json, the faces it embeds, what each slide declares on its own body, transitions and entrances, the master built from the project's tokens, speaker notes, charts, and what each refusal reports
 ---
 
 # Slides
 
-`canon slides render --source <folder>` turns a folder of `.html` slides into an editable PowerPoint deck. Each slide describes its own shapes. What belongs to the whole deck, being the bands, the numbers, and the mark, sits in one file beside them, and the master that carries it takes the project's own colors and face.
+`canon slides render <deck>` turns a folder of `.html` slides into an editable PowerPoint deck. Each deck lives in its own folder under `.canon/slides/`, which `canon records push` backs and git ignores, and `canon slides list --json` lists them. Each slide describes its own shapes. What belongs to the whole deck, being the bands, the numbers, and the mark, sits in one file beside them, and the master that carries it takes the project's own colors and face.
 
 ```bash
-canon slides render --source slides/q3-review
+canon slides list --json
+canon slides render q3-review
 ```
+
+## The deck folder
+
+| Path                             | Holds                                                |
+| -------------------------------- | ---------------------------------------------------- |
+| `.canon/slides/<deck>/*.html`    | the slides, rendered in filename order               |
+| `.canon/slides/<deck>/deck.json` | what belongs to the whole deck, described below      |
+| `.canon/slides/<deck>/assets/`   | images the slides reference by a relative path       |
+| `.canon/slides/layouts/`         | the project's shared layouts, never listed as a deck |
+
+A folder holding no `.html` file is not a deck. `render` with no name takes the only deck there is, and refuses with the list when there are several. It also takes a folder path outside `.canon/slides/`.
 
 ## The deck file
 

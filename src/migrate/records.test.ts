@@ -29,7 +29,7 @@ afterEach(() => {
 
 describe('MOVED_ENTRIES', () => {
   it('should carry the twelve ignore entries the move collapsed, plus every record folder added since', () => {
-    expect(MOVED_ENTRIES).toHaveLength(19)
+    expect(MOVED_ENTRIES).toHaveLength(20)
   })
 
   it('should leave the worktrees folder where the harness requires it', () => {

@@ -2,11 +2,8 @@
  * The design system's one source of values.
  *
  * `canon/DESIGN.md` is rendered from this module rather than read by it, so
- * the document a person opens is a view and this file is the fact. Every
- * rendering surface reads from here in the form it can take: a CSS surface
- * takes custom properties through `@/design/css`, and the slide renderer takes
- * bare hex through `bareHex` below, because PowerPoint has no concept of a
- * custom property.
+ * the document a person opens is a view and this file is the fact. A CSS
+ * surface reads it as custom properties through `@/design/css`.
  *
  * The two artifacts can disagree, which is what the `design` gate stage exists
  * to catch. Nothing else compares them.
@@ -370,17 +367,4 @@ export function colorValue(
   tokens: DesignTokens = TOKENS,
 ): string | undefined {
   return tokens.color.find((token) => token.role === role)?.value
-}
-
-/**
- * The adapter the slide renderer takes. `PptxGenJS` receives color as
- * `{ color: theme.background }` and wants six hex digits with no leading `#`,
- * so the shared thing is the value and this is the per-consumer form.
- *
- * The hex is raised to upper case because that is the spelling
- * `src/slides/styles.ts` has always written, and the only one a diff of a
- * rendered deck reads cleanly against.
- */
-export function bareHex(value: string): string {
-  return value.replace(/^#/, '').toUpperCase()
 }

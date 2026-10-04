@@ -1,49 +1,59 @@
 ---
 name: draft-slides
-description: Drafts a `.claude/SLIDES.md` source from a topic, picks a layout per slide, then renders it to PowerPoint via `canon slides render`. Use when asked to "draft slides", "make a deck", "build a presentation", "turn this into slides", or "render a SLIDES.md". Holds the deck design rules. Do NOT reimplement render logic. The CLI owns layout and styling. Assumes the `canon` CLI is on PATH.
+description: Draws a deck as HTML slides in the project's own design, one folder under `.canon/slides/` per deck, then renders it to an editable PowerPoint file via `canon slides render`. Use when asked to "draft slides", "make a deck", "build a presentation", "turn this into slides", or "render the deck". Holds the deck design rules. Do NOT reimplement the conversion. The CLI owns layout into PowerPoint shapes, the master, and packaging. Assumes the `canon` CLI is on PATH.
 ---
 
 # Draft slides
 
-Author a `SLIDES.md` source, then shell out to `canon slides render`. The CLI owns all layout and styling. This skill owns content and the design choices encoded in the source.
+Draw each slide as an HTML file in a deck folder, then shell out to `canon slides render`. The CLI lays every slide out in a browser and rebuilds it as editable PowerPoint shapes. This skill owns the content, the slide markup, and the design choices the markup encodes.
 
-## Read the catalog
+## Read the decks and the format
 
-Run this first to load the available layouts. Never hardcode layout names. The catalog is the source of truth.
+Run both first. Never hardcode a deck name, an attribute, or a chart type. The CLI is the source of truth for each.
 
 ```bash
 canon slides list --json 2>/dev/null
+canon docs slides
 ```
 
-## Draft the source
+The list returns one row per deck, carrying its `name`, `title`, slide count, and `path`. When the request names a deck the list holds, edit that folder. Otherwise pick a new kebab-case name no row carries.
 
-Write the deck to `.claude/SLIDES.md` from the project root. Structure:
+The docs page states what `deck.json` holds, what each slide declares on its `<body>`, the motion attributes, speaker notes, charts, and what each refusal reports.
 
-- Deck frontmatter between `---` delimiters: `title`, optional `subtitle`, `palette`, and `variant` (light or dark).
-- One slide per section, separated by a `---` rule. Each slide opens with a `# Title` and a `layout:` line naming a layout from the catalog, followed by its content.
+## Draw the deck
 
-Match content shape to the layout: bullet lists for list layouts, `## Heading` blocks for columns, `- value : caption` pairs for stats and cards, a quote with a `- attribution` line for quotes.
+A deck folder sits at `.canon/slides/<deck>/` from the project root, and holds:
 
-For a deck with chapters, add a `toc` slide near the front and mark each chapter opener with the `section` layout. The render fills the contents links and the per-slide footer automatically from the section slides. Leave the `toc` slide body empty.
+- One `.html` file per slide, rendered in filename order. Number them with a zero-padded prefix, such as `01-cover.html`, so a slide inserted later sorts where it belongs.
+- `deck.json`, optional, for the title, the header and footer bands, slide numbers, the mark, and embedded faces.
+- `assets/` for images the slides reference by a relative path.
+
+Never write a slide into `.canon/slides/layouts/`. That folder holds the project's shared layouts and is never listed as a deck.
+
+Each slide is a full HTML document laid out at 1280 by 720 CSS pixels. Position its blocks absolutely or with a flex or grid container sized to that frame, and keep every element inside it.
 
 ## Design rules
 
-The palette and type scale live in the CLI. Own the choices the source controls.
+The render injects the project's token stylesheet ahead of each slide's own styles, so the deck takes the project's design rather than the toolkit's.
 
-- Pick the variant that fits the topic. Light is a paper background, dark is near black. Both carry the same rust accent.
-- Vary the layout across slides. Never repeat title-and-bullets on every slide. Reach for columns, stat callouts, grids, and section dividers.
-- The CLI enforces the type scale, so size content to fit rather than overflow. Keep titles short and bullet lines tight.
-- Never write centered body text or content that overflows a slide. Let the layouts place the elements.
+- Use the project's custom properties, such as `var(--color-accent)`, for every color, face, and spacing value the stylesheet defines. Read the names from `.claude/design/base.css` and any overrides under `.claude/design/project/`. When neither exists, say the deck renders unstyled rather than inventing values to cover it.
+- Leave the `--color-*` roles to the stylesheet rather than redefining them in a slide. The master reads its colors off the first slide's `<html>`, and a slide body computing its own `--color-text` is reported, since the bands keep the master's colors.
+- Vary the composition across slides. Never repeat a title over bullets on every slide. Reach for columns, a row of large numbers, a grid of cards, a chart, a pull quote, and section dividers.
+- Keep titles short and lines tight, so text fits its box at the size the design sets rather than overflowing the frame.
+- Never write centered body text.
+- Prefer CSS the converter maps to native shapes. An element computing a property it cannot map is drawn as a picture of itself and reported on stderr, so a slide full of gradients and filters stops being editable.
 
 ## Render
 
 Shell out to the CLI. It writes the deck and reports the path.
 
 ```bash
-canon slides render --source .claude/SLIDES.md --out .canon/tmp/render/slides
+canon slides render <deck>
 ```
 
-Pass `--variant light` or `--variant dark` to override the source variant for a one-off render. Pass `--open` to open the deck, and `--mirror <dir>` (or set `CANON_SLIDES_MIRROR`) to copy it into a synced folder.
+With one deck in the project the name can be left out. The render refuses with the deck list when there are several. Pass `--open` to open the deck, and `--mirror <dir>`, or set `CANON_SLIDES_MIRROR`, to copy it into a synced folder.
+
+Read every `✗` line the render prints. A picture fallback, a refused link, chart, or effect, and a missing token each leave the deck written with that piece degraded or left out.
 
 ## QA loop
 
@@ -51,12 +61,13 @@ Run this once after the first render, then stop.
 
 1. Convert the deck to images: `soffice --headless --convert-to pdf <deck>.pptx` then `pdftoppm -r 90 -png <deck>.pdf slide`. If `soffice` or `pdftoppm` is missing, skip the image pass and say so. Do not fail the render.
 2. Open and inspect every rendered image in this session, checking each slide for overlap, overflow, low contrast, and empty regions.
-3. Fix the reported issues in `SLIDES.md` once, re-render, and stop. Do not loop indefinitely on aesthetics.
+3. Fix the reported issues and the `✗` lines in the slide files once, re-render, and stop. Do not loop indefinitely on aesthetics.
 
 ## Response
 
 After rendering, report:
 
-- Slide count and the deck path
-- The palette and variant used
+- The deck folder, the slide count, and the written `.pptx` path
+- Whether the project's token stylesheet was found
+- Each `✗` line the final render printed, or that it printed none
 - Any QA issues found and what changed, or that the deck passed clean

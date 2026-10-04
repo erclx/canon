@@ -47,11 +47,11 @@ Read the ratio mechanically out of bytes 16 to 24 of a PNG header after renderin
 
 ## Wireframe transcription
 
-The wireframe standard sends class or token names and pixel-exact spacing out of a wireframe, and its `## Regions` prefers a role label over a class name. A wireframe regenerated from an already-built surface needs the opposite: `canon/wireframes/slides/canvas.md` names `src/slides/layouts.ts`'s `MX` and `BODY_Y` constants, and the `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height.
+The wireframe standard sends class or token names and pixel-exact spacing out of a wireframe, and its `## Regions` prefers a role label over a class name. A wireframe regenerated from an already-built surface needs the opposite: the `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height.
 
 `## Transcription wireframes` states the mode rather than repealing the rule. It permits a source citation, class or token names, and exact geometry only where the wireframe is regenerated from a built surface's own render code, and it requires the file to open by naming that source. A wireframe drafted ahead of any build keeps the original rule, since there is no source yet to check it against.
 
-Moving the class names and pixel values into a `canon/context/` entry lost. Nothing else documents those constants or the teach variables, so the move would have created a second source for facts the render code already carries.
+Moving the class names and pixel values into a `canon/context/` entry lost. Nothing else documents the teach variables, so the move would have created a second source for facts the render code already carries.
 
 The carve-out asks for the source citation alone. A separate sentence stating that the block transcribes rather than approximates lost, since a class name and a line number traced to a real file already carry that signal.
 
