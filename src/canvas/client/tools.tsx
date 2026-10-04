@@ -49,10 +49,15 @@ interface HistoryButton {
   readonly icon: JSX.Element
 }
 
+/** The modifier the platform names for undo, Cmd on macOS and Ctrl elsewhere. */
+const MOD = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform ?? '')
+  ? 'Cmd'
+  : 'Ctrl'
+
 const HISTORY_BUTTONS: readonly HistoryButton[] = [
   {
     name: 'Undo',
-    shortcut: 'Ctrl+Z',
+    shortcut: `${MOD}+Z`,
     keys: 'Control+Z Meta+Z',
     run: () => undo(),
     icon: (
@@ -63,7 +68,7 @@ const HISTORY_BUTTONS: readonly HistoryButton[] = [
   },
   {
     name: 'Redo',
-    shortcut: 'Ctrl+Shift+Z',
+    shortcut: `${MOD}+Shift+Z`,
     keys: 'Control+Shift+Z Meta+Shift+Z Control+Y',
     run: () => redo(),
     icon: (

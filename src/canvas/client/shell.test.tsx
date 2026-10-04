@@ -3617,6 +3617,19 @@ describe('undo', () => {
     expect(historyButton('Redo').disabled).toBe(false)
   })
 
+  it('should say Undone for a moment once an undo lands', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(mount.querySelector('.history-notice')?.textContent).toBe('Undone')
+  })
+
   it('should undo on Ctrl and Z and redo on Ctrl, Shift, and Z or Ctrl and Y', async () => {
     const pages = [page('drafts', [frame('hero')])]
     renderWithHistory(pages, true)

@@ -615,6 +615,12 @@ async function stepHistory(
       historyNotice.value = `Could not ${direction} (status ${response.status}). Try again.`
     } else if (outcome === 'dropped') {
       historyNotice.value = HISTORY_NOTICES[direction]
+    } else if (outcome === 'applied') {
+      const done = direction === 'undo' ? 'Undone' : 'Redone'
+      historyNotice.value = done
+      setTimeout(() => {
+        if (historyNotice.value === done) historyNotice.value = undefined
+      }, SAVED_MS)
     } else {
       historyNotice.value = undefined
     }

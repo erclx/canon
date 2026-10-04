@@ -79,7 +79,8 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
 - Frame label: `<name> <width> × <height>`, then `<by> editing` while a session marks the frame, then the theme switch reading `Dark` or `Light`
 - Size chip: `<width> × <height>` in whole pixels
-- Tool strip: icons named `Move (V)`, `Pan (H)`, `Undo (Ctrl+Z)`, `Redo (Ctrl+Shift+Z)`, and `Hide panels (\)` or `Show panels (\)`
+- Tool strip: icons named `Move (V)`, `Pan (H)`, `Undo (Ctrl+Z)`, `Redo (Ctrl+Shift+Z)`, with `Cmd` for `Ctrl` on macOS, and `Hide panels (\)` or `Show panels (\)`
+- Undo landed: `Undone` or `Redone` in the history notice for a moment
 - Panel handles: separators named `Resize pages panel` and `Resize details panel`
 - Undo dropped: `Could not undo, since that element or frame changed after your edit. Nothing was written.`, and `redo` and `the undo` in place for a redo
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
@@ -109,7 +110,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Picking a page in the list shows its frames and fits them into the surface
 - Picking a frame in the list selects it and centers it at the current zoom, and pressing one on the surface marks its row
 - Dragging the empty surface, or scrolling anywhere on it, frames included, pans it, and scrolling with the control key held zooms about the pointer
-- Pan, or Space held, pans on any drag. With the canvas focused, V and H pick the tool, `+` and `-` zoom, Shift+1 fits. A field, or Cmd or Ctrl, keeps the key
+- Pan, or Space held, pans on any drag. With the canvas focused, V and H pick the tool, `+` and `-` zoom, Shift+1 fits. A field keeps every key, and Cmd or Ctrl keeps any key but undo and redo
 - A frame file Claude rewrites reloads that frame alone, and pan and zoom stay where they were
 - A frame or page Claude adds appears without a manual refresh
 - The theme toggle flips the chrome between light and dark and is remembered for the next visit

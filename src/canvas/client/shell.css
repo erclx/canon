@@ -48,8 +48,9 @@ code {
 }
 
 /*
- * The hit area lies over the surface side of the edge, clear of a panel's
- * scrollbar on the same edge, with a line drawn at the edge itself.
+ * Centered on the edge, so a 24 pixel circle around it stays inside the
+ * panel's padding on one side and short of the tool strip on the other, with
+ * a line drawn at the edge itself.
  */
 .panel-handle {
   position: absolute;
@@ -62,11 +63,11 @@ code {
 }
 
 .panel-handle-left {
-  left: var(--panel-left, 15rem);
+  left: calc(var(--panel-left, 15rem) - 6px);
 }
 
 .panel-handle-right {
-  right: var(--panel-right, 16rem);
+  right: calc(var(--panel-right, 16rem) - 6px);
 }
 
 .panel-handle::after {
@@ -74,16 +75,9 @@ code {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 5px;
   width: 2px;
   background: transparent;
-}
-
-.panel-handle-left::after {
-  left: -1px;
-}
-
-.panel-handle-right::after {
-  right: -1px;
 }
 
 .panel-handle:hover::after,
