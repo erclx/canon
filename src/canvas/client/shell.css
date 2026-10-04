@@ -237,8 +237,18 @@ code {
   right: 0;
   display: flex;
   align-items: center;
-  /* Sized against the zoom, so the label reads at one screen size at any zoom. */
-  gap: calc(6px * var(--outline-scale, 1));
+  /*
+   * Sized against the zoom, so the label reads at one screen size at any zoom.
+   * A row too short for all three parts wraps the theme switch and then the
+   * size onto lines the clip hides, so the name keeps the row longest.
+   */
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: calc(6px * var(--outline-scale, 1));
+  row-gap: calc(40px * var(--outline-scale, 1));
+  height: calc(25px * var(--outline-scale, 1));
+  overflow: clip;
+  overflow-clip-margin: calc(4px * var(--outline-scale, 1));
   padding-bottom: calc(6px * var(--outline-scale, 1));
   font-size: calc(11px * var(--outline-scale, 1));
   line-height: 1.3;
@@ -246,7 +256,13 @@ code {
   white-space: nowrap;
 }
 
+/* A theme switch focused on a hidden line shows rather than staying hidden. */
+.frame-label:focus-within {
+  overflow: visible;
+}
+
 .frame-name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--color-text);

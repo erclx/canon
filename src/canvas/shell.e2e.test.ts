@@ -568,10 +568,17 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     const zoom = await selectFrameAt(25)
     const sizes = await screenSizes()
 
+    // A short row gives up the size and the theme switch before the name.
+    const second = page.locator('.frame[data-frame="second"] .frame-name')
+    const clipped = await second.evaluate(
+      (name) => name.scrollWidth - name.clientWidth,
+    )
+
     expect(zoom).toBeLessThanOrEqual(30)
     expect(sizes.label).toBeGreaterThan(10)
     expect(sizes.label).toBeLessThan(20)
     expect(sizes.handle).toBeCloseTo(24, 0)
+    expect(clipped).toBeLessThanOrEqual(0)
     await page.screenshot({ path: join(SHOTS, 'frame-selected-25.png') })
   }, 30_000)
 
