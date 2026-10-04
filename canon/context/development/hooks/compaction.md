@@ -13,7 +13,7 @@ Each trigger gets the channel that reaches the session on it. The vendor's `addi
 
 The once-per-session marker stays on `manual` alone, since a precompute pass drains anything counted per session on `auto`. The seed copy is withheld, since a scaffolded target without the plugin would meet a blocked `/compact` naming a skill it does not carry.
 
-The matcher separates a manual compaction from an automatic one. The vendor reference documents no event-specific payload field for `PreCompact`, so the script reads `trigger` and routes on it rather than trusting the matcher alone, since a registration widened to `*` would otherwise send an automatic compaction down the blocking path. An absent value takes the manual path, the conservative reading of a payload naming no trigger. The `hook_event_name` test ahead of it is what keeps the hook silent under `hooks-guard.test.ts`'s inert payload, which names a tool and no event.
+The matcher separates a manual compaction from an automatic one. The vendor reference documents no event-specific payload field for `PreCompact`, so the script reads `trigger` and routes on it rather than trusting the matcher alone, since a registration widened to `*` would otherwise send an automatic compaction down the blocking path. An absent value takes the manual path, the conservative reading of a payload naming no trigger. The `hook_event_name` test ahead of it is what keeps the hook silent under `src/hooks/guard.test.ts`'s inert payload, which names a tool and no event.
 
 ### The once-per-session marker
 

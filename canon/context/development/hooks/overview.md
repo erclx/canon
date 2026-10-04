@@ -37,7 +37,7 @@ Neither copy parses a standard directly. Both read a `markdown audit --json` rec
 
 The seed differs from the toolkit copy in what it can resolve rather than in what it reads. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names `bun add -g @erclx/canon` when the machine carries none. A non-zero exit is the blunter alternative and carries more than a PostToolUse event warrants.
 
-`hooks-guard.test.ts` covers all four branches, and each case stubs a runner or withholds one, so the verdict comes from the fixture rather than from whichever build the machine carries.
+`src/hooks/guard.test.ts` covers all four branches, and each case stubs a runner or withholds one, so the verdict comes from the fixture rather than from whichever build the machine carries.
 
 ### The dev command reminder
 
