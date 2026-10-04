@@ -21,6 +21,7 @@ max_turns = 30
 paths = [
   ".canon/canvas/drafts/pricing.html",
   ".canon/canvas/drafts/layout.json",
+  ".canon/canvas/editing.json",
   ".canon/tmp/canvas-capture/drafts/pricing.png",
 ]
 
@@ -65,3 +66,10 @@ pattern = '"frames"'
 [[content]]
 path = ".canon/canvas/drafts/layout.json"
 pattern = '"pricing"\s*:'
+
+# The frame was marked before the write, which creates the record, and cleared
+# after it, which leaves the record holding no mark. A run that never cleared
+# leaves the pricing key behind until it lapses.
+[[content]]
+path = ".canon/canvas/editing.json"
+pattern = '^\{\s*\}\s*$'
