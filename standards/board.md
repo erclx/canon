@@ -21,7 +21,7 @@ Does not govern:
 
 A board works when a session reading it alone can answer:
 
-- Which task can a worker be handed now, and which files would it collide on?
+- Which task can a worker be handed now, and which files does it share with work already running?
 - What is each blocked task waiting on, and what would clear it?
 - Which task gets planned next, and what is it ranked against?
 
@@ -49,7 +49,7 @@ Group tasks by readiness rather than by status, one row per task, under the colu
 
 Readiness is three groups under fixed headings, `## Run now`, `## Up next`, and `## Needs a plan`, in that order. The names are the contract rather than a suggestion, because a board grouped by readiness under names of its own satisfies every other rule here and still reads as empty to anything counting rows under a heading. Add no fourth group. A task belongs to exactly one, and the tests are read in order.
 
-- `## Run now`: a written plan covers every open outcome, and the task carries no reason it cannot start. A collision against the files something already running touches is one such reason, and the `Touches` column is what states it. A worker is handed a task from this group alone.
+- `## Run now`: a written plan covers every open outcome, and the task carries no reason it cannot start. A collision with running work is one such reason only where no merge settles it, being a contract, a relocation, or a sweep. A shared file alone is none, since the branch merging second rebases. The `Touches` column states the set to read. A worker is handed a task from this group alone.
 - `## Up next`: a written plan exists, and the task carries a stated reason it cannot start. The `Waiting on` column names that reason.
 - `## Needs a plan`: everything else. The task has no plan, or the plan it carries no longer describes the work.
 
@@ -69,7 +69,7 @@ Position alone carries it, and no rank column exists. A number beside each row i
 
 The `Waiting on` column under `## Up next` carries that reason in one of three forms. `## Needs a plan` states no file set at all, because a task with no plan has no bounded one to state. A group with no rows keeps its heading and its header row.
 
-Under `## Up next` a collision names the file held by the task already running, a sibling task names that task, and an external condition names both the condition and what would satisfy it. Naming what would satisfy it is what separates a blocked row from one nobody has examined, so a cell stating a condition with no way out of it fails the test. The header text is the contract the way the group names are, because anything reading the cell resolves the column by header rather than by position.
+Under `## Up next` a collision names the file held by the task already running and which hold it is: a contract, a relocation, or a sweep. A sibling task names that task, and an external condition names both the condition and what would satisfy it. Naming what would satisfy it is what separates a blocked row from one nobody has examined, so a cell stating a condition with no way out of it fails the test. The header text is the contract the way the group names are, because anything reading the cell resolves the column by header rather than by position.
 
 Under `## Needs a plan` the cell carries two halves and each takes one clause: what the task needs before it can be planned, then why it sits at this position. The second clause is comparative, and it names what the row is ranked against in one of two forms: a sibling row, or the class of rows it sits in. The row `leads`, `heads`, `opens`, `closes`, `trails`, `precedes`, `follows`, or `outranks` whichever it names, or `sits under`, `above`, or `below` it. Either form puts something other than this row in the clause, which is what makes the position readable by anyone but its author.
 

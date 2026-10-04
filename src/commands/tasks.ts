@@ -42,6 +42,7 @@ import {
 import {
   type Finding,
   type FolderClaim,
+  type SharedFiles,
   type WideToken,
   type Unplaced,
   type Untested,
@@ -239,7 +240,8 @@ export function register(program: Command): void {
         '  no Needs a plan row has a live plan, and every Up next row has one',
         '  every task file carries a board row or a backlog line, never both',
         '  no task carries more than one row',
-        '  no two Run now rows touch the same file',
+        '  every Run now row names the files it touches',
+        '  a file two Run now rows share is listed, never failed',
         '',
         'Exit codes:',
         '  0  every check passed',
@@ -1383,7 +1385,7 @@ function reportValidation(
     logStep(outcome.findings.length === 0 ? 'Clean' : 'Findings')
     if (outcome.findings.length === 0) {
       logInfo(
-        'every row resolves, every task sits on one surface, and each touches its own files',
+        'every row resolves, every task sits on one surface, and each run now row names its files',
       )
     } else {
       for (const finding of outcome.findings) logWarn(describe(finding))
@@ -1410,6 +1412,16 @@ function reportValidation(
       logInfo('every run now row names files rather than folders')
     } else {
       for (const claim of outcome.claims) logWarn(describeClaim(claim))
+    }
+
+    // A shared file holds nothing under the dispatch gate, so the pairs report
+    // with the warn glyph and move no exit code. They stay listed for merge
+    // order and for the holds a Touches cell cannot state.
+    logStep('Shared files')
+    if (outcome.shared.length === 0) {
+      logInfo('no two run now rows name the same file')
+    } else {
+      for (const pair of outcome.shared) logWarn(describeShared(pair))
     }
 
     // The width limit is a heuristic over one preview pane, so a wide token
@@ -1447,6 +1459,7 @@ function reportValidation(
         findings: outcome.findings,
         untested: outcome.untested,
         claims: outcome.claims,
+        shared: outcome.shared,
         wide: outcome.wide,
         unplaced: outcome.unplaced,
       })}\n`,
@@ -1467,6 +1480,10 @@ function describeUntested(row: Untested): string {
 
 function describeClaim(claim: FolderClaim): string {
   return `${claim.group}: ${claim.subject} ${claim.message}`
+}
+
+function describeShared(pair: SharedFiles): string {
+  return `${pair.group}: ${pair.subject} ${pair.message}`
 }
 
 function describeWide(token: WideToken): string {

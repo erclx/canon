@@ -916,7 +916,7 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['row-duplicated'])
   })
 
-  it('should report two run now rows touching the same file', async () => {
+  it('should leave the findings empty for two run now rows sharing a file', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
     await seedPlan('v1.0-first')
@@ -932,12 +932,10 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && outcome.findings).toMatchObject([
-      { kind: 'touches-collided', message: 'both touch docs/commands.md.' },
-    ])
+    expect(outcome.ok && outcome.findings).toEqual([])
   })
 
-  it('should report a directory colliding with a file inside it', async () => {
+  it('should list a directory sharing a file inside it', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
     await seedPlan('v1.0-first')
@@ -953,7 +951,9 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && kinds(outcome.findings)).toEqual(['touches-collided'])
+    expect(outcome.ok && outcome.shared).toMatchObject([
+      { subject: 'v1.0-first and v2.0-second' },
+    ])
   })
 
   it('should name the row that claimed the containing path', async () => {
@@ -972,12 +972,45 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && outcome.findings).toMatchObject([
+    expect(outcome.ok && outcome.shared).toMatchObject([
       {
-        kind: 'touches-collided',
         message: 'both touch src/tasks, which v2.0-second claims as a folder.',
       },
     ])
+  })
+
+  it('should list two run now rows sharing a file as shared', async () => {
+    await seedTask('v1.0-first')
+    await seedTask('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedPlan('v2.0-second')
+    await seedBoard(
+      boardBody([
+        readyTable([
+          { stem: 'v1.0-first', touches: '`src/a.ts`, `docs/commands.md`' },
+          { stem: 'v2.0-second', touches: '`src/b.ts`, `docs/commands.md`' },
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && outcome.shared).toEqual([
+      {
+        group: 'Run now',
+        subject: 'v1.0-first and v2.0-second',
+        message: 'both touch docs/commands.md.',
+      },
+    ])
+  })
+
+  it('should report an empty shared list on a board with no run now rows', async () => {
+    await seedTask('v3.0-third')
+    await seedBoard(needsPlanBoard('a plan'))
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && outcome.shared).toEqual([])
   })
 
   it('should report a run now row claiming a bare folder', async () => {

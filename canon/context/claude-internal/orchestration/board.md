@@ -37,6 +37,8 @@ The three groups have no slot at the other end either, for work too small to pla
 
 The check it earns its place on is file-set overlap between `## Run now` rows. That group's test has a plan half and a half asking whether the task carries a reason it cannot start, and the paths a row shares with something already running are the candidates the dispatch conflict check tests for one, which is the part a person cannot run by eye.
 
+The validator lists those pairs in a `shared` array that moves no exit code. A collision finding exiting 2 was the retired alternative, which held only while the gate serialized on a shared file. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, that finding failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
+
 ### Blockers
 
 The blocker check reaches the opposite groups on the same argument. A blocker cell is a measurement taken the day a row was parked, and two of the five kinds it carries put a fact on disk: a cited task is settled by being archived, by being declined, or by reaching the trunk, and a cited file is settled by nothing under `## Run now` still holding it. Both are inputs the validator already reads for the other four checks.
