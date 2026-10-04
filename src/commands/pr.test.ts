@@ -956,6 +956,14 @@ describe('canon pr preview against the pull request files', () => {
     expect(record).toMatchObject({ reason: 'gh-failed' })
   })
 
+  it('should go on to the dispatch when the only served change removes a path', async () => {
+    writeFileSync(join(tempDir, 'files.tsv'), 'removed\tweb/old.html\n')
+
+    const record = await runPreviewRecord()
+
+    expect(record).toMatchObject({ reason: 'gh-failed' })
+  })
+
   it('should refuse as unreadable-changes when the changed files cannot be read', async () => {
     writeFileSync(join(tempDir, 'files-fail'), '')
 

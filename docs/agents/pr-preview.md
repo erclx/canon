@@ -46,8 +46,8 @@ already decides when production deploys. A workflow with neither list, with no
 push trigger, or that does not parse as YAML serves every change, so a project
 whose every change ships keeps minting for every branch.
 
-The changed paths come from the files endpoint, which skips a removed path, so
-a branch whose only site change deletes a file reads as `unserved`.
+A removed path counts, the same as GitHub's own push filter counts it, so a
+branch whose only site change deletes a file still gets a preview.
 
 ## Why an unfenced deploy is refused
 

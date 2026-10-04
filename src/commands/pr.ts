@@ -1610,18 +1610,24 @@ async function runReviewState(
   return 0
 }
 
+interface PullFiles {
+  /** Each path that still exists at the head, tagged with whether the pull request added it. */
+  readonly present: ReadonlyMap<string, boolean>
+  /** Each path the pull request removed, which a deploy's push filter still counts. */
+  readonly removed: readonly string[]
+}
+
 /**
- * The paths a pull request changed that still exist at its head, each tagged
- * with whether the pull request added it, read through the paginated files
- * endpoint so the set is the same from any checkout and never capped at the
- * first view. `renamed` and `copied` count as added, since the new path has no
+ * The paths a pull request changed, read through the paginated files endpoint
+ * so the set is the same from any checkout and never capped at the first
+ * view. `renamed` and `copied` count as added, since the new path has no
  * counterpart at the merge base. Returns undefined when the read fails, which
  * refuses rather than rendering a short set.
  */
 async function listPullFiles(
   cwd: string,
   number: number,
-): Promise<ReadonlyMap<string, boolean> | undefined> {
+): Promise<PullFiles | undefined> {
   const stdout = await gh(cwd, [
     'api',
     '--paginate',
@@ -1630,15 +1636,19 @@ async function listPullFiles(
     '.[] | [.status, .filename] | @tsv',
   ])
   if (stdout === null) return undefined
-  const files = new Map<string, boolean>()
+  const present = new Map<string, boolean>()
+  const removed: string[] = []
   for (const line of stdout.split('\n').filter(Boolean)) {
     const [status, path] = line.split('\t')
-    if (status === undefined || path === undefined || status === 'removed') {
-      continue
-    }
-    files.set(path, status !== 'modified' && status !== 'changed')
+    if (status === undefined || path === undefined) continue
+    if (status === 'removed') removed.push(path)
+    else present.set(path, status !== 'modified' && status !== 'changed')
   }
-  return files
+  return { present, removed }
+}
+
+function everyChangedPath(files: PullFiles): string[] {
+  return [...files.present.keys(), ...files.removed]
 }
 
 /**
@@ -1742,8 +1752,8 @@ async function runEvidence(
   }
 
   const grouped = await groupEvidence(
-    [...pullFiles.keys()],
-    async (path) => pullFiles.get(path) === false,
+    [...pullFiles.present.keys()],
+    async (path) => pullFiles.present.get(path) === false,
   )
 
   let existingCases = 0
@@ -1784,7 +1794,7 @@ async function runEvidence(
   const deploy = findDeployWorkflow(await readWorkflows(root))
   const deployServesChange =
     deploy.kind === 'found' &&
-    servesChange(deploy.filter, [...pullFiles.keys()])
+    servesChange(deploy.filter, everyChangedPath(pullFiles))
   const isUnserved = deploy.kind === 'found' && !deployServesChange
 
   if (isCheck) {
@@ -2071,7 +2081,7 @@ async function runPreview(
       root,
     )
   }
-  if (!servesChange(pick.filter, [...changed.keys()])) {
+  if (!servesChange(pick.filter, everyChangedPath(changed))) {
     return refuseWith('unserved', PREVIEW_REFUSALS.unserved, emitJson, root)
   }
 
