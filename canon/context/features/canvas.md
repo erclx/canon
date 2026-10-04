@@ -53,6 +53,12 @@ Writing `border-radius` or `padding` drops that shorthand's longhands from the s
 
 Fill writes `100%` on either axis and Fit writes `fit-content`, one property per edit as the writer takes it. Fill is wrong for a row child sharing space, which needs `flex: 1` read off the parent's axis, and that waits until the operator meets it. The alignment grid posts `justify-content` and then `align-items` as two edits, the second carrying the hash the first answered with, and maps its cells through the container's `flex-direction` so a column swaps the axes.
 
+### Typography edits
+
+Family and size list their token group first, written as `var(--name)`, and a typed literal last, marked raw where the group holds any token. The groups are the Theme tab's `font-family` and `font-size`, so a sheet not following that naming lists nothing and the field takes a literal with no menu. A family shows the first name of its stack, unquoted, and posts nothing unless changed. A pasted `font-family: X;` line keeps its value alone, since the writer refuses the semicolon.
+
+A browser computes a unitless line height to pixels, so the field shows a pixel value as its ratio to the font size and writes a typed number unitless. Its Auto writes `normal`, which is the keyword a line height takes. Letter spacing writes a bare number as pixels and runs below zero, so its scrub is unclamped, and both fields scrub in tenths. Alignment reads `start` and `end` through the element's computed `direction`, so the pressed side is the one the text paints on.
+
 ### Capture
 
 - A frame capture goes through a server started for the call, so the injected tokens are in the image, and renders at the frame's layout width so a media query resolves there. It never captures the file on disk.
@@ -90,6 +96,7 @@ The component gallery existed only for the board's components panel and retired 
 - Happy-dom 20 has no `showPopover()`, so the inspector's popovers call it only where the browser has it, and the shell tests reach them as plain fixed elements. Preact runs a child's layout effect before its parent's, so a control inside a popover the parent shows in its own effect shows the popover itself before it takes focus.
 - A browser computes `justify-content` and `align-items` as `normal` on a flex container left at its defaults, so the alignment grid reads `normal` and `stretch` as the start cell, and a click on that cell still writes it so the operator can pin a stretched row. Happy-dom returns only what the inline style set, so only the browser walk catches a default container showing no checked cell.
 - The W and H mode menu is a transparent native `select` over a chevron rather than a popover, so its list opens above the panel's scroll clipping with no placement code and answers the keyboard as the platform does. The focus ring draws on the lane holding it, since the select itself is invisible.
+- The writer reads a style attribute through `HTMLRewriter`, whose `getAttribute` returns the value with its entities still encoded and whose `setAttribute` escapes only `"`, as `&quot;`. A quoted font family comes back carrying `&quot;`, so the declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
 - `canon/wireframes/canvas.md` sits near the 300 rendered line ceiling, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.

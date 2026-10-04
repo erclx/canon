@@ -19,7 +19,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
 - Element inspector: below the frame inspector when an element is selected, its `tag.class` name over six titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
-- Sections: Layout holds x and y read-only, then width and height as a number, Fill, or Fit, then padding. Flex holds alignment, direction, wrap, and gap, else an add button. Appearance holds opacity and radius. Typography holds size, weight, and font read-only. Fill holds color and background as swatch, hex, opacity, tokens, and eyedropper. Text holds text, read-only over children
+- Sections: Layout holds x and y read-only, then width and height as a number, Fill, or Fit, then padding. Flex holds alignment, direction, wrap, and gap, else an add button. Appearance holds opacity and radius. Typography holds family, size and weight, line height and letter spacing, then four alignment buttons. Family and size offer their tokens first. Fill holds color and background as swatch, hex, opacity, tokens, and eyedropper. Text holds text, read-only over children
 - Field: a bordered box with a short glyph inside its left edge, such as `W`, and the value right of it. A section header keeps an empty lane at its right for later buttons
 
 ### Below 900 wide
@@ -76,8 +76,8 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
 - Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Appearance`, `Typography`, `Fill`, `Text`
-- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Op`, `R`, `TL` to `BL`, `Size`, `Wt`, `Font`, `T`, each short for its accessible name
-- Empty field placeholders: `0` for gap, `None` for background
+- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Op`, `R`, `TL` to `BL`, `Aa`, `Size`, `Wt`, `LH`, `LS`, `T`, each short for its accessible name
+- Empty field placeholders: `0` for gap and letter spacing, `None` for background
 - Left panel tabs: `Pages`, `Theme`
 - Color field: the hex in capitals, or a token's name, then the opacity and `%`, named `<field>`, `<field> opacity`, `<field> picker` opening `<field> color`, `<field> tokens` opening `<field> token list`, and `<field> eyedropper`
 - Edit landed: `Saved`
