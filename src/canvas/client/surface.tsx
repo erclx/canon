@@ -103,6 +103,22 @@ function isOwnedByTarget(event: KeyboardEvent, action: SurfaceAction): boolean {
   )
 }
 
+/**
+ * A press read as a second click selects a word or a whole frame even while
+ * panning, so no selection may start in the shell or a frame then.
+ */
+function blockSelectionWhilePanning(event: Event): void {
+  if (shownTool.value === 'pan') event.preventDefault()
+}
+
+/** Drops any selection in the shell and in every loaded frame document. */
+function clearSelections(): void {
+  document.getSelection()?.removeAllRanges()
+  for (const doc of frameDocuments.value.values()) {
+    doc.getSelection()?.removeAllRanges()
+  }
+}
+
 /** A computed length in pixels, or the fallback for one that is not. */
 function pixels(value: string, fallback: number): number {
   const parsed = Number.parseFloat(value)
@@ -307,6 +323,7 @@ function FrameView({
      */
     loaded.addEventListener('keydown', onKey)
     loaded.addEventListener('keyup', onKey)
+    loaded.addEventListener('selectstart', blockSelectionWhilePanning)
     loaded.defaultView?.addEventListener('blur', () => {
       spacePan.value = undefined
     })
@@ -610,7 +627,11 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
       spacePan.value = undefined
     }
     window.addEventListener('blur', endPan)
-    return () => window.removeEventListener('blur', endPan)
+    document.addEventListener('selectstart', blockSelectionWhilePanning)
+    return () => {
+      window.removeEventListener('blur', endPan)
+      document.removeEventListener('selectstart', blockSelectionWhilePanning)
+    }
   }, [])
 
   const runAction = (action: SurfaceAction) => {
@@ -661,7 +682,7 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     const target = event.target as HTMLElement | null
     if (shownTool.value !== 'pan' && target?.closest('.frame')) return
     /* A selection left over would paint over every frame the pan crosses. */
-    if (shownTool.value === 'pan') document.getSelection()?.removeAllRanges()
+    if (shownTool.value === 'pan') clearSelections()
     drag.current = { x: event.clientX, y: event.clientY }
     viewportRef.current?.setPointerCapture?.(event.pointerId)
   }
@@ -678,7 +699,18 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     }
   }
 
+  /*
+   * A press selects text by default, a word or a whole frame when it reads as
+   * a second click, and neither `selectstart` nor a clear at pointer down
+   * reaches that. Leaving focus where it was also keeps the frame hearing the
+   * Space release.
+   */
+  const handleMouseDown = (event: MouseEvent) => {
+    if (shownTool.value === 'pan') event.preventDefault()
+  }
+
   const handlePointerUp = () => {
+    if (drag.current && shownTool.value === 'pan') clearSelections()
     drag.current = undefined
   }
 
@@ -697,6 +729,7 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
         class="viewport"
         onWheel={handleWheel}
         onPointerDown={handlePointerDown}
+        onMouseDown={handleMouseDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}

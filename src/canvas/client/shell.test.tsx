@@ -3244,6 +3244,74 @@ describe('view tools', () => {
     expect(document.getSelection()?.isCollapsed ?? true).toBe(true)
   })
 
+  it('should clear a text selection inside a frame when a pan drag starts', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    const range = doc.createRange()
+    range.selectNodeContents(doc.querySelector('h1') as Element)
+    doc.getSelection()?.addRange(range)
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', viewportOf(), 100, 100)
+
+    expect(doc.getSelection()?.isCollapsed ?? true).toBe(true)
+  })
+
+  it('should keep a press on the viewport from starting a selection while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const press = new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      detail: 2,
+    })
+    act(() => {
+      viewportOf().dispatchEvent(press)
+    })
+
+    expect(press.defaultPrevented).toBe(true)
+  })
+
+  it('should leave a press on the viewport its default with the move tool', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    const press = new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+    })
+    act(() => {
+      viewportOf().dispatchEvent(press)
+    })
+
+    expect(press.defaultPrevented).toBe(false)
+  })
+
+  it('should keep a selection from starting in the shell while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const start = new Event('selectstart', { bubbles: true, cancelable: true })
+    act(() => {
+      labelFor('hero').dispatchEvent(start)
+    })
+
+    expect(start.defaultPrevented).toBe(true)
+  })
+
+  it('should keep a selection from starting inside a frame while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const start = new Event('selectstart', { bubbles: true, cancelable: true })
+    act(() => {
+      doc.querySelector('h1')?.dispatchEvent(start)
+    })
+
+    expect(start.defaultPrevented).toBe(true)
+  })
+
   it('should not select a focused frame when Space comes up after a drag', () => {
     renderApp([page('drafts', [frame('hero')])])
 

@@ -922,6 +922,35 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     ).toBe(true)
   }, 30_000)
 
+  it('should pan from a picked element text with Space held and leave no selection in either document', async () => {
+    await selectFrameAt(100)
+    const frameDoc = page.frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+    await frameDoc.locator('h1').click()
+    const heading = await frameDoc.locator('h1').boundingBox()
+    if (!heading) throw new Error('no heading on screen')
+    const before = await planeTransform()
+
+    // The press lands on the heading's text, read as a second click soon after the pick.
+    await page.keyboard.down('Space')
+    await page.mouse.down({ clickCount: 2 })
+    await page.mouse.move(heading.x + 120, heading.y + 132, { steps: 6 })
+    await page.mouse.up({ clickCount: 2 })
+    await page.keyboard.up('Space')
+
+    await expect.poll(planeTransform).not.toBe(before)
+    const selections = await page.evaluate((name) => {
+      const iframe = document.querySelector<HTMLIFrameElement>(
+        `.frame[data-frame="${name}"] iframe`,
+      )
+      return {
+        shell: document.getSelection()?.type,
+        frame: iframe?.contentDocument?.getSelection()?.type,
+      }
+    }, FRAME)
+    expect(selections.shell).not.toBe('Range')
+    expect(selections.frame).not.toBe('Range')
+  }, 30_000)
+
   it('should fit every frame on Shift+1', async () => {
     await selectFrameAt(200)
     await page.locator('main.surface').focus()
