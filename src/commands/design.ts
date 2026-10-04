@@ -8,20 +8,23 @@ import {
 } from '@/design/adapter'
 import { buildDesignCss } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
+import { addProjectFace, listProjectFaces } from '@/design/project-fonts'
 import { renderDesignDoc } from '@/design/render'
 import { DESIGN_BASE_CSS, DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel, SCRATCH } from '@/record-root'
 import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
-import { resolveTarget } from '@/targets/validate'
+import { isDirectory, resolveTarget } from '@/targets/validate'
 import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
 
 export function register(program: Command): void {
   const design = program
     .command('design')
     .helpOption('-h, --help', 'Show this help message')
-    .description('Design system commands (regen, css, render, install, sync)')
+    .description(
+      'Design system commands (regen, css, render, install, sync, fonts)',
+    )
 
   design
     .command('regen')
@@ -172,6 +175,143 @@ export function register(program: Command): void {
         { protectedRoot: PROJECT_ROOT },
       )
     })
+
+  registerFonts(design)
+}
+
+const FONTS_DIR = join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR, 'fonts')
+
+interface FontsRefused {
+  readonly ok: false
+  readonly reason: string
+  readonly detail: string
+}
+
+function writeJson(record: unknown): void {
+  process.stdout.write(`${JSON.stringify(record)}\n`)
+}
+
+function refuseFonts(
+  title: string,
+  refusal: FontsRefused,
+  emitJson: boolean,
+): number {
+  if (emitJson) writeJson(refusal)
+  intro(title)
+  logError(refusal.detail)
+  outro()
+  return 1
+}
+
+/** A target that is a directory, or the refusal naming the path given. */
+function fontsTarget(target: string): string | FontsRefused {
+  const resolved = resolve(target)
+  if (!isDirectory(resolved)) {
+    return {
+      ok: false,
+      reason: 'no-target',
+      detail: `Target directory not found: ${target}`,
+    }
+  }
+  return resolved
+}
+
+function registerFonts(design: Command): void {
+  const fonts = design
+    .command('fonts')
+    .helpOption('-h, --help', 'Show this help message')
+    .description(`Read and add the project's own faces under ${FONTS_DIR}/`)
+    .addHelpText(
+      'after',
+      [
+        '',
+        `Faces are declared as @font-face rules in ${join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR)}/fonts.css,`,
+        'which the canvas embeds into every frame. Sync never writes the folder.',
+        '',
+      ].join('\n'),
+    )
+
+  fonts
+    .command('list')
+    .helpOption('-h, --help', 'Show this help message')
+    .description('List each face the project override sheets declare')
+    .argument('[target]', 'Target directory', '.')
+    .option('--json', 'Emit the record on stdout')
+    .action((target: string, opts: { json?: boolean }) => {
+      const title = 'canon design fonts list'
+      const resolved = fontsTarget(target)
+      if (typeof resolved !== 'string') {
+        process.exitCode = refuseFonts(title, resolved, Boolean(opts.json))
+        return
+      }
+      const faces = listProjectFaces(resolved)
+      if (opts.json) writeJson({ ok: true, faces })
+      intro(title)
+      if (faces.length === 0) logInfo(`No faces declared under ${FONTS_DIR}/`)
+      for (const face of faces) {
+        const line = `${face.family} ${face.weight} ${face.style}: ${face.file} in ${face.sheet}`
+        if (face.present) logInfo(line)
+        else logWarn(`${line} (${face.problem ?? 'missing'})`)
+      }
+      outro()
+    })
+
+  fonts
+    .command('add')
+    .helpOption('-h, --help', 'Show this help message')
+    .description(
+      `Copy a woff2, woff, ttf, or otf face into ${FONTS_DIR}/ and declare it`,
+    )
+    .argument('<file>', 'Font file to copy')
+    .argument('[target]', 'Target directory', '.')
+    .requiredOption('--family <name>', 'Family name the face declares')
+    .option('--weight <n>', "Weight, or a range such as '100 900'", '400')
+    .option('--style <style>', 'normal or italic', 'normal')
+    .option('--json', 'Emit the record on stdout')
+    .action(
+      (
+        file: string,
+        target: string,
+        opts: { family: string; weight: string; style: string; json?: boolean },
+      ) => {
+        const title = 'canon design fonts add'
+        const emitJson = Boolean(opts.json)
+        const resolved = fontsTarget(target)
+        if (typeof resolved !== 'string') {
+          process.exitCode = refuseFonts(title, resolved, emitJson)
+          return
+        }
+        if (resolved === PROJECT_ROOT) {
+          process.exitCode = refuseFonts(
+            title,
+            {
+              ok: false,
+              reason: 'toolkit-root',
+              detail:
+                'Cannot run against toolkit root. Files here are the source of truth.',
+            },
+            emitJson,
+          )
+          return
+        }
+        const outcome = addProjectFace(resolved, resolve(file), {
+          family: opts.family,
+          weight: opts.weight,
+          style: opts.style,
+        })
+        if (!outcome.ok) {
+          process.exitCode = refuseFonts(title, outcome, emitJson)
+          return
+        }
+        if (emitJson) writeJson(outcome)
+        intro(title)
+        logAdd(join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR, outcome.file))
+        logInfo(
+          `Declared ${outcome.family} ${outcome.weight} ${outcome.style} in ${outcome.sheet}`,
+        )
+        outro()
+      },
+    )
 }
 
 /**

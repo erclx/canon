@@ -1,7 +1,18 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR } from '@/design/adapter'
-import { buildDesignCss } from '@/design/css'
+import { buildDesignCss, fontFaceBlock } from '@/design/css'
+import {
+  FONT_FACES,
+  HAND_DRAWN_FONT_FACES,
+  type FontFace,
+} from '@/design/fonts'
+import {
+  type DroppedFace,
+  inlineProjectFaces,
+  namedFamilies,
+  projectSheets,
+} from '@/design/project-fonts'
 import { isOwnCheckout } from '@/project-root'
 
 /**
@@ -17,6 +28,8 @@ export type FrameTokens =
       readonly css: string
       /** Relative to the root, in the order the stylesheet concatenates them. */
       readonly files: readonly string[]
+      /** Project faces left out of the sheet, present only when one was. */
+      readonly dropped?: readonly DroppedFace[]
     }
   | { readonly source: 'none'; readonly css: ''; readonly notice: string }
 
@@ -113,19 +126,44 @@ export function tokenGroups(css: string): TokenGroup[] {
 
 /** The installed files in cascade order: the base first, then each override. */
 function installedFiles(root: string): string[] {
-  const files: string[] = []
   const base = join(DESIGN_INSTALL_DIR, BASE_FILE)
-  if (existsSync(join(root, base))) files.push(base)
+  return [
+    ...(existsSync(join(root, base)) ? [base] : []),
+    ...projectSheets(root),
+  ]
+}
 
+/**
+ * The vendored faces the installed sheets name and no project rule already
+ * declares, so a target renders the base's families on a machine that never
+ * installed them, and a project face of the same family wins outright.
+ */
+function toolkitFaces(css: string, declared: ReadonlySet<string>): FontFace[] {
+  const named = namedFamilies(css)
+  return [...FONT_FACES, ...HAND_DRAWN_FONT_FACES].filter(
+    (face) => named.has(face.family) && !declared.has(face.family),
+  )
+}
+
+/**
+ * A project sheet with its local `url()`s inlined, since a frame is served
+ * from the content folder and cannot reach a path under `.claude/design/`.
+ */
+function installedSheets(root: string, files: readonly string[]) {
   const projectDir = join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR)
-  if (existsSync(join(root, projectDir))) {
-    const overrides = readdirSync(join(root, projectDir))
-      .filter((name) => name.endsWith('.css'))
-      .sort((a, b) => a.localeCompare(b))
-      .map((name) => join(projectDir, name))
-    files.push(...overrides)
-  }
-  return files
+  const dropped: DroppedFace[] = []
+  const declared = new Set<string>()
+  const css = files
+    .map((file) => {
+      const raw = readFileSync(join(root, file), 'utf8')
+      if (!file.startsWith(projectDir)) return `/* ${file} */\n${raw}`
+      const inlined = inlineProjectFaces(root, file, raw)
+      dropped.push(...inlined.dropped)
+      for (const family of inlined.declared) declared.add(family)
+      return `/* ${file} */\n${inlined.css}`
+    })
+    .join('\n')
+  return { css, dropped, declared }
 }
 
 /**
@@ -141,7 +179,7 @@ export function resolveFrameTokens(
     /*
      * Faces embedded, since the type tokens name `Geist Variable` and a
      * machine with only static Geist installed renders every frame in the
-     * fallback. An installed base owns its fonts, so that branch gets none.
+     * fallback.
      */
     return {
       source: 'toolkit',
@@ -151,10 +189,14 @@ export function resolveFrameTokens(
 
   const files = installedFiles(root)
   if (files.length > 0) {
-    const css = files
-      .map((file) => `/* ${file} */\n${readFileSync(join(root, file), 'utf8')}`)
-      .join('\n')
-    return { source: 'installed', css, files }
+    const { css, dropped, declared } = installedSheets(root, files)
+    const faces = toolkitFaces(css, declared)
+    return {
+      source: 'installed',
+      css: faces.length > 0 ? `${fontFaceBlock(faces)}\n${css}` : css,
+      files,
+      ...(dropped.length > 0 && { dropped }),
+    }
   }
 
   return { source: 'none', css: '', notice: NONE_NOTICE }

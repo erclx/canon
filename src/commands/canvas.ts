@@ -870,6 +870,11 @@ async function runServe(
   if (tokens.source === 'none') logWarn(tokens.notice)
   else if (tokens.source === 'installed') {
     for (const file of tokens.files) logInfo(file)
+    for (const face of tokens.dropped ?? []) {
+      logWarn(
+        `${face.sheet}: dropped the face at ${face.file} (${face.reason})`,
+      )
+    }
   } else logInfo('this toolkit’s own token module')
   logStep('Stop')
   logInfo('Ctrl-C')
