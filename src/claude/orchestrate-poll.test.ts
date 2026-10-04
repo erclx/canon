@@ -668,6 +668,20 @@ describe('poll', () => {
       expect(pushed).toContain('STALE     #7')
     })
 
+    it('should report a conflicted branch again when a push leaves it conflicting', () => {
+      const first = commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') })
+      openPull('7', first)
+      expect(poll().stdout).toContain('OPENED    #7')
+      pushMain(commit(base, 'main2', { 'a.txt': fileWith(0, 'theirs') }))
+      expect(poll().stdout).toContain('CONFLICT  #7')
+
+      openPull('7', commit(first, 'pr7', { 'b.txt': fileWith(2, 'fix') }))
+      const pushed = poll().stdout
+
+      expect(pushed).toContain('MOVED     #7')
+      expect(pushed).toContain('CONFLICT  #7')
+    })
+
     it('should not report a branch rebased onto main as stale', () => {
       openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
       const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })

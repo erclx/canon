@@ -359,8 +359,12 @@ export const classify = (
   let state = row.heading
 
   // A conflict arrives from the base moving, not from the branch, so it is
-  // reported on the transition rather than only when the head changes.
-  if (row.merges === 'conflict' && old.merges !== 'conflict') {
+  // reported on the transition rather than only when the head changes. A push
+  // that leaves it conflicting reports it again, for the same reason STALE does.
+  if (
+    row.merges === 'conflict' &&
+    (old.merges !== 'conflict' || row.head !== old.head)
+  ) {
     lines.push(`CONFLICT  #${row.number} no longer merges into ${context.base}`)
   }
 
