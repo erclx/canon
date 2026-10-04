@@ -1,5 +1,5 @@
 /** @jsxImportSource preact */
-import type { JSX } from 'preact'
+import type { ComponentChildren, JSX } from 'preact'
 import { useRef } from 'preact/hooks'
 import { scrubStep } from '@/canvas/client/inspector/values'
 
@@ -35,6 +35,8 @@ interface FieldProps {
   readonly onCommit: (value: string) => void
   /** Makes the glyph a drag handle. Typing stays the keyboard path. */
   readonly scrub?: Scrub
+  /** A control inside the field's box after the value, such as a mode menu. */
+  readonly trailing?: ComponentChildren
 }
 
 const NUMBER = /^-?\d*\.?\d+$/
@@ -69,6 +71,7 @@ export function Field({
   placeholder,
   onCommit,
   scrub,
+  trailing,
 }: FieldProps): JSX.Element {
   const input = useRef<HTMLInputElement>(null)
   const handle = useRef<HTMLSpanElement>(null)
@@ -169,6 +172,7 @@ export function Field({
           if (event.key === 'Escape') event.currentTarget.value = initial
         }}
       />
+      {trailing}
     </div>
   )
 }

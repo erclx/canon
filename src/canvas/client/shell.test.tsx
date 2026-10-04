@@ -1111,6 +1111,28 @@ describe('Inspector edit', () => {
     ])
   })
 
+  it('should write width 100% when Fill is picked from the size menu', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width mode'), 'Fill')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '100%' }),
+    ])
+  })
+
+  it('should show an inline fit-content height as Fit', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="height: fit-content">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('height').value).toBe('Fit')
+  })
+
   /** Opens the color picker of the field of that name and returns it. */
   function openPicker(name: string): HTMLElement {
     const swatch = mount.querySelector<HTMLButtonElement>(

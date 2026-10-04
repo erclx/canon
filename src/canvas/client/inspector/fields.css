@@ -129,6 +129,58 @@
 }
 
 /*
+ * A size's mode menu trails its number. The select is transparent over the
+ * chevron, so the platform's own list opens and the field keeps one height.
+ */
+.size-mode {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 22px;
+  border-radius: var(--radius-action);
+  color: var(--color-muted);
+}
+
+.size-mode:hover,
+.size-mode:focus-within {
+  color: var(--color-text);
+  background: var(--color-chrome);
+}
+
+.size-mode-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.size-mode-select:disabled {
+  cursor: not-allowed;
+}
+
+.size-mode:has(.size-mode-select:disabled) {
+  opacity: 0.5;
+}
+
+/* The select is invisible, so the project ring draws on the lane holding it. */
+.size-mode:has(.size-mode-select:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0;
+}
+
+.size-mode-chevron {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+/*
  * A color is one field: a swatch leading in the glyph's lane, the hex, and the
  * opacity right-aligned, with the tokens and the eyedropper trailing the row.
  */

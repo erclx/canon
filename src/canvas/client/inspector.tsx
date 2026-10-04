@@ -8,6 +8,7 @@ import {
   type Scrub,
 } from '@/canvas/client/inspector/field'
 import { Section } from '@/canvas/client/inspector/section'
+import { SizeField } from '@/canvas/client/inspector/size-field'
 import {
   clampScrub,
   displayValue,
@@ -237,7 +238,22 @@ function ElementFields({
           glyph="Y"
           value={String(Math.round(rect.top))}
         />
-        {SIZE_FIELDS.map(styleField)}
+        {SIZE_FIELDS.map((field) => (
+          <SizeField
+            key={field.property}
+            label={field.label}
+            glyph={field.glyph}
+            initial={displayValue(
+              field.property,
+              currentValue(node, field.property),
+            )}
+            isBusy={isBusy}
+            onCommit={(typed) =>
+              commit(field.property)(toCssValue(field.property, typed))
+            }
+            scrub={'style' in node ? scrubOf(field.property) : undefined}
+          />
+        ))}
       </Section>
       <Section title="Flex">{FLEX_FIELDS.map(styleField)}</Section>
       <Section title="Typography">
