@@ -126,4 +126,4 @@ gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F
 
 The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `event=COMMENT` submits the review as a comment, the same state the old `--comment` flag produced.
 
-A pass carrying nothing at all, only minors, a withdrawal, or only answered reviewer requests takes a close-out body rather than the shapes above, per `${CLAUDE_SKILL_DIR}/references/body-variants.md`.
+A pass carrying nothing at all, a withdrawal, or only answered reviewer requests takes a close-out body, and a pass carrying only minors keeps the full shape, both per `${CLAUDE_SKILL_DIR}/references/body-variants.md`.
