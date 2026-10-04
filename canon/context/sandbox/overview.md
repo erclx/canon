@@ -12,13 +12,17 @@ Owns the scenarios that provision isolated project states for testing scripts, c
 ## Layout
 
 - `sandbox/` owns the scenario scripts, one folder per category
-- `sandbox/<category>/` owns one file per command, each holding one or more named scenarios
+- `sandbox/<category>/` owns one file per command, `.ts` or `.sh`, each holding one or more named scenarios
 - `sandbox/fixtures/` owns file content staged into the sandbox and each arm's `expect.toml`
-- `src/sandbox/` owns the provisioning order, the hook contract, the expectation checker, the coverage report, and the skill census
-- `scripts/sandbox-hook.sh` owns the bash entry a scenario's hooks run through, since the scenarios and the library they call stay bash
+- `src/sandbox/` owns the provisioning order, the scenario contract and its loader in `scenario.ts`, the hook contract, the expectation checker, the coverage report, and the skill census
+- `scripts/sandbox-hook.sh` owns the bash entry a `.sh` scenario's hooks run through, kept until the last bash scenario is ported
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project state, outside the repository and unique to the run that provisioned it
 
-Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `src/commands/sandbox.ts` and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in both, so a helper the harness needs on disk goes to `scripts/lib/` or `src/sandbox/`.
+Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every listing filters it out through `listCategories` in `src/sandbox/scenario.ts`. Any other subdirectory added there reads as a category, so a helper the harness needs on disk goes to `scripts/lib/` or `src/sandbox/`.
+
+### Two scenario forms
+
+A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, and docs categories are ported, and the rest stay bash until their slice. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
 
 ## Decisions
 
@@ -56,6 +60,7 @@ The retired eval runner extracted its fixture to a `mktemp -d` carrying no seed,
 - Skip `create` scenarios. They require user input with no default and loop on empty input.
 - A scenario that adds narrative to a seeded file appends rather than overwrites. Overwriting clobbers the seed and breaks any test depending on seed-driven behavior. In a fixture tree that is the `create/` versus `append/` split, and written inline it is `>` versus `>>`.
 - Passing a scenario name that matches no option aborts with an `Unknown scenario` error.
+- `dev:review` provisions red on every run. Its arm commits the fixture itself while auto-commit stays on, so the auto-commit finds nothing and exits 1. Equivalence reads it as red-on-base, so a port inherits the red rather than causing it.
 - On Windows, back-to-back headless runs can briefly fail to wipe the sandbox tree with a busy-lock. Re-run, or `canon sandbox clean` first.
 - Skills whose body forbids probing project surfaces, such as `canon-feedback`, have no fixture to anchor and stay out of scope. The command such a skill drives can still earn an arm under `infra/`, where `infra:feedback` asserts `canon feedback` refusing a report missing a required field. The refusal is the half a sandbox sees, since a report that passes validation writes into the toolkit's own `.canon/feedback/` rather than into the tree the snapshot covers.
 - A driven session calls the `canon` on PATH, which is the published release rather than the checkout under test. A catalog the branch extends, such as a new governance rule, is absent from that session's `canon gov list`, so a `target-setup` arm cannot `--add` it until a release ships it. `canon/context/sandbox/headless.md` carries the repair.

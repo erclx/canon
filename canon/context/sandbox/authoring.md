@@ -5,9 +5,21 @@ description: Scenario file shape, the three hooks, the provisioning order, and t
 
 # Authoring
 
-Each scenario is a `.sh` file with two optional hook functions, `use_config` and `use_anchor`, and a required `stage_setup` function. `src/sandbox/provision.ts` handles provisioning, asset injection, skill injection, git setup, and baseline tagging, and the hooks configure that pipeline before it runs. `canon/context/sandbox/fixtures.md` covers the file content a scenario stages.
+A scenario is a `.ts` file whose default export declares its config, its anchor flag, and its arms, or a `.sh` file with two optional hook functions, `use_config` and `use_anchor`, and a required `stage_setup` function. Write a new scenario in TypeScript. `src/sandbox/provision.ts` handles provisioning, asset injection, skill injection, git setup, and baseline tagging, and the declaration configures that pipeline before it runs. `canon/context/sandbox/fixtures.md` covers the file content a scenario stages.
+
+## Writing a TypeScript scenario
+
+`sandbox/<category>/<command>.ts` default-exports `scenario()` from `src/sandbox/scenario.ts`, and `sandbox/git/pr.ts` shows the shape. `config` holds what `use_config` exported, `anchor: true` stands in for `use_anchor`, and `arms` maps each arm name to a function staging the tree through its context. Arm order is routing order, so a headless caller naming none gets the first. A lone arm named `default` routes nothing.
+
+The arms run in the harness process, so the context is the only way into the tree. Every command it runs takes `ctx.dir` as its `cwd`, and a scenario never calls `process.chdir` or spawns a child itself. A failing command stops the arm with its status as `set -e` did, `allowFailure` is the `|| true`, and `ctx.exec` hands the run to a verb. Narration stays as `ctx.log` calls, so `canon sandbox equivalence` compares a port's log byte for byte.
 
 ## Decisions
+
+### Two scenario forms until the retire slice
+
+Provisioning refuses a stem present as both `.sh` and `.ts`, and equivalence reports it, so a port deletes its `.sh` in the commit landing the `.ts`. A port passes when `canon sandbox equivalence <category> --stub-remote` reads every arm identical against the base. Until the retire slice, `stage_fixtures` and the anchor helpers carry a twin in `scripts/lib/` and in `src/sandbox/scenario.ts`, so a fix lands in both.
+
+Keeping the context in a `sandbox/lib/` beside the scenarios was the rejected alternative. Five `src/` readers load a scenario, and `src/` importing from a folder the package does not ship breaks the installed CLI.
 
 ### The hook contract
 

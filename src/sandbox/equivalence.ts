@@ -17,10 +17,14 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { collectCoverage, DEFAULT_ARM } from '@/sandbox/coverage'
+import {
+  armNames,
+  listCategories,
+  listScenarioFiles,
+  loadScenario,
+  type ScenarioKind,
+} from '@/sandbox/scenario'
 import { createStubRemote, readStubManifest } from '@/sandbox/stub-remote'
-
-/** Holds fixture content rather than scenarios. Twin of the filter in `sandbox.ts`. */
-const FIXTURES_DIR = 'fixtures'
 
 /** One arm provisions inside this budget on each side, or reads as a failed run. */
 const PROVISION_TIMEOUT_MS = 120_000
@@ -149,13 +153,6 @@ export function armKey(arm: Arm): string {
   return arm.arm === undefined ? scenario : `${scenario}/${arm.arm}`
 }
 
-function directories(path: string): string[] {
-  return readdirSync(path, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort()
-}
-
 /**
  * Reads the quoted arguments of `select_or_route_scenario`, joining a call that
  * continues across backslash-newline pairs. The first argument is the prompt and
@@ -202,6 +199,42 @@ function matchesArm(arm: Arm, targets: readonly string[]): boolean {
 }
 
 /**
+ * Reads a scenario's arm names and anchor flag: off a bash file's source, and
+ * off a TypeScript module's own keys, which is what its stage routes on.
+ */
+function readArms(
+  file: string,
+  kind: ScenarioKind,
+):
+  | { ok: true; anchor: boolean; names: string[] }
+  | { ok: false; error: string } {
+  if (kind === 'sh') {
+    const source = readFileSync(file, 'utf8')
+
+    return {
+      ok: true,
+      anchor: /^use_anchor\s*\(\)/m.test(source),
+      names: parseArmNames(source),
+    }
+  }
+
+  try {
+    const definition = loadScenario(file)
+
+    return {
+      ok: true,
+      anchor: definition.anchor === true,
+      names: armNames(definition),
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+}
+
+/**
  * Lists every provision a target names, from the scenario source. An armed arm
  * that `canon sandbox coverage` reports and this list lacks is returned as an
  * error, so a scenario whose call this reader cannot parse cannot shrink the
@@ -216,25 +249,23 @@ export function enumerateArms(
   const errors: string[] = []
   const coverage = collectCoverage(root)
 
-  for (const category of directories(sandboxDir)) {
-    if (category === FIXTURES_DIR) continue
+  for (const category of listCategories(sandboxDir)) {
+    const { scenarios, ambiguous } = listScenarioFiles(
+      join(sandboxDir, category),
+    )
+    for (const command of ambiguous)
+      if (matchesTarget(category, command, targets))
+        errors.push(`${category}:${command} exists as both .sh and .ts`)
 
-    const commands = readdirSync(join(sandboxDir, category), {
-      withFileTypes: true,
-    })
-      .filter((f) => f.isFile() && f.name.endsWith('.sh'))
-      .map((f) => f.name.replace(/\.sh$/, ''))
-      .sort()
-
-    for (const command of commands) {
+    for (const { command, file, kind } of scenarios) {
       if (!matchesTarget(category, command, targets)) continue
 
-      const source = readFileSync(
-        join(sandboxDir, category, `${command}.sh`),
-        'utf8',
-      )
-      const anchor = /^use_anchor\s*\(\)/m.test(source)
-      const names = parseArmNames(source)
+      const declared = readArms(file, kind)
+      if (!declared.ok) {
+        errors.push(`${category}:${command} did not load: ${declared.error}`)
+        continue
+      }
+      const { anchor, names } = declared
 
       const found: Arm[] =
         names.length === 0

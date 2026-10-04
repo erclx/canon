@@ -129,6 +129,32 @@ describe('enumerateArms', () => {
     expect(arms.map((a) => a.arm)).toEqual(['-', 'two words', undefined])
   })
 
+  it('should read a TypeScript scenario arms and anchor off its module', () => {
+    write(
+      'sandbox/git/pr.ts',
+      'export default { anchor: true, arms: { one: () => {}, two: () => {} } }\n',
+    )
+
+    const { arms } = enumerateArms(root, ['git'])
+
+    expect(arms).toEqual([
+      { category: 'git', command: 'pr', arm: 'one', anchor: true },
+      { category: 'git', command: 'pr', arm: 'two', anchor: true },
+    ])
+  })
+
+  it('should report a stem present in both forms', () => {
+    scenario('git', 'pr', 'stage_setup() { :; }\n')
+    write(
+      'sandbox/git/pr.ts',
+      'export default { arms: { default: () => {} } }\n',
+    )
+
+    const { arms, errors } = enumerateArms(root, [])
+
+    expect([arms, errors]).toEqual([[], ['git:pr exists as both .sh and .ts']])
+  })
+
   it('should narrow to one arm when the target names it', () => {
     scenario('claude', 'docs', 'select_or_route_scenario "Q" "a" "b"\n')
 

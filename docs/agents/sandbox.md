@@ -9,7 +9,7 @@ description: Scenario routing, the expectation scoring surface, and the coverage
 
 ## Scenarios
 
-Scenarios live under `sandbox/`, one folder per category. `sandbox/fixtures/` is the exception, holding file content that scenarios stage rather than scenarios of its own, so the picker and the coverage report both filter it out. That tree sits outside `files` in `package.json`, so an installed `canon` carries the command, reports it as toolkit-only on one line, and exits 1 rather than failing on the missing directory. Route non-interactively with `SANDBOX_SCENARIO`:
+Scenarios live under `sandbox/`, one folder per category and one file per command, either a TypeScript module or a bash script, and provisioning refuses a command present in both forms. `sandbox/fixtures/` is the exception, holding file content that scenarios stage rather than scenarios of its own, so the picker and the coverage report both filter it out. That tree sits outside `files` in `package.json`, so an installed `canon` carries the command, reports it as toolkit-only on one line, and exits 1 rather than failing on the missing directory. Route non-interactively with `SANDBOX_SCENARIO`:
 
 ```bash
 SANDBOX_SCENARIO=sync canon sandbox infra:tooling
@@ -93,7 +93,7 @@ The baseline is a detached worktree with full history, removed on exit including
 
 The record lists per arm `identical`, `differs` with the manifest keys that differ, `red-on-base` when both sides fail the same way, or `skipped-anchor`. It also carries `canonVersion`, `baseCommit`, `masksApplied`, `errors`, and `counts`. A declared arm adds a `check` entry from `canon sandbox check` on the head tree, whose `asserted` count shows its `expect.toml` resolved from `sandbox/fixtures/`.
 
-Exit 0 means every compared arm is identical or red the same way on both sides. Exit 1 means any `differs`, a base and head exit that disagree, or an armed arm that `canon sandbox coverage` lists and enumeration lacks.
+Exit 0 means every compared arm is identical or red the same way on both sides. Exit 1 means any `differs`, a base and head exit that disagree, an armed arm that `canon sandbox coverage` lists and enumeration lacks, a scenario present as both `.sh` and `.ts`, or a `.ts` scenario that fails to load.
 
 ## Scenario coverage
 
