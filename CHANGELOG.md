@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.29.0](https://github.com/erclx/canon/compare/v5.28.0...v5.29.0) (2026-10-04)
+
+
+### Features
+
+* **canvas:** undo shell edits and hide or resize the side panels ([#2252](https://github.com/erclx/canon/issues/2252)) ([3d8131f](https://github.com/erclx/canon/commit/3d8131f9c2bf20d19b155f1766c4845d1195a13f))
+* **pr:** render evidence images at true size ([#2253](https://github.com/erclx/canon/issues/2253)) ([f54b8da](https://github.com/erclx/canon/commit/f54b8da3b8876f6867ee8396f020e24a43027a90))
+
 ## [5.28.0](https://github.com/erclx/canon/compare/v5.27.0...v5.28.0) (2026-10-04)
 
 

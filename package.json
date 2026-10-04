@@ -1,7 +1,7 @@
 {
   "name": "@erclx/canon",
   "type": "module",
-  "version": "5.28.0",
+  "version": "5.29.0",
   "description": "Runs your agent's work and keeps its code good, on one setup for every repo.",
   "license": "MIT",
   "bin": {
