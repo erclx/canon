@@ -18,7 +18,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
 - Element inspector: below the frame inspector when an element is selected, its `tag.class` name over five titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
-- Sections: Layout holds x and y read-only, then width and height. Flex holds direction, gap, and padding. Typography holds size, weight, and the font family read-only. Fill holds color and background with a token picker each. Text holds the text field, read-only on an element holding others
+- Sections: Layout holds x and y read-only, then width and height. Flex holds direction, gap, and padding. Typography holds size, weight, and the font family read-only. Fill holds color and background as one color field each, whose swatch opens the picker under it. Text holds the text field, read-only on an element holding others
 - Field: a bordered box with a short glyph inside its left edge, such as `W`, and the value right of it. A section header keeps an empty lane at its right for later buttons
 
 ### Below 900 wide
@@ -39,7 +39,7 @@ The sketch stays until a capture of the canvas exists.
 | > drafts  2|  | | <selected elem>  | |   | <frame>|   | [X 48][Y 120] |
 |   approved1|  | +------------------+ |   |        |   | [W 96][H 40 ] |
 |            |  |   <frame document>   |   |        |   | Fill          |
-| Frames     |  +----------------------+   +--------+   | [Fg red ][▾]  |
+| Frames     |  +----------------------+   +--------+   | [■FF0000 100%]|
 | ▾ hero 1440|                                          | Text          |
 |    body    |                                          | [T Start    ] |
 |     main   |                                          | Page          |
@@ -91,10 +91,10 @@ The sketch stays until a capture of the canvas exists.
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
 - Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Typography`, `Fill`, `Text`
-- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Size`, `Wt`, `Font`, `Fg`, `Bg`, `T`, each named for assistive technology by its full word
+- Element field glyphs: `X`, `Y`, `W`, `H`, `Dir`, `Gap`, `Pad`, `Size`, `Wt`, `Font`, `T`, each named for assistive technology by its full word
 - Empty field placeholders: `0` for gap, `None` for background
 - Left panel tabs: `Pages`, `Theme`
-- Token picker: `Token` as its empty choice, then each color token by name, with `<field> token` as its accessible name
+- Color field: the hex in capitals, or a token's name, then the opacity and `%`, named `<field>`, `<field> opacity`, and `<field> picker`, which opens `<field> colors`
 - Edit landed: `Saved`
 - Theme group labels: `Color`, `Spacing`, `Radius`, `Font family`, `Font size`, `Other`
 - Theme empty: `No tokens resolve for this project, so there is nothing to list.`, then the server's notice
@@ -134,7 +134,7 @@ The sketch stays until a capture of the canvas exists.
 - A field shows a pixel length rounded and with no unit, reads `auto` and `normal` as words, and shows a `normal` gap or a transparent background empty. A bare number typed into a length writes as pixels, and a rounded value left unchanged sends nothing
 - Dragging a number field's glyph scrubs it, one per pixel or ten with Shift, previewed in the frame and written once on release. A length stops at 0, a weight at 1 and 1000, and an empty gap scrubs from 0. A cancelled drag puts both back
 - A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it
-- Picking a color token writes `var(--<name>)` into the file rather than the value it resolves to
+- Picking a color token writes `var(--<name>)`, or below full opacity a `color-mix()` of it with `transparent`, so the element keeps following the theme. An inline value the field cannot read shows as written, with opacity off. The picker lists tokens, then hex and opacity, and closes on Escape or on losing focus
 - Fields hold while an edit is in flight and take the file's values again once the frame reloads
 - An edit made against a version of the frame the file has since moved past is refused, never applied to a shifted element, and the frame reloads from the file
 - The Theme tab lists what the token stylesheet defines and edits nothing

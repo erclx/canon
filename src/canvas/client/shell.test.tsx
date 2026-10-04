@@ -1257,6 +1257,19 @@ describe('Inspector edit', () => {
     ).not.toContain('raw')
   })
 
+  it('should show an inline value the picker cannot read as written with opacity off', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: var(--color-accent, #fff)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('background').value).toBe('var(--color-accent, #fff)')
+    expect(fieldNamed('background opacity').disabled).toBe(true)
+  })
+
   it('should read a transparent background as no fill and post nothing on open and close', () => {
     renderWithTokens([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', '<h1>A</h1>')

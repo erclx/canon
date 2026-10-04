@@ -62,6 +62,10 @@ const BASE_CSS = `:root {
   --color-clay: #c76b5f;
   --space-md: 16px;
 }
+
+[data-theme='light'] {
+  --color-clay: #f2c4bc;
+}
 `
 
 async function browserAvailable(): Promise<boolean> {
@@ -313,6 +317,49 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(isSwatchFocused).toBe(true)
     expect(await picker.count()).toBe(0)
   }, 30_000)
+
+  it('should keep a picked token following the frame theme', async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/frames/edit') &&
+          sent.request().method() === 'POST',
+      ),
+      (async () => {
+        await page.getByRole('button', { name: 'background picker' }).click()
+        await page
+          .getByRole('dialog', { name: 'background colors' })
+          .getByRole('option', { name: '--color-clay' })
+          .click()
+      })(),
+    ])
+    expect(response.status()).toBe(200)
+
+    const heading = page
+      .locator(`.frame[data-frame="${FRAME}"] iframe`)
+      .contentFrame()
+      .locator('h1')
+    const background = () =>
+      heading
+        .evaluate((element) => getComputedStyle(element).backgroundColor, {
+          timeout: 2_000,
+        })
+        .catch(() => '')
+    await expect.poll(background, { timeout: 15_000 }).toMatch(/^rgb/)
+    const before = await background()
+    await page
+      .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
+      .click()
+    await expect.poll(background, { timeout: 15_000 }).not.toBe(before)
+    const after = await background()
+    await page
+      .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
+      .click()
+
+    expect(new Set([before, after])).toEqual(
+      new Set(['rgb(199, 107, 95)', 'rgb(242, 196, 188)']),
+    )
+  }, 45_000)
 
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()

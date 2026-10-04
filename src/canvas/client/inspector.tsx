@@ -249,13 +249,18 @@ function ElementFields({
       <Section title="Fill">
         {FILL_FIELDS.map((field) => {
           const painted = computedValue(node, field.property)
-          const text = currentValue(node, field.property)
+          const inline = inlineValue(node, field.property)
+          /*
+           * An inline value the picker cannot read stays as written. Reading
+           * the computed color in its place would show a token-following
+           * value as a literal, and an opacity edit would freeze it.
+           */
           return (
             <ColorField
               key={field.property}
               label={field.label}
-              color={parseColor(text) ?? parseColor(painted)}
-              text={text}
+              color={parseColor(inline || painted)}
+              text={inline || painted}
               painted={painted}
               tokens={colorTokens}
               paint={(name) => tokenPaint(doc, name)}
