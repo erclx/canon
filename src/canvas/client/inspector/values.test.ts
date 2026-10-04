@@ -4,9 +4,11 @@ import {
   composeColor,
   displayValue,
   isNoFill,
+  opacityToCss,
   parseColor,
   readHex,
   readOpacity,
+  sharedRadius,
   scrubStep,
   toCssValue,
   type WrittenColor,
@@ -53,6 +55,22 @@ describe('displayValue', () => {
     expect(displayValue('background-color', 'rgba(0, 0, 0, 0)')).toBe('')
   })
 
+  it('should read a full inline width as Fill', () => {
+    expect(displayValue('width', '100%')).toBe('Fill')
+  })
+
+  it('should read a fit-content height as Fit', () => {
+    expect(displayValue('height', 'fit-content')).toBe('Fit')
+  })
+
+  it('should read an opacity as a percent', () => {
+    expect(displayValue('opacity', '0.5')).toBe('50%')
+  })
+
+  it('should read a full opacity as 100 percent', () => {
+    expect(displayValue('opacity', '1')).toBe('100%')
+  })
+
   it('should leave a color as written', () => {
     expect(displayValue('color', 'rgb(255, 0, 0)')).toBe('rgb(255, 0, 0)')
   })
@@ -91,6 +109,46 @@ describe('toCssValue', () => {
 
   it('should leave a value with its own unit as typed', () => {
     expect(toCssValue('width', '2rem')).toBe('2rem')
+  })
+
+  it('should write Fill as a full length', () => {
+    expect(toCssValue('width', 'Fill')).toBe('100%')
+  })
+
+  it('should write Fit as fit-content', () => {
+    expect(toCssValue('height', 'Fit')).toBe('fit-content')
+  })
+
+  it('should add px to a bare number for a corner radius', () => {
+    expect(toCssValue('border-top-left-radius', '6')).toBe('6px')
+  })
+})
+
+describe('opacityToCss', () => {
+  it('should write a percent as a fraction', () => {
+    expect(opacityToCss('50')).toBe('0.5')
+  })
+
+  it('should take a percent typed with its sign', () => {
+    expect(opacityToCss('25%')).toBe('0.25')
+  })
+
+  it('should refuse a percent above 100', () => {
+    expect(opacityToCss('150')).toBeUndefined()
+  })
+
+  it('should refuse a percent below 0', () => {
+    expect(opacityToCss('-5')).toBeUndefined()
+  })
+})
+
+describe('sharedRadius', () => {
+  it('should read four equal corners as one radius', () => {
+    expect(sharedRadius(['8px', '8px', '8px', '8px'])).toBe('8px')
+  })
+
+  it('should read corners that differ as no shared radius', () => {
+    expect(sharedRadius(['8px', '0px', '8px', '8px'])).toBeUndefined()
   })
 })
 
