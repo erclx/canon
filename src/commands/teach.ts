@@ -42,7 +42,7 @@ import {
   logWarn,
   outro,
   pipeOutput,
-} from '@/ui'
+} from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 /**

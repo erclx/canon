@@ -22,7 +22,7 @@ description: Declined prompts, headless refusals, decision seams, record-driven 
 
 ## Driving a prompt needs a PTY
 
-`select` in `src/ui.ts` exits when `process.stdin.isTTY` is false, so every branch behind a prompt is unreachable from vitest and from a plain shell run. `script -qec "<command>" /dev/null` allocates a PTY, and piping timed keystrokes into it exercises the real apply path, with `j` and `\r` moving and confirming. The `canon sync` commit path had no other route to verification: a fake `GitRunner` proved the decision logic, and only the PTY run proved the narrowed staging actually stages the changed paths and that `git` output pipes into the open frame. Order the sleeps against the domain work that runs before the prompt.
+`select` in `src/cli/ui.ts` exits when `process.stdin.isTTY` is false, so every branch behind a prompt is unreachable from vitest and from a plain shell run. `script -qec "<command>" /dev/null` allocates a PTY, and piping timed keystrokes into it exercises the real apply path, with `j` and `\r` moving and confirming. The `canon sync` commit path had no other route to verification: a fake `GitRunner` proved the decision logic, and only the PTY run proved the narrowed staging actually stages the changed paths and that `git` output pipes into the open frame. Order the sleeps against the domain work that runs before the prompt.
 
 ## A check sits where the write runs
 

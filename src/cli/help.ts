@@ -1,4 +1,4 @@
-import { palette } from '@/ui'
+import { palette } from '@/cli/ui'
 
 const HELP_WIDTH = 80
 const SIGNATURE_WIDTH = 19

@@ -9,7 +9,15 @@ import {
 import { abbreviate, groupByTreatment } from '@/inventory/group'
 import { findSubject, SUBJECTS } from '@/inventory/subjects'
 import type { WalkRefusal } from '@/inventory/walk'
-import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
 
 /**
  * Holds wiring only. Every browser reference sits behind `loadWalker`, because

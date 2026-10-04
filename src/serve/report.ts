@@ -4,7 +4,7 @@ import {
   type ServeOutcome,
   type ServeStarted,
 } from '@/serve/static'
-import { intro, logError, logInfo, logStep, logWarn, outro } from '@/ui'
+import { intro, logError, logInfo, logStep, logWarn, outro } from '@/cli/ui'
 
 /**
  * The relative path where it stays inside the working directory, and the

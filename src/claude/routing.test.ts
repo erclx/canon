@@ -57,8 +57,8 @@ describe('namedPaths', () => {
 
   it('should list each distinct path once in reading order', () => {
     expect(
-      namedPaths('- `src/cli.ts` and `src/ui.ts` and `src/cli.ts` again.'),
-    ).toEqual(['src/cli.ts', 'src/ui.ts'])
+      namedPaths('- `src/cli.ts` and `src/cli/ui.ts` and `src/cli.ts` again.'),
+    ).toEqual(['src/cli.ts', 'src/cli/ui.ts'])
   })
 })
 

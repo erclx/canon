@@ -1,7 +1,15 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { type ScanRefusal, scanShippedTree } from '@/secrets/scan'
-import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
 
 interface ScanCommandOptions {
   readonly json?: boolean

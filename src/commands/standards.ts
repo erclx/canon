@@ -17,7 +17,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 
 interface StandardsListOptions {
   readonly json?: boolean

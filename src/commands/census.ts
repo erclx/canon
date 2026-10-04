@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { census, type CensusRefusal } from '@/census/count'
-import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 interface CensusCommandOptions {
   readonly json?: boolean

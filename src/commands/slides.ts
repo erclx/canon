@@ -4,7 +4,7 @@ import { INSTALL_BROWSER } from '@/browser/engine'
 import { creationRel, SCRATCH } from '@/roots/record'
 import { listDecks, resolveDeck, SLIDES_FOLDER } from '@/slides/decks'
 import { openDeck } from '@/slides/open'
-import { intro, outro, palette } from '@/ui'
+import { intro, outro, palette } from '@/cli/ui'
 
 const SLIDES_AT = creationRel(process.cwd(), SLIDES_FOLDER)
 

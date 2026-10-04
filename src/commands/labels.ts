@@ -6,7 +6,7 @@ import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
 import { scanPhaseLabels } from '@/labels/phase'
 import { scanTitleSpelling } from '@/labels/spelling'
-import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 interface AuditOptions {
   readonly base?: string

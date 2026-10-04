@@ -86,7 +86,7 @@ describe('auditLabels', () => {
       const base = git(root, ['rev-parse', 'HEAD'])
       git(root, ['checkout', '-b', 'feat/x'])
       write(root, 'infra/main.tf', 'resource {}\n')
-      write(root, 'src/ui.ts', 'export const b = 2\n')
+      write(root, 'src/cli/ui.ts', 'export const b = 2\n')
 
       const report = await auditLabels(root)
 

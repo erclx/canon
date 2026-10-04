@@ -80,7 +80,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 
 /** Returned when a gating finding is present. */
 const EXIT_GATE = 2

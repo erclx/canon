@@ -27,7 +27,7 @@ The patterns and the rows differ at both ends rather than by an omission. `^clau
 
 ### How the census reads a test
 
-The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds there, and it excludes a test reading a fixture as data. That exclusion puts `src/comments/trend.test.ts` outside the set, since it replays fixed git revisions and skips itself when they are unreachable, and `src/commands/exit-code.test.ts`, which copies `src/` and `tsconfig.json` into a temp root. `src/git/gh-invocations.test.ts` and `src/ui.test.ts` resolve the repository root and then walk `src/` alone.
+The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds there, and it excludes a test reading a fixture as data. That exclusion puts `src/comments/trend.test.ts` outside the set, since it replays fixed git revisions and skips itself when they are unreachable, and `src/commands/exit-code.test.ts`, which copies `src/` and `tsconfig.json` into a temp root. `src/git/gh-invocations.test.ts` and `src/cli/ui.test.ts` resolve the repository root and then walk `src/` alone.
 
 A temp root is not the repository root, which is the clause that decides three more. `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts` each resolve against an `mkdtempSync` directory, so a sweep reading for the resolution form alone counts too many.
 

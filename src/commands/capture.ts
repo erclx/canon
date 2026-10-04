@@ -15,7 +15,7 @@ import {
   logWarn,
   outro,
   pipeOutput,
-} from '@/ui'
+} from '@/cli/ui'
 
 /**
  * Kept rather than removed, unlike the selector's default that came out for

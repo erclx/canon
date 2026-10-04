@@ -9,7 +9,7 @@ import {
   logWarn,
   outro,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 import { compareVersions, parseVersion } from '@/version/compare'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { detectManager, installCommand, type Manager } from '@/version/manager'

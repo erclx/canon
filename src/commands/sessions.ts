@@ -23,7 +23,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 interface ListCommandOptions {

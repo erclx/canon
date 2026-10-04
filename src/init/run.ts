@@ -1,4 +1,4 @@
-import { logInfo, logStep, logWarn } from '@/ui'
+import { logInfo, logStep, logWarn } from '@/cli/ui'
 
 /**
  * A domain either runs or announces why it did not. Governance under

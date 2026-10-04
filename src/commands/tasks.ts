@@ -59,7 +59,7 @@ import {
   logWarn,
   outro,
   pipeOutput,
-} from '@/ui'
+} from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 /** Returned when the board carries a finding, which is the gating result. */

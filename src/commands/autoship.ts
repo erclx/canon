@@ -4,7 +4,7 @@ import {
   type FailedTest,
   classifyChanges,
 } from '@/autoship/classify'
-import { intro, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 interface ClassifyOptions {
   readonly json?: boolean

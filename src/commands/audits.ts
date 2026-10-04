@@ -20,7 +20,15 @@ import {
   summarize,
 } from '@/audits/run'
 import { gitEnv } from '@/git/env'
-import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
 import { currentWorktreeRoot } from '@/git/worktree'
 
 interface RunCommandOptions {

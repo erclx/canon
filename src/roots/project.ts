@@ -72,7 +72,7 @@ export function findCheckoutMismatch(startDir: string): string | undefined {
  * The warning line every verb that answers from `PROJECT_ROOT` emits when the
  * caller's cwd sits inside a second checkout, or `undefined` when it does not.
  *
- * It returns the string rather than logging it so this module keeps no `@/ui`
+ * It returns the string rather than logging it so this module keeps no `@/cli/ui`
  * dependency and the wording is unit-testable on its own. The wording names
  * both roots and no subcommand: the four chokepoints that carry it stand under
  * eight-plus verbs each, so a per-verb suffix would cost a parameter at every

@@ -16,7 +16,15 @@ import { creationRel, SCRATCH } from '@/roots/record'
 import { surfaceDir } from '@/roots/surface'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { isDirectory, resolveTarget } from '@/targets/validate'
-import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
+import {
+  intro,
+  logAdd,
+  logError,
+  logInfo,
+  logWarn,
+  outro,
+  palette,
+} from '@/cli/ui'
 
 export function register(program: Command): void {
   const design = program

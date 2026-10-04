@@ -32,7 +32,7 @@ import {
   outro,
   palette,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 
 interface SyncOptions {
   readonly skip?: string

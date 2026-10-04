@@ -70,7 +70,7 @@ import {
   writeSettings,
 } from '@/claude/settings'
 import { copyPreservingMode } from '@/sync/copy'
-import { execScript } from '@/exec'
+import { execScript } from '@/cli/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { recordDir } from '@/roots/record'
 import { SURFACE_ENTRIES, surfaceDir } from '@/roots/surface'
@@ -90,7 +90,7 @@ import {
   pipeOutput,
   plural,
   select,
-} from '@/ui'
+} from '@/cli/ui'
 import { describeSkew, readSkew, type SkewReport } from '@/version/skew'
 
 interface SeedsListOptions {

@@ -12,7 +12,15 @@ import {
 } from '@/demo/container'
 import { DEFAULT_CURSORS } from '@/demo/cursors'
 import { loadCursorTheme } from '@/demo/theme'
-import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
 
 const DEFAULT_OUT = 'demos'
 

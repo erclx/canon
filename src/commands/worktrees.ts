@@ -8,7 +8,7 @@ import {
   outro,
   pipeOutput,
   plural,
-} from '@/ui'
+} from '@/cli/ui'
 import {
   type Refusal,
   type ReclaimReport,

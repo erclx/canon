@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { recordDir } from '@/roots/record'
 import { ensureYtDlp, fetchOne } from '@/transcripts/fetch'
-import { palette } from '@/ui'
+import { palette } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 interface TranscriptOptions {

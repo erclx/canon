@@ -9,7 +9,7 @@ import {
 } from '@/comments/scan'
 import { type TrendPoint, trend } from '@/comments/trend'
 import { loadVocabulary, type Vocabulary } from '@/comments/vocabulary'
-import { intro, logInfo, logStep, logWarn, outro, pipeOutput } from '@/ui'
+import { intro, logInfo, logStep, logWarn, outro, pipeOutput } from '@/cli/ui'
 
 interface ScanCommandOptions {
   readonly json?: boolean

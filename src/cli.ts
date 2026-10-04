@@ -44,7 +44,7 @@ import { register as census } from '@/commands/census'
 import { register as targets } from '@/commands/targets'
 import { register as upgrade } from '@/commands/upgrade'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
-import { renderHelp } from '@/help'
+import { renderHelp } from '@/cli/help'
 
 function showHelp(): void {
   console.log(renderHelp(process.stdout))

@@ -39,7 +39,7 @@ import {
 } from '@/shipped/references'
 import { surfaceDir } from '@/roots/surface'
 import { seedRoots } from '@/tooling/seeds'
-import { plural } from '@/ui'
+import { plural } from '@/cli/ui'
 import {
   README_PARAPHRASE_MARKER,
   readmeCitationsIn,
