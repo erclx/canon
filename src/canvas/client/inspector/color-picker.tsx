@@ -124,7 +124,7 @@ interface NumberRowProps {
 
 /**
  * Three numbers for one space. Each commits on change, reading its two
- * neighbours as they stand, and a value that is not a number puts all three
+ * neighbors as they stand, and a value that is not a number puts all three
  * back.
  */
 function NumberRow({
