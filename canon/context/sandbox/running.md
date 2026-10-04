@@ -8,7 +8,7 @@ description: Prerequisites, the command surface, and the toolkit-only refusal an
 ## Decisions
 
 - Every sandbox verb is toolkit-only and refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. A linked worktree meets the refusal on every sandbox read, since the `canon` on the path resolves to the published binary rather than to the branch under it.
-- When a scenario argument is passed, `manage-sandbox.sh` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1`. Multi-scenario scripts call `select_or_route_scenario` from `lib/ui.sh`, which reads `SANDBOX_SCENARIO` and skips the picker when set.
+- When a scenario argument is passed, `canon sandbox` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1` for the hook children. Multi-scenario scripts call `select_or_route_scenario` from `lib/ui.sh`, which reads `SANDBOX_SCENARIO` and skips the picker when set.
 - The `internal-sandbox-check` skill maps changed plugin skills and changed `scripts/` files on a feature branch to their matching scenarios, so an e2e gap on a script edit surfaces the way one on a skill edit does.
 
 ## Gotchas

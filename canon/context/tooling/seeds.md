@@ -65,7 +65,7 @@ The base stack owns `canon/context/index.md` and the claude tree ships none, tho
 
 ### A new claude seed folder needs its array entry
 
-`planSeeds` in `src/claude/seeds.ts` iterates a literal `SUBDIRS` array rather than listing the tree, so a folder added under `tooling/claude/seeds/.claude/` or `tooling/claude/seeds/canon/` is invisible to `canon init`. The sandbox misses it too, since `inject_seeds` in `scripts/manage-sandbox.sh` runs `canon claude init` and shares the planner, so no seeded arm shows the folder either. Pair every seed-folder addition with the `SUBDIRS` entry, an assertion in `scripts/core/install-check.sh`, and a run of `canon claude init` into an empty repository. The array order is also the install and timeline order, which `src/claude/seeds-list.test.ts` asserts.
+`planSeeds` in `src/claude/seeds.ts` iterates a literal `SUBDIRS` array rather than listing the tree, so a folder added under `tooling/claude/seeds/.claude/` or `tooling/claude/seeds/canon/` is invisible to `canon init`. The sandbox misses it too, since the seeds step in `src/sandbox/provision.ts` runs `canon claude init` and shares the planner, so no seeded arm shows the folder either. Pair every seed-folder addition with the `SUBDIRS` entry, an assertion in `scripts/core/install-check.sh`, and a run of `canon claude init` into an empty repository. The array order is also the install and timeline order, which `src/claude/seeds-list.test.ts` asserts.
 
 ### Splitting a seeded domain strands target-facing citations
 

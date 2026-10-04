@@ -25,7 +25,7 @@ Narrowed to one function. The payload builder lives in `src/gov/payload.ts`, and
 
 - `rule_subdir`: emit a source rule's subdirectory relative to the rules root, or empty when the rule sits at the root. Stays bash permanently
 
-`rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. `manage-sandbox.sh` does not source `gov.sh`, since gov injection runs through the real installer. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
+`rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. The sandbox harness does not source `gov.sh`, since gov injection runs through the real installer. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
 
 The bash reading of frontmatter treats the first `---` on any line as the start of a frontmatter block, so a document whose body carries two horizontal rules loses everything between them. `stripFrontmatter` in `src/markdown/frontmatter.ts` anchors to the first line instead and leaves such a body intact, which is the reading `canon docs <topic>` emits.
 
@@ -43,7 +43,7 @@ A fatal precondition placed inside a helper that callers invoke as `$(helper)` c
 
 ### A library must not declare a hook the dispatcher probes for
 
-When a dispatcher branches on whether a hook is defined, export a named helper for the hook to call rather than declaring the hook in shared code. `manage-sandbox.sh` chooses between cloning an anchor and starting empty on `type -t use_anchor`, and nine scenarios collapsed their identical `use_anchor` stubs into `lib/sandbox-git.sh`. Declaring the hook there would have handed an anchor to `git/commit.sh`, `git/stage.sh`, and `infra/indexes.sh`, which source the file only for the identity helpers. Grep for the dispatcher's presence test and list every file that sources the library before moving a hook body.
+When a dispatcher branches on whether a hook is defined, export a named helper for the hook to call rather than declaring the hook in shared code. `scripts/sandbox-hook.sh` reports the choice between staging an anchor and starting empty off `type -t use_anchor`, and nine scenarios collapsed their identical `use_anchor` stubs into `lib/sandbox-git.sh`. Declaring the hook there would have handed an anchor to `git/commit.sh`, `git/stage.sh`, and `infra/indexes.sh`, which source the file only for the identity helpers. Grep for the dispatcher's presence test and list every file that sources the library before moving a hook body.
 
 ### Exercise a `gh` failure path without reaching the branch that creates
 

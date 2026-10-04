@@ -27,7 +27,7 @@ Every run lands at `.canon/tmp/runs/sandbox/<target>-<arm>-<timestamp>.json`, an
 
 - The record is gitignored scratch with no rotation, one file per run. Writing it is additive and stdout stays the data contract, so a failure to record warns on stderr and prints the verdict anyway. The turn count is then recoverable from nowhere else, so an arm whose record failed cannot have its ceiling calibrated without paying for the run twice.
 - When the skill session exits non-zero, `record_dead_run` stamps `{is_error, exit_code, raw_output}` to the same folder ahead of that exit, so the run that most needs a record still gets one.
-- A non-zero exit from `manage-sandbox.sh` during provisioning logs `Provisioning exited <n> before the session could start.`, which separates that failure from a session exit, since both leave no verdict and no run record.
+- A non-zero exit from `canon sandbox --no-header` during provisioning logs `Provisioning exited <n> before the session could start.`, which separates that failure from a session exit, since both leave no verdict and no run record.
 
 ### Turn budget
 
