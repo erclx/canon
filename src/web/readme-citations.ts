@@ -34,7 +34,7 @@ const QUOTED_PHRASE = /"([^"]+)"/g
  * retired `README.md:<n>` form, reported rather than accepted so the fragile
  * convention this replaces cannot come back on a later edit.
  *
- * Modeled on `clientCommandCitationsIn` in `src/client-commands.ts`, including
+ * Modeled on `clientCommandCitationsIn` in `src/gate/client-commands.ts`, including
  * its use of `isMarked` for the exemption.
  */
 export function readmeCitationsIn(

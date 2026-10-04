@@ -5,7 +5,7 @@ import { applyInitOptions, flagsProvided } from '@/init/flags'
 import { type InitFlags, parseSkip, planInit } from '@/init/plan'
 import { runDomains } from '@/init/run'
 import { buildSteps } from '@/init/steps'
-import { resolveTarget } from '@/target'
+import { resolveTarget } from '@/targets/validate'
 import { intro, logInfo, logStep, logWarn, outro, palette, select } from '@/ui'
 
 interface InitOptions {

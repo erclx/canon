@@ -64,12 +64,12 @@ import {
   serializeSettings,
   writeSettings,
 } from '@/claude/settings'
-import { copyPreservingMode } from '@/copy'
+import { copyPreservingMode } from '@/sync/copy'
 import { execScript } from '@/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { recordDir } from '@/record-root'
 import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
-import { isDirectory, resolveTarget } from '@/target'
+import { isDirectory, resolveTarget } from '@/targets/validate'
 import { injectGitignore, pruneGitignore } from '@/tooling/inject'
 import {
   frameError,

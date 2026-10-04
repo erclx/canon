@@ -20,7 +20,7 @@ import {
 } from '@/sync/target'
 import type { UnclaimedFolder } from '@/sync/reverse'
 import { runGitWorkflow } from '@/sync/workflow'
-import { resolveTarget } from '@/target'
+import { resolveTarget } from '@/targets/validate'
 import {
   intro,
   isNonInteractive,

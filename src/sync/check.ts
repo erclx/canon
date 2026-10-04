@@ -29,7 +29,7 @@ import {
   stampedCommit,
   type StampDomain,
 } from '@/sync/stamp'
-import { isDirectory } from '@/target'
+import { isDirectory } from '@/targets/validate'
 import {
   isWholeStack,
   loadManifest,

@@ -14,7 +14,7 @@ import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel, SCRATCH } from '@/record-root'
 import { surfaceDir } from '@/surface-root'
 import { recordStamp, runDomainSync } from '@/sync/engine'
-import { resolveTarget } from '@/target'
+import { resolveTarget } from '@/targets/validate'
 import { intro, logAdd, logError, logInfo, logWarn, outro, palette } from '@/ui'
 
 export function register(program: Command): void {

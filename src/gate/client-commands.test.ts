@@ -3,7 +3,7 @@ import {
   CLIENT_COMMAND_MARKER,
   type ClientCommand,
   clientCommandCitationsIn,
-} from '@/client-commands'
+} from '@/gate/client-commands'
 
 const RM: ClientCommand = {
   command: 'claude rm',

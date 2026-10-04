@@ -9,7 +9,7 @@ import {
   retiredNameStampPath,
   stampPath,
 } from '@/sync/stamp'
-import { isDirectory } from '@/target'
+import { isDirectory } from '@/targets/validate'
 
 /**
  * Folders a walk never descends into.

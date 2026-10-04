@@ -53,7 +53,7 @@ import {
 } from '@/gov/test-order'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { writeChainStamp } from '@/sync/stamp'
-import { resolveTarget } from '@/target'
+import { resolveTarget } from '@/targets/validate'
 import {
   intro,
   isNonInteractive,

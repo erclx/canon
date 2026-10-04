@@ -5,7 +5,7 @@ import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BASELINE_REL } from '@/audits/baseline'
 import { LEDGER_SKILLS, PRACTICE_SKILLS } from '@/claude/skills-audit'
-import { CLIENT_COMMAND_MARKER } from '@/client-commands'
+import { CLIENT_COMMAND_MARKER } from '@/gate/client-commands'
 import { gitEnv } from '@/git-env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
 import {

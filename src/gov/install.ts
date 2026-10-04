@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { basename, dirname, join, relative } from 'node:path'
-import { copyPreservingMode } from '@/copy'
+import { copyPreservingMode } from '@/sync/copy'
 
 export interface RuleSource {
   readonly rule: string

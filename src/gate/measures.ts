@@ -6,7 +6,7 @@ import {
   CLIENT_COMMANDS,
   type ClientCommand,
   clientCommandCitationsIn,
-} from '@/client-commands'
+} from '@/gate/client-commands'
 import {
   isOverCount,
   isOverLength,
@@ -982,7 +982,7 @@ export const clientCommandCitations = async (
     return {
       emissions: [],
       failure:
-        'The client command table is empty, so the corpus was walked and nothing was looked for. Check src/client-commands.ts.',
+        'The client command table is empty, so the corpus was walked and nothing was looked for. Check src/gate/client-commands.ts.',
     }
   }
 
@@ -1023,8 +1023,8 @@ export const clientCommandCitations = async (
     ),
     failure:
       found.length === 1
-        ? `One tracked citation quotes a client command with the wrong argument. Match it against the canonical form in src/client-commands.ts, or mark the line ${CLIENT_COMMAND_MARKER}: <reason> where the argument differs on purpose.`
-        : `${found.length} tracked citations quote a client command with the wrong argument. Match each against the canonical form in src/client-commands.ts, or mark the line ${CLIENT_COMMAND_MARKER}: <reason> where the argument differs on purpose.`,
+        ? `One tracked citation quotes a client command with the wrong argument. Match it against the canonical form in src/gate/client-commands.ts, or mark the line ${CLIENT_COMMAND_MARKER}: <reason> where the argument differs on purpose.`
+        : `${found.length} tracked citations quote a client command with the wrong argument. Match each against the canonical form in src/gate/client-commands.ts, or mark the line ${CLIENT_COMMAND_MARKER}: <reason> where the argument differs on purpose.`,
   }
 }
 
