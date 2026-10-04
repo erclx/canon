@@ -8,8 +8,13 @@ const POSITIONS = ['flex-start', 'center', 'flex-end'] as const
 const ROWS = ['top', 'middle', 'bottom'] as const
 const COLUMNS = ['left', 'center', 'right'] as const
 
-/** Computed values that read as one of the three positions. */
+/**
+ * Computed values that read as one of the three positions. A container left
+ * at its defaults packs from the start, and stretched children do too.
+ */
 const READS: Readonly<Record<string, number>> = {
+  normal: 0,
+  stretch: 0,
   'flex-start': 0,
   start: 0,
   'self-start': 0,

@@ -1241,6 +1241,18 @@ describe('Inspector edit', () => {
     expect(cellNamed('bottom center').getAttribute('aria-checked')).toBe('true')
   })
 
+  it('should mark the top left cell on a container left at its defaults', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: normal; align-items: normal"><span>a</span></div>',
+    )
+
+    clickIn(doc, 'div')
+
+    expect(cellNamed('top left').getAttribute('aria-checked')).toBe('true')
+  })
+
   it('should move focus between cells with the arrow keys', () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', ROW_BODY)
