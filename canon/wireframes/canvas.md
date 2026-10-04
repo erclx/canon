@@ -15,6 +15,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, editing badge, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for every part drops the theme switch, then the badge, then the size, before it shortens the name
 - Element outline: drawn over a frame, dashed around the element under the pointer
 - Selection: a thin outline around the selected frame or element with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
+- Tool strip: at the surface's top left, Move over Pan, the one in effect lit
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
@@ -73,6 +74,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
 - Frame label: `<name> <width> × <height>`, then `<by> editing` while a session marks the frame, then the theme switch reading `Dark` or `Light`
 - Size chip: `<width> × <height>` in whole pixels
+- Tool strip: icons named `Move (V)` and `Pan (H)`
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
 - Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Appearance`, `Typography`, `Fill`, `Text`
@@ -102,6 +104,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Picking a page in the list shows its frames and fits them into the surface
 - Picking a frame in the list centers it at the current zoom
 - Dragging the empty surface or scrolling pans it, and scrolling with the control key held zooms about the pointer
+- Pan, or Space held, pans on any drag, over frames too. With the surface or a frame focused, V and H pick the tool, `+`, `=`, and `-` zoom, and Shift+1 fits. A field keeps its keys, and Cmd or Ctrl ones stay the browser's
 - A frame file Claude rewrites reloads that frame alone, and pan and zoom stay where they were
 - A frame or page Claude adds appears without a manual refresh
 - The theme toggle flips the chrome between light and dark and is remembered for the next visit
@@ -112,7 +115,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Picking a layer row selects that element the same way, and selecting one on the surface opens its frame's layers and marks its row
 - Scrolling over a frame pans the surface, and scrolling with the control key held zooms it, as over the empty surface
 - A press that never moves writes no position or size, and every drag divides the pointer's travel by the zoom
-- With a frame focused, Enter or Space selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
+- With a frame focused, Enter, or Space released with no pan, selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
 - Dragging a selected frame's corner handle resizes it with the opposite corner held, and releasing writes the box to the layout in one write. Control or Command with an arrow resizes it by 10, or 50 with Shift, right and down growing it
 - Dragging a selected element's corner handle previews its size in the frame, then writes `width` and `height` in pixels, one edit per changed axis on the hash the last answered. Its inspector fields are the keyboard path
 - Picking a frame in the list selects it on the surface, and pressing one on the surface marks its row
