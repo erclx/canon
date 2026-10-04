@@ -96,6 +96,14 @@ describe('listProjectFaces', () => {
   it('should list nothing where the project folder is absent', () => {
     expect(listProjectFaces(ROOT)).toEqual([])
   })
+
+  it('should list a face carried as a data URI as present', () => {
+    seed(SHEET, faceRule('Inter', 'data:font/woff2;base64,AAAA'))
+
+    expect(listProjectFaces(ROOT)).toMatchObject([
+      { family: 'Inter', file: 'data:', present: true },
+    ])
+  })
 })
 
 describe('inlineProjectFaces', () => {
@@ -212,6 +220,15 @@ describe('addProjectFace', () => {
     )
 
     expect(result).toMatchObject({ ok: false, reason: 'invalid-font' })
+  })
+
+  it('should refuse a file name CSS would have to escape', () => {
+    const result = addProjectFace(ROOT, fontFile("it's.woff2"), {
+      family: 'Inter',
+    })
+
+    expect(result).toMatchObject({ ok: false, reason: 'invalid-font' })
+    expect(existsSync(join(ROOT, '.claude/design'))).toBe(false)
   })
 
   it('should refuse a family name CSS would have to escape', () => {

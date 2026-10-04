@@ -218,10 +218,19 @@ export function listProjectFaces(root: string): ProjectFace[] {
     const css = masked(readFileSync(join(root, sheet), 'utf8'))
     return [...css.matchAll(FACE_RULE)].map((match): ProjectFace => {
       const rule = match[0]
-      const file = localUrls(rule)[0] ?? ''
-      const at: Located = file
-        ? locate(root, sheet, file)
-        : { ok: false, reason: 'missing' }
+      const local = localUrls(rule)[0]
+      const external = [...rule.matchAll(URL)][0]?.[2]?.trim() ?? ''
+      /*
+       * A rule carrying its face inline or remotely has no file to read, and
+       * the frame keeps it as written, so it lists as present. A `data:` URI
+       * is shortened to its scheme rather than echoing the whole face.
+       */
+      const file = local ?? (external.startsWith('data:') ? 'data:' : external)
+      const at: Located = local
+        ? locate(root, sheet, local)
+        : external
+          ? { ok: true, path: external }
+          : { ok: false, reason: 'missing' }
       return {
         family: familyOf(rule),
         weight: descriptor(rule, 'font-weight') ?? '400',
@@ -259,6 +268,8 @@ export type AddOutcome =
 
 /** A name CSS takes inside single quotes with no escaping. */
 const SAFE_FAMILY = /^[A-Za-z0-9][A-Za-z0-9 _-]*$/
+/** A file name a single-quoted `url()` takes with no escaping. */
+const SAFE_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 const WEIGHT = /^\d{1,4}( \d{1,4})?$/
 
 function weightInRange(weight: string): boolean {
@@ -283,6 +294,13 @@ export function addProjectFace(
       ok: false,
       reason: 'invalid-font',
       detail: `${name} is not a font. Use woff2, woff, ttf, or otf`,
+    }
+  }
+  if (!SAFE_FILE.test(name)) {
+    return {
+      ok: false,
+      reason: 'invalid-font',
+      detail: `${name} must be letters, digits, dots, dashes, or underscores to sit in a url(). Rename it`,
     }
   }
   if (!existsSync(source) || !statSync(source).isFile()) {
