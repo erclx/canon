@@ -63,11 +63,11 @@ One `canon canvas serve` process holds the history, in `src/canvas/history.ts`, 
 
 An element entry keeps the raw style attribute, plus the raw inner content for a text edit, so one restore covers every inspector field. A box entry keeps the layout box, or none for a frame the reader placed. Edits sharing a `step` token on one element merge into one entry, which is how a corner drag or a two-property commit undoes as one.
 
-A restore takes the writers' own lock and refuses as `changed` when the element at the index no longer carries the recorded tag and state, or the layout moved on. The history then drops that entry rather than overwriting a newer state. The check is scoped to the element, so Claude rewriting a neighbor in the same frame leaves the operator's entry live.
+A restore takes the writers' own lock and refuses as `changed` when the frame's element count differs from the edit's, when the element at the index no longer carries the recorded tag and state, or when the layout moved on. The count is the check that catches an insert ahead of the target, since an unstyled state matches every unstyled sibling of the same tag. The history then drops that entry rather than overwriting a newer state or landing on a neighbor. A rewrite that leaves the count alone is checked against the target element only, so Claude restyling a neighbor leaves the operator's entry live.
 
 ### Side panels
 
-The panels-hidden flag and both widths persist under one `canon-canvas-panels` key, read and written by `App` rather than by `main.tsx` beside the theme, so the shell tests reach the stored preference. Each width is clamped on read between 180 and 480, and so the surface keeps 320, the reflow floor. The details panel gives way first, since long layer names are what the pages panel widens for. Below 900 wide the narrow columns keep their own fixed widths and the handles hide.
+The panels-hidden flag and both widths persist under one `canon-canvas-panels` key, read and written by `App` rather than by `main.tsx` beside the theme, so the shell tests reach the stored preference. Each width is clamped on read and again on every window resize, between 180 and 480 and so the surface keeps 320, the reflow floor. The details panel gives way first, since long layer names are what the pages panel widens for. Below 900 wide the narrow columns keep their own fixed widths and the handles hide.
 
 The surface shifts the view by however far its left edge moves, so frames hold still on screen when a panel hides or resizes. Each handle is a focusable separator the arrow keys move, centered on the edge so a 24 pixel circle around it clears both the panel's padding and the tool strip.
 

@@ -113,31 +113,50 @@ function storePanels(panels: StoredPanels): void {
 }
 
 /**
+ * Holds both widths inside this window, the details panel giving way first,
+ * since long layer names are what the pages panel widens for.
+ */
+function fitWidths(widths: PanelWidths): PanelWidths {
+  const right = clampPanelWidth(
+    'right',
+    widths.right,
+    window.innerWidth,
+    widths,
+  )
+  const left = clampPanelWidth('left', widths.left, window.innerWidth, {
+    ...widths,
+    right,
+  })
+  return { left, right }
+}
+
+/**
  * Restores the panels the last visit left and stores each change, the way the
  * theme pick is kept. The read lands before the first paint, so a hidden
- * layout never flashes open. Each stored width is clamped against this
- * window, since one kept from a wider window could squeeze the surface out.
- * The details panel gives way first, since long layer names are what the
- * pages panel widens for.
+ * layout never flashes open. The widths are clamped on that read and on every
+ * window resize, since a width kept from a wider window could squeeze the
+ * surface out.
  */
 function usePanelPreference(): void {
   useLayoutEffect(() => {
     const stored = readStoredPanels()
-    const right = clampPanelWidth(
-      'right',
-      stored.right,
-      window.innerWidth,
-      stored,
-    )
-    const left = clampPanelWidth('left', stored.left, window.innerWidth, {
-      ...stored,
-      right,
-    })
     panelsHidden.value = stored.hidden
-    panelWidths.value = { left, right }
-    return effect(() =>
+    panelWidths.value = fitWidths(stored)
+    const handleResize = () => {
+      const fitted = fitWidths(panelWidths.value)
+      const { left, right } = panelWidths.value
+      if (fitted.left !== left || fitted.right !== right) {
+        panelWidths.value = fitted
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    const stopStoring = effect(() =>
       storePanels({ hidden: panelsHidden.value, ...panelWidths.value }),
     )
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      stopStoring()
+    }
   }, [])
 }
 

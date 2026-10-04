@@ -422,7 +422,8 @@ describe('restoreElement', () => {
       },
     )
     if (!outcome.ok || !states) throw new Error('the edit did not land')
-    return { ...states, index: addressOf(html, tag).index }
+    const { index, count } = addressOf(html, tag)
+    return { ...states, index, count }
   }
 
   it('should bring every longhand back when a radius edit is undone', () => {
@@ -430,7 +431,7 @@ describe('restoreElement', () => {
       '<h1>',
       '<h1 style="border-top-left-radius: 2px; border-bottom-right-radius: 8px">',
     )
-    const { before, after, index } = editObserved(html, 'h1', {
+    const { before, after, index, count } = editObserved(html, 'h1', {
       property: 'border-radius',
       value: '4px',
     })
@@ -439,7 +440,7 @@ describe('restoreElement', () => {
       ROOT,
       'drafts',
       'hero',
-      { index, tag: 'h1' },
+      { index, tag: 'h1', count },
       after,
       before,
     )
@@ -453,19 +454,26 @@ describe('restoreElement', () => {
       '<h1>',
       '<h1 style="font-family: &quot;Inter&quot;, sans-serif">',
     )
-    const { before, after, index } = editObserved(html, 'h1', {
+    const { before, after, index, count } = editObserved(html, 'h1', {
       property: 'color',
       value: 'blue',
     })
 
-    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+    restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1', count },
+      after,
+      before,
+    )
 
     expect(readFileSync(framePath(), 'utf8')).toBe(html)
   })
 
   it('should restore text holding an entity byte for byte', () => {
     const html = FRAME.replace('Ship it', 'Ship &amp; it')
-    const { before, after, index } = editObserved(html, 'h1', {
+    const { before, after, index, count } = editObserved(html, 'h1', {
       property: 'text',
       value: 'Launch <now>',
     })
@@ -473,26 +481,47 @@ describe('restoreElement', () => {
       '<h1>Launch &lt;now&gt;</h1>',
     )
 
-    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+    restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1', count },
+      after,
+      before,
+    )
 
     expect(readFileSync(framePath(), 'utf8')).toBe(html)
   })
 
   it('should reapply an undone edit', () => {
-    const { before, after, index } = editObserved(FRAME, 'h1', {
+    const { before, after, index, count } = editObserved(FRAME, 'h1', {
       property: 'color',
       value: 'blue',
     })
     const edited = readFileSync(framePath(), 'utf8')
-    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+    restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1', count },
+      after,
+      before,
+    )
 
-    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, before, after)
+    restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1', count },
+      before,
+      after,
+    )
 
     expect(readFileSync(framePath(), 'utf8')).toBe(edited)
   })
 
   it('should refuse when the element changed since the edit', () => {
-    const { before, after, index } = editObserved(FRAME, 'h1', {
+    const { before, after, index, count } = editObserved(FRAME, 'h1', {
       property: 'color',
       value: 'blue',
     })
@@ -506,7 +535,7 @@ describe('restoreElement', () => {
       ROOT,
       'drafts',
       'hero',
-      { index, tag: 'h1' },
+      { index, tag: 'h1', count },
       after,
       before,
     )
@@ -516,7 +545,7 @@ describe('restoreElement', () => {
   })
 
   it('should refuse when another element now sits at the index', () => {
-    const { before, after, index } = editObserved(FRAME, 'h1', {
+    const { before, after, index, count } = editObserved(FRAME, 'h1', {
       property: 'color',
       value: 'blue',
     })
@@ -530,7 +559,7 @@ describe('restoreElement', () => {
       ROOT,
       'drafts',
       'hero',
-      { index, tag: 'h1' },
+      { index, tag: 'h1', count },
       after,
       before,
     )
@@ -539,8 +568,54 @@ describe('restoreElement', () => {
     expect(readFileSync(framePath(), 'utf8')).toBe(shifted)
   })
 
+  it('should refuse a redo once a same-tag unstyled element was inserted ahead of the target', () => {
+    const html = FRAME.replace(
+      '<main class="hero">',
+      '<main class="hero">\n      <p>one</p>\n      <p>two</p>',
+    )
+    seedFrame(html)
+    const elements = sourceElements(html)
+    const target = elements.findIndex((element) => element.text === 'two')
+    let states: { before: ElementState; after: ElementState } | undefined
+    editFrame(
+      ROOT,
+      'drafts',
+      'hero',
+      {
+        index: target,
+        tag: 'p',
+        count: elements.length,
+        hash: contentHash(html),
+      },
+      { property: 'color', value: 'blue' },
+      (observed) => {
+        states = observed
+      },
+    )
+    if (!states) throw new Error('the edit did not land')
+    const address = { index: target, tag: 'p', count: elements.length }
+    restoreElement(ROOT, 'drafts', 'hero', address, states.after, states.before)
+    const shifted = readFileSync(framePath(), 'utf8').replace(
+      '<p>one</p>',
+      '<p>zero</p>\n      <p>one</p>',
+    )
+    writeFileSync(framePath(), shifted)
+
+    const outcome = restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      address,
+      states.before,
+      states.after,
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'changed' })
+    expect(readFileSync(framePath(), 'utf8')).toBe(shifted)
+  })
+
   it('should apply when a different element in the frame changed', () => {
-    const { before, after, index } = editObserved(FRAME, 'h1', {
+    const { before, after, index, count } = editObserved(FRAME, 'h1', {
       property: 'color',
       value: 'blue',
     })
@@ -553,7 +628,7 @@ describe('restoreElement', () => {
       ROOT,
       'drafts',
       'hero',
-      { index, tag: 'h1' },
+      { index, tag: 'h1', count },
       after,
       before,
     )

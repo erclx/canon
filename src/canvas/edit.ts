@@ -468,17 +468,24 @@ export type ElementRestore =
 
 /**
  * Writes a recorded state back to one element under the file's lock, only
- * while the element at that index still carries the tag and the state the
- * record expects. Anything else means the file moved on since, so the restore
- * refuses as `changed` rather than overwrite a newer state or land on a
- * neighbor. The state comes from the server's own record, never a request,
- * since inner content is written back as markup.
+ * while the file holds as many elements as it did at the edit and the element
+ * at that index still carries the tag and the state the record expects. An
+ * unstyled state matches any unstyled sibling, so the count is what catches
+ * an element inserted or removed ahead of the target. Anything else means the
+ * file moved on since, so the restore refuses as `changed` rather than
+ * overwrite a newer state or land on a neighbor. The state comes from the
+ * server's own record, never a request, since inner content is written back
+ * as markup.
  */
 export function restoreElement(
   root: string,
   page: string,
   frame: string,
-  target: { readonly index: number; readonly tag: string },
+  target: {
+    readonly index: number
+    readonly tag: string
+    readonly count: number
+  },
   expected: ElementState,
   to: ElementState,
 ): ElementRestore {
@@ -495,7 +502,11 @@ export function restoreElement(
     const bom = source.startsWith(BOM) ? BOM : ''
     const html = source.slice(bom.length)
     const current = readElement(html, target.index)
-    if (current?.tag !== target.tag || !sameState(current, expected)) {
+    if (
+      sourceElements(html).length !== target.count ||
+      current?.tag !== target.tag ||
+      !sameState(current, expected)
+    ) {
       return {
         ok: false,
         reason: 'changed',

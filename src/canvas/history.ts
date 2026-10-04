@@ -19,6 +19,8 @@ export interface ElementEntry {
   readonly frame: string
   readonly index: number
   readonly tag: string
+  /** How many elements the file held, which an insert or removal ahead of the target changes. */
+  readonly count: number
   readonly before: ElementState
   readonly after: ElementState
   /** Edits a control posts as one gesture share this, and merge into one entry. */

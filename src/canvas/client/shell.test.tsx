@@ -3871,6 +3871,23 @@ describe('panel resize', () => {
     expect(shellStyle('--panel-right')).toBe('210px')
   })
 
+  it('should clamp both widths again when the window narrows', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    press(handle('Resize pages panel'), 'End')
+    press(handle('Resize details panel'), 'End')
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1000,
+    })
+
+    act(() => {
+      window.dispatchEvent(new Event('resize'))
+    })
+
+    expect(shellStyle('--panel-left')).toBe('480px')
+    expect(shellStyle('--panel-right')).toBe('200px')
+  })
+
   it('should bring a resized panel back at its width after a hide and show', () => {
     renderApp([page('drafts', [frame('hero')])])
     dragBy(handle('Resize pages panel'), 60)

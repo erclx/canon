@@ -130,7 +130,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Picking a color token keeps the element following the theme at any opacity, and a picker drag writes once on release
 - Fields hold while an edit is in flight and take the file's values once the frame reloads. An edit made against a version the file has moved past is refused and the frame reloads
 - The Theme tab lists what the token stylesheet defines and edits nothing
-- With the canvas focused, Ctrl or Cmd with Z undoes the operator's last edit, move, or resize as one gesture, and Shift with it or Ctrl with Y redoes. Claude's writes never enter the history, and one to the same element drops the operator's entry rather than being overwritten
+- With the canvas focused, Ctrl or Cmd with Z undoes the operator's last edit, move, or resize as one gesture, and Shift with it or Ctrl with Y redoes. Claude's writes never enter the history, and one that rewrites what the edit changed, or adds or removes an element in that frame, drops the operator's entry rather than being overwritten
 - The panel toggle, or backslash with the canvas focused, hides both panels. A drag or an arrow key on a handle resizes its panel, never squeezing the surface out. Both are remembered for the next visit
 
 ## Not on this surface

@@ -14,6 +14,7 @@ function elementEntry(overrides: Partial<ElementEntry> = {}): ElementEntry {
     frame: 'hero',
     index: 4,
     tag: 'h1',
+    count: 9,
     before: { style: undefined },
     after: { style: 'color: red' },
     ...overrides,

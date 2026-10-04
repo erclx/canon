@@ -666,6 +666,7 @@ export function startCanvas(
                       frame,
                       index: element.index,
                       tag: element.tag,
+                      count: element.count,
                       before,
                       after,
                       ...(step !== undefined && { step }),

@@ -57,7 +57,7 @@ The Theme tab in the shell lists what the token stylesheet defines, grouped as c
 
 The operator undoes and redoes their own shell edits, frame moves, and frame resizes from Ctrl or Cmd with Z, Shift with it or Ctrl with Y, or the tool strip's buttons. The history lives in the `canvas serve` process and covers shell edits alone, so a `canvas edit`, `canvas frame move`, or `canvas frame resize` never enters it, and their `--json` records are unchanged. A restart clears it.
 
-An undo writes the recorded state back only while the element or frame still holds what the operator's edit left. When Claude has since rewritten that element, through a file or `canvas edit`, the operator's entry for it is dropped and nothing is written, and the shell says so. A write to another element in the same frame leaves the entry live. The page record at `/api/pages` carries `history` as `{ canUndo, canRedo }`.
+An undo writes the recorded state back only while the element or frame still holds what the operator's edit left. When Claude has since rewritten what that edit changed, being the element's inline style or, for a text edit, its text, or has added or removed an element in that frame, the operator's entry is dropped and nothing is written, and the shell says so. A write that changes another element's style or text, or another part of the same element, leaves the entry live. The page record at `/api/pages` carries `history` as `{ canUndo, canRedo }`.
 
 The tool strip also holds a toggle, bound to backslash, that hides both side panels to show the whole surface, and each panel resizes from a handle on its inner edge. Both are remembered in the browser and write nothing to the project.
 
