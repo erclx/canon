@@ -47,6 +47,6 @@ Two sessions that auto-start the same stdio MCP server each spawn their own proc
 
 - [Parallel features](../../docs/workflow/parallel-features.md) for merge order, rebasing siblings, cleanup, and which paths to serialize
 - [Operating model](../../docs/workflow/operating-model.md) for the orchestrator and worker roles that run in these worktrees
-- [Claude Code permissions](permissions.md) for settings resolution details
+- [Claude Code permissions](permissions.md) for the rule that blocks every subagent
 - [Claude Code subagents](subagents.md) for in-session parallelism without worktrees
 - [Zshrc aliases for Claude Code](../../docs/workflow/zshrc-aliases.md) for `clw` and friends to shorten worktree spawn

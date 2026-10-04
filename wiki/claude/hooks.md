@@ -9,5 +9,4 @@ Hooks are handlers that run in response to Claude Code events. The harness execu
 
 ## Notes
 
-- `PermissionRequest` does not fire in non-interactive (`-p`) mode. Use `PreToolUse` for automated decisions there.
 - Guard interactive-only output in a shell profile with `if [[ $- == *i* ]]`, since a stray `echo` in `~/.zshrc` corrupts the hook's JSON.

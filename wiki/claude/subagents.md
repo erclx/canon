@@ -19,6 +19,6 @@ A deny rule on the `Agent` tool stops every spawn. [Permissions](permissions.md#
 
 ## Related
 
-- [Claude Code skills](skills.md) for the `context: fork` frontmatter fields
-- [Claude Code hooks](hooks.md) for `SubagentStart` and `SubagentStop` events
+- [Claude Code skills](skills.md) for the source on skills, including running one in a forked subagent
+- [Claude Code hooks](hooks.md) for the source on hook events, including those around a subagent
 - [Claude Code agent view](agent-view.md) for the background session, which has a pane a subagent lacks

@@ -9,7 +9,7 @@ A Claude Code session can discover the other sessions it can reach and message o
 
 ## A row names a session and not its branch
 
-A consumer that has to reach the session holding a particular branch cannot read it off the listing. Ordering rows by start time and matching them against the order the worktrees were created is the inference this invites, and it fails when two sessions start inside the same minute. An earlier measurement against five worktrees found the ordering held and read that as settled, which is the case it did not cover.
+A listing shows each local session's working directory unless Remote Control is connected, but a row names no branch. A consumer that has to reach the session holding a particular branch must map directory to branch itself, and the shortcut it is tempted to take instead is ordering rows by start time and matching them against the order the worktrees were created. That fails when two sessions start inside the same minute. An earlier measurement against five worktrees found the ordering held and read that as settled, which is the case it did not cover.
 
 The record each session writes for itself carries the working directory, so an exact match on one file resolves a name to a branch where the ordering only guesses. The file layout is an implementation detail rather than a published interface, so a consumer depending on it states what it relies on and reports when the read is unavailable.
 
