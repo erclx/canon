@@ -40,7 +40,7 @@ import {
   slugOf,
 } from '@/migrate/evidence-ordinal'
 import { presentFolders } from '@/records/backup'
-import { recordDir, SCRATCH, spell, type RecordRoot } from '@/record-root'
+import { recordDir, SCRATCH, spell, type RecordRoot } from '@/roots/record'
 
 const CANON: RecordRoot = '.canon'
 const CLAUDE: RecordRoot = '.claude'

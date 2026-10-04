@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
   assertedPercent,
   collectCensus,

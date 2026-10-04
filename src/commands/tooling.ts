@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
   injectConfigs,
   injectGitignore,

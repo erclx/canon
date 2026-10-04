@@ -10,7 +10,7 @@ import {
   SURFACE_ROOTS,
   surfaceDir,
   surfaceDirs,
-} from '@/surface-root'
+} from '@/roots/surface'
 
 describe('resolveSurfacePath', () => {
   let root: string

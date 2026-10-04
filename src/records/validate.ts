@@ -6,7 +6,7 @@ import { linesOutsideFences } from '@/markdown/scan'
 import {
   recordDir as resolveRecordDir,
   recordDirs as resolveRecordDirs,
-} from '@/record-root'
+} from '@/roots/record'
 import { ATTRIBUTE_MARKER, governedPaths, readScope } from '@/standards/scope'
 import {
   TEACH_GLOSSARY,
@@ -39,7 +39,7 @@ export type RecordKind = (typeof RECORD_KINDS)[number]
  * the second, so one order serves both.
  *
  * Every other kind is a session record and takes the record roots instead,
- * resolved by `@/record-root`. Standards is the one kind that is tracked, so it
+ * resolved by `@/roots/record`. Standards is the one kind that is tracked, so it
  * does not move and spells its own two candidates here.
  */
 const STANDARDS_FOLDERS: readonly string[] = [

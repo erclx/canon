@@ -1,4 +1,4 @@
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import { compareVersions, parseVersion } from '@/version/compare'
 import {
   type InstalledPackage,

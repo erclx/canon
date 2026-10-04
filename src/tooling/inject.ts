@@ -4,7 +4,7 @@ import { dirname, join, relative } from 'node:path'
 import { $ } from 'bun'
 import { copyPreservingMode } from '@/sync/copy'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
-import { resolveSurfacePath } from '@/surface-root'
+import { resolveSurfacePath } from '@/roots/surface'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,

@@ -18,7 +18,7 @@ import {
   resolveAddress,
   type SourceElement,
 } from '@/canvas/address'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 
 /**
  * The content format. A page is a folder under the record root's `canvas/`, a

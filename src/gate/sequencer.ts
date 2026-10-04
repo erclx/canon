@@ -8,7 +8,7 @@ import type {
 } from '@/gate/measures'
 import type { Check, Stage } from '@/gate/stages'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 export type StageStatus =
   /** Every check ran and none found a fact. */

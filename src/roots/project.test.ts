@@ -13,7 +13,7 @@ import {
   findCheckoutMismatch,
   isOwnCheckout,
   PROJECT_ROOT,
-} from '@/project-root'
+} from '@/roots/project'
 
 let fixture: string
 

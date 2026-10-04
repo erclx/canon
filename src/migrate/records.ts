@@ -15,7 +15,7 @@ import {
   RECORD_ENTRIES,
   RECORD_ROOTS,
   spell,
-} from '@/record-root'
+} from '@/roots/record'
 
 /** The root the entries below leave, exported so the writer can prune it. */
 export const FROM_ROOT: RecordRoot = '.claude'
@@ -112,8 +112,8 @@ const EXCLUDED_PREFIXES: readonly string[] = [
 
 const EXCLUDED_PATHS: readonly string[] = [
   'CHANGELOG.md',
-  'src/record-root.ts',
-  'src/surface-root.ts',
+  'src/roots/record.ts',
+  'src/roots/surface.ts',
 ]
 
 const EXCLUDED_SUFFIXES: readonly string[] = ['.test.ts']

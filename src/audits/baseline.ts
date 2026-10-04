@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import type { AuditResult } from '@/audits/catalog'
-import { resolveExisting } from '@/legacy-path'
+import { resolveExisting } from '@/roots/legacy'
 
 /**
  * Where the retained counts live, relative to the project root.

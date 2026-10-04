@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { wordCount } from '@/context/architecture'
 import { bodyLines } from '@/markdown/scan'
-import { surfaceDir } from '@/surface-root'
+import { surfaceDir } from '@/roots/surface'
 
 /**
  * The record this measures, relative to `root`, resolved at either surface

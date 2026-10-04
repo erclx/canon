@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { isAbsolute, relative, resolve } from 'node:path'
 import { isUnder } from '@/tasks/paths'
-import { recordDir, recordDirs } from '@/record-root'
+import { recordDir, recordDirs } from '@/roots/record'
 import {
   hasStagedBatches,
   normalizeOperatorCall,

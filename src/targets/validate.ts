@@ -1,6 +1,6 @@
 import { statSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { checkoutMismatchWarning } from '@/project-root'
+import { checkoutMismatchWarning } from '@/roots/project'
 import { logError, logWarn, outro } from '@/ui'
 
 export function isDirectory(path: string): boolean {

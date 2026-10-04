@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
 import { cliPath, cliRun } from '@/cli-run'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import {
   buildCheckReport,
   type CheckReport,

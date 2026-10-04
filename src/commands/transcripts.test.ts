@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { resolveOutDir } from '@/commands/transcripts'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 describe('resolveOutDir', () => {

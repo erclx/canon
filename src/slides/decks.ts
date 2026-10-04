@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
-import { creationRel, recordDir } from '@/record-root'
+import { creationRel, recordDir } from '@/roots/record'
 import { readDeck } from '@/slides/convert/deck'
 
 /**

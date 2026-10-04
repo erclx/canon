@@ -5,7 +5,7 @@ import { TEACH_STYLESHEET_COMPONENTS } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { type BodyLine, bodyLines } from '@/markdown/scan'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import { TEACH_FONT_FACES } from '@/teach/fonts'
 import { writeIfChanged } from '@/teach/write-if-changed'
 

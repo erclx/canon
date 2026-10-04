@@ -9,7 +9,7 @@
  */
 
 import { join } from 'node:path'
-import { SURFACE_ENTRIES, spell, type SurfaceRoot } from '@/surface-root'
+import { SURFACE_ENTRIES, spell, type SurfaceRoot } from '@/roots/surface'
 
 /** The root the entries below leave. */
 export const FROM_ROOT: SurfaceRoot = '.claude'
@@ -102,8 +102,8 @@ const EXCLUDED_PREFIXES: readonly string[] = [
 
 const EXCLUDED_PATHS: readonly string[] = [
   'CHANGELOG.md',
-  'src/surface-root.ts',
-  'src/record-root.ts',
+  'src/roots/surface.ts',
+  'src/roots/record.ts',
 ]
 
 export function isExcludedPath(path: string): boolean {

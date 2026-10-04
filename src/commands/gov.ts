@@ -8,8 +8,8 @@ import {
   type CountsReport,
   scanCounts,
 } from '@/counts/scan'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
-import { creationRel, SCRATCH } from '@/record-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
+import { creationRel, SCRATCH } from '@/roots/record'
 import { createGovAdapter } from '@/gov/adapter'
 import { regenConsumedRules } from '@/gov/consumed'
 import { regenStandardRules } from '@/gov/standard-rules'

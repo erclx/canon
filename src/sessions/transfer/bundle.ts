@@ -11,7 +11,7 @@ import {
 import { basename, dirname, isAbsolute, join, relative } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
-import { recordDir, recordRoot, SCRATCH } from '@/record-root'
+import { recordDir, recordRoot, SCRATCH } from '@/roots/record'
 import { remoteIdentity } from '@/records/backup'
 import {
   encodeProjectPath,

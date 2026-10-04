@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { INSTALL_BROWSER } from '@/browser/engine'
-import { creationRel, SCRATCH } from '@/record-root'
+import { creationRel, SCRATCH } from '@/roots/record'
 import { listDecks, resolveDeck, SLIDES_FOLDER } from '@/slides/decks'
 import { openDeck } from '@/slides/open'
 import { intro, outro, palette } from '@/ui'

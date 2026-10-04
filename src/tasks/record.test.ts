@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import { tasksDir } from '@/tasks/archive'
 import {
   closeOutcomeLines,

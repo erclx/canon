@@ -8,7 +8,7 @@ import {
   recordDir,
   SCRATCH,
   spell,
-} from '@/record-root'
+} from '@/roots/record'
 
 /** The window after which a reviewed entry is due again, in days. */
 export const DEFAULT_REVIEW_DAYS = 30

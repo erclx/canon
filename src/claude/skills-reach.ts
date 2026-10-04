@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSkillsCorpus } from '@/claude/skills-list'
-import { SURFACE_ROOTS } from '@/surface-root'
+import { SURFACE_ROOTS } from '@/roots/surface'
 
 /**
  * The authoring roots this repository owns and no install channel delivers.

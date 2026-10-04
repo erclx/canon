@@ -13,7 +13,7 @@ import {
   namedFamilies,
   projectSheets,
 } from '@/design/project-fonts'
-import { isOwnCheckout } from '@/project-root'
+import { isOwnCheckout } from '@/roots/project'
 
 /**
  * The stylesheet injected into every frame, so a frame drawn with

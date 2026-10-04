@@ -1,6 +1,6 @@
 import { linesOutsideFences, maskCodeSpans } from '@/markdown/scan'
-import { RECORD_ENTRIES, RECORD_ROOTS } from '@/record-root'
-import type { RecordRoot } from '@/record-root'
+import { RECORD_ENTRIES, RECORD_ROOTS } from '@/roots/record'
+import type { RecordRoot } from '@/roots/record'
 
 /**
  * The two version namespaces `standards/versioning.md` keeps apart, and why a

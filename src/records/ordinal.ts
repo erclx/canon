@@ -1,6 +1,6 @@
 import { mkdir, readdir, rm, stat } from 'node:fs/promises'
 import { extractOrdinal } from '@/intake/folder'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 
 /**
  * The two record folders that share one ordinal sequence, per

@@ -2,7 +2,7 @@ import { existsSync, lstatSync, readdirSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
-import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/record-root'
+import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/roots/record'
 import { type BlockedPath, guardPayload } from '@/records/push-guard'
 
 /**

@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import { ensureYtDlp, fetchOne } from '@/transcripts/fetch'
 import { palette } from '@/ui'
 import { mainWorktreeRoot } from '@/git/worktree'

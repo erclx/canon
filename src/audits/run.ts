@@ -8,7 +8,7 @@ import {
   type Corpus,
 } from '@/audits/catalog'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 /** Every value a corpus filter accepts, matching the `Corpus` union. */
 export const CORPORA: readonly Corpus[] = ['tracked', 'per-machine', 'upstream']

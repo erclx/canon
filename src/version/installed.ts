@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 /** What a reader prints in place of a field the manifest did not carry. */
 export const UNKNOWN_LABEL = 'unknown'

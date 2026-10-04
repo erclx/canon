@@ -1,7 +1,7 @@
 import type { Command } from 'commander'
 import { type DocEntry, listDocs } from '@/docs/list'
 import { listTopics, readTopic, resolveTopic } from '@/docs/read'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { intro, logError, logInfo, logStep, logWarn, outro } from '@/ui'
 
 export function register(program: Command): void {

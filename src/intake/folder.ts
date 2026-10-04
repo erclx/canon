@@ -9,7 +9,7 @@ import {
   readItems,
   writeAnswerLine,
 } from '@/intake/items'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 
 export const INTAKE_REFUSALS = [
   'no-intake',

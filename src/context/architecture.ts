@@ -2,7 +2,7 @@ import { access, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
 import { type BodyLine, bodyLines } from '@/markdown/scan'
-import { surfaceDir } from '@/surface-root'
+import { surfaceDir } from '@/roots/surface'
 
 /**
  * The record this measures, relative to `root`.
