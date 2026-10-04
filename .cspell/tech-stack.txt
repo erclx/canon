@@ -23,6 +23,7 @@ contentful
 coproc
 coreutils
 coveragerc
+creatordate
 crxjs
 cspell
 currentcolor
