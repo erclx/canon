@@ -86,7 +86,7 @@ paths:
 
 Always-on rules emit no `paths:` key. The Cursor schema of `globs`, `alwaysApply`, and `priority` is not consumed and must not appear in source.
 
-Claude Code discovers `.claude/rules/*.md` recursively at session start. A rule without `paths:` always applies, with the same priority as `CLAUDE.md`, and a rule with `paths:` applies when Claude reads a matching file. `wiki/claude/memory.md` carries the loading-time details. Recursive discovery is also why a target still holding the flat `.claude/rules/<subdir>/` layout loads two copies of a rule, which `canon/context/governance/install.md` covers.
+Claude Code discovers `.claude/rules/*.md` recursively at session start. A rule without `paths:` always applies, with the same priority as `CLAUDE.md`, and a rule with `paths:` applies when Claude reads a matching file. The source page linked from `wiki/claude/memory.md` carries the loading-time details. Recursive discovery is also why a target still holding the flat `.claude/rules/<subdir>/` layout loads two copies of a rule, which `canon/context/governance/install.md` covers.
 
 ## Adding a rule
 
