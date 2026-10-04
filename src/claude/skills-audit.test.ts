@@ -7,6 +7,7 @@ import {
   auditSkills,
   DESCRIPTION_LIMIT,
   EXIT_MISSING_REQUIREMENT,
+  LEDGER_SKILLS,
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
 } from '@/claude/skills-audit'
@@ -469,10 +470,52 @@ function practiceSkill(
  * varies, so an append to the list needs no edit here.
  */
 function listedPracticeSkillsExcept(omitted: string): void {
-  for (const rel of PRACTICE_SKILLS.filter((rel) => rel !== omitted)) {
+  for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
     practiceSkill(CLOSING, { name: basename(rel) })
   }
 }
+
+describe('auditSkills ledger list', () => {
+  const ledgerOnly =
+    LEDGER_SKILLS.find((rel) => !PRACTICE_SKILLS.includes(rel)) ?? ''
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept(ledgerOnly)
+  })
+
+  it('should report a ledger-listed skill carrying no ledger', async () => {
+    practiceSkill([], { name: basename(ledgerOnly), hasLedger: false })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: ledgerOnly,
+        detail: `missing ledger: ${join('references', 'adopted.md')}`,
+      },
+    ])
+    expect(report.referenceContents).toEqual([])
+  })
+
+  it('should not read the closing sections on a ledger-listed skill', async () => {
+    practiceSkill([], { name: basename(ledgerOnly) })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a ledger-listed skill whose folder the shipped corpus lacks', async () => {
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: ledgerOnly,
+        detail: 'missing skill: no folder under the shipped corpus',
+      },
+    ])
+  })
+})
 
 describe('auditSkills practice list', () => {
   it('should report a listed skill whose folder the shipped corpus lacks', async () => {

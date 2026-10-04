@@ -40,6 +40,21 @@ export const PRACTICE_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'code-craft'),
   join(SHIPPED_CORPUS, 'build-in-slices'),
   join(SHIPPED_CORPUS, 'deprecation-migration'),
+  join(SHIPPED_CORPUS, 'search-craft'),
+  join(SHIPPED_CORPUS, 'video-craft'),
+]
+
+/**
+ * Every skill carrying the source ledger, being the practice skills and the
+ * skills that teach a craft without the practice closing sections. Kept apart
+ * from `PRACTICE_SKILLS` so citing sources never forces those sections onto a
+ * skill whose body is not shaped around a practice a session cuts short.
+ */
+export const LEDGER_SKILLS: readonly string[] = [
+  ...PRACTICE_SKILLS,
+  join(SHIPPED_CORPUS, 'design-taste'),
+  join(SHIPPED_CORPUS, 'write-human'),
+  join(SHIPPED_CORPUS, 'test-first'),
 ]
 
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
@@ -332,7 +347,7 @@ function missingPracticeSkills(
 ): SkillFinding[] {
   if (!hasShippedCorpus) return []
   const found = new Set(sources.map((source) => source.rel))
-  return PRACTICE_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
+  return LEDGER_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
     rel,
     detail: 'missing skill: no folder under the shipped corpus',
   }))
@@ -344,14 +359,15 @@ function missingPracticeSkills(
  * standard never names.
  */
 function practiceFindings(source: SkillSource): SkillFinding[] {
-  if (!PRACTICE_SKILLS.includes(source.rel)) return []
+  if (!LEDGER_SKILLS.includes(source.rel)) return []
 
-  const sections = PRACTICE_SECTIONS.filter(
-    (section) => !source.sections.includes(section),
-  ).map((section) => ({
-    rel: source.rel,
-    detail: `missing section: ${section}`,
-  }))
+  const isPractice = PRACTICE_SKILLS.includes(source.rel)
+  const sections = (isPractice ? PRACTICE_SECTIONS : [])
+    .filter((section) => !source.sections.includes(section))
+    .map((section) => ({
+      rel: source.rel,
+      detail: `missing section: ${section}`,
+    }))
   const ledger = source.hasLedger
     ? []
     : [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]

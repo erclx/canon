@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BASELINE_REL } from '@/audits/baseline'
-import { PRACTICE_SKILLS } from '@/claude/skills-audit'
+import { LEDGER_SKILLS, PRACTICE_SKILLS } from '@/claude/skills-audit'
 import { CLIENT_COMMAND_MARKER } from '@/client-commands'
 import { gitEnv } from '@/git-env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
@@ -1260,12 +1260,15 @@ describe('skillPracticeShape', () => {
    * varies, so an append to the list needs no edit here.
    */
   const writeListedExcept = (omitted?: string): void => {
-    for (const rel of PRACTICE_SKILLS.filter((rel) => rel !== omitted)) {
+    for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
       writePracticeSkill(CLOSED, rel)
     }
   }
 
   const [varied = ''] = PRACTICE_SKILLS
+
+  const ledgerOnly =
+    LEDGER_SKILLS.find((rel) => !PRACTICE_SKILLS.includes(rel)) ?? ''
 
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'canon-skill-practice-shape-'))
@@ -1301,6 +1304,20 @@ describe('skillPracticeShape', () => {
     expect(report.failure).toContain(
       `${varied} missing section: Before handing over`,
     )
+  })
+
+  it('fails a ledger-listed skill missing its ledger, naming the ledger list', async () => {
+    writeListedExcept(ledgerOnly)
+    mkdirSync(join(root, ledgerOnly), { recursive: true })
+    writeFileSync(
+      join(root, ledgerOnly, 'SKILL.md'),
+      `---\nname: ${basename(ledgerOnly)}\ndescription: Applies a practice.\n---\n\n# Practice\n`,
+    )
+
+    const report = await skillPracticeShape(context())
+
+    expect(report.failure).toContain(`${ledgerOnly} missing ledger`)
+    expect(report.failure).toContain('ledger list')
   })
 
   it('reports a project carrying no skill corpus as unmeasured', async () => {
