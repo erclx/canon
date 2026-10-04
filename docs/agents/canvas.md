@@ -1,6 +1,6 @@
 ---
 title: Canvas
-description: The canvas server, its content format, and the verbs that list, arrange, select, edit, and capture frames
+description: The canvas server, its content format, and the verbs that list, arrange, select, edit, mark, and capture frames
 ---
 
 # Canvas

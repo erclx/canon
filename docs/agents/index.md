@@ -10,7 +10,7 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 
 - [Architecture record](architecture-record.md): The findings canon context audit reads off the architecture record, being the entry cap, revisit sentence, length, decision word, and risk bullet gates the record states for itself, the claim coverage report, and the word counts, plus the requirements record's word cap
 - [Audits](audits.md): Running every health check as one set, what the single verdict means, the exit code each outcome takes, the retained baseline and the delta it reports, and which corpora are kept out of the record
-- [Canvas](canvas.md): The canvas server, its content format, and the verbs that list, arrange, select, edit, and capture frames
+- [Canvas](canvas.md): The canvas server, its content format, and the verbs that list, arrange, select, edit, mark, and capture frames
 - [Capture](capture.md): Rendering HTML sources to PNG, what the command asserts about fonts, and why the selector has no default
 - [Census](census.md): Tracked-plus-untracked file count, a breakdown by extension, and a line total that skips whatever reads as binary
 - [Command catalog](commands.md): Every top-level command with its purpose, each domain's subcommands and the page describing them, the browser commands, and the version skew report
