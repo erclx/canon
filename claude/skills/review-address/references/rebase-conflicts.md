@@ -1,11 +1,11 @@
 ---
 title: Rebase a stale branch
-description: The stash-and-rebase sequence, the conflict resolution rules, and the two recovery messages a hunk needing a decision takes
+description: The stash-and-rebase sequence, the conflict resolution rules, the two recovery messages a hunk needing a decision takes, and the message it owes the controlling session
 ---
 
 # Rebase a stale branch
 
-Mechanics for Step 5 of `review-address` once `git merge-tree` exits non-zero. A branch that still merges skips this file entirely, which is the ordinary run.
+Mechanics for Step 5 of `review-address` once either half of its staleness test fires, being `git merge-tree` exiting non-zero or `main` having changed a file the branch writes. A branch passing both skips this file entirely, which is the ordinary run.
 
 ## The sequence
 
@@ -33,6 +33,8 @@ These rules apply to a hunk from the rebase and a hunk from the stash pop alike:
   - A hunk raised by the stash pop arrives after the rebase already landed, so no abort applies and the conflict stays in the tree: `❌ Conflict needs a decision at <file>. Branch rebased, fixes left conflicted in the tree.`
 
 Both sides of every hunk sit in the conflict and `git log origin/main` names what landed, so the tree carries the context. Do not wait on the orchestrator for it.
+
+The stop still owes a message. When the launch named a controlling session, send it the stop line through `canon:session-relay` before halting, adding the commit on `main` that wrote the other side of the hunk, per the worker channel the `role-worker` skill states. Nothing else surfaces the halt, since the next review pass that would read it as a finding never starts on a branch nobody pushed. With nobody named, print the two lines above and stop.
 
 ## After the rebase
 

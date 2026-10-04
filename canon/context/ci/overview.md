@@ -45,7 +45,11 @@ Scope selection goes through an `--all` argument, since it describes what to run
 
 CI is what makes a scoped local gate safe. `verify.yml` triggers on `pull_request`, pushes to `main`, `merge_group`, a weekly `schedule`, and `workflow_dispatch`. Scoping baselines on `origin/main`, so a branch gates against what it will merge into rather than against its own tip.
 
-That baseline answers a branch tested against a stale `main`, but not two branches each green against the same `main` whose combination is red. The ruleset governing merges (id `12882487`) requires `🛡️ Static Checks` and carries `strict_required_status_checks_policy: false` with no `merge_queue` rule, so a pull request's green run tests against its own branch tip rather than the state it will actually merge into.
+### What a green run tests
+
+That baseline answers a branch tested against a stale `main`, but not two branches each green against the same `main` whose combination is red. The ruleset governing merges (id `12882487`) requires `🛡️ Static Checks` and carries `strict_required_status_checks_policy: false` with no `merge_queue` rule. A pull request's run checks out `refs/pull/<n>/merge`, the merge with `main` as of its last push, confirmed in the Checkout step log of run 37203889787. Nothing re-runs it when `main` moves, so once a sibling merges, the green describes a merge nobody will make.
+
+The orchestrator poll covers that gap by hand. Its `STALE` reading names an open pull request whose files `main` changed since it branched, the branch's own worker rebases and re-runs the gate, and the draft mark stays on until it has. Its `OVERLAP` reading names two open pull requests that conflict with each other, so the merge order is settled before either lands. `canon/context/claude-internal/orchestration/poll.md` carries how both are read.
 
 The `merge_group` trigger above is a prerequisite for closing that gap through a merge queue rather than a fix on its own: a workflow with no job listening for the event never completes a queue entry, so the trigger has to exist before a `merge_queue` rule can be added, and it stays inert without one.
 

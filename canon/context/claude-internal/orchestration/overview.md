@@ -25,6 +25,7 @@ Each file covers one stage of a row's life:
 - `canon/context/claude-internal/orchestration/planning.md`: the planning dispatch and the gotchas of reading a plan
 - `canon/context/claude-internal/orchestration/dispatch.md`: the self-dispatch, its three gates, and what binds concurrency
 - `canon/context/claude-internal/orchestration/review.md`: the review trigger, its poll and watch loops, and the handback dispatch
+- `canon/context/claude-internal/orchestration/poll.md`: how the poll classifies a pull request, its base-movement readings, and its test harness
 - `canon/context/claude-internal/orchestration/runbooks.md`: the orchestrator runbooks, the session map, and the parked-row pass
 - `canon/context/claude-internal/orchestration/reclaim.md`: the reading that decides which worktree is safe to remove, and the removal routes
 
