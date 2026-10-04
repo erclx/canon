@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStubSeed, stripSeedMarker } from '@/seed-marker'
+import { isStubSeed, stripSeedMarker } from '@/tooling/seed-marker'
 
 function withFrontmatter(...fields: string[]): string {
   return ['---', ...fields, '---', '', '# Architecture', ''].join('\n')

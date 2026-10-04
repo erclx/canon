@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { stripFrontmatter } from '@/frontmatter'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 import { SURFACE_ROOTS } from '@/surface-root'
 
 const INDEX_TOPIC = 'index'

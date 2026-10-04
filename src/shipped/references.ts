@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { isMarked } from '@/exempt-marker'
+import { isMarked } from '@/sweep/exempt-marker'
 
 /**
  * The corpora a target reader reaches, which is the `files` field less `src`.
@@ -113,7 +113,7 @@ const COMMIT_SHA = /(?<![0-9A-Za-z_@/#])([0-9a-f]{7,40})(?![0-9A-Za-z_])/g
  * one.
  *
  * The literal is hardcoded rather than read from `package.json` or
- * `git remote`, matching `src/github-format.ts` and `src/commands/repo.ts`,
+ * `git remote`, matching `src/feedback/github-format.ts` and `src/commands/repo.ts`,
  * which already hardcode it.
  *
  * Same word-boundary discipline as the two patterns above: a word character

@@ -8,7 +8,7 @@ import {
   missingFieldMessage,
   parseSections,
   readField,
-} from '@/commands/feedback-format'
+} from '@/feedback/body'
 
 function report(overrides: Record<string, string> = {}): string {
   const fields: Record<string, string> = {

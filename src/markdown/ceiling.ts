@@ -8,7 +8,7 @@ import { CHECKPOINTS, documentHeight } from '@/markdown/structure'
  *
  * The whole line rather than anywhere on it, so a standard quoting the marker
  * inside a code span to document it does not exempt itself. A marker with no
- * reason does not count, for the reason `isMarked` in `src/exempt-marker.ts`
+ * reason does not count, for the reason `isMarked` in `src/sweep/exempt-marker.ts`
  * gives: a bare token reads as a line that meant to say something and did not.
  */
 const EXEMPT_MARKER = /^<!--\s*canon-length-exempt:[ \t]*(\S.*?)\s*-->$/

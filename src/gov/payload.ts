@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
-import { stripFrontmatter } from '@/frontmatter'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 
 /**
  * Lists installed rules in the order the payload concatenates them. Sorting by

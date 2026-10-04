@@ -3,7 +3,7 @@ import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { $ } from 'bun'
 import { copyPreservingMode } from '@/copy'
-import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
+import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { resolveSurfacePath } from '@/surface-root'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
 import {

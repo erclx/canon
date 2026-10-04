@@ -1,4 +1,4 @@
-import { isMarked } from '@/exempt-marker'
+import { isMarked } from '@/sweep/exempt-marker'
 
 export const README_PARAPHRASE_MARKER = 'canon-allow-readme-paraphrase'
 

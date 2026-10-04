@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { regenOne } from '@/indexes/regen'
-import { isUnder } from '@/paths'
+import { isUnder } from '@/tasks/paths'
 import { recordDir, recordDirs } from '@/record-root'
 
 const TASKS = 'tasks'

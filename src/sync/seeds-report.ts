@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
 import { planSeeds, type Seed } from '@/claude/seeds'
-import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
+import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { findInstalledOrigin, readHistoryIndex } from '@/sync/history'
 
 /**

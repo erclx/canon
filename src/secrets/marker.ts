@@ -1,9 +1,9 @@
-import { isMarked } from '@/exempt-marker'
+import { isMarked } from '@/sweep/exempt-marker'
 
 /**
  * The inline token exempting one line from the secret scan.
  *
- * Shaped on the `stub: true` precedent in `src/seed-marker.ts`, which answers
+ * Shaped on the `stub: true` precedent in `src/tooling/seed-marker.ts`, which answers
  * a check whose own comment records a false-positive class. The exemption
  * travels with the line it exempts rather than sitting in a path list away
  * from it, so a reader meeting a muted match finds the reason on the spot.

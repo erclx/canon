@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { isUnder } from '@/paths'
+import { isUnder } from '@/tasks/paths'
 
 describe('isUnder', () => {
   it('should read a directory as being under itself', () => {

@@ -1,4 +1,4 @@
-import { escapeForPattern, isMarked } from '@/exempt-marker'
+import { escapeForPattern, isMarked } from '@/sweep/exempt-marker'
 
 /**
  * A client command this repository quotes, with the argument spelling every

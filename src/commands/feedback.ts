@@ -7,11 +7,11 @@ import {
   deriveTitle,
   missingField,
   missingFieldMessage,
-} from '@/commands/feedback-format'
+} from '@/feedback/body'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
 import { creationRel } from '@/record-root'
-import { createGithubIssue } from '@/github'
-import { issueFailureMessage } from '@/github-format'
+import { createGithubIssue } from '@/feedback/github'
+import { issueFailureMessage } from '@/feedback/github-format'
 import { frameError, frameSuccess, logWarn, palette } from '@/ui'
 
 function readStdin(): Promise<string> {
