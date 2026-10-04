@@ -142,9 +142,7 @@ Read `<heading>` off the first line of the file Step 7 posted, never composed he
 P passed, F failed, E need eyes, N not driven. Posted to PR #<number> under <heading>.
 ```
 
-Add `Review-event checks: <passing|failing|unread>.` after it.
-
-Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendation, since this pass saw the app and not the change.
+Add `Review-event checks: <passing|failing|unread>.` and `Ticks: <ticked N|reason>.` after it, the second naming the count Step 8 ticked or the verb's refusal `reason`. Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendation, since this pass saw the app and not the change.
 
 ## Rules
 
@@ -152,4 +150,4 @@ Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendat
 - Drive the checklist and the sweep, and nothing else. Open exploration has no end a dispatcher can predict.
 - Never check out, build, or serve the head. An address is handed to this pass or the pass refuses.
 - Never read a value off the snapshot file whole. Search it for the ref a box needs, and read text, styles, and geometry with `eval`.
-- Write only under `.canon/tmp/pr/review-ui/`, at the main worktree root, and to the frames branch through `canon pr frames`, which goes through the API and checks nothing out.
+- Write only under `.canon/tmp/pr/review-ui/`, at the main worktree root, to the frames branch through `canon pr frames`, which goes through the API and checks nothing out, and to the evidence comment's boxes through `canon pr tick`.

@@ -2017,9 +2017,6 @@ async function runEvidence(
         states,
         ...(commentId !== undefined && { commentId }),
         ...carried,
-        ...(checklist !== undefined && {
-          boxes: readChecklistBoxes(checklist),
-        }),
       })}\n`,
     )
   }

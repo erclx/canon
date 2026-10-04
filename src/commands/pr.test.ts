@@ -602,7 +602,18 @@ describe('canon pr evidence reports the marked comment', () => {
       expect(record.body).not.toContain('- [x]')
     })
 
-    it('should number the boxes the rendered checklist carries', async () => {
+    it('should report the boxes as posted rather than as the render settles them', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(record.boxes).toMatchObject([
+        { number: 1, isTicked: true },
+        { number: 2, isTicked: false },
+      ])
+    })
+
+    it('should number the boxes the posted checklist carries', async () => {
       writeComments([markedCommentBody()])
 
       const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
