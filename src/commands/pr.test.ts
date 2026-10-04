@@ -394,6 +394,7 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     'case "$*" in',
     '  *graphql*|"pr "*|"repo view"*) exit 1 ;;',
     `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
+    `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
     `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
     '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; echo "{\\"number\\":7,\\"head\\":{\\"ref\\":\\"feat/x\\",\\"sha\\":\\"$h\\"},\\"base\\":{\\"ref\\":\\"main\\"},\\"mergeable_state\\":\\"clean\\"}" ;;',
@@ -814,6 +815,68 @@ describe('canon pr evidence reads the pull request', () => {
     expect(record.body).toContain(
       '| nav | <img src="https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true" width="1000" alt="nav base"> |',
     )
+  })
+
+  describe('image widths', () => {
+    function writeImage(ref: string, name: string, width: number): void {
+      const bytes = Buffer.alloc(24)
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes)
+      bytes.writeUInt32BE(width, 16)
+      mkdirSync(join(tempDir, 'img'), { recursive: true })
+      writeFileSync(join(tempDir, 'img', `${ref}-${name}`), bytes)
+    }
+
+    it('should render each image at the smaller of its own width and 1000', async () => {
+      writeFixture(
+        'files.tsv',
+        'added\tevidence/dark/crop.png\nadded\tevidence/dark/full.png\n',
+      )
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writeImage('deadbeef', 'crop.png', 38)
+      writeImage('deadbeef', 'full.png', 2880)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(record.body).toContain('width="38" alt="crop head"')
+      expect(record.body).toContain('width="1000" alt="full head"')
+    })
+
+    it('should read base and head widths at their own commits', async () => {
+      writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writeImage('cafe01', 'nav.png', 38)
+      writeImage('deadbeef', 'nav.png', 400)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(record.body).toContain('width="38" alt="nav base"')
+      expect(record.body).toContain('width="400" alt="nav head"')
+    })
+
+    it('should render 1000 and keep the row when the header read fails', async () => {
+      writeFixture('files.tsv', 'added\tevidence/dark/hero.png\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(record.body).toContain('width="1000" alt="hero head"')
+      expect(record.widthUnread).toEqual(['head:evidence/dark/hero.png'])
+    })
+
+    it('should render 1000 for an image that is not a PNG', async () => {
+      writeFixture('files.tsv', 'added\tevidence/dark/photo.jpg\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writeImage('deadbeef', 'photo.jpg', 38)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(record.body).toContain('width="1000" alt="photo head"')
+      expect(record).not.toHaveProperty('widthUnread')
+    })
   })
 
   it('should drop a path the pull request removed', async () => {

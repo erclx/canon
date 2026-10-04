@@ -12,9 +12,31 @@ import {
   type OwedInput,
   readChecklistBoxes,
   readOwed,
+  readPngWidth,
   renderEvidenceBody,
   settleChecklist,
 } from '@/pr/evidence'
+
+describe('readPngWidth', () => {
+  function header(width: number): Uint8Array {
+    const bytes = new Uint8Array(24)
+    bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    new DataView(bytes.buffer).setUint32(16, width)
+    return bytes
+  }
+
+  it('should read the width from the IHDR chunk', () => {
+    expect(readPngWidth(header(2880))).toBe(2880)
+  })
+
+  it('should return undefined for bytes that are not a PNG', () => {
+    expect(readPngWidth(new Uint8Array(24).fill(0xff))).toBeUndefined()
+  })
+
+  it('should return undefined for a truncated header', () => {
+    expect(readPngWidth(header(38).subarray(0, 10))).toBeUndefined()
+  })
+})
 
 describe('groupEvidence', () => {
   it('should refuse when no changed path carries an evidence segment', async () => {
@@ -160,6 +182,64 @@ describe('renderEvidenceBody', () => {
     expect(body.trim().endsWith('<!-- pr-evidence: head=bbbb111 -->')).toBe(
       true,
     )
+  })
+
+  describe('image width', () => {
+    function render(items: EvidenceState['items']): string {
+      return renderEvidenceBody(
+        [{ state: 'dark', items }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+    }
+
+    it('should show a small image at its own width', () => {
+      const body = render([
+        { path: 'evidence/dark/a.png', stem: 'a', added: true, width: 38 },
+      ])
+
+      expect(body).toContain('width="38" alt="a head"')
+    })
+
+    it('should cap a large image at the ceiling', () => {
+      const body = render([
+        { path: 'evidence/dark/a.png', stem: 'a', added: true, width: 2880 },
+      ])
+
+      expect(body).toContain('width="1000" alt="a head"')
+    })
+
+    it('should fall back to the ceiling when no width was read', () => {
+      const body = render([
+        { path: 'evidence/dark/a.png', stem: 'a', added: true },
+      ])
+
+      expect(body).toContain('width="1000" alt="a head"')
+    })
+
+    it('should give base and head of one case their own widths', () => {
+      const body = render([
+        {
+          path: 'evidence/dark/a.png',
+          stem: 'a',
+          added: false,
+          width: 400,
+          baseWidth: 38,
+        },
+      ])
+
+      expect(body).toContain('width="38" alt="a base"')
+      expect(body).toContain('width="400" alt="a head"')
+    })
+
+    it('should still count a case whose image carries a narrow width', () => {
+      const body = render([
+        { path: 'evidence/dark/a.png', stem: 'a', added: true, width: 38 },
+      ])
+
+      expect(countEvidenceCases(body)).toBe(1)
+    })
   })
 
   it('should drop the Base column for a state whose cases are all added', () => {

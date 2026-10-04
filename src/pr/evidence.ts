@@ -57,6 +57,10 @@ export interface EvidenceItem {
   readonly stem: string
   /** True when `path` did not exist at the comparison's base commit. */
   readonly added: boolean
+  /** Pixel width of the head image, read from its PNG header. Absent when unread. */
+  readonly width?: number
+  /** Pixel width of the base image, absent for an added case or an unread header. */
+  readonly baseWidth?: number
 }
 
 export interface EvidenceState {
@@ -140,11 +144,32 @@ function rawUrl(repo: string, sha: string, path: string): string {
 }
 
 /**
- * The pixel width every screenshot asks for. GitHub sizes a comment table to
- * its content and clamps an image to its cell, so a width past any comment
- * fills the cell, where `width="100%"` leaves a narrow screenshot narrow.
+ * The most pixels a screenshot asks for. GitHub sizes a comment table to its
+ * content and clamps an image to its cell, so a width past any comment fills
+ * the cell, where `width="100%"` leaves a narrow screenshot narrow. An image
+ * asks for the smaller of its own width and this ceiling, so a small crop
+ * shows at its true size and is never scaled up. An image whose width was not
+ * read asks for the ceiling.
  */
 const IMAGE_WIDTH = 1000
+
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+
+/** Bytes of a PNG that reach the end of IHDR's width field. */
+export const PNG_HEADER_BYTES = 24
+
+/**
+ * The pixel width in a PNG's IHDR chunk, or undefined for bytes that are not
+ * a PNG with a header or that carry a zero width.
+ */
+export function readPngWidth(bytes: Uint8Array): number | undefined {
+  if (bytes.length < PNG_HEADER_BYTES) return undefined
+  if (PNG_SIGNATURE.some((byte, index) => bytes[index] !== byte)) {
+    return undefined
+  }
+  const width = new DataView(bytes.buffer, bytes.byteOffset).getUint32(16)
+  return width > 0 ? width : undefined
+}
 
 /** A table cell and an attribute value share one escape, since a stem is a path segment placed in both. */
 function escapeCell(text: string): string {
@@ -156,8 +181,9 @@ function escapeCell(text: string): string {
     .replaceAll('|', '&#124;')
 }
 
-function evidenceImage(url: string, alt: string): string {
-  return `<img src="${url}" width="${IMAGE_WIDTH}" alt="${alt}">`
+function evidenceImage(url: string, alt: string, width?: number): string {
+  const shown = Math.min(width ?? IMAGE_WIDTH, IMAGE_WIDTH)
+  return `<img src="${url}" width="${shown}" alt="${alt}">`
 }
 
 const EVIDENCE_IMAGE = String.raw`(?:!\[\]\([^)]*\)|<img [^>]*>)`
@@ -232,8 +258,16 @@ export function renderEvidenceBody(
       const stem = escapeCell(item.stem)
       const before = item.added
         ? '*(new)*'
-        : evidenceImage(rawUrl(repo, base, item.path), `${stem} base`)
-      const after = evidenceImage(rawUrl(repo, head, item.path), `${stem} head`)
+        : evidenceImage(
+            rawUrl(repo, base, item.path),
+            `${stem} base`,
+            item.baseWidth,
+          )
+      const after = evidenceImage(
+        rawUrl(repo, head, item.path),
+        `${stem} head`,
+        item.width,
+      )
       return hasBase
         ? `| ${stem} | ${before} | ${after} |`
         : `| ${stem} | ${after} |`
