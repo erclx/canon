@@ -54,6 +54,7 @@ Use `## Overview`, `## Key technical decisions` with one named H3 per decision, 
 
 - Rewrite a decision a later one changed rather than appending the change beside it. A reader should find the design that stands in one place, with the alternative that lost stated once.
 - Hold only what is open under `## Risks / open questions`. An entry leaves the section in the change that settles it, becoming a decision here when it fills a slot and moving to the domain context entry it constrains when it does not.
+- Carry an optional `reviewed: YYYY-MM-DD` frontmatter field naming the day someone last read the record whole for drift. Whoever finishes that review sets it as the review's last edit, and `canon records stale canonical` reads it to count the releases shipped since. A record with no field reads as never reviewed.
 
 ## Verification anchors
 
