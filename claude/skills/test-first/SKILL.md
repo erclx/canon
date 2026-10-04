@@ -19,6 +19,8 @@ description: Write the failing test for a behavior before writing the code that 
 - Changing what a function already does starts with changing what its test asserts. Run that changed test once before touching the implementation, and confirm it fails against the code as it stands today.
 - A test that already passes before any code changes proves nothing about the new behavior. Widen the assertion or add a case until the suite fails against the current implementation.
 
+Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external sources the loop matches, which parts were declined, and which rules no source states.
+
 ## What this skill does not cover
 
 - Which layer a test belongs at and what makes it a good one. `canon:test-craft` owns that judgment, and step 1 loads it.
