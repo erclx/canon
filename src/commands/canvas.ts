@@ -29,7 +29,12 @@ import { CANVAS_PORT, startCanvas } from '@/canvas/server'
 import { PROJECT_ROOT } from '@/project-root'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
-import { callerIdentity, resolveSessions, selfOf } from '@/sessions/resolve'
+import {
+  callerIdentity,
+  type Located,
+  resolveSessions,
+  selfOf,
+} from '@/sessions/resolve'
 import {
   intro,
   logAdd,
@@ -742,10 +747,20 @@ async function runComposite(
  * The caller's roster name, or a generic label when the environment names no
  * session or the roster holds no row for it, as in a sandbox or a CI run.
  */
+async function unlocated(): Promise<Located> {
+  return {
+    repository: null,
+    worktree: null,
+    branch: null,
+    unresolved: 'git-unavailable',
+  }
+}
+
 async function sessionLabel(): Promise<string> {
   const identity = callerIdentity()
   if (identity.sessionId === null && identity.pid === null) return 'a session'
-  const report = await resolveSessions()
+  /* The label needs the name alone, so skip the git probe each row's branch costs. */
+  const report = await resolveSessions({ locate: unlocated })
   if (report.kind === 'absent') return 'a session'
   const self = selfOf(report.sessions, identity)
   return self.kind === 'self' ? self.session.name : 'a session'
