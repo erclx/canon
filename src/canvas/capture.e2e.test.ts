@@ -68,6 +68,29 @@ const UNSTYLED = `<!doctype html>
 </html>
 `
 
+const CONTENTS_FAMILY = '__canon_absent_contents_family__'
+
+const CONTENTS_STYLED = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>contents-styled</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: var(--type-body-family);
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph renders in the token face.</p>
+    <div style="display: contents; font-family: '${CONTENTS_FAMILY}'">
+      This text draws no box of its own.
+    </div>
+  </body>
+</html>
+`
+
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')
   try {
@@ -94,6 +117,7 @@ function provision(root: string): void {
   for (const [name, html] of [
     ['body-styled', BODY_STYLED],
     ['unstyled', UNSTYLED],
+    ['contents-styled', CONTENTS_STYLED],
   ] as const) {
     const added = addFrame(root, PAGE, name, { width: WIDTH, height: HEIGHT })
     if (!added.ok) throw new Error(added.detail)
@@ -192,4 +216,26 @@ describe.skipIf(!hasBrowser)('captureCanvas', () => {
     },
     60_000,
   )
+
+  it('should probe text sitting directly inside a display contents element', async () => {
+    const outcome = await captureCanvas(
+      root,
+      `${PAGE}/contents-styled`,
+      join(root, 'contents-styled.png'),
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      captures: [
+        {
+          result: {
+            status: 'failed',
+            reason: expect.stringContaining(
+              `${CONTENTS_FAMILY} is not installed`,
+            ),
+          },
+        },
+      ],
+    })
+  }, 60_000)
 })

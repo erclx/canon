@@ -171,22 +171,26 @@ function failed(source: CaptureSource, reason: string): CaptureResult {
 
 /**
  * The computed families of the captured element and of each element under it
- * that holds a non-blank text node of its own and draws a box, which is the
- * text the screenshot shows. The box test keeps out `<style>`, `<script>`,
- * `<title>`, and anything hidden, whose computed family is the browser default
- * and would refuse every source that styles a descendant rather than the root.
+ * holding a non-blank text node of its own that draws a box, which is the text
+ * the screenshot shows. Testing the text node's box rather than the element's
+ * keeps out `<style>`, `<script>`, `<title>`, and anything hidden, whose
+ * computed family is the browser default and would refuse every source that
+ * styles a descendant rather than the root, and keeps in text directly inside a
+ * `display: contents` element, which draws no box of its own.
  *
  * Falls back to the element's own family when nothing under it holds text, so
  * a container of iframes is still probed through the family it declares.
  */
 async function renderedTextFamilies(element: Locator): Promise<string[]> {
   return element.evaluate((root) => {
+    const range = document.createRange()
     const holdsText = (node: Element): boolean =>
-      [...node.childNodes].some(
-        (child) =>
-          child.nodeType === Node.TEXT_NODE &&
-          (child.textContent ?? '').trim() !== '',
-      ) && node.getClientRects().length > 0
+      [...node.childNodes].some((child) => {
+        if (child.nodeType !== Node.TEXT_NODE) return false
+        if ((child.textContent ?? '').trim() === '') return false
+        range.selectNodeContents(child)
+        return range.getClientRects().length > 0
+      })
     const texts = [root, ...root.querySelectorAll('*')].filter(holdsText)
     return (texts.length > 0 ? texts : [root]).map(
       (node) => getComputedStyle(node).fontFamily,
