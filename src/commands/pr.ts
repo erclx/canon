@@ -202,6 +202,8 @@ const PREVIEW_REFUSALS: Record<
     '--check only reads the deploy runs and waits on nothing, so it takes no --timeout.',
   'no-deploy':
     'No workflow under .github/workflows/ runs pages deploy and carries a workflow_dispatch trigger, so there is nothing to dispatch.',
+  unserved:
+    "The deploy workflow's push path filter matches no path this pull request changed, so the site it publishes would not show the change. Nothing was dispatched.",
   // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
   unfenced:
     'The deploy workflow passes no --branch=${{ github.ref_name }}, so a dispatch from this branch would publish it to production. Add the flag before asking for a preview.',
