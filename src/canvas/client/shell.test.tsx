@@ -588,6 +588,9 @@ describe('Inspector', () => {
 const HERO_BODY =
   '<main><h1 class="title">Hero</h1><button class="cta" style="color: rgb(255, 0, 0); font-size: 20px; font-weight: 700">Start</button></main>'
 
+/** A row flex container, which shows the Flex section's fields. */
+const ROW_BODY = '<div style="display: flex"><span>a</span><span>b</span></div>'
+
 describe('Layers', () => {
   it('should stay closed until the operator opens a frame', () => {
     renderApp([page('drafts', [frame('hero')])])
@@ -1131,6 +1134,138 @@ describe('Inspector edit', () => {
     clickIn(doc, 'h1')
 
     expect(fieldNamed('height').value).toBe('Fit')
+  })
+
+  it('should show the Flex header alone with an add button on a block', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    expect(buttonNamed('Add flex layout')).toBeTruthy()
+    expect(
+      mount.querySelector('[aria-label="Element"] [aria-label="gap"]'),
+    ).toBeNull()
+  })
+
+  it('should make the element a flex container from the add button', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await act(async () => {
+      buttonNamed('Add flex layout').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'display', value: 'flex' }),
+    ])
+  })
+
+  it('should offer no add button on a grid container', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<div style="display: grid">A</div>')
+
+    clickIn(doc, 'div')
+
+    expect(
+      mount.querySelector(
+        '[aria-label="Element"] [aria-label="Add flex layout"]',
+      ),
+    ).toBeNull()
+  })
+
+  /** A cell of the alignment grid by its accessible name. */
+  function cellNamed(name: string): HTMLButtonElement {
+    const cell = mount.querySelector<HTMLButtonElement>(
+      `[aria-label="Element"] [role="radiogroup"] [aria-label="${name}"]`,
+    )
+    if (!cell) throw new Error(`no alignment cell ${name}`)
+    return cell
+  }
+
+  it('should align a row to the top right from its grid cell', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-end',
+      }),
+      expect.objectContaining({ property: 'align-items', value: 'flex-start' }),
+    ])
+  })
+
+  it('should swap the axes for a column when aligning top right', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; flex-direction: column"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-start',
+      }),
+      expect.objectContaining({ property: 'align-items', value: 'flex-end' }),
+    ])
+  })
+
+  it('should mark the cell the container is aligned to', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: center; align-items: flex-end"><span>a</span></div>',
+    )
+
+    clickIn(doc, 'div')
+
+    expect(cellNamed('bottom center').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('should move focus between cells with the arrow keys', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    clickIn(doc, 'div')
+    act(() => cellNamed('top left').focus())
+
+    press(cellNamed('top left'), 'ArrowRight')
+
+    expect(document.activeElement).toBe(cellNamed('top center'))
+  })
+
+  it('should wrap a flex container from the wrap toggle', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      buttonNamed('Wrap').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'flex-wrap', value: 'wrap' }),
+    ])
   })
 
   /** Opens the color picker of the field of that name and returns it. */
@@ -1909,18 +2044,18 @@ describe('Inspector edit', () => {
 
   it('should not offer a scrub on a field holding no number', () => {
     renderApp([page('drafts', [frame('hero')])])
-    const doc = loadFrame('hero', HERO_BODY)
+    const doc = loadFrame('hero', ROW_BODY)
 
-    clickIn(doc, 'button')
+    clickIn(doc, 'div')
 
     expect(glyphOf('direction').classList.contains('is-scrub')).toBe(false)
   })
 
   it('should scrub an empty gap from its placeholder', async () => {
     renderApp([page('drafts', [frame('hero')])])
-    const doc = loadFrame('hero', '<h1>A</h1>')
+    const doc = loadFrame('hero', ROW_BODY)
     stampHash(doc, 'abc123')
-    clickIn(doc, 'h1')
+    clickIn(doc, 'div')
     const glyph = glyphOf('gap')
 
     await drag('pointerdown', glyph, 10)

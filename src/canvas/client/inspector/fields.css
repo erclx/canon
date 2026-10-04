@@ -128,6 +128,109 @@
   font-weight: 400;
 }
 
+/* An icon in a section's header lane or beside a field, square at row height. */
+.section-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.section-icon:hover,
+.section-icon[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.section-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.section-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The alignment grid on the left, the direction and wrap stacked beside it. */
+.flex-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-xs);
+  align-items: start;
+}
+
+.flex-layout-side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.flex-layout-side .glyph-field {
+  flex: 1;
+}
+
+.align-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 24px);
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+}
+
+.align-cell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.align-cell:hover {
+  color: var(--color-text);
+}
+
+.align-cell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.align-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.align-cell[aria-checked='true'] {
+  color: var(--color-accent);
+}
+
+.align-cell[aria-checked='true'] .align-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 /*
  * A size's mode menu trails its number. The select is transparent over the
  * chevron, so the platform's own list opens and the field keeps one height.

@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
+import { AlignGrid } from '@/canvas/client/inspector/align-grid'
 import { ColorField } from '@/canvas/client/inspector/color-field'
 import {
   Field,
@@ -67,11 +68,19 @@ const SIZE_FIELDS: readonly StyleField[] = [
   { label: 'height', glyph: 'H', property: 'height' },
 ]
 
+const DIRECTION_FIELD: StyleField = {
+  label: 'direction',
+  glyph: 'Dir',
+  property: 'flex-direction',
+}
+
 const FLEX_FIELDS: readonly StyleField[] = [
-  { label: 'direction', glyph: 'Dir', property: 'flex-direction' },
   { label: 'gap', glyph: 'Gap', property: 'gap', placeholder: '0' },
   { label: 'padding', glyph: 'Pad', property: 'padding', isWide: true },
 ]
+
+const FLEX_DISPLAYS = new Set(['flex', 'inline-flex'])
+const GRID_DISPLAYS = new Set(['grid', 'inline-grid'])
 
 const TYPE_FIELDS: readonly StyleField[] = [
   { label: 'size', glyph: 'Size', property: 'font-size' },
@@ -176,6 +185,23 @@ function ElementFields({
   const commit = (property: string) => (value: string) => {
     if (address) void editElement(frameRef, key, address, property, value)
   }
+  /*
+   * The writer takes one property an edit, so a control setting two posts
+   * them in turn, each carrying the hash the last answered with, and stops
+   * at the first refusal.
+   */
+  const commitAll = async (
+    changes: readonly (readonly [string, string])[],
+  ): Promise<void> => {
+    for (const [property, value] of changes) {
+      if (!address) return
+      await editElement(frameRef, key, address, property, value)
+      if (editRefusal.value) return
+    }
+  }
+  const display = computedValue(node, 'display').trim()
+  const isFlex = FLEX_DISPLAYS.has(display)
+  const isWrapped = computedValue(node, 'flex-wrap').trim() === 'wrap'
   const rect = node.getBoundingClientRect()
   const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
@@ -255,7 +281,63 @@ function ElementFields({
           />
         ))}
       </Section>
-      <Section title="Flex">{FLEX_FIELDS.map(styleField)}</Section>
+      <Section
+        title="Flex"
+        action={
+          isFlex || GRID_DISPLAYS.has(display) ? null : (
+            <button
+              type="button"
+              class="section-icon"
+              aria-label="Add flex layout"
+              title="Add flex layout"
+              disabled={isBusy}
+              onClick={() => commit('display')('flex')}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 3.5v9M3.5 8h9" />
+              </svg>
+            </button>
+          )
+        }
+      >
+        {isFlex ? (
+          <>
+            <div class="flex-layout is-wide">
+              <AlignGrid
+                direction={computedValue(node, 'flex-direction').trim()}
+                justifyContent={computedValue(node, 'justify-content')}
+                alignItems={computedValue(node, 'align-items')}
+                isBusy={isBusy}
+                onPick={(alignment) =>
+                  void commitAll([
+                    ['justify-content', alignment.justifyContent],
+                    ['align-items', alignment.alignItems],
+                  ])
+                }
+              />
+              <div class="flex-layout-side">
+                {styleField(DIRECTION_FIELD)}
+                <button
+                  type="button"
+                  class="section-icon"
+                  aria-label="Wrap"
+                  title="Wrap"
+                  aria-pressed={isWrapped}
+                  disabled={isBusy}
+                  onClick={() =>
+                    commit('flex-wrap')(isWrapped ? 'nowrap' : 'wrap')
+                  }
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M2.5 4.5h9a2.5 2.5 0 0 1 0 5h-6M7.5 7.5l-2 2 2 2M2.5 12.5h1" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {FLEX_FIELDS.map(styleField)}
+          </>
+        ) : null}
+      </Section>
       <Section title="Typography">
         {TYPE_FIELDS.map(styleField)}
         {font ? (
