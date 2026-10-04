@@ -99,6 +99,44 @@ describe('acquireSuiteLock', () => {
     expect(holderOnDisk()).toMatchObject({ pid: 200 })
   })
 
+  it('should announce the holder once when the wait starts', async () => {
+    const running = { 100: '5000', 200: '6000' }
+    const first = await acquireSuiteLock(optionsFor(100, running))
+    const announced: LockHolder[] = []
+    let sleeps = 0
+    const sleep = async () => {
+      sleeps += 1
+      if (sleeps === 2) first.release()
+    }
+
+    await acquireSuiteLock(
+      optionsFor(200, running, {
+        sleep,
+        onWait: (holder) => announced.push(holder),
+      }),
+    )
+
+    expect(announced).toEqual([
+      { pid: 100, procStart: '5000', root: '/worktrees/100' },
+    ])
+  })
+
+  it('should announce nothing when the lock is free', async () => {
+    const announced: LockHolder[] = []
+
+    await acquireSuiteLock(
+      optionsFor(
+        100,
+        { 100: '5000' },
+        {
+          onWait: (holder) => announced.push(holder),
+        },
+      ),
+    )
+
+    expect(announced).toEqual([])
+  })
+
   it('should take over at once from a holder whose process is gone', async () => {
     writeHolder({ pid: 100, procStart: '5000', root: '/worktrees/100' })
 

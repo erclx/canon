@@ -43,7 +43,9 @@ The gap is narrowed to what the census names rather than closed, since a corpus 
 
 ## The Tests stage holds a machine lock
 
-The Tests stage holds a lock file under the machine state folder while its suite runs, so one box runs one suite at a time however many worktrees push at once. `lock: 'tests'` on the stage in `src/gate/stages.ts` names it, `executeStage` in `src/gate/sequencer.ts` takes it once the scope check passes and releases it in a `finally`, and `src/gate/suite-lock.ts` owns the file. A gate that queued prints one line naming the worktree it waited on and the seconds it waited, so a slow stage reads as queued rather than slow. The stage's `ms` stays wall time and includes the wait.
+The Tests stage holds a lock file under the machine state folder while its suite runs, so one box runs one suite at a time however many worktrees push at once. `lock: 'tests'` on the stage in `src/gate/stages.ts` names it, `executeStage` in `src/gate/sequencer.ts` takes it once the scope check passes and releases it in a `finally`, and `src/gate/suite-lock.ts` owns the file.
+
+A gate that starts queuing says so on stderr at once, naming the holder's pid and worktree, since a stage prints only after it returns and a silent wait reads as a hung suite. Once the suite has run, the stage repeats the wait in its own output with the seconds it took. The stage's `ms` stays wall time and includes the wait, and `queuedMs` in the `--json` record carries the queued part.
 
 ### Why a lock rather than a worker cap
 
@@ -66,6 +68,8 @@ A takeover renames the stale file aside rather than deleting it, because two acq
 ### What the lock does not cover
 
 CI skips the lock, since each runner runs one suite. A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+
+The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.
 
 ## Gotchas
 

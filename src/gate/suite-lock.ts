@@ -30,6 +30,8 @@ export interface SuiteLockOptions {
   readonly probes?: LivenessProbes
   readonly pollMs?: number
   readonly sleep?: (ms: number) => Promise<void>
+  /** Called once, when the first poll finds a live holder, so a wait is never silent. */
+  readonly onWait?: (holder: LockHolder) => void
 }
 
 export interface HeldLock {
@@ -202,6 +204,9 @@ export async function acquireSuiteLock(
         waitedOn,
         waitedMs: waitedOn === undefined ? 0 : performance.now() - startedAt,
       }
+    }
+    if (waitedOn === undefined && outcome.holder !== undefined) {
+      options.onWait?.(outcome.holder)
     }
     waitedOn = outcome.holder ?? waitedOn
     await sleep(pollMs)

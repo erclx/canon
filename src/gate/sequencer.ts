@@ -7,7 +7,11 @@ import type {
   RunCommand,
 } from '@/gate/measures'
 import type { Check, Stage } from '@/gate/stages'
-import { acquireSuiteLock, machineLockPath } from '@/gate/suite-lock'
+import {
+  acquireSuiteLock,
+  type LockHolder,
+  machineLockPath,
+} from '@/gate/suite-lock'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
 
@@ -33,6 +37,11 @@ export interface StageResult {
    * holding a machine lock, the time it queued behind another worktree.
    */
   readonly ms: number
+  /**
+   * The part of `ms` spent queued behind another worktree's hold on the stage's
+   * machine lock. Absent where the stage never waited.
+   */
+  readonly queuedMs?: number
 }
 
 export interface GateContext extends MeasureContext {
@@ -43,6 +52,12 @@ export interface GateContext extends MeasureContext {
    * scoping is off and every stage runs.
    */
   readonly changed?: readonly string[]
+  /**
+   * Told when a stage starts queuing on its machine lock. A stage prints only
+   * once it returns, so without this a queued gate is silent for the whole
+   * wait and reads as a hung suite.
+   */
+  readonly onQueue?: (label: string, holder: LockHolder) => void
 }
 
 export interface ChangedSet {
@@ -167,6 +182,7 @@ async function executeStage(
   const held = await acquireSuiteLock({
     path: machineLockPath(stage.lock),
     root: ctx.root,
+    onWait: (holder) => ctx.onQueue?.(stage.label, holder),
   })
   const queued: Emission[] =
     held.waitedOn === undefined
@@ -179,7 +195,10 @@ async function executeStage(
         ]
 
   try {
-    return await runChecks(stage, ctx, queued)
+    const outcome = await runChecks(stage, ctx, queued)
+    return held.waitedOn === undefined
+      ? outcome
+      : { ...outcome, queuedMs: held.waitedMs }
   } finally {
     held.release()
   }

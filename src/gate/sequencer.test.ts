@@ -260,6 +260,49 @@ describe('a stage holding a machine lock', () => {
     expect(outcome.status).toBe('passed')
   })
 
+  it('should announce the queue before the stage finishes', async () => {
+    placeLiveHolder('/worktrees/other')
+    setTimeout(() => unlinkSync(lockPath()), 50)
+    const order: string[] = []
+    const checking: Measure = async () => {
+      order.push('check')
+      return { emissions: [] }
+    }
+
+    await runStage(
+      stage('suite', {
+        lock: 'suite',
+        checks: [{ kind: 'measure', measure: checking }],
+      }),
+      contextWith({
+        onQueue: (label, holder) => order.push(`${label} ${holder.root}`),
+      }),
+    )
+
+    expect(order).toEqual(['suite /worktrees/other', 'check'])
+  })
+
+  it('should carry the time it queued on the result', async () => {
+    placeLiveHolder('/worktrees/other')
+    setTimeout(() => unlinkSync(lockPath()), 50)
+
+    const outcome = await runStage(
+      stage('suite', { lock: 'suite' }),
+      contextWith(),
+    )
+
+    expect(outcome.queuedMs).toBeGreaterThan(0)
+  })
+
+  it('should carry no queue time on a stage that never waited', async () => {
+    const outcome = await runStage(
+      stage('suite', { lock: 'suite' }),
+      contextWith(),
+    )
+
+    expect(outcome.queuedMs).toBeUndefined()
+  })
+
   it('should name the worktree it queued behind', async () => {
     placeLiveHolder('/worktrees/other')
     setTimeout(() => unlinkSync(lockPath()), 50)
