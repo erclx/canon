@@ -345,13 +345,20 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
           timeout: 2_000,
         })
         .catch(() => '')
-    await expect.poll(background, { timeout: 15_000 }).toMatch(/^rgb/)
+    // A read taken while the frame reloads comes back empty or stale, so each
+    // poll waits for one of the token's two values rather than any change.
+    const clay = /^rgb\((199, 107, 95|242, 196, 188)\)$/
+    await expect.poll(background, { timeout: 15_000 }).toMatch(clay)
     const before = await background()
     await page
       .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
       .click()
-    await expect.poll(background, { timeout: 15_000 }).not.toBe(before)
-    const after = await background()
+    const settled = async () => {
+      const value = await background()
+      return value !== before && clay.test(value) ? value : ''
+    }
+    await expect.poll(settled, { timeout: 15_000 }).toMatch(clay)
+    const after = await settled()
     await page
       .getByRole('button', { name: new RegExp(`^Show ${FRAME} in `) })
       .click()
@@ -359,6 +366,38 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(new Set([before, after])).toEqual(
       new Set(['rgb(199, 107, 95)', 'rgb(242, 196, 188)']),
     )
+  }, 45_000)
+
+  it('should keep focus on the swatch after a keyboard pick reloads the frame', async () => {
+    await page.getByRole('button', { name: 'background picker' }).focus()
+    // Pressed back to back with no wait, since a key typed straight after the
+    // one that opened the picker has to reach the list rather than the swatch.
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('ArrowUp')
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/frames/edit') &&
+          sent.request().method() === 'POST',
+      ),
+      page.keyboard.press('Enter'),
+    ])
+    expect(response.status()).toBe(200)
+
+    // The field reading the new token proves the inspector remounted on the
+    // reloaded frame, so focus read alongside it is focus after the reload.
+    const field = page.getByRole('textbox', { name: 'background', exact: true })
+    await expect
+      .poll(
+        async () => [
+          await field.inputValue({ timeout: 2_000 }).catch(() => ''),
+          await page.evaluate(() =>
+            document.activeElement?.getAttribute('aria-label'),
+          ),
+        ],
+        { timeout: 15_000 },
+      )
+      .toEqual(['--color-ink', 'background picker'])
   }, 45_000)
 
   it('should list tokens on the Theme tab', async () => {

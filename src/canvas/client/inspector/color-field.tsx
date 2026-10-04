@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useLayoutEffect, useRef, useState } from 'preact/hooks'
 import {
   composeColor,
   type ParsedColor,
@@ -143,6 +143,29 @@ function ColorInputs({
 }
 
 /**
+ * The swatch whose picker last wrote a value, so it takes focus back each time
+ * the frame reloads. A saved edit remounts the inspector, once for the edit and
+ * again when the file watcher reports the write, and each remount replaces the
+ * swatch that held focus and drops it to the page. It holds until focus lands
+ * anywhere else.
+ */
+let refocus: string | undefined
+
+function swatchLabel(label: string): string {
+  return `${label} picker`
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('focusin', (event) => {
+    if (refocus === undefined) return
+    const target = event.target
+    const name =
+      target instanceof Element ? target.getAttribute('aria-label') : null
+    if (name !== swatchLabel(refocus)) refocus = undefined
+  })
+}
+
+/**
  * One color property: a swatch opening the picker, the hex, and the opacity.
  * The picker lists the project's color tokens ahead of any raw value, since a
  * token keeps following the theme and a literal does not.
@@ -166,7 +189,11 @@ export function ColorField({
   const [active, setActive] = useState(Math.max(0, picked))
   const isNone = color?.kind === 'none'
 
-  useEffect(() => {
+  /*
+   * Focus moves in the commit rather than after paint, so a key typed straight
+   * after the one that opened the picker reaches the list, not the swatch.
+   */
+  useLayoutEffect(() => {
     if (!isOpen) return
     const target =
       list.current ??
@@ -175,15 +202,28 @@ export function ColorField({
     target?.focus()
   }, [isOpen])
 
+  useLayoutEffect(() => {
+    if (refocus === label) swatch.current?.focus()
+  }, [label])
+
   const close = () => {
     setOpen(false)
     swatch.current?.focus()
   }
 
-  const pick = (name: string) => {
+  /* Writes from inside the picker, whose swatch keeps focus across the reload. */
+  const commitFromPicker = (value: string) => {
     close()
-    if (color?.kind === 'token' && color.name === name) return
-    onCommit(
+    refocus = label
+    onCommit(value)
+  }
+
+  const pick = (name: string) => {
+    if (color?.kind === 'token' && color.name === name) {
+      close()
+      return
+    }
+    commitFromPicker(
       composeColor({ kind: 'token', name, opacity: currentOpacity(color) }),
     )
   }
@@ -206,7 +246,7 @@ export function ColorField({
             ref={swatch}
             class={isNone ? 'swatch is-none' : 'swatch'}
             type="button"
-            aria-label={`${label} picker`}
+            aria-label={swatchLabel(label)}
             aria-haspopup="dialog"
             aria-expanded={isOpen}
             title={label}
@@ -318,10 +358,7 @@ export function ColorField({
               color={color}
               text={text}
               isBusy={isBusy}
-              onCommit={(value) => {
-                close()
-                onCommit(value)
-              }}
+              onCommit={commitFromPicker}
             />
           </div>
         </div>
