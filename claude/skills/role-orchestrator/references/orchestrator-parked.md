@@ -17,13 +17,13 @@ The sweep's own question stays distinct from this one. It asks which parked row 
 
 Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`. A `## Run now` row carries no blocker by definition, so the pass skips it. On the idle trigger, also every row in `.canon/tasks/backlog.md` when the file exists, per the trigger split above. Resolve the board, the backlog, and each task file at the main worktree root, the way `session-worktree` does.
 
-Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row collides with, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/board.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
+Take the board rows in board order and finish one before opening the next. Clearing a row changes what the next row holds behind, so a pass that measures every row first and writes afterwards writes against a board it has already invalidated. On the idle trigger, walk the backlog after the board, in the file's own filename order, since `${CLAUDE_SKILL_DIR}/../../standards/board.md` fixes that file as unordered and nothing about a row's position there means anything to preserve mid-pass.
 
 ## Re-testing a row
 
 The blocker cell states what the row waits on, and each kind is tested differently. `canon tasks validate` already re-takes the first two and reports the rest as untested, so run it first and re-take by hand only what it names.
 
-- Collision with a track in flight: the validator tests the file the cell cites against the Touches column of every `## Run now` row. A track that merged since the row was parked is no longer in flight, whatever the sets still share. A cell naming the file in prose rather than in backticks cites nothing, so write the collision the way the board format spells it and the check picks the row up on the next run.
+- A hold behind a track in flight: the validator tests the file the cell cites against the Touches column of every `## Run now` row. A track that merged since the row was parked is no longer in flight, whatever the sets still share. Re-test the cell under the conflict check in `orchestrator-dispatch.md` too, since a row parked on a shared file alone holds on nothing and moves up. A cell naming the file in prose rather than in backticks cites nothing, so write the hold the way the board format spells it and the check picks the row up on the next run.
 - A dependency on another task: the validator opens the task a link in the cell names. One whose outcomes are all `[x]`, one already archived, or one already declined, holds nothing. A cell naming the task in prose resolves to no file, so open it by hand and rewrite the cell as a link.
 - A condition about the tree, such as a count of some shape or the presence of a construct: measure it again, per Two ways a re-test goes wrong below.
 - Waiting on a plan: nothing external holds the row, so the pass writes the plan rather than testing anything. See The plan half below.
@@ -59,7 +59,7 @@ Plan what the pass clears, and plan any `## Needs a plan` row whose only blocker
 
 Run `plan-feature` for each, carrying the constraint per in-flight track that `## The loop` in `role-orchestrator` requires. Verify each plan against the tree the way that step does, since a plan written now is written against a tree several branches are already changing.
 
-Stop where `## Parallelism` stops rather than planning every row the pass cleared. A plan whose file set collides with every track in flight is one nobody can dispatch.
+Stop where `## Parallelism` stops rather than planning every row the pass cleared. A plan the conflict check holds behind every track in flight is one nobody can dispatch.
 
 Do not restate the refill procedure. `orchestrator-refill.md` owns it and `orchestrator-sweep.md` wraps it for a batch of merges, so this pass promotes through that method rather than a second one.
 
@@ -67,7 +67,7 @@ Do not restate the refill procedure. `orchestrator-refill.md` owns it and `orche
 
 Age is not evidence. A row untouched for weeks invites promotion, and the waiting is not an argument for it. `role-orchestrator` refuses to promote a task to fill the queue and this pass inherits that refusal, so a row whose blocker still holds stays where it is. Reporting it as still parked, against a measurement taken this pass, is a result.
 
-A scoping defect can wear a blocker. A task whose file set collides with every other task by construction is oversized rather than blocked, and planning it again produces the same plan nobody can dispatch. Split it into tasks with disjoint file sets, so the board stops carrying a row that re-measures the same way every pass.
+A scoping defect can wear a blocker. A task conflicting with every other by construction, through a contract everything consumes or a sweep over everything, is oversized rather than blocked, and planning it again produces the same plan nobody can dispatch. Split it so each piece holds behind fewer tracks, and the board stops carrying a row that re-measures the same way every pass. A task that merely shares files with everything is not this case.
 
 ## Output
 
@@ -77,7 +77,7 @@ Cleared: <row>, now <group>, plan at <path>
 Declined: <row>, waited on <task> which was declined, now <group>
 Still parked: <row>, <blocker> re-confirmed against <what was measured>
 Untestable: <row>, waits on <operator action>
-Split: <task> into <tasks>, file set collided with everything by construction
+Split: <task> into <tasks>, conflicted with everything by contract or sweep
 Backlog cleared: <row>, now bottom of ## Needs a plan, waiting on <what changed>
 Still backlogged: <row>, <what was checked> found unchanged
 ```

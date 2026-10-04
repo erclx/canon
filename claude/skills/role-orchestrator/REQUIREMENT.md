@@ -1,13 +1,13 @@
 ---
 name: role-orchestrator
-description: What the one warm control session owns, why it plans and reviews without building or merging, and the collision rule that binds parallelism
+description: What the one warm control session owns, why it plans and reviews without building or merging, and the conflict test that holds a parallel build
 ---
 
 # Role orchestrator requirement
 
 ## Gap
 
-Without this skill, the session holding the cross-feature picture starts building, and the picture goes with it. Two features land on the same wiring seam because nobody listed their file sets against each other, and the second pull request rebases onto a tree it was never planned against. Findings from a merged pull request stay in a thread nobody re-reads, so the rule they should have changed never changes.
+Without this skill, the session holding the cross-feature picture starts building, and the picture goes with it. Two features land where one depends on the other or consumes a contract the other changes, because nobody read their plans against each other, and the second pull request rebases onto a tree it was never planned against. Findings from a merged pull request stay in a thread nobody re-reads, so the rule they should have changed never changes. Holding on one shared path costs as much, and ran six canvas rows one at a time on 2026-10-04 though no practitioner source serializes on a shared file.
 
 The queue fails in both directions. It empties and a free worker waits, or it fills with whatever is oldest rather than with what establishes a mechanism. A plan handed over unverified is the quiet one, since it goes stale from whatever merged after it was written, and a worker that trusts its account of the tree builds against a shape that no longer exists. A second orchestrator makes all of this unrecoverable, because the board is gitignored and neither session can read the other's writes.
 
@@ -15,7 +15,7 @@ Refilling on a merge and on a thinning ready list leaves the window between them
 
 Every one of those triggers looks forward, so a row already parked is measured once and re-tested never. A blocker cell is a claim about the tree that was true the day it was written, and a merge changes the tree under every parked row at once rather than under the rows naming it. A row therefore sits on a condition that stopped holding weeks earlier with nothing reporting the gap.
 
-Re-measuring one goes wrong twice over, and both ways return a confident number rather than an error. A count read looser than its consumer defines the shape answers a question nobody asked, and a condition measured against the tree at hand reads as unreachable while it stays live in the corpus a shipped command runs against. Waiting is not evidence either, and a task colliding with everything by construction gets re-measured every pass rather than split.
+Re-measuring one goes wrong twice over, and both ways return a confident number rather than an error. A count read looser than its consumer defines the shape answers a question nobody asked, and a condition measured against the tree at hand reads as unreachable while it stays live in the corpus a shipped command runs against. Waiting is not evidence either, and a task conflicting with everything by construction gets re-measured every pass rather than split.
 
 Writing those plans against the tree alone is the second half, since several branches are already changing the shape a plan describes. A plan carrying a bare path list rather than a constraint per in-flight track leaves the worker guessing which act each path forbids, which is the dangling citation the rule against bare paths already exists to prevent.
 
@@ -39,20 +39,20 @@ The dispatch's return leg is unplaced for the same reason. A reply reaches this 
 
 Both halves of that channel are written here and one of them is performed elsewhere, so a worker owes what nothing it loads states. The review trigger inherits the same asymmetry: firing on a dispatch spends an interval against a building worker that has no pull request, and a trigger matching pull requests alone stays silent through a worker that crashes, which only a roster read the poll script cannot make would catch.
 
-Cost never enters the decision to widen a wave. The rule weighing how many tracks to open measures collision and review attention, and both describe what a worker writes rather than what the loop spends. Claude Code delivers a message from another session as a fresh turn carrying the whole accumulated context, and a recurring poll bills that same window on its own interval, so a wave's spend tracks this session's context rather than the work coming back. The one setting that bounds it reads as available to whoever finds it, and the two values that would bound it break the handback the loop runs on.
+Cost never enters the decision to widen a wave. The rule weighing how many tracks to open measures conflict and review attention, and both describe what a worker writes rather than what the loop spends. Claude Code delivers a message from another session as a fresh turn carrying the whole accumulated context, and a recurring poll bills that same window on its own interval, so a wave's spend tracks this session's context rather than the work coming back. The one setting that bounds it reads as available to whoever finds it, and the two values that would bound it break the handback the loop runs on.
 
 The session also records nothing of what it learns. Both other callers of memory capture are ship-chain skills and this one never ships, so the session taking every operator correction is the session with no moment that writes one down. Hanging that moment on the merge sweep answers it and bills the operator a capture pass per batch of merges while nothing is being built, which is a cost paid on the days shipping is fastest.
 
-Dispatch parts from what it checked in three ways. The gate and the worker each derive the branch from their own reading of one plan and reach different strings, a launched worker inherits its launcher's model rather than the configured default, and a cleared file set does not hold, since a track can cross the set it cleared against and still merge clean.
+Dispatch parts from what it checked in three ways. The gate and the worker each derive the branch from their own reading of one plan and reach different strings, a launched worker inherits its launcher's model rather than the configured default, and a declared file set does not hold, since a track crosses the set its plan named.
 
 ## Must
 
 - Read the priority file for execution order, since the index sorts by filename and states no order
 - Report the state of play so the human knows what to launch, what to review, and what to merge
 - Verify a plan against the tree before handing it over, counting the sites it claims and opening the files it describes
-- List a candidate's file set against every track in flight, and serialize when the sets are not disjoint
-- State what a wave costs in inbound turns beside the collision rule, and name the control that bounds it together with the reason it stays unset, since a lever recorded without its conclusion reads as available to set
-- Place every finding a merged pull request produced against the surface that owns it, and write the board so a row's readiness and disjointness claims stay checkable
+- Hold a candidate only on a dependency, a contract, a relocation, a sweep, or a stated reason, since those predict a conflict a merge cannot settle and a shared file does not
+- State what a wave costs in inbound turns beside the conflict rule, and name the control that bounds it together with the reason it stays unset, since a lever recorded without its conclusion reads as available to set
+- Place every finding a merged pull request produced against the surface that owns it, and write the board so a row's readiness and hold claims stay checkable
 - Place what the return leg carries by what it changes, sending an answer that settles a finding onto the pull request and one that corrects this session's model of the world to the task owning that surface, since neither becomes a record by being read
 - Keep one planned, non-conflicting task in reserve beyond what is running
 - Refill the queue while a wave is still building, rather than on a merge and a thinning list alone, since neither of those fires across the window planning costs nothing
@@ -75,10 +75,10 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Measure a condition the way the code consuming it defines the shape, and settle which tree the condition is about before counting, since both errors return a number rather than a failure
 - Write each re-test into the row and its measurement into that task's Findings, since a result reported in chat is gone at the next compaction and the next pass measures the same thing
 - Plan a row the re-test clears, since a cleared row carrying no plan is one the next pass looks at again
-- Split a task whose file set collides with every other by construction, rather than re-measuring a scoping defect that reads as a blocker
+- Split a task that conflicts with every other by construction, rather than re-measuring a scoping defect that reads as a blocker
 - Check a candidate branch is unclaimed by an existing worktree or a live session before dispatching a background worker for it, since the measured failure this closes is a worker colliding with someone else's work already sitting in the row
-- Dispatch only a candidate whose file set is disjoint from every track in flight, compared at the file path rather than a folder above it, since a count knows nothing about what two workers write
-- Hold a candidate whose sets are disjoint when a stated reason serializes it, and write that reason on the hold, since disjointness is necessary and not sufficient
+- Dispatch a candidate sharing only files with a track in flight and name the shared paths, and have the branch merging second resolve after the first merges, since every source the gate cites tests at integration
+- Write a stated reason on the hold it makes, since two tracks interact in ways no plan reading shows
 - Name each self-dispatched worker explicitly with the `worker-` prefix, since that is the role the name marks and a client-derived name is a fragment of the session's identifier
 - Carry the dispatcher's `sessionId` in the launch prompt, since a worker owed two messages has no property on the roster that resolves a controller and a name goes stale inside the window it builds in
 - Report each self-dispatch and the row it fired against loudly enough to follow, since a person no longer watches the launch step happen
@@ -89,9 +89,9 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 
 - Implement a feature or edit any tracked file from this session, at any size, since the ban offers no proportionality exception
 - Merge. Recommend merge or changes and leave the gate to the human.
-- Spawn a worker with the Agent tool, since an in-process subagent shares this session's context and cannot be steered or reached independently. A dispatched `claude --bg` process is not this: it is a separate session with its own worktree and its own PR, gated by the collision check and the file-set disjointness test.
+- Spawn a worker with the Agent tool, since an in-process subagent shares this session's context and cannot be steered or reached independently. A dispatched `claude --bg` process is not this: it is a separate session with its own worktree and its own PR, gated by the branch check and the conflict check.
 - Hand a worker anything but a plan, because scope lives there
-- Name a count of the defect's extent or the mechanism behind it while filing a row, since this seat measures a defect from where it stands and the planner is the reader who commits to that scope. A blocker re-test, a collision check, and a file set decide whether a row can start rather than how big it is, and they stay.
+- Name a count of the defect's extent or the mechanism behind it while filing a row, since this seat measures a defect from where it stands and the planner is the reader who commits to that scope. A blocker re-test, a branch check, and a conflict check decide whether a row can start rather than how big it is, and they stay.
 - Run a second orchestrator against the same board
 - Promote a task to fill the queue when nothing qualifies. A thin queue is a real answer.
 - Promote a parked row on how long it has waited, since age is not a measurement of the blocker
@@ -106,8 +106,8 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Cross-version sequencing asked for: say no surface carries it, rather than asserting an active version the tree does not state
 - This body dropped from a long session approaching a compaction: name the re-invocation and the runbook paths, since the routing lives in the body and a user-invoked skill routes nothing once it is gone
 - Blocker only an operator can clear: record the row as untestable this pass and name the action owed, rather than re-measuring what no session can move
-- Collision check refuses, with no session registry or no repository resolved: treat the candidate as unverified and fall back to the human-launch line, rather than reading a check that could not run as a clear one
-- Candidate's file set overlaps a track in flight, or a stated reason serializes it: leave the row ready for the next pass, rather than dispatching onto a shared seam
+- Branch check refuses, with no session registry or no repository resolved: treat the candidate as unverified and fall back to the human-launch line, rather than reading a check that could not run as a clear one
+- Candidate holds under the conflict check: leave the row ready and name the hold, rather than dispatching onto a contract still moving
 - Operator states a cap for the session: honor it for that session alone, rather than treating it as a standing rule or writing the number into a file
 
 ## Out of scope
