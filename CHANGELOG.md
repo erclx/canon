@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.28.0](https://github.com/erclx/canon/compare/v5.27.0...v5.28.0) (2026-10-04)
+
+
+### Features
+
+* **canvas:** add a move and pan tool strip, Space pan, and zoom keys ([#2237](https://github.com/erclx/canon/issues/2237)) ([ea162c6](https://github.com/erclx/canon/commit/ea162c6c38f55e0e90940c1f25c48dab780542d3))
+* **canvas:** edit type family, spacing, and alignment ([#2234](https://github.com/erclx/canon/issues/2234)) ([eb8428f](https://github.com/erclx/canon/commit/eb8428f3f1ac989306dfa11566dfe0b8144d30c1))
+* **canvas:** show which session is editing a frame on its label ([#2233](https://github.com/erclx/canon/issues/2233)) ([5026f9d](https://github.com/erclx/canon/commit/5026f9d1442072d8504343cc12c16b0dccacdb51))
+* **claude:** hold a dispatch on a conflict rather than a shared file ([#2235](https://github.com/erclx/canon/issues/2235)) ([dee9119](https://github.com/erclx/canon/commit/dee911957bbf2f706b26b6d83b3b2a7edb589ef1))
+* **claude:** re-test a branch main moved under before it merges ([#2244](https://github.com/erclx/canon/issues/2244)) ([2eafdba](https://github.com/erclx/canon/commit/2eafdba90eb572a0db7e1affdae70cac1ea8aef9))
+* **gate:** queue the tests stage behind another worktree's suite ([#2247](https://github.com/erclx/canon/issues/2247)) ([f8c48ff](https://github.com/erclx/canon/commit/f8c48ff034be930541dc0a7a095cf6bfd5ecd7be))
+* **pr:** fill the comment with the evidence table ([#2248](https://github.com/erclx/canon/issues/2248)) ([15a13c6](https://github.com/erclx/canon/commit/15a13c6f8e2ad591dfe0864592585ee4833f2ffe))
+* **pr:** tick passed checklist boxes and clear unearned ticks ([#2236](https://github.com/erclx/canon/issues/2236)) ([4a8dba8](https://github.com/erclx/canon/commit/4a8dba8f97b74b462ec5e99031f7131962aefd3b))
+* **review-ui:** move frames out of the results table ([#2246](https://github.com/erclx/canon/issues/2246)) ([a1c10b3](https://github.com/erclx/canon/commit/a1c10b35e3e76c1e4ce52bd206d753f40e83bfef))
+* **sandbox:** provision scenarios from TypeScript modules ([#2238](https://github.com/erclx/canon/issues/2238)) ([609a43f](https://github.com/erclx/canon/commit/609a43fc3a61e8896219bf84cfe5baa935c57c62))
+* **standards:** let a plan name a shared path beside a hold ([#2243](https://github.com/erclx/canon/issues/2243)) ([86d7e3c](https://github.com/erclx/canon/commit/86d7e3c1f9228a54c4eeedc9914c50b890a8812b))
+* **tasks:** report shared run now files rather than failing on them ([#2242](https://github.com/erclx/canon/issues/2242)) ([7a7e435](https://github.com/erclx/canon/commit/7a7e435ea28678cb9ee55f664700267711326750))
+
 ## [5.27.0](https://github.com/erclx/canon/compare/v5.26.0...v5.27.0) (2026-10-04)
 
 
