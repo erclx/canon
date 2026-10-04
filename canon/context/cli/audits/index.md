@@ -21,6 +21,6 @@ The aggregate and its baseline, the context and markdown audits, the skill and r
 - [Reports](reports.md): The comment census, the test-order report, the label coverage report, and the key-changes bijection
 - [Restated-instruction sweep](restated.md): The canon gov restated sweep, its asymmetric surfaces, recall-first matching, polarity, and rules read as both subject and candidate
 - [Routing measures](routing.md): The skill routing rank over the case corpus, its tokenizer and unmeasurable cases, and the CLAUDE.md routing report
-- [Skill audit and reach](skills.md): The skill audit with its dated-provenance, practice shape, and reference contents checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
+- [Skill audit and reach](skills.md): The skill audit with its dated-provenance, practice shape, reference contents, and family checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
 - [State-scoped checks](state-scoped.md): The secret scan and the dependency advisory read, which measure what is already committed rather than what is arriving
 - [Superseded-value sweep](superseded.md): The canon gov superseded sweep, its key, its corpus, the replacement annotation, and the derived stem that reaches a family of names

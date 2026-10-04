@@ -1,13 +1,13 @@
 ---
 title: Skill audit and reach
-description: The skill audit with its dated-provenance, practice shape, and reference contents checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
+description: The skill audit with its dated-provenance, practice shape, reference contents, and family checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
 ---
 
 # Skill audit and reach
 
 ## The skill audit
 
-`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `standards/skill-practice.md`, gating on one check and reporting nine, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
+`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `standards/skill-practice.md`, gating on one check and reporting ten, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 
@@ -38,6 +38,14 @@ It reports and never sets the failing exit, for the reason provenance does. The 
 The ninth check reads every file under `references/` for a `## Contents` H2 once it runs past 100 lines, reporting each as `referenceContents`. The threshold is Anthropic's skill authoring guidance for long reference files, and the count is every line of the file the way `wc -l` prints it, frontmatter included, so the number a finding names matches what a reader sees beside it. The heading matches as an exact H2 outside a fence, the same reading the practice sections take, through one shared helper.
 
 It reports and no gate stage reads it, so a reference crossing 100 lines never fails a push. The 300-line document ceiling is the constraint that bites first: three references sat at exactly 300 rendered lines when the check landed, so a contents list there cannot fit until the file splits, and those findings stay open.
+
+### Family
+
+The tenth check reads `metadata.family` from every skill under `claude/skills/` and reports a missing value, or one naming no key in `src/claude/skills-families.ts`, as `family`. The family names the skill map group a skill's row sits under, and the landing page groups its skills field by the field, so the web build is the other reader. An internal skill takes no row and no family, so the check never asks `.claude/skills/` for one.
+
+The vocabulary keeps short keys apart from the map's headings. A heading is prose and a frontmatter value is not, so renaming a heading edits one constant rather than every skill in its group. Family never decides the practice list, which stays a hand list for the reason that section gives.
+
+It reports and never sets the failing exit. The Skill family gate stage fails the same finding here.
 
 ## The citation reach check
 

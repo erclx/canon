@@ -100,6 +100,7 @@ allowed-tools: <tools required>
 - `disable-model-invocation: true`: user-invoked only, Claude will not auto-trigger. Set it on a skill that starts a process the operator owns, never on one reachable by a matched trigger.
 - `allowed-tools`: restrict tool access when the skill is active
 - `metadata`: optional key-value pairs (`author`, `version`, `mcp-server`)
+- `metadata.family` (required on a skill under `claude/skills/`): the skill map group the skill's row sits under, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
 
 ## Description
 
