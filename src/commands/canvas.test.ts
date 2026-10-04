@@ -212,6 +212,118 @@ describe('canon canvas frame move', () => {
   })
 })
 
+describe('canon canvas frame resize', () => {
+  it('should resize a frame and report the box as one JSON record', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas(
+      'frame',
+      'resize',
+      'drafts',
+      'hero',
+      '--width',
+      '800',
+      '--height',
+      '600',
+      '--json',
+    )
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: true,
+      frame: 'hero',
+      box: { x: 0, y: 0, width: 800, height: 600 },
+    })
+    expect(JSON.parse(canvas('list', '--json').stdout)).toMatchObject({
+      pages: [{ frames: [{ name: 'hero', width: 800, height: 600 }] }],
+    })
+  })
+
+  it('should move the frame when given a position with the size', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas(
+      'frame',
+      'resize',
+      'drafts',
+      'hero',
+      '--width',
+      '500',
+      '--x',
+      '-40',
+      '--y',
+      '-20',
+      '--json',
+    )
+
+    expect(JSON.parse(run.stdout).box).toMatchObject({
+      x: -40,
+      y: -20,
+      width: 500,
+    })
+  })
+
+  it('should leave the other axis at the size the frame is', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero', '--width', '390', '--height', '844')
+
+    const run = canvas(
+      'frame',
+      'resize',
+      'drafts',
+      'hero',
+      '--width',
+      '420',
+      '--json',
+    )
+
+    expect(JSON.parse(run.stdout).box).toMatchObject({
+      width: 420,
+      height: 844,
+    })
+  })
+
+  it('should refuse a zero size with exit 1 and a reason', () => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+
+    const run = canvas(
+      'frame',
+      'resize',
+      'drafts',
+      'hero',
+      '--width',
+      '0',
+      '--json',
+    )
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({
+      ok: false,
+      reason: 'invalid-size',
+    })
+  })
+
+  it('should refuse a frame that does not exist', () => {
+    canvas('page', 'add', 'drafts')
+
+    const run = canvas(
+      'frame',
+      'resize',
+      'drafts',
+      'hero',
+      '--width',
+      '10',
+      '--json',
+    )
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
+  })
+})
+
 describe('canon canvas selection', () => {
   it('should report none when nothing is selected', () => {
     const run = canvas('selection', '--json')
