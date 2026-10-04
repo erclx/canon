@@ -11,7 +11,7 @@ Every image and embedded render the landing page and the README carry, and the f
 
 ## Layout
 
-- `web/public/assets/` owns `social-card.png`, the `og:image`, symlinked from the repository's own `assets/evidence/`, where `canon/context/development/evidence.md` records it as a named exception
+- `web/public/assets/` owns `social-card.png`, the `og:image`, symlinked from the repository's own `assets/frames/`, which sits outside the dev evidence folder `canon/context/development/evidence.md` describes
 - `web/public/evidence/` owns the two fixed captures of one pull request the evidence beat shows, prod evidence by the boundary `canon/context/development/evidence.md` states
 - `web/public/previews/` owns build-time renders embedded as `<iframe>` sources, being `design-tokens/` and `teach-workspace/`
 - `web/card-src/` owns the social card route, served by `web/card.config.mjs`
@@ -26,7 +26,7 @@ Every image and embedded render the landing page and the README carry, and the f
 
 The social card is a `draft-identity` composition: the mark on a tile in `FAVICON_COLORS`, the name, `site.tagline`, and an `Eric Le · canon.erclx.dev` byline, matching the operator's other project cards. The hero frame is drawn to be read at page size rather than at thumbnail size, so it is not the card. The dark capture ships as `og:image` with `og:image:width`, `height`, and `alt`, and `social-card-light.png` sits beside it for a place that picks its own image.
 
-`web/public/assets/social-card.png` is a symlink into `assets/evidence/`, not a copy, so one image has one source. The Windows-checkout cost, a plain-text path with no build error, is recorded in `canon/context/tooling/stacks.md`. `assets/evidence/hero.png` stays committed, owned by `regen-hero.ts` and the capture-stamp gate, though no page cites it.
+`web/public/assets/social-card.png` is a symlink into `assets/frames/`, not a copy, so one image has one source. The Windows-checkout cost, a plain-text path with no build error, is recorded in `canon/context/tooling/stacks.md`. `assets/frames/hero.png` stays committed, owned by `regen-hero.ts` and the capture-stamp gate, though no page cites it.
 
 The card route and its config are copied from the `astro` stack rather than synced, since `canon tooling sync astro web --write` would overwrite every other golden config under `web/`. `bun run web:card` serves it on 4421 plus `WORKTREE_PORT_OFFSET`. The route differs from the stack copy in three ways: it emits the Geist face itself, reads the mark, copy, and `FAVICON_COLORS` from their sources, and takes `?theme=light`. The config turns the Astro dev toolbar off, since it paints over the viewport `canon capture` cuts the card from.
 
@@ -50,9 +50,9 @@ The `teach-workspace` preview copies only rendered HTML and CSS, never a workspa
 
 The README carries three images: the mark, the install frame, and `demos/agent-view/demo.gif`. Stills of the landing page's first screen, the catalog ledger, a slide, and the teach listing are left out, because two stated different counts for the same catalogs and the first duplicated the recording's opening frame. The deck and the teach workspace are reached through the `Teach` and `Slides` rows of the domain table.
 
-Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>` on `prefers-color-scheme`. The gif stays dark, clicks `.theme-toggle` in its second beat, and is recorded against `#dispatch` and `#workers`. `assets/brand/mark-accent.svg` and `mark-accent-light.svg` bake each accent in, because `mark.svg` uses `currentColor` and renders black inside an `<img>`. `assets/evidence/arrival.png` stays committed and is retaken by hand in dark mode when the first screen changes, since it has no template, though no README shows it.
+Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>` on `prefers-color-scheme`. The gif stays dark, clicks `.theme-toggle` in its second beat, and is recorded against `#dispatch` and `#workers`. `assets/brand/mark-accent.svg` and `mark-accent-light.svg` bake each accent in, because `mark.svg` uses `currentColor` and renders black inside an `<img>`. `assets/frames/arrival.png` stays committed and is retaken by hand in dark mode when the first screen changes, since it has no template, though no README shows it.
 
 ## Gotchas
 
-- The social card's stamp digests the capture address, not the page, so an edit to `web/card-src/pages/og-card.astro`, to `site` in `copy.ts`, to `assets/brand/mark.svg`, or to `FAVICON_COLORS` leaves the committed PNG stale with every check green. Re-capture both themes through `bun run web:card` after any of them: `canon capture http://127.0.0.1:<port>/og-card --selector .card --out assets/evidence/social-card.png`, and again with `?theme=light` into `social-card-light.png`.
+- The social card's stamp digests the capture address, not the page, so an edit to `web/card-src/pages/og-card.astro`, to `site` in `copy.ts`, to `assets/brand/mark.svg`, or to `FAVICON_COLORS` leaves the committed PNG stale with every check green. Re-capture both themes through `bun run web:card` after any of them: `canon capture http://127.0.0.1:<port>/og-card --selector .card --out assets/frames/social-card.png`, and again with `?theme=light` into `social-card-light.png`.
 - A design-token change moves the capture markup and the stamps and leaves the PNGs byte-identical, because the frames render on the dark ground and never set `data-theme`. The Hero stage is a drift check over `assets/captures/*.html`, so it fails until the regenerated frames are committed, which is the stage working rather than a defect.

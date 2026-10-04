@@ -36,6 +36,6 @@ Before shipping any change under `web/`:
 - `internal/rules/claude/593-landing-page.md`: the page's conventions, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
-- `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/*.png`
+- `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`
 - `canon/context/web/assets.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before adding or moving an image under one
