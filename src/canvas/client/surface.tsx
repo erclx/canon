@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
 import type { JSX, RefObject } from 'preact'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks'
 import { addressOf, documentElements, elementAt } from '@/canvas/address'
 import type { Frame } from '@/canvas/content'
 import { type SurfaceAction, surfaceAction } from '@/canvas/client/keys'
@@ -19,6 +19,7 @@ import {
   hoveredElement,
   moveFrameTo,
   panBy,
+  panelsHidden,
   previewMove,
   previewResize,
   redo,
@@ -32,6 +33,7 @@ import {
   spacePan,
   type Theme,
   toggleFrameTheme,
+  togglePanels,
   undo,
   view,
   zoomAt,
@@ -599,6 +601,21 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     fitViewport(viewportRef)
   }, [page?.name])
 
+  /*
+   * A panel hiding, showing, or resizing moves the viewport's left edge, so
+   * the view shifts by as much the other way and the frames hold still on
+   * screen. Reading the flag subscribes this component to it.
+   */
+  const viewportLeft = useRef<number | undefined>(undefined)
+  const isHidden = panelsHidden.value
+  useLayoutEffect(() => {
+    const left = viewportRef.current?.getBoundingClientRect().left
+    if (left === undefined) return
+    const before = viewportLeft.current
+    viewportLeft.current = left
+    if (before !== undefined && before !== left) panBy(before - left, 0)
+  }, [isHidden])
+
   const handleWheelTurn = (turn: WheelTurn) => {
     if (turn.isZoom) {
       const rect = viewportRef.current?.getBoundingClientRect()
@@ -665,6 +682,9 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
         return
       case 'redo':
         void redo()
+        return
+      case 'panels-toggle':
+        togglePanels()
     }
   }
 

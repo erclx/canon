@@ -14,6 +14,7 @@ export type SurfaceAction =
   | 'pan-release'
   | 'undo'
   | 'redo'
+  | 'panels-toggle'
 
 /** The fields of a `KeyboardEvent` the map reads, so a test needs no DOM. */
 export interface KeyInput {
@@ -50,8 +51,9 @@ function historyAction(event: KeyInput): SurfaceAction | undefined {
 
 /**
  * Space coming up releases whatever is held with it, or a modifier pressed
- * mid-pan would leave the pan stuck. Shift and the 1 key fits by `code`,
- * since the character Shift gives on that key differs by layout.
+ * mid-pan would leave the pan stuck. Shift and the 1 key fits, and the
+ * backslash key toggles the panels, by `code`, since the character each
+ * gives differs by layout.
  */
 export function surfaceAction(event: KeyInput): SurfaceAction | undefined {
   if (event.type === 'keyup') {
@@ -64,5 +66,6 @@ export function surfaceAction(event: KeyInput): SurfaceAction | undefined {
     if (event.code === 'Digit1') return 'zoom-fit'
     return event.key === '+' ? 'zoom-in' : undefined
   }
+  if (event.code === 'Backslash') return 'panels-toggle'
   return PLAIN_KEYS[event.key.toLowerCase()]
 }

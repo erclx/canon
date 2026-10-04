@@ -154,6 +154,7 @@ function failWrites(pages: Page[]): void {
 beforeEach(() => {
   resetState()
   releasePicker()
+  localStorage.clear()
   sent = []
   recordWrites()
   mount = document.createElement('div')
@@ -3658,6 +3659,88 @@ describe('undo', () => {
     expect(mount.querySelector('.history-notice')?.textContent).toContain(
       'Could not undo',
     )
+  })
+})
+
+describe('panel toggle', () => {
+  function shell(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('.shell')
+    if (!element) throw new Error('no shell')
+    return element
+  }
+
+  function surface(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('main.surface')
+    if (!element) throw new Error('no surface')
+    return element
+  }
+
+  function pressBackslash(target: EventTarget): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {
+      key: '\\',
+      code: 'Backslash',
+      bubbles: true,
+      cancelable: true,
+    })
+    act(() => {
+      target.dispatchEvent(event)
+    })
+    return event
+  }
+
+  it('should hide both panels on backslash and show them on the next', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    pressBackslash(surface())
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+    pressBackslash(surface())
+
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should hide and show from a button named by what it does', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Hide panels (\\)').click())
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should leave backslash typed in a field to the field', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const field = document.createElement('input')
+    surface().append(field)
+
+    const event = pressBackslash(field)
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should keep the panels hidden across a remount', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Hide panels (\\)').click())
+    act(() => render(null, mount))
+    resetState()
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+  })
+
+  it('should show a selection made while hidden once the panels return', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Hide panels (\\)').click())
+
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(
+      mount.querySelector('[aria-label="Details"]')?.textContent,
+    ).toContain('hero')
   })
 })
 

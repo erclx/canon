@@ -587,6 +587,16 @@ code {
   }
 }
 
+/* Two classes outrank every width's own columns, so hiding holds at each. */
+.shell.panels-hidden {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.shell.panels-hidden > .panel {
+  display: none;
+}
+
 .frame-row {
   display: flex;
   align-items: center;

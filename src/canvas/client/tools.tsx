@@ -3,9 +3,11 @@ import type { JSX } from 'preact'
 import {
   activeTool,
   history,
+  panelsHidden,
   redo,
   shownTool,
   type Tool,
+  togglePanels,
   undo,
 } from '@/canvas/client/state'
 
@@ -118,6 +120,29 @@ export function ToolStrip(): JSX.Element {
           {icon}
         </button>
       ))}
+      <span class="tools-divider" aria-hidden="true" />
+      <PanelsButton />
     </div>
+  )
+}
+
+/** Named by what a press does now, so the panels come back by mouse too. */
+function PanelsButton(): JSX.Element {
+  const name = panelsHidden.value ? 'Show panels' : 'Hide panels'
+  return (
+    <button
+      type="button"
+      class="tool-button"
+      aria-label={`${name} (\\)`}
+      aria-keyshortcuts="\\"
+      title={`${name} (\\)`}
+      data-panels={panelsHidden.value ? 'hidden' : 'shown'}
+      onClick={togglePanels}
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="2" y="3" width="12" height="10" rx="1.5" />
+        {panelsHidden.value ? null : <path d="M5.5 3v10M10.5 3v10" />}
+      </svg>
+    </button>
   )
 }

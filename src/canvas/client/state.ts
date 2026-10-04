@@ -135,6 +135,13 @@ export const writeError = signal<string | undefined>(undefined)
 
 export const leftTab = signal<LeftTab>('pages')
 
+/** Whether the operator hid both side panels to see the whole surface. */
+export const panelsHidden = signal(false)
+
+export function togglePanels(): void {
+  panelsHidden.value = !panelsHidden.value
+}
+
 /** The tool the strip has lit, which a Space pan overrides while held. */
 export const activeTool = signal<Tool>('move')
 
@@ -727,4 +734,5 @@ export function resetState(): void {
   editedHashes.value = new Map()
   history.value = NO_HISTORY
   historyNotice.value = undefined
+  panelsHidden.value = false
 }

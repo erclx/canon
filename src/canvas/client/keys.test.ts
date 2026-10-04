@@ -150,4 +150,22 @@ describe('surfaceAction', () => {
       ),
     ).toBeUndefined()
   })
+
+  it('should toggle the panels on backslash', () => {
+    expect(surfaceAction(key({ key: '\\', code: 'Backslash' }))).toBe(
+      'panels-toggle',
+    )
+  })
+
+  it('should toggle the panels on the backslash key whatever character a layout gives it', () => {
+    expect(surfaceAction(key({ key: '#', code: 'Backslash' }))).toBe(
+      'panels-toggle',
+    )
+  })
+
+  it('should leave Ctrl and backslash to the browser', () => {
+    expect(
+      surfaceAction(key({ key: '\\', code: 'Backslash', ctrlKey: true })),
+    ).toBeUndefined()
+  })
 })

@@ -1,9 +1,15 @@
 /** @jsxImportSource preact */
+import { effect } from '@preact/signals'
 import type { JSX } from 'preact'
-import { useRef } from 'preact/hooks'
+import { useLayoutEffect, useRef } from 'preact/hooks'
 import { Inspector } from '@/canvas/client/inspector'
 import { PagesPanel } from '@/canvas/client/pages-panel'
-import { currentPage, focusFrame, tokens } from '@/canvas/client/state'
+import {
+  currentPage,
+  focusFrame,
+  panelsHidden,
+  tokens,
+} from '@/canvas/client/state'
 import { Surface } from '@/canvas/client/surface'
 
 const SOURCE_LABEL = {
@@ -66,10 +72,51 @@ function PageDetails(): JSX.Element | null {
   )
 }
 
+const PANELS_KEY = 'canon-canvas-panels'
+
+interface StoredPanels {
+  readonly hidden: boolean
+}
+
+/** What the last visit left, with anything unreadable read as the default. */
+function readStoredPanels(): StoredPanels {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(PANELS_KEY) ?? '{}')
+    const record =
+      typeof parsed === 'object' && parsed !== null
+        ? (parsed as Record<string, unknown>)
+        : {}
+    return { hidden: record.hidden === true }
+  } catch {
+    return { hidden: false }
+  }
+}
+
+function storePanels(panels: StoredPanels): void {
+  try {
+    localStorage.setItem(PANELS_KEY, JSON.stringify(panels))
+  } catch {
+    /* A blocked store costs the remembered layout, nothing else. */
+  }
+}
+
+/**
+ * Restores the panels the last visit left and stores each change, the way the
+ * theme pick is kept. The read lands before the first paint, so a hidden
+ * layout never flashes open.
+ */
+function usePanelPreference(): void {
+  useLayoutEffect(() => {
+    panelsHidden.value = readStoredPanels().hidden
+    return effect(() => storePanels({ hidden: panelsHidden.value }))
+  }, [])
+}
+
 export function App(): JSX.Element {
   const viewportRef = useRef<HTMLDivElement>(null)
+  usePanelPreference()
   return (
-    <div class="shell">
+    <div class={panelsHidden.value ? 'shell panels-hidden' : 'shell'}>
       <PagesPanel
         onFocusFrame={(frame) => {
           const rect = viewportRef.current?.getBoundingClientRect()
