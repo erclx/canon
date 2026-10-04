@@ -11,6 +11,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { IMPLIED_ATTRIBUTE, TOKENS_ATTRIBUTE } from '@/canvas/address'
+import { moveFrame } from '@/canvas/content'
+import { editFrameAtIndex } from '@/canvas/edit'
 import { EDITING_FILE, EDITING_TTL_MS, markEditing } from '@/canvas/editing'
 import { type CanvasStarted, injectTokens, startCanvas } from '@/canvas/server'
 import { SERVE_HOST } from '@/serve/static'
@@ -901,5 +903,178 @@ describe('editing marks', () => {
     expect(await events.until(EDITING_FILE)).toContain(
       `{"page":"${EDITING_FILE}","file":""}`,
     )
+  })
+})
+
+async function historyFlags(server: CanvasStarted): Promise<unknown> {
+  return (await (await get(server, '/api/pages')).json()).history
+}
+
+describe('undo history', () => {
+  it('should report nothing to undo before any edit', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    expect(await historyFlags(server)).toEqual({
+      canUndo: false,
+      canRedo: false,
+    })
+  })
+
+  it('should undo a shell edit and report it can redo', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+    await post(server, '/api/frames/edit', editBody())
+
+    const response = await post(server, '/api/history/undo', {})
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      ok: true,
+      outcome: 'applied',
+      history: { canUndo: false, canRedo: true },
+    })
+    expect(frameFile('drafts', 'hero')).toBe(EDIT_FRAME)
+  })
+
+  it('should redo an undone edit', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+    await post(server, '/api/frames/edit', editBody())
+    const edited = frameFile('drafts', 'hero')
+    await post(server, '/api/history/undo', {})
+
+    const response = await post(server, '/api/history/redo', {})
+
+    expect(await response.json()).toMatchObject({ outcome: 'applied' })
+    expect(frameFile('drafts', 'hero')).toBe(edited)
+  })
+
+  it('should merge two edits sharing a step into one undo', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+    const first = await post(
+      server,
+      '/api/frames/edit',
+      editBody({ property: 'width', value: '10px', step: 'drag' }),
+    )
+    const { hash } = await first.json()
+    await post(
+      server,
+      '/api/frames/edit',
+      editBody({
+        element: { index: 3, tag: 'h1', count: 4, hash },
+        property: 'height',
+        value: '20px',
+        step: 'drag',
+      }),
+    )
+
+    await post(server, '/api/history/undo', {})
+
+    expect(frameFile('drafts', 'hero')).toBe(EDIT_FRAME)
+    expect(await historyFlags(server)).toEqual({
+      canUndo: false,
+      canRedo: true,
+    })
+  })
+
+  it('should drop the entry and write nothing once the element changed', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+    await post(server, '/api/frames/edit', editBody())
+    const rewritten = frameFile('drafts', 'hero').replace('blue', 'green')
+    seed('drafts/hero.html', rewritten)
+
+    const response = await post(server, '/api/history/undo', {})
+
+    expect(await response.json()).toEqual({
+      ok: true,
+      outcome: 'dropped',
+      history: { canUndo: false, canRedo: false },
+    })
+    expect(frameFile('drafts', 'hero')).toBe(rewritten)
+  })
+
+  it('should record nothing for a refused edit', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    await post(server, '/api/frames/edit', editBody({ property: 'margin' }))
+
+    expect(await historyFlags(server)).toMatchObject({ canUndo: false })
+  })
+
+  it('should record nothing for an edit made outside the server', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    editFrameAtIndex(ROOT, 'drafts', 'hero', 3, {
+      property: 'color',
+      value: 'blue',
+    })
+
+    expect(await historyFlags(server)).toMatchObject({ canUndo: false })
+  })
+
+  it('should undo a frame move and drop the box restore once the layout moved on', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    seed(
+      'drafts/layout.json',
+      JSON.stringify({
+        frames: { hero: { x: 0, y: 0, width: 400, height: 300 } },
+      }),
+    )
+    const server = start()
+    await post(server, '/api/frames/move', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 50,
+      y: 60,
+    })
+    await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 50,
+      y: 60,
+      width: 200,
+      height: 100,
+    })
+
+    await post(server, '/api/history/undo', {})
+    expect(layoutOf('drafts').frames.hero).toEqual({
+      x: 50,
+      y: 60,
+      width: 400,
+      height: 300,
+    })
+    moveFrame(ROOT, 'drafts', 'hero', { x: 90, y: 90 })
+    const response = await post(server, '/api/history/undo', {})
+
+    expect(await response.json()).toMatchObject({ outcome: 'dropped' })
+    expect(layoutOf('drafts').frames.hero).toMatchObject({ x: 90, y: 90 })
+  })
+
+  it('should answer empty when there is nothing to undo', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(server, '/api/history/undo', {})
+
+    expect(await response.json()).toMatchObject({ outcome: 'empty' })
+  })
+
+  it('should refuse an undo another origin sent', async () => {
+    seed('drafts/hero.html', EDIT_FRAME)
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/history/undo',
+      {},
+      { origin: 'https://evil.example' },
+    )
+
+    expect(response.status).toBe(403)
   })
 })

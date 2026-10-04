@@ -7,6 +7,7 @@ import {
   TOKENS_ATTRIBUTE,
 } from '@/canvas/address'
 import {
+  type BoxObserver,
   type ContentRefused,
   canvasDir,
   contentHash,
@@ -15,11 +16,18 @@ import {
   moveFrame,
   readSelection,
   resizeFrame,
+  restoreBox,
   TEMP_SUFFIX,
   writeSelection,
 } from '@/canvas/content'
-import { type EditRefused, editFrame } from '@/canvas/edit'
+import { type EditRefused, editFrame, restoreElement } from '@/canvas/edit'
 import { readEditing } from '@/canvas/editing'
+import {
+  type ApplyResult,
+  type Direction,
+  History,
+  type HistoryEntry,
+} from '@/canvas/history'
 import {
   resolveFrameTokens,
   type TokenOptions,
@@ -311,6 +319,59 @@ function isLoopbackOrigin(origin: string, port: number): boolean {
   )
 }
 
+/**
+ * Writes one entry back through the writer that recorded it. A busy lock
+ * keeps the entry for another try, and any other refusal means the target
+ * moved on or went, so the entry drops.
+ */
+function applyEntry(
+  root: string,
+  entry: HistoryEntry,
+  direction: Direction,
+): ApplyResult {
+  const isUndo = direction === 'undo'
+  const outcome =
+    entry.kind === 'element'
+      ? restoreElement(
+          root,
+          entry.page,
+          entry.frame,
+          entry,
+          isUndo ? entry.after : entry.before,
+          isUndo ? entry.before : entry.after,
+        )
+      : restoreBox(
+          root,
+          entry.page,
+          entry.frame,
+          isUndo ? entry.after : entry.before,
+          isUndo ? entry.before : entry.after,
+        )
+  if (outcome.ok) return 'applied'
+  return outcome.reason === 'busy' ? 'busy' : 'dropped'
+}
+
+function stepHistory(
+  root: string,
+  history: History,
+  direction: Direction,
+): Response {
+  const apply = (entry: HistoryEntry) => applyEntry(root, entry, direction)
+  const outcome =
+    direction === 'undo' ? history.undo(apply) : history.redo(apply)
+  if (outcome === 'busy') {
+    return json(
+      {
+        ok: false,
+        reason: 'busy',
+        detail: 'the file is being written, try again',
+      },
+      409,
+    )
+  }
+  return json({ ok: true, outcome, history: history.flags() })
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
@@ -444,6 +505,16 @@ export function startCanvas(
     embedFonts: true,
   })
   const changes = new ChangeStream(content)
+  /*
+   * Held here and written only by the shell's write routes, so an edit a CLI
+   * verb makes in its own process never enters it.
+   */
+  const history = new History()
+  const recordBox =
+    (page: string, frame: string): BoxObserver =>
+    (before, after) => {
+      history.record({ kind: 'box', page, frame, before, after })
+    }
   const first = options.port ?? CANVAS_PORT
 
   let bound: ReturnType<typeof bindFirstFree>
@@ -487,8 +558,15 @@ export function startCanvas(
               editing: readEditing(root, new Date()).map(
                 ({ page, frame, by, until }) => ({ page, frame, by, until }),
               ),
+              history: history.flags(),
             })
           }),
+          '/api/history/undo': {
+            POST: guarded(mutation(() => stepHistory(root, history, 'undo'))),
+          },
+          '/api/history/redo': {
+            POST: guarded(mutation(() => stepHistory(root, history, 'redo'))),
+          },
           '/api/frames/move': {
             POST: guarded(
               mutation((body) => {
@@ -501,10 +579,14 @@ export function startCanvas(
                 ) {
                   return badBody('send page, frame, x, and y')
                 }
-                const outcome = moveFrame(root, body.page, body.frame, {
-                  x: body.x,
-                  y: body.y,
-                })
+                const { page, frame } = body
+                const outcome = moveFrame(
+                  root,
+                  page,
+                  frame,
+                  { x: body.x, y: body.y },
+                  recordBox(page, frame),
+                )
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),
             ),
@@ -523,12 +605,19 @@ export function startCanvas(
                 ) {
                   return badBody('send page, frame, x, y, width, and height')
                 }
-                const outcome = resizeFrame(root, body.page, body.frame, {
-                  x: body.x,
-                  y: body.y,
-                  width: body.width,
-                  height: body.height,
-                })
+                const { page, frame } = body
+                const outcome = resizeFrame(
+                  root,
+                  page,
+                  frame,
+                  {
+                    x: body.x,
+                    y: body.y,
+                    width: body.width,
+                    height: body.height,
+                  },
+                  recordBox(page, frame),
+                )
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),
             ),
@@ -557,14 +646,30 @@ export function startCanvas(
                     'send an element as index, tag, count, and the hash it was served with',
                   )
                 }
+                const { page, frame, step } = body
+                if (step !== undefined && typeof step !== 'string') {
+                  return badBody('send step as a string, or leave it out')
+                }
                 const outcome = editFrame(
                   root,
-                  body.page,
-                  body.frame,
+                  page,
+                  frame,
                   element,
                   {
                     property: body.property,
                     value: body.value,
+                  },
+                  ({ before, after }) => {
+                    history.record({
+                      kind: 'element',
+                      page,
+                      frame,
+                      index: element.index,
+                      tag: element.tag,
+                      before,
+                      after,
+                      ...(step !== undefined && { step }),
+                    })
                   },
                 )
                 return outcome.ok ? json(outcome) : refusal(outcome)

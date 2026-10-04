@@ -420,10 +420,10 @@ export interface Position {
 }
 
 /**
- * Hears the box a write replaced, undefined when the layout held none, apart
- * from the returned record, which the CLI prints.
+ * Hears the box a write replaced, undefined when the layout held none, and the
+ * box it wrote, apart from the returned record, which the CLI prints.
  */
-export type BoxObserver = (replaced: Box | undefined) => void
+export type BoxObserver = (replaced: Box | undefined, written: Box) => void
 
 /**
  * Moves one frame and keeps its size. A frame the layout never named takes the
@@ -467,7 +467,7 @@ export function moveFrame(
     }
 
     writeLayout(dir, new Map([...boxes, [frame, box]]))
-    observe?.(boxes.get(frame))
+    observe?.(boxes.get(frame), box)
     return { ok: true, page, frame, file, box }
   })
 }
@@ -518,7 +518,7 @@ export function resizeFrame(
     }
 
     writeLayout(dir, new Map([...boxes, [frame, written]]))
-    observe?.(boxes.get(frame))
+    observe?.(boxes.get(frame), written)
     return { ok: true, page, frame, file, box: written }
   })
 }
@@ -541,14 +541,15 @@ export type BoxRestore =
 
 /**
  * Writes a recorded box back under the layout lock, only while the layout
- * still holds the box the record expects. Restoring to no box drops the
- * frame's entry, so the reader places it in the default row again.
+ * still holds the box the record expects, where undefined expects none.
+ * Restoring to no box drops the frame's entry, so the reader places it in the
+ * default row again.
  */
 export function restoreBox(
   root: string,
   page: string,
   frame: string,
-  expected: Box,
+  expected: Box | undefined,
   to: Box | undefined,
 ): BoxRestore {
   const dir = pagePath(root, page)
