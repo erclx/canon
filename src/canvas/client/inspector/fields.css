@@ -130,8 +130,7 @@
 
 /*
  * A color is one field: a swatch leading in the glyph's lane, the hex, and the
- * opacity right-aligned. The picker opens in the flow under it, so it can never
- * reach past the panel's edge or scroll it sideways.
+ * opacity right-aligned, with the tokens and the eyedropper trailing the row.
  */
 .color-field {
   min-width: 0;
@@ -246,15 +245,218 @@
   user-select: none;
 }
 
-.color-picker {
+/*
+ * The picker and the token list float beside the panel, in the top layer
+ * where the browser has one. The panel scrolls and clips, so neither sits in
+ * its flow. The script places each at fixed coordinates inside the window, and
+ * the caps below hold a window too small for the whole picker.
+ */
+.color-popover {
+  position: fixed;
+  inset: auto;
+  z-index: 10;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  margin: 0;
+  padding: var(--space-sm);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-chrome);
+  color: var(--color-text);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.color-popover.is-tokens {
+  width: 14rem;
+  padding: var(--space-xs);
+}
+
+.picker {
+  --picker-hue: red;
+  --picker-solid: transparent;
+  display: grid;
+  grid-template-columns: 14rem 14px 14px 13rem;
+  gap: var(--space-sm);
+  align-items: stretch;
+}
+
+/*
+ * The area draws white to the hue left to right, then black over it bottom
+ * to top, so a point reads as saturation across and brightness up.
+ */
+.picker-area {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-action);
+  background:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, var(--picker-hue));
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.picker-thumb {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.picker-slider {
+  appearance: none;
+  width: 14px;
+  height: 100%;
+  margin: 0;
+  border-radius: var(--radius-action);
+  writing-mode: vertical-lr;
+  cursor: pointer;
+}
+
+/* Hue runs red at the top through the wheel and back to red at the foot. */
+.picker-hue {
+  background: linear-gradient(
+    to bottom,
+    #f00,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00
+  );
+}
+
+/* Alpha runs opaque at the top to clear at the foot, over a checker. */
+.picker-alpha {
+  direction: rtl;
+  background-image:
+    linear-gradient(to bottom, var(--picker-solid), transparent),
+    linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-border) 75%);
+  background-size:
+    auto,
+    8px 8px,
+    8px 8px,
+    8px 8px,
+    8px 8px;
+  background-position:
+    0 0,
+    0 0,
+    0 4px,
+    4px -4px,
+    -4px 0;
+}
+
+.picker-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 6px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+
+.picker-slider::-moz-range-thumb {
+  width: 10px;
+  height: 2px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5);
+}
+
+.picker-side {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  margin-top: var(--space-xs);
-  padding: var(--space-xs);
+  min-width: 0;
+}
+
+.picker-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 3.5rem;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-action);
-  background: var(--color-chrome);
+}
+
+/* Each half paints over the checker, so an alpha below full reads as one. */
+.picker-previous,
+.picker-new {
+  --paint: transparent;
+  padding: 0;
+  border: 0;
+  background-image:
+    linear-gradient(var(--paint), var(--paint)),
+    linear-gradient(45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-border) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-border) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-border) 75%);
+  background-size:
+    auto,
+    8px 8px,
+    8px 8px,
+    8px 8px,
+    8px 8px;
+  background-position:
+    0 0,
+    0 0,
+    0 4px,
+    4px -4px,
+    -4px 0;
+}
+
+.picker-previous {
+  cursor: pointer;
+}
+
+.picker-compare-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.picker-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border-radius: var(--radius-action);
+}
+
+.picker-channel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.picker-number {
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px var(--space-xs);
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.picker-letter {
+  color: var(--color-muted);
+  font-size: 0.75em;
+  text-align: center;
+  user-select: none;
 }
 
 .token-list {
@@ -289,4 +491,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* A trailing icon on the color row, square at the row's height. */
+.color-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.color-icon:hover,
+.color-icon[aria-expanded='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.color-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.color-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }

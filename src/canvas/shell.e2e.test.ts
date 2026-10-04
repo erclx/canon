@@ -284,25 +284,39 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect([first, second]).toEqual([0, 0])
   }, 30_000)
 
-  it('should open the color picker inside the details panel in both themes', async () => {
+  it('should open the full picker inside the window in both themes', async () => {
     const swatch = page.getByRole('button', { name: 'background picker' })
-    const picker = page.getByRole('dialog', { name: 'background colors' })
-    const panel = page.locator('.panel-right')
+    const picker = page.getByRole('dialog', { name: 'background color' })
     const toggle = page.getByRole('button', {
       name: /^Switch to (light|dark) theme$/,
     })
-    /* Opens the picker, captures it, and closes it from the keyboard. */
+    /*
+     * Opens the picker, captures it, and closes it from the keyboard. Returns
+     * how far it reaches past the window on each side, the page's own
+     * sideways scroll, and how far it covers the details panel, all of which
+     * should be zero or less.
+     */
     const capture = async (shot: string) => {
       await swatch.click()
       await expect
-        .poll(() => picker.getByRole('option').allInnerTexts())
-        .toEqual(['--color-ink', '--color-clay'])
-      const overflow = await panel.evaluate(
-        (element) => element.scrollWidth - element.clientWidth,
-      )
-      await panel.screenshot({ path: join(SHOTS, shot) })
+        .poll(() => picker.getByRole('slider').count())
+        .toBeGreaterThan(0)
+      const reach = await picker.evaluate((element) => {
+        const box = element.getBoundingClientRect()
+        const root = document.documentElement
+        const panel = document.querySelector('.panel-right')
+        return [
+          -box.left,
+          -box.top,
+          box.right - root.clientWidth,
+          box.bottom - root.clientHeight,
+          root.scrollWidth - root.clientWidth,
+          box.right - (panel?.getBoundingClientRect().left ?? box.right),
+        ].map((value) => Math.max(0, Math.ceil(value)))
+      })
+      await page.screenshot({ path: join(SHOTS, shot) })
       await page.keyboard.press('Escape')
-      return overflow
+      return reach
     }
 
     const first = await capture('picker-a.png')
@@ -313,10 +327,62 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     const second = await capture('picker-b.png')
     await toggle.click()
 
-    expect([first, second]).toEqual([0, 0])
+    expect([first, second]).toEqual([
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+    ])
     expect(isSwatchFocused).toBe(true)
     expect(await picker.count()).toBe(0)
   }, 30_000)
+
+  it('should track the first drag on the alpha strip after opening', async () => {
+    await page.getByRole('button', { name: 'background picker' }).click()
+    const alpha = page
+      .getByRole('dialog', { name: 'background color' })
+      .getByRole('slider', { name: 'alpha' })
+    const box = await alpha.boundingBox()
+    if (!box) throw new Error('the alpha strip has no box')
+    const x = box.x + box.width / 2
+    const edits: string[] = []
+    const record = (request: { url(): string; method(): string }) => {
+      if (
+        request.url().endsWith('/api/frames/edit') &&
+        request.method() === 'POST'
+      ) {
+        edits.push(request.url())
+      }
+    }
+    page.on('request', record)
+
+    // Pressed on the track below the thumb, where the range fires its first
+    // input before focus leaves the area, so the area's blur sees a session
+    // it did not open.
+    await page.mouse.move(x, box.y + box.height * 0.2)
+    await page.mouse.down()
+    for (const step of [0.4, 0.6, 0.8, 0.95]) {
+      await page.mouse.move(x, box.y + box.height * step)
+    }
+    const during = await alpha.inputValue()
+    const postedMidDrag = edits.length
+    await page.keyboard.press('Escape')
+    await page.mouse.up()
+    page.off('request', record)
+
+    expect([Number(during) < 20, postedMidDrag]).toEqual([true, 0])
+  }, 30_000)
+
+  it('should list the color tokens behind the tokens icon', async () => {
+    const list = page.getByRole('dialog', { name: 'background token list' })
+
+    await page.getByRole('button', { name: 'background tokens' }).click()
+
+    await expect
+      .poll(() => list.getByRole('option').allInnerTexts())
+      .toEqual(['--color-ink', '--color-clay'])
+    await page.screenshot({ path: join(SHOTS, 'tokens.png') })
+    await page.keyboard.press('Escape')
+    expect(await list.count()).toBe(0)
+  })
 
   it('should keep a picked token following the frame theme', async () => {
     const [response] = await Promise.all([
@@ -326,9 +392,9 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
           sent.request().method() === 'POST',
       ),
       (async () => {
-        await page.getByRole('button', { name: 'background picker' }).click()
+        await page.getByRole('button', { name: 'background tokens' }).click()
         await page
-          .getByRole('dialog', { name: 'background colors' })
+          .getByRole('dialog', { name: 'background token list' })
           .getByRole('option', { name: '--color-clay' })
           .click()
       })(),
@@ -368,10 +434,10 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     )
   }, 45_000)
 
-  it('should keep focus on the swatch after a keyboard pick reloads the frame', async () => {
-    await page.getByRole('button', { name: 'background picker' }).focus()
+  it('should keep focus on the tokens icon after a keyboard pick reloads the frame', async () => {
+    await page.getByRole('button', { name: 'background tokens' }).focus()
     // Pressed back to back with no wait, since a key typed straight after the
-    // one that opened the picker has to reach the list rather than the swatch.
+    // one that opened the list has to reach it rather than the icon.
     await page.keyboard.press('Enter')
     await page.keyboard.press('ArrowUp')
     const [response] = await Promise.all([
@@ -397,7 +463,58 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
         ],
         { timeout: 15_000 },
       )
-      .toEqual(['--color-ink', 'background picker'])
+      .toEqual(['--color-ink', 'background tokens'])
+  }, 45_000)
+
+  it('should post one edit for a drag across the area', async () => {
+    const edits: string[] = []
+    const record = (request: { url(): string; method(): string }) => {
+      if (
+        request.url().endsWith('/api/frames/edit') &&
+        request.method() === 'POST'
+      ) {
+        edits.push(request.url())
+      }
+    }
+    await page.getByRole('button', { name: 'background picker' }).click()
+    const area = page
+      .getByRole('dialog', { name: 'background color' })
+      .getByRole('slider', { name: 'saturation and brightness' })
+    const box = await area.boundingBox()
+    if (!box) throw new Error('the area has no box')
+    page.on('request', record)
+
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.2)
+    await page.mouse.down()
+    for (const step of [0.35, 0.5, 0.65, 0.8]) {
+      await page.mouse.move(box.x + box.width * step, box.y + box.height * step)
+    }
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/frames/edit') &&
+          sent.request().method() === 'POST',
+      ),
+      page.mouse.up(),
+    ])
+    // The reload settles before the count is read, so a second write would
+    // land, and the picker reopens on the reloaded frame.
+    const field = page.getByRole('textbox', { name: 'background', exact: true })
+    await expect
+      .poll(
+        async () => [
+          await field.inputValue({ timeout: 2_000 }).catch(() => ''),
+          await page.getByRole('dialog', { name: 'background color' }).count(),
+        ],
+        { timeout: 15_000 },
+      )
+      .toEqual([expect.stringMatching(/^[0-9a-f]{6}$/), 1])
+    await page.screenshot({ path: join(SHOTS, 'picker-drag.png') })
+    page.off('request', record)
+    await page.keyboard.press('Escape')
+
+    expect(response.status()).toBe(200)
+    expect(edits).toHaveLength(1)
   }, 45_000)
 
   it('should list tokens on the Theme tab', async () => {

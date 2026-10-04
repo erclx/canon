@@ -1,11 +1,20 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { useLayoutEffect, useRef, useState } from 'preact/hooks'
+import type { ScrubSession } from '@/canvas/client/inspector/field'
+import {
+  ColorInputs,
+  currentOpacity,
+} from '@/canvas/client/inspector/color-inputs'
+import {
+  ColorPicker,
+  isPickerHeld,
+  releasePicker,
+} from '@/canvas/client/inspector/color-picker'
 import {
   composeColor,
   type ParsedColor,
   readHex,
-  readOpacity,
 } from '@/canvas/client/inspector/values'
 
 interface ColorFieldProps {
@@ -15,144 +24,42 @@ interface ColorFieldProps {
   readonly color: ParsedColor | undefined
   /** The value as written, shown when `color` is undefined. */
   readonly text: string
+  /** The element's own inline value, empty where none stands. */
+  readonly inline: string
   /** The color the browser paints, which fills the swatch. */
   readonly painted: string
   /** The color tokens in the order the token sheet sorts them. */
   readonly tokens: readonly string[]
-  /** The color a token paints in the frame, read when the picker opens. */
+  /** The color a token paints in the frame, read when the list opens. */
   readonly paint: (name: string) => string
+  /** The frame, element, and property, so a reload reopens the right picker. */
+  readonly owner: string
   readonly isRaw: boolean
   readonly isBusy: boolean
-  readonly onCommit: (value: string) => void
-}
-
-function shownHex(color: ParsedColor | undefined, text: string): string {
-  if (!color) return text
-  if (color.kind === 'none') return ''
-  return color.kind === 'token' ? color.name : color.hex
-}
-
-function shownOpacity(color: ParsedColor | undefined): string {
-  return color && color.kind !== 'none' ? String(color.opacity) : ''
-}
-
-function currentOpacity(color: ParsedColor | undefined): number {
-  return color && color.kind !== 'none' ? color.opacity : 100
-}
-
-/**
- * What a typed hex writes. A token name typed whole picks the token, and any
- * other text goes through as written, which the panel then marks raw.
- */
-function fromTyped(typed: string, opacity: number): string {
-  const hex = readHex(typed)
-  if (hex) {
-    return composeColor({
-      kind: 'hex',
-      hex: hex.hex,
-      opacity: hex.opacity ?? opacity,
-    })
-  }
-  if (/^--[\w-]+$/.test(typed)) {
-    return composeColor({ kind: 'token', name: typed, opacity })
-  }
-  return typed
-}
-
-interface ColorInputsProps {
-  readonly hexLabel: string
-  readonly opacityLabel: string
-  readonly color: ParsedColor | undefined
-  readonly text: string
-  readonly isBusy: boolean
+  /** Opens a session previewing into the frame, where the element takes one. */
+  readonly preview?: () => ScrubSession
   readonly onCommit: (value: string) => void
 }
 
 /**
- * The hex and the opacity. Each commits on change and posts nothing when the
- * value is what it started at, or an opacity outside 0 to 100.
- */
-function ColorInputs({
-  hexLabel,
-  opacityLabel,
-  color,
-  text,
-  isBusy,
-  onCommit,
-}: ColorInputsProps): JSX.Element {
-  const hex = shownHex(color, text)
-  const opacity = shownOpacity(color)
-  return (
-    <>
-      <input
-        class={
-          color === undefined
-            ? 'glyph-field-input is-text'
-            : color.kind === 'token'
-              ? 'glyph-field-input is-token'
-              : 'glyph-field-input'
-        }
-        type="text"
-        aria-label={hexLabel}
-        title={hex}
-        defaultValue={hex}
-        placeholder="None"
-        disabled={isBusy}
-        spellcheck={false}
-        onChange={(event) => {
-          const typed = event.currentTarget.value.trim()
-          if (typed === '' || typed === hex) return
-          onCommit(fromTyped(typed, currentOpacity(color)))
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') event.currentTarget.value = hex
-        }}
-      />
-      <input
-        class="color-opacity"
-        type="text"
-        inputMode="numeric"
-        aria-label={opacityLabel}
-        defaultValue={opacity}
-        disabled={isBusy || !color || color.kind === 'none'}
-        spellcheck={false}
-        onChange={(event) => {
-          const percent = readOpacity(event.currentTarget.value)
-          if (
-            percent === undefined ||
-            !color ||
-            color.kind === 'none' ||
-            percent === color.opacity
-          ) {
-            event.currentTarget.value = opacity
-            return
-          }
-          onCommit(composeColor({ ...color, opacity: percent }))
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') event.currentTarget.value = opacity
-        }}
-      />
-      {opacity ? (
-        <span class="color-percent" aria-hidden="true">
-          %
-        </span>
-      ) : null}
-    </>
-  )
-}
-
-/**
- * The swatch whose picker last wrote a value, so it takes focus back each time
- * the frame reloads. A saved edit remounts the inspector, once for the edit and
- * again when the file watcher reports the write, and each remount replaces the
- * swatch that held focus and drops it to the page. It holds until focus lands
- * anywhere else.
+ * The accessible name of the row control that last wrote a value, so it takes
+ * focus back each time the frame reloads. A saved edit remounts the inspector,
+ * once for the edit and again when the file watcher reports the write, and each
+ * remount replaces the control that held focus and drops it to the page. It
+ * holds until focus lands anywhere else.
  */
 let refocus: string | undefined
 
 function swatchLabel(label: string): string {
   return `${label} picker`
+}
+
+function tokensLabel(label: string): string {
+  return `${label} tokens`
+}
+
+function eyedropperLabel(label: string): string {
+  return `${label} eyedropper`
 }
 
 if (typeof document !== 'undefined') {
@@ -161,28 +68,87 @@ if (typeof document !== 'undefined') {
     const target = event.target
     const name =
       target instanceof Element ? target.getAttribute('aria-label') : null
-    if (name !== swatchLabel(refocus)) refocus = undefined
+    if (name !== refocus) refocus = undefined
   })
 }
 
+/** The screen sampler, where the browser ships one. */
+function eyeDropper(): (new () => EyeDropperSampler) | undefined {
+  return typeof window === 'undefined' ? undefined : window.EyeDropper
+}
+
+type Open = 'picker' | 'tokens' | undefined
+
+const GAP = 8
+
 /**
- * One color property: a swatch opening the picker, the hex, and the opacity.
- * The picker lists the project's color tokens ahead of any raw value, since a
- * token keeps following the theme and a literal does not.
+ * The left edge of the scrolling panel holding the row, so a popover clears
+ * the panel's padding rather than overlapping it. The row's own edge stands in
+ * where no ancestor scrolls.
+ */
+function panelLeft(row: HTMLElement): number {
+  for (let node = row.parentElement; node; node = node.parentElement) {
+    const overflow = getComputedStyle(node).overflowY
+    if (overflow === 'auto' || overflow === 'scroll') {
+      return node.getBoundingClientRect().left
+    }
+  }
+  return row.getBoundingClientRect().left
+}
+
+/**
+ * Places a popover beside the row, to the left of the panel, and holds it
+ * inside the window. The panel scrolls and clips, so the popover sits in the
+ * top layer where the browser has one and at fixed coordinates either way.
+ */
+function place(popover: HTMLElement, row: HTMLElement): void {
+  if (
+    typeof popover.showPopover === 'function' &&
+    !popover.matches(':popover-open')
+  ) {
+    popover.showPopover()
+  }
+  const box = popover.getBoundingClientRect()
+  const anchor = row.getBoundingClientRect()
+  const width = document.documentElement.clientWidth || window.innerWidth
+  const height = document.documentElement.clientHeight || window.innerHeight
+  const before = panelLeft(row) - GAP - box.width
+  const left =
+    before >= GAP
+      ? before
+      : Math.max(GAP, Math.min(anchor.right + GAP, width - box.width - GAP))
+  const top = Math.max(GAP, Math.min(anchor.top, height - box.height - GAP))
+  popover.style.left = `${left}px`
+  popover.style.top = `${top}px`
+}
+
+/**
+ * One color property: a swatch opening the picker, the hex, the opacity, a
+ * tokens icon opening the project's color tokens, and an eyedropper where the
+ * browser has one. A token keeps following the theme and a literal does not,
+ * so the tokens sit one press from the row.
  */
 export function ColorField({
   label,
   color,
   text,
+  inline,
   painted,
   tokens,
   paint,
+  owner,
   isRaw,
   isBusy,
+  preview,
   onCommit,
 }: ColorFieldProps): JSX.Element {
-  const [isOpen, setOpen] = useState(false)
+  const [open, setOpen] = useState<Open>(() =>
+    isPickerHeld(owner) ? 'picker' : undefined,
+  )
+  const root = useRef<HTMLDivElement>(null)
+  const row = useRef<HTMLDivElement>(null)
   const swatch = useRef<HTMLButtonElement>(null)
+  const tokenButton = useRef<HTMLButtonElement>(null)
   const list = useRef<HTMLUListElement>(null)
   const dialog = useRef<HTMLDivElement>(null)
   const picked = color?.kind === 'token' ? tokens.indexOf(color.name) : -1
@@ -191,31 +157,32 @@ export function ColorField({
 
   /*
    * Focus moves in the commit rather than after paint, so a key typed straight
-   * after the one that opened the picker reaches the list, not the swatch.
+   * after the one that opened the list reaches it, not the button.
    */
   useLayoutEffect(() => {
-    if (!isOpen) return
-    const target =
-      list.current ??
-      dialog.current?.querySelector<HTMLInputElement>('input') ??
-      null
-    target?.focus()
-  }, [isOpen])
+    if (!open || !dialog.current || !row.current) return
+    place(dialog.current, row.current)
+    if (open === 'tokens') (list.current ?? dialog.current).focus()
+  }, [open])
 
   useLayoutEffect(() => {
-    if (refocus === label) swatch.current?.focus()
+    if (refocus === undefined) return
+    root.current
+      ?.querySelector<HTMLElement>(`[aria-label="${refocus}"]`)
+      ?.focus()
   }, [label])
 
   const close = () => {
-    setOpen(false)
-    swatch.current?.focus()
+    const trigger = open === 'tokens' ? tokenButton : swatch
+    releasePicker()
+    setOpen(undefined)
+    trigger.current?.focus()
   }
 
-  /* Writes from inside the picker, whose swatch keeps focus across the reload. */
-  const commitFromPicker = (value: string) => {
-    close()
-    refocus = label
-    onCommit(value)
+  const toggle = (next: Exclude<Open, undefined>) => {
+    releasePicker()
+    setActive(Math.max(0, picked))
+    setOpen(open === next ? undefined : next)
   }
 
   const pick = (name: string) => {
@@ -223,8 +190,31 @@ export function ColorField({
       close()
       return
     }
-    commitFromPicker(
+    close()
+    refocus = tokensLabel(label)
+    onCommit(
       composeColor({ kind: 'token', name, opacity: currentOpacity(color) }),
+    )
+  }
+
+  const Sampler = eyeDropper()
+  const sample = async (sampler: new () => EyeDropperSampler) => {
+    let picked: string
+    try {
+      picked = (await new sampler().open()).sRGBHex
+    } catch {
+      /* The operator dismissed the sampler, which writes nothing. */
+      return
+    }
+    const hex = readHex(picked)
+    if (!hex) return
+    refocus = eyedropperLabel(label)
+    onCommit(
+      composeColor({
+        kind: 'hex',
+        hex: hex.hex,
+        opacity: currentOpacity(color),
+      }),
     )
   }
 
@@ -232,15 +222,23 @@ export function ColorField({
 
   return (
     <div
+      ref={root}
       class="color-field is-wide"
       onFocusOut={(event) => {
-        const next = event.relatedTarget
-        if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
-          setOpen(false)
-        }
+        const field = event.currentTarget
+        /*
+         * Read once focus has settled. A reload removes the field while it
+         * holds focus, and a picker held across that reload must stay open.
+         */
+        setTimeout(() => {
+          if (!field.isConnected) return
+          if (field.contains(document.activeElement)) return
+          releasePicker()
+          setOpen(undefined)
+        }, 0)
       }}
     >
-      <div class="fill-row">
+      <div ref={row} class="fill-row">
         <div class="glyph-field">
           <button
             ref={swatch}
@@ -248,13 +246,10 @@ export function ColorField({
             type="button"
             aria-label={swatchLabel(label)}
             aria-haspopup="dialog"
-            aria-expanded={isOpen}
+            aria-expanded={open === 'picker'}
             title={label}
             disabled={isBusy}
-            onClick={() => {
-              setActive(Math.max(0, picked))
-              setOpen(!isOpen)
-            }}
+            onClick={() => toggle('picker')}
           >
             <span
               class="swatch-paint"
@@ -270,6 +265,38 @@ export function ColorField({
             onCommit={onCommit}
           />
         </div>
+        <button
+          ref={tokenButton}
+          class="color-icon"
+          type="button"
+          aria-label={tokensLabel(label)}
+          aria-haspopup="dialog"
+          aria-expanded={open === 'tokens'}
+          title="Pick a color token"
+          disabled={isBusy}
+          onClick={() => toggle('tokens')}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="5" cy="5" r="2.25" />
+            <circle cx="11" cy="5" r="2.25" />
+            <circle cx="5" cy="11" r="2.25" />
+            <circle cx="11" cy="11" r="2.25" />
+          </svg>
+        </button>
+        {Sampler ? (
+          <button
+            class="color-icon"
+            type="button"
+            aria-label={eyedropperLabel(label)}
+            title="Pick a color from the screen"
+            disabled={isBusy}
+            onClick={() => void sample(Sampler)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M10.5 2.5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L12 7l.5.5-1 1-4-4 1-1L9 4zM7.5 5.5l3 3-5 5H2.5v-3z" />
+            </svg>
+          </button>
+        ) : null}
         {isRaw ? (
           <span
             class="raw"
@@ -279,12 +306,17 @@ export function ColorField({
           </span>
         ) : null}
       </div>
-      {isOpen ? (
+      {open ? (
         <div
           ref={dialog}
-          class="color-picker"
+          class={
+            open === 'picker' ? 'color-popover' : 'color-popover is-tokens'
+          }
+          popover="manual"
           role="dialog"
-          aria-label={`${label} colors`}
+          aria-label={
+            open === 'picker' ? `${label} color` : `${label} token list`
+          }
           tabIndex={-1}
           onKeyDown={(event) => {
             if (event.key !== 'Escape') return
@@ -296,7 +328,18 @@ export function ColorField({
             close()
           }}
         >
-          {tokens.length > 0 ? (
+          {open === 'picker' ? (
+            <ColorPicker
+              owner={owner}
+              color={color}
+              text={text}
+              inline={inline}
+              painted={painted}
+              begin={preview}
+              isBusy={isBusy}
+              onCommit={onCommit}
+            />
+          ) : tokens.length > 0 ? (
             <ul
               ref={list}
               class="token-list"
@@ -348,19 +391,6 @@ export function ColorField({
               No color tokens resolve. Add them to the token sheet
             </p>
           )}
-          <div class="glyph-field">
-            <span class="glyph" aria-hidden="true">
-              #
-            </span>
-            <ColorInputs
-              hexLabel="hex"
-              opacityLabel="opacity"
-              color={color}
-              text={text}
-              isBusy={isBusy}
-              onCommit={commitFromPicker}
-            />
-          </div>
         </div>
       ) : null}
     </div>

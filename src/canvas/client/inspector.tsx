@@ -261,11 +261,16 @@ function ElementFields({
               label={field.label}
               color={parseColor(inline || painted)}
               text={inline || painted}
+              inline={inline}
               painted={painted}
+              owner={`${key}:${address?.index ?? -1}:${field.property}`}
               tokens={colorTokens}
               paint={(name) => tokenPaint(doc, name)}
               isRaw={isRawInline(node, field.property)}
               isBusy={isBusy}
+              preview={
+                'style' in node ? scrubOf(field.property).begin : undefined
+              }
               onCommit={commit(field.property)}
             />
           )

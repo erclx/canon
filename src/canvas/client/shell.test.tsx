@@ -9,12 +9,14 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { documentElements } from '@/canvas/address'
 import { App } from '@/canvas/client/app'
 import { isRawValue } from '@/canvas/client/inspector'
+import { releasePicker } from '@/canvas/client/inspector/color-picker'
 import {
   applyChange,
   applyRecord,
   type PagesRecord,
   resetState,
   savedEdit,
+  selection,
   theme,
   view,
 } from '@/canvas/client/state'
@@ -131,6 +133,7 @@ function failWrites(pages: Page[]): void {
 
 beforeEach(() => {
   resetState()
+  releasePicker()
   sent = []
   recordWrites()
   mount = document.createElement('div')
@@ -1116,10 +1119,29 @@ describe('Inspector edit', () => {
     if (!swatch) throw new Error(`no swatch on ${name}`)
     act(() => swatch.click())
     const picker = mount.querySelector<HTMLElement>(
-      `[aria-label="Element"] [role="dialog"][aria-label="${name} colors"]`,
+      `[aria-label="Element"] [role="dialog"][aria-label="${name} color"]`,
     )
     if (!picker) throw new Error(`no picker on ${name}`)
     return picker
+  }
+
+  /** The picker already open on the field of that name. */
+  function openedPicker(name: string): HTMLElement {
+    const picker = mount.querySelector<HTMLElement>(
+      `[aria-label="Element"] [role="dialog"][aria-label="${name} color"]`,
+    )
+    if (!picker) throw new Error(`no open picker on ${name}`)
+    return picker
+  }
+
+  /** Opens the token list of the field of that name and returns it. */
+  function openTokens(name: string): HTMLElement {
+    act(() => buttonNamed(`${name} tokens`).click())
+    const popover = mount.querySelector<HTMLElement>(
+      `[aria-label="Element"] [role="dialog"][aria-label="${name} token list"]`,
+    )
+    if (!popover) throw new Error(`no token list on ${name}`)
+    return popover
   }
 
   function optionNamed(picker: HTMLElement, name: string): HTMLElement {
@@ -1130,17 +1152,71 @@ describe('Inspector edit', () => {
     return option
   }
 
-  it('should list the color tokens before the hex input', () => {
+  function controlIn<T extends HTMLElement = HTMLInputElement>(
+    picker: HTMLElement,
+    name: string,
+  ): T {
+    const control = picker.querySelector<T>(`[aria-label="${name}"]`)
+    if (!control) throw new Error(`no control ${name} in the picker`)
+    return control
+  }
+
+  async function settle(run: () => void) {
+    await act(async () => {
+      run()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+  }
+
+  function key(target: HTMLElement, name: string, shiftKey = false) {
+    target.dispatchEvent(
+      new KeyboardEvent('keydown', { key: name, shiftKey, bubbles: true }),
+    )
+  }
+
+  /** Moves a range the way a drag does: input while it moves, change on release. */
+  async function slide(range: HTMLInputElement, value: string) {
+    await settle(() => {
+      range.value = value
+      range.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await settle(() => {
+      range.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+  }
+
+  function heading(doc: Document): HTMLElement {
+    const element = doc.querySelector<HTMLElement>('h1')
+    if (!element) throw new Error('no heading')
+    return element
+  }
+
+  function areaOf(picker: HTMLElement): HTMLElement {
+    return controlIn<HTMLElement>(picker, 'saturation and brightness')
+  }
+
+  it('should open a picker with no token options from the swatch', () => {
     renderWithTokens([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
     clickIn(doc, 'h1')
 
     const picker = openPicker('background')
 
-    const order = [
-      ...picker.querySelectorAll('[role="option"], [aria-label="hex"]'),
-    ].map((node) => node.getAttribute('aria-label') ?? node.textContent)
-    expect(order).toEqual(['--color-text', '--color-accent', 'hex'])
+    expect(picker.querySelectorAll('[role="option"]')).toHaveLength(0)
+    expect(areaOf(picker).getAttribute('role')).toBe('slider')
+  })
+
+  it('should list the color tokens from the tokens icon', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+
+    const popover = openTokens('background')
+
+    const names = [...popover.querySelectorAll('[role="option"]')].map(
+      (node) => node.textContent,
+    )
+    expect(names).toEqual(['--color-text', '--color-accent'])
   })
 
   it('should write the token picked as var()', async () => {
@@ -1148,12 +1224,9 @@ describe('Inspector edit', () => {
     const doc = loadFrame('hero', HERO_BODY)
     stampHash(doc, 'abc123')
     clickIn(doc, 'h1')
-    const picker = openPicker('background')
+    const popover = openTokens('background')
 
-    await act(async () => {
-      optionNamed(picker, '--color-accent').click()
-      await new Promise((resolve) => setTimeout(resolve, 0))
-    })
+    await settle(() => optionNamed(popover, '--color-accent').click())
 
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({
@@ -1161,6 +1234,303 @@ describe('Inspector edit', () => {
         value: 'var(--color-accent)',
       }),
     ])
+  })
+
+  it('should write the hex an HSL row converts to', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await commit(controlIn(picker, 'HSL lightness'), '25')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: '#804000' }),
+    ])
+  })
+
+  it('should show the clamped color an out-of-gamut LCH row wrote', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #808080">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    controlIn(picker, 'LCH lightness').value = '50'
+    controlIn(picker, 'LCH chroma').value = '150'
+
+    await commit(controlIn(picker, 'LCH hue'), '30')
+
+    const [written] = sentTo('/api/frames/edit') as { value: string }[]
+    const shown = ['red', 'green', 'blue']
+      .map((name) =>
+        Number(controlIn(openedPicker('background'), name).value)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')
+    expect(`#${shown}`).toBe(written?.value)
+  })
+
+  it('should preview a keyboard step on the area and post nothing', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const area = areaOf(openPicker('background'))
+
+    await settle(() => key(area, 'ArrowDown', true))
+
+    expect(heading(doc).style.getPropertyValue('background-color')).not.toBe(
+      '#ff8000',
+    )
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should post the area value once on Enter', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const area = areaOf(openPicker('background'))
+
+    await settle(() => key(area, 'ArrowDown', true))
+    await settle(() => key(area, 'ArrowDown', true))
+    await settle(() => key(area, 'Enter'))
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: '#cc6600' }),
+    ])
+  })
+
+  it('should reopen the picker on the hue it held after the write reloads the frame', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderApp(pages)
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #808080">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    await slide(controlIn(picker, 'hue'), '200')
+    await settle(() => key(areaOf(picker), 'ArrowRight', true))
+    await settle(() => key(areaOf(picker), 'Enter'))
+
+    await act(async () => {
+      await applyChange(
+        { page: 'drafts', file: 'hero.html' },
+        /* The server's record carries the pick, so the reload keeps it. */
+        fetchReturning({
+          ...record(pages),
+          selection: selection.value ?? null,
+        }),
+      )
+    })
+    stampHash(
+      loadFrame('hero', '<h1 style="background-color: #737c80">A</h1>'),
+      'def456',
+    )
+
+    expect(controlIn(openedPicker('background'), 'hue').value).toBe('200')
+  })
+
+  it('should restore the open value on Escape and post nothing', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const area = areaOf(openPicker('background'))
+    await settle(() => key(area, 'ArrowDown', true))
+
+    await settle(() => key(area, 'Escape'))
+
+    expect(heading(doc).style.getPropertyValue('background-color')).toBe(
+      '#ff8000',
+    )
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should drop the preview on Escape where no inline value stood', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const area = areaOf(openPicker('background'))
+    await settle(() => key(area, 'ArrowDown', true))
+
+    await settle(() => key(area, 'Escape'))
+
+    expect(heading(doc).style.getPropertyValue('background-color')).toBe('')
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should restore the open value from Previous and post nothing', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    await settle(() => key(areaOf(picker), 'ArrowDown', true))
+
+    await settle(() =>
+      controlIn<HTMLButtonElement>(picker, 'previous color').click(),
+    )
+
+    expect(heading(doc).style.getPropertyValue('background-color')).toBe(
+      '#ff8000',
+    )
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should keep a token through the alpha slider as color-mix()', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: var(--color-accent)">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await slide(controlIn(picker, 'alpha'), '40')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        value: 'color-mix(in srgb, var(--color-accent) 40%, transparent)',
+      }),
+    ])
+  })
+
+  it('should write a hex when the hue moves on a token', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: var(--color-accent)">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await slide(controlIn(picker, 'hue'), '200')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        value: expect.stringMatching(/^#[0-9a-f]{6}$/),
+      }),
+    ])
+  })
+
+  it('should hold the picker while an edit is in flight', async () => {
+    let release = () => {}
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({
+        url: String(url),
+        body: JSON.parse(String(init?.body ?? 'null')),
+      })
+      await new Promise<void>((resolve) => {
+        release = resolve
+      })
+      return new Response('{"ok":true}', {
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    await slide(controlIn(picker, 'hue'), '200')
+
+    await slide(controlIn(openedPicker('background'), 'hue'), '220')
+    await settle(() =>
+      key(areaOf(openedPicker('background')), 'ArrowDown', true),
+    )
+    await settle(() => key(areaOf(openedPicker('background')), 'Enter'))
+    await commit(controlIn(openedPicker('background'), 'red'), '10')
+
+    expect(sentTo('/api/frames/edit')).toHaveLength(1)
+    await settle(() => release())
+  })
+
+  it('should leave a range drag running when the area loses focus to it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    const alpha = controlIn(picker, 'alpha')
+
+    await settle(() => {
+      alpha.value = '98'
+      alpha.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await settle(() => areaOf(picker).dispatchEvent(new FocusEvent('blur')))
+    const midDrag = sentTo('/api/frames/edit').length
+    await slide(controlIn(openedPicker('background'), 'alpha'), '40')
+
+    expect([midDrag, sentTo('/api/frames/edit')]).toEqual([
+      0,
+      [expect.objectContaining({ value: '#ff800066' })],
+    ])
+  })
+
+  it('should clamp an RGB row to the channel range it writes', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #000000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await commit(controlIn(picker, 'red'), '300')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ value: '#ff0000' }),
+    ])
+    expect(controlIn(openedPicker('background'), 'red').value).toBe('255')
+  })
+
+  it('should hold the hue on a grey and post nothing for it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #808080">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+
+    await slide(controlIn(picker, 'hue'), '200')
+
+    expect(controlIn(openedPicker('background'), 'hue').value).toBe('200')
+    expect(sentTo('/api/frames/edit')).toEqual([])
   })
 
   it('should write a token below full opacity as color-mix()', async () => {
@@ -1314,7 +1684,7 @@ describe('Inspector edit', () => {
     stampHash(doc, 'abc123')
     clickIn(doc, 'h1')
     const list =
-      openPicker('background').querySelector<HTMLElement>('[role="listbox"]')
+      openTokens('background').querySelector<HTMLElement>('[role="listbox"]')
     if (!list) throw new Error('no token list')
     const press = (key: string) =>
       list.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
@@ -1331,6 +1701,52 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({ value: 'var(--color-accent)' }),
     ])
+  })
+
+  describe('eyedropper', () => {
+    const host = window as unknown as Record<string, unknown>
+
+    afterEach(() => {
+      delete host.EyeDropper
+    })
+
+    it('should offer no eyedropper where the browser has none', () => {
+      renderApp([page('drafts', [frame('hero')])])
+      const doc = loadFrame('hero', HERO_BODY)
+
+      clickIn(doc, 'h1')
+
+      expect(
+        mount.querySelector('[aria-label="background eyedropper"]'),
+      ).toBeNull()
+    })
+
+    it('should write the hex the eyedropper resolves at the row opacity', async () => {
+      host.EyeDropper = class {
+        async open() {
+          return { sRGBHex: '#336699' }
+        }
+      }
+      renderApp([page('drafts', [frame('hero')])])
+      const doc = loadFrame(
+        'hero',
+        '<h1 style="background-color: #ff880080">A</h1>',
+      )
+      stampHash(doc, 'abc123')
+      clickIn(doc, 'h1')
+
+      await act(async () => {
+        buttonNamed('background eyedropper').click()
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(sentTo('/api/frames/edit')).toEqual([
+        expect.objectContaining({
+          property: 'background-color',
+          value: '#33669980',
+        }),
+      ])
+    })
   })
 
   it('should edit text on an element holding text alone', async () => {
