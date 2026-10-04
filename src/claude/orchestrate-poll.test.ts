@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = join(
   import.meta.dirname,
-  '../claude/skills/role-orchestrator/scripts/poll.ts',
+  '../../claude/skills/role-orchestrator/scripts/poll.ts',
 )
 
 const HEAD = '1111111111111111111111111111111111111111'

@@ -6,7 +6,7 @@ import {
   type Read,
   type Worker,
   type WatchState,
-} from '../claude/skills/role-orchestrator/scripts/watch'
+} from '../../claude/skills/role-orchestrator/scripts/watch'
 
 const buildWorker = (overrides: Partial<Worker> = {}): Worker => ({
   branch: 'feat/thing',

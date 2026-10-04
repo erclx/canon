@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = join(
   import.meta.dirname,
-  '../tooling/web/configs/scripts/worktree-port.sh',
+  '../../tooling/web/configs/scripts/worktree-port.sh',
 )
 
 const BASE = 4321

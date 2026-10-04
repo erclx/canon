@@ -18,10 +18,10 @@ The array and the list below are two copies of one set with nothing comparing th
 - `governance/rules/` category folders: `bun --bun vitest run src/gov/adapter.test.ts`
 - `standards/markdown.md`: `bun --bun vitest run src/standards/read.test.ts`
 - `tooling/base/reference.md`: `bun --bun vitest run src/tooling/read.test.ts`
-- `.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/`: `bun --bun vitest run src/hooks-guard.test.ts`
-- `claude/skills/role-orchestrator/scripts/poll.ts`: `bun --bun vitest run src/orchestrate-poll.test.ts`
-- `claude/skills/role-orchestrator/scripts/watch.ts`: `bun --bun vitest run src/orchestrate-watch.test.ts`
-- `tooling/web/configs/scripts/worktree-port.sh`: `bun --bun vitest run src/worktree-port.test.ts`
+- `.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/`: `bun --bun vitest run src/hooks/guard.test.ts`
+- `claude/skills/role-orchestrator/scripts/poll.ts`: `bun --bun vitest run src/claude/orchestrate-poll.test.ts`
+- `claude/skills/role-orchestrator/scripts/watch.ts`: `bun --bun vitest run src/claude/orchestrate-watch.test.ts`
+- `tooling/web/configs/scripts/worktree-port.sh`: `bun --bun vitest run src/tooling/worktree-port.test.ts`
 
 The patterns and the rows differ at both ends rather than by an omission. `^claude/skills/` covers the skill-body row and both script rows, `^governance/rules/` covers both governance rows, and the hooks row expands into two patterns because its test reaches the seed copy as well. The patterns that are directory prefixes exist because their tests walk the tree whole, and two of those reach a rule or a skill a branch adds rather than edits. `src/gov/adapter.test.ts` asserts an absence, that `governance/rules/project/` ships empty because the subfolder is reserved for a target, so adding a rule there is what trips it.
 

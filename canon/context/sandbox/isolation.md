@@ -57,7 +57,7 @@ A scoped pass says nothing about a write past the watch's reach, being a home di
 
 ### A nested background dispatch is bounded rather than watched
 
-An arm invoked without the narration its fixture states can dispatch a real `claude --bg` session against the machine's process table. Every watch reports clean and is right to, since a dispatched session writes into neither the tree `snapshot_tree` reads nor the four directories `snapshot_root` reads. An unbound dispatch keeps spending until a person finds and kills it, and `SIGTERM` alone does not end it. Three mechanisms bound it, and all sit in `scripts/lib/sandbox-dispatch.sh` rather than in `run.sh`, their only caller, so `src/sandbox-dispatch.test.ts` reaches each without launching a session.
+An arm invoked without the narration its fixture states can dispatch a real `claude --bg` session against the machine's process table. Every watch reports clean and is right to, since a dispatched session writes into neither the tree `snapshot_tree` reads nor the four directories `snapshot_root` reads. An unbound dispatch keeps spending until a person finds and kills it, and `SIGTERM` alone does not end it. Three mechanisms bound it, and all sit in `scripts/lib/sandbox-dispatch.sh` rather than in `run.sh`, their only caller, so `src/sandbox/dispatch.test.ts` reaches each without launching a session.
 
 #### The shim
 

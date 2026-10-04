@@ -55,7 +55,7 @@ A hook that is the only enforcer of a rule cannot discard its command's output, 
 
 ### The two hook trees drift with nothing comparing them
 
-`.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/` hold the same scripts maintained twice, and nothing regenerates or compares them. A branch fixing one side can leave the other running the old logic, and the drift is silent because each copy is valid shell that passes every stage, so only a hand diff finds it. `src/hooks-guard.test.ts` is the one exception, walking both directories for the stdin guard covered in `canon/context/development/hooks/guards.md`.
+`.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/` hold the same scripts maintained twice, and nothing regenerates or compares them. A branch fixing one side can leave the other running the old logic, and the drift is silent because each copy is valid shell that passes every stage, so only a hand diff finds it. `src/hooks/guard.test.ts` is the one exception, walking both directories for the stdin guard covered in `canon/context/development/hooks/guards.md`.
 
 ### Linting the hooks
 

@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-const ROOT = join(import.meta.dirname, '..')
+const ROOT = join(import.meta.dirname, '../..')
 
 // Both trees carry the same guard and nothing else compares them, so a fix
 // landing in one and not the other passes every other stage in the gate.
