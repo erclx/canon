@@ -568,7 +568,12 @@ describe('canon pr evidence reports the marked comment', () => {
   })
 
   it('should carry the marked fields on a no-evidence record', async () => {
-    writeComments([markedCommentBody()])
+    writeComments([
+      markedCommentBody().replace(
+        /## What to look at[\s\S]*<!-- pr-checklist:end -->\n\n/,
+        '',
+      ),
+    ])
 
     const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
 
@@ -576,7 +581,36 @@ describe('canon pr evidence reports the marked comment', () => {
       reason: 'no-evidence',
       preview: 'https://feat-x.site.pages.dev',
       local: 'http://localhost:5173',
-      checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+    })
+  })
+
+  describe('carried checklist', () => {
+    it('should render a checklist-only branch rather than report no-evidence', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(record.reason).toBe('ok')
+    })
+
+    it('should clear a tick the comment earned at another head', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(record.body).toContain('- [ ] the hero settles')
+      expect(record.body).not.toContain('- [x]')
+    })
+
+    it('should number the boxes the rendered checklist carries', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(record.boxes).toMatchObject([
+        { number: 1, text: 'the hero settles' },
+        { number: 2, text: 'the footer wraps' },
+      ])
     })
   })
 
@@ -1301,6 +1335,136 @@ describe('canon pr local', () => {
       record: expect.objectContaining({ reason: 'no-comment' }),
       exit: 0,
     })
+  })
+})
+
+describe('canon pr tick', () => {
+  let tempDir: string
+  let repoRoot: string
+  let commentsFile: string
+  let apiLog: string
+  let bin: string
+  let tip: string
+
+  const CHECKLIST = [
+    '- [ ] the hero settles',
+    '- [ ] the footer wraps',
+    '- [ ] the mood is calm (taste)',
+  ].join('\n')
+
+  async function runTick(
+    args: string[],
+  ): Promise<{ readonly record: { reason?: string }; readonly exit: number }> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'tick', '7', '--json', '--root', repoRoot, ...args],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${bin}:${process.env.PATH}` },
+      },
+    )
+    return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
+  }
+
+  function writeMarkedComment(checklist: string | undefined): void {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      tip,
+      undefined,
+      checklist,
+    )
+    writeFileSync(
+      commentsFile,
+      JSON.stringify({
+        comments: [
+          { url: 'https://github.com/o/r/pull/7#issuecomment-99', body },
+        ],
+      }),
+    )
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-tick-'))
+    repoRoot = join(tempDir, 'repo')
+    bin = join(tempDir, 'bin')
+    commentsFile = join(tempDir, 'comments.json')
+    apiLog = join(tempDir, 'api.log')
+    mkdirSync(repoRoot)
+    writeFakeGh(bin, commentsFile, apiLog)
+    initBranchRepo(repoRoot, {})
+    const remote = join(tempDir, 'remote.git')
+    execaSync('git', ['init', '-q', '--bare', remote])
+    execaSync('git', ['-C', repoRoot, 'remote', 'add', 'origin', remote])
+    execaSync('git', ['-C', repoRoot, 'push', '-q', 'origin', 'feat/x'])
+    tip = execaSync('git', ['-C', repoRoot, 'rev-parse', 'HEAD']).stdout
+    writeMarkedComment(CHECKLIST)
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should tick and stamp the named boxes through a PATCH', async () => {
+    const outcome = await runTick(['--boxes', '1', '--head', tip.slice(0, 7)])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'ticked', head: tip }),
+      exit: 0,
+    })
+    const written = readFileSync(apiLog, 'utf8')
+    expect(written).toContain(
+      `- [x] the hero settles · passed at \`${tip.slice(0, 7)}\`\n`,
+    )
+    expect(written).toContain('- [ ] the footer wraps\n')
+  })
+
+  it('should refuse a head that is not the remote tip and write nothing', async () => {
+    const outcome = await runTick(['--boxes', '1', '--head', '1234567'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'stale-head' }),
+      exit: 1,
+    })
+    expect(existsSync(apiLog)).toBe(false)
+  })
+
+  it('should refuse a taste box and write nothing', async () => {
+    const outcome = await runTick(['--boxes', '1,3', '--head', tip])
+
+    expect(outcome.record.reason).toBe('taste-box')
+    expect(existsSync(apiLog)).toBe(false)
+  })
+
+  it('should refuse a box past the end of the checklist', async () => {
+    const outcome = await runTick(['--boxes', '9', '--head', tip])
+
+    expect(outcome.record.reason).toBe('no-box')
+  })
+
+  it('should refuse when the evidence comment carries no checklist', async () => {
+    writeMarkedComment(undefined)
+
+    const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+    expect(outcome.record.reason).toBe('no-checklist')
+  })
+
+  it('should refuse when no comment carries the marker', async () => {
+    writeFileSync(commentsFile, '{"comments":[]}')
+
+    const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+    expect(outcome.record.reason).toBe('no-comment')
+  })
+
+  it('should refuse a malformed box list', async () => {
+    const outcome = await runTick(['--boxes', 'one', '--head', tip])
+
+    expect(outcome.record.reason).toBe('bad-boxes')
   })
 })
 
