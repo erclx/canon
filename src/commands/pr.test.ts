@@ -496,17 +496,20 @@ describe('canon pr evidence --local', () => {
     ])
 
     expect(record.reason).toBe('ok')
-    expect(record.body?.split('\n')[0]).toBe(
+    expect(record.body?.split('\n').slice(0, 3)).toEqual([
+      '## Evidence',
+      '',
       '**Local preview:** http://localhost:5173',
-    )
+    ])
   })
 })
 
 /** A marked comment body carrying every field the record reports, in the shape `renderEvidenceBody` writes. */
 function markedCommentBody(): string {
   return [
-    '**Preview:** https://feat-x.site.pages.dev',
-    '**Local preview:** http://localhost:5173',
+    '## Evidence',
+    '',
+    '**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173',
     '',
     '## What to look at',
     '',

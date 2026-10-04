@@ -10,11 +10,20 @@ const SHORT_SHA_LENGTH = 7
 /** Prefix of the trailing marker this module writes and reads back. */
 const MARKER_PREFIX = '<!-- pr-evidence:'
 
-/** How the first line of a body names the branch's preview deployment. */
+/** How the address line names the branch's preview deployment. */
 const PREVIEW_PREFIX = '**Preview:**'
 
-/** How the opening block names the branch's server on the operator's own machine, under any hosted preview line. */
+/** How the address line names the branch's server on the operator's own machine, after any hosted segment. */
 export const LOCAL_PREFIX = '**Local preview:**'
+
+/** What joins the hosted and local segments on the one address line. */
+const ADDRESS_SEPARATOR = ' · '
+
+/** The heading every body opens with. */
+const EVIDENCE_HEADING = '## Evidence'
+
+/** How the visible commit line opens. */
+const BASE_PREFIX = '**Base:**'
 
 /** The heading the checklist sits under, printed outside the delimiters so a carried checklist never doubles it. */
 const CHECKLIST_HEADING = '## What to look at'
@@ -135,15 +144,15 @@ export function evidenceMarker(head: string): string {
  * pinned to a commit sha rather than a branch, so the comment keeps showing
  * what it claimed even after the branch moves.
  *
- * A preview address opens the body, and with no states it is the whole body
- * apart from the marker, so a pull request whose screenshots did not change
- * still gets one comment a later call can find and edit in place.
+ * The body opens with `## Evidence` and, under it, one address line joining
+ * whichever of the hosted and local previews apply, so the comment reads as
+ * evidence first and a preview never stands where the heading should. With no
+ * states the heading and the address are the whole body apart from the
+ * marker, so a pull request whose screenshots did not change still gets one
+ * comment a later call can find and edit in place.
  *
  * A checklist closes the body, below the comparison it annotates, so one
- * comment carries the preview address, the screenshots, and what to look at.
- *
- * A local address sits under the hosted one, never above it, so the hosted
- * line keeps the first-line position `findEvidencePreview` reads.
+ * comment carries the addresses, the screenshots, and what to look at.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -154,11 +163,15 @@ export function renderEvidenceBody(
   checklist?: string,
   local?: string,
 ): string {
-  const addresses = [
+  const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
     ...(local === undefined ? [] : [`${LOCAL_PREFIX} ${local}`]),
   ]
-  const opening = addresses.length === 0 ? [] : [...addresses, '']
+  const opening = [
+    EVIDENCE_HEADING,
+    '',
+    ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
+  ]
   const closing =
     checklist === undefined
       ? []
@@ -198,9 +211,7 @@ export function renderEvidenceBody(
 
   return [
     ...opening,
-    '## Evidence',
-    '',
-    `**Base:** \`${base.slice(0, SHORT_SHA_LENGTH)}\` · **Head:** \`${head.slice(0, SHORT_SHA_LENGTH)}\``,
+    `${BASE_PREFIX} \`${base.slice(0, SHORT_SHA_LENGTH)}\` · **Head:** \`${head.slice(0, SHORT_SHA_LENGTH)}\``,
     '',
     ...sections,
     '',
@@ -295,18 +306,78 @@ export function findEvidenceCaseCount(
   return marked === undefined ? 0 : countEvidenceCases(marked.body)
 }
 
+/** Lines that close the address region, being whatever a body carries below its addresses. */
+const REGION_ENDS = [
+  BASE_PREFIX,
+  CHECKLIST_HEADING,
+  '<details',
+  CHECKLIST_START,
+  MARKER_PREFIX,
+]
+
+export interface AddressReading {
+  /** Indexes of the lines carrying a hosted or local segment. */
+  readonly lines: readonly number[]
+  readonly preview?: string
+  readonly local?: string
+}
+
+function readSegment(segment: string, prefix: string): string | undefined {
+  return segment.startsWith(prefix)
+    ? segment.slice(prefix.length).trim() || undefined
+    : undefined
+}
+
 /**
- * The preview address the marked comment already opens with. A re-render
- * after a later push passes no address of its own, and carrying this one
- * forward keeps that edit from deleting the link a reviewer is using.
+ * Reads the addresses a body carries in the region above its commit line,
+ * checklist, comparison, or marker, matching each prefix wherever it sits in
+ * that region. One reader covers the layout that opens on the addresses as
+ * well as the one that opens on the heading, so an open pull request keeps
+ * its links across the first re-render, and a line quoted further down in a
+ * checklist is never taken for an address.
+ */
+export function readAddresses(body: string): AddressReading {
+  const lines: number[] = []
+  let preview: string | undefined
+  let local: string | undefined
+  const bodyLines = body.split('\n')
+  for (let index = 0; index < bodyLines.length; index += 1) {
+    const line = (bodyLines[index] ?? '').trim()
+    if (REGION_ENDS.some((end) => line.startsWith(end))) break
+    let isAddress = false
+    for (const segment of line.split(ADDRESS_SEPARATOR.trim())) {
+      const trimmed = segment.trim()
+      const hosted = readSegment(trimmed, PREVIEW_PREFIX)
+      const own = readSegment(trimmed, LOCAL_PREFIX)
+      if (hosted !== undefined) preview ??= hosted
+      if (own !== undefined) local ??= own
+      if (hosted !== undefined || own !== undefined) isAddress = true
+    }
+    if (isAddress) lines.push(index)
+  }
+  return {
+    lines,
+    ...(preview !== undefined && { preview }),
+    ...(local !== undefined && { local }),
+  }
+}
+
+function findMarked(
+  comments: readonly EvidenceComment[],
+): EvidenceComment | undefined {
+  return comments.find((comment) => hasEvidenceMarker(comment.body))
+}
+
+/**
+ * The preview address the marked comment already carries. A re-render after
+ * a later push passes no address of its own, and carrying this one forward
+ * keeps that edit from deleting the link a reviewer is using.
  */
 export function findEvidencePreview(
   comments: readonly EvidenceComment[],
 ): string | undefined {
-  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
-  const first = marked?.body.split('\n')[0]?.trim() ?? ''
-  if (!first.startsWith(PREVIEW_PREFIX)) return undefined
-  return first.slice(PREVIEW_PREFIX.length).trim() || undefined
+  const marked = findMarked(comments)
+  return marked === undefined ? undefined : readAddresses(marked.body).preview
 }
 
 /**
@@ -331,12 +402,8 @@ export function findLocalLineIndex(body: string): number {
 export function findEvidenceLocal(
   comments: readonly EvidenceComment[],
 ): string | undefined {
-  const marked = comments.find((comment) => hasEvidenceMarker(comment.body))
-  if (marked === undefined) return undefined
-  const index = findLocalLineIndex(marked.body)
-  if (index === -1) return undefined
-  const line = marked.body.split('\n')[index]?.trim() ?? ''
-  return line.slice(LOCAL_PREFIX.length).trim() || undefined
+  const marked = findMarked(comments)
+  return marked === undefined ? undefined : readAddresses(marked.body).local
 }
 
 /**
