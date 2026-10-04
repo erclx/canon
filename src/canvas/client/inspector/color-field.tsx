@@ -1,10 +1,16 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
 import { useLayoutEffect, useRef, useState } from 'preact/hooks'
+import type { ScrubSession } from '@/canvas/client/inspector/field'
 import {
   ColorInputs,
   currentOpacity,
 } from '@/canvas/client/inspector/color-inputs'
+import {
+  ColorPicker,
+  isPickerHeld,
+  releasePicker,
+} from '@/canvas/client/inspector/color-picker'
 import {
   composeColor,
   type ParsedColor,
@@ -18,14 +24,20 @@ interface ColorFieldProps {
   readonly color: ParsedColor | undefined
   /** The value as written, shown when `color` is undefined. */
   readonly text: string
+  /** The element's own inline value, empty where none stands. */
+  readonly inline: string
   /** The color the browser paints, which fills the swatch. */
   readonly painted: string
   /** The color tokens in the order the token sheet sorts them. */
   readonly tokens: readonly string[]
-  /** The color a token paints in the frame, read when the picker opens. */
+  /** The color a token paints in the frame, read when the list opens. */
   readonly paint: (name: string) => string
+  /** The frame, element, and property, so a reload reopens the right picker. */
+  readonly owner: string
   readonly isRaw: boolean
   readonly isBusy: boolean
+  /** Opens a session previewing into the frame, where the element takes one. */
+  readonly preview?: () => ScrubSession
   readonly onCommit: (value: string) => void
 }
 
@@ -40,6 +52,10 @@ let refocus: string | undefined
 
 function swatchLabel(label: string): string {
   return `${label} picker`
+}
+
+function tokensLabel(label: string): string {
+  return `${label} tokens`
 }
 
 function eyedropperLabel(label: string): string {
@@ -61,25 +77,63 @@ function eyeDropper(): (new () => EyeDropperSampler) | undefined {
   return typeof window === 'undefined' ? undefined : window.EyeDropper
 }
 
+type Open = 'picker' | 'tokens' | undefined
+
+const GAP = 8
+
 /**
- * One color property: a swatch opening the picker, the hex, and the opacity.
- * The picker lists the project's color tokens ahead of any raw value, since a
- * token keeps following the theme and a literal does not.
+ * Places a popover beside the row, to the left of the panel, and holds it
+ * inside the window. The panel scrolls and clips, so the popover sits in the
+ * top layer where the browser has one and at fixed coordinates either way.
+ */
+function place(popover: HTMLElement, row: HTMLElement): void {
+  if (
+    typeof popover.showPopover === 'function' &&
+    !popover.matches(':popover-open')
+  ) {
+    popover.showPopover()
+  }
+  const box = popover.getBoundingClientRect()
+  const anchor = row.getBoundingClientRect()
+  const width = document.documentElement.clientWidth || window.innerWidth
+  const height = document.documentElement.clientHeight || window.innerHeight
+  const before = anchor.left - GAP - box.width
+  const left =
+    before >= GAP
+      ? before
+      : Math.max(GAP, Math.min(anchor.right + GAP, width - box.width - GAP))
+  const top = Math.max(GAP, Math.min(anchor.top, height - box.height - GAP))
+  popover.style.left = `${left}px`
+  popover.style.top = `${top}px`
+}
+
+/**
+ * One color property: a swatch opening the picker, the hex, the opacity, a
+ * tokens icon opening the project's color tokens, and an eyedropper where the
+ * browser has one. A token keeps following the theme and a literal does not,
+ * so the tokens sit one press from the row.
  */
 export function ColorField({
   label,
   color,
   text,
+  inline,
   painted,
   tokens,
   paint,
+  owner,
   isRaw,
   isBusy,
+  preview,
   onCommit,
 }: ColorFieldProps): JSX.Element {
-  const [isOpen, setOpen] = useState(false)
+  const [open, setOpen] = useState<Open>(() =>
+    isPickerHeld(owner) ? 'picker' : undefined,
+  )
   const root = useRef<HTMLDivElement>(null)
+  const row = useRef<HTMLDivElement>(null)
   const swatch = useRef<HTMLButtonElement>(null)
+  const tokenButton = useRef<HTMLButtonElement>(null)
   const list = useRef<HTMLUListElement>(null)
   const dialog = useRef<HTMLDivElement>(null)
   const picked = color?.kind === 'token' ? tokens.indexOf(color.name) : -1
@@ -88,16 +142,13 @@ export function ColorField({
 
   /*
    * Focus moves in the commit rather than after paint, so a key typed straight
-   * after the one that opened the picker reaches the list, not the swatch.
+   * after the one that opened the list reaches it, not the button.
    */
   useLayoutEffect(() => {
-    if (!isOpen) return
-    const target =
-      list.current ??
-      dialog.current?.querySelector<HTMLInputElement>('input') ??
-      null
-    target?.focus()
-  }, [isOpen])
+    if (!open || !dialog.current || !row.current) return
+    place(dialog.current, row.current)
+    if (open === 'tokens') (list.current ?? dialog.current).focus()
+  }, [open])
 
   useLayoutEffect(() => {
     if (refocus === undefined) return
@@ -107,15 +158,28 @@ export function ColorField({
   }, [label])
 
   const close = () => {
-    setOpen(false)
-    swatch.current?.focus()
+    const trigger = open === 'tokens' ? tokenButton : swatch
+    releasePicker()
+    setOpen(undefined)
+    trigger.current?.focus()
   }
 
-  /* Writes from inside the picker, whose swatch keeps focus across the reload. */
-  const commitFromPicker = (value: string) => {
+  const toggle = (next: Exclude<Open, undefined>) => {
+    releasePicker()
+    setActive(Math.max(0, picked))
+    setOpen(open === next ? undefined : next)
+  }
+
+  const pick = (name: string) => {
+    if (color?.kind === 'token' && color.name === name) {
+      close()
+      return
+    }
     close()
-    refocus = swatchLabel(label)
-    onCommit(value)
+    refocus = tokensLabel(label)
+    onCommit(
+      composeColor({ kind: 'token', name, opacity: currentOpacity(color) }),
+    )
   }
 
   const Sampler = eyeDropper()
@@ -139,16 +203,6 @@ export function ColorField({
     )
   }
 
-  const pick = (name: string) => {
-    if (color?.kind === 'token' && color.name === name) {
-      close()
-      return
-    }
-    commitFromPicker(
-      composeColor({ kind: 'token', name, opacity: currentOpacity(color) }),
-    )
-  }
-
   const id = `color-${label.replace(/\W+/g, '-')}`
 
   return (
@@ -156,13 +210,20 @@ export function ColorField({
       ref={root}
       class="color-field is-wide"
       onFocusOut={(event) => {
-        const next = event.relatedTarget
-        if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
-          setOpen(false)
-        }
+        const field = event.currentTarget
+        /*
+         * Read once focus has settled. A reload removes the field while it
+         * holds focus, and a picker held across that reload must stay open.
+         */
+        setTimeout(() => {
+          if (!field.isConnected) return
+          if (field.contains(document.activeElement)) return
+          releasePicker()
+          setOpen(undefined)
+        }, 0)
       }}
     >
-      <div class="fill-row">
+      <div ref={row} class="fill-row">
         <div class="glyph-field">
           <button
             ref={swatch}
@@ -170,13 +231,10 @@ export function ColorField({
             type="button"
             aria-label={swatchLabel(label)}
             aria-haspopup="dialog"
-            aria-expanded={isOpen}
+            aria-expanded={open === 'picker'}
             title={label}
             disabled={isBusy}
-            onClick={() => {
-              setActive(Math.max(0, picked))
-              setOpen(!isOpen)
-            }}
+            onClick={() => toggle('picker')}
           >
             <span
               class="swatch-paint"
@@ -192,6 +250,24 @@ export function ColorField({
             onCommit={onCommit}
           />
         </div>
+        <button
+          ref={tokenButton}
+          class="color-icon"
+          type="button"
+          aria-label={tokensLabel(label)}
+          aria-haspopup="dialog"
+          aria-expanded={open === 'tokens'}
+          title="Pick a color token"
+          disabled={isBusy}
+          onClick={() => toggle('tokens')}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="5" cy="5" r="2.25" />
+            <circle cx="11" cy="5" r="2.25" />
+            <circle cx="5" cy="11" r="2.25" />
+            <circle cx="11" cy="11" r="2.25" />
+          </svg>
+        </button>
         {Sampler ? (
           <button
             class="color-icon"
@@ -215,12 +291,17 @@ export function ColorField({
           </span>
         ) : null}
       </div>
-      {isOpen ? (
+      {open ? (
         <div
           ref={dialog}
-          class="color-picker"
+          class={
+            open === 'picker' ? 'color-popover' : 'color-popover is-tokens'
+          }
+          popover="manual"
           role="dialog"
-          aria-label={`${label} colors`}
+          aria-label={
+            open === 'picker' ? `${label} color` : `${label} token list`
+          }
           tabIndex={-1}
           onKeyDown={(event) => {
             if (event.key !== 'Escape') return
@@ -232,7 +313,17 @@ export function ColorField({
             close()
           }}
         >
-          {tokens.length > 0 ? (
+          {open === 'picker' ? (
+            <ColorPicker
+              owner={owner}
+              color={color}
+              text={text}
+              inline={inline}
+              painted={painted}
+              begin={preview}
+              onCommit={onCommit}
+            />
+          ) : tokens.length > 0 ? (
             <ul
               ref={list}
               class="token-list"
@@ -284,19 +375,6 @@ export function ColorField({
               No color tokens resolve. Add them to the token sheet
             </p>
           )}
-          <div class="glyph-field">
-            <span class="glyph" aria-hidden="true">
-              #
-            </span>
-            <ColorInputs
-              hexLabel="hex"
-              opacityLabel="opacity"
-              color={color}
-              text={text}
-              isBusy={isBusy}
-              onCommit={commitFromPicker}
-            />
-          </div>
         </div>
       ) : null}
     </div>
