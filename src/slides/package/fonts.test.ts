@@ -81,6 +81,17 @@ describe('eotOf', () => {
     expect(header.subarray(84, 84 + family.length)).toEqual(family)
   })
 
+  it('should close the header on the empty root string checksum and zero EUDC fields', () => {
+    const tail = header.length - ttf.length - 20
+
+    expect([...header.subarray(tail, tail + 4)]).toEqual([
+      0x42, 0x53, 0x47, 0x50,
+    ])
+    expect([...header.subarray(tail + 4, tail + 20)]).toEqual(
+      Array.from({ length: 16 }, () => 0),
+    )
+  })
+
   it('should end with the font data unchanged', () => {
     expect(header.subarray(header.length - ttf.length)).toEqual(ttf)
   })
