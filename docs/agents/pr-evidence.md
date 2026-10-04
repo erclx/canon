@@ -70,8 +70,8 @@ shows a reviewer, each field present only when that comment holds it:
 
 | Field       | What it carries                                                   |
 | ----------- | ----------------------------------------------------------------- |
-| `preview`   | The hosted `**Preview:**` address the comment opens with.         |
-| `local`     | The `**Local preview:**` address under it.                        |
+| `preview`   | The hosted `**Preview:**` address on the comment's address line.  |
+| `local`     | The `**Local preview:**` address beside it.                       |
 | `checklist` | The checklist between its delimiters, with any ticked boxes kept. |
 
 These come from the comment already posted, never from the flags the call
@@ -142,11 +142,34 @@ details wrapper lands once, not twice.
 
 ## The preview line
 
-`--preview <url>` opens the body with the branch's preview address, and a run
+Every body opens with `## Evidence`. Under it sits one address line carrying
+whichever previews apply, joined by a middle dot:
+
+```plaintext
+## Evidence
+
+**Preview:** <url> · **Local preview:** <url>
+
+**Base:** `aaaa000` · **Head:** `bbbb111`
+```
+
+The Base and Head line follows only when the comment carries screenshots.
+
+`--preview <url>` puts the branch's hosted address on that line, and a run
 without it carries forward the address the marked comment already holds. With
-no evidence in the diff and an address in hand, the body is the address and the
-marker alone, reported as `ok`. `canon docs pr-preview` covers where the
-address comes from.
+no evidence in the diff and an address in hand, the body is the heading, the
+address line, and the marker alone, reported as `ok`. `canon docs pr-preview`
+covers where the address comes from.
+
+A carried hosted address is dropped when a deploy workflow resolves and its
+push path filter matches no path the pull request changed, since the site it
+links shows none of the change. An explicit `--preview` is always kept.
+
+The carry-forward reads every line above the commit line, the checklist, and
+the comparison for each prefix, wherever it sits. A comment posted before the
+heading opened the body, with each address on a line of its own at the top,
+reads the same way, so an open pull request keeps its links on its first
+re-render.
 
 ## The checklist line
 
@@ -173,11 +196,10 @@ gone.
 
 ## The local preview line
 
-`--local <url>` adds `**Local preview:** <url>` to the opening block: under the
-hosted `**Preview:**` line when there is one, and as the first line when there
-is not. The hosted line always keeps the first position, since that is the one
-line the carry-forward reads for it. A run without the option carries forward
-the local address the marked comment already holds, the same as the other two.
+`--local <url>` adds `**Local preview:** <url>` to the address line, after the
+hosted segment when there is one and alone when there is not. A run without the
+option carries forward the local address the marked comment already holds, the
+same as the other two.
 
 The option does not turn `no-evidence` into `ok` on its own. A branch with a
 dev server running and no rendered change would otherwise get a comment holding
@@ -206,10 +228,11 @@ canon pr evidence 1341 --check --json
 - `evidence` is owed when the changed set carries an evidence image and no
   comment carries the marker.
 - `preview` is owed when the pull request has a marked comment or an evidence
-  change, a deploy workflow resolves in the checkout the verb runs from, and
-  the marked comment's first line is no `**Preview:**` line. A
-  `**Local preview:**` line does not satisfy it. A project deploying nothing is
-  never owed a preview.
+  change, a deploy workflow resolves in the checkout the verb runs from, its
+  push path filter matches a path the pull request changed, and the marked
+  comment carries no `**Preview:**` address. A `**Local preview:**` address
+  does not satisfy it. A project deploying nothing is never owed a preview,
+  and neither is a branch its deploy does not build from.
 
 The record carries `owed`, `commentId` when a marked comment exists, and the
 same `preview`, `local`, and `checklist` fields the other reasons carry, so a

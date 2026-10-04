@@ -1,6 +1,6 @@
 ---
 title: The pull request preview deploy
-description: How canon pr preview finds a fenced Cloudflare Pages deploy, dispatches it on a pull request's branch, reads the alias the run prints, the refusal reasons it names, and why an unfenced deploy is refused before anything runs
+description: How canon pr preview finds a fenced Cloudflare Pages deploy, refuses a branch its push filter does not serve, dispatches it on a pull request's branch, reads the alias the run prints, the refusal reasons it names, and why an unfenced deploy is refused before anything runs
 ---
 
 # The pull request preview deploy
@@ -8,8 +8,8 @@ description: How canon pr preview finds a fenced Cloudflare Pages deploy, dispat
 `canon pr preview` publishes a pull request's branch to a Cloudflare Pages
 preview and reports the address. `git-pr` calls it after the evidence
 comparison, then re-renders that comment through `canon pr evidence --preview`
-so the link opens it. A reviewer gets a page to click into before merging
-rather than screenshots and a checklist alone.
+so the link sits on the address line under its heading. A reviewer gets a page
+to click into before merging rather than screenshots and a checklist alone.
 
 ```bash
 canon pr preview --json
@@ -30,6 +30,24 @@ the first file, in path order, that meets four tests:
 
 The workflow is read before the pull request, so a project with no fenced
 deploy is refused without a network call.
+
+## Which branches it serves
+
+A dispatch runs the workflow whatever its `on.push.paths` filter says, so a
+branch that touched nothing the site builds from would get a preview showing
+none of its change. The verb reads the pull request's changed paths and matches
+them against the picked workflow's own `on.push.paths` or `on.push.paths-ignore`
+list, applying `!` patterns in order the way GitHub does. When nothing matches,
+it refuses as `unserved` and dispatches nothing. `--check` answers `unserved`
+the same way.
+
+The push filter is the one statement of what the site builds from, since it
+already decides when production deploys. A workflow with neither list, with no
+push trigger, or that does not parse as YAML serves every change, so a project
+whose every change ships keeps minting for every branch.
+
+The changed paths come from the files endpoint, which skips a removed path, so
+a branch whose only site change deletes a file reads as `unserved`.
 
 ## Why an unfenced deploy is refused
 
@@ -62,19 +80,21 @@ keeps the match independent of the local clock.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
-| Reason          | What it means                                                              |
-| --------------- | -------------------------------------------------------------------------- |
-| `ok`            | The preview was published. `url` carries the address and `runId` the run.  |
-| `no-deploy`     | No dispatchable workflow runs `pages deploy`.                              |
-| `unfenced`      | The deploy passes no `--branch`, so nothing was dispatched.                |
-| `no-alias`      | The workflow prints no alias line, or the finished run's log carried none. |
-| `run-failed`    | The deploy run finished without succeeding. `runId` names it.              |
-| `timeout`       | The run did not finish inside `--timeout` minutes, 15 by default.          |
-| `bad-timeout`   | `--timeout` was not a positive number.                                     |
-| `gh-missing`    | `gh` is not on the path.                                                   |
-| `gh-failed`     | `gh` could not read the pull request, or list or dispatch the workflow.    |
-| `no-branch`     | The pull request carries no head branch name.                              |
-| `check-timeout` | `--check` was combined with `--timeout`.                                   |
+| Reason               | What it means                                                              |
+| -------------------- | -------------------------------------------------------------------------- |
+| `ok`                 | The preview was published. `url` carries the address and `runId` the run.  |
+| `no-deploy`          | No dispatchable workflow runs `pages deploy`.                              |
+| `unserved`           | The push path filter matches no changed path, so nothing was dispatched.   |
+| `unreadable-changes` | The pull request's changed paths could not be read.                        |
+| `unfenced`           | The deploy passes no `--branch`, so nothing was dispatched.                |
+| `no-alias`           | The workflow prints no alias line, or the finished run's log carried none. |
+| `run-failed`         | The deploy run finished without succeeding. `runId` names it.              |
+| `timeout`            | The run did not finish inside `--timeout` minutes, 15 by default.          |
+| `bad-timeout`        | `--timeout` was not a positive number.                                     |
+| `gh-missing`         | `gh` is not on the path.                                                   |
+| `gh-failed`          | `gh` could not read the pull request, or list or dispatch the workflow.    |
+| `no-branch`          | The pull request carries no head branch name.                              |
+| `check-timeout`      | `--check` was combined with `--timeout`.                                   |
 
 The exit is 0 on `ok` and 1 on every refusal. A `timeout` leaves the run
 going, so the preview may still land after the verb has given up on it.
@@ -107,10 +127,11 @@ reason but `fresh`.
 
 ## How the address reaches the pull request
 
-`canon pr evidence --preview <url>` puts `**Preview:** <url>` on the first line
-of the evidence body. With no evidence image in the diff, the body is that line
-and the trailing marker alone, so a pull request whose screenshots did not
-change still gets one comment a later call can find and edit.
+`canon pr evidence --preview <url>` puts `**Preview:** <url>` on the address
+line under the evidence body's `## Evidence` heading. With no evidence image in
+the diff, the body is the heading, that line, and the trailing marker alone, so
+a pull request whose screenshots did not change still gets one comment a later
+call can find and edit.
 
 A later `canon pr evidence` run without `--preview` reads the address off the
 marked comment and carries it into the new body. `git-followup` re-renders the
@@ -123,7 +144,9 @@ way, which is what keeps that push from wiping boxes a reviewer already ticked.
 A `pull_request` trigger on `closed` in the same workflow runs a cleanup job
 that deletes every preview deployment Cloudflare holds for the branch. The
 deploy job carries `if: github.event_name != 'pull_request'`, so a closed pull
-request never deploys.
+request never deploys. The same close runs `canon pr local --remove`, which
+drops the address line from the evidence comment, hosted link included, so the
+comment never links a deployment that no longer exists.
 
 ## What this does not cover
 
