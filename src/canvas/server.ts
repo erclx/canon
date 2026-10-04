@@ -1,7 +1,9 @@
 import { type FSWatcher, mkdirSync, watch } from 'node:fs'
 import {
+  countElements,
   type ElementAddress,
   HASH_ATTRIBUTE,
+  IMPLIED_ATTRIBUTE,
   TOKENS_ATTRIBUTE,
 } from '@/canvas/address'
 import {
@@ -92,24 +94,125 @@ function styleElement(css: string, hash: string | undefined): string {
   return `<style ${TOKENS_ATTRIBUTE}${stamp}>${css.replaceAll('</style', '<\\/style')}</style>`
 }
 
+/** The wrappers a browser builds whether or not the file states them. */
+const WRAPPERS = new Set(['html', 'head', 'body'])
+
+/** Which of the document wrappers the file states, counted as the address counts. */
+function statedWrappers(html: string): Set<string> {
+  const stated = new Set<string>()
+  countElements(new HTMLRewriter(), (element) => {
+    const tag = element.tagName.toLowerCase()
+    if (WRAPPERS.has(tag)) stated.add(tag)
+    return undefined
+  }).transform(html)
+  return stated
+}
+
+/** Prepends markup inside the first element a selector matches. */
+function prependFirst(html: string, selector: string, markup: string): string {
+  let isDone = false
+  return new HTMLRewriter()
+    .on(selector, {
+      element(element) {
+        if (isDone) return
+        isDone = true
+        element.prepend(markup, { html: true })
+      },
+    })
+    .transform(html)
+}
+
+/**
+ * What a browser parses into the head it builds ahead of a fragment's first
+ * content. A comment or whitespace among them stays in that head too.
+ */
+const HEAD_CONTENT = new Set([
+  'base',
+  'link',
+  'meta',
+  'noscript',
+  'script',
+  'style',
+  'template',
+  'title',
+])
+
+/**
+ * Opens a marked body where the browser would build its own: ahead of the
+ * first element or text outside the head content a file leads with, or at the
+ * end when the file holds nothing else.
+ */
+function openBodyBeforeContent(html: string, marker: string): string {
+  let isOpen = false
+  let headDepth = 0
+  const open = (target: HTMLRewriterTypes.Element | HTMLRewriterTypes.Text) => {
+    isOpen = true
+    target.before(marker, { html: true })
+  }
+  return new HTMLRewriter()
+    .on('*', {
+      element(element) {
+        if (isOpen || headDepth > 0) return
+        const tag = element.tagName.toLowerCase()
+        if (tag === 'html') return
+        if (!HEAD_CONTENT.has(tag)) {
+          open(element)
+          return
+        }
+        if (!element.canHaveContent || element.selfClosing) return
+        headDepth += 1
+        element.onEndTag(() => {
+          headDepth -= 1
+        })
+      },
+    })
+    .onDocument({
+      text(chunk) {
+        if (!isOpen && headDepth === 0 && chunk.text.trim() !== '') open(chunk)
+      },
+      end(end) {
+        if (!isOpen) end.append(marker, { html: true })
+      },
+    })
+    .transform(html)
+}
+
 /**
  * Puts the tokens first in the head, so a stylesheet the frame links itself
- * still wins the cascade. A frame with no head gets the element right after
- * its doctype, which a browser hoists into the head it builds. A hash stamps
- * the element even when no tokens resolve, since the shell sends it back with
- * an element pick.
+ * still wins the cascade. A hash stamps the element even when no tokens
+ * resolve, since the shell sends it back with an element pick.
+ *
+ * A wrapper the file leaves out is written in marked, since the browser would
+ * build it anyway and the shell's count would run past the file's. An `html`
+ * goes right after the doctype, which keeps the frame out of quirks mode. A
+ * marked `head` is left open, so the head content a fragment leads with parses
+ * into it the way it would into the head a browser builds, and a file stating
+ * neither `head` nor `body` gets a marked body opened where that content ends.
+ * A file stating a `head` but no `body` is left to the browser.
  */
 export function injectTokens(html: string, css: string, hash?: string): string {
   if (css === '' && hash === undefined) return html
-  const element = styleElement(css, hash)
-  const head = html.match(/<head(?:\s[^>]*)?>/i)
-  if (head?.index === undefined) {
-    /* Ahead of a doctype the element would drop the frame into quirks mode. */
-    const doctype = html.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
-    return `${doctype}${element}${html.slice(doctype.length)}`
+  const style = styleElement(css, hash)
+  const stated = statedWrappers(html)
+  const isHeadStated = stated.has('head')
+  const withBody =
+    isHeadStated || stated.has('body')
+      ? html
+      : openBodyBeforeContent(html, `<body ${IMPLIED_ATTRIBUTE}>`)
+  if (isHeadStated) {
+    const withHead = prependFirst(withBody, 'head', style)
+    return stated.has('html') ? withHead : markedHtml(withHead, '')
   }
-  const at = head.index + head[0].length
-  return `${html.slice(0, at)}${element}${html.slice(at)}`
+  const head = `<head ${IMPLIED_ATTRIBUTE}>${style}`
+  return stated.has('html')
+    ? prependFirst(withBody, 'html', head)
+    : markedHtml(withBody, head)
+}
+
+/** Writes a marked `html` and what follows it right after the doctype. */
+function markedHtml(html: string, lead: string): string {
+  const doctype = html.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
+  return `${doctype}<html ${IMPLIED_ATTRIBUTE}>${lead}${html.slice(doctype.length)}`
 }
 
 /**

@@ -6,10 +6,12 @@ import {
   elementAt,
   excerpt,
   HASH_ATTRIBUTE,
+  IMPLIED_ATTRIBUTE,
   resolveAddress,
   sourceElements,
   TOKENS_ATTRIBUTE,
 } from '@/canvas/address'
+import { injectTokens } from '@/canvas/server'
 
 function page(body: string, head = '<title>t</title>'): string {
   return `<!doctype html><html lang="en"><head>${head}</head><body>${body}</body></html>`
@@ -97,6 +99,12 @@ describe('documentElements', () => {
 
     expect(browserTags(served)).toEqual(serverTags(source))
   })
+
+  it('should skip a wrapper the server marked as implied', () => {
+    const served = `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}><style ${TOKENS_ATTRIBUTE}></style></head><body ${IMPLIED_ATTRIBUTE}><h1>Bare</h1>`
+
+    expect(browserTags(served)).toEqual(['h1'])
+  })
 })
 
 describe('addressOf', () => {
@@ -136,13 +144,49 @@ describe('resolveAddress', () => {
     expect(outcome).toMatchObject({ ok: false, reason: 'address-mismatch' })
   })
 
-  it('should report a mismatch when the browser implied the document wrapper', () => {
-    const fragment = '<h1>Bare</h1>'
-    const doc = new DOMParser().parseFromString(fragment, 'text/html')
+  it.each([
+    ['a bare fragment', '<h1>Bare</h1><p>x</p>'],
+    [
+      'an html and body with no head',
+      '<html lang="en"><body><h1>Bare</h1></body></html>',
+    ],
+    [
+      'a head-only lead before the content',
+      '<!doctype html><title>t</title><h1>Bare</h1>',
+    ],
+    [
+      'a style-led fragment',
+      '<style>h1:first-child{color:red}</style><h1>Bare</h1>',
+    ],
+  ])('should agree on %s once the server marks the wrapper', (_, file) => {
+    const served = injectTokens(file, ':root{}', 'abc123')
+    const doc = new DOMParser().parseFromString(served, 'text/html')
     const heading = doc.querySelector('h1')
     const address = heading ? addressOf(doc, heading) : undefined
 
-    const outcome = address && resolveAddress(fragment, address)
+    const outcome = address && resolveAddress(file, address)
+
+    expect(outcome).toMatchObject({ ok: true, element: { tag: 'h1' } })
+  })
+
+  it('should keep the lang of an html the file states', () => {
+    const served = injectTokens(
+      '<html lang="en"><body><p>a</p></body></html>',
+      '',
+    )
+    const doc = new DOMParser().parseFromString(served, 'text/html')
+
+    expect(doc.documentElement.getAttribute('lang')).toBe('en')
+  })
+
+  it('should still report a mismatch for a head with no body', () => {
+    const file = '<html><head><title>t</title></head><h1>Bare</h1></html>'
+    const served = injectTokens(file, ':root{}', 'abc123')
+    const doc = new DOMParser().parseFromString(served, 'text/html')
+    const heading = doc.querySelector('h1')
+    const address = heading ? addressOf(doc, heading) : undefined
+
+    const outcome = address && resolveAddress(file, address)
 
     expect(outcome).toMatchObject({ ok: false, reason: 'address-mismatch' })
   })

@@ -10,8 +10,9 @@ import { connect } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { IMPLIED_ATTRIBUTE, TOKENS_ATTRIBUTE } from '@/canvas/address'
 import { EDITING_FILE, EDITING_TTL_MS, markEditing } from '@/canvas/editing'
-import { type CanvasStarted, startCanvas } from '@/canvas/server'
+import { type CanvasStarted, injectTokens, startCanvas } from '@/canvas/server'
 import { SERVE_HOST } from '@/serve/static'
 
 let ROOT = ''
@@ -115,6 +116,93 @@ afterEach(async () => {
   await Promise.all(openReaders.splice(0).map((reader) => reader.cancel()))
   await Promise.all(running.splice(0).map((server) => server.stop()))
   rmSync(ROOT, { recursive: true, force: true })
+})
+
+const STYLE = `<style ${TOKENS_ATTRIBUTE}>:root{}</style>`
+
+describe('injectTokens', () => {
+  it('should put the style first in a head the file states and mark nothing', () => {
+    const html =
+      '<!doctype html><html lang="en"><head><title>t</title></head><body><p>a</p></body></html>'
+
+    const served = injectTokens(html, ':root{}')
+
+    expect(served).toBe(
+      `<!doctype html><html lang="en"><head>${STYLE}<title>t</title></head><body><p>a</p></body></html>`,
+    )
+  })
+
+  it('should write a marked head right after an html the file states', () => {
+    const html = '<!doctype html><html lang="en"><body><p>a</p></body></html>'
+
+    const served = injectTokens(html, ':root{}')
+
+    expect(served).toBe(
+      `<!doctype html><html lang="en"><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body><p>a</p></body></html>`,
+    )
+  })
+
+  it('should write a marked html, head, and body after the doctype of a fragment', () => {
+    const served = injectTokens('<!doctype html><h1>x</h1>', ':root{}')
+
+    expect(served).toBe(
+      `<!doctype html><html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should write the marked wrapper first in a fragment with no doctype', () => {
+    const served = injectTokens('<h1>x</h1>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should land ahead of a leading comment rather than inside it', () => {
+    const served = injectTokens('<!-- <head> --><h1>x</h1>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<!-- <head> --><body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should keep the head content a fragment leads with inside the marked head', () => {
+    const served = injectTokens(
+      '<meta charset="utf-8"><style>h1:first-child{color:red}</style>\n<h1>x</h1>',
+      ':root{}',
+    )
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<meta charset="utf-8"><style>h1:first-child{color:red}</style>\n<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should open the marked body ahead of text a fragment leads with', () => {
+    const served = injectTokens('<title>t</title>Hello <b>x</b>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<title>t</title><body ${IMPLIED_ATTRIBUTE}>Hello <b>x</b>`,
+    )
+  })
+
+  it('should open the marked body at the end of a fragment holding only head content', () => {
+    const served = injectTokens('<title>t</title>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<title>t</title><body ${IMPLIED_ATTRIBUTE}>`,
+    )
+  })
+
+  it('should mark only the html when the file states its head and body', () => {
+    const served = injectTokens(
+      '<head><title>t</title></head><body><p>a</p></body>',
+      ':root{}',
+    )
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head>${STYLE}<title>t</title></head><body><p>a</p></body>`,
+    )
+  })
 })
 
 describe('startCanvas', () => {
