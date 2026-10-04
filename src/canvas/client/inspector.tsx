@@ -1,5 +1,6 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
+import { useState } from 'preact/hooks'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
 import { AlignGrid } from '@/canvas/client/inspector/align-grid'
 import { ColorField } from '@/canvas/client/inspector/color-field'
@@ -13,7 +14,9 @@ import { SizeField } from '@/canvas/client/inspector/size-field'
 import {
   clampScrub,
   displayValue,
+  opacityToCss,
   parseColor,
+  sharedRadius,
   toCssValue,
 } from '@/canvas/client/inspector/values'
 import {
@@ -77,6 +80,26 @@ const DIRECTION_FIELD: StyleField = {
 const FLEX_FIELDS: readonly StyleField[] = [
   { label: 'gap', glyph: 'Gap', property: 'gap', placeholder: '0' },
   { label: 'padding', glyph: 'Pad', property: 'padding', isWide: true },
+]
+
+/** The corners in the order the radius shorthand lists them. */
+const CORNER_FIELDS: readonly StyleField[] = [
+  { label: 'top left radius', glyph: 'TL', property: 'border-top-left-radius' },
+  {
+    label: 'top right radius',
+    glyph: 'TR',
+    property: 'border-top-right-radius',
+  },
+  {
+    label: 'bottom right radius',
+    glyph: 'BR',
+    property: 'border-bottom-right-radius',
+  },
+  {
+    label: 'bottom left radius',
+    glyph: 'BL',
+    property: 'border-bottom-left-radius',
+  },
 ]
 
 const FLEX_DISPLAYS = new Set(['flex', 'inline-flex'])
@@ -199,6 +222,11 @@ function ElementFields({
       if (editRefusal.value) return
     }
   }
+  const corners = CORNER_FIELDS.map((field) =>
+    currentValue(node, field.property).trim(),
+  )
+  const radius = sharedRadius(corners)
+  const [isPerCorner, setPerCorner] = useState(radius === undefined)
   const display = computedValue(node, 'display').trim()
   const isFlex = FLEX_DISPLAYS.has(display)
   const isWrapped = computedValue(node, 'flex-wrap').trim() === 'wrap'
@@ -337,6 +365,49 @@ function ElementFields({
             {FLEX_FIELDS.map(styleField)}
           </>
         ) : null}
+      </Section>
+      <Section
+        title="Appearance"
+        action={
+          <button
+            type="button"
+            class="section-icon"
+            aria-label="Per-corner radius"
+            title="Per-corner radius"
+            aria-pressed={isPerCorner}
+            onClick={() => setPerCorner(!isPerCorner)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 6.5V5a2 2 0 0 1 2-2h1.5M9.5 3H11a2 2 0 0 1 2 2v1.5M13 9.5V11a2 2 0 0 1-2 2H9.5M6.5 13H5a2 2 0 0 1-2-2V9.5" />
+            </svg>
+          </button>
+        }
+      >
+        <Field
+          label="opacity"
+          glyph="Op"
+          initial={displayValue('opacity', computedValue(node, 'opacity'))}
+          isBusy={isBusy}
+          onCommit={(typed) => {
+            const value = opacityToCss(typed)
+            if (value !== undefined) commit('opacity')(value)
+          }}
+        />
+        {isPerCorner ? (
+          CORNER_FIELDS.map(styleField)
+        ) : (
+          <Field
+            label="radius"
+            glyph="R"
+            initial={displayValue('border-radius', radius ?? '')}
+            isBusy={isBusy}
+            placeholder="0"
+            onCommit={(typed) =>
+              commit('border-radius')(toCssValue('border-radius', typed))
+            }
+            scrub={'style' in node ? scrubOf('border-radius') : undefined}
+          />
+        )}
       </Section>
       <Section title="Typography">
         {TYPE_FIELDS.map(styleField)}

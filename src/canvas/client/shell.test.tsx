@@ -824,7 +824,7 @@ describe('Inspector element', () => {
       [...mount.querySelectorAll('[aria-label="Element"] section h3')].map(
         (heading) => heading.textContent,
       ),
-    ).toEqual(['Layout', 'Flex', 'Typography', 'Fill', 'Text'])
+    ).toEqual(['Layout', 'Flex', 'Appearance', 'Typography', 'Fill', 'Text'])
   })
 
   it('should show a computed length rounded to a whole number', () => {
@@ -1266,6 +1266,72 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({ property: 'flex-wrap', value: 'wrap' }),
     ])
+  })
+
+  it('should write 50 percent opacity as 0.5', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('opacity'), '50')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'opacity', value: '0.5' }),
+    ])
+  })
+
+  it('should post nothing for an opacity percent past 100', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('opacity'), '150')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should write one radius for every corner', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('radius'), '12')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'border-radius', value: '12px' }),
+    ])
+  })
+
+  it('should write only the corner changed once the radius is per corner', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    act(() => buttonNamed('Per-corner radius').click())
+
+    await commit(fieldNamed('top left radius'), '4')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'border-top-left-radius',
+        value: '4px',
+      }),
+    ])
+  })
+
+  it('should open per corner on an element whose corners differ', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="border-top-left-radius: 8px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('top left radius').value).toBe('8')
   })
 
   /** Opens the color picker of the field of that name and returns it. */
