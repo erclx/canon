@@ -25,7 +25,9 @@ The write routes the shell posts to also refuse a request carrying an `Origin` o
 
 `frame move <page> <name> --x <px> --y <px>` rewrites one frame's position in `layout.json` and keeps its size. An omitted axis stays where the frame is. It refuses a frame or page that does not exist and a layout that does not parse.
 
-The shell writes through the same writer when the operator drags a frame. Both take a lock file beside the layout, read it, merge their change, and replace it, so a drag released while a verb writes loses neither position. A writer that cannot get the lock within two seconds refuses with reason `busy`.
+`frame resize <page> <name> --width <px> --height <px>` rewrites one frame's whole box in one write, and `--x` and `--y` move it at the same time. An omitted flag keeps the frame's current value. It refuses a width or height that is not a positive number as `invalid-size`, a position that is not a number as `invalid-position`, and a missing frame, a missing page, or a layout that does not parse as `frame move` does.
+
+The shell writes through the same writer when the operator drags a frame or one of its corner handles. Both take a lock file beside the layout, read it, merge their change, and replace it, so a drag released while a verb writes loses neither position. A writer that cannot get the lock within two seconds refuses with reason `busy`.
 
 `canvas selection --json` emits `{ ok, selection }` with the page, frame, file, box, and path of the frame the operator selected, or `selection: null` when nothing is selected or the selected frame has since been removed. Read it when the operator says "this one".
 
