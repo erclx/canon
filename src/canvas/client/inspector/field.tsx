@@ -21,6 +21,8 @@ export interface Scrub {
   readonly begin: () => ScrubSession
   /** Holds a scrubbed number inside what the property accepts. */
   readonly clamp: (value: number) => number
+  /** Scales each pixel's move, for a value whose useful range is small. */
+  readonly step?: number
 }
 
 interface FieldProps {
@@ -120,8 +122,11 @@ export function Field({
           const moved = event.clientX - held.lastX
           held.lastX = event.clientX
           held.value = scrub.clamp(
-            Math.round((held.value + moved * scrubStep(event.shiftKey)) * 10) /
-              10,
+            Math.round(
+              (held.value +
+                moved * scrubStep(event.shiftKey) * (scrub.step ?? 1)) *
+                10,
+            ) / 10,
           )
           const shown = String(held.value)
           if (input.current) input.current.value = shown
@@ -173,6 +178,60 @@ export function Field({
         }}
       />
       {trailing}
+    </div>
+  )
+}
+
+interface SelectFieldProps {
+  readonly label: string
+  readonly glyph: string
+  /** Each option's value, which is also what it shows. */
+  readonly options: readonly string[]
+  readonly value: string
+  readonly isBusy: boolean
+  readonly isWide?: boolean
+  readonly onCommit: (value: string) => void
+}
+
+/**
+ * A value picked from a fixed list, drawn like a field with a chevron. The
+ * select is native, so its list opens above the panel's clipping. A current
+ * value outside the list stays as an option, so it shows rather than blanks.
+ */
+export function SelectField({
+  label,
+  glyph,
+  options,
+  value,
+  isBusy,
+  isWide,
+  onCommit,
+}: SelectFieldProps): JSX.Element {
+  const shown = options.includes(value) ? options : [...options, value]
+  return (
+    <div class={fieldClass(isWide, 'is-select')}>
+      <span class="glyph" aria-hidden="true" title={label}>
+        {glyph}
+      </span>
+      <select
+        class="glyph-field-input glyph-select"
+        aria-label={label}
+        value={value}
+        disabled={isBusy}
+        onChange={(event) => {
+          const picked = event.currentTarget.value
+          if (picked !== value) onCommit(picked)
+        }}
+      >
+        {shown.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <svg class="select-chevron" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M4.5 6.5 8 10l3.5-3.5" />
+      </svg>
     </div>
   )
 }

@@ -8,16 +8,23 @@ import {
   Field,
   ReadOnlyField,
   type Scrub,
+  SelectField,
 } from '@/canvas/client/inspector/field'
 import { Section } from '@/canvas/client/inspector/section'
 import { SizeField } from '@/canvas/client/inspector/size-field'
+import { TokenSelect } from '@/canvas/client/inspector/token-select'
 import {
   clampScrub,
+  declarationValue,
   displayValue,
+  firstFamily,
+  lineHeightValue,
   opacityToCss,
   parseColor,
   sharedRadius,
+  textAlignOf,
   toCssValue,
+  tokenOf,
 } from '@/canvas/client/inspector/values'
 import {
   currentPage,
@@ -34,6 +41,7 @@ import {
   tokens,
   writeError,
 } from '@/canvas/client/state'
+import type { TokenKind } from '@/canvas/tokens'
 import '@/canvas/client/inspector/fields.css'
 
 /** Elements the parser never gives content, so they hold no text to edit. */
@@ -112,10 +120,25 @@ const CORNER_FIELDS: readonly StyleField[] = [
 const FLEX_DISPLAYS = new Set(['flex', 'inline-flex'])
 const GRID_DISPLAYS = new Set(['grid', 'inline-grid'])
 
-const TYPE_FIELDS: readonly StyleField[] = [
-  { label: 'size', glyph: 'Size', property: 'font-size' },
-  { label: 'weight', glyph: 'Wt', property: 'font-weight' },
+const WEIGHTS = ['100', '200', '300', '400', '500', '600', '700', '800', '900']
+
+/** Line height and letter spacing move in tenths, since their range is small. */
+const SPACING_FIELDS: readonly StyleField[] = [
+  { label: 'line height', glyph: 'LH', property: 'line-height' },
+  {
+    label: 'letter spacing',
+    glyph: 'LS',
+    property: 'letter-spacing',
+    placeholder: '0',
+  },
 ]
+
+const TEXT_ALIGNS = [
+  { value: 'left', path: 'M2.5 4h11M2.5 8h7M2.5 12h9' },
+  { value: 'center', path: 'M2.5 4h11M4.5 8h7M3.5 12h9' },
+  { value: 'right', path: 'M2.5 4h11M6.5 8h7M4.5 12h9' },
+  { value: 'justify', path: 'M2.5 4h11M2.5 8h11M2.5 12h11' },
+] as const
 
 const FILL_FIELDS = [
   { label: 'color', property: 'color' },
@@ -241,20 +264,29 @@ function ElementFields({
   const isFlex = FLEX_DISPLAYS.has(display)
   const isWrapped = computedValue(node, 'flex-wrap').trim() === 'wrap'
   const rect = node.getBoundingClientRect()
-  const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
-  const colorTokens =
+  const groupTokens = (kind: TokenKind): readonly string[] =>
     tokens.value?.groups
-      ?.find((group) => group.kind === 'color')
+      ?.find((group) => group.kind === kind)
       ?.tokens.map((token) => token.name) ?? []
+  const colorTokens = groupTokens('color')
+  const family = currentValue(node, 'font-family')
+  const familyToken = tokenOf(family)
+  const size = currentValue(node, 'font-size')
+  const sizeToken = tokenOf(size)
+  const textAlign = textAlignOf(
+    computedValue(node, 'text-align'),
+    computedValue(node, 'direction'),
+  )
 
   /**
    * Previews into the frame's own inline style and writes through the same
    * edit as typing. A reload mid-drag replaces the document, so a release
    * against one no longer on screen posts nothing.
    */
-  const scrubOf = (property: string): Scrub => ({
+  const scrubOf = (property: string, step?: number): Scrub => ({
     clamp: (value) => clampScrub(property, value),
+    step,
     begin: () => {
       const original = inlineValue(node, property)
       const style = (node as HTMLElement).style
@@ -422,10 +454,88 @@ function ElementFields({
         )}
       </Section>
       <Section title="Typography">
-        {TYPE_FIELDS.map(styleField)}
-        {font ? (
-          <ReadOnlyField label="font" glyph="Font" value={font} isWide />
-        ) : null}
+        <TokenSelect
+          label="family"
+          glyph="Aa"
+          initial={familyToken ?? firstFamily(family)}
+          tokens={groupTokens('font-family')}
+          token={familyToken}
+          isRaw={isRawInline(node, 'font-family')}
+          isBusy={isBusy}
+          isWide
+          onCommit={(typed) =>
+            commit('font-family')(declarationValue('font-family', typed))
+          }
+          onPick={(name) => commit('font-family')(`var(${name})`)}
+        />
+        <TokenSelect
+          label="size"
+          glyph="Size"
+          initial={sizeToken ?? displayValue('font-size', size)}
+          tokens={groupTokens('font-size')}
+          token={sizeToken}
+          isRaw={isRawInline(node, 'font-size')}
+          isBusy={isBusy}
+          onCommit={(typed) =>
+            commit('font-size')(toCssValue('font-size', typed))
+          }
+          onPick={(name) => commit('font-size')(`var(${name})`)}
+          scrub={'style' in node ? scrubOf('font-size') : undefined}
+        />
+        <SelectField
+          label="weight"
+          glyph="Wt"
+          options={WEIGHTS}
+          value={currentValue(node, 'font-weight').trim()}
+          isBusy={isBusy}
+          onCommit={commit('font-weight')}
+        />
+        {SPACING_FIELDS.map((field) => (
+          <Field
+            key={field.property}
+            label={field.label}
+            glyph={field.glyph}
+            initial={
+              field.property === 'line-height'
+                ? lineHeightValue(
+                    currentValue(node, 'line-height'),
+                    computedValue(node, 'font-size'),
+                  )
+                : displayValue(
+                    field.property,
+                    currentValue(node, field.property),
+                  )
+            }
+            isBusy={isBusy}
+            placeholder={field.placeholder}
+            onCommit={(typed) =>
+              commit(field.property)(toCssValue(field.property, typed))
+            }
+            scrub={'style' in node ? scrubOf(field.property, 0.1) : undefined}
+          />
+        ))}
+        <div class="segmented is-wide" role="group" aria-label="text alignment">
+          {TEXT_ALIGNS.map((align) => (
+            <button
+              key={align.value}
+              type="button"
+              class="segment"
+              aria-label={`Align ${align.value}`}
+              title={`Align ${align.value}`}
+              aria-pressed={textAlign === align.value}
+              disabled={isBusy}
+              onClick={() => {
+                if (textAlign !== align.value) {
+                  commit('text-align')(align.value)
+                }
+              }}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d={align.path} />
+              </svg>
+            </button>
+          ))}
+        </div>
       </Section>
       <Section title="Fill">
         {FILL_FIELDS.map((field) => {

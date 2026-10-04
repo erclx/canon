@@ -679,3 +679,81 @@
   height: 14px;
   fill: currentColor;
 }
+
+/*
+ * A value picked from a fixed list. The native select draws its value as the
+ * field's text and the chevron sits over its right edge, so the platform list
+ * opens on press and the field keeps the height of every other one.
+ */
+.glyph-field.is-select {
+  position: relative;
+}
+
+.glyph-select {
+  appearance: none;
+  padding-right: 22px;
+  cursor: pointer;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 6px;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: var(--color-muted);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* A raw marker inside a field sits before its menu, clear of the value. */
+.glyph-field .raw {
+  padding: 0 2px 0 var(--space-xs);
+}
+
+/* Mutually exclusive choices for one value, drawn as one field split evenly. */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  min-height: 24px;
+  padding: 1px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-action);
+  background: var(--color-surface);
+}
+
+.segment {
+  display: grid;
+  place-items: center;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.segment:hover {
+  color: var(--color-text);
+}
+
+.segment[aria-pressed='true'] {
+  background: var(--color-chrome);
+  color: var(--color-text);
+}
+
+.segment:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.segment svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}

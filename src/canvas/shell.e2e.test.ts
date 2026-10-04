@@ -61,6 +61,8 @@ const BASE_CSS = `:root {
   --color-ink: #1a1a1a;
   --color-clay: #c76b5f;
   --space-md: 16px;
+  --type-body-family: Georgia, serif;
+  --type-heading-size: 2rem;
 }
 
 [data-theme='light'] {
@@ -732,6 +734,64 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     )
     expect(await frame.getAttribute('data-editing')).toBeNull()
   }, 45_000)
+
+  it('should keep the typography controls inside the panel in both themes', async () => {
+    const heading = HELLO.replace(
+      '<h1 class="title">',
+      '<h1 class="title" style="font-family: var(--type-body-family); line-height: 1.2; letter-spacing: -0.02em; text-align: center">',
+    )
+    writeFileSync(
+      join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`),
+      heading,
+    )
+    const family = page.getByRole('textbox', { name: 'family', exact: true })
+    await expect
+      .poll(
+        async () => {
+          await page
+            .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
+            .locator('button.layer', { hasText: /^h1\.title/ })
+            .click({ timeout: 2_000 })
+            .catch(() => undefined)
+          return family.inputValue({ timeout: 2_000 }).catch(() => '')
+        },
+        { timeout: 15_000 },
+      )
+      .toBe('--type-body-family')
+
+    const panel = page.locator('.panel-right')
+    const overflowIn = () =>
+      panel.evaluate((element) => element.scrollWidth - element.clientWidth)
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    await page
+      .getByRole('group', { name: 'text alignment' })
+      .scrollIntoViewIfNeeded()
+    // An earlier case's edit leaves Saved up on a timer, so the shot waits it out.
+    await expect
+      .poll(() => panel.locator('.saved').count(), { timeout: 10_000 })
+      .toBe(0)
+    const first = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'typography-a.png') })
+    await toggle.click()
+    const second = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'typography-b.png') })
+    await toggle.click()
+
+    expect([first, second]).toEqual([0, 0])
+    expect(await family.inputValue()).toBe('--type-body-family')
+    expect(
+      await page
+        .getByRole('textbox', { name: 'line height', exact: true })
+        .inputValue(),
+    ).toBe('1.2')
+    expect(
+      await page
+        .getByRole('button', { name: 'Align center' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  }, 30_000)
 
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
