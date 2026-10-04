@@ -106,6 +106,12 @@ function publish(path: string, text: string, pid: number): boolean {
  * would both get through. A rename moves the file to a name only this acquirer
  * uses, so only one of them gets it, and comparing what moved against what was
  * judged catches the case where another acquirer already replaced it.
+ *
+ * One interleaving still gets through. A third acquirer publishing between the
+ * rename and the restore leaves the moved holder's file with nowhere to go, so
+ * two suites run at once. That costs one oversubscribed run and never a hang,
+ * and closing it needs a lock the kernel releases, which `node:fs` does not
+ * offer.
  */
 function displace(path: string, judged: string, pid: number): void {
   const aside = `${path}.${pid}.stale`

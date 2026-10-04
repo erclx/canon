@@ -28,7 +28,10 @@ export interface StageResult {
   readonly emissions: readonly Emission[]
   /** The remedy line a failed stage prints, naming what to do about it. */
   readonly failure?: string
-  /** Wall time the stage's checks took, including every process spawn. */
+  /**
+   * Wall time the stage took, including every process spawn and, on a stage
+   * holding a machine lock, the time it queued behind another worktree.
+   */
   readonly ms: number
 }
 
