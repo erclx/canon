@@ -4,7 +4,7 @@ import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import {
   listChangedFiles,
   listIgnoreAdditions,
@@ -13,7 +13,7 @@ import {
   parseIgnoreAdditions,
   type RenamePair,
   resolveBaseRef,
-} from '@/git-files'
+} from '@/git/files'
 import {
   type Bijection,
   type BijectionRefusal,

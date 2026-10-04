@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { baseCandidates, isMergeBase, TRUNK_REFS } from '@/git-base'
+import { baseCandidates, isMergeBase, TRUNK_REFS } from '@/git/base'
 
 describe('baseCandidates', () => {
   it('should return only the named ref when one is given', () => {

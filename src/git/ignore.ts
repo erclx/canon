@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /**
  * Reports which of `candidates` git ignores under `root`.

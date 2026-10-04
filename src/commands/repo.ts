@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import {
   compareMetadata,
   type CurrentMetadata,

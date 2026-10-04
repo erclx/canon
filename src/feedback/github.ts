@@ -1,5 +1,5 @@
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/project-root'
 import {
   buildIssueArgs,

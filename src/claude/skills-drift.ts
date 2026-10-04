@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { execaSync } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /**
  * The shipped corpus alone. A session loads a body from the plugin root, which

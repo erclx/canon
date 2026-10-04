@@ -27,7 +27,7 @@ The patterns and the rows differ at both ends rather than by an omission. `^clau
 
 ### How the census reads a test
 
-The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds there, and it excludes a test reading a fixture as data. That exclusion puts `src/comments/trend.test.ts` outside the set, since it replays fixed git revisions and skips itself when they are unreachable, and `src/commands/exit-code.test.ts`, which copies `src/` and `tsconfig.json` into a temp root. `src/gh-invocations.test.ts` and `src/ui.test.ts` resolve the repository root and then walk `src/` alone.
+The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds there, and it excludes a test reading a fixture as data. That exclusion puts `src/comments/trend.test.ts` outside the set, since it replays fixed git revisions and skips itself when they are unreachable, and `src/commands/exit-code.test.ts`, which copies `src/` and `tsconfig.json` into a temp root. `src/git/gh-invocations.test.ts` and `src/ui.test.ts` resolve the repository root and then walk `src/` alone.
 
 A temp root is not the repository root, which is the clause that decides three more. `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts` each resolve against an `mkdtempSync` directory, so a sweep reading for the resolution form alone counts too many.
 
@@ -47,7 +47,7 @@ The gap is narrowed to what the census names rather than closed, since a corpus 
 
 A single test file runs through `bun --bun vitest run <path>`, which is the form `package.json` spells in its `test` script, and never `bunx vitest run <path>`, `bun run vitest run <path>`, or bare `bun test`. Each wrong form fails with its own signature, and each reads like a regression rather than a bad invocation:
 
-- Zero tests. Without `--bun`, vitest resolves under node, where a module reaching git through `$` from `bun` fails to import at collection time and the file reports zero tests rather than a failure. `Cannot find package 'bun' imported from src/git-ignore.ts` is one form of it.
+- Zero tests. Without `--bun`, vitest resolves under node, where a module reaching git through `$` from `bun` fails to import at collection time and the file reports zero tests rather than a failure. `Cannot find package 'bun' imported from src/git/ignore.ts` is one form of it.
 - Failures a green tree does not have. A module calling `Bun.Glob`, `Bun.TOML`, or `Bun.YAML` without importing anything collects and runs under node, then throws `ReferenceError: Bun is not defined` at the call site, so the file reports ordinary failures pointing at a source line. `src/context/citations.ts` and `src/indexes/walk.ts` both show it under `bunx`.
 - Every case failing identically. `src/commands/pr.test.ts` spawns `process.execPath`, which is node under `bunx`, so `src/cli.ts` never starts past its shebang, stdout comes back empty, and every case dies on `SyntaxError: Unexpected end of JSON input` at the test's own `JSON.parse` line.
 - `TypeError: expect is not a function`. Bare `bun test` runs Bun's own test runner, and `it.concurrent(name, async ({ expect }) => ...)` reads its `expect` off a vitest-only context argument that runner never supplies.

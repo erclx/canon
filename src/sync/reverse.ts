@@ -1,7 +1,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { execaSync } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import {
   findInstalledOrigin,
   type HistoryIndex,

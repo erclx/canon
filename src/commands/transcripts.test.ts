@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { resolveOutDir } from '@/commands/transcripts'
 import { recordDir } from '@/record-root'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 describe('resolveOutDir', () => {
   it('resolves a caller-supplied --out against the CWD', async () => {

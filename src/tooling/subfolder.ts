@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, realpathSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { isWholeStack, type Manifest, seedFiles } from '@/tooling/manifest'
 
 /**

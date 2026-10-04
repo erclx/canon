@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { basename, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { resolveFolders } from '@/context/folders'
-import { gitEnv } from '@/git-env'
-import { listChangedFiles, resolveBaseRef } from '@/git-files'
+import { gitEnv } from '@/git/env'
+import { listChangedFiles, resolveBaseRef } from '@/git/files'
 import { surfaceDir } from '@/surface-root'
 
 /**

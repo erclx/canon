@@ -11,7 +11,7 @@ import {
   sectionAround,
   sweepSections,
 } from '@/context/classify/extract'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 const LONG_PARAGRAPH = Array.from(
   { length: MIN_ADDED_WORDS + 5 },

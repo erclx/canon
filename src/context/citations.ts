@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 import { RECORD_ROOTS } from '@/record-root'
 import { SURFACE_ROOTS } from '@/surface-root'
 

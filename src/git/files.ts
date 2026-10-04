@@ -1,6 +1,6 @@
 import { $ } from 'bun'
-import { baseCandidates, isMergeBase } from '@/git-base'
-import { gitEnv } from '@/git-env'
+import { baseCandidates, isMergeBase } from '@/git/base'
+import { gitEnv } from '@/git/env'
 
 /** Runs git under `root` with the resolution variables a hook exports stripped. */
 async function git(

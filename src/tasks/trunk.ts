@@ -1,5 +1,5 @@
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 const GIT_TIMEOUT_MS = 10_000
 

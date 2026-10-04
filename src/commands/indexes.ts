@@ -4,7 +4,7 @@ import { $ } from 'bun'
 import type { Command } from 'commander'
 import { buildIndexCatalog } from '@/indexes/list'
 import { exitCodeFor, type RegenResult, regenOne } from '@/indexes/regen'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { findIndexedAncestor, isIgnored, listIndexes } from '@/indexes/walk'
 import { intro, logAdd, logInfo, logStep, logWarn, outro } from '@/ui'
 

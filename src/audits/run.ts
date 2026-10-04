@@ -7,7 +7,7 @@ import {
   classify,
   type Corpus,
 } from '@/audits/catalog'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/project-root'
 
 /** Every value a corpus filter accepts, matching the `Corpus` union. */

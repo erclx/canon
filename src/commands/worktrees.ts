@@ -16,7 +16,7 @@ import {
   type Unreadable,
   type WorktreeVerdict,
 } from '@/worktrees/reclaim'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 import { repairBareFlag } from '@/worktrees/bare-flag'
 import {
   removeReclaimable,

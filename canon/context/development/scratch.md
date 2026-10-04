@@ -36,7 +36,7 @@ Two write kinds take two routes. Creating a whole file is a heredoc through `Bas
 
 Changing a line inside a file that already exists has no shell route, because the stream editors that would do it are banned for rewriting the line they anchored to and for exiting zero on a non-match, so it runs through a `canon` verb resolving the main root in-process. Relocating the four scratch folders was the other candidate, and it addresses nothing, since the refusal is tool-scoped rather than filesystem-scoped, while costing a breaking rename for every installed target.
 
-`canon tasks pull-request` and `canon tasks outcome` cover the two edits the board takes, and `mainWorktreeRoot()` in `src/worktree.ts` is the resolver all of them share. A skill with a structured edit no verb covers reads the file and writes it back whole instead. `git-pr` routes its own `Pull request:` line through the verb rather than writing it directly, since a linked worktree's own write there is the refused path and the number is what the archive gate depends on.
+`canon tasks pull-request` and `canon tasks outcome` cover the two edits the board takes, and `mainWorktreeRoot()` in `src/git/worktree.ts` is the resolver all of them share. A skill with a structured edit no verb covers reads the file and writes it back whole instead. `git-pr` routes its own `Pull request:` line through the verb rather than writing it directly, since a linked worktree's own write there is the refused path and the number is what the archive gate depends on.
 
 A setting would lift the refusal outright rather than route around it. `worktree.bgIsolation` takes `worktree` or `none`, defaults to `worktree`, sits per repository, and the refusal message names it directly.
 

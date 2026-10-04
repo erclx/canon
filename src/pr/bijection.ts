@@ -1,4 +1,4 @@
-import type { RenamePair } from '@/git-files'
+import type { RenamePair } from '@/git/files'
 import { extractKeyChangePaths, KEY_CHANGES, type PathClaim } from '@/pr/paths'
 
 /**

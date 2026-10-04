@@ -1,5 +1,5 @@
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import type { WorktreeVerdict } from '@/worktrees/reclaim'
 
 /** Which half of the removal a failure landed on, so a reader repairs the right one. */

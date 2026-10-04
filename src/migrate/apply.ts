@@ -1,7 +1,7 @@
 import { $ } from 'bun'
 import { readFile, mkdir, rename, rmdir, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import type { RenamePlan, RenameSource } from '@/migrate/plan'
 import { FROM_ROOT as OLD_ROOT, type RecordsPlan } from '@/migrate/records'
 

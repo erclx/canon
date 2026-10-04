@@ -7,7 +7,7 @@ import type {
   RunCommand,
 } from '@/gate/measures'
 import type { Check, Stage } from '@/gate/stages'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/project-root'
 
 export type StageStatus =

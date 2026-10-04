@@ -3,7 +3,7 @@ import type { Command } from 'commander'
 import { recordDir } from '@/record-root'
 import { ensureYtDlp, fetchOne } from '@/transcripts/fetch'
 import { palette } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 interface TranscriptOptions {
   out?: string

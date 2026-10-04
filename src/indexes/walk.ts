@@ -1,6 +1,6 @@
 import { existsSync, statSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { listIgnored } from '@/git-ignore'
+import { listIgnored } from '@/git/ignore'
 
 const INDEX_FILE = 'index.md'
 

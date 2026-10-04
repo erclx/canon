@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { $ } from 'bun'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { encodeProjectPath } from '@/sessions/transfer/transcript'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
