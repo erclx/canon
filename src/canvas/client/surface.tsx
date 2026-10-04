@@ -16,7 +16,10 @@ import {
   moveFrameTo,
   panBy,
   previewMove,
+  previewResize,
   registerFrameDocument,
+  resizeElement,
+  resizeFrameTo,
   selectElement,
   selectFrame,
   selection,
@@ -25,12 +28,15 @@ import {
   view,
   zoomAt,
 } from '@/canvas/client/state'
+import {
+  DRAG_THRESHOLD,
+  HoverOutline,
+  type OverlayBox,
+  SelectionOverlay,
+} from '@/canvas/client/selection'
 
 /** One wheel notch or one button press. */
 const ZOOM_STEP = 1.2
-
-/** Screen pixels a press travels before it reads as a drag and not a click. */
-const DRAG_THRESHOLD = 3
 
 /** Surface units one arrow press moves a frame, and one with Shift held. */
 const NUDGE = 10
@@ -76,25 +82,111 @@ function asElement(target: EventTarget | null): Element | undefined {
   return node?.nodeType === 1 ? (node as Element) : undefined
 }
 
-function ElementOutline({
-  element,
-  kind,
+/** A computed length in pixels, or the fallback for one that is not. */
+function pixels(value: string, fallback: number): number {
+  const parsed = Number.parseFloat(value)
+  return value.endsWith('px') && Number.isFinite(parsed) ? parsed : fallback
+}
+
+/**
+ * The selected element's overlay. A handle drag previews the size as inline
+ * style on the element and writes it once on release, the way the inspector's
+ * scrub does. The drag measures the border box while `width` and `height` set
+ * whatever box the element sizes by, so the delta is added to the computed
+ * value rather than written as the box itself.
+ */
+function ElementSelection({
+  node,
+  doc,
+  frameRef,
+  docKey,
 }: {
-  readonly element: Element
-  readonly kind: 'hover' | 'selected'
+  readonly node: Element
+  readonly doc: Document
+  readonly frameRef: FrameRef
+  readonly docKey: string
 }): JSX.Element {
-  const rect = element.getBoundingClientRect()
+  const start = useRef<
+    | {
+        readonly width: number
+        readonly height: number
+        readonly inlineWidth: string
+        readonly inlineHeight: string
+      }
+    | undefined
+  >(undefined)
+  const style = (node as HTMLElement).style
+
+  const measure = () => {
+    const rect = node.getBoundingClientRect()
+    return { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+  }
+
+  const cssSize = (box: OverlayBox, origin: OverlayBox) => {
+    const from = start.current
+    return {
+      width: Math.round(
+        (from?.width ?? origin.width) + box.width - origin.width,
+      ),
+      height: Math.round(
+        (from?.height ?? origin.height) + box.height - origin.height,
+      ),
+    }
+  }
+
+  const handleStart = () => {
+    const computed = doc.defaultView?.getComputedStyle(node)
+    const rect = node.getBoundingClientRect()
+    start.current = {
+      width: pixels(computed?.width ?? '', rect.width),
+      height: pixels(computed?.height ?? '', rect.height),
+      inlineWidth: style.getPropertyValue('width'),
+      inlineHeight: style.getPropertyValue('height'),
+    }
+  }
+
+  const handlePreview = (box: OverlayBox, from: OverlayBox) => {
+    const size = cssSize(box, from)
+    style.setProperty('width', `${size.width}px`)
+    style.setProperty('height', `${size.height}px`)
+  }
+
+  const restore = () => {
+    const from = start.current
+    if (!from) return
+    style.setProperty('width', from.inlineWidth)
+    style.setProperty('height', from.inlineHeight)
+  }
+
+  const handleCommit = (box: OverlayBox, from: OverlayBox) => {
+    const size = cssSize(box, from)
+    const address = addressOf(doc, node)
+    const isUnchanged = box.width === from.width && box.height === from.height
+    if (!address || isUnchanged) {
+      restore()
+      return
+    }
+    void resizeElement(
+      frameRef,
+      docKey,
+      address,
+      box.width === from.width ? undefined : size.width,
+      box.height === from.height ? undefined : size.height,
+    )
+  }
+
+  const handleCancel = restore
+
   return (
-    <div
-      class="element-outline"
-      data-outline={kind}
-      aria-hidden="true"
-      style={{
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
-      }}
+    <SelectionOverlay
+      kind="element"
+      measure={measure}
+      hasChip
+      isMeasuredWhileDragging
+      onStart={handleStart}
+      onPreview={handlePreview}
+      onCommit={handleCommit}
+      onCancel={handleCancel}
     />
   )
 }
@@ -263,8 +355,25 @@ function FrameView({
     const delta = ARROWS[event.key]
     if (!delta || !isSelected) return
     event.preventDefault()
+    /* The keyboard path for a handle drag: right and down grow the frame. */
+    if (event.ctrlKey || event.metaKey) {
+      void resizeFrameTo(ref, {
+        x: frame.x,
+        y: frame.y,
+        width: Math.max(1, frame.width + delta.x * step),
+        height: Math.max(1, frame.height + delta.y * step),
+      })
+      return
+    }
     void moveFrameTo(ref, frame.x + delta.x * step, frame.y + delta.y * step)
   }
+
+  const frameBox = (): OverlayBox => ({
+    x: frame.x,
+    y: frame.y,
+    width: frame.width,
+    height: frame.height,
+  })
 
   const next = value === 'dark' ? 'light' : 'dark'
   return (
@@ -272,6 +381,7 @@ function FrameView({
       class="frame"
       data-frame={frame.name}
       data-selected={isSelected ? 'true' : undefined}
+      data-picked={picked ? 'true' : undefined}
       data-dragging={draggingFrame.value === frame.name ? 'true' : undefined}
       tabIndex={0}
       aria-label={`${frame.name}, ${frame.width} by ${frame.height}`}
@@ -318,10 +428,25 @@ function FrameView({
           onLoad={handleLoad}
         />
         {hoveredNode && hoveredNode !== selectedNode ? (
-          <ElementOutline element={hoveredNode} kind="hover" />
+          <HoverOutline element={hoveredNode} />
         ) : null}
-        {selectedNode ? (
-          <ElementOutline element={selectedNode} kind="selected" />
+        {isSelected && !picked ? (
+          <SelectionOverlay
+            kind="frame"
+            measure={frameBox}
+            offset={{ x: frame.x, y: frame.y }}
+            onPreview={(box) => previewResize(ref, box)}
+            onCommit={(box) => void resizeFrameTo(ref, box)}
+            onCancel={(origin) => previewResize(ref, origin)}
+          />
+        ) : null}
+        {doc && selectedNode ? (
+          <ElementSelection
+            node={selectedNode}
+            doc={doc}
+            frameRef={ref}
+            docKey={key}
+          />
         ) : null}
       </div>
     </figure>

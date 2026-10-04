@@ -12,6 +12,7 @@ import {
   LOCK_SUFFIX,
   moveFrame,
   readSelection,
+  resizeFrame,
   TEMP_SUFFIX,
   writeSelection,
 } from '@/canvas/content'
@@ -349,6 +350,11 @@ export function startCanvas(
         hostname: SERVE_HOST,
         port,
         development: false,
+        /*
+         * Production mode turns port reuse on, so a second canvas would bind
+         * beside one already listening rather than walk past it.
+         */
+        reusePort: false,
         /* The change stream stays open for as long as the shell does. */
         idleTimeout: 0,
         routes: {
@@ -395,6 +401,30 @@ export function startCanvas(
                 const outcome = moveFrame(root, body.page, body.frame, {
                   x: body.x,
                   y: body.y,
+                })
+                return outcome.ok ? json(outcome) : refusal(outcome)
+              }),
+            ),
+          },
+          '/api/frames/resize': {
+            POST: guarded(
+              mutation((body) => {
+                if (
+                  !isRecord(body) ||
+                  typeof body.page !== 'string' ||
+                  typeof body.frame !== 'string' ||
+                  typeof body.x !== 'number' ||
+                  typeof body.y !== 'number' ||
+                  typeof body.width !== 'number' ||
+                  typeof body.height !== 'number'
+                ) {
+                  return badBody('send page, frame, x, y, width, and height')
+                }
+                const outcome = resizeFrame(root, body.page, body.frame, {
+                  x: body.x,
+                  y: body.y,
+                  width: body.width,
+                  height: body.height,
                 })
                 return outcome.ok ? json(outcome) : refusal(outcome)
               }),

@@ -464,6 +464,55 @@ export function moveFrame(
   })
 }
 
+/**
+ * Writes one frame's whole box. A handle on the top or left edge moves the
+ * frame as it resizes it, so position and size land in one locked write rather
+ * than a move and a resize another writer could land between.
+ */
+export function resizeFrame(
+  root: string,
+  page: string,
+  frame: string,
+  box: Box,
+): FrameOutcome {
+  if (!isValidName(page)) {
+    return refuse('invalid-name', `${page} is not a valid page name`)
+  }
+  if (!isValidName(frame)) {
+    return refuse('invalid-name', `${frame} is not a valid frame name`)
+  }
+  if (!Number.isFinite(box.x) || !Number.isFinite(box.y)) {
+    return refuse('invalid-position', 'x and y must be numbers')
+  }
+  const isPositive = (value: number) => Number.isFinite(value) && value > 0
+  if (!isPositive(box.width) || !isPositive(box.height)) {
+    return refuse('invalid-size', 'width and height must be positive numbers')
+  }
+
+  const dir = pagePath(root, page)
+  if (!isDirectory(dir)) return refuse('no-page', `page ${page} does not exist`)
+  const file = `${frame}${FRAME_EXTENSION}`
+  if (!existsSync(join(dir, file))) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  return withLayoutLock(dir, () => {
+    const { boxes, malformed } = readLayout(dir)
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const written: Box = {
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height,
+    }
+
+    writeLayout(dir, new Map([...boxes, [frame, written]]))
+    return { ok: true, page, frame, file, box: written }
+  })
+}
+
 export interface Selection {
   readonly page: string
   readonly frame: string

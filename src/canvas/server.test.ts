@@ -19,9 +19,9 @@ const running: CanvasStarted[] = []
 
 const SHELL_MARKER = '<p>shell</p>'
 
-function start(): CanvasStarted {
+function start(port = 0): CanvasStarted {
   const outcome = startCanvas(ROOT, {
-    port: 0,
+    port,
     shell: new Response(SHELL_MARKER, {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     }),
@@ -123,6 +123,17 @@ describe('startCanvas', () => {
 
     expect(server.host).toBe('127.0.0.1')
     expect(server.url).toBe(`http://127.0.0.1:${server.port}/`)
+  })
+
+  it('should walk past a port another canvas already holds', () => {
+    const first = start()
+
+    const second = start(first.port)
+
+    // Greater than rather than exactly one above, because the walk skips every
+    // occupied port and parallel sessions on this machine hold ports of their
+    // own.
+    expect(second.port).toBeGreaterThan(first.port)
   })
 
   it('should serve the shell at the root', async () => {
@@ -419,6 +430,77 @@ describe('POST /api/frames/move', () => {
       server,
       '/api/frames/move',
       { page: 'drafts', frame: 'hero', x: 1, y: 1 },
+      { origin: 'https://evil.example' },
+    )
+
+    expect(response.status).toBe(403)
+  })
+})
+
+describe('POST /api/frames/resize', () => {
+  it('should write the box through the shared layout writer', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 10,
+      y: 20,
+      width: 800,
+      height: 600,
+    })
+
+    expect(response.status).toBe(200)
+    expect(layoutOf('drafts').frames.hero).toEqual({
+      x: 10,
+      y: 20,
+      width: 800,
+      height: 600,
+    })
+  })
+
+  it('should answer 400 naming the reason for a zero height', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 0,
+      y: 0,
+      width: 400,
+      height: 0,
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      ok: false,
+      reason: 'invalid-size',
+    })
+  })
+
+  it('should answer 400 for a body that carries no size', async () => {
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 0,
+      y: 0,
+    })
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should refuse a request another origin sent', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/resize',
+      { page: 'drafts', frame: 'hero', x: 0, y: 0, width: 9, height: 9 },
       { origin: 'https://evil.example' },
     )
 
