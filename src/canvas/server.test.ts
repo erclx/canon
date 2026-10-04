@@ -18,9 +18,9 @@ const running: CanvasStarted[] = []
 
 const SHELL_MARKER = '<p>shell</p>'
 
-function start(): CanvasStarted {
+function start(port = 0): CanvasStarted {
   const outcome = startCanvas(ROOT, {
-    port: 0,
+    port,
     shell: new Response(SHELL_MARKER, {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     }),
@@ -122,6 +122,17 @@ describe('startCanvas', () => {
 
     expect(server.host).toBe('127.0.0.1')
     expect(server.url).toBe(`http://127.0.0.1:${server.port}/`)
+  })
+
+  it('should walk past a port another canvas already holds', () => {
+    const first = start()
+
+    const second = start(first.port)
+
+    // Greater than rather than exactly one above, because the walk skips every
+    // occupied port and parallel sessions on this machine hold ports of their
+    // own.
+    expect(second.port).toBeGreaterThan(first.port)
   })
 
   it('should serve the shell at the root', async () => {
