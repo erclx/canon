@@ -1,6 +1,6 @@
 ---
 title: Review
-description: The review trigger and its poll and watch loops, how the poll classifies a pull request and is tested, and the handback dispatch that carries a posted finding to the worker
+description: The review trigger and its poll and watch loops, where the poll lives and keeps its baseline, and the handback dispatch that carries a posted finding to the worker
 ---
 
 # Review
@@ -43,27 +43,7 @@ The scripts are TypeScript, so the type check reaches them through the `claude/s
 
 The script is tracked and its baseline is not. State lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, resolved through `git worktree list` rather than through the script's own folder, so a poll started from a linked worktree reads what one started from main wrote.
 
-## How the poll classifies
-
-`RESPONSE` is two tests rather than one count. The count asks whether a reply is new to the script, the stamp asks whether it is newer than the last pass, and a reply failing the second is one that pass already answered. A worker answers a finding and the reviewing session closes out seconds later, which is the ordinary handback rather than a race, so the count alone would report the answered thread on the next run and route a re-review that stops at the guard `review-pr` states.
-
-The review family reaches the script through `canon pr review-state` rather than a filter of its own, one call answering the covered commit, the heading, the age, and the pass instant as four fields. That verb is the only parser of the read-time marker `review-pr` writes into every body it posts, which keeps the script from carrying a second copy of that format. The branch is taken on the record's `source` field rather than on the exit, since a refusal record carries `reason` and no `source`, and an empty result falls through to a fallback over the payload that reads the submission stamps alone. `replyState` still returns the newest reply stamp beside the count, so that test pays for no second filter either.
-
-The age and the pass instant split rather than sharing a stamp. `age` and `STALLED` read `submittedAt`, which measures how long a posted comment has waited on a human, and `passAt` reads `readAt`, falling back to `submittedAt`, which bounds what that pass had read. Both stamps live on the row a run builds and never enter the baseline. That keeps a baseline an older version wrote readable, since the line format is unchanged, and a carried line keeps its baseline fields whole and classifies nothing.
-
-`UNMATCHED` counts the comments this run carries under a heading outside the six the comment filters know. The count, unlike the two stamps, rides in the baseline, because the next run has to know whether a heading already reported is still the newest one.
-
-A line read from an older baseline may lack a field, so the comparison reads a missing count as zero rather than leaning on an equality test the way `RESPONSE` does. The baseline is read as the first eight space-separated fields, so a short line still parses. `src/claude/orchestrate-poll.test.ts` and `src/claude/orchestrate-watch.test.ts` run the two scripts' behavior.
-
-The UI family is one token, `none` or `<open|closed>-<head|behind>-<short-sha>`, read off `.reviews` by `uiState` and compared against the head as a prefix, since the `review-ui` marker may carry a short sha. It sits ahead of the unmatched heading on the snapshot line, because that heading carries spaces and has to stay last, and it rides in the baseline as the eighth field so the next run can report a transition. Carrying the covered sha in the token is what makes a second UI pass at a new head read as a change even when its heading repeats. A carried pull request never reaches that read, since `main` writes its baseline line back unchanged beyond the heading, so no `UI-` state fires on it and the baseline keeps the previous token.
-
-### The poll's tests
-
-`src/claude/orchestrate-poll.test.ts` covers the classifier, which puts a shipped skill script under test. The harness builds a throwaway repository under `mktemp` and puts a stub `gh` first on `PATH`, answering the REST list, reviews, issue-comments, pull, and repository reads out of fixture files a case rewrites between runs. The stub refuses `pr`, `repo view`, and `graphql`. Either of the reviews and comments reads failing carries the pull request forward.
-
-A stub `canon` sits beside it answering `pr review-state` alone, which keeps the review scope a value a case sets rather than one the machine's installed binary decides, and refusing everything else, which is the answer `pr head` gives against a fixture with no remote. Writing the scope record from the same reviews lets a case override it to a marker naming an earlier commit, and disabling the stub turns that case back into the stale `SEEN` while the rest stay green.
-
-Two calls over one baseline replay a thread, since the classifier reaches its elif chain only on the second sighting of a pull request. A fake head sha keeps `git cat-file` failing, so `merges` reports `unknown` and `git merge-tree` never runs against a base the fixture has no remote for.
+How the script classifies a pull request, its base-movement readings, and its test harness sit in `poll.md`.
 
 ## The handback dispatch
 
