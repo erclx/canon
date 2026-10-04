@@ -290,3 +290,35 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* A trailing icon on the color row, square at the row's height. */
+.color-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-action);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.color-icon:hover,
+.color-icon[aria-expanded='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.color-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.color-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}

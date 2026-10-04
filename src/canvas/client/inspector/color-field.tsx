@@ -8,6 +8,7 @@ import {
 import {
   composeColor,
   type ParsedColor,
+  readHex,
 } from '@/canvas/client/inspector/values'
 
 interface ColorFieldProps {
@@ -29,16 +30,20 @@ interface ColorFieldProps {
 }
 
 /**
- * The swatch whose picker last wrote a value, so it takes focus back each time
- * the frame reloads. A saved edit remounts the inspector, once for the edit and
- * again when the file watcher reports the write, and each remount replaces the
- * swatch that held focus and drops it to the page. It holds until focus lands
- * anywhere else.
+ * The accessible name of the row control that last wrote a value, so it takes
+ * focus back each time the frame reloads. A saved edit remounts the inspector,
+ * once for the edit and again when the file watcher reports the write, and each
+ * remount replaces the control that held focus and drops it to the page. It
+ * holds until focus lands anywhere else.
  */
 let refocus: string | undefined
 
 function swatchLabel(label: string): string {
   return `${label} picker`
+}
+
+function eyedropperLabel(label: string): string {
+  return `${label} eyedropper`
 }
 
 if (typeof document !== 'undefined') {
@@ -47,8 +52,13 @@ if (typeof document !== 'undefined') {
     const target = event.target
     const name =
       target instanceof Element ? target.getAttribute('aria-label') : null
-    if (name !== swatchLabel(refocus)) refocus = undefined
+    if (name !== refocus) refocus = undefined
   })
+}
+
+/** The screen sampler, where the browser ships one. */
+function eyeDropper(): (new () => EyeDropperSampler) | undefined {
+  return typeof window === 'undefined' ? undefined : window.EyeDropper
 }
 
 /**
@@ -68,6 +78,7 @@ export function ColorField({
   onCommit,
 }: ColorFieldProps): JSX.Element {
   const [isOpen, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
   const swatch = useRef<HTMLButtonElement>(null)
   const list = useRef<HTMLUListElement>(null)
   const dialog = useRef<HTMLDivElement>(null)
@@ -89,7 +100,10 @@ export function ColorField({
   }, [isOpen])
 
   useLayoutEffect(() => {
-    if (refocus === label) swatch.current?.focus()
+    if (refocus === undefined) return
+    root.current
+      ?.querySelector<HTMLElement>(`[aria-label="${refocus}"]`)
+      ?.focus()
   }, [label])
 
   const close = () => {
@@ -100,8 +114,29 @@ export function ColorField({
   /* Writes from inside the picker, whose swatch keeps focus across the reload. */
   const commitFromPicker = (value: string) => {
     close()
-    refocus = label
+    refocus = swatchLabel(label)
     onCommit(value)
+  }
+
+  const Sampler = eyeDropper()
+  const sample = async (sampler: new () => EyeDropperSampler) => {
+    let picked: string
+    try {
+      picked = (await new sampler().open()).sRGBHex
+    } catch {
+      /* The operator dismissed the sampler, which writes nothing. */
+      return
+    }
+    const hex = readHex(picked)
+    if (!hex) return
+    refocus = eyedropperLabel(label)
+    onCommit(
+      composeColor({
+        kind: 'hex',
+        hex: hex.hex,
+        opacity: currentOpacity(color),
+      }),
+    )
   }
 
   const pick = (name: string) => {
@@ -118,6 +153,7 @@ export function ColorField({
 
   return (
     <div
+      ref={root}
       class="color-field is-wide"
       onFocusOut={(event) => {
         const next = event.relatedTarget
@@ -156,6 +192,20 @@ export function ColorField({
             onCommit={onCommit}
           />
         </div>
+        {Sampler ? (
+          <button
+            class="color-icon"
+            type="button"
+            aria-label={eyedropperLabel(label)}
+            title="Pick a color from the screen"
+            disabled={isBusy}
+            onClick={() => void sample(Sampler)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M10.5 2.5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L12 7l.5.5-1 1-4-4 1-1L9 4zM7.5 5.5l3 3-5 5H2.5v-3z" />
+            </svg>
+          </button>
+        ) : null}
         {isRaw ? (
           <span
             class="raw"

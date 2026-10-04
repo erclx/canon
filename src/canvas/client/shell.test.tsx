@@ -1333,6 +1333,52 @@ describe('Inspector edit', () => {
     ])
   })
 
+  describe('eyedropper', () => {
+    const host = window as unknown as Record<string, unknown>
+
+    afterEach(() => {
+      delete host.EyeDropper
+    })
+
+    it('should offer no eyedropper where the browser has none', () => {
+      renderApp([page('drafts', [frame('hero')])])
+      const doc = loadFrame('hero', HERO_BODY)
+
+      clickIn(doc, 'h1')
+
+      expect(
+        mount.querySelector('[aria-label="background eyedropper"]'),
+      ).toBeNull()
+    })
+
+    it('should write the hex the eyedropper resolves at the row opacity', async () => {
+      host.EyeDropper = class {
+        async open() {
+          return { sRGBHex: '#336699' }
+        }
+      }
+      renderApp([page('drafts', [frame('hero')])])
+      const doc = loadFrame(
+        'hero',
+        '<h1 style="background-color: #ff880080">A</h1>',
+      )
+      stampHash(doc, 'abc123')
+      clickIn(doc, 'h1')
+
+      await act(async () => {
+        buttonNamed('background eyedropper').click()
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+
+      expect(sentTo('/api/frames/edit')).toEqual([
+        expect.objectContaining({
+          property: 'background-color',
+          value: '#33669980',
+        }),
+      ])
+    })
+  })
+
   it('should edit text on an element holding text alone', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', HERO_BODY)
