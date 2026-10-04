@@ -33,7 +33,7 @@ describe('surfaceAction', () => {
     ).toBe('zoom-in')
   })
 
-  it('should zoom in on equals, the unshifted plus key', () => {
+  it('should zoom in on equals, the plus key without Shift', () => {
     expect(surfaceAction(key({ key: '=', code: 'Equal' }))).toBe('zoom-in')
   })
 
@@ -56,9 +56,9 @@ describe('surfaceAction', () => {
   })
 
   it('should release the pan when Space comes up', () => {
-    expect(
-      surfaceAction(key({ type: 'keyup', key: ' ', code: 'Space' })),
-    ).toBe('pan-release')
+    expect(surfaceAction(key({ type: 'keyup', key: ' ', code: 'Space' }))).toBe(
+      'pan-release',
+    )
   })
 
   it('should release the pan when Space comes up with Ctrl held', () => {

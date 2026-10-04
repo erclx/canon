@@ -24,7 +24,7 @@ export interface KeyInput {
   readonly altKey: boolean
 }
 
-const UNSHIFTED: Readonly<Record<string, SurfaceAction | undefined>> = {
+const PLAIN_KEYS: Readonly<Record<string, SurfaceAction | undefined>> = {
   v: 'tool-move',
   h: 'tool-pan',
   '=': 'zoom-in',
@@ -50,5 +50,5 @@ export function surfaceAction(event: KeyInput): SurfaceAction | undefined {
     if (event.code === 'Digit1') return 'zoom-fit'
     return event.key === '+' ? 'zoom-in' : undefined
   }
-  return UNSHIFTED[event.key.toLowerCase()]
+  return PLAIN_KEYS[event.key.toLowerCase()]
 }
