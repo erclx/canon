@@ -47,6 +47,14 @@ The selection overlay in `client/selection.tsx` draws the outline, four corner h
 
 An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
 
+### View tools and keys
+
+The key layer is one pure map in `client/keys.ts` from a key event to a surface action, called by the surface `<main>` and by every loaded frame document. A click inside a frame moves focus into that frame's window, so `handleLoad` forwards each frame's key presses and releases the way it forwards `wheel`, and the surface would hear nothing after the first pick without it. A key reaches the layer only while the surface or a frame holds focus, which keeps a letter typed into a panel field out of it. A key typed into a field inside a frame stays with the field, and Space on a focused button stays the button's.
+
+A Space pan lives in its own `spacePan` signal beside `activeTool`, so releasing Space returns to whichever tool was picked without the layer remembering it, and the strip lights the computed `shownTool`. While a pan is in effect every `.frame` takes `pointer-events: none`, so a drag over a frame reaches the viewport and picks nothing. A focused frame selects on Space's release rather than its press, and only when no drag moved the view.
+
+The layer never claims a key release. A button fires its Space activation on release, so preventing the default there to end a pan stopped Zoom in, Fit, and the tool buttons answering Space. The strip floats inside the surface rather than taking a grid column, so fit takes the strip's width as a left inset and never lands a frame under it.
+
 ### Layout edits
 
 Writing `border-radius` or `padding` drops that shorthand's longhands from the same inline style, so switching radius from per corner back to one value takes one edit and no corner left behind overrides it. A longhand write leaves its shorthand, since the longhand comes later and wins. The table of shorthands sits beside the writer's property set and holds those two families alone.
@@ -99,5 +107,5 @@ The component gallery existed only for the board's components panel and retired 
 - The writer reads a style attribute through `HTMLRewriter`, whose `getAttribute` returns the value with its entities still encoded and whose `setAttribute` escapes only `"`, as `&quot;`. A quoted font family comes back carrying `&quot;`, so the declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
-- `canon/wireframes/canvas.md` sits near the 300 rendered line ceiling, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.
+- `canon/wireframes/canvas.md` sits at the 300 rendered line ceiling, so the next addition to it cuts something first, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.
