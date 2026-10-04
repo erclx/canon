@@ -38,9 +38,62 @@ code {
 }
 
 .shell {
+  position: relative;
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 16rem;
+  grid-template-columns: var(--panel-left, 15rem) minmax(0, 1fr) var(
+      --panel-right,
+      16rem
+    );
   height: 100%;
+}
+
+/*
+ * The hit area lies over the surface side of the edge, clear of a panel's
+ * scrollbar on the same edge, with a line drawn at the edge itself.
+ */
+.panel-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel-handle-left {
+  left: var(--panel-left, 15rem);
+}
+
+.panel-handle-right {
+  right: var(--panel-right, 16rem);
+}
+
+.panel-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: transparent;
+}
+
+.panel-handle-left::after {
+  left: -1px;
+}
+
+.panel-handle-right::after {
+  right: -1px;
+}
+
+.panel-handle:hover::after,
+.panel-handle:active::after,
+.panel-handle:focus-visible::after {
+  background: var(--color-accent);
+}
+
+.shell.panels-hidden > .panel-handle {
+  display: none;
 }
 
 .panel {
@@ -569,7 +622,8 @@ code {
     grid-template-columns: 12rem minmax(0, 1fr);
   }
 
-  .panel-right {
+  .panel-right,
+  .panel-handle {
     display: none;
   }
 }

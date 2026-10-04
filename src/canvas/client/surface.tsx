@@ -20,6 +20,7 @@ import {
   moveFrameTo,
   panBy,
   panelsHidden,
+  panelWidths,
   previewMove,
   previewResize,
   redo,
@@ -608,13 +609,14 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
    */
   const viewportLeft = useRef<number | undefined>(undefined)
   const isHidden = panelsHidden.value
+  const leftWidth = panelWidths.value.left
   useLayoutEffect(() => {
     const left = viewportRef.current?.getBoundingClientRect().left
     if (left === undefined) return
     const before = viewportLeft.current
     viewportLeft.current = left
     if (before !== undefined && before !== left) panBy(before - left, 0)
-  }, [isHidden])
+  }, [isHidden, leftWidth])
 
   const handleWheelTurn = (turn: WheelTurn) => {
     if (turn.isZoom) {

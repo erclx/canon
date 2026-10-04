@@ -3744,6 +3744,131 @@ describe('panel toggle', () => {
   })
 })
 
+describe('panel resize', () => {
+  function handle(name: string): HTMLElement {
+    const element = mount.querySelector<HTMLElement>(
+      `[role="separator"][aria-label="${name}"]`,
+    )
+    if (!element) throw new Error(`no handle named ${name}`)
+    return element
+  }
+
+  function shellStyle(property: string): string {
+    return (
+      mount
+        .querySelector<HTMLElement>('.shell')
+        ?.style.getPropertyValue(property) ?? ''
+    )
+  }
+
+  function dragBy(target: HTMLElement, dx: number): void {
+    pointer('pointerdown', target, 500, 10)
+    pointer('pointermove', target, 500 + dx, 10)
+    pointer('pointerup', target, 500 + dx, 10)
+  }
+
+  function press(target: HTMLElement, key: string): void {
+    act(() => {
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+      )
+    })
+  }
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1440,
+    })
+  })
+
+  it('should widen the pages panel by a drag to the right on its handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize pages panel'), 60)
+
+    expect(shellStyle('--panel-left')).toBe('300px')
+  })
+
+  it('should widen the details panel by a drag to the left on its handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize details panel'), -44)
+
+    expect(shellStyle('--panel-right')).toBe('300px')
+  })
+
+  it('should move no frame, pan nothing, and record nothing on a handle drag', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value
+
+    dragBy(handle('Resize pages panel'), 60)
+
+    expect(view.value).toEqual(before)
+    expect(sent).toEqual([])
+  })
+
+  it('should stop at the floor and the ceiling', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize pages panel'), -500)
+    expect(shellStyle('--panel-left')).toBe('180px')
+    dragBy(handle('Resize pages panel'), 900)
+
+    expect(shellStyle('--panel-left')).toBe('480px')
+  })
+
+  it('should resize from the arrow keys on a focused handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    press(handle('Resize pages panel'), 'ArrowRight')
+    press(handle('Resize details panel'), 'ArrowLeft')
+
+    expect(shellStyle('--panel-left')).toBe('256px')
+    expect(shellStyle('--panel-right')).toBe('272px')
+    expect(handle('Resize pages panel').getAttribute('aria-valuenow')).toBe(
+      '256',
+    )
+  })
+
+  it('should keep a dragged width across a remount', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    dragBy(handle('Resize pages panel'), 60)
+    act(() => render(null, mount))
+    resetState()
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shellStyle('--panel-left')).toBe('300px')
+  })
+
+  it('should clamp a stored width a wider window left behind', () => {
+    localStorage.setItem(
+      'canon-canvas-panels',
+      JSON.stringify({ hidden: false, left: 470, right: 470 }),
+    )
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1000,
+    })
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shellStyle('--panel-left')).toBe('470px')
+    expect(shellStyle('--panel-right')).toBe('210px')
+  })
+
+  it('should bring a resized panel back at its width after a hide and show', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    dragBy(handle('Resize pages panel'), 60)
+
+    act(() => buttonNamed('Hide panels (\\)').click())
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(shellStyle('--panel-left')).toBe('300px')
+  })
+})
+
 describe('index.html', () => {
   it('should declare an inline icon so the browser never requests /favicon.ico', () => {
     const html = readFileSync(

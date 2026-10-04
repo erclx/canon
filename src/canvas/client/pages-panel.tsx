@@ -174,7 +174,11 @@ function Tabs(): JSX.Element {
 
 export function PagesPanel(props: PagesPanelProps): JSX.Element {
   return (
-    <nav class="panel panel-left" aria-label="Pages and frames">
+    <nav
+      id="pages-panel"
+      class="panel panel-left"
+      aria-label="Pages and frames"
+    >
       <header class="panel-head">
         <span class="brand">Canvas</span>
         <ThemeToggle />

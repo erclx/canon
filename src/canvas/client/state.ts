@@ -142,6 +142,53 @@ export function togglePanels(): void {
   panelsHidden.value = !panelsHidden.value
 }
 
+export type PanelSide = 'left' | 'right'
+
+export interface PanelWidths {
+  readonly left: number
+  readonly right: number
+}
+
+/** The 15rem and 16rem columns the shell opened at before panels resized. */
+export const DEFAULT_PANEL_WIDTHS: PanelWidths = { left: 240, right: 256 }
+export const MIN_PANEL_WIDTH = 180
+export const MAX_PANEL_WIDTH = 480
+/** What a panel never squeezes the surface below, the reflow floor. */
+export const MIN_SURFACE_WIDTH = 320
+
+export const panelWidths = signal<PanelWidths>(DEFAULT_PANEL_WIDTHS)
+
+/**
+ * Holds one panel between the floor and the ceiling, and under whatever keeps
+ * the surface at its own floor beside the other panel. The floor wins on a
+ * window too narrow for both.
+ */
+export function clampPanelWidth(
+  side: PanelSide,
+  width: number,
+  windowWidth: number,
+  widths: PanelWidths = panelWidths.value,
+): number {
+  const other = side === 'left' ? widths.right : widths.left
+  const ceiling = Math.min(
+    MAX_PANEL_WIDTH,
+    windowWidth - other - MIN_SURFACE_WIDTH,
+  )
+  const fallback = DEFAULT_PANEL_WIDTHS[side]
+  const wanted = Number.isFinite(width) ? width : fallback
+  return Math.round(Math.max(MIN_PANEL_WIDTH, Math.min(ceiling, wanted)))
+}
+
+export function setPanelWidth(
+  side: PanelSide,
+  width: number,
+  windowWidth: number,
+): void {
+  const next = clampPanelWidth(side, width, windowWidth)
+  if (panelWidths.value[side] === next) return
+  panelWidths.value = { ...panelWidths.value, [side]: next }
+}
+
 /** The tool the strip has lit, which a Space pan overrides while held. */
 export const activeTool = signal<Tool>('move')
 
@@ -735,4 +782,5 @@ export function resetState(): void {
   history.value = NO_HISTORY
   historyNotice.value = undefined
   panelsHidden.value = false
+  panelWidths.value = DEFAULT_PANEL_WIDTHS
 }
