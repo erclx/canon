@@ -22,6 +22,11 @@ export interface TokenSource {
 
 export type LeftTab = 'pages' | 'theme'
 
+export type Tool = 'move' | 'pan'
+
+/** A Space pan held, and whether a drag has moved the view while it was. */
+export type SpacePan = 'held' | 'dragged'
+
 /** One property change to the selected element, as the inspector posts it. */
 export interface PendingEdit {
   readonly key: string
@@ -122,6 +127,16 @@ export const draggingFrame = signal<string | undefined>(undefined)
 export const writeError = signal<string | undefined>(undefined)
 
 export const leftTab = signal<LeftTab>('pages')
+
+/** The tool the strip has lit, which a Space pan overrides while held. */
+export const activeTool = signal<Tool>('move')
+
+export const spacePan = signal<SpacePan | undefined>(undefined)
+
+/** The tool in effect, so Space shows Pan lit and releasing it restores it. */
+export const shownTool = computed<Tool>(() =>
+  spacePan.value ? 'pan' : activeTool.value,
+)
 
 /** The edit in flight, which holds its field until the server answers. */
 export const pendingEdit = signal<PendingEdit | undefined>(undefined)
@@ -550,11 +565,19 @@ export function panBy(dx: number, dy: number): void {
   view.value = { ...current, x: current.x + dx, y: current.y + dy }
 }
 
-/** Fits every frame on the current page into a viewport of the given size. */
-export function fitView(width: number, height: number, padding = 48): void {
+/**
+ * Fits every frame on the current page into a viewport of the given size,
+ * clear of `insetLeft` pixels of chrome floating over its left edge.
+ */
+export function fitView(
+  width: number,
+  height: number,
+  padding = 48,
+  insetLeft = 0,
+): void {
   const frames = currentPage.value?.frames ?? []
   if (frames.length === 0 || width <= 0 || height <= 0) {
-    view.value = { x: padding, y: padding, zoom: 0.5 }
+    view.value = { x: insetLeft + padding, y: padding, zoom: 0.5 }
     return
   }
   const left = Math.min(...frames.map((frame) => frame.x))
@@ -563,14 +586,14 @@ export function fitView(width: number, height: number, padding = 48): void {
   const bottom = Math.max(...frames.map((frame) => frame.y + frame.height))
   const zoom = clampZoom(
     Math.min(
-      (width - padding * 2) / (right - left),
+      (width - insetLeft - padding * 2) / (right - left),
       (height - padding * 2) / (bottom - top),
       1,
     ),
   )
   view.value = {
     zoom,
-    x: padding - left * zoom,
+    x: insetLeft + padding - left * zoom,
     y: padding - top * zoom,
   }
 }
@@ -607,6 +630,8 @@ export function resetState(): void {
   draggingFrame.value = undefined
   writeError.value = undefined
   leftTab.value = 'pages'
+  activeTool.value = 'move'
+  spacePan.value = undefined
   pendingEdit.value = undefined
   savedEdit.value = undefined
   editRefusal.value = undefined

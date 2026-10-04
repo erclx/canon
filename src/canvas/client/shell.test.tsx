@@ -19,6 +19,7 @@ import { App } from '@/canvas/client/app'
 import { isRawValue } from '@/canvas/client/inspector'
 import { releasePicker } from '@/canvas/client/inspector/color-picker'
 import {
+  activeTool,
   applyChange,
   applyRecord,
   editedHashes,
@@ -27,6 +28,7 @@ import {
   resetState,
   savedEdit,
   selection,
+  spacePan,
   theme,
   view,
 } from '@/canvas/client/state'
@@ -2764,6 +2766,37 @@ describe('selection handles', () => {
     expect(figureFor('hero').querySelectorAll('.selection')).toHaveLength(1)
   })
 
+  it('should pan rather than resize when Space is held over a handle', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    const before = view.value
+    const surface = mount.querySelector('main.surface')
+    act(() => {
+      surface?.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: ' ',
+          code: 'Space',
+          bubbles: true,
+        }),
+      )
+    })
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 140, y: 130 },
+    )
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(view.value).toEqual({
+      ...before,
+      x: before.x + 40,
+      y: before.y + 30,
+    })
+  })
+
   it('should resize a frame by the drag in surface units at half zoom', async () => {
     renderApp([page('drafts', [frame('hero', { x: 40, y: 60 })])])
     act(() => {
@@ -3076,6 +3109,387 @@ describe('selection handles', () => {
     )
 
     expect(edits).toBe(1)
+  })
+})
+
+describe('view tools', () => {
+  function surface(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('main.surface')
+    if (!element) throw new Error('no surface')
+    return element
+  }
+
+  function viewportOf(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('.viewport')
+    if (!element) throw new Error('no viewport')
+    return element
+  }
+
+  function key(
+    target: EventTarget,
+    type: 'keydown' | 'keyup',
+    init: KeyboardEventInit,
+  ): KeyboardEvent {
+    const event = new KeyboardEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      ...init,
+    })
+    act(() => {
+      target.dispatchEvent(event)
+    })
+    return event
+  }
+
+  function toolNamed(name: string): HTMLButtonElement {
+    const button = mount.querySelector<HTMLButtonElement>(
+      `[aria-label="Tools"] button[aria-label="${name}"]`,
+    )
+    if (!button) throw new Error(`no tool named ${name}`)
+    return button
+  }
+
+  it('should show Move pressed and Pan not when the surface opens', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(toolNamed('Move (V)').getAttribute('aria-pressed')).toBe('true')
+    expect(toolNamed('Pan (H)').getAttribute('aria-pressed')).toBe('false')
+  })
+
+  it('should pick the pan tool from its button', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => toolNamed('Pan (H)').click())
+
+    expect(activeTool.value).toBe('pan')
+    expect(toolNamed('Pan (H)').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('should pick the pan tool on H and the move tool on V', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    key(surface(), 'keydown', { key: 'h', code: 'KeyH' })
+    expect(activeTool.value).toBe('pan')
+    key(surface(), 'keydown', { key: 'v', code: 'KeyV' })
+
+    expect(activeTool.value).toBe('move')
+  })
+
+  it('should pan rather than select when the pan tool drags over a frame', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => toolNamed('Pan (H)').click())
+    const before = view.value
+
+    pointer('pointerdown', labelFor('hero'), 100, 100)
+    pointer('pointermove', labelFor('hero'), 160, 130)
+    pointer('pointerup', labelFor('hero'), 160, 130)
+
+    expect(view.value).toEqual({
+      ...before,
+      x: before.x + 60,
+      y: before.y + 30,
+    })
+    expect(sentTo('/api/selection')).toEqual([])
+    expect(sentTo('/api/frames/move')).toEqual([])
+  })
+
+  it('should pan with Space held over a frame and select nothing', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', labelFor('hero'), 100, 100)
+    pointer('pointermove', labelFor('hero'), 140, 120)
+    pointer('pointerup', labelFor('hero'), 140, 120)
+
+    expect(view.value).toEqual({
+      ...before,
+      x: before.x + 40,
+      y: before.y + 20,
+    })
+    expect(sentTo('/api/selection')).toEqual([])
+  })
+
+  it('should return to the tool before once Space comes up', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    expect(toolNamed('Pan (H)').getAttribute('aria-pressed')).toBe('true')
+    key(surface(), 'keyup', { key: ' ', code: 'Space' })
+
+    expect(spacePan.value).toBeUndefined()
+    expect(toolNamed('Move (V)').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('should select a focused frame when Space comes up with no drag', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    key(figureFor('hero'), 'keydown', { key: ' ', code: 'Space' })
+    key(figureFor('hero'), 'keyup', { key: ' ', code: 'Space' })
+
+    expect(sentTo('/api/selection')).toEqual([
+      { page: 'drafts', frame: 'hero' },
+    ])
+  })
+
+  it('should clear a text selection when a pan drag starts', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const range = document.createRange()
+    range.selectNodeContents(figureFor('hero'))
+    document.getSelection()?.addRange(range)
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', viewportOf(), 100, 100)
+
+    expect(document.getSelection()?.isCollapsed ?? true).toBe(true)
+  })
+
+  it('should clear a text selection inside a frame when a pan drag starts', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    const range = doc.createRange()
+    range.selectNodeContents(doc.querySelector('h1') as Element)
+    doc.getSelection()?.addRange(range)
+
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', viewportOf(), 100, 100)
+
+    expect(doc.getSelection()?.isCollapsed ?? true).toBe(true)
+  })
+
+  it('should keep a press on the viewport from starting a selection while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const press = new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      detail: 2,
+    })
+    act(() => {
+      viewportOf().dispatchEvent(press)
+    })
+
+    expect(press.defaultPrevented).toBe(true)
+  })
+
+  it('should move focus from a panel field to the surface on a Pan tool press', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+    const field = mount.querySelector<HTMLInputElement>('.panel-right input')
+    if (!field) throw new Error('no inspector input')
+    act(() => toolNamed('Pan (H)').click())
+    field.focus()
+
+    act(() => {
+      viewportOf().dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(document.activeElement).toBe(surface())
+  })
+
+  it('should leave focus where it is on a press with Space held', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    act(() => toolNamed('Move (V)').focus())
+
+    act(() => {
+      viewportOf().dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(document.activeElement).toBe(toolNamed('Move (V)'))
+  })
+
+  it('should leave a press on the viewport its default with the move tool', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    const press = new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+    })
+    act(() => {
+      viewportOf().dispatchEvent(press)
+    })
+
+    expect(press.defaultPrevented).toBe(false)
+  })
+
+  it('should keep a selection from starting in the shell while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const start = new Event('selectstart', { bubbles: true, cancelable: true })
+    act(() => {
+      labelFor('hero').dispatchEvent(start)
+    })
+
+    expect(start.defaultPrevented).toBe(true)
+  })
+
+  it('should keep a selection from starting inside a frame while panning', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    const start = new Event('selectstart', { bubbles: true, cancelable: true })
+    act(() => {
+      doc.querySelector('h1')?.dispatchEvent(start)
+    })
+
+    expect(start.defaultPrevented).toBe(true)
+  })
+
+  it('should not select a focused frame when Space comes up after a drag', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    key(figureFor('hero'), 'keydown', { key: ' ', code: 'Space' })
+    pointer('pointerdown', viewportOf(), 100, 100)
+    pointer('pointermove', viewportOf(), 140, 100)
+    pointer('pointerup', viewportOf(), 140, 100)
+    key(figureFor('hero'), 'keyup', { key: ' ', code: 'Space' })
+
+    expect(sentTo('/api/selection')).toEqual([])
+  })
+
+  it('should end a Space pan when the window loses focus', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+
+    act(() => {
+      window.dispatchEvent(new Event('blur'))
+    })
+
+    expect(spacePan.value).toBeUndefined()
+  })
+
+  it('should take a key pressed inside a frame document', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+
+    key(doc.querySelector('h1') as Element, 'keydown', {
+      key: 'h',
+      code: 'KeyH',
+    })
+
+    expect(activeTool.value).toBe('pan')
+  })
+
+  it('should keep Space from scrolling a frame document it pans', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    const event = key(doc.body, 'keydown', { key: ' ', code: 'Space' })
+
+    expect(event.defaultPrevented).toBe(true)
+    expect(spacePan.value).toBe('held')
+  })
+
+  it('should leave a letter typed into a field inside a frame to the field', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<input type="text" />')
+
+    const event = key(doc.querySelector('input') as Element, 'keydown', {
+      key: 'h',
+      code: 'KeyH',
+    })
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(activeTool.value).toBe('move')
+  })
+
+  it('should do nothing for a letter typed into a panel input', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+    const input = mount.querySelector<HTMLInputElement>(
+      '.panel-right input[type="text"], .panel-right input:not([type])',
+    )
+    if (!input) throw new Error('no inspector input')
+
+    key(input, 'keydown', { key: 'h', code: 'KeyH' })
+
+    expect(activeTool.value).toBe('move')
+  })
+
+  it('should zoom in on plus as the Zoom in button does', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value.zoom
+
+    key(surface(), 'keydown', { key: '+', code: 'Equal', shiftKey: true })
+
+    expect(view.value.zoom).toBeCloseTo(before * 1.2)
+  })
+
+  it('should zoom out on minus', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value.zoom
+
+    key(surface(), 'keydown', { key: '-', code: 'Minus' })
+
+    expect(view.value.zoom).toBeCloseTo(before / 1.2)
+  })
+
+  it('should leave Space on a focused button to activate it', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    const down = key(buttonNamed('Fit'), 'keydown', { key: ' ', code: 'Space' })
+    const up = key(buttonNamed('Fit'), 'keyup', { key: ' ', code: 'Space' })
+
+    expect([down.defaultPrevented, up.defaultPrevented]).toEqual([false, false])
+    expect(spacePan.value).toBeUndefined()
+  })
+
+  it('should leave Ctrl and plus to the browser', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value
+
+    const event = key(surface(), 'keydown', {
+      key: '+',
+      code: 'Equal',
+      ctrlKey: true,
+    })
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(view.value).toEqual(before)
+  })
+
+  it('should fit every frame on Shift and 1', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    Object.defineProperty(viewportOf(), 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 0, top: 0, width: 1000, height: 600 }),
+    })
+    act(() => {
+      view.value = { x: 300, y: 300, zoom: 2 }
+    })
+
+    key(surface(), 'keydown', { key: '!', code: 'Digit1', shiftKey: true })
+
+    expect(view.value.zoom).toBeCloseTo((600 - 96) / 900)
+  })
+
+  it('should fit the frames clear of the tool strip', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    Object.defineProperty(viewportOf(), 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 200, top: 0, width: 1000, height: 600 }),
+    })
+    const strip = mount.querySelector('[aria-label="Tools"]')
+    if (!strip) throw new Error('no tool strip')
+    Object.defineProperty(strip, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 214, right: 260, top: 14, bottom: 80 }),
+    })
+
+    act(() => buttonNamed('Fit').click())
+
+    expect(view.value.x).toBe(60 + 48)
   })
 })
 

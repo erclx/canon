@@ -15,6 +15,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, editing badge, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for every part drops the theme switch, then the badge, then the size, before it shortens the name
 - Element outline: drawn over a frame, dashed around the element under the pointer
 - Selection: a thin outline around the selected frame or element with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
+- Tool strip: at the surface's top left, Move over Pan, the one in effect lit
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
@@ -66,13 +67,14 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Section labels: `Pages`, `Frames`, `Page`, `Tokens`
 - No pages: `No pages yet. Run canon canvas page add <name> to add one.`
 - Empty page: `No frames on this page. Run canon canvas frame add <page> <name> to add one.`, with `<page>` the current page's name
-- Loading: `Loading`
+- Loading: `Loading`, then `Loading layers` in a frame's layers and `Loading the frame to read this element` in the element inspector
 - Unreachable: `Could not read the canvas (<reason>). Check canon canvas serve is still running.`, with `<reason>` templated
 - Token source: `This toolkit`, `Installed design`, or `None`, over the installed file list or the server's notice
 - Unplaced: `<n> frames have no box in layout.json and sit in a default row.`, singular for one
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
 - Frame label: `<name> <width> × <height>`, then `<by> editing` while a session marks the frame, then the theme switch reading `Dark` or `Light`
 - Size chip: `<width> × <height>` in whole pixels
+- Tool strip: icons named `Move (V)` and `Pan (H)`
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
 - Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Appearance`, `Typography`, `Fill`, `Text`
@@ -88,8 +90,6 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Edit refused, nested text: `Could not save the text, since this element holds other elements.`
 - Edit refused, bad value: `Could not save that value (<detail>).`, with `<detail>` the server's reason
 - Layers disclosure: `Show layers of <frame>` or `Hide layers of <frame>` as its accessible name
-- Layers loading: `Loading layers`
-- Element loading: `Loading the frame to read this element`
 - Element stale: `The frame changed since this element was picked, so its index may name another element now. Pick it again.`
 - Element mismatch: `Could not select that element, since the browser and the file count the elements of this frame differently, as when the browser builds an element the file does not state.`
 - Element changed before the pick: `Could not select that element, since the frame changed before the pick arrived. Pick it again once the frame reloads.`
@@ -100,8 +100,9 @@ The captures named in the States table show the layout, so it carries no sketch.
 ## Behavior
 
 - Picking a page in the list shows its frames and fits them into the surface
-- Picking a frame in the list centers it at the current zoom
-- Dragging the empty surface or scrolling pans it, and scrolling with the control key held zooms about the pointer
+- Picking a frame in the list selects it and centers it at the current zoom, and pressing one on the surface marks its row
+- Dragging the empty surface, or scrolling anywhere on it, frames included, pans it, and scrolling with the control key held zooms about the pointer
+- Pan, or Space held, pans on any drag. With the canvas focused, V and H pick the tool, `+` and `-` zoom, Shift+1 fits. A field, or Cmd or Ctrl, keeps the key
 - A frame file Claude rewrites reloads that frame alone, and pan and zoom stay where they were
 - A frame or page Claude adds appears without a manual refresh
 - The theme toggle flips the chrome between light and dark and is remembered for the next visit
@@ -110,20 +111,17 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Dragging a frame by its label moves it, and releasing writes the new position to the page's layout, where it survives a restart
 - Clicking inside a frame selects the element under the pointer and its frame, and the click goes no further, so a link or a button in the frame does nothing. The element is written by its index in document order, with the hash of the file the frame was served from, and a pick made against a version the file has since moved past is refused
 - Picking a layer row selects that element the same way, and selecting one on the surface opens its frame's layers and marks its row
-- Scrolling over a frame pans the surface, and scrolling with the control key held zooms it, as over the empty surface
 - A press that never moves writes no position or size, and every drag divides the pointer's travel by the zoom
-- With a frame focused, Enter or Space selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
+- With a frame focused, Enter, or Space released with no pan, selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
 - Dragging a selected frame's corner handle resizes it with the opposite corner held, and releasing writes the box to the layout in one write. Control or Command with an arrow resizes it by 10, or 50 with Shift, right and down growing it
 - Dragging a selected element's corner handle previews its size in the frame, then writes `width` and `height` in pixels, one edit per changed axis on the hash the last answered. Its inspector fields are the keyboard path
-- Picking a frame in the list selects it on the surface, and pressing one on the surface marks its row
 - A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
 - An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
 - A field shows a pixel length rounded and with no unit, reads `auto` and `normal` as words, and shows a `normal` gap or a transparent background empty. A bare number typed into a length writes as pixels, and a rounded value left unchanged sends nothing
 - Dragging a number field's glyph scrubs it, one per pixel or ten with Shift, previewed in the frame and written once on release. A length stops at 0, a weight at 1 and 1000, and an empty gap scrubs from 0. A cancelled drag puts both back
 - A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it
 - Picking a color token writes `var(--<name>)`, or below full opacity a `color-mix()` of it with `transparent`, so the element keeps following the theme. An unreadable inline value shows as written. A picker drag writes once on release, and any change but the alpha writes a hex
-- Fields hold while an edit is in flight and take the file's values again once the frame reloads
-- An edit made against a version of the frame the file has since moved past is refused, never applied to a shifted element, and the frame reloads from the file
+- Fields hold while an edit is in flight and take the file's values once the frame reloads. An edit made against a version the file has moved past is refused, never applied to a shifted element, and the frame reloads
 - The Theme tab lists what the token stylesheet defines and edits nothing
 
 ## Not on this surface

@@ -793,6 +793,191 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     ).toBe('true')
   }, 30_000)
 
+  /** The plane's transform, which moves with every pan and zoom. */
+  function planeTransform(): Promise<string> {
+    return page
+      .locator('.plane')
+      .evaluate((plane) => (plane as HTMLElement).style.transform)
+  }
+
+  it('should pan rather than pick when the pan tool drags over a frame', async () => {
+    await selectFrameAt(100)
+    const tools = page.getByRole('toolbar', { name: 'Tools' })
+    await tools.getByRole('button', { name: 'Pan (H)' }).click()
+    const body = await page
+      .locator(`.frame[data-frame="${FRAME}"] iframe`)
+      .boundingBox()
+    if (!body) throw new Error('no frame on screen')
+    const startX = body.x + body.width / 2
+    const startY = body.y + body.height / 2
+    const before = await planeTransform()
+    const picks: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/selection')) picks.push(sent.url())
+    })
+
+    // A frame under the pan tool takes no pointer, so the press lands behind it.
+    const hit = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.tagName,
+      [startX, startY],
+    )
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX + 80, startY + 40, { steps: 4 })
+    await page.mouse.up()
+
+    expect(hit).not.toBe('IFRAME')
+    expect(
+      await tools
+        .getByRole('button', { name: 'Pan (H)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(picks).toEqual([])
+    await page.screenshot({ path: join(SHOTS, 'pan-tool.png') })
+    await page.keyboard.press('v')
+    expect(
+      await tools
+        .getByRole('button', { name: 'Move (V)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  }, 30_000)
+
+  it('should pan with Space held after a pick moved focus into the frame', async () => {
+    const frameDoc = page.frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+    await frameDoc.locator('h1').click()
+    // The drag starts on the heading, where a press would begin a text selection.
+    const heading = await frameDoc.locator('h1').boundingBox()
+    if (!heading) throw new Error('no heading on screen')
+    const startX = heading.x + heading.width / 2
+    const startY = heading.y + heading.height / 2
+    const before = await planeTransform()
+    const picks: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/selection')) picks.push(sent.url())
+    })
+
+    await page.keyboard.down('Space')
+    await expect
+      .poll(() =>
+        page
+          .getByRole('button', { name: 'Pan (H)' })
+          .getAttribute('aria-pressed'),
+      )
+      .toBe('true')
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX - 60, startY - 30, { steps: 4 })
+    await page.mouse.up()
+    await page.keyboard.up('Space')
+
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(picks).toEqual([])
+    expect(
+      await page
+        .getByRole('button', { name: 'Move (V)' })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+    // A pan leaves no text selection painting over the frames it crossed.
+    expect(
+      await page.evaluate(() => document.getSelection()?.isCollapsed ?? true),
+    ).toBe(true)
+  }, 30_000)
+
+  it('should pan from a picked element handle with Space held and leave no selection', async () => {
+    await selectFrameAt(100)
+    await page
+      .frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+      .locator('h1')
+      .click()
+    const handle = await page
+      .locator(
+        `.frame[data-frame="${FRAME}"] .selection[data-selection="element"] [data-handle="se"]`,
+      )
+      .boundingBox()
+    if (!handle) throw new Error('no handle on screen')
+    const startX = handle.x + handle.width / 2
+    const startY = handle.y + handle.height / 2
+    const before = await planeTransform()
+    const edits: string[] = []
+    page.on('request', (sent) => {
+      if (sent.url().endsWith('/api/frames/edit')) edits.push(sent.url())
+    })
+
+    await page.keyboard.down('Space')
+    await expect
+      .poll(() => page.locator('main.surface').getAttribute('data-tool'))
+      .toBe('pan')
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX + 120, startY + 80, { steps: 8 })
+    await page.mouse.up()
+    await page.keyboard.up('Space')
+
+    // A handle sets its own pointer events, so it must yield to a pan too.
+    await expect.poll(planeTransform).not.toBe(before)
+    expect(edits).toEqual([])
+    expect(
+      await page.evaluate(() => document.getSelection()?.isCollapsed ?? true),
+    ).toBe(true)
+  }, 30_000)
+
+  it('should pan from a picked element text with Space held and leave no selection in either document', async () => {
+    await selectFrameAt(100)
+    const frameDoc = page.frameLocator(`.frame[data-frame="${FRAME}"] iframe`)
+    await frameDoc.locator('h1').click()
+    const heading = await frameDoc.locator('h1').boundingBox()
+    if (!heading) throw new Error('no heading on screen')
+    const before = await planeTransform()
+
+    // The press lands on the heading's text, read as a second click soon after the pick.
+    await page.keyboard.down('Space')
+    await page.mouse.down({ clickCount: 2 })
+    await page.mouse.move(heading.x + 120, heading.y + 132, { steps: 6 })
+    await page.mouse.up({ clickCount: 2 })
+    await page.keyboard.up('Space')
+
+    await expect.poll(planeTransform).not.toBe(before)
+    const selections = await page.evaluate((name) => {
+      const iframe = document.querySelector<HTMLIFrameElement>(
+        `.frame[data-frame="${name}"] iframe`,
+      )
+      return {
+        shell: document.getSelection()?.type,
+        frame: iframe?.contentDocument?.getSelection()?.type,
+      }
+    }, FRAME)
+    expect(selections.shell).not.toBe('Range')
+    expect(selections.frame).not.toBe('Range')
+  }, 30_000)
+
+  it('should fit every frame on Shift+1', async () => {
+    await selectFrameAt(200)
+    await page.locator('main.surface').focus()
+
+    await page.keyboard.press('Shift+Digit1')
+
+    const viewport = await page.locator('.viewport').boundingBox()
+    const strip = await page
+      .getByRole('toolbar', { name: 'Tools' })
+      .boundingBox()
+    if (!viewport || !strip) throw new Error('no viewport on screen')
+    for (const name of [FRAME, 'second']) {
+      const box = await page
+        .locator(`.frame[data-frame="${name}"]`)
+        .boundingBox()
+      if (!box) throw new Error(`no ${name} on screen`)
+      // The label sits above the box, so the box clears the strip's right edge.
+      expect(box.x).toBeGreaterThanOrEqual(strip.x + strip.width)
+      expect(box.y).toBeGreaterThanOrEqual(viewport.y)
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.x + viewport.width)
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        viewport.y + viewport.height,
+      )
+    }
+    await page.screenshot({ path: join(SHOTS, 'fit.png') })
+  }, 30_000)
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
