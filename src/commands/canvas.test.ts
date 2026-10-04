@@ -353,6 +353,136 @@ describe('canon canvas edit', () => {
   })
 })
 
+describe('canon canvas editing', () => {
+  /** The caller's environment with every session identity stripped. */
+  function anonymousEnv(): NodeJS.ProcessEnv {
+    const {
+      CLAUDE_CODE_SESSION_ID: _id,
+      CLAUDE_PID: _pid,
+      CLAUDE_CODE_MESSAGING_SOCKET: _socket,
+      ...rest
+    } = process.env
+    return rest
+  }
+
+  function editing(env: NodeJS.ProcessEnv, ...args: string[]): Run {
+    const result = spawnSync(
+      'bun',
+      [CLI, 'canvas', 'editing', ...args, '--root', ROOT, '--json'],
+      {
+        encoding: 'utf8',
+        env: { ...env, CANON_NON_INTERACTIVE: '1', NO_COLOR: '1' },
+      },
+    )
+    return {
+      status: result.status,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    }
+  }
+
+  function seedRoster(sessionId: string, name: string): string {
+    const config = join(ROOT, 'claude-config')
+    mkdirSync(join(config, 'sessions'), { recursive: true })
+    writeFileSync(
+      join(config, 'sessions', `${process.pid}.json`),
+      JSON.stringify({ pid: process.pid, cwd: ROOT, name, sessionId }),
+    )
+    return config
+  }
+
+  beforeEach(() => {
+    canvas('page', 'add', 'drafts')
+    canvas('frame', 'add', 'drafts', 'hero')
+    canvas('frame', 'add', 'drafts', 'pricing')
+  })
+
+  it('should mark a frame and list it', () => {
+    editing(anonymousEnv(), 'drafts/hero')
+
+    const run = editing(anonymousEnv())
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toEqual({
+      ok: true,
+      editing: [
+        expect.objectContaining({
+          page: 'drafts',
+          frame: 'hero',
+          by: 'a session',
+        }),
+      ],
+    })
+  })
+
+  it('should clear a mark with --done and leave the other', () => {
+    editing(anonymousEnv(), 'drafts/hero')
+    editing(anonymousEnv(), 'drafts/pricing')
+
+    const run = editing(anonymousEnv(), 'drafts/hero', '--done')
+
+    expect(run.status).toBe(0)
+    expect(
+      JSON.parse(run.stdout).editing.map(
+        (mark: { frame: string }) => mark.frame,
+      ),
+    ).toEqual(['pricing'])
+  })
+
+  it('should succeed on --done for a frame holding no mark', () => {
+    const run = editing(anonymousEnv(), 'drafts/hero', '--done')
+
+    expect(run.status).toBe(0)
+    expect(JSON.parse(run.stdout)).toEqual({ ok: true, editing: [] })
+  })
+
+  it('should label the mark with the caller roster name', () => {
+    const config = seedRoster('session-under-test', 'canvas-builder')
+
+    const run = editing(
+      {
+        ...anonymousEnv(),
+        CLAUDE_CONFIG_DIR: config,
+        CLAUDE_CODE_SESSION_ID: 'session-under-test',
+      },
+      'drafts/hero',
+    )
+
+    expect(JSON.parse(run.stdout).editing[0].by).toBe('canvas-builder')
+  })
+
+  it('should label the mark with --by over the roster name', () => {
+    const config = seedRoster('session-under-test', 'canvas-builder')
+
+    const run = editing(
+      {
+        ...anonymousEnv(),
+        CLAUDE_CONFIG_DIR: config,
+        CLAUDE_CODE_SESSION_ID: 'session-under-test',
+      },
+      'drafts/hero',
+      '--by',
+      'operator',
+    )
+
+    expect(JSON.parse(run.stdout).editing[0].by).toBe('operator')
+  })
+
+  it('should refuse a frame that is not on disk', () => {
+    const run = editing(anonymousEnv(), 'drafts/missing')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'no-frame' })
+  })
+
+  it('should refuse --done with no frame named', () => {
+    const run = editing(anonymousEnv(), '--done')
+
+    expect(run.status).toBe(1)
+    expect(JSON.parse(run.stdout)).toMatchObject({ reason: 'invalid-name' })
+  })
+})
+
 describe('canon canvas capture', () => {
   it('should refuse a page that does not exist before starting a browser', () => {
     const run = canvas('capture', 'missing', '--json')
