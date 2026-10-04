@@ -41,6 +41,14 @@ The classifier sweep degrades differently. With the model layer off it answers f
 
 Both are the same rule `target-check` states as "unread is not current", taken one level down from a domain to an axis. `canon/context/claude-plugin/target-check.md` carries the original.
 
+## Why the requirements and architecture records get an identity read
+
+A fold allowed to write `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md` on any ship drifts both one reasonable edit at a time, with nothing reading either whole. `context-fold` never writes the first and writes the second only for a slot decision a folded plan names, which leaves this skill as the one surface reading both. When the scope reaches them, the staleness axis tests identity claims beside the four path-shaped ones: a goal nobody pursues, a non-goal since shipped, a constraint the tree contradicts, a decision whose revisit sentence fired, and a risk already fixed.
+
+The review point comes from `canon records stale canonical`, which reads an optional `reviewed: YYYY-MM-DD` frontmatter field on each record and counts the release tags merged into HEAD after it. The point is a date rather than a commit because this repository squash-merges, so a review commit written on a feature branch never reaches `main`. The verb sits under `canon records stale` rather than a new `canon context review`, since it extends a verb whose job is already what is due for review, at the cost of one tracked kind in a group otherwise about gitignored records. Both records are tracked, so it reads the current worktree rather than the main one.
+
+Nothing triggers the review but a request. Intake 137 item 7 proposed a `target-check` pointer, and the operator withdrew every trigger, hook, gate stage, and CI step with it. The skill prints one reminder line per record, routes a finished review to `markdown-propose`, and that review's last edit sets the stamp. This skill writes neither.
+
 ## Where it sits against the neighbors
 
 - `target-check` asks the structural question across six domains and names document health as out of scope by design. This is the surface that scope was left for.
