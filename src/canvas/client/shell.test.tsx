@@ -3273,6 +3273,38 @@ describe('view tools', () => {
     expect(press.defaultPrevented).toBe(true)
   })
 
+  it('should move focus from a panel field to the surface on a Pan tool press', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'button')
+    const field = mount.querySelector<HTMLInputElement>('.panel-right input')
+    if (!field) throw new Error('no inspector input')
+    act(() => toolNamed('Pan (H)').click())
+    field.focus()
+
+    act(() => {
+      viewportOf().dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(document.activeElement).toBe(surface())
+  })
+
+  it('should leave focus where it is on a press with Space held', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    key(surface(), 'keydown', { key: ' ', code: 'Space' })
+    act(() => toolNamed('Move (V)').focus())
+
+    act(() => {
+      viewportOf().dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true }),
+      )
+    })
+
+    expect(document.activeElement).toBe(toolNamed('Move (V)'))
+  })
+
   it('should leave a press on the viewport its default with the move tool', () => {
     renderApp([page('drafts', [frame('hero')])])
 

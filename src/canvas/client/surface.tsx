@@ -702,11 +702,18 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
   /*
    * A press selects text by default, a word or a whole frame when it reads as
    * a second click, and neither `selectstart` nor a clear at pointer down
-   * reaches that. Leaving focus where it was also keeps the frame hearing the
-   * Space release.
+   * reaches that. Under a held Space, focus stays where it was so the frame
+   * still hears the release. Under the Pan tool the press takes focus itself,
+   * as the default would have, so a field it leaves commits and the next key
+   * reaches the layer.
    */
   const handleMouseDown = (event: MouseEvent) => {
-    if (shownTool.value === 'pan') event.preventDefault()
+    if (shownTool.value !== 'pan') return
+    event.preventDefault()
+    if (!spacePan.value) {
+      const surface = (event.currentTarget as HTMLElement).closest('main')
+      surface?.focus({ preventScroll: true })
+    }
   }
 
   const handlePointerUp = () => {
