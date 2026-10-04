@@ -37,7 +37,7 @@ Neither copy parses a standard directly. Both read a `markdown audit --json` rec
 
 The seed differs from the toolkit copy in what it can resolve rather than in what it reads. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names `bun add -g @erclx/canon` when the machine carries none. A non-zero exit is the blunter alternative and carries more than a PostToolUse event warrants.
 
-`hooks-guard.test.ts` covers all four branches, and each case stubs a runner or withholds one, so the verdict comes from the fixture rather than from whichever build the machine carries.
+`src/hooks/guard.test.ts` covers all four branches, and each case stubs a runner or withholds one, so the verdict comes from the fixture rather than from whichever build the machine carries.
 
 ### The dev command reminder
 
@@ -55,7 +55,7 @@ A hook that is the only enforcer of a rule cannot discard its command's output, 
 
 ### The two hook trees drift with nothing comparing them
 
-`.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/` hold the same scripts maintained twice, and nothing regenerates or compares them. A branch fixing one side can leave the other running the old logic, and the drift is silent because each copy is valid shell that passes every stage, so only a hand diff finds it. `src/hooks-guard.test.ts` is the one exception, walking both directories for the stdin guard covered in `canon/context/development/hooks/guards.md`.
+`.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/` hold the same scripts maintained twice, and nothing regenerates or compares them. A branch fixing one side can leave the other running the old logic, and the drift is silent because each copy is valid shell that passes every stage, so only a hand diff finds it. `src/hooks/guard.test.ts` is the one exception, walking both directories for the stdin guard covered in `canon/context/development/hooks/guards.md`.
 
 ### Linting the hooks
 

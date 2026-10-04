@@ -4,7 +4,7 @@
 
 # Step 6 reads the port helper rather than restating a number, so what this arm
 # asserts is that the skill reported what the helper derived. The helper itself
-# is covered by `src/worktree-port.test.ts`, which is where the three directory
+# is covered by `src/tooling/worktree-port.test.ts`, which is where the three directory
 # shapes are separated. This arm covers the reporting line above it.
 
 # Every top-level key sits above the first `[[content]]` block. A bare key below

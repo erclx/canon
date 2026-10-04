@@ -11,7 +11,7 @@
 #
 # Three mechanisms sit here rather than in `sandbox/run.sh`, which is the
 # only caller. Each is reachable from a test that never launches a session:
-# `src/sandbox-dispatch.test.ts` drives the shim against a stub binary and the
+# `src/sandbox/dispatch.test.ts` drives the shim against a stub binary and the
 # reap against a `sleep`, where proving either through `run.sh` would mean
 # spawning the thing the bound exists to prevent.
 

@@ -13,7 +13,7 @@ Each trigger gets the channel that reaches the session on it. The vendor's `addi
 
 The once-per-session marker stays on `manual` alone, since a precompute pass drains anything counted per session on `auto`. The seed copy is withheld, since a scaffolded target without the plugin would meet a blocked `/compact` naming a skill it does not carry.
 
-The matcher separates a manual compaction from an automatic one. The vendor reference documents no event-specific payload field for `PreCompact`, so the script reads `trigger` and routes on it rather than trusting the matcher alone, since a registration widened to `*` would otherwise send an automatic compaction down the blocking path. An absent value takes the manual path, the conservative reading of a payload naming no trigger. The `hook_event_name` test ahead of it is what keeps the hook silent under `hooks-guard.test.ts`'s inert payload, which names a tool and no event.
+The matcher separates a manual compaction from an automatic one. The vendor reference documents no event-specific payload field for `PreCompact`, so the script reads `trigger` and routes on it rather than trusting the matcher alone, since a registration widened to `*` would otherwise send an automatic compaction down the blocking path. An absent value takes the manual path, the conservative reading of a payload naming no trigger. The `hook_event_name` test ahead of it is what keeps the hook silent under `src/hooks/guard.test.ts`'s inert payload, which names a tool and no event.
 
 ### The once-per-session marker
 
@@ -63,7 +63,7 @@ It blocks rather than advising the way every other seeded hook does, because exi
 
 A missing input exits quiet rather than blocking, on every guard from `transcript_path` down to the boundary match, so a transient miss never reports as though it were the defect this hook exists to catch. A payload missing `transcript_path`, `prompt_id`, or a `promptId` match is malformed rather than stale, since reading `last_assistant_message` off the payload removes the lag this design would otherwise carry.
 
-Two written paths sharing a basename would otherwise let one mention clear both, since the ordinary check tests only the basename. The hook counts basenames across the turn's written paths first, and a basename shared by more than one falls back to matching the full path instead. The count pipes the basenames through `sort | uniq -d` rather than keeping an associative array, since macOS ships bash 3.2 and `declare -A` fails there on every turn. A scan in `src/hooks-guard.test.ts` fails on any bash-4-only construct in either hook tree.
+Two written paths sharing a basename would otherwise let one mention clear both, since the ordinary check tests only the basename. The hook counts basenames across the turn's written paths first, and a basename shared by more than one falls back to matching the full path instead. The count pipes the basenames through `sort | uniq -d` rather than keeping an associative array, since macOS ships bash 3.2 and `declare -A` fails there on every turn. A scan in `src/hooks/guard.test.ts` fails on any bash-4-only construct in either hook tree.
 
 ## Gotchas
 

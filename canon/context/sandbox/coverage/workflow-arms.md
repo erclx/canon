@@ -57,7 +57,7 @@ It does not reach the published layout. The arm runs `bun "$PROJECT_ROOT/src/cli
 
 `claude:session-worktree/port-offset` stages the web layer's port helper into the target and pins the reply to `Port offset 27`, the cksum of the worktree folder name modulo the band of 50, plus one. Pinning the number rather than its shape separates a session that read the helper from one that printed a plausible integer, and the folder name is derived from the plan the branch matches rather than chosen by the run. The dependency line lands on the last of Step 6's bullets, since the arm seeds no manifest inside the worktree.
 
-The arm cannot reach the refusal branch for a leftover folder, since Step 4 registers whatever it creates. The scenario seeds one as a sibling for a hand drive and says so in `manual`, and `src/worktree-port.test.ts` covers the branch directly.
+The arm cannot reach the refusal branch for a leftover folder, since Step 4 registers whatever it creates. The scenario seeds one as a sibling for a hand drive and says so in `manual`, and `src/tooling/worktree-port.test.ts` covers the branch directly.
 
 ### Submodule
 

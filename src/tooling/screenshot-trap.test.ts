@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = join(
   import.meta.dirname,
-  '../tooling/web/configs/scripts/screenshot.sh',
+  '../../tooling/web/configs/scripts/screenshot.sh',
 )
 
 let fixture: string

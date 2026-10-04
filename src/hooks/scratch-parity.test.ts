@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const ROOT = join(import.meta.dirname, '..')
+const ROOT = join(import.meta.dirname, '../..')
 
 // Both trees carry the same hook and nothing else compares them, matching
-// src/hooks-guard.test.ts's TREES. A fix landing in one and not the other
+// src/hooks/guard.test.ts's TREES. A fix landing in one and not the other
 // still passes every other stage in the gate.
 const TREES = [
   { dir: join(ROOT, '.claude/hooks'), label: '.claude/hooks' },

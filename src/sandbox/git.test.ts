@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-const LIB = join(import.meta.dirname, '../scripts/lib/sandbox-git.sh')
+const LIB = join(import.meta.dirname, '../../scripts/lib/sandbox-git.sh')
 
 let root: string
 
