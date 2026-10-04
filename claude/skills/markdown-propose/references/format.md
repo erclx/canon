@@ -2,6 +2,15 @@
 
 Governs the proposal `markdown-propose` writes before it edits anything. The concern being screened is an input and does not change the format.
 
+## Contents
+
+- [Folder](#folder)
+- [Change format](#change-format)
+- [The answer contract](#the-answer-contract)
+- [Applying](#applying)
+- [After](#after)
+- [Retrieval](#retrieval)
+
 ## Folder
 
 - One folder per screening pass at `.canon/proposals/<nn>-<slug>/`, where the slug names the subject rather than the activity

@@ -130,6 +130,7 @@ allowed-tools: <tools required>
 - Below the ceiling, name the branch that skips a block before moving it. A block every run dereferences costs a read and saves nothing.
 - Past the ceiling, move a whole step to a reference, preferring a step a named branch skips. Keep the step heading in the body with one line naming the file to read on reaching it, so the body still shows every step in order.
 - Name every file under `references/` in the body at the point a session reads it, since an unnamed reference is never loaded.
+- Open a file under `references/` running over 100 lines with a `## Contents` H2 of anchor links after its H1 and intro, so a session that reads only the top of the file still sees everything it holds.
 - Keep the trigger, the skip condition, and the guard in the body. A run that never reaches the block has to decide that without opening the reference.
 - Never point one skill at a sibling skill's folder for a reference both read. Each skill carries its own copy under `references/`, generated rather than hand-copied by the rule in `## Path resolution`.
 

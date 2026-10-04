@@ -47,5 +47,6 @@ A practice skill failing any of these is non-conforming even when every heading 
 ## Which skills are practice skills
 
 - `canon claude skills audit` keeps the list of practice skills and checks each listed one for the three closing sections and the ledger.
+- It keeps a wider ledger list beside it, holding every practice skill plus the skills that teach a craft drawn from outside sources without a practice's closing shape. A skill on the wider list alone owes the ledger and none of the three sections.
 - Never mark a skill as a practice skill in its own frontmatter, since a self-declared kind lets a skill exempt itself.
-- The list names this toolkit's shipped skills alone, so a project's own practice skill takes this shape with no check behind it.
+- Both lists name this toolkit's shipped skills alone, so a project's own practice skill takes this shape with no check behind it.

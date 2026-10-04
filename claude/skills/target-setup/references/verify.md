@@ -12,6 +12,14 @@ Two depths over one contract. Both read the `scripts` block from the project's
 own `package.json` and run what is declared there, so neither hardcodes a script
 name and a stack exposing a different set is covered without an edit here.
 
+## Contents
+
+- [Guards](#guards)
+- [Step 1: read scripts](#step-1-read-scripts)
+- [Step 2: run the chain](#step-2-run-the-chain)
+- [Step 3: report](#step-3-report)
+- [Out of scope](#out-of-scope)
+
 ## Guards
 
 A monorepo syncs each language root into its own subfolder, so the project root

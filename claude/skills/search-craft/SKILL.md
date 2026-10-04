@@ -44,9 +44,11 @@ The procedure that loaded this skill owns what the result is for and where it is
 
 Each line is a claim measured once, and `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` records the date under its Gap. Sites change their blocking without notice, so re-check a line before relying on it. Add a line only for a failure a session actually hit, and record the date it hit in the requirement beside it.
 
-- Reddit answers its RSS feed and refuses its JSON search with a 403. `WebFetch` is refused for the site.
+- Reddit refuses its RSS feed and its JSON search alike with a 403. `WebFetch` is refused for the site, so no keyless route reaches it.
 - X answers nothing without paying or a login. `curl` redirects to a login page and `WebFetch` returns 402.
 - Stop and ask the operator before any route that pays, logs in, or works around a refusal. Never suggest scraping behind a login.
+
+Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which comparable skills were read, what was adopted and declined, and why.
 
 ## Excuses and rebuttals
 

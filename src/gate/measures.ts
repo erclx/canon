@@ -18,6 +18,7 @@ import {
 import { isOverWordCap, measureRequirements } from '@/context/requirements'
 import {
   auditSkills,
+  LEDGER_SKILLS,
   PRACTICE_LEDGER,
   PRACTICE_SKILLS,
   SHIPPED_CORPUS,
@@ -411,8 +412,9 @@ export const skillProvenance: Measure = async (ctx) => {
 }
 
 /**
- * Every listed practice skill against the closing sections and the ledger
- * `standards/skill-practice.md` requires of one.
+ * Every listed practice skill against the closing sections, and every skill on
+ * the wider ledger list against the ledger, both of which
+ * `standards/skill-practice.md` requires.
  *
  * Read in-process for the reason `skillProvenance` is, so the verb keeps its
  * missing-requirement-only exit. The list names shipped folders alone, so a
@@ -434,14 +436,14 @@ export const skillPracticeShape: Measure = async (ctx) => {
       .join(', ')
     return {
       emissions: [],
-      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named, or the ledger at ${PRACTICE_LEDGER}.`,
+      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named to a practice skill, or the ledger at ${PRACTICE_LEDGER} to any skill on the ledger list.`,
     }
   }
 
   return {
     emissions: [
       info(
-        `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section and a ledger`,
+        `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section, and ${plural(LEDGER_SKILLS.length, 'listed skill')} carry a ledger`,
       ),
     ],
   }

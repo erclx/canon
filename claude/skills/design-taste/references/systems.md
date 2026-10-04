@@ -40,10 +40,4 @@ The layer a model is worst at, and the layer where rules are hardest to make fal
 
 ## Considered and declined
 
-Each failed the test in `REQUIREMENT.md`. Recorded so they are not argued again.
-
-- **Control sizing and proportion.** An unguided model produces reasonable controls without instruction, so it fails the first question.
-- **Specific ratios for a type scale**, such as a named musical interval. Falsifiable and arbitrary, and a project picking a different ratio is not wrong.
-- **Named palettes or banned hues.** A value ban, which belongs to the project's design document. This is where every external catalog of this kind ends up, and it is why theirs cannot be imported.
-- **A minimum contrast figure.** A threshold with a number, which the accessibility rules own.
-- **Imagery as a system.** There is no scale to establish. What a model gets wrong about images is using fake ones, which `tells.md` already covers, so the layer stays thin on purpose rather than by oversight.
+The items considered for this reference and declined sit in `adopted.md` beside this file, recorded so they are not argued again.

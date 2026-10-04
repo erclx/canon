@@ -9,6 +9,14 @@ What the `install` and `gov` phases both do before they write anything. Stated
 once here rather than twice in the body, since the two phases differ in what
 they install rather than in how they read the project.
 
+## Contents
+
+- [Read the catalogs](#read-the-catalogs)
+- [Detect](#detect)
+- [Resolve arguments](#resolve-arguments)
+- [Gap handling](#gap-handling)
+- [Preview](#preview)
+
 ## Read the catalogs
 
 Run in parallel. Never hardcode stack, rule, or standards names. The

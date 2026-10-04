@@ -24,8 +24,11 @@ import { listSeeds, readSeedContents } from '@/claude/seeds-list'
 import {
   auditExitCode,
   auditSkills,
+  CONTENTS_SECTION,
+  CONTENTS_THRESHOLD,
   CORPORA,
   DESCRIPTION_LIMIT,
+  LEDGER_SKILLS,
   PRACTICE_LEDGER,
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
@@ -1398,6 +1401,7 @@ async function runSkillsAudit(
     reportRequirementShape(report)
     reportProvenance(report)
     reportPracticeShape(report)
+    reportReferenceContents(report)
     reportUnmeasured()
     outro()
   }
@@ -1421,13 +1425,16 @@ async function runSkillsAudit(
           requirementSections: report.requirementSections,
           datedProvenance: report.datedProvenance,
           practiceShape: report.practiceShape,
+          referenceContents: report.referenceContents,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
           requirementSections: REQUIREMENT_SECTIONS,
           corpora: CORPORA,
           practiceSkills: PRACTICE_SKILLS,
+          ledgerSkills: LEDGER_SKILLS,
           practiceSections: PRACTICE_SECTIONS,
+          contentsThreshold: CONTENTS_THRESHOLD,
         },
       })}\n`,
     )
@@ -1626,10 +1633,10 @@ function reportProvenance(report: SkillsAudit): void {
 function reportPracticeShape(report: SkillsAudit): void {
   logStep('Practice shape')
   logInfo(
-    `A listed practice skill closes with ${PRACTICE_SECTIONS.map((section) => `## ${section}`).join(', ')}, and carries ${PRACTICE_LEDGER}.`,
+    `A listed practice skill closes with ${PRACTICE_SECTIONS.map((section) => `## ${section}`).join(', ')}, and every skill on the wider ledger list carries ${PRACTICE_LEDGER}.`,
   )
   logInfo(
-    `The list is kept here and names ${plural(PRACTICE_SKILLS.length, 'shipped skill')}, so a skill outside ${SHIPPED_CORPUS} is never read.`,
+    `Both lists are kept here and name ${plural(PRACTICE_SKILLS.length, 'practice skill')} and ${plural(LEDGER_SKILLS.length, 'ledger skill')}, so a skill outside ${SHIPPED_CORPUS} is never read.`,
   )
 
   if (report.practiceShape.length === 0) {
@@ -1641,6 +1648,24 @@ function reportPracticeShape(report: SkillsAudit): void {
     `${plural(report.practiceShape.length, 'missing part')} across the listed practice skills`,
   )
   reportFindings(report.practiceShape)
+}
+
+/** Reports without failing the run, the same judgment the practice shape is. */
+function reportReferenceContents(report: SkillsAudit): void {
+  logStep('Reference contents')
+  logInfo(
+    `A reference over ${CONTENTS_THRESHOLD} lines opens with a ## ${CONTENTS_SECTION} list, matched exactly outside fences.`,
+  )
+
+  if (report.referenceContents.length === 0) {
+    logInfo('Every long reference opens with a contents list.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.referenceContents.length, 'long reference')} with no contents list`,
+  )
+  reportFindings(report.referenceContents)
 }
 
 /**

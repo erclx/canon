@@ -115,9 +115,11 @@ It states no values. A value belongs to the project's own design document.
 
 ## The rest of the catalog
 
-Read `${CLAUDE_SKILL_DIR}/references/tells.md` before handing over anything a model drafted, and whenever output satisfies every rule here and still reads generic. The ten above are the common cases. It holds the rest, plus the countable composition limits, the first-screen budget, and the record of which external items were adopted, which declined, and why.
+Read `${CLAUDE_SKILL_DIR}/references/tells.md` before handing over anything a model drafted, and whenever output satisfies every rule here and still reads generic. The ten above are the common cases. It holds the rest, plus the countable composition limits and the first-screen budget.
 
-Skip it on a small change to a surface with a settled direction. The catalog is a diagnostic and costs a read on every invocation that does not need one.
+Skip `tells.md` on a small change to a surface with a settled direction. The catalog is a diagnostic and costs a read on every invocation that does not need one.
+
+Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external catalog items were adopted, which declined, and why.
 
 ## When it reads almost right
 

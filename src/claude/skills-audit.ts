@@ -40,6 +40,21 @@ export const PRACTICE_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'code-craft'),
   join(SHIPPED_CORPUS, 'build-in-slices'),
   join(SHIPPED_CORPUS, 'deprecation-migration'),
+  join(SHIPPED_CORPUS, 'search-craft'),
+  join(SHIPPED_CORPUS, 'video-craft'),
+]
+
+/**
+ * Every skill carrying the source ledger, being the practice skills and the
+ * skills that teach a craft without the practice closing sections. Kept apart
+ * from `PRACTICE_SKILLS` so citing sources never forces those sections onto a
+ * skill whose body is not shaped around a practice a session cuts short.
+ */
+export const LEDGER_SKILLS: readonly string[] = [
+  ...PRACTICE_SKILLS,
+  join(SHIPPED_CORPUS, 'design-taste'),
+  join(SHIPPED_CORPUS, 'write-human'),
+  join(SHIPPED_CORPUS, 'test-first'),
 ]
 
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
@@ -51,6 +66,16 @@ export const PRACTICE_SECTIONS: readonly string[] = [
 
 /** The source ledger every practice skill carries beside its body. */
 export const PRACTICE_LEDGER = join('references', 'adopted.md')
+
+/**
+ * The line count past which a reference opens with a contents list, from
+ * Anthropic's skill authoring guidance. Counted over the whole file the way
+ * `wc -l` counts it, so "over 100" holds at 101 and not at 100.
+ */
+export const CONTENTS_THRESHOLD = 100
+
+/** The H2 a long reference opens with, matched exactly outside fences. */
+export const CONTENTS_SECTION = 'Contents'
 
 /**
  * The one reason this audit refuses. A project carrying neither corpus is the
@@ -102,6 +127,7 @@ export interface SkillsAudit {
   readonly requirementSections: readonly SkillFinding[]
   readonly datedProvenance: readonly SkillFinding[]
   readonly practiceShape: readonly SkillFinding[]
+  readonly referenceContents: readonly SkillFinding[]
 }
 
 interface SkillSource {
@@ -126,6 +152,7 @@ interface SkillSource {
 interface SkillText {
   readonly rel: string
   readonly text: string
+  readonly isReference: boolean
 }
 
 /**
@@ -177,6 +204,9 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
       ),
       ...sources.flatMap(practiceFindings),
     ],
+    referenceContents: sources.flatMap((source) =>
+      source.bodies.flatMap(contentsFindings),
+    ),
   }
 }
 
@@ -233,16 +263,14 @@ async function readSkill(
     description: declared(readField(fields, 'description')),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
-    sections: bodyLines(body)
-      .filter((line) => !line.fenced)
-      .map((line) => SECTION.exec(line.text)?.[1])
-      .filter((text): text is string => text !== undefined),
+    sections: sectionsOf(body),
     hasLedger: existsSync(join(skillDir, PRACTICE_LEDGER)),
     bodies: [
-      { rel: join(skillRel, 'SKILL.md'), text: body },
+      { rel: join(skillRel, 'SKILL.md'), text: body, isReference: false },
       ...references.map((path, index) => ({
         rel: join(skillRel, path),
         text: referenceTexts[index] ?? '',
+        isReference: true,
       })),
     ],
   }
@@ -255,6 +283,14 @@ async function readSkill(
 function declared(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
   return trimmed === undefined || trimmed === '' ? undefined : trimmed
+}
+
+/** Every H2 outside a fence, the one level both exact-section checks read. */
+function sectionsOf(source: string): string[] {
+  return bodyLines(source)
+    .filter((line) => !line.fenced)
+    .map((line) => SECTION.exec(line.text)?.[1])
+    .filter((text): text is string => text !== undefined)
 }
 
 function headings(source: string): string[] {
@@ -311,7 +347,7 @@ function missingPracticeSkills(
 ): SkillFinding[] {
   if (!hasShippedCorpus) return []
   const found = new Set(sources.map((source) => source.rel))
-  return PRACTICE_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
+  return LEDGER_SKILLS.filter((rel) => !found.has(rel)).map((rel) => ({
     rel,
     detail: 'missing skill: no folder under the shipped corpus',
   }))
@@ -323,19 +359,37 @@ function missingPracticeSkills(
  * standard never names.
  */
 function practiceFindings(source: SkillSource): SkillFinding[] {
-  if (!PRACTICE_SKILLS.includes(source.rel)) return []
+  if (!LEDGER_SKILLS.includes(source.rel)) return []
 
-  const sections = PRACTICE_SECTIONS.filter(
-    (section) => !source.sections.includes(section),
-  ).map((section) => ({
-    rel: source.rel,
-    detail: `missing section: ${section}`,
-  }))
+  const isPractice = PRACTICE_SKILLS.includes(source.rel)
+  const sections = (isPractice ? PRACTICE_SECTIONS : [])
+    .filter((section) => !source.sections.includes(section))
+    .map((section) => ({
+      rel: source.rel,
+      detail: `missing section: ${section}`,
+    }))
   const ledger = source.hasLedger
     ? []
     : [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
 
   return [...sections, ...ledger]
+}
+
+/**
+ * Reads references alone, since `SKILL.md` carries its own length checkpoint
+ * and no contents rule. Frontmatter counts toward the length, so the count a
+ * finding names is the one `wc -l` prints beside it.
+ */
+function contentsFindings(source: SkillText): SkillFinding[] {
+  if (!source.isReference) return []
+
+  const lines = source.text.replace(/\n$/, '').split('\n').length
+  if (lines <= CONTENTS_THRESHOLD) return []
+  if (sectionsOf(source.text).includes(CONTENTS_SECTION)) return []
+
+  return [
+    { rel: source.rel, detail: `${lines} lines, no ## ${CONTENTS_SECTION}` },
+  ]
 }
 
 /**

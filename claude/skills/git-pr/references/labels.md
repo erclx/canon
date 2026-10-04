@@ -5,6 +5,18 @@ description: Path-to-label map format, prefix matching against the changed set, 
 
 # Label reference
 
+## Contents
+
+- [Scope](#scope)
+- [Map format](#map-format)
+- [Paths a map declines to label](#paths-a-map-declines-to-label)
+- [Reporting a surface no row reaches](#reporting-a-surface-no-row-reaches)
+- [Matching](#matching)
+- [Applying](#applying)
+- [A label the remote does not carry](#a-label-the-remote-does-not-carry)
+- [Release pull requests](#release-pull-requests)
+- [Labels at run time](#labels-at-run-time)
+
 ## Scope
 
 Governs the labels a pull request carries: the map a project declares, how a changed path resolves to a label, and what a label missing from the remote costs.

@@ -67,4 +67,4 @@ Report each file written or updated by its full path from the project root.
 
 ## Source material
 
-The position on external writing guidance sits in `${CLAUDE_SKILL_DIR}/references/source-material.md`, which states what this skill adopted, what it declined, and the measurement behind each. Read it before importing a rule from outside this corpus. Do not re-derive that position, since a second answer will disagree with the recorded one.
+The position on external writing guidance sits in `${CLAUDE_SKILL_DIR}/references/adopted.md`, which states what this skill adopted, what it declined, and the measurement behind each. Read it before importing a rule from outside this corpus. Do not re-derive that position, since a second answer will disagree with the recorded one.

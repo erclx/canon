@@ -7,6 +7,13 @@ description: The Challenge, Discuss, Apply, and Cleanup phases of memory-review,
 
 The phases of `memory-review` after Propose. The session reads this file when the phase table in the skill picks Challenge, Discuss, Apply, or Cleanup, and reads only the section for that phase. The skill's Guards still hold for every phase here.
 
+## Contents
+
+- [Challenge phase](#challenge-phase)
+- [Discuss phase](#discuss-phase)
+- [Apply phase](#apply-phase)
+- [Cleanup phase](#cleanup-phase)
+
 ## Challenge phase
 
 Trigger: user says "challenge the promotes", "challenge before apply", or asks for a high-bar pass. Run before Apply. No mutations to memory files or promotion targets. Review file only.

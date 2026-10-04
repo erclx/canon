@@ -1,13 +1,13 @@
 ---
 title: Skill audit and reach
-description: The skill audit with its dated-provenance and practice shape checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
+description: The skill audit with its dated-provenance, practice shape, and reference contents checks, and the citation reach check over shipped skill bodies with its qualifier and a target's own corpus
 ---
 
 # Skill audit and reach
 
 ## The skill audit
 
-`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `standards/skill-practice.md`, gating on one check and reporting eight, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
+`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `standards/skill-practice.md`, gating on one check and reporting nine, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 
@@ -25,11 +25,19 @@ It reports and never sets the failing exit. Targets run this verb, and a date in
 
 ### Practice shape
 
-The eighth check reads each skill on `PRACTICE_SKILLS` in `src/claude/skills-audit.ts` for the three closing H2s `standards/skill-practice.md` names and for `references/adopted.md`, reporting each missing part as `practiceShape`. A listed folder the shipped corpus does not hold reports as a missing skill, since the walk only reaches folders that exist and a renamed or misspelled entry would otherwise pass unread. That half stays silent where `claude/skills/` is absent, which is every target. A heading matches only as an exact H2 outside a fence, so an H3 or a heading carrying trailing words reads as missing, and a skill renaming toward the shape owes the exact spelling.
+The eighth check reads each skill on `PRACTICE_SKILLS` in `src/claude/skills-audit.ts` for the three closing H2s `standards/skill-practice.md` names, and each skill on the wider ledger list below for `references/adopted.md`, reporting each missing part as `practiceShape`. A listed folder the shipped corpus does not hold reports as a missing skill, since the walk only reaches folders that exist and a renamed or misspelled entry would otherwise pass unread. That half stays silent where `claude/skills/` is absent, which is every target. A heading matches only as an exact H2 outside a fence, so an H3 or a heading carrying trailing words reads as missing, and a skill renaming toward the shape owes the exact spelling.
 
 The list lives in the audit rather than in a skill's frontmatter, because a skill declaring its own kind could exempt itself by leaving the key off. It is keyed by corpus-relative folder, `claude/skills/<name>`, so a target's own `.claude/skills/` folder sharing a name is never swept in. The cost is that a target cannot list its own practice skills, and the shipped standard says the shape carries no check there. Each later practice skill appends one entry, which makes the array a shared append point across the rows that add one. The tests in `src/claude/skills-audit.test.ts` and `src/gate/measures.test.ts` write a conforming fixture for every listed entry but the one a test varies, so an append changes only the list.
 
+The ledger reads a second list, `LEDGER_SKILLS`, which spreads `PRACTICE_SKILLS` and adds the skills that cite outside sources without a practice's closing shape, being `design-taste`, `write-human`, and `test-first`. Widening the practice list instead would have forced the three closing sections onto bodies shaped around a craft rather than a practice a session cuts short. A skill on the wider list alone reports a missing ledger and never a missing section, and the missing-skill half walks the wider list. Both arrays are now shared append points, and the fixtures write every ledger-listed entry.
+
 It reports and never sets the failing exit, for the reason provenance does. The Skill practice shape gate stage fails the same finding here.
+
+### Reference contents
+
+The ninth check reads every file under `references/` for a `## Contents` H2 once it runs past 100 lines, reporting each as `referenceContents`. The threshold is Anthropic's skill authoring guidance for long reference files, and the count is every line of the file the way `wc -l` prints it, frontmatter included, so the number a finding names matches what a reader sees beside it. The heading matches as an exact H2 outside a fence, the same reading the practice sections take, through one shared helper.
+
+It reports and no gate stage reads it, so a reference crossing 100 lines never fails a push. The 300-line document ceiling is the constraint that bites first: three references sat at exactly 300 rendered lines when the check landed, so a contents list there cannot fit until the file splits, and those findings stay open.
 
 ## The citation reach check
 

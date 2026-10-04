@@ -12,6 +12,19 @@ user, and writes. The CLI handles validation and regeneration only.
 Read `canon docs indexes` from the toolkit if context on the system is needed
 before scanning.
 
+## Contents
+
+- [Scope](#scope)
+- [Scan](#scan)
+- [Present candidates](#present-candidates)
+- [Draft frontmatter](#draft-frontmatter)
+- [Scaffold the folder index](#scaffold-the-folder-index)
+- [Inject](#inject)
+- [Validate](#validate)
+- [Offer the convention seed](#offer-the-convention-seed)
+- [Closeout](#closeout)
+- [Reference](#reference)
+
 ## Scope
 
 - Bootstrap un-indexed folders only. Skip folders that already contain an `index.md`.

@@ -45,6 +45,8 @@ Create `demos/<slug>/beats.md` at the project root, creating the folder if it do
 
 Write all nine sections. Pre-seed every section with concrete content so the draft is shippable as-is. The user edits down rather than fills blanks.
 
+Load `canon:video-craft` for every zoom and caption value the draft names, and report it rather than proceeding silently when it does not resolve. The template below states none, since each number there traces to a source that skill records.
+
 ```markdown
 # Screencast: <short title>
 
@@ -72,7 +74,7 @@ Five beats. Each uses five fields. Add a sixth `Transition out` only when non-de
 - On screen: <derived from hero moment>
 - Action: <one verb, derived>
 - Watch for:
-- Emphasis: zoom 1.4x
+- Emphasis: zoom onto the action, scale and speed per `canon:video-craft`
 - Caption:
 
 ### Beat 2: Setup
@@ -104,7 +106,7 @@ Five beats. Each uses five fields. Add a sixth `Transition out` only when non-de
 - On screen:
 - Action:
 - Watch for:
-- Emphasis: zoom 1.2x out
+- Emphasis: zoom out to full frame
 - Caption:
 
 ## 4. Sequencing notes
@@ -119,14 +121,14 @@ Five beats. Each uses five fields. Add a sixth `Transition out` only when non-de
 - Resolution: 1920x1080
 - Frame rate: 30fps
 - Container: mp4 H.264
-- Zoom: max 1.8x with always-zoom-out before cut
+- Zoom: only on an action too small to read at full frame, scale, speed, and dwell per `canon:video-craft`, zoomed out before every cut
 - Highlight overlay: ~1.5s soft glow
 
-## 6. Caption typography
+## 6. Captions
 
-- White text on dark scrim at ~60% opacity
-- ~200ms fade in and out
-- One line max per caption, split across beats if needed
+- Each caption names what its beat's frame shows, at most two lines of 42 characters, per `canon:video-craft`
+- Hold and reading rate per `canon:video-craft`, splitting a caption across beats rather than shortening its hold
+- Placed off the element the beat acts on
 
 ## 7. Distribution
 

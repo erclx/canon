@@ -7,6 +7,14 @@ description: How git-pr finds the UI checklist and the local server, posts the e
 
 The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The step runs on every pull request, with no test on the diff ahead of it. `no-evidence` is the silent branch, so a pull request that changes no rendered surface posts nothing.
 
+## Contents
+
+- [Find the UI checklist](#find-the-ui-checklist)
+- [Find the local server](#find-the-local-server)
+- [Post the evidence comparison](#post-the-evidence-comparison)
+- [Post the UI checklist alone](#post-the-ui-checklist-alone)
+- [Post the preview address](#post-the-preview-address)
+
 ## Find the UI checklist
 
 `ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
