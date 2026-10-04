@@ -44,7 +44,7 @@ import {
   type ScratchEvidencePlan,
   walkScratchEvidenceCorpus,
 } from '@/migrate/scratch-evidence'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { readStamp, stampedHashes } from '@/sync/stamp'
 import { logError, logInfo, logStep, logWarn, plural } from '@/ui'
 

@@ -11,7 +11,7 @@ import {
   recordDirs,
   recordRoot,
   SCRATCH,
-} from '@/record-root'
+} from '@/roots/record'
 
 let ROOT = ''
 

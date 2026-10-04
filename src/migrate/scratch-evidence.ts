@@ -34,7 +34,7 @@ import {
   slugOf,
 } from '@/migrate/evidence-ordinal'
 import { presentFolders } from '@/records/backup'
-import { recordDir, SCRATCH } from '@/record-root'
+import { recordDir, SCRATCH } from '@/roots/record'
 
 /**
  * Every folder this promotion moves, at the name it carries under scratch.

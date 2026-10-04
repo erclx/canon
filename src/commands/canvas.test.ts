@@ -12,7 +12,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { writeSelection } from '@/canvas/content'
 import { missingClientDeps } from '@/commands/canvas'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 

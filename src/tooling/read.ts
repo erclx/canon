@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 /**
  * Spells the package root in a report where every other root spells a

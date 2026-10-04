@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir } from 'node:fs/promises'
 import { relative } from 'node:path'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import {
   archiveDir,
   declinedDir,

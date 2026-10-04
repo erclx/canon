@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 import { planReach, type ReachOutcome, readDeclarations } from '@/tasks/reach'
 import { orderingPath } from '@/tasks/validate'
 

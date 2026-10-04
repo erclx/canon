@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
 import { INDEX_FILE, listIndexes } from '@/indexes/walk'
-import { RECORD_ROOTS } from '@/record-root'
-import { SURFACE_ROOTS } from '@/surface-root'
+import { RECORD_ROOTS } from '@/roots/record'
+import { SURFACE_ROOTS } from '@/roots/surface'
 
 /**
  * Folder names under a record root audited by default.

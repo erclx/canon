@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url'
  */
 export const PROJECT_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '..',
+  '../..',
 )
 
 const readPackageName = (root: string): string | undefined => {

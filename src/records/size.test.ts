@@ -8,7 +8,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { SCRATCH } from '@/record-root'
+import { SCRATCH } from '@/roots/record'
 import { BACKED_FOLDERS } from '@/records/backup'
 import {
   type FolderSize,

@@ -11,7 +11,7 @@ import {
   summarize,
 } from '@/gate/sequencer'
 import { STAGES } from '@/gate/stages'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
   intro,
   logError,

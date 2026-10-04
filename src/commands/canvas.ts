@@ -27,7 +27,7 @@ import {
   readEditing,
 } from '@/canvas/editing'
 import { CANVAS_PORT, startCanvas } from '@/canvas/server'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import { resolveFrameTokens } from '@/canvas/tokens'
 import { displayPath, parsePort, waitForInterrupt } from '@/serve/report'
 import {

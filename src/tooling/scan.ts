@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveSurfacePath } from '@/surface-root'
+import { resolveSurfacePath } from '@/roots/surface'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,

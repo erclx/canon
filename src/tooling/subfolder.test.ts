@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import { resolveChain } from '@/tooling/manifest'
 import {
   isSubfolderTarget,

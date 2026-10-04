@@ -12,7 +12,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 // A word the web layer's own configs introduce must reach a seed dictionary,
 // or every child stack scaffolded from it fails Spelling on first `check`.

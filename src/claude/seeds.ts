@@ -2,9 +2,9 @@ import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/sync/copy'
-import { creationRel, isRecordEntry } from '@/record-root'
+import { creationRel, isRecordEntry } from '@/roots/record'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
-import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
+import { SURFACE_ENTRIES, surfaceDir } from '@/roots/surface'
 
 const SEEDS_DIR = join('tooling', 'claude', 'seeds')
 const CLAUDE_DIR = '.claude'

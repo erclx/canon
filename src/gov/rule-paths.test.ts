@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildRuleEntries } from '@/gov/list'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 function matchesRule(name: string, path: string): boolean {
   const rule = buildRuleEntries(PROJECT_ROOT).find((r) => r.name === name)

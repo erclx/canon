@@ -125,8 +125,8 @@ describe('isExcludedPath', () => {
   })
 
   it('should exclude both root resolver modules', () => {
-    expect(isExcludedPath('src/surface-root.ts')).toBe(true)
-    expect(isExcludedPath('src/record-root.ts')).toBe(true)
+    expect(isExcludedPath('src/roots/surface.ts')).toBe(true)
+    expect(isExcludedPath('src/roots/record.ts')).toBe(true)
   })
 
   it('should exclude the migrate modules', () => {
@@ -151,7 +151,7 @@ describe('isExcludedPath', () => {
 
 describe('referencesExcluded', () => {
   it('should read a quoted excluded path as coupling', () => {
-    expect(referencesExcluded('see src/surface-root.ts')).toBe(true)
+    expect(referencesExcluded('see src/roots/surface.ts')).toBe(true)
   })
 })
 

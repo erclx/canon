@@ -11,7 +11,7 @@ import {
   resolveRules,
   unreferencedRules,
 } from '@/gov/stacks'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 let root: string
 let target: string

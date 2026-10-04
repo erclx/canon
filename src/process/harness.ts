@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import { stateDir } from '@/targets/registry'
 
 const CLI = join(PROJECT_ROOT, 'src/cli.ts')

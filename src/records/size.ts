@@ -1,7 +1,7 @@
 import { existsSync, type Stats } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
-import { RECORD_ROOTS, recordDir, SCRATCH } from '@/record-root'
+import { RECORD_ROOTS, recordDir, SCRATCH } from '@/roots/record'
 import { candidateFolders } from '@/records/backup'
 
 /**

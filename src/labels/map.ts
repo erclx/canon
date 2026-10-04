@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveExisting } from '@/legacy-path'
+import { resolveExisting } from '@/roots/legacy'
 
 /**
  * Where a project declares its pull request label map.

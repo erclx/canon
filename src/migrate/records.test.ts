@@ -317,11 +317,11 @@ describe('isExcludedPath', () => {
   })
 
   it('should exclude the module stating the roots', () => {
-    expect(isExcludedPath('src/record-root.ts')).toBe(true)
+    expect(isExcludedPath('src/roots/record.ts')).toBe(true)
   })
 
   it('should exclude the module stating the surface roots', () => {
-    expect(isExcludedPath('src/surface-root.ts')).toBe(true)
+    expect(isExcludedPath('src/roots/surface.ts')).toBe(true)
   })
 
   it('should exclude its own source', () => {

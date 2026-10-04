@@ -71,9 +71,9 @@ import {
 } from '@/claude/settings'
 import { copyPreservingMode } from '@/sync/copy'
 import { execScript } from '@/exec'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
-import { recordDir } from '@/record-root'
-import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
+import { recordDir } from '@/roots/record'
+import { SURFACE_ENTRIES, surfaceDir } from '@/roots/surface'
 import { isDirectory, resolveTarget } from '@/targets/validate'
 import { injectGitignore, pruneGitignore } from '@/tooling/inject'
 import {

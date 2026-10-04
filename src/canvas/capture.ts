@@ -13,7 +13,7 @@ import {
   FRAMES_PREFIX,
   startCanvas,
 } from '@/canvas/server'
-import { recordDir } from '@/record-root'
+import { recordDir } from '@/roots/record'
 
 /**
  * The element a frame is captured by. The document rather than its body, so a

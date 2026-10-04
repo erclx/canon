@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { execa } from 'execa'
-import { checkoutMismatchWarning, PROJECT_ROOT } from '@/project-root'
+import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { logWarn } from '@/ui'
 
 export async function execScript(

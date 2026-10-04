@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SKILL_CASES } from '@/claude/cases/all'
 import { loadCatalog } from '@/claude/skills-rank'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 describe('SKILL_CASES', () => {
   it('should cover every shipped skill with at least one case', () => {

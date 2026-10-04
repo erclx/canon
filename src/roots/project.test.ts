@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -7,7 +13,7 @@ import {
   findCheckoutMismatch,
   isOwnCheckout,
   PROJECT_ROOT,
-} from '@/project-root'
+} from '@/roots/project'
 
 let fixture: string
 
@@ -22,6 +28,16 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(fixture, { force: true, recursive: true })
+})
+
+describe('PROJECT_ROOT', () => {
+  it('should name the directory holding this package.json', () => {
+    const raw = readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf8')
+
+    const { name } = JSON.parse(raw) as { name?: string }
+
+    expect(name).toBe('@erclx/canon')
+  })
 })
 
 describe('findCheckoutMismatch', () => {

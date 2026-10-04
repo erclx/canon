@@ -1,6 +1,6 @@
 import type { Command } from 'commander'
 import { execa } from 'execa'
-import { findCheckoutMismatch, PROJECT_ROOT } from '@/project-root'
+import { findCheckoutMismatch, PROJECT_ROOT } from '@/roots/project'
 import {
   frameError,
   intro,

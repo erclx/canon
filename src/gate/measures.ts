@@ -37,7 +37,7 @@ import {
   SHIPPED_CORPORA,
   type ShippedReference,
 } from '@/shipped/references'
-import { surfaceDir } from '@/surface-root'
+import { surfaceDir } from '@/roots/surface'
 import { seedRoots } from '@/tooling/seeds'
 import { plural } from '@/ui'
 import {

@@ -3,7 +3,7 @@ import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { regenOne } from '@/indexes/regen'
 import { isUnder } from '@/tasks/paths'
-import { recordDir, recordDirs } from '@/record-root'
+import { recordDir, recordDirs } from '@/roots/record'
 
 const TASKS = 'tasks'
 const PLANS = 'plans'

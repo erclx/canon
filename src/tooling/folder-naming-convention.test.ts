@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import micromatch from 'micromatch'
 import { describe, expect, it } from 'vitest'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 
 const CONFIGS = {
   astro: join(PROJECT_ROOT, 'tooling', 'astro', 'configs', 'eslint.config.js'),

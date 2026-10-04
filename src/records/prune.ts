@@ -3,7 +3,7 @@ import { readdir, rm, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { RECORD_LAYOUT_MOVES } from '@/migrate/record-layout'
 import { PROMOTED_FOLDERS } from '@/migrate/scratch-evidence'
-import { RECORD_ROOTS, recordDir, SCRATCH } from '@/record-root'
+import { RECORD_ROOTS, recordDir, SCRATCH } from '@/roots/record'
 import { day, newestMtime } from '@/records/size'
 
 const DAY_MS = 24 * 60 * 60 * 1000

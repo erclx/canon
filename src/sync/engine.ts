@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { isAbsolute, relative, resolve } from 'node:path'
 import { copyPreservingMode } from '@/sync/copy'
-import { checkoutMismatchWarning } from '@/project-root'
+import { checkoutMismatchWarning } from '@/roots/project'
 import { findInstalledOrigin, readHistoryIndex } from '@/sync/history'
 import {
   type DomainHashes,

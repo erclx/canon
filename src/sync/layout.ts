@@ -1,8 +1,8 @@
 import { existsSync, statSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
 import { SUBDIRS } from '@/claude/seeds'
-import { creationRel, isRecordEntry } from '@/record-root'
-import { SURFACE_ENTRIES, spell, surfaceDir } from '@/surface-root'
+import { creationRel, isRecordEntry } from '@/roots/record'
+import { SURFACE_ENTRIES, spell, surfaceDir } from '@/roots/surface'
 import type { StampDomain } from '@/sync/stamp'
 
 const CLAUDE_DIR = '.claude'

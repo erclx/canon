@@ -1,6 +1,6 @@
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/project-root'
+import { PROJECT_ROOT } from '@/roots/project'
 import {
   buildIssueArgs,
   failureDetail,

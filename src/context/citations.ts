@@ -2,8 +2,8 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { listRepositoryFiles } from '@/git/files'
-import { RECORD_ROOTS } from '@/record-root'
-import { SURFACE_ROOTS } from '@/surface-root'
+import { RECORD_ROOTS } from '@/roots/record'
+import { SURFACE_ROOTS } from '@/roots/surface'
 
 /**
  * Suppresses citation checking for the source line carrying it.
