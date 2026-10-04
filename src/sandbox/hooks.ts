@@ -76,10 +76,21 @@ export function probeScenario(
   return { ok: true, ...parseProbe(result.stdout) }
 }
 
+/**
+ * How `stage_setup` ended. The retired dispatcher ran it in its own shell, so
+ * an `exit` there ended provisioning through the frame-closing trap, and an
+ * `exec` replaced the harness outright, leaving its program's frame as the last
+ * one written. The harness reproduces both from this.
+ */
+export type StageEnding = 'returned' | 'exited' | 'replaced'
+
 export interface StageResult {
   readonly status: number
+  readonly ending: StageEnding
   readonly exports: Readonly<Record<string, string>>
 }
+
+const EXITED_RECORD = '@exited'
 
 /**
  * Runs `stage_setup` inside the tree with every stream inherited, so a scenario
@@ -104,12 +115,13 @@ export function stageScenario(
       stdio,
     })
     const status = result.status ?? 1
-    const exports =
-      status === 0 && existsSync(report)
-        ? parsePairs(readFileSync(report, 'utf8')).exports
-        : {}
+    if (!existsSync(report)) return { status, ending: 'replaced', exports: {} }
 
-    return { status, exports }
+    const text = readFileSync(report, 'utf8')
+    if (text.split('\0').includes(EXITED_RECORD))
+      return { status, ending: 'exited', exports: {} }
+
+    return { status, ending: 'returned', exports: parsePairs(text).exports }
   } finally {
     rmSync(scratch, { recursive: true, force: true })
   }

@@ -12,13 +12,14 @@ set -o pipefail
 #                            and prints every export they changed, closed by an
 #                            `@anchor=<0|1>` record
 #   stage <scenario> <file>  re-runs both hooks, runs `stage_setup` inside the
-#                            tree, and writes the exports it changed to <file>
+#                            tree, and writes the exports it changed to <file>,
+#                            or an `@exited` record when the shell exits first
 #
 # Pairs are NUL-separated `NAME=value`, since a value can hold a newline. The
-# stage reports back because a scenario can set `SANDBOX_SKIP_AUTO_COMMIT` from
-# `stage_setup`, which the retired dispatcher read from the same shell. The
-# stage re-runs the hooks rather than receiving the probe's pairs, since every
-# scenario's hooks only export.
+# retired dispatcher ran `stage_setup` in its own shell, so an export, an `exit`,
+# or an `exec` there reached the harness, and the report carries all three: an
+# `exec` skips the EXIT trap and leaves no report at all. The stage re-runs the
+# hooks rather than receiving the probe's pairs, since they only export.
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -36,9 +37,9 @@ _hook_report="${3:-}"
 [[ "$_hook_mode" == "probe" || "$_hook_mode" == "stage" ]] || _hook_die "mode must be probe or stage, got: ${_hook_mode:-<empty>}"
 [ -f "$_hook_scenario" ] || _hook_die "no scenario file at: ${_hook_scenario:-<empty>}"
 [ "$_hook_mode" = "probe" ] || [ -n "$_hook_report" ] || _hook_die "stage needs a file to report its exports to"
+[ "$_hook_mode" = "probe" ] || trap 'printf "@exited\0" >"$_hook_report"' EXIT
 
 declare -A _hook_before
-
 _hook_snapshot() {
   local name
   _hook_before=()
@@ -94,4 +95,5 @@ _hook_run
 _hook_snapshot
 cd "$SANDBOX"
 stage_setup
+trap - EXIT
 _hook_changed >"$_hook_report"

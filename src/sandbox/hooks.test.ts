@@ -122,6 +122,7 @@ describe('stageScenario', () => {
 
     expect(result).toEqual({
       status: 0,
+      ending: 'returned',
       exports: { SANDBOX_SKIP_AUTO_COMMIT: 'true' },
     })
   })
@@ -131,6 +132,22 @@ describe('stageScenario', () => {
 
     const result = stageScenario(file, env, 'ignore')
 
-    expect(result).toEqual({ status: 3, exports: {} })
+    expect(result).toEqual({ status: 3, ending: 'exited', exports: {} })
+  })
+
+  it('should tell an exit inside stage_setup from a return', () => {
+    const file = scenario('stage_setup() {\n  exit 0\n}')
+
+    const result = stageScenario(file, env, 'ignore')
+
+    expect(result).toEqual({ status: 0, ending: 'exited', exports: {} })
+  })
+
+  it('should report a stage_setup that execs another program as replaced', () => {
+    const file = scenario('stage_setup() {\n  exec sh -c "exit 4"\n}')
+
+    const result = stageScenario(file, env, 'ignore')
+
+    expect(result).toEqual({ status: 4, ending: 'replaced', exports: {} })
   })
 })

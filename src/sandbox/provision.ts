@@ -43,7 +43,10 @@ const SKILL_PATHSPEC = 'claude/skills/**/SKILL.md'
  * stop, which is what the bash harness's `trap close_timeline EXIT` did.
  */
 class Halt extends Error {
-  constructor(readonly status: number) {
+  constructor(
+    readonly status: number,
+    readonly isFrameOpen = true,
+  ) {
     super(`halted with ${status}`)
   }
 }
@@ -427,8 +430,11 @@ function provisionScenario(
   configureCredentials(sandbox, env)
   setupAssets(root, sandbox, env)
 
+  // A scenario that execs a verb as its last step hands the run to that verb,
+  // whose own frame is the last one written, so nothing follows it here.
   const staged = stageScenario(file, env)
-  if (staged.status !== 0) throw new Halt(staged.status)
+  if (staged.ending === 'replaced') throw new Halt(staged.status, false)
+  if (staged.ending === 'exited') throw new Halt(staged.status)
   Object.assign(env, staged.exports)
 
   const isSkipAutoCommit = (env.SANDBOX_SKIP_AUTO_COMMIT ?? '') !== ''
@@ -583,7 +589,7 @@ export async function runSandbox(
     return 0
   } catch (error) {
     if (!(error instanceof Halt)) throw error
-    outro()
+    if (error.isFrameOpen) outro()
 
     return error.status
   }
