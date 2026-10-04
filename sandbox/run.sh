@@ -330,7 +330,7 @@ main() {
   [ -z "$prompt" ] && log_error "Missing prompt. Pass the skill invocation, e.g. \"/canon:git-commit\"."
 
   # Minted here, in this shell rather than inside a `$(...)` capture, so the
-  # export survives into the two children below: manage-sandbox.sh resolves
+  # export survives into the two children below: `canon sandbox` resolves
   # the same tree during provisioning, and the `sandbox check` at the end
   # resolves it again to score what that provisioning produced.
   mint_sandbox_run_id
@@ -341,7 +341,7 @@ main() {
 
   log_step "Provisioning $target"
   local provision_code=0
-  bash "$PROJECT_ROOT/scripts/manage-sandbox.sh" --no-header "$target" "$scenario" >&2 || provision_code=$?
+  bun "$PROJECT_ROOT/src/cli.ts" sandbox --no-header "$target" "$scenario" >&2 || provision_code=$?
   if [ "$provision_code" -ne 0 ]; then
     log_warn "Provisioning exited $provision_code before the session could start."
     exit "$provision_code"
