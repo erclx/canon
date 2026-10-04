@@ -44,6 +44,7 @@ import {
   scanRouting,
 } from '@/claude/routing'
 import { type DriftReport, readDrift } from '@/claude/skills-drift'
+import { familyKeys } from '@/claude/skills-families'
 import { listSkills } from '@/claude/skills-list'
 import {
   type ReachRefusal,
@@ -1402,6 +1403,7 @@ async function runSkillsAudit(
     reportProvenance(report)
     reportPracticeShape(report)
     reportReferenceContents(report)
+    reportFamily(report)
     reportUnmeasured()
     outro()
   }
@@ -1426,6 +1428,7 @@ async function runSkillsAudit(
           datedProvenance: report.datedProvenance,
           practiceShape: report.practiceShape,
           referenceContents: report.referenceContents,
+          family: report.family,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
@@ -1435,6 +1438,7 @@ async function runSkillsAudit(
           ledgerSkills: LEDGER_SKILLS,
           practiceSections: PRACTICE_SECTIONS,
           contentsThreshold: CONTENTS_THRESHOLD,
+          families: familyKeys(),
         },
       })}\n`,
     )
@@ -1666,6 +1670,27 @@ function reportReferenceContents(report: SkillsAudit): void {
     `${plural(report.referenceContents.length, 'long reference')} with no contents list`,
   )
   reportFindings(report.referenceContents)
+}
+
+/**
+ * Reports without failing the verb, the split the practice shape takes. The
+ * Skill family stage of `canon gate run` is what fails a push on it.
+ */
+function reportFamily(report: SkillsAudit): void {
+  logStep('Family')
+  logInfo(
+    `A skill under ${SHIPPED_CORPUS} declares metadata.family, one of ${familyKeys().join(', ')}.`,
+  )
+
+  if (report.family.length === 0) {
+    logInfo('Every shipped skill declares a known family.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.family.length, 'skill')} with a missing or unknown family`,
+  )
+  reportFindings(report.family)
 }
 
 /**

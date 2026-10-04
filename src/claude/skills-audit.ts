@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { isFamilyKey } from '@/claude/skills-families'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { bodyLines, maskDisplayed } from '@/markdown/scan'
 
@@ -128,6 +129,7 @@ export interface SkillsAudit {
   readonly datedProvenance: readonly SkillFinding[]
   readonly practiceShape: readonly SkillFinding[]
   readonly referenceContents: readonly SkillFinding[]
+  readonly family: readonly SkillFinding[]
 }
 
 interface SkillSource {
@@ -136,6 +138,8 @@ interface SkillSource {
   readonly hasReadme: boolean
   readonly name: string | undefined
   readonly description: string | undefined
+  /** `metadata.family`, undefined when absent, blank, or not a string. */
+  readonly family: string | undefined
   /** Undefined when the folder carries no `REQUIREMENT.md` at all. */
   readonly requirementHeadings: readonly string[] | undefined
   /** Every H2 in `SKILL.md` outside a fence, for the practice shape. */
@@ -207,6 +211,7 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     referenceContents: sources.flatMap((source) =>
       source.bodies.flatMap(contentsFindings),
     ),
+    family: sources.flatMap(familyFindings),
   }
 }
 
@@ -261,6 +266,7 @@ async function readSkill(
     hasReadme: existsSync(join(skillDir, 'README.md')),
     name: declared(readField(fields, 'name')),
     description: declared(readField(fields, 'description')),
+    family: declaredFamily(fields?.fields.metadata),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
     sections: sectionsOf(body),
@@ -283,6 +289,13 @@ async function readSkill(
 function declared(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
   return trimmed === undefined || trimmed === '' ? undefined : trimmed
+}
+
+function declaredFamily(metadata: unknown): string | undefined {
+  if (typeof metadata !== 'object' || metadata === null) return undefined
+  if (Array.isArray(metadata)) return undefined
+  const { family } = metadata as Record<string, unknown>
+  return typeof family === 'string' ? declared(family) : undefined
 }
 
 /** Every H2 outside a fence, the one level both exact-section checks read. */
@@ -373,6 +386,21 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
     : [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
 
   return [...sections, ...ledger]
+}
+
+/**
+ * Asks only the shipped corpus for a family, since the family names the skill
+ * map group a skill's row sits under and an internal skill takes no row.
+ */
+function familyFindings(source: SkillSource): SkillFinding[] {
+  if (dirname(source.rel) !== SHIPPED_CORPUS) return []
+  if (source.family === undefined) {
+    return [
+      { rel: source.rel, detail: 'frontmatter declares no metadata.family' },
+    ]
+  }
+  if (isFamilyKey(source.family)) return []
+  return [{ rel: source.rel, detail: `unknown family: ${source.family}` }]
 }
 
 /**

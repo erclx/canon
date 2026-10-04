@@ -629,6 +629,73 @@ describe('auditSkills practice shape', () => {
   })
 })
 
+/** A conforming skill whose frontmatter carries `metadata` followed by `value`. */
+function skillWithMetadata(value: string, corpus = 'claude'): void {
+  const dir = conformingSkill('git-commit', corpus)
+  writeFileSync(
+    join(dir, 'SKILL.md'),
+    `---\nname: git-commit\ndescription: Commits\nmetadata:${value}\n---\n\n# Body\n`,
+  )
+}
+
+describe('auditSkills family', () => {
+  it('should report a shipped skill declaring no family', async () => {
+    conformingSkill('git-commit')
+
+    const report = await auditSkills(root)
+
+    expect(report.family).toEqual([
+      {
+        rel: join('claude', 'skills', 'git-commit'),
+        detail: 'frontmatter declares no metadata.family',
+      },
+    ])
+  })
+
+  it('should report a shipped skill whose family is not a vocabulary key', async () => {
+    skillWithMetadata('\n  family: shipping')
+
+    const report = await auditSkills(root)
+
+    expect(report.family).toEqual([
+      {
+        rel: join('claude', 'skills', 'git-commit'),
+        detail: 'unknown family: shipping',
+      },
+    ])
+  })
+
+  it('should report a shipped skill whose metadata is a string', async () => {
+    skillWithMetadata(' ship')
+
+    const report = await auditSkills(root)
+
+    expect(report.family).toHaveLength(1)
+  })
+
+  it('should stay silent on a shipped skill declaring a vocabulary key', async () => {
+    skillWithMetadata('\n  family: ship')
+
+    const report = await auditSkills(root)
+
+    expect(report.family).toEqual([])
+  })
+
+  it('should stay silent on an internal skill declaring no family', async () => {
+    conformingSkill('internal-scripts', '.claude')
+
+    const report = await auditSkills(root)
+
+    expect(report.family).toEqual([])
+  })
+
+  it('should not fail the exit code on a family finding alone', async () => {
+    conformingSkill('git-commit')
+
+    expect(auditExitCode(await auditSkills(root))).toBe(0)
+  })
+})
+
 describe('auditExitCode', () => {
   it('should fail on a missing requirement', async () => {
     const dir = skillDir('git-commit')
