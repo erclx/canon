@@ -99,6 +99,29 @@ describe('injectChangedSkills', () => {
     expect(injected).toEqual([])
   })
 
+  it('should take the merge base against origin/main over a stale local main', () => {
+    const remote = join(dir, 'origin.git')
+    const advancer = join(dir, 'advancer')
+    git(dir, 'init', '-q', '--bare', '-b', 'main', remote)
+    initRepo(root)
+    write(root, 'claude/skills/shared/SKILL.md', 'before the remote moved\n')
+    commitAll(root, 'base')
+    git(root, 'remote', 'add', 'origin', remote)
+    git(root, 'push', '-q', 'origin', 'main')
+    git(dir, 'clone', '-q', remote, advancer)
+    git(advancer, 'config', 'user.name', 'test')
+    git(advancer, 'config', 'user.email', 'test@example.com')
+    write(advancer, 'claude/skills/shared/SKILL.md', 'merged upstream\n')
+    commitAll(advancer, 'merged upstream')
+    git(advancer, 'push', '-q', 'origin', 'main')
+    git(root, 'fetch', '-q', 'origin')
+    git(root, 'checkout', '-q', '-b', 'feature', 'origin/main')
+
+    const injected = injectChangedSkills(root, sandbox, false)
+
+    expect(injected).toEqual([])
+  })
+
   it('should skip a skill the branch deleted', () => {
     branchTouchingSkills()
 
