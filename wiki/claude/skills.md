@@ -9,4 +9,4 @@ A skill is a reusable instruction set in a `SKILL.md` file with YAML frontmatter
 
 ## A marketplace plugin loads from a cache
 
-Marketplace plugins are cached under `~/.claude/plugins/cache/`, and a session loads the cached copy rather than the working tree. A session building a change to its own skills can hold the version from before the last update, and `--plugin-dir <worktree>/claude` loads the worktree's copy instead. Skill discovery follows symlinks but does not traverse outside the plugin root, which is why a file shared across skills has to sit under the plugin root.
+Marketplace plugins are cached under `~/.claude/plugins/cache/`, and a session loads the cached copy rather than the working tree. A session building a change to its own skills can hold the version from before the last update, and `--plugin-dir <worktree>/claude` loads the worktree's copy instead.
