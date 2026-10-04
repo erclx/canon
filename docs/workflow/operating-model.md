@@ -34,7 +34,7 @@ it. All four are framing and boundaries rather than logic.
 
 The planner is the one role the orchestrator also performs. Per-row planning
 runs warm inside the orchestrator's own session or cold in a dispatched one, and
-the boundary between them is the cross-feature call: which rows collide, what
+the boundary between them is the cross-feature call: which rows conflict, what
 merges before what, and whether a row should run at all stay with the
 orchestrator, because a session reading the board sees blockers and file sets
 and can write a confident merge order off a partial picture. The per-row
@@ -62,20 +62,20 @@ Filing that row stops at the defect and the surface it was seen on. How far the
 defect reaches and what causes it belong to whoever plans the row, so it arrives
 carrying neither a count nor an asserted mechanism, and the seat that found it
 says as much in a plain sentence rather than supplying either. What separates the
-two is what a measurement decides: the blocker re-test, the collision check, and
-the file set compared against every track in flight all decide whether a row can
+two is what a measurement decides: the blocker re-test, the branch check, and
+the conflict check against every track in flight all decide whether a row can
 start, and only a count of the defect's extent decides how big it is.
 
 ## The loop
 
 One feature travels this path end to end.
 
-1. The next feature is planned with `plan-feature`, writing a plan to `.canon/plans/`. The orchestrator runs it warm when the row turns on a contract other features consume or a shared wiring seam, and dispatches a planner under `role-planner` otherwise. A cold planner measures the row against the tree rather than trusting what the row claims, and it reads what is in flight by composing the live session roster with open pull requests. A bare branch or worktree is not evidence on its own, since this repository leaves both behind after a squash merge.
-2. Orchestrator checks the plan waits on nobody, checks the branch is unclaimed, and checks the plan's file set is disjoint from every track in flight, then dispatches a background worker with `claude --bg` against the plan, naming the branch and the model on the launch rather than leaving the worker to derive either. No count caps how many run at once. The branch travels as the argument to the worker's own worktree call, which is the one place the name is read rather than inferred. It falls back to naming the invocation for a human to run through `session-worktree` and `auto-ship` when the plan still waits on an answer only the operator can give, the check refuses, the sets overlap, or a stated reason serializes the plan behind a track already in flight. Either way, the worker enters its own worktree, builds, self-checks, opens a PR, and stops at the PR boundary.
+1. The next feature is planned with `plan-feature`, writing a plan to `.canon/plans/`. The orchestrator runs it warm when the row turns on a contract other features consume or a dependency on another row, and dispatches a planner under `role-planner` otherwise. A cold planner measures the row against the tree rather than trusting what the row claims, and it reads what is in flight by composing the live session roster with open pull requests. A bare branch or worktree is not evidence on its own, since this repository leaves both behind after a squash merge.
+2. Orchestrator checks the plan waits on nobody, checks the branch is unclaimed, and checks no conflict holds the plan behind a track in flight, then dispatches a background worker with `claude --bg` against the plan, naming the branch and the model on the launch rather than leaving the worker to derive either. No count caps how many run at once. The branch travels as the argument to the worker's own worktree call, which is the one place the name is read rather than inferred. It falls back to naming the invocation for a human to run through `session-worktree` and `auto-ship` when the plan still waits on an answer only the operator can give, the branch check refuses, or a conflict holds the plan behind a track already in flight. Either way, the worker enters its own worktree, builds, self-checks, opens a PR, and stops at the PR boundary.
 3. A reviewer under `role-reviewer`, or the orchestrator, posts `review-pr` findings, and `review-ui` drives any visual checklist beside it.
 4. Orchestrator tells the session holding that branch to run `review-address` once the pass posted a finding at any severity, resolving the target then with `canon sessions list --branch` and reporting the invocation for the human when no live session holds it. The worker addresses the findings, rebases onto `origin/main` when a sibling landed first and left the branch unable to merge, then pushes a follow-up. A pass carrying only minor findings dispatches too, since the grade runs low often enough that a floor at should-fix loses fixes a worker would have made. `review-pr` states that threshold and the heading follows it, so an open heading is itself the signal to send.
 5. Orchestrator closes the review out with `review-pr` again. The second pass reads only the commits the follow-up added, or the worker's response alone when the follow-up added none, and posts under `## Review` when it finds anything and under `## Review closed` when it finds nothing, so a reader learns from the heading whether work is still owed and takes the merge decision from the counts on the line under it. A pass finding nothing where a close-out already stands rewrites that comment to cover what it read rather than posting a second one, so the thread carries one live verdict. Repeat from step 4 until a pass closes the review.
-6. The human reads the result and merges. The orchestrator tells any trailing worker whose branch shares a seam with the merged one to run `review-address`, which rebases whether or not the review left anything open.
+6. The human reads the result and merges. After each merge, the orchestrator tells any trailing worker whose files the merged diff touches to run `review-address`, which rebases whether or not the review left anything open.
 
 There is no loop construct here. Each worker is a single build that halts at the
 PR. The merge stays a manual human gate. Reliability comes from the plan being
@@ -200,12 +200,7 @@ before another is carried nowhere at all.
 
 ## Parallelism
 
-The binding constraint is the human and the shared files rather than the board.
-No number caps worker tracks. Open one whenever its file set is disjoint from
-every track already in flight, compared at the file path rather than at a folder
-above it, and stop adding once you can no longer review every output properly.
-Serialize a track sharing a wiring seam with another, and serialize one whose
-sets are disjoint when a stated reason still puts it behind another.
+Review attention binds, and no number caps worker tracks, so stop adding once you cannot review every output. A row waits only on a conflict a merge cannot settle, which the `role-orchestrator` dispatch runbook states once. A shared file is not one: both rows build, and the branch merging second resolves any conflict in its own session after the first lands, since no practice source serializes on a file. [Fowler](https://martinfowler.com/articles/branching-patterns.html) has whoever integrates second check health "even if it's a clean merge", and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to hours with no integration phase.
 
 Review splits by vantage. A reviewer under `role-reviewer` takes a pull
 request's read, first pass included, when three await one (a number set by

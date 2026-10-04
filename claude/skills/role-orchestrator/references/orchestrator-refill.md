@@ -19,16 +19,16 @@ It counts unclaimed plans against workers rather than reading the reserve in ste
 4. Read `.canon/tasks/priority.md` and count entries under its `## Run now` heading that carry a written plan. Keep one in reserve beyond what is running.
 5. Promote from the top of `## Needs a plan`, which is where the last sweep recorded what to plan next. Depart from that order when something has changed under it and say what changed, since a position nobody honors is the ordering going stale on the surface built to hold it. What sets the order in the first place is whether a task establishes functionality rather than how old it is, so prefer a task that adds or proves a mechanism over one that trims, tidies, or audits an existing surface.
    - Re-take the demotion half of the board-or-backlog call while the file is open. A row that has stopped being near-term moves to `backlog.md`, one line removed from `priority.md` and written there, per the standard's test. The promotion half is `orchestrator-parked.md`'s to run as a full walk over every backlog row, so this step does not repeat it. A row that pass clears already sits at the bottom of `## Needs a plan` before this sweep reads the heading.
-6. Before promoting a candidate, list the files it touches against every task already running, per `## Parallelism` in the skill body. Name the overlap and serialize when the sets are not disjoint.
-   - A candidate held by something outside the tree stays where it is whatever those sets show. A collision is one of the reasons a task cannot start, so disjointness clears that reason alone and leaves an external condition standing.
+6. Before promoting a candidate, test it against every task already running under the conflict check in `orchestrator-dispatch.md`. Serialize it behind a task only on one of that check's holds, and name the hold. A path the two merely share is promoted beside it, named so the merge order plans the rebase.
+   - A candidate held by something outside the tree stays where it is whatever the check shows. A conflict is one of the reasons a task cannot start, so clearing the check clears that reason alone and leaves an external condition standing.
 7. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then report:
 
 ```plaintext
 Capture: owed since <the last handoff, or session start when none has run>
 Findings placed: <finding> → <destination>
 Archived: <task>
-Promoted: <task>, touches <surfaces>, parallel with <task> because <disjoint sets>
-Serialized: <task> behind <task>, both write <file>
+Promoted: <task>, touches <surfaces>, parallel with <task>, sharing <paths or none>
+Serialized: <task> behind <task>, held on <dependency, contract, relocation, sweep, or reason>
 Backlogged: <task>, because <what stopped being near-term>
 Ready now: <tasks with plans, and what each waits on>
 ```
@@ -37,7 +37,7 @@ The capture row states a standing debt rather than a per-run result. Running cap
 
 That block is the detail. Lead the reply with the three slots under `## Every later turn` in `orchestrator-output.md`, so the human reads what they own before the evidence for it.
 
-Treat a task that edits `canon/context/` entries wholesale as conflicting with every other task, because the root instruction file requires each task to update its own domain entry as it lands.
+A task that edits `canon/context/` entries wholesale is a sweep under the conflict check, and holds every other task, because the root instruction file requires each task to update its own domain entry as it lands.
 
 Do not promote a task to fill the queue when nothing qualifies. A thin queue is a real answer and it beats a plan nobody needed.
 
@@ -49,7 +49,7 @@ Promoting, demoting, and archiving a row all write `.canon/tasks/priority.md`, a
 - Write both halves of a move before reporting it. A row removed from one surface and not written to the other leaves a task file nothing names, and the folder is gitignored with no history to recover the row from. `canon tasks validate` reports that state, so run it after any move.
 - Put the reason a row sits where it does in its Waiting on cell. Position is the ordering and the cell is where the ordering's rationale lives, so a row promoted with the cell left alone carries an order the next sweep cannot check.
 - Put a pointer in the Plan column, never prose. `## Run now` claims a written plan covers every open outcome, and `auto-ship` refuses at its guard when it follows the column and finds no plan, which spends a worker dispatch to learn what the row should have said.
-- Name the file set in the Touches column. The disjointness call in step 6 is only checkable later when the sets are written down rather than reasoned once and discarded.
+- Name the file set in the Touches column. It feeds the merge order and the shared paths a dispatch names, and the hold call in step 6 is only checkable later when the sets are written down rather than reasoned once and discarded.
 - Re-resolve every Plan pointer after anything archives a plan
 - Read the file back after writing it, since the row that lands is the row a worker acts on
 

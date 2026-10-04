@@ -30,16 +30,16 @@ In review (your turn):
 PR #<n> <title>
   → /review-pr
 
-Merge order: #<a> before #<b> (shared seam: <files>).
+Merge order: #<a> before #<b> (shared paths: <files>).
 
 Next: <the single most useful action>
 ```
 
-Omit any section with nothing in it. Recommend a handoff only for a plan whose file set is disjoint from every track already in flight, per `## Parallelism` in the skill body.
+Omit any section with nothing in it. Recommend a handoff only for a plan the conflict check in `orchestrator-dispatch.md` holds behind no track already in flight, and name any paths it shares with one.
 
 `In flight` covers the state between the other two, which lasts ten to thirty minutes and is most of what an operator sees once this session dispatches its own workers. Read the progress figures off each worker's worktree rather than from the worker, since a busy status says a session is alive and nothing about whether it is moving, and name the model because a dispatcher now picks one per row.
 
-Leave a plan out of `Ready to build` once a row in flight names it. The plan file stays in `.canon/plans/` for the whole build, so listing it there recommends handing off work already underway, and the disjointness rule in `## Parallelism` withdraws the recommendation only for a reader who already knows what is running.
+Leave a plan out of `Ready to build` once a row in flight names it. The plan file stays in `.canon/plans/` for the whole build, so listing it there recommends handing off work already underway, and the conflict check withdraws the recommendation only for a reader who already knows what is running.
 
 The block opens on the board rather than on a version, because no committed file states one, and a version line would restate what a reader can already see on the rows, dated by nothing.
 
@@ -56,6 +56,6 @@ Decisions:
 Next: <the single most useful action>
 ```
 
-Keep the detail below the block and keep it skippable. A decision reached at the bottom of three paragraphs has been buried, which is the failure this shape exists to prevent. Reuse the vocabulary above rather than inventing a second one, and keep a file set on the row claiming it so the reader can check a disjointness claim instead of taking it.
+Keep the detail below the block and keep it skippable. A decision reached at the bottom of three paragraphs has been buried, which is the failure this shape exists to prevent. Reuse the vocabulary above rather than inventing a second one, and keep a file set on the row claiming it so the reader can check a hold or a shared-path claim instead of taking it.
 
 Write no shape for a correction. A correction is a sentence, and a format for admitting error invites ceremony where plainness is the whole value.

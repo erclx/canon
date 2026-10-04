@@ -12,8 +12,8 @@ This session is the orchestrator: the one warm session that holds the
 cross-feature picture. It plans and reviews.
 
 It does not build, and it does not merge. Building happens in cold worker
-sessions, dispatched by this skill once the collision check clears or launched
-by the human when it does not. Merging is the human's gate.
+sessions, dispatched by this skill once the branch is unclaimed and no conflict
+holds the row, or launched by the human when either fails. Merging is the human's gate.
 
 This skill holds the framing, the board procedure, and the dispatch. Every step
 that builds something runs an existing skill. The queue rules below decide which
@@ -59,16 +59,16 @@ Report the state of play in the invocation block, and open every later sweep rep
 
 ## The loop
 
-1. Plan the next feature. The cross-feature call stays in this warm session, being which rows collide, what merges before what, and whether a row should run at all. Per-row planning runs either way: `plan-feature` here with that context, or a cold planner dispatched under `role-planner` through the planning shape in `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md`. Every plan written from here also carries a constraint per track in flight, which the paragraph below this list states.
-2. Decide parallelism and merge order. Note which plans touch a shared wiring seam so their PRs merge in sequence, not at once.
+1. Plan the next feature. The cross-feature call stays in this warm session, being which rows conflict, what merges before what, and whether a row should run at all. Per-row planning runs either way: `plan-feature` here with that context, or a cold planner dispatched under `role-planner` through the planning shape in `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md`. Every plan written from here also carries a constraint per track in flight, which the paragraph below this list states.
+2. Decide parallelism and merge order. Note which plans depend on another or change a contract another consumes, since those hold, and which merely share a file, since those build together and the second to merge rebases.
 3. Verify the plan against the tree. Reading it is not enough, since a plan goes stale from whatever merged after it was written. Grep for each construct it names and count the sites against the count it claims. Check that every phase label it cites is still open. Open each file it describes rather than trusting its account of the contents. Correct the plan before handing it over.
-4. Hand off. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` and follow it: check the branch is unclaimed, check the row's file set against every track in flight, then dispatch a background worker with `claude --bg`. Fall back to the human-launch line it replaces when the check refuses, the sets overlap, or a stated reason serializes the row behind something already out.
+4. Hand off. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-dispatch.md` and follow it: check the branch is unclaimed, run its conflict check against every track in flight, then dispatch a background worker with `claude --bg`. Fall back to the human-launch line it replaces when the branch check refuses or the conflict check holds the row behind something already out.
 5. Review the PR. When a worker opens a PR, its first pass runs through `review-pr` in a reviewer dispatched under `role-reviewer` when `### The review dispatch` below fires, and in this session otherwise. Either is the deep, independent pass. The worker's autoship self-review was only the green gate.
    - Learning that a PR moved is the mechanical half, so read `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` and run the poll under the condition it states rather than checking the board by hand. That runbook holds the routing and the trigger, and a summary of it here is a second source that drifts from it.
-6. Dispatch the handback. A pass posting anything owed, a finding at any severity or a testing question, tells the session holding that branch to run `review-address`, rather than waiting for a person to relay it. Re-review when the worker's own message says the address pass finished, per the channel `role-worker` states, rather than polling for an answer nothing else marks as landed, and send the re-review back to the dispatched reviewer when one took the first pass. Once a pass posts `## Review closed`, a UI close names the current head wherever the PR carries a checklist, and `--check` reports `settled`, lift the pull request's draft mark yourself, per Boundaries below. Then the human merges. Tell the trailing worker to rebase when its branch shares a seam with the merged one.
+6. Dispatch the handback. A pass posting anything owed, a finding at any severity or a testing question, tells the session holding that branch to run `review-address`, rather than waiting for a person to relay it. Re-review when the worker's own message says the address pass finished, per the channel `role-worker` states, rather than polling for an answer nothing else marks as landed, and send the re-review back to the dispatched reviewer when one took the first pass. Once a pass posts `## Review closed`, a UI close names the current head wherever the PR carries a checklist, and `--check` reports `settled`, lift the pull request's draft mark yourself, per Boundaries below. Then the human merges. Tell each trailing worker whose files the merged diff touches to run `review-address`, which rebases it when it no longer merges, after each merge rather than once per wave.
    - Read `${CLAUDE_SKILL_DIR}/references/orchestrator-handback.md` on reaching this step. It holds how the message is addressed and worded, what to do when no live session holds the branch, and where a worker's reply goes.
 
-A plan written here is written against a tree several branches are already changing, so it names the file set of every track in flight as a constraint, one set per track, read from the Touches column of that track's row. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. A bare path list leaves the worker guessing, which is how a plan ends up forbidding the repair of a citation the change broke.
+A plan written here is written against a tree several branches are already changing, so it names the file set of every track in flight as a constraint, one set per track, read from the Touches column of that track's row. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. A bare path list leaves the worker guessing, which is how a plan ends up forbidding the repair of a citation the change broke. A path the two share forbids an act only where the conflict check in `orchestrator-dispatch.md` holds the pair, and otherwise names what the second branch to merge rebases over.
 
 Stamp the block with the commit this session read the tree at, which the same section fixes the form of. A plan written during a refill sits in the ready queue while the wave it names merges, so the constraint is true when written and false when a worker reads it. The stamp is what lets that worker test the difference, and the standard carries the test.
 
@@ -79,7 +79,7 @@ Stamp the block with the commit this session read the tree at, which the same se
 - Do not merge. Recommend merge or changes. The human merges.
 - Lift a pull request's draft mark once its review closes, whether this session or a reviewer it dispatched closed it, acting directly on the pull request rather than dispatching a worker. Hold it on any `canon pr evidence <number> --check --json` reason but `settled`, reporting that reason, and where that record carries a `checklist`, until a UI close names the current head. `role-worker` and `role-reviewer` state the mirroring refusal: neither can verify who is asking or whether review actually closed, so the act stays with this session.
 - Do not spawn a worker with the Agent tool. An in-process subagent shares this session's context and cannot be steered or reached independently, which breaks the property this boundary protects rather than the mechanism it names. The launch in `orchestrator-launch.md` is a separate `claude --bg` process with its own worktree and its own PR, so it preserves that property instead.
-- Dispatch a background worker only once the collision check in `orchestrator-dispatch.md` clears and the row's file set is disjoint from every track in flight. Colliding with an existing worktree or session is what the check exists to catch rather than a judgment call this session makes case by case. No fixed count binds how many tracks run at once, and Parallelism below states what does.
+- Dispatch a background worker only once the branch check in `orchestrator-dispatch.md` clears and its conflict check holds the row behind no track in flight. Colliding with an existing worktree or session is what the branch check exists to catch rather than a judgment call this session makes case by case, and a shared file alone is not a hold. No fixed count binds how many tracks run at once, and Parallelism below states what does.
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
 - Do not hand a worker anything but a plan, since scope lives there. A plan carries exact diffs only when they are already known, otherwise it states the scope and the open questions and lets the worker write the diff.
 
@@ -91,9 +91,9 @@ Filing a row states the defect and the surface it was seen on, and stops there. 
 
 A finding placed into another task's `## Findings` is filing under a second name and takes the same rule. An unverified cause costs more than an unverified count, since a count fails loudly at the first re-measurement while a mechanism nobody opened the module to check sends real work in the wrong direction.
 
-What the measurement decides is the test, rather than whether one was taken. A measurement that decides whether a row can start stays in this seat, which covers the blocker re-test in `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, the collision check before a dispatch, and the file set refill step 6 lists against every track in flight. One that decides how big the row is goes to the planner.
+What the measurement decides is the test, rather than whether one was taken. A measurement that decides whether a row can start stays in this seat, which covers the blocker re-test in `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, the branch and conflict checks before a dispatch, and the hold refill step 6 tests against every track in flight. One that decides how big the row is goes to the planner.
 
-Both kinds read the same tree, and only a sizing count commits a plan to a scope this seat cannot see the whole of. A row filed under `## Needs a plan` carries no `Touches` column either, so filing it unmeasured owes no file set and the disjointness machinery is untouched. A position claim in that group's cell is in scope as well: name the row it outranks or the class it belongs to, each a judgment about order, and never reach for a count of the defect's extent to justify the rank, which is the untested number this boundary keeps off the row wearing a ranking argument.
+Both kinds read the same tree, and only a sizing count commits a plan to a scope this seat cannot see the whole of. A row filed under `## Needs a plan` carries no `Touches` column either, so filing it unmeasured owes no file set and the conflict check is untouched. A position claim in that group's cell is in scope as well: name the row it outranks or the class it belongs to, each a judgment about order, and never reach for a count of the defect's extent to justify the rank, which is the untested number this boundary keeps off the row wearing a ranking argument.
 
 ## Refilling the ready queue
 
@@ -103,27 +103,25 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-refill.md` on reaching any of 
 
 ## Parallelism
 
-No fixed number caps worker tracks. Collision between file sets is what binds, so
-list the files a candidate touches against every track already in flight and open
-it only when the sets are disjoint. What thins as tracks multiply is the review
-attention each output gets, so add a track while you can still review every one
-properly and stop when you cannot. An operator can also cap this session's
-workers by saying so, and a spoken cap binds for that session rather than
-standing as a number in a file.
+No fixed number caps worker tracks, and a shared file does not hold one. A
+candidate waits behind a track in flight only on a conflict, which the check in
+`orchestrator-dispatch.md` states once along with the sources it follows. What
+binds is the review attention each output gets, which thins as tracks multiply,
+so add a track while you can still review every one properly and stop when you
+cannot. Widening dispatch makes that bound bite sooner rather than lifting it.
+An operator can also cap this session's workers by saying so, and a spoken cap
+binds for that session rather than standing as a number in a file.
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-inbound.md` before widening a
 wave, for what each inbound turn costs this session and why the one control over
 it stays unset.
 
-Serialize any track that touches a shared wiring seam with another in flight, and
-serialize one whose sets are disjoint when a stated reason still puts it behind
-another, since two tracks interact in ways no file-set comparison reads. One
-building a skill and one auditing that catalog write nothing in common and the
-audit still counts a denominator the other is moving.
-
-Merge the branch with the smallest shared-file footprint first, and merge a
-branch touching `CLAUDE.md`, a Claude context entry, or a regenerated `index.md`
-last. Have every sibling rebase on the new `main` before the next merge. Two
+Two tracks sharing a file both build, and the one merging second rebases and
+resolves in its own session, after the first lands. Merge the branch with the
+smallest shared-file footprint first, so the rebases spread across the wave, and
+merge a branch touching `CLAUDE.md`, a Claude context entry, or a regenerated
+`index.md` last. Have every sibling the merged diff touches rebase on the new
+`main` before the next merge. Two
 workers running a server take a port apiece without being told to, since a
 stack derives it from the worktree it runs in through `scripts/worktree-port.sh`.
 Read that value rather than assigning one, and set `WORKTREE_PORT_OFFSET` by

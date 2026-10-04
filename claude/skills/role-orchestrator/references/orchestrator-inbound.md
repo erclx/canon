@@ -5,7 +5,7 @@ description: What each message from another session costs the orchestrator's con
 
 # What an inbound turn costs
 
-Part of `role-orchestrator`'s `## Parallelism`. The session reads this file before widening a wave, since collision is what binds the track count and this is what it costs.
+Part of `role-orchestrator`'s `## Parallelism`. The session reads this file before widening a wave, since review attention is what binds the track count and this is what it costs.
 
 Inbound turns are the third input to that judgment. Claude Code delivers a
 message from another session as a new turn whenever this one sits idle, and the

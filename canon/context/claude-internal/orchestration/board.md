@@ -35,7 +35,7 @@ The three groups have no slot at the other end either, for work too small to pla
 
 `canon tasks validate` checks what a row claims once the sweep has rewritten it. It is a verb rather than a hook because the board is gitignored per-machine scratch, so a `PostToolUse` hook would fire on intermediate states mid-restructure and run nowhere but an interactive session. It reads and never writes, since a row is the orchestrator's claim about readiness and a validator repairing one would assert the claim it exists to test.
 
-The check it earns its place on is file-set overlap between `## Run now` rows. That group's test has a plan half and a half asking whether the task carries a reason it cannot start, and a collision against what something already running touches is one such reason, which is the part a person cannot run by eye.
+The check it earns its place on is file-set overlap between `## Run now` rows. That group's test has a plan half and a half asking whether the task carries a reason it cannot start, and the paths a row shares with something already running are the candidates the dispatch conflict check tests for one, which is the part a person cannot run by eye.
 
 ### Blockers
 
