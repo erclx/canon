@@ -60,7 +60,7 @@ configure_sandbox_git_identity() {
 SANDBOX_ANCHOR_REPO="canon-sandbox"
 
 # A scenario calls this from its own use_anchor hook rather than this file
-# defining the hook. manage-sandbox.sh keys off `type -t use_anchor`, so
+# defining the hook. sandbox-hook.sh keys off `type -t use_anchor`, so
 # declaring it here would hand an anchor to the scenarios that source this file
 # for the identity helpers alone.
 use_sandbox_anchor() {

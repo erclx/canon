@@ -48,7 +48,7 @@ tooling = ["tooling/"]
 # left to the rows below, so a new `scripts/` folder goes bare until the
 # uncovered-surface check names it.
 cli = ["src/", "scripts/lib/", "scripts/eval/"]
-sandbox = ["sandbox/", "scripts/manage-sandbox.sh"]
+sandbox = ["sandbox/", "scripts/sandbox-hook.sh", "src/sandbox/"]
 docs = ["docs/", "wiki/", "README.md", "CONTRIBUTING.md", "examples/"]
 # The canon.erclx.dev landing page: its own Astro config, its own manual
 # typecheck path, its own Playwright e2e suite, and its own deploy workflow
