@@ -13,7 +13,7 @@ description: The canvas server, its content format, and the verbs that list, arr
 
 The toolkit's own tokens arrive with the font faces they name embedded, so a frame renders in them on a machine that never installed them. An installed base gets the same treatment: each vendored face its sheets name is embedded, unless a project rule declares that family itself.
 
-A project's own `@font-face` rules under `.claude/design/project/` have each `url()` inlined as a `data:` URI. A rule whose file is missing, or whose path leads out of `.claude/design/project/` after links resolve, is dropped and named under `tokens.dropped` in the `canvas serve --json` record, and the frame still renders. `canon design fonts add` writes those rules.
+A project's own `@font-face` rules under `.claude/design/project/` have each `url()` inlined as a `data:` URI. A rule whose file is missing, or whose path leads out of `.claude/design/project/` after links resolve, is dropped and the frame still renders. `canvas serve` warns once per dropped rule and names each under `tokens.dropped` in its `--json` record. The confinement check reads each `url()` after percent-decoding it. `canon design fonts add` writes those rules.
 
 Before it binds a port, `canvas serve` checks that `preact` and `@preact/signals` resolve from the package the CLI runs from, never from the served project. When either is missing it refuses with reason `missing-client-deps` and names `bun install` in the detail, rather than serving a shell that loads as a blank page.
 
