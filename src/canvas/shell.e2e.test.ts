@@ -335,6 +335,42 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(await picker.count()).toBe(0)
   }, 30_000)
 
+  it('should track the first drag on the alpha strip after opening', async () => {
+    await page.getByRole('button', { name: 'background picker' }).click()
+    const alpha = page
+      .getByRole('dialog', { name: 'background color' })
+      .getByRole('slider', { name: 'alpha' })
+    const box = await alpha.boundingBox()
+    if (!box) throw new Error('the alpha strip has no box')
+    const x = box.x + box.width / 2
+    const edits: string[] = []
+    const record = (request: { url(): string; method(): string }) => {
+      if (
+        request.url().endsWith('/api/frames/edit') &&
+        request.method() === 'POST'
+      ) {
+        edits.push(request.url())
+      }
+    }
+    page.on('request', record)
+
+    // Pressed on the track below the thumb, where the range fires its first
+    // input before focus leaves the area, so the area's blur sees a session
+    // it did not open.
+    await page.mouse.move(x, box.y + box.height * 0.2)
+    await page.mouse.down()
+    for (const step of [0.4, 0.6, 0.8, 0.95]) {
+      await page.mouse.move(x, box.y + box.height * step)
+    }
+    const during = await alpha.inputValue()
+    const postedMidDrag = edits.length
+    await page.keyboard.press('Escape')
+    await page.mouse.up()
+    page.off('request', record)
+
+    expect([Number(during) < 20, postedMidDrag]).toEqual([true, 0])
+  }, 30_000)
+
   it('should list the color tokens behind the tokens icon', async () => {
     const list = page.getByRole('dialog', { name: 'background token list' })
 

@@ -219,10 +219,19 @@ interface ColorPickerProps {
   readonly onCommit: (value: string) => void
 }
 
+/** A control that previews before it writes. */
+type Control = 'area' | 'alpha' | 'hue'
+
 interface Pending {
   readonly session: ScrubSession
   /** The value when the session opened, which a release equal to it restores. */
   readonly from: string
+  /**
+   * The control moving the color, which alone may end the session. A range
+   * fires its first input on a press before focus leaves the area, so the
+   * area's blur would otherwise write the range's half-finished drag.
+   */
+  owner: Control
 }
 
 /**
@@ -300,8 +309,16 @@ export function ColorPicker({
     setState(next)
   }
 
-  const start = (): Pending => {
-    if (pending.current) return pending.current
+  /*
+   * A control moving the color while another's session is open takes that
+   * session over, so its restore point stays the value the frame held before
+   * either moved and one release writes both.
+   */
+  const start = (owner: Control): Pending => {
+    if (pending.current) {
+      pending.current.owner = owner
+      return pending.current
+    }
     pending.current = {
       session: begin?.() ?? {
         preview: () => undefined,
@@ -309,22 +326,26 @@ export function ColorPicker({
         commit: onCommit,
       },
       from: valueOf(latest.current),
+      owner,
     }
     return pending.current
   }
 
   /* Moves the color during a drag or a key step, previewing and posting nothing. */
-  const move = (next: PickerState) => {
+  const move = (owner: Control, next: PickerState) => {
     if (isBusy) return
-    const session = start().session
+    const session = start(owner).session
     show(next)
     session.preview(valueOf(next))
   }
 
-  /* Ends the session: writes once when the value moved, else puts it back. */
-  const settle = (focus = nameOf(document.activeElement)) => {
+  /*
+   * Ends the session that control owns: writes once when the value moved,
+   * else puts it back. A session another control owns is left running.
+   */
+  const settle = (owner: Control, focus = nameOf(document.activeElement)) => {
     const open = pending.current
-    if (!open) return
+    if (!open || open.owner !== owner) return
     pending.current = null
     const value = valueOf(latest.current)
     if (value === open.from || isBusy) {
@@ -363,7 +384,7 @@ export function ColorPicker({
   const moveTo = (event: PointerEvent) => {
     const box = area.current?.getBoundingClientRect()
     if (!box || box.width === 0 || box.height === 0) return
-    move({
+    move('area', {
       ...latest.current,
       hsv: {
         h: latest.current.hsv.h,
@@ -446,10 +467,10 @@ export function ColorPicker({
         onPointerUp={(event) => {
           if (dragging.current !== event.pointerId) return
           dragging.current = null
-          settle()
+          settle('area')
         }}
         onPointerCancel={cancel}
-        onBlur={(event) => settle(nameOf(event.relatedTarget))}
+        onBlur={(event) => settle('area', nameOf(event.relatedTarget))}
         onKeyDown={(event) => {
           const step = event.shiftKey ? 10 : 1
           const { s, v } = latest.current.hsv
@@ -462,14 +483,14 @@ export function ColorPicker({
           const change = moves[event.key]
           if (change) {
             event.preventDefault()
-            move({
+            move('area', {
               ...latest.current,
               hsv: { ...latest.current.hsv, ...change },
               token: undefined,
             })
           } else if (event.key === 'Enter') {
             event.preventDefault()
-            settle()
+            settle('area')
           }
         }}
       >
@@ -495,13 +516,13 @@ export function ColorPicker({
             event.currentTarget.value = String(latest.current.alpha)
             return
           }
-          move({
+          move('alpha', {
             ...latest.current,
             alpha: Number(event.currentTarget.value),
           })
         }}
-        onChange={() => settle()}
-        onBlur={(event) => settle(nameOf(event.relatedTarget))}
+        onChange={() => settle('alpha')}
+        onBlur={(event) => settle('alpha', nameOf(event.relatedTarget))}
       />
       <input
         class="picker-slider picker-hue"
@@ -519,7 +540,7 @@ export function ColorPicker({
             event.currentTarget.value = String(Math.round(latest.current.hsv.h))
             return
           }
-          move({
+          move('hue', {
             ...latest.current,
             hsv: {
               ...latest.current.hsv,
@@ -528,8 +549,8 @@ export function ColorPicker({
             token: undefined,
           })
         }}
-        onChange={() => settle()}
-        onBlur={(event) => settle(nameOf(event.relatedTarget))}
+        onChange={() => settle('hue')}
+        onBlur={(event) => settle('hue', nameOf(event.relatedTarget))}
       />
       <div class="picker-side">
         <div class="picker-compare">

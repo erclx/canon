@@ -1474,6 +1474,31 @@ describe('Inspector edit', () => {
     await settle(() => release())
   })
 
+  it('should leave a range drag running when the area loses focus to it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="background-color: #ff8000">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    const picker = openPicker('background')
+    const alpha = controlIn(picker, 'alpha')
+
+    await settle(() => {
+      alpha.value = '98'
+      alpha.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await settle(() => areaOf(picker).dispatchEvent(new FocusEvent('blur')))
+    const midDrag = sentTo('/api/frames/edit').length
+    await slide(controlIn(openedPicker('background'), 'alpha'), '40')
+
+    expect([midDrag, sentTo('/api/frames/edit')]).toEqual([
+      0,
+      [expect.objectContaining({ value: '#ff800066' })],
+    ])
+  })
+
   it('should clamp an RGB row to the channel range it writes', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame(
