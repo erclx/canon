@@ -60,17 +60,17 @@ describe('captureStamps', () => {
   /**
    * A whole capture set whose stamp agrees with both files beside it, which is
    * what a tree looks like directly after `canon capture assets/captures --out
-   * assets/evidence` wrote all three. The markup lands under `assets/captures/`
-   * and the image and stamp under `assets/evidence/`, so a set spans two
+   * assets/frames` wrote all three. The markup lands under `assets/captures/`
+   * and the image and stamp under `assets/frames/`, so a set spans two
    * folders here the way it does in the tree.
    */
   const writeSet = (base: string, markup: string): void => {
     const html = `<html>${markup}</html>`
     const png = `${base} image bytes`
     writeFileSync(join(root, 'assets', 'captures', `${base}.html`), html)
-    writeFileSync(join(root, 'assets', 'evidence', `${base}.png`), png)
+    writeFileSync(join(root, 'assets', 'frames', `${base}.png`), png)
     writeFileSync(
-      join(root, 'assets', 'evidence', `${base}.stamp`),
+      join(root, 'assets', 'frames', `${base}.stamp`),
       [
         `source: ${base}.html`,
         `source-sha256: ${digest(html)}`,
@@ -84,7 +84,7 @@ describe('captureStamps', () => {
     root = mkdtempSync(join(tmpdir(), 'canon-capture-stamps-'))
     mkdirSync(join(root, 'assets'))
     mkdirSync(join(root, 'assets', 'captures'))
-    mkdirSync(join(root, 'assets', 'evidence'))
+    mkdirSync(join(root, 'assets', 'frames'))
   })
 
   afterEach(() => {
@@ -124,24 +124,24 @@ describe('captureStamps', () => {
   it('covers the install set as well as the hero one', async () => {
     writeSet('hero', 'hero')
     writeSet('install', 'install')
-    writeFileSync(join(root, 'assets', 'evidence', 'install.png'), 'replaced')
+    writeFileSync(join(root, 'assets', 'frames', 'install.png'), 'replaced')
 
     const report = await captureStamps(context())
 
     expect(report.failure).toBeDefined()
     expect(report.emissions[0]?.text).toContain(
-      'assets/evidence/install.png hashes to',
+      'assets/frames/install.png hashes to',
     )
   })
 
   it('names what a half-written set is missing rather than reading its stamp', async () => {
     writeSet('install', 'install')
-    rmSync(join(root, 'assets', 'evidence', 'install.stamp'))
+    rmSync(join(root, 'assets', 'frames', 'install.stamp'))
 
     const report = await captureStamps(context())
 
     expect(report.emissions[0]?.text).toBe(
-      'Missing from the install set: assets/evidence/install.stamp',
+      'Missing from the install set: assets/frames/install.stamp',
     )
   })
 
@@ -188,12 +188,12 @@ describe('captureStamps', () => {
 
   it('names the markup under captures when a set is missing only its image', async () => {
     writeSet('hero', 'hero')
-    rmSync(join(root, 'assets', 'evidence', 'hero.png'))
+    rmSync(join(root, 'assets', 'frames', 'hero.png'))
 
     const report = await captureStamps(context())
 
     expect(report.emissions[0]?.text).toBe(
-      'Missing from the hero set: assets/evidence/hero.png',
+      'Missing from the hero set: assets/frames/hero.png',
     )
   })
 })

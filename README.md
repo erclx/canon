@@ -43,8 +43,8 @@ claude plugin install canon@canon
 ```
 
 <picture>
- <source media="(prefers-color-scheme: dark)" srcset="assets/evidence/install.png">
- <img src="assets/evidence/install-light.png" alt="Adding the canon marketplace and installing the plugin in Claude Code">
+ <source media="(prefers-color-scheme: dark)" srcset="assets/frames/install.png">
+ <img src="assets/frames/install-light.png" alt="Adding the canon marketplace and installing the plugin in Claude Code">
 </picture>
 
 The skills land as `/canon:<name>`. If your session was already open, run `/reload-plugins` to pick them up.

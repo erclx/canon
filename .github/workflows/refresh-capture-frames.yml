@@ -103,7 +103,7 @@ jobs:
             echo "Markup is current, nothing to capture."
             exit 0
           fi
-          bun src/cli.ts capture assets/captures --selector .window --out assets/evidence
+          bun src/cli.ts capture assets/captures --selector .window --out assets/frames
 
       # The home baseline `canon pr evidence` compares a page change against.
       # pr-visual-checks.yml runs the same script and reports whether its frames
@@ -123,13 +123,13 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           HUSKY: 0
         run: |
-          if [ -z "$(git status --porcelain assets/captures assets/evidence)" ]; then
+          if [ -z "$(git status --porcelain assets/captures assets/frames assets/evidence)" ]; then
             echo "Frames are current, nothing to refresh."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/captures assets/evidence
+          git add assets/captures assets/frames assets/evidence
           git commit -m "chore(web): refresh capture frames"
           rendered=$(git rev-parse HEAD)
           written=$(git diff --name-only --no-renames --diff-filter=d HEAD~1 HEAD)
@@ -142,7 +142,7 @@ jobs:
           if [ -n "$dropped" ]; then
             printf '%s\n' "$dropped" | xargs -d '\n' git rm -q --ignore-unmatch --
           fi
-          if git diff --cached --quiet -- assets/captures assets/evidence; then
+          if git diff --cached --quiet -- assets/captures assets/frames assets/evidence; then
             echo "Main already carries these frames, nothing to refresh."
             exit 0
           fi

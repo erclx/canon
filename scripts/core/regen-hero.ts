@@ -20,7 +20,7 @@
  *
  * Only the HTML regenerates here. The PNG beside it is a chromium render whose
  * bytes move with the browser version. Rebuild the images with
- * `canon capture assets/captures --selector .window --out assets/evidence`
+ * `canon capture assets/captures --selector .window --out assets/frames`
  * after this script reports a change. That capture writes a .stamp beside each
  * PNG, which records the digest of the markup it rendered and is what the Hero
  * stage compares, so a frame's three files commit together. The frame carries
