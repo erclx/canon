@@ -18,7 +18,7 @@ Owns the scenarios that provision isolated project states for testing scripts, c
 - `scripts/sandbox-hook.sh` owns the bash entry a scenario's hooks run through, since the scenarios and the library they call stay bash
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project state, outside the repository and unique to the run that provisioned it
 
-Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `src/commands/sandbox.ts` and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in both, so a helper the harness needs on disk goes to `scripts/lib/`, where `sandbox-dispatch.sh` sits.
+Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `src/commands/sandbox.ts` and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in both, so a helper the harness needs on disk goes to `scripts/lib/` or `src/sandbox/`.
 
 ## Decisions
 
