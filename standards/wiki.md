@@ -47,8 +47,17 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Sourcing
 
 - Close the intro paragraph with a `Source:` sentence naming the owner. Link the canonical page where one exists, and name the owner alone where the subject has no single URL.
+- Link a docs page in its fetchable form, `https://code.claude.com/docs/en/<page>.md`, so a session reads the live text rather than a copy.
 - Fetch current information through the `claude-code-guide` agent when the subject is Claude Code. Do not work from training knowledge.
 - Propose an addition or correction and wait for confirmation. Do not write to a wiki file unasked.
+
+## Shape
+
+- Keep a page thin: the `Source:` sentence, an orientation paragraph, and lesson sections. The source owns the reference detail and a paraphrase of it falls behind within days.
+- Apply the lesson test per section: keep a fact about the subject only when the source page does not state it. Such a fact is a gotcha this project hit, a constraint it relies on, or how it uses the feature.
+- Read the current source before keeping or cutting a section. A fact kept from memory is the drift this shape exists to prevent.
+- Send a session that wants reference detail to the source and fetch it live. The page answers orientation and lessons only.
+- Leave a page with no lessons as the source link and the orientation paragraph. A catalog routes a reader by page, so the stub stays.
 
 ## Template
 
@@ -60,9 +69,9 @@ description: <one line naming what this page covers>
 
 # <Subject>
 
-<What the subject is and why it matters.> Source: <owner, with a link to the canonical page where one exists>.
+<What the subject is and why it matters, in a short orientation.> Source: <owner, with a link to the canonical page where one exists>.
 
-## <Section>
+## <Lesson>
 
-<Reference content.>
+<A fact the source page does not state.>
 ```

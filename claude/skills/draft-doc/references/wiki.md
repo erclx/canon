@@ -39,7 +39,7 @@ The standard forbids working from training knowledge, so the draft is built on a
 
 ## Draft
 
-- Draft `title` and `description` frontmatter against the standard's contract, then the intro paragraph closing on `Source:`, then the reference sections.
+- Draft `title` and `description` frontmatter against the standard's contract, then the intro paragraph closing on `Source:` as a short orientation, then the lesson sections. Let the read of the source decide what is a lesson: keep a fact only when the source page does not state it, and leave reference detail to the source.
 - Write what the fetch returned rather than what the subject is assumed to do.
 - Answer one question per section and stop. A reader arrives to settle something specific rather than to read the page through.
 - Mark a claim the fetch left unsettled rather than smoothing over it. An unmarked gap reads as a checked fact.

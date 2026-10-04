@@ -71,4 +71,4 @@ Load the skill before editing anything in its domain.
 
 ## Wiki
 
-- Before answering a how-to question about an external tool or a Claude Code concept, scan `wiki/index.md`, then the role catalog it links. Workflow, shell, and target-project questions are answered from `docs/index.md`.
+- Before answering a how-to question about an external tool or a Claude Code concept, scan `wiki/index.md`, then the role catalog it links. Reference detail comes from the page's `Source:` link, fetched live, and the wiki answers only orientation and lessons. Workflow, shell, and target-project questions are answered from `docs/index.md`.
