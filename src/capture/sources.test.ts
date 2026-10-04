@@ -2,7 +2,11 @@ import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { primaryFontFamily, resolveCaptureSources } from '@/capture/sources'
+import {
+  primaryFontFamily,
+  resolveCaptureSources,
+  textFamilies,
+} from '@/capture/sources'
 
 function fixture(names: string[]): string {
   const dir = mkdtempSync(join(tmpdir(), 'canon-capture-'))
@@ -98,5 +102,33 @@ describe('primaryFontFamily', () => {
 
   it('should return an empty string for an empty declaration', () => {
     expect(primaryFontFamily('')).toBe('')
+  })
+})
+
+describe('textFamilies', () => {
+  it('should keep one entry per distinct primary family', () => {
+    expect(
+      textFamilies(['"Geist Variable", sans-serif', 'Geist Variable, serif']),
+    ).toEqual(['Geist Variable'])
+  })
+
+  it('should keep the families in document order', () => {
+    expect(
+      textFamilies(['Geist Variable', '"Noto Sans Mono", monospace']),
+    ).toEqual(['Geist Variable', 'Noto Sans Mono'])
+  })
+
+  it('should strip quotes the way primaryFontFamily does', () => {
+    expect(textFamilies(["'Noto Sans Mono', monospace"])).toEqual([
+      'Noto Sans Mono',
+    ])
+  })
+
+  it('should drop a declaration naming no family', () => {
+    expect(textFamilies(['', 'Geist Variable'])).toEqual(['Geist Variable'])
+  })
+
+  it('should return an empty list for no declarations', () => {
+    expect(textFamilies([])).toEqual([])
   })
 })

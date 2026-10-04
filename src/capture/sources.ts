@@ -66,3 +66,14 @@ export function primaryFontFamily(declaration: string): string {
   const first = declaration.split(',')[0]?.trim() ?? ''
   return first.replace(/^['"]|['"]$/g, '')
 }
+
+/**
+ * Reduces the computed `font-family` of each rendered text element to the
+ * distinct families a capture has to prove resolved, in document order, so a
+ * frame that sets its font on any ancestor of its text is checked against the
+ * face the text actually draws in.
+ */
+export function textFamilies(declarations: readonly string[]): string[] {
+  const families = declarations.map(primaryFontFamily).filter(Boolean)
+  return [...new Set(families)]
+}
