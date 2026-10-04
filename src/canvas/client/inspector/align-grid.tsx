@@ -10,7 +10,8 @@ const COLUMNS = ['left', 'center', 'right'] as const
 
 /**
  * Computed values that read as one of the three positions. A container left
- * at its defaults packs from the start, and stretched children do too.
+ * at its defaults packs from the start, and stretched children do too, so
+ * both show the start cell without stating it.
  */
 const READS: Readonly<Record<string, number>> = {
   normal: 0,
@@ -25,6 +26,9 @@ const READS: Readonly<Record<string, number>> = {
   'self-end': 2,
   right: 2,
 }
+
+/** Values a container takes without stating a position, which a pick pins. */
+const IMPLIED = new Set(['normal', 'stretch'])
 
 export interface Alignment {
   readonly justifyContent: string
@@ -94,6 +98,8 @@ export function AlignGrid({
   onPick,
 }: AlignGridProps): JSX.Element {
   const checked = cellOf(direction, justifyContent, alignItems)
+  const isImplied =
+    IMPLIED.has(justifyContent.trim()) || IMPLIED.has(alignItems.trim())
   const [focus, setFocus] = useState<readonly [number, number]>(
     checked ?? [0, 0],
   )
@@ -141,7 +147,9 @@ export function AlignGrid({
               disabled={isBusy}
               onFocus={() => setFocus([row, column])}
               onClick={() => {
-                if (!isChecked) onPick(alignmentOf(direction, row, column))
+                if (!isChecked || isImplied) {
+                  onPick(alignmentOf(direction, row, column))
+                }
               }}
             >
               <span class="align-dot" aria-hidden="true" />

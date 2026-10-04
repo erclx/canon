@@ -1282,6 +1282,49 @@ describe('Inspector edit', () => {
     expect(cellNamed('top left').getAttribute('aria-checked')).toBe('true')
   })
 
+  it('should pin a container left at its defaults from the cell it shows checked', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: normal; align-items: normal"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top left').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-start',
+      }),
+      expect.objectContaining({
+        property: 'align-items',
+        value: 'flex-start',
+      }),
+    ])
+  })
+
+  it('should post nothing for a click on a cell the container states', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: center; align-items: flex-end"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('bottom center').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
   it('should move focus between cells with the arrow keys', () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', ROW_BODY)
