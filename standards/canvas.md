@@ -41,7 +41,8 @@ A canvas failing these is non-conforming even when it satisfies every shape rule
 ## Frames
 
 - Write one frame as one `.html` file inside its page folder. The filename without its extension is the frame's name, and the name follows the page naming rule.
-- Write each frame as a whole document, with a doctype, a `head`, and a `body`. A fragment gets elements the browser builds around it, and an address the operator picks inside it can no longer be matched to the file.
+- Write a frame as a whole document or as a fragment. The server writes in the `html`, `head`, and `body` a fragment leaves out, marked so a pick still matches the file.
+- State a `body` whenever the frame states a `head`, and state the `tbody` of every table. The browser builds either one where the file leaves it out, and an address the operator picks inside the frame can no longer be matched to the file.
 - Write every table with its `tbody` stated, for the same reason. A browser adds one the file leaves out.
 - Keep a frame self-contained. Inline its own styles and scripts, or link a file inside the same page folder, since a frame is served from its page and nothing outside the canvas resolves.
 - Use the project's custom properties, `var(--<name>)`, for every value the token stylesheet defines. A literal copied from it shows the right color today and the wrong one after the next token change.
