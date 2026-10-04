@@ -6,10 +6,11 @@ import { join } from 'node:path'
 /**
  * Mints a short per-run identifier the first time it is asked for and holds it
  * in `CANON_SANDBOX_RUN_ID` for the rest of this process, so a script that
- * spawns a child inheriting `process.env` — `run.sh` calling `manage-sandbox.sh`
- * and then `canon sandbox check` — resolves the same tree in every one of them.
- * A process that already carries the variable, inherited from such a parent,
- * reuses it rather than minting a new one.
+ * spawns a child inheriting `process.env` — `run.sh` calling `canon sandbox` to
+ * provision and then `canon sandbox check` — resolves the same tree in every one
+ * of them, as do the hook and installer children provisioning spawns. A process
+ * that already carries the variable, inherited from such a parent, reuses it
+ * rather than minting a new one.
  *
  * Twin of `mint_sandbox_run_id` in `scripts/lib/sandbox-path.sh`.
  */
