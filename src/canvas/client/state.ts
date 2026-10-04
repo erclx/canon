@@ -45,11 +45,19 @@ export interface SelectionRef extends FrameRef {
   readonly element?: ElementRef
 }
 
+/** A frame a session says it is editing, until the stamp it expires at. */
+export interface EditingRef extends FrameRef {
+  readonly by: string
+  readonly until: string
+}
+
 export interface PagesRecord {
   readonly pages: readonly Page[]
   readonly tokens: TokenSource
   /** Absent when nothing is selected or the selected frame is gone. */
   readonly selection?: SelectionRef | null
+  /** The live marks, which a server older than the mark leaves out. */
+  readonly editing?: readonly EditingRef[]
 }
 
 export interface ChangeEvent {
@@ -100,6 +108,9 @@ export const frameDocuments = signal<ReadonlyMap<string, Document>>(new Map())
 export const hoveredElement = signal<
   { readonly key: string; readonly index: number } | undefined
 >(undefined)
+
+/** Each marked frame's mark by frame key, dropped at its `until`. */
+export const editingFrames = signal<ReadonlyMap<string, EditingRef>>(new Map())
 
 /** Frame keys whose layers are open in the pages panel. */
 export const expandedFrames = signal<ReadonlySet<string>>(new Set())
@@ -193,10 +204,62 @@ export function toggleLayers(key: string): void {
   expandedFrames.value = next
 }
 
+/*
+ * An expiry writes no file and raises no change event, so nothing rereads the
+ * page list when a mark lapses. One timer, set for the earliest `until`, drops
+ * it instead, and every record resets it.
+ */
+let editingTimer: ReturnType<typeof setTimeout> | undefined
+
+/*
+ * The longest delay a timer holds. A longer one fires at once, so an `until`
+ * far out would reschedule on every tick rather than wait.
+ */
+const MAX_TIMER_MS = 2 ** 31 - 1
+
+function liveMarks(
+  marks: Iterable<readonly [string, EditingRef]>,
+  now: number,
+): ReadonlyMap<string, EditingRef> {
+  return new Map([...marks].filter(([, mark]) => Date.parse(mark.until) > now))
+}
+
+function scheduleExpiry(): void {
+  clearTimeout(editingTimer)
+  editingTimer = undefined
+  const next = Math.min(
+    ...[...editingFrames.value.values()].map((mark) => Date.parse(mark.until)),
+  )
+  if (!Number.isFinite(next)) return
+  editingTimer = setTimeout(
+    () => {
+      editingFrames.value = liveMarks(editingFrames.value, Date.now())
+      scheduleExpiry()
+    },
+    Math.min(MAX_TIMER_MS, Math.max(0, next - Date.now())),
+  )
+}
+
+/** Keys each mark by the file of the frame it names, as the surface reads. */
+function applyEditing(
+  all: readonly Page[],
+  marks: readonly EditingRef[],
+): void {
+  const keyed = marks.flatMap((mark) => {
+    const frame = all
+      .find((candidate) => candidate.name === mark.page)
+      ?.frames.find((candidate) => candidate.name === mark.frame)
+    return frame ? [[frameKey(mark.page, frame), mark] as const] : []
+  })
+  editingFrames.value = liveMarks(keyed, Date.now())
+  scheduleExpiry()
+}
+
 export function applyRecord(record: PagesRecord): void {
   pages.value = record.pages
   tokens.value = record.tokens
   selection.value = record.selection ?? undefined
+  applyEditing(record.pages, record.editing ?? [])
   loadError.value = undefined
   isLoaded.value = true
 }
@@ -537,6 +600,9 @@ export function resetState(): void {
   selection.value = undefined
   frameDocuments.value = new Map()
   hoveredElement.value = undefined
+  editingFrames.value = new Map()
+  clearTimeout(editingTimer)
+  editingTimer = undefined
   expandedFrames.value = new Set()
   draggingFrame.value = undefined
   writeError.value = undefined

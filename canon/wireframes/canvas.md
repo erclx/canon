@@ -12,7 +12,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Pages panel: a column down the left edge holding the brand line and theme toggle at its top, then the Pages and Theme tabs. The Pages tab holds the page list and below it the current page's frame list
 - Theme tab: in place of the page and frame lists while picked, the project's tokens under one label per group (color, spacing, radius, font family, font size, other), one row a token reading its name and value, with a swatch beside each color. Read-only
 - Layers: under each frame's row in the frame list, opened by the disclosure beside it, the frame's element tree from its body down, one row per element reading `tag.class` and a leaf's text
-- Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for all three drops the theme switch, then the size, before it shortens the name
+- Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, editing badge, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for every part drops the theme switch, then the badge, then the size, before it shortens the name
 - Element outline: drawn over a frame, dashed around the element under the pointer
 - Selection: a thin outline around the selected frame or element with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
@@ -53,6 +53,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 | element-mismatch | The browser counts the frame's elements differently from its file, as with a table written without its tbody | The pick refused and an alert in the details panel                                                                    | `assets/evidence/canvas-layers/element-mismatch-1440.png` |
 | dragging         | The operator moves a pressed frame                                                                           | The frame following the pointer, and its x and y updating in the inspector                                            | `assets/evidence/canvas-arrange/dragged-1440.png`         |
 | resizing         | The operator drags a corner handle of the selected frame or element                                          | A frame grows with its far corner held, an element from its own top left, sized in the label or the chip              | not captured                                              |
+| editing          | A session marks the frame with `canon canvas editing`, until `--done` or the mark's expiry                   | A badge naming the session after the size, announced politely, and a dashed outline around the frame                  | `assets/evidence/canvas-editing-badge/`                   |
 | write-failed     | The server refuses a move or a selection                                                                     | The frame back at its stored place and an alert in the details panel                                                  | not captured                                              |
 | edited           | The operator commits a changed field or picks a token                                                        | The frame reloading with the change, and `Saved` beside the element label for a moment                                | not captured                                              |
 | edit-refused     | The server refuses an edit, as when the frame file changed after the edit was made                           | The frame reloaded from the file, the typed value dropped, and an alert in the details panel saying nothing was saved | not captured                                              |
@@ -70,7 +71,7 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Token source: `This toolkit`, `Installed design`, or `None`, over the installed file list or the server's notice
 - Unplaced: `<n> frames have no box in layout.json and sit in a default row.`, singular for one
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
-- Frame label: `<name> <width> × <height>`, then the theme switch reading `Dark` or `Light`
+- Frame label: `<name> <width> × <height>`, then `<by> editing` while a session marks the frame, then the theme switch reading `Dark` or `Light`
 - Size chip: `<width> × <height>` in whole pixels
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`

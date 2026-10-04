@@ -55,7 +55,7 @@ The Theme tab in the shell lists what the token stylesheet defines, grouped as c
 
 ## Mark a frame being edited
 
-`canvas editing <page>/<frame>` marks a frame as being edited, so an open canvas can show who is working on it before the write lands. Run it before writing a frame and again with `--done` once the edits are written. A bare `canvas editing` lists the live marks, and `--json` emits `{ ok, editing }` after each of the three, with each mark carrying `page`, `frame`, `by`, `since`, and `until`.
+`canvas editing <page>/<frame>` marks a frame as being edited, so an open canvas shows who is working on it before the write lands. The shell draws the mark as `<by> editing` on that frame's label with a dashed outline around it, and drops it on the reread after `--done` or at the mark's `until` with no reread. Run it before writing a frame and again with `--done` once the edits are written. A bare `canvas editing` lists the live marks, and `--json` emits `{ ok, editing }` after each of the three, with each mark carrying `page`, `frame`, `by`, `since`, and `until`.
 
 The label is `--by <name>` when given. Without it, the verb reads the caller's name off the session roster, and falls back to `a session` when the environment names no session or the roster holds none matching it.
 

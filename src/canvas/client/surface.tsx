@@ -6,6 +6,7 @@ import type { Frame } from '@/canvas/content'
 import {
   currentPage,
   draggingFrame,
+  editingFrames,
   fitView,
   type FrameRef,
   frameDocuments,
@@ -227,6 +228,7 @@ function FrameView({
   /* Bumped when the frame document scrolls, so the outlines follow it. */
   const [, setScrolled] = useState(0)
   const doc = frameDocuments.value.get(key)
+  const editing = editingFrames.value.get(key)
 
   useEffect(() => {
     applyFrameTheme(iframe.current, value)
@@ -383,8 +385,9 @@ function FrameView({
       data-selected={isSelected ? 'true' : undefined}
       data-picked={picked ? 'true' : undefined}
       data-dragging={draggingFrame.value === frame.name ? 'true' : undefined}
+      data-editing={editing ? 'true' : undefined}
       tabIndex={0}
-      aria-label={`${frame.name}, ${frame.width} by ${frame.height}`}
+      aria-label={`${frame.name}, ${frame.width} by ${frame.height}${editing ? `, ${editing.by} editing` : ''}`}
       aria-current={isSelected ? 'true' : undefined}
       onKeyDown={handleKeyDown}
       style={{
@@ -406,6 +409,10 @@ function FrameView({
         </span>
         <span class="frame-size">
           {frame.width} × {frame.height}
+        </span>
+        {/* Rendered empty while unmarked, so a mark landing is announced. */}
+        <span class="frame-editing" aria-live="polite">
+          {editing ? `${editing.by} editing` : ''}
         </span>
         <button
           type="button"

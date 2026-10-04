@@ -239,8 +239,9 @@ code {
   align-items: center;
   /*
    * Sized against the zoom, so the label reads at one screen size at any zoom.
-   * A row too short for all three parts wraps the theme switch and then the
-   * size onto lines the clip hides, so the name keeps the row longest.
+   * A row too short for every part wraps the theme switch, then the editing
+   * badge, then the size onto lines the clip hides, so the name keeps the row
+   * longest.
    */
   flex-wrap: wrap;
   align-content: flex-start;
@@ -271,6 +272,40 @@ code {
 .frame-size {
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Ahead of the theme switch, so a row too short for both wraps the switch
+ * first. The editing outline still marks the frame when the badge wraps too.
+ */
+.frame-editing {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4px * var(--outline-scale, 1));
+  padding: calc(1px * var(--outline-scale, 1))
+    calc(6px * var(--outline-scale, 1));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.frame-editing:empty {
+  display: none;
+}
+
+.frame-editing::before {
+  content: '';
+  width: calc(6px * var(--outline-scale, 1));
+  height: calc(6px * var(--outline-scale, 1));
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Dashed, so it reads apart from the solid accent of a selection. */
+.frame[data-editing='true'] iframe {
+  outline: calc(2px * var(--outline-scale, 1)) dashed var(--color-success);
+  outline-offset: calc(2px * var(--outline-scale, 1));
 }
 
 .frame-theme {
