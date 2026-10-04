@@ -1,13 +1,13 @@
 ---
 title: Dispatch
-description: The self-dispatch that launches a background worker for a Run now row, its plan-answer, branch, and file-set gates, how the worker is named and addressed, and what binds concurrency
+description: The self-dispatch that launches a background worker for a Run now row, its plan-answer, branch, and conflict gates, how the worker is named and addressed, and what binds concurrency
 ---
 
 # Dispatch
 
 ## The self-dispatch
 
-Step 4 of the loop can launch a background `claude --bg` worker itself for a `## Run now` row, rather than only naming the invocation for a human to run. `orchestrator-dispatch.md` holds the procedure: derive the candidate branch with `canon tasks plan-branch <plan> --json`, check the row's plan against `canon tasks plan-answers <plan> --json`, check the branch against `canon sessions list --branch <branch> --json`, check the row's file set against every track in flight, then dispatch from the template in `orchestrator-launch.md`.
+Step 4 of the loop can launch a background `claude --bg` worker itself for a `## Run now` row, rather than only naming the invocation for a human to run. `orchestrator-dispatch.md` holds the procedure: derive the candidate branch with `canon tasks plan-branch <plan> --json`, check the row's plan against `canon tasks plan-answers <plan> --json`, check the branch against `canon sessions list --branch <branch> --json`, run the conflict check against every track in flight, then dispatch from the template in `orchestrator-launch.md`.
 
 Spawning a worker with the Agent tool stays forbidden, since an in-process subagent cannot be steered or reached independently. The `claude --bg` dispatch is a separate process with its own worktree and its own pull request, which is the property the boundary protects rather than the mechanism it happens to name.
 
@@ -71,7 +71,9 @@ Asking sits above inferring on the worker's ladder. A session with an operator p
 
 ## What binds concurrency
 
-The bound is the file-set disjointness test `docs/workflow/operating-model.md` states under `## Parallelism`, compared at the file path rather than at a folder above it, plus a stated reason to serialize a disjoint pair the sets cannot separate. A fixed cap of three concurrent workers was the rejected alternative: a cap reads session names, while the disjointness test reads what those sessions write, so the two never answer the same question. The cost is a bound a dispatcher can talk past, since nothing verifies a serialize reason. Measured at `83fc7fb5` on 2026-08-27, against seven workers dispatched in one afternoon, four concurrent and none colliding.
+A row holds behind a track in flight only on a conflict a merge cannot settle, being a dependency, a contract one changes and the other consumes, a relocation, a sweep, or a stated reason, which `orchestrator-dispatch.md` states once with its sources. What binds past that is review attention. A shared file is not a hold: both build, and the branch merging second rebases in its own session after the first lands, which is how Fowler, DORA, and GitHub's merge queue run parallel work, testing at integration rather than serializing on a file.
+
+A file-set disjointness gate was the rejected alternative. It replaced a fixed cap of three workers at `83fc7fb5` on 2026-08-27, and on 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. A trial merge cannot replace it at dispatch, since a candidate has no commits, so `git merge-tree` stays at integration. The cost is more rebases and a contract hold that rests on the dispatcher reading a plan's Risks by hand.
 
 What binds and what costs are separate readings. `## Parallelism` carries what binds, and its `references/orchestrator-inbound.md` carries what costs. A cross-session message arrives as a new turn carrying the orchestrator's whole accumulated context, and a recurring poll bills that window again on its own interval, so a wave's spend tracks the controlling session's context rather than the work coming back. `crossSessionInbound` is the only control over it and stays unset, since `hold` and `refuse` both break the worker handback and `accept` bounds nothing. The section states the conclusion beside the cost, because a lever named without it reads as available to pull.
 
@@ -79,7 +81,7 @@ Granularity is where the verb reads wrong rather than fails. `sharesPath` in `sr
 
 The `worker-` prefix separates a dispatched worker from an operator's own launch in a session listing, since only a self-dispatch writes it. It carries no count.
 
-A grep on the policy phrase undercounts the surfaces stating it. `docs/workflow/operating-model.md` carries the policy twice, once in loop step 2 and once in its own `## Parallelism` section, and the second spelling names a number without using the phrase, so a sweep keyed on the phrase leaves it stating a retired rule.
+A grep on the policy phrase undercounts the surfaces stating it. The shared-file rule was spelled in the orchestrator body, its requirement, five runbooks, two workflow docs, and this entry, and also as `wiring seam`, `serialize`, and `shared file`, which a grep on `disjoint` misses. Re-grep all four after any change to the policy.
 
 ## Gotchas
 
