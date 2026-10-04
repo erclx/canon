@@ -57,6 +57,13 @@ touches, because that subfolder is project-authored by location the way
 `.claude/rules/project/` is. An override named exactly like the shipped file is
 still the project's.
 
+A project's faces sit in that subfolder too, under `fonts/` with plain
+`@font-face` rules in `fonts.css`. `canon design fonts add <file> --family <name>`
+copies a `woff2`, `woff`, `ttf`, or `otf` face in and appends its rule
+(`--weight`, `--style`, `--json`), refusing bytes that disagree with the
+extension as `invalid-font`. `fonts list --json` emits one row per rule, with a
+`problem` where the file is missing or lies outside the subfolder.
+
 The override ships absent rather than empty. An empty file is one the project
 did not ask for and did not write, the reconciliation already handles a missing
 side, and an empty override invites a target to fill it before it has an

@@ -11,7 +11,9 @@ description: The canvas server, its content format, and the verbs that list, arr
 
 `canvas serve` serves the canvas on `127.0.0.1`, walks ports like `canon serve`, refuses a `Host` other than loopback on its own port, and runs until interrupted. Each frame gets the project's token stylesheet injected, being this toolkit's tokens in its own checkout, else `.claude/design/base.css` plus anything under `.claude/design/project/`, else none with a notice. An open canvas reloads a frame whose file changes.
 
-The toolkit's own tokens arrive with the font faces they name embedded, so a frame renders in them on a machine that never installed them. An installed base owns its fonts and gets no faces added.
+The toolkit's own tokens arrive with the font faces they name embedded, so a frame renders in them on a machine that never installed them. An installed base gets the same treatment: each vendored face its sheets name is embedded, unless a project rule declares that family itself.
+
+A project's own `@font-face` rules under `.claude/design/project/` have each `url()` inlined as a `data:` URI. A rule whose file is missing, or whose path leads out of `.claude/design/project/` after links resolve, is dropped and named under `tokens.dropped` in the `canvas serve --json` record, and the frame still renders. `canon design fonts add` writes those rules.
 
 Before it binds a port, `canvas serve` checks that `preact` and `@preact/signals` resolve from the package the CLI runs from, never from the served project. When either is missing it refuses with reason `missing-client-deps` and names `bun install` in the detail, rather than serving a shell that loads as a blank page.
 

@@ -91,7 +91,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `wiki`, in `scripting.md`: `init`
 - `indexes`, in `indexes.md`: `regen`, `list`
 - `docs`, in `docs.md`: `list`, `<topic>`
-- `design`, in `install-and-sync.md` for `install` and `sync`, and described below for the rest: `render`, `regen`, `css`, `install`, `sync`
+- `design`, in `install-and-sync.md` for `install`, `sync`, and `fonts`, and below for the rest: `render`, `regen`, `css`, `install`, `sync`, `fonts`
 - `slides`, described below: `render`, `list`
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`
@@ -127,8 +127,7 @@ Subcommands no other page describes:
 
 - `claude plugin-update` matches the installed marketplace plugin against `claude/.claude-plugin/plugin.json`'s own name and runs `claude plugin update` on it, reading the version back off `claude plugin list --json`, since the update call reports none of its own (`--json`).
 - `claude skills rank` scores either skill corpus's descriptions against a case corpus by TF-IDF cosine similarity, reporting rank-one and top-three (`--cases <path>`).
-- `design regen` rewrites this repository's `canon/DESIGN.md` from `src/design/tokens.ts` and `src/design/base.css` from `src/design/neutral.ts`. `design css` emits the tokens and components as CSS on stdout, with `--no-components` for properties alone, and `design render` declares each vendored face the typography table names under `--embed-fonts`.
-- `slides list --json` emits one row per deck under `.canon/slides/`, carrying `name`, `title`, `slides`, and `path`.
+- `design regen` rewrites this repository's `canon/DESIGN.md` from `src/design/tokens.ts` and `src/design/base.css` from `src/design/neutral.ts`. `design css` emits the tokens and components as CSS on stdout, with `--no-components` for properties alone, and `design render` declares each vendored face the typography table names under `--embed-fonts`.- `slides list --json` emits one row per deck under `.canon/slides/`, carrying `name`, `title`, `slides`, and `path`.
 - `slides render [deck]` takes a deck name or a folder, defaulting to the only deck, and lays out each `.html` file in filename order in Chromium at 1280 by 720 and rebuilds it as editable shapes. Each element drawn as a picture prints one `✗` line on stderr naming the slide, the selector, and the properties that forced it. A link left out, being a `#slide-N` past the deck's end or any target that is neither that nor an absolute URL, prints one too, and the exit stays 0.
 - A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
 - `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
