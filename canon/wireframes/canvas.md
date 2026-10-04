@@ -12,7 +12,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Pages panel: a column down the left edge holding the brand line and theme toggle at its top, then the Pages and Theme tabs. The Pages tab holds the page list and below it the current page's frame list
 - Theme tab: in place of the page and frame lists while picked, the project's tokens under one label per group (color, spacing, radius, font family, font size, other), one row a token reading its name and value, with a swatch beside each color. Read-only
 - Layers: under each frame's row in the frame list, opened by the disclosure beside it, the frame's element tree from its body down, one row per element reading `tag.class` and a leaf's text
-- Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom
+- Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for all three drops the theme switch, then the size, before it shortens the name
 - Element outline: drawn over a frame, dashed around the element under the pointer
 - Selection: a thin outline around the selected frame or element with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
