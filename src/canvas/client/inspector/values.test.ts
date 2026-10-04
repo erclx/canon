@@ -181,6 +181,18 @@ describe('parseColor', () => {
     ).toEqual({ kind: 'token', name: '--color-accent', opacity: 60 })
   })
 
+  it('should read a hex at zero opacity as no fill', () => {
+    expect(parseColor('#ff880000')).toEqual({ kind: 'none' })
+  })
+
+  it('should read the srgb color() form a mix computes to', () => {
+    expect(parseColor('color(srgb 1 0.5 0 / 0.6)')).toEqual({
+      kind: 'hex',
+      hex: 'ff8000',
+      opacity: 60,
+    })
+  })
+
   it('should leave a named color unread', () => {
     expect(parseColor('blue')).toBeUndefined()
   })

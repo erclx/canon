@@ -74,6 +74,9 @@ export type ParsedColor = WrittenColor | { readonly kind: 'none' }
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 const RGB =
   /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i
+/** What a browser computes `color-mix()` in srgb to, channels 0 to 1. */
+const SRGB =
+  /^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/i
 const VAR = /^var\(\s*(--[\w-]+)\s*\)$/i
 const MIX =
   /^color-mix\(\s*in\s+srgb\s*,\s*var\(\s*(--[\w-]+)\s*\)\s+([\d.]+)%\s*,\s*transparent\s*\)$/i
@@ -141,16 +144,27 @@ export function parseColor(value: string): ParsedColor | undefined {
     }
   }
   const hex = text.startsWith('#') ? readHex(text) : undefined
-  if (hex) return { kind: 'hex', hex: hex.hex, opacity: hex.opacity ?? 100 }
+  if (hex) return painted(hex.hex, hex.opacity ?? 100)
   const rgb = text.match(RGB)
-  if (!rgb) return undefined
-  const opacity = alphaPercent(rgb[4])
-  if (opacity === 0) return { kind: 'none' }
-  return {
-    kind: 'hex',
-    hex: [rgb[1], rgb[2], rgb[3]].map((part) => channel(Number(part))).join(''),
-    opacity,
+  if (rgb) {
+    return painted(
+      [rgb[1], rgb[2], rgb[3]].map((part) => channel(Number(part))).join(''),
+      alphaPercent(rgb[4]),
+    )
   }
+  const srgb = text.match(SRGB)
+  if (!srgb) return undefined
+  return painted(
+    [srgb[1], srgb[2], srgb[3]]
+      .map((part) => channel(Number(part) * 255))
+      .join(''),
+    alphaPercent(srgb[4]),
+  )
+}
+
+/** A color at zero opacity paints nothing, whichever form wrote it. */
+function painted(hex: string, opacity: number): ParsedColor {
+  return opacity === 0 ? { kind: 'none' } : { kind: 'hex', hex, opacity }
 }
 
 /**

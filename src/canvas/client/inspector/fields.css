@@ -206,7 +206,9 @@
   text-transform: uppercase;
 }
 
-.color-field .glyph-field-input::placeholder {
+/* Only a hex reads in capitals. A value the picker cannot read stays as written. */
+.color-field .glyph-field-input::placeholder,
+.color-field .glyph-field-input.is-text {
   text-transform: none;
 }
 

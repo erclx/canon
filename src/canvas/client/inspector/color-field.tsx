@@ -86,9 +86,11 @@ function ColorInputs({
     <>
       <input
         class={
-          color?.kind === 'token'
-            ? 'glyph-field-input is-token'
-            : 'glyph-field-input'
+          color === undefined
+            ? 'glyph-field-input is-text'
+            : color.kind === 'token'
+              ? 'glyph-field-input is-token'
+              : 'glyph-field-input'
         }
         type="text"
         aria-label={hexLabel}
