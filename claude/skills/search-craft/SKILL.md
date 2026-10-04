@@ -1,6 +1,8 @@
 ---
 name: search-craft
 description: Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access. Use before any outside search for evidence, papers, documentation, statistics, or opinion, when a procedure loads it at its sourcing step, or when asked "find me the strongest evidence on X", "where should I look for this", "what does the research say", "find papers on", "look up the docs for", or "what are people saying about". Do NOT use to format a citation, which belongs to the surface writing it, to source a Claude Code subject, which is the `claude-code-guide` agent, or to generate an image, which is not search.
+metadata:
+  family: build
 ---
 
 # Search craft

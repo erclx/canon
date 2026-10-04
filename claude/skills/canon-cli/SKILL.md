@@ -1,6 +1,8 @@
 ---
 name: canon-cli
 description: Reference for what a canon verb does before you run it. Run `canon docs agents` for the full command catalog, `canon docs` for any other reference doc, and read this skill's own table for what a sync or install command overwrites, merges, or leaves untouched in a target project. Use when asked "which canon command do I run", "is there a doc for X", "will this overwrite my changes", or before running `canon tooling`, `canon standards`, `canon claude sync`, or `canon init`. Do NOT use to execute a sync, an install, or a docs lookup, only to know which command answers the question.
+metadata:
+  family: answer
 ---
 
 # Toolkit CLI contract

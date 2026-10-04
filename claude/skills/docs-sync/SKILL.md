@@ -1,6 +1,8 @@
 ---
 name: docs-sync
 description: Rewrites stale `README.md` and `docs/*.md` sections based on changes since main. Use before staging, or when asked to "sync the public docs", "update the docs in docs/", or "update the README". Do NOT use for the context entries, planning records, or task board, which `context-fold` owns, or for changelog and `CLAUDE.md` updates.
+metadata:
+  family: ship
 ---
 
 # Docs sync

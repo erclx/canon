@@ -1,6 +1,8 @@
 ---
 name: ux-audit
 description: Audits the current UI for incomplete, inconsistent, or confusing patterns. Reads DESIGN.md and canon/wireframes/ for intent, scans UI files, and outputs observations grouped by surface. Use when asked "audit the UX", "audit the UI", "UX audit", or "find UI roughness". Do NOT use for new feature planning or code changes, and do NOT use to measure what a running interface costs to paint, which is `ux-measure`.
+metadata:
+  family: check
 ---
 
 # UX audit

@@ -2,6 +2,8 @@
 name: role-orchestrator
 description: Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills. Use when asked to "be the orchestrator", "run the orchestrator", "orchestrate this project", or to set up the control session for parallel feature builds. Do NOT build features or merge PRs in this session.
 disable-model-invocation: true
+metadata:
+  family: parallel
 ---
 
 # Role orchestrator

@@ -1,6 +1,8 @@
 ---
 name: draft-doc
 description: Drafts one brand-new project document from scratch against the standard for its kind, picking the kind from where it lands, a `docs/` page, a `canon/context/` entry, a `canon/wireframes/` surface, a wiki reference page, or a README.md. Checks the catalog for a name or topic collision, places it, confirms with the user, then writes. Use when asked to "write a new docs page for X", "write a context entry for X", "draft a wireframe for X", "write a wiki page for X", or "write a README" where none exists yet. Do NOT use to rewrite or sync an existing page or README against a diff, which is `docs-sync`, or to refresh a context entry or wireframe, which is `context-fold`.
+metadata:
+  family: generate
 ---
 
 # Doc draft

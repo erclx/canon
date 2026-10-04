@@ -1,6 +1,8 @@
 ---
 name: repo-metadata
 description: Proposes a GitHub About description, homepage, and topic set computed from the README's opening line and package.json, reports the difference against what the repository's remote already carries, and stops without writing. A later invocation, carrying the operator's answered fields, writes the change through gh repo edit. Use when asked to "propose repo metadata", "check the github description", "does our github about text match the readme", "sync github topics", "update the repo homepage", or "apply the repo metadata answers". Do NOT use to edit README.md itself, or to change a repository setting other than description, homepage, or topics.
+metadata:
+  family: setup
 ---
 
 # Repo metadata

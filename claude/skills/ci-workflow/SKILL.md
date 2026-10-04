@@ -1,6 +1,8 @@
 ---
 name: ci-workflow
 description: Generates GitHub Actions CI workflow files with parallel jobs, emoji job names, and gated deploy stages. Use when asked to "write a CI workflow", add GitHub Actions, set up a CI pipeline, or create a `.github/workflows` file.
+metadata:
+  family: generate
 ---
 
 # CI workflow

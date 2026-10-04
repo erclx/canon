@@ -1,6 +1,8 @@
 ---
 name: role-planner
 description: Asserts the planner role for a session writing one plan, groundwork track, or intake pass under one row, holding what it reads before deciding, what may be written and where, how to read what is already in flight, and what it hands back. Use when asked to "be the planner", "you are a planner session", at the start of a dispatched or hand-launched planning, groundwork, or intake run, or when a planning session needs to know what it may not write. Do NOT use to write the record itself, which is `plan-feature`, `plan-groundwork`, or `plan-intake`, to make the cross-feature merge call, or to implement.
+metadata:
+  family: parallel
 ---
 
 # Role planner

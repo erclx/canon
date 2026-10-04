@@ -2,6 +2,8 @@
 name: plan-intake-answer
 description: Walks an intake folder's unread items and puts them as batched questions in chat, writing each selection back onto the item it answers. Use when asked to "answer the intake", "work through the open items", "answer my intake questions", "go through the dump", or "let me answer these from here". Do NOT use to file a dump or write new items, which is `plan-intake`.
 disable-model-invocation: true
+metadata:
+  family: decide
 ---
 
 # Plan intake answer

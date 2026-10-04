@@ -1,6 +1,8 @@
 ---
 name: plan-feature
 description: Plans a feature by reading the project's Claude setup and scanning relevant source files. Outputs which files to touch, risks, and ambiguities, then stops. Use before implementing anything, or when asked to "implement X", "add X", "build X", or "I want to add X". Do NOT implement. Plan only.
+metadata:
+  family: decide
 ---
 
 # Plan feature

@@ -1,6 +1,8 @@
 ---
 name: build-in-slices
 description: Carries how a building session works through an approved plan in thin slices, each one tested, committed, and left green before the next starts, and how it records what it noticed outside the plan rather than fixing it. Use before implementing a plan that touches more than one behavior or file, when a branch is piling up uncommitted work, or when asked "how should I build this", "how do I avoid one giant diff", "should I commit this now", or "should I fix this while I'm here". Do NOT use for the red, green, refactor loop inside one behavior, which is `test-first`, to shape the code a slice writes, which is `code-craft`, or to decide what a worker may write, which is `role-worker`.
+metadata:
+  family: build
 ---
 
 # Build in slices

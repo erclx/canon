@@ -2,6 +2,8 @@
 name: decision-escalate
 description: Collects every open decision whose answer turns on the operator's preference, since only they know what they need, puts them as one batch of questions each carrying options and a recommended default, then waits. Use when asked to "escalate this", "ask me the open questions", "batch the open decisions", "what do you need from me", or "stop and ask before you pick". Do NOT use for a judgment call the session can settle, which is a pick with the tradeoff stated in one sentence.
 disable-model-invocation: true
+metadata:
+  family: decide
 ---
 
 # Decision escalate

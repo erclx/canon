@@ -1,6 +1,8 @@
 ---
 name: canvas
 description: Drives the local design canvas, where pages hold HTML frames the operator sees, drags, selects, and edits in the browser. Starts the canvas when it is not running, confirms the live shell loads, makes pages and frames, edits a frame through its file, reads what the operator selected or restyled, captures finished frames, and carries a picked direction into the project's design document. Use when asked to "open the canvas", "put this on the canvas", "draw a frame for X", "change the one I selected", "what did I pick", "capture this frame", or "move that frame on the canvas". Do NOT use to trace reference images into design values, which is `sketch-design`, or to write the design document from code, which is `design-extract`.
+metadata:
+  family: decide
 ---
 
 # Canvas

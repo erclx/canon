@@ -3,6 +3,8 @@ name: teach-workspace
 description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, and proposes where a durable page from one belongs once it outgrows the workspace. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", or "promote this reference page". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply.
 disable-model-invocation: true
 argument-hint: <subject to learn, or the topic of a workspace to resume or promote>
+metadata:
+  family: answer
 ---
 
 # Teach workspace

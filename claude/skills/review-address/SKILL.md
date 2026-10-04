@@ -1,6 +1,8 @@
 ---
 name: review-address
 description: Pulls review findings and CI status on the current branch's open PR, fixes each in the working tree, refreshes any stale `.claude/` docs, replies with a summary comment, and pushes a follow-up commit. The worker's return leg after `review-pr`. Use when asked to "address the review", "fix the PR comments", "respond to review", or after an orchestrator posts findings. Do NOT use to write a review. That is `review-pr`.
+metadata:
+  family: after-pr
 ---
 
 # Review address

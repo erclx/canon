@@ -1,6 +1,8 @@
 ---
 name: test-first
 description: Write the failing test for a behavior before writing the code that satisfies it, confirm it fails for the right reason, implement the smallest change that turns it green, then refactor with the suite green. Auto-triggers before implementing a planned feature, adding a function or an endpoint, or extending existing behavior whose new shape is already decided. Do NOT use for a failure with no known cause, which is canon:systematic-debugging, or when the test for the behavior already exists and already passes.
+metadata:
+  family: build
 ---
 
 # Test first

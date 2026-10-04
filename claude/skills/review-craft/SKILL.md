@@ -1,6 +1,8 @@
 ---
 name: review-craft
 description: Carries what a code review looks for and how much evidence a finding needs, from design and scope through breakage outside the diff, a test or check the change weakens to pass, performance, developer experience, executable prose, stale docs, security classes, and rendered output checked against the screenshots a pull request carries. Use when reviewing a change, when a review procedure loads it for its axes, or when asked "what should a review look for", "what does a good review check", "how sure do I need to be before flagging this", or "did the review look at the screenshots". Do NOT use to run a review, post it, or grade its findings, which is `review-branch` for local work and `review-pr` for a pull request, and do NOT use for a deliberate full security audit, which is the built-in `security-review`.
+metadata:
+  family: build
 ---
 
 # Review craft

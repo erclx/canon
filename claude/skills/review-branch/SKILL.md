@@ -1,6 +1,8 @@
 ---
 name: review-branch
 description: Reviews all changes since main for bugs, edge cases, and logic flaws. Reads CLAUDE.md, REQUIREMENTS.md, and ARCHITECTURE.md for context, then applies a structured review to the full diff and outputs a findings report. Coding standards from `.claude/rules/` are auto-loaded by Claude Code. Use when asked to review changes, run a code review, or check the current branch. Do NOT auto-trigger on vague signals like "looks good" or "can you check this". Require an explicit review request or an autoship invocation.
+metadata:
+  family: check
 ---
 
 # Review branch

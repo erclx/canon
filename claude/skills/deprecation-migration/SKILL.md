@@ -1,6 +1,8 @@
 ---
 name: deprecation-migration
 description: Carries how a session retires a function, a flag, a field, a file, or a command without stranding whoever still calls it, from deciding whether to deprecate at all through proving no caller remains, migrating callers through an adapter or a strangler, and removing the old surface in its own change after the new one has carried every caller. Use when deleting or replacing code something may still call, when a deprecated path has lingered with no date, when finding dead or unowned code, or when asked "can I delete this", "how do I retire this", "how do I migrate callers off X", or "is anything still using this". Do NOT use to move or rename a file with no caller change, which is `codebase-layout`, to migrate a database schema, which the project's persistence rule governs, or to shape a new field or flag added beside an old one, which is `api-design`.
+metadata:
+  family: build
 ---
 
 # Deprecation and migration

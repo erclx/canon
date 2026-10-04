@@ -1,6 +1,8 @@
 ---
 name: draft-ready
 description: Writes a ready folder for finished files, its `00-overview.md`, the thin plan that points at it, and the task with a board row placed, reported to an orchestrator, or left to the operator, in one invocation. Use when asked to "write a ready folder", "hand these files to a worker", "package these finished files for a worker", "make a ready handoff", or when a session already holds the exact text of a skill, rule, or doc and a worker should copy it rather than author it. Do NOT use to plan a change nobody has written yet, which is `plan-feature`, to copy a folder into a worktree and ship it, which is `role-worker`, or to file a task with no finished files behind it, which is `task-board`.
+metadata:
+  family: generate
 ---
 
 # Draft ready

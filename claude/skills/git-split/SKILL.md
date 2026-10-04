@@ -1,6 +1,8 @@
 ---
 name: git-split
 description: Splits a mixed-commit branch into focused branches off main using cherry-pick. Use when a branch has unrelated commits, asking "split this branch", or needing to separate concerns into reviewable PRs.
+metadata:
+  family: after-pr
 ---
 
 # Git split

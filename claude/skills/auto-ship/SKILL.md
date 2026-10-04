@@ -2,6 +2,8 @@
 name: auto-ship
 description: Chains implement → verify → review → ship after a feature plan is approved. Reads the plan the caller names, the plan a named task points at, or the plan for the current branch when none is named, runs the full pipeline in one session, and stops on any failure or non-minor review finding. Use when asked to "autoship", "ship this feature end to end", or "run the chain". Do NOT auto-trigger. Requires an approved plan file.
 disable-model-invocation: true
+metadata:
+  family: build
 ---
 
 # Auto ship

@@ -1,6 +1,8 @@
 ---
 name: video-craft
 description: Carries what makes a composed video of software read as designed rather than generic, being captions that name only what the frame shows, which moment earns a zoom and how fast it lands, how a real pointer behaves on a real interface, music or silence and how far under a voice the music sits, and reading a frame before dismissing a checker finding. Every number traces to a source. Use before composing or judging any video, whether a product demo, an explainer, a pull request walkthrough, or a launch clip, when a render reads generic or slow, or when asked "make this video look designed", "is this zoom too slow", "what should this caption say", "should this have music", or "the checker flagged a frame, is it real". Do NOT use for general motion such as easing, speed variety, and click timing, which HyperFrames' `hyperframes-animation` and `hyperframes-creative` carry, to fetch or generate a media file, which is `media-use`, or to record the take, which is `record-screencast`.
+metadata:
+  family: build
 ---
 
 # Video craft

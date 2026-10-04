@@ -1,6 +1,8 @@
 ---
 name: context-fold
 description: Folds a session into the project's context entries, architecture, and wireframes, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
+metadata:
+  family: ship
 ---
 
 # Context fold

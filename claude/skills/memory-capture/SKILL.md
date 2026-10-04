@@ -1,6 +1,8 @@
 ---
 name: memory-capture
 description: Extracts durable patterns from the current session, routes a domain fact to the context entry that owns it, and writes the residue to `.canon/memory/` as feedback, project, user, or reference files. Use when asked to "capture memory", "capture lessons", "wrap up the session", "end of session memory", or as a step in autoship. Do NOT use to curate existing memory. Use `memory-review` for that.
+metadata:
+  family: ship
 ---
 
 # Memory capture

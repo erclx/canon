@@ -1,6 +1,8 @@
 ---
 name: bash-cli-script
 description: Generates a small non-interactive Bash wrapper for automation, CI, and agent-run tasks, with strict mode, logs on stderr, a clean stdout, and explicit exit codes. Stops at 100 lines and routes the work to TypeScript on Bun. Use when asked for "a shell script", "a wrapper script", an automation or CI script, a cron job, or a pipeline helper. Do NOT use for a tool that prompts a person or draws a terminal UI, or for a script that will run past 100 lines. Both are written in TypeScript on Bun.
+metadata:
+  family: generate
 ---
 
 # Bash CLI script

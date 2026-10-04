@@ -1,6 +1,8 @@
 ---
 name: project-commands
 description: Runs a command the project documents in its development context entry and stops there. Use when asked to "start the app", "start the dev server", "run the checks", "run the build", "spin it up", or "what commands does this project have". Do NOT use to confirm a change works in a running app, which needs verification past the launch. Do NOT use to deploy, publish, or release.
+metadata:
+  family: build
 ---
 
 # Project commands

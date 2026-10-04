@@ -1,6 +1,8 @@
 ---
 name: target-check
 description: Reports what a target project holds against what the toolkit currently ships, one section per domain, reading through `canon` verbs rather than inspecting files. Use when asked to "check this target", "what has this project fallen behind on", "is this project current with the toolkit", "run the target check", or as the first thing a rollout worker runs after entering a target. Do NOT use to repair a finding, which the owning command or skill does, and do NOT use in the toolkit repository itself.
+metadata:
+  family: upkeep
 ---
 
 # Target check

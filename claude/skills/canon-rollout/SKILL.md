@@ -2,6 +2,8 @@
 name: canon-rollout
 description: Takes one toolkit change out to every consuming project and brings each to a mergeable pull request. Carries an orchestrator role that enumerates the targets, dispatches a worker into each, reviews every pull request, and routes what each review posts, and a worker role that builds inside one target and answers its review. Use when asked to "roll this out to the targets", "take this change to every project", "run a rollout wave", "update the consuming projects", or when a session was dispatched into a target by a wave. Do NOT use for this repository's own board, which is `role-orchestrator`, and merge nothing.
 disable-model-invocation: true
+metadata:
+  family: upkeep
 ---
 
 # Canon rollout

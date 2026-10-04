@@ -1,6 +1,8 @@
 ---
 name: memory-review
 description: Reviews `.canon/memory/` and proposes per-entry actions (promote to an always-loaded rule, move into a skill body, route to a context entry, hand off to governance, or retire as stale). Also runs the discuss, challenge, apply, and cleanup phases on an existing review file. Use when asked to "review memory", "discuss memory questions", "challenge the promotes", "apply memory decisions", "cleanup memory review", "promote memory", or "consolidate memories". Do NOT auto-apply. Output a grouped proposal and wait for block-by-block approval.
+metadata:
+  family: ship
 ---
 
 # Memory review

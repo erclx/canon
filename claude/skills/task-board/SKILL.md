@@ -1,6 +1,8 @@
 ---
 name: task-board
 description: Creates a task file in `.canon/tasks/` with the filename, phase label, and frontmatter the standard requires, and archives a shipped one out of the folder. Use when asked to "add a task", "create a task", "queue this", "put this on the board", "archive that task", or "close out a shipped task". Do NOT use to mark an outcome `[x]`. That is `context-fold`.
+metadata:
+  family: decide
 ---
 
 # Task board

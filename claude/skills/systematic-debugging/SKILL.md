@@ -1,6 +1,8 @@
 ---
 name: systematic-debugging
 description: Forces root-cause investigation before any fix when a test fails, a bug surfaces, or unexpected behavior appears. Auto-triggers on "test is failing", "it's broken", "why does X happen", "this isn't working". Do NOT use for trivial typo fixes or when the cause is already agreed on.
+metadata:
+  family: build
 ---
 
 # Systematic debugging

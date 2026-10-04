@@ -1,6 +1,8 @@
 ---
 name: index-lookup
 description: Answers a topic search over every tracked index.md catalog in the project by running `canon indexes list --json` and matching the topic against each entry's title, description, and path, then reports the hits or names why there are none. Names the gitignored task and memory catalogs and the groundwork and intake record folders as pointers outside its walked corpus, so it never claims a topic is undocumented when the topic only sits there. Use when asked "where is X documented", "is there a page about X", "search the docs for X", "find the index entry for X", or "what covers X". Do NOT use to grep source code, browse a file whose path is already known, or regenerate an index, which is `canon indexes regen`.
+metadata:
+  family: answer
 ---
 
 # Index lookup
