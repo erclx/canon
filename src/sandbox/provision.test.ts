@@ -139,6 +139,25 @@ describe('injectChangedSkills', () => {
       '.claude/skills/edited/SKILL.md\n.claude/skills/fresh/SKILL.md\n',
     )
   })
+
+  it('should inject nothing when the run resolves skills through the plugin', () => {
+    branchTouchingSkills()
+
+    const injected = injectChangedSkills(root, sandbox, false, true)
+
+    expect(injected).toEqual([])
+    expect(existsSync(join(sandbox, '.claude/skills'))).toBe(false)
+  })
+
+  it('should write no exclude line when injection is skipped', () => {
+    branchTouchingSkills()
+
+    injectChangedSkills(root, sandbox, true, true)
+
+    expect(
+      readFileSync(join(sandbox, '.git/info/exclude'), 'utf8'),
+    ).not.toContain('.claude/skills/')
+  })
 })
 
 describe('commitScenarioChanges', () => {

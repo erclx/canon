@@ -335,6 +335,11 @@ main() {
   # resolves it again to score what that provisioning produced.
   mint_sandbox_run_id
 
+  # The session below loads the branch's skills whole through --plugin-dir. A
+  # copied SKILL.md would outrank that and cite references beside it that were
+  # never copied, so provisioning injects nothing for a headless run.
+  export SANDBOX_SKIP_SKILL_INJECT=1
+
   local sandbox
   sandbox="$(resolve_sandbox_dir)"
   log_step "Sandbox: $sandbox"
