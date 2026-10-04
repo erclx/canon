@@ -27,6 +27,10 @@ export const STYLE_PROPERTIES = [
   'background-color',
   'font-size',
   'font-weight',
+  'font-family',
+  'line-height',
+  'letter-spacing',
+  'text-align',
   'width',
   'height',
   'padding',
@@ -133,10 +137,13 @@ function checkChange(change: EditChange): EditRefused | undefined {
   return undefined
 }
 
+const CHARACTER_REFERENCE = /&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/iy
+
 /**
  * Splits a style attribute at each semicolon outside parentheses and quotes,
  * keeping every segment's own spacing so an untouched one is written back as
- * it was.
+ * it was. The rewriter hands the attribute over undecoded and writes a quote
+ * back as `&quot;`, so a character reference's own semicolon never splits.
  */
 function declarations(style: string): string[] {
   const segments: string[] = []
@@ -145,7 +152,10 @@ function declarations(style: string): string[] {
   let start = 0
   for (let at = 0; at < style.length; at += 1) {
     const char = style[at]
-    if (quote) {
+    CHARACTER_REFERENCE.lastIndex = at
+    if (char === '&' && CHARACTER_REFERENCE.test(style)) {
+      at = CHARACTER_REFERENCE.lastIndex - 1
+    } else if (quote) {
       if (char === quote) quote = undefined
     } else if (char === '"' || char === "'") quote = char
     else if (char === '(') depth += 1

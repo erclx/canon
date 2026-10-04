@@ -182,6 +182,10 @@ describe('applyEdit', () => {
     ['border-top-right-radius', '4px'],
     ['border-bottom-right-radius', '4px'],
     ['border-bottom-left-radius', '4px'],
+    ['font-family', 'var(--type-body-family)'],
+    ['line-height', '1.5'],
+    ['letter-spacing', '-0.02em'],
+    ['text-align', 'center'],
   ])('should write %s into the inline style', (property, value) => {
     const outcome = applyEdit(FRAME, addressOf(FRAME, 'h1'), {
       property,
@@ -235,6 +239,24 @@ describe('applyEdit', () => {
 
     expect(outcome.ok && linesChanged(html, outcome.html)).toEqual([
       '      <h1 style="border-radius: 8px; border-top-left-radius: 0">Ship it</h1>',
+    ])
+  })
+
+  it('should keep a quoted family stack as one value beside the next declaration', () => {
+    const html = FRAME.replace('<h1>', '<h1 style="color: red">')
+    const first = applyEdit(html, addressOf(html, 'h1'), {
+      property: 'font-family',
+      value: '"Geist Variable", sans-serif',
+    })
+    const after = first.ok ? first.html : ''
+
+    const second = applyEdit(after, addressOf(after, 'h1'), {
+      property: 'font-family',
+      value: 'serif',
+    })
+
+    expect(second.ok && linesChanged(FRAME, second.html)).toEqual([
+      '      <h1 style="color: red; font-family: serif">Ship it</h1>',
     ])
   })
 
