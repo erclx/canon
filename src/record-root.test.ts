@@ -162,4 +162,8 @@ describe('isRecordEntry', () => {
   it('should claim the canvas content folder for the record root', () => {
     expect(isRecordEntry('canvas')).toBe(true)
   })
+
+  it('should claim the slides deck folder for the record root', () => {
+    expect(isRecordEntry('slides')).toBe(true)
+  })
 })
