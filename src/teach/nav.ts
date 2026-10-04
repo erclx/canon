@@ -7,7 +7,7 @@ import {
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
 import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
-import { stripFrontmatter } from '@/frontmatter'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { PROJECT_ROOT } from '@/project-root'
 import { compileScript } from '@/teach/browser/compile'

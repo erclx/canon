@@ -1,6 +1,6 @@
 import { lstat, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { isBinary } from '@/binary'
+import { isBinary } from '@/sweep/binary'
 import { scanText } from '@/secrets/scan'
 
 /**

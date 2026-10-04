@@ -4,7 +4,7 @@ import { BARE_NAME, IGNORE_MARKER } from '@/context/citations'
 import type { AuditedFolder } from '@/context/folders'
 import { type BodyLine, bodyLines, maskDisplayed } from '@/markdown/scan'
 import { documentHeight } from '@/markdown/structure'
-import { isStubSeed } from '@/seed-marker'
+import { isStubSeed } from '@/tooling/seed-marker'
 
 /**
  * Checkpoint quoted from the standard stating it. It is not a cap.

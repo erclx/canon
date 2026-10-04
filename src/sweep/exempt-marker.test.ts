@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isMarked } from '@/exempt-marker'
+import { isMarked } from '@/sweep/exempt-marker'
 
 const TOKEN = 'canon-allow-example'
 

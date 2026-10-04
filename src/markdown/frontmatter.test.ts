@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { stripFrontmatter } from '@/frontmatter'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 
 describe('stripFrontmatter', () => {
   it('should drop a leading frontmatter block', () => {

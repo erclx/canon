@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { stripFrontmatter } from '@/frontmatter'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 import { PROJECT_ROOT } from '@/project-root'
 
 export const INDEX_FILE = 'index.md'

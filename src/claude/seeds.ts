@@ -3,7 +3,7 @@ import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/copy'
 import { creationRel, isRecordEntry } from '@/record-root'
-import { rewritesOnInstall, stripSeedMarker } from '@/seed-marker'
+import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'
 
 const SEEDS_DIR = join('tooling', 'claude', 'seeds')

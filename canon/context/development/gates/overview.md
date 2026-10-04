@@ -95,4 +95,4 @@ Any tool granted write access to a format-checked file has to agree with the for
 
 ### A marker built on `isMarked` reaches only its own line and the one above
 
-`isMarked` in `src/exempt-marker.ts` reads a citation's own line and the line directly above it, and stops there. A multi-line comment that states the marker on its first line and repeats the exempted pattern on a later continuation line, such as a second `README.md:NN`-shaped token inside a `readmeCitationsIn` anchor comment in `src/web/readme-citations.ts`, reads as unmarked on that later line. Keep every occurrence of an exempted pattern on the marker's own line or the line immediately above.
+`isMarked` in `src/sweep/exempt-marker.ts` reads a citation's own line and the line directly above it, and stops there. A multi-line comment that states the marker on its first line and repeats the exempted pattern on a later continuation line, such as a second `README.md:NN`-shaped token inside a `readmeCitationsIn` anchor comment in `src/web/readme-citations.ts`, reads as unmarked on that later line. Keep every occurrence of an exempted pattern on the marker's own line or the line immediately above.

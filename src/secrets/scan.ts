@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { isBinary } from '@/binary'
+import { isBinary } from '@/sweep/binary'
 import { listRepositoryFiles } from '@/git-files'
 import { isExempt } from '@/secrets/marker'
 import { matchLine } from '@/secrets/patterns'

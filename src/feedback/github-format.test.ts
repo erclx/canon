@@ -3,7 +3,7 @@ import {
   buildIssueArgs,
   failureDetail,
   issueFailureMessage,
-} from '@/github-format'
+} from '@/feedback/github-format'
 
 describe('buildIssueArgs', () => {
   it('builds title and body args with no labels', () => {

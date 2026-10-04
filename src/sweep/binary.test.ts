@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isBinary } from '@/binary'
+import { isBinary } from '@/sweep/binary'
 
 describe('isBinary', () => {
   it('should read a NUL byte as binary', () => {

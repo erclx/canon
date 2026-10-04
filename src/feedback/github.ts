@@ -6,7 +6,7 @@ import {
   failureDetail,
   type CreateIssueOptions,
   type CreateIssueResult,
-} from '@/github-format'
+} from '@/feedback/github-format'
 
 const GH_TIMEOUT_MS = 30_000
 
