@@ -8,38 +8,59 @@ set -o pipefail
 # `src/sandbox/provision.ts`. Scenarios and the library they call stay bash, so
 # the harness reaches them through this entry and nothing else.
 #
-#   probe <scenario>  runs `use_config` and `use_anchor` when declared and prints
-#                     every export they changed as NUL-separated NAME=value
-#                     pairs, closed by an `@anchor=<0|1>` record
-#   stage <scenario>  re-runs both hooks, then `stage_setup` inside the tree
+#   probe <scenario>         runs `use_config` and `use_anchor` when declared
+#                            and prints every export they changed, closed by an
+#                            `@anchor=<0|1>` record
+#   stage <scenario> <file>  re-runs both hooks, runs `stage_setup` inside the
+#                            tree, and writes the exports it changed to <file>
 #
-# The stage re-runs the hooks rather than receiving the probe's pairs, since
-# every scenario's hooks only export, and a re-run keeps `stage_setup` in the
-# one shell those exports land in, as the retired dispatcher ran it.
+# Pairs are NUL-separated `NAME=value`, since a value can hold a newline. The
+# stage reports back because a scenario can set `SANDBOX_SKIP_AUTO_COMMIT` from
+# `stage_setup`, which the retired dispatcher read from the same shell. The
+# stage re-runs the hooks rather than receiving the probe's pairs, since every
+# scenario's hooks only export.
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 export PROJECT_ROOT
 
-die() {
+# Globals carry a prefix, since the scenario sourced below shares this shell.
+_hook_die() {
   echo "sandbox-hook: $1" >&2
   exit 2
 }
+_hook_mode="${1:-}"
+_hook_scenario="${2:-}"
+_hook_report="${3:-}"
 
-mode="${1:-}"
-scenario="${2:-}"
+[[ "$_hook_mode" == "probe" || "$_hook_mode" == "stage" ]] || _hook_die "mode must be probe or stage, got: ${_hook_mode:-<empty>}"
+[ -f "$_hook_scenario" ] || _hook_die "no scenario file at: ${_hook_scenario:-<empty>}"
+[ "$_hook_mode" = "probe" ] || [ -n "$_hook_report" ] || _hook_die "stage needs a file to report its exports to"
 
-[[ "$mode" == "probe" || "$mode" == "stage" ]] || die "mode must be probe or stage, got: ${mode:-<empty>}"
-[ -f "$scenario" ] || die "no scenario file at: ${scenario:-<empty>}"
+declare -A _hook_before
+
+_hook_snapshot() {
+  local name
+  _hook_before=()
+  for name in $(compgen -e); do
+    _hook_before[$name]="${!name}"
+  done
+}
+
+# The shell moves PWD and OLDPWD itself on every `cd`, and neither is state.
+_hook_changed() {
+  local name
+  for name in $(compgen -e); do
+    [[ "$name" == "PWD" || "$name" == "OLDPWD" ]] && continue
+    if [[ ! -v _hook_before[$name] ]] || [ "${_hook_before[$name]}" != "${!name}" ]; then
+      printf '%s=%s\0' "$name" "${!name}"
+    fi
+  done
+}
 
 # Taken before `config.sh`, so a `GITHUB_ORG` it derives from the remote reaches
 # the harness as an export like any other.
-declare -A exported_before
-if [ "$mode" = "probe" ]; then
-  for name in $(compgen -e); do
-    exported_before[$name]="${!name}"
-  done
-fi
+_hook_snapshot
 
 source "$PROJECT_ROOT/scripts/config.sh"
 source "$PROJECT_ROOT/scripts/lib/ui.sh"
@@ -48,40 +69,29 @@ source "$PROJECT_ROOT/scripts/lib/sandbox-git.sh"
 source "$PROJECT_ROOT/scripts/lib/sandbox-fixtures.sh"
 
 # Unexported, as the dispatcher held them, so a scenario reads both while a
-# child it spawns sees neither.
+# child it spawns sees neither. Shellcheck cannot see the scenario reading them.
 # shellcheck disable=SC2034
-SANDBOX="$(resolve_sandbox_dir)"
-# shellcheck disable=SC2034
-SANDBOX_DIR="$PROJECT_ROOT/sandbox"
+SANDBOX="$(resolve_sandbox_dir)" SANDBOX_DIR="$PROJECT_ROOT/sandbox"
 
 # shellcheck source=/dev/null
-source "$scenario"
+source "$_hook_scenario"
 
-has_hook() {
-  [[ "$(type -t "$1")" == "function" ]]
+_hook_declared() { [[ "$(type -t "$1")" == "function" ]]; }
+_hook_run() {
+  if _hook_declared use_config; then use_config; fi
+  if _hook_declared use_anchor; then use_anchor; fi
 }
 
-run_hooks() {
-  if has_hook use_config; then use_config; fi
-  if has_hook use_anchor; then use_anchor; fi
-}
-
-if [ "$mode" = "probe" ]; then
+if [ "$_hook_mode" = "probe" ]; then
   # Stdout carries the pairs alone, so a hook that prints is moved off it.
-  run_hooks >&2
-
-  for name in $(compgen -e); do
-    if [[ ! -v exported_before[$name] ]] || [ "${exported_before[$name]}" != "${!name}" ]; then
-      printf '%s=%s\0' "$name" "${!name}"
-    fi
-  done
-
-  anchor=0
-  if has_hook use_anchor; then anchor=1; fi
-  printf '@anchor=%s\0' "$anchor"
+  _hook_run >&2
+  _hook_changed
+  if _hook_declared use_anchor; then printf '@anchor=1\0'; else printf '@anchor=0\0'; fi
   exit 0
 fi
 
-run_hooks
+_hook_run
+_hook_snapshot
 cd "$SANDBOX"
 stage_setup
+_hook_changed >"$_hook_report"

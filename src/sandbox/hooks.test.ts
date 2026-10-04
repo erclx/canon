@@ -1,8 +1,14 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { parseProbe, probeScenario } from '@/sandbox/hooks'
+import { parseProbe, probeScenario, stageScenario } from '@/sandbox/hooks'
 
 let dir: string
 let env: NodeJS.ProcessEnv
@@ -89,5 +95,42 @@ describe('probeScenario', () => {
     const result = probeScenario(file, { ...env, NO_COLOR: '1' }, 'pipe')
 
     expect(result).toEqual({ ok: false, status: 1 })
+  })
+})
+
+describe('stageScenario', () => {
+  beforeEach(() => {
+    mkdirSync(join(dir, 'tree'))
+  })
+
+  it('should run stage_setup inside the tree with the use_config exports', () => {
+    const file = scenario(
+      'use_config() {\n  export GREETING="hi"\n}\nstage_setup() {\n  printf "%s" "$GREETING" > staged.txt\n}',
+    )
+
+    stageScenario(file, env, 'ignore')
+
+    expect(readFileSync(join(dir, 'tree', 'staged.txt'), 'utf8')).toBe('hi')
+  })
+
+  it('should report an export stage_setup sets, and none the hooks set', () => {
+    const file = scenario(
+      'use_config() {\n  export GREETING="hi"\n}\nstage_setup() {\n  export SANDBOX_SKIP_AUTO_COMMIT="true"\n}',
+    )
+
+    const result = stageScenario(file, env, 'ignore')
+
+    expect(result).toEqual({
+      status: 0,
+      exports: { SANDBOX_SKIP_AUTO_COMMIT: 'true' },
+    })
+  })
+
+  it('should pass through the status of a stage_setup that fails', () => {
+    const file = scenario('stage_setup() {\n  return 3\n}')
+
+    const result = stageScenario(file, env, 'ignore')
+
+    expect(result).toEqual({ status: 3, exports: {} })
   })
 })
