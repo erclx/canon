@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
-import { copyPreservingMode } from '@/copy'
+import { copyPreservingMode } from '@/sync/copy'
 import { creationRel, isRecordEntry } from '@/record-root'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { SURFACE_ENTRIES, surfaceDir } from '@/surface-root'

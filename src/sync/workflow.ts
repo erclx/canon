@@ -11,7 +11,7 @@ import {
   syncBranchName,
 } from '@/sync/git'
 import { domainPaths, SYNC_DOMAINS } from '@/sync/target'
-import { isDirectory } from '@/target'
+import { isDirectory } from '@/targets/validate'
 import {
   intro,
   logError,

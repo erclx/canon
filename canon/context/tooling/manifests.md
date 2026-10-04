@@ -27,7 +27,7 @@ Gitignore merging is additive only and existing entries are never touched, so a 
 - Bun's script shell expands command substitution and a leading environment assignment, so a script value may carry `VAR=$(bash scripts/x.sh) command`. Verified 2026-08-13 against `bun run`.
 - `Bun.Glob` skips dotfiles unless `dot: true` is set. Tooling configs are almost entirely dotfiles, so omitting it matches 4 of 14 files in `base` and fails silently.
 - Non-`.txt` seeds are copy-once. To re-seed a structured file, delete it and sync again.
-- `copyPreservingMode` in `src/copy.ts` keeps a destination's mode, per `internal/rules/core/096-operator-files.md`. A target's `scripts/verify.sh` keeps its executable bit across a sync whatever mode the source carries. It sits at the top level rather than in `src/tooling/` because the sync engine needs the same guarantee.
+- `copyPreservingMode` in `src/sync/copy.ts` keeps a destination's mode, per `internal/rules/core/096-operator-files.md`. A target's `scripts/verify.sh` keeps its executable bit across a sync whatever mode the source carries. It sits in `src/sync/` rather than `src/tooling/` because the sync engine owns it and the tooling inject reads it.
 
 ### The ignore-parity check
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { isAbsolute, relative, resolve } from 'node:path'
-import { copyPreservingMode } from '@/copy'
+import { copyPreservingMode } from '@/sync/copy'
 import { checkoutMismatchWarning } from '@/project-root'
 import { findInstalledOrigin, readHistoryIndex } from '@/sync/history'
 import {
@@ -16,7 +16,7 @@ import {
   toStampKey,
   writeStamp,
 } from '@/sync/stamp'
-import { isDirectory } from '@/target'
+import { isDirectory } from '@/targets/validate'
 import {
   intro,
   isNonInteractive,

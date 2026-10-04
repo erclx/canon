@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { DESIGN_INSTALL_DIR } from '@/design/adapter'
-import { isDirectory } from '@/target'
+import { isDirectory } from '@/targets/validate'
 
 export const SYNC_DOMAINS = ['governance', 'design', 'claude'] as const
 

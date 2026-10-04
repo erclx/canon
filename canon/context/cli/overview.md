@@ -18,7 +18,9 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 - `src/tooling/` owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`, and `seed-marker.ts`, the seed stub contract that `canon/context/tooling/` owns and that `tooling/`, `claude/`, `sync/`, and `context/` read
 - `src/sweep/` owns the contract every line sweep reads, which files it skips (`binary.ts`) and which lines it mutes (`exempt-marker.ts`). Six domains share it, so the folder is named for the contract rather than for a `utils` bucket
 - `src/feedback/` owns the `canon feedback` engine, being the body's required sections (`body.ts`), the GitHub issue call (`github.ts`), and its argument and failure formatting (`github-format.ts`). `src/commands/feedback.ts` is its only consumer
-- `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, and the drift report, with governance's per-domain adapter in `src/gov/`. `src/standards/` carries none, since nothing installs that corpus into a project and there is no copy to reconcile
+- `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, the drift report, and `copy.ts`, the mode-preserving install copy that the governance, tooling, and claude adapters read, with governance's per-domain adapter in `src/gov/`. `src/standards/` carries none, since nothing installs that corpus into a project and there is no copy to reconcile
+- `src/targets/` owns target projects, including `validate.ts`, whose `resolveTarget` validates the directory an install verb is pointed at, and `resolve.ts`, the registry read
+- `src/gate/` owns the gate stages, including `client-commands.ts`, the client command table the citation stage in `measures.ts` reads
 - `src/init/` owns the `canon init` option surface, the preview and count, the domain step list, and the partial-failure runner
 - `src/docs/` and `src/wiki/` own the two read-only domains, which reach for no shared engine because neither syncs into a target
 - `src/claude/` owns seed planning, the gitignore preview, and the user settings merge
