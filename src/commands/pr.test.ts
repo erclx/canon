@@ -1133,20 +1133,20 @@ describe('canon pr local', () => {
     })
   })
 
-  it('should replace the local line with the note on --remove', async () => {
+  it('should drop the address line and leave no note on --remove', async () => {
     writeMarkedComment(
-      '**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      '## Evidence\n\n**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
     )
 
-    const outcome = await runLocal(['7', '--remove', '--note', 'gone'])
+    const outcome = await runLocal(['7', '--remove'])
 
     expect(outcome.record.reason).toBe('removed')
     expect(readFileSync(apiLog, 'utf8')).toBe(
-      'body=gone\n\n<!-- pr-evidence: head=abc -->',
+      'body=## Evidence\n\n<!-- pr-evidence: head=abc -->',
     )
   })
 
-  it('should report no-line and write nothing when the comment carries no local line', async () => {
+  it('should report no-line and write nothing when the comment carries no address line', async () => {
     writeMarkedComment('## Evidence\n\n<!-- pr-evidence: head=abc -->')
 
     const outcome = await runLocal(['7', '--remove'])

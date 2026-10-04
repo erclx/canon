@@ -1,18 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  dropAddressLine,
   findLocalServer,
   type Listener,
   type LocalRunner,
   parseLsofListeners,
   parseProcNetTcp,
-  stripLocalLine,
 } from '@/pr/local'
 
 const MAIN = '/repo'
 const LINKED = '/repo/.claude/worktrees/feat-a'
 const SIBLING = '/repo/.claude/worktrees/feat-b'
 const MARKER = '<!-- pr-evidence: head=abc -->'
-const NOTE = '_Local preview removed when the pull request closed._'
 
 interface FakeServer {
   readonly port: number
@@ -183,43 +182,87 @@ describe('parseProcNetTcp', () => {
   })
 })
 
-describe('stripLocalLine', () => {
-  it('should replace the local line with the note and keep every other line byte for byte', () => {
+describe('dropAddressLine', () => {
+  const CHECKLIST = [
+    '## What to look at',
+    '',
+    '<!-- pr-checklist:start -->',
+    '- [x] the hero settles',
+    '<!-- pr-checklist:end -->',
+    '',
+    MARKER,
+  ]
+
+  it('should drop the address line carrying both addresses and keep every other line byte for byte', () => {
     const body = [
-      '**Preview:** https://feat-x.site.pages.dev',
+      '## Evidence',
+      '',
+      '**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173',
+      '',
+      ...CHECKLIST,
+    ].join('\n')
+
+    const dropped = dropAddressLine(body)
+
+    expect(dropped).toBe(['## Evidence', '', ...CHECKLIST].join('\n'))
+  })
+
+  it('should leave no doubled gap under the heading when the local address stood alone', () => {
+    const body = [
+      '## Evidence',
+      '',
       '**Local preview:** http://localhost:5173',
       '',
-      '## What to look at',
-      '',
-      '<!-- pr-checklist:start -->',
-      '- [x] the hero settles',
-      '<!-- pr-checklist:end -->',
+      '**Base:** `aaaa000` · **Head:** `bbbb111`',
       '',
       MARKER,
     ].join('\n')
 
-    const stripped = stripLocalLine(body, NOTE)
+    const dropped = dropAddressLine(body)
 
-    expect(stripped).toBe(
-      body.replace('**Local preview:** http://localhost:5173', NOTE),
+    expect(dropped).toBe(
+      [
+        '## Evidence',
+        '',
+        '**Base:** `aaaa000` · **Head:** `bbbb111`',
+        '',
+        MARKER,
+      ].join('\n'),
     )
   })
 
-  it('should return undefined when the body carries no local line', () => {
+  it('should drop both address lines of an old-layout body and its blank line', () => {
+    const body = [
+      '**Preview:** https://feat-x.site.pages.dev',
+      '**Local preview:** http://localhost:5173',
+      '',
+      ...CHECKLIST,
+    ].join('\n')
+
+    const dropped = dropAddressLine(body)
+
+    expect(dropped).toBe(CHECKLIST.join('\n'))
+  })
+
+  it('should return undefined when the body carries no address', () => {
     const body = ['## Evidence', '', MARKER].join('\n')
 
-    const stripped = stripLocalLine(body, NOTE)
+    const dropped = dropAddressLine(body)
 
-    expect(stripped).toBeUndefined()
+    expect(dropped).toBeUndefined()
   })
 
-  it('should return undefined on a body it already stripped', () => {
-    const body = ['**Local preview:** http://localhost:5173', '', MARKER].join(
-      '\n',
-    )
-    const once = stripLocalLine(body, NOTE) ?? ''
+  it('should return undefined on a body it already dropped', () => {
+    const body = [
+      '## Evidence',
+      '',
+      '**Local preview:** http://localhost:5173',
+      '',
+      MARKER,
+    ].join('\n')
+    const once = dropAddressLine(body) ?? ''
 
-    const twice = stripLocalLine(once, NOTE)
+    const twice = dropAddressLine(once)
 
     expect(twice).toBeUndefined()
   })

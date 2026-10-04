@@ -14,7 +14,7 @@ const MARKER_PREFIX = '<!-- pr-evidence:'
 const PREVIEW_PREFIX = '**Preview:**'
 
 /** How the address line names the branch's server on the operator's own machine, after any hosted segment. */
-export const LOCAL_PREFIX = '**Local preview:**'
+const LOCAL_PREFIX = '**Local preview:**'
 
 /** What joins the hosted and local segments on the one address line. */
 const ADDRESS_SEPARATOR = ' · '
@@ -378,21 +378,6 @@ export function findEvidencePreview(
 ): string | undefined {
   const marked = findMarked(comments)
   return marked === undefined ? undefined : readAddresses(marked.body).preview
-}
-
-/**
- * Where the local address line sits in a body, searched only through the
- * opening block above the first blank line, so a line quoted further down in
- * a checklist is never taken for it. -1 when the block carries none.
- */
-export function findLocalLineIndex(body: string): number {
-  const lines = body.split('\n')
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = (lines[index] ?? '').trim()
-    if (line === '') return -1
-    if (line.startsWith(LOCAL_PREFIX)) return index
-  }
-  return -1
 }
 
 /**

@@ -51,13 +51,13 @@ import {
 } from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
+  dropAddressLine,
   findLocalServer,
   type Listener,
   type LocalRefusal,
   type LocalRunner,
   parseLsofListeners,
   parseProcNetTcp,
-  stripLocalLine,
 } from '@/pr/local'
 import { KEY_CHANGES } from '@/pr/paths'
 import {
@@ -110,16 +110,11 @@ interface EvidenceOptions extends ReadOptions {
 
 interface LocalOptions extends ReadOptions {
   readonly remove?: boolean
-  readonly note?: string
 }
 
 /** Shared by every verb that resolves a pull request from the checkout's branch. */
 const AMBIGUOUS_PULL =
   'More than one pull request is open on this branch, each against another base. Name the pull request number.'
-
-/** What replaces the local address line once the pull request closes. */
-const LOCAL_REMOVED_NOTE =
-  '_Local preview removed when the pull request closed._'
 
 /** How long the probe waits on a listener before reading it as not a server. */
 const LOCAL_PROBE_TIMEOUT_MS = 2_000
@@ -677,15 +672,7 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Worktree to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
-    .option(
-      '--remove',
-      "Replace the evidence comment's local preview line with a note",
-    )
-    .option(
-      '--note <text>',
-      'What replaces the line on --remove',
-      LOCAL_REMOVED_NOTE,
-    )
+    .option('--remove', "Drop the evidence comment's preview address line")
     .addHelpText(
       'after',
       [
@@ -702,16 +689,19 @@ export function register(program: Command): void {
         'without it.',
         '',
         '--remove reads the pull request comment carrying the pr-evidence',
-        'marker and replaces its **Local preview:** line with --note, editing',
-        'the comment itself so a close workflow with no session can call it.',
+        'marker and drops its address line, the **Preview:** and **Local',
+        'preview:** segments together, leaving no note in its place. It edits',
+        'the comment itself so a close workflow with no session can call it,',
+        'and drops the hosted link too because the same close deletes the',
+        "branch's preview deployments.",
         '',
         'Read `reason` on the JSON record:',
         '  ok                  a page answered, with its address in `url`',
         '  no-server           nothing inside this worktree served a page',
         '  no-listener-reader  neither lsof nor /proc is available',
-        '  removed             --remove replaced the line',
+        '  removed             --remove dropped the line',
         '  no-comment          --remove found no marked comment, a no-op',
-        '  no-line             --remove found no local line, a no-op',
+        '  no-line             --remove found no address line, a no-op',
         '',
         'Exit codes:',
         '  0  a server was found, or --remove finished, including a no-op',
@@ -2282,7 +2272,7 @@ async function runLocal(opts: LocalOptions): Promise<number> {
 }
 
 /**
- * Replaces the local line on the marked comment. The verb writes here rather
+ * Drops the address line on the marked comment. The verb writes here rather
  * than handing a body back, because its caller is a close workflow with no
  * session to post one.
  */
@@ -2292,7 +2282,6 @@ async function runLocalRemove(
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
-  const note = opts.note ?? LOCAL_REMOVED_NOTE
 
   intro('canon pr local --remove')
 
@@ -2335,9 +2324,9 @@ async function runLocalRemove(
     return finish('no-comment', 'No comment carries the evidence marker.')
   }
 
-  const stripped = stripLocalLine(marked.body, note)
-  if (stripped === undefined) {
-    return finish('no-line', 'The evidence comment carries no local line.')
+  const dropped = dropAddressLine(marked.body)
+  if (dropped === undefined) {
+    return finish('no-line', 'The evidence comment carries no address line.')
   }
 
   const patched = await gh(root, [
@@ -2346,7 +2335,7 @@ async function runLocalRemove(
     'PATCH',
     `repos/{owner}/{repo}/issues/comments/${commentId}`,
     '-f',
-    `body=${stripped}`,
+    `body=${dropped}`,
   ])
   if (patched === null) {
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
