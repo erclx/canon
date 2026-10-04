@@ -78,7 +78,7 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 - Do not assume a viewport. A frame renders at its layout width on the canvas and in a capture alike, so size it with media queries against that width rather than against the operator's window.
 - Do not assume the theme. The canvas theme toggle is the operator's own state, and a capture shows each frame in its default theme.
 - Do not assume a network. Name only fonts the machine has, or ship the font beside the frame, since a capture refuses a frame naming a font it cannot find.
-- Do not assume a default font. Set `font-family` on the `html` element with an installed family first, since a capture checks the root's first family and the browser's default serif is absent from many machines.
+- Do not assume a default font. Set `font-family` with an installed family first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines.
 - Do not assume the frame is the source. A picked direction is carried into the project's design document or its wireframes, and the operator clears the frame once it has been carried.
 - Do not assume the canvas survives the checkout. The folder is gitignored, so a lost checkout loses every page in it.
 
