@@ -274,7 +274,10 @@ function ElementFields({
   const familyToken = tokenOf(family)
   const size = currentValue(node, 'font-size')
   const sizeToken = tokenOf(size)
-  const textAlign = textAlignOf(computedValue(node, 'text-align'))
+  const textAlign = textAlignOf(
+    computedValue(node, 'text-align'),
+    computedValue(node, 'direction'),
+  )
 
   /**
    * Previews into the frame's own inline style and writes through the same

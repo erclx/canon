@@ -695,15 +695,6 @@
   cursor: pointer;
 }
 
-.glyph-select:focus-visible {
-  outline: none;
-}
-
-.glyph-field.is-select:has(.glyph-select:focus-visible) {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 0;
-}
-
 .select-chevron {
   position: absolute;
   right: 6px;

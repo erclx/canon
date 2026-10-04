@@ -405,16 +405,20 @@ describe('line height writes', () => {
 })
 
 describe('textAlignOf', () => {
-  it('should read start as left', () => {
-    expect(textAlignOf('start')).toBe('left')
+  it('should read start as left in left-to-right text', () => {
+    expect(textAlignOf('start', 'ltr')).toBe('left')
   })
 
-  it('should read end as right', () => {
-    expect(textAlignOf('end')).toBe('right')
+  it('should read end as right in left-to-right text', () => {
+    expect(textAlignOf('end', 'ltr')).toBe('right')
+  })
+
+  it('should read start as right in right-to-left text', () => {
+    expect(textAlignOf('start', 'rtl')).toBe('right')
   })
 
   it('should leave a named side as it is', () => {
-    expect(textAlignOf('center')).toBe('center')
+    expect(textAlignOf('center', 'rtl')).toBe('center')
   })
 })
 

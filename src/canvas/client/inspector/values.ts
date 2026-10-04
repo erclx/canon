@@ -138,13 +138,14 @@ export function firstFamily(stack: string): string {
 }
 
 /**
- * Text alignment by the side it lands on. The logical keywords read as their
- * left-to-right sides, which is the direction every frame here is written in.
+ * Text alignment by the side it lands on, so the group presses the side the
+ * text paints on. The logical keywords turn on the element's direction.
  */
-export function textAlignOf(computed: string): string {
+export function textAlignOf(computed: string, direction: string): string {
   const value = computed.trim()
-  if (value === 'start') return 'left'
-  if (value === 'end') return 'right'
+  const isRtl = direction.trim() === 'rtl'
+  if (value === 'start') return isRtl ? 'right' : 'left'
+  if (value === 'end') return isRtl ? 'left' : 'right'
   return value
 }
 
