@@ -138,7 +138,7 @@ describe('injectTokens', () => {
     const served = injectTokens(html, ':root{}')
 
     expect(served).toBe(
-      `<!doctype html><html lang="en"><head ${IMPLIED_ATTRIBUTE}>${STYLE}</head><body><p>a</p></body></html>`,
+      `<!doctype html><html lang="en"><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body><p>a</p></body></html>`,
     )
   })
 
@@ -146,7 +146,7 @@ describe('injectTokens', () => {
     const served = injectTokens('<!doctype html><h1>x</h1>', ':root{}')
 
     expect(served).toBe(
-      `<!doctype html><html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}</head><body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+      `<!doctype html><html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
     )
   })
 
@@ -154,7 +154,7 @@ describe('injectTokens', () => {
     const served = injectTokens('<h1>x</h1>', ':root{}')
 
     expect(served).toBe(
-      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}</head><body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
     )
   })
 
@@ -162,7 +162,34 @@ describe('injectTokens', () => {
     const served = injectTokens('<!-- <head> --><h1>x</h1>', ':root{}')
 
     expect(served).toBe(
-      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}</head><body ${IMPLIED_ATTRIBUTE}><!-- <head> --><h1>x</h1>`,
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<!-- <head> --><body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should keep the head content a fragment leads with inside the marked head', () => {
+    const served = injectTokens(
+      '<meta charset="utf-8"><style>h1:first-child{color:red}</style>\n<h1>x</h1>',
+      ':root{}',
+    )
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<meta charset="utf-8"><style>h1:first-child{color:red}</style>\n<body ${IMPLIED_ATTRIBUTE}><h1>x</h1>`,
+    )
+  })
+
+  it('should open the marked body ahead of text a fragment leads with', () => {
+    const served = injectTokens('<title>t</title>Hello <b>x</b>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<title>t</title><body ${IMPLIED_ATTRIBUTE}>Hello <b>x</b>`,
+    )
+  })
+
+  it('should open the marked body at the end of a fragment holding only head content', () => {
+    const served = injectTokens('<title>t</title>', ':root{}')
+
+    expect(served).toBe(
+      `<html ${IMPLIED_ATTRIBUTE}><head ${IMPLIED_ATTRIBUTE}>${STYLE}<title>t</title><body ${IMPLIED_ATTRIBUTE}>`,
     )
   })
 

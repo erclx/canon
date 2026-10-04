@@ -123,30 +123,96 @@ function prependFirst(html: string, selector: string, markup: string): string {
 }
 
 /**
+ * What a browser parses into the head it builds ahead of a fragment's first
+ * content. A comment or whitespace among them stays in that head too.
+ */
+const HEAD_CONTENT = new Set([
+  'base',
+  'link',
+  'meta',
+  'noscript',
+  'script',
+  'style',
+  'template',
+  'title',
+])
+
+/**
+ * Opens a marked body where the browser would build its own: ahead of the
+ * first element or text outside the head content a file leads with, or at the
+ * end when the file holds nothing else.
+ */
+function openBodyBeforeContent(html: string, marker: string): string {
+  let isOpen = false
+  let headDepth = 0
+  const open = (target: HTMLRewriterTypes.Element | HTMLRewriterTypes.Text) => {
+    isOpen = true
+    target.before(marker, { html: true })
+  }
+  return new HTMLRewriter()
+    .on('*', {
+      element(element) {
+        if (isOpen || headDepth > 0) return
+        const tag = element.tagName.toLowerCase()
+        if (tag === 'html') return
+        if (!HEAD_CONTENT.has(tag)) {
+          open(element)
+          return
+        }
+        if (!element.canHaveContent || element.selfClosing) return
+        headDepth += 1
+        element.onEndTag(() => {
+          headDepth -= 1
+        })
+      },
+    })
+    .onDocument({
+      text(chunk) {
+        if (!isOpen && headDepth === 0 && chunk.text.trim() !== '') open(chunk)
+      },
+      end(end) {
+        if (!isOpen) end.append(marker, { html: true })
+      },
+    })
+    .transform(html)
+}
+
+/**
  * Puts the tokens first in the head, so a stylesheet the frame links itself
  * still wins the cascade. A hash stamps the element even when no tokens
  * resolve, since the shell sends it back with an element pick.
  *
  * A wrapper the file leaves out is written in marked, since the browser would
  * build it anyway and the shell's count would run past the file's. An `html`
- * goes right after the doctype, which keeps the frame out of quirks mode, and a
- * file stating none of `head` and `body` gets a body opened after the head. A
- * file stating a `head` but no `body` is left to the browser.
+ * goes right after the doctype, which keeps the frame out of quirks mode. A
+ * marked `head` is left open, so the head content a fragment leads with parses
+ * into it the way it would into the head a browser builds, and a file stating
+ * neither `head` nor `body` gets a marked body opened where that content ends.
+ * A file stating a `head` but no `body` is left to the browser.
  */
 export function injectTokens(html: string, css: string, hash?: string): string {
   if (css === '' && hash === undefined) return html
   const style = styleElement(css, hash)
   const stated = statedWrappers(html)
   const isHeadStated = stated.has('head')
-  const lead = `${isHeadStated ? '' : `<head ${IMPLIED_ATTRIBUTE}>${style}</head>`}${
-    isHeadStated || stated.has('body') ? '' : `<body ${IMPLIED_ATTRIBUTE}>`
-  }`
-  const withHead = isHeadStated ? prependFirst(html, 'head', style) : html
-  if (stated.has('html')) {
-    return lead === '' ? withHead : prependFirst(withHead, 'html', lead)
+  const withBody =
+    isHeadStated || stated.has('body')
+      ? html
+      : openBodyBeforeContent(html, `<body ${IMPLIED_ATTRIBUTE}>`)
+  if (isHeadStated) {
+    const withHead = prependFirst(withBody, 'head', style)
+    return stated.has('html') ? withHead : markedHtml(withHead, '')
   }
-  const doctype = withHead.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
-  return `${doctype}<html ${IMPLIED_ATTRIBUTE}>${lead}${withHead.slice(doctype.length)}`
+  const head = `<head ${IMPLIED_ATTRIBUTE}>${style}`
+  return stated.has('html')
+    ? prependFirst(withBody, 'html', head)
+    : markedHtml(withBody, head)
+}
+
+/** Writes a marked `html` and what follows it right after the doctype. */
+function markedHtml(html: string, lead: string): string {
+  const doctype = html.match(/^\s*<!doctype[^>]*>/i)?.[0] ?? ''
+  return `${doctype}<html ${IMPLIED_ATTRIBUTE}>${lead}${html.slice(doctype.length)}`
 }
 
 /**

@@ -154,6 +154,10 @@ describe('resolveAddress', () => {
       'a head-only lead before the content',
       '<!doctype html><title>t</title><h1>Bare</h1>',
     ],
+    [
+      'a style-led fragment',
+      '<style>h1:first-child{color:red}</style><h1>Bare</h1>',
+    ],
   ])('should agree on %s once the server marks the wrapper', (_, file) => {
     const served = injectTokens(file, ':root{}', 'abc123')
     const doc = new DOMParser().parseFromString(served, 'text/html')
