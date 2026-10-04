@@ -3,7 +3,9 @@ import type { JSX, RefObject } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { addressOf, documentElements, elementAt } from '@/canvas/address'
 import type { Frame } from '@/canvas/content'
+import { type SurfaceAction, surfaceAction } from '@/canvas/client/keys'
 import {
+  activeTool,
   currentPage,
   draggingFrame,
   editingFrames,
@@ -24,6 +26,8 @@ import {
   selectElement,
   selectFrame,
   selection,
+  shownTool,
+  spacePan,
   type Theme,
   toggleFrameTheme,
   view,
@@ -35,6 +39,7 @@ import {
   type OverlayBox,
   SelectionOverlay,
 } from '@/canvas/client/selection'
+import { ToolStrip } from '@/canvas/client/tools'
 
 /** One wheel notch or one button press. */
 const ZOOM_STEP = 1.2
@@ -81,6 +86,21 @@ interface WheelTurn {
 function asElement(target: EventTarget | null): Element | undefined {
   const node = target as Node | null
   return node?.nodeType === 1 ? (node as Element) : undefined
+}
+
+/**
+ * Whether a key belongs to the element it was typed in rather than to the
+ * canvas: any key in a field, and Space on a control it activates. A frame's
+ * draft can hold its own fields, and their keys arrive through the forwarding.
+ */
+function isOwnedByTarget(event: KeyboardEvent, action: SurfaceAction): boolean {
+  const target = asElement(event.target)
+  if (!target) return false
+  if ((target as HTMLElement).isContentEditable) return true
+  if (target.closest('input, textarea, select')) return true
+  return (
+    action === 'pan-hold' && target.closest('button, a[href], summary') !== null
+  )
 }
 
 /** A computed length in pixels, or the fallback for one that is not. */
@@ -212,10 +232,12 @@ function FrameView({
   page,
   frame,
   onWheelTurn,
+  onKey,
 }: {
   readonly page: string
   readonly frame: Frame
   readonly onWheelTurn: (turn: WheelTurn) => void
+  readonly onKey: (event: KeyboardEvent) => void
 }): JSX.Element {
   const key = frameKey(page, frame)
   const version = frameVersions.value.get(key) ?? 0
@@ -279,6 +301,15 @@ function FrameView({
       },
       { passive: false },
     )
+    /*
+     * A click inside the frame moves focus into its window, so the surface
+     * hears no key after the first pick unless the frame passes it on.
+     */
+    loaded.addEventListener('keydown', onKey)
+    loaded.addEventListener('keyup', onKey)
+    loaded.defaultView?.addEventListener('blur', () => {
+      spacePan.value = undefined
+    })
   }
 
   const picked =
@@ -300,6 +331,8 @@ function FrameView({
 
   const handlePointerDown = (event: PointerEvent) => {
     if (event.button !== 0) return
+    /* A pan drag starting on the label belongs to the surface behind it. */
+    if (shownTool.value === 'pan') return
     if ((event.target as HTMLElement | null)?.closest('.frame-theme')) return
     gesture.current = {
       startX: event.clientX,
@@ -348,7 +381,7 @@ function FrameView({
    */
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.target !== event.currentTarget) return
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter') {
       event.preventDefault()
       select()
       return
@@ -368,6 +401,16 @@ function FrameView({
       return
     }
     void moveFrameTo(ref, frame.x + delta.x * step, frame.y + delta.y * step)
+  }
+
+  /*
+   * Space held pans, so it selects on release instead, and only when no drag
+   * moved the view while it was down. This runs before the surface's own
+   * release clears the pan.
+   */
+  const handleKeyUp = (event: KeyboardEvent) => {
+    if (event.target !== event.currentTarget || event.key !== ' ') return
+    if (spacePan.value !== 'dragged') select()
   }
 
   const frameBox = (): OverlayBox => ({
@@ -390,6 +433,7 @@ function FrameView({
       aria-label={`${frame.name}, ${frame.width} by ${frame.height}${editing ? `, ${editing.by} editing` : ''}`}
       aria-current={isSelected ? 'true' : undefined}
       onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
       style={{
         left: `${frame.x}px`,
         top: `${frame.y}px`,
@@ -468,18 +512,30 @@ function viewportSize(viewport: RefObject<HTMLDivElement | null>): {
   return { width: rect?.width ?? 0, height: rect?.height ?? 0 }
 }
 
+/** The zoom toolbar's actions, which its keys call as well. */
+function zoomCentered(
+  viewport: RefObject<HTMLDivElement | null>,
+  factor: number,
+): void {
+  const { width, height } = viewportSize(viewport)
+  zoomAt(factor, width / 2, height / 2)
+}
+
+function fitViewport(viewport: RefObject<HTMLDivElement | null>): void {
+  const { width, height } = viewportSize(viewport)
+  fitView(width, height)
+}
+
 function Toolbar({ viewportRef }: SurfaceProps): JSX.Element {
-  const zoomCentered = (factor: number) => {
-    const { width, height } = viewportSize(viewportRef)
-    zoomAt(factor, width / 2, height / 2)
-  }
   return (
     <div class="toolbar" role="toolbar" aria-label="Zoom">
       <button
         type="button"
         class="icon-button"
         aria-label="Zoom out"
-        onClick={() => zoomCentered(1 / ZOOM_STEP)}
+        aria-keyshortcuts="-"
+        title="Zoom out (-)"
+        onClick={() => zoomCentered(viewportRef, 1 / ZOOM_STEP)}
       >
         −
       </button>
@@ -490,17 +546,18 @@ function Toolbar({ viewportRef }: SurfaceProps): JSX.Element {
         type="button"
         class="icon-button"
         aria-label="Zoom in"
-        onClick={() => zoomCentered(ZOOM_STEP)}
+        aria-keyshortcuts="+"
+        title="Zoom in (+)"
+        onClick={() => zoomCentered(viewportRef, ZOOM_STEP)}
       >
         +
       </button>
       <button
         type="button"
         class="text-button"
-        onClick={() => {
-          const { width, height } = viewportSize(viewportRef)
-          fitView(width, height)
-        }}
+        aria-keyshortcuts="Shift+1"
+        title="Fit (Shift+1)"
+        onClick={() => fitViewport(viewportRef)}
       >
         Fit
       </button>
@@ -543,9 +600,56 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     })
   }
 
+  /* A pan held when the window loses focus never hears its Space come up. */
+  useEffect(() => {
+    const endPan = () => {
+      spacePan.value = undefined
+    }
+    window.addEventListener('blur', endPan)
+    return () => window.removeEventListener('blur', endPan)
+  }, [])
+
+  const runAction = (action: SurfaceAction) => {
+    switch (action) {
+      case 'tool-move':
+        activeTool.value = 'move'
+        return
+      case 'tool-pan':
+        activeTool.value = 'pan'
+        return
+      case 'zoom-in':
+        zoomCentered(viewportRef, ZOOM_STEP)
+        return
+      case 'zoom-out':
+        zoomCentered(viewportRef, 1 / ZOOM_STEP)
+        return
+      case 'zoom-fit':
+        fitViewport(viewportRef)
+        return
+      case 'pan-hold':
+        spacePan.value ??= 'held'
+        return
+      case 'pan-release':
+        spacePan.value = undefined
+    }
+  }
+
+  /*
+   * The surface's one key handler, which every frame document feeds too. The
+   * default is prevented only for a key it takes, so Space stops scrolling a
+   * frame it pans and every other key keeps its own meaning.
+   */
+  const handleKey = (event: KeyboardEvent) => {
+    const action = surfaceAction(event)
+    if (!action) return
+    if (action !== 'pan-release' && isOwnedByTarget(event, action)) return
+    event.preventDefault()
+    runAction(action)
+  }
+
   const handlePointerDown = (event: PointerEvent) => {
     const target = event.target as HTMLElement | null
-    if (target?.closest('.frame, .toolbar')) return
+    if (shownTool.value !== 'pan' && target?.closest('.frame')) return
     drag.current = { x: event.clientX, y: event.clientY }
     viewportRef.current?.setPointerCapture?.(event.pointerId)
   }
@@ -553,8 +657,13 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
   const handlePointerMove = (event: PointerEvent) => {
     const start = drag.current
     if (!start) return
-    panBy(event.clientX - start.x, event.clientY - start.y)
+    const dx = event.clientX - start.x
+    const dy = event.clientY - start.y
+    panBy(dx, dy)
     drag.current = { x: event.clientX, y: event.clientY }
+    if (spacePan.value === 'held' && (dx !== 0 || dy !== 0)) {
+      spacePan.value = 'dragged'
+    }
   }
 
   const handlePointerUp = () => {
@@ -563,7 +672,14 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
 
   const { x, y, zoom } = view.value
   return (
-    <main class="surface" aria-label="Canvas">
+    <main
+      class="surface"
+      aria-label="Canvas"
+      tabIndex={0}
+      data-tool={shownTool.value}
+      onKeyDown={handleKey}
+      onKeyUp={handleKey}
+    >
       <div
         ref={viewportRef}
         class="viewport"
@@ -587,10 +703,12 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
               page={page.name}
               frame={frame}
               onWheelTurn={handleWheelTurn}
+              onKey={handleKey}
             />
           ))}
         </div>
       </div>
+      <ToolStrip />
       <Toolbar viewportRef={viewportRef} />
     </main>
   )

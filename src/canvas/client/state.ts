@@ -22,6 +22,11 @@ export interface TokenSource {
 
 export type LeftTab = 'pages' | 'theme'
 
+export type Tool = 'move' | 'pan'
+
+/** A Space pan held, and whether a drag has moved the view while it was. */
+export type SpacePan = 'held' | 'dragged'
+
 /** One property change to the selected element, as the inspector posts it. */
 export interface PendingEdit {
   readonly key: string
@@ -122,6 +127,16 @@ export const draggingFrame = signal<string | undefined>(undefined)
 export const writeError = signal<string | undefined>(undefined)
 
 export const leftTab = signal<LeftTab>('pages')
+
+/** The tool the strip has lit, which a Space pan overrides while held. */
+export const activeTool = signal<Tool>('move')
+
+export const spacePan = signal<SpacePan | undefined>(undefined)
+
+/** The tool in effect, so Space shows Pan lit and releasing it restores it. */
+export const shownTool = computed<Tool>(() =>
+  spacePan.value ? 'pan' : activeTool.value,
+)
 
 /** The edit in flight, which holds its field until the server answers. */
 export const pendingEdit = signal<PendingEdit | undefined>(undefined)
@@ -607,6 +622,8 @@ export function resetState(): void {
   draggingFrame.value = undefined
   writeError.value = undefined
   leftTab.value = 'pages'
+  activeTool.value = 'move'
+  spacePan.value = undefined
   pendingEdit.value = undefined
   savedEdit.value = undefined
   editRefusal.value = undefined
