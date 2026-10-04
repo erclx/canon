@@ -7,31 +7,22 @@ const ROOT = join(import.meta.dirname, '..', '..')
 
 /**
  * Every `gh pr` subcommand and `gh repo view` run on GraphQL, which a cloud
- * session's GitHub proxy refuses. The review-address leg reads and writes, so
- * any of them there breaks a cloud worker answering a review.
+ * session's GitHub proxy refuses. A cloud session runs each body below, so a
+ * read or a write through any of them breaks it there.
  */
 const ANY_GRAPHQL = /\bgh (pr [a-z]+|repo view)\b/
 
 /**
- * The bodies off the leg have moved their reads alone. Their writes, being
- * `gh pr review`, `gh pr create`, and `gh pr edit`, are a later slice.
- */
-const GRAPHQL_READS = /\bgh (pr (view|list)|repo view)\b/
-
-/**
  * Paths under `claude/skills/`, each a whole skill folder or one file. The
- * leg borrows `git-pr`'s evidence reference to mint a preview, so that file
- * sits on it while the rest of `git-pr` does not.
+ * review-address leg borrows `git-pr`'s evidence reference to mint a preview,
+ * so that file sits on it while the rest of `git-pr` does not.
  */
-const TIERS: readonly {
-  readonly paths: readonly string[]
-  readonly pattern: RegExp
-}[] = [
-  {
-    paths: ['review-address', 'git-followup', 'git-pr/references/evidence.md'],
-    pattern: ANY_GRAPHQL,
-  },
-  { paths: ['review-ui', 'git-split'], pattern: GRAPHQL_READS },
+const CLOUD_PATHS: readonly string[] = [
+  'review-address',
+  'git-followup',
+  'git-pr/references/evidence.md',
+  'review-ui',
+  'git-split',
 ]
 
 function filesUnder(dir: string): string[] {
@@ -43,27 +34,23 @@ function filesUnder(dir: string): string[] {
   })
 }
 
-function hitsIn(target: string, pattern: RegExp): string[] {
+function hitsIn(target: string): string[] {
   return filesUnder(join(ROOT, 'claude', 'skills', target)).flatMap((path) =>
     readFileSync(path, 'utf8')
       .split('\n')
       .flatMap((line, index) =>
-        pattern.test(line)
+        ANY_GRAPHQL.test(line)
           ? [`${relative(ROOT, path)}:${index + 1}: ${line.trim()}`]
           : [],
       ),
   )
 }
 
-describe('the cloud review-address leg', () => {
-  it.each(
-    TIERS.flatMap(({ paths, pattern }) =>
-      paths.map((target) => ({ target, pattern })),
-    ),
-  )(
-    'should call no GraphQL-backed gh subcommand in $target',
-    ({ target, pattern }) => {
-      expect(hitsIn(target, pattern)).toEqual([])
+describe('the skills a cloud session runs', () => {
+  it.each(CLOUD_PATHS)(
+    'should call no GraphQL-backed gh subcommand in %s',
+    (target) => {
+      expect(hitsIn(target)).toEqual([])
     },
   )
 })

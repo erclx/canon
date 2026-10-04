@@ -86,7 +86,8 @@ git switch -c <branch> main && git cherry-pick <sha> <sha> \
   && (cat <<'BODY' > .canon/tmp/pr/split/<branch>.md
 <body following pr.md template, written from the cherry-picked commits>
 BODY
-) && gh pr create --title "<title>" --body-file .canon/tmp/pr/split/<branch>.md \
+) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch> -f base=main -F body=@.canon/tmp/pr/split/<branch>.md --jq .html_url \
+  && printf 'opened=true\n' \
   && rm .canon/tmp/pr/split/<branch>.md
 
 # Return to primary branch, push, and open its PR
@@ -94,12 +95,17 @@ git checkout <new_name> && git push -u origin <new_name> \
   && (cat <<'BODY' > .canon/tmp/pr/split/<new_name>.md
 <body following pr.md template, written from the primary's commits>
 BODY
-) && gh pr create --title "<title>" --body-file .canon/tmp/pr/split/<new_name>.md \
+) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<new_name> -f base=main -F body=@.canon/tmp/pr/split/<new_name>.md --jq .html_url \
+  && printf 'opened=true\n' \
   && rm .canon/tmp/pr/split/<new_name>.md
 
 # Clean up the body-file dir if all PRs succeeded (no-op when non-empty)
 rmdir .canon/tmp/pr/split 2>/dev/null || true
 ```
+
+Every pull request opens through the REST pulls endpoint rather than the `gh pr` create subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. The endpoint requires `base`, so each call names the branch its layer sits on. `-F` reads the body file, where `-f` would post the path itself.
+
+A create the endpoint refuses, such as one for a head that already has an open pull request, exits non-zero and stops the chain before `opened=true` prints and before the body file is removed. The `opened=true` line is what a pull request creation log reads to count the opening, since the REST call prints a URL and never names itself.
 
 For stacked mode, base each branch on the previous and cherry-pick only that group's commits:
 
@@ -115,7 +121,8 @@ git switch -c <branch-1> main && git cherry-pick <g1-sha> <g1-sha> \
   && (cat <<'BODY' > .canon/tmp/pr/split/<branch-1>.md
 <body following pr.md template, written from the cherry-picked commits>
 BODY
-) && gh pr create --title "<title>" --body-file .canon/tmp/pr/split/<branch-1>.md \
+) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch-1> -f base=main -F body=@.canon/tmp/pr/split/<branch-1>.md --jq .html_url \
+  && printf 'opened=true\n' \
   && rm .canon/tmp/pr/split/<branch-1>.md
 
 # Group 2: based on <branch-1>, this group's commits only
@@ -124,15 +131,17 @@ git checkout -b <branch-2> && git cherry-pick <g2-sha> <g2-sha> \
   && (cat <<'BODY' > .canon/tmp/pr/split/<branch-2>.md
 <body following pr.md template, written from the cherry-picked commits>
 BODY
-) && gh pr create --title "<title>" --body-file .canon/tmp/pr/split/<branch-2>.md \
+) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch-2> -f base=<branch-1> -F body=@.canon/tmp/pr/split/<branch-2>.md --jq .html_url \
+  && printf 'opened=true\n' \
   && rm .canon/tmp/pr/split/<branch-2>.md
 
-# Return to primary branch, push, and open its PR
+# Return to primary branch, push, and open its PR on the last group's branch
 git checkout <new_name> && git push -u origin <new_name> \
   && (cat <<'BODY' > .canon/tmp/pr/split/<new_name>.md
 <body following pr.md template, written from the primary's commits>
 BODY
-) && gh pr create --title "<title>" --body-file .canon/tmp/pr/split/<new_name>.md \
+) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<new_name> -f base=<branch-2> -F body=@.canon/tmp/pr/split/<new_name>.md --jq .html_url \
+  && printf 'opened=true\n' \
   && rm .canon/tmp/pr/split/<new_name>.md
 
 # Clean up the body-file dir if all PRs succeeded (no-op when non-empty)
@@ -145,6 +154,8 @@ Respond with exactly one line:
 
 `✅ Renamed: <old> → <new> | PRs: <primary-url>, <url1>, <url2>`
 
+Read each URL off the line its create printed through `--jq .html_url`.
+
 Do not add any other text.
 
 ## Stacked merge loop
@@ -153,10 +164,10 @@ When the user signals the previous stacked PR has merged, restack the next one.
 
 1. Rebase and push. The own-commit-count comes from the original split table.
    `git fetch origin main && git checkout <branch> && git rebase --onto origin/main HEAD~<own-commit-count> && git push --force-with-lease`
-2. Verify the PR's base auto-retargeted to main with `gh api repos/{owner}/{repo}/pulls/<num> --jq .base.ref`, a REST read a cloud session's GitHub proxy serves where it refuses GraphQL. If not, `gh pr edit <num> --base main`.
+2. Verify the PR's base auto-retargeted to main with `gh api repos/{owner}/{repo}/pulls/<num> --jq .base.ref`, a REST read a cloud session's GitHub proxy serves where it refuses GraphQL. If not, retarget it with `gh api -X PATCH repos/{owner}/{repo}/pulls/<num> -f base=main --silent`.
 3. Reply: `✅ <branch> rebased onto main. Ready for squash-merge.`
 
 Edge cases:
 
 - If this branch's commits modify a file added by an unmerged upstream PR, wait for that PR to merge before rebasing.
-- If the PR was orphaned by base-branch deletion, recreate it with `gh pr create --base main --head <branch>` and a regenerated body.
+- If the PR was orphaned by base-branch deletion, recreate it with the same create the final commands run, passing `-f head=<branch> -f base=main` and a regenerated body, and print `opened=true` after it.

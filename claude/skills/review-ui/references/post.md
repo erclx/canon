@@ -68,7 +68,9 @@ Record the instant just before the post, in UTC, as `<posted-at>`. Step 8 keeps 
 
 ```bash
 date -u +%Y-%m-%dT%H:%M:%SZ
-gh pr review <number> --comment --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md
+gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F body=@.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md --jq .html_url
 ```
 
-Never post through `--approve` or `--request-changes`, which carry a state the poll does not read and a weight this pass has not earned.
+The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `-F` reads the file into the body, where `-f` would post the path itself.
+
+Never pass `event=APPROVE` or `event=REQUEST_CHANGES`, which carry a state the poll does not read and a weight this pass has not earned.
