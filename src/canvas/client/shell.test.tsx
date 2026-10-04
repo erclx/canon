@@ -2194,6 +2194,90 @@ describe('selection handles', () => {
     ])
   })
 
+  it('should drop the preview when a handle drag comes back to where it started', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1>Hero</h1>')
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+    const handle = handleOf('hero', 'se')
+
+    await act(async () => {
+      const at = (type: string, x: number) =>
+        handle.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: x,
+            clientY: 100,
+            pointerId: 1,
+          }),
+        )
+      at('pointerdown', 100)
+      at('pointermove', 140)
+      at('pointermove', 100)
+      at('pointerup', 100)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    const style = doc.querySelector<HTMLElement>('h1')?.style
+    expect(sentTo('/api/frames/edit')).toEqual([])
+    expect(style?.width).toBe('')
+    expect(style?.height).toBe('')
+  })
+
+  it('should keep an element overlay on the element while a top left handle drags', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 200px">Hero</h1>')
+    stampHash(doc, 'abc123')
+    const target = doc.querySelector<HTMLElement>('h1')
+    if (!target) throw new Error('no h1 in the frame')
+    /* The element grows from its own top left, so its box tracks the style. */
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => {
+        const width = Number.parseFloat(target.style.width) || 200
+        return { x: 10, y: 20, left: 10, top: 20, width, height: 50 }
+      },
+    })
+    clickIn(doc, 'h1')
+    act(() => {
+      view.value = { ...view.value, zoom: 1 }
+    })
+    const handle = handleOf('hero', 'nw')
+
+    await act(async () => {
+      handle.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 100,
+          pointerId: 1,
+        }),
+      )
+      handle.dispatchEvent(
+        new PointerEvent('pointermove', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 100,
+          pointerId: 1,
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    const overlay = figureFor('hero').querySelector<HTMLElement>(
+      '.selection[data-selection="element"]',
+    )
+    expect(overlay?.style.left).toBe('10px')
+    expect(overlay?.style.width).toBe('240px')
+    expect(overlay?.querySelector('.selection-chip')?.textContent).toBe(
+      '240 × 50',
+    )
+  })
+
   it('should send one edit for an element dragged along one axis', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame(

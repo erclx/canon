@@ -161,7 +161,8 @@ function ElementSelection({
   const handleCommit = (box: OverlayBox, from: OverlayBox) => {
     const size = cssSize(box, from)
     const address = addressOf(doc, node)
-    if (!address) {
+    const isUnchanged = box.width === from.width && box.height === from.height
+    if (!address || isUnchanged) {
       restore()
       return
     }
@@ -181,6 +182,7 @@ function ElementSelection({
       kind="element"
       measure={measure}
       hasChip
+      isMeasuredWhileDragging
       onStart={handleStart}
       onPreview={handlePreview}
       onCommit={handleCommit}

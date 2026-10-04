@@ -63,6 +63,12 @@ export interface SelectionOverlayProps {
   /** Subtracted from the box to place the overlay inside its container. */
   readonly offset?: { readonly x: number; readonly y: number }
   readonly hasChip?: boolean
+  /**
+   * Draws the target's own measured box during a drag rather than the dragged
+   * one. An element in normal flow grows from its own top left whichever corner
+   * is dragged, so only its measured box shows where it actually sits.
+   */
+  readonly isMeasuredWhileDragging?: boolean
   readonly onStart?: () => void
   readonly onPreview?: (box: OverlayBox, origin: OverlayBox) => void
   readonly onCommit: (box: OverlayBox, origin: OverlayBox) => void
@@ -79,6 +85,7 @@ export function SelectionOverlay({
   measure,
   offset = { x: 0, y: 0 },
   hasChip = false,
+  isMeasuredWhileDragging = false,
   onStart,
   onPreview,
   onCommit,
@@ -120,8 +127,8 @@ export function SelectionOverlay({
       Math.round(dx / zoom),
       Math.round(dy / zoom),
     )
-    setDragged(current.box)
     onPreview?.(current.box, current.origin)
+    setDragged(isMeasuredWhileDragging ? measure() : current.box)
   }
 
   const handlePointerUp = () => {
