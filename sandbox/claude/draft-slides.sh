@@ -25,7 +25,7 @@ stage_setup() {
     log_info "Action:  /canon:draft-slides 'ledger v1 overview deck'"
     log_info "Expect:  a new folder under .canon/slides/ holding numbered .html slides drawn with var(--...) tokens"
     log_info "         and varied compositions, rendered to .canon/tmp/render/slides/, every ✗ line read back,"
-    log_info "         and a one-pass QA check. Nothing written to .claude/SLIDES.md or .canon/slides/layouts/"
+    log_info "         and a one-pass QA check. Nothing written under .canon/slides/layouts/ or .claude/"
     ;;
   "bare")
     stage_fixtures claude draft-slides bare 01-initial

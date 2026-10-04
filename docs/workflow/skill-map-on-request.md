@@ -20,7 +20,7 @@ These two groups hold the skills no single moment in a project's life calls for,
 | `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                                     |
 | `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                                                 |
 | `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
-| `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                                                          |
+| `canon:draft-slides`      | For a deck, drawn as HTML slides in its own folder and rendered to editable PowerPoint                                                         |
 | `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                                                  |
 | `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap                                   |
 | `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                                                    |

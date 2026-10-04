@@ -46,7 +46,7 @@ Documentation, articles, reference pages, learning material. The reader arrived 
 ## Kinds this file does not cover
 
 - **Transactional flows** such as checkout, sign-up and settings are read as application UI. Their distinctive rules are state coverage and error recovery, which the `ui` governance rules already carry.
-- **Presentation surfaces** such as slide decks are governed by `${CLAUDE_SKILL_DIR}/../../standards/slides.md` and drafted by `draft-slides`. Take the layer ordering and the floor from the body and the rest from there.
+- **Presentation surfaces** such as slide decks are drafted by `draft-slides`, which carries the deck's own design rules. Take the layer ordering and the floor from the body and the rest from that skill.
 - **Terminal and text-mode surfaces** have no layout engine and their own color rules, stated where the writing surface is decided rather than here.
 
 A read naming any of the three above takes the body's rules and says it has no per-kind guidance, naming the surface that governs it. A read naming a kind this file does not list at all says so rather than borrowing the nearest section.
