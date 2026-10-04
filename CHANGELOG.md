@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.27.0](https://github.com/erclx/canon/compare/v5.26.0...v5.27.0) (2026-10-04)
+
+
+### Features
+
+* **canvas:** add selection handles that resize frames and elements ([#2221](https://github.com/erclx/canon/issues/2221)) ([2816624](https://github.com/erclx/canon/commit/2816624683d8c6eea10031c4e2b2cbe34f31fb60))
+* **canvas:** edit sizing, flex alignment, opacity, and radius ([#2229](https://github.com/erclx/canon/issues/2229)) ([94322d4](https://github.com/erclx/canon/commit/94322d42ed2a7a71c242a268a4a7fc52c80b1293))
+* **canvas:** mark a frame as being edited from the CLI ([#2224](https://github.com/erclx/canon/issues/2224)) ([2644a08](https://github.com/erclx/canon/commit/2644a083039d9e70334a50d79bf5ae7292bdc9c1))
+* **canvas:** open a full color picker and move tokens behind an icon ([#2212](https://github.com/erclx/canon/issues/2212)) ([036b0e6](https://github.com/erclx/canon/commit/036b0e6b1f8977c01436f383152dc71fb79a3ce7))
+* **canvas:** pick an element in a frame with no head ([#2225](https://github.com/erclx/canon/issues/2225)) ([02d0c2f](https://github.com/erclx/canon/commit/02d0c2fe413f3104ceddfcb31daa0e80dd272ff3))
+* **claude:** give every shipped skill a family and group the map by it ([#2230](https://github.com/erclx/canon/issues/2230)) ([a2bcbd8](https://github.com/erclx/canon/commit/a2bcbd84b78674955aaa0288feca299f3ae608d6))
+* **design:** embed a project's font faces in canvas frames ([#2227](https://github.com/erclx/canon/issues/2227)) ([c1c75e7](https://github.com/erclx/canon/commit/c1c75e73a5bcced5e9187941fb11bdee71217c53))
+* **pr:** open evidence on its heading and refuse unserved previews ([#2231](https://github.com/erclx/canon/issues/2231)) ([1f9a61a](https://github.com/erclx/canon/commit/1f9a61ab55f2b18bceb5969f0b27ff72a3b9a79e))
+* **sandbox:** drive headless runs from 'canon sandbox run' ([#2228](https://github.com/erclx/canon/issues/2228)) ([023e2fa](https://github.com/erclx/canon/commit/023e2fa3abd5387fa474bda28f3ce9f2722debf5))
+
+
+### Bug Fixes
+
+* **canvas:** bind the serve port so a second canvas walks past it ([#2226](https://github.com/erclx/canon/issues/2226)) ([09505da](https://github.com/erclx/canon/commit/09505daae5f1925512d592d7cc78f562015bdc39))
+* **sandbox:** skip skill injection for a headless run ([#2217](https://github.com/erclx/canon/issues/2217)) ([af42784](https://github.com/erclx/canon/commit/af42784f1e80757ed62455a0c4d44673b3be36cb))
+* **slides:** write the empty root string checksum into embedded faces ([#2222](https://github.com/erclx/canon/issues/2222)) ([ee0ed71](https://github.com/erclx/canon/commit/ee0ed71340d38f52ce7b71361495f88234366baa))
+
 ## [5.26.0](https://github.com/erclx/canon/compare/v5.25.0...v5.26.0) (2026-10-04)
 
 
