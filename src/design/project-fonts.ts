@@ -133,10 +133,23 @@ type Located =
   | { readonly ok: true; readonly path: string }
   | { readonly ok: false; readonly reason: FaceProblem }
 
-/** Confined lexically before any read, then again after resolving links. */
+/** A URL path as the name on disk, or undefined for a malformed escape. */
+function decoded(url: string): string | undefined {
+  try {
+    return decodeURIComponent(url.replace(/[?#].*$/, ''))
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Confined lexically before any read, then again after resolving links. The
+ * check runs on the decoded path, so an escaped `..` cannot pass it.
+ */
 function locate(root: string, sheet: string, url: string): Located {
   const folder = projectDir(root)
-  const clean = url.replace(/[?#].*$/, '')
+  const clean = decoded(url)
+  if (clean === undefined) return { ok: false, reason: 'missing' }
   if (isAbsolute(clean)) return { ok: false, reason: 'outside-folder' }
   const path = resolve(join(root, dirname(sheet)), clean)
   if (!isWithin(folder, path)) return { ok: false, reason: 'outside-folder' }

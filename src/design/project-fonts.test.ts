@@ -167,6 +167,41 @@ describe('inlineProjectFaces', () => {
     expect(result.dropped).toMatchObject([{ reason: 'outside-folder' }])
   })
 
+  it('should read a percent-encoded file name as the name on disk', () => {
+    seed('.claude/design/project/fonts/My Face.woff2', WOFF2)
+
+    const result = inlineProjectFaces(
+      ROOT,
+      SHEET,
+      faceRule('Inter', 'fonts/My%20Face.woff2'),
+    )
+
+    expect(result.dropped).toEqual([])
+    expect(result.css).toContain(WOFF2.toString('base64'))
+  })
+
+  it('should drop a rule whose percent escape is malformed', () => {
+    const result = inlineProjectFaces(
+      ROOT,
+      SHEET,
+      faceRule('Inter', 'fonts/bad%E0.woff2'),
+    )
+
+    expect(result.dropped).toMatchObject([{ reason: 'missing' }])
+  })
+
+  it('should refuse an encoded parent path without reading it', () => {
+    const outside = fontFile('secret.woff2')
+    const url = relative(
+      join(ROOT, '.claude/design/project'),
+      outside,
+    ).replaceAll('.', '%2E')
+
+    const result = inlineProjectFaces(ROOT, SHEET, faceRule('Inter', url))
+
+    expect(result.dropped).toMatchObject([{ reason: 'outside-folder' }])
+  })
+
   it('should leave a data URI and a remote URL as written', () => {
     const css = `${faceRule('A', 'data:font/woff2;base64,AAAA')}${faceRule('B', 'https://example.com/b.woff2')}`
 
