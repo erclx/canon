@@ -768,6 +768,10 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await page
       .getByRole('group', { name: 'text alignment' })
       .scrollIntoViewIfNeeded()
+    // An earlier case's edit leaves Saved up on a timer, so the shot waits it out.
+    await expect
+      .poll(() => panel.locator('.saved').count(), { timeout: 10_000 })
+      .toBe(0)
     const first = await overflowIn()
     await panel.screenshot({ path: join(SHOTS, 'typography-a.png') })
     await toggle.click()
