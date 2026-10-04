@@ -72,7 +72,9 @@ export function displayValue(property: string, raw: string): string {
 export function toCssValue(property: string, typed: string): string {
   const value = typed.trim()
   /* A line height has no auto keyword, so the field's Auto is its normal. */
-  if (property === 'line-height' && value === 'Auto') return 'normal'
+  if (property === 'line-height' && value.toLowerCase() === 'auto') {
+    return 'normal'
+  }
   if (value === 'Auto' || value === 'Normal') return value.toLowerCase()
   if (SIZES.has(property) && SIZE_MODES[value]) return SIZE_MODES[value]
   if (!LENGTHS.has(property) && !SIGNED_LENGTHS.has(property)) return value

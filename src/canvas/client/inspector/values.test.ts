@@ -395,6 +395,10 @@ describe('line height writes', () => {
     expect(toCssValue('line-height', 'Auto')).toBe('normal')
   })
 
+  it('should write a lowercase auto as normal', () => {
+    expect(toCssValue('line-height', 'auto')).toBe('normal')
+  })
+
   it('should leave a bare number unitless', () => {
     expect(toCssValue('line-height', '1.5')).toBe('1.5')
   })
