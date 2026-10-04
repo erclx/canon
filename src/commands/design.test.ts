@@ -46,7 +46,8 @@ function fontFile(name: string, bytes: string): string {
   return path
 }
 
-describe('canon design fonts', () => {
+/** A spawn outlasts the default 5 s under a parallel run's load. */
+describe('canon design fonts', { timeout: RUN_TIMEOUT_MS }, () => {
   it('should list a face add wrote as present', async () => {
     const font = fontFile('inter.woff2', 'wOF2fake')
 
