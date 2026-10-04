@@ -1,9 +1,9 @@
 ---
 title: Orchestrator dispatch runbook
-description: The plan-answer gate, the collision check before a self-dispatch, the file-set disjointness gate, the branch and model the launch names, the fallback to a human launch, and the loop's stopping condition
+description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch and model the launch names, the fallback to a human launch, and the loop's stopping condition
 ---
 
-Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The disjointness gate below is where that row's file set is tested against every track in flight.
+Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
 
 ## Contents
 
@@ -11,7 +11,7 @@ Run this at loop step 4, for a `## Run now` row whose plan is verified, in place
 - [Check the plan waits on nobody](#check-the-plan-waits-on-nobody)
 - [Check the branch is unclaimed](#check-the-branch-is-unclaimed)
 - [Hold what this pass already launched](#hold-what-this-pass-already-launched)
-- [Check the file sets are disjoint](#check-the-file-sets-are-disjoint)
+- [Check for a conflict with the tracks in flight](#check-for-a-conflict-with-the-tracks-in-flight)
 - [Pick the model](#pick-the-model)
 - [Pick local or cloud](#pick-local-or-cloud)
 - [Dispatch](#dispatch)
@@ -47,7 +47,7 @@ Branch on `launchable` rather than on the exit code, which a shell function wrap
 
 This gate runs ahead of the two collision checks because it is the cheapest reading of the three, needing no roster and no ref, and because it is the only one asking about the row itself rather than about what else is in flight. A row nobody can launch does not need testing against the tracks already out.
 
-It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The disjointness gate compares the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a file clears a check the tree would fail, and what catches it then is a worker's message rather than any check.
+It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The conflict check reads the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a renamed or relocated path clears a check the tree would fail, and what catches it then is a worker's message rather than any check.
 
 A blank `- Answer:` is not an unanswered question. `${CLAUDE_SKILL_DIR}/../../standards/plan.md` fixes an empty slot as accepting the `- Suggested:` line above it, which is what makes a plan decision-ready in one pass. The narrow case this reads is `- Suggested: needs your call, <why>` and its two demonstrated paraphrases, `needs operator's call` and `needs the operator's call`, over an empty slot, the form that same standard writes where the answer turns on preference rather than on a technical default. A gate reading every blank slot as open would refuse every plan in the folder.
 
@@ -58,7 +58,7 @@ What it prevents is a halt nobody is watching for. `role-worker` instructs a ses
 Run `canon sessions list --branch <type>/<slug> --json` and read `claimed` off the record.
 
 - `claimed: true`: the row is not free. Report what holds it, `worktree` when it names a path, `sessions` when it carries a row, and `refs` when the branch already exists. Move to the next candidate rather than colliding.
-- `claimed: false`, `sessionsReadable: true`, and `refsReadable: true`: proceed to the disjointness gate.
+- `claimed: false`, `sessionsReadable: true`, and `refsReadable: true`: proceed to the conflict check.
 - `claimed: false` with either flag false, or the command refuses, or the record carries no `claimed` key (`reason` reads `no-registry` or `no-repository`): treat the candidate as unverified rather than clear. Report which reading could not be taken and fall back to the human-launch line below. Dispatching on a check that could not be read reproduces the exact collision this exists to prevent.
 
 Reading `claimed` off the record is what keeps this a check rather than a rule a session can talk itself out of. The field is already the composed answer across the worktree listing, the live session roster, and the refs that name the branch, so nothing here re-derives the OR.
@@ -77,21 +77,23 @@ A worker registers with `branch: main` and the main worktree as its `cwd` until 
 
 Keep the branch of every row this pass has launched and treat a candidate matching one as claimed, without re-running the check. That closes the window for this dispatcher and only for it. A second dispatcher in another session reads git and the roster alone, sees none of this record, and can still take the same row. Say so when reporting, rather than implying the window is shut.
 
-## Check the file sets are disjoint
+## Check for a conflict with the tracks in flight
 
-No count binds this. List the files the candidate's plan touches, from its `**Files to touch:**` lines, against the file set of every track already in flight, read off the Touches column of each row on the board. Dispatch when the sets are disjoint and hold the row otherwise.
+No count binds this, and a shared file does not either. Hold a candidate behind a track in flight when any of these five holds, naming the hold and the track, and dispatch it otherwise:
 
-The board is not the whole set. A track a person launched by hand carries no row, so that column cannot see it, which is the ordinary shape whenever the operator is launching rather than dispatching. Read `canon sessions list --json` for the branches in flight, and take the file set of any branch no row names from the plan that branch is building. A candidate cleared against the board alone is cleared against a partial reading.
+1. Dependency. The row or plan cites the track as something it waits on or builds over, including a stacked slice based on the other's branch.
+2. Contract. One plan changes a contract the other consumes, such as an exported signature, a CLI verb's flags or JSON record, a skill step another skill cites, or a config or frontmatter key, read off the changing plan's `**Risks:**`.
+3. Relocation. One plan moves, renames, splits, or deletes a path the other writes or reads, which a rebase cannot settle mechanically. Both sides of a rename sit before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
+4. Sweep. One plan rewrites a file or folder wholesale, such as a terminology pass or a `canon/context/` reflow, and the other writes inside it.
+5. A stated reason, written on the hold: a singleton resource, or tracks interacting where no file reading shows, as a row creating a skill does with one counting that catalog. Nothing verifies the reason, so this hold stands only while the dispatcher applies it.
 
-Take the comparison at the file path rather than at a folder above it. `canon tasks validate` compares the paths each row wrote, so a collision it reports on a folder means a row's Touches cell claimed that folder rather than the verb widening anything. A cell naming a bare folder collides with every row writing a file under it, which reads as the verb comparing path segments too coarsely and is not.
+A shared file with none of the five is not a hold. Dispatch both and name the shared paths, so the merge order and the second branch's rebase are planned rather than discovered. The branch merging second resolves after the first merges, never against a sibling still building, by running `review-address` in the session that built it, whose Step 5 rebases before the gate runs over the merged result. A hunk needing a decision the tree does not carry goes to the controller, and a branch no live session holds gets the review-address shape in `orchestrator-launch.md`.
 
-The finding names which row contributed the containing path, and a bare-folder cell reports as a claim of its own beside the findings. Read that output as a candidate list, settle each pair by file, and narrow the cell that over-claimed rather than discounting the collision it caused.
+No practitioner source serializes on a shared file. Each builds in parallel and tests at integration, where the merge surfaces a textual conflict and the suite run over the merged result surfaces a semantic one. Fowler's [branching patterns](https://martinfowler.com/articles/branching-patterns.html) have whoever integrates second pull mainline in and check health "even if it's a clean merge", his [Semantic Conflict](https://martinfowler.com/bliki/SemanticConflict.html) names self-testing code as the first defense, [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to a few hours, and GitHub's [merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) tests each pull request against everything queued ahead of it. A candidate has no commits to trial-merge, so `git merge-tree` runs at integration and this check reads what a plan declares.
 
-A declared set is what a branch sets out to write rather than a bound on it, so this gate clears against a prediction and the branch outgrows it hours later. A track can cross the set it cleared against and still merge clean, which is a gate reporting disjoint while a real overlap stood. Two classes account for nearly all of the crossing. The ship chain's own steps write past every plan, since `canon:context-fold` refreshes whichever context entry a change reaches and `canon:docs-sync` reaches the public docs, and neither surface is one a planner can name before the change exists. The drift stages `bun run check` regenerates and asserts are the second, together with the test and sandbox siblings a source change drags in. Nothing here prevents either, because the files at issue are written long after this gate clears. What reads the other end is `canon tasks plan-reach`, which `canon:git-ship` runs at step 5 against the branch's own diff, so a crossing this gate could not see is named before the pull request opens rather than after it merges.
+Read `canon sessions list --json` for the branches in flight as well as the board, since a track a person launched by hand carries no row, and read the plan of any branch no row names. `canon tasks validate` and `canon tasks plan-reach` report the paths two rows share, which is a candidate list for the five holds and the paths the dispatch names. A shared folder means a Touches cell claimed it bare, so narrow that cell rather than reading the folder as a sweep.
 
-Disjointness is necessary and not sufficient, so hold a candidate whose sets do not touch when a stated reason serializes it, and write the reason on the hold. One row creating a skill and another auditing that catalog and counting it write nothing in common, and dispatching both still leaves the audit counting a denominator that moves underneath it. Nothing verifies that a reason was written, so the rule holds only while the dispatcher applies it.
-
-What binds past that is review attention rather than a count, and `## Parallelism` in the skill body states it along with the cap an operator can set for a session. The one number this skill carries is the review dispatch's count of three in `orchestrator-review-dispatch.md`, which moves a review rather than binding a track, and this runbook carries none.
+A declared set predicts what a branch writes rather than bounding it, since `canon:context-fold`, `canon:docs-sync`, and the regenerated drift stages write past every plan. Such a crossing changes what the second branch rebases over rather than whether a row holds, and `canon tasks plan-reach` at `canon:git-ship` step 5 names it before the pull request opens. What binds past the five holds is review attention, which `## Parallelism` in the skill body states.
 
 ## Pick the model
 
@@ -111,9 +113,9 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check ab
 
 ## Fall back to the human
 
-Hand the row to the human-launch line in step 4 instead of dispatching when any of these hold, and name which one: the plan still waits on the operator, the plan-answer read could not be taken, the collision check refused, the row's file set overlaps a track already out, or a stated reason holds the row behind one.
+Hand the row to the human-launch line in step 4 instead of dispatching when any of these hold, and name which one: the plan still waits on the operator, the plan-answer read could not be taken, the collision check refused, or the row holds behind a track already out under the conflict check, on a dependency, a contract, a relocation, a sweep, or a stated reason. A shared file alone is not on that list.
 
-The first of those five is the one that reaches a person rather than the board. A row held for a collision or for a serialize reason waits on the wave clearing, where a row held on its plan waits on an answer only the operator can give, so hand that one over with the question label and its stated reason attached rather than as a name and a refusal.
+The first of those four is the one that reaches a person rather than the board. A row held on its branch or under the conflict check waits on the wave clearing, where a row held on its plan waits on an answer only the operator can give, so hand that one over with the question label and its stated reason attached rather than as a name and a refusal.
 
 Hand the person one command: `/canon:auto-ship <plan>`, naming the row, the plan path, and the branch together, with no worktree call ahead of it. A leading worktree call adds nothing beyond what `auto-ship` Step 0 already reaches for itself. A second command also risks a client folding two commands into one message, which reads everything after the first command's name as its own argument and drops the second, per `### Position zero` in `orchestrator-launch.md`.
 
