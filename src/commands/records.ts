@@ -31,6 +31,11 @@ import {
   staleMemory,
 } from '@/records/stale'
 import {
+  type CanonicalDoc,
+  type CanonicalReport,
+  staleCanonical,
+} from '@/records/stale-canonical'
+import {
   type Finding,
   type FindingRemedy,
   isRecordKind,
@@ -85,8 +90,11 @@ interface StaleCommandOptions extends ValidateCommandOptions {
   readonly days?: string
 }
 
-/** The one kind `stale` reads, since only a memory entry carries a review date. */
-const STALE_KINDS = ['memory'] as const
+/**
+ * The kinds `stale` reads. A memory entry ages by days in the shared pen, and
+ * a canonical doc ages by the releases shipped since its review.
+ */
+const STALE_KINDS = ['memory', 'canonical'] as const
 
 interface OrdinalCommandOptions extends ValidateCommandOptions {
   readonly claim?: boolean
@@ -270,14 +278,17 @@ export function register(program: Command): void {
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
       '--days <n>',
-      `Days after a review before an entry is due again (default ${DEFAULT_REVIEW_DAYS})`,
+      `Days after a review before a memory entry is due again (default ${DEFAULT_REVIEW_DAYS})`,
     )
-    .option('--root <path>', 'Project root, defaulting to the main worktree')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the main worktree except on canonical',
+    )
     .addHelpText(
       'after',
       [
         '',
-        'Reads the top-level entries of the memory folder, never review/, archive/,',
+        'memory: reads the top-level entries of the memory folder, never review/, archive/,',
         'or index.md. An entry is due when it carries no reviewed date, a reviewed',
         'value that is not a date, or one older than --days. A path is a backticked',
         'token holding a / and a file extension, resolved against the project root',
@@ -288,17 +299,24 @@ export function register(program: Command): void {
         'Entries are ordered due first, then those citing a missing path, then the',
         'longest unreviewed, then by name, so a review takes the first N as a batch.',
         '',
+        'canonical: reads REQUIREMENTS.md and ARCHITECTURE.md at whichever surface',
+        'root carries each, in the current worktree since both are tracked. Each',
+        'reports its reviewed date and the release tags merged into HEAD after that',
+        'day, or never when it carries no date. --days does not apply.',
+        '',
         'Exit codes:',
         '  0  the reading completed, whatever it found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'It gates nothing and writes nothing. A due entry is a queue position rather',
-        'than a failure, and a missing path is a prompt for the review to judge.',
+        'than a failure, and a missing path or a release count is a prompt for the',
+        'review to judge.',
         '',
         'Examples:',
         '  canon records stale memory',
         '  canon records stale memory --json',
         '  canon records stale memory --days 60 --json',
+        '  canon records stale canonical --json',
         '',
       ].join('\n'),
     )
@@ -560,6 +578,8 @@ async function runStale(
     )
   }
 
+  if (kind === 'canonical') return runStaleCanonical(opts, emitJson)
+
   const days = Number(opts.days ?? DEFAULT_REVIEW_DAYS)
 
   if (!Number.isInteger(days) || days <= 0) {
@@ -586,6 +606,68 @@ async function runStale(
 
   reportStale(outcome)
   return 0
+}
+
+/**
+ * Both docs are tracked, so the root is the checkout the caller stands in. The
+ * main worktree would answer from its own copy and miss a stamp this branch
+ * just wrote.
+ */
+async function runStaleCanonical(
+  opts: StaleCommandOptions,
+  emitJson: boolean,
+): Promise<number> {
+  if (opts.days !== undefined) {
+    return reportRefusal(
+      'canon records stale',
+      {
+        reason: 'bad-days',
+        message:
+          '--days does not apply to canonical, which counts releases rather than days.',
+      },
+      emitJson,
+    )
+  }
+
+  const root = opts.root ?? (await currentWorktreeRoot())
+  const outcome = await staleCanonical(root)
+
+  if (!outcome.ok)
+    return reportRefusal('canon records stale', outcome, emitJson)
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify(outcome)}\n`)
+    return 0
+  }
+
+  intro('canon records stale')
+  logStep('Canonical')
+
+  if (outcome.docs.length === 0) {
+    logInfo('neither REQUIREMENTS.md nor ARCHITECTURE.md exists')
+  } else {
+    for (const doc of outcome.docs) logInfo(describeCanonical(doc, outcome))
+  }
+
+  if (!outcome.tagged) logInfo('no release tags merged into HEAD')
+  outro()
+  return 0
+}
+
+function describeCanonical(
+  doc: CanonicalDoc,
+  outcome: CanonicalReport,
+): string {
+  if (doc.reviewed === null) {
+    return doc.invalidReviewed === undefined
+      ? `${doc.path}: never reviewed`
+      : `${doc.path}: reviewed value is not a date: ${doc.invalidReviewed}`
+  }
+
+  const since = outcome.tagged
+    ? `${plural(doc.releasesSince ?? 0, 'release')} since`
+    : 'no releases to count'
+  return `${doc.path}: reviewed ${doc.reviewed}, ${since}`
 }
 
 function staleRow(entry: StaleEntry): string[] {
