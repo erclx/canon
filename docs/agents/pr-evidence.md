@@ -42,7 +42,7 @@ directory under the `evidence/` segment, and within a state by filename stem,
 so a `before/hero.png` and an `after/hero.png` naming the same case group as
 one entry, not two files. Each entry carries whether it existed at the base
 commit, so the comment shows a base image or marks it new. All-new states drop
-the Base column and each image is an `<img width="1000">`.
+the Base column and each `<img>` takes its PNG width, at most 1000.
 
 `reason` on the record is what a caller branches on, not the exit code:
 

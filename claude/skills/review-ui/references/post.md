@@ -25,11 +25,11 @@ Write it to `.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` at the main w
 
 P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, rendered by <renderer>.
 
-| Box                                | Verdict    | Evidence                                      |
-| ---------------------------------- | ---------- | --------------------------------------------- |
-| 1. <the box as written, shortened> | fail       | <the value read against what the box expects> |
-| 2. <box>                           | needs eyes | <what the frame showed, in words>             |
-| 3. <box>                           | pass       | Evidence `<stem>` <what it showed, in words>  |
+| Box                                          | Evidence                                      |
+| -------------------------------------------- | --------------------------------------------- |
+| **Fail.** 1. <the box as written, shortened> | <the value read against what the box expects> |
+| **Needs eyes.** 2. <box>                     | <what the frame showed, in words>             |
+| **Pass.** 3. <box>                           | Evidence `<stem>` <what it showed, in words>  |
 
 **Frames**
 
@@ -49,6 +49,8 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 
 <!-- review-ui: head=<head> -->
 ```
+
+The table has two columns and each Box cell opens on its verdict in bold with a period: `**Pass.**`, `**Fail.**`, `**Needs eyes.**`, or `**Not driven.**`. A column holding only those short words loses its width beside two long ones and GitHub breaks its header mid-word, so the verdict rides in the Box cell instead.
 
 An Evidence cell resting on a frame holds words only, so the table's text columns keep the body's width. A frame Step 5 pushed goes in the Frames block below the table, one `Box <n>, <verdict>` label then the `![](<link>)` embed for each framed box, with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image.
 

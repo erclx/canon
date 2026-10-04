@@ -32,10 +32,14 @@ import {
   findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
+  type EvidenceItem,
+  type EvidenceReading,
   groupEvidence,
   hasMarkedEvidenceComment,
+  PNG_HEADER_BYTES,
   readChecklistBoxes,
   readOwed,
+  readPngWidth,
   renderEvidenceBody,
   settleChecklist,
 } from '@/pr/evidence'
@@ -1746,6 +1750,72 @@ async function readPullMergeBase(
   return sha === null || sha.trim() === '' ? undefined : sha.trim()
 }
 
+/**
+ * The pixel width of a PNG at `sha`, read over the contents API like every
+ * other evidence read. The endpoint ignores a `Range` header, so the whole
+ * file arrives and only its first bytes are read. Undefined for any other
+ * format or a failed read, so the render keeps its ceiling width.
+ */
+async function readImageWidth(
+  cwd: string,
+  path: string,
+  sha: string,
+): Promise<number | undefined> {
+  if (!/\.png$/i.test(path)) return undefined
+  try {
+    const result = await execa(
+      'gh',
+      [
+        'api',
+        '-H',
+        'Accept: application/vnd.github.raw',
+        `repos/{owner}/{repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${sha}`,
+      ],
+      {
+        cwd,
+        timeout: GH_TIMEOUT_MS,
+        env: gitEnv(),
+        extendEnv: false,
+        encoding: 'buffer',
+      },
+    )
+    return readPngWidth(result.stdout.subarray(0, PNG_HEADER_BYTES))
+  } catch {
+    return undefined
+  }
+}
+
+/** Each item with the pixel width of its head image and, when it has one, its base image. */
+async function withImageWidths(
+  cwd: string,
+  reading: EvidenceReading,
+  base: string | undefined,
+  head: string,
+): Promise<EvidenceReading> {
+  if (reading.kind === 'refused') return reading
+  const states = await Promise.all(
+    reading.states.map(async (entry) => ({
+      ...entry,
+      items: await Promise.all(
+        entry.items.map(async (item): Promise<EvidenceItem> => {
+          const [width, baseWidth] = await Promise.all([
+            readImageWidth(cwd, item.path, head),
+            item.added || base === undefined
+              ? undefined
+              : readImageWidth(cwd, item.path, base),
+          ])
+          return {
+            ...item,
+            ...(width !== undefined && { width }),
+            ...(baseWidth !== undefined && { baseWidth }),
+          }
+        }),
+      ),
+    })),
+  )
+  return { kind: 'read', states }
+}
+
 async function runEvidence(
   number: string | undefined,
   opts: EvidenceOptions,
@@ -1954,7 +2024,8 @@ async function runEvidence(
     unsettled === undefined
       ? undefined
       : settleChecklist(unsettled, identity.head, findEvidenceHead(comments))
-  const states = grouped.kind === 'read' ? grouped.states : []
+  const sized = await withImageWidths(root, grouped, base, identity.head)
+  const states = sized.kind === 'read' ? sized.states : []
   const body = renderEvidenceBody(
     states,
     repo,
