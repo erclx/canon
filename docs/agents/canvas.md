@@ -35,7 +35,7 @@ A pick is refused as `address-mismatch` when the browser builds elements the fil
 
 ## Edit
 
-`canvas edit <page>/<frame> --element <index> --set <property>=<value>` sets one property of the element at that index, the same index `canvas selection` reports. The properties are `text`, `color`, `background-color`, `font-size`, `font-weight`, `width`, `height`, `padding`, `gap`, and `flex-direction`. A style property is written into the element's inline `style`, replacing that property and leaving the others as they were, and an empty value drops it.
+`canvas edit <page>/<frame> --element <index> --set <property>=<value>` sets one property of the element at that index, the same index `canvas selection` reports. The properties are `text`, `color`, `background-color`, `font-size`, `font-weight`, `width`, `height`, `padding`, `gap`, `display`, `flex-direction`, `justify-content`, `align-items`, `flex-wrap`, `opacity`, `border-radius`, `border-top-left-radius`, `border-top-right-radius`, `border-bottom-right-radius`, and `border-bottom-left-radius`. A style property is written into the element's inline `style`, replacing that property and leaving the others as they were, and an empty value drops it. Writing `border-radius` or `padding` also drops that shorthand's longhands from the same `style`, so no corner or side left over overrides the new value. Writing a longhand leaves its shorthand in place, since the longhand comes later and wins.
 
 `text` replaces the text of an element holding text alone and refuses one holding other elements as `not-text-only`. Every byte outside the element stays as it was. `--json` emits the page, frame, file, path, and the file's new `hash`.
 
