@@ -39,7 +39,9 @@ A pick is refused as `address-mismatch` when the browser builds elements the fil
 
 `text` replaces the text of an element holding text alone and refuses one holding other elements as `not-text-only`. Every byte outside the element stays as it was. `--json` emits the page, frame, file, path, and the file's new `hash`.
 
-The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. A color picked from the project's tokens is written as `var(--<name>)`. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
+The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
+
+A color picked from the project's tokens is written as `var(--<name>)`, and below full opacity as a `color-mix()` of that `var()` with `transparent` at the opacity percent, so it keeps following the theme. A browser older than 2023 drops a `color-mix()` value, which leaves the property unset there. A hex is written as six digits, or eight below full opacity.
 
 Inline style beats a class, so an operator's edit masks a class change Claude makes later. Read a frame's inline styles before restyling it, and remove one the change should replace. The inspector marks a color or background set inline with the word `raw` when its value names no `var()` and is not `currentColor` or a CSS-wide keyword, since that value stays fixed when the theme changes. A property outside the set, or a value carrying `;`, `{`, `}`, `<`, `>`, or a line break, is refused as `invalid-edit`.
 
