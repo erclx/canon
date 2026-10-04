@@ -2,7 +2,13 @@
 //
 // Run as `bun poll.ts`. The pure pieces are exported so a test drives the code
 // a loop runs, and `main` runs only when this file is the entry point.
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import { join } from 'node:path'
 
 import { baseBranch, baseRef, mainRoot, run } from './repo'
@@ -458,6 +464,26 @@ export const classify = (
 }
 
 /**
+ * What the last run saw on one pull request's base movement, read off its
+ * baseline entry. STALE and CONFLICT print as lines only on a transition or a
+ * push, so a reader deciding a draft lift several runs later reads this
+ * instead. A reading an older baseline never recorded is unknown, not clear.
+ */
+export const standingLine = (entry: Baseline): string => {
+  const at = short(entry.head)
+  if (entry.merges === 'conflict') {
+    return `CONFLICT  #${entry.number} standing at ${at}`
+  }
+  if (entry.stale === 'stale')
+    return `STALE     #${entry.number} standing at ${at}`
+  if (entry.merges === 'clean' && entry.stale === 'fresh') {
+    return `CLEAR     #${entry.number} at ${at}`
+  }
+
+  return `UNKNOWN   #${entry.number} at ${at}, the last run could not read whether it merges or is current`
+}
+
+/**
  * A pull request this run could not read keeps the line it had, so the GONE
  * sweep does not read the gap as a merge. Its heading is blanked to a value no
  * branch matches unless it already reads `reported`, since echoing it intact
@@ -786,7 +812,26 @@ const countSince =
     return log.isOk ? log.stdout.split('\n').filter((l) => l !== '').length : 0
   }
 
-const main = (): number => {
+/** `--check <number>` reads the baseline alone and writes nothing. */
+const check = (statePath: string, number: string): number => {
+  const entry = (existsSync(statePath) ? readFileSync(statePath, 'utf8') : '')
+    .split('\n')
+    .filter((line) => line !== '')
+    .map(parseBaseline)
+    .find((candidate) => candidate.number === number)
+  if (entry === undefined) {
+    console.error(
+      `poll: #${number} has no baseline entry, so nothing is known about it`,
+    )
+
+    return 1
+  }
+  console.log(standingLine(entry))
+
+  return 0
+}
+
+const main = (args: string[]): number => {
   const root = mainRoot()
   if (root === null) {
     console.error('poll: not a git repository, so nothing is classified')
@@ -797,8 +842,9 @@ const main = (): number => {
   // The baseline is per-machine mutable state, so it stays in gitignored
   // scratch even though the script is tracked.
   const stateDir = join(root, '.canon', 'tmp', 'pr', 'poll')
-  mkdirSync(stateDir, { recursive: true })
   const statePath = join(stateDir, 'baseline.txt')
+  if (args[0] === '--check') return check(statePath, args[1] ?? '')
+  mkdirSync(stateDir, { recursive: true })
   appendFileSync(statePath, '')
 
   const ref = baseRef()
@@ -928,4 +974,4 @@ const main = (): number => {
   return 0
 }
 
-if (import.meta.main) process.exitCode = main()
+if (import.meta.main) process.exitCode = main(process.argv.slice(2))

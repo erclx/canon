@@ -700,6 +700,66 @@ describe('poll', () => {
       expect(rebased).not.toContain('STALE')
     })
 
+    // The draft lift reads a standing reading at lift time, which may be many
+    // runs after the line that reported it, so the check reads the baseline.
+    describe('standing check', () => {
+      const check = (number: string): PollResult => {
+        const run = spawnSync('bun', [SCRIPT, '--check', number], {
+          cwd: join(root, 'repo'),
+          encoding: 'utf8',
+          env: buildEnv(),
+        })
+
+        return {
+          status: run.status,
+          stderr: run.stderr,
+          stdout: run.stdout.trim(),
+        }
+      }
+
+      it('should report a stale branch as standing after its line has passed', () => {
+        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+        pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
+        poll()
+        expect(poll().stdout).toBe('No movement.')
+
+        expect(check('7').stdout).toMatch(
+          /^STALE {5}#7 standing at [0-9a-f]{7}$/,
+        )
+      })
+
+      it('should report a conflicted branch as standing', () => {
+        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+        pushMain(commit(base, 'main2', { 'a.txt': fileWith(0, 'theirs') }))
+        poll()
+
+        expect(check('7').stdout).toMatch(/^CONFLICT {2}#7 standing at /)
+      })
+
+      it('should report a branch rebased onto main as clear', () => {
+        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+        const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })
+        pushMain(main2)
+        poll()
+        openPull(
+          '7',
+          commit(main2, 'rebased', {
+            'a.txt': fileWith(0, 'mine').replace('five', 'theirs'),
+          }),
+        )
+        poll()
+
+        expect(check('7').stdout).toMatch(/^CLEAR {5}#7 at /)
+      })
+
+      it('should refuse a pull request the baseline does not hold', () => {
+        const run = check('9')
+
+        expect(run.status).toBe(1)
+        expect(run.stderr).toContain('#9 has no baseline entry')
+      })
+    })
+
     it('should report nothing for two open pull requests that merge together cleanly', () => {
       listOpen('7', '8')
       openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
