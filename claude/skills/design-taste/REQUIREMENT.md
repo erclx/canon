@@ -46,7 +46,7 @@ A rule belongs in this skill only when all four hold. Three of the four reject m
 3. **It is judgment rather than a threshold.** A contrast ratio has a number and belongs to the floor. Whether a palette reads cheap has no number and belongs here.
 4. **One line states it, and something could violate that line.** "Use whitespace intentionally" fails, since nothing could break it. "No three consecutive image-and-text splits" passes, since it can be counted.
 
-A rule failing any of the four is recorded as considered and declined rather than argued again, in the reference where it would have gone.
+A rule failing any of the four is recorded as considered and declined rather than argued again, in `references/adopted.md`, under the reference where it would have gone.
 
 ## Must not
 

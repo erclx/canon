@@ -1,6 +1,6 @@
 ---
 title: Machine tells in design
-description: The visual defaults a model reaches for when nothing states a direction, each with what to do instead, plus the record of which external items were adopted, which were declined, and why
+description: The visual defaults a model reaches for when nothing states a direction, each with what to do instead, plus the countable composition limits and the first-screen budget
 ---
 
 # Machine tells in design
