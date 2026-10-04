@@ -150,7 +150,7 @@ whichever previews apply, joined by a middle dot:
 
 **Preview:** <url> · **Local preview:** <url>
 
-**Base:** `aaaa000` · **Head:** `bbbb111`
+**Base:** `<base>` · **Head:** `<head>`
 ```
 
 The Base and Head line follows only when the comment carries screenshots.
