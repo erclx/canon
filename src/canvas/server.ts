@@ -348,6 +348,11 @@ export function startCanvas(
         hostname: SERVE_HOST,
         port,
         development: false,
+        /*
+         * Production mode turns port reuse on, so a second canvas would bind
+         * beside one already listening rather than walk past it.
+         */
+        reusePort: false,
         /* The change stream stays open for as long as the shell does. */
         idleTimeout: 0,
         routes: {

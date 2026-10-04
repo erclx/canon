@@ -13,9 +13,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
  * state of a single walk on one page, so they run in order and share it.
  *
  * The server runs as a subprocess against a temporary root, on a port the
- * kernel just handed out. Bun binds with port reuse on by default on Linux, so
- * the serve verb's own walk from its default port shares the port with an
- * operator's canvas already listening there, and requests reach either process.
+ * kernel just handed out, so the walk never starts at a port an operator's
+ * canvas holds. Bun turns port reuse on in production mode, which the serve
+ * verb runs in, so the bind passes `reusePort: false` to walk past a held port.
  *
  * The suite needs a browser binary. CI installs none, so it skips there rather
  * than failing, which means a green pipeline is not evidence this passed. Run
