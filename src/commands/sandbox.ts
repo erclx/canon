@@ -25,6 +25,7 @@ import {
   type RunEnvelope,
   type Verdict,
 } from '@/sandbox/expect'
+import { runHeadless } from '@/sandbox/headless/run'
 import { runSandbox } from '@/sandbox/provision'
 import { sandboxTree } from '@/sandbox/tree'
 import {
@@ -510,7 +511,7 @@ export function register(program: Command): void {
       if (mismatch !== undefined) logWarn(mismatch)
 
       // `--no-header` is the frame opt-out for a caller that already opened
-      // one, which `sandbox/run.sh` and the picker below both do.
+      // one, which `canon sandbox run` and the picker below both do.
       const isHeader = cmd.args[0] !== '--no-header'
       const args = isHeader ? cmd.args : cmd.args.slice(1)
 
@@ -526,6 +527,57 @@ export function register(program: Command): void {
         arm: args[1] === '' ? undefined : args[1],
       })
     })
+
+  sandbox
+    .command('run')
+    .description(
+      'Provision a scenario, drive one claude -p session over it, and print the envelope with its verdict',
+    )
+    .argument('[target]', 'Scenario as <category>:<command>, e.g. git:commit')
+    .argument('[prompt]', 'Skill invocation, e.g. "/canon:git-commit"')
+    .argument('[arm]', 'Named scenario arm, e.g. small')
+    .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Env overrides:',
+        '  CANON_SKILL_TEST_MODEL            default sonnet',
+        '  CANON_SKILL_TEST_TOOLS            default Bash,Read,Glob,Grep,Edit,Write',
+        '  CANON_SKILL_TEST_MAX_TURNS        default 30',
+        '  CANON_SKILL_TEST_PERMISSION_MODE  default bypassPermissions',
+        '',
+        'Examples:',
+        '  canon sandbox run git:commit "/canon:git-commit"',
+        '  canon sandbox run claude:plan-feature "/canon:plan-feature add a widget" small',
+        '',
+        'Bills a real session through the claude binary on PATH.',
+        'Exit codes: the verdict, 1 when the envelope does not parse, or the',
+        'provisioning or session code when either stops the run first.',
+      ].join('\n'),
+    )
+    .action(
+      async (
+        target: string | undefined,
+        prompt: string | undefined,
+        arm: string | undefined,
+        _opts: unknown,
+        cmd: Command,
+      ) => {
+        if (target === undefined) {
+          cmd.help()
+          return
+        }
+        if (reportAbsentScenarioTree()) return
+
+        process.exitCode = await runHeadless({
+          projectRoot: PROJECT_ROOT,
+          target,
+          prompt,
+          arm,
+        })
+      },
+    )
 
   sandbox
     .command('check')
@@ -628,7 +680,7 @@ export function register(program: Command): void {
         '  canon sandbox equivalence claude --json',
         '  canon sandbox equivalence claude:plan-feature --base origin/main',
         '',
-        'Provisions offline only and never runs sandbox/run.sh or a claude binary.',
+        'Provisions offline only and never runs canon sandbox run or a claude binary.',
         '--stub-remote also runs the anchor arms, and wins over --include-anchor.',
         'Exit codes: 0 when every compared arm is identical or red the same way',
         'on both sides, 1 on any difference, exit mismatch, or enumeration error.',
