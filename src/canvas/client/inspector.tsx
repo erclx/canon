@@ -158,46 +158,6 @@ function elementName(element: Element): string {
   return [tag, ...element.classList].join('.')
 }
 
-interface TokenPickerProps {
-  readonly label: string
-  readonly initial: string
-  readonly isBusy: boolean
-  readonly onCommit: (value: string) => void
-}
-
-function TokenPicker({
-  label,
-  initial,
-  isBusy,
-  onCommit,
-}: TokenPickerProps): JSX.Element | null {
-  const colors =
-    tokens.value?.groups?.find((group) => group.kind === 'color')?.tokens ?? []
-  if (colors.length === 0) return null
-  return (
-    <select
-      class="token-picker"
-      aria-label={`${label} token`}
-      title="Pick a project token"
-      value={
-        colors.some((token) => initial === `var(${token.name})`) ? initial : ''
-      }
-      disabled={isBusy}
-      onChange={(event) => {
-        const { value } = event.currentTarget
-        if (value !== '' && value !== initial) onCommit(value)
-      }}
-    >
-      <option value="">Token</option>
-      {colors.map((token) => (
-        <option key={token.name} value={`var(${token.name})`}>
-          {token.name}
-        </option>
-      ))}
-    </select>
-  )
-}
-
 function ElementFields({
   node,
   doc,
