@@ -6,7 +6,8 @@ import {
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
-import { brandFavicon, faviconLink } from '@/design/favicon'
+import { brandFavicon } from '@/design/brand-favicon'
+import { faviconLink } from '@/design/favicon'
 import { stripFrontmatter } from '@/markdown/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { compileScript } from '@/teach/browser/compile'

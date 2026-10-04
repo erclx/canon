@@ -1,7 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { PROJECT_ROOT } from '@/roots/project'
-
 export interface FaviconColors {
   readonly light: string
   readonly dark: string
@@ -42,16 +38,4 @@ export function renderFavicon(mark: string, colors: FaviconColors): string {
  */
 export function faviconLink(svg: string): string {
   return `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(svg)}">`
-}
-
-const BRAND_MARK = 'assets/brand/mark.svg'
-
-/**
- * The brand icon, built from the mark and the favicon's own pair, the same two
- * inputs `web/public/favicon.svg` is generated from. Every surface that shows
- * the icon reads it here rather than keeping a copy that drifts from the mark.
- */
-export function brandFavicon(): string {
-  const mark = readFileSync(join(PROJECT_ROOT, BRAND_MARK), 'utf8')
-  return renderFavicon(mark, FAVICON_COLORS)
 }

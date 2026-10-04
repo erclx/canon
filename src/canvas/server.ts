@@ -34,7 +34,7 @@ import {
   tokenGroups,
 } from '@/canvas/tokens'
 import { buildDesignCss } from '@/design/css'
-import { brandFavicon } from '@/design/favicon'
+import { brandFavicon } from '@/design/brand-favicon'
 import {
   bindFirstFree,
   PORT_ATTEMPTS,
