@@ -41,7 +41,7 @@ Any change but the alpha writes a hex, because a token's color cannot change fro
 
 ### Selection handles
 
-The selection overlay in `client/selection.tsx` draws the outline, four corner handles, and an element's size chip, and sizes each against `--outline-scale`, the inverse of the zoom the plane sets, so all of it holds one screen size. The frame label sizes the same way. A handle drag divides the pointer's travel by the zoom, since the delta arrives in screen pixels and the box is in surface units.
+The selection overlay in `client/selection.tsx` draws the outline, four corner handles, and an element's size chip, and sizes each against `--outline-scale`, the inverse of the zoom the plane sets, so all of it holds one screen size. The frame label sizes the same way. A handle drag divides the pointer's travel by the zoom, since the delta arrives in screen pixels and the box is in surface units. A frame's overlay holds the corner opposite the handle, while an element's draws the element's own measured box during the drag, since an element in normal flow grows from its top left whichever handle moves.
 
 An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
 
