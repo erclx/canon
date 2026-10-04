@@ -38,6 +38,7 @@ Each check traces to a line in the standard.
 - No ISO date in `SKILL.md` or any file under `references/`, reported as `datedProvenance` in the JSON record's `findings`
 - Each listed practice skill closing with `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`, and each skill on the wider ledger list carrying `references/adopted.md`, reported together as `practiceShape`
 - Each file under `references/` running over 100 lines opening with a `## Contents` H2, reported as `referenceContents`
+- Each skill under `claude/skills/` declaring a `metadata.family` that names a key in `checkpoints.families`, reported as `family`
 
 A body whose frontmatter does not parse reports as declaring neither field rather than ending the run, so one malformed file cannot hide the corpus behind it. A key present with an empty value reads as absent, since a blank `name` would otherwise report as a name disagreeing with every folder. A folder carrying no requirement is reported once under presence rather than counted again for the sections it therefore lacks.
 
@@ -61,7 +62,7 @@ A check with no rule behind it prints an opinion as a defect, which is where the
 
 ## Exit codes
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, requirement-section, dated-provenance, practice shape, and reference contents findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around. In the toolkit, two `bun run check` stages read the same report in-process and fail a push on dated provenance and on practice shape, since its own corpus is held at zero on both.
+Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a skill folder carrying no `REQUIREMENT.md`. Only presence sets a failing code. Name, description, folder, requirement-section, dated-provenance, practice shape, reference contents, and family findings print and return `0`, because each is a judgment a reader settles and failing a push on one would make the check something to route around. In the toolkit, three `bun run check` stages read the same report in-process and fail a push on dated provenance, on practice shape, and on family, since its own corpus is held at zero on all three.
 
 No stage reads reference contents, so a long reference without a list stays a report.
 

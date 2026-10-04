@@ -17,7 +17,7 @@ Use these to discover what's available instead of hardcoding names.
 | `canon standards list --json`     | Standards docs and the paths each governs                        |
 | `canon gov list --json`           | Governance stacks, rule sets, and unreferenced rules             |
 | `canon claude seeds list --json`  | Seed doc sources with content                                    |
-| `canon claude skills list --json` | Plugin skills, descriptions, requirement flag                    |
+| `canon claude skills list --json` | Plugin skills, descriptions, requirement flag, family vocabulary |
 | `canon docs list --json`          | Consumer docs plus per-domain context                            |
 | `canon audits list --json`        | Audits the set runs, the corpus each reads, and whether it gates |
 
@@ -67,6 +67,13 @@ count spanning both overstates what ships. A skill whose frontmatter is missing
 or unparseable returns an empty description rather than failing the listing, so
 one malformed file cannot hide the rest of the catalog. `--names` emits skill
 names one per line.
+
+Each skill in `--json` carries `family`, the `metadata.family` its frontmatter
+declares, or `null` where it declares none. A top-level `families` array holds
+the vocabulary as `{ key, group }` entries in skill map order, where `group` is
+the map heading the family's rows sit under. Read a new skill's family from it
+rather than from the map. `--by-family` prints the human listing as one step per
+family, with a trailing step for any skill whose family is missing or unknown.
 
 Each entry also carries `requirement`, whether the folder holds a sibling
 `REQUIREMENT.md`. Every skill is meant to carry one, so a `false` is a gap to
