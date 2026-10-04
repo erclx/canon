@@ -812,7 +812,7 @@ describe('canon pr evidence reads the pull request', () => {
 
     expect(record.body).toContain('| hero | *(new)* |')
     expect(record.body).toContain(
-      '| nav | ![](https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true) |',
+      '| nav | <img src="https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true" width="1000" alt="nav base"> |',
     )
   })
 
@@ -832,7 +832,9 @@ describe('canon pr evidence reads the pull request', () => {
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
-    expect(record.body).toContain('| moved | *(new)* |')
+    expect(record.body).toContain('| Case | Head |')
+    expect(record.body).toContain('| moved | <img ')
+    expect(record.body).not.toContain('*(new)*')
   })
 
   it('should render a copied path as new', async () => {
@@ -840,7 +842,9 @@ describe('canon pr evidence reads the pull request', () => {
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
-    expect(record.body).toContain('| dup | *(new)* |')
+    expect(record.body).toContain('| Case | Head |')
+    expect(record.body).toContain('| dup | <img ')
+    expect(record.body).not.toContain('*(new)*')
   })
 
   it('should refuse would-empty and print no body when a render holds no cases over a comment that does', async () => {

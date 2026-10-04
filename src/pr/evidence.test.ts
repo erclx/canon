@@ -150,15 +150,83 @@ describe('renderEvidenceBody', () => {
 
     expect(body).toContain('<summary>dark (2)</summary>')
     expect(body).toContain(
-      '![](https://github.com/erclx/annex/blob/aaaa000/web/evidence/dark/hero.png?raw=true)',
+      '<img src="https://github.com/erclx/annex/blob/aaaa000/web/evidence/dark/hero.png?raw=true" width="1000" alt="hero base">',
     )
     expect(body).toContain(
-      '![](https://github.com/erclx/annex/blob/bbbb111/web/evidence/dark/hero.png?raw=true)',
+      '<img src="https://github.com/erclx/annex/blob/bbbb111/web/evidence/dark/hero.png?raw=true" width="1000" alt="hero head">',
     )
+    expect(body).toContain('| Case | Base | Head |')
     expect(body).toContain('| new-case | *(new)* |')
     expect(body.trim().endsWith('<!-- pr-evidence: head=bbbb111 -->')).toBe(
       true,
     )
+  })
+
+  it('should drop the Base column for a state whose cases are all added', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/a.png', stem: 'a', added: true },
+            { path: 'evidence/dark/b.png', stem: 'b', added: true },
+          ],
+        },
+      ],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+    )
+
+    expect(body).toContain('| Case | Head |\n| --- | --- |')
+    expect(body).toContain(
+      '| a | <img src="https://github.com/o/r/blob/bbbb111/evidence/dark/a.png?raw=true" width="1000" alt="a head"> |',
+    )
+    expect(body).not.toContain('*(new)*')
+    expect(body).not.toContain('| Base |')
+  })
+
+  it('should decide the columns per state, keeping new only in the added rows of a mixed one', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/a.png', stem: 'a', added: true },
+            { path: 'evidence/dark/b.png', stem: 'b', added: false },
+          ],
+        },
+        {
+          state: 'light',
+          items: [{ path: 'evidence/light/a.png', stem: 'a', added: true }],
+        },
+      ],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+    )
+
+    expect(body.match(/\| Case \| Base \| Head \|/g)).toHaveLength(1)
+    expect(body.match(/\| Case \| Head \|/g)).toHaveLength(1)
+    expect(body.match(/\*\(new\)\*/g)).toHaveLength(1)
+  })
+
+  it('should escape a stem carrying a pipe or an angle bracket in the row and the alt text', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [{ path: 'evidence/dark/a.png', stem: 'a|<b>"', added: true }],
+        },
+      ],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+    )
+
+    expect(body).toContain('| a&#124;&lt;b&gt;&quot; | <img ')
+    expect(body).toContain('alt="a&#124;&lt;b&gt;&quot; head">')
+    expect(countEvidenceCases(body)).toBe(1)
   })
 
   it('should open the body with the heading and the preview address under it', () => {
@@ -639,6 +707,55 @@ describe('countEvidenceCases', () => {
     )
 
     expect(countEvidenceCases(body)).toBe(3)
+  })
+
+  it('should count the rows of a body posted in the three-column markdown image shape', () => {
+    const body = [
+      '| Case | Base | Head |',
+      '| --- | --- | --- |',
+      '| a | *(new)* | ![](https://github.com/o/r/blob/h/a.png?raw=true) |',
+      '| b | ![](https://github.com/o/r/blob/b/b.png?raw=true) | ![](https://github.com/o/r/blob/h/b.png?raw=true) |',
+    ].join('\n')
+
+    expect(countEvidenceCases(body)).toBe(2)
+  })
+
+  it('should count the rows of a two-column body', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/a.png', stem: 'a', added: true },
+            { path: 'evidence/dark/b.png', stem: 'b', added: true },
+          ],
+        },
+      ],
+      'o/r',
+      'base',
+      'head',
+    )
+
+    expect(countEvidenceCases(body)).toBe(2)
+  })
+
+  it('should count the rows of a three-column body in the img shape', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            { path: 'evidence/dark/a.png', stem: 'a', added: true },
+            { path: 'evidence/dark/b.png', stem: 'b', added: false },
+          ],
+        },
+      ],
+      'o/r',
+      'base',
+      'head',
+    )
+
+    expect(countEvidenceCases(body)).toBe(2)
   })
 
   it('should count zero for a preview-only body', () => {

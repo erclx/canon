@@ -45,7 +45,7 @@ mkdir -p .canon/tmp/pr/review/evidence/<number>
 git show <sha>:<path> > .canon/tmp/pr/review/evidence/<number>/<side>-<name>.png
 ```
 
-Take the sha from the row, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool. A `*(new)*` base cell has no before image.
+Take the sha from the row, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool. A `*(new)*` base cell has no before image, and a state whose cases are all added has no Base column at all. Read the URL out of the `src=` of each `<img>`, or out of `![](` in a comment posted before the embed changed.
 
 ## How many to open
 
