@@ -18,7 +18,7 @@ The miss is measured. On 2026-10-02 two queries ran twice each with identical te
 
 The authorities in both pairs were named by the session unprompted once it was asked to, which is the argument for a method over a list. Two queries at one run each show the effect exists and do not size it.
 
-Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit refused its JSON search with a 403 and refused `WebFetch`, while its RSS feed answered 200. X redirected `curl` to a login page and returned 402 to `WebFetch`, so no free route reaches it.
+Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit refused its JSON search with a 403 and refused `WebFetch`, while its RSS feed answered 200. X redirected `curl` to a login page and returned 402 to `WebFetch`, so no free route reaches it. Re-probed on 2026-10-04, Reddit's RSS feed, its search feed, and its JSON listing and search all answered 403, so the feed that answered two days earlier no longer does.
 
 ## Must
 
