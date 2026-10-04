@@ -1,6 +1,6 @@
 ---
 name: context-fold
-description: Folds a session into the project's context entries, requirements, architecture, and wireframes, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
+description: Folds a session into the project's context entries, architecture, and wireframes, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
 ---
 
 # Context fold
@@ -82,13 +82,15 @@ The verb resolves the board at the main worktree root in-process, which is the r
 
 Read `ok` and `reason` out of that record rather than the exit. An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command and takes the second status, which flattens every non-zero exit to zero. A refusal arriving as success leaves the outcome unmarked while the chain moves on, so the board reports shipped work as open and the next session re-plans it.
 
-**REQUIREMENTS.md, ARCHITECTURE.md, DESIGN.md, a wireframe surface file (flat or nested)**
+**ARCHITECTURE.md, DESIGN.md, a wireframe surface file (flat or nested)**
 
+- Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
 - Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md` and `${CLAUDE_SKILL_DIR}/../../standards/architecture.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
-- Write a session decision into the `canon/context/` entry for the domain it constrains, under that entry's `## Decisions`, by default. Touch `canon/ARCHITECTURE.md` only for a decision that fills one of the slots `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` names, however many domains its reasoning reaches.
+- Write a session decision into the `canon/context/` entry for the domain it constrains, under that entry's `## Decisions`, by default.
+- Touch `canon/ARCHITECTURE.md` only when a plan a matched task's `Plan:` line names states a decision filling a slot `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` names. A slot decision no plan carries goes to the domain entry.
 - Read the entry cap the record states before adding a decision to it. At the cap, merge two decisions or retire one to the domain entry it constrains, and name which in the report. Never compress a decision's prose to fit, and never pack two decisions under one heading.
 - Close a decision entry in `canon/ARCHITECTURE.md` with its verification anchor whenever this run writes that entry or amends its reasoning and that reasoning cites a measured number. Re-read the number against the tree first, since the marker records the read rather than the edit. `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` fixes the sentence.
 - Leave every decision entry this run did not write alone, anchored or not. The rule is scoped forward, so an entry written before it is dated by blame rather than by a read. Step 5 reports a stale anchor and no step writes one on an entry it did not amend.
@@ -107,9 +109,7 @@ Skip silently when the filter leaves nothing, which is every branch touching no 
 
 Skip this step silently when `canon/ARCHITECTURE.md` does not exist at `pwd` or carries no decision entry with a verification anchor. A record written before the rule holds none, and a project is not told on every ship that nothing has been checked when the standard calls that state correct. When the baseline is unusable, scope the sweep to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the anchor sweep.`
 
-This step reports and never writes. The record carries no frontmatter, so an anchor is a sentence sharing a paragraph with the claim it marks, and a pass editing prose to mark prose has no structural guard against editing the claim beside it. A surface whose marker sits in YAML gets that separation for free and this one cannot.
-
-Step 3 holds the writer, and the two never meet. Anchoring fires when this run amends a decision, and this sweep fires when the diff moves a path under one, so a single step covering both would gate the anchor obligation on a signal that has nothing to do with it.
+This step reports and never writes. An anchor is a sentence sharing a paragraph with the claim it marks rather than a frontmatter field, and a pass editing prose to mark prose has no structural guard against editing the claim beside it. A surface whose marker sits in YAML gets that separation for free and this one cannot.
 
 Follow `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` for the anchor sentence this step matches on.
 
@@ -152,6 +152,8 @@ Output one line per file updated:
 When Step 3 met the architecture record's cap, add one line naming what it did there:
 
 `↪ Architecture at cap: merged <heading> into <heading>` or `↪ Architecture at cap: retired <heading> to <context entry>`
+
+When Step 2 noted a requirements change: `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`
 
 Step 10 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 

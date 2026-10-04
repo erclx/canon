@@ -43,11 +43,11 @@ What this misses is a claim whose number moved with no matching citation in the 
 
 ## What the sweep never does
 
-- Write into the entry. The record carries no frontmatter, so the marker and the claim share one paragraph and an edit reaching one reaches the other.
+- Write into the entry. The anchor is a sentence rather than a frontmatter field, so the marker and the claim share one paragraph and an edit reaching one reaches the other.
 - Refresh an anchor. Re-reading the number is the act the marker records, so a date written by a pass that measured nothing is the false confidence the marker exists to prevent.
 - Flag an unanchored entry. The standard scopes the rule forward, and an entry written before it is dated by blame rather than by a read.
 
-The session amending a decision writes its anchor, which Step 3 already requires.
+The session amending a decision writes its anchor, which Step 3 already requires. Step 3 holds the writer, and the two never meet. Anchoring fires when this run amends a decision, and this sweep fires when the diff moves a path under one, so a single step covering both would gate the anchor obligation on a signal that has nothing to do with it.
 
 ## Output
 
