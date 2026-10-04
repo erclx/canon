@@ -8,6 +8,11 @@ export interface SkillListing {
   readonly name: string
   readonly description: string
   readonly requirement: boolean
+  /**
+   * The `metadata.family` the frontmatter declares, read as written. Whether it
+   * names a vocabulary key is the audit's finding, not the listing's.
+   */
+  readonly family: string | null
 }
 
 export interface SkillsCorpus {
@@ -72,28 +77,50 @@ export function listSkillsAt(skillsRoot: string): SkillListing[] {
     }),
   ].sort()
 
-  return paths.map((path) => ({
-    name: dirname(path),
-    description: readDescription(join(skillsRoot, path)),
-    requirement: existsSync(join(skillsRoot, dirname(path), 'REQUIREMENT.md')),
-  }))
+  return paths.map((path) => {
+    const { description, family } = readListedFields(join(skillsRoot, path))
+    return {
+      name: dirname(path),
+      description,
+      requirement: existsSync(
+        join(skillsRoot, dirname(path), 'REQUIREMENT.md'),
+      ),
+      family,
+    }
+  })
+}
+
+interface ListedFields {
+  readonly description: string
+  readonly family: string | null
 }
 
 /**
- * Returns an empty description rather than throwing on a skill whose
- * frontmatter is missing or unparseable, so one malformed file does not hide
- * the rest of the catalog from a caller counting it.
+ * Returns an empty description and a null family rather than throwing on a
+ * skill whose frontmatter is missing or unparseable, so one malformed file
+ * does not hide the rest of the catalog from a caller counting it.
  */
-function readDescription(path: string): string {
+function readListedFields(path: string): ListedFields {
+  const empty = { description: '', family: null }
   const match = FRONTMATTER.exec(readFileSync(path, 'utf8'))
-  if (!match) return ''
+  if (!match) return empty
 
+  let parsed: unknown
   try {
-    const parsed = Bun.YAML.parse(match[1])
-    if (typeof parsed !== 'object' || parsed === null) return ''
-    const { description } = parsed as Record<string, unknown>
-    return typeof description === 'string' ? description : ''
+    parsed = Bun.YAML.parse(match[1])
   } catch {
-    return ''
+    return empty
   }
+  if (!isRecord(parsed)) return empty
+
+  const { description, metadata } = parsed
+  const family = isRecord(metadata) ? metadata.family : undefined
+  return {
+    description: typeof description === 'string' ? description : '',
+    family: typeof family === 'string' ? family : null,
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
