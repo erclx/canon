@@ -1192,6 +1192,17 @@ const TOKENS: PagesRecord['tokens'] = {
       ],
     },
     { kind: 'spacing', tokens: [{ name: '--space-sm', value: '0.5rem' }] },
+    {
+      kind: 'font-family',
+      tokens: [
+        { name: '--type-body-family', value: 'Inter, sans-serif' },
+        { name: '--type-code-family', value: 'monospace' },
+      ],
+    },
+    {
+      kind: 'font-size',
+      tokens: [{ name: '--type-heading-size', value: '2rem' }],
+    },
   ],
 }
 
@@ -1308,6 +1319,176 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({ property: 'padding', value: '12px' }),
     ])
+  })
+
+  it('should post a family token picked from the family menu as var()', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('family tokens'), '--type-body-family')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'font-family',
+        value: 'var(--type-body-family)',
+      }),
+    ])
+  })
+
+  it('should post a size token picked from the size menu as var()', async () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('size tokens'), '--type-heading-size')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'font-size',
+        value: 'var(--type-heading-size)',
+      }),
+    ])
+  })
+
+  it('should mark a family set inline as a literal as raw', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="font-family: &quot;Geist Variable&quot;, serif">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('family').value).toBe('Geist Variable')
+    expect(
+      fieldNamed('family').closest('.glyph-field')?.querySelector('.raw'),
+    ).toBeTruthy()
+  })
+
+  it('should show a family token by its name with no raw marker', () => {
+    renderWithTokens([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="font-family: var(--type-body-family)">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('family').value).toBe('--type-body-family')
+    expect(
+      fieldNamed('family').closest('.glyph-field')?.querySelector('.raw'),
+    ).toBeNull()
+  })
+
+  it('should post a pasted family declaration as its value alone', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('family'), 'font-family: Inter, sans-serif;')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'font-family',
+        value: 'Inter, sans-serif',
+      }),
+    ])
+  })
+
+  it('should post nothing for a quoted family committed as shown', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="font-family: &quot;Geist Variable&quot;, Geist, sans-serif">A</h1>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('family'), 'Geist Variable')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should post a weight picked from the weight menu', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'button')
+
+    await commit(fieldNamed('weight'), '300')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'font-weight', value: '300' }),
+    ])
+  })
+
+  it('should show a unitless line height and post nothing when it is unchanged', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="line-height: 1.5">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('line height').value).toBe('1.5')
+    await commit(fieldNamed('line height'), '1.5')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should show a normal line height as Auto', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="line-height: normal">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('line height').value).toBe('Auto')
+  })
+
+  it('should write a bare letter spacing as pixels', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('letter spacing'), '-0.5')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'letter-spacing', value: '-0.5px' }),
+    ])
+  })
+
+  it('should post text-align center from the alignment group', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await act(async () => {
+      buttonNamed('Align center').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'text-align', value: 'center' }),
+    ])
+  })
+
+  it('should press the alignment the element holds and post nothing for it', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="text-align: right">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await act(async () => {
+      buttonNamed('Align right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(buttonNamed('Align right').getAttribute('aria-pressed')).toBe('true')
+    expect(sentTo('/api/frames/edit')).toEqual([])
   })
 
   it('should show the Flex header alone with an add button on a block', () => {
