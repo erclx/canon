@@ -7,6 +7,7 @@ subtitle: Local dev loop and the run command table, how bun run check scopes its
 
 Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
 
+- [Evidence modes](evidence.md): The dev and prod meanings of evidence, the one boundary that sorts a folder between them, a row per kind with its writer and gate and whether canon pr evidence compares it, the folders carrying the segment and neither kind, and the products with no dev baseline yet
 - [Gating stages](gates/index.md): The stages that gate a push on a measure, what sequences them, the report-only Audit set stage, the content stages, and the catalog stages. Start with overview.
 - [Hooks](hooks/index.md): Where shell scripts and hooks live, the tool-call guards, the compaction and turn hooks, the session budget settings, and the husky git hooks. Start with overview.
 - [Overview](overview.md): What the development domain owns, the toolchain setup, the run command table and its consumers, and why the entry is a folder
