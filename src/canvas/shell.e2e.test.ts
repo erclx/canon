@@ -681,6 +681,58 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     ).toBe('true')
   }, 30_000)
 
+  it('should show the editing badge at a low and a high zoom in both themes and clear it on done', async () => {
+    const target = `${PAGE}/${FRAME}`
+    runCli(['canvas', 'editing', target, '--by', 'worker-a', '--root', root])
+    const frame = page.locator(`.frame[data-frame="${FRAME}"]`)
+    const badge = frame.locator('.frame-editing')
+    await expect.poll(() => badge.textContent()).toBe('worker-a editing')
+
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    /* The name keeps the row, and a badge on it never covers the switch. */
+    const overlap = () =>
+      frame.evaluate((figure) => {
+        const box = (selector: string) =>
+          figure.querySelector(selector)?.getBoundingClientRect()
+        const name = figure.querySelector('.frame-name')
+        const tag = box('.frame-editing')
+        const theme = box('.frame-theme')
+        const isCovering =
+          tag && theme && tag.width > 0 && theme.width > 0
+            ? tag.right > theme.left &&
+              tag.left < theme.right &&
+              tag.bottom > theme.top &&
+              tag.top < theme.bottom
+            : false
+        return {
+          clipped: name ? name.scrollWidth - name.clientWidth : -1,
+          isCovering,
+        }
+      })
+
+    const states: { clipped: number; isCovering: boolean }[] = []
+    for (const zoom of [25, 200]) {
+      await selectFrameAt(zoom)
+      for (const shot of ['a', 'b']) {
+        states.push(await overlap())
+        await page.screenshot({
+          path: join(SHOTS, `editing-${zoom}-${shot}.png`),
+        })
+        await toggle.click()
+      }
+    }
+
+    runCli(['canvas', 'editing', target, '--done', '--root', root])
+    await expect.poll(() => badge.textContent()).toBe('')
+
+    expect(states).toEqual(
+      Array.from({ length: 4 }, () => ({ clipped: 0, isCovering: false })),
+    )
+    expect(await frame.getAttribute('data-editing')).toBeNull()
+  }, 45_000)
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
