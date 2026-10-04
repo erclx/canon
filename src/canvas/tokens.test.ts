@@ -117,12 +117,61 @@ describe('resolveFrameTokens', () => {
     expect(faceFamilies(css)).toEqual(expect.arrayContaining(named))
   })
 
-  it('should inject no toolkit font face for an installed base', () => {
+  it('should carry a toolkit face for each family an installed base names', () => {
+    seedDesign(
+      'base.css',
+      ":root { --type-body-family: Geist Variable, sans-serif; --figure-hand: 'Virgil', cursive; }",
+    )
+
+    const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
+
+    expect(faceFamilies(css)).toEqual(['Geist Variable', 'Virgil'])
+  })
+
+  it('should embed no toolkit face an installed sheet does not name', () => {
     seedDesign('base.css', ':root { --type-body-family: Geist, sans-serif; }')
 
     const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
 
     expect(css).not.toContain('@font-face')
+  })
+
+  it('should let a project face replace the toolkit face of the same family', () => {
+    seedDesign(
+      'base.css',
+      ':root { --type-body-family: Geist Variable, sans-serif; }',
+    )
+    seedDesign('project/fonts/geist.woff2', 'wOF2project')
+    seedDesign(
+      'project/fonts.css',
+      "@font-face { font-family: 'Geist Variable'; src: url('fonts/geist.woff2'); }",
+    )
+
+    const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
+
+    expect(faceFamilies(css)).toEqual(['Geist Variable'])
+    expect(css).toContain(Buffer.from('wOF2project').toString('base64'))
+  })
+
+  it('should report a project face it dropped and still resolve the sheet', () => {
+    seedDesign(
+      'project/fonts.css',
+      "@font-face { font-family: 'Inter'; src: url('../../../x.woff2'); } :root { --x: 1; }",
+    )
+
+    const tokens = resolveFrameTokens(ROOT, { isOwnCheckout: false })
+
+    expect(tokens).toMatchObject({
+      source: 'installed',
+      dropped: [
+        {
+          sheet: '.claude/design/project/fonts.css',
+          file: '../../../x.woff2',
+          reason: 'outside-folder',
+        },
+      ],
+    })
+    expect(tokens.css).toContain('--x: 1;')
   })
 
   it('should take the installed base followed by the project overrides', () => {
