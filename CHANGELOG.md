@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.26.0](https://github.com/erclx/canon/compare/v5.25.0...v5.26.0) (2026-10-04)
+
+
+### Features
+
+* **canvas:** edit colors through a swatch, hex, and token-first picker ([#2204](https://github.com/erclx/canon/issues/2204)) ([b01ae17](https://github.com/erclx/canon/commit/b01ae17af19d62551e2b4403943720f1b3124ab6))
+* **capture:** probe the font of every rendered text element ([#2200](https://github.com/erclx/canon/issues/2200)) ([88a31d6](https://github.com/erclx/canon/commit/88a31d67cc45b57b07184b3335d093f1a97751e7))
+* **claude:** check reference contents and source ledgers in skills ([#2205](https://github.com/erclx/canon/issues/2205)) ([af2ce02](https://github.com/erclx/canon/commit/af2ce023be8657cf1ff7deb34cd256eb59ccf5ee))
+* **claude:** move review-ui and git-split pull request writes to REST ([#2199](https://github.com/erclx/canon/issues/2199)) ([8080401](https://github.com/erclx/canon/commit/80804014ee7ea8a56a8405a4d3a4772b0ee4d6ed))
+* **claude:** review the canonical docs on request instead of every ship ([#2201](https://github.com/erclx/canon/issues/2201)) ([b850b3f](https://github.com/erclx/canon/commit/b850b3f4517a02971a73a44878caa3b4ca725129))
+* **sandbox:** provision scenarios from TypeScript via a hook subprocess ([#2206](https://github.com/erclx/canon/issues/2206)) ([4dafeb2](https://github.com/erclx/canon/commit/4dafeb282454b16ec892e8f9c4ccc9485f19d465))
+* **slides:** keep each deck in its own folder of html slides ([#2209](https://github.com/erclx/canon/issues/2209)) ([7f7c2b7](https://github.com/erclx/canon/commit/7f7c2b76beedcbdbb7a7b6f5dc6701e0b47b5c61))
+
+
+### Bug Fixes
+
+* **capture:** refuse a generic family and skip text-free elements ([#2210](https://github.com/erclx/canon/issues/2210)) ([bba3242](https://github.com/erclx/canon/commit/bba324283e0ef93c0811f54a6f1eeb653b218abb))
+
 ## [5.25.0](https://github.com/erclx/canon/compare/v5.24.0...v5.25.0) (2026-10-03)
 
 
