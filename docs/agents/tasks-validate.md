@@ -12,7 +12,7 @@ canon tasks validate
 canon tasks validate --json
 ```
 
-Seven checks run. Touches reaches one half of the `## Run now` test the board standard states, and Plan reaches every group, reading the Plan column under `## Run now` and the task file's own line under the other two. Mapping and Grouping test the folder contract and hold for every group, and Shape holds for every group too, ahead of the four. Ordering reaches only the `## Needs a plan` rows, and Blockers reaches every row outside `## Run now`:
+Seven checks run. Touches reaches only the `## Run now` rows, asking each to name its files, and Plan reaches every group, reading the Plan column under `## Run now` and the task file's own line under the other two. Mapping and Grouping test the folder contract and hold for every group, and Shape holds for every group too, ahead of the four. Ordering reaches only the `## Needs a plan` rows, and Blockers reaches every row outside `## Run now`:
 
 | Check    | What it reports                                                                                                         |
 | -------- | ----------------------------------------------------------------------------------------------------------------------- |
