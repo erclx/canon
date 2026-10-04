@@ -112,14 +112,6 @@ ensure_sandbox_anchor_repo() {
   log_info "Created ${GITHUB_ORG}/${repo_name} as a private repository."
 }
 
-# Mirrors the merge-base resolution the diff-baseline port already carries
-# across five skill bodies, so a checkout whose local main trails origin/main
-# does not pull in skill bodies other merged branches changed.
-resolve_sandbox_skill_diff_base() {
-  git -C "$PROJECT_ROOT" merge-base HEAD origin/main 2>/dev/null ||
-    git -C "$PROJECT_ROOT" merge-base HEAD main 2>/dev/null
-}
-
 # A remote is useless without an author, so the scenarios that reach one always
 # configure both. configure_sandbox_git_identity stays callable on its own for
 # the scenarios that never push. The probe runs first so an absent remote is

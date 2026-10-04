@@ -84,6 +84,21 @@ describe('injectChangedSkills', () => {
     ).toBe('after\n')
   })
 
+  it('should leave out a skill only main changed after the branch forked', () => {
+    initRepo(root)
+    write(root, 'claude/skills/shared/SKILL.md', 'at the fork\n')
+    commitAll(root, 'base')
+    git(root, 'checkout', '-q', '-b', 'feature')
+    git(root, 'checkout', '-q', 'main')
+    write(root, 'claude/skills/shared/SKILL.md', 'moved on main\n')
+    commitAll(root, 'main moves')
+    git(root, 'checkout', '-q', 'feature')
+
+    const injected = injectChangedSkills(root, sandbox, false)
+
+    expect(injected).toEqual([])
+  })
+
   it('should skip a skill the branch deleted', () => {
     branchTouchingSkills()
 
