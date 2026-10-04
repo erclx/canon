@@ -253,6 +253,32 @@ describe('stageScenarioInProcess', () => {
     ])
   })
 
+  it('should name GITHUB_ORG when an anchor scenario has no organization', async () => {
+    const writes: string[] = []
+    vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      writes.push(String(chunk))
+      return true
+    })
+    const definition = definitionOf({ default: (ctx) => ctx.anchorRemote() })
+
+    await stage(definition, { GITHUB_ORG: '', ANCHOR_REPO: 'canon-sandbox' })
+
+    expect(writes.join('')).toContain('Export GITHUB_ORG=<org>')
+  })
+
+  it('should name the anchor flag when a scenario never declared one', async () => {
+    const writes: string[] = []
+    vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      writes.push(String(chunk))
+      return true
+    })
+    const definition = definitionOf({ default: (ctx) => ctx.anchorRemote() })
+
+    await stage(definition, { GITHUB_ORG: 'org', ANCHOR_REPO: '' })
+
+    expect(writes.join('')).toContain('Set anchor: true')
+  })
+
   it('should set the sandbox author from the environment', async () => {
     execFileSync('git', ['init', '-q'], { cwd: tree })
     const definition = definitionOf({ default: (ctx) => ctx.identity() })

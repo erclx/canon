@@ -396,9 +396,13 @@ export function createStageContext(options: ContextOptions): StageContext {
   const anchorRemote = (): void => {
     const org = env.GITHUB_ORG ?? ''
     const repo = env.ANCHOR_REPO ?? ''
-    if (org === '' || repo === '')
+    if (org === '')
       fail(
-        'The anchor remote needs GITHUB_ORG and a repository name. Set anchor: true on the scenario.',
+        'GITHUB_ORG is empty. Export GITHUB_ORG=<org>, or run from a clone whose remote.origin.url points at GitHub.',
+      )
+    if (repo === '')
+      fail(
+        'The anchor remote needs a repository name. Set anchor: true on the scenario.',
       )
     ensureAnchorRepo(org, repo)
     identity()
