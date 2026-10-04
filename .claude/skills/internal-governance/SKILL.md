@@ -11,7 +11,7 @@ Read `canon/context/governance/overview.md` for the system overview and `canon/c
 
 - Read `canon/context/governance/rules.md` for the numbering ranges before picking a number for a new rule.
 - Follow `standards/rule.md` for frontmatter, heading style, and bullet conventions when writing a new rule file.
-- `rule_subdir` is all that is left in `scripts/lib/gov.sh`. Frontmatter stripping is `src/frontmatter.ts`. Do not duplicate either.
+- `rule_subdir` is all that is left in `scripts/lib/gov.sh`. Frontmatter stripping is `src/markdown/frontmatter.ts`. Do not duplicate either.
 - Every verb is TypeScript and `scripts/gov/` is gone. The sync engine is `src/sync/engine.ts`, the gov adapter is `src/gov/adapter.ts`, the payload builder is `src/gov/payload.ts`, the stack resolver is `src/gov/stacks.ts`, and the catalog behind `list` is `src/gov/list.ts`.
 - Changing what counts as a change, or where a rule's source lives, belongs in the adapter. Changing the scan report, the prompt, or the apply loop belongs in the engine, where any future adapter will inherit it.
 - `internal/rules/` follows the same numbering and frontmatter convention as `governance/rules/`, per `canon/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.

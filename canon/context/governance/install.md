@@ -40,7 +40,7 @@ Committing the consumed copy lets a citation spell one path that resolves here a
 - `runInstall` in `src/commands/gov.ts` writes two stamp records after copying: `recordStamp` for the file hashes a sync refreshes, and `writeChainStamp` for the stack name the operator gave. The chain stamp lets a later sync answer what the target's stack lists without re-deriving it from installed band folders.
 - `canon gov install` and `canon gov sync` refuse to run against the toolkit root, because a target's rules are the operator's to edit. `canon gov regen` runs against it on purpose, since the destination there is produced output.
 - `scripts/lib/gov.sh` holds `rule_subdir` alone. It is called once per rule file inside a loop, so routing it through the CLI would cost a process per file, and it stays because the sandbox scripts are its callers.
-- The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
+- The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/markdown/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
 - A project holding `.cursor/rules/` from an earlier toolkit version keeps those files, since sync does not touch them. Remove the folder by hand in a project that does not use Cursor.
 - A target on the flat `.claude/rules/<subdir>/` layout is invisible to both bootstrap verbs. Sync walks only `.claude/rules/canon/` and exits 0, and install writes there without clearing the flat tree. Claude Code then loads both copies of an edited rule, one of them frozen. Run `canon migrate rule-layout` before either verb.
 

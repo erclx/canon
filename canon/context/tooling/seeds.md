@@ -53,7 +53,7 @@ The `ARCHITECTURE.md` and `REQUIREMENTS.md` seeds state the word, risk, and entr
 
 A seed exempts itself from the section check with `stub: true` in its frontmatter, and both install paths strip the field so no target receives it. The exemption exists because a standard may sanction omitting a section and no measure separates that from a file that forgot it, the false-positive class a comment in `src/context/audit.ts` records. No seed sets the marker, since every skeletal seed still declares each section its standard requires, and marking one that passes would switch off a live check for nothing.
 
-Stripping is duplicated across the two install paths because the seed trees are: `injectSeeds` in `src/tooling/inject.ts` for the stacks and `applySeeds` in `src/claude/seeds.ts` for the claude tree. Both narrow to `.md`, so hook scripts and `settings.json` copy byte for byte, and `src/seed-marker.ts` holds the one reader and the one stripper they share.
+Stripping is duplicated across the two install paths because the seed trees are: `injectSeeds` in `src/tooling/inject.ts` for the stacks and `applySeeds` in `src/claude/seeds.ts` for the claude tree. Both narrow to `.md`, so hook scripts and `settings.json` copy byte for byte, and `src/tooling/seed-marker.ts` holds the one reader and the one stripper they share.
 
 ## Gotchas
 

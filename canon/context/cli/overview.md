@@ -11,23 +11,25 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 
 ## Layout
 
-- `src/` owns the entry point (`cli.ts`), the package root every other module resolves against (`project-root.ts`), the exec helper that spawns bash (`exec.ts`), the shared terminal UI matching `lib/ui.sh` style (`ui.ts`), and the cross-domain file and GitHub helpers
+- `src/` owns the entry point (`cli.ts`), the package root every other module resolves against (`project-root.ts`), the exec helper that spawns bash (`exec.ts`), the shared terminal UI matching `lib/ui.sh` style (`ui.ts`), and the cross-domain file helpers
 - `src/commands/` owns one file per `canon` subcommand, each one not yet migrated a thin pass-through to a `manage-*.sh` script
 - `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/features/slides.md`, and `canon/context/features/transcripts.md`
 - `src/indexes/` owns the index engine, documented in `canon/context/context-model/indexes.md`
-- `src/tooling/` owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`
+- `src/tooling/` owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`, and `seed-marker.ts`, the seed stub contract that `canon/context/tooling/` owns and that `tooling/`, `claude/`, `sync/`, and `context/` read
+- `src/sweep/` owns the contract every line sweep reads, which files it skips (`binary.ts`) and which lines it mutes (`exempt-marker.ts`). Six domains share it, so the folder is named for the contract rather than for a `utils` bucket
+- `src/feedback/` owns the `canon feedback` engine, being the body's required sections (`body.ts`), the GitHub issue call (`github.ts`), and its argument and failure formatting (`github-format.ts`). `src/commands/feedback.ts` is its only consumer
 - `src/sync/` owns the sync engine, the `canon sync` git workflow, the install stamp, and the drift report, with governance's per-domain adapter in `src/gov/`. `src/standards/` carries none, since nothing installs that corpus into a project and there is no copy to reconcile
 - `src/init/` owns the `canon init` option surface, the preview and count, the domain step list, and the partial-failure runner
 - `src/docs/` and `src/wiki/` own the two read-only domains, which reach for no shared engine because neither syncs into a target
 - `src/claude/` owns seed planning, the gitignore preview, and the user settings merge
-- `src/tasks/` owns the task-board archive, the one domain whose primary caller is a git hook rather than a person, and the two record verbs a skill reaches for when worktree isolation refuses its own write
+- `src/tasks/` owns the task-board archive, the one domain whose primary caller is a git hook rather than a person, and the two record verbs a skill reaches for when worktree isolation refuses its own write, plus `paths.ts`, whose `isUnder` only the answers and archive verbs read
 - `src/worktree.ts` owns `mainWorktreeRoot()`, which every shared-scratch verb resolves its root through
 - `src/worktree.ts` also owns `currentWorktreeRoot()`, the same read against `git rev-parse --show-toplevel`, for a verb over a tracked tree. The two answer different questions: shared scratch lives at one root every session reads, and a tracked tree is per worktree, so a verb reading one from the main root reports on files the session never edited
 - `src/worktree.ts` also owns `listWorktrees()`, the branch each worktree in the repository holds, parsed off `git worktree list --porcelain`
 - `src/sessions/` owns the live-session roster, splitting the registry read, the liveness decision, and the git join across three modules so the platform-specific half is the only one a stub has to replace, plus `claim.ts`, which composes that roster with `listWorktrees()` so a caller can ask whether a branch is already claimed by either surface without re-deriving the join itself. `src/sessions/transfer/` holds the second role, moving a session between machines: `transcript.ts` locates a transcript under the projects folder and `bundle.ts` packs it with its side folder and a manifest
 - `src/comments/` owns the comment census, reasoned about in `canon/context/cli/audits/reports.md`
 - `src/context/` owns the context-folder audit, reasoned about alongside it
-- `src/markdown/` owns the attribute-standard audit, reasoned about alongside both, and the fence walker every other markdown reader now shares
+- `src/markdown/` owns the attribute-standard audit, reasoned about alongside both, and the fence walker every other markdown reader now shares, beside `frontmatter.ts`, the stripper `docs`, `teach`, `gov`, and `standards` read
 - `src/secrets/` owns the shipped-tree secret scan, splitting the rule set, the exemption marker, the corpus resolver, and the walker across four modules so the keying and the exclusion mechanism move independently. Reasoned about in `canon/context/cli/audits/state-scoped.md`
 - `src/deps/` owns the dependency advisory read, which shells the runtime's own command rather than carrying an index and is the only audit engine here that reaches a network
 - `src/labels/` owns the pull request label map, splitting the TOML read from the matcher so a caller holding a changed set can resolve coverage without touching git. Reasoned about in `canon/context/cli/audits/reports.md`

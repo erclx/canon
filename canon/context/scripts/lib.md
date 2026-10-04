@@ -21,13 +21,13 @@ Source this in any script that needs terminal output. When `CANON_NON_INTERACTIV
 
 ## `gov.sh`
 
-Narrowed to one function. The payload builder lives in `src/gov/payload.ts`, and `strip_frontmatter` lives in `src/frontmatter.ts`.
+Narrowed to one function. The payload builder lives in `src/gov/payload.ts`, and `strip_frontmatter` lives in `src/markdown/frontmatter.ts`.
 
 - `rule_subdir`: emit a source rule's subdirectory relative to the rules root, or empty when the rule sits at the root. Stays bash permanently
 
 `rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. `manage-sandbox.sh` does not source `gov.sh`, since gov injection runs through the real installer. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
 
-The bash reading of frontmatter treats the first `---` on any line as the start of a frontmatter block, so a document whose body carries two horizontal rules loses everything between them. `stripFrontmatter` in `src/frontmatter.ts` anchors to the first line instead and leaves such a body intact, which is the reading `canon docs <topic>` emits.
+The bash reading of frontmatter treats the first `---` on any line as the start of a frontmatter block, so a document whose body carries two horizontal rules loses everything between them. `stripFrontmatter` in `src/markdown/frontmatter.ts` anchors to the first line instead and leaves such a body intact, which is the reading `canon docs <topic>` emits.
 
 The divergence is latent on the current corpus. All 22 documents under `docs/` and `canon/context/` strip byte-identically under both, so the difference guards documents not yet written rather than repairing today's output. Three other inputs diverge and each favors the TypeScript reading: a file with no trailing newline, a block opening on line 2, and an unterminated block. The last two are the ones worth knowing, since the bash reading emits nothing at all for an unterminated block and swallows a mid-document block that was never frontmatter.
 

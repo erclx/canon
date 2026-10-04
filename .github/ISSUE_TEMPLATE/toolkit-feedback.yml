@@ -5,7 +5,7 @@ labels: ['feedback']
 # The web mirror of the report `canon feedback` validates. A submission renders
 # each label as a `### <label>` section, which is the shape the CLI parses, so
 # both routes reach triage as one document. `required` here mirrors
-# REQUIRED_FIELDS in src/commands/feedback-format.ts, which is where the list is
+# REQUIRED_FIELDS in src/feedback/body.ts, which is where the list is
 # spelled and where every report filed through the CLI is checked against it.
 body:
   - type: input
