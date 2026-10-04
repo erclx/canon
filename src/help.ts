@@ -105,7 +105,7 @@ const EXAMPLES = [
   'canon canvas list --json',
   'canon slides render',
   'canon slides list --json',
-  'canon capture assets/captures/install.html --selector .window --out assets/evidence',
+  'canon capture assets/captures/install.html --selector .window --out assets/frames',
   'canon serve .canon/teach',
   'canon inventory focus --json',
   'canon drive http://localhost:4173 run.json --json',

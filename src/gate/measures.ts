@@ -166,7 +166,7 @@ export function auditsBaselineRel(root: string): string {
 }
 
 export const CAPTURE_STAMP_FAILURE =
-  'A capture set disagrees with the stamp written when its image was captured. Run canon capture assets/captures --selector .window --out assets/evidence and commit each frame with its image and its stamp.'
+  'A capture set disagrees with the stamp written when its image was captured. Run canon capture assets/captures --selector .window --out assets/frames and commit each frame with its image and its stamp.'
 
 function parseJson(payload: string): unknown {
   try {
@@ -1478,11 +1478,12 @@ async function collectPluginManifests(ctx: MeasureContext): Promise<string[]> {
  * A capture set spans two folders. The markup and the template beside it are
  * the authored half and sit under `assets/captures/`, while the image a
  * document points at and the stamp answering for it sit under
- * `assets/evidence/`, which is where `--out assets/evidence` sends them and where
- * `canon pr evidence` looks for a changed image.
+ * `assets/frames/`, which is where `--out assets/frames` sends them. They sit
+ * outside `assets/evidence/` so a changed marketing image is not read as dev
+ * evidence.
  */
 const CAPTURE_MARKUP_DIR = 'assets/captures'
-const CAPTURE_OUTPUT_DIR = 'assets/evidence'
+const CAPTURE_OUTPUT_DIR = 'assets/frames'
 
 /**
  * Every capture under `assets/captures/`, named by the base its three files

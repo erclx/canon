@@ -15,15 +15,14 @@ Under `assets/evidence/` is dev, and anywhere else a tracked folder is named `ev
 
 ## The tracked kinds
 
-| Kind               | Folder                                                  | Writer                                                                   | Gate                                                  | Compared |
-| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------- | -------- |
-| Dev, the site      | `assets/evidence/home/`                                 | the capture job, or the branch that changes the page                     | none, the surface-capture rule asks for the commit    | yes      |
-| Dev, the canvas    | `assets/evidence/canvas-<slice>/`                       | the session changing the canvas shell                                    | none, the `internal-canvas` skill asks for the commit | yes      |
-| Prod, the examples | `examples/teach/evidence/`, `examples/design/evidence/` | `canon capture`, which writes a `.stamp` beside each image               | none, an example is disclaimed rather than gated      | yes      |
-| Prod, the site     | `web/public/evidence/`                                  | hand-placed, two fixed captures of one pull request                      | none                                                  | yes      |
-| Named exception    | `assets/evidence/` at its root                          | `scripts/core/regen-hero.ts`, and `bun run web:card` for the social card | the capture-stamp stage                               | yes      |
+| Kind               | Folder                                                  | Writer                                                     | Gate                                                  | Compared |
+| ------------------ | ------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------- | -------- |
+| Dev, the site      | `assets/evidence/home/`                                 | the capture job, or the branch that changes the page       | none, the surface-capture rule asks for the commit    | yes      |
+| Dev, the canvas    | `assets/evidence/canvas-<slice>/`                       | the session changing the canvas shell                      | none, the `internal-canvas` skill asks for the commit | yes      |
+| Prod, the examples | `examples/teach/evidence/`, `examples/design/evidence/` | `canon capture`, which writes a `.stamp` beside each image | none, an example is disclaimed rather than gated      | yes      |
+| Prod, the site     | `web/public/evidence/`                                  | hand-placed, two fixed captures of one pull request        | none                                                  | yes      |
 
-The exception row is the marketing images, being the hero, the social card, and the arrival and install frames. They are prod evidence under the dev folder, which contradicts the boundary until they move. Delete the row when `feature-marketing-images-off-evidence` lands. `canon/context/web/assets.md` owns the social card and the beat captures.
+The marketing images, being the hero, the social card, and the arrival and install frames, sit in `assets/frames/` and are not evidence of either kind. `canon pr evidence` never compares them, and the capture-stamp stage gates them. `canon/context/web/assets.md` owns the social card and the beat captures.
 
 The canvas baseline sits in sibling `canvas-<slice>/` folders today. The target is one `canvas` folder, which `feature-canvas-evidence-folder` brings, so treat the sibling layout as pending and never list the siblings by name.
 

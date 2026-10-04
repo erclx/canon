@@ -43,7 +43,7 @@ What the script can read bounds what a frame can show. It reads committed catalo
 
 So a template placed a further folder down is skipped by regeneration, by capture, and by the drift gate at once, and nothing reports it, because each is a filter over a listing and a filter matching nothing returns an empty set. The nesting therefore stops at that one level, and `assets/brand/` is safe only because no stage ever looks for the SVG it holds.
 
-Only the markup half reads that way. `captureBases` lists `assets/captures/`, then `readCaptureSet` builds the `.png` and the `.stamp` against `assets/evidence/`, which is where `--out assets/evidence` puts them, so a set is one base name resolved in two folders rather than three files in one. The frames carry no `showcase-` prefix, since separating markup from image needs no prefix once the two live in separate folders rather than a single flat listing.
+Only the markup half reads that way. `captureBases` lists `assets/captures/`, then `readCaptureSet` builds the `.png` and the `.stamp` against `assets/frames/`, which is where `--out assets/frames` puts them, so a set is one base name resolved in two folders rather than three files in one. The frames carry no `showcase-` prefix, since separating markup from image needs no prefix once the two live in separate folders rather than a single flat listing.
 
 ### What the assert covers
 
@@ -53,7 +53,7 @@ The stage takes its set of frames off the `.html` files in `assets/captures/`, w
 
 ### Run a branch-reading verb from source
 
-An installed `canon capture` renders rather than refusing, which makes the wrong route quiet rather than safe. A session clearing this stage in this repository runs it through the source entry point, as `bun src/cli.ts capture assets/captures/hero.html --selector .window --out assets/evidence`, since the global binary is whatever release last published and this stage compares against the branch. `--selector` carries no default, so a run that omits it refuses before rendering anything.
+An installed `canon capture` renders rather than refusing, which makes the wrong route quiet rather than safe. A session clearing this stage in this repository runs it through the source entry point, as `bun src/cli.ts capture assets/captures/hero.html --selector .window --out assets/frames`, since the global binary is whatever release last published and this stage compares against the branch. `--selector` carries no default, so a run that omits it refuses before rendering anything.
 
 The rule generalizes past this stage to every verb reading data the branch authors. `canon claude skills rank` is the second instance: it ranks prompts against the case list of whatever release last published, so a branch editing `src/claude/cases/` reads its own change as absent and reports the old prompt beside the old expected skill, which reads as a case that never routed at all. Run such a verb through `bun src/cli.ts` whenever the branch touches what it reads. A verb reading the checkout instead, such as `canon gov test-order`, answers correctly from the global binary, since what it reads moves with the tree rather than with the release.
 

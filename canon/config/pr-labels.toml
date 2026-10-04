@@ -125,10 +125,10 @@ release-managed = [
 # row over any of them adds a second label to a mechanical edit. An `assets/`
 # entry is a stem, so it covers the light sibling and the stamp.
 generated = [
-  "assets/evidence/hero",
-  "assets/evidence/install",
+  "assets/frames/hero",
+  "assets/frames/install",
   "assets/evidence/catalog",
-  "assets/evidence/arrival",
+  "assets/frames/arrival",
   "assets/evidence/home/",
   "canon/config/baseline.json",
 ]

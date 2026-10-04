@@ -158,8 +158,8 @@ describe("resolveCoverage against the repository's own map", () => {
 
   it('should decline a light sibling, its stamp, and a home frame the real config names by stem', () => {
     const coverage = resolveCoverage(repositoryMap(), [
-      'assets/evidence/hero-light.png',
-      'assets/evidence/hero-light.stamp',
+      'assets/frames/hero-light.png',
+      'assets/frames/hero-light.stamp',
       'assets/captures/hero-light.html',
       'assets/evidence/home/frame-1.png',
     ])
