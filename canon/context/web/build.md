@@ -44,7 +44,7 @@ The `design` gate stage regenerates and drift-checks `web/src/styles/tokens.css`
 
 ### Two copies of the path globs
 
-`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same eight shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. The visual list adds a ninth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
+`deploy-site.yml`'s push-trigger globs and `pr-visual-checks.yml`'s pull-request-trigger globs are two literal copies of the same nine shared entries, compared by the `visual-path-globs` gate stage through `visualPathGlobs` in `src/gate/measures.ts`. One of the nine is the negation `!assets/evidence/**` under `assets/**`, in both copies on purpose: pull request screenshots are nothing the page reads, and `canon pr preview` reads the deploy filter to decide whether a branch's site preview shows its change. The cost is that a pull request moving only the `assets/evidence/home/` baseline runs no capture job, which is a baseline compared against the page it was just regenerated from. The visual list adds a tenth, `tooling/web/configs/e2e/**`, where the capture harness sits, which has no deploy counterpart since a harness edit changes no byte of the built site. `VISUAL_ONLY_GLOBS` beside it declares that entry to the stage, so any other one-sided glob still fails.
 
 ## Gotchas
 
