@@ -25,7 +25,9 @@ The write routes the shell posts to also refuse a request carrying an `Origin` o
 
 `frame move <page> <name> --x <px> --y <px>` rewrites one frame's position in `layout.json` and keeps its size. An omitted axis stays where the frame is. It refuses a frame or page that does not exist and a layout that does not parse.
 
-The shell writes through the same writer when the operator drags a frame. Both take a lock file beside the layout, read it, merge their change, and replace it, so a drag released while a verb writes loses neither position. A writer that cannot get the lock within two seconds refuses with reason `busy`.
+`frame resize <page> <name> --width <px> --height <px>` rewrites one frame's whole box in one write, and `--x` and `--y` move it at the same time. An omitted flag keeps the frame's current value. It refuses a width or height that is not a positive number as `invalid-size`, a position that is not a number as `invalid-position`, and a missing frame, a missing page, or a layout that does not parse as `frame move` does.
+
+The shell writes through the same writer when the operator drags a frame or one of its corner handles. Both take a lock file beside the layout, read it, merge their change, and replace it, so a drag released while a verb writes loses neither position. A writer that cannot get the lock within two seconds refuses with reason `busy`.
 
 `canvas selection --json` emits `{ ok, selection }` with the page, frame, file, box, and path of the frame the operator selected, or `selection: null` when nothing is selected or the selected frame has since been removed. Read it when the operator says "this one".
 
@@ -39,7 +41,7 @@ A pick is refused as `address-mismatch` when the browser builds elements the fil
 
 `text` replaces the text of an element holding text alone and refuses one holding other elements as `not-text-only`. Every byte outside the element stays as it was. `--json` emits the page, frame, file, path, and the file's new `hash`.
 
-The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
+The operator edits the same set from the inspector, which posts to the same writer with the hash the frame was served with. Dragging a selected element's corner handle writes `width` and then `height` in pixels through that writer, the second edit carrying the hash the first answered. An edit made against a version of the file Claude has since rewritten is refused as `stale-address` and the shell reloads the frame, so nothing lands on a shifted element. Both writers take the frame file's lock, and an edit that keeps the selected element where it was keeps the selection fresh.
 
 A color picked from the project's tokens is written as `var(--<name>)`, and below full opacity as a `color-mix()` of that `var()` with `transparent` at the opacity percent, so it keeps following the theme. A browser older than 2023 drops a `color-mix()` value, which leaves the property unset there. A hex is written as six digits, or eight below full opacity. The inspector's full color picker writes a hex for any color it sets, so the field marks the value raw, and only its alpha keeps a token through the `color-mix()` form.
 

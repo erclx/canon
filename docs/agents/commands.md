@@ -96,7 +96,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`
 - `teach`, in `teach.md`: `list`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
-- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `selection`, `edit`, `capture`
+- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `frame resize`, `selection`, `edit`, `capture`
 - `sandbox`, in `sandbox.md`: `reset`, `clean`, `check`, `coverage`
 - `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
 - `intake`, in `intake.md`: `list`, `answer`

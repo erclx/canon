@@ -425,6 +425,77 @@ describe('POST /api/frames/move', () => {
   })
 })
 
+describe('POST /api/frames/resize', () => {
+  it('should write the box through the shared layout writer', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 10,
+      y: 20,
+      width: 800,
+      height: 600,
+    })
+
+    expect(response.status).toBe(200)
+    expect(layoutOf('drafts').frames.hero).toEqual({
+      x: 10,
+      y: 20,
+      width: 800,
+      height: 600,
+    })
+  })
+
+  it('should answer 400 naming the reason for a zero height', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 0,
+      y: 0,
+      width: 400,
+      height: 0,
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      ok: false,
+      reason: 'invalid-size',
+    })
+  })
+
+  it('should answer 400 for a body that carries no size', async () => {
+    const server = start()
+
+    const response = await post(server, '/api/frames/resize', {
+      page: 'drafts',
+      frame: 'hero',
+      x: 0,
+      y: 0,
+    })
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should refuse a request another origin sent', async () => {
+    seed('drafts/hero.html', '<p>hero</p>')
+    const server = start()
+
+    const response = await post(
+      server,
+      '/api/frames/resize',
+      { page: 'drafts', frame: 'hero', x: 0, y: 0, width: 9, height: 9 },
+      { origin: 'https://evil.example' },
+    )
+
+    expect(response.status).toBe(403)
+  })
+})
+
 describe('POST /api/selection', () => {
   it('should record the frame and report it in the page list', async () => {
     seed('drafts/hero.html', '<p>hero</p>')
