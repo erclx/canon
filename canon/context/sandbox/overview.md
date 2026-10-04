@@ -76,7 +76,7 @@ Six things a run cannot reach. Each is a property of the harness rather than a g
 - Marketplace install behavior. `run.sh` points `--plugin-dir` at a worktree instead of installing the plugin, so anything depending on a real install stays outside the harness.
 - A mid-session rule change. Rules are discovered at session start and the harness spawns a fresh session per run, so this binds the session doing the editing rather than the run.
 - Host-conditional behavior such as linked-worktree locks or remote-state failures. A standalone sandbox repo cannot reproduce the trigger.
-- The standards fallback of a skill the branch changed. Both resolution routes can land on one file, and no assertion tells them apart.
+- The standards fallback of a skill the branch changed, in an interactive sandbox. Both resolution routes can land on one file there, and no assertion tells them apart.
 - A write landing outside both the sandbox tree and the four watched scratch directories. `canon/context/sandbox/isolation.md` states what the watch reaches.
 - Git state. `snapshot_tree` excludes `.git`, and the declaration keys read paths, file content, the write list, the reply, and the turn count, so no key reaches a commit, a branch, or a rewritten history.
 
@@ -86,7 +86,7 @@ A nested background dispatch is not on this list. A shim bounds it and `sessions
 
 A shipped body cites `${CLAUDE_SKILL_DIR}/../../standards/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on `<root>/standards/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no standard still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/standards/`, a path inside the fixture that no assertion can tell from a project copy.
 
-`injectChangedSkills` in `src/sandbox/provision.ts` injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies, and checking a fallback means leaving that skill's body alone on the branch. Closing the gap means changing what injection copies or what `--plugin-dir` points at, and both trade one unreachable case for another.
+`run.sh` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no standard separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
 
 ### Git state
 

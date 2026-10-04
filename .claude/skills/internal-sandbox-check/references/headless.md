@@ -12,7 +12,7 @@ Verify the `Provisioning:` scenario through `sandbox/run.sh`, which drives the s
 Derive the arguments from the Step 2 mapping:
 
 - Target: `<category>:<rest>` from the scenario path `sandbox/<category>/<rest>.sh`
-- Prompt: `/canon:<skill-name>` with no arguments. The qualified form resolves through `--plugin-dir` whether or not the branch changed the skill, and a bare `/<skill-name>` resolves only for the ones the sandbox injects.
+- Prompt: `/canon:<skill-name>` with no arguments. The qualified form resolves through `--plugin-dir` whether or not the branch changed the skill. `run.sh` injects no skill into its tree, so a bare `/<skill-name>` never reaches the branch's body.
 - Arm: required for a multi-arm scenario, omitted for a single-arm one
 
 ```bash

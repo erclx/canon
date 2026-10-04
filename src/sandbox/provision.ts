@@ -273,12 +273,22 @@ function setupAssets(
  * tree, so a scenario exercises the branch's skill rather than the installed
  * plugin's. The merge base against `origin/main` comes first, so a local `main`
  * trailing the remote does not pull in skills other merged branches changed.
+ * A headless run skips it, since a copied body alone shadows the plugin's whole
+ * skill folder and its relative citations then resolve to nothing.
  */
 export function injectChangedSkills(
   root: string,
   sandbox: string,
   isSkipAutoCommit: boolean,
+  isSkipInject = false,
 ): string[] {
+  if (isSkipInject) {
+    logInfo(
+      'Skipped dev skill injection: the run resolves skills through --plugin-dir',
+    )
+    return []
+  }
+
   const base = (
     readGit(root, ['merge-base', 'HEAD', 'origin/main']) ??
     readGit(root, ['merge-base', 'HEAD', 'main']) ??
@@ -438,7 +448,8 @@ function provisionScenario(
   Object.assign(env, staged.exports)
 
   const isSkipAutoCommit = (env.SANDBOX_SKIP_AUTO_COMMIT ?? '') !== ''
-  injectChangedSkills(root, sandbox, isSkipAutoCommit)
+  const isSkipInject = (env.SANDBOX_SKIP_SKILL_INJECT ?? '') !== ''
+  injectChangedSkills(root, sandbox, isSkipAutoCommit, isSkipInject)
   must(commitScenarioChanges(sandbox, isSkipAutoCommit, env))
   tagBaseline(sandbox, env)
 
