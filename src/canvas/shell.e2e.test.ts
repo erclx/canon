@@ -517,6 +517,51 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(edits).toHaveLength(1)
   }, 45_000)
 
+  it('should keep the flex and appearance controls inside the panel in both themes', async () => {
+    const row = HELLO.replace(
+      '<p>One paragraph under the heading.</p>',
+      '<div class="row" style="display: flex; justify-content: center; gap: 8px; border-radius: 6px; opacity: 0.8"><span>One</span><span>Two</span></div>',
+    )
+    writeFileSync(join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`), row)
+    const grid = page.getByRole('radiogroup', { name: 'Alignment' })
+    await expect
+      .poll(
+        async () => {
+          await page
+            .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
+            .locator('button.layer', { hasText: /^div\.row/ })
+            .click({ timeout: 2_000 })
+            .catch(() => undefined)
+          return grid.count()
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(1)
+
+    const panel = page.locator('.panel-right')
+    const opacity = page.getByRole('textbox', { name: 'opacity', exact: true })
+    const overflowIn = () =>
+      panel.evaluate((element) => element.scrollWidth - element.clientWidth)
+    const toggle = page.getByRole('button', {
+      name: /^Switch to (light|dark) theme$/,
+    })
+    await opacity.scrollIntoViewIfNeeded()
+    const first = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'layout-a.png') })
+    await toggle.click()
+    const second = await overflowIn()
+    await panel.screenshot({ path: join(SHOTS, 'layout-b.png') })
+    await toggle.click()
+
+    expect([first, second]).toEqual([0, 0])
+    expect(await opacity.inputValue()).toBe('80%')
+    expect(
+      await grid
+        .getByRole('radio', { name: 'top center' })
+        .getAttribute('aria-checked'),
+    ).toBe('true')
+  }, 30_000)
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
