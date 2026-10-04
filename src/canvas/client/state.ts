@@ -1,6 +1,6 @@
 import { computed, signal } from '@preact/signals'
 import type { ElementAddress } from '@/canvas/address'
-import type { Frame, Page } from '@/canvas/content'
+import type { Box, Frame, Page } from '@/canvas/content'
 import type { TokenGroup } from '@/canvas/tokens'
 
 /**
@@ -320,7 +320,8 @@ const EDIT_NOTICES: Readonly<Record<string, string | undefined>> = {
 /**
  * Posts one property change to the element the address names. A refusal
  * says why and reloads the frame, so a pending value never sits over a file
- * that moved under it.
+ * that moved under it. Resolves to what the write answered, or undefined when
+ * nothing was written.
  */
 export async function editElement(
   ref: FrameRef,
@@ -329,7 +330,7 @@ export async function editElement(
   property: string,
   value: string,
   fetchImpl: typeof fetch = fetch,
-): Promise<void> {
+): Promise<{ readonly hash?: string } | undefined> {
   const hash = editedHashes.value.get(key) ?? address.hash
   pendingEdit.value = { key, index: address.index, property }
   try {
@@ -358,7 +359,7 @@ export async function editElement(
           : `Could not save (status ${response.status}). Check canon canvas serve is still running.`)
       reloadFrame(key)
       await loadPages(fetchImpl)
-      return
+      return undefined
     }
     editRefusal.value = undefined
     const saved = pendingEdit.value
@@ -366,15 +367,48 @@ export async function editElement(
     setTimeout(() => {
       if (savedEdit.value === saved) savedEdit.value = undefined
     }, SAVED_MS)
-    if (typeof record.hash === 'string') {
-      const hashes = new Map(editedHashes.value)
-      hashes.set(key, record.hash)
-      editedHashes.value = hashes
-    }
+    if (typeof record.hash !== 'string') return {}
+    const hashes = new Map(editedHashes.value)
+    hashes.set(key, record.hash)
+    editedHashes.value = hashes
+    return { hash: record.hash }
   } catch (error) {
     editRefusal.value = `Could not save (${error instanceof Error ? error.message : 'unknown'}). Check canon canvas serve is still running.`
+    return undefined
   } finally {
     pendingEdit.value = undefined
+  }
+}
+
+/**
+ * Writes an element's new size as one edit per changed axis, width first. The
+ * second carries the hash the first answered, so a frame reloading between the
+ * two cannot leave it holding the hash of a file already rewritten. A refused
+ * first edit sends no second.
+ */
+export async function resizeElement(
+  ref: FrameRef,
+  key: string,
+  address: ElementAddress,
+  width: number | undefined,
+  height: number | undefined,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  let current = address
+  if (width !== undefined) {
+    const written = await editElement(
+      ref,
+      key,
+      current,
+      'width',
+      `${width}px`,
+      fetchImpl,
+    )
+    if (!written) return
+    if (written.hash) current = { ...current, hash: written.hash }
+  }
+  if (height !== undefined) {
+    await editElement(ref, key, current, 'height', `${height}px`, fetchImpl)
   }
 }
 
@@ -404,6 +438,32 @@ export async function moveFrameTo(
 ): Promise<void> {
   previewMove(ref, x, y)
   await write('/api/frames/move', { ...ref, x, y }, fetchImpl)
+}
+
+/** Resizes a frame on the surface without writing, as a handle drag does. */
+export function previewResize(ref: FrameRef, box: Box): void {
+  pages.value = pages.value.map((candidate) =>
+    candidate.name === ref.page
+      ? {
+          ...candidate,
+          frames: candidate.frames.map((frame) =>
+            frame.name === ref.frame
+              ? { ...frame, ...box, placed: true }
+              : frame,
+          ),
+        }
+      : candidate,
+  )
+}
+
+/** Shows the new box and writes it through the server's shared layout writer. */
+export async function resizeFrameTo(
+  ref: FrameRef,
+  box: Box,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  previewResize(ref, box)
+  await write('/api/frames/resize', { ...ref, ...box }, fetchImpl)
 }
 
 export function clampZoom(zoom: number): number {

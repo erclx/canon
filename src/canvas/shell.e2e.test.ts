@@ -517,6 +517,118 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     expect(edits).toHaveLength(1)
   }, 45_000)
 
+  /** Steps the toolbar zoom toward a percent, which moves by a factor per press. */
+  async function zoomToward(percent: number): Promise<number> {
+    const readout = page.locator('.toolbar .zoom')
+    const read = async () =>
+      Number.parseInt((await readout.textContent()) ?? '', 10)
+    for (let step = 0; step < 30; step += 1) {
+      const current = await read()
+      const next = current * (current > percent ? 1 / 1.2 : 1.2)
+      if (Math.abs(next - percent) >= Math.abs(current - percent)) break
+      await page
+        .getByRole('button', {
+          name: current > percent ? 'Zoom out' : 'Zoom in',
+          exact: true,
+        })
+        .click()
+    }
+    return read()
+  }
+
+  /** Zooms, then centers a frame from its row so its label is on screen. */
+  async function selectFrameAt(percent: number, name = FRAME): Promise<number> {
+    const zoom = await zoomToward(percent)
+    await page.getByRole('tab', { name: 'Pages' }).click()
+    await page
+      .getByRole('list', { name: 'Frames' })
+      .getByTitle(name, { exact: true })
+      .click()
+    await expect
+      .poll(() =>
+        page
+          .locator(`.frame[data-frame="${name}"] .selection`)
+          .getAttribute('data-selection'),
+      )
+      .toBe('frame')
+    return zoom
+  }
+
+  /** Every zoom draws the label and the handles at one screen size. */
+  async function screenSizes(): Promise<{ label: number; handle: number }> {
+    const frame = page.locator(`.frame[data-frame="${FRAME}"]`)
+    const label = await frame.locator('.frame-name').boundingBox()
+    const handle = await frame
+      .locator('.selection [data-handle="se"]')
+      .boundingBox()
+    return { label: label?.height ?? 0, handle: handle?.width ?? 0 }
+  }
+
+  it('should draw a selected frame label and handles at one screen size zoomed out', async () => {
+    const zoom = await selectFrameAt(25)
+    const sizes = await screenSizes()
+
+    expect(zoom).toBeLessThanOrEqual(30)
+    expect(sizes.label).toBeGreaterThan(10)
+    expect(sizes.label).toBeLessThan(20)
+    expect(sizes.handle).toBeCloseTo(24, 0)
+    await page.screenshot({ path: join(SHOTS, 'frame-selected-25.png') })
+  }, 30_000)
+
+  it('should draw a selected frame label and handles at one screen size zoomed in', async () => {
+    const zoom = await selectFrameAt(200)
+    const sizes = await screenSizes()
+
+    expect(zoom).toBeGreaterThanOrEqual(170)
+    expect(sizes.label).toBeGreaterThan(10)
+    expect(sizes.label).toBeLessThan(20)
+    expect(sizes.handle).toBeCloseTo(24, 0)
+    await page.screenshot({ path: join(SHOTS, 'frame-selected-200.png') })
+  }, 30_000)
+
+  it('should draw handles and a size chip on a selected element', async () => {
+    await selectFrameAt(100)
+    await page
+      .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
+      .locator('button.layer', { hasText: /^p/ })
+      .click()
+
+    const overlay = page.locator(
+      `.frame[data-frame="${FRAME}"] .selection[data-selection="element"]`,
+    )
+    await expect.poll(() => overlay.locator('[data-handle]').count()).toBe(4)
+    await expect
+      .poll(() => overlay.locator('.selection-chip').textContent())
+      .toMatch(/^\d+ × \d+$/)
+    await page.screenshot({ path: join(SHOTS, 'element-selected.png') })
+  }, 30_000)
+
+  it('should resize a frame by a corner drag divided by the zoom', async () => {
+    const zoom = (await selectFrameAt(50, 'second')) / 100
+    const handle = await page
+      .locator('.frame[data-frame="second"] .selection [data-handle="se"]')
+      .boundingBox()
+    if (!handle) throw new Error('no handle on screen')
+    const startX = handle.x + handle.width / 2
+    const startY = handle.y + handle.height / 2
+
+    const written = page.waitForRequest(
+      (sent) =>
+        sent.url().endsWith('/api/frames/resize') && sent.method() === 'POST',
+    )
+    await page.mouse.move(startX, startY)
+    await page.mouse.down()
+    await page.mouse.move(startX + 50, startY + 25, { steps: 5 })
+    await page.mouse.up()
+    const request = await written
+    const box = request.postDataJSON() as { width: number; height: number }
+
+    // The readout rounds the zoom to a whole percent, so the check allows it.
+    expect((await request.response())?.status()).toBe(200)
+    expect(Math.abs(box.width - (480 + 50 / zoom))).toBeLessThan(4)
+    expect(Math.abs(box.height - (320 + 25 / zoom))).toBeLessThan(4)
+  }, 30_000)
+
   it('should list tokens on the Theme tab', async () => {
     await page.getByRole('tab', { name: 'Theme' }).click()
 
