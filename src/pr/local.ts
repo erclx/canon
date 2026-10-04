@@ -1,4 +1,4 @@
-import { findLocalLineIndex } from '@/pr/evidence'
+import { readAddresses } from '@/pr/evidence'
 
 /**
  * The folder linked worktrees sit under. A listener there belongs to another
@@ -111,15 +111,21 @@ export function parseProcNetTcp(text: string): ProcSocket[] {
 }
 
 /**
- * Replaces the local address line of a marked body with `note`, leaving
- * every other byte in place so the trailing marker, the checklist delimiters,
- * and any ticked box survive. Undefined when the body carries no such line,
- * which is also what a second strip of the same body returns.
+ * Drops the address line of a marked body, hosted and local segments alike,
+ * since the close that runs this also deletes the branch's preview
+ * deployments and a link left behind points at nothing. Every other byte stays
+ * in place, so the trailing marker, the checklist delimiters, and any ticked
+ * box survive, and the blank line the address sat on is dropped with it so no
+ * gap doubles. Undefined when the body carries no address, which is also what
+ * a second drop of the same body returns.
  */
-export function stripLocalLine(body: string, note: string): string | undefined {
-  const index = findLocalLineIndex(body)
-  if (index === -1) return undefined
-  const lines = body.split('\n')
-  lines[index] = note
+export function dropAddressLine(body: string): string | undefined {
+  const { lines: indexes } = readAddresses(body)
+  const first = indexes[0]
+  if (first === undefined) return undefined
+  const dropped = new Set(indexes)
+  const lines = body.split('\n').filter((_, index) => !dropped.has(index))
+  const isGapAbove = first === 0 || (lines[first - 1] ?? '').trim() === ''
+  if (isGapAbove && (lines[first] ?? '').trim() === '') lines.splice(first, 1)
   return lines.join('\n')
 }

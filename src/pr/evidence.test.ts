@@ -158,7 +158,7 @@ describe('renderEvidenceBody', () => {
     )
   })
 
-  it('should open the body with the preview address when one is given', () => {
+  it('should open the body with the heading and the preview address under it', () => {
     const body = renderEvidenceBody(
       [
         {
@@ -174,13 +174,17 @@ describe('renderEvidenceBody', () => {
       'https://feat-thing.annex.pages.dev',
     )
 
-    expect(body.split('\n')[0]).toBe(
+    expect(body.split('\n').slice(0, 5)).toEqual([
+      '## Evidence',
+      '',
       '**Preview:** https://feat-thing.annex.pages.dev',
-    )
+      '',
+      '**Base:** `aaaa000` · **Head:** `bbbb111`',
+    ])
     expect(body).toContain('<summary>dark (1)</summary>')
   })
 
-  it('should render the preview and the marker alone when no evidence changed', () => {
+  it('should render the heading, the preview, and the marker alone when no evidence changed', () => {
     const body = renderEvidenceBody(
       [],
       'erclx/annex',
@@ -191,6 +195,8 @@ describe('renderEvidenceBody', () => {
 
     expect(body).toBe(
       [
+        '## Evidence',
+        '',
         '**Preview:** https://feat-thing.annex.pages.dev',
         '',
         '<!-- pr-evidence: head=bbbb111 -->',
@@ -198,7 +204,7 @@ describe('renderEvidenceBody', () => {
     )
   })
 
-  it('should put the local address under the hosted preview when both are given', () => {
+  it('should join the hosted and local addresses on one line when both are given', () => {
     const body = renderEvidenceBody(
       [],
       'erclx/annex',
@@ -211,15 +217,16 @@ describe('renderEvidenceBody', () => {
 
     expect(body).toBe(
       [
-        '**Preview:** https://feat-thing.annex.pages.dev',
-        '**Local preview:** http://localhost:5173',
+        '## Evidence',
+        '',
+        '**Preview:** https://feat-thing.annex.pages.dev · **Local preview:** http://localhost:5173',
         '',
         '<!-- pr-evidence: head=bbbb111 -->',
       ].join('\n'),
     )
   })
 
-  it('should open the body with the local address when no hosted preview is given', () => {
+  it('should carry the local address alone on the line when no hosted preview is given', () => {
     const body = renderEvidenceBody(
       [],
       'erclx/annex',
@@ -230,7 +237,9 @@ describe('renderEvidenceBody', () => {
       'http://localhost:5173',
     )
 
-    expect(body.split('\n').slice(0, 3)).toEqual([
+    expect(body.split('\n').slice(0, 5)).toEqual([
+      '## Evidence',
+      '',
       '**Local preview:** http://localhost:5173',
       '',
       '## What to look at',
@@ -276,6 +285,8 @@ describe('renderEvidenceBody', () => {
 
     expect(body).toBe(
       [
+        '## Evidence',
+        '',
         '## What to look at',
         '',
         '<!-- pr-checklist:start -->',
@@ -387,7 +398,7 @@ describe('renderEvidenceBody', () => {
       expect(body).toContain(`/blob/${head}/evidence/dark/hero.png?raw=true`)
     })
 
-    it('should keep the preview on line one and the line out of the opening block', () => {
+    it('should read every field back from a body carrying both addresses and a checklist', () => {
       const body = renderEvidenceBody(
         states,
         'o/r',
@@ -401,7 +412,6 @@ describe('renderEvidenceBody', () => {
       const comments = [
         { url: 'https://github.com/o/r/pull/1#issuecomment-9', body },
       ]
-      expect(body.split('\n')[0]).toBe('**Preview:** https://x.dev')
       expect(findEvidencePreview(comments)).toBe('https://x.dev')
       expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
       expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
@@ -456,7 +466,7 @@ describe('findEvidenceCommentId', () => {
 })
 
 describe('findEvidencePreview', () => {
-  it('should read the preview address off the marked comment', () => {
+  it('should read the preview address off an old-layout comment that opens with it', () => {
     const preview = findEvidencePreview([
       {
         url: 'https://github.com/o/r/pull/1#issuecomment-222',
@@ -489,6 +499,17 @@ describe('findEvidencePreview', () => {
     expect(preview).toBeUndefined()
   })
 
+  it('should read the preview segment off the address line under the heading', () => {
+    const preview = findEvidencePreview([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## Evidence\n\n**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173\n\n**Base:** `aaaa000` · **Head:** `bbbb111`\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(preview).toBe('https://feat-x.site.pages.dev')
+  })
+
   it('should not read a local first line as a hosted preview', () => {
     const preview = findEvidencePreview([
       {
@@ -502,7 +523,18 @@ describe('findEvidencePreview', () => {
 })
 
 describe('findEvidenceLocal', () => {
-  it('should read the local address under a hosted preview', () => {
+  it('should read the local segment after the hosted one on the address line', () => {
+    const local = findEvidenceLocal([
+      {
+        url: 'https://github.com/o/r/pull/1#issuecomment-222',
+        body: '## Evidence\n\n**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      },
+    ])
+
+    expect(local).toBe('http://localhost:5173')
+  })
+
+  it('should read the local address under a hosted preview in the old layout', () => {
     const local = findEvidenceLocal([
       {
         url: 'https://github.com/o/r/pull/1#issuecomment-222',
@@ -644,14 +676,14 @@ describe('readOwed', () => {
       hasEvidenceChange: false,
       hasMarkedComment: false,
       carriedPreview: false,
-      deployWorkflowFound: false,
+      deployServesChange: false,
       ...overrides,
     }
   }
 
   it('should owe evidence and preview in that order when an evidence change has no comment and a deploy resolves', () => {
     const owed = readOwed(
-      owedInput({ hasEvidenceChange: true, deployWorkflowFound: true }),
+      owedInput({ hasEvidenceChange: true, deployServesChange: true }),
     )
 
     expect(owed).toEqual(['evidence', 'preview'])
@@ -665,7 +697,7 @@ describe('readOwed', () => {
 
   it('should owe a preview when a marked comment opens with no preview line', () => {
     const owed = readOwed(
-      owedInput({ hasMarkedComment: true, deployWorkflowFound: true }),
+      owedInput({ hasMarkedComment: true, deployServesChange: true }),
     )
 
     expect(owed).toEqual(['preview'])
@@ -680,7 +712,7 @@ describe('readOwed', () => {
             body: '<!-- pr-checklist:start -->\n- [ ] look\n<!-- pr-checklist:end -->\n\n<!-- pr-evidence: head=abc -->',
           },
         ]),
-        deployWorkflowFound: true,
+        deployServesChange: true,
       }),
     )
 
@@ -693,7 +725,7 @@ describe('readOwed', () => {
         hasEvidenceChange: true,
         hasMarkedComment: true,
         carriedPreview: true,
-        deployWorkflowFound: true,
+        deployServesChange: true,
       }),
     )
 
@@ -701,7 +733,7 @@ describe('readOwed', () => {
   })
 
   it('should owe nothing when the pull request has no evidence change and no marked comment', () => {
-    const owed = readOwed(owedInput({ deployWorkflowFound: true }))
+    const owed = readOwed(owedInput({ deployServesChange: true }))
 
     expect(owed).toEqual([])
   })

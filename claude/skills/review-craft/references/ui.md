@@ -18,9 +18,9 @@ Read the thread over REST, which a cloud session's GitHub proxy serves where it 
 gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' --jq '.[] | select((.body // "") | contains("<!-- pr-evidence: head=")) | .body'
 ```
 
-Take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with a `**Preview:**` line when the project has a preview address.
+Take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with `## Evidence` and a comment posted before that layout opens with a `**Preview:**` line instead.
 
-Flag the change as shipping no screenshot when it paints and the pull request carries no marked comment, carries one with no `## Evidence` section, or carries only a checklist posted alone. Then decide how to raise it by whether the project keeps captures, which is the same test `canon pr evidence` applies:
+Flag the change as shipping no screenshot when it paints and the pull request carries no marked comment, carries one with no comparison, meaning no `**Base:**` line and no `<details>` table, or carries only a checklist posted alone. The `## Evidence` heading opens every marked comment, a checklist-only one included, so the heading alone never means screenshots are present. Then decide how to raise it by whether the project keeps captures, which is the same test `canon pr evidence` applies:
 
 ```bash
 git ls-tree -r --name-only <base> | grep -E '(^|/)evidence/.*\.(png|jpe?g|gif|webp|avif|svg)$' | head -1

@@ -5,7 +5,9 @@ import {
   type PreviewRunner,
   readPreviewAlias,
   readPreviewHead,
+  readServedPaths,
   type RunRow,
+  servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
 
@@ -93,6 +95,28 @@ describe('findDeployWorkflow', () => {
     expect(pick).toEqual({
       kind: 'found',
       path: '.github/workflows/deploy.yml',
+      filter: { kind: 'all' },
+    })
+  })
+
+  it("should carry the picked workflow's push path filter", () => {
+    const pick = findDeployWorkflow([
+      workflow(
+        '.github/workflows/deploy.yml',
+        FENCED.replace(
+          'on:\n',
+          "on:\n  push:\n    branches: [main]\n    paths:\n      - 'web/**'\n",
+        ).replace(
+          '- run: echo "canon-preview-alias: $ALIAS_URL"',
+          '- run: |\n          echo "canon-preview-alias: $ALIAS_URL"',
+        ),
+      ),
+    ])
+
+    expect(pick).toEqual({
+      kind: 'found',
+      path: '.github/workflows/deploy.yml',
+      filter: { kind: 'paths', patterns: ['web/**'] },
     })
   })
 
@@ -177,6 +201,103 @@ describe('findDeployWorkflow', () => {
     ])
 
     expect(pick).toEqual({ kind: 'refused', reason: 'no-alias' })
+  })
+})
+
+describe('readServedPaths', () => {
+  it('should read on.push.paths as the paths that serve a change', () => {
+    const text =
+      "on:\n  push:\n    paths:\n      - 'web/**'\n      - '!web/drafts/**'\n"
+
+    expect(readServedPaths(text)).toEqual({
+      kind: 'paths',
+      patterns: ['web/**', '!web/drafts/**'],
+    })
+  })
+
+  it('should read on.push.paths-ignore as the paths that never serve one', () => {
+    const text = "on:\n  push:\n    paths-ignore:\n      - 'docs/**'\n"
+
+    expect(readServedPaths(text)).toEqual({
+      kind: 'paths-ignore',
+      patterns: ['docs/**'],
+    })
+  })
+
+  it('should serve every change when the push trigger carries no path filter', () => {
+    const text = 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n'
+
+    expect(readServedPaths(text)).toEqual({ kind: 'all' })
+  })
+
+  it('should serve every change when the workflow carries no push trigger', () => {
+    expect(readServedPaths('on:\n  workflow_dispatch:\n')).toEqual({
+      kind: 'all',
+    })
+  })
+
+  it('should serve every change when the workflow is not readable YAML', () => {
+    expect(readServedPaths('on: [push\n  : :')).toEqual({ kind: 'all' })
+  })
+})
+
+describe('servesChange', () => {
+  it('should serve a change touching a path under a ** pattern', () => {
+    const filter = { kind: 'paths', patterns: ['web/**'] } as const
+
+    expect(servesChange(filter, ['web/src/page.ts'])).toBe(true)
+  })
+
+  it('should not serve a change whose path only shares the prefix', () => {
+    const filter = { kind: 'paths', patterns: ['web/**'] } as const
+
+    expect(servesChange(filter, ['webhooks/x.ts'])).toBe(false)
+  })
+
+  it('should let a later negation exclude a path an earlier pattern included', () => {
+    const filter = {
+      kind: 'paths',
+      patterns: ['web/**', '!web/drafts/**'],
+    } as const
+
+    expect(servesChange(filter, ['web/drafts/a.md'])).toBe(false)
+  })
+
+  it('should let a later inclusion restore a path an earlier negation excluded', () => {
+    const filter = {
+      kind: 'paths',
+      patterns: ['web/**', '!web/drafts/**', 'web/drafts/keep.md'],
+    } as const
+
+    expect(servesChange(filter, ['web/drafts/keep.md'])).toBe(true)
+  })
+
+  it('should serve a change with any path outside paths-ignore', () => {
+    const filter = { kind: 'paths-ignore', patterns: ['docs/**'] } as const
+
+    expect(servesChange(filter, ['docs/a.md', 'src/b.ts'])).toBe(true)
+  })
+
+  it('should not serve a change whose every path is ignored', () => {
+    const filter = { kind: 'paths-ignore', patterns: ['docs/**'] } as const
+
+    expect(servesChange(filter, ['docs/a.md'])).toBe(false)
+  })
+
+  it('should serve any change when the filter is all', () => {
+    expect(servesChange({ kind: 'all' }, ['anything.ts'])).toBe(true)
+  })
+
+  it("should read a canvas-only change as unserved by this repository's site deploy", async () => {
+    const text = await Bun.file('.github/workflows/deploy-site.yml').text()
+
+    expect(
+      servesChange(readServedPaths(text), [
+        'src/canvas/shell/selection.ts',
+        'src/canvas/shell/selection.test.ts',
+        'assets/evidence/canvas-selection/selected.png',
+      ]),
+    ).toBe(false)
   })
 })
 

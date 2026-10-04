@@ -16,6 +16,8 @@ on:
       # VISUAL_ONLY_GLOBS in src/gate/measures.ts declares it to the gate.
       - 'web/**'
       - 'assets/**'
+      # Pull request screenshots, which the page never reads.
+      - '!assets/evidence/**'
       - 'src/design/**'
       - 'governance/rules/**'
       - 'standards/**'

@@ -16,7 +16,7 @@ jobs:
       # Say so and pass rather than failing a close nobody can fix.
       - name: Skip a fork pull request
         if: github.event.pull_request.head.repo.full_name != github.repository
-        run: echo "::notice::Fork pull request, so the token cannot edit the evidence comment. The local preview line stays."
+        run: echo "::notice::Fork pull request, so the token cannot edit the evidence comment. The preview line stays."
 
       - name: Checkout
         if: github.event.pull_request.head.repo.full_name == github.repository
@@ -32,7 +32,7 @@ jobs:
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: bun install --frozen-lockfile
 
-      - name: Replace the local preview line on the evidence comment
+      - name: Drop the preview line from the evidence comment
         if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}

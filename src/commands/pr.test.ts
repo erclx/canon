@@ -496,17 +496,20 @@ describe('canon pr evidence --local', () => {
     ])
 
     expect(record.reason).toBe('ok')
-    expect(record.body?.split('\n')[0]).toBe(
+    expect(record.body?.split('\n').slice(0, 3)).toEqual([
+      '## Evidence',
+      '',
       '**Local preview:** http://localhost:5173',
-    )
+    ])
   })
 })
 
 /** A marked comment body carrying every field the record reports, in the shape `renderEvidenceBody` writes. */
 function markedCommentBody(): string {
   return [
-    '**Preview:** https://feat-x.site.pages.dev',
-    '**Local preview:** http://localhost:5173',
+    '## Evidence',
+    '',
+    '**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173',
     '',
     '## What to look at',
     '',
@@ -527,11 +530,12 @@ describe('canon pr evidence reports the marked comment', () => {
 
   async function runEvidenceRecord(
     files: Record<string, string>,
+    args: string[] = [],
   ): Promise<Record<string, unknown>> {
     initBranchRepo(repoRoot, files)
     const result = await execa(
       process.execPath,
-      [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+      [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot, ...args],
       {
         cwd: repoRoot,
         reject: false,
@@ -589,6 +593,32 @@ describe('canon pr evidence reports the marked comment', () => {
       local: 'http://localhost:5173',
       checklist: '- [x] the hero settles\n- [ ] the footer wraps',
     })
+  })
+
+  it('should drop a carried hosted preview the deploy does not build from', async () => {
+    writeComments([markedCommentBody()])
+
+    const record = await runEvidenceRecord({
+      'evidence/hero.png': 'png',
+      '.github/workflows/deploy.yml': WEB_ONLY_DEPLOY,
+    })
+
+    expect(record.body).not.toContain('**Preview:**')
+    expect(record.body).toContain('**Local preview:** http://localhost:5173')
+  })
+
+  it('should keep an explicit --preview on a branch the deploy does not build from', async () => {
+    writeComments([markedCommentBody()])
+
+    const record = await runEvidenceRecord(
+      {
+        'evidence/hero.png': 'png',
+        '.github/workflows/deploy.yml': WEB_ONLY_DEPLOY,
+      },
+      ['--preview', 'https://manual.pages.dev'],
+    )
+
+    expect(record.body).toContain('**Preview:** https://manual.pages.dev')
   })
 
   it('should omit every field when no comment carries the marker', async () => {
@@ -848,6 +878,101 @@ const FENCED_DEPLOY = [
   '',
 ].join('\n')
 
+/** A fenced deploy whose push trigger builds only from `web/`, in YAML the filter reader can parse. */
+const WEB_ONLY_DEPLOY = [
+  'on:',
+  '  push:',
+  '    branches: [main]',
+  '    paths:',
+  "      - 'web/**'",
+  '  workflow_dispatch:',
+  'jobs:',
+  '  deploy:',
+  '    steps:',
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
+  '      - run: wrangler pages deploy dist --branch=${{ github.ref_name }}',
+  '      - run: |',
+  '          echo "canon-preview-alias: $ALIAS_URL"',
+  '',
+].join('\n')
+
+describe('canon pr preview against the pull request files', () => {
+  let tempDir: string
+  let repoRoot: string
+
+  async function runPreviewRecord(
+    args: string[] = [],
+  ): Promise<Record<string, unknown>> {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'pr', 'preview', '7', '--json', '--root', repoRoot, ...args],
+      {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+      },
+    )
+    return JSON.parse(result.stdout)
+  }
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-preview-files-'))
+    repoRoot = join(tempDir, 'repo')
+    const commentsFile = join(tempDir, 'comments.json')
+    mkdirSync(repoRoot)
+    writeFileSync(commentsFile, '{"comments":[]}')
+    writeFakeGh(join(tempDir, 'bin'), commentsFile, join(tempDir, 'api.log'))
+    initBranchRepo(repoRoot, {
+      '.github/workflows/deploy.yml': WEB_ONLY_DEPLOY,
+    })
+  })
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  it('should refuse as unserved when no changed path is one the deploy builds from', async () => {
+    writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/canvas/a.ts\n')
+
+    const record = await runPreviewRecord()
+
+    expect(record).toMatchObject({ reason: 'unserved' })
+  })
+
+  it('should refuse --check as unserved the same way', async () => {
+    writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/canvas/a.ts\n')
+
+    const record = await runPreviewRecord(['--check'])
+
+    expect(record).toMatchObject({ reason: 'unserved' })
+  })
+
+  it('should go on to the dispatch when a changed path is one the deploy builds from', async () => {
+    writeFileSync(join(tempDir, 'files.tsv'), 'modified\tweb/index.html\n')
+
+    const record = await runPreviewRecord()
+
+    expect(record).toMatchObject({ reason: 'gh-failed' })
+  })
+
+  it('should go on to the dispatch when the only served change removes a path', async () => {
+    writeFileSync(join(tempDir, 'files.tsv'), 'removed\tweb/old.html\n')
+
+    const record = await runPreviewRecord()
+
+    expect(record).toMatchObject({ reason: 'gh-failed' })
+  })
+
+  it('should refuse as unreadable-changes when the changed files cannot be read', async () => {
+    writeFileSync(join(tempDir, 'files-fail'), '')
+
+    const record = await runPreviewRecord()
+
+    expect(record).toMatchObject({ reason: 'unreadable-changes' })
+  })
+})
+
 describe('canon pr evidence --check', () => {
   let tempDir: string
   let repoRoot: string
@@ -931,6 +1056,20 @@ describe('canon pr evidence --check', () => {
     const record = await runCheck()
 
     expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+  })
+
+  it('should owe no preview on a branch the deploy does not build from', async () => {
+    mkdirSync(join(repoRoot, '.github', 'workflows'), { recursive: true })
+    writeFileSync(
+      join(repoRoot, '.github', 'workflows', 'deploy.yml'),
+      WEB_ONLY_DEPLOY,
+    )
+    writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/canvas/a.ts\n')
+    writeComment('## What to look at\n\n<!-- pr-evidence: head=abc -->')
+
+    const record = await runCheck()
+
+    expect(record).toMatchObject({ reason: 'settled', owed: [] })
   })
 
   it('should report settled for a marked comment with no preview line when no deploy workflow resolves', async () => {
@@ -1130,20 +1269,20 @@ describe('canon pr local', () => {
     })
   })
 
-  it('should replace the local line with the note on --remove', async () => {
+  it('should drop the address line and leave no note on --remove', async () => {
     writeMarkedComment(
-      '**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+      '## Evidence\n\n**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
     )
 
-    const outcome = await runLocal(['7', '--remove', '--note', 'gone'])
+    const outcome = await runLocal(['7', '--remove'])
 
     expect(outcome.record.reason).toBe('removed')
     expect(readFileSync(apiLog, 'utf8')).toBe(
-      'body=gone\n\n<!-- pr-evidence: head=abc -->',
+      'body=## Evidence\n\n<!-- pr-evidence: head=abc -->',
     )
   })
 
-  it('should report no-line and write nothing when the comment carries no local line', async () => {
+  it('should report no-line and write nothing when the comment carries no address line', async () => {
     writeMarkedComment('## Evidence\n\n<!-- pr-evidence: head=abc -->')
 
     const outcome = await runLocal(['7', '--remove'])

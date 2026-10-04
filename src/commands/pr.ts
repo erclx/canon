@@ -51,13 +51,13 @@ import {
 } from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
+  dropAddressLine,
   findLocalServer,
   type Listener,
   type LocalRefusal,
   type LocalRunner,
   parseLsofListeners,
   parseProcNetTcp,
-  stripLocalLine,
 } from '@/pr/local'
 import { KEY_CHANGES } from '@/pr/paths'
 import {
@@ -68,6 +68,7 @@ import {
   type PreviewRefusal,
   type PreviewRunner,
   type RunRow,
+  servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
 import {
@@ -110,16 +111,11 @@ interface EvidenceOptions extends ReadOptions {
 
 interface LocalOptions extends ReadOptions {
   readonly remove?: boolean
-  readonly note?: string
 }
 
 /** Shared by every verb that resolves a pull request from the checkout's branch. */
 const AMBIGUOUS_PULL =
   'More than one pull request is open on this branch, each against another base. Name the pull request number.'
-
-/** What replaces the local address line once the pull request closes. */
-const LOCAL_REMOVED_NOTE =
-  '_Local preview removed when the pull request closed._'
 
 /** How long the probe waits on a listener before reading it as not a server. */
 const LOCAL_PROBE_TIMEOUT_MS = 2_000
@@ -194,7 +190,7 @@ const PREVIEW_TIMEOUT_MINUTES = 15
 const PREVIEW_POLL_MS = 15_000
 
 const PREVIEW_REFUSALS: Record<
-  PreviewRefusal | 'bad-timeout' | 'check-timeout',
+  PreviewRefusal | 'bad-timeout' | 'check-timeout' | 'unreadable-changes',
   string
 > = {
   'bad-timeout': '--timeout takes a positive number of minutes.',
@@ -202,6 +198,8 @@ const PREVIEW_REFUSALS: Record<
     '--check only reads the deploy runs and waits on nothing, so it takes no --timeout.',
   'no-deploy':
     'No workflow under .github/workflows/ runs pages deploy and carries a workflow_dispatch trigger, so there is nothing to dispatch.',
+  unserved:
+    "The deploy workflow's push path filter matches no path this pull request changed, so the site it publishes would not show the change. Nothing was dispatched.",
   // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
   unfenced:
     'The deploy workflow passes no --branch=${{ github.ref_name }}, so a dispatch from this branch would publish it to production. Add the flag before asking for a preview.',
@@ -209,6 +207,8 @@ const PREVIEW_REFUSALS: Record<
     'The deploy never printed a canon-preview-alias line, so no address could be read. Add the alias step from the cloudflare stack reference to the workflow.',
   'gh-failed':
     'gh could not list or dispatch the deploy workflow for this branch.',
+  'unreadable-changes':
+    'GitHub could not list what this pull request changed, so whether the deploy serves it is unknown. Nothing was dispatched.',
   'run-failed':
     'The deploy run finished without succeeding, so no preview was published. Read the run log.',
   timeout:
@@ -508,7 +508,7 @@ export function register(program: Command): void {
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
       '--preview <url>',
-      'Open the body with this preview address, from canon pr preview',
+      'Put this preview address on the line under the heading, from canon pr preview',
     )
     .option(
       '--checklist <path>',
@@ -516,7 +516,7 @@ export function register(program: Command): void {
     )
     .option(
       '--local <url>',
-      "Add this worktree's running server under any preview line, from canon pr local",
+      "Add this worktree's running server to the address line, from canon pr local",
     )
     .option(
       '--check',
@@ -544,11 +544,21 @@ export function register(program: Command): void {
         '  would-empty  the render holds no cases and the marked comment holds',
         '               some, so no body is printed and a person edits the comment',
         '',
-        "--preview puts the address on the body's first line. With no evidence",
-        'in the diff, the body is that line and the marker alone, reported as',
-        'ok, so the preview still lands in one comment a later call can edit.',
-        'Without --preview, an address the marked comment already opens with',
-        'is carried into the new body, so a re-render after a push keeps it.',
+        'Every body opens with `## Evidence`, then one address line joining',
+        'the hosted and local previews with " · ", carrying whichever apply,',
+        'then the Base and Head line when there are screenshots.',
+        '',
+        '--preview puts the hosted address on that line. With no evidence in',
+        'the diff, the body is the heading, that line, and the marker alone,',
+        'reported as ok, so the preview still lands in one comment a later',
+        'call can edit. Without --preview, an address the marked comment',
+        'already carries is carried into the new body, so a re-render after a',
+        'push keeps it, unless a deploy workflow resolves and its push path',
+        'filter matches no path the pull request changed, in which case the',
+        'carried hosted address is dropped. An explicit --preview is always',
+        'kept. The address region above the comparison is read for each',
+        'prefix wherever it sits, so a comment that opens on the addresses',
+        'still carries them forward.',
         '',
         '--checklist closes the body with a visual checklist, below the',
         'comparison it annotates. A checklist the marked comment already',
@@ -558,17 +568,17 @@ export function register(program: Command): void {
         'image renders a marked body holding the checklist, so a later call',
         'finds and edits that comment.',
         '',
-        '--local adds a **Local preview:** line under the hosted preview line,',
-        'or opens the body with it when there is none, and is carried forward',
-        'the same way. It does not by itself turn no-evidence into ok, so a',
+        '--local adds a **Local preview:** segment after any hosted one on the',
+        'address line, or carries the line alone, and is carried forward the',
+        'same way. It does not by itself turn no-evidence into ok, so a',
         'branch with a server running and nothing to show posts no link-only',
         'comment. Together with --checklist the link and the checklist land in',
         'one comment.',
         '',
         'Both reasons carry what the marked comment already posted, each field',
         'present only when that comment holds it:',
-        '  preview    the hosted **Preview:** address the comment opens with',
-        '  local      the **Local preview:** address under it',
+        '  preview    the hosted **Preview:** address the comment carries',
+        '  local      the **Local preview:** address beside it',
         '  checklist  the checklist between its delimiters, ticks included',
         'These come from the comment already posted, never from the flags this',
         'call passed. A checklist the caller posted raw after a refused render',
@@ -582,8 +592,9 @@ export function register(program: Command): void {
         '  owed     `owed` lists evidence, preview, or both, in that order',
         'evidence is owed when an evidence image changed and no comment carries',
         'the marker. preview is owed when either holds, a deploy workflow in',
-        "this checkout resolves, and the marked comment's first line is no",
-        '**Preview:** line. A failed deploy reads the same as a skipped one.',
+        'this checkout resolves, its push path filter matches a path the pull',
+        'request changed, and the marked comment carries no **Preview:**',
+        'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
         'with --preview, --local, or --checklist as check-writes.',
         '',
@@ -636,9 +647,16 @@ export function register(program: Command): void {
         'A deploy without the --branch flag is refused before anything runs,',
         'because Pages publishes an unfenced deploy to production.',
         '',
+        "The pull request's changed paths are then matched against the",
+        "workflow's own on.push.paths or paths-ignore filter, since a dispatch",
+        'ignores that filter and would publish a site showing none of the',
+        'change. A workflow with neither filter serves every change.',
+        '',
         'Read `reason` on the JSON record:',
         '  ok          the preview was published, with its address in `url`',
         '  no-deploy   no dispatchable workflow runs pages deploy',
+        '  unserved    the push filter matches no changed path, so nothing was',
+        '              dispatched, and --check answers the same',
         '  unfenced    the deploy passes no --branch, so nothing was dispatched',
         '  no-alias    the workflow prints no canon-preview-alias line',
         '  run-failed  the deploy run finished without succeeding',
@@ -675,15 +693,7 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Worktree to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
-    .option(
-      '--remove',
-      "Replace the evidence comment's local preview line with a note",
-    )
-    .option(
-      '--note <text>',
-      'What replaces the line on --remove',
-      LOCAL_REMOVED_NOTE,
-    )
+    .option('--remove', "Drop the evidence comment's preview address line")
     .addHelpText(
       'after',
       [
@@ -700,16 +710,19 @@ export function register(program: Command): void {
         'without it.',
         '',
         '--remove reads the pull request comment carrying the pr-evidence',
-        'marker and replaces its **Local preview:** line with --note, editing',
-        'the comment itself so a close workflow with no session can call it.',
+        'marker and drops its address line, the **Preview:** and **Local',
+        'preview:** segments together, leaving no note in its place. It edits',
+        'the comment itself so a close workflow with no session can call it,',
+        'and drops the hosted link too because the same close deletes the',
+        "branch's preview deployments.",
         '',
         'Read `reason` on the JSON record:',
         '  ok                  a page answered, with its address in `url`',
         '  no-server           nothing inside this worktree served a page',
         '  no-listener-reader  neither lsof nor /proc is available',
-        '  removed             --remove replaced the line',
+        '  removed             --remove dropped the line',
         '  no-comment          --remove found no marked comment, a no-op',
-        '  no-line             --remove found no local line, a no-op',
+        '  no-line             --remove found no address line, a no-op',
         '',
         'Exit codes:',
         '  0  a server was found, or --remove finished, including a no-op',
@@ -1597,18 +1610,24 @@ async function runReviewState(
   return 0
 }
 
+interface PullFiles {
+  /** Each path that still exists at the head, tagged with whether the pull request added it. */
+  readonly present: ReadonlyMap<string, boolean>
+  /** Each path the pull request removed, which a deploy's push filter still counts. */
+  readonly removed: readonly string[]
+}
+
 /**
- * The paths a pull request changed that still exist at its head, each tagged
- * with whether the pull request added it, read through the paginated files
- * endpoint so the set is the same from any checkout and never capped at the
- * first view. `renamed` and `copied` count as added, since the new path has no
+ * The paths a pull request changed, read through the paginated files endpoint
+ * so the set is the same from any checkout and never capped at the first
+ * view. `renamed` and `copied` count as added, since the new path has no
  * counterpart at the merge base. Returns undefined when the read fails, which
  * refuses rather than rendering a short set.
  */
 async function listPullFiles(
   cwd: string,
   number: number,
-): Promise<ReadonlyMap<string, boolean> | undefined> {
+): Promise<PullFiles | undefined> {
   const stdout = await gh(cwd, [
     'api',
     '--paginate',
@@ -1617,15 +1636,19 @@ async function listPullFiles(
     '.[] | [.status, .filename] | @tsv',
   ])
   if (stdout === null) return undefined
-  const files = new Map<string, boolean>()
+  const present = new Map<string, boolean>()
+  const removed: string[] = []
   for (const line of stdout.split('\n').filter(Boolean)) {
     const [status, path] = line.split('\t')
-    if (status === undefined || path === undefined || status === 'removed') {
-      continue
-    }
-    files.set(path, status !== 'modified' && status !== 'changed')
+    if (status === undefined || path === undefined) continue
+    if (status === 'removed') removed.push(path)
+    else present.set(path, status !== 'modified' && status !== 'changed')
   }
-  return files
+  return { present, removed }
+}
+
+function everyChangedPath(files: PullFiles): string[] {
+  return [...files.present.keys(), ...files.removed]
 }
 
 /**
@@ -1729,8 +1752,8 @@ async function runEvidence(
   }
 
   const grouped = await groupEvidence(
-    [...pullFiles.keys()],
-    async (path) => pullFiles.get(path) === false,
+    [...pullFiles.present.keys()],
+    async (path) => pullFiles.present.get(path) === false,
   )
 
   let existingCases = 0
@@ -1766,13 +1789,20 @@ async function runEvidence(
     ...(carriedChecklist !== undefined && { checklist: carriedChecklist }),
   }
 
+  // A deploy that resolves and does not build from any changed path makes a
+  // carried hosted link point at a site that shows none of this change.
+  const deploy = findDeployWorkflow(await readWorkflows(root))
+  const deployServesChange =
+    deploy.kind === 'found' &&
+    servesChange(deploy.filter, everyChangedPath(pullFiles))
+  const isUnserved = deploy.kind === 'found' && !deployServesChange
+
   if (isCheck) {
     const owed = readOwed({
       hasEvidenceChange: grouped.kind === 'read',
       hasMarkedComment: hasMarkedEvidenceComment(comments),
       carriedPreview: carriedPreview !== undefined,
-      deployWorkflowFound:
-        findDeployWorkflow(await readWorkflows(root)).kind === 'found',
+      deployServesChange,
     })
     logStep(owed.length === 0 ? 'Settled' : 'Owed')
     logInfo(
@@ -1838,7 +1868,7 @@ async function runEvidence(
     )
   }
 
-  const preview = opts.preview ?? carriedPreview
+  const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
   const local = opts.local ?? carriedLocal
   const checklist = suppliedChecklist ?? carriedChecklist
   const states = grouped.kind === 'read' ? grouped.states : []
@@ -2036,6 +2066,24 @@ async function runPreview(
     return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
   const { identity } = read
+
+  // A dispatch ignores the workflow's own push filter, so the filter is read
+  // here, ahead of both the mint and the check, rather than left to GitHub.
+  const changed =
+    identity.number === undefined
+      ? undefined
+      : await listPullFiles(root, identity.number)
+  if (changed === undefined) {
+    return refuseWith(
+      'unreadable-changes',
+      PREVIEW_REFUSALS['unreadable-changes'],
+      emitJson,
+      root,
+    )
+  }
+  if (!servesChange(pick.filter, everyChangedPath(changed))) {
+    return refuseWith('unserved', PREVIEW_REFUSALS.unserved, emitJson, root)
+  }
 
   if (opts.check === true) {
     return runPreviewCheck(root, emitJson, pick.path, identity)
@@ -2280,7 +2328,7 @@ async function runLocal(opts: LocalOptions): Promise<number> {
 }
 
 /**
- * Replaces the local line on the marked comment. The verb writes here rather
+ * Drops the address line on the marked comment. The verb writes here rather
  * than handing a body back, because its caller is a close workflow with no
  * session to post one.
  */
@@ -2290,7 +2338,6 @@ async function runLocalRemove(
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
-  const note = opts.note ?? LOCAL_REMOVED_NOTE
 
   intro('canon pr local --remove')
 
@@ -2333,9 +2380,9 @@ async function runLocalRemove(
     return finish('no-comment', 'No comment carries the evidence marker.')
   }
 
-  const stripped = stripLocalLine(marked.body, note)
-  if (stripped === undefined) {
-    return finish('no-line', 'The evidence comment carries no local line.')
+  const dropped = dropAddressLine(marked.body)
+  if (dropped === undefined) {
+    return finish('no-line', 'The evidence comment carries no address line.')
   }
 
   const patched = await gh(root, [
@@ -2344,7 +2391,7 @@ async function runLocalRemove(
     'PATCH',
     `repos/{owner}/{repo}/issues/comments/${commentId}`,
     '-f',
-    `body=${stripped}`,
+    `body=${dropped}`,
   ])
   if (patched === null) {
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)

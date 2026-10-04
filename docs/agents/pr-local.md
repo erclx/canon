@@ -1,6 +1,6 @@
 ---
 title: The pull request local preview
-description: How canon pr local finds the server a worktree is running, why a server in another worktree is never reported, the refusal reasons it names, and how a close workflow removes the link with --remove
+description: How canon pr local finds the server a worktree is running, why a server in another worktree is never reported, the refusal reasons it names, and how a close workflow drops the address line with --remove
 ---
 
 # The pull request local preview
@@ -10,7 +10,7 @@ worktree is running. `git-pr` calls it ahead of the evidence comparison and
 passes the address through `canon pr evidence --local`, so a reviewer on the
 same machine gets the running branch to click into beside the screenshots and
 the checklist. A workflow on the pull request's `closed` event calls it again
-with `--remove`, which replaces the line with a note.
+with `--remove`, which drops the address line and leaves nothing in its place.
 
 ```bash
 canon pr local --json
@@ -62,9 +62,9 @@ to it on this pull request would show a reviewer the wrong code.
 | `ok`                 | A server answered. `url` carries the address and `port` the port.     |
 | `no-server`          | Nothing inside this worktree served an HTML page.                     |
 | `no-listener-reader` | Neither `lsof` nor `/proc` is available, so no socket could be read.  |
-| `removed`            | `--remove` replaced the local line on the evidence comment.           |
+| `removed`            | `--remove` dropped the address line from the evidence comment.        |
 | `no-comment`         | `--remove` found no comment carrying the evidence marker.             |
-| `no-line`            | `--remove` found the comment but no local line on it.                 |
+| `no-line`            | `--remove` found the comment but no address line on it.               |
 | `gh-missing`         | `--remove` needs `gh` and it is not on the path.                      |
 | `gh-failed`          | `--remove` could not read the comments or could not edit the comment. |
 
@@ -84,12 +84,19 @@ on:
     types: [closed]
 ```
 
-It reads the comment carrying the `pr-evidence` marker, replaces the
-`**Local preview:**` line with the `--note` text, and edits the comment itself
-through `gh api`. The verb writes here rather than handing a body back, because
-its caller is a workflow with no session to post one. Every other byte of the
-comment stays as it was, which keeps the marker, the checklist delimiters, and
-any ticked box intact. A second run finds no line and reports `no-line`.
+It reads the comment carrying the `pr-evidence` marker, drops the address line
+under `## Evidence`, the hosted `**Preview:**` segment and the
+`**Local preview:**` segment together, and edits the comment itself through
+`gh api`. The hosted link goes too because the deploy workflow deletes the
+branch's preview deployments on the same close. No note replaces the line, and
+the blank line it sat on goes with it so no gap doubles under the heading. A
+comment in the older layout, with each address on its own line at the top,
+loses both lines the same way.
+
+The verb writes here rather than handing a body back, because its caller is a
+workflow with no session to post one. Every other byte of the comment stays as
+it was, which keeps the marker, the checklist delimiters, and any ticked box
+intact. A second run finds no line and reports `no-line`.
 
 A fork pull request gets a read-only token, so the workflow skips the edit with
 a notice rather than failing the close.
@@ -100,6 +107,5 @@ The link can still go dead while the pull request is open, such as when the
 session holding the server retires. Only the close is covered, and a re-render
 after a push carries the line forward whether the server still answers or not.
 
-The hosted `**Preview:**` line from `canon pr preview` stays on the comment
-after close, even though its deployments are deleted then. `canon docs
-pr-preview` covers that path.
+`canon docs pr-preview` covers how the hosted address is minted and when it is
+refused.

@@ -16,6 +16,7 @@ const BRANCH_FENCE = '--branch=${{ github.ref_name }}'
 
 export type PreviewRefusal =
   | 'no-deploy'
+  | 'unserved'
   | 'unfenced'
   | 'no-alias'
   | 'gh-failed'
@@ -27,8 +28,77 @@ export interface WorkflowFile {
   readonly text: string
 }
 
+/**
+ * Which changed paths a deploy builds from, read off its own push trigger, so
+ * the workflow that decides when production deploys is also the one statement
+ * of what a branch preview serves.
+ */
+export type ServedFilter =
+  | { readonly kind: 'all' }
+  | { readonly kind: 'paths'; readonly patterns: readonly string[] }
+  | { readonly kind: 'paths-ignore'; readonly patterns: readonly string[] }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+function readPatterns(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  return value.filter((entry): entry is string => typeof entry === 'string')
+}
+
+/**
+ * Reads `on.push.paths` or `on.push.paths-ignore`. A workflow with neither,
+ * with no push trigger, or that does not parse serves every change, since
+ * reading unserved by mistake stops every reader asking for a preview.
+ */
+export function readServedPaths(workflowText: string): ServedFilter {
+  let parsed: unknown
+  try {
+    parsed = Bun.YAML.parse(workflowText)
+  } catch {
+    return { kind: 'all' }
+  }
+  const on = isRecord(parsed) ? parsed.on : undefined
+  const push = isRecord(on) ? on.push : undefined
+  if (!isRecord(push)) return { kind: 'all' }
+
+  const paths = readPatterns(push.paths)
+  if (paths !== undefined) return { kind: 'paths', patterns: paths }
+  const ignored = readPatterns(push['paths-ignore'])
+  if (ignored !== undefined) return { kind: 'paths-ignore', patterns: ignored }
+  return { kind: 'all' }
+}
+
+/** Whether the patterns match a path, applied in order so a later `!` pattern overrides an earlier one, as GitHub applies them. */
+function matchesInOrder(patterns: readonly string[], path: string): boolean {
+  let isMatched = false
+  for (const pattern of patterns) {
+    const isNegated = pattern.startsWith('!')
+    const glob = new Bun.Glob(isNegated ? pattern.slice(1) : pattern)
+    if (glob.match(path)) isMatched = !isNegated
+  }
+  return isMatched
+}
+
+/** Whether a push carrying `changedPaths` would run the deploy, by the filter its trigger declares. */
+export function servesChange(
+  filter: ServedFilter,
+  changedPaths: readonly string[],
+): boolean {
+  if (filter.kind === 'all') return true
+  if (filter.kind === 'paths') {
+    return changedPaths.some((path) => matchesInOrder(filter.patterns, path))
+  }
+  return changedPaths.some((path) => !matchesInOrder(filter.patterns, path))
+}
+
 export type WorkflowPick =
-  | { readonly kind: 'found'; readonly path: string }
+  | {
+      readonly kind: 'found'
+      readonly path: string
+      readonly filter: ServedFilter
+    }
   | {
       readonly kind: 'refused'
       readonly reason: 'no-deploy' | 'unfenced' | 'no-alias'
@@ -36,6 +106,7 @@ export type WorkflowPick =
 
 interface WorkflowShape {
   readonly path: string
+  readonly text: string
   readonly deployLines: readonly string[]
   readonly isDispatchable: boolean
   readonly hasMarker: boolean
@@ -51,6 +122,7 @@ function readShape(file: WorkflowFile): WorkflowShape {
     .filter((line) => !line.trimStart().startsWith('#'))
   return {
     path: file.path,
+    text: file.text,
     deployLines: lines.filter((line) => line.includes('pages deploy')),
     isDispatchable: lines.some((line) => /^\s*workflow_dispatch:/.test(line)),
     hasMarker: lines.some((line) => line.includes(ALIAS_MARKER)),
@@ -80,7 +152,11 @@ export function findDeployWorkflow(
   const marked = fenced.find((shape) => shape.hasMarker)
   if (marked === undefined) return { kind: 'refused', reason: 'no-alias' }
 
-  return { kind: 'found', path: marked.path }
+  return {
+    kind: 'found',
+    path: marked.path,
+    filter: readServedPaths(marked.text),
+  }
 }
 
 export function readPreviewAlias(log: string): string | undefined {
