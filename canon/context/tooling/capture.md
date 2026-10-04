@@ -37,6 +37,8 @@ The sweep under `screenshots/` is gitignored and per worktree, so it partitions 
 
 A first commit to `evidence/` runs the capture twice with no code change between and confirms byte-identical output, since that is what catches a flaky render before it reaches the pull request.
 
+This repository sorts its own `evidence/` folders into dev and prod by location, which `canon/context/development/evidence.md` writes down, and the seed's README frame under `assets/evidence/readme/` is the target-side contrast.
+
 ### Where server readiness lives
 
 `canon tooling verify` runs `bun run screenshot` in every scaffolded stack whose `package.json` declares it, being `astro` and `nextjs`, then asserts PNGs landed under `screenshots/`. A capture seed naming one project's selectors therefore fails every other stack's verify unless a selector matching nothing is reported and skipped. `canon tooling verify web` cannot catch that, since `web` carries no scaffold command.

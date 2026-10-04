@@ -52,6 +52,7 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 ## Assets and captures
 
 - Read `canon/context/development/regeneration.md`'s Hero section before touching `assets/captures/` or `assets/*.png`. Those renders gate on drift, so a hand edit to a generated frame is overwritten by the next `scripts/core/regen-hero.ts` run.
+- Read `canon/context/development/evidence.md` before editing `src/capture/` or `src/pr/`. It states which `evidence` folders are dev baselines and which are prod captures, and that `canon pr evidence` compares both.
 
 ## Hooks and husky
 

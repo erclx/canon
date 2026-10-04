@@ -23,6 +23,7 @@ A deck is a folder of HTML slides under `.canon/slides/<deck>/`, drawn in the pr
 - A deck is a draft made with Claude, so it lives under the record root rather than in a committed folder. Images and video would otherwise grow git history for good, and the cost is that no deck is reviewable in a pull request.
 - `slides` is a record entry, so `canon records push` backs it. At a `.canon` root the push reads every top-level folder, and at a legacy `.claude` root it reads `BACKED_FOLDERS`, which names `slides` too.
 - A deck folder holds what the converter reads and nothing else: `.html` slides in filename order, an optional `deck.json`, and `assets/`. Whether a deck is authored as a canvas page instead stays open until that authoring surface is measured, and a canvas page would export into the same folder shape.
+- No slides capture is committed, so none is prod evidence today. A dev baseline would sit at `assets/evidence/slides/` and does not exist. `canon/context/development/evidence.md` owns the boundary.
 - The markdown source and its nine layouts were retired with this layout. They painted every project's deck in Canon's palette and could carry no image, chart, table, notes, or motion. No repository held a markdown deck when they went, so nothing migrates one.
 
 ## Commands

@@ -44,3 +44,4 @@ After changing what a workspace's files must contain:
 - `canon standards glossary`: the entry shape, ordering, and which terms a workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy deciding what to teach next, which is the shipped skill's own concern rather than this one's
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
+- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`

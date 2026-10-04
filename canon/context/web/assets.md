@@ -11,8 +11,8 @@ Every image and embedded render the landing page and the README carry, and the f
 
 ## Layout
 
-- `web/public/assets/` owns `social-card.png`, the `og:image`, symlinked from the repository's own `assets/evidence/`
-- `web/public/evidence/` owns the two fixed captures of one pull request the evidence beat shows
+- `web/public/assets/` owns `social-card.png`, the `og:image`, symlinked from the repository's own `assets/evidence/`, where `canon/context/development/evidence.md` records it as a named exception
+- `web/public/evidence/` owns the two fixed captures of one pull request the evidence beat shows, prod evidence by the boundary `canon/context/development/evidence.md` states
 - `web/public/previews/` owns build-time renders embedded as `<iframe>` sources, being `design-tokens/` and `teach-workspace/`
 - `web/card-src/` owns the social card route, served by `web/card.config.mjs`
 

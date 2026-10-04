@@ -38,3 +38,4 @@ Before shipping any change under `web/`:
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/*.png`
 - `canon/context/web/assets.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses
+- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before adding or moving an image under one

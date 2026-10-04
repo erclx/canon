@@ -31,3 +31,4 @@ Read `canon/context/features/canvas.md` for the layout, the content format, toke
 - `docs/agents/canvas.md`: every verb, record, and refusal
 - `claude/skills/canvas/`: the procedure a session follows to drive the canvas, which is the shipped skill's concern rather than this one's
 - `canon standards canvas`: the frame content format both writers share
+- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before committing a walk's states
