@@ -304,11 +304,7 @@ describe('skillGroups', () => {
       [['alpha', 'Use `beta` first <!-- canon-keep-retired -->']],
     ])
 
-    const [group] = skillGroups(
-      markdown,
-      catalog({ alpha: 'other' }),
-      FAMILIES,
-    )
+    const [group] = skillGroups(markdown, catalog({ alpha: 'other' }), FAMILIES)
 
     expect(group?.skills[0]?.usage).toBe('Use beta first')
   })

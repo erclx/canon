@@ -460,9 +460,7 @@ export const skillPracticeShape: Measure = async (ctx) => {
  */
 export const skillFamily: Measure = async (ctx) => {
   const report = await auditSkills(ctx.root)
-  const shipped = report.corpora.find(
-    (corpus) => corpus.rel === SHIPPED_CORPUS,
-  )
+  const shipped = report.corpora.find((corpus) => corpus.rel === SHIPPED_CORPUS)
   if (shipped === undefined) {
     return {
       emissions: [],
@@ -483,9 +481,7 @@ export const skillFamily: Measure = async (ctx) => {
 
   return {
     emissions: [
-      info(
-        `${plural(shipped.skills, 'shipped skill')} declare a known family`,
-      ),
+      info(`${plural(shipped.skills, 'shipped skill')} declare a known family`),
     ],
   }
 }

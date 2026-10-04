@@ -110,11 +110,7 @@ export function readSession(): SessionReads {
   const { skills, families } = readCanonJson<{
     skills: Skill[]
     families: SkillFamily[]
-  }>([
-    'claude',
-    'skills',
-    'list',
-  ])
+  }>(['claude', 'skills', 'list'])
   const seeds = readCanonJson<unknown[]>(['claude', 'seeds', 'list'])
   const census = readCanonJson<{ files: number }>([
     'census',
