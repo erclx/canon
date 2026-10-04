@@ -23,6 +23,7 @@ description: The canvas server, the page and frame content format, token resolut
 
 - A page is a folder, a frame is one `.html` file in it, and `layout.json` beside them holds each frame's box. The markup stays a plain file so a session edits a frame the way it edits any other file, and the box lives apart so moving a frame never rewrites its markup.
 - Every writer of `layout.json` takes a lock file beside it, reads, merges its change, and replaces the file in one rename. The server and a CLI verb are two processes, so a drag released while a verb writes would otherwise lose one of the two positions.
+- `moveFrame` writes a position and `resizeFrame` writes a whole box, and the shell and the CLI share both. A top or left handle moves the frame as it resizes it, so the resize takes the box in one locked write rather than a move and a resize another writer could land between.
 - The content resolves at the main worktree root from every worktree, the way every record folder does, so a session in a linked worktree draws on the canvas the operator has open rather than on a copy nobody serves.
 - An element is addressed by its index in document order, with the frame file's hash beside it. The index shifts when the file changes, so a selection reports `stale` once the hash moves, and a pick or an edit made against an older hash is refused as `stale-address`. A frame written as a fragment or a table without its `tbody` makes the browser build elements the file never states, which is why the standard requires whole documents.
 
@@ -37,6 +38,12 @@ The inspector writes a token at full opacity as `var(--<name>)` and below it as 
 The swatch opens the full picker, which edits in HSV so a grey keeps the hue the operator set, and converts to CIE LCH as CSS `lch()` defines it. The conversions are about 150 lines of published formulas in `inspector/color-space.ts`, since a picker library would add a dependency and bring its own DOM and keyboard model.
 
 Any change but the alpha writes a hex, because a token's color cannot change from the inspector without editing the token. The alpha keeps a token through the `color-mix()` form. An LCH value outside sRGB clamps per channel and the rows show the color written. Chroma reduction maps the gamut more faithfully and waits.
+
+### Selection handles
+
+The selection overlay in `client/selection.tsx` draws the outline, four corner handles, and an element's size chip, and sizes each against `--outline-scale`, the inverse of the zoom the plane sets, so all of it holds one screen size. The frame label sizes the same way. A handle drag divides the pointer's travel by the zoom, since the delta arrives in screen pixels and the box is in surface units.
+
+An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
 
 ### Capture
 
@@ -65,4 +72,6 @@ The component gallery existed only for the board's components panel and retired 
 - A popover meant to stay open across its own write keeps its state in module scope, keyed by frame, element, and property, and reopens from it on mount, as the full color picker does. The field's focus-out close waits a tick and skips a field already detached, so the removal during a reload does not read as focus leaving.
 - Happy-dom 20 has no `showPopover()`, so the inspector's popovers call it only where the browser has it, and the shell tests reach them as plain fixed elements. Preact runs a child's layout effect before its parent's, so a control inside a popover the parent shows in its own effect shows the popover itself before it takes focus.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
+- In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
+- `canon/wireframes/canvas.md` sits near the 300 rendered line ceiling, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.
