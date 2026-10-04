@@ -44,7 +44,30 @@ interface Release {
 }
 
 /**
- * Every tag HEAD has merged, newest first, with the day it was created.
+ * A tag ending in a dotted version, bare or behind a component prefix such as
+ * `canon-v2.1.0`. An eval, deploy, or snapshot tag on the trunk names no
+ * release and would otherwise inflate the count.
+ */
+const RELEASE_TAG = /(?:^|[-/@_])v?\d+\.\d+(?:\.\d+)?(?:[-+][0-9A-Za-z.-]+)?$/
+
+/**
+ * A repository before its first commit has no HEAD for `--merged` to resolve,
+ * which git reports as a failed read. It has no tags either, so it reads as an
+ * empty history rather than an unreadable one.
+ */
+async function isUnborn(root: string): Promise<boolean> {
+  const [gitDir, head] = await Promise.all([
+    $`git -C ${root} rev-parse --git-dir`.env(gitEnv()).quiet().nothrow(),
+    $`git -C ${root} rev-parse --verify -q HEAD`
+      .env(gitEnv())
+      .quiet()
+      .nothrow(),
+  ])
+  return gitDir.exitCode === 0 && head.exitCode !== 0
+}
+
+/**
+ * Every release tag HEAD has merged, newest first, with the day it was created.
  *
  * The creator date is the tagging date on an annotated tag and the commit date
  * on a lightweight one, so a history mixing both counts by two clocks.
@@ -63,7 +86,7 @@ async function mergedReleases(root: string): Promise<Release[] | undefined> {
     .env(gitEnv())
     .quiet()
     .nothrow()
-  if (result.exitCode !== 0) return undefined
+  if (result.exitCode !== 0) return (await isUnborn(root)) ? [] : undefined
 
   return result.stdout
     .toString()
@@ -73,6 +96,7 @@ async function mergedReleases(root: string): Promise<Release[] | undefined> {
       const [day, tag] = line.trim().split(' ')
       return { day, tag }
     })
+    .filter((release) => RELEASE_TAG.test(release.tag))
 }
 
 /**

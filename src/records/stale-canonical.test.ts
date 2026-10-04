@@ -124,6 +124,28 @@ describe('staleCanonical on a tagged history', () => {
 
     expect(doc).toMatchObject({ releasesSince: 1, latestRelease: 'v1.0.0' })
   })
+
+  it('should leave out a tag that does not name a release', async () => {
+    writeDoc('canon/REQUIREMENTS.md', '2026-03-01')
+    release('v1.0.0', '2026-04-01')
+    release('eval/seed-ablation-20260502', '2026-05-02')
+
+    const doc = await readDoc('canon/REQUIREMENTS.md')
+
+    expect(doc).toMatchObject({ releasesSince: 1, latestRelease: 'v1.0.0' })
+  })
+
+  it('should count a component-prefixed release tag', async () => {
+    writeDoc('canon/REQUIREMENTS.md', '2026-03-01')
+    release('canon-v2.1.0', '2026-04-01')
+
+    const doc = await readDoc('canon/REQUIREMENTS.md')
+
+    expect(doc).toMatchObject({
+      releasesSince: 1,
+      latestRelease: 'canon-v2.1.0',
+    })
+  })
 })
 
 describe('staleCanonical on the doc set', () => {
@@ -159,6 +181,23 @@ describe('staleCanonical with no tags', () => {
       releasesSince: 0,
       latestRelease: null,
     })
+  })
+})
+
+describe('staleCanonical before the first commit', () => {
+  it('should read an unborn head as a history with no tags', async () => {
+    const unborn = mkdtempSync(join(tmpdir(), 'canon-stale-canonical-unborn-'))
+    execaSync('git', ['-C', unborn, 'init', '-q'], {
+      env: gitEnv(),
+      extendEnv: false,
+    })
+    mkdirSync(join(unborn, 'canon'))
+    writeFileSync(join(unborn, 'canon', 'REQUIREMENTS.md'), '# Requirements\n')
+
+    const outcome = await staleCanonical(unborn)
+    rmSync(unborn, { recursive: true, force: true })
+
+    expect(outcome).toMatchObject({ ok: true, tagged: false })
   })
 })
 

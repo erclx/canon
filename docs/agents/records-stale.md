@@ -60,9 +60,9 @@ The record carries `total`, `due`, `days`, the `folder` read relative to the roo
 
 Each doc's review point is an optional `reviewed: YYYY-MM-DD` frontmatter field, set by whoever finishes a review, per `canon standards requirements` and `canon standards architecture`. It is a date rather than a commit, since a commit written on a feature branch never reaches a trunk that squash-merges. The field is read the way the memory field is, so a value that is not a calendar date comes back as `invalidReviewed`.
 
-The count is every tag merged into `HEAD` whose creator date falls after the reviewed day. A lightweight tag's creator date is its commit's date and an annotated tag's is the tagging date, so a project mixing both counts by two clocks.
+The count is every release tag merged into `HEAD` whose creator date falls after the reviewed day. A release tag ends in a dotted version, bare as `v5.25.0` or behind a component prefix as `canon-v2.1.0`, so an eval, deploy, or snapshot tag on the trunk never inflates it. A lightweight tag's creator date is its commit's date and an annotated tag's is the tagging date, so a project mixing both counts by two clocks.
 
-The record carries `tagged`, false when `HEAD` has merged no tag, and one `docs` row per doc with `path`, `reviewed`, `releasesSince`, and `latestRelease`. `releasesSince` is null on a doc never reviewed and `0` on one reviewed after every tag. With no tags it is also `0`, which is why `tagged` travels beside it.
+The record carries `tagged`, false when `HEAD` has merged no release tag or the repository has no commit yet, and one `docs` row per doc with `path`, `reviewed`, `releasesSince`, and `latestRelease`. `releasesSince` is null on a doc never reviewed and `0` on one reviewed after every tag. With no tags it is also `0`, which is why `tagged` travels beside it.
 
 It gates nothing, and no hook, gate stage, or workflow runs it. `canon:document-health` reads it when asked to review the two records.
 
