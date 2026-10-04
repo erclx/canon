@@ -152,9 +152,13 @@ export function eotOf(bytes: Uint8Array): EotResult {
     }
     const strings = names(font, name)
     const padding = Buffer.alloc(2)
-    // RootStringCheckSum, EUDCCodePage, Padding6, SignatureSize, EUDCFlags,
-    // and EUDCFontSize, all zero for a face with no root string or EUDC data.
+    // RootStringCheckSum, then EUDCCodePage, Padding6, SignatureSize,
+    // EUDCFlags, and EUDCFontSize, zero for a face with no EUDC data. The
+    // checksum is the root string's byte sum XOR 0x50475342, so an empty root
+    // string still writes the constant, and PowerPoint refuses to install a
+    // face whose checksum is zero as tampered with.
     const tail = Buffer.alloc(20)
+    tail.writeUInt32LE(0x50475342, 0)
     const eot = Buffer.concat([
       header(font, os2.offset, head.offset),
       padding,
