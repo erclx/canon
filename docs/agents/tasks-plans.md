@@ -59,7 +59,7 @@ The question block is read through the same parser `canon tasks validate` runs, 
 
 Branch on `launchable` rather than on the exit code, for the reason the section above states: a shell profile wrapping `canon` in a function can take a later command's status and mask every non-zero exit, which reads a waiting plan as a launchable one.
 
-The orchestrator dispatch runbook calls this before it checks the branch or the file sets, so a row whose plan still needs a person is handed back rather than launched into a worker that halts on the same question.
+The orchestrator dispatch runbook calls this before it checks the branch or runs its conflict check, so a row whose plan still needs a person is handed back rather than launched into a worker that halts on the same question.
 
 ```bash
 canon tasks plan-answers dispatch-answer-gate --json | jq -r '.launchable'

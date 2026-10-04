@@ -24,7 +24,7 @@ Execution order comes off `.canon/tasks/priority.md` and nothing sequences work 
 
 Run one orchestrator at a time. The board is gitignored, so a second session reads none of the first one's writes and the two collide on labels and archives.
 
-See [operating model](operating-model.md) for what caps the worker tracks under it and when a disjoint one still waits. An operator caps a session's workers by saying so, and that cap binds for the session rather than standing as a number in a file.
+See [operating model](operating-model.md) for what caps the worker tracks under it and what conflict holds one behind another. An operator caps a session's workers by saying so, and that cap binds for the session rather than standing as a number in a file.
 
 Before a handoff, the orchestrator checks the plan against the tree rather than reading it: grep each construct it names and count the sites, confirm every phase label it cites is still open, and open each file it describes. A plan goes stale from whatever merged after it was written, and reading cannot catch that.
 
@@ -60,22 +60,22 @@ A branch review report takes the other route and is swept rather than archived. 
 
 A fan-out of N worktrees produces N pull requests. The order they merge in matters only when two branches touch the same file.
 
-**Collision profile.** Work confined to one domain directory, such as a new skill under its own folder or independent fixes in different subtrees of `scripts/`, rarely collides. These paths are shared hotspots, so a branch touching one serializes rather than fans out, because parallel edits almost always produce a conflict or a stale regenerated file:
+**Rebase profile.** Work confined to one domain directory, such as a new skill under its own folder or independent fixes in different subtrees of `scripts/`, rarely touches a sibling's files. A shared file does not hold a branch back, per the conflict test in [operating model](operating-model.md). These paths are shared hotspots, the ones a second branch should expect to rebase over and resolve:
 
 - `CLAUDE.md`, since cross-domain behavior lives there
 - `tooling/**`, since stack manifests, golden configs, and seeds are tightly coupled
 - `canon/context/context-model/overview.md` and `docs/agents/`, which several domains cross-reference
-- Any folder's `index.md`, since `canon indexes regen` rewrites it and two worktrees adding files to a regen-covered folder race on it
+- Any folder's `index.md`, since `canon indexes regen` rewrites it and two worktrees adding files to a regen-covered folder race on it. Resolve its conflict by running the regen over the rebased tree rather than by hand.
 
-Land any in-flight edit to a hotspot on `main` before fanning out. A worktree on a stale `CLAUDE.md` costs more to rebase than it saved.
+Land any in-flight edit to a hotspot on `main` before fanning out where you can. A worktree on a stale `CLAUDE.md` costs more to rebase than it saved.
 
 **Merge order.** Merge the branch with the smallest hotspot footprint first. A branch touching `CLAUDE.md`, a context entry, or a regenerated `index.md` merges last, and its siblings rebase on the new `main` once it lands.
 
-**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. Run `git fetch origin && git rebase origin/main` in the sibling, resolve any conflict in the worktree, push, then merge. Never force-merge a stale branch.
+**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. The branch merging second resolves, in the session that built it and after the first lands, never against a sibling still building: run `/review-address` there, which trial-merges against `origin/main`, rebases, and leaves the gate to run over the result. Push, then merge. Never force-merge a stale branch.
 
 **Clean up after merge.** Run `/git-worktree cleanup` to remove worktrees whose branches merged on GitHub and prune the local branches. The skill reads merge state through `gh pr view`. To start a fresh feature from a stale worktree, `ExitWorktree(action: "keep")` back to main, then `/session-worktree <new-name>`.
 
-**When fan-out was the wrong call.** If every sibling needs a rebase and every rebase conflicts on the same file, the branches should have serialized. Land one, wait, then start the next. The cleanup skill only tidies a flow that already worked.
+**When fan-out was the wrong call.** Sharing a file was never the reason. If every rebase needs a decision the tree does not carry, because one branch depended on another, changed a contract the other consumed, moved a path the other wrote, or swept a folder the other wrote inside, the branches should have serialized. Land one, wait, then start the next. The cleanup skill only tidies a flow that already worked.
 
 ## The task board
 
@@ -85,7 +85,7 @@ Land any in-flight edit to a hotspot on `main` before fanning out. A worktree on
 
 `canon tasks validate` reads a row against its own table before it reads anything the row claims. A blank or prose line closes the table above it, so a row stranded there is checked against the line behind it rather than parsed as a continuation, and a row that clears that test still has its cell count checked against its header. A `## Needs a plan` row that states its own position, searched for `<ordinal> here` or the bare word `last` anywhere in the cell rather than at its start, is checked against where it actually sits, which is what catches a gap, a duplicate, and a sequence starting somewhere other than first alike.
 
-Past that shape, it checks what a surviving row claims against what the tree holds: every plan pointer resolves, every task file is named by a board row or a backlog line and never by both, no task sits in two groups, and no two rows marked ready touch the same file. One check across both surfaces is what lets a task move between the board and the backlog without the move reading as a dropped file. The collision check is the half a reader cannot run by eye, and it is what keeps two workers from being handed colliding work. Blockers re-takes what a parked row waits on, reporting one whose cited task reached the trunk and one whose cited file nothing running still holds. A cited task settles the row by being archived, or by closing every outcome and naming a pull request the trunk carries, since the checkbox alone is marked while the branch is still in review. Both halves read a citation out of the blocker cell, so a row citing neither is reported as untested rather than counted clean, and so is a cited task the trunk could not answer for. It reports and never writes, because a row is the orchestrator's claim and a validator repairing one would assert the claim it exists to test. Nothing fires it automatically, since the board is gitignored per-machine scratch with no shared moment to hang a hook on, so the orchestrator's sweep calls it at the point the readiness claim is made and follows it with the parked re-test.
+Past that shape, it checks what a surviving row claims against what the tree holds: every plan pointer resolves, every task file is named by a board row or a backlog line and never by both, no task sits in two groups, and no two rows marked ready touch the same file. One check across both surfaces is what lets a task move between the board and the backlog without the move reading as a dropped file. The collision check is the half a reader cannot run by eye, and its shared paths are the candidate list the orchestrator's conflict check reads, rather than a hold on their own. Blockers re-takes what a parked row waits on, reporting one whose cited task reached the trunk and one whose cited file nothing running still holds. A cited task settles the row by being archived, or by closing every outcome and naming a pull request the trunk carries, since the checkbox alone is marked while the branch is still in review. Both halves read a citation out of the blocker cell, so a row citing neither is reported as untested rather than counted clean, and so is a cited task the trunk could not answer for. It reports and never writes, because a row is the orchestrator's claim and a validator repairing one would assert the claim it exists to test. Nothing fires it automatically, since the board is gitignored per-machine scratch with no shared moment to hang a hook on, so the orchestrator's sweep calls it at the point the readiness claim is made and follows it with the parked re-test.
 
 `canon:task-board` owns the two operations that bracket a task's life. It creates the file, holding the filename convention and the frontmatter contract so a malformed write cannot break the index for every sibling, and it moves a shipped task to `.canon/tasks/archive/`. Creation is where the origin invariant is enforced: every task names a plan, a groundwork folder, an intake folder, or an issue, since a task with no origin is either lost context or work nobody decided to do.
 
