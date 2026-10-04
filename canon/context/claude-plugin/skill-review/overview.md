@@ -43,7 +43,7 @@ Where a handoff may legitimately continue into the skill it names, as a fresh ta
 
 ## The origin split in autoship
 
-`auto-ship` Step 7 splits findings by origin before it reads severity. A critical or should-fix finding the branch inherited stops the chain, and one this run caused is repaired in place at any severity, bounded at a single pass the way Step 3 bounds verify. Severity alone is not enough to decide this, since a self-inflicted finding at any severity is worth fixing on the spot rather than reporting as a stop that hands the work back to the same session that created it.
+`auto-ship` Step 7, through its `references/review-findings.md`, splits findings by origin before it reads severity. A critical or should-fix finding the branch inherited stops the chain, and one this run caused is repaired in place at any severity, bounded at a single pass the way Step 3 bounds verify. Severity alone is not enough to decide this, since a self-inflicted finding at any severity is worth fixing on the spot rather than reporting as a stop that hands the work back to the same session that created it.
 
 Origin is causation rather than authorship, which is the half that decides the hard cases. Staleness a run induces in a file it never opened is its own. The plan's file list is not the boundary either: it scopes what a run builds, and reading it as a review boundary is scope discipline applied to the wrong question.
 
