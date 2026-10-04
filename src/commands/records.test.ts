@@ -163,3 +163,81 @@ describe('canon records stale', () => {
     expect(JSON.parse(result.stdout)).toMatchObject({ reason: 'bad-days' })
   })
 })
+
+describe('canon records stale canonical', () => {
+  let root: string
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-records-stale-canonical-'))
+    await execa('git', ['init', '-q', '--initial-branch=main'], { cwd: root })
+    await execa(
+      'git',
+      [
+        '-c',
+        'user.email=test@example.com',
+        '-c',
+        'user.name=Test',
+        'commit',
+        '--allow-empty',
+        '-q',
+        '-m',
+        'chore: init',
+      ],
+      { cwd: root },
+    )
+    await mkdir(join(root, 'canon'), { recursive: true })
+    await writeFile(join(root, 'canon', 'REQUIREMENTS.md'), '# Requirements\n')
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('should write one JSON record naming each doc and exit 0', async () => {
+    const result = await runCli([
+      'records',
+      'stale',
+      'canonical',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      ok: true,
+      tagged: false,
+      docs: [{ path: 'canon/REQUIREMENTS.md', reviewed: null }],
+    })
+  })
+
+  it('should keep the human report off stdout', async () => {
+    const result = await runCli([
+      'records',
+      'stale',
+      'canonical',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toContain('canon/REQUIREMENTS.md')
+  })
+
+  it('should refuse --days, which a release count does not read', async () => {
+    const result = await runCli([
+      'records',
+      'stale',
+      'canonical',
+      '--days',
+      '30',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(1)
+    expect(JSON.parse(result.stdout)).toMatchObject({ reason: 'bad-days' })
+  })
+})

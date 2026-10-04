@@ -59,6 +59,18 @@ No verb answers whether a document still describes the tree it was written about
 
 Mark every staleness finding as a reading. It is this session's judgment rather than a measurement, and a report that sets it beside two verb-backed axes without marking it implies evidence the axis does not carry.
 
+### The requirements and architecture records
+
+When the scope reaches `canon/REQUIREMENTS.md` or `canon/ARCHITECTURE.md`, read each for identity drift as well as for stale paths, and take the review point from the verb:
+
+```bash
+CANON_NON_INTERACTIVE=1 canon records stale canonical --json
+```
+
+Each doc in the record carries `reviewed` and `releasesSince`. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the two docs.
+
+Nothing triggers this review but a request. A finished review routes to `markdown-propose` for the rewrite, and its last edit sets `reviewed:` in the doc's frontmatter to the day the operator's answers landed. This run writes neither.
+
 ## Step 4: report per document
 
 Give each document its three axes, and give each axis three things: the state, the evidence class, and the command or skill that repairs it. Naming the repair is not running it.
@@ -84,5 +96,14 @@ Document health: `<scope>`, <n> documents read.
 
 Length and placement are measured. Staleness is a reading.
 ```
+
+When Step 3 read the canonical records, add one reminder line per doc the verb returned, under the evidence line:
+
+```markdown
+`canon/REQUIREMENTS.md`: reviewed <date>, <n> releases since.
+`canon/ARCHITECTURE.md`: never reviewed.
+```
+
+Write `reviewed value is not a date: <value>` for a doc carrying `invalidReviewed`, and `no release tags to count` in place of the count when `tagged` is false. Name the unread cause instead when the verb refused or the binary carries no `canonical` kind.
 
 Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the three classes exist to prevent.

@@ -65,7 +65,7 @@ const RAW_FRONTMATTER = /^---\n([\s\S]*?)\n---/
  * A value that is not a calendar date reads as never reviewed and is carried
  * back so the review can see it, rather than throwing over one hand edit.
  */
-function readReviewed(
+export function readReviewed(
   text: string,
 ): Pick<StaleEntry, 'reviewed' | 'invalidReviewed'> {
   const block = RAW_FRONTMATTER.exec(text)?.[1]

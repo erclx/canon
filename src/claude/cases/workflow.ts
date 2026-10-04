@@ -147,6 +147,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'document-health',
   },
   {
+    prompt:
+      'Are our requirements and architecture docs still true, and when were they last reviewed?',
+    expect: 'document-health',
+  },
+  {
     prompt: 'Open a new entry on the task board for this piece of work.',
     expect: 'task-board',
   },

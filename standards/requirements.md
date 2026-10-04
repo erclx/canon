@@ -46,6 +46,8 @@ This file loads into every session, so its weight is paid before any work starts
 
 Once every entry in the MVP list, or in a later scope section, has shipped, delete the section. Git keeps the old text, and the document states the project as it stands. Do not annotate an entry as shipped and leave it in place. While any entry is unshipped, do not renumber the list or append to it.
 
+The record may carry an optional `reviewed: YYYY-MM-DD` frontmatter field naming the day someone last read it whole for identity drift. Whoever finishes that review sets it as the review's last edit, and `canon records stale canonical` reads it to count the releases shipped since. A record with no field reads as never reviewed.
+
 Later scope arrives as a new section rather than as an extension of the MVP list. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Nothing sequences either list into versions. Work reaches the board as discrete tasks under `tasks.md`, and `board.md` orders them by readiness, so a section here states what is wanted and never when it lands.
 
 ## Distribution

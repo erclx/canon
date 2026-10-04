@@ -7,7 +7,7 @@ description: What the planning-doc reconcile is for, the gaps it closes, and why
 
 ## Gap
 
-Without this skill, the planning docs describe the scope the session opened with. An outcome the diff shipped stays unchecked, so the board reports finished work as open and the next session re-plans it. A requirement or architecture decision that changed mid-cycle lives only in the conversation and dies with it. Plans for closed tasks accumulate in the live folder, so the folder stops indicating what is in flight.
+Without this skill, the planning docs describe the scope the session opened with. An outcome the diff shipped stays unchecked, so the board reports finished work as open and the next session re-plans it. An architecture decision a plan settled mid-cycle lives only in the conversation and dies with it. Plans for closed tasks accumulate in the live folder, so the folder stops indicating what is in flight.
 
 A decision's verification anchor has the same shape of gap in the other direction. The reasoning keeps reading as current while the number it cites moves underneath, and an amendment written without an anchor leaves nothing recording which numbers were checked and which nobody has read since.
 
@@ -16,6 +16,8 @@ A handoff file has the same shape of gap as an unmarked outcome. A page a learni
 The receipt half of that sweep was missing entirely. A review receipt was deleted per shipped branch and a memory-review receipt was skipped, because the exclusion protecting the checklist and audit prefixes caught a third by accident. Nothing but an operator asking collected it, and a collection that waits on someone remembering to ask is one a folder outgrows, so the skipped population grew per shipped branch and never shrank until it was most of the folder.
 
 The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the planning surface the request was about goes untouched.
+
+The opposite gap opened from the same write. A fold allowed to touch the requirements and architecture records on every ship rewrote both one reasonable edit at a time, and nothing read either for whether it still stated the project's identity. Each ship looked correct and the sum drifted.
 
 This skill writes canonical docs at the end of a long build and never reviews what it wrote. An appended figure or a branch-narrated re-measurement lands unchecked the same way a session's own edits do, so what the fold produces carries the exact defect the standards it cites already ban.
 
@@ -28,7 +30,8 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Write tracked docs at the current worktree root and the task board at the main root, since only the first commits with the branch
 - Count every other citation before archiving a plan, comparing resolved targets rather than raw strings or bare filenames
 - Retarget a closed task at the archived plan, so the reasoning behind finished work stays reachable
-- Write a decision to the domain context entry it constrains unless it fills an architecture slot, since reach admits nearly every decision to an always-loaded file
+- Write a decision to the domain context entry it constrains unless a plan this run folds states it and it fills an architecture slot, since reach admits nearly every decision to an always-loaded file and a slot decision only the conversation carries was never reviewed
+- Report a requirements or direction change in one line naming `document-health`, rather than writing it, so the identity record changes only when the operator reviews it
 - Merge or retire an architecture entry before adding one at the record's stated cap, and name which in the report, so the cap never turns into compressed prose or two decisions packed under one heading
 - Anchor a decision entry this run writes or amends whose reasoning cites a measured number, re-reading the number against the tree before writing the marker
 - Report an anchored decision whose cited path the diff touched, since the number was read before the branch moved what it counted
@@ -48,6 +51,7 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Infer a new task from the diff. Only outcomes already on the board get marked.
 - Touch task files the session did not change
 - Widen what a writing step reads when the baseline is unusable. Widening a read is safe and widening a write stubs a surface for every file in the repository.
+- Write the requirements record. It states identity, and a fold reads one session where a review reads the whole project.
 - Edit `CLAUDE.md` inline. Every change there goes through a diff-and-approve gate, so this skill only flags.
 - Create a context entry, or move or delete a plan. A plan is settled by the merge, and `canon tasks archive` carries it.
 - Overwrite a file a promotion block routes to. A destination that already holds a page is a merge for a person, and folding over it discards work this skill never read.
