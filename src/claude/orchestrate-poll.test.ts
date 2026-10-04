@@ -652,6 +652,40 @@ describe('poll', () => {
       expect(poll().stdout).toContain('STALE     #7')
     })
 
+    // The draft lift waits for a push carrying no STALE beside its MOVED, so a
+    // push that left the branch behind has to say so again.
+    it('should report a stale branch again when a push leaves it behind', () => {
+      const first = commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') })
+      openPull('7', first)
+      const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })
+      pushMain(main2)
+      expect(poll().stdout).toContain('STALE     #7')
+
+      openPull('7', commit(first, 'pr7', { 'b.txt': fileWith(2, 'fix') }))
+      const pushed = poll().stdout
+
+      expect(pushed).toContain('MOVED     #7')
+      expect(pushed).toContain('STALE     #7')
+    })
+
+    it('should not report a branch rebased onto main as stale', () => {
+      openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+      const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })
+      pushMain(main2)
+      expect(poll().stdout).toContain('STALE     #7')
+
+      openPull(
+        '7',
+        commit(main2, 'rebased', {
+          'a.txt': fileWith(0, 'mine').replace('five', 'theirs'),
+        }),
+      )
+      const rebased = poll().stdout
+
+      expect(rebased).toContain('MOVED     #7')
+      expect(rebased).not.toContain('STALE')
+    })
+
     it('should report nothing for two open pull requests that merge together cleanly', () => {
       listOpen('7', '8')
       openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))

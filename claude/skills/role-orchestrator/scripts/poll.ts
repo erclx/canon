@@ -366,7 +366,11 @@ export const classify = (
 
   // Staleness arrives the same way, and reports on its transition so a branch
   // left behind across several runs earns one handback rather than one a run.
-  if (old.stale !== 'stale') lines.push(...staleLine(row, context.base))
+  // A push that leaves it behind reports it again, since the draft lift reads a
+  // MOVED with no STALE beside it as the rebase having landed.
+  if (old.stale !== 'stale' || row.head !== old.head) {
+    lines.push(...staleLine(row, context.base))
+  }
 
   // A rising count is what is new here. It fires on a tracked pull request
   // only: a first sighting takes whatever already sits on the thread as its
