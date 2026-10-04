@@ -83,7 +83,7 @@ The operator restyles elements from the inspector, and each edit lands as inline
 - Capture a whole page once its frames are finished: `canon canvas capture <page> --composite --json`. The image shows each frame clipped to its box at its layout position.
 - Capture once per finished frame or page, not after every edit. The live canvas is the working view, and a capture is the record handed on.
 - Read each `path` off the record rather than composing one.
-- A capture refused because a font is not installed names the family it read off the frame's text. Set that text's `font-family` to a family the machine has and capture again, rather than reporting the frame as captured.
+- A capture refused because a font is not installed names the family it read off the frame's text. Set that text's `font-family` to a named family the machine has, never a generic keyword such as `sans-serif`, and capture again, rather than reporting the frame as captured.
 
 ## Step 7: carry a picked direction back
 
