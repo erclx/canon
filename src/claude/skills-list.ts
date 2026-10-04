@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { CORPORA } from '@/claude/skills-audit'
+import { isFamilyKey, SKILL_FAMILIES } from '@/claude/skills-families'
 
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/
 
@@ -88,6 +89,39 @@ export function listSkillsAt(skillsRoot: string): SkillListing[] {
       family,
     }
   })
+}
+
+export interface FamilyGroup {
+  readonly key: string
+  readonly group: string
+  readonly skills: readonly string[]
+}
+
+export interface FamilyGrouping {
+  /** Vocabulary order, holding only the families some listing declares. */
+  readonly groups: readonly FamilyGroup[]
+  /** Listings whose family is missing or names no vocabulary key. */
+  readonly unassigned: readonly string[]
+}
+
+export function groupByFamily(
+  listings: readonly SkillListing[],
+): FamilyGrouping {
+  const groups = SKILL_FAMILIES.map((family) => ({
+    ...family,
+    skills: listings
+      .filter((listing) => listing.family === family.key)
+      .map((listing) => listing.name),
+  })).filter((group) => group.skills.length > 0)
+
+  return {
+    groups,
+    unassigned: listings
+      .filter(
+        (listing) => listing.family === null || !isFamilyKey(listing.family),
+      )
+      .map((listing) => listing.name),
+  }
 }
 
 interface ListedFields {

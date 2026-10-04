@@ -2,7 +2,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { listSkills } from '@/claude/skills-list'
+import {
+  groupByFamily,
+  listSkills,
+  type SkillListing,
+} from '@/claude/skills-list'
 
 let root: string
 
@@ -174,5 +178,47 @@ describe('listSkills', () => {
 
   it('should return an empty list when no skills directory exists', () => {
     expect(listSkills(root)).toEqual([])
+  })
+})
+
+function listing(name: string, family: string | null): SkillListing {
+  return { name, description: '', requirement: true, family }
+}
+
+describe('groupByFamily', () => {
+  it('should order groups by the vocabulary rather than by listing order', () => {
+    const grouped = groupByFamily([
+      listing('git-pr', 'ship'),
+      listing('target-setup', 'setup'),
+    ])
+
+    expect(grouped.groups.map((group) => group.key)).toEqual(['setup', 'ship'])
+  })
+
+  it('should carry each group heading and its member names', () => {
+    const grouped = groupByFamily([
+      listing('git-commit', 'ship'),
+      listing('git-pr', 'ship'),
+    ])
+
+    expect(grouped.groups).toEqual([
+      { key: 'ship', group: 'Ship it', skills: ['git-commit', 'git-pr'] },
+    ])
+  })
+
+  it('should leave out a family no listing declares', () => {
+    const grouped = groupByFamily([listing('git-pr', 'ship')])
+
+    expect(grouped.groups).toHaveLength(1)
+  })
+
+  it('should collect a missing or unknown family apart from every group', () => {
+    const grouped = groupByFamily([
+      listing('git-pr', 'ship'),
+      listing('loose', null),
+      listing('stray', 'shipping'),
+    ])
+
+    expect(grouped.unassigned).toEqual(['loose', 'stray'])
   })
 })
