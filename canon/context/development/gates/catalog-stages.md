@@ -53,6 +53,8 @@ The stage fails a push on any non-exempt document past the ceiling, naming every
 
 A table counts at the width the formatter pads it to, so one wide cell raises every row to that width. A lookup table carrying long cells costs close to twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file sitting near the ceiling.
 
+Because frontmatter counts, a sweep adding a frontmatter field across a corpus pushes every body already at the ceiling over it. Measure each target's slack with `canon markdown audit` before planning such a sweep, and name the splits it forces in the plan.
+
 ## Folder-echoed filenames
 
 The Folder-echoed filenames stage reads every path `git ls-files` lists and fails on each one whose stem, the basename up to its first dot, equals its immediate parent folder's name or opens with `<folder>-`. The failure names every path in one pass. A tree git cannot list reports as unmeasured rather than passing. It reads the parent folder only, so the governance install layout under `.claude/rules/canon/canon/`, where a folder repeats a folder, stays out of reach.
