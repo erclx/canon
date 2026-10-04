@@ -76,26 +76,4 @@ These are the rules with numbers, so they are checked by counting rather than by
 
 ## Adopted, declined, and why
 
-External catalogs were read and filtered rather than imported. This section is the record, and a later session extends it rather than re-deriving it.
-
-### Adopted
-
-**Adopted with no change.** The three equal cards, the centered hero over a wash, enumerated eyebrows, scroll cues, decorative status dots, atmospheric strips, the fake screenshot built from boxes, filler verbs, and placeholder that reads as placeholder. Each names a shape, each carries a replacement, and none depends on a stack.
-
-**Adopted with the stack removed.** Source items naming an icon set, a component library, a font by name, or an animation package were rewritten to state what the rule is about. "Do not use Inter" became one family doing every job, since the defensible claim is about pairing and role separation rather than about one typeface.
-
-### Declined
-
-**Banned fonts by name.** A font ban is a value ban, and a value belongs to the project's own design document rather than to a skill that loads everywhere. A project that wants a typeface ruled out rules it out there.
-
-**Numeric intensity dials.** Every external source carries a 1-to-10 scale for variance, motion and density. A session picks a middle value and reports compliance. That satisfies the rule, decides nothing, and leaves no trace a later reader could check it by. The declared read carries the same information in a sentence somebody can argue with.
-
-**The em dash ban as a design rule.** One source bans the character on a page as a visual tell. The markdown standard already bans it for prose reasons and `canon markdown audit` gates that from package data, so restating it here would put a second copy of an enforced rule behind an unenforced pointer.
-
-**The official-package map.** A table routing a brief to Fluent, Material, Carbon, Polaris, Primer or a government design system. It is real advice and it is a stack decision a project takes once, so it belongs in that project's own records rather than in a skill that loads on every design round.
-
-**Scoping out application UI.** The largest source covers landing pages, portfolios and redesigns, and excludes dashboards, data tables and multi-step product UI. Those exclusions are most of what software projects actually build, so the kinds reference carries application UI as a first-class kind.
-
-### Carried as a caution
-
-**Greeking.** Placeholder text is correct while judging space and wrong once an arm is judged on content, since real copy length is what breaks a composition. State which of the two a set is doing.
+The record of which external catalog items were adopted, which declined, and why sits in `adopted.md` beside this file.
