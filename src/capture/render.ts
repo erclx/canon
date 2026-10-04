@@ -2,9 +2,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright-core'
-import type { Browser, Page } from 'playwright-core'
+import type { Browser, Locator, Page } from 'playwright-core'
 import type { CaptureSource } from '@/capture/sources'
-import { primaryFontFamily, resolveCaptureSources } from '@/capture/sources'
+import { resolveCaptureSources, textFamilies } from '@/capture/sources'
 import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
 
 /**
@@ -97,14 +97,13 @@ async function captureOne(
     }
 
     await page.evaluate(() => document.fonts.ready.then(() => undefined))
-    const family = primaryFontFamily(
-      await element.evaluate((node) => getComputedStyle(node).fontFamily),
-    )
-    if (family && !(await resolvesFont(page, family))) {
-      return failed(
-        source,
-        `${family} is not installed, so the capture would rewrap against a fallback`,
-      )
+    for (const family of textFamilies(await renderedTextFamilies(element))) {
+      if (!(await resolvesFont(page, family))) {
+        return failed(
+          source,
+          `${family} is not installed, so the capture would rewrap against a fallback`,
+        )
+      }
     }
 
     mkdirSync(dirname(source.pngPath), { recursive: true })
@@ -168,6 +167,31 @@ function sourceIdentifier(source: CaptureSource): string {
 
 function failed(source: CaptureSource, reason: string): CaptureResult {
   return { status: 'failed', source: sourceIdentifier(source), reason }
+}
+
+/**
+ * The computed families of the captured element and of each element under it
+ * that holds a non-blank text node of its own and draws a box, which is the
+ * text the screenshot shows. The box test keeps out `<style>`, `<script>`,
+ * `<title>`, and anything hidden, whose computed family is the browser default
+ * and would refuse every source that styles a descendant rather than the root.
+ *
+ * Falls back to the element's own family when nothing under it holds text, so
+ * a container of iframes is still probed through the family it declares.
+ */
+async function renderedTextFamilies(element: Locator): Promise<string[]> {
+  return element.evaluate((root) => {
+    const holdsText = (node: Element): boolean =>
+      [...node.childNodes].some(
+        (child) =>
+          child.nodeType === Node.TEXT_NODE &&
+          (child.textContent ?? '').trim() !== '',
+      ) && node.getClientRects().length > 0
+    const texts = [root, ...root.querySelectorAll('*')].filter(holdsText)
+    return (texts.length > 0 ? texts : [root]).map(
+      (node) => getComputedStyle(node).fontFamily,
+    )
+  })
 }
 
 /**
