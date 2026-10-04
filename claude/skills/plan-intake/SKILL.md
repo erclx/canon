@@ -1,6 +1,8 @@
 ---
 name: plan-intake
 description: Files a raw brain dump into a numbered intake folder under `.canon/intake/<nn>-<slug>/`, one item per finding carrying a measured problem, a proposed fix, and a verdict. Use when asked to "file this dump", "triage my notes", "work through this list", "sort out this brain dump", or "run an intake pass". Do NOT use for one question that has to be measured before anyone can plan it. That is `plan-groundwork`.
+metadata:
+  family: decide
 ---
 
 # Plan intake

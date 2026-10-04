@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the architecture record, the document ceiling, skill provenance, skill practice shape, and standard success criteria
+description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the architecture record, the document ceiling, skill provenance, skill practice shape, skill family, and standard success criteria
 ---
 
 # Catalog stages
@@ -53,6 +53,8 @@ The stage fails a push on any non-exempt document past the ceiling, naming every
 
 A table counts at the width the formatter pads it to, so one wide cell raises every row to that width. A lookup table carrying long cells costs close to twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file sitting near the ceiling.
 
+Because frontmatter counts, a sweep adding a frontmatter field across a corpus pushes every body already at the ceiling over it. Measure each target's slack with `canon markdown audit` before planning such a sweep, and name the splits it forces in the plan.
+
 ## Folder-echoed filenames
 
 The Folder-echoed filenames stage reads every path `git ls-files` lists and fails on each one whose stem, the basename up to its first dot, equals its immediate parent folder's name or opens with `<folder>-`. The failure names every path in one pass. A tree git cannot list reports as unmeasured rather than passing. It reads the parent folder only, so the governance install layout under `.claude/rules/canon/canon/`, where a folder repeats a folder, stays out of reach.
@@ -72,6 +74,12 @@ It fails outright rather than reporting, because the corpus sits at zero and a r
 The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or the ledger it lacks, or the listed skill itself when no folder under `claude/skills/` matches it. It reads the same report the Skill provenance stage does and fails for the same reason: the verb keeps its exit on a missing requirement alone, so a target is told and never fails, while every listed skill here is held at zero.
 
 It reports unmeasured when `claude/skills/` is absent rather than when both corpora are, since the list names shipped folders alone and a tree carrying only `.claude/skills/` would otherwise pass without reading a practice skill.
+
+## Skill family
+
+The Skill family stage calls `auditSkills` in-process and fails on every `family` finding, naming each skill under `claude/skills/` whose `metadata.family` is missing or names no key in `src/claude/skills-families.ts`. The verb reports the same finding and keeps its exit on a missing requirement alone, the split the practice shape stage takes.
+
+The field needs a stage of its own because no stage reads the skill map. Its only reader is the web build, which CI runs when a skill or the map changes and `bun run check` never runs, so a skill with no family would otherwise reach the push and fail there. Internal skills take no family and the stage never asks them for one. A tree without `claude/skills/` reports unmeasured.
 
 ## Standard success criteria
 

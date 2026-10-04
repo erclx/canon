@@ -1,6 +1,8 @@
 ---
 name: create-rule
 description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<n>-<slug>.md` with correct frontmatter and a non-colliding number. Use when asked to "add a rule", "create a governance rule", "write a project rule", or when a project needs a coding rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
+metadata:
+  family: generate
 ---
 
 # Create rule

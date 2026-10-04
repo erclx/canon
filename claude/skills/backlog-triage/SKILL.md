@@ -1,6 +1,8 @@
 ---
 name: backlog-triage
 description: Files a measured verdict for every backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, then applies the verdicts the operator approved through the task verbs. Use when asked to "triage the backlog", "prune the backlog", "which backlog rows are still worth doing", "clear out the backlog", or "apply the backlog triage". Do NOT use to file a brain dump, which is `plan-intake`, to answer the filed items, which is `plan-intake-answer`, or to create, archive, or decline one named task, which is `task-board`.
+metadata:
+  family: decide
 ---
 
 # Backlog triage

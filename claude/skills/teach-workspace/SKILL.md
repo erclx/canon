@@ -3,13 +3,15 @@ name: teach-workspace
 description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, and proposes where a durable page from one belongs once it outgrows the workspace. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", or "promote this reference page". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply.
 disable-model-invocation: true
 argument-hint: <subject to learn, or the topic of a workspace to resume or promote>
+metadata:
+  family: answer
 ---
 
 # Teach workspace
 
 Run a learning workspace on one subject across sessions. The workspace holds what the learner has been through, so a session weeks later resumes from the folder rather than from the conversation.
 
-The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
+The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, the record's revisit schedule in `revisit.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
 
 ## Guards
 
@@ -129,19 +131,7 @@ Record the wrong answer rather than the count. The next session places the learn
 
 Record what the teach-back left out under what the learner got wrong, naming the concept and where the explanation broke. A produced answer and a selected one are both retrieval failures the next session places from, so a second heading would split one input across two sections.
 
-Then write `## Revisit`, one bullet per item, in the shape `${CLAUDE_SKILL_DIR}/../../standards/teach.md` fixes:
-
-```markdown
-## Revisit
-
-- **<what comes back up>**: due <YYYY-MM-DD>, rung <n>
-```
-
-Take both the date and the rung from the `due` entry Step 1 already read, copying `hit` for an item the learner retrieved unaided and `miss` for one they did not, with the rung stepped the same way. Do not compute a date from the ladder. A session told to widen a gap still picks the number by judgment, which is the reason the verb reports both dates at all.
-
-An item the records have never scheduled has no `due` entry to copy from. Open it at rung 1, dated the day after this session, which is the ladder's floor and the one number this body states. Every later date for it comes from the verb.
-
-An entry outside this shape schedules nothing and nothing reports that it was skipped, so write the shape exactly. A later record naming the same item supersedes an earlier entry, so revise a schedule by writing the new bullet rather than editing the record it was set in.
+Then write `## Revisit`. Read `${CLAUDE_SKILL_DIR}/references/revisit.md` before writing it, for the bullet shape, where each date and rung is copied from, and the first schedule for an item no record has set.
 
 Then restate the mission's success lines with what is now met, reading them from the `success` the lesson verb already reported rather than from `MISSION.md` by eye. Report each line as met or not met, and name what the learner did that meets it. A mission whose lines are all met is finished, and saying so is what closes a workspace.
 

@@ -1,6 +1,8 @@
 ---
 name: test-craft
 description: Carries the rule that decides which layer a test belongs at, the question each one opens with, the end to end budget, and the final filter a session runs over what it wrote. Use when writing, changing, or judging a test, after implementing as well as before, when adding a regression guard, when choosing between unit, component, or end to end, or when asked "where should this test go", "is this a good test", "should this be an e2e test", or "why is our e2e suite so slow". Do NOT use for the red, green, refactor procedure, which is `test-first`, or for a bug nobody has explained yet, which is `systematic-debugging`.
+metadata:
+  family: build
 ---
 
 # Test craft

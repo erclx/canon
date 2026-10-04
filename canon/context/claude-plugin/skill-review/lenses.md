@@ -39,7 +39,7 @@ A pass whose bullets are all answered takes the closed heading with the block st
 
 ## The key-changes claim check
 
-Step 3 also checks `## Key Changes`: `canon pr key-changes` compares the paths that section claims against the pull request's own changed-file list, and the step files a claim the diff does not carry under the same `**PR body**` block the stale ticked box takes, since what both corrupt is the merge record rather than a file in the diff.
+Step 3 also checks `## Key Changes`, through `references/key-changes.md`: `canon pr key-changes` compares the paths that section claims against the pull request's own changed-file list, and the step files a claim the diff does not carry under the same `**PR body**` block the stale ticked box takes, since what both corrupt is the merge record rather than a file in the diff.
 
 The section is read alone, since `## Technical Context` names files a branch never touched by design. A bullet's claim region ends at its first comma, since a clause past the comma is usually naming context rather than the edit itself, and reading the whole bullet as a claim pulls those context mentions in as false claimed-but-untouched paths.
 

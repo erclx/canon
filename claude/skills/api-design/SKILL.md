@@ -1,6 +1,8 @@
 ---
 name: api-design
 description: Carries the rules for shaping what a caller of code can see and come to depend on, being a function's exports, a command's flags and output, a file format, an endpoint, or a module boundary, so a change keeps every existing caller working and exposes nothing by accident. Use when adding or changing a public function, a flag, an output shape, a schema, an error a caller handles, or a retried write, or when asked "is this a breaking change", "can I rename this field", "what should this return", "how do I make this safe to retry", or "how should I version this". Do NOT use for a visual interface, which is `design-taste`, to decide where a file sits, which is `codebase-layout`, or to list the consumers a finished change breaks during review, which is `review-craft`.
+metadata:
+  family: build
 ---
 
 # API design

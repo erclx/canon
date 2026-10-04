@@ -1,6 +1,8 @@
 ---
 name: ux-measure
 description: Measures paint, processor, and layout cost against a running interface and reports numbers against published thresholds. Detects the project's existing browser harness rather than requiring one. Use when asked "how fast is this page", "measure the UI", "what does this cost to render", "check Core Web Vitals", or "profile the interface". Do NOT use to judge UI quality by reading source, which is `ux-audit`.
+metadata:
+  family: check
 ---
 
 # UX measure

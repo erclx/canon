@@ -1,6 +1,8 @@
 ---
 name: session-resume
 description: Resumes a previous session by reading the handoff it left behind, tracked work, and relevant context. Use when starting a new session, or when asked to "pick up where we left off", "what was I working on", or "resume".
+metadata:
+  family: parallel
 ---
 
 # Session resume

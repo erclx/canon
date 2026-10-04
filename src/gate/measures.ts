@@ -23,6 +23,7 @@ import {
   PRACTICE_SKILLS,
   SHIPPED_CORPUS,
 } from '@/claude/skills-audit'
+import { familyKeys } from '@/claude/skills-families'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
@@ -445,6 +446,42 @@ export const skillPracticeShape: Measure = async (ctx) => {
       info(
         `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section, and ${plural(LEDGER_SKILLS.length, 'listed skill')} carry a ledger`,
       ),
+    ],
+  }
+}
+
+/**
+ * Every shipped skill against the family vocabulary, since the landing page
+ * groups the skill map by the field and a skill without one has no group.
+ *
+ * Read in-process for the reason `skillProvenance` is. Only the shipped corpus
+ * takes a family, so a tree without `claude/skills/` reports unmeasured rather
+ * than a vacuous pass.
+ */
+export const skillFamily: Measure = async (ctx) => {
+  const report = await auditSkills(ctx.root)
+  const shipped = report.corpora.find((corpus) => corpus.rel === SHIPPED_CORPUS)
+  if (shipped === undefined) {
+    return {
+      emissions: [],
+      unmeasured: `no skill corpus at ${SHIPPED_CORPUS} resolved, so no family was read.`,
+    }
+  }
+
+  const found = report.family
+  if (found.length > 0) {
+    const where = found
+      .map((finding) => `${finding.rel} ${finding.detail}`)
+      .join(', ')
+    return {
+      emissions: [],
+      failure: `${plural(found.length, 'skill family finding')}: ${where}. Add metadata.family to the frontmatter, one of ${familyKeys().join(', ')}, matching the skill map group its row sits under.`,
+    }
+  }
+
+  return {
+    emissions: [
+      info(`${plural(shipped.skills, 'shipped skill')} declare a known family`),
     ],
   }
 }

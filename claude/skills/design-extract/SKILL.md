@@ -1,6 +1,8 @@
 ---
 name: design-extract
 description: Drafts `canon/DESIGN.md` from a project's existing prose and shell UI surfaces, or proposes token values from `REQUIREMENTS.md` and a `## Personality` section when no UI code exists yet. Use when asked to "extract the design system", "draft DESIGN.md", "bootstrap design tokens", "capture the visual system", "propose a design system", "bootstrap DESIGN.md from scratch", "draft tokens for a greenfield project", or "replace Claude Design onboarding". Do NOT use to mutate an existing `canon/DESIGN.md`.
+metadata:
+  family: setup
 ---
 
 # Design extract

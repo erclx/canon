@@ -1,6 +1,8 @@
 ---
 name: create-standard
 description: Creates a new standard file in `standards/`. Use when asked to "create a standard", add a standard, or write a new authoring convention. Do NOT use to edit an existing standard.
+metadata:
+  family: generate
 ---
 
 # Create standard

@@ -1,6 +1,8 @@
 ---
 name: git-worktree
 description: Lists linked worktrees with PR state and cleans up merged ones. Use when asked to "list worktrees", "clean up worktrees", or after shipping a PR to reclaim slots. Do NOT use to enter a worktree from scratch (use `session-worktree`).
+metadata:
+  family: after-pr
 ---
 
 # Git worktree

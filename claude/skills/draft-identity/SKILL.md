@@ -1,6 +1,8 @@
 ---
 name: draft-identity
 description: Drafts a project's logo mark through draft-and-pick's render-and-pick loop, then composes the picked mark into an icon sequence and a 1200x630 social card. Use when asked to "make a logo", "design a logo mark", "create a favicon", "build the icon set", "generate a social card", "make an og:image", or "draft the logo and social card together". Do NOT use to mutate an existing logo file directly, which is a plain edit, or to record the mark's construction rules in DESIGN.md, which is out of scope.
+metadata:
+  family: generate
 ---
 
 # Draft identity

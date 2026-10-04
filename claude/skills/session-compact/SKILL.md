@@ -1,6 +1,8 @@
 ---
 name: session-compact
 description: Captures a session's memory, then writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped. Use before running /compact, when asked to "write a handoff", "prepare for compaction", "save where we got to", or before moving a session to another machine, or when a PreCompact hook blocks and names this skill. Do NOT use for a session holding the orchestrator role, whose board handoff is `session-map`. Do NOT use to record a decision a groundwork track owns, which is `plan-groundwork`.
+metadata:
+  family: parallel
 ---
 
 # Session compact

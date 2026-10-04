@@ -25,6 +25,7 @@ import {
   SANDBOX_UNDECLARED_CEILING,
   sandboxCoverage,
   shippedReferences,
+  skillFamily,
   skillPracticeShape,
   skillProvenance,
   visualPathGlobs,
@@ -1322,6 +1323,83 @@ describe('skillPracticeShape', () => {
 
   it('reports a project carrying no skill corpus as unmeasured', async () => {
     const report = await skillPracticeShape(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toContain('no skill corpus')
+  })
+})
+
+describe('skillFamily', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('skillFamily reads the corpus and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const writeSkill = (corpus: string, name: string, metadata: string): void => {
+    const dir = join(root, corpus, 'skills', name)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `---\nname: ${name}\ndescription: Does a thing.\n${metadata}---\n\n# Skill\n`,
+    )
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-skill-family-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it('passes a shipped skill declaring a vocabulary key', async () => {
+    writeSkill('claude', 'git-commit', 'metadata:\n  family: ship\n')
+
+    const report = await skillFamily(context())
+
+    expect(report.failure).toBeUndefined()
+    expect(report.unmeasured).toBeUndefined()
+  })
+
+  it('fails a shipped skill declaring no family, naming it', async () => {
+    writeSkill('claude', 'git-commit', '')
+
+    const report = await skillFamily(context())
+
+    expect(report.failure).toContain(
+      `${join('claude', 'skills', 'git-commit')} frontmatter declares no metadata.family`,
+    )
+  })
+
+  it('fails a shipped skill declaring an unknown family, naming the value', async () => {
+    writeSkill('claude', 'git-commit', 'metadata:\n  family: shipping\n')
+
+    const report = await skillFamily(context())
+
+    expect(report.failure).toContain('unknown family: shipping')
+  })
+
+  it('passes an internal skill declaring no family', async () => {
+    writeSkill('claude', 'git-commit', 'metadata:\n  family: ship\n')
+    writeSkill('.claude', 'internal-scripts', '')
+
+    const report = await skillFamily(context())
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('reports a project carrying no shipped corpus as unmeasured', async () => {
+    writeSkill('.claude', 'internal-scripts', '')
+
+    const report = await skillFamily(context())
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toContain('no skill corpus')

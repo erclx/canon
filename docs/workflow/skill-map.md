@@ -8,7 +8,9 @@ category: Workflow
 
 Groups run in the order a project meets them. They reconcile the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target/projects.md) describes, so every moment either one names has a group. Each row says when to reach for a skill, and its description says what it does.
 
-This page and [skill map on request](skill-map-on-request.md) are the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row across the two. A skill serving two moments sits at the earlier one, this page counting as earlier than the sibling, and a mention on any other page is prose rather than routing. The sibling holds the groups that answer a request rather than mark a moment. The landing page's skills field renders from both pages, so its build refuses a skill with no row and a row naming no skill.
+This page and [skill map on request](skill-map-on-request.md) are the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row across the two. A skill serving two moments sits at the earlier one, this page counting as earlier than the sibling, and a mention on any other page is prose rather than routing. The sibling holds the groups that answer a request rather than mark a moment.
+
+Each row sits under the group its skill's `metadata.family` names. The landing page's skills field groups by that field and reads each row's text from both pages, so its build refuses a skill with no row, a row naming no skill, a row filed under another group, and a heading on either page naming no family group, even one with no rows under it. A new group takes its vocabulary entry in `src/claude/skills-families.ts` before its heading lands here.
 
 ## Set up a project
 

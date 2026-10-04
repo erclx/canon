@@ -1,6 +1,8 @@
 ---
 name: session-worktree
 description: Enters a Claude Code worktree at `.claude/worktrees/<name>/` with a name derived from the active plan or branch. Use when asked to "enter a worktree", "start a worktree", "work in a worktree", or at the plan-to-execute boundary after `/plan-feature`. Also use when an `Edit` or `Write` to a main-root file such as a plan, a task, or a memory entry was refused for session isolation. Do NOT use to list, clean up, or rotate worktrees (use `git-worktree`).
+metadata:
+  family: build
 ---
 
 # Session worktree
@@ -125,17 +127,7 @@ Read the worktree root and evaluate node and python independently against a lite
 
 Name the ecosystem in both installed lines rather than leaving `Dependencies are installed.` unqualified. Both checks can fire on one project, so an unqualified line reported the same sentence twice for a dual-root project with both folders present, and a reader could not tell which half each line answered.
 
-Take `<install>` from the lockfile beside the manifest, checked in this order, first match wins:
-
-| Lockfile                  | Install command |
-| ------------------------- | --------------- |
-| `bun.lock` or `bun.lockb` | `bun install`   |
-| `pnpm-lock.yaml`          | `pnpm install`  |
-| `yarn.lock`               | `yarn install`  |
-| `package-lock.json`       | `npm install`   |
-| none of the above         | `bun install`   |
-
-The order matters only when more than one lockfile sits beside the manifest, such as a project mid-migration between package managers. It is fixed rather than derived from anything about the project, so a reader hitting that rare case checks which manager the project actually uses rather than trusting the row the table picked first.
+Take `<install>` from the lockfile beside the manifest. Read `${CLAUDE_SKILL_DIR}/references/install-command.md` when the Node line reports dependencies not installed, for the order the lockfiles are checked in and the command each one names.
 
 Emit the closing line only on its own direct test, run ahead of the two checks above rather than reached by falling through them unmatched: `[ ! -f package.json ] && [ ! -f pyproject.toml ] && [ ! -f requirements.txt ]`: `No package manifest, so there is nothing to install.` A dual-root project matches both checks above, and a fallthrough test would route it here by accident.
 

@@ -1,6 +1,8 @@
 ---
 name: plan-groundwork
 description: Opens and runs a numbered groundwork folder under `.canon/groundwork/<nn>-<slug>/` for a topic that has to be measured before it can be planned. Detects open, resume, and close from the folder itself. Use when asked to "research X", "dig into X", "work out what we should do about X", "measure this before we commit", or "open a groundwork folder". Do NOT use to write a feature plan or to implement. That is `plan-feature`.
+metadata:
+  family: decide
 ---
 
 # Plan groundwork

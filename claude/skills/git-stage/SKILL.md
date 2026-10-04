@@ -1,6 +1,8 @@
 ---
 name: git-stage
 description: Groups staged files by concern and generates one conventional commit per group. Use when asked to "group these changes into commits", or when staged changes span multiple concerns and need to ship as separate commits. Do NOT use on a single-concern staged set. That is `git-commit`, which also preserves a hunk-level selection this skill's unstage and restage over whole files would widen.
+metadata:
+  family: ship
 ---
 
 # Git stage

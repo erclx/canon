@@ -22,6 +22,7 @@ import {
   seedStandards,
   rawFieldFileReference,
   shippedReferences,
+  skillFamily,
   skillPracticeShape,
   skillProvenance,
   standardCriteria,
@@ -495,6 +496,14 @@ export const STAGES: readonly Stage[] = [
     id: 'skill-practice-shape',
     label: 'Skill practice shape',
     checks: [{ kind: 'measure', measure: skillPracticeShape }],
+  },
+  {
+    // The audit verb only reports a shipped skill with a missing or unknown
+    // family, so a target is told without failing. The landing page groups the
+    // skill map by the field, so the stage holds this corpus at zero.
+    id: 'skill-family',
+    label: 'Skill family',
+    checks: [{ kind: 'measure', measure: skillFamily }],
   },
   {
     id: 'standard-criteria',

@@ -44,7 +44,12 @@ import {
   scanRouting,
 } from '@/claude/routing'
 import { type DriftReport, readDrift } from '@/claude/skills-drift'
-import { listSkills } from '@/claude/skills-list'
+import { familyKeys, SKILL_FAMILIES } from '@/claude/skills-families'
+import {
+  type FamilyGrouping,
+  groupByFamily,
+  listSkills,
+} from '@/claude/skills-list'
 import {
   type ReachRefusal,
   type ReachReport,
@@ -96,6 +101,7 @@ interface SeedsListOptions {
 interface SkillsListOptions {
   readonly json?: boolean
   readonly names?: boolean
+  readonly byFamily?: boolean
 }
 
 interface SkillsAuditOptions {
@@ -359,8 +365,12 @@ export function register(program: Command): void {
     .command('list')
     .description('List the plugin skills shipped under claude/skills/')
     .helpOption('-h, --help', 'Show this help message')
-    .option('--json', 'Emit JSON with name and description')
+    .option(
+      '--json',
+      'Emit JSON with each skill and the ordered family vocabulary',
+    )
     .option('--names', 'Only list skill names, one per line')
+    .option('--by-family', 'Group the listing under each family')
     .addHelpText(
       'after',
       [
@@ -368,6 +378,8 @@ export function register(program: Command): void {
         'Notes:',
         '  Internal skills under .claude/skills/ are excluded, since they',
         '  never install into a target project.',
+        '  Each skill carries the family its frontmatter declares under',
+        '  metadata.family, and --json lists the vocabulary as families.',
         '',
       ].join('\n'),
     )
@@ -770,7 +782,9 @@ function runSkillsList(opts: SkillsListOptions): number {
 
   if (opts.json) {
     if (mismatch !== undefined) logWarn(mismatch)
-    process.stdout.write(`${JSON.stringify({ skills: listings })}\n`)
+    process.stdout.write(
+      `${JSON.stringify({ skills: listings, families: SKILL_FAMILIES })}\n`,
+    )
     return 0
   }
 
@@ -784,12 +798,32 @@ function runSkillsList(opts: SkillsListOptions): number {
 
   intro('canon claude')
   if (mismatch !== undefined) logWarn(mismatch)
-  logStep('Plugin skills')
-  for (const listing of listings) {
-    logInfo(listing.name)
+  if (opts.byFamily) {
+    reportByFamily(groupByFamily(listings))
+  } else {
+    logStep('Plugin skills')
+    for (const listing of listings) {
+      logInfo(listing.name)
+    }
   }
   outro()
   return 0
+}
+
+/**
+ * One step per family in vocabulary order. A skill with a missing or unknown
+ * family takes a trailing step rather than vanishing, so the view still
+ * accounts for every listed skill.
+ */
+function reportByFamily(grouping: FamilyGrouping): void {
+  for (const group of grouping.groups) {
+    logStep(`${group.group} (${group.key})`)
+    for (const name of group.skills) logInfo(name)
+  }
+
+  if (grouping.unassigned.length === 0) return
+  logStep('No known family')
+  for (const name of grouping.unassigned) logWarn(name)
 }
 
 /**
@@ -1402,6 +1436,7 @@ async function runSkillsAudit(
     reportProvenance(report)
     reportPracticeShape(report)
     reportReferenceContents(report)
+    reportFamily(report)
     reportUnmeasured()
     outro()
   }
@@ -1426,6 +1461,7 @@ async function runSkillsAudit(
           datedProvenance: report.datedProvenance,
           practiceShape: report.practiceShape,
           referenceContents: report.referenceContents,
+          family: report.family,
         },
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
@@ -1435,6 +1471,7 @@ async function runSkillsAudit(
           ledgerSkills: LEDGER_SKILLS,
           practiceSections: PRACTICE_SECTIONS,
           contentsThreshold: CONTENTS_THRESHOLD,
+          families: familyKeys(),
         },
       })}\n`,
     )
@@ -1666,6 +1703,27 @@ function reportReferenceContents(report: SkillsAudit): void {
     `${plural(report.referenceContents.length, 'long reference')} with no contents list`,
   )
   reportFindings(report.referenceContents)
+}
+
+/**
+ * Reports without failing the verb, the split the practice shape takes. The
+ * Skill family stage of `canon gate run` is what fails a push on it.
+ */
+function reportFamily(report: SkillsAudit): void {
+  logStep('Family')
+  logInfo(
+    `A skill under ${SHIPPED_CORPUS} declares metadata.family, one of ${familyKeys().join(', ')}.`,
+  )
+
+  if (report.family.length === 0) {
+    logInfo('Every shipped skill declares a known family.')
+    return
+  }
+
+  logWarn(
+    `${plural(report.family.length, 'skill')} with a missing or unknown family`,
+  )
+  reportFindings(report.family)
 }
 
 /**

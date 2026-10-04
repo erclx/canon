@@ -1,6 +1,8 @@
 ---
 name: role-worker
 description: Asserts the worker role for a building session, holding the boundary set, the lifetime, and the two channel obligations a session owes whoever dispatched it. Use when asked to "be the worker", "you are a worker session", at the start of a dispatched or hand-launched build, or when a building session needs to know what it may not write. Do NOT use to plan the next feature, to run the independent review pass, or to merge.
+metadata:
+  family: parallel
 ---
 
 # Role worker

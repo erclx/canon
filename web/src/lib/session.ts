@@ -14,6 +14,7 @@ import {
   type RuleMatchResult,
   type RuleMeta,
   ruleBullet,
+  type SkillFamily,
   type SkillGroup,
   skillGroups,
 } from './derive'
@@ -30,8 +31,9 @@ import {
 export const EDITED_PATH = 'src/design/tokens.ts'
 
 /**
- * The pages the skill map spans, in the order their groups render. Joined into
- * one string so `skillGroups` keeps its single refusal in both directions.
+ * The pages the skill map spans. Joined into one string so `skillGroups` keeps
+ * its single refusal in both directions. The family vocabulary sets the order
+ * the groups render in, and the pages supply each skill's usage text.
  */
 const SKILL_MAP_PAGES = [
   'docs/workflow/skill-map.md',
@@ -46,6 +48,7 @@ interface GovList {
 interface Skill {
   readonly name: string
   readonly description: string
+  readonly family: string | null
 }
 
 export interface SessionReads {
@@ -104,11 +107,10 @@ export function readSession(): SessionReads {
 
   const counts = readCatalogCounts()
   const gov = readCanonJson<GovList>(['gov', 'list'])
-  const { skills } = readCanonJson<{ skills: Skill[] }>([
-    'claude',
-    'skills',
-    'list',
-  ])
+  const { skills, families } = readCanonJson<{
+    skills: Skill[]
+    families: SkillFamily[]
+  }>(['claude', 'skills', 'list'])
   const seeds = readCanonJson<unknown[]>(['claude', 'seeds', 'list'])
   const census = readCanonJson<{ files: number }>([
     'census',
@@ -130,7 +132,8 @@ export function readSession(): SessionReads {
     skills,
     skillGroups: skillGroups(
       SKILL_MAP_PAGES.map((page) => readRepoFile(root, page)).join('\n\n'),
-      skills.map((skill) => skill.name),
+      skills,
+      families,
     ),
     standards: counts.standards,
     commands: commandNamesFromHelp(readCanonText(['--help'])),

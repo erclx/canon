@@ -1,6 +1,8 @@
 ---
 name: codebase-layout
 description: Carries the rules that decide where a new file goes, when a folder splits, and when a file moves from its one consumer to shared code, so a plan places each new path by role and feature with a one-clause reason rather than beside its nearest neighbor. Use when a plan names a file or folder that does not exist yet, when `plan-feature` reaches its placement step, or when asked "where should this file go", "this folder is flat", "restructure this folder", or "should this be its own folder". Do NOT use to choose which layer a test belongs at, which is `test-craft`, or to shape what a module's interface exposes, which is `api-design`.
+metadata:
+  family: decide
 ---
 
 # Codebase layout

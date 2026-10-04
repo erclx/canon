@@ -1,6 +1,8 @@
 ---
 name: git-ship
 description: Runs the full post-feature workflow by syncing docs, staging commits, renaming the branch, and opening a PR. Use after implementing a feature, or when asked to "ship", "ship this", or "ship it". Do NOT auto-trigger. Shipping is a decision the user takes.
+metadata:
+  family: ship
 ---
 
 # Ship

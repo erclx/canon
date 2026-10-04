@@ -1,6 +1,8 @@
 ---
 name: session-map
 description: Writes the session map, the board-side handoff at `.canon/tasks/session-<slug>.md`, for an orchestrating session or on a request naming the session map or the task board, running the skill-drift step the write procedure opens with. Use when asked to "write the session map", "write the board handoff", or when a session holding `canon:role-orchestrator` hands off before a compaction. Do NOT use for a plain session about to compact, which is `session-compact` and writes a note outside the board. Do NOT use to route session facts to a context entry or the memory folder, which is `memory-capture` and writes a different artifact, and do NOT use to read a handoff back, which is `session-resume`.
+metadata:
+  family: parallel
 ---
 
 # Session map

@@ -1,6 +1,8 @@
 ---
 name: ui-checklist
 description: Writes the visual checklist a reviewer reads beside the evidence screenshots, and names each changed behavior shipping with no test so `test-craft` can place one. Use after implementing UI changes, or when asked "what should I look at", "what do I verify", or "give me a visual checklist". Do NOT use in empty sessions with no implementation context, and do NOT use to write the tests themselves.
+metadata:
+  family: build
 ---
 
 # UI checklist

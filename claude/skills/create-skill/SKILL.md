@@ -1,6 +1,8 @@
 ---
 name: create-skill
 description: Creates a new `SKILL.md` in `.claude/skills/`. Use when asked to "create a skill", add a skill, or make a new skill.
+metadata:
+  family: generate
 ---
 
 # Create skill

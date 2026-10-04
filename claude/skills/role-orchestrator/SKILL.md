@@ -2,6 +2,8 @@
 name: role-orchestrator
 description: Asserts the orchestrator role for the current session, holds the build loop and the queue-refill sweep, and dispatches to the feature, review, and worktree skills. Use when asked to "be the orchestrator", "run the orchestrator", "orchestrate this project", or to set up the control session for parallel feature builds. Do NOT build features or merge PRs in this session.
 disable-model-invocation: true
+metadata:
+  family: parallel
 ---
 
 # Role orchestrator
@@ -109,20 +111,9 @@ properly and stop when you cannot. An operator can also cap this session's
 workers by saying so, and a spoken cap binds for that session rather than
 standing as a number in a file.
 
-Inbound turns are the third input to that judgment. Claude Code delivers a
-message from another session as a new turn whenever this one sits idle, and the
-turn carries the whole accumulated context rather than the few lines the worker
-sent, so one handback from a wide wave costs more than the same handback from a
-narrow one. A recurring review poll bills that window again on every interval it
-fires. Weigh the spend before widening, since it lands on this session's context
-and never on the worker's.
-
-`crossSessionInbound` is the control, on an `accept`, `hold`, `refuse` ladder,
-and it is recorded here as deliberately not pulled. `hold` and `refuse` are the
-two values that bound the cost, and both break the handback this loop runs on,
-since a held message reaches nobody until a later `accept` applies and a refused
-one is dropped outright. `accept` bounds nothing. Read the ladder before turning
-concurrency up rather than after, and leave it unset.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-inbound.md` before widening a
+wave, for what each inbound turn costs this session and why the one control over
+it stays unset.
 
 Serialize any track that touches a shared wiring seam with another in flight, and
 serialize one whose sets are disjoint when a stated reason still puts it behind

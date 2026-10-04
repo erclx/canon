@@ -1,6 +1,8 @@
 ---
 name: ux-walkthrough
 description: Runs an inspection walkthrough over a running app with the operator. Measures each finding off the built page, drafts arms as served HTML pages lifted from the app's own markup and stylesheet, hands over the localhost link before every pick question, records findings and picks with the arms they beat in one walkthrough file, and relays picks only in batches the operator calls. Use when asked to "run a first-use walkthrough", "do an operator walkthrough", "go through my findings one by one", "inspection walkthrough over the app", or "walk through everything I listed with me". Do NOT use for one decision on its own, which is `draft-and-pick`, to read source for roughness, which is `ux-audit`, or to build a pick, which is `plan-feature` and a worker.
+metadata:
+  family: check
 ---
 
 # UX walkthrough

@@ -1,6 +1,8 @@
 ---
 name: seed-sync
 description: Audits a project's installed Claude seed docs against the toolkit's current seed source and proposes per-section edits without overwriting customizations. Use when asked to "sync seeds", "update my seeds", "check seed drift", "did the toolkit seeds change", or when reconciling `CLAUDE.md` and `.claude/` preambles after an upstream toolkit update.
+metadata:
+  family: upkeep
 ---
 
 # Seed sync

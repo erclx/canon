@@ -1,6 +1,8 @@
 ---
 name: draft-slides
 description: Draws a deck as HTML slides in the project's own design, one folder under `.canon/slides/` per deck, then renders it to an editable PowerPoint file via `canon slides render`. Use when asked to "draft slides", "make a deck", "build a presentation", "turn this into slides", or "render the deck". Holds the deck design rules. Do NOT reimplement the conversion. The CLI owns layout into PowerPoint shapes, the master, and packaging. Assumes the `canon` CLI is on PATH.
+metadata:
+  family: generate
 ---
 
 # Draft slides

@@ -1,6 +1,8 @@
 ---
 name: context-fold
 description: Folds a session into the project's context entries, architecture, and wireframes, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
+metadata:
+  family: ship
 ---
 
 # Context fold
@@ -145,20 +147,4 @@ Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, 
 
 ## After completion
 
-Output one line per file updated:
-
-`✅ Updated: <path written>`
-
-When Step 3 met the architecture record's cap, add one line naming what it did there:
-
-`↪ Architecture at cap: merged <heading> into <heading>` or `↪ Architecture at cap: retired <heading> to <context entry>`
-
-When Step 2 noted a requirements change: `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`
-
-Step 10 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
-
-If no files were updated and nothing was swept, output:
-
-`✅ No changes needed.`
-
-Suppress that line when Step 2 already reported no doc updates. It closes the run on its own, and emitting both leaves a quiet session reporting success twice for one outcome.
+Read `${CLAUDE_SKILL_DIR}/references/completion-report.md` before printing anything, for the line each outcome prints, the lines Step 3, Step 2, and Step 10 add, and when the closing line is suppressed.

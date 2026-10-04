@@ -1,6 +1,8 @@
 ---
 name: sketch-design
 description: Runs a reference-and-pick loop against operator-supplied images and URLs, then writes the picked reference's traced color, type, and spacing values to a handoff file `design-extract` reads. Use when asked to "sketch a design direction", "compare these reference sites", "pick a look before we build DESIGN.md", "show me a few design directions", or as the first move on `design-extract`'s greenfield path when nothing has been rendered yet. Do NOT use when a value is already anchored to running code or a stylesheet, which is `design-extract`'s source path, or to draft the design system document itself, which stays `design-extract`'s job.
+metadata:
+  family: setup
 ---
 
 # Sketch design

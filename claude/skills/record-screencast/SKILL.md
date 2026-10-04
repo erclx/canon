@@ -1,6 +1,8 @@
 ---
 name: record-screencast
 description: Drives a screencast draft through to a recording. Compiles it with `canon demo compile` when no plan exists yet at the default path, skipping compile when one is already there, runs `canon demo run` once nothing is unresolved, then composes the take into a finished mp4 through HyperFrames when the draft's wrap section asks for anything. Reports every unresolved field from the compile or run record and stops rather than guessing one. Use when asked to "record the screencast", "run the demo", "compile and record this draft", or right after `draft-screencast` prints its next-step line. Do NOT use to draft the beats, which is `draft-screencast`, or to fill in a plan's target or URL, which is the operator's own edit.
+metadata:
+  family: generate
 ---
 
 # Record screencast

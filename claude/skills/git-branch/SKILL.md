@@ -1,6 +1,8 @@
 ---
 name: git-branch
 description: Generates and validates conventional branch names. Use for any branch naming or renaming, such as when asked to "name this branch".
+metadata:
+  family: ship
 ---
 
 # Git branch

@@ -1,6 +1,8 @@
 ---
 name: design-taste
 description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which the `ui` governance rules carry, for the shape of the project's design document, which `design.md` governs, to run the candidate loop, which is `draft-and-pick`, or to trace a reference's values, which is `sketch-design`.
+metadata:
+  family: build
 ---
 
 # Design taste

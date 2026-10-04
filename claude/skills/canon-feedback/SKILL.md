@@ -1,6 +1,8 @@
 ---
 name: canon-feedback
 description: Format a report about something broken, missing, or off in canon and open it as a GitHub issue on the toolkit repo via `canon feedback --github`, where the toolkit's triage reads it. Use when asked to "send this to the toolkit", "report this to canon", "file toolkit feedback", or "give the toolkit feedback about X". Do NOT use for general complaints about other tooling, IDE issues, or in-project bugs that do not implicate canon surfaces.
+metadata:
+  family: upkeep
 ---
 
 # Canon feedback

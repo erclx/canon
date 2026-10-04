@@ -1,6 +1,8 @@
 ---
 name: git-pr
 description: Generates pull request titles and descriptions from git diffs. Use for any PR creation or update, such as when asked to "open a pull request".
+metadata:
+  family: ship
 ---
 
 # Git PR

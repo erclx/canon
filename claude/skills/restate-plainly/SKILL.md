@@ -1,6 +1,8 @@
 ---
 name: restate-plainly
 description: Restates a dense answer or a named markdown document in plain language, cutting jargon and keeping only what changes a decision. Use when asked to "restate that in plain language", "say that plainly", "what does this actually mean", "cut the jargon", "give me the plain version", or "restate this document". Do NOT use to draft or revise prose, which is `write-human`, and do NOT fire on the model's own judgment that its own output was dense.
+metadata:
+  family: answer
 ---
 
 # Restate plainly
