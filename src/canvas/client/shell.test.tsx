@@ -3320,6 +3320,24 @@ describe('view tools', () => {
 
     expect(view.value.zoom).toBeCloseTo((600 - 96) / 900)
   })
+
+  it('should fit the frames clear of the tool strip', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    Object.defineProperty(viewportOf(), 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 200, top: 0, width: 1000, height: 600 }),
+    })
+    const strip = mount.querySelector('[aria-label="Tools"]')
+    if (!strip) throw new Error('no tool strip')
+    Object.defineProperty(strip, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ left: 214, right: 260, top: 14, bottom: 80 }),
+    })
+
+    act(() => buttonNamed('Fit').click())
+
+    expect(view.value.x).toBe(60 + 48)
+  })
 })
 
 describe('index.html', () => {

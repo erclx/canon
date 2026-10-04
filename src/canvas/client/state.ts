@@ -565,11 +565,19 @@ export function panBy(dx: number, dy: number): void {
   view.value = { ...current, x: current.x + dx, y: current.y + dy }
 }
 
-/** Fits every frame on the current page into a viewport of the given size. */
-export function fitView(width: number, height: number, padding = 48): void {
+/**
+ * Fits every frame on the current page into a viewport of the given size,
+ * clear of `insetLeft` pixels of chrome floating over its left edge.
+ */
+export function fitView(
+  width: number,
+  height: number,
+  padding = 48,
+  insetLeft = 0,
+): void {
   const frames = currentPage.value?.frames ?? []
   if (frames.length === 0 || width <= 0 || height <= 0) {
-    view.value = { x: padding, y: padding, zoom: 0.5 }
+    view.value = { x: insetLeft + padding, y: padding, zoom: 0.5 }
     return
   }
   const left = Math.min(...frames.map((frame) => frame.x))
@@ -578,14 +586,14 @@ export function fitView(width: number, height: number, padding = 48): void {
   const bottom = Math.max(...frames.map((frame) => frame.y + frame.height))
   const zoom = clampZoom(
     Math.min(
-      (width - padding * 2) / (right - left),
+      (width - insetLeft - padding * 2) / (right - left),
       (height - padding * 2) / (bottom - top),
       1,
     ),
   )
   view.value = {
     zoom,
-    x: padding - left * zoom,
+    x: insetLeft + padding - left * zoom,
     y: padding - top * zoom,
   }
 }

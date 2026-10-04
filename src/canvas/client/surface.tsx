@@ -521,9 +521,14 @@ function zoomCentered(
   zoomAt(factor, width / 2, height / 2)
 }
 
+/** Fits the page clear of the tool strip floating over the viewport's left. */
 function fitViewport(viewport: RefObject<HTMLDivElement | null>): void {
-  const { width, height } = viewportSize(viewport)
-  fitView(width, height)
+  const rect = viewport.current?.getBoundingClientRect()
+  const strip = viewport.current?.parentElement
+    ?.querySelector('.tools')
+    ?.getBoundingClientRect()
+  const inset = rect && strip ? Math.max(0, strip.right - rect.left) : 0
+  fitView(rect?.width ?? 0, rect?.height ?? 0, undefined, inset)
 }
 
 function Toolbar({ viewportRef }: SurfaceProps): JSX.Element {
@@ -571,8 +576,7 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
 
   /* Fits a page once when it opens, never on a reload of the same page. */
   useEffect(() => {
-    const { width, height } = viewportSize(viewportRef)
-    fitView(width, height)
+    fitViewport(viewportRef)
   }, [page?.name])
 
   const handleWheelTurn = (turn: WheelTurn) => {
