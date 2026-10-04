@@ -39,10 +39,11 @@ Poll GitHub for pull request movement by running `bun <POLL_SCRIPT>`, then act o
 - OPENED, or a pull request with no prior review pass: take its first pass where the review dispatch runbook of the canon:role-orchestrator skill places it, running the canon:review-pr skill here or launching a reviewer. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
 - SEEN: report it and stop. A pass already covers that head, whether it arrived out of band or before the poll first saw the pull request, so no review follows.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
-- CONFLICT: report it and stop. The branch owner rebases, not this session.
+- CONFLICT or STALE: send the session holding that branch the rebase handback in the canon:role-orchestrator skill's handback runbook, resolving it the way the handback rule below does. The branch owner rebases, not this session. The poll prints one of the two for a pull request, never both, so it earns one message. Hold the draft lift on it until a MOVED arrives with no STALE or CONFLICT beside it, since its green run tested a main that no longer exists.
+- OVERLAP: report the pair and the files, and settle their merge order now under the Parallelism rule of the canon:role-orchestrator skill. Dispatch nobody. The second to merge reads STALE or CONFLICT once the first lands, and the handback goes out then.
 - UNMATCHED: report it and stop. A comment posted under a heading outside the known set reaches nobody automatically, so a person decides whether to answer it by hand or the set needs a ninth heading.
 - UI-OPEN: dispatch the canon:review-address skill under the rule below, the same as an open code pass. A later RESPONSE re-sends the UI reviewer too.
-- UI-CLOSED: report it, and lift the draft mark only once the code review is closed too.
+- UI-CLOSED: report it, and lift the draft mark only once the code review is closed too and no STALE or CONFLICT stands on the pull request.
 - UI-STALE: the UI verdict trails the head. Message the live UI reviewer to drive the new head, or launch one, and lift no mark on it.
 - GONE: report it, then sweep the board by invoking the canon:role-orchestrator skill and following its queue-refill sweep.
 - A line starting `poll:`: report it verbatim and treat that pull request as unread this run. It is a failed query, not a state.
@@ -68,6 +69,14 @@ The eight headings the script knows are written by `review-pr`, `review-address`
 `STALLED` is the one state the script derives from a heading rather than from a commit or a count, since `review-pr` posts the open heading exactly when a dispatch is owed, per the threshold that skill states. The heading alone cannot carry it, because an open pass means a dispatch was owed and made, so the ordinary healthy thread is a worker still working. The age of that pass is the third test: the state fires when the open pass covers the head, nothing has followed it, and it is older than the `STALE_AFTER` seconds set at the top of the script. It reports once per entry and fires again after any commit or reply resets the thread. A project whose workers run longer than the default two hours raises that number.
 
 The state reaches every stalled dispatch, since one threshold governs the heading and the dispatch alike and a pass carrying anything posts the open heading. A minors-only pass therefore reports here on the same terms as a blocking one, which widens the state from what it caught while the two were split. It stays a heading test rather than a count test, so nothing here pins the summary line, which is a second string this script does not own.
+
+### Base movement
+
+A pull request's run tests the merge with the base as of its last push, so once a sibling merges, that green describes a merge nobody will make. `STALE` closes that gap by hand where a ruleset requiring branches to be current, or a merge queue, would close it on the host. It fires when the base changed a file the pull request writes since the commit it branched from, and names the files. A base that moved only on files the branch does not write reads as nothing, since re-testing after every merge is a merge queue's cost without its batching.
+
+`STALE` reports on its transition and again on every push that leaves the branch behind, which is what lets a `MOVED` with nothing beside it read as the rebase having landed. A pull request whose written set could not be read, being a fork or a deleted head, reads as unknown rather than current, and reports nothing either way.
+
+`OVERLAP` names two open pull requests that conflict with each other, read by merging their heads locally. Only pairs sharing a written path are tried, which keeps a wave of ten to a handful of merges. It reports once per pair, carried in the tenth baseline field, so the merge order is settled before the second branch has to rebase rather than after.
 
 ### The count behind the review dispatch
 

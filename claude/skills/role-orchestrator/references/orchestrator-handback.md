@@ -1,9 +1,9 @@
 ---
 title: Orchestrator handback runbook
-description: Addressing the session that answers a posted review, what to report when none is live, and where a worker's reply is placed by what it changes
+description: Addressing the session that answers a posted review, the rebase handback a stale or conflicted branch earns, what to report when none is live, and where a worker's reply is placed by what it changes
 ---
 
-Read this at loop step 6, once a review pass has posted anything owed and the session holding that branch is to run `review-address`.
+Read this at loop step 6, once a review pass has posted anything owed or the poll reports a branch stale or conflicted, and the session holding that branch is to run `review-address`.
 
 ## Sending the handback
 
@@ -12,6 +12,16 @@ Read this at loop step 6, once a review pass has posted anything owed and the se
 - Open the message with the worktree and branch the sender believes the reader holds, asking to be corrected, whenever that mapping is inferred rather than confirmed
 - Name the skill for the reader to run rather than writing an invocation, which arrives as text
 - Read the pull request's own draft flag rather than the state a worker reports, and report what the read returned and when rather than the state alone. `canon docs pr-reads` states why a reported field can lag and say nothing about it. The flag settles the question only once the worker's chain has run its undo, and nothing marks that moment, so a read taken between the pull request opening and that call sees a genuinely ready pull request about to become a draft and has told an operator the opposite of what the worker had said.
+
+## The rebase handback
+
+A `STALE` or `CONFLICT` from the poll goes to the branch's own session the same way, with `review-address` as the skill to run, since its staleness test rebases a branch `main` moved under even when the merge is clean. Name what merged under the branch, being the pull request that landed and the files the poll listed, so the worker reads those hunks first rather than re-deriving them from `git log`.
+
+Say that a check failing after a clean rebase is a semantic conflict to fix on the branch, and that a hunk needing a decision the tree does not carry comes back as a message rather than as a guess. A pull request carrying review findings as well earns one message naming both, since one `review-address` run answers them together.
+
+The worker that built the branch rebases it, not this session. It holds the plan behind each hunk, and a rebase made here would also write a branch this session does not own.
+
+## Re-review and reachability
 
 A re-review goes back to the reviewer that took the first pass. Find a live `reviewer-<project>-<number>` for that pull request through `canon sessions list --json` by name and message it to re-run `review-pr`. When none is live, launch a fresh reviewer through the reviewer shape in `orchestrator-reviewer-launch.md` or review in place, under the same trigger `orchestrator-review-dispatch.md` states, rather than messaging a name that no longer answers.
 
