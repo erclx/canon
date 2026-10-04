@@ -295,6 +295,7 @@ describe('servesChange', () => {
       servesChange(readServedPaths(text), [
         'src/canvas/shell/selection.ts',
         'src/canvas/shell/selection.test.ts',
+        'assets/evidence/canvas-selection/selected.png',
       ]),
     ).toBe(false)
   })

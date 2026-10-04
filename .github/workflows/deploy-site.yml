@@ -11,6 +11,8 @@ on:
       # this list beside the page itself.
       - 'web/**'
       - 'assets/**'
+      # Pull request screenshots, which the page never reads.
+      - '!assets/evidence/**'
       - 'src/design/**'
       - 'governance/rules/**'
       - 'standards/**'
