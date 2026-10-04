@@ -37,7 +37,7 @@ The three groups have no slot at the other end either, for work too small to pla
 
 The check it earns its place on is file-set overlap between `## Run now` rows. That group's test has a plan half and a half asking whether the task carries a reason it cannot start, and the paths a row shares with something already running are the candidates the dispatch conflict check tests for one, which is the part a person cannot run by eye.
 
-The validator lists those pairs in a `shared` array that moves no exit code. A `touches-collided` finding exiting 2 was the retired alternative, which held only while the gate serialized on a shared file. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, that finding failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
+The validator lists those pairs in a `shared` array that moves no exit code. A collision finding exiting 2 was the retired alternative, which held only while the gate serialized on a shared file. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, that finding failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
 
 ### Blockers
 
