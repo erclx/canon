@@ -209,6 +209,12 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await page.screenshot({ path: join(SHOTS, 'open.png') })
   }, 30_000)
 
+  it('should point the tab icon at the served brand icon', async () => {
+    const href = await page.locator('link[rel="icon"]').getAttribute('href')
+
+    expect(href).toBe('/api/icon.svg')
+  })
+
   it('should outline the frame a row selects', async () => {
     await page
       .getByRole('list', { name: 'Frames' })

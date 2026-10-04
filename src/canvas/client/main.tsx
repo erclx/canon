@@ -51,6 +51,15 @@ chrome.rel = 'stylesheet'
 chrome.href = '/api/chrome.css'
 document.head.prepend(chrome)
 
+/*
+ * The page declares an empty icon so the browser never asks for /favicon.ico,
+ * since the bundler cannot resolve a route the server answers, and this points
+ * it at the brand icon once the shell loads.
+ */
+document
+  .querySelector('link[rel="icon"]')
+  ?.setAttribute('href', '/api/icon.svg')
+
 const events = new EventSource('/api/events')
 events.addEventListener('message', (message) => {
   void applyChange(JSON.parse(message.data) as ChangeEvent)

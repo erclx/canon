@@ -3900,7 +3900,7 @@ describe('panel resize', () => {
 })
 
 describe('index.html', () => {
-  it('should link the served icon so the browser never requests /favicon.ico', () => {
+  it('should declare an inline icon so the browser never requests /favicon.ico', () => {
     const html = readFileSync(
       join(import.meta.dirname, '..', 'index.html'),
       'utf8',
@@ -3908,8 +3908,8 @@ describe('index.html', () => {
 
     const doc = new DOMParser().parseFromString(html, 'text/html')
 
-    expect(doc.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(
-      '/api/icon.svg',
+    expect(doc.querySelector('link[rel="icon"]')?.getAttribute('href')).toMatch(
+      /^data:/,
     )
   })
 })
