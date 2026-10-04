@@ -980,6 +980,40 @@ describe('validateBoard', () => {
     ])
   })
 
+  it('should list two run now rows sharing a file as shared', async () => {
+    await seedTask('v1.0-first')
+    await seedTask('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedPlan('v2.0-second')
+    await seedBoard(
+      boardBody([
+        readyTable([
+          { stem: 'v1.0-first', touches: '`src/a.ts`, `docs/commands.md`' },
+          { stem: 'v2.0-second', touches: '`src/b.ts`, `docs/commands.md`' },
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && outcome.shared).toEqual([
+      {
+        group: 'Run now',
+        subject: 'v1.0-first and v2.0-second',
+        message: 'both touch docs/commands.md.',
+      },
+    ])
+  })
+
+  it('should report an empty shared list on a board with no run now rows', async () => {
+    await seedTask('v3.0-third')
+    await seedBoard(needsPlanBoard('a plan'))
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && outcome.shared).toEqual([])
+  })
+
   it('should report a run now row claiming a bare folder', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')

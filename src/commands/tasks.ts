@@ -42,6 +42,7 @@ import {
 import {
   type Finding,
   type FolderClaim,
+  type SharedFiles,
   type WideToken,
   type Unplaced,
   type Untested,
@@ -1412,6 +1413,16 @@ function reportValidation(
       for (const claim of outcome.claims) logWarn(describeClaim(claim))
     }
 
+    // A shared file holds nothing under the dispatch gate, so the pairs report
+    // with the warn glyph and move no exit code. They stay listed for merge
+    // order and for the holds a Touches cell cannot state.
+    logStep('Shared files')
+    if (outcome.shared.length === 0) {
+      logInfo('no two run now rows name the same file')
+    } else {
+      for (const pair of outcome.shared) logWarn(describeShared(pair))
+    }
+
     // The width limit is a heuristic over one preview pane, so a wide token
     // reports and moves no exit code, and a measure failing on a cell that
     // fits would teach a reader to skip it.
@@ -1447,6 +1458,7 @@ function reportValidation(
         findings: outcome.findings,
         untested: outcome.untested,
         claims: outcome.claims,
+        shared: outcome.shared,
         wide: outcome.wide,
         unplaced: outcome.unplaced,
       })}\n`,
@@ -1467,6 +1479,10 @@ function describeUntested(row: Untested): string {
 
 function describeClaim(claim: FolderClaim): string {
   return `${claim.group}: ${claim.subject} ${claim.message}`
+}
+
+function describeShared(pair: SharedFiles): string {
+  return `${pair.group}: ${pair.subject} ${pair.message}`
 }
 
 function describeWide(token: WideToken): string {

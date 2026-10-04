@@ -90,6 +90,20 @@ export interface FolderClaim {
 }
 
 /**
+ * A path two `## Run now` rows both name in their `Touches` cells. A shared
+ * file is no hold, since the dispatch gate starts both rows and the branch
+ * merging second rebases, so the pair reports beside the findings and moves no
+ * exit code. It stays listed because merge order reads it, and because it is
+ * the candidate list a dispatcher reads for the dependency, contract,
+ * relocation, and sweep holds a `Touches` cell cannot state.
+ */
+export interface SharedFiles {
+  readonly group: BoardGroup
+  readonly subject: string
+  readonly message: string
+}
+
+/**
  * A code span in a board cell that the markdown preview cannot break, so it
  * pushes the table past the pane and makes it scroll sideways. Either the
  * longest whitespace-free run is wider than `WIDE_LIMIT`, or the span is a
@@ -151,6 +165,7 @@ export interface ValidateReport {
   readonly findings: readonly Finding[]
   readonly untested: readonly Untested[]
   readonly claims: readonly FolderClaim[]
+  readonly shared: readonly SharedFiles[]
   readonly wide: readonly WideToken[]
   readonly unplaced: readonly Unplaced[]
 }
@@ -892,17 +907,16 @@ function planPath(target: string, dir: string, root: string): string {
 }
 
 /**
- * The half of the `## Run now` test a person cannot check by eye. Two rows a
- * worker may be handed at once must touch disjoint files, and the `Touches`
- * column is the only place either set is written down.
+ * The half of the `## Run now` test a person cannot check by eye. The pairs
+ * are read off the `Touches` column, the only place either set is written
+ * down, so a row stating none leaves its merge order and its reach unreadable.
  */
 function checkCollisions(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
-  const ready = rows.filter((row) => row.group === 'Run now')
 
-  for (const row of ready) {
-    // An absent column and an unreadable one both leave the row untested by
-    // the loop below, so reporting only the second would pass a board whose
+  for (const row of rows.filter((candidate) => candidate.group === 'Run now')) {
+    // An absent column and an unreadable one both leave the row out of every
+    // pair, so reporting only the second would pass a board whose
     // `## Run now` table declares no file set at all.
     if (!row.touches || row.touches.length === 0) {
       findings.push({
@@ -913,6 +927,21 @@ function checkCollisions(rows: readonly BoardRow[]): Finding[] {
       })
     }
   }
+
+  for (const pair of checkSharedFiles(rows)) {
+    findings.push({ kind: 'touches-collided', ...pair })
+  }
+
+  return findings
+}
+
+/**
+ * Lists every path two `## Run now` rows both name, one entry per pair of
+ * rows. It reports rather than fails, since sharing a file holds nothing.
+ */
+function checkSharedFiles(rows: readonly BoardRow[]): SharedFiles[] {
+  const pairs: SharedFiles[] = []
+  const ready = rows.filter((row) => row.group === 'Run now')
 
   for (let i = 0; i < ready.length; i += 1) {
     for (let j = i + 1; j < ready.length; j += 1) {
@@ -929,8 +958,7 @@ function checkCollisions(rows: readonly BoardRow[]): Finding[] {
 
       if (shared.length === 0) continue
 
-      findings.push({
-        kind: 'touches-collided',
+      pairs.push({
         group: 'Run now',
         subject: `${subjectOf(left)} and ${subjectOf(right)}`,
         message: `both touch ${joinShared(shared)}.`,
@@ -938,7 +966,7 @@ function checkCollisions(rows: readonly BoardRow[]): Finding[] {
     }
   }
 
-  return findings
+  return pairs
 }
 
 function subjectOf(row: BoardRow): string {
@@ -1391,6 +1419,7 @@ export async function validateBoard(
     findings,
     untested: parked.untested,
     claims: checkFolderClaims(rows, root),
+    shared: checkSharedFiles(rows),
     wide: checkWideTokens(rows),
     unplaced: checkUnplaced(rows, backlog, stems),
   }
