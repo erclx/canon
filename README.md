@@ -98,6 +98,7 @@ Working with an agent rather than reading this yourself? It loads `CLAUDE.md` at
 - [AI workflow](docs/workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
 - [Operating model](docs/workflow/operating-model.md): orchestrator, planner, and worker roles for building across parallel sessions
 - [Skill map](docs/workflow/skill-map.md): plugin skills grouped by the moment a project meets them
+- [Skill map on request](docs/workflow/skill-map-on-request.md): plugin skills that serve a request rather than a moment
 - [Visual design workflow](docs/workflow/visual-design-workflow.md): tiered guide for design and wireframe authoring
 - [Target projects](docs/target/projects.md): scaffold, add a domain later, sync upstream drift
 - [Agents](docs/agents/index.md): CLI flags, exit codes, and JSON output shapes

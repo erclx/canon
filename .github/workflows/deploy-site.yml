@@ -15,7 +15,7 @@ on:
       - 'governance/rules/**'
       - 'standards/**'
       - 'claude/skills/**'
-      - 'docs/workflow/skill-map.md'
+      - 'docs/workflow/skill-map*.md'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
   # A closed pull request runs only the cleanup job below, which deletes the

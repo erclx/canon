@@ -8,7 +8,7 @@ category: Workflow
 
 Groups run in the order a project meets them. They reconcile the scenarios in [AI workflow](ai-workflow.md) with the lifecycle [target projects](../target/projects.md) describes, so every moment either one names has a group. Each row says when to reach for a skill, and its description says what it does.
 
-This page is the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row here. A skill serving two moments sits at the earlier one, and a mention on any other page is prose rather than routing. The landing page's skills field renders from this page, so its build refuses a skill with no row and a row naming no skill.
+This page and [skill map on request](skill-map-on-request.md) are the corpus the coverage claim is measured against: every name `canon claude skills list --names` reports takes exactly one row across the two. A skill serving two moments sits at the earlier one, this page counting as earlier than the sibling, and a mention on any other page is prose rather than routing. The sibling holds the groups that answer a request rather than mark a moment. The landing page's skills field renders from both pages, so its build refuses a skill with no row and a row naming no skill.
 
 ## Set up a project
 
@@ -115,36 +115,3 @@ This page is the corpus the coverage claim is measured against: every name `cano
 | `canon:canon-feedback`        | When something in the toolkit is broken, missing, or off, to open an issue on it       |
 | `canon:canon-feedback-triage` | In the toolkit repo, to work through the open feedback issues                          |
 | `canon:canon-rollout`         | In the toolkit repo, to take one change out to every consuming project at once         |
-
-## Generate an artifact on demand
-
-| Skill                     | When to use                                                                                                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                                               |
-| `canon:create-skill`      | For a new `SKILL.md`                                                                                                                           |
-| `canon:create-standard`   | For a new authoring convention                                                                                                                 |
-| `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wireframe surface, wiki reference page, or `README.md`, drafted against the standard for its kind |
-| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                                      |
-| `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                                     |
-| `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                                                 |
-| `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
-| `canon:draft-slides`      | For a deck, drafted as `.claude/SLIDES.md` and rendered to PowerPoint                                                                          |
-| `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                                                  |
-| `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap                                   |
-| `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                                                    |
-
-## Answer a question at any point
-
-| Skill                       | When to use                                                                                                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon:canon-cli`           | Before running an unfamiliar verb, a sync, or an install, to learn which command to run, which reference doc covers it, or what it overwrites, merges, or leaves alone |
-| `canon:index-lookup`        | To find where a topic is documented across the tracked `index.md` catalogs                                                                                             |
-| `canon:youtube-transcripts` | When a video transcript is wanted in the repo as context                                                                                                               |
-| `canon:read-frames`         | To read a recorded demo back frame by frame and report what each one shows, with no verdict on whether the recording looks right                                       |
-| `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                                                             |
-| `canon:write-human`         | Before drafting or revising prose, for voice, rhythm, and density                                                                                                      |
-| `canon:restate-plainly`     | When an answer or a document has to be read again in plain words                                                                                                       |
-
-Every row answers a question rather than marking a point in a project's life, so a phase above would send a reader to the wrong group.
-
-A learning workspace produces two halves and only one of them leaves. A lesson is worked through once and stays in the workspace, and a reference page or a glossary carries no learner, so it belongs wherever the project already keeps prose on that subject. Asking `canon:teach-workspace` to promote sorts each durable page by who owns its subject, sending an Anthropic-owned subject to the wiki, an internal one to the matching context entry, and everything else, subject-neutral material included, to the public docs. It proposes and waits, because a promoted page is public prose that needs a line naming who owns the subject, and it writes nothing to a destination: each page the operator confirms goes to a handoff file that `canon:context-fold` folds in from a branch. A project with no wiki folder gets a refusal naming `canon wiki init` rather than a folder it never asked for.

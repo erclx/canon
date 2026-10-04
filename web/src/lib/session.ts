@@ -29,6 +29,15 @@ import {
 /** The path the depicted session edited, which is what decides the rules figure. */
 export const EDITED_PATH = 'src/design/tokens.ts'
 
+/**
+ * The pages the skill map spans, in the order their groups render. Joined into
+ * one string so `skillGroups` keeps its single refusal in both directions.
+ */
+const SKILL_MAP_PAGES = [
+  'docs/workflow/skill-map.md',
+  'docs/workflow/skill-map-on-request.md',
+] as const
+
 interface GovList {
   readonly stacks: readonly { name: string; rules: readonly string[] }[]
   readonly rules: readonly RuleMeta[]
@@ -120,7 +129,7 @@ export function readSession(): SessionReads {
   cached = {
     skills,
     skillGroups: skillGroups(
-      readRepoFile(root, 'docs/workflow/skill-map.md'),
+      SKILL_MAP_PAGES.map((page) => readRepoFile(root, page)).join('\n\n'),
       skills.map((skill) => skill.name),
     ),
     standards: counts.standards,
