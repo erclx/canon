@@ -67,11 +67,11 @@ A finding names the wireframe or design-file line the image breaks, never a tast
 
 ## The checklist
 
-The `## What to look at` block between the `pr-checklist` markers is the author's claim about what was verified.
+The `## What to look at` block between the `pr-checklist` markers holds what was claimed as verified. A tick stamped `passed at` the current head is the UI reviewer's pass, and an unstamped tick is an author's or operator's claim.
 
-- Test each ticked box against an opened image showing the state and width it names. Flag a box whose image contradicts it, quoting the box.
+- Test each ticked box against an opened image showing the state and width it names, a stamped one included, since the UI reviewer drove the running app and not the committed stills. Flag a box whose image contradicts it, quoting the box.
 - A ticked box no image covers is untested rather than confirmed, and the finding says so.
-- Test only the rows the current comment shows. A box ticked on an earlier head can describe images the comment no longer carries.
+- Test only the rows the current comment shows. The next render clears a tick whose stamp names another head, so a tick not stamped at the current head may describe images the comment no longer carries.
 - Leave unchecked boxes to the procedure's own read of the description.
 
 ## With no pull request

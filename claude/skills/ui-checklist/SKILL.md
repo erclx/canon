@@ -41,7 +41,7 @@ Write each box so a session driving the running app can run it without guessing:
 - **Taste.** End the line with `(taste)` when the result is a judgment of look or feel rather than a fact a driver can observe. A driver reports such a box as needing a person's eyes instead of passing it.
 - **Setup.** A box needing a state the page does not open in states the setup inline. When a hosted preview cannot reach that state, such as a stopped service or a seeded record, end the line with `(local only)` instead.
 
-The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment carries ticked boxes forward by that shape.
+The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment reads boxes by that shape. Only the UI reviewer ticks a box, stamping it with the commit it passed at, and the comment carries that tick forward only while the head it names is current.
 
 ## The missing-test list
 

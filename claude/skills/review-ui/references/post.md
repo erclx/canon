@@ -64,7 +64,7 @@ End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 
 
 Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../../standards/publish.md`, since nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
 
-Record the instant just before the post, in UTC, as `<posted-at>`. Step 8 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
+Record the instant just before the post, in UTC, as `<posted-at>`. Step 9 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
 
 ```bash
 date -u +%Y-%m-%dT%H:%M:%SZ
@@ -72,5 +72,7 @@ gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F
 ```
 
 The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `-F` reads the file into the body, where `-f` would post the path itself.
+
+The ticks come after the post, in Step 8, so the verdict and the ticks report the same `<head>`. The post never ticks, and a pass that stops before posting ticks nothing.
 
 Never pass `event=APPROVE` or `event=REQUEST_CHANGES`, which carry a state the poll does not read and a weight this pass has not earned.

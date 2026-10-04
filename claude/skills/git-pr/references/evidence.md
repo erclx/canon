@@ -98,7 +98,7 @@ rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
 
 The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
 
-Deleting the file is what makes the later re-render safe. `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it is editing, so the boxes a reviewer already ticked survive the push.
+Deleting the file is what makes the later re-render safe. `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it is editing, so the checklist survives the push. A tick survives a render at the head its stamp names and is cleared by one at a newer head, which leaves the next UI pass to earn it again.
 
 ## Post the preview address
 
