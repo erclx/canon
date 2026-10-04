@@ -1,5 +1,15 @@
 # Issue reference
 
+## Contents
+
+- [Scope](#scope)
+- [Title](#title)
+- [Labels](#labels)
+- [Content](#content)
+- [Sections](#sections)
+- [Formatting](#formatting)
+- [Examples](#examples)
+
 ## Scope
 
 Governs a tracker issue: its title, its labels, and the sections its body carries.

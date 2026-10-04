@@ -5,6 +5,19 @@ description: The plan-answer gate, the collision check before a self-dispatch, t
 
 Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The disjointness gate below is where that row's file set is tested against every track in flight.
 
+## Contents
+
+- [Derive the candidate](#derive-the-candidate)
+- [Check the plan waits on nobody](#check-the-plan-waits-on-nobody)
+- [Check the branch is unclaimed](#check-the-branch-is-unclaimed)
+- [Hold what this pass already launched](#hold-what-this-pass-already-launched)
+- [Check the file sets are disjoint](#check-the-file-sets-are-disjoint)
+- [Pick the model](#pick-the-model)
+- [Pick local or cloud](#pick-local-or-cloud)
+- [Dispatch](#dispatch)
+- [Fall back to the human](#fall-back-to-the-human)
+- [Stop the loop](#stop-the-loop)
+
 ## Derive the candidate
 
 Run `canon tasks plan-branch <plan> --json` against the row's plan file and read `branch`, `type`, `slug`, and `conforms` off the record.

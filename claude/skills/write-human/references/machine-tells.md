@@ -9,6 +9,19 @@ Each pattern below is a shape rather than a token, so no closed word set matches
 
 Work top down. The first three account for most of what a reader calls machine-written.
 
+## Contents
+
+- [Rule of three](#rule-of-three)
+- [Synonym cycling](#synonym-cycling)
+- [False ranges](#false-ranges)
+- [Inline-header lists](#inline-header-lists)
+- [Adverb propping](#adverb-propping)
+- [Passive voice with an unnamed actor](#passive-voice-with-an-unnamed-actor)
+- [Closing restatement](#closing-restatement)
+- [Question as transition](#question-as-transition)
+- [Escalating parallel clauses](#escalating-parallel-clauses)
+- [Empty superlative frames](#empty-superlative-frames)
+
 ## Rule of three
 
 A triad wherever a list appears, whatever the subject actually holds. Three adjectives, three clauses, three examples, over and over, until the count is the only thing a reader can predict.

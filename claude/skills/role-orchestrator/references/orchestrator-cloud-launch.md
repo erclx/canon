@@ -9,6 +9,14 @@ Run this once `orchestrator-dispatch.md` has cleared a row and picked cloud for 
 
 The shape needs a `SessionStart` hook in the repository that, on the VM alone, copies the plugin skills into `.claude/skills/` and puts `canon` on the path. A repository without one cannot take this shape, so fall back to a local worker there. Where the hook exists, the launch prompt calls `/auto-ship` with no `canon:` prefix, since the copied skills list as project skills.
 
+## Contents
+
+- [Check the row is unclaimed](#check-the-row-is-unclaimed)
+- [The prompt](#the-prompt)
+- [The create](#the-create)
+- [Recognize the pull request](#recognize-the-pull-request)
+- [Dispatch a review to a cloud reviewer](#dispatch-a-review-to-a-cloud-reviewer)
+
 ## Check the row is unclaimed
 
 A cloud worker never appears in `canon sessions list` and never pushes the derived branch, since the cloud assigns it a `claude/` branch of its own. So the roster and the refs read clear on a row a cloud worker is already building. Run the local check in `orchestrator-dispatch.md` anyway, since a local worker on the same row still collides, then read the two places a cloud worker does show:
