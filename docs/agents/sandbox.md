@@ -39,11 +39,35 @@ The verdict `state` is `pass`, `fail`, or `unchecked`. An arm with no `expect.to
 
 Omitting `--writes`, `--escapes`, or `--envelope` does not silently drop the assertion kinds that need them. Write scope, escape scope, the turn ceiling, and the reply assertion report as unchecked and appear in the count, so the standalone command cannot claim more coverage than it had. Supplying `--escapes` without `--escapes-watched` reports the same way: a zero-escape result with no root confirmed watched is unmeasured rather than a pass. A verdict never reports `pass` with zero assertions.
 
-An arm declaring `escape_scope` asserts a bound on `run.sh`'s own escape watch rather than on the sandbox tree. `write_scope` skips when the run wrote nothing, since a required output missing is itself a finding, but `escape_scope` passes on zero escapes outright, since a clean run producing none is the expected outcome for a destination nothing requires a skill to touch, provided `--escapes-watched` confirms a root held something to watch. Declaring `escape_scope = []` asserts that a correct run reaches none of the watched destinations at all. `canon/context/sandbox/isolation.md` names what the watch reaches and what it cannot.
+An arm declaring `escape_scope` asserts a bound on the headless runner's own escape watch rather than on the sandbox tree. `write_scope` skips when the run wrote nothing, since a required output missing is itself a finding, but `escape_scope` passes on zero escapes outright, since a clean run producing none is the expected outcome for a destination nothing requires a skill to touch, provided `--escapes-watched` confirms a root held something to watch. Declaring `escape_scope = []` asserts that a correct run reaches none of the watched destinations at all. `canon/context/sandbox/isolation.md` names what the watch reaches and what it cannot.
 
 An envelope that parses but carries no `result` field skips the reply assertion the same way an absent file does. An envelope carrying an empty `result` fails it, since a run that returned no text is a finding rather than a gap in the input.
 
 Exit 0 means `pass` or `unchecked`. Exit 1 means `fail`, or a caller error: a malformed target, or a sandbox that was never provisioned. A missing sandbox reports as an error rather than a failed verdict, because failing every path assertion would read as a skill that did nothing. `--strict` moves `unchecked` to exit 1 for a caller that has finished arming its scenarios.
+
+## Headless runs
+
+`canon sandbox run` provisions a scenario, drives one `claude -p` session over it, and scores the result with `canon sandbox check`. `sandbox/run.sh` is a wrapper that passes its arguments to the verb, so either spelling runs the same code.
+
+```bash
+canon sandbox run <category>:<command> "<prompt>" [arm]
+canon sandbox run claude:plan-feature "/canon:plan-feature add a widget" small
+```
+
+Every run bills a real session through the `claude` binary on `PATH`. The session runs with `--plugin-dir` pointed at this checkout's `claude/`, so it loads the branch's skills rather than an installed copy, and provisioning injects no skill into the tree for the same reason. Four variables override the flags it hands to `claude -p`:
+
+| Variable                           | Default                          |
+| ---------------------------------- | -------------------------------- |
+| `CANON_SKILL_TEST_MODEL`           | `sonnet`                         |
+| `CANON_SKILL_TEST_TOOLS`           | `Bash,Read,Glob,Grep,Edit,Write` |
+| `CANON_SKILL_TEST_MAX_TURNS`       | `30`                             |
+| `CANON_SKILL_TEST_PERMISSION_MODE` | `bypassPermissions`              |
+
+The max-turns value is the only budget a run has. An arm's `max_turns` is asserted after the run and cannot raise it.
+
+Stdout carries one JSON record: the session's envelope with `verdict`, `escapes`, and `sessions` merged in, described under the skills census below. Stderr carries the framed timeline, the provisioning output, the session's own stderr, the verdict report, and a warning for each escape, new session record, or reaped process. An envelope that does not parse still prints its verdict, under `is_error: true`.
+
+Exit codes follow whichever step stopped the run. Provisioning's code ends a run before the session starts, and a session that exits non-zero ends it with that code after writing a dead-run record, `{is_error, exit_code, raw_output}`, to the same runs folder the merged record uses. Otherwise the verdict's code stands, except that an envelope that does not parse forces 1. An interrupt reaps the session's process group before the runner exits.
 
 ## Provisioning equivalence
 
@@ -95,8 +119,8 @@ A skill pairs to a scenario by filename, `<category>-<command>` first and bare `
 
 `exempt` means no arm should be written and holds only with a reason, declared in `sandbox/exempt.toml` and limited to a harness limit the checker cannot reach past or a skill that writes no artifact. An armed arm outranks an exemption. An exemption naming no shipped skill, or naming one an arm now asserts, exits 1 without `--strict`. Each armed arm reports as `<category>:<command>/<arm>`, so two same-named arms under different scenarios stay distinct.
 
-`sandbox/run.sh` calls this after a headless run and merges the verdict into the envelope it prints. It also writes that merged record to `.canon/tmp/runs/sandbox/<target>-<arm>-<timestamp>.json` with a `writes` array appended, and logs the path on stderr. Both fields are what a later re-score needs, since `--envelope` and `--writes` read files the run deletes on exit.
+`canon sandbox run` calls this after a headless run and merges the verdict into the envelope it prints. It also writes that merged record to `.canon/tmp/runs/sandbox/<target>-<arm>-<timestamp>.json` with a `writes` array appended, and logs the path on stderr. Both fields are what a later re-score needs, since `--envelope` and `--writes` read files the run deletes on exit.
 
 Two more fields ride alongside the verdict rather than inside it. `escapes` lists what the run wrote under a watched toolkit root, which the verdict cannot assert over because those files sit outside the sandbox tree. `sessions` reports the nested-dispatch bound, carrying `watched` for whether the client's session registry was there to read, `new` for the records that appeared while the run was in flight, `concurrent` for the records present both before and after, and `reap` for what the run found in the session's process group afterwards. Neither field fails a run on its own.
 
-`run.sh` passes `concurrent` through `--concurrent-sessions` to `sandbox check`, and `checkEscapeScope` appends a witness count to an `unbounded escape:` message rather than lets it soften the verdict.
+`canon sandbox run` passes `concurrent` through `--concurrent-sessions` to `sandbox check`, and `checkEscapeScope` appends a witness count to an `unbounded escape:` message rather than lets it soften the verdict.

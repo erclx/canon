@@ -26,7 +26,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 - The scenario tree sits at `sandbox/` rather than under `scripts/`, the folder for a project's chores. The harness carries its own authoring contract, census, and expectation scoring, and it held seven eighths of the shell under `scripts/` before it moved, so the chores folder was mostly one domain that was not a chore.
 - Staying under `scripts/` was the alternative, and it ties the folder to the language. The scenarios are meant to be rebuilt in TypeScript in this same folder, which a role name survives and a language-shaped home does not.
-- The provisioning order lives in `src/sandbox/provision.ts`, and the bash dispatcher it replaced is gone. The headless runner `sandbox/run.sh` and the `scripts/lib/sandbox-*.sh` libraries stay where they are until their own slice moves them, so neither moves twice.
+- The provisioning order lives in `src/sandbox/provision.ts`, and the bash dispatcher it replaced is gone. The headless runner moved to `src/sandbox/headless/` with its dispatch bound, and `sandbox/run.sh` stays as a wrapper over `canon sandbox run` until the retire slice retargets its citations. `scripts/lib/sandbox-path.sh` keeps the three functions `scripts/sandbox-hook.sh` and `scripts/lib/ui.sh` still call.
 - Four gates walked `scripts/` by name, being `check:shell`, the `shfmt` roots in `format` and `check:format`, and `scripts/core/check-color-source.sh`. Each names `sandbox` as a root of its own now, and the color check fails when either root is missing rather than reporting a tree it never walked.
 
 ### Scenario defaults and the reset contract
@@ -73,12 +73,12 @@ canon() {
 
 Six things a run cannot reach. Each is a property of the harness rather than a gap to close per task, so a claim depending on one is hand-verified and says so.
 
-- Marketplace install behavior. `run.sh` points `--plugin-dir` at a worktree instead of installing the plugin, so anything depending on a real install stays outside the harness.
+- Marketplace install behavior. `canon sandbox run` points `--plugin-dir` at a worktree instead of installing the plugin, so anything depending on a real install stays outside the harness.
 - A mid-session rule change. Rules are discovered at session start and the harness spawns a fresh session per run, so this binds the session doing the editing rather than the run.
 - Host-conditional behavior such as linked-worktree locks or remote-state failures. A standalone sandbox repo cannot reproduce the trigger.
 - The standards fallback of a skill the branch changed, in an interactive sandbox. Both resolution routes can land on one file there, and no assertion tells them apart.
 - A write landing outside both the sandbox tree and the four watched scratch directories. `canon/context/sandbox/isolation.md` states what the watch reaches.
-- Git state. `snapshot_tree` excludes `.git`, and the declaration keys read paths, file content, the write list, the reply, and the turn count, so no key reaches a commit, a branch, or a rewritten history.
+- Git state. `snapshotTree` excludes `.git`, and the declaration keys read paths, file content, the write list, the reply, and the turn count, so no key reaches a commit, a branch, or a rewritten history.
 
 A nested background dispatch is not on this list. A shim bounds it and `sessions` records it, and `canon/context/sandbox/isolation.md` states the three cases that bound still misses.
 
@@ -86,7 +86,7 @@ A nested background dispatch is not on this list. A shim bounds it and `sessions
 
 A shipped body cites `${CLAUDE_SKILL_DIR}/../../standards/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on `<root>/standards/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no standard still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/standards/`, a path inside the fixture that no assertion can tell from a project copy.
 
-`run.sh` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no standard separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
+`canon sandbox run` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no standard separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
 
 ### Git state
 
