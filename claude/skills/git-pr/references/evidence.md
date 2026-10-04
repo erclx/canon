@@ -39,9 +39,9 @@ The verb reads the listening sockets on this machine, keeps those whose process 
 
 Pass `--local` to the evidence step only on an `ok` here. The binary answering `ok` is the one carrying the flag, so a binary lacking the verb never meets a flag it would reject.
 
-With a checklist, a diff carrying no evidence image still renders `ok`, and a local link rides in the same comment above the checklist, so a reviewer gets both in one place. A local link with neither an evidence image nor a checklist still reports `no-evidence`, which keeps a branch that changed no rendered surface from getting a comment holding a link and nothing else.
+With a checklist, a diff carrying no evidence image still renders `ok`, and a local link rides in the same comment on the address line under `## Evidence`, above the checklist, so a reviewer gets both in one place. A local link with neither an evidence image nor a checklist still reports `no-evidence`, which keeps a branch that changed no rendered surface from getting a comment holding a link and nothing else.
 
-A seeded workflow replaces the line with a note once the pull request closes, so the link does not outlive the branch it points at.
+A seeded workflow drops the whole address line once the pull request closes, hosted and local segments together and with no note in their place, so neither link outlives the branch it points at.
 
 ## Post the evidence comparison
 
@@ -110,15 +110,15 @@ The evidence comment is already posted, so the reviewer has the screenshots whil
 canon pr preview <number> --json
 ```
 
-The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production. `canon docs pr-preview` states the contract. Read `reason` on the record rather than the exit code.
+The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production, and when the workflow's own push path filter matches no path the pull request changed, since a dispatch ignores that filter and the site it published would show none of the change. `canon docs pr-preview` states the contract. Read `reason` on the record rather than the exit code.
 
-- `ok`: re-render the evidence body with the address on its first line, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
+- `ok`: re-render the evidence body with the address on the line under `## Evidence`, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
 
 ```bash
 canon pr evidence <number> --preview <url> --json
 ```
 
-The hosted address takes the first line and a local link already on the comment moves to the second, carried forward with no flag.
+The hosted address opens the address line and a local link already on the comment follows it on the same line, carried forward with no flag.
 
-- `no-deploy`: the project deploys nothing a dispatch can start. Say nothing and move on.
+- `no-deploy` or `unserved`: the project deploys nothing a dispatch can start, or nothing this branch changed is something its site builds from. Say nothing and move on.
 - Any other `reason`, being `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report it with the record's `message` and move on without stopping the chain. A missing link costs the reviewer a click, and a held ship costs the whole chain.
