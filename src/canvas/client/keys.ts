@@ -12,6 +12,9 @@ export type SurfaceAction =
   | 'zoom-fit'
   | 'pan-hold'
   | 'pan-release'
+  | 'undo'
+  | 'redo'
+  | 'panels-toggle'
 
 /** The fields of a `KeyboardEvent` the map reads, so a test needs no DOM. */
 export interface KeyInput {
@@ -34,21 +37,35 @@ const PLAIN_KEYS: Readonly<Record<string, SurfaceAction | undefined>> = {
 }
 
 /**
- * Cmd, Ctrl, and Alt combinations are the browser's or the system's, so any
- * of them held on a press returns nothing. Space coming up releases whatever
- * is held with it, or a modifier pressed mid-pan would leave the pan stuck.
- * Shift and the 1 key fits by `code`, since the character Shift gives on that
- * key differs by layout.
+ * Undo and redo are the one exception to the browser owning a modifier: Ctrl
+ * or Cmd with Z, with Shift to redo, and Ctrl with Y. Any other Cmd, Ctrl, or
+ * Alt combination is the browser's or the system's, so it returns nothing.
+ */
+function historyAction(event: KeyInput): SurfaceAction | undefined {
+  if (event.altKey) return undefined
+  const key = event.key.toLowerCase()
+  if (key === 'z') return event.shiftKey ? 'redo' : 'undo'
+  if (key === 'y' && event.ctrlKey && !event.shiftKey) return 'redo'
+  return undefined
+}
+
+/**
+ * Space coming up releases whatever is held with it, or a modifier pressed
+ * mid-pan would leave the pan stuck. Shift and the 1 key fits, and the
+ * backslash key toggles the panels, by `code`, since the character each
+ * gives differs by layout.
  */
 export function surfaceAction(event: KeyInput): SurfaceAction | undefined {
   if (event.type === 'keyup') {
     return event.key === ' ' ? 'pan-release' : undefined
   }
   if (event.type !== 'keydown') return undefined
-  if (event.ctrlKey || event.metaKey || event.altKey) return undefined
+  if (event.ctrlKey || event.metaKey) return historyAction(event)
+  if (event.altKey) return undefined
   if (event.shiftKey) {
     if (event.code === 'Digit1') return 'zoom-fit'
     return event.key === '+' ? 'zoom-in' : undefined
   }
+  if (event.code === 'Backslash') return 'panels-toggle'
   return PLAIN_KEYS[event.key.toLowerCase()]
 }

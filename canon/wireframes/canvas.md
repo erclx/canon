@@ -15,7 +15,9 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 - Surface: the area between the two panels, holding every frame of the current page placed at its box, with each frame's name, size, editing badge, and theme switch on one line above it. That line is the frame's handle, and it holds one screen size at any zoom. A row too short for every part drops the theme switch, then the badge, then the size, before it shortens the name
 - Element outline: drawn over a frame, dashed around the element under the pointer
 - Selection: a thin outline around the selected frame or element with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
-- Tool strip: at the surface's top left, Move over Pan, the one in effect lit
+- Tool strip: at the surface's top left, Move over Pan, the one in effect lit, then Undo over Redo, each disabled while there is nothing to step, then the panel toggle
+- Panel handles: on each panel's inner edge, a line in the accent on hover, focus, or drag
+- History notice: at the surface's top center once an undo or redo drops an entry
 - Zoom toolbar: floating at the bottom right corner of the surface, holding zoom out, the zoom level, zoom in, and fit
 - Details panel: a slim column down the right edge, holding the inspector for the selected frame, then the current page's name and frame count, then where the frames' tokens come from
 - Inspector: the top section of the details panel, showing the selected frame's name and its x, y, width, and height as read-only fields, two to a row
@@ -25,7 +27,7 @@ Opened on localhost by `canon canvas serve`. It shows one project's pages and th
 
 ### Below 900 wide
 
-- The details panel is hidden and the pages panel narrows
+- The details panel is hidden and the pages panel narrows to a fixed width with no handle
 
 ### Below 600 wide
 
@@ -35,31 +37,34 @@ The captures named in the States table show the layout, so it carries no sketch.
 
 ## States
 
-| State            | Reached when                                                                                                 | Shows                                                                                                                 | Evidence                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| filled           | The current page holds at least one frame                                                                    | Every frame at its box, the page selected in the list                                                                 | not captured                                              |
-| no-pages         | The canvas folder holds no page                                                                              | The page list replaced by the add-a-page line, no frame list                                                          | not captured                                              |
-| empty-page       | The current page holds no frame                                                                              | The frame list replaced by the add-a-frame line, an empty surface                                                     | not captured                                              |
-| unplaced         | A frame file has no box in the page's layout                                                                 | That frame in a row after the placed ones, and a count of them at right                                               | not captured                                              |
-| malformed        | The page's layout file does not parse                                                                        | Every frame in a default row, and an alert at right naming the file                                                   | not captured                                              |
-| no-tokens        | No token stylesheet resolves for the project                                                                 | Frames unstyled, and the details panel naming where tokens would go                                                   | not captured                                              |
-| unreachable      | The page list cannot be read from the server                                                                 | The panel replaced by one line saying to check the server is running                                                  | not captured                                              |
-| light            | The system prefers light, or the operator picks light                                                        | The chrome on the light ground                                                                                        | not captured                                              |
-| dark             | The system prefers dark, or the operator picks dark                                                          | The chrome on the dark ground                                                                                         | not captured                                              |
-| frame-switched   | The operator switches one frame's theme from its label                                                       | That frame in the other theme while the chrome and the rest stay put                                                  | not captured                                              |
-| selected         | The operator presses a frame's label, or picks it in the list                                                | That frame outlined with corner handles, its name in the accent, its row marked, its box in the inspector             | `assets/evidence/canvas-selection-handles/`               |
-| element-hover    | The pointer rests on an element in a frame or a layer row                                                    | A dashed outline around that element on the surface                                                                   | `assets/evidence/canvas-layers/element-hover-1440.png`    |
-| element-selected | The operator clicks an element in a frame, or picks its layer row                                            | An outline with corner handles and a size chip, its layer row marked, and its values in the element inspector         | `assets/evidence/canvas-selection-handles/`               |
-| element-stale    | The frame file changed since the element was picked                                                          | No element outline and no layer row marked, and the element inspector saying the pick may name another element now    | `assets/evidence/canvas-layers/element-stale-1440.png`    |
-| element-mismatch | The browser counts the frame's elements differently from its file, as with a table written without its tbody | The pick refused and an alert in the details panel                                                                    | `assets/evidence/canvas-layers/element-mismatch-1440.png` |
-| dragging         | The operator moves a pressed frame                                                                           | The frame following the pointer, and its x and y updating in the inspector                                            | `assets/evidence/canvas-arrange/dragged-1440.png`         |
-| resizing         | The operator drags a corner handle of the selected frame or element                                          | A frame grows with its far corner held, an element from its own top left, sized in the label or the chip              | not captured                                              |
-| editing          | A session marks the frame with `canon canvas editing`, until `--done` or the mark's expiry                   | A badge naming the session after the size, announced politely, and a dashed outline around the frame                  | `assets/evidence/canvas-editing-badge/`                   |
-| write-failed     | The server refuses a move or a selection                                                                     | The frame back at its stored place and an alert in the details panel                                                  | not captured                                              |
-| edited           | The operator commits a changed field or picks a token                                                        | The frame reloading with the change, and `Saved` beside the element label for a moment                                | not captured                                              |
-| edit-refused     | The server refuses an edit, as when the frame file changed after the edit was made                           | The frame reloaded from the file, the typed value dropped, and an alert in the details panel saying nothing was saved | not captured                                              |
-| theme            | The operator picks the Theme tab                                                                             | The token groups in place of the page and frame lists                                                                 | not captured                                              |
-| theme-empty      | The Theme tab is picked and no token stylesheet resolves                                                     | One line saying no tokens resolve, then the server's notice                                                           | not captured                                              |
+| State            | Reached when                                                            | Shows                                                                                      | Evidence                                    |
+| ---------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| filled           | The current page holds at least one frame                               | Every frame at its box, the page selected in the list                                      | not captured                                |
+| no-pages         | The canvas folder holds no page                                         | The page list replaced by the add-a-page line, no frame list                               | not captured                                |
+| empty-page       | The current page holds no frame                                         | The frame list replaced by the add-a-frame line, an empty surface                          | not captured                                |
+| unplaced         | A frame file has no box in the page's layout                            | That frame in a row after the placed ones, and a count of them at right                    | not captured                                |
+| malformed        | The page's layout file does not parse                                   | Every frame in a default row, and an alert at right naming the file                        | not captured                                |
+| no-tokens        | No token stylesheet resolves for the project                            | Frames unstyled, and the details panel naming where tokens would go                        | not captured                                |
+| unreachable      | The page list cannot be read from the server                            | The panel replaced by one line saying to check the server is running                       | not captured                                |
+| light            | The system prefers light, or the operator picks light                   | The chrome on the light ground                                                             | not captured                                |
+| dark             | The system prefers dark, or the operator picks dark                     | The chrome on the dark ground                                                              | not captured                                |
+| frame-switched   | The operator switches one frame's theme from its label                  | That frame in the other theme while the chrome and the rest stay put                       | not captured                                |
+| selected         | The operator presses a frame's label, or picks it in the list           | The frame outlined with handles, its name in the accent, its row marked, its box shown     | `assets/evidence/canvas-selection-handles/` |
+| element-hover    | The pointer rests on an element in a frame or a layer row               | A dashed outline around that element on the surface                                        | `assets/evidence/canvas-layers/`            |
+| element-selected | The operator clicks an element in a frame, or picks its layer row       | An outline with handles and a size chip, its layer row marked, its values in the inspector | `assets/evidence/canvas-selection-handles/` |
+| element-stale    | The frame file changed since the element was picked                     | No outline or marked row, and the inspector saying the pick may now name another element   | `assets/evidence/canvas-layers/`            |
+| element-mismatch | The browser and the file count the frame's elements differently         | The pick refused and an alert in the details panel                                         | `assets/evidence/canvas-layers/`            |
+| dragging         | The operator moves a pressed frame                                      | The frame following the pointer, and its x and y updating in the inspector                 | `assets/evidence/canvas-arrange/`           |
+| resizing         | The operator drags a corner handle of the selected frame or element     | A frame grows from its held far corner, an element from its top left, its size shown       | not captured                                |
+| editing          | A session marks the frame, until it clears the mark or the mark expires | A badge naming the session after the size, and a dashed outline around the frame           | `assets/evidence/canvas-editing-badge/`     |
+| write-failed     | The server refuses a move or a selection                                | The frame back at its stored place and an alert in the details panel                       | not captured                                |
+| edited           | The operator commits a changed field or picks a token                   | The frame reloading with the change, and `Saved` beside the element label for a moment     | not captured                                |
+| edit-refused     | The server refuses an edit, as when the file changed under it           | The frame reloaded, the typed value dropped, and an alert saying nothing was saved         | not captured                                |
+| undo-dropped     | An undo or redo finds its element or frame changed since the edit       | Nothing written, the entry gone, and the history notice saying so                          | `assets/evidence/canvas-undo/`              |
+| panels-hidden    | The operator presses the panel toggle or its key                        | Both panels gone and the surface the full width, the frames held still                     | `assets/evidence/canvas-undo/`              |
+| panels-resized   | The operator drags a panel handle or moves it with the arrow keys       | That panel at the new width, the frames held still on screen                               | `assets/evidence/canvas-undo/`              |
+| theme            | The operator picks the Theme tab                                        | The token groups in place of the page and frame lists                                      | not captured                                |
+| theme-empty      | The Theme tab is picked and no token stylesheet resolves                | One line saying no tokens resolve, then the server's notice                                | not captured                                |
 
 ## Copy
 
@@ -74,7 +79,10 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Malformed: `layout.json does not parse, so every frame sits in a default row. Fix the file to restore their places.`
 - Frame label: `<name> <width> × <height>`, then `<by> editing` while a session marks the frame, then the theme switch reading `Dark` or `Light`
 - Size chip: `<width> × <height>` in whole pixels
-- Tool strip: icons named `Move (V)` and `Pan (H)`
+- Tool strip: icons named `Move (V)`, `Pan (H)`, `Undo (Ctrl+Z)`, `Redo (Ctrl+Shift+Z)`, with `Cmd` for `Ctrl` on macOS, and `Hide panels (\)` or `Show panels (\)`
+- Undo landed: `Undone` or `Redone` in the history notice for a moment
+- Panel handles: separators named `Resize pages panel` and `Resize details panel`
+- Undo dropped: `Could not undo, since that element or frame changed after your edit. Nothing was written.`, and `redo` and `the undo` in place for a redo
 - Zoom toolbar: `−`, `<n>%`, `+`, `Fit`
 - Inspector label: `Frame`, with field glyphs `X`, `Y`, `W`, `H` and accessible names `x`, `y`, `width`, `height`
 - Element inspector label: `Element`, with section titles `Layout`, `Flex`, `Appearance`, `Typography`, `Fill`, `Text`
@@ -102,27 +110,28 @@ The captures named in the States table show the layout, so it carries no sketch.
 - Picking a page in the list shows its frames and fits them into the surface
 - Picking a frame in the list selects it and centers it at the current zoom, and pressing one on the surface marks its row
 - Dragging the empty surface, or scrolling anywhere on it, frames included, pans it, and scrolling with the control key held zooms about the pointer
-- Pan, or Space held, pans on any drag. With the canvas focused, V and H pick the tool, `+` and `-` zoom, Shift+1 fits. A field, or Cmd or Ctrl, keeps the key
+- Pan, or Space held, pans on any drag. With the canvas focused, V and H pick the tool, `+` and `-` zoom, Shift+1 fits. A field keeps every key, and Cmd or Ctrl keeps any key but undo and redo
 - A frame file Claude rewrites reloads that frame alone, and pan and zoom stay where they were
 - A frame or page Claude adds appears without a manual refresh
 - The theme toggle flips the chrome between light and dark and is remembered for the next visit
 - A frame's theme switch flips that frame alone
 - Pressing a frame's label selects it, dropping any element picked inside it, and one frame is selected at a time. The selection is written to the project, so Claude reads it as "this one"
 - Dragging a frame by its label moves it, and releasing writes the new position to the page's layout, where it survives a restart
-- Clicking inside a frame selects the element under the pointer and its frame, and the click goes no further, so a link or a button in the frame does nothing. The element is written by its index in document order, with the hash of the file the frame was served from, and a pick made against a version the file has since moved past is refused
+- Clicking inside a frame selects the element under the pointer and its frame, and the click goes no further, so a link or a button in the frame does nothing. A pick made against a version the file has since moved past is refused
 - Picking a layer row selects that element the same way, and selecting one on the surface opens its frame's layers and marks its row
-- A press that never moves writes no position or size, and every drag divides the pointer's travel by the zoom
-- With a frame focused, Enter, or Space released with no pan, selects it, and the arrow keys move the selected frame by 10, or by 50 with Shift held
-- Dragging a selected frame's corner handle resizes it with the opposite corner held, and releasing writes the box to the layout in one write. Control or Command with an arrow resizes it by 10, or 50 with Shift, right and down growing it
-- Dragging a selected element's corner handle previews its size in the frame, then writes `width` and `height` in pixels, one edit per changed axis on the hash the last answered. Its inspector fields are the keyboard path
+- A press that never moves writes no position or size
+- With a frame focused, Enter, or Space released with no pan, selects it, and the arrow keys nudge the selected frame, further with Shift
+- Dragging a selected frame's corner handle resizes it with the opposite corner held, and Control or Command with an arrow resizes it from the keyboard
+- Dragging a selected element's corner handle previews its size in the frame, then writes its width and height. Its inspector fields are the keyboard path
 - A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
 - An element field commits on Enter or on leaving it, and a value left as it started sends nothing. Escape puts the field back
-- A field shows a pixel length rounded and with no unit, reads `auto` and `normal` as words, and shows a `normal` gap or a transparent background empty. A bare number typed into a length writes as pixels, and a rounded value left unchanged sends nothing
-- Dragging a number field's glyph scrubs it, one per pixel or ten with Shift, previewed in the frame and written once on release. A length stops at 0, a weight at 1 and 1000, and an empty gap scrubs from 0. A cancelled drag puts both back
+- Dragging a number field's glyph scrubs it, previewed in the frame and written once on release. A cancelled drag puts both back
 - A committed field writes into the element's inline style in the frame file, or its text, and leaves the rest of the file as it was. The frame reloads to show it
-- Picking a color token writes `var(--<name>)`, or below full opacity a `color-mix()` of it with `transparent`, so the element keeps following the theme. An unreadable inline value shows as written. A picker drag writes once on release, and any change but the alpha writes a hex
-- Fields hold while an edit is in flight and take the file's values once the frame reloads. An edit made against a version the file has moved past is refused, never applied to a shifted element, and the frame reloads
+- Picking a color token keeps the element following the theme at any opacity, and a picker drag writes once on release
+- Fields hold while an edit is in flight and take the file's values once the frame reloads. An edit made against a version the file has moved past is refused and the frame reloads
 - The Theme tab lists what the token stylesheet defines and edits nothing
+- With the canvas focused, Ctrl or Cmd with Z undoes the operator's last edit, move, or resize as one gesture, and Shift with it or Ctrl with Y redoes. Claude's writes never enter the history, and one that rewrites what the edit changed, or adds or removes an element in that frame, drops the operator's entry rather than being overwritten
+- The panel toggle, or backslash with the canvas focused, hides both panels. A drag or an arrow key on a handle resizes its panel, never squeezing the surface out. Both are remembered for the next visit
 
 ## Not on this surface
 

@@ -53,6 +53,14 @@ Inline style beats a class, so an operator's edit masks a class change Claude ma
 
 The Theme tab in the shell lists what the token stylesheet defines, grouped as color, spacing, radius, font family, font size, and other. The page record at `/api/pages` carries the same list as `tokens.groups`.
 
+## Undo in the shell
+
+The operator undoes and redoes their own shell edits, frame moves, and frame resizes from Ctrl or Cmd with Z, Shift with it or Ctrl with Y, or the tool strip's buttons. The history lives in the `canvas serve` process and covers shell edits alone, so a `canvas edit`, `canvas frame move`, or `canvas frame resize` never enters it, and their `--json` records are unchanged. A restart clears it.
+
+An undo writes the recorded state back only while the element or frame still holds what the operator's edit left. When Claude has since rewritten what that edit changed, being the element's inline style or, for a text edit, its text, or has added or removed an element in that frame, the operator's entry is dropped and nothing is written, and the shell says so. A write that changes another element's style or text, or another part of the same element, leaves the entry live. The page record at `/api/pages` carries `history` as `{ canUndo, canRedo }`.
+
+The tool strip also holds a toggle, bound to backslash, that hides both side panels to show the whole surface, and each panel resizes from a handle on its inner edge. Both are remembered in the browser and write nothing to the project.
+
 ## Mark a frame being edited
 
 `canvas editing <page>/<frame>` marks a frame as being edited, so an open canvas shows who is working on it before the write lands. The shell draws the mark as `<by> editing` on that frame's label with a dashed outline around it, and drops it on the reread after `--done` or at the mark's `until` with no reread. Run it before writing a frame and again with `--done` once the edits are written. A bare `canvas editing` lists the live marks, and `--json` emits `{ ok, editing }` after each of the three, with each mark carrying `page`, `frame`, `by`, `since`, and `until`.

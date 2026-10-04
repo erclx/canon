@@ -23,6 +23,7 @@ import {
   readSelection,
   renamePage,
   resizeFrame,
+  restoreBox,
   writeSelection,
 } from '@/canvas/content'
 
@@ -506,6 +507,89 @@ describe('resizeFrame', () => {
       ['a', 10, 10, 400],
       ['b', 600, 0, 200],
     ])
+  })
+})
+
+describe('restoreBox', () => {
+  const placed = { x: 0, y: 0, width: 400, height: 300 }
+
+  it('should report the box a move replaced to a caller that asks', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 400, height: 300 })
+    let replaced: unknown = 'unheard'
+
+    const outcome = moveFrame(
+      ROOT,
+      'drafts',
+      'hero',
+      { x: 50, y: 60 },
+      (box) => {
+        replaced = box
+      },
+    )
+
+    expect(replaced).toEqual(placed)
+    expect(outcome).toEqual({
+      ok: true,
+      page: 'drafts',
+      frame: 'hero',
+      file: 'hero.html',
+      box: { x: 50, y: 60, width: 400, height: 300 },
+    })
+  })
+
+  it('should report no box when the layout held none', () => {
+    seedPage('drafts', ['hero'])
+    let replaced: unknown = 'unheard'
+
+    resizeFrame(
+      ROOT,
+      'drafts',
+      'hero',
+      { x: 1, y: 2, width: 30, height: 40 },
+      (box) => {
+        replaced = box
+      },
+    )
+
+    expect(replaced).toBeUndefined()
+  })
+
+  it('should write the recorded box back when the layout still holds the expected one', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 400, height: 300 })
+    const moved = { x: 50, y: 60, width: 400, height: 300 }
+    moveFrame(ROOT, 'drafts', 'hero', moved)
+
+    const outcome = restoreBox(ROOT, 'drafts', 'hero', moved, placed)
+
+    expect(outcome).toEqual({ ok: true })
+    expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject(placed)
+  })
+
+  it('should drop the box when the frame had none before', () => {
+    seedPage('drafts', ['hero'])
+    const sized = { x: 1, y: 2, width: 30, height: 40 }
+    resizeFrame(ROOT, 'drafts', 'hero', sized)
+
+    restoreBox(ROOT, 'drafts', 'hero', sized, undefined)
+
+    expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject({
+      placed: false,
+    })
+  })
+
+  it('should refuse when the layout moved on since', () => {
+    seedPage('drafts', [])
+    addFrame(ROOT, 'drafts', 'hero', { width: 400, height: 300 })
+    const moved = { x: 50, y: 60, width: 400, height: 300 }
+    moveFrame(ROOT, 'drafts', 'hero', moved)
+    moveFrame(ROOT, 'drafts', 'hero', { x: 90, y: 90 })
+
+    const outcome = restoreBox(ROOT, 'drafts', 'hero', moved, placed)
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'changed' })
+    expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject({ x: 90, y: 90 })
   })
 })
 

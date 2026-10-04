@@ -63,6 +63,13 @@ export interface PagesRecord {
   readonly selection?: SelectionRef | null
   /** The live marks, which a server older than the mark leaves out. */
   readonly editing?: readonly EditingRef[]
+  /** Whether the server holds an edit to undo or redo, absent before undo shipped. */
+  readonly history?: HistoryFlags
+}
+
+export interface HistoryFlags {
+  readonly canUndo: boolean
+  readonly canRedo: boolean
 }
 
 export interface ChangeEvent {
@@ -128,6 +135,60 @@ export const writeError = signal<string | undefined>(undefined)
 
 export const leftTab = signal<LeftTab>('pages')
 
+/** Whether the operator hid both side panels to see the whole surface. */
+export const panelsHidden = signal(false)
+
+export function togglePanels(): void {
+  panelsHidden.value = !panelsHidden.value
+}
+
+export type PanelSide = 'left' | 'right'
+
+export interface PanelWidths {
+  readonly left: number
+  readonly right: number
+}
+
+/** The 15rem and 16rem columns the shell opened at before panels resized. */
+export const DEFAULT_PANEL_WIDTHS: PanelWidths = { left: 240, right: 256 }
+export const MIN_PANEL_WIDTH = 180
+export const MAX_PANEL_WIDTH = 480
+/** What a panel never squeezes the surface below, the reflow floor. */
+export const MIN_SURFACE_WIDTH = 320
+
+export const panelWidths = signal<PanelWidths>(DEFAULT_PANEL_WIDTHS)
+
+/**
+ * Holds one panel between the floor and the ceiling, and under whatever keeps
+ * the surface at its own floor beside the other panel. The floor wins on a
+ * window too narrow for both.
+ */
+export function clampPanelWidth(
+  side: PanelSide,
+  width: number,
+  windowWidth: number,
+  widths: PanelWidths = panelWidths.value,
+): number {
+  const other = side === 'left' ? widths.right : widths.left
+  const ceiling = Math.min(
+    MAX_PANEL_WIDTH,
+    windowWidth - other - MIN_SURFACE_WIDTH,
+  )
+  const fallback = DEFAULT_PANEL_WIDTHS[side]
+  const wanted = Number.isFinite(width) ? width : fallback
+  return Math.round(Math.max(MIN_PANEL_WIDTH, Math.min(ceiling, wanted)))
+}
+
+export function setPanelWidth(
+  side: PanelSide,
+  width: number,
+  windowWidth: number,
+): void {
+  const next = clampPanelWidth(side, width, windowWidth)
+  if (panelWidths.value[side] === next) return
+  panelWidths.value = { ...panelWidths.value, [side]: next }
+}
+
 /** The tool the strip has lit, which a Space pan overrides while held. */
 export const activeTool = signal<Tool>('move')
 
@@ -148,6 +209,14 @@ const SAVED_MS = 2500
 
 /** Why the last edit wrote nothing, until the next one lands. */
 export const editRefusal = signal<string | undefined>(undefined)
+
+const NO_HISTORY: HistoryFlags = { canUndo: false, canRedo: false }
+
+/** What the server's history holds, as the last page record reported it. */
+export const history = signal<HistoryFlags>(NO_HISTORY)
+
+/** Why the last undo or redo wrote nothing, until the next one runs. */
+export const historyNotice = signal<string | undefined>(undefined)
 
 /**
  * The hash an edit answered by frame key, until that frame reloads. A second
@@ -275,6 +344,7 @@ export function applyRecord(record: PagesRecord): void {
   tokens.value = record.tokens
   selection.value = record.selection ?? undefined
   applyEditing(record.pages, record.editing ?? [])
+  history.value = record.history ?? NO_HISTORY
   loadError.value = undefined
   isLoaded.value = true
 }
@@ -395,11 +465,22 @@ const EDIT_NOTICES: Readonly<Record<string, string | undefined>> = {
     'Could not save the text, since this element holds other elements.',
 }
 
+let stepCount = 0
+
+/**
+ * A token the edits of one gesture share, so the server merges them into one
+ * undo. The time keeps it apart from a token an earlier shell load sent.
+ */
+export function newStep(): string {
+  stepCount += 1
+  return `${Date.now().toString(36)}-${stepCount}`
+}
+
 /**
  * Posts one property change to the element the address names. A refusal
  * says why and reloads the frame, so a pending value never sits over a file
  * that moved under it. Resolves to what the write answered, or undefined when
- * nothing was written.
+ * nothing was written. Edits carrying one step undo as one.
  */
 export async function editElement(
   ref: FrameRef,
@@ -407,6 +488,7 @@ export async function editElement(
   address: ElementAddress,
   property: string,
   value: string,
+  step?: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<{ readonly hash?: string } | undefined> {
   const hash = editedHashes.value.get(key) ?? address.hash
@@ -420,6 +502,7 @@ export async function editElement(
         element: { ...address, hash },
         property,
         value,
+        ...(step !== undefined && { step }),
       }),
     })
     const body: unknown = await response.json().catch(() => undefined)
@@ -440,6 +523,7 @@ export async function editElement(
       return undefined
     }
     editRefusal.value = undefined
+    historyNotice.value = undefined
     const saved = pendingEdit.value
     savedEdit.value = saved
     setTimeout(() => {
@@ -459,10 +543,11 @@ export async function editElement(
 }
 
 /**
- * Writes an element's new size as one edit per changed axis, width first. The
- * second carries the hash the first answered, so a frame reloading between the
- * two cannot leave it holding the hash of a file already rewritten. A refused
- * first edit sends no second.
+ * Writes an element's new size as one edit per changed axis, width first,
+ * sharing one step so a single undo restores both. The second carries the
+ * hash the first answered, so a frame reloading between the two cannot leave
+ * it holding the hash of a file already rewritten. A refused first edit sends
+ * no second.
  */
 export async function resizeElement(
   ref: FrameRef,
@@ -472,6 +557,7 @@ export async function resizeElement(
   height: number | undefined,
   fetchImpl: typeof fetch = fetch,
 ): Promise<void> {
+  const step = newStep()
   let current = address
   if (width !== undefined) {
     const written = await editElement(
@@ -480,14 +566,77 @@ export async function resizeElement(
       current,
       'width',
       `${width}px`,
+      step,
       fetchImpl,
     )
     if (!written) return
     if (written.hash) current = { ...current, hash: written.hash }
   }
   if (height !== undefined) {
-    await editElement(ref, key, current, 'height', `${height}px`, fetchImpl)
+    await editElement(
+      ref,
+      key,
+      current,
+      'height',
+      `${height}px`,
+      step,
+      fetchImpl,
+    )
   }
+}
+
+const HISTORY_NOTICES = {
+  undo: 'Could not undo, since that element or frame changed after your edit. Nothing was written.',
+  redo: 'Could not redo, since that element or frame changed after the undo. Nothing was written.',
+} as const
+
+/**
+ * Asks the server to step its history and rereads the page list for the new
+ * flags. A written step clears every hash an edit answered, since the frame
+ * it named was just rewritten under it. The frame itself reloads on the
+ * change event the write raises.
+ */
+async function stepHistory(
+  direction: 'undo' | 'redo',
+  fetchImpl: typeof fetch,
+): Promise<void> {
+  try {
+    const response = await fetchImpl(`/api/history/${direction}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    })
+    const body: unknown = await response.json().catch(() => undefined)
+    const outcome =
+      typeof body === 'object' && body !== null && 'outcome' in body
+        ? body.outcome
+        : undefined
+    if (!response.ok) {
+      historyNotice.value = `Could not ${direction} (status ${response.status}). Try again.`
+    } else if (outcome === 'dropped') {
+      historyNotice.value = HISTORY_NOTICES[direction]
+    } else if (outcome === 'applied') {
+      const done = direction === 'undo' ? 'Undone' : 'Redone'
+      historyNotice.value = done
+      setTimeout(() => {
+        if (historyNotice.value === done) historyNotice.value = undefined
+      }, SAVED_MS)
+    } else {
+      historyNotice.value = undefined
+    }
+    if (outcome === 'applied') editedHashes.value = new Map()
+  } catch (error) {
+    historyNotice.value = `Could not ${direction} (${error instanceof Error ? error.message : 'unknown'}). Check canon canvas serve is still running.`
+  }
+  await loadPages(fetchImpl)
+}
+
+export function undo(fetchImpl: typeof fetch = fetch): Promise<void> {
+  return stepHistory('undo', fetchImpl)
+}
+
+export function redo(fetchImpl: typeof fetch = fetch): Promise<void> {
+  return stepHistory('redo', fetchImpl)
 }
 
 /**
@@ -636,4 +785,8 @@ export function resetState(): void {
   savedEdit.value = undefined
   editRefusal.value = undefined
   editedHashes.value = new Map()
+  history.value = NO_HISTORY
+  historyNotice.value = undefined
+  panelsHidden.value = false
+  panelWidths.value = DEFAULT_PANEL_WIDTHS
 }

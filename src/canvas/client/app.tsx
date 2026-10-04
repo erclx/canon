@@ -1,9 +1,20 @@
 /** @jsxImportSource preact */
+import { effect } from '@preact/signals'
 import type { JSX } from 'preact'
-import { useRef } from 'preact/hooks'
+import { useLayoutEffect, useRef } from 'preact/hooks'
 import { Inspector } from '@/canvas/client/inspector'
 import { PagesPanel } from '@/canvas/client/pages-panel'
-import { currentPage, focusFrame, tokens } from '@/canvas/client/state'
+import { PanelHandle } from '@/canvas/client/panel-handle'
+import {
+  clampPanelWidth,
+  currentPage,
+  DEFAULT_PANEL_WIDTHS,
+  focusFrame,
+  type PanelWidths,
+  panelsHidden,
+  panelWidths,
+  tokens,
+} from '@/canvas/client/state'
 import { Surface } from '@/canvas/client/surface'
 
 const SOURCE_LABEL = {
@@ -66,22 +77,112 @@ function PageDetails(): JSX.Element | null {
   )
 }
 
+const PANELS_KEY = 'canon-canvas-panels'
+
+interface StoredPanels extends PanelWidths {
+  readonly hidden: boolean
+}
+
+function storedWidth(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+/** What the last visit left, with anything unreadable read as the default. */
+function readStoredPanels(): StoredPanels {
+  const fallback = { hidden: false, ...DEFAULT_PANEL_WIDTHS }
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(PANELS_KEY) ?? '{}')
+    if (typeof parsed !== 'object' || parsed === null) return fallback
+    const record = parsed as Record<string, unknown>
+    return {
+      hidden: record.hidden === true,
+      left: storedWidth(record.left, fallback.left),
+      right: storedWidth(record.right, fallback.right),
+    }
+  } catch {
+    return fallback
+  }
+}
+
+function storePanels(panels: StoredPanels): void {
+  try {
+    localStorage.setItem(PANELS_KEY, JSON.stringify(panels))
+  } catch {
+    /* A blocked store costs the remembered layout, nothing else. */
+  }
+}
+
+/**
+ * Holds both widths inside this window, the details panel giving way first,
+ * since long layer names are what the pages panel widens for.
+ */
+function fitWidths(widths: PanelWidths): PanelWidths {
+  const right = clampPanelWidth(
+    'right',
+    widths.right,
+    window.innerWidth,
+    widths,
+  )
+  const left = clampPanelWidth('left', widths.left, window.innerWidth, {
+    ...widths,
+    right,
+  })
+  return { left, right }
+}
+
+/**
+ * Restores the panels the last visit left and stores each change, the way the
+ * theme pick is kept. The read lands before the first paint, so a hidden
+ * layout never flashes open. The widths are clamped on that read and on every
+ * window resize, since a width kept from a wider window could squeeze the
+ * surface out.
+ */
+function usePanelPreference(): void {
+  useLayoutEffect(() => {
+    const stored = readStoredPanels()
+    panelsHidden.value = stored.hidden
+    panelWidths.value = fitWidths(stored)
+    const handleResize = () => {
+      const fitted = fitWidths(panelWidths.value)
+      const { left, right } = panelWidths.value
+      if (fitted.left !== left || fitted.right !== right) {
+        panelWidths.value = fitted
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    const stopStoring = effect(() =>
+      storePanels({ hidden: panelsHidden.value, ...panelWidths.value }),
+    )
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      stopStoring()
+    }
+  }, [])
+}
+
 export function App(): JSX.Element {
   const viewportRef = useRef<HTMLDivElement>(null)
+  usePanelPreference()
+  const { left, right } = panelWidths.value
   return (
-    <div class="shell">
+    <div
+      class={panelsHidden.value ? 'shell panels-hidden' : 'shell'}
+      style={{ '--panel-left': `${left}px`, '--panel-right': `${right}px` }}
+    >
       <PagesPanel
         onFocusFrame={(frame) => {
           const rect = viewportRef.current?.getBoundingClientRect()
           focusFrame(frame, rect?.width ?? 0, rect?.height ?? 0)
         }}
       />
+      <PanelHandle side="left" controls="pages-panel" />
       <Surface viewportRef={viewportRef} />
-      <aside class="panel panel-right" aria-label="Details">
+      <aside id="details-panel" class="panel panel-right" aria-label="Details">
         <Inspector />
         <PageDetails />
         <TokenDetails />
       </aside>
+      <PanelHandle side="right" controls="details-panel" />
     </div>
   )
 }

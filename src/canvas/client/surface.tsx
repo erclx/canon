@@ -1,6 +1,6 @@
 /** @jsxImportSource preact */
 import type { JSX, RefObject } from 'preact'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks'
 import { addressOf, documentElements, elementAt } from '@/canvas/address'
 import type { Frame } from '@/canvas/content'
 import { type SurfaceAction, surfaceAction } from '@/canvas/client/keys'
@@ -15,11 +15,15 @@ import {
   frameKey,
   frameTheme,
   frameVersions,
+  historyNotice,
   hoveredElement,
   moveFrameTo,
   panBy,
+  panelsHidden,
+  panelWidths,
   previewMove,
   previewResize,
+  redo,
   registerFrameDocument,
   resizeElement,
   resizeFrameTo,
@@ -30,6 +34,8 @@ import {
   spacePan,
   type Theme,
   toggleFrameTheme,
+  togglePanels,
+  undo,
   view,
   zoomAt,
 } from '@/canvas/client/state'
@@ -596,6 +602,22 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
     fitViewport(viewportRef)
   }, [page?.name])
 
+  /*
+   * A panel hiding, showing, or resizing moves the viewport's left edge, so
+   * the view shifts by as much the other way and the frames hold still on
+   * screen. Reading the flag subscribes this component to it.
+   */
+  const viewportLeft = useRef<number | undefined>(undefined)
+  const isHidden = panelsHidden.value
+  const leftWidth = panelWidths.value.left
+  useLayoutEffect(() => {
+    const left = viewportRef.current?.getBoundingClientRect().left
+    if (left === undefined) return
+    const before = viewportLeft.current
+    viewportLeft.current = left
+    if (before !== undefined && before !== left) panBy(before - left, 0)
+  }, [isHidden, leftWidth])
+
   const handleWheelTurn = (turn: WheelTurn) => {
     if (turn.isZoom) {
       const rect = viewportRef.current?.getBoundingClientRect()
@@ -656,6 +678,15 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
         return
       case 'pan-release':
         spacePan.value = undefined
+        return
+      case 'undo':
+        void undo()
+        return
+      case 'redo':
+        void redo()
+        return
+      case 'panels-toggle':
+        togglePanels()
     }
   }
 
@@ -762,6 +793,11 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
       </div>
       <ToolStrip />
       <Toolbar viewportRef={viewportRef} />
+      {historyNotice.value ? (
+        <p class="history-notice" role="status">
+          {historyNotice.value}
+        </p>
+      ) : null}
     </main>
   )
 }

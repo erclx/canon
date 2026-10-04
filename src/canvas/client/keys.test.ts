@@ -110,4 +110,62 @@ describe('surfaceAction', () => {
       surfaceAction(key({ key: ' ', code: 'Space', ctrlKey: true })),
     ).toBeUndefined()
   })
+
+  it('should undo on Ctrl and Z', () => {
+    expect(surfaceAction(key({ key: 'z', code: 'KeyZ', ctrlKey: true }))).toBe(
+      'undo',
+    )
+  })
+
+  it('should undo on Cmd and Z', () => {
+    expect(surfaceAction(key({ key: 'z', code: 'KeyZ', metaKey: true }))).toBe(
+      'undo',
+    )
+  })
+
+  it('should redo on Cmd, Shift, and Z', () => {
+    expect(
+      surfaceAction(
+        key({ key: 'Z', code: 'KeyZ', metaKey: true, shiftKey: true }),
+      ),
+    ).toBe('redo')
+  })
+
+  it('should redo on Ctrl and Y', () => {
+    expect(surfaceAction(key({ key: 'y', code: 'KeyY', ctrlKey: true }))).toBe(
+      'redo',
+    )
+  })
+
+  it('should leave Alt and Z to the page', () => {
+    expect(
+      surfaceAction(key({ key: 'z', code: 'KeyZ', altKey: true })),
+    ).toBeUndefined()
+  })
+
+  it('should leave Ctrl, Alt, and Z to the page', () => {
+    expect(
+      surfaceAction(
+        key({ key: 'z', code: 'KeyZ', ctrlKey: true, altKey: true }),
+      ),
+    ).toBeUndefined()
+  })
+
+  it('should toggle the panels on backslash', () => {
+    expect(surfaceAction(key({ key: '\\', code: 'Backslash' }))).toBe(
+      'panels-toggle',
+    )
+  })
+
+  it('should toggle the panels on the backslash key whatever character a layout gives it', () => {
+    expect(surfaceAction(key({ key: '#', code: 'Backslash' }))).toBe(
+      'panels-toggle',
+    )
+  })
+
+  it('should leave Ctrl and backslash to the browser', () => {
+    expect(
+      surfaceAction(key({ key: '\\', code: 'Backslash', ctrlKey: true })),
+    ).toBeUndefined()
+  })
 })

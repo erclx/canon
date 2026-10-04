@@ -420,6 +420,12 @@ export interface Position {
 }
 
 /**
+ * Hears the box a write replaced, undefined when the layout held none, and the
+ * box it wrote, apart from the returned record, which the CLI prints.
+ */
+export type BoxObserver = (replaced: Box | undefined, written: Box) => void
+
+/**
  * Moves one frame and keeps its size. A frame the layout never named takes the
  * default size it was already drawn at, so the move does not resize it.
  */
@@ -428,6 +434,7 @@ export function moveFrame(
   page: string,
   frame: string,
   to: Position,
+  observe?: BoxObserver,
 ): FrameOutcome {
   if (!isValidName(page)) {
     return refuse('invalid-name', `${page} is not a valid page name`)
@@ -460,6 +467,7 @@ export function moveFrame(
     }
 
     writeLayout(dir, new Map([...boxes, [frame, box]]))
+    observe?.(boxes.get(frame), box)
     return { ok: true, page, frame, file, box }
   })
 }
@@ -474,6 +482,7 @@ export function resizeFrame(
   page: string,
   frame: string,
   box: Box,
+  observe?: BoxObserver,
 ): FrameOutcome {
   if (!isValidName(page)) {
     return refuse('invalid-name', `${page} is not a valid page name`)
@@ -509,7 +518,63 @@ export function resizeFrame(
     }
 
     writeLayout(dir, new Map([...boxes, [frame, written]]))
+    observe?.(boxes.get(frame), written)
     return { ok: true, page, frame, file, box: written }
+  })
+}
+
+function isSameBox(a: Box | undefined, b: Box | undefined): boolean {
+  if (a === undefined || b === undefined) return a === b
+  return (
+    a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
+  )
+}
+
+export type BoxRestore =
+  | { readonly ok: true }
+  | ContentRefused
+  | {
+      readonly ok: false
+      readonly reason: 'changed'
+      readonly detail: string
+    }
+
+/**
+ * Writes a recorded box back under the layout lock, only while the layout
+ * still holds the box the record expects, where undefined expects none.
+ * Restoring to no box drops the frame's entry, so the reader places it in the
+ * default row again.
+ */
+export function restoreBox(
+  root: string,
+  page: string,
+  frame: string,
+  expected: Box | undefined,
+  to: Box | undefined,
+): BoxRestore {
+  const dir = pagePath(root, page)
+  if (!isDirectory(dir)) return refuse('no-page', `page ${page} does not exist`)
+  if (!existsSync(join(dir, `${frame}${FRAME_EXTENSION}`))) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  return withFileLock(join(dir, LAYOUT_FILE), (): BoxRestore => {
+    const { boxes, malformed } = readLayout(dir)
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    if (!isSameBox(boxes.get(frame), expected)) {
+      return {
+        ok: false,
+        reason: 'changed',
+        detail: `${page}/${frame} moved since this change, so nothing was written`,
+      }
+    }
+    const next = new Map(boxes)
+    if (to === undefined) next.delete(frame)
+    else next.set(frame, to)
+    writeLayout(dir, next)
+    return { ok: true }
   })
 }
 

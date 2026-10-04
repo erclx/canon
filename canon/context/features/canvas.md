@@ -5,6 +5,8 @@ description: The canvas server, the page and frame content format, token resolut
 
 # Canvas
 
+<!-- canon-length-exempt: the canvas has outgrown one entry and splits into a folder of sub-areas next, a change of its own rather than one more feature's -->
+
 ## Overview
 
 `canon canvas` serves a local surface of pages and HTML frames that the operator drags, selects, and edits in the browser, and gives an agent a verb for each thing the mouse does. The `canvas` plugin skill tells a session how to drive it, and `standards/canvas.md` fixes the content format both sides write. The verb reference, with every record and refusal, is `docs/agents/canvas.md`.
@@ -45,13 +47,29 @@ Any change but the alpha writes a hex, because a token's color cannot change fro
 
 The selection overlay in `client/selection.tsx` draws the outline, four corner handles, and an element's size chip, and sizes each against `--outline-scale`, the inverse of the zoom the plane sets, so all of it holds one screen size. The frame label sizes the same way. A handle drag divides the pointer's travel by the zoom, since the delta arrives in screen pixels and the box is in surface units. A frame's overlay holds the corner opposite the handle, while an element's draws the element's own measured box during the drag, since an element in normal flow grows from its top left whichever handle moves.
 
-An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
+An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered and both carrying one undo step. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
 
 ### View tools and keys
 
 The key layer is one pure map in `client/keys.ts`, called by the surface `<main>` and by every frame document, since a click inside a frame moves focus into its window and `handleLoad` has to forward its keys the way it forwards `wheel`. Only the surface or a frame feeds it, so a panel field keeps its letters, and a field inside a frame and Space on a focused button keep theirs too. The layer never claims a key release, because a button fires its Space activation there.
 
 A Space pan lives in its own `spacePan` signal beside `activeTool`, so releasing Space restores the picked tool, and the strip lights the computed `shownTool`. While panning, every `.frame` and its descendants take `pointer-events: none`, since a selection handle sets its own and a Space drag starting on one resized the element. A pan press prevents the viewport's mouse press default, since a press read as a second click selected a word or a whole frame and painted it blue, and neither blocking a selection's start event nor a clear at pointer down reached that. The pan also blocks that start event and clears the selection in the shell and every frame document. A Pan tool press focuses the surface itself, so a field it leaves commits, while a press under a held Space leaves focus where the release will arrive. A focused frame selects on Space's release, and only when no drag moved the view. The strip floats inside the surface, so fit takes its width as a left inset.
+
+Undo and redo are the one modifier combination the map claims, Ctrl or Cmd with Z and Shift to redo, plus Ctrl with Y, since the canvas has no text of its own for the browser's undo to act on. Any other Cmd, Ctrl, or Alt press stays the browser's. The panel toggle is the backslash key, matched by `code` as Shift and 1 is, since its character differs by layout.
+
+### Undo history
+
+One `canon canvas serve` process holds the history, in `src/canvas/history.ts`, and only the server's edit, move, and resize routes record into it, through optional observers the writers call once a write lands. The CLI verbs run in another process and pass none, so Claude's edits never enter it and the records those verbs print stay unchanged. Recording in the writers themselves was the alternative, and it would have reached the CLI's process as well. A server restart clears the history, while a shell reload keeps it.
+
+An element entry keeps the raw style attribute, plus the raw inner content for a text edit, so one restore covers every inspector field. A box entry keeps the layout box, or none for a frame the reader placed. Edits sharing a `step` token on one element merge into one entry, which is how a corner drag or a two-property commit undoes as one.
+
+A restore takes the writers' own lock and refuses as `changed` when the frame's element count differs from the edit's, when the element at the index no longer carries the recorded tag and state, or when the layout moved on. The count is the check that catches an insert ahead of the target, since an unstyled state matches every unstyled sibling of the same tag. The history then drops that entry rather than overwriting a newer state or landing on a neighbor. A rewrite that leaves the count alone is checked against the target element only, so Claude restyling a neighbor leaves the operator's entry live.
+
+### Side panels
+
+The panels-hidden flag and both widths persist under one `canon-canvas-panels` key, read and written by `App` rather than by `main.tsx` beside the theme, so the shell tests reach the stored preference. Each width is clamped on read and again on every window resize, between 180 and 480 and so the surface keeps 320, the reflow floor. The details panel gives way first, since long layer names are what the pages panel widens for. Below 900 wide the narrow columns keep their own fixed widths and the handles hide.
+
+The surface shifts the view by however far its left edge moves, so frames hold still on screen when a panel hides or resizes. Each handle is a focusable separator the arrow keys move, centered on the edge so a 24 pixel circle around it clears both the panel's padding and the tool strip.
 
 ### Layout edits
 
@@ -105,5 +123,6 @@ The component gallery existed only for the board's components panel and retired 
 - The writer reads a style attribute through `HTMLRewriter`, whose `getAttribute` returns the value with its entities still encoded and whose `setAttribute` escapes only `"`, as `&quot;`. A quoted font family comes back carrying `&quot;`, so the declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
-- `canon/wireframes/canvas.md` sits at the 300 rendered line ceiling, so the next addition to it cuts something first, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.
+- `canon/wireframes/canvas.md` sits just under the 300 rendered line ceiling. Its States table renders each row at about 233 characters, three lines apiece, so one cell wider than the widest already there pushes every row back to four lines and the file past the ceiling. Its Behavior list states intent with no measurements, which live in this entry.
+- `HTMLRewriter` hands each text chunk over as source text with its entities still encoded, so the chunks inside an element holding text alone join into its raw inner content, and `setInnerContent(raw, { html: true })` writes it back byte for byte. The text undo depends on that, and takes the bytes from the server's record, never a request, since they are written as markup.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.

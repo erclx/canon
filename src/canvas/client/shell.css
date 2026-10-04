@@ -38,9 +38,56 @@ code {
 }
 
 .shell {
+  position: relative;
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 16rem;
+  grid-template-columns: var(--panel-left, 15rem) minmax(0, 1fr) var(
+      --panel-right,
+      16rem
+    );
   height: 100%;
+}
+
+/*
+ * Centered on the edge, so a 24 pixel circle around it stays inside the
+ * panel's padding on one side and short of the tool strip on the other, with
+ * a line drawn at the edge itself.
+ */
+.panel-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.panel-handle-left {
+  left: calc(var(--panel-left, 15rem) - 6px);
+}
+
+.panel-handle-right {
+  right: calc(var(--panel-right, 16rem) - 6px);
+}
+
+.panel-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background: transparent;
+}
+
+.panel-handle:hover::after,
+.panel-handle:active::after,
+.panel-handle:focus-visible::after {
+  background: var(--color-accent);
+}
+
+.shell.panels-hidden > .panel-handle {
+  display: none;
 }
 
 .panel {
@@ -531,6 +578,32 @@ code {
   background: var(--color-border);
 }
 
+.tool-button:disabled {
+  opacity: 0.4;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.tools-divider {
+  height: 1px;
+  margin: 2px var(--space-xs);
+  background: var(--color-border);
+}
+
+.history-notice {
+  position: absolute;
+  top: var(--space-md);
+  left: 50%;
+  max-width: min(28rem, calc(100% - 8rem));
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-chrome);
+  color: var(--color-text);
+  transform: translateX(-50%);
+}
+
 .zoom {
   min-width: 3.5rem;
   text-align: center;
@@ -543,7 +616,8 @@ code {
     grid-template-columns: 12rem minmax(0, 1fr);
   }
 
-  .panel-right {
+  .panel-right,
+  .panel-handle {
     display: none;
   }
 }
@@ -559,6 +633,16 @@ code {
     border-right: 0;
     border-bottom: 1px solid var(--color-border);
   }
+}
+
+/* Two classes outrank every width's own columns, so hiding holds at each. */
+.shell.panels-hidden {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.shell.panels-hidden > .panel {
+  display: none;
 }
 
 .frame-row {

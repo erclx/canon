@@ -154,6 +154,7 @@ function failWrites(pages: Page[]): void {
 beforeEach(() => {
   resetState()
   releasePicker()
+  localStorage.clear()
   sent = []
   recordWrites()
   mount = document.createElement('div')
@@ -2923,6 +2924,31 @@ describe('selection handles', () => {
     ])
   })
 
+  it('should send both edits of an element resize under one undo step', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="width: 200px; height: 50px">Hero</h1>',
+    )
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    answerEditsWith(['def456', 'ghi789'])
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 150, y: 110 },
+    )
+
+    const steps = sentTo('/api/frames/edit').map(
+      (body) => (body as { step?: unknown }).step,
+    )
+    expect(steps).toHaveLength(2)
+    expect(typeof steps[0]).toBe('string')
+    expect(steps[1]).toBe(steps[0])
+  })
+
   it('should drop the preview when a handle drag comes back to where it started', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', '<h1>Hero</h1>')
@@ -3498,6 +3524,378 @@ describe('view tools', () => {
     act(() => buttonNamed('Fit').click())
 
     expect(view.value.x).toBe(60 + 48)
+  })
+})
+
+describe('undo', () => {
+  function surface(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('main.surface')
+    if (!element) throw new Error('no surface')
+    return element
+  }
+
+  function key(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      ...init,
+    })
+    act(() => {
+      target.dispatchEvent(event)
+    })
+    return event
+  }
+
+  function historyButton(name: string): HTMLButtonElement {
+    const button = [
+      ...mount.querySelectorAll<HTMLButtonElement>(
+        '[aria-label="Tools"] button',
+      ),
+    ].find((candidate) => candidate.title.startsWith(`${name} (`))
+    if (!button) throw new Error(`no ${name} button`)
+    return button
+  }
+
+  /**
+   * Answers each history step with the outcome given and the reread with the
+   * flags given, recording what was posted.
+   */
+  function answerHistory(
+    pages: Page[],
+    outcome: string,
+    flags = { canUndo: false, canRedo: true },
+  ): void {
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      if (init?.method === 'POST') {
+        sent.push({ url: String(url), body: JSON.parse(String(init.body)) })
+        return new Response(JSON.stringify({ ok: true, outcome }), {
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      return new Response(
+        JSON.stringify({ ...record(pages), history: flags }),
+        { headers: { 'content-type': 'application/json' } },
+      )
+    }) as typeof fetch
+  }
+
+  function renderWithHistory(pages: Page[], canUndo: boolean): void {
+    act(() => {
+      applyRecord({
+        ...record(pages),
+        history: { canUndo, canRedo: false },
+      })
+      render(<App />, mount)
+    })
+  }
+
+  it('should disable both buttons while the server holds nothing to step', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(historyButton('Undo').disabled).toBe(true)
+    expect(historyButton('Redo').disabled).toBe(true)
+  })
+
+  it('should enable undo once the page record reports an edit to undo', () => {
+    renderWithHistory([page('drafts', [frame('hero')])], true)
+
+    expect(historyButton('Undo').disabled).toBe(false)
+    expect(historyButton('Redo').disabled).toBe(true)
+  })
+
+  it('should post an undo from its button and light redo from the reread', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/history/undo')).toEqual([{}])
+    expect(historyButton('Redo').disabled).toBe(false)
+  })
+
+  it('should say Undone for a moment once an undo lands', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(mount.querySelector('.history-notice')?.textContent).toBe('Undone')
+  })
+
+  it('should undo on Ctrl and Z and redo on Ctrl, Shift, and Z or Ctrl and Y', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      key(surface(), { key: 'z', code: 'KeyZ', ctrlKey: true })
+      key(surface(), { key: 'Z', code: 'KeyZ', ctrlKey: true, shiftKey: true })
+      key(surface(), { key: 'y', code: 'KeyY', ctrlKey: true })
+    })
+
+    expect(sentTo('/api/history/undo')).toHaveLength(1)
+    expect(sentTo('/api/history/redo')).toHaveLength(2)
+  })
+
+  it('should leave Ctrl and Z typed in a field to the field', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+    const field = document.createElement('input')
+    surface().append(field)
+
+    const event = key(field, { key: 'z', code: 'KeyZ', ctrlKey: true })
+    await act(async () => {})
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(sentTo('/api/history/undo')).toEqual([])
+  })
+
+  it('should say so when the server dropped an entry that changed', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'dropped', { canUndo: false, canRedo: false })
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(mount.querySelector('.history-notice')?.textContent).toContain(
+      'Could not undo',
+    )
+  })
+})
+
+describe('panel toggle', () => {
+  function shell(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('.shell')
+    if (!element) throw new Error('no shell')
+    return element
+  }
+
+  function surface(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('main.surface')
+    if (!element) throw new Error('no surface')
+    return element
+  }
+
+  function pressBackslash(target: EventTarget): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {
+      key: '\\',
+      code: 'Backslash',
+      bubbles: true,
+      cancelable: true,
+    })
+    act(() => {
+      target.dispatchEvent(event)
+    })
+    return event
+  }
+
+  it('should hide both panels on backslash and show them on the next', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    pressBackslash(surface())
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+    pressBackslash(surface())
+
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should hide and show from a button named by what it does', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    act(() => buttonNamed('Hide panels (\\)').click())
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should leave backslash typed in a field to the field', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const field = document.createElement('input')
+    surface().append(field)
+
+    const event = pressBackslash(field)
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(shell().classList.contains('panels-hidden')).toBe(false)
+  })
+
+  it('should keep the panels hidden across a remount', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Hide panels (\\)').click())
+    act(() => render(null, mount))
+    resetState()
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shell().classList.contains('panels-hidden')).toBe(true)
+  })
+
+  it('should show a selection made while hidden once the panels return', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    act(() => buttonNamed('Hide panels (\\)').click())
+
+    pointer('pointerdown', labelFor('hero'), 10, 10)
+    pointer('pointerup', labelFor('hero'), 10, 10)
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(
+      mount.querySelector('[aria-label="Details"]')?.textContent,
+    ).toContain('hero')
+  })
+})
+
+describe('panel resize', () => {
+  function handle(name: string): HTMLElement {
+    const element = mount.querySelector<HTMLElement>(
+      `[role="separator"][aria-label="${name}"]`,
+    )
+    if (!element) throw new Error(`no handle named ${name}`)
+    return element
+  }
+
+  function shellStyle(property: string): string {
+    return (
+      mount
+        .querySelector<HTMLElement>('.shell')
+        ?.style.getPropertyValue(property) ?? ''
+    )
+  }
+
+  function dragBy(target: HTMLElement, dx: number): void {
+    pointer('pointerdown', target, 500, 10)
+    pointer('pointermove', target, 500 + dx, 10)
+    pointer('pointerup', target, 500 + dx, 10)
+  }
+
+  function press(target: HTMLElement, key: string): void {
+    act(() => {
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+      )
+    })
+  }
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1440,
+    })
+  })
+
+  it('should widen the pages panel by a drag to the right on its handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize pages panel'), 60)
+
+    expect(shellStyle('--panel-left')).toBe('300px')
+  })
+
+  it('should widen the details panel by a drag to the left on its handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize details panel'), -44)
+
+    expect(shellStyle('--panel-right')).toBe('300px')
+  })
+
+  it('should move no frame, pan nothing, and record nothing on a handle drag', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const before = view.value
+
+    dragBy(handle('Resize pages panel'), 60)
+
+    expect(view.value).toEqual(before)
+    expect(sent).toEqual([])
+  })
+
+  it('should stop at the floor and the ceiling', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    dragBy(handle('Resize pages panel'), -500)
+    expect(shellStyle('--panel-left')).toBe('180px')
+    dragBy(handle('Resize pages panel'), 900)
+
+    expect(shellStyle('--panel-left')).toBe('480px')
+  })
+
+  it('should resize from the arrow keys on a focused handle', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    press(handle('Resize pages panel'), 'ArrowRight')
+    press(handle('Resize details panel'), 'ArrowLeft')
+
+    expect(shellStyle('--panel-left')).toBe('256px')
+    expect(shellStyle('--panel-right')).toBe('272px')
+    expect(handle('Resize pages panel').getAttribute('aria-valuenow')).toBe(
+      '256',
+    )
+  })
+
+  it('should keep a dragged width across a remount', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    dragBy(handle('Resize pages panel'), 60)
+    act(() => render(null, mount))
+    resetState()
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shellStyle('--panel-left')).toBe('300px')
+  })
+
+  it('should clamp a stored width a wider window left behind', () => {
+    localStorage.setItem(
+      'canon-canvas-panels',
+      JSON.stringify({ hidden: false, left: 470, right: 470 }),
+    )
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1000,
+    })
+
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(shellStyle('--panel-left')).toBe('470px')
+    expect(shellStyle('--panel-right')).toBe('210px')
+  })
+
+  it('should clamp both widths again when the window narrows', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    press(handle('Resize pages panel'), 'End')
+    press(handle('Resize details panel'), 'End')
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1000,
+    })
+
+    act(() => {
+      window.dispatchEvent(new Event('resize'))
+    })
+
+    expect(shellStyle('--panel-left')).toBe('480px')
+    expect(shellStyle('--panel-right')).toBe('200px')
+  })
+
+  it('should bring a resized panel back at its width after a hide and show', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    dragBy(handle('Resize pages panel'), 60)
+
+    act(() => buttonNamed('Hide panels (\\)').click())
+    act(() => buttonNamed('Show panels (\\)').click())
+
+    expect(shellStyle('--panel-left')).toBe('300px')
   })
 })
 

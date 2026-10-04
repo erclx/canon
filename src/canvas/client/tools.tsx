@@ -1,6 +1,15 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
-import { activeTool, shownTool, type Tool } from '@/canvas/client/state'
+import {
+  activeTool,
+  history,
+  panelsHidden,
+  redo,
+  shownTool,
+  type Tool,
+  togglePanels,
+  undo,
+} from '@/canvas/client/state'
 
 interface ToolButton {
   readonly tool: Tool
@@ -32,9 +41,51 @@ const TOOLS: readonly ToolButton[] = [
   },
 ]
 
-/** The tool strip floating at the surface's left edge, one button a tool. */
+interface HistoryButton {
+  readonly name: 'Undo' | 'Redo'
+  readonly shortcut: string
+  readonly keys: string
+  readonly run: () => Promise<void>
+  readonly icon: JSX.Element
+}
+
+/** The modifier the platform names for undo, Cmd on macOS and Ctrl elsewhere. */
+const MOD = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform ?? '')
+  ? 'Cmd'
+  : 'Ctrl'
+
+const HISTORY_BUTTONS: readonly HistoryButton[] = [
+  {
+    name: 'Undo',
+    shortcut: `${MOD}+Z`,
+    keys: 'Control+Z Meta+Z',
+    run: () => undo(),
+    icon: (
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M5.5 3.5L2.5 6.5l3 3M2.5 6.5h7a4 4 0 0 1 0 8H7" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Redo',
+    shortcut: `${MOD}+Shift+Z`,
+    keys: 'Control+Shift+Z Meta+Shift+Z Control+Y',
+    run: () => redo(),
+    icon: (
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M10.5 3.5l3 3-3 3M13.5 6.5h-7a4 4 0 0 0 0 8H9" />
+      </svg>
+    ),
+  },
+]
+
+/**
+ * The tool strip floating at the surface's left edge, one button a tool, then
+ * undo and redo, each disabled while the server holds nothing to step.
+ */
 export function ToolStrip(): JSX.Element {
   const shown = shownTool.value
+  const { canUndo, canRedo } = history.value
   return (
     <div
       class="tools"
@@ -59,6 +110,44 @@ export function ToolStrip(): JSX.Element {
           {icon}
         </button>
       ))}
+      <span class="tools-divider" aria-hidden="true" />
+      {HISTORY_BUTTONS.map(({ name, shortcut, keys, run, icon }) => (
+        <button
+          key={name}
+          type="button"
+          class="tool-button"
+          aria-label={`${name} (${shortcut})`}
+          aria-keyshortcuts={keys}
+          title={`${name} (${shortcut})`}
+          disabled={name === 'Undo' ? !canUndo : !canRedo}
+          onClick={() => void run()}
+        >
+          {icon}
+        </button>
+      ))}
+      <span class="tools-divider" aria-hidden="true" />
+      <PanelsButton />
     </div>
+  )
+}
+
+/** Named by what a press does now, so the panels come back by mouse too. */
+function PanelsButton(): JSX.Element {
+  const name = panelsHidden.value ? 'Show panels' : 'Hide panels'
+  return (
+    <button
+      type="button"
+      class="tool-button"
+      aria-label={`${name} (\\)`}
+      aria-keyshortcuts="\\"
+      title={`${name} (\\)`}
+      data-panels={panelsHidden.value ? 'hidden' : 'shown'}
+      onClick={togglePanels}
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="2" y="3" width="12" height="10" rx="1.5" />
+        {panelsHidden.value ? null : <path d="M5.5 3v10M10.5 3v10" />}
+      </svg>
+    </button>
   )
 }

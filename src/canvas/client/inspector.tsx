@@ -34,6 +34,7 @@ import {
   frameDocuments,
   frameKey,
   frameVersions,
+  newStep,
   pendingEdit,
   savedEdit,
   selectedElement,
@@ -240,17 +241,25 @@ function ElementFields({
   }
   /*
    * The writer takes one property an edit, so a control setting two posts
-   * them in turn and stops at the first refusal. Each carries the hash the
-   * last answered with in its own address, since a frame reloading between
-   * the two clears the stored one.
+   * them in turn and stops at the first refusal, under one step so they undo
+   * as one. Each carries the hash the last answered with in its own address,
+   * since a frame reloading between the two clears the stored one.
    */
   const commitAll = async (
     changes: readonly (readonly [string, string])[],
   ): Promise<void> => {
+    const step = newStep()
     let current = address
     for (const [property, value] of changes) {
       if (!current) return
-      const written = await editElement(frameRef, key, current, property, value)
+      const written = await editElement(
+        frameRef,
+        key,
+        current,
+        property,
+        value,
+        step,
+      )
       if (!written) return
       if (written.hash) current = { ...current, hash: written.hash }
     }

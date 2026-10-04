@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import type { Browser, Page } from 'playwright-core'
@@ -985,4 +991,108 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     await expect.poll(() => tokens.count()).toBeGreaterThan(0)
     await page.screenshot({ path: join(SHOTS, 'theme.png') })
   })
+
+  function frameFile(): string {
+    return readFileSync(
+      join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`),
+      'utf8',
+    )
+  }
+
+  it('should undo an edit from the keyboard, redo it from the button, and drop it once the file moved on', async () => {
+    writeFileSync(join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`), HELLO)
+    await page.getByRole('tab', { name: 'Pages' }).click()
+    const background = page.getByRole('textbox', {
+      name: 'background',
+      exact: true,
+    })
+    await expect
+      .poll(
+        async () => {
+          await page
+            .getByRole('list', { name: `Layers of ${FRAME}`, exact: true })
+            .locator('button.layer', { hasText: /^h1\.title/ })
+            .click({ timeout: 2_000 })
+            .catch(() => undefined)
+          return background.isVisible()
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true)
+
+    await background.fill('336699')
+    await background.press('Enter')
+    await expect.poll(frameFile, { timeout: 10_000 }).toContain('336699')
+    const undo = page.getByRole('button', { name: 'Undo (Ctrl+Z)' })
+    await expect.poll(() => undo.isEnabled()).toBe(true)
+    await page
+      .getByRole('toolbar', { name: 'Tools' })
+      .screenshot({ path: join(SHOTS, 'undo-controls.png') })
+
+    await page.locator('main.surface').focus()
+    await page.keyboard.press('Control+z')
+    await expect.poll(frameFile, { timeout: 10_000 }).toBe(HELLO)
+
+    await page.getByRole('button', { name: 'Redo (Ctrl+Shift+Z)' }).click()
+    await expect.poll(frameFile, { timeout: 10_000 }).toContain('336699')
+
+    const moved = frameFile().replace('336699', '993366')
+    writeFileSync(join(root, '.canon', 'canvas', PAGE, `${FRAME}.html`), moved)
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (sent) =>
+          sent.url().endsWith('/api/history/undo') &&
+          sent.request().method() === 'POST',
+      ),
+      undo.click(),
+    ])
+    const notice = page.locator('.history-notice')
+    await expect.poll(() => notice.textContent()).toContain('Could not undo')
+    await page.screenshot({ path: join(SHOTS, 'undo-dropped.png') })
+
+    expect(response.status()).toBe(200)
+    expect(frameFile()).toBe(moved)
+  }, 45_000)
+
+  it('should hide both panels on backslash, give the surface the width, and keep it across a reload', async () => {
+    await page.locator('main.surface').focus()
+
+    await page.keyboard.press('Backslash')
+
+    const shell = page.locator('.shell')
+    await expect
+      .poll(() => shell.getAttribute('class'))
+      .toContain('panels-hidden')
+    const viewport = await page.locator('.viewport').boundingBox()
+    expect(viewport?.width).toBe(1600)
+    await page.screenshot({ path: join(SHOTS, 'panels-hidden.png') })
+
+    await page.reload({ waitUntil: 'load' })
+    await expect
+      .poll(() => shell.getAttribute('class'), { timeout: 15_000 })
+      .toContain('panels-hidden')
+    await page.getByRole('button', { name: 'Show panels (\\)' }).click()
+    await expect
+      .poll(() => shell.getAttribute('class'))
+      .not.toContain('panels-hidden')
+  }, 30_000)
+
+  it('should widen the pages panel by a drag on its handle', async () => {
+    const panel = page.locator('nav.panel-left')
+    const before = (await panel.boundingBox())?.width ?? 0
+    const handle = page.getByRole('separator', { name: 'Resize pages panel' })
+    const box = await handle.boundingBox()
+    if (!box) throw new Error('the handle has no box')
+
+    await page.mouse.move(box.x + 2, box.y + 200)
+    await page.mouse.down()
+    await page.mouse.move(box.x + 42, box.y + 200)
+    await page.mouse.move(box.x + 82, box.y + 200)
+    await page.mouse.up()
+
+    await expect
+      .poll(async () => (await panel.boundingBox())?.width)
+      .toBe(before + 80)
+    await page.screenshot({ path: join(SHOTS, 'panels-resized.png') })
+  }, 30_000)
 })
