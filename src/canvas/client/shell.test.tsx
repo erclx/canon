@@ -13,6 +13,7 @@ import { releasePicker } from '@/canvas/client/inspector/color-picker'
 import {
   applyChange,
   applyRecord,
+  editedHashes,
   type PagesRecord,
   resetState,
   savedEdit,
@@ -588,6 +589,9 @@ describe('Inspector', () => {
 const HERO_BODY =
   '<main><h1 class="title">Hero</h1><button class="cta" style="color: rgb(255, 0, 0); font-size: 20px; font-weight: 700">Start</button></main>'
 
+/** A row flex container, which shows the Flex section's fields. */
+const ROW_BODY = '<div style="display: flex"><span>a</span><span>b</span></div>'
+
 describe('Layers', () => {
   it('should stay closed until the operator opens a frame', () => {
     renderApp([page('drafts', [frame('hero')])])
@@ -821,7 +825,7 @@ describe('Inspector element', () => {
       [...mount.querySelectorAll('[aria-label="Element"] section h3')].map(
         (heading) => heading.textContent,
       ),
-    ).toEqual(['Layout', 'Flex', 'Typography', 'Fill', 'Text'])
+    ).toEqual(['Layout', 'Flex', 'Appearance', 'Typography', 'Fill', 'Text'])
   })
 
   it('should show a computed length rounded to a whole number', () => {
@@ -1109,6 +1113,349 @@ describe('Inspector edit', () => {
     expect(sentTo('/api/frames/edit')).toEqual([
       expect.objectContaining({ property: 'width', value: '300px' }),
     ])
+  })
+
+  it('should write width 100% when Fill is picked from the size menu', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width mode'), 'Fill')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '100%' }),
+    ])
+  })
+
+  it('should show an inline fit-content height as Fit', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="height: fit-content">A</h1>')
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('height').value).toBe('Fit')
+  })
+
+  it('should edit padding on a block element from the Layout section', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('padding'), '12')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'padding', value: '12px' }),
+    ])
+  })
+
+  it('should show the Flex header alone with an add button on a block', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+
+    clickIn(doc, 'h1')
+
+    expect(buttonNamed('Add flex layout')).toBeTruthy()
+    expect(
+      mount.querySelector('[aria-label="Element"] [aria-label="gap"]'),
+    ).toBeNull()
+  })
+
+  it('should make the element a flex container from the add button', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await act(async () => {
+      buttonNamed('Add flex layout').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'display', value: 'flex' }),
+    ])
+  })
+
+  it('should offer no add button on a grid container', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<div style="display: grid">A</div>')
+
+    clickIn(doc, 'div')
+
+    expect(
+      mount.querySelector(
+        '[aria-label="Element"] [aria-label="Add flex layout"]',
+      ),
+    ).toBeNull()
+  })
+
+  /** A cell of the alignment grid by its accessible name. */
+  function cellNamed(name: string): HTMLButtonElement {
+    const cell = mount.querySelector<HTMLButtonElement>(
+      `[aria-label="Element"] [role="radiogroup"] [aria-label="${name}"]`,
+    )
+    if (!cell) throw new Error(`no alignment cell ${name}`)
+    return cell
+  }
+
+  it('should align a row to the top right from its grid cell', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-end',
+      }),
+      expect.objectContaining({ property: 'align-items', value: 'flex-start' }),
+    ])
+  })
+
+  it('should send the second alignment edit on the hash the first answered across a reload', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      sent.push({ url: String(url), body: JSON.parse(String(init?.body)) })
+      return new Response('{"ok":true,"hash":"def456"}', {
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+    /* A frame reload landing after the first edit clears the stored hash. */
+    const stopReloads = editedHashes.subscribe((hashes) => {
+      if (hashes.size > 0) editedHashes.value = new Map()
+    })
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    stopReloads()
+
+    expect(sentTo('/api/frames/edit').at(-1)).toMatchObject({
+      property: 'align-items',
+      element: { hash: 'def456' },
+    })
+  })
+
+  it('should swap the axes for a column when aligning top right', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; flex-direction: column"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top right').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-start',
+      }),
+      expect.objectContaining({ property: 'align-items', value: 'flex-end' }),
+    ])
+  })
+
+  it('should mark the cell the container is aligned to', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: center; align-items: flex-end"><span>a</span></div>',
+    )
+
+    clickIn(doc, 'div')
+
+    expect(cellNamed('bottom center').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('should mark the top left cell on a container left at its defaults', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: normal; align-items: normal"><span>a</span></div>',
+    )
+
+    clickIn(doc, 'div')
+
+    expect(cellNamed('top left').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('should pin a container left at its defaults from the cell it shows checked', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: normal; align-items: normal"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('top left').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'justify-content',
+        value: 'flex-start',
+      }),
+      expect.objectContaining({
+        property: 'align-items',
+        value: 'flex-start',
+      }),
+    ])
+  })
+
+  it('should post nothing for a click on a cell the container states', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<div style="display: flex; justify-content: center; align-items: flex-end"><span>a</span></div>',
+    )
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      cellNamed('bottom center').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should move focus between cells with the arrow keys', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    clickIn(doc, 'div')
+    act(() => cellNamed('top left').focus())
+
+    press(cellNamed('top left'), 'ArrowRight')
+
+    expect(document.activeElement).toBe(cellNamed('top center'))
+  })
+
+  it('should wrap a flex container from the wrap toggle', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', ROW_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'div')
+
+    await act(async () => {
+      buttonNamed('Wrap').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'flex-wrap', value: 'wrap' }),
+    ])
+  })
+
+  it('should write 50 percent opacity as 0.5', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('opacity'), '50')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'opacity', value: '0.5' }),
+    ])
+  })
+
+  it('should post nothing for an opacity percent past 100', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('opacity'), '150')
+
+    expect(sentTo('/api/frames/edit')).toEqual([])
+  })
+
+  it('should write one radius for every corner', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('radius'), '12')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'border-radius', value: '12px' }),
+    ])
+  })
+
+  it('should write only the corner changed once the radius is per corner', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+    act(() => buttonNamed('Per-corner radius').click())
+
+    await commit(fieldNamed('top left radius'), '4')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({
+        property: 'border-top-left-radius',
+        value: '4px',
+      }),
+    ])
+  })
+
+  it('should give opacity its own row so the corners form two rows of two', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', HERO_BODY)
+    clickIn(doc, 'h1')
+
+    act(() => buttonNamed('Per-corner radius').click())
+
+    expect(
+      fieldNamed('opacity')
+        .closest('.glyph-field')
+        ?.classList.contains('is-wide'),
+    ).toBe(true)
+  })
+
+  it('should write a typed number over a Fill width as pixels', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame('hero', '<h1 style="width: 100%">A</h1>')
+    stampHash(doc, 'abc123')
+    clickIn(doc, 'h1')
+
+    await commit(fieldNamed('width'), '320')
+
+    expect(sentTo('/api/frames/edit')).toEqual([
+      expect.objectContaining({ property: 'width', value: '320px' }),
+    ])
+  })
+
+  it('should open per corner on an element whose corners differ', () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="border-top-left-radius: 8px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px">A</h1>',
+    )
+
+    clickIn(doc, 'h1')
+
+    expect(fieldNamed('top left radius').value).toBe('8')
   })
 
   /** Opens the color picker of the field of that name and returns it. */
@@ -1887,18 +2234,18 @@ describe('Inspector edit', () => {
 
   it('should not offer a scrub on a field holding no number', () => {
     renderApp([page('drafts', [frame('hero')])])
-    const doc = loadFrame('hero', HERO_BODY)
+    const doc = loadFrame('hero', ROW_BODY)
 
-    clickIn(doc, 'button')
+    clickIn(doc, 'div')
 
     expect(glyphOf('direction').classList.contains('is-scrub')).toBe(false)
   })
 
   it('should scrub an empty gap from its placeholder', async () => {
     renderApp([page('drafts', [frame('hero')])])
-    const doc = loadFrame('hero', '<h1>A</h1>')
+    const doc = loadFrame('hero', ROW_BODY)
     stampHash(doc, 'abc123')
-    clickIn(doc, 'h1')
+    clickIn(doc, 'div')
     const glyph = glyphOf('gap')
 
     await drag('pointerdown', glyph, 10)

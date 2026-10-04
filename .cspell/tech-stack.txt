@@ -86,6 +86,7 @@ libvpx
 libx
 licence
 listitem
+longhands
 longtask
 lucide
 mapfile

@@ -13,7 +13,7 @@ description: The canvas server, the page and frame content format, token resolut
 
 - `src/canvas/` owns the server, the content reader and writers, element addressing, the inline-style editor, token resolution, and capture
 - `src/canvas/client/` owns the browser shell, built by Bun's HTML bundler when the server starts
-- `src/canvas/client/inspector/` owns the inspector's field, section, color field and picker, value formatting and color parsing, and its own stylesheet, composed by `inspector.tsx`
+- `src/canvas/client/inspector/` owns the inspector's field, section, size field, alignment grid, color field and picker, value formatting and color parsing, and its own stylesheet, composed by `inspector.tsx`
 - `claude/skills/canvas/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
 
@@ -46,6 +46,12 @@ Any change but the alpha writes a hex, because a token's color cannot change fro
 The selection overlay in `client/selection.tsx` draws the outline, four corner handles, and an element's size chip, and sizes each against `--outline-scale`, the inverse of the zoom the plane sets, so all of it holds one screen size. The frame label sizes the same way. A handle drag divides the pointer's travel by the zoom, since the delta arrives in screen pixels and the box is in surface units. A frame's overlay holds the corner opposite the handle, while an element's draws the element's own measured box during the drag, since an element in normal flow grows from its top left whichever handle moves.
 
 An element resize is two edits through the inspector's writer, width then height, the second carrying the hash the first answered. A multi-property edit would have reached into the edit writer for one caller. Passing the answered hash rather than reading it back from state is what lets the second edit land when the frame reloads between the two, since a reload clears the stored hash.
+
+### Layout edits
+
+Writing `border-radius` or `padding` drops that shorthand's longhands from the same inline style, so switching radius from per corner back to one value takes one edit and no corner left behind overrides it. A longhand write leaves its shorthand, since the longhand comes later and wins. The table of shorthands sits beside the writer's property set and holds those two families alone.
+
+Fill writes `100%` on either axis and Fit writes `fit-content`, one property per edit as the writer takes it. Fill is wrong for a row child sharing space, which needs `flex: 1` read off the parent's axis, and that waits until the operator meets it. The alignment grid posts `justify-content` and then `align-items` as two edits, the second carrying the hash the first answered with, and maps its cells through the container's `flex-direction` so a column swaps the axes.
 
 ### Capture
 
@@ -81,6 +87,8 @@ The component gallery existed only for the board's components panel and retired 
 - A saved edit reloads the frame twice, once on the edit's answer and once when the file watcher reports the write, and each reload remounts the inspector. A control that must keep focus across an edit takes it back on every mount until focus lands elsewhere, as the color row's controls do, and moves focus in a layout effect so a key typed straight after the opening one is not lost.
 - A popover meant to stay open across its own write keeps its state in module scope, keyed by frame, element, and property, and reopens from it on mount, as the full color picker does. The field's focus-out close waits a tick and skips a field already detached, so the removal during a reload does not read as focus leaving.
 - Happy-dom 20 has no `showPopover()`, so the inspector's popovers call it only where the browser has it, and the shell tests reach them as plain fixed elements. Preact runs a child's layout effect before its parent's, so a control inside a popover the parent shows in its own effect shows the popover itself before it takes focus.
+- A browser computes `justify-content` and `align-items` as `normal` on a flex container left at its defaults, so the alignment grid reads `normal` and `stretch` as the start cell, and a click on that cell still writes it so the operator can pin a stretched row. Happy-dom returns only what the inline style set, so only the browser walk catches a default container showing no checked cell.
+- The W and H mode menu is a transparent native `select` over a chevron rather than a popover, so its list opens above the panel's scroll clipping with no placement code and answers the keyboard as the platform does. The focus ring draws on the lane holding it, since the select itself is invisible.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
 - `canon/wireframes/canvas.md` sits near the 300 rendered line ceiling, and its States table renders each row at about 311 characters, four lines apiece, so one longer cell widens every row. Keep a new cell inside the widest one already there.

@@ -31,10 +31,37 @@ export const STYLE_PROPERTIES = [
   'height',
   'padding',
   'gap',
+  'display',
   'flex-direction',
+  'justify-content',
+  'align-items',
+  'flex-wrap',
+  'opacity',
+  'border-radius',
+  'border-top-left-radius',
+  'border-top-right-radius',
+  'border-bottom-right-radius',
+  'border-bottom-left-radius',
 ] as const
 
 export type StyleProperty = (typeof STYLE_PROPERTIES)[number]
+
+/**
+ * The longhands a shorthand write drops, so a later longhand in the attribute
+ * does not keep overriding the value just set. A longhand write leaves its
+ * shorthand alone, since the longhand comes later and already wins.
+ */
+const SHORTHAND_LONGHANDS: Readonly<
+  Partial<Record<StyleProperty, readonly string[]>>
+> = {
+  'border-radius': [
+    'border-top-left-radius',
+    'border-top-right-radius',
+    'border-bottom-right-radius',
+    'border-bottom-left-radius',
+  ],
+  padding: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+}
 
 export type EditProperty = StyleProperty | 'text'
 
@@ -139,15 +166,18 @@ function propertyOf(segment: string): string {
 /**
  * Sets one property in a style attribute, or drops it on an empty value. The
  * first declaration of it is replaced in place and any later one dropped, so
- * nothing further in the attribute overrides the edit. Undefined means no
- * style is left.
+ * nothing further in the attribute overrides the edit. A shorthand also drops
+ * its longhands. Undefined means no style is left.
  */
 export function setDeclaration(
   style: string,
   property: StyleProperty,
   value: string,
 ): string | undefined {
-  const segments = declarations(style)
+  const longhands = SHORTHAND_LONGHANDS[property] ?? []
+  const segments = declarations(style).filter(
+    (segment) => !longhands.includes(propertyOf(segment)),
+  )
   const matches = segments.filter((segment) => propertyOf(segment) === property)
   const declaration = `${property}: ${value.trim()}`
 
@@ -164,7 +194,10 @@ export function setDeclaration(
       return [`${lead}${declaration}`]
     })
   } else {
-    const kept = style.replace(/[\s;]*$/, '')
+    const kept = segments
+      .join(';')
+      .replace(/^[\s;]+/, '')
+      .replace(/[\s;]*$/, '')
     return kept === '' ? declaration : `${kept}; ${declaration}`
   }
 

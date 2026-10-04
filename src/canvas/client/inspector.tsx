@@ -1,6 +1,8 @@
 /** @jsxImportSource preact */
 import type { JSX } from 'preact'
+import { useState } from 'preact/hooks'
 import { addressOf, elementAt, excerpt, isRawText } from '@/canvas/address'
+import { AlignGrid } from '@/canvas/client/inspector/align-grid'
 import { ColorField } from '@/canvas/client/inspector/color-field'
 import {
   Field,
@@ -8,10 +10,13 @@ import {
   type Scrub,
 } from '@/canvas/client/inspector/field'
 import { Section } from '@/canvas/client/inspector/section'
+import { SizeField } from '@/canvas/client/inspector/size-field'
 import {
   clampScrub,
   displayValue,
+  opacityToCss,
   parseColor,
+  sharedRadius,
   toCssValue,
 } from '@/canvas/client/inspector/values'
 import {
@@ -66,11 +71,46 @@ const SIZE_FIELDS: readonly StyleField[] = [
   { label: 'height', glyph: 'H', property: 'height' },
 ]
 
+const DIRECTION_FIELD: StyleField = {
+  label: 'direction',
+  glyph: 'Dir',
+  property: 'flex-direction',
+}
+
 const FLEX_FIELDS: readonly StyleField[] = [
-  { label: 'direction', glyph: 'Dir', property: 'flex-direction' },
   { label: 'gap', glyph: 'Gap', property: 'gap', placeholder: '0' },
-  { label: 'padding', glyph: 'Pad', property: 'padding', isWide: true },
 ]
+
+/** Padding applies to any box, so it sits in Layout rather than Flex. */
+const PADDING_FIELD: StyleField = {
+  label: 'padding',
+  glyph: 'Pad',
+  property: 'padding',
+  isWide: true,
+}
+
+/** The corners in the order the radius shorthand lists them. */
+const CORNER_FIELDS: readonly StyleField[] = [
+  { label: 'top left radius', glyph: 'TL', property: 'border-top-left-radius' },
+  {
+    label: 'top right radius',
+    glyph: 'TR',
+    property: 'border-top-right-radius',
+  },
+  {
+    label: 'bottom right radius',
+    glyph: 'BR',
+    property: 'border-bottom-right-radius',
+  },
+  {
+    label: 'bottom left radius',
+    glyph: 'BL',
+    property: 'border-bottom-left-radius',
+  },
+]
+
+const FLEX_DISPLAYS = new Set(['flex', 'inline-flex'])
+const GRID_DISPLAYS = new Set(['grid', 'inline-grid'])
 
 const TYPE_FIELDS: readonly StyleField[] = [
   { label: 'size', glyph: 'Size', property: 'font-size' },
@@ -175,6 +215,31 @@ function ElementFields({
   const commit = (property: string) => (value: string) => {
     if (address) void editElement(frameRef, key, address, property, value)
   }
+  /*
+   * The writer takes one property an edit, so a control setting two posts
+   * them in turn and stops at the first refusal. Each carries the hash the
+   * last answered with in its own address, since a frame reloading between
+   * the two clears the stored one.
+   */
+  const commitAll = async (
+    changes: readonly (readonly [string, string])[],
+  ): Promise<void> => {
+    let current = address
+    for (const [property, value] of changes) {
+      if (!current) return
+      const written = await editElement(frameRef, key, current, property, value)
+      if (!written) return
+      if (written.hash) current = { ...current, hash: written.hash }
+    }
+  }
+  const corners = CORNER_FIELDS.map((field) =>
+    currentValue(node, field.property).trim(),
+  )
+  const radius = sharedRadius(corners)
+  const [isPerCorner, setPerCorner] = useState(radius === undefined)
+  const display = computedValue(node, 'display').trim()
+  const isFlex = FLEX_DISPLAYS.has(display)
+  const isWrapped = computedValue(node, 'flex-wrap').trim() === 'wrap'
   const rect = node.getBoundingClientRect()
   const font = currentValue(node, 'font-family')
   const text = node.textContent ?? ''
@@ -237,9 +302,125 @@ function ElementFields({
           glyph="Y"
           value={String(Math.round(rect.top))}
         />
-        {SIZE_FIELDS.map(styleField)}
+        {SIZE_FIELDS.map((field) => (
+          <SizeField
+            key={field.property}
+            label={field.label}
+            glyph={field.glyph}
+            initial={displayValue(
+              field.property,
+              currentValue(node, field.property),
+            )}
+            isBusy={isBusy}
+            onCommit={(typed) =>
+              commit(field.property)(toCssValue(field.property, typed))
+            }
+            scrub={'style' in node ? scrubOf(field.property) : undefined}
+          />
+        ))}
+        {styleField(PADDING_FIELD)}
       </Section>
-      <Section title="Flex">{FLEX_FIELDS.map(styleField)}</Section>
+      <Section
+        title="Flex"
+        action={
+          isFlex || GRID_DISPLAYS.has(display) ? null : (
+            <button
+              type="button"
+              class="section-icon"
+              aria-label="Add flex layout"
+              title="Add flex layout"
+              disabled={isBusy}
+              onClick={() => commit('display')('flex')}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 3.5v9M3.5 8h9" />
+              </svg>
+            </button>
+          )
+        }
+      >
+        {isFlex ? (
+          <>
+            <div class="flex-layout is-wide">
+              <AlignGrid
+                direction={computedValue(node, 'flex-direction').trim()}
+                justifyContent={computedValue(node, 'justify-content')}
+                alignItems={computedValue(node, 'align-items')}
+                isBusy={isBusy}
+                onPick={(alignment) =>
+                  void commitAll([
+                    ['justify-content', alignment.justifyContent],
+                    ['align-items', alignment.alignItems],
+                  ])
+                }
+              />
+              <div class="flex-layout-side">
+                {styleField(DIRECTION_FIELD)}
+                <button
+                  type="button"
+                  class="section-icon"
+                  aria-label="Wrap"
+                  title="Wrap"
+                  aria-pressed={isWrapped}
+                  disabled={isBusy}
+                  onClick={() =>
+                    commit('flex-wrap')(isWrapped ? 'nowrap' : 'wrap')
+                  }
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M2.5 4.5h9a2.5 2.5 0 0 1 0 5h-6M7.5 7.5l-2 2 2 2M2.5 12.5h1" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {FLEX_FIELDS.map(styleField)}
+          </>
+        ) : null}
+      </Section>
+      <Section
+        title="Appearance"
+        action={
+          <button
+            type="button"
+            class="section-icon"
+            aria-label="Per-corner radius"
+            title="Per-corner radius"
+            aria-pressed={isPerCorner}
+            onClick={() => setPerCorner(!isPerCorner)}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 6.5V5a2 2 0 0 1 2-2h1.5M9.5 3H11a2 2 0 0 1 2 2v1.5M13 9.5V11a2 2 0 0 1-2 2H9.5M6.5 13H5a2 2 0 0 1-2-2V9.5" />
+            </svg>
+          </button>
+        }
+      >
+        <Field
+          label="opacity"
+          glyph="Op"
+          initial={displayValue('opacity', computedValue(node, 'opacity'))}
+          isBusy={isBusy}
+          isWide={isPerCorner}
+          onCommit={(typed) => {
+            const value = opacityToCss(typed)
+            if (value !== undefined) commit('opacity')(value)
+          }}
+        />
+        {isPerCorner ? (
+          CORNER_FIELDS.map(styleField)
+        ) : (
+          <Field
+            label="radius"
+            glyph="R"
+            initial={displayValue('border-radius', radius ?? '')}
+            isBusy={isBusy}
+            placeholder="0"
+            onCommit={(typed) =>
+              commit('border-radius')(toCssValue('border-radius', typed))
+            }
+            scrub={'style' in node ? scrubOf('border-radius') : undefined}
+          />
+        )}
+      </Section>
       <Section title="Typography">
         {TYPE_FIELDS.map(styleField)}
         {font ? (

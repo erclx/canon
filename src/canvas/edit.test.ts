@@ -171,6 +171,82 @@ describe('applyEdit', () => {
     expect(outcome).toMatchObject({ ok: false, reason: 'invalid-edit' })
   })
 
+  it.each([
+    ['display', 'flex'],
+    ['justify-content', 'center'],
+    ['align-items', 'flex-end'],
+    ['flex-wrap', 'wrap'],
+    ['opacity', '0.5'],
+    ['border-radius', '8px'],
+    ['border-top-left-radius', '4px'],
+    ['border-top-right-radius', '4px'],
+    ['border-bottom-right-radius', '4px'],
+    ['border-bottom-left-radius', '4px'],
+  ])('should write %s into the inline style', (property, value) => {
+    const outcome = applyEdit(FRAME, addressOf(FRAME, 'h1'), {
+      property,
+      value,
+    })
+
+    expect(outcome.ok && linesChanged(FRAME, outcome.html)).toEqual([
+      `      <h1 style="${property}: ${value}">Ship it</h1>`,
+    ])
+  })
+
+  it('should drop the corner longhands when the radius shorthand is set', () => {
+    const html = FRAME.replace(
+      '<h1>',
+      '<h1 style="color: red; border-radius: 8px; border-top-left-radius: 0; margin: 2px">',
+    )
+
+    const outcome = applyEdit(html, addressOf(html, 'h1'), {
+      property: 'border-radius',
+      value: '12px',
+    })
+
+    expect(outcome.ok && linesChanged(html, outcome.html)).toEqual([
+      '      <h1 style="color: red; border-radius: 12px; margin: 2px">Ship it</h1>',
+    ])
+  })
+
+  it('should drop the side longhands when the padding shorthand is set', () => {
+    const html = FRAME.replace(
+      '<h1>',
+      '<h1 style="padding-top: 1px; color: red;padding-left:3px">',
+    )
+
+    const outcome = applyEdit(html, addressOf(html, 'h1'), {
+      property: 'padding',
+      value: '4px',
+    })
+
+    expect(outcome.ok && linesChanged(html, outcome.html)).toEqual([
+      '      <h1 style="color: red; padding: 4px">Ship it</h1>',
+    ])
+  })
+
+  it('should append a longhand after its shorthand and keep the shorthand', () => {
+    const html = FRAME.replace('<h1>', '<h1 style="border-radius: 8px">')
+
+    const outcome = applyEdit(html, addressOf(html, 'h1'), {
+      property: 'border-top-left-radius',
+      value: '0',
+    })
+
+    expect(outcome.ok && linesChanged(html, outcome.html)).toEqual([
+      '      <h1 style="border-radius: 8px; border-top-left-radius: 0">Ship it</h1>',
+    ])
+  })
+
+  it('should still refuse a property the set leaves out', () => {
+    const outcome = applyEdit(FRAME, addressOf(FRAME, 'h1'), {
+      property: 'transform',
+      value: 'none',
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'invalid-edit' })
+  })
+
   it('should keep a byte order mark the file starts with', () => {
     const html = `﻿${FRAME}`
 

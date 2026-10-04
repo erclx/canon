@@ -5,7 +5,25 @@
  */
 
 /** Properties whose bare numbers are pixel lengths. */
-const LENGTHS = new Set(['width', 'height', 'padding', 'gap', 'font-size'])
+const LENGTHS = new Set([
+  'width',
+  'height',
+  'padding',
+  'gap',
+  'font-size',
+  'border-radius',
+  'border-top-left-radius',
+  'border-top-right-radius',
+  'border-bottom-right-radius',
+  'border-bottom-left-radius',
+])
+
+/** Properties a size mode writes, each mode by the name the field shows. */
+const SIZES = new Set(['width', 'height'])
+const SIZE_MODES: Readonly<Record<string, string>> = {
+  Fill: '100%',
+  Fit: 'fit-content',
+}
 
 const PX = /^(-?\d*\.?\d+)px$/
 
@@ -28,6 +46,14 @@ export function displayValue(property: string, raw: string): string {
   const value = raw.trim()
   if (property === 'gap' && (value === '' || value === 'normal')) return ''
   if (property === 'background-color' && isNoFill(value)) return ''
+  if (property === 'opacity' && value !== '')
+    return `${Math.round(Number(value) * 100)}%`
+  if (SIZES.has(property)) {
+    const mode = Object.keys(SIZE_MODES).find(
+      (name) => SIZE_MODES[name] === value,
+    )
+    if (mode) return mode
+  }
   if (value === 'auto') return 'Auto'
   if (value === 'normal') return 'Normal'
   return value.split(/\s+/).map(formatPx).join(' ')
@@ -36,11 +62,27 @@ export function displayValue(property: string, raw: string): string {
 export function toCssValue(property: string, typed: string): string {
   const value = typed.trim()
   if (value === 'Auto' || value === 'Normal') return value.toLowerCase()
+  if (SIZES.has(property) && SIZE_MODES[value]) return SIZE_MODES[value]
   if (!LENGTHS.has(property)) return value
   return value
     .split(/\s+/)
     .map((token) => (/^-?\d*\.?\d+$/.test(token) ? `${token}px` : token))
     .join(' ')
+}
+
+/** A typed opacity percent as the fraction CSS takes, refused outside 0 to 100. */
+export function opacityToCss(typed: string): string | undefined {
+  const percent = readOpacity(typed)
+  return percent === undefined ? undefined : String(percent / 100)
+}
+
+/**
+ * The radius all four corners share, read in the order the longhands run,
+ * or undefined where any corner differs and the panel shows each one.
+ */
+export function sharedRadius(corners: readonly string[]): string | undefined {
+  const [first] = corners
+  return corners.every((corner) => corner === first) ? first : undefined
 }
 
 /**
