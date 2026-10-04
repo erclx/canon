@@ -1,21 +1,21 @@
 ---
 title: Token module
-description: The modules under src/design and what each owns, the three surfaces reading the tokens, the component layer, type and space scales, the font families, color derivation, and the brand mark's five copies
+description: The modules under src/design and what each owns, the two surfaces reading the tokens, the component layer, type and space scales, the font families, color derivation, and the brand mark's five copies
 ---
 
 # Token module
 
 ## Overview
 
-`src/design/tokens.ts` holds this repository's design values, and every generated stylesheet, the slide theme, and the capture frames read them from there. `canon/context/design/overview.md` states why the record is generated rather than authored.
+`src/design/tokens.ts` holds this repository's design values, and every generated stylesheet and the capture frames read them from there. `canon/context/design/overview.md` states why the record is generated rather than authored.
 
 The module's prose slots are lists of one-line rules, so the record carries values and rules and this entry carries the reasons behind them. A value whose why needs a paragraph adds it here, never to the module.
 
 ## Decisions
 
-### Three surfaces read the module
+### Two surfaces read the module
 
-The slide theme takes bare hex through `bareHex`, since `PptxGenJS` receives `{ color: theme.background }` and PowerPoint has no concept of a custom property. The token preview's own chrome and a teach workspace stylesheet take custom properties through `@/design/css`. The hero and the terminal framing carry their own copies, so the record is the source for three surfaces and a description of two.
+The token preview's own chrome and a teach workspace stylesheet take custom properties through `@/design/css`. The hero and the terminal framing carry their own copies, so the record is the source for two surfaces and a description of two. A slide deck reads the project's own tokens through the canvas resolution rather than this module, so a deck takes the project's design rather than Canon's.
 
 The consolidated dark set is the palette the hero already draws, so no capture needed to move. It clears one of the two contrast failures too: the hero's rust reads 5.77 and 5.36 against the two dark grounds, where the slide theme's reads 4.36 and 3.99.
 
@@ -66,7 +66,7 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 ### Color consumers
 
 - The terminal framing keeps its own values on purpose. `scripts/lib/ui.sh` and `src/ui.ts` each spell six escape constants, and `canon/context/scripts/framing.md` records one color source per language with a check behind each, so a third spelling generated from the module would break the rule those checks hold. `WHITE` and `GREY` name no role, so the record describes the terminal palette in part.
-- The slide theme and the two rendered captures agree by construction. `scripts/core/regen-hero.ts` fills a `{{TOKENS}}` placeholder in each `assets/captures/*.html.tmpl` with what `canon design css --no-components` emits, so a value moved in the module moves both frames. The component half is left out on purpose, since a static capture renders neither the status marker nor the webkit scrollbar.
+- The two rendered captures agree with the module by construction. `scripts/core/regen-hero.ts` fills a `{{TOKENS}}` placeholder in each `assets/captures/*.html.tmpl` with what `canon design css --no-components` emits, so a value moved in the module moves both frames. The component half is left out on purpose, since a static capture renders neither the status marker nor the webkit scrollbar.
 - `src/design/css.test.ts` cannot cover `TEACH_STYLESHEET_COMPONENTS` through each component's `reads` array alone, which is self-satisfying for a name a component both declares and reads. `TEACH_CHROME` declares seven legacy alias properties, `--panel`, `--rule`, `--ink`, `--ink-soft`, `--ink-faint`, `--accent`, and `--accent-bg`, that a hand-authored lesson diagram consumes by name. A second test derives its required names from a fixture shaped like a lesson diagram's `var(--name)` references.
 
 ### The brand mark

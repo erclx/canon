@@ -10,4 +10,4 @@ DESIGN.md and the token module it renders from, the extract skill and its two pa
 - [Extract skill](extract.md): The design-extract skill's source and greenfield paths, why one skill picks its path from the tree, the seed shape it fills, and the sandbox scenario picker
 - [Overview](overview.md): What the design domain owns, the generated record against a target's authored one, the neutral base a target inherits, and the design workflow
 - [Render](render.md): The canon design render preview, how the parser carries the verify tag, the confidence count and the columns it reads, embedded fonts, and the token cells the preview cannot paint
-- [Token module](tokens.md): The modules under src/design and what each owns, the three surfaces reading the tokens, the component layer, type and space scales, the font families, color derivation, and the brand mark's five copies
+- [Token module](tokens.md): The modules under src/design and what each owns, the two surfaces reading the tokens, the component layer, type and space scales, the font families, color derivation, and the brand mark's five copies
