@@ -10,7 +10,14 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { type ElementAddress, sourceElements } from '@/canvas/address'
 import { contentHash, readSelection, writeSelection } from '@/canvas/content'
-import { applyEdit, editFrame, editFrameAtIndex } from '@/canvas/edit'
+import {
+  applyEdit,
+  type EditChange,
+  editFrame,
+  editFrameAtIndex,
+  restoreElement,
+} from '@/canvas/edit'
+import type { ElementState } from '@/canvas/history'
 
 let ROOT = ''
 
@@ -396,5 +403,164 @@ describe('editFrame', () => {
     })
 
     expect(readSelection(ROOT)?.element?.stale).toBe(true)
+  })
+})
+
+describe('restoreElement', () => {
+  /** Edits through the writer and hands back the states it observed. */
+  function editObserved(html: string, tag: string, change: EditChange) {
+    seedFrame(html)
+    let states: { before: ElementState; after: ElementState } | undefined
+    const outcome = editFrame(
+      ROOT,
+      'drafts',
+      'hero',
+      addressOf(html, tag),
+      change,
+      (observed) => {
+        states = observed
+      },
+    )
+    if (!outcome.ok || !states) throw new Error('the edit did not land')
+    return { ...states, index: addressOf(html, tag).index }
+  }
+
+  it('should bring every longhand back when a radius edit is undone', () => {
+    const html = FRAME.replace(
+      '<h1>',
+      '<h1 style="border-top-left-radius: 2px; border-bottom-right-radius: 8px">',
+    )
+    const { before, after, index } = editObserved(html, 'h1', {
+      property: 'border-radius',
+      value: '4px',
+    })
+
+    const outcome = restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1' },
+      after,
+      before,
+    )
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(readFileSync(framePath(), 'utf8')).toBe(html)
+  })
+
+  it('should restore a quoted family carrying an entity byte for byte', () => {
+    const html = FRAME.replace(
+      '<h1>',
+      '<h1 style="font-family: &quot;Inter&quot;, sans-serif">',
+    )
+    const { before, after, index } = editObserved(html, 'h1', {
+      property: 'color',
+      value: 'blue',
+    })
+
+    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+
+    expect(readFileSync(framePath(), 'utf8')).toBe(html)
+  })
+
+  it('should restore text holding an entity byte for byte', () => {
+    const html = FRAME.replace('Ship it', 'Ship &amp; it')
+    const { before, after, index } = editObserved(html, 'h1', {
+      property: 'text',
+      value: 'Launch <now>',
+    })
+    expect(readFileSync(framePath(), 'utf8')).toContain(
+      '<h1>Launch &lt;now&gt;</h1>',
+    )
+
+    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+
+    expect(readFileSync(framePath(), 'utf8')).toBe(html)
+  })
+
+  it('should reapply an undone edit', () => {
+    const { before, after, index } = editObserved(FRAME, 'h1', {
+      property: 'color',
+      value: 'blue',
+    })
+    const edited = readFileSync(framePath(), 'utf8')
+    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, after, before)
+
+    restoreElement(ROOT, 'drafts', 'hero', { index, tag: 'h1' }, before, after)
+
+    expect(readFileSync(framePath(), 'utf8')).toBe(edited)
+  })
+
+  it('should refuse when the element changed since the edit', () => {
+    const { before, after, index } = editObserved(FRAME, 'h1', {
+      property: 'color',
+      value: 'blue',
+    })
+    const rewritten = readFileSync(framePath(), 'utf8').replace(
+      'color: blue',
+      'color: green',
+    )
+    writeFileSync(framePath(), rewritten)
+
+    const outcome = restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1' },
+      after,
+      before,
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'changed' })
+    expect(readFileSync(framePath(), 'utf8')).toBe(rewritten)
+  })
+
+  it('should refuse when another element now sits at the index', () => {
+    const { before, after, index } = editObserved(FRAME, 'h1', {
+      property: 'color',
+      value: 'blue',
+    })
+    const shifted = readFileSync(framePath(), 'utf8').replace(
+      '<main class="hero">',
+      '<main class="hero">\n      <h2>New</h2>',
+    )
+    writeFileSync(framePath(), shifted)
+
+    const outcome = restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1' },
+      after,
+      before,
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'changed' })
+    expect(readFileSync(framePath(), 'utf8')).toBe(shifted)
+  })
+
+  it('should apply when a different element in the frame changed', () => {
+    const { before, after, index } = editObserved(FRAME, 'h1', {
+      property: 'color',
+      value: 'blue',
+    })
+    writeFileSync(
+      framePath(),
+      readFileSync(framePath(), 'utf8').replace('color: red', 'color: teal'),
+    )
+
+    const outcome = restoreElement(
+      ROOT,
+      'drafts',
+      'hero',
+      { index, tag: 'h1' },
+      after,
+      before,
+    )
+
+    expect(outcome).toMatchObject({ ok: true })
+    expect(readFileSync(framePath(), 'utf8')).toBe(
+      FRAME.replace('color: red', 'color: teal'),
+    )
   })
 })

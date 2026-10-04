@@ -17,6 +17,7 @@ import {
   withFileLock,
   writeSelection,
 } from '@/canvas/content'
+import type { ElementState } from '@/canvas/history'
 
 /**
  * The basic set an operator edits by hand. Each is a CSS property written into
@@ -102,6 +103,11 @@ const MAX_VALUE_LENGTH = 200
 const DECLARATION_BREAK = /[;{}<>\n\r]/
 
 const BOM = '﻿'
+
+/* The rewriter drops a leading byte order mark, so a read skips it first. */
+function withoutBom(html: string): string {
+  return html.startsWith(BOM) ? html.slice(BOM.length) : html
+}
 
 function refuse(reason: EditRefusal, detail: string): EditRefused {
   return { ok: false, reason, detail }
@@ -292,11 +298,106 @@ export function applyEdit(
   return { ok: true, html: `${bom}${rewritten}` }
 }
 
+interface ElementRead {
+  readonly tag: string
+  readonly style: string | undefined
+  /** The raw text inside it, entities still encoded, when it holds text alone. */
+  readonly inner: string | undefined
+}
+
+/**
+ * What the element at an index holds, read as the file states it. Each text
+ * chunk the rewriter hands over is the source text, so the inner content keeps
+ * every entity as written.
+ */
+function readElement(html: string, index: number): ElementRead | undefined {
+  let found: { tag: string; style: string | undefined } | undefined
+  let isOpen = false
+  let hasChild = false
+  let inner = ''
+  countElements(new HTMLRewriter(), (element, at) => {
+    if (isOpen) hasChild = true
+    if (at !== index) return undefined
+    found = {
+      tag: element.tagName.toLowerCase(),
+      style: element.getAttribute('style') ?? undefined,
+    }
+    if (!element.canHaveContent || element.selfClosing) return undefined
+    isOpen = true
+    return () => {
+      isOpen = false
+    }
+  })
+    .onDocument({
+      text(chunk) {
+        if (isOpen) inner += chunk.text
+      },
+    })
+    .transform(html)
+  if (!found) return undefined
+  return { ...found, inner: hasChild ? undefined : inner }
+}
+
+function stateOf(read: ElementRead, withInner: boolean): ElementState {
+  return withInner
+    ? { style: read.style, inner: read.inner }
+    : { style: read.style }
+}
+
+function sameState(read: ElementRead, state: ElementState): boolean {
+  if (read.style !== state.style) return false
+  return state.inner === undefined || read.inner === state.inner
+}
+
+/**
+ * Restamps a selection that was fresh before a write, since neither an edit
+ * nor a restore moves an element.
+ */
+function restampSelection(
+  root: string,
+  page: string,
+  frame: string,
+  before: ReturnType<typeof readSelection>,
+  html: string,
+): void {
+  if (
+    before?.page !== page ||
+    before.frame !== frame ||
+    !before.element ||
+    before.element.stale
+  ) {
+    return
+  }
+  writeSelection(root, {
+    page,
+    frame,
+    element: {
+      index: before.element.index,
+      tag: before.element.tag,
+      count: sourceElements(html).length,
+    },
+  })
+}
+
+function writeFrame(path: string, html: string): void {
+  const temp = `${path}.${process.pid}${TEMP_SUFFIX}`
+  writeFileSync(temp, html)
+  renameSync(temp, path)
+}
+
+/** The element's state on each side of an edit, which undo restores. */
+export type EditObserver = (states: {
+  readonly before: ElementState
+  readonly after: ElementState
+}) => void
+
 /**
  * Edits one element of a frame file under the file's lock. An address carrying
  * a hash the file no longer has is refused rather than applied at an index the
  * change may have shifted. A selection that was fresh before the edit is
- * restamped after it, since the edit moves no element.
+ * restamped after it, since the edit moves no element. An observer hears the
+ * element's state before and after a write that landed, apart from the
+ * returned record, which the CLI prints.
  */
 export function editFrame(
   root: string,
@@ -304,6 +405,7 @@ export function editFrame(
   frame: string,
   address: ElementAddress,
   change: EditChange,
+  observe?: EditObserver,
 ): FrameEdit {
   const invalid = checkChange(change)
   if (invalid) return invalid
@@ -324,30 +426,25 @@ export function editFrame(
         `${page}/${frame} changed after this edit was made, so nothing was written`,
       )
     }
-    const before = readSelection(root)
-    const isSelectionFresh =
-      before?.page === page &&
-      before.frame === frame &&
-      before.element !== undefined &&
-      !before.element.stale
+    const selected = readSelection(root)
+    const source = bytes.toString('utf8')
 
-    const applied = applyEdit(bytes.toString('utf8'), address, change)
+    const applied = applyEdit(source, address, change)
     if (!applied.ok) return applied
 
-    const temp = `${path}.${process.pid}${TEMP_SUFFIX}`
-    writeFileSync(temp, applied.html)
-    renameSync(temp, path)
+    writeFrame(path, applied.html)
+    restampSelection(root, page, frame, selected, applied.html)
 
-    if (isSelectionFresh && before.element) {
-      writeSelection(root, {
-        page,
-        frame,
-        element: {
-          index: before.element.index,
-          tag: before.element.tag,
-          count: sourceElements(applied.html).length,
-        },
-      })
+    if (observe) {
+      const withInner = change.property === 'text'
+      const before = readElement(withoutBom(source), address.index)
+      const after = readElement(withoutBom(applied.html), address.index)
+      if (before && after) {
+        observe({
+          before: stateOf(before, withInner),
+          after: stateOf(after, withInner),
+        })
+      }
     }
     return {
       ok: true,
@@ -356,6 +453,70 @@ export function editFrame(
       file: found.file,
       hash: contentHash(applied.html),
     }
+  })
+}
+
+export type RestoreRefusal = EditRefusal | 'changed'
+
+export type ElementRestore =
+  | { readonly ok: true; readonly hash: string }
+  | {
+      readonly ok: false
+      readonly reason: RestoreRefusal
+      readonly detail: string
+    }
+
+/**
+ * Writes a recorded state back to one element under the file's lock, only
+ * while the element at that index still carries the tag and the state the
+ * record expects. Anything else means the file moved on since, so the restore
+ * refuses as `changed` rather than overwrite a newer state or land on a
+ * neighbor. The state comes from the server's own record, never a request,
+ * since inner content is written back as markup.
+ */
+export function restoreElement(
+  root: string,
+  page: string,
+  frame: string,
+  target: { readonly index: number; readonly tag: string },
+  expected: ElementState,
+  to: ElementState,
+): ElementRestore {
+  const onPage = readPage(root, page)
+  if (!onPage) return refuse('no-page', `page ${page} does not exist`)
+  const found = onPage.frames.find((candidate) => candidate.name === frame)
+  if (!found) {
+    return refuse('no-frame', `frame ${frame} does not exist on ${page}`)
+  }
+
+  const path = join(canvasDir(root), page, found.file)
+  return withFileLock(path, (): ElementRestore => {
+    const source = readFileSync(path, 'utf8')
+    const bom = source.startsWith(BOM) ? BOM : ''
+    const html = source.slice(bom.length)
+    const current = readElement(html, target.index)
+    if (current?.tag !== target.tag || !sameState(current, expected)) {
+      return {
+        ok: false,
+        reason: 'changed',
+        detail: `<${target.tag}> in ${page}/${frame} changed since this edit, so nothing was written`,
+      }
+    }
+    const selected = readSelection(root)
+    const rewritten = countElements(new HTMLRewriter(), (element, at) => {
+      if (at !== target.index) return undefined
+      if (to.style === undefined) element.removeAttribute('style')
+      else element.setAttribute('style', to.style)
+      if (to.inner !== undefined) {
+        element.setInnerContent(to.inner, { html: true })
+      }
+      return undefined
+    }).transform(html)
+    const written = `${bom}${rewritten}`
+
+    writeFrame(path, written)
+    restampSelection(root, page, frame, selected, written)
+    return { ok: true, hash: contentHash(written) }
   })
 }
 
