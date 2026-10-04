@@ -38,14 +38,14 @@ A box written before that format may carry no route, no width, and a verb such a
 
 Each box takes exactly one.
 
-| Verdict             | When                                                    | Evidence it carries                                                                                                          |
-| ------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                    |
-| pass or fail, frame | The result has a stated criterion only an image settles | The pushed frame's link or the matching evidence stem, and what the frame shows, in words                                    |
-| needs eyes          | The box ends in `(taste)`                               | The pushed frame's link or the matching evidence stem, and what the frame showed, with nothing about whether it looks right  |
-| not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold |
+| Verdict             | When                                                    | Evidence it carries                                                                                                                                   |
+| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                                             |
+| pass or fail, frame | The result has a stated criterion only an image settles | The matching evidence stem or the pushed frame's link going to the Frames block, and what the frame shows, in words                                   |
+| needs eyes          | The box ends in `(taste)`                               | The matching evidence stem or the pushed frame's link going to the Frames block, and what the frame showed, with nothing about whether it looks right |
+| not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold                          |
 
-A frame verdict carries one image at most, and never one the worker's evidence already shows. When a state and stem in the evidence record match the box's route, width, and theme, the evidence names that stem and nothing is pushed. Otherwise the frame goes up through `canon pr frames` and the evidence carries the `link` the record returned, which names the frame's path on the frames branch. Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
+A frame verdict carries one image at most, and never one the worker's evidence already shows. When a state and stem in the evidence record match the box's route, width, and theme, the evidence names that stem and nothing is pushed. Otherwise the frame goes up through `canon pr frames` and the `link` the record returned, which names the frame's path on the frames branch, goes under the Frames block and never inside the table row. Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
 
 A push that refuses leaves the words alone, with the reason named. Never cite the local frame path. A path under `.canon/` is a board identifier the label scan rejects, and it resolves only on this machine.
 
