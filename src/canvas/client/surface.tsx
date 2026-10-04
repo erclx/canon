@@ -640,13 +640,19 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
 
   /*
    * The surface's one key handler, which every frame document feeds too. The
-   * default is prevented only for a key it takes, so Space stops scrolling a
-   * frame it pans and every other key keeps its own meaning.
+   * default is prevented only for a key press it takes, so Space stops
+   * scrolling a frame it pans and every other key keeps its own meaning. A
+   * release always ends the pan and never claims the keyup, since a button
+   * fires its Space activation there.
    */
   const handleKey = (event: KeyboardEvent) => {
     const action = surfaceAction(event)
     if (!action) return
-    if (action !== 'pan-release' && isOwnedByTarget(event, action)) return
+    if (action === 'pan-release') {
+      runAction(action)
+      return
+    }
+    if (isOwnedByTarget(event, action)) return
     event.preventDefault()
     runAction(action)
   }

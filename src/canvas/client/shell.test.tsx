@@ -3292,6 +3292,16 @@ describe('view tools', () => {
     expect(view.value.zoom).toBeCloseTo(before / 1.2)
   })
 
+  it('should leave Space on a focused button to activate it', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    const down = key(buttonNamed('Fit'), 'keydown', { key: ' ', code: 'Space' })
+    const up = key(buttonNamed('Fit'), 'keyup', { key: ' ', code: 'Space' })
+
+    expect([down.defaultPrevented, up.defaultPrevented]).toEqual([false, false])
+    expect(spacePan.value).toBeUndefined()
+  })
+
   it('should leave Ctrl and plus to the browser', () => {
     renderApp([page('drafts', [frame('hero')])])
     const before = view.value
