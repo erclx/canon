@@ -25,7 +25,7 @@ import {
 } from '@/claude/skills-audit'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 import { ceilingFindings } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'

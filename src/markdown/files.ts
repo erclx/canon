@@ -1,6 +1,6 @@
 import { existsSync, statSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 
 const MARKDOWN = /\.md$/
 

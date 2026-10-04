@@ -1,6 +1,6 @@
 import { basename } from 'node:path'
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import {
   type Confidence,
   liveness,

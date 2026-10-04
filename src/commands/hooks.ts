@@ -5,7 +5,7 @@ import {
   runPostMerge,
   STEP_VERBS,
 } from '@/hooks/post-merge'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 interface PostMergeOptions {
   readonly root?: string

@@ -1,5 +1,5 @@
 import { $ } from 'bun'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /**
  * Resolves the root of the checkout the caller is standing in, which is the

@@ -24,7 +24,7 @@ import {
   pipeOutput,
   plural,
 } from '@/ui'
-import { mainWorktreeRoot } from '@/worktree'
+import { mainWorktreeRoot } from '@/git/worktree'
 
 interface ListCommandOptions {
   readonly json?: boolean

@@ -1,6 +1,6 @@
 import { execaSync } from 'execa'
-import { baseCandidates, isMergeBase } from '@/git-base'
-import { gitEnv } from '@/git-env'
+import { baseCandidates, isMergeBase } from '@/git/base'
+import { gitEnv } from '@/git/env'
 
 /**
  * The extensions this check can pair. A test sits beside its subject under one

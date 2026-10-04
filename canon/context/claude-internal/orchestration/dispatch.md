@@ -35,7 +35,7 @@ A question carrying no suggestion is a stop at execution too, and it stays the v
 
 ## The branch gate
 
-The branch check reads `claimed` off its own record rather than composing the readings itself. The field already answers across all three, and reading a pre-composed field keeps the check a verb rather than a rule the model can talk itself out of. `src/sessions/claim.ts` is the composition, joining the session roster against `listWorktrees()` and `branchRefs()` in `src/worktree.ts`.
+The branch check reads `claimed` off its own record rather than composing the readings itself. The field already answers across all three, and reading a pre-composed field keeps the check a verb rather than a rule the model can talk itself out of. `src/sessions/claim.ts` is the composition, joining the session roster against `listWorktrees()` and `branchRefs()` in `src/git/worktree.ts`.
 
 Three readings rather than two. A worktree can outlive the session that made it and a session can hold a branch before a worktree exists for it. A branch behind a merged pull request has neither and is taken anyway, so a check reading only the first two clears it and sends a worker onto a used branch.
 

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { sep } from 'node:path'
 import { execaSync } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /** Blob SHA to the newest commit whose post-image for that path held it. */
 export type PathHistory = ReadonlyMap<string, string>

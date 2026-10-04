@@ -1,5 +1,5 @@
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /**
  * One child `canon` call. Each step runs as its own process rather than

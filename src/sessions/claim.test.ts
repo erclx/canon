@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { checkClaim } from '@/sessions/claim'
 import { repositoryOf, type ResolvedSession } from '@/sessions/resolve'
 

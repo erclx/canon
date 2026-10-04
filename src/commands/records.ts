@@ -56,7 +56,7 @@ import {
   pipeOutput,
   plural,
 } from '@/ui'
-import { currentWorktreeRoot, mainWorktreeRoot } from '@/worktree'
+import { currentWorktreeRoot, mainWorktreeRoot } from '@/git/worktree'
 
 /** Returned when a record carries a finding, which is the gating result. */
 const EXIT_FINDINGS = 2

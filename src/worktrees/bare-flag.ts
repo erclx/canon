@@ -1,6 +1,6 @@
 import { basename } from 'node:path'
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 
 /** Why a run wrote nothing. The three are different states a caller can tell apart. */
 export type BareFlagSkip =

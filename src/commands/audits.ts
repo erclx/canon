@@ -19,9 +19,9 @@ import {
   type Summary,
   summarize,
 } from '@/audits/run'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { intro, logError, logInfo, logStep, logWarn, outro, plural } from '@/ui'
-import { currentWorktreeRoot } from '@/worktree'
+import { currentWorktreeRoot } from '@/git/worktree'
 
 interface RunCommandOptions {
   readonly json?: boolean

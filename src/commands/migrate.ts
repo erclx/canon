@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
-import { listRepositoryFiles } from '@/git-files'
+import { listRepositoryFiles } from '@/git/files'
 import { indexSourceRules } from '@/gov/adapter'
 import { applyRecordsMove, applyRename, readSources } from '@/migrate/apply'
 import { isToolkitOwned, planRename, type RenamePlan } from '@/migrate/plan'

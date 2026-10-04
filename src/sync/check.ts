@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { basename, join, sep } from 'node:path'
 import { execa } from 'execa'
-import { gitEnv } from '@/git-env'
+import { gitEnv } from '@/git/env'
 import { createDesignAdapter, DESIGN_INSTALL_DIR } from '@/design/adapter'
 import { createGovAdapter, rulesSourceDir } from '@/gov/adapter'
 import { successorResolver } from '@/gov/renames'
