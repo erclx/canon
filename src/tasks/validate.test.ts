@@ -916,7 +916,7 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['row-duplicated'])
   })
 
-  it('should report two run now rows touching the same file', async () => {
+  it('should leave the findings empty for two run now rows sharing a file', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
     await seedPlan('v1.0-first')
@@ -932,12 +932,10 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && outcome.findings).toMatchObject([
-      { kind: 'touches-collided', message: 'both touch docs/commands.md.' },
-    ])
+    expect(outcome.ok && outcome.findings).toEqual([])
   })
 
-  it('should report a directory colliding with a file inside it', async () => {
+  it('should list a directory sharing a file inside it', async () => {
     await seedTask('v1.0-first')
     await seedTask('v2.0-second')
     await seedPlan('v1.0-first')
@@ -953,7 +951,9 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && kinds(outcome.findings)).toEqual(['touches-collided'])
+    expect(outcome.ok && outcome.shared).toMatchObject([
+      { subject: 'v1.0-first and v2.0-second' },
+    ])
   })
 
   it('should name the row that claimed the containing path', async () => {
@@ -972,9 +972,8 @@ describe('validateBoard', () => {
 
     const outcome = await validateBoard(ROOT)
 
-    expect(outcome.ok && outcome.findings).toMatchObject([
+    expect(outcome.ok && outcome.shared).toMatchObject([
       {
-        kind: 'touches-collided',
         message: 'both touch src/tasks, which v2.0-second claims as a folder.',
       },
     ])

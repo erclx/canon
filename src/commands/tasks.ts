@@ -1384,7 +1384,7 @@ function reportValidation(
     logStep(outcome.findings.length === 0 ? 'Clean' : 'Findings')
     if (outcome.findings.length === 0) {
       logInfo(
-        'every row resolves, every task sits on one surface, and each touches its own files',
+        'every row resolves, every task sits on one surface, and each run now row names its files',
       )
     } else {
       for (const finding of outcome.findings) logWarn(describe(finding))

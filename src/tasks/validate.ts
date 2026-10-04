@@ -50,7 +50,6 @@ export const FINDING_KINDS = [
   'row-misordered',
   'row-unranked',
   'touches-unstated',
-  'touches-collided',
   'blocker-settled',
   'blocker-unresolved',
   'blocker-declined',
@@ -907,11 +906,11 @@ function planPath(target: string, dir: string, root: string): string {
 }
 
 /**
- * The half of the `## Run now` test a person cannot check by eye. The pairs
- * are read off the `Touches` column, the only place either set is written
- * down, so a row stating none leaves its merge order and its reach unreadable.
+ * The `## Run now` test a person cannot check by eye. The shared pairs are read
+ * off the `Touches` column, the only place either set is written down, so a
+ * row stating none leaves its merge order and its reach unreadable.
  */
-function checkCollisions(rows: readonly BoardRow[]): Finding[] {
+function checkTouches(rows: readonly BoardRow[]): Finding[] {
   const findings: Finding[] = []
 
   for (const row of rows.filter((candidate) => candidate.group === 'Run now')) {
@@ -926,10 +925,6 @@ function checkCollisions(rows: readonly BoardRow[]): Finding[] {
         message: 'names no file, so its collisions cannot be read.',
       })
     }
-  }
-
-  for (const pair of checkSharedFiles(rows)) {
-    findings.push({ kind: 'touches-collided', ...pair })
   }
 
   return findings
@@ -1010,7 +1005,7 @@ function joinShared(clauses: readonly string[]): string {
  * the row does rewrite the directory, so this states the reach rather than
  * calling it a defect.
  *
- * The scan takes `## Run now` alone, where `checkCollisions` takes it. A cell in
+ * The scan takes `## Run now` alone, where `checkSharedFiles` takes it. A cell in
  * another group describes work nobody has planned, so it is written as a
  * sentence and rewritten at planning time, and a claim read off one reports on
  * prose rather than on a file set. That is the shape that teaches a reader to
@@ -1405,7 +1400,7 @@ export async function validateBoard(
     ...checkPlans(rows, dir, root),
     ...(await checkPlanAgreement(rows, dir, root)),
     ...(await checkGroupClaims(rows, dir, root)),
-    ...checkCollisions(rows),
+    ...checkTouches(rows),
     ...checkOrdering(rows),
     ...parked.findings,
   ]
