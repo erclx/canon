@@ -240,7 +240,7 @@
   flex: none;
   display: grid;
   place-items: center;
-  width: 20px;
+  width: 24px;
   height: 22px;
   border-radius: var(--radius-action);
   color: var(--color-muted);
