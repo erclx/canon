@@ -1,6 +1,14 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { PROJECT_ROOT } from '@/roots/project'
 
-import { FAVICON_COLORS, faviconLink, renderFavicon } from './favicon'
+import {
+  FAVICON_COLORS,
+  brandFavicon,
+  faviconLink,
+  renderFavicon,
+} from './favicon'
 
 const PAGE_ACCENTS = ['#c76b5f', '#ad4a4b']
 
@@ -50,5 +58,16 @@ describe('faviconLink', () => {
     const link = faviconLink(renderFavicon(buildMark(), FAVICON_COLORS))
 
     expect(link.slice(link.indexOf(',') + 1, -2)).not.toMatch(/[#"<>\s]/)
+  })
+})
+
+describe('brandFavicon', () => {
+  it('should render the brand mark with the favicon colors', () => {
+    const mark = readFileSync(
+      join(PROJECT_ROOT, 'assets/brand/mark.svg'),
+      'utf8',
+    )
+
+    expect(brandFavicon()).toBe(renderFavicon(mark, FAVICON_COLORS))
   })
 })

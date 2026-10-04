@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { readdir, readFile, rm } from 'node:fs/promises'
 import { join, posix, relative } from 'node:path'
 import {
@@ -6,10 +6,9 @@ import {
   TEACH_STYLESHEET_COMPONENTS,
 } from '@/design/components'
 import { buildDesignCss } from '@/design/css'
-import { FAVICON_COLORS, faviconLink, renderFavicon } from '@/design/favicon'
+import { brandFavicon, faviconLink } from '@/design/favicon'
 import { stripFrontmatter } from '@/markdown/frontmatter'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
-import { PROJECT_ROOT } from '@/roots/project'
 import { compileScript } from '@/teach/browser/compile'
 import { dismiss } from '@/teach/browser/dismiss'
 import { focusLine } from '@/teach/browser/focus-line'
@@ -39,8 +38,6 @@ import {
 } from '@/teach/workspace'
 import { writeIfChanged } from '@/teach/write-if-changed'
 
-const BRAND_MARK = 'assets/brand/mark.svg'
-
 /**
  * The link `teach-workspace` once had a session write by hand into every page.
  * A lesson keeps whatever sits outside its marked regions, so the old icon
@@ -68,14 +65,9 @@ function dropHandWrittenHead(html: string): string {
   )
 }
 
-/**
- * Built from the brand mark and the favicon's own pair, the same two inputs
- * `web/public/favicon.svg` is generated from, so every teach page carries the
- * icon the landing page does rather than a copy of its own.
- */
+/** Every teach page carries the icon the landing page does rather than a copy of its own. */
 function teachFavicon(): string {
-  const mark = readFileSync(join(PROJECT_ROOT, BRAND_MARK), 'utf8')
-  return faviconLink(renderFavicon(mark, FAVICON_COLORS))
+  return faviconLink(brandFavicon())
 }
 
 /**
