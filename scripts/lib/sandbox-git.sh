@@ -60,7 +60,7 @@ configure_sandbox_git_identity() {
 SANDBOX_ANCHOR_REPO="canon-sandbox"
 
 # A scenario calls this from its own use_anchor hook rather than this file
-# defining the hook. manage-sandbox.sh keys off `type -t use_anchor`, so
+# defining the hook. sandbox-hook.sh keys off `type -t use_anchor`, so
 # declaring it here would hand an anchor to the scenarios that source this file
 # for the identity helpers alone.
 use_sandbox_anchor() {
@@ -110,14 +110,6 @@ ensure_sandbox_anchor_repo() {
     log_error "Could not create ${GITHUB_ORG}/${repo_name}: ${gh_error}"
   fi
   log_info "Created ${GITHUB_ORG}/${repo_name} as a private repository."
-}
-
-# Mirrors the merge-base resolution the diff-baseline port already carries
-# across five skill bodies, so a checkout whose local main trails origin/main
-# does not pull in skill bodies other merged branches changed.
-resolve_sandbox_skill_diff_base() {
-  git -C "$PROJECT_ROOT" merge-base HEAD origin/main 2>/dev/null ||
-    git -C "$PROJECT_ROOT" merge-base HEAD main 2>/dev/null
 }
 
 # A remote is useless without an author, so the scenarios that reach one always

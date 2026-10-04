@@ -13,7 +13,7 @@
 # Mints a short random per-run identifier the first time it is asked for, then
 # holds it in CANON_SANDBOX_RUN_ID for the rest of this process. A direct call
 # (not `$(...)`) exports it into the caller's own shell, which is what lets
-# `run.sh` mint once and have manage-sandbox.sh and the check it shells out to
+# `run.sh` mint once and have the provisioning and the check it shells out to
 # both inherit the same id as ordinary children. A call already carrying the
 # variable, inherited from such a parent, reuses it rather than minting a new one.
 #

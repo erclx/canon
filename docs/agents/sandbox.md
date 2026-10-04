@@ -9,7 +9,7 @@ description: Scenario routing, the expectation scoring surface, and the coverage
 
 ## Scenarios
 
-Scenarios live under `sandbox/`, one folder per category. `sandbox/fixtures/` is the exception, holding file content that scenarios stage rather than scenarios of its own, so both pickers filter it out. That tree sits outside `files` in `package.json`, so an installed `canon` carries the command, reports it as toolkit-only on one line, and exits 1 rather than failing on the missing directory. Route non-interactively with `SANDBOX_SCENARIO`:
+Scenarios live under `sandbox/`, one folder per category. `sandbox/fixtures/` is the exception, holding file content that scenarios stage rather than scenarios of its own, so the picker and the coverage report both filter it out. That tree sits outside `files` in `package.json`, so an installed `canon` carries the command, reports it as toolkit-only on one line, and exits 1 rather than failing on the missing directory. Route non-interactively with `SANDBOX_SCENARIO`:
 
 ```bash
 SANDBOX_SCENARIO=sync canon sandbox infra:tooling

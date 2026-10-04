@@ -23,7 +23,7 @@ sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
 
 Resolve the arm at Step 4, before the report prints. Grep the scenario file for `select_or_route_scenario`, which is what a multi-arm scenario calls. Roughly half the catalog declares it, so treat the multi-arm case as ordinary rather than exceptional.
 
-A multi-arm scenario run with no arm never reaches the skill session. `run.sh` forwards the arm to `manage-sandbox.sh`, which sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives one, so an empty arm leaves both unset and `select_or_route_scenario` falls through to the picker. The picker aborts on a missing TTY, which is every agent-driven run, and it blocks on input when a TTY is attached. Passing `CANON_NON_INTERACTIVE=1` to dodge that is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose.
+A multi-arm scenario run with no arm never reaches the skill session. `run.sh` forwards the arm to `canon sandbox`, which sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives one, so an empty arm leaves both unset and `select_or_route_scenario` falls through to the picker. The picker aborts on a missing TTY, which is every agent-driven run, and it blocks on input when a TTY is attached. Passing `CANON_NON_INTERACTIVE=1` to dodge that is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose.
 
 Do not guess the arm from the scenario file. Ask the user: `Arm for <category>:<rest>? (arm name, or "none" to skip verification)`. Accept `none` as the `no-mechanism` gate. This mirrors the question Step 2a already asks when a skill maps to no scenario.
 

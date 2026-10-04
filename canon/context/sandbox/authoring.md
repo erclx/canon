@@ -5,22 +5,30 @@ description: Scenario file shape, the three hooks, the provisioning order, and t
 
 # Authoring
 
-Each scenario is a `.sh` file with two optional hook functions, `use_config` and `use_anchor`, and a required `stage_setup` function. `manage-sandbox.sh` handles provisioning, asset injection, skill injection, git setup, and baseline tagging, and the hooks configure that pipeline before it runs. `canon/context/sandbox/fixtures.md` covers the file content a scenario stages.
+Each scenario is a `.sh` file with two optional hook functions, `use_config` and `use_anchor`, and a required `stage_setup` function. `src/sandbox/provision.ts` handles provisioning, asset injection, skill injection, git setup, and baseline tagging, and the hooks configure that pipeline before it runs. `canon/context/sandbox/fixtures.md` covers the file content a scenario stages.
 
 ## Decisions
 
+### The hook contract
+
+A scenario's hooks run in a bash child through `scripts/sandbox-hook.sh`, and the TypeScript harness reads back only what the contract carries. `probe` runs `use_config` and `use_anchor` and prints every export they changed as NUL-separated pairs plus an anchor flag. `stage` re-runs both hooks, then runs `stage_setup` inside the tree and writes a report file.
+
+- The stage re-runs the hooks rather than receiving the probe's pairs, since every hook only exports. Passing the pairs in the environment is the switch to make the day a hook does more.
+- The report carries what `stage_setup` did to the shell the old dispatcher shared with it: the exports it changed, an `@exited` record when the shell exits first, and nothing at all when it `exec`s a verb, since an `exec` skips the EXIT trap. `tooling:upstream` sets `SANDBOX_SKIP_AUTO_COMMIT` from `stage_setup`, and arms across ten `infra` scenarios end on `exec bun src/cli.ts <verb>`, whose own frame is the last one written.
+- Writing a scenario so it fits the contract was the rejected alternative, because a scenario edited to fit is the signal that the contract is wrong.
+
 ### Which commit `SANDBOX_SKIP_AUTO_COMMIT` gates
 
-Two helpers in `scripts/manage-sandbox.sh` commit, and the flag reaches only the second. `initialize_sandbox_environment` provisions, then calls `setup_sandbox_assets`, which injects seeds and rules and closes on `commit_environment_setup`. Only afterwards does `execute_sandbox_and_commit` run `stage_setup`, then `inject_changed_skills`, then `commit_sandbox_changes`, which is the commit the flag guards.
+Two steps in `src/sandbox/provision.ts` commit, and the flag reaches only the second. Provisioning injects seeds and rules and closes on the environment commit. Only afterwards does the stage run `stage_setup`, then `injectChangedSkills`, then `commitScenarioChanges`, which is the commit the flag guards.
 
 That order lets an arm stage a deliberately dirty tree. Work `stage_setup` leaves staged, unstaged, or untracked survives provisioning under the flag, because the unconditional commit already ran. `claude:review-branch` depends on it, staging one bug in each of four halves so the selection rule has all four to read.
 
 ### Injecting changed skills
 
-After `stage_setup`, `manage-sandbox.sh` unions the `claude/skills/**/SKILL.md` diff with any untracked new skill folders and copies each into `<sandbox>/.claude/skills/<name>/SKILL.md`. Project-scoped skills take priority over the installed plugin, so invoking `/<skill-name>` in the sandbox session exercises the branch's version, committed or not, without `--plugin-dir` or `--bare`.
+After `stage_setup`, `injectChangedSkills` unions the `claude/skills/**/SKILL.md` diff with any untracked new skill folders and copies each into `<sandbox>/.claude/skills/<name>/SKILL.md`. Project-scoped skills take priority over the installed plugin, so invoking `/<skill-name>` in the sandbox session exercises the branch's version, committed or not, without `--plugin-dir` or `--bare`.
 
 - The diff lists a skill the branch deleted beside one it changed, so the loop skips a path no longer in the tree and a branch retiring a skill provisions without a failed copy.
-- The changed set comes from `resolve_sandbox_skill_diff_base` in `scripts/lib/sandbox-git.sh`, using `git merge-base HEAD origin/main`, falling back to `merge-base HEAD main` and then to bare `main`. A checkout whose local `main` trails the remote still diffs against what merged, rather than injecting bodies from commits the branch never touched.
+- The changed set diffs against `git merge-base HEAD origin/main`, falling back to `merge-base HEAD main` and then to bare `main`. A checkout whose local `main` trails the remote still diffs against what merged, rather than injecting bodies from commits the branch never touched.
 - Under `SANDBOX_SKIP_AUTO_COMMIT` the copies would stay untracked and reach an arm whose skill reads untracked files, so each is appended to `$SANDBOX/.git/info/exclude` right after the copy. That keeps it off `git ls-files --others --exclude-standard` while `.claude/skills/` still loads it.
 
 ### Gov injection
@@ -31,13 +39,13 @@ A failed install aborts provisioning with the installer's own stderr, since a sa
 
 ### The anchor remote
 
-`use_sandbox_anchor` in `scripts/lib/sandbox-git.sh` holds the repository name, `canon-sandbox`, in one place, and every declaring scenario delegates to it with no argument. `ANCHOR_REPO` carries no default, since a fallback would sit permanently unreached. The library exports `use_sandbox_anchor` rather than declaring `use_anchor` itself, because `manage-sandbox.sh` keys off `type -t use_anchor` to decide between staging the anchor fixture and starting empty, and a hook declared at source time would hand an anchor to every scenario sourcing the file for its identity helpers.
+`use_sandbox_anchor` in `scripts/lib/sandbox-git.sh` holds the repository name, `canon-sandbox`, in one place, and every declaring scenario delegates to it with no argument. `ANCHOR_REPO` carries no default, since a fallback would sit permanently unreached. The library exports `use_sandbox_anchor` rather than declaring `use_anchor` itself, because `scripts/sandbox-hook.sh` keys off `type -t use_anchor` to decide between staging the anchor fixture and starting empty, and a hook declared at source time would hand an anchor to every scenario sourcing the file for its identity helpers.
 
 - The anchor URL is built once by `sandbox_anchor_url` and reaches GitHub over HTTPS rather than SSH, since an agent cannot answer a passphrase prompt and a machine carrying only `gh` credentials has none to offer SSH.
 - The harness sets `credential.helper` to `!gh auth git-credential` on the sandbox repo rather than expecting the operator to run `gh auth setup-git`. `gh auth login` leaves git without a credential, and scoping the helper to the throwaway repo keeps the operator's global config unwritten while covering the pushes the agent makes from inside the sandbox.
 - Setting the helper resets the list first with an empty value. `credential.helper` is multi-valued across system, global, and local config, so a plain set leaves an operator's own `store` entry or stale token answering first, and the push fails with a 403 on exactly the machines this setup serves.
-- `GIT_TERMINAL_PROMPT=0` is exported by `manage-sandbox.sh` and again by `run.sh`. Git otherwise falls back to a terminal prompt when no helper supplies a credential, which would block on `/dev/tty` rather than fail. `run.sh` needs its own export because the agent pushes from a session that does not inherit the provisioning environment.
-- `require_sandbox_anchor_config` runs in the main shell before provisioning, because `sandbox_anchor_url` is called inside command substitutions where `log_error` exits only the subshell. Without it an empty `GITHUB_ORG` produces `git remote add origin ""`, which succeeds and leaves the run failing later somewhere unrelated.
+- `GIT_TERMINAL_PROMPT=0` is set by the provisioning harness for every child it spawns and again by `run.sh`. Git otherwise falls back to a terminal prompt when no helper supplies a credential, which would block on `/dev/tty` rather than fail. `run.sh` needs its own export because the agent pushes from a session that does not inherit the provisioning environment.
+- The harness refuses an empty `GITHUB_ORG` before staging an anchor tree, because `sandbox_anchor_url` is called inside command substitutions where `log_error` exits only the subshell. Without it an empty `GITHUB_ORG` produces `git remote add origin ""`, which succeeds and leaves the run failing later somewhere unrelated.
 - `configure_sandbox_anchor_remote` sets identity and the remote in one call. `configure_sandbox_git_identity` stays callable alone, since a scenario that never reaches a remote must not acquire one. The baseline push stays with each scenario, because several push after staging their own fixture, and publishing the anchor content early would change what lands on `origin/main`.
 
 ### Probing the anchor
@@ -51,7 +59,7 @@ Refusing is the default because every anchor scenario force-pushes to `main`, so
 ## Gotchas
 
 - A scenario reading git history through a pipeline ending in an early exit fails on output it read. Scenario files run under `set -o pipefail`, so a `grep -m 1` matching the first line closes the pipe while git is still writing, and the substitution returns git's SIGPIPE status. The failure is timing-dependent and passes by hand in an interactive shell. Take the listing through a process substitution with a `while read` loop and `break`, which pipefail does not observe. `infra:drift` carries both reads in that shape.
-- `init_empty_sandbox` writes a `.gitignore` holding `.canon/tmp/` and `node_modules` before `stage_setup` runs, so a scenario modelling ignore-entry drift rewrites a file it did not create. Truncating it drops both entries, and a session that installs anything then has `node_modules` tracked. Copy the file before the write and restore the copy afterwards, which removes exactly what the write added. The same shape covers any file the harness seeds and a scenario modifies.
+- The empty tree `src/sandbox/provision.ts` starts from carries a `.gitignore` holding `.canon/tmp/` and `node_modules` before `stage_setup` runs, so a scenario modelling ignore-entry drift rewrites a file it did not create. Truncating it drops both entries, and a session that installs anything then has `node_modules` tracked. Copy the file before the write and restore the copy afterwards, which removes exactly what the write added. The same shape covers any file the harness seeds and a scenario modifies.
 - A refusal arm that stages nothing still owes its commit call a check. `stage_setup` runs after the seed-injection commit, so an arm changing nothing on disk hits an empty diff, which exits 1 under `set -e` and aborts before the `log_step` lines print. Skip the commit call on an arm whose fixture is the absence of a file.
 - A failure arm naming its expected cause still fires for causes nobody anticipated. A `gh` call carrying an unsupported flag fails straight into a fallback log line with no pull request created, while the scenario reports ready. Give a fallback a message naming the failure rather than a guess at its cause, and follow any precondition step with a read proving the artifact exists.
 - An anchor arm that declares `use_anchor` and never calls `configure_sandbox_anchor_remote` runs the full anchor provisioning path with no network call and no force-push to the shared remote. `provision_sandbox` dispatches on `type -t use_anchor` alone, so a throwaway scenario declaring it with a no-op `stage_setup` checks provisioning, and a pushing arm is worth spending only on the run that has to prove the remote path. The second way to run an anchor arm without a force-push is `canon sandbox equivalence <category> --stub-remote`, which points the arm at a local bare repository and a stub `gh`. `canon/context/sandbox/fixtures.md` covers what it compares.

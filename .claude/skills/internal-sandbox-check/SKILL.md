@@ -41,7 +41,7 @@ The four lists, in order:
 - The changed sandbox scenarios
 - The current root, whether that is main or a linked worktree
 
-`.sandbox/` lives under whichever root ran `manage-sandbox.sh`, because the script resolves `PROJECT_ROOT` from its own path.
+Provisioning reads the scenarios of whichever root ran `bun src/cli.ts sandbox`, because the CLI resolves `PROJECT_ROOT` from its own path.
 
 Drop any path in the script list that already appears in the scenario list. Scenario edits surface through the "Scenarios changed but not paired" tail and do not need a mapping pass.
 
@@ -112,7 +112,7 @@ Build the distinct scenario list from Step 2 results. Keep their original input 
 
 Resolve the arm and the gate for the `Provisioning:` scenario here, following the arm rule in `.claude/skills/internal-sandbox-check/references/headless.md` and the skip conditions in Step 6. Both outcomes are read before Step 6 runs: this step prints them on the `Headless verification:` line, and Step 5 skips on them.
 
-Then read `.claude/skills/internal-sandbox-check/references/report.md` for the block to print and the rules each of its sections follows. Always invoke the local `scripts/manage-sandbox.sh`, never `canon sandbox`, which from a worktree runs the main repo's stale scenarios.
+Then read `.claude/skills/internal-sandbox-check/references/report.md` for the block to print and the rules each of its sections follows. Always invoke the local `bun src/cli.ts sandbox`, never `canon sandbox`, which from a worktree runs the main repo's stale scenarios.
 
 ## Step 5: execute re-provision
 

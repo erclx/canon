@@ -13,11 +13,11 @@ Print one block to chat:
 Sandbox check
 
 Provisioning:
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
+  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
 
 Queued (run manually after testing the current scenario):
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
-  CANON_NON_INTERACTIVE=1 ./scripts/manage-sandbox.sh <category>:<scenario>
+  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
+  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
 
 Headless verification (this session runs it):
   sandbox/run.sh <category>:<rest> "/canon:<skill-name>" <arm>
@@ -39,9 +39,9 @@ Rules for the block:
 - An `EXEMPT` row prints its census `reason` as the hint, which is the whole value of reading the file. Print the reason verbatim rather than summarizing it, since a reader overturns an exemption by disagreeing with its stated grounds.
 - A row carrying a census verdict or `OUTSIDE-CENSUS` shows `none` in the scenario column. Five statuses now resolve to no scenario, so the label is what distinguishes them and the column no longer does.
 - For plugin skills, use `<skill-name>` as the item path and append `# /<skill-name>` as the invocation hint. For scripts under `scripts/`, use the path relative to the repo root (`scripts/core/regen-hero.ts`) and omit the hint. For `src/**` items, append `# Closest e2e: bun run check:install` as the hint.
-- `Provisioning:` shows exactly one scenario, the next to provision. Always invoke the local script, never `canon sandbox`. `canon` is globally installed and resolves to the main repo's scripts, so from a worktree it would run stale scenarios and provision the sandbox outside the worktree.
+- `Provisioning:` shows exactly one scenario, the next to provision. Always invoke the local `bun src/cli.ts`, never `canon sandbox`. `canon` is globally installed and resolves to the main repo's source, so from a worktree it would run stale scenarios and provision the sandbox outside the worktree.
 - `.sandbox/` is a single directory per repo root. Provisioning a second scenario overwrites the first, so the skill provisions one at a time and queues the rest.
-- `Queued:` lists every remaining distinct scenario as a full `manage-sandbox.sh` command, one per line, so the user can copy directly. Omit the section when there is only one scenario.
+- `Queued:` lists every remaining distinct scenario as a full `bun src/cli.ts sandbox` command, one per line, so the user can copy directly. Omit the section when there is only one scenario.
 - Omit `Provisioning:` and `Queued:` when no pairing carries a scenario, since there is nothing to provision.
 - `Headless verification:` shows the Step 6 command for the `Provisioning:` scenario alone, carrying the arm when the scenario is multi-arm. Replace the command with `gate: <label>` when a Step 6 skip condition holds, so the report says why before the run is missing rather than after.
 - Print the interactive re-test command flush-left as a single chained line (`cd … && claude --plugin-dir … --model sonnet`) so the user can paste it into any terminal

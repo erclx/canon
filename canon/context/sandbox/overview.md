@@ -14,10 +14,11 @@ Owns the scenarios that provision isolated project states for testing scripts, c
 - `sandbox/` owns the scenario scripts, one folder per category
 - `sandbox/<category>/` owns one file per command, each holding one or more named scenarios
 - `sandbox/fixtures/` owns file content staged into the sandbox and each arm's `expect.toml`
-- `src/sandbox/` owns the expectation checker, the coverage report, and the skill census
+- `src/sandbox/` owns the provisioning order, the hook contract, the expectation checker, the coverage report, and the skill census
+- `scripts/sandbox-hook.sh` owns the bash entry a scenario's hooks run through, since the scenarios and the library they call stay bash
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project state, outside the repository and unique to the run that provisioned it
 
-Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `scripts/manage-sandbox.sh`, `src/commands/sandbox.ts`, and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in all three, so a helper the harness needs on disk goes to `scripts/lib/`, where `sandbox-dispatch.sh` sits.
+Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every picker filters it out by the literal string `fixtures` in `src/commands/sandbox.ts` and `src/sandbox/coverage.ts`. Any other subdirectory added there reads as a category in both, so a helper the harness needs on disk goes to `scripts/lib/`, where `sandbox-dispatch.sh` sits.
 
 ## Decisions
 
@@ -25,7 +26,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 - The scenario tree sits at `sandbox/` rather than under `scripts/`, the folder for a project's chores. The harness carries its own authoring contract, census, and expectation scoring, and it held seven eighths of the shell under `scripts/` before it moved, so the chores folder was mostly one domain that was not a chore.
 - Staying under `scripts/` was the alternative, and it ties the folder to the language. The scenarios are meant to be rebuilt in TypeScript in this same folder, which a role name survives and a language-shaped home does not.
-- The bash harness that provisions the tree, `scripts/manage-sandbox.sh` and the `scripts/lib/sandbox-*.sh` libraries, stays under `scripts/` until its TypeScript replacement lands under `src/`, so it does not move twice.
+- The provisioning order lives in `src/sandbox/provision.ts`, and the bash dispatcher it replaced is gone. The headless runner `sandbox/run.sh` and the `scripts/lib/sandbox-*.sh` libraries stay where they are until their own slice moves them, so neither moves twice.
 - Four gates walked `scripts/` by name, being `check:shell`, the `shfmt` roots in `format` and `check:format`, and `scripts/core/check-color-source.sh`. Each names `sandbox` as a root of its own now, and the color check fails when either root is missing rather than reporting a tree it never walked.
 
 ### Scenario defaults and the reset contract
@@ -85,7 +86,7 @@ A nested background dispatch is not on this list. A shim bounds it and `sessions
 
 A shipped body cites `${CLAUDE_SKILL_DIR}/../../standards/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on `<root>/standards/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no standard still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/standards/`, a path inside the fixture that no assertion can tell from a project copy.
 
-`inject_changed_skills` injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies, and checking a fallback means leaving that skill's body alone on the branch. Closing the gap means changing what injection copies or what `--plugin-dir` points at, and both trade one unreachable case for another.
+`injectChangedSkills` in `src/sandbox/provision.ts` injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies, and checking a fallback means leaving that skill's body alone on the branch. Closing the gap means changing what injection copies or what `--plugin-dir` points at, and both trade one unreachable case for another.
 
 ### Git state
 

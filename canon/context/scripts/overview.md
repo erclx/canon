@@ -9,16 +9,16 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 
 ## Layout
 
-- `scripts/` owns `manage-sandbox.sh`, the only entry point in the folder. No other domain has a dispatcher
+- `scripts/` owns `sandbox-hook.sh`, the bash entry the TypeScript sandbox harness spawns to run a scenario's hooks. No domain keeps a bash dispatcher
 - `scripts/core/` owns repo maintenance: bootstrap, verify, regen
 - No domain keeps a verb folder under `scripts/`. `tooling` was the last to empty its own, once `canon tooling verify` moved to `src/tooling/verify-stack.ts`
 - `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results. It carries no runner and nothing dispatches to it
 - `scripts/lib/` owns shared functions, sourced and never executed directly. No bash function is under test
-- The scenario tree that `manage-sandbox.sh` provisions from sits at `sandbox/` in the project root, outside this folder, covered in `canon/context/sandbox/index.md`
+- The scenario tree that `canon sandbox` provisions from sits at `sandbox/` in the project root, outside this folder, covered in `canon/context/sandbox/index.md`
 
 ## Decisions
 
-- `manage-sandbox.sh` is the last entry point and stays bash permanently by decision. It holds its domain logic in the dispatcher rather than in a verb folder, so read it before assuming a scenario's behavior sits one file down.
+- The sandbox scenarios stay bash permanently by decision. Their provisioning order moved to `src/sandbox/provision.ts`, and each scenario's hooks run through `scripts/sandbox-hook.sh`, so read both before assuming a scenario's behavior sits in its own file.
 - A migrated domain loses its dispatcher entirely, and `src/commands/<domain>.ts` routes every verb it owns.
 - A dispatcher holding domain logic migrates in one pull request per file rather than verb by verb, since splitting the migration of dispatchers that share the same tracking documents would collide there for no review benefit.
 - A dispatcher that grew domain logic migrates that logic out to `src/<domain>/` rather than into the command file. Seed collection, gitignore scanning, and a settings merge are the shape that forces it, since a command file can unit-test none of them while `src/exec.ts` throws under vitest.
