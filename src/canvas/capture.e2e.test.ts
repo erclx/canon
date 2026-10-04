@@ -104,12 +104,21 @@ async function browserAvailable(): Promise<boolean> {
 
 const hasBrowser = await browserAvailable()
 
-function isTimesInstalled(): boolean {
-  const result = Bun.spawnSync(['fc-list', 'Times New Roman'], {
-    stdout: 'pipe',
-    stderr: 'ignore',
-  })
-  return result.exitCode === 0 && result.stdout.toString().trim() !== ''
+/**
+ * True only where `fc-list` answers that Times New Roman is absent. A machine
+ * with no `fc-list`, such as macOS, makes the spawn throw, and the answer there
+ * is unknown rather than absent, so the case skips.
+ */
+function isTimesMissing(): boolean {
+  try {
+    const result = Bun.spawnSync(['fc-list', 'Times New Roman'], {
+      stdout: 'pipe',
+      stderr: 'ignore',
+    })
+    return result.exitCode === 0 && result.stdout.toString().trim() === ''
+  } catch {
+    return false
+  }
 }
 
 function provision(root: string): void {
@@ -191,7 +200,7 @@ describe.skipIf(!hasBrowser)('captureCanvas', () => {
     }
   }, 60_000)
 
-  it.skipIf(isTimesInstalled())(
+  it.runIf(isTimesMissing())(
     'should refuse a frame that sets no family anywhere',
     async () => {
       const outcome = await captureCanvas(
