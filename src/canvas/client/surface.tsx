@@ -15,11 +15,13 @@ import {
   frameKey,
   frameTheme,
   frameVersions,
+  historyNotice,
   hoveredElement,
   moveFrameTo,
   panBy,
   previewMove,
   previewResize,
+  redo,
   registerFrameDocument,
   resizeElement,
   resizeFrameTo,
@@ -30,6 +32,7 @@ import {
   spacePan,
   type Theme,
   toggleFrameTheme,
+  undo,
   view,
   zoomAt,
 } from '@/canvas/client/state'
@@ -656,6 +659,12 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
         return
       case 'pan-release':
         spacePan.value = undefined
+        return
+      case 'undo':
+        void undo()
+        return
+      case 'redo':
+        void redo()
     }
   }
 
@@ -762,6 +771,11 @@ export function Surface({ viewportRef }: SurfaceProps): JSX.Element {
       </div>
       <ToolStrip />
       <Toolbar viewportRef={viewportRef} />
+      {historyNotice.value ? (
+        <p class="history-notice" role="status">
+          {historyNotice.value}
+        </p>
+      ) : null}
     </main>
   )
 }

@@ -531,6 +531,32 @@ code {
   background: var(--color-border);
 }
 
+.tool-button:disabled {
+  opacity: 0.4;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.tools-divider {
+  height: 1px;
+  margin: 2px var(--space-xs);
+  background: var(--color-border);
+}
+
+.history-notice {
+  position: absolute;
+  top: var(--space-md);
+  left: 50%;
+  max-width: min(28rem, calc(100% - 8rem));
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-chrome);
+  color: var(--color-text);
+  transform: translateX(-50%);
+}
+
 .zoom {
   min-width: 3.5rem;
   text-align: center;

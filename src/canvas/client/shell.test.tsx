@@ -2923,6 +2923,31 @@ describe('selection handles', () => {
     ])
   })
 
+  it('should send both edits of an element resize under one undo step', async () => {
+    renderApp([page('drafts', [frame('hero')])])
+    const doc = loadFrame(
+      'hero',
+      '<h1 style="width: 200px; height: 50px">Hero</h1>',
+    )
+    stampHash(doc, 'abc123')
+    placeElement(doc, 'h1', { x: 10, y: 20, width: 200, height: 50 })
+    clickIn(doc, 'h1')
+    answerEditsWith(['def456', 'ghi789'])
+
+    await dragHandle(
+      handleOf('hero', 'se'),
+      { x: 100, y: 100 },
+      { x: 150, y: 110 },
+    )
+
+    const steps = sentTo('/api/frames/edit').map(
+      (body) => (body as { step?: unknown }).step,
+    )
+    expect(steps).toHaveLength(2)
+    expect(typeof steps[0]).toBe('string')
+    expect(steps[1]).toBe(steps[0])
+  })
+
   it('should drop the preview when a handle drag comes back to where it started', async () => {
     renderApp([page('drafts', [frame('hero')])])
     const doc = loadFrame('hero', '<h1>Hero</h1>')
@@ -3498,6 +3523,141 @@ describe('view tools', () => {
     act(() => buttonNamed('Fit').click())
 
     expect(view.value.x).toBe(60 + 48)
+  })
+})
+
+describe('undo', () => {
+  function surface(): HTMLElement {
+    const element = mount.querySelector<HTMLElement>('main.surface')
+    if (!element) throw new Error('no surface')
+    return element
+  }
+
+  function key(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      ...init,
+    })
+    act(() => {
+      target.dispatchEvent(event)
+    })
+    return event
+  }
+
+  function historyButton(name: string): HTMLButtonElement {
+    const button = [
+      ...mount.querySelectorAll<HTMLButtonElement>(
+        '[aria-label="Tools"] button',
+      ),
+    ].find((candidate) => candidate.title.startsWith(`${name} (`))
+    if (!button) throw new Error(`no ${name} button`)
+    return button
+  }
+
+  /**
+   * Answers each history step with the outcome given and the reread with the
+   * flags given, recording what was posted.
+   */
+  function answerHistory(
+    pages: Page[],
+    outcome: string,
+    flags = { canUndo: false, canRedo: true },
+  ): void {
+    globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+      if (init?.method === 'POST') {
+        sent.push({ url: String(url), body: JSON.parse(String(init.body)) })
+        return new Response(JSON.stringify({ ok: true, outcome }), {
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      return new Response(
+        JSON.stringify({ ...record(pages), history: flags }),
+        { headers: { 'content-type': 'application/json' } },
+      )
+    }) as typeof fetch
+  }
+
+  function renderWithHistory(pages: Page[], canUndo: boolean): void {
+    act(() => {
+      applyRecord({
+        ...record(pages),
+        history: { canUndo, canRedo: false },
+      })
+      render(<App />, mount)
+    })
+  }
+
+  it('should disable both buttons while the server holds nothing to step', () => {
+    renderApp([page('drafts', [frame('hero')])])
+
+    expect(historyButton('Undo').disabled).toBe(true)
+    expect(historyButton('Redo').disabled).toBe(true)
+  })
+
+  it('should enable undo once the page record reports an edit to undo', () => {
+    renderWithHistory([page('drafts', [frame('hero')])], true)
+
+    expect(historyButton('Undo').disabled).toBe(false)
+    expect(historyButton('Redo').disabled).toBe(true)
+  })
+
+  it('should post an undo from its button and light redo from the reread', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(sentTo('/api/history/undo')).toEqual([{}])
+    expect(historyButton('Redo').disabled).toBe(false)
+  })
+
+  it('should undo on Ctrl and Z and redo on Ctrl, Shift, and Z or Ctrl and Y', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+
+    await act(async () => {
+      key(surface(), { key: 'z', code: 'KeyZ', ctrlKey: true })
+      key(surface(), { key: 'Z', code: 'KeyZ', ctrlKey: true, shiftKey: true })
+      key(surface(), { key: 'y', code: 'KeyY', ctrlKey: true })
+    })
+
+    expect(sentTo('/api/history/undo')).toHaveLength(1)
+    expect(sentTo('/api/history/redo')).toHaveLength(2)
+  })
+
+  it('should leave Ctrl and Z typed in a field to the field', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'applied')
+    const field = document.createElement('input')
+    surface().append(field)
+
+    const event = key(field, { key: 'z', code: 'KeyZ', ctrlKey: true })
+    await act(async () => {})
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(sentTo('/api/history/undo')).toEqual([])
+  })
+
+  it('should say so when the server dropped an entry that changed', async () => {
+    const pages = [page('drafts', [frame('hero')])]
+    renderWithHistory(pages, true)
+    answerHistory(pages, 'dropped', { canUndo: false, canRedo: false })
+
+    await act(async () => {
+      historyButton('Undo').click()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(mount.querySelector('.history-notice')?.textContent).toContain(
+      'Could not undo',
+    )
   })
 })
 
