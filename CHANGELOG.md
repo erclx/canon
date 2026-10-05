@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.30.0](https://github.com/erclx/canon/compare/v5.29.0...v5.30.0) (2026-10-05)
+
+
+### Features
+
+* **canvas:** show the brand icon in the shell tab ([#2256](https://github.com/erclx/canon/issues/2256)) ([cb6de4a](https://github.com/erclx/canon/commit/cb6de4ac0fea54813b7e9dc51a8c833143c80c75))
+
 ## [5.29.0](https://github.com/erclx/canon/compare/v5.28.0...v5.29.0) (2026-10-04)
 
 
