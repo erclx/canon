@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { IMPLIED_ATTRIBUTE, TOKENS_ATTRIBUTE } from '@/canvas/address'
 import { moveFrame } from '@/canvas/content'
 import { editFrameAtIndex } from '@/canvas/edit'
+import { brandFavicon } from '@/design/brand-favicon'
 import { EDITING_FILE, EDITING_TTL_MS, markEditing } from '@/canvas/editing'
 import { type CanvasStarted, injectTokens, startCanvas } from '@/canvas/server'
 import { SERVE_HOST } from '@/serve/static'
@@ -348,6 +349,15 @@ describe('startCanvas', () => {
     const css = await (await get(server, '/api/chrome.css')).text()
 
     expect(css).toContain('--color-background:')
+  })
+
+  it('should serve the brand icon as an SVG', async () => {
+    const server = start()
+
+    const response = await get(server, '/api/icon.svg')
+
+    expect(response.headers.get('content-type')).toBe('image/svg+xml')
+    expect(await response.text()).toBe(brandFavicon())
   })
 
   it('should send a change event when a frame file is written', async () => {
