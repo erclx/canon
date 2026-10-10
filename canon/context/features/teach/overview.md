@@ -1,9 +1,9 @@
 ---
-title: Teach
+title: Overview
 description: Learning workspace layout, the chrome splice, the committed fixture, and the canon teach verbs
 ---
 
-# Teach
+# Overview
 
 ## Overview
 
@@ -16,7 +16,8 @@ Two standards fix the artifact and one skill drives the pedagogy. `claude/skills
 - `src/teach/` owns the workspace reader, the chrome splice, lesson resolution, and the body renderer
 - `examples/teach/` owns the committed fixture, rooted at `00-fixture/`, which development renders against
 - `.canon/teach/` owns the operator's live workspaces, gitignored and backed through `canon records push`
-- `canon/context/features/teach-chrome.md` owns the chrome's build and style decisions and the page scripts
+- `chrome.md` beside this entry owns the chrome's build and style decisions and the page scripts
+- `pages.md` beside this entry owns what the root, contents, lesson, and reference pages show and do
 
 ## Decisions
 

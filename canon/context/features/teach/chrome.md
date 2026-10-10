@@ -1,13 +1,49 @@
 ---
-title: Teach chrome
-description: The teach page's chrome, sidebar, type scale, and typed browser scripts, with the decisions behind them
+title: Chrome
+description: The teach page chrome, its regions and breadcrumb, sidebar, type scale, and typed browser scripts, with the decisions behind them
 ---
 
-# Teach chrome
+# Chrome
 
 ## Overview
 
-The chrome is the masthead, breadcrumb, sidebar, footer nav, and reading bar `canon teach nav` splices into every teach page. `teach.md` carries the workspace, the splice, and the verbs. This entry carries the browser side: how the chrome is built and styled, and the scripts it runs.
+The chrome is the masthead, breadcrumb, sidebar, footer nav, and reading bar `canon teach nav` splices into every teach page. `overview.md` carries the workspace, the splice, and the verbs. This entry carries the browser side: how the chrome is built and styled, and the scripts it runs.
+
+## Surface
+
+Every page shares one header and one course sidebar, built by `renderHeader` and `renderSidebar` in `src/teach/nav.ts` and styled by the chrome rules in `examples/teach/course.css`. The bar is `--teach-mast-h`, 3.5rem tall, and its row spans the window rather than the reading measure, so the collapse and theme controls sit at the same inset on every page. The foot nav shares the article's measure, and an anchor jump lands below the bar rather than behind it.
+
+### Regions
+
+- Sidebar (`.sb`): the left column, holding the workspace switcher at its top, a meta line, the page list, and a foot line. Above 1100px it sits beside the pane and at 1100px and below it overlays the page
+- Masthead (`.mast`): sticky across the top of the pane, holding the collapse control and the breadcrumb on the left and the theme toggle on the right
+- Reading bar: a strip along the masthead's bottom edge that fills left to right with position in the page. It is the one motion the chrome carries, and it reports position inside the lesson where the sidebar reports position in the course
+- Jump menu: a panel under whichever crumb caret opened it, overlapping the page content below it rather than pushing it down
+- Pane (`.pane`): right of the sidebar and under the masthead, holding the page's own `<main>`
+
+### Breadcrumb
+
+The crumb grows with depth. The root has one segment, `Workspaces`. A contents page has two, with the workspace after it, and a lesson has three, ending in `Lesson N of M`. A reference page puts the page's title in the third place. Only that trailing segment drops its jump menu, and every other one, current page or not, still opens one.
+
+A crumb and its caret form one chip. The label goes to the page, the caret opens the menu, and the whole chip fills with the chrome hover ground while the pointer is over it or its menu is open. Crumb links are neutral rather than accented, since the accent marks where you are rather than where you can go, and the caret stays drawn and muted in every state. The trailing segment reads `Lesson N of M` until the lesson's own title scrolls off and carries the title afterwards.
+
+The `☰` control left of the crumb collapses the sidebar. It is the panel's only trigger at any window width, and below 1100px it opens the panel over the lesson rather than beside it.
+
+### States and behavior
+
+- sidebar-open: a lesson or reference page loads, and the sidebar sits beside the pane
+- sidebar-shut: the root or a contents page loads, and the pane takes the full width under the masthead
+- jump-menu-open: the visitor hovers or clicks a crumb caret, and the menu panel opens under its trigger. A row pairs a two-digit ordinal with the item's name, marked as the current page where it is, with a lesson count trailing in the workspace menu and nothing in the lesson menu
+- Opening one jump menu closes any other already open, the sidebar's workspace switcher included. A click outside every menu closes it, and Escape does too and returns focus to the trigger
+- A breadcrumb menu opens on hover as well as click, and a click on a panel hover already opened keeps it open. The sidebar's switcher stays click-only, since its panel opens over the lesson list the pointer is headed toward
+- The theme toggle flips light and dark and remembers the pick in the visitor's own browser, falling back to the system preference
+- The sidebar's workspace heading stops at two lines with an ellipsis and carries the whole title in its `title` attribute, so a long title stays inside the top band
+
+### Not on this surface
+
+- No search across workspaces or lessons, since the sidebar filter narrows one workspace's lesson list only
+- No account, sign-in, or sync control, since every page is a local file
+- No progress saved per visitor beyond the theme and the sidebar's width and open state
 
 ## Decisions
 
@@ -40,5 +76,6 @@ Two literals stay on purpose. `code` sets `0.85em` and `pre code` sets `1em`, be
 
 ## Related
 
-- `canon/context/features/teach.md`: the workspace, the chrome splice, and the verbs
+- `canon/context/features/teach/overview.md`: the workspace, the chrome splice, and the verbs
+- `canon/context/features/teach/pages.md`: what each page kind shows and does under this chrome
 - `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from
