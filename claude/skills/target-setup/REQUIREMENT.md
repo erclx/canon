@@ -36,12 +36,12 @@ two copies could disagree with nothing comparing them.
 
 ## Must not
 
-- Guard against clobbering an existing project's configs, which `target-check` and `canon sync` cover instead
+- Guard against clobbering an existing project's configs, which `canon sync` covers on an existing project and `target-check` reports on
 - Author a rule or a stack in the target project on the fly
 - Generate a config the tooling stack ships as a golden file
 - Install Claude Code plugins, which provision a machine rather than a project
 - Fail an unattended scaffold on a server start, which is flaky enough to be a depth the operator asks for
-- Survive as a skill nothing invokes but a person typing its name. the target projects page names it as the scaffold step, so a later read finding no caller but the author has found a body that should have stayed a verb
+- Survive as a skill nothing invokes but a person typing its name. The target projects page names it as the scaffold step, so a later read finding no caller but the author has found a body that should have stayed a verb
 
 ## Guards
 

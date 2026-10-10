@@ -110,7 +110,7 @@ The list stays written in the skill body as the fallback for a target whose inst
 
 Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
 
-The chain ends at capture, and review is run on its own.
+The chain ends at capture, and nothing curates the pen after it.
 
 ### UI polish
 
