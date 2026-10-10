@@ -2,7 +2,7 @@
 name: canon-feedback-triage
 description: Files every open GitHub issue labeled `feedback` on the toolkit repo into an intake folder as one measured item each, skipping any issue the board already carries. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback`), to answer the filed items (that is `plan-intake-answer`), or for general GitHub issue triage unrelated to toolkit feedback.
 metadata:
-  family: decide
+  family: upkeep
 ---
 
 # Canon feedback triage
