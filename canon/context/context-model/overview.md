@@ -45,7 +45,7 @@ The test no longer ships as a rule, so it reaches a session through this entry a
 
 `canon/REQUIREMENTS.md` states a word cap the Canonical records stage gates. `CLAUDE.md` states none, and trims hold it instead, each moving a bullet into the skill or entry that reads it. Reach never bounds either file, since nearly every fact touches two domains. Bounding by reach is how an eager architecture record once grew to forty entries and about 15k tokens loaded into every session, and a numeric ceiling on its length was tried first and dropped, since nothing enforced it and every merge drifted past it.
 
-That record is retired here. A decision several domains read lands in the entry of the domain it constrains most, so a session pays for it on demand rather than at every start. Each other entry it touches points there, and the pointer carries no check, since nothing compares an entry against the one it defers to.
+That record is retired here, and `CLAUDE.md` states where a decision several domains read now lands. A session pays for such a decision on demand rather than at every start. The pointer each other domain keeps carries no check, since nothing compares an entry against the one it defers to.
 
 ### What each root holds
 
