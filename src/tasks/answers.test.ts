@@ -235,6 +235,66 @@ describe('planAnswers', () => {
     expect(outcome.open.map(({ label }) => label)).toContain('Batch staging')
   })
 
+  describe('a plan stacked on a live sibling', () => {
+    const FILES = ['a', 'b', 'c', 'd'].map((name) => `src/${name}.ts`)
+
+    async function writeStacked(extra: readonly string[]): Promise<void> {
+      const entries = FILES.map((path) => `- \`${path}\`: the change.`)
+      const write = (slug: string, constraints: readonly string[]) =>
+        writeFile(
+          join(ROOT, '.canon', 'plans', `feature-${slug}.md`),
+          [
+            `# Feature: ${slug}`,
+            '',
+            '**Constraints:**',
+            '',
+            ...constraints.map((line) => `- ${line}`),
+            '',
+            '**Files to touch:**',
+            '',
+            ...entries,
+            '',
+          ].join('\n'),
+          'utf8',
+        )
+
+      await write('parent', [])
+      await write('child', ['Stacks on `feature-parent`.', ...extra])
+    }
+
+    it('should hold the child with a Stacked sibling entry', async () => {
+      await writeStacked([])
+
+      const outcome = await planAnswers(ROOT, 'child')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(false)
+      expect(outcome.open.map(({ label }) => label)).toContain(
+        'Stacked sibling',
+      )
+    })
+
+    it('should launch the parent', async () => {
+      await writeStacked([])
+
+      const outcome = await planAnswers(ROOT, 'parent')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+
+    it('should launch the child once a Judged apart line gives a reason', async () => {
+      await writeStacked([
+        'Judged apart from `feature-parent`: a contract the child builds against.',
+      ])
+
+      const outcome = await planAnswers(ROOT, 'child')
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+  })
+
   it('should launch an ordinary plan carrying no staged batch', async () => {
     await writePlan('gate', [
       { suggested: 'the first, since the group already carries a verb.' },

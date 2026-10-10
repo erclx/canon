@@ -75,6 +75,7 @@ export const FINDING_KINDS = [
   'category-mismatch',
   'operator-call-phrasing',
   'batch-unsplit',
+  'stack-foldable',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]

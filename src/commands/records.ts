@@ -57,6 +57,7 @@ import {
   plural,
 } from '@/cli/ui'
 import { currentWorktreeRoot, mainWorktreeRoot } from '@/git/worktree'
+import { readLivePlans, stackFindings } from '@/tasks/stack'
 
 /** Returned when a record carries a finding, which is the gating result. */
 const EXIT_FINDINGS = 2
@@ -911,7 +912,24 @@ async function runValidate(
 
   const root = opts.root ?? (await defaultRoot(kind))
 
-  return report(await validateRecords(root, kind), emitJson, root)
+  return report(await validateWithStacks(root, kind), emitJson, root)
+}
+
+/**
+ * Appends the one plans finding that reads across files. It sits in the command
+ * layer because `src/records/` sits below `src/tasks/`, and `migrate` iterates
+ * `validateRecords` alone, so it never meets a finding with no safe repair.
+ */
+async function validateWithStacks(
+  root: string,
+  kind: RecordKind,
+): Promise<ValidateOutcome> {
+  const outcome = await validateRecords(root, kind)
+  if (!outcome.ok || kind !== 'plans') return outcome
+
+  const stacked = stackFindings(await readLivePlans(root))
+
+  return { ...outcome, findings: [...outcome.findings, ...stacked] }
 }
 
 function report(
