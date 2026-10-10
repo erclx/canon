@@ -58,7 +58,7 @@ The article gate is looser than the verb list and carries a real cost. Re-runnin
 
 A delta phrased as a transition (`from fourteen to fifteen`), a fraction (`thirteen of sixteen`), and a total reached through an indirect noun (`denominator of sixty-one shipped skills`) are all catalog-size claims this corpus carries, and none matches the trigger shape this reads. Each stays a known gap. The false-positive rate that gated closing them has a measurement behind it now, and what it showed is that the widening these three need is the one that costs a false positive rather than the one that does not.
 
-A second figure in a sentence whose first figure already matched is a fourth gap and a structural one, since one match is taken per catalog per sentence. `authors 66 rules under governance/rules/ and consumes 62 into .claude/rules/` is read for its 74 alone, which is correct here because the two figures name different populations, and a sentence stating one catalog twice would go unread the same way.
+A second figure in a sentence whose first figure already matched is a fourth gap and a structural one, since one match is taken per catalog per sentence. `authors 66 rules under governance/rules/ and consumes 45 into .claude/rules/` is read for its 66 alone, which is correct here because the two figures name different populations, and a sentence stating one catalog twice would go unread the same way.
 
 A calendar date (`2026-08-21`) or a backticked commit reference in the same sentence reads the whole sentence past, since that is how this corpus already marks a figure as a historical record rather than a live claim. `canon/ARCHITECTURE.md` and the context entries carry a figure this way deliberately, and every one of them stays correct forever.
 

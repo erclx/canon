@@ -18,7 +18,7 @@ Eleven sections in reading order, then the footer. A skip link and a sticky nav 
 - Ask and rules: the operator's request as a turn, then the rules matching the path it touches, as a split figure with the matched rules on the right
 - Skill and plan: a four-step flow showing one skill loaded out of the catalog, then the planner's turn stating the plan is its only write
 - Dispatch and workers: a controller over the two roles it launches, then a branch graph of the workers on disjoint file sets
-- Gate and memory: the test-first line quoted from the planning rule, then where the session's facts are routed
+- Gate and memory: the test-first line quoted from the `test-first` skill description, then where the session's facts are routed
 - Review and merge: the reviewer's turn with a before-and-after pair of real captures of one pull request, the review exchange, and the merge as a hook and its consequences, followed by the design tokens that merge landed, embedded live
 - Provenance: a ledger naming each session that built the change and what it produced
 - Install: three steps, one card each
