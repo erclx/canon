@@ -11,7 +11,7 @@ description: The candidate and document draft surfaces, the identity surface, an
 
 The name carries no ownership prefix, on the ownership axis in `canon/context/claude-plugin/skill-strategy/axes.md`: this skill drafts candidates as canvas pages and deletes them with the pick, so a bare verb phrase places it beside `decision-escalate` rather than beside a workflow-surface family. A noun with no act in it was the alternative and was declined.
 
-Each round is one canvas page and each arm one frame on it, named `arm-<id>`. The canvas page list reaches every round from one address, its theme toggle sets every frame at once, and each frame renders at its own layout width, which together retired the hand-written round picker the skill used to ship. The run records the pages it adds and deletes only those at close, since the canvas folder also holds the operator's own pages.
+Each round is one canvas page and each arm one frame on it, named `arm-<id>`. The canvas page list reaches every round from one address, its theme toggle sets every frame at once, and each frame renders at its own layout width, so the skill ships no picker or theme control of its own. The run records the pages it adds and deletes only those at close, since the canvas folder also holds the operator's own pages.
 
 ### The canvas page is the comparison
 
