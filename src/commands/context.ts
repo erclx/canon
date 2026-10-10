@@ -65,10 +65,6 @@ import {
   type RequirementsReport,
 } from '@/context/requirements'
 import { auditIndexes, type FolderDrift } from '@/context/index-drift'
-import {
-  measureWireframeFolder,
-  type WireframeStatesReport,
-} from '@/context/wireframe-states'
 import { RENDER_WIDTH } from '@/markdown/structure'
 import {
   frameError,
@@ -104,7 +100,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, entry cap, word cap, and risk cap, the requirements record against its own word cap, and wireframe states against their evidence folders',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, entry cap, word cap, and risk cap, and the requirements record against its own word cap',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -139,8 +135,7 @@ export function register(program: Command): void {
         'never gated. --gate widens the gate to the other two',
         'findings that are facts rather than judgments: a missing required',
         'section and index drift. A context entry requires Overview and',
-        'Layout, and a wireframe requires Regions, States, Copy, and Not on',
-        'this surface. Entry length, reference form, table, provenance, and the',
+        'Layout. Entry length, reference form, table, provenance, and the',
         'record claim classification are judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
@@ -201,7 +196,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon context classify diff',
         '  canon context classify diff --base origin/main --json',
-        '  canon context classify diff --doc-types context,wireframes',
+        '  canon context classify diff --doc-types context',
         '',
       ].join('\n'),
     )
@@ -612,7 +607,7 @@ async function runAudit(
     return refuse('bad-folder-list', names, gateOnly, root, opts.json ?? false)
   }
 
-  // The root base is opt-in. A target carrying a root `wireframes/` would
+  // The root base is opt-in. A target carrying a root folder of its own would
   // otherwise be audited against a standard it never adopted, on a bare run
   // that named nothing.
   const named = opts.folder !== undefined
@@ -669,15 +664,6 @@ async function runAudit(
   // different answers, and one value for both reports the second as the first.
   const record = gateOnly ? undefined : await measureArchitecture(root)
   const requirements = gateOnly ? undefined : await measureRequirements(root)
-  const wireframes = gateOnly
-    ? []
-    : (
-        await Promise.all(
-          folders
-            .filter((folder) => folder.name === 'wireframes')
-            .map((folder) => measureWireframeFolder(root, folder)),
-        )
-      ).flat()
 
   if (gateOnly) {
     reportGate(citations)
@@ -693,7 +679,6 @@ async function runAudit(
     reportDrift(drift)
     reportRecord(record, root)
     reportRequirements(requirements, root)
-    reportWireframeStates(wireframes)
     outro()
   }
 
@@ -733,19 +718,14 @@ async function runAudit(
         architecture: gateOnly ? undefined : (record ?? null),
         // The same three states for the requirements record.
         requirements: gateOnly ? undefined : (requirements ?? null),
-        // Absent under `--citations-only`, for the same reason as above. An
-        // empty array under the ordinary run says the project carries no
-        // wireframes folder or no entry carrying a States table, which is a
-        // fact rather than an unmeasured run.
-        wireframes: gateOnly ? undefined : wireframes,
         checkpoints: {
           lines: LENGTH_CHECKPOINT,
           renderWidth: RENDER_WIDTH,
           provenanceFolder: PROVENANCE_FOLDER,
           requiredSections: REQUIRED_SECTIONS,
           // Keyed on the audited folder name. The flat key above stays for a
-          // caller that read it before wireframes owed a section, since turning
-          // it into this map would break that caller without an error.
+          // caller that read it first, since removing it would break that
+          // caller without an error.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
         },
       })}\n`,
@@ -764,7 +744,6 @@ async function runAudit(
       requirements !== undefined && isOverWordCap(requirements),
     sections,
     drift,
-    wireframes,
     widened,
   })
 
@@ -945,8 +924,7 @@ function reportReferenceForm(
 
 /**
  * Names the path each finding belongs to, which is an entry in the folder named
- * under `.claude/`, the folder itself in a domain split across one, and the
- * file in any wireframe folder. States
+ * under `.claude/`, and the folder itself in a domain split across one. States
  * the reach on every run for the reason the provenance report does.
  *
  * This prints ahead of the four readability measures because a missing section
@@ -983,7 +961,7 @@ function reportSections(
     )
   }
   logInfo(
-    'A heading at any level counts. Each entry answers for itself, except in a context domain split across a folder, where a sibling answers for the rest. A wireframe answers for itself in every folder.',
+    'A heading at any level counts. Each entry answers for itself, except in a context domain split across a folder, where a sibling answers for the rest.',
   )
 
   if (missing.length === 0) {
@@ -1351,45 +1329,5 @@ function reportDrift(drift: readonly FolderDrift[]): void {
   }
 
   logWarn(plural(lines.length, 'disagreement'))
-  pipeOutput(lines.join('\n'))
-}
-
-function reportWireframeStates(
-  wireframes: readonly WireframeStatesReport[],
-): void {
-  logStep('Wireframe states')
-
-  const withRows = wireframes.filter((entry) => entry.rows.length > 0)
-  if (withRows.length === 0) {
-    logInfo(
-      'No wireframe carries a States table, so nothing was checked against its evidence folders.',
-    )
-    return
-  }
-
-  const lines = withRows.flatMap((entry) => [
-    ...entry.missingFolders.map(
-      (finding) =>
-        `${entry.rel}:${finding.line}  ${finding.state}  no folder at ${finding.path}`,
-    ),
-    ...entry.unlistedFolders.map(
-      (finding) =>
-        `${entry.rel}  ${finding.root}/${finding.folder}  named in no row`,
-    ),
-    ...(entry.sketchWithEvidence
-      ? [
-          `${entry.rel}:${entry.sketchLine}  a plaintext sketch sits beside evidence that already exists`,
-        ]
-      : []),
-  ])
-
-  if (lines.length === 0) {
-    logInfo(
-      `${plural(withRows.length, 'wireframe')} checked, every state matched one-to-one with its evidence folder.`,
-    )
-    return
-  }
-
-  logWarn(plural(lines.length, 'finding'))
   pipeOutput(lines.join('\n'))
 }

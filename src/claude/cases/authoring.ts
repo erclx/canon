@@ -40,11 +40,6 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Draft a wireframe for the settings panel, nothing under canon/wireframes covers that surface yet.',
-    expect: 'draft-doc',
-  },
-  {
-    prompt:
       'Write a wiki reference page for Claude Code output styles, no page covers that subject yet.',
     expect: 'draft-doc',
   },

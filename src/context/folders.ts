@@ -20,16 +20,14 @@ import { SURFACE_ROOTS } from '@/roots/surface'
 export const DEFAULT_FOLDERS: readonly string[] = [
   'context',
   'diagrams',
-  'wireframes',
 ]
 
 /**
  * The bases every folder in the default list is looked for under.
  *
  * `diagrams` is a session record and resolves under `RECORD_ROOTS`, while
- * `context` and `wireframes` are tracked and resolve under `SURFACE_ROOTS`, so
- * the split this comment used to describe as hypothetical is real: two
- * folders on this list read from two different root lists. The base array is
+ * `context` is tracked and resolves under `SURFACE_ROOTS`, so two folders on
+ * this list read from two different root lists. The base array is
  * their union rather than a per-name map, since a name resolving at the wrong
  * root costs one extra `existsSync` and nothing else, where a map states the
  * split a second time next to the one each resolver module already carries.
@@ -90,10 +88,10 @@ export interface AuditedFolder {
  * Names the requested record-root folders that actually exist, which is the
  * citation check's scope.
  *
- * A skill or seed pointing into `canon/wireframes/` is a live instruction for
+ * A skill or seed pointing into an optional folder is a live instruction for
  * a project that carries the folder and says nothing about one that does not.
- * Checking a path into an absent folder would fail eight shipped references
- * here for the sole reason that this repository has no wireframes.
+ * Checking a path into an absent folder would fail shipped references here for
+ * the sole reason that this repository does not carry it.
  *
  * A folder resolved at the project root is measured and stays out of this. The
  * pattern the citation check builds spells the `.claude/` prefix, so admitting
@@ -172,7 +170,7 @@ function locate(
  * beside `node_modules` and a build output.
  *
  * The project root is reached only when the caller opts in, so a target holding
- * a root `wireframes/` is not audited against a standard it never adopted by
+ * a root folder of its own name is not audited against a standard it never adopted by
  * the mere act of running the command. `.claude/` still wins a name carried by
  * both, and the scope line prints the resolved path so a caller reads which
  * base was taken rather than inferring it.

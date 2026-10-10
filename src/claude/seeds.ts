@@ -22,7 +22,6 @@ export const SUBDIRS: readonly string[] = [
   'context',
   'memory',
   'tasks',
-  'wireframes',
 ]
 
 export type SeedScope = 'claude' | 'root'

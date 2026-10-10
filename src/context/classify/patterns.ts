@@ -37,42 +37,17 @@ export interface PatternVerdict<V extends string> {
 const NARRATION =
   /moved (again|twice|on)|has since|at this branch|on `feat|Measured in PR|did not survive|the operator picked|picked arm|\barm \d|closed on|was retired|no longer|used to|\bround\b|a review pass|this pass/i
 
-/**
- * A source-file path inside prose, the shape of implementation detail landing
- * on a surface that should describe layout and intent instead. Ported
- * verbatim from `heuristic.py`.
- */
-const MECHANISM_IN_WIREFRAME = /`[\w./-]+\.(tsx?|py|css|spec\.ts)`/
-
 function narrationQuote(text: string): string | undefined {
   return text.match(NARRATION)?.[0]
 }
 
-/**
- * Classifies one diff-mode chunk from its added text alone.
- *
- * `file` decides whether the wireframe-only MOVE test applies. A file argument
- * rather than a boolean matches `run.ts`'s other call sites, which hold the
- * path and not a pre-computed flag.
- */
+/** Classifies one diff-mode chunk from its added text alone. */
 export function diffPatternVerdict(
-  file: string,
   added: string,
 ): PatternVerdict<DiffVerdict> {
   const quote = narrationQuote(added)
   if (quote !== undefined) {
     return { verdict: 'HISTORY', quote, reason: 'narrates how this got here' }
-  }
-
-  if (file.includes('wireframes/')) {
-    const match = added.match(MECHANISM_IN_WIREFRAME)
-    if (match) {
-      return {
-        verdict: 'MOVE',
-        quote: match[0],
-        reason: 'names a source file, which is implementation detail',
-      }
-    }
   }
 
   return { verdict: 'KEEP', reason: 'no narration or wrong-surface pattern' }
@@ -87,7 +62,6 @@ export function diffPatternVerdict(
  * regex layer follows it.
  */
 export function sweepPatternVerdict(
-  file: string,
   body: string,
 ): PatternVerdict<SweepVerdict> {
   const quote = narrationQuote(body)
@@ -96,17 +70,6 @@ export function sweepPatternVerdict(
       verdict: 'REWRITE',
       quote,
       reason: 'carries its own history rather than the current state alone',
-    }
-  }
-
-  if (file.includes('wireframes/')) {
-    const match = body.match(MECHANISM_IN_WIREFRAME)
-    if (match) {
-      return {
-        verdict: 'MOVE',
-        quote: match[0],
-        reason: 'names a source file, which is implementation detail',
-      }
     }
   }
 
