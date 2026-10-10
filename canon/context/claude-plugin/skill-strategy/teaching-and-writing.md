@@ -1,6 +1,6 @@
 ---
 title: Teaching and writing
-description: The teaching surface and why it sorts by what the reader is doing, the writing surface a rule delivers, and the restatement surface asked for by name
+description: The teaching surface and why it sorts by what the reader is doing, the writing surface a rule delivers
 ---
 
 # Teaching and writing
@@ -50,11 +50,3 @@ Delivery is the load-bearing half rather than the body. The `writing/markdown` r
 Three references hold what a body cannot. `machine-tells.md` is a diagnostic catalog behind a stated trigger, so a short original draft pays no read for it. `density.md` splits what a compression pass may cut from what it may not, which is the layer a terse register has no answer for. `adopted.md` records what was adopted from outside and what was declined, including the ban on abstract metaphor nouns: `surface` alone appears 593 times in tracked markdown at `57ee7467`, so adopting that item rewrites the corpus or is ignored in silence.
 
 What stays open is the same gap `teach-workspace` records about option order. Cadence is a property of a passage over many sentences, nothing compares the output against these rules, and the sandbox arm therefore carries its rhythm claims as manual entries rather than asserting them.
-
-## The restatement surface
-
-`restate-plainly` takes a dense answer or a named markdown document and returns the plain version. It is asked for by name, which is what separates it from its two neighbors. `write-human` governs a passage being drafted or revised and arrives on a markdown edit, and `canon markdown audit` reports sentence spread and repeated openings from package data. One writes and one measures, and a reader who stopped to decode an answer is served by neither.
-
-The name is the decision the row owns. `simplify` is the obvious pick and is a built-in whose subject is code cleanup, so taking it makes a description match ambiguous even though the slash form disambiguates. `plain-language` describes the output where the skill is named for the act. Model invocation stays on, unlike the bodies carrying `disable-model-invocation`, because the ask arrives in ordinary words far more often than as a command, and the description bars the one case it rules out: the skill never fires on the model's own opinion of its own output.
-
-The body writes no file. A restatement is read once to reach a decision, and rewriting a document into a file is a proposal against the source rather than a restatement of it. That keeps the arm's mechanical half small, since what it can assert is that the tree was left alone and the reply named the source path and the `Cut:` label. Whether the plain version kept the deciding half is the judgment the skill exists to make and nothing checks it, so every claim about the content sits under `manual` rather than being padded into the count.

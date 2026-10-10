@@ -9,17 +9,7 @@ Claude Code includes built-in features that overlap with some toolkit skills. Th
 
 ## Code review
 
-| Aspect   | Claude Code Review (built-in)                   | `review-branch` skill                                                             |
-| -------- | ----------------------------------------------- | --------------------------------------------------------------------------------- |
-| What     | Managed service that reviews PRs on GitHub      | Local skill that reviews diffs in terminal                                        |
-| Trigger  | Auto on PR push, or `@claude review` on a PR    | `/review-branch` in a Claude Code session                                         |
-| Context  | Reads the full repo on Anthropic infrastructure | Reads project docs (REQUIREMENTS, ARCHITECTURE) plus auto-loaded `.claude/rules/` |
-| Output   | Inline PR comments with severity tags           | Terminal findings grouped by file                                                 |
-| Best for | Post-push review on GitHub                      | Pre-push local review aware of project docs and governance                        |
-
-Use both: run `review-branch` locally before pushing, then let Code Review catch anything on the PR.
-
-The table covers the pre-push half and stops there. Two more surfaces meet on the pull request itself.
+Claude Code Review is a managed service that reviews pull requests on GitHub. It runs on a push to the pull request or on `@claude review`, reads the full repo on Anthropic infrastructure, and posts inline comments with severity tags. Two more surfaces meet on the pull request itself.
 
 The `/code-review` slash command takes a pull request number, a branch, or a path, runs at a chosen effort level, and posts findings back with `--comment` as inline comments or, under `ultra`, with `--post` as one comment from the operator's own account. `review-pr` reaches the same moment and posts under `## Review` while a finding is open and `## Review closed` once a pass carries none.
 

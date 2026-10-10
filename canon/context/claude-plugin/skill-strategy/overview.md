@@ -22,7 +22,7 @@ Fixture: a `plugin.json` with no `skills` key, `skills/flat/SKILL.md` as the con
 Each file covers one question:
 
 - `canon/context/claude-plugin/skill-strategy/axes.md`: how a skill is named and sorted, from the prefix families to the direction axis
-- `canon/context/claude-plugin/skill-strategy/teaching-and-writing.md`: the teaching, writing, and restatement surfaces
+- `canon/context/claude-plugin/skill-strategy/teaching-and-writing.md`: the teaching and writing surfaces
 - `canon/context/claude-plugin/skill-strategy/drafting.md`: the candidate, draft, identity, and canvas surfaces
 - `canon/context/claude-plugin/skill-strategy/catalog-health.md`: whether a skill earns its place, reading a usage census, the skill not built, and reading the catalog for overlap
 - `canon/context/claude-plugin/skill-strategy/redundancy-audit.md`: each skill compared against its community counterpart, and the borrows taken
@@ -33,7 +33,7 @@ Each file covers one question:
 
 These entries hold the reasons instead: why a skill exists, where its boundary against a sibling sits, and what a coverage verdict turned on. None of that is recoverable from a listing, and the roster is recoverable from nothing else. `standards/context.md` puts a catalog a `list` command already returns under what does not go in, and says to link the command so the entry cannot drift from it.
 
-The `migration-*` prefix names a skill performing a one-time structural move of a project into a newer toolkit layout, and the family is empty. Its members retired once `target-check` shipped, since each encoded one historical transition by hand and went obsolete the moment that transition finished, where a check reading current documentation stays true for whatever a target falls behind on next. A relocation a target still needs reaches it as a `target-check` finding. A skill name carries no alias, so a target or operator naming a retired skill gets nothing. Recurring reconciliation tools like `seed-sync` are not migrations.
+The `migration-*` prefix names a skill performing a one-time structural move of a project into a newer toolkit layout, and the family is empty. Its members retired once `target-check` shipped, since each encoded one historical transition by hand and went obsolete the moment that transition finished, where a check reading current documentation stays true for whatever a target falls behind on next. A relocation a target still needs reaches it as a `target-check` finding. A skill name carries no alias, so a target or operator naming a retired skill gets nothing.
 
 ## The consumer map
 

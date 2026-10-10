@@ -11,9 +11,9 @@ The task board is a folder of one file per task, which is what keeps two concurr
 
 `.canon/memory/` carries the same shape and mechanism. `standards/memory.md` fixes the frontmatter an entry carries, so the shared renderer groups the catalog by kind, and `.claude/hooks/records-index.sh` regenerates `index.md` on every write.
 
-`.canon/review/` carries a subfolder per producer: `branch/` for `review-branch`, `memory/` for receipts nothing writes now, and `design/` for the `canon design render` preview. The canvas content sits at `.canon/canvas/` on the record root rather than under `review/`, since it is a drafting surface the operator keeps open rather than a report somebody reads once. The filename prefix does the folder's job for a producer with no subfolder, since the ignore entry and the backed-folder entry already cover everything under `review/`, so `ux-audit-*`, `ux-measure-*`, and `seed-audit-*` land at the folder root.
+`.canon/review/` carries a subfolder per producer: `branch/` for reports nothing writes now, `memory/` for receipts nothing writes now, and `design/` for the `canon design render` preview. The canvas content sits at `.canon/canvas/` on the record root rather than under `review/`, since it is a drafting surface the operator keeps open rather than a report somebody reads once. The filename prefix does the folder's job for a producer with no subfolder, since the ignore entry and the backed-folder entry already cover everything under `review/`, so `ux-audit-*`, `ux-measure-*`, and `seed-audit-*` land at the folder root.
 
-A branch report is the one thing here that gets swept rather than archived. It is read once by the session addressing it, and the durable record of what a review found is the comment `review-pr` posts, so `context-fold` deletes any report whose branch is gone. What that loses is a local-only review on a branch that never opened a pull request, which `review-branch` says where a reader meets the report.
+A branch report is the one thing here that gets swept rather than archived. No skill writes one now, so `context-fold` deletes any older report whose branch is gone, since the durable record of what a review found is the comment `review-pr` posts.
 
 ## A durable record is named for what it is
 

@@ -37,7 +37,6 @@ The same asymmetry is why an unread domain is a third state beside current and b
 ## Where it sits against the neighbors
 
 - `target-setup` scaffolds a project that holds nothing. This one reads a project that already holds something.
-- `seed-sync` proposes per-section seed edits. This one counts seed states and names that skill.
 
 ## Open
 

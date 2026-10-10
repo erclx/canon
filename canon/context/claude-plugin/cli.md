@@ -56,7 +56,7 @@ User-level pieces (attribution, permission `allow` entries, and `.env` denies) l
 
 ## seeds
 
-`canon claude seeds list [--json|--names]` enumerates the seed docs that `canon claude init` would copy into a project. Skills consume `--json` to compare a target project's installed copies against the toolkit's current seed source and propose targeted edits. The CLI only emits content. Reconciliation is the skill's job (see `seed-sync`).
+`canon claude seeds list [--json|--names]` enumerates the seed docs that `canon claude init` would copy into a project. Skills consume `--json` to compare a target project's installed copies against the toolkit's current seed source and propose targeted edits. The CLI only emits content. Reconciliation is a hand merge against that source.
 
 The listing reads `planSeeds`, the same function `init` applies, so the two cannot disagree about what a seed install contains.
 
@@ -66,7 +66,7 @@ Reports whether each seeded project doc is present, then reconciles `.gitignore`
 
 `canon sync` invokes this command with `CANON_NON_INTERACTIVE=1` when `.claude/` exists in the target, so gitignore reconciliation lands in the combined sync PR alongside other domains. The changed-file tracking in `src/sync/target.ts` watches `.gitignore` for this reason.
 
-Seed audits are not automated. Run the `seed-sync` skill for per-part reconciliation across the preamble and each `##` section. `canon sync` prints a tip reminder at the tail.
+Seed audits are not automated. Merge a drifted seed by hand against the toolkit copy, one `##` section at a time. `canon sync` prints a tip reminder at the tail.
 
 ## setup
 
