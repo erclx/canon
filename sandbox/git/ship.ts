@@ -8,10 +8,7 @@ function stageDraft(ctx: StageContext): void {
 
   ctx.write('src/server.js', 'export const PORT = 8080;\n')
 
-  ctx.write(
-    '.gitignore',
-    'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n',
-  )
+  ctx.write('.gitignore', 'node_modules\n.canon/plans/\n.canon/review/\n')
 
   ctx.git('add', '.')
   ctx.commit('chore(project): init')
@@ -41,7 +38,7 @@ export default scenario({
 
       ctx.log.step('Scenario ready: without changelog')
       ctx.log.info(
-        'Context: draft/init branch, port changed to 3000, health check added, README stale, no CHANGELOG.md, one seeded memory entry',
+        'Context: draft/init branch, port changed to 3000, health check added, README stale, no CHANGELOG.md',
       )
       ctx.log.info('Action:  /git:ship')
       ctx.log.info(
@@ -60,7 +57,7 @@ export default scenario({
 
       ctx.log.step('Scenario ready: with changelog')
       ctx.log.info(
-        'Context: draft/init branch, port changed to 3000, health check added, README stale, CHANGELOG.md present, one seeded memory entry',
+        'Context: draft/init branch, port changed to 3000, health check added, README stale, CHANGELOG.md present',
       )
       ctx.log.info('Action:  /git:ship')
       ctx.log.info(

@@ -12,7 +12,7 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back 
 Each block is a page an operator already confirmed a destination for, so this step lands it rather than judging it again. Write to the destination the heading names, at `pwd` rather than at the main root, since every destination here is a tracked file that commits with the branch:
 
 - A wiki page and a public doc arrive as a whole file. Write it as the block gives it, and stop with the block unfolded when the destination path already holds a file, since overwriting a page someone else wrote is not a fold.
-- A context entry is merged into rather than created. Fold the body into the sections it belongs under, the same way the routed facts above are folded, and never add an entry the catalog does not already carry.
+- A context entry is merged into rather than created. Fold the body into the sections it belongs under, and never add an entry the catalog does not already carry.
 
 Then delete the handoff file so a later run does not fold it twice, and regenerate the index of any folder that carries one.
 

@@ -13,7 +13,7 @@ const run = promisify(execFile)
 /** Every settle on an observer or a transition is bounded explicitly. */
 const SETTLE = { timeout: 5_000 }
 
-/** The capture itself launches a browser and shoots eighteen frames. */
+/** The capture itself launches a browser and shoots seventeen frames. */
 const CAPTURE_TIMEOUT = 180_000
 
 const HARNESS = fileURLToPath(
@@ -45,7 +45,6 @@ const SECTIONS = [
   'dispatch',
   'workers',
   'gate',
-  'memory',
   'evidence',
   'loop',
   'merge',
@@ -170,7 +169,7 @@ test.describe('the section capture', () => {
     // Read what the run wrote before measuring what was asked for. The list
     // below is a copy of the harness's own, so a section dropped from the
     // harness fails the measurement loudly while one added to it would fail
-    // nothing, and the eighteenth frame would reach the committed baseline
+    // nothing, and the seventeenth frame would reach the committed baseline
     // with nothing having checked where it was cut from.
     const written = await readdir(home, { withFileTypes: true })
     expect(

@@ -118,15 +118,6 @@ export function readSession(): SessionReads {
   const base = gov.stacks.find((stack) => stack.name === 'base')
   if (!base) throw new Error('The governance catalog carries no base stack')
 
-  // The memory figure states that the pen keeps only the residue. It is read
-  // here so the page stops claiming it the moment the rule stops saying it.
-  const memoryRule = readRepoFile(root, 'governance/rules/canon/603-memory.md')
-  if (!memoryRule.includes('no context entry owns')) {
-    throw new Error(
-      '603-memory no longer limits the memory folder to what no context entry owns',
-    )
-  }
-
   cached = {
     skills,
     skillGroups: skillGroups(

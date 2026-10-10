@@ -97,16 +97,9 @@
     </p>
     <h2>Personality</h2>
     <p>
-      Warm neutrals carry the frame under a single rust accent, set in Geist.
-      The subject is a toolkit for people who read documents and diffs as much
-      as they run commands, so the voice is a proportional one and the page
-      reads as prose. One accent carries every count, link, and primary action.
-      Promoting a second and third into structural roles is what reads as a
-      generated interface, so the palette stays at one. Monospace is a role the
-      page uses rather than its voice. The `code` role takes it, and so does any
-      terminal frame a surface embeds, since those show what the shell printed
-      and matching the shell is what makes them legible. Every other role is
-      Geist.
+      Warm neutrals under one rust accent, set in Geist. The page reads as
+      prose, and monospace appears only where a surface shows what a shell
+      printed. One accent carries every count, link, and primary action.
     </p>
     <h2>Color</h2>
     <table>
@@ -649,24 +642,17 @@
       </tbody>
     </table>
     <h2>Motion</h2>
-    <p>
-      Motion is not used. No transition, animation, or keyframe declaration
-      appears on any rendered surface, and the capture pipeline screenshots a
-      static frame.
-    </p>
+    <ul>
+      <li>
+        None. No transition, animation, or keyframe on any rendered surface.
+      </li>
+    </ul>
     <h2>Iconography</h2>
-    <p>
-      No icon library is installed. `assets/brand/mark.svg` is the one authored
-      icon, embedded inline in the hero topbar, and the surfaces otherwise draw
-      literal glyph characters: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯` for the terminal framing.
-      The same mark ships in five independently-maintained copies that carry
-      different colors by design rather than by drift, each fitted to the chrome
-      it renders on: the dark accent for a dark-chrome surface, the light accent
-      for a light-chrome one, and the pair the web favicon takes from
-      `src/design/favicon.ts`, which teach pages also take by rendering the live
-      mark. Unifying them or repairing the one that looks drifted would break
-      the fit each was chosen for. `canon/context/design/tokens.md` carries
-      which file holds each copy.
-    </p>
+    <ul>
+      <li>
+        No icon library. `assets/brand/mark.svg` is the one authored icon.
+      </li>
+      <li>The terminal draws glyphs: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯`.</li>
+    </ul>
   </body>
 </html>

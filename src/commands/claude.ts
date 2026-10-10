@@ -158,13 +158,13 @@ interface RoutingOptions {
 }
 
 const SEEDED_FILES: readonly string[] = ['REQUIREMENTS.md', 'DESIGN.md']
-const SEEDED_DIRS: readonly string[] = ['memory', 'tasks']
+const SEEDED_DIRS: readonly string[] = ['tasks']
 
 /**
  * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
  *
  * A tracked surface entry resolves under `canon/` ahead of `.claude/`, while
- * `memory` and `tasks` are session records resolved under `.canon/` ahead of
+ * `tasks` is a session record resolved under `.canon/` ahead of
  * `.claude/`. Routing every name through `recordDir` would report a migrated
  * target's surface folder as missing, since that resolver never checks
  * `canon/`.

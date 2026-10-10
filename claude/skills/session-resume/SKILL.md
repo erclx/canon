@@ -9,7 +9,7 @@ metadata:
 
 ## Step 1: read tracked work
 
-Resolve `.canon/plans/`, `.canon/memory/`, `.canon/compact/`, and `.canon/tasks/` at the main worktree root the way `session-worktree` does.
+Resolve `.canon/plans/`, `.canon/compact/`, and `.canon/tasks/` at the main worktree root the way `session-worktree` does.
 
 Read these in parallel, skipping any that do not exist:
 
@@ -18,8 +18,6 @@ Read these in parallel, skipping any that do not exist:
 - `.canon/plans/*.md`: execution detail for in-progress tasks
 
 Then read only the task files the summary needs, typically the top one. Do not read the whole folder.
-
-Once the top task is known, grep `.canon/memory/index.md` for two or three terms from its title and read at most three of the entries whose rows match. Never read the index whole, since a grown pen's index runs to hundreds of rows and the report shows three at most. With no top task, or no row matching, read no memory entry and say nothing about it.
 
 Most projects carry no handoff. Say nothing about its absence, since a line reporting it every run trains a reader to skip the line on the run where a handoff exists.
 
@@ -35,8 +33,6 @@ Output these sections, omitting the first when no handoff was found:
 
 **Active plans:** one line per file in `.canon/plans/`, linking each to its task file in `.canon/tasks/`. Say "None" if empty.
 
-**Relevant context:** the memory entries Step 1 matched to the top backlog item, three at most. Skip if none matched.
-
 ## Step 3: recommend
 
 End with one line: `Start with: <first Up next item>` and note whether it has a linked plan.
@@ -44,8 +40,6 @@ End with one line: `Start with: <first Up next item>` and note whether it has a 
 When the board is empty and a handoff was found, name what the handoff leaves open instead: `Start with: <the open thread the handoff names>`. A recommendation slot filled with nothing reads as a failed run, and a handoff on an empty board is the shape a session leaves when it was reasoning rather than shipping.
 
 Do not offer to remove entries. A completed task is archived out of `.canon/tasks/` when work ships. The git log is the authoritative record of shipped work. Plan files are archived per the lifecycle rule in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan-lifecycle.md`.
-
-Memory is updated only when a recorded fact becomes wrong, never on resume. A domain fact reaches a session through `canon/context/`, which `memory-capture` routes to and the three-tier model loads on demand, so the memory folder read here is the residue no context entry owns.
 
 ## Writing the next one
 

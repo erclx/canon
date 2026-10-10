@@ -23,13 +23,11 @@ The sequence also reaches the remote on work nothing re-checked. This skill is t
 - Name the condition under which the closing block is not emitted, since a caller that closes on its own block leaves two instructions about the last line and nothing deciding between them
 - Watch continuous integration to a terminal state in the background, so the session stays reachable while CI runs, and stop on a failure naming the check
 - Read the evidence thread with `canon pr evidence <number> --check --json` once CI passes, run what it reports owed, and report done only on `settled`, since a chain that never reads the thread ships a regenerated image with no comment and no preview and leaves the controller to repair it
-- Stop memory work at the Propose phase
 
 ## Must not
 
 - Auto-trigger. Shipping is a decision the user takes, and the tool permission dialog on the push and the pull request is the gate that holds it now that the frontmatter no longer disables model invocation.
 - Fix a failing check. The stop is the point, since a green pull request reached by auto-fix hides what broke.
-- Run the memory Apply phase. Promoting an entry changes how the agent operates and ships as its own change.
 - Attempt a fix for a failing verify. The user is already making one, which is what brought the run back here.
 - Implement or review. This chain starts from work already believed done.
 - Report the chain done before the CI watch exits. A turn ending on the watch line leaves a pull request still waiting on CI, and a `✅ Shipped` there claims a result nothing has read.

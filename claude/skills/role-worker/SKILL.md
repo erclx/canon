@@ -28,7 +28,7 @@ which `auto-ship` Step 2 loads.
 
 ## Where the session stands
 
-- Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, `.canon/memory/`, and `.canon/ready/` at the main worktree root, never against the linked worktree this session builds in. Those folders are gitignored, so `git worktree add` never creates them and the copy beside the build is absent rather than empty.
+- Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, and `.canon/ready/` at the main worktree root, never against the linked worktree this session builds in. Those folders are gitignored, so `git worktree add` never creates them and the copy beside the build is absent rather than empty.
 - Report a plan that fails to resolve as unreadable from here, naming the main-root path. Reporting the task as having no plan is true where this session stands and wrong about the world, and a reader with no second tree to check cannot separate the two.
 - Build the plan the launch named. Do not write a second one when the path fails to resolve, since a row that cites a plan already has one and drafting another produces two plans for one row.
 - Copy a ready folder's files verbatim to the paths its plan's constraints name, when the plan's `**Constraints:**` block names one, and edit only what the gate or the overview's own list requires. A rewrite discards the text the handoff exists to carry.

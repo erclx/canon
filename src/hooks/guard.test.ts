@@ -146,7 +146,6 @@ beforeAll(() => {
   const project = join(fixture, 'project')
   for (const dir of [
     join(project, 'canon/context/development'),
-    join(project, '.claude/memory'),
     join(project, '.claude/tasks'),
     join(project, '.claude/worktrees/demo'),
     join(project, 'indexed'),
@@ -247,7 +246,6 @@ beforeAll(() => {
     'Dev commands.\n',
   )
   writeFileSync(join(project, '.claude/tasks/sample.md'), 'no frontmatter\n')
-  writeFileSync(join(project, '.claude/memory/sample.md'), 'no frontmatter\n')
   writeFileSync(join(project, '.claude/worktrees/demo/note.md'), 'note\n')
 
   // One payload per hook that reaches the branch doing the work, paired with a
@@ -479,7 +477,7 @@ describe('records-index.sh folders and roots', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'records-index.sh')
 
-    for (const folder of ['tasks', 'memory']) {
+    for (const folder of ['tasks']) {
       for (const root of ['.canon', '.claude']) {
         it.concurrent(
           `should name ${root}/${folder}/index.md on ${tree.label}`,
@@ -516,9 +514,7 @@ describe('records-index.sh exclusions', () => {
     ['tasks', 'archive/v01.0-shipped.md'],
     ['tasks', 'declined/idea.md'],
     ['tasks', 'index.md'],
-    ['memory', 'review/receipt.md'],
-    ['memory', 'archive/retired.md'],
-    ['memory', 'index.md'],
+    ['memory', 'sample.md'],
   ]
 
   for (const tree of TREES) {

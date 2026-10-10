@@ -45,7 +45,7 @@ Two standards fix the artifact and one skill drives the pedagogy. `claude/skills
 
 Recording a source's rung as a field was rejected too, since a `canon teach resource` schema change buys a check only a reader can make, so a third-rung source carries its reason in the free-text title.
 
-**A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `context-fold` folds and deletes. Sharing the memory-routing handoff was the obvious reuse and is what the pattern cannot take, since that file already has two writers and a reader that deletes it.
+**A durable page promoted out of a workspace routes through a file of its own**, at `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `context-fold` folds and deletes. A second producer of a handoff needs a file of its own, since a reader that deletes it would discard whatever another writer left.
 
 ## Gotchas
 

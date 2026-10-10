@@ -40,8 +40,8 @@ Shapes to avoid in a rule.
 Properties a rule should have, aim for, or minimize.
 
 - **Ceremony**: visible overhead a structure imposes on author or reader. Use when deciding whether a structural choice earns the weight it adds.
-- **Crispness**: the one-line phrasability test. Use when deciding whether to promote a memory entry or cut it.
-- **Generality**: breadth of a rule's applicability. Use when auditing a newly drafted rule or promoting a memory.
+- **Crispness**: the one-line phrasability test. Use when deciding whether to promote a rule or cut it.
+- **Generality**: breadth of a rule's applicability. Use when auditing a newly drafted rule.
 - **Language-agnostic**: portable across programming languages or domains. Use when authoring governance or standards meant to apply beyond one language.
 
 ## Frames

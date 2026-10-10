@@ -39,8 +39,6 @@ A `REPLACE` or `HISTORY` finding is applied in place with a one-line reason to k
 
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
-### The memory review nudge fires on a count
-
 ## Pull request writes
 
 ### Pull request detection hits a merged namesake
@@ -75,4 +73,4 @@ When a sequence of grouped commits runs unattended and one is rejected by a hook
 
 ### A branch built in slices reaches the stage step with nothing staged
 
-`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 6 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.
+`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 5 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.

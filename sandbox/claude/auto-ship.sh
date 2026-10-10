@@ -22,7 +22,7 @@ stage_setup() {
   # Wipe anchor content to start clean
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/memory/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n' >.gitignore
 
   case "$SELECTED_OPTION" in
   "happy-path")
@@ -37,15 +37,13 @@ stage_setup() {
     stage_fixtures claude auto-ship happy-path 02-plan
 
     log_step "Scenario ready: autoship happy path"
-    log_info "Context: main, with an approved plan staged for feat/add-farewell and one seeded memory entry"
+    log_info "Context: main, with an approved plan staged for feat/add-farewell"
     log_info "Action:  /auto-ship"
     log_info "Expect:  implements farewell fn, verify passes, PR marked draft and read back"
     log_info "         Step 4 runs test-order in the worktree and reports clean, since the"
     log_info "         branch is taken fresh off main and carries no commit of its own yet"
     log_info "         Step 6 invokes git-ship rather than restating the chain, so the verify"
     log_info "         runs twice and the marking lands before the CI watch, reported from the read"
-    log_info "         a headless run with no interaction has nothing for capture to find, so"
-    log_info "         it typically reports Nothing worth capturing"
     ;;
   "test-order-violation")
     # The branch has to carry the violating commits, and a worktree taken fresh

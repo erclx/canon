@@ -1,6 +1,6 @@
 ---
 name: session-worktree
-description: Enters a Claude Code worktree at `.claude/worktrees/<name>/` with a name derived from the active plan or branch. Use when asked to "enter a worktree", "start a worktree", "work in a worktree", or at the plan-to-execute boundary after `/plan-feature`. Also use when an `Edit` or `Write` to a main-root file such as a plan, a task, or a memory entry was refused for session isolation. Do NOT use to list, clean up, or rotate worktrees (use `git-worktree`).
+description: Enters a Claude Code worktree at `.claude/worktrees/<name>/` with a name derived from the active plan or branch. Use when asked to "enter a worktree", "start a worktree", "work in a worktree", or at the plan-to-execute boundary after `/plan-feature`. Also use when an `Edit` or `Write` to a main-root file such as a plan, a task, or a review report was refused for session isolation. Do NOT use to list, clean up, or rotate worktrees (use `git-worktree`).
 metadata:
   family: build
 ---

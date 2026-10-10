@@ -43,13 +43,8 @@ paths = [
 # than on how a sentence was worded.
 absent = [".canon/tasks/session-feat-csv-export.md"]
 
-# The map, plus the index a `Write` fires the board hook on. `.canon/memory/**`
-# is admitted rather than required: the skill opens by invoking capture, and a
-# cold session may legitimately have nothing to persist, so a written memory file
-# is a result the skill does not owe and its absence is not a failure. The first
-# run wrote neither, which is what leaves this entry admitting a path no observed
-# run has taken.
-write_scope = [".canon/tasks/**", ".canon/memory/**"]
+# The map, plus the index a `Write` fires the board hook on.
+write_scope = [".canon/tasks/**"]
 
 # The path comes off the skill's own Output block. The fixture fixes the branch,
 # so this reads back off provisioning rather than off how one run worded a line.
@@ -57,7 +52,6 @@ reply = [".canon/tasks/session-csv-export.md"]
 
 manual = [
   "The map reports what each step actually returned rather than what the session expected it to. Semantic: a prediction and a result read alike in the written text, so the blocks below catch a map silent about a step and not a map that guessed.",
-  "The capture the skill opens with ran. Unwired: a cold project gives capture nothing to persist, so it writes no file and returns no routed line, and the map owes it no mention either. The first run of this arm confirmed a conforming map that names capture nowhere, so the step is observable only in a tool-call list the harness does not supply.",
   "No fourth section over the core three. Semantic: a negative, and an entry asserting what a run must not have written passes on every spelling that phrases it differently.",
   "The three core sections appear in the order the standard fixes. Semantic: their bodies are free prose, so no single block spans two headings without pinning what a writer puts between them.",
   "The map says which of the two commits the ref came from, the window having found none before it. Judgment: item 3 requires the writer to say which, never to echo the wording item 3 states it in, so a map reading that the ref is the only commit the repository holds satisfies the rule and fails any pin over the phrase. The fixture fixes no token here, since its one commit carries a hash that moves per run.",

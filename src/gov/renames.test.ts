@@ -131,4 +131,12 @@ describe('shipped ledger', () => {
 
     expect(cyclic).toEqual([])
   })
+
+  it('should resolve no successor for a retired memory rule', () => {
+    const resolved = ['603-memory', '045-memory', 'memory'].filter(
+      (name) => resolveSuccessor(ledger, index, name) !== undefined,
+    )
+
+    expect(resolved).toEqual([])
+  })
 })

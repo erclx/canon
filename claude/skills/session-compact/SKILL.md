@@ -1,6 +1,6 @@
 ---
 name: session-compact
-description: Captures a session's memory, then writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped. Use before running /compact, when asked to "write a handoff", "prepare for compaction", "save where we got to", or before moving a session to another machine, or when a PreCompact hook blocks and names this skill. Do NOT use for a session holding the orchestrator role, whose board handoff is `session-map`. Do NOT use to record a decision a groundwork track owns, which is `plan-groundwork`.
+description: Writes one handoff note to .canon/compact/ so the session after a compaction picks up where this one stopped. Use before running /compact, when asked to "write a handoff", "prepare for compaction", "save where we got to", or before moving a session to another machine, or when a PreCompact hook blocks and names this skill. Do NOT use for a session holding the orchestrator role, whose board handoff is `session-map`. Do NOT use to record a decision a groundwork track owns, which is `plan-groundwork`.
 metadata:
   family: parallel
 ---
@@ -17,15 +17,7 @@ Write only what a compaction destroys. Everything a later session can read from 
 - Decline where the session holds no reasoning a reader could not get faster from git or from a record already written. Say so in one line and write nothing. A padded note is worse than an absent one, because a reader who finds a note trusts it.
 - Resolve `.canon/` at the main worktree root and send the write out as a heredoc, both the way `session-worktree` states.
 
-## Step 1: capture memory
-
-Invoke `canon:memory-capture` and let it return before writing. The note then cites what was written rather than restating the same lesson in prose.
-
-State the caveat the caller gives about committing. A caller that does not commit says so, and capture skips routing and writes memory files alone.
-
-Carry through the line capture returns when a fact routed, so the session knows a fold is still owed. Report nothing else about what it wrote.
-
-## Step 2: write the note
+## Step 1: write the note
 
 Write one file to `.canon/compact/<slug>.md`. Name `<slug>` for the work as a short kebab-case phrase, taken from what the session did rather than from the branch, so a session that ran on `main` still gets a name a reader recognizes. Use `latest` when nothing in the session names the work.
 
@@ -33,11 +25,10 @@ Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md` for what each section ca
 
 Overwrite a note of the same name. One session's work has one note, and a second file for the same work splits the handoff.
 
-## Step 3: report
+## Step 2: report
 
 ```plaintext
 ✅ Handoff written: .canon/compact/<slug>.md
-<the line memory-capture returned, where a fact routed>
 Move: canon records push, then canon sessions export <id>
 ```
 
@@ -59,7 +50,6 @@ A decline reports itself so a caller can tell it from a failure:
 
 ## What this delegates
 
-- The memory pass, its routing, and the pen's shape: `canon:memory-capture`
 - The orchestrator's handoff, which carries a drift check and writes a task row: `canon:session-map`
 - Reading a handoff back at the start of the next session: `canon:session-resume`
 - Packing the session for another machine: `canon sessions export`, with `canon sessions import` and then `/canon:session-resume` on the arriving side

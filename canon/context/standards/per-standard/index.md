@@ -7,8 +7,8 @@ subtitle: Decisions behind individual standards that their shape rules do not sh
 
 Decisions behind individual standards that their shape rules do not show, grouped by standard family. Start with overview.
 
-- [Memory and tasks](memory-and-tasks.md): Where the memory standard's delete prohibition lives and why, the shape rules measured against the pen, why the review queue is its own verb reading cited paths, the tasks readiness test widened to admit a row waiting on an external condition, the board standard split from tasks, and the origin and archiving rationale
 - [Overview](overview.md): Which standards cost more reasoning than their shape rules show, where each file records it, and why the rule lives in the standard while the count behind it lives here
 - [Plan](plan.md): What the plan standard fixes and why its section markers are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, and the branch description cap a plan filename feeds
 - [Publish](publish.md): The cross-reference form split by destination, the destination test every scan under it inherits, the record-root reading, and the title-spelling and title-format checks beside them
 - [Surfaces](surfaces.md): The teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, and when a standard moves into its one reader's skill
+- [Tasks](tasks.md): The tasks readiness test widened to admit a row waiting on an external condition, the board standard split from tasks, and the origin and archiving rationale

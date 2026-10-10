@@ -28,7 +28,6 @@ Without this skill, the run from an approved plan to an open pull request is a c
 - Fix a failing check. The stop is deliberate, since a green pull request reached by auto-fix hides what broke.
 - Restate the ship sequence. Two copies of one order drift with nothing comparing them, which is what the merge into `git-ship` closed.
 - Skip that skill's own verify for repeating this chain's. The gate exists for the resumed run, and a chain that suppresses it leaves the resumed run reaching nothing.
-- Run the memory Apply phase. Promoting an entry changes how the agent operates and ships as its own change.
 - Stop the chain or rewrite a commit over a test-order finding. The verb reports and never gates, and a commit already in history is a different act from the work this run is building.
 
 ## Guards

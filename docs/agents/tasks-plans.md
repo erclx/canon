@@ -118,7 +118,7 @@ It reads only what is written down, so it inherits the dispatch runbook's blindn
 
 A claim is only as current as the folder it was read from, and the live folder holds a plan whose work already shipped until something archives it. `canon tasks archive` moves a plan on merge, so a plan stranded by a run that never reached the archive keeps claiming its files against every branch afterwards. Check whether the holder is actually in flight before treating a claim as a collision: the first run of this verb on its own branch reported five paths held by a plan whose verb had already merged, and the whole reading came of a file nobody archived. `canon tasks validate` is what reports the stranded plan itself.
 
-`canon:git-ship` runs it at step 5, after `git add -A` and before the commit grouping. That is the first point the branch is whole and the last before a pull request exists to carry the answer.
+`canon:git-ship` runs it at step 4, after `git add -A` and before the commit grouping. That is the first point the branch is whole and the last before a pull request exists to carry the answer.
 
 ```bash
 canon tasks plan-reach dispatch-answer-gate --json | jq -r '.claimed[] | "\(.path) held by \([.holders[].name] | join(", "))"'

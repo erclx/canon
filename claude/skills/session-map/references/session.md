@@ -31,7 +31,6 @@ Does not govern:
 - The transform from a branch name to the slug in the filename: `slug.md`
 - The role-specific sections a caller adds over the core, which belong to that caller
 - The note a plain session writes at `.canon/compact/<slug>.md`, whose shape lives in the `session-compact` skill's own reference
-- Which memories a session captures before writing, which is the capture surface's own subject
 
 ## What a working session map looks like
 
@@ -71,12 +70,11 @@ Add a section only for content that fits none of the three and would otherwise b
 
 The `session-map` skill is the invocable route onto this procedure and holds no role, so a session reaching for a handoff without knowing this document exists still lands here. A session that arrives at this document directly follows the steps below unchanged.
 
-1. Capture what the session learned first, so the map cites what was written instead of restating the same lesson in prose.
-2. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`. A skill body enters a session once and re-invoking the skill does not re-read the file, so the drift is worst at exactly this moment and a name here is a body the session has been following out of date. Recording a name is not acting on it, and the verb misses a body this session edited and has not committed. This step belongs to session length rather than to any role, so every writer runs it, and a refusal names the boundary of what the verb can read rather than a fault.
-3. Recover that commit from how long the session has been running with `git log -1 --format=%H --before='<duration> ago'`, rounding the duration up rather than down. Nothing on the machine records it. A ref older than the oldest load over-reports, and confirming a name costs one read of the body, so the generous end is the safe one and a guess at the exact commit is not worth making. An empty result means no commit predates the window, so take the oldest commit the history holds and say which of the two the ref came from.
-4. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering and what each task waits on, a task file holds its own findings, and a measurement folder holds its track.
-5. Cite a commit, a task, or a file and line for every claim, so the next session can tell a read from a recall.
-6. Fill a section from reasoning the session actually holds. A session with no cross-feature picture that fills `## State` from what is already in git has written a summary of the tree, which the reader can produce faster than they can read it.
+1. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`. A skill body enters a session once and re-invoking the skill does not re-read the file, so the drift is worst at exactly this moment and a name here is a body the session has been following out of date. Recording a name is not acting on it, and the verb misses a body this session edited and has not committed. This step belongs to session length rather than to any role, so every writer runs it, and a refusal names the boundary of what the verb can read rather than a fault.
+2. Recover that commit from how long the session has been running with `git log -1 --format=%H --before='<duration> ago'`, rounding the duration up rather than down. Nothing on the machine records it. A ref older than the oldest load over-reports, and confirming a name costs one read of the body, so the generous end is the safe one and a guess at the exact commit is not worth making. An empty result means no commit predates the window, so take the oldest commit the history holds and say which of the two the ref came from.
+3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering and what each task waits on, a task file holds its own findings, and a measurement folder holds its track.
+4. Cite a commit, a task, or a file and line for every claim, so the next session can tell a read from a recall.
+5. Fill a section from reasoning the session actually holds. A session with no cross-feature picture that fills `## State` from what is already in git has written a summary of the tree, which the reader can produce faster than they can read it.
 
 Do not restate the board, and do not summarize the work that shipped, since version control already carries it.
 

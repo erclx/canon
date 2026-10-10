@@ -20,7 +20,6 @@
 [renamed]
 "015-output" = "566-output"
 "035-tasks" = "602-tasks"
-"045-memory" = "603-memory"
 "055-scratch" = "604-scratch"
 "085-worktrees" = "605-worktrees"
 "087-git" = "606-git"
@@ -29,7 +28,6 @@
 "550-design" = "650-design"
 "555-tasks" = "655-tasks"
 "558-plan" = "658-plan"
-"559-memory" = "659-memory"
 "501-markdown" = "801-markdown"
 "580-readme" = "880-readme"
 "591-standard-authoring" = "891-standard-authoring"
@@ -41,7 +39,6 @@
 "610-context" = "context"
 "650-design" = "design"
 "655-tasks" = "tasks"
-"659-memory" = "memory"
 "570-skill" = "skill"
 "590-rule-authoring" = "rule"
 "801-markdown" = "markdown"

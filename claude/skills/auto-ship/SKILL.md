@@ -86,7 +86,7 @@ If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`),
 
 ## Step 6: ship
 
-Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, memory capture, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. Read the order there and never here.
+Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. Read the order there and never here.
 
 One thing this chain adds. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, naming the number that step returned rather than one resolved by branch. Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back. A `false` read stops the chain, and never re-issue the mark on it.
 
@@ -96,18 +96,16 @@ Emit the Output block on the wake after `git-ship`'s background CI watch exits o
 
 ## Output
 
-Respond with up to four lines:
+Respond with up to two lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
 🖼️ <N> visual boxes unchecked (<M> taste), owed on the evidence comment of <PR url> to the operator, or to the UI reviewer for the boxes a driver can run
-<N facts routed to context entries>
-<N memories captured in .canon/memory/>
 ```
 
 `<state>` is whatever the Step 6 read returned, being `draft` or `ready, unsupervised`, rather than the state the mark asked for.
 
-Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session.
+Fill the second line from the counts Step 5 held, and omit it when no checklist was produced.
 
 This block replaces the one `git-ship` closes on rather than following it, since emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 

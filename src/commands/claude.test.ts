@@ -29,9 +29,9 @@ describe('seededDirPath', () => {
     )
   })
 
-  it('should resolve memory under .canon/ rather than canon/', () => {
-    mkdirSync(join(root, '.canon', 'memory'), { recursive: true })
+  it('should resolve tasks under .canon/ rather than canon/', () => {
+    mkdirSync(join(root, '.canon', 'tasks'), { recursive: true })
 
-    expect(seededDirPath(root, 'memory')).toBe(join(root, '.canon', 'memory'))
+    expect(seededDirPath(root, 'tasks')).toBe(join(root, '.canon', 'tasks'))
   })
 })

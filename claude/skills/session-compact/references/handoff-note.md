@@ -63,6 +63,6 @@ Not general advice. A caution a reader could have guessed is noise around the tw
 
 - A `## State` section. A session that committed nothing has no state, and one that did has it in the log.
 - The tree, the file counts, and the folder listing. All survive a compaction.
-- The session's narrative. What was tried and abandoned belongs in the record the track keeps, or in memory if it generalizes, or nowhere.
-- A lesson already written to `.canon/memory/`. Cite the entry by name rather than restating it.
+- The session's narrative. What was tried and abandoned belongs in the record the track keeps, or nowhere.
+- A lesson stated as a lesson. Put it in `## Where to pick up` as the context edit or the task that carries it, since nothing else reads a note once the next session is past it.
 - Anything the reader would have to take on trust. Every claim carries a file, a commit, or a record.
