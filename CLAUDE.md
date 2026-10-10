@@ -12,18 +12,17 @@ A CLI and Claude Code plugin. What it is for, its goals, and its constraints are
 
 Each rule or fact lives in one surface. Others point at it. `canon/context/context-model/overview.md` carries the test that sorts a fact between surfaces.
 
-| Kind of content                                                        | Owner                                                               |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Identity, goals, non-goals, constraints                                | `canon/REQUIREMENTS.md`                                             |
-| A decision filling an architecture slot, with its rejected alternative | `canon/ARCHITECTURE.md`                                             |
-| Behavior every session needs                                           | `CLAUDE.md`                                                         |
-| Behavior that fires on a path being edited                             | `governance/rules/`, or `internal/rules/` for this repository alone |
-| Shape of an artifact many sessions edit                                | `standards/`                                                        |
-| What a session needs when editing domain X                             | `.claude/skills/internal-<X>/SKILL.md`                              |
-| Narrative, decisions, and gotchas for one domain                       | `canon/context/<X>/`                                                |
-| Consumer-facing reference                                              | `docs/`, with the CLI contract in `docs/agents/`                    |
+| Kind of content                                                                  | Owner                                                               |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Identity, goals, non-goals, constraints                                          | `canon/REQUIREMENTS.md`                                             |
+| Behavior every session needs                                                     | `CLAUDE.md`                                                         |
+| Behavior that fires on a path being edited                                       | `governance/rules/`, or `internal/rules/` for this repository alone |
+| Shape of an artifact many sessions edit                                          | `standards/`                                                        |
+| What a session needs when editing domain X                                       | `.claude/skills/internal-<X>/SKILL.md`                              |
+| Narrative, decisions with their rejected alternative, and gotchas for one domain | `canon/context/<X>/`                                                |
+| Consumer-facing reference                                                        | `docs/`, with the CLI contract in `docs/agents/`                    |
 
-A fact more than one domain reads is canonical. A fact one domain reads belongs to that domain, however important.
+A fact more than one domain reads is canonical. A fact one domain reads belongs to that domain, however important. A decision several domains read is the exception, landing in the entry of the domain it constrains most while the others point at it.
 
 ## Domains
 
@@ -41,7 +40,6 @@ Load the skill before editing anything in its domain.
 | `src/canvas/`, `src/commands/canvas.ts`                                      | `internal-canvas`     |
 
 @canon/REQUIREMENTS.md
-@canon/ARCHITECTURE.md
 @canon/context/index.md
 
 ## Key paths

@@ -39,14 +39,14 @@ This is canon's own mechanisms, generated from the tree. Name a Retire match aga
 
 Sort every line into one class. Verify each claim against the files before keeping it.
 
-| Class   | Test                                                                                                                                                            |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Revisit | It trips a "Revisit when" sentence in `canon/ARCHITECTURE.md` or `canon/context/`, or lifts a gate, preview, or limitation a canon record says it is waiting on |
-| Retire  | The platform now ships what a catalog mechanism does, fully or partly, so canon could delete or shrink its own                                                  |
-| Adopt   | It gives a canon workflow a capability it lacks, works around by hand, or could do better with it. Name the canon surface and the gain                          |
-| Fix     | It breaks or changes behavior canon depends on                                                                                                                  |
-| Wiki    | It makes a lesson on a `wiki/claude/` page false, or its orientation paragraph wrong, in a way a reader would act on. Open the page and quote the line          |
-| Drop    | None of the above                                                                                                                                               |
+| Class   | Test                                                                                                                                                   |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Revisit | It trips a "Revisit when" sentence in `canon/context/`, or lifts a gate, preview, or limitation a canon record says it is waiting on                   |
+| Retire  | The platform now ships what a catalog mechanism does, fully or partly, so canon could delete or shrink its own                                         |
+| Adopt   | It gives a canon workflow a capability it lacks, works around by hand, or could do better with it. Name the canon surface and the gain                 |
+| Fix     | It breaks or changes behavior canon depends on                                                                                                         |
+| Wiki    | It makes a lesson on a `wiki/claude/` page false, or its orientation paragraph wrong, in a way a reader would act on. Open the page and quote the line |
+| Drop    | None of the above                                                                                                                                      |
 
 - Ask of each new built-in command, tool, or extension mechanism which catalog row does something overlapping, since Retire is the class a read of release lines alone misses.
 - A line you confirm changes nothing in canon is a near-miss, never a Fix.
