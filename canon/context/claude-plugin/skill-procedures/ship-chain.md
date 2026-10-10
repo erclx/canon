@@ -93,4 +93,4 @@ When a sequence of grouped commits runs unattended and one is rejected by a hook
 
 ### A branch built in slices reaches the stage step with nothing staged
 
-`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 6 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.
+`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 5 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.
