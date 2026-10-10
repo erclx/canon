@@ -113,6 +113,7 @@ export async function walkReleases(
 
 export function githubPageFetcher(
   env: Record<string, string | undefined> = process.env,
+  signal?: AbortSignal,
 ): PageFetcher {
   const token = env.GH_TOKEN ?? env.GITHUB_TOKEN
   const headers: Record<string, string> = {
@@ -125,7 +126,7 @@ export function githubPageFetcher(
     try {
       const response = await fetch(
         `${RELEASES_URL}?per_page=${PER_PAGE}&page=${page}`,
-        { headers },
+        { headers, signal },
       )
       if (response.status === 403 || response.status === 429) {
         return {

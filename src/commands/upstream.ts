@@ -30,6 +30,7 @@ import {
 
 const LLMS_URL = 'https://code.claude.com/docs/llms.txt'
 const VERSION = /^\d+(\.\d+)*$/
+const READ_BUDGET_MS = 5000
 
 interface RootOption {
   readonly root?: string
@@ -311,7 +312,12 @@ async function readGap(
   const cached = readDueCache(root, installed, cursor, now)
   if (cached) return cached.gap
 
-  const walk = await walkReleases(cursor, githubPageFetcher())
+  // The hook that calls this has a 10 second timeout, and a network that drops
+  // packets would otherwise hold every session start to it with nothing cached.
+  const walk = await walkReleases(
+    cursor,
+    githubPageFetcher(process.env, AbortSignal.timeout(READ_BUDGET_MS)),
+  )
   const gap: Gap | null =
     walk.kind === 'reached'
       ? {
@@ -331,7 +337,7 @@ async function readGap(
       gap,
     })
   } catch {
-    // A cache that cannot be written costs a request next session, not a wrong answer.
+    // A cache that cannot be written costs a request, not a wrong answer.
   }
 
   return gap
