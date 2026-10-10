@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint" "layout" "vague" "underspecified"
+  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "stacked" "constraint" "layout" "vague" "underspecified"
 
   case "$SELECTED_OPTION" in
   "full")
@@ -57,6 +57,20 @@ stage_setup() {
     log_info "Context: two unrelated tasks in .canon/tasks/, one API change and one prose edit"
     log_info "Action:  /plan-feature 'add pagination to /users and tighten the docs intro'"
     log_info "Expect:  two plan files in .canon/plans/, one per concern, not a single bundled slug, and each task's Plan: line points at its own plan"
+    ;;
+  "stacked")
+    stage_fixtures claude plan-feature stacked 01-initial
+
+    mkdir -p src/form
+
+    mkdir -p .canon/tasks
+
+    git add . && git commit -m "feat(form): initial signup form" --no-verify -q
+
+    log_step "Scenario ready: feature planning (stacked)"
+    log_info "Context: one task with three outcomes that build in sequence over the same three source files"
+    log_info "Action:  /plan-feature 'plan the task'"
+    log_info "Expect:  one plan file in .canon/plans/, or every extra plan carrying a Judged apart from constraint with a reason, and canon records validate plans reports no stack-foldable"
     ;;
   "constraint")
     stage_fixtures claude plan-feature constraint 01-initial

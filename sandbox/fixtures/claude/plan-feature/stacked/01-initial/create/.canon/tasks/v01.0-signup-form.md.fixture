@@ -1,0 +1,12 @@
+---
+title: 'v01.0: Harden the signup form'
+description: Validate the email, show errors, and show a submit state
+---
+
+# v01.0: Harden the signup form
+
+- [ ] Outcome: the form rejects an email with no at sign
+- [ ] Outcome: a rejected email shows an error message beside the field, built on the validation above
+- [ ] Outcome: submitting shows a pending state and disables the button, built on the error handling above
+
+Each outcome edits `src/form/signup-form.ts`, `src/form/signup-state.ts`, and `src/form/signup-form.test.ts`, and builds on the one before it.

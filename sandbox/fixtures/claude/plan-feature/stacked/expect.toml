@@ -1,0 +1,26 @@
+# What a correct `/canon:plan-feature plan the task` run leaves behind on the
+# seeded signup form: one plan for three outcomes that build in sequence over
+# the same three source files, or several plans of which every extra one
+# carries a `Judged apart from` constraint with a reason. Read by
+# `canon sandbox check`.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is the fold rule: stacked batches sharing their files
+# fold into one branch unless the plan writes down why they are judged apart.
+# The checker cannot count files or take an either-or over them, so the count
+# and the clean validate are manual and the plan's existence is the mechanical
+# part.
+
+# Declared at the cap, with no observed run yet to correct it from.
+max_turns = 30
+
+paths = [".canon/plans/feature-*.md"]
+
+write_scope = [".canon/plans/**", ".canon/tasks/**", ".canon/tmp/**"]
+
+manual = [
+  "The run wrote one plan file, or every plan file beyond the first carries a `Judged apart from` constraint with a reason. Unwired: the checker cannot count files or take an either-or over them.",
+  "`canon records validate plans` run in the sandbox reports no `stack-foldable` and no `batch-unsplit`. Unwired: the checker reads files and the reply, and runs no command.",
+]

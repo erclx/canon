@@ -1,0 +1,5 @@
+export interface SignupState {
+  email: string
+}
+
+export const initialState: SignupState = { email: '' }
