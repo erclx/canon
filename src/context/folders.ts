@@ -17,10 +17,7 @@ import { SURFACE_ROOTS } from '@/roots/surface'
  * these names. A folder left off the list is never resolved, so a path into one
  * goes stale silently rather than failing a push.
  */
-export const DEFAULT_FOLDERS: readonly string[] = [
-  'context',
-  'diagrams',
-]
+export const DEFAULT_FOLDERS: readonly string[] = ['context', 'diagrams']
 
 /**
  * The bases every folder in the default list is looked for under.

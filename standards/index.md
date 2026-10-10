@@ -23,4 +23,3 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Slug reference](slug.md): Transform from a git branch name to a slug, and the three responses to an empty result
 - [Standard reference](standard.md): Shape and content rules for authoring a standard
 - [Versioning reference](versioning.md): Phase label vs semver discipline across tasks, PRs, reviews, issues, commits, and tags
-- [Wireframe reference](wireframes.md): Shape and content rules for canon/wireframes/<surface>.md files

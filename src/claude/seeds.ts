@@ -17,12 +17,7 @@ const HOOKS = 'hooks'
  * stem in an older layout, which is what `@/sync/layout` pairs a target against
  * to find a superseded artifact.
  */
-export const SUBDIRS: readonly string[] = [
-  HOOKS,
-  'context',
-  'memory',
-  'tasks',
-]
+export const SUBDIRS: readonly string[] = [HOOKS, 'context', 'memory', 'tasks']
 
 export type SeedScope = 'claude' | 'root'
 

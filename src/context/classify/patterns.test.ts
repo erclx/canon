@@ -23,9 +23,7 @@ describe('diffPatternVerdict', () => {
   })
 
   it('should keep a table row rewritten in place', () => {
-    const result = diffPatternVerdict(
-      '| Consolidated | 585 | 587 | `art_3` |',
-    )
+    const result = diffPatternVerdict('| Consolidated | 585 | 587 | `art_3` |')
 
     expect(result.verdict).toBe('KEEP')
   })

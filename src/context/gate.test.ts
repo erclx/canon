@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SectionFinding } from '@/context/audit'
-import {
-  type GateInput,
-  hasDrift,
-  isGating,
-} from '@/context/gate'
+import { type GateInput, hasDrift, isGating } from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
 function makeDrift(overrides: Partial<FolderDrift> = {}): FolderDrift {

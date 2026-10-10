@@ -42,9 +42,7 @@ function narrationQuote(text: string): string | undefined {
 }
 
 /** Classifies one diff-mode chunk from its added text alone. */
-export function diffPatternVerdict(
-  added: string,
-): PatternVerdict<DiffVerdict> {
+export function diffPatternVerdict(added: string): PatternVerdict<DiffVerdict> {
   const quote = narrationQuote(added)
   if (quote !== undefined) {
     return { verdict: 'HISTORY', quote, reason: 'narrates how this got here' }
