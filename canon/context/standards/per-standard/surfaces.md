@@ -35,7 +35,7 @@ A workspace is named `<nn>-<topic>` rather than by a bare slug, so a listing sor
 
 `claude/skills/teach-workspace/references/glossary.md` governs a glossary wherever it sits, which is why the format is a standard of its own rather than a section of `teach.md`. A workspace glossary is promotable, and a promotion lands the file at a path no glob covers, so the shape has to travel with the file. `teach.md` keeps the requirement that the file exists and yields the entry shape, which declares the boundary from both sides.
 
-It sits at the flat root and resolves to `teach-workspace`, the one surface driving every promotion. Both readers name the skill rather than a path: `teach.md` because a promoted file has no fixed address, and `governance/rules/standards/teach.md` because it ships with the CLI while the reference ships with the plugin, so it carries the report-the-gap instruction `800-prose` uses across that split.
+It sits at the flat root and resolves to `teach-workspace`, the one surface driving every promotion. The reader names the skill rather than a path, because a promoted file has no fixed address.
 
 The format comes from the external source the teaching surface was built against, the more specified of the two candidates: it adds a term only once the material has used it, picks one word per concept and lists the rejected synonyms as aliases to avoid, and requires the glossary's own terms inside other definitions. `internal/vocabulary.md` departs on one rule and states the departure in its own intro, since a bank drawn from every session has no first appearance to name. Recording the exception on the page rather than in the standard follows `standards/standard.md`, since a standard citing a real file goes stale when that file moves.
 

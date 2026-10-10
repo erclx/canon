@@ -74,8 +74,8 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `governance/rules/standards/plan.md`.
 - `plan-lifecycle.md` fixes when a plan is written, how it is amended, and its move to the archive. `governance/rules/standards/plan.md`, through a pointer bullet. Split from `plan.md` for the same ceiling, which `plan.md` still sits one line under.
 - `readme.md` fixes the voice and structure of the page a project leads with. `governance/rules/standards/readme.md`.
-- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it. `governance/rules/standards/ready.md`.
-- `requirements.md` fixes the problem, goals, and non-goals record. `governance/rules/standards/requirements.md`.
+- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it.
+- `requirements.md` fixes the problem, goals, and non-goals record.
 - `rule.md` fixes a path-scoped governance rule. `governance/rules/standards/rule.md`.
 - `session.md` fixes the pre-compaction handoff. `governance/rules/standards/session.md`, which globs the `session-` file alone because `governance/rules/standards/tasks.md` globs the board around it and one rule over both shapes would carry two.
 - `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `governance/rules/standards/skill.md`.
@@ -85,7 +85,7 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/standards/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/standards/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
-- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `governance/rules/standards/teach.md`, which most targets never fire, since they open no workspace. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
+- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
 - `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root

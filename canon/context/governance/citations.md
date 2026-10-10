@@ -26,6 +26,8 @@ A rule stating a general fact has nowhere to point for the local decision, since
 
 `canon gov citations` resolves every path a rule body cites across `governance/rules/` and `internal/rules/`, plus every frontmatter `paths:` glob under `internal/rules/`, and `bun run check` gates on it as the `Rule citations` stage. The verdicts below stay a manual read: the stage answers whether a citation resolves, and nothing answers whether a resolving citation points at the right file or restates what it points at.
 
+A `canon standards <name>` citation resolves against `standards/` and then against the skill reference the `MOVED_STANDARDS` map in `src/standards/read.ts` names for a retired standard, so a generated rule keeps citing a moved standard by name with no rewrite. A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
+
 At `2e912110` the corpus held 36 body citations across 77 rules. Twenty were `canon standards <name>`, fifteen were backticked paths, and one named a sibling rule by filename. All 36 resolved or were excused, and every internal glob matched, so the gate shipped as a floor rather than as a repair.
 
 #### Bounds
@@ -65,13 +67,11 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `standards/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
 
 - `governance/rules/standards/wireframes.md` → `canon standards wireframes`, without restating the ASCII-fence, region-label, copy-verbatim, interaction-intent, or same-PR-update rules.
-- `governance/rules/standards/requirements.md` → `canon standards requirements`, without restating the goal-as-outcome, non-goal, MVP-lifecycle, later-scope, or `## Distribution` rules.
 - `governance/rules/standards/architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
 - `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
 - `governance/rules/standards/tasks.md` → `canon standards tasks` and `canon standards board`, without restating the origin-line, outcome-sizing, heading, no-implementation-detail, or archiving rules.
 - `governance/rules/standards/memory.md` → `canon standards memory`, without restating the routing or pen rules.
 - `governance/rules/standards/session.md` → `canon standards session`, without restating the own-file, worktree-root, compaction-only, or citation rules, and keeps the routing bullet pointing at `governance/rules/standards/tasks.md`.
-- `governance/rules/standards/ready.md` → `canon standards ready`, without restating the folder-name, overview-frontmatter, mirrored-tree, or thin-plan rules. Not moot: no plugin skill creates the folder, so a governance-only target reaches it by hand-authoring against the standard.
 - `governance/rules/standards/skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
 - `governance/rules/standards/readme.md` → `canon standards readme`, without restating the audience-and-voice rules.
 - `governance/rules/standards/rule.md` → `canon standards rule`, without restating the numbering or body rules.
@@ -79,7 +79,6 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 - `governance/rules/standards/context.md` → `canon standards context`, without restating the supersede-in-place rule. Also moot.
 - `governance/rules/standards/groundwork.md` → `canon standards groundwork`, without restating the folder-name or measuring-and-closing rules. Also moot.
 - `governance/rules/standards/intake.md` → `canon standards intake`, without restating the folder-name or answer-contract rules. Also moot.
-- `governance/rules/standards/teach.md` → `canon standards teach`, without restating the workspace-conventions rules. Also moot.
 
 ### Skill citations carrying the prefix and fallback
 
@@ -87,7 +86,7 @@ Each rule and standard below cites its skill with the `canon:` prefix plus a rep
 
 - `governance/rules/canon/603-memory.md` cites `canon:memory-capture` and `canon:context-fold`, and leaves the pointer at its standard to `governance/rules/standards/memory.md`.
 - `governance/rules/lang/120-bash.md` cites `canon:bash-cli-script`.
-- `governance/rules/standards/teach.md` and `claude/skills/teach-workspace/references/teach.md` both cite `canon:teach-workspace`, the standard's fallback reading "say so and stop".
+- `claude/skills/teach-workspace/references/teach.md` cites `canon:teach-workspace`, the standard's fallback reading "say so and stop".
 - `governance/rules/standards/skill.md` cites `canon:create-skill` twice.
 - `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
 
@@ -98,7 +97,6 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 - `governance/rules/standards/context.md`, scoped to `canon/context/**`. Only `context-fold` and `memory-capture` write an entry there.
 - `governance/rules/standards/groundwork.md`, scoped to `.canon/groundwork/**`. Only `plan-groundwork` creates a track folder.
 - `governance/rules/standards/intake.md`, scoped to `.canon/intake/**`. Only `plan-intake` creates a dump folder.
-- `governance/rules/standards/teach.md`, scoped to `.canon/teach/**`. Only `teach-workspace` creates a workspace.
 
 ### Clean pointer, no other note
 
