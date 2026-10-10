@@ -48,7 +48,7 @@ Two reads belong to the `plan-feature` path alone, since neither a groundwork
 track nor an intake pass is sequenced behind another row or validated as a plan:
 
 - The plan of any row this one is sequenced behind, including one already moved to `.canon/plans/archive/`. Reading a shipped plan produced the strongest constraint in the first trial and no brief asked for it.
-- `${CLAUDE_SKILL_DIR}/../../standards/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` on the file once it is written. Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists.
+- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` on the file once it is written. Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists.
 
 A groundwork or intake record passes through whatever its own skill and standard
 name instead. The gitignored-folder problem is the same for all three, so run

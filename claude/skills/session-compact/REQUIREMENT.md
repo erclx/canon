@@ -9,7 +9,7 @@ description: Why a plain session needs a handoff surface that is not the task bo
 
 Without this skill, a session facing a compaction reaches for `session-map`, which writes `.canon/tasks/session-<slug>.md`. The board carries four such files today, and `session-resume` drops them by name prefix to read the real rows, so a reader works around a misplacement on every run.
 
-`session-map` also carries the orchestrator's shape: a drift check against a start commit nothing records, a step for role sections, and a `## State` section. A session that shipped nothing pays all three to leave one note behind, and `standards/session.md` already names a `## State` filled from the tree as non-conforming, which is the failure that shape invites.
+`session-map` also carries the orchestrator's shape: a drift check against a start commit nothing records, a step for role sections, and a `## State` section. A session that shipped nothing pays all three to leave one note behind, and the `session-map` skill's `references/session.md` already names a `## State` filled from the tree as non-conforming, which is the failure that shape invites.
 
 Sessions also write the wrong thing into a handoff. They restate the tree, which survives a compaction, and omit what each decision beat, which does not.
 

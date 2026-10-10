@@ -53,11 +53,11 @@ An operator's shell profile may wrap `canon` in a function that runs the binary 
 
 ### Origins
 
-The origin invariant is owned by `standards/tasks.md`. Orchestration adds that a handoff needs more than an origin, because scope lives in the plan rather than in the task file, so a task can sit on the board plan-less and gains one when it is handed out. See Boundaries in `role-orchestrator` for the handoff rule and for the boundary that keeps tracked edits out of the main worktree.
+The origin invariant is owned by `claude/skills/task-board/references/tasks.md`. Orchestration adds that a handoff needs more than an origin, because scope lives in the plan rather than in the task file, so a task can sit on the board plan-less and gains one when it is handed out. See Boundaries in `role-orchestrator` for the handoff rule and for the boundary that keeps tracked edits out of the main worktree.
 
 The reverse direction of that invariant reads three origins. `task-board` lists tracks and runs an issue query, and reading intake folders needs a route of its own. The obvious signal reports the opposite of the truth: most intake folders with no live task are each cited by an archived task, which is promoted and shipped rather than abandoned, so a check keyed on board citations alone names finished folders and none of the state it exists to find.
 
-Counting `.canon/tasks/archive/` and `.canon/tasks/declined/` beside the board separates the two, and the answer slots are read through `canon intake list --json` rather than by grepping headings, since the verb owns the parse `standards/intake.md` fixes and skips the index and every fenced sample a grep would count. The verb reports four counts per folder and the check reads three of them. `malformed` earns its own wording rather than an exclusion, because an item carrying no answer slot is neither unread nor answered, so a test reading `unread` alone folds a broken file onto the answered side and reports it as decided work nobody promoted. The step names what it read on a clean pass rather than printing nothing.
+Counting `.canon/tasks/archive/` and `.canon/tasks/declined/` beside the board separates the two, and the answer slots are read through `canon intake list --json` rather than by grepping headings, since the verb owns the parse `claude/skills/plan-intake/references/intake.md` fixes and skips the index and every fenced sample a grep would count. The verb reports four counts per folder and the check reads three of them. `malformed` earns its own wording rather than an exclusion, because an item carrying no answer slot is neither unread nor answered, so a test reading `unread` alone folds a broken file onto the answered side and reports it as decided work nobody promoted. The step names what it read on a clean pass rather than printing nothing.
 
 ## Phase label containment
 
@@ -73,7 +73,7 @@ A task's plan pointer decides whether the sweep can see it at all. A plan carrie
 
 A task carrying no pointer in any form fails the same way and is harder to see, since a plan matched to it only by slug is stranded with no record it existed. It also reaches upstream of the archive: `auto-ship` pointed at that task stops on the plan-shape test in its own Step 1, since a task carries `## Outcomes` and `## Findings` rather than `**Files to touch:**`, and the operator has to hand the plan's own path to the skill instead.
 
-Two task files sharing one `Plan:` line fail at the other end, tripping `git-pr`'s more-than-one-match guard so the number write skips and `canon tasks archive` never fires for the batch that closed. `standards/tasks.md` is the authority on the form.
+Two task files sharing one `Plan:` line fail at the other end, tripping `git-pr`'s more-than-one-match guard so the number write skips and `canon tasks archive` never fires for the batch that closed. `claude/skills/task-board/references/tasks.md` is the authority on the form.
 
 ### Archiving a plan strands the priority link
 

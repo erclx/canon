@@ -63,7 +63,7 @@ Two classes resolve to nothing and are right to. Both are reported by name rathe
 
 Only an exact declaration exempts, never a glob match against one. A glob declares a shape, so a body path sitting inside it is still a citation and a stale one is still a defect. A rule scoped at `docs/**` citing a `docs/agents/renamed.md` that moved is exactly the class this stage exists to catch, and matching the glob would excuse it.
 
-**Ignored.** A path git ignores is session scratch no clone is expected to hold. `governance/rules/standards/tasks.md` cites `.canon/tasks/index.md`, which is real in a live project and absent from a fresh clone and from every linked worktree. Resolving against the filesystem alone would make the verdict depend on which tree the stage ran in, so the unresolved paths go to one batched `git check-ignore` and an ignored one is excused. A read git cannot answer refuses rather than reporting those paths dead.
+**Ignored.** A path git ignores is session scratch no clone is expected to hold. `governance/rules/canon/tasks.md` cites `.canon/tasks/index.md`, which is real in a live project and absent from a fresh clone and from every linked worktree. Resolving against the filesystem alone would make the verdict depend on which tree the stage ran in, so the unresolved paths go to one batched `git check-ignore` and an ignored one is excused. A read git cannot answer refuses rather than reporting those paths dead.
 
 ## Why the glob half reads one corpus
 

@@ -12,8 +12,8 @@ A warm session that has already written a change hands the exact text to the wor
 Read these in parallel before writing:
 
 - `${CLAUDE_SKILL_DIR}/references/ready.md`: the folder layout, the overview frontmatter, the mirrored tree, and the thin-plan contract
-- `${CLAUDE_SKILL_DIR}/../../standards/plan.md`: the plan's sections and its answer contract
-- `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`: the task file's shape and origin lines
+- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`: the plan's sections and its answer contract
+- `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`: the task file's shape and origin lines
 - `${CLAUDE_SKILL_DIR}/references/assembly.md`: the overview and thin-plan templates and the destination match check
 
 ## Guards
@@ -61,7 +61,7 @@ install -D -m 0644 <source> <main-root>/.canon/ready/<nn>-<slug>/<destination pa
 
 ## Step 5: write the thin plan
 
-Write `<main-root>/.canon/plans/feature-<slug>.md` from the template, by heredoc, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
+Write `<main-root>/.canon/plans/feature-<slug>.md` from the template, by heredoc, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
 - List every Step 1 destination under `**Files to touch:**`, each with one clause on why it changes, pointing at the folder's copy rather than restating it.
 - Add a `**Constraints:**` line naming the ready folder as the verbatim source for those paths.
@@ -71,7 +71,7 @@ Run the match check in `${CLAUDE_SKILL_DIR}/references/assembly.md` before going
 
 ## Step 6: write the task
 
-Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label Step 2 claimed, without calling the verb again, since a second call would claim a different label. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
+Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label Step 2 claimed, without calling the verb again, since a second call would claim a different label. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`. Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
 
 ```bash
 canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
@@ -79,7 +79,7 @@ canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
 
 Branch on the record rather than on the exit. The `Ready:` line orients a worker reading the task, and `canon tasks archive` reads it to move the folder on ship.
 
-A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now`, per the tests in `${CLAUDE_SKILL_DIR}/../../standards/board.md`. A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported below, so whoever controls the board decides whether a contract, a relocation, or a sweep moves the row to `## Up next`.
+A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now`, per the tests in `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`. A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported below, so whoever controls the board decides whether a contract, a relocation, or a sweep moves the row to `## Up next`.
 
 Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions list --self --json` for this session and `canon sessions list --json` for a row from the same repository, under another `sessionId`, whose `name` starts with `orchestrator-`. Treat a refused read as a roster read that failed.
 

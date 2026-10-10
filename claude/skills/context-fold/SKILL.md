@@ -75,7 +75,7 @@ For each doc with relevant changes, apply updates following these rules. Read a 
 **`.canon/tasks/`**
 
 - Mark completed outcomes `[x]` in the task's own file through `canon tasks outcome <stem> --close <n> --json`, repeating `--close` for each. Positions count every outcome checkbox in file order from 1, which the read above already gives. Do not move or archive the file.
-- Write a newly identified task as its own file, following `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` for the filename and frontmatter.
+- Write a newly identified task as its own file, following `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` for the filename and frontmatter.
 - Do not touch task files this session did not change.
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it.
 

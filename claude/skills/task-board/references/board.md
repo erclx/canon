@@ -7,6 +7,15 @@ description: Readiness groups, row cells, and ordering for priority.md, the unor
 
 Applies to `.canon/tasks/priority.md`, `.canon/tasks/backlog.md`, and `.canon/tasks/index.md`, the three files beside the tasks that say which one runs next. Update `priority.md` when a task is filed, planned, dispatched, or blocked, and `backlog.md` whenever the board is swept.
 
+## Contents
+
+- [Scope](#scope)
+- [What a working board looks like](#what-a-working-board-looks-like)
+- [The files](#the-files)
+- [Ordering](#ordering)
+- [The backlog](#the-backlog)
+- [Validation](#validation)
+
 ## Scope
 
 Governs the board files under `.canon/tasks/`: the readiness groups and their columns in `priority.md`, row order and the reason each row states, the backlog beside it, and the generated index.

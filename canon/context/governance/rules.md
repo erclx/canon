@@ -45,7 +45,7 @@ Each source also installs into its own folder: `.claude/rules/canon/`, `.claude/
 
 ### Rules group by the audience they serve
 
-A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, `tooling/` for dev setup, `writing/` for prose and document shape, and `standards/` for the generated rules routing a path to its standard. `base` takes the last five whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
+A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, where the two record rules for `.canon/tasks/**` and `.canon/plans/**` sit unnumbered as `writing/markdown.md` does, `tooling/` for dev setup, `writing/` for prose and document shape, and `standards/` for the generated rules routing a path to its standard. `base` takes the last five whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
 
 Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, was the alternative, and it left two groups with no honest home: the generic code rules are not tooling, and the prose rules are not about Claude.
 

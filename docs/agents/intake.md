@@ -78,4 +78,4 @@ Skills branch on the reason rather than on the exit code:
 canon intake list toolkit-overview --unread --json | jq -r '.clusters[] | .cluster'
 ```
 
-For the folder layout, the item format, the answer contract, and retrieval, see `standards/intake.md`.
+For the folder layout, the item format, the answer contract, and retrieval, see `claude/skills/plan-intake/references/intake.md`.

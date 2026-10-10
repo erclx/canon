@@ -13,7 +13,7 @@ The runbooks ship inside the skill because a runbook the skill cites has to reso
 
 ## The session map
 
-`orchestrator-handoff.md` covers the write side of a compaction and `orchestrator-resume.md` the read side, both over the session map `standards/session.md` governs. The standard holds what any session can fill: the three core sections, the per-session filename, the capture and drift steps that open the write, and the citation rule. The `session-map` skill is the invocable route onto it, which the runbook calls rather than restating.
+`orchestrator-handoff.md` covers the write side of a compaction and `orchestrator-resume.md` the read side, both over the session map `claude/skills/session-map/references/session.md` governs. The standard holds what any session can fill: the three core sections, the per-session filename, the capture and drift steps that open the write, and the citation rule. The `session-map` skill is the invocable route onto it, which the runbook calls rather than restating.
 
 A plain session about to compact takes `session-compact` instead, which writes a note under `.canon/compact/` and leaves the board alone, and the `PreCompact` hook names that skill and points this role at its own runbook. The runbook holds what the role adds over that call: the section for decisions taken under delegated authority, the closing block that restarts the review poll, and the caveat that this session never commits, which the door takes and passes to capture so no fact routes into a tracked file. All three are settled before the door writes, since the door reports the map as written and knows nothing of the role.
 
@@ -23,7 +23,7 @@ A fourth act settles ahead of those three and puts nothing in the map at all. Th
 
 Splitting on role rather than on file is what lets a feature session write a handoff at all. A worker holds no delegation to have exercised and runs no review poll, so lifting the whole runbook would hand it two sections it can only leave blank, and a blank section teaches its reader to skip the file. The drift step sits in the standard on the opposite test: the failure it detects follows session length rather than role, so a long worker session writing a handoff while following a body the repository has moved past is the case the step exists for.
 
-The standard sits in the flat `standards/` root rather than in a skill's `references/`, because two skills read it and a skill body may not cite a path inside a sibling skill. The root reaches both callers through the corpus the plugin ships beside `skills/`, so a project holding the plugin resolves it and a project holding neither runs `canon standards session`.
+The reference sits in `session-map`, the one skill that writes the file. `role-orchestrator` and `session-resume` read it as siblings through `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, which resolves in the plugin cache as `../markdown-craft/` does, and a project holding no plugin runs `canon standards session`.
 
 ### One file per session
 
@@ -49,7 +49,7 @@ Folding the pass into the sweep was the alternative and it loses the idle-sessio
 
 The runbook carries the two ways a re-test returns a confident wrong answer rather than an error: reading the condition looser than the code consuming it defines the shape, and measuring it against a tree the shipped command does not run against.
 
-The pass carries a second scope rather than a second runbook, walking `backlog.md` on the same idle trigger. A backlog row carries no blocker cell, so the walk applies a different test than a board row gets, reading `standards/board.md`'s own board-or-backlog call off the task file's `## Findings` and its origin line rather than porting the five blocker kinds onto a surface that carries none of them. The two directions of that call stay split: the runbook performs the promotion direction as a full walk over the backlog, and the refill-sweep sub-bullet in `orchestrator-refill.md` keeps only the demotion direction, a row that stopped being near-term moving to `backlog.md`, rather than restating a walk the runbook owns.
+The pass carries a second scope rather than a second runbook, walking `backlog.md` on the same idle trigger. A backlog row carries no blocker cell, so the walk applies a different test than a board row gets, reading `claude/skills/task-board/references/board.md`'s own board-or-backlog call off the task file's `## Findings` and its origin line rather than porting the five blocker kinds onto a surface that carries none of them. The two directions of that call stay split: the runbook performs the promotion direction as a full walk over the backlog, and the refill-sweep sub-bullet in `orchestrator-refill.md` keeps only the demotion direction, a row that stopped being near-term moving to `backlog.md`, rather than restating a walk the runbook owns.
 
 ## Gotchas
 

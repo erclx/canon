@@ -6,7 +6,7 @@ const HEADING = /^#{1,6}\s/
  * A section marker holding its line alone, which is the signpost a document
  * uses where its own template asks for bold rather than a heading.
  *
- * `standards/plan.md` gives `## Summary` a heading and marks the four sections
+ * `claude/skills/plan-feature/references/plan.md` gives `## Summary` a heading and marks the four sections
  * below it this way, so a conforming plan read as one run from its first line
  * to its last and all seven live plans reported past the depth checkpoint, at
  * 106 to 166 rendered lines. A measure firing on a whole corpus says nothing

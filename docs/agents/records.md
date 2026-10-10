@@ -43,7 +43,7 @@ Exit codes: `0` nothing carried a known transform, or `--write` repaired everyth
 
 ## Ordinal
 
-`canon records ordinal <kind> <slug>` reports the next ordinal `intake` and `groundwork` share, or claims it with `--claim`. The two kinds share one sequence, per `standards/intake.md` and `standards/groundwork.md`, so this reads both `.canon/intake/` and `.canon/groundwork/` regardless of which kind was asked for.
+`canon records ordinal <kind> <slug>` reports the next ordinal `intake` and `groundwork` share, or claims it with `--claim`. The two kinds share one sequence, per `claude/skills/plan-intake/references/intake.md` and `claude/skills/plan-groundwork/references/groundwork.md`, so this reads both `.canon/intake/` and `.canon/groundwork/` regardless of which kind was asked for.
 
 ```bash
 canon records ordinal intake my-topic
