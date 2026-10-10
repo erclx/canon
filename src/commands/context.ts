@@ -172,7 +172,7 @@ export function register(program: Command): void {
     .option('--base <ref>', 'Far side of the range, defaulting to the trunk')
     .option(
       '--doc-types <list>',
-      `Comma-separated canonical doc types (default: all five: ${CANONICAL_DOC_TYPES.join(', ')})`,
+      `Comma-separated canonical doc types (default: all four: ${CANONICAL_DOC_TYPES.join(', ')})`,
     )
     .option(
       '--backend <name>',
@@ -207,13 +207,13 @@ export function register(program: Command): void {
   classify
     .command('sweep')
     .description(
-      'Classify every section of the five canonical doc types, split at H3',
+      'Classify every section of the four canonical doc types, split at H3',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--doc-types <list>',
-      `Comma-separated canonical doc types (default: all five: ${CANONICAL_DOC_TYPES.join(', ')})`,
+      `Comma-separated canonical doc types (default: all four: ${CANONICAL_DOC_TYPES.join(', ')})`,
     )
     .option(
       '--backend <name>',

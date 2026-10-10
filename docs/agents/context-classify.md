@@ -20,7 +20,7 @@ canon context classify sweep --doc-types design,requirements --json
 | Option               | Behavior                                                       |
 | -------------------- | -------------------------------------------------------------- |
 | `--base <ref>`       | Diff mode only. Far side of the range, defaulting to the trunk |
-| `--doc-types <list>` | Comma-separated canonical doc types (default: all five)        |
+| `--doc-types <list>` | Comma-separated canonical doc types (default: all four)        |
 | `--backend <name>`   | Override the resolved model backend for this run               |
 | `--model <name>`     | Override the resolved model name for this run                  |
 | `--json`             | Add a machine-readable record on stdout                        |

@@ -188,7 +188,7 @@ describe('extractDiffChunks', () => {
     if (result.kind === 'ok') expect(result.chunks).toHaveLength(0)
   })
 
-  it('should ignore a change outside the five canonical doc types', async () => {
+  it('should ignore a change outside the four canonical doc types', async () => {
     commit('chore: init', { 'src/index.ts': 'export const x = 1\n' })
     write('src/index.ts', `export const x = 1\n// ${LONG_PARAGRAPH}\n`)
 
