@@ -148,7 +148,7 @@ seed_missing_evidence_pr() {
     gh pr view feat/header-spacing --json url -q .url 2>/dev/null)
 }
 
-# The same change with captures and a wireframe stating the narrow layout. The
+# The same change with captures and a checklist box stating the narrow layout. The
 # narrow head capture shows the nav row running off the edge, while the ticked
 # box claims it collapses into the menu button. The comment is the one the real
 # verb renders from this checkout, which sits on the branch, so the arm reads
@@ -161,8 +161,6 @@ seed_evidence_mismatch_pr() {
 
   cp "$EVIDENCE_RENDER/head/header.html" "$EVIDENCE_RENDER/head/header.css" src/
   cp "$EVIDENCE_RENDER/head/390.png" "$EVIDENCE_RENDER/head/1280.png" evidence/header/
-
-  stage_fixtures claude review-pr evidence-mismatch 01-wireframes
 
   git add . && git commit -m "feat(site): add pricing link to the header" --no-verify -q
   git push --force origin HEAD -q
@@ -476,7 +474,7 @@ Accepted as recorded. No status field is added, since nothing consumes one and t
 
     log_step "Scenario ready: a ticked box the narrow capture contradicts"
     log_info "Context: open draft PR on feat/header-pricing with an ## Evidence comment from canon pr evidence"
-    log_info "         canon/wireframes/header.md says the nav collapses into a Menu button below 600px"
+    log_info "         the checklist box says the nav collapses into a Menu button below 600px"
     log_info "         the head capture at 390 shows the nav row running off the edge, and the box claiming"
     log_info "         the collapse is ticked"
     log_info "Action:  /review-pr"

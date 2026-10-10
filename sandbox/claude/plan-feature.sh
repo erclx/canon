@@ -48,15 +48,12 @@ stage_setup() {
 
     mkdir -p .claude
 
-    mkdir -p canon/wireframes
-    rm -f canon/wireframes/feature-name.md
-
     mkdir -p .canon/tasks
 
     git add . && git commit -m "chore(notes): initial notes repo" --no-verify -q
 
     log_step "Scenario ready: feature planning (small mode)"
-    log_info "Context: prose-only repo, single README task, decoy DESIGN and wireframes/ with sentinel text"
+    log_info "Context: prose-only repo, single README task, decoy DESIGN with sentinel text"
     log_info "Action:  /plan-feature (reference the task in .canon/tasks/)"
     log_info "Expect:  chat-only output, NO .canon/plans/ file written, decoys NOT surfaced"
     ;;
