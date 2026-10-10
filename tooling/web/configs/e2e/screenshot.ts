@@ -58,7 +58,6 @@ const HOME_SECTIONS: CaptureSection[] = [
   { name: 'dispatch', selector: '#dispatch' },
   { name: 'workers', selector: '#workers' },
   { name: 'gate', selector: '#gate' },
-  { name: 'memory', selector: '#memory' },
   { name: 'evidence', selector: '#evidence' },
   { name: 'loop', selector: '#loop' },
   { name: 'merge', selector: '#merge' },
