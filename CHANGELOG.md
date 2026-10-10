@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.32.0](https://github.com/erclx/canon/compare/v5.31.0...v5.32.0) (2026-10-10)
+
+
+### Features
+
+* **claude:** retire the wireframes record ([#2293](https://github.com/erclx/canon/issues/2293)) ([596d732](https://github.com/erclx/canon/commit/596d7321317fdc1d93e54266793374cdceec3cc5))
+* **feedback:** file issues only and triage into an intake folder ([#2294](https://github.com/erclx/canon/issues/2294)) ([e27be63](https://github.com/erclx/canon/commit/e27be63fae951ba048e8b83a60320f33ed8ed553))
+* **skills:** draft draft-and-pick candidates as frames on the canvas ([#2301](https://github.com/erclx/canon/issues/2301)) ([cc21c24](https://github.com/erclx/canon/commit/cc21c24c6966ef70f803817ede2df6e09b9db1ac))
+* **skills:** let create-skill run unattended and name both roots ([#2298](https://github.com/erclx/canon/issues/2298)) ([e0bf449](https://github.com/erclx/canon/commit/e0bf44920d8cf338ebeba24a5426f0b97a8f62d3))
+* **standards:** require only goals and non-goals in requirements ([#2296](https://github.com/erclx/canon/issues/2296)) ([63fa271](https://github.com/erclx/canon/commit/63fa271cc6f48ef8c2b1136a1dbbb64244b3e50b))
+* **upstream:** remind the operator when a digest is due ([#2287](https://github.com/erclx/canon/issues/2287)) ([84cab44](https://github.com/erclx/canon/commit/84cab447305345df814a1c0136a1e3f7ced02557))
+
 ## [5.31.0](https://github.com/erclx/canon/compare/v5.30.0...v5.31.0) (2026-10-10)
 
 
