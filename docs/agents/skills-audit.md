@@ -5,7 +5,7 @@ description: Measuring both skill corpora against the skill standards, the check
 
 # Skill audit
 
-`canon claude skills audit [path]` reports both skill corpora against the rules `standards/skill.md`, `standards/skill-requirement.md`, and `standards/skill-practice.md` state mechanically. It reads and reports. Fixing what it finds is separate work.
+`canon claude skills audit [path]` reports both skill corpora against the rules `standards/skill.md`, `claude/skills/create-skill/references/skill-requirement.md`, and `claude/skills/create-skill/references/skill-practice.md` state mechanically. It reads and reports. Fixing what it finds is separate work.
 
 ```bash
 canon claude skills audit

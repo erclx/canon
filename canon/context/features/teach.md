@@ -9,7 +9,7 @@ description: Learning workspace layout, the chrome splice, the committed fixture
 
 A learning workspace is a folder of standalone HTML lessons a learner opens directly, with a mission, a glossary, resource pages and learning records beside them. `canon teach` opens a workspace, resolves what the next lesson needs, seeds a stylesheet from the design tokens, and splices navigation chrome into every lesson.
 
-Two standards fix the artifact and one skill drives the pedagogy. `standards/teach.md` fixes layout, ordinal naming, frontmatter, and the mission and learning-record formats. `standards/glossary.md` fixes the glossary. The shipped `teach-workspace` skill decides what to teach next, which is deliberately not a standard.
+Two standards fix the artifact and one skill drives the pedagogy. `claude/skills/teach-workspace/references/teach.md` fixes layout, ordinal naming, frontmatter, and the mission and learning-record formats. `claude/skills/teach-workspace/references/glossary.md` fixes the glossary. The shipped `teach-workspace` skill decides what to teach next, which is deliberately not a standard.
 
 ## Layout
 

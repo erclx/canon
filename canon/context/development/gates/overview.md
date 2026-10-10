@@ -89,7 +89,7 @@ The `drift` check pairs the diff with `git ls-files --others --exclude-standard`
 
 ### A fence is exempt from the prose gate and not from the spell gate
 
-The prose-standards hook treats a fenced code block as exempt and `bun run check:spell` does not, so an invented short identifier inside a mermaid fence can pass every prose gate and still fail the check that blocks the commit. `standards/mermaid.md` names the fence exemption for the prose hook while saying nothing about the spell stage, so the exemption reads wider than it is. Spell participant aliases and node ids as whole words, and check punctuation bans inside labels by hand. The `Markdown bans` and `Spelling` stages read different corpora, so no reordering closes the gap between them.
+The prose-standards hook treats a fenced code block as exempt and `bun run check:spell` does not, so an invented short identifier inside a mermaid fence can pass every prose gate and still fail the check that blocks the commit. `claude/skills/draft-figure/references/mermaid.md` names the fence exemption for the prose hook while saying nothing about the spell stage, so the exemption reads wider than it is. Spell participant aliases and node ids as whole words, and check punctuation bans inside labels by hand. The `Markdown bans` and `Spelling` stages read different corpora, so no reordering closes the gap between them.
 
 ### A write grant has to agree with the formatter
 

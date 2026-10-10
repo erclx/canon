@@ -29,7 +29,7 @@ Each file covers one part of the review loop:
 
 No version-sequencing surface exists. `role-orchestrator` and `review-pr` each read `.canon/tasks/priority.md`'s `Waiting on` cell for why a row sits where it does, one line per row, rather than a roadmap version file, so reasoning spanning several rows has no dedicated home and reaches a later session only through whoever remembers it.
 
-`standards/requirements.md`'s Lifecycle section states that later scope arrives as a new section and that nothing sequences either list into versions.
+`claude/skills/draft-doc/references/requirements.md`'s Lifecycle section states that later scope arrives as a new section and that nothing sequences either list into versions.
 
 ## Asserting a routing decision
 

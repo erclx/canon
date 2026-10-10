@@ -21,7 +21,7 @@ A pass that amends a decision's reasoning without re-reading its numbers dates t
 
 ## Teach
 
-`standards/teach.md` fixes the layout, the ordinal naming, the frontmatter, and the mission and learning-record formats of a learning workspace, while the pedagogy that decides what to teach next sits in `teach-workspace/references/`.
+`claude/skills/teach-workspace/references/teach.md` fixes the layout, the ordinal naming, the frontmatter, and the mission and learning-record formats of a learning workspace, while the pedagogy that decides what to teach next sits in `teach-workspace/references/`.
 
 - An attribute standard beside `markdown.md` lost on the second-reader test, since a standard nothing else cites has no owner to correct it.
 - Folding the pedagogy into `teach.md` lost to `governance/rules/standards/standard.md`, since a standard governs one document type or one attribute rather than both.
@@ -33,7 +33,7 @@ A workspace is named `<nn>-<topic>` rather than by a bare slug, so a listing sor
 
 ## Glossary
 
-`standards/glossary.md` governs a glossary wherever it sits, which is why the format is a standard of its own rather than a section of `teach.md`. A workspace glossary is promotable, and a promotion lands the file at a path no glob covers, so the shape has to travel with the file. `teach.md` keeps the requirement that the file exists and yields the entry shape, which declares the boundary from both sides.
+`claude/skills/teach-workspace/references/glossary.md` governs a glossary wherever it sits, which is why the format is a standard of its own rather than a section of `teach.md`. A workspace glossary is promotable, and a promotion lands the file at a path no glob covers, so the shape has to travel with the file. `teach.md` keeps the requirement that the file exists and yields the entry shape, which declares the boundary from both sides.
 
 It sits at the flat root and resolves to `teach-workspace`, the one surface driving every promotion. Both readers name the skill rather than a path: `teach.md` because a promoted file has no fixed address, and `governance/rules/standards/teach.md` because it ships with the CLI while the reference ships with the plugin, so it carries the report-the-gap instruction `800-prose` uses across that split.
 
@@ -41,7 +41,7 @@ The format comes from the external source the teaching surface was built against
 
 ## Mermaid aspect rule
 
-The taller-than-wide rule in `standards/mermaid.md` is decided by the widest rank's label text and column count, so a wide render is fixed by trimming node labels to three or four words and stacking independent siblings with a `~~~` invisible link, not by removing nodes. A `~~~` link inside a subgraph or folding two nodes into one label can swing a diagram from wider-than-tall to taller-than-wide with every node and edge otherwise unchanged.
+The taller-than-wide rule in `claude/skills/draft-figure/references/mermaid.md` is decided by the widest rank's label text and column count, so a wide render is fixed by trimming node labels to three or four words and stacking independent siblings with a `~~~` invisible link, not by removing nodes. A `~~~` link inside a subgraph or folding two nodes into one label can swing a diagram from wider-than-tall to taller-than-wide with every node and edge otherwise unchanged.
 
 Read the ratio mechanically out of bytes 16 to 24 of a PNG header after rendering through `bunx -y @mermaid-js/mermaid-cli`. A fan-in the standard bans is a separate problem, and a vertical timeline with the trigger on each edge label clears both at once.
 
@@ -67,7 +67,7 @@ A standard with one reader lives in that reader's skill. `claude/skills/git-issu
 
 The count is the test, and it decays: a count that predates a later citation moves a file a second reader still needs, so re-count before every move.
 
-A standard with zero readers is the other case. `standards/wiki.md` was cited by nothing, so every page conformed from the author's memory rather than from a read. Giving it a reader, now the wiki kind of `draft-doc`, is what closes that, where moving the standard into a skill would bury a rule nothing enforces inside the only thing that reads it. Drafting that reader forced the first check against the tree, and all fourteen pages passed, including the sourcing rule a session working from recall breaks silently.
+A standard with zero readers is the other case. `claude/skills/draft-doc/references/wiki.md` was cited by nothing, so every page conformed from the author's memory rather than from a read. Giving it a reader, now the wiki kind of `draft-doc`, is what closes that, where moving the standard into a skill would bury a rule nothing enforces inside the only thing that reads it. Drafting that reader forced the first check against the tree, and all fourteen pages passed, including the sourcing rule a session working from recall breaks silently.
 
 Write frequency is why the wiki got a drafting skill and the architecture record and requirements did not. Across all 1725 commits at `f635d673`, the wiki folder appears in 90 against 8 for `canon/ARCHITECTURE.md` and 1 for `canon/REQUIREMENTS.md`. Over the last 200 commits the order inverts, wiki 5 and architecture 8, because the wiki was written heavily and early. The all-time figure decides, since a skill is built for the traffic a surface attracts across its life, and a later reader re-running the count on a short range should know the choice was made against the long one.
 
