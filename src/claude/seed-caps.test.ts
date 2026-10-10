@@ -64,6 +64,8 @@ describe('requirements seed', () => {
     const line = capLine(seed)
 
     expect(line).toBeDefined()
-    expect(template(read('claude/skills/draft-doc/references/requirements.md'))).toContain(line)
+    expect(
+      template(read('claude/skills/draft-doc/references/requirements.md')),
+    ).toContain(line)
   })
 })
