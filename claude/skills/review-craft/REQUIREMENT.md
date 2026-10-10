@@ -37,14 +37,14 @@ The axes also said nothing about a change that passes by lowering the bar it has
 
 ## Must not
 
-- State a severity or a posting rule. `review-pr` and `review-branch` each own a ladder, and the two define `should-fix` differently.
+- State a severity or a posting rule. `review-pr` owns the ladder.
 - Restate the high-signal filter either procedure carries
-- Name a repository-specific capture layout, width list, or folder. The evidence marker and `canon/wireframes/` are target contracts, and everything else is the project's.
+- Name a repository-specific capture layout, width list, or folder. The evidence marker is a target contract, and everything else is the project's.
 - Carry a per-surface reference beyond security and rendered output before a measured miss asks for one
 
 ## Out of scope
 
-- Running a review, reading the diff, posting findings, and grading them: `review-branch` and `review-pr`
+- Running a review, reading the diff, posting findings, and grading them: `review-pr`
 - The high-signal filter and the severity ladder, which stay in each procedure body
 - Which layer a test belongs at: `test-craft`
 - Capturing screenshots or writing the visual checklist: `canon pr evidence` and `ui-checklist`

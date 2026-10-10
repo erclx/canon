@@ -65,7 +65,6 @@ The one job-duplication candidate an overlap read across the catalog has found i
 
 Every other pair that reads as overlap is a declared boundary or a wording collision rather than genuine duplication.
 
-- `seed-sync` cites `canon-cli` and `target-setup` does not, a gap an overlap read found and no pass has closed.
 - `target-setup` carries the leaf-script check and the server smoke check as two depths inside one reference rather than two skills. The procedures differ, since a leaf script is judged by its exit code and a server by whether it starts and stays up, but what a caller picks between is how heavy the check is rather than which of two skills to name, and a depth argument states that where two descriptions would not.
 - `test-first` and the `canon gov test-order` step in `auto-ship` do not overlap: the body carries the red-green loop and the autoship step carries a history read. The boundary that matters is against `systematic-debugging`, since both write a test before a change and only one starts from a failure nobody has explained.
 - `record-screencast` and `draft-screencast` stay separate, since a second skill re-reading a draft it did not write is the risk the split declines.

@@ -44,6 +44,5 @@ Importing that catalog wholesale fails on a different measurement. External mate
 - The banned characters, which `markdown.md` states for a reader and `canon markdown audit` gates from package data
 - Spelling, which a project's spell checker enforces
 - Markdown mechanics, being headings, lists, code spans, punctuation, and file references
-- Restating text that already exists in plainer words, which `restate-plainly` owns on a different trigger, since a restatement is asked for by name and this arrives on a glob match. The rules here still govern how that restatement reads, and that body cites this one rather than carrying a copy.
 - What voice a given surface declares, which belongs to the standard governing that surface
 - Measuring whether finished output followed these rules, which needs a check this skill does not carry

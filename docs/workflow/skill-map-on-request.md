@@ -10,18 +10,18 @@ These two groups hold the skills no single moment in a project's life calls for,
 
 ## Generate an artifact on demand
 
-| Skill                     | When to use                                                                                                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                                               |
-| `canon:create-skill`      | For a new `SKILL.md`                                                                                                                           |
-| `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wireframe surface, wiki reference page, or `README.md`, drafted against the standard for its kind |
-| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                                      |
-| `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                                     |
-| `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
-| `canon:draft-slides`      | For a deck, drawn as HTML slides in its own folder and rendered to editable PowerPoint                                                         |
-| `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                                                  |
-| `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap                                   |
-| `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                                                    |
+| Skill                     | When to use                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                            |
+| `canon:create-skill`      | For a new `SKILL.md`                                                                                                        |
+| `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wiki reference page, or `README.md`, drafted against the standard for its kind |
+| `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                   |
+| `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                  |
+| `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                          |
+| `canon:draft-slides`      | For a deck, drawn as HTML slides in its own folder and rendered to editable PowerPoint                                      |
+| `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                               |
+| `canon:record-screencast` | For recording a screencast draft, then composing the take into a finished mp4 when the draft asks for a wrap                |
+| `canon:draft-identity`    | For a project's logo mark and its social card, drafted through `draft-and-pick`'s pick loop                                 |
 
 ## Answer a question at any point
 
@@ -33,7 +33,6 @@ These two groups hold the skills no single moment in a project's life calls for,
 | `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                                                             |
 | `canon:markdown-craft`      | Before a substantial markdown edit, for the format and structure rules and the audit that follows                                                                      |
 | `canon:write-human`         | Before drafting or revising prose, for voice, rhythm, and density                                                                                                      |
-| `canon:restate-plainly`     | When an answer or a document has to be read again in plain words                                                                                                       |
 
 Every row answers a question rather than marking a point in a project's life, so filing one under a phase on the [skill map](skill-map.md) would send a reader to the wrong group.
 

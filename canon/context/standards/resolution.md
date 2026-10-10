@@ -19,7 +19,7 @@ Two entries rather than one because a checkout of this repository would otherwis
 
 No single citation form answers everywhere, since nothing mirrors the corpus under `.claude/` and no install writes a copy into a target. `internal/rules/claude/598-authoring-layout.md` states the split as one case apiece: a body under `claude/` cites the plugin root, a rule or a seed calls `canon standards <name>`, and a file staying in this repository cites `standards/<name>.md`.
 
-A reader has to know which surface they are on, and nothing checks that they got it right. `DEFAULT_FOLDERS` in `src/context/folders.ts` covers `context`, `decisions`, `diagrams`, and `wireframes`, so the citation gate never resolves a `standards/` path either way and reports nothing on a wrong form.
+A reader has to know which surface they are on, and nothing checks that they got it right. `DEFAULT_FOLDERS` in `src/context/folders.ts` covers `context` and `diagrams`, so the citation gate never resolves a `standards/` path either way and reports nothing on a wrong form.
 
 The `paths:` glob on `governance/rules/standards/standard.md` matches `standards/` alone, so a target holding a stale installed copy elsewhere never matches that rule, which governs authoring rather than an installed artifact.
 

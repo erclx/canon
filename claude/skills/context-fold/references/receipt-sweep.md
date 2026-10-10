@@ -1,11 +1,11 @@
 ---
 title: Sweep consumed receipts
-description: How context-fold Step 9 sweeps branch review reports whose branch is gone, and what it keeps and reports
+description: How context-fold Step 8 sweeps branch review reports whose branch is gone, and what it keeps and reports
 ---
 
 # Sweep consumed receipts
 
-Step 9 of `context-fold`, reached in order on every run.
+Step 8 of `context-fold`, reached in order on every run.
 
 Sweep the review receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 
@@ -15,13 +15,13 @@ Plans are not swept here. A plan is settled by the merge rather than by an outco
 
 ## Reviews
 
-Leave the current branch's review receipt where it is. `auto-ship` Step 6 keeps minor findings in `.canon/review/branch-<slug>.md` and its closing block hands the reader that path, so deleting it here removes the file the chain that invoked this skill is still citing. Seven runs recorded that collision across two days before a sandbox fixture asserted the receipt and could pass only on a run the chain stopped early.
+Leave the current branch's review receipt where it is. No skill writes one now, so one that exists is older and its branch is still live.
 
 The body that writes a receipt owns its lifetime. This skill sweeps on behalf of whatever called it and has no way to read whether a file is still in use, where the chain that wrote this one cites it in its own output and knows. What reaps it is the branch sweep below, one branch later, once the branch it names is gone.
 
 Sweep the branch reports this session never opened. List `.canon/review/branch-*.md`, run the slug transform in `${CLAUDE_SKILL_DIR}/../../standards/slug.md` over every name `git branch --format='%(refname:short)'` prints, and delete a report whose slug matches none of them. Take the names from that format rather than from `git branch --list`, which marks the current branch with `* ` and a branch checked out in another worktree with `+ `, so a transform reading the marked lines as written turns a live branch into a slug nothing matches and sweeps a report a sibling worktree is still working from. A branch report is read once, by the session addressing it, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so a report outliving its branch is holding nothing. Skipping this leaves them accumulating for the life of the checkout, since a slug is unique per feature and no later branch ever looks for one.
 
-What that removes is a local-only review on a branch deleted before it opened a pull request. `review-branch` says so where a reader meets the report, and the sweep runs anyway rather than keeping every report against the one case, since nothing else ever clears them.
+What that removes is a local-only review on a branch deleted before it opened a pull request. The sweep runs anyway rather than keeping every report against the one case, since nothing else ever clears them.
 
 Do not sweep `ux-audit-*.md` or `ux-measure-*.md` (standalone deliverables). Those sit at `.canon/review/` itself rather than under a producer folder, so the glob above never reaches them.
 

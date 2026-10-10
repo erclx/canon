@@ -25,7 +25,7 @@ When the operator picks a frame, the session leaves the decision on the canvas a
 - Read the operator's selection when they point at something, and treat a stale element pick as unknown
 - Read a frame's inline styles before restyling it, and say which operator edits were kept and which dropped
 - Capture once per finished frame or page rather than after every edit
-- Carry a picked direction into the project's design document or wireframes
+- Carry a picked value into the project's design document, and leave a picked layout on the canvas for the plan that builds it
 
 ## Must not
 

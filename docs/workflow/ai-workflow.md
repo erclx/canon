@@ -19,7 +19,6 @@ canon/
 ├── REQUIREMENTS.md  ← problem, goals, non-goals
 ├── ARCHITECTURE.md  ← technical design decisions
 ├── DESIGN.md        ← visual intent and token decisions (UI projects)
-├── wireframes/      ← regions, states, UI copy, and interaction rules (UI projects)
 └── context/         ← per-domain narrative loaded on demand via index.md
 
 .claude/
@@ -31,7 +30,7 @@ canon/
 └── tmp/             ← deletable scratch, safe to remove without loss
 ```
 
-A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context, wireframes, and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
+A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
 
 Three tiers of context load with different cost: always-loaded (root `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`), path-scoped lazy (`.claude/rules/<scope>.md` with `paths:` glob), and on-demand lookup (`canon/context/<domain>.md`, or `canon/context/<domain>/` once a domain outgrows one file, discovered via `canon/context/index.md`). See [the context model](../../canon/context/context-model/overview.md) for the full picture.
 
@@ -69,10 +68,8 @@ What a spike leaves behind splits on whether a later reader needs the file to ch
 
 #### Session 2
 
-Start a fresh Claude Code session. The diff is sufficient context for both review and ship.
+Start a fresh Claude Code session. The diff is sufficient context for ship.
 
-- Invoke `canon:review-branch` to review all changes since main and output a findings report
-- Fix any valid findings
 - Invoke `canon:git-ship` to run the project's verify commands, sync docs, commit by concern, rename branch, and open PR
 
 ### Parallel features
@@ -81,27 +78,13 @@ When features are independent, run them in parallel, one worktree and one sessio
 
 ### Autonomous ship
 
-For features on a mature stack, chain the post-plan pipeline in one session. Approve the plan, invoke `canon:auto-ship`, and the skill runs implement → verify → review → ship sequentially.
+For features on a mature stack, chain the post-plan pipeline in one session. Approve the plan, invoke `canon:auto-ship`, and the skill runs implement → verify → ship sequentially.
 
 - Use when the plan is tight and the stack has real verify commands and test coverage
-- Autoship stops on: verify failure after one fix attempt, an inherited review finding above minor, no diff baseline resolving against `main`, an empty changed-file list, or hook failure
+- Autoship stops on: verify failure after one fix attempt, or hook failure
 - A produced UI checklist does not stop it. The checklist rides to the draft pull request's evidence comment, and the closing block names how many visual boxes are still unchecked and who owes them
 - Every stop leaves recoverable state. Fix and resume with `/git-ship`
 - Skip autoship for auth, migrations, security-sensitive changes, or work where the plan itself is uncertain
-
-#### What reaches review
-
-Review findings split by origin before severity is read. One the branch inherited stops the chain, and one the run itself caused is repaired in place at any severity, bounded at a single pass. Origin is causation rather than authorship, so staleness the run induced in a file it never opened counts as its own and the plan's file list bounds what it builds rather than what it may repair.
-
-Review is skipped when the diff is prose that only informs: every changed file matches `*.md` or `*.txt`, and none sits under a behavior path. Behavior paths cover skills and rules in both the authoring and the installed spelling, so the list matches whether a repository authors those surfaces or consumed them from the toolkit. Standards, `internal/`, and `tooling/` carry the authoring spelling alone, since none of the three reaches a session through a `.claude/` copy, and root `CLAUDE.md` is named as a file because a path prefix reaches nothing sitting in no folder.
-
-Markdown under one states what an agent does, so a branch touching it reaches review while `docs/` and `wiki/` still skip and stay gated by `docs-sync`, `canon markdown audit`, and pre-push hooks.
-
-An empty changed-file list stops the chain rather than counting as prose-only. The filename test passes vacuously on an empty set, which routed a branch past review instead of through it.
-
-`canon autoship classify` answers that decision now, and the chain branches on the record it returns rather than on a session applying the list above. Three runs read past the list while it was prose, the last of them a driven arm that staged a file the list names and shipped a draft pull request with no review. The verb takes the names the chain already computed, so no second diff baseline resolves, and it names the file and the test that decided. [Review classification](../agents/review-classification.md) carries the record shape and the exit codes.
-
-The list stays written in the skill body as the fallback for a target whose installed CLI predates the verb, since the two ship at different speeds. That fallback is never a skip: failing open is the defect the verb closes, so an absent subcommand routes to review rather than past it.
 
 ### UI polish
 
@@ -115,7 +98,7 @@ Verify the change manually in the browser. Invoke `canon:ui-checklist` if you ne
 
 ### Review
 
-Invoke `canon:review-branch` at the start of session 2. It reads all changed files and outputs a findings report. Fix valid findings before invoking `canon:git-ship`. If nothing is valid, skip directly to ship.
+Review runs on the pull request. An independent session invokes `canon:review-pr` once `canon:git-ship` has opened it, and the worker answers what it posts with `canon:review-address`.
 
 ### UI-heavy project
 

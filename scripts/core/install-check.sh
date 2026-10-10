@@ -101,7 +101,7 @@ log_step "Assert scaffold"
 # scaffold reads a standard through `canon standards <name>`, resolving against
 # the toolkit rather than a copy this gate could assert on. The two
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
-for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" "canon/wireframes/index.md" \
+for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" \
   ".prettierrc" ".editorconfig" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.sh" \
   ".claude/rules/canon/claude/566-output.md" ".claude/rules/canon/canon/604-scratch.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then

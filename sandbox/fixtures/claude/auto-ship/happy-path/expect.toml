@@ -1,24 +1,22 @@
 # What a correct `/canon:auto-ship` run leaves behind on the happy-path
-# arm, once Step 7 and what follows it have run. Read by `canon sandbox check`.
+# arm, once Step 6 has run. Read by `canon sandbox check`.
 # Patterns use TOML literal strings so a regex needs no backslash escaping.
 
-# `#1242` routed Step 7 through a body carrying `disable-model-invocation`,
+# `#1242` routed a step through a body carrying `disable-model-invocation`,
 # which halted every chained run before it committed while a green board and a
-# green gate both read the run as clean. Steps 1 through 6 already have their
-# own arms, `prose-informational` and `prose-executable` beside this one among
-# them, so this declares only what a run reaching Step 7 leaves that one
-# halting before it would not: the completion line `auto-ship`'s own
-# Output contract mandates.
+# green gate both read the run as clean. This declares what a run reaching the
+# ship step leaves that one halting before it would not: the completion line
+# `auto-ship`'s own Output contract mandates.
 
 # No max_turns yet. A real pass on 2026-08-30 came in at 74 turns, well past
 # the 30 this row dropped for want of a number, which is what the drop was
 # for. One sample of a chain whose cost follows however much both
-# doc syncs and review find to do is not enough to set a ceiling from.
+# doc syncs and ship find to do is not enough to set a ceiling from.
 
 # `git-ship`'s sequence reaches this exact line only after the verify gate, both
 # doc syncs, staging, the commit, the branch rename, and the pull request have
 # all run, with the draft marking landing before the CI watch. A chain halted
-# at or before Step 7, silently or on a refused invocation, ends its reply
+# at or before the ship step, silently or on a refused invocation, ends its reply
 # somewhere else, which is what makes this the one assertion that would have
 # failed `#1242` and every other stop point in the chain's own recovery table.
 reply = ["Autoshipped (draft)"]

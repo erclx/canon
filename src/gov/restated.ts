@@ -36,8 +36,8 @@ const SKILL_ROOTS: readonly string[] = [SHIPPED_SKILLS_REL, PROJECT_SKILLS_REL]
 /**
  * Path pairs whose duplication is deliberate and already recorded.
  *
- * The seed is authored from the always-loaded file and `seed-sync`
- * exists to reconcile the two, so a bullet appearing in both is the design
+ * The seed is authored from the always-loaded file and a hand merge
+ * reconciles the two, so a bullet appearing in both is the design
  * rather than a defect. Excluding by pair rather than by content is what the
  * plan settled on: the duplication is a location fact this repository already
  * records, and a content test would have to rediscover it on every run.
@@ -611,7 +611,7 @@ function authorityFor(
   if (candidate.kind === 'seed') {
     return {
       authority: 'claude-md',
-      reason: `${INSTRUCTIONS_REL} is authored first and the seed carries it to a target, so an edit starts there and reaches the seed through seed-sync`,
+      reason: `${INSTRUCTIONS_REL} is authored first and the seed carries it to a target, so an edit starts there and reaches the seed through a hand merge`,
     }
   }
 

@@ -13,7 +13,7 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 
 ## Must
 
-- Read the design system and the per-surface wireframes as ground truth for intent before flagging any drift
+- Read the design system as ground truth for intent before flagging any drift, where the project carries one
 - Group findings by surface, since a surface is what a person opens and fixes
 - Cover missing feedback states, unhandled edge cases, inconsistencies, and friction in daily use
 - Write the full report to the branch-derived path at the main worktree root, overwriting
@@ -36,5 +36,5 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 - Fixing what it found, which is a separate change with its own review
 - Feature planning, which `plan-feature` owns
 - Verifying one specific change, which `ui-checklist` owns
-- Defining the intent it audits against, which the design document and the wireframes own
+- Defining the intent it audits against, which the design document owns
 - Measuring what a running interface costs to paint, block, or shift, which `ux-measure` owns. Contrast stays here rather than going with it, being computable from two color values this skill already reads off the token table.

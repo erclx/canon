@@ -26,9 +26,6 @@ Read these in parallel from the project root, skipping any that do not exist:
 Also read these when the feature touches code or UI. Skip them for prose, docs, catalog, or config-only changes:
 
 - `canon/DESIGN.md`: tokens, typography, spacing, and component rules
-- `canon/wireframes/index.md` + the surface files relevant to the feature: intended UI layout and behavior. Read `index.md` first, then follow only the links the feature actually touches, each a flat `canon/wireframes/<surface>.md` or a grouped surface's own `canon/wireframes/<surface>/index.md` and the siblings it lists. Do not read the whole folder speculatively.
-
-When the plan adds or revises a surface, the wireframe file follows `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md`.
 
 Coding standards live in `.claude/rules/`. Claude Code loads them automatically. Path-scoped rules apply to the files they match.
 

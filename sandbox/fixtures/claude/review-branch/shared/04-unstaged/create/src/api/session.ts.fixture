@@ -1,5 +1,0 @@
-export function readToken(headers: Record<string, string>) {
-  const token = headers.authorization ?? null;
-  console.log(`resolved token ${token}`);
-  return token;
-}

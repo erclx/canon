@@ -19,7 +19,7 @@ Each file covers one procedure family:
 
 - `canon/context/claude-plugin/skill-procedures/labels.md`: the label map a project declares, when labelling runs, and what the map fails to cover
 - `canon/context/claude-plugin/skill-procedures/worktree-entry.md`: the `core.bare` repair, the dependency check, the branch entry hands the ship chain, and which document the chain resolved
-- `canon/context/claude-plugin/skill-procedures/ship-chain.md`: the hazards a ship chain meets, from a mis-scoped review to a write landing on the wrong pull request
+- `canon/context/claude-plugin/skill-procedures/ship-chain.md`: the hazards a ship chain meets, from a citation count reading one surface to a write landing on the wrong pull request
 
 ## The CLI shell-out pattern
 

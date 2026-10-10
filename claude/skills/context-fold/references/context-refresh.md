@@ -1,11 +1,11 @@
 ---
 title: Refresh context entries
-description: How context-fold Step 7 folds diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
+description: How context-fold Step 6 folds diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
 ---
 
 # Refresh context entries
 
-Step 7 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
+Step 6 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
 
 The diff carries what the repository changed, and this step rewrites against it.
 

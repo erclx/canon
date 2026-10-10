@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-# No project copy of the corpus, for the same reason `claude/review-branch.sh` carries
+# No project copy of the corpus, for the same reason `claude/review-craft.sh` carries
 # none. The absent project copy forces `ui-checklist` onto the
 # `${CLAUDE_SKILL_DIR}/../../standards/skill.md` fallback, and the branch name
 # below turns that citation into a checklist filename `expect.toml` asserts by

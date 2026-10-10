@@ -12,4 +12,4 @@ Where a plugin skill lives, how the catalog is named and sorted, the reasoning b
 - [Drafting](drafting.md): The candidate and document draft surfaces, the identity surface, and the canvas surface, with the boundary each holds against its neighbors
 - [Overview](overview.md): Where a plugin skill lives, the catalog command, the consumer map, the workflow against domain-knowledge split, the three entry points, and what a skill body carries
 - [Redundancy audit](redundancy-audit.md): Each toolkit skill with a plausible community counterpart compared against it, the borrows taken into a body, and the one borrow still standing
-- [Teaching and writing](teaching-and-writing.md): The teaching surface and why it sorts by what the reader is doing, the writing surface a rule delivers, and the restatement surface asked for by name
+- [Teaching and writing](teaching-and-writing.md): The teaching surface and why it sorts by what the reader is doing, the writing surface a rule delivers

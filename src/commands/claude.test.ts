@@ -15,12 +15,10 @@ afterEach(() => {
 })
 
 describe('seededDirPath', () => {
-  it('should resolve wireframes under canon/ for a migrated target holding only that root', () => {
-    mkdirSync(join(root, 'canon', 'wireframes'), { recursive: true })
+  it('should resolve a surface entry under canon/ for a migrated target holding only that root', () => {
+    mkdirSync(join(root, 'canon', 'context'), { recursive: true })
 
-    expect(seededDirPath(root, 'wireframes')).toBe(
-      join(root, 'canon', 'wireframes'),
-    )
+    expect(seededDirPath(root, 'context')).toBe(join(root, 'canon', 'context'))
   })
 
   it('should not resolve a retired decisions folder under canon/', () => {

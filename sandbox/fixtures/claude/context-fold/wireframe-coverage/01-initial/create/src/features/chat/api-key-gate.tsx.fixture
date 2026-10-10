@@ -1,3 +1,0 @@
-export function ApiKeyGate() {
-  return <div>BYOK gate</div>;
-}

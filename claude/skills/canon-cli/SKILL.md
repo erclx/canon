@@ -42,11 +42,11 @@ No list of those paths ships in this body, since a copy would go stale on a diff
 - An interactive run still prompts. `--write` skips the prompt, and `--check` refuses to write even with a TTY.
 - Seeds are user-owned. Dictionary `.txt` files merge and sort. Other seeds are copy-once, so re-seeding a structured file means deleting it and syncing again.
 - No command writes a standard into a project. A `.claude/standards/` folder from an older toolkit is inert, and deleting it costs nothing.
-- For section-level customizations of a seed doc, use the `seed-sync` skill, not `canon ... sync`. It diffs per section and preserves edits.
+- For section-level customizations of a seed doc, merge by hand against the toolkit copy, not through `canon ... sync`.
 
 ## CLAUDE.md
 
-- `CLAUDE.md` is a copy-once seed. No `canon` sync command ever updates it. Reconcile it with the `seed-sync` skill, which diffs the preamble and each section and preserves customizations by default.
+- `CLAUDE.md` is a copy-once seed. No `canon` sync command ever updates it. Merge it by hand against the toolkit copy, keeping the project's customizations.
 
 ## Source of truth
 

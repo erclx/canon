@@ -13,8 +13,7 @@ canon/
 ├── REQUIREMENTS.md    ← seeded. Project problem, goals, non-goals
 ├── ARCHITECTURE.md    ← seeded. Technical design decisions and open questions
 ├── DESIGN.md          ← seeded. Visual intent and the decisions behind it
-├── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
-└── wireframes/        ← seeded. Per-surface regions and states. `index.md` is the discovery anchor; `<surface>.md` files hold the regions list, the states table, and the behavior bullets.
+└── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
 
 .claude/
 ├── GOV.md             ← retired. Removed by `canon gov sync` if present from a prior install
@@ -24,7 +23,7 @@ canon/
 .canon/
 ├── tasks/             ← seeded. One file per task plus a generated index.md, local scratch only. `archive/` holds the tasks that shipped.
 ├── plans/             ← execution detail for multi-step tasks. `feature-*.md` entries swept by context-fold into `archive/`.
-├── review/            ← one subfolder per producer. `branch/` for review-branch, `design/` for canon design render.
+├── review/            ← one subfolder per producer. `branch/` no longer written, `design/` for canon design render.
 └── tmp/               ← ephemeral scratch space, safe to delete without loss
 ```
 

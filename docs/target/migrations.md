@@ -64,7 +64,7 @@ Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so 
 
 The same sweep carries the merge of the five per-kind document drafters into `draft-doc`, so a citation of any one of them lands on `canon:draft-doc`.
 
-Eleven skills and one rule were retired without a rename, so the sweep has nothing to map them to and leaves a citation of one as it stands. `design-extract` and `sketch-design` are replaced by `canon:canvas`, which carries a picked direction into `canon/DESIGN.md`. `bash-cli-script`, `canon-operator`, `canon-rollout`, `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor, and `canon repo metadata` went with `repo-metadata`. The `120-bash` rule left the `base` stack, so `canon gov sync` removes its installed copy. Replace each citation by hand, or delete the sentence naming a skill that has no successor. <!-- canon-keep-retired -->
+Fourteen skills, one verb, and one rule were retired without a rename, so the sweep has nothing to map them to and leaves a citation of one as it stands. `design-extract` and `sketch-design` are replaced by `canon:canvas`, which carries a picked direction into `canon/DESIGN.md`. `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, `canon-rollout`, `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor. `canon repo metadata` went with `repo-metadata`, and `canon autoship` went with `review-branch`, whose review step it served. The `120-bash` rule left the `base` stack, so `canon gov sync` removes its installed copy. Replace each citation by hand, or delete the sentence naming a skill that has no successor. <!-- canon-keep-retired -->
 
 The memory system retired the same way. `memory-capture`, the `603-memory` rule, and the `memory` standard have no successor, and a citation of any one is replaced by hand or deleted. Ship chains no longer capture a session's lessons, so a lesson goes to the context entry that owns the fact, or to a task's findings. The `canon records` memory kind stays, so a project can still validate, back up, and migrate a folder it holds. <!-- canon-keep-retired -->
 
@@ -115,3 +115,15 @@ The walk checks both `.claude/snippets` and a root `snippets/`, since a toolkit 
 - `project` is content the project wrote under the same name, which the retirement does not reach, so leave it alone
 
 The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` and a root `snippets/` by hand there, and treat what you find as `unattributed`.
+
+## Keep or delete the wireframes folder, your call
+
+The toolkit retired the wireframes record. Its standard, its generated rule, its seeded folder, and the `@canon/wireframes/index.md` import in the seed `CLAUDE.md` no longer ship, and no skill reads or writes `canon/wireframes/` any more. The canvas holds visual direction instead.
+
+A project scaffolded earlier keeps what it already holds, and nothing deletes it:
+
+- `canon/wireframes/` stays yours, unaudited and unreferenced by any skill. Keep it as plain notes or delete it.
+- The `@canon/wireframes/index.md` line in your `CLAUDE.md` stays until you remove it, since `canon claude sync` reports the seed `CLAUDE.md` rather than rewriting a file you own. Delete the line when you delete the folder, because an import of a missing file reads as a broken pointer.
+- `.claude/rules/canon/standards/wireframes.md` leaves on the next `canon gov sync`, which deletes a held copy of a rule the toolkit no longer ships.
+
+A `## States` table under `canon/wireframes/` is no longer checked against evidence folders, so `canon context audit --gate` passes without reading the folder.

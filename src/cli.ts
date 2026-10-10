@@ -37,7 +37,6 @@ import { register as gate } from '@/commands/gate'
 import { register as secrets } from '@/commands/secrets'
 import { register as deps } from '@/commands/deps'
 import { register as labels } from '@/commands/labels'
-import { register as autoship } from '@/commands/autoship'
 import { register as pr } from '@/commands/pr'
 import { register as census } from '@/commands/census'
 import { register as upstream } from '@/commands/upstream'
@@ -98,7 +97,6 @@ hooks(program)
 secrets(program)
 deps(program)
 labels(program)
-autoship(program)
 pr(program)
 census(program)
 upstream(program)

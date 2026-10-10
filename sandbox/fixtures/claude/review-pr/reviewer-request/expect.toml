@@ -21,8 +21,7 @@ paths = [".canon/tmp/pr/review/body-*.md"]
 # The only file this arm's diff has any business touching.
 write_scope = [".canon/tmp/pr/review/**"]
 
-# Fixed by Step 5's own output template, not chosen by the run, the same test
-# `claude:restate-plainly`'s `Cut:` pin already applies.
+# Fixed by Step 5's own output template, not chosen by the run.
 reply = ["reviewer request"]
 
 # No max_turns yet. A clean pass on 2026-08-26 came in at 25 against the

@@ -5,7 +5,7 @@ description: Why what a review looks for lives in review-craft rather than in ei
 
 # Criteria
 
-`review-craft` carries what a review looks for and the evidence bar, while `review-pr` and `review-branch` carry the procedure: which files a pass reads, the high-signal filter, the severity ladder, and where the report lands. Both procedure bodies load it at the step where they review.
+`review-craft` carries what a review looks for and the evidence bar, while `review-pr` carries the procedure: which files a pass reads, the high-signal filter, the severity ladder, and where the report lands. Its body loads it at the step where it reviews.
 
 ## Why criteria split from procedure
 
@@ -19,7 +19,7 @@ A third reference, for a dependency upgrade, was planned and not built. A seeded
 
 ## Why the filter and the severity stayed behind
 
-The two procedures grade on different ladders. `review-pr` routes a dispatch on its threshold and `review-branch` routes the ship chain on its own, and the two define `should-fix` differently. A criteria body stating a severity would contradict one of them. The references say flag, and the procedure grades.
+`review-pr` grades on its own ladder and routes a dispatch on its threshold. A criteria body stating a severity would contradict it. The references say flag, and the procedure grades.
 
 The design axis has to survive the filter both bodies carry against subjective suggestions, which is why the body states a design finding as a concrete cost.
 
@@ -41,7 +41,7 @@ Each sandbox arm ran once against the bodies before this skill existed.
 
 ## What the green runs showed
 
-The first runs with the skill in place failed on loading rather than on judgment. `review-branch` never invoked the skill while the pointer sat as the first item of its list, and one `review-pr` pass skipped the Step 3 pointer entirely. Both bodies now open the review step with an instruction to invoke the skill before reading anything for findings, and each run since has loaded it.
+The first runs with the skill in place failed on loading rather than on judgment. One `review-pr` pass skipped the Step 3 pointer entirely. The body now opens the review step with an instruction to invoke the skill before reading anything for findings, and each run since has loaded it.
 
 The references loaded less reliably than the skill. One `missing-evidence` pass read `ui.md` and went straight to posting without running the check for an absent screenshot, which sat at the end of the reference. That check now opens the reference, carrying the command that decides finding against question. A later pass skipped the reference and raised the gap anyway, off the committed capture it found in the tree. Another ran that command in the same batch as the write that posted its body, and noticed the finding only after posting, so the reference now asks for the answer before any body is composed. The run after that filed the absent screenshot as a graded finding against the pull request, citing the committed capture the check found.
 
