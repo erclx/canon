@@ -13,7 +13,7 @@ A decision's verification anchor has the same shape of gap in the other directio
 
 A handoff file has the same shape of gap as an unmarked outcome. A page a learning workspace produced and an operator already picked a destination for sits in gitignored scratch until something lands it, and the session that produced it is gone by the time a branch exists to carry the write. Left unfolded it reads as promoted while the destination holds nothing.
 
-The receipt half of that sweep was missing entirely. A review receipt was deleted per shipped branch and a memory-review receipt was skipped, because the exclusion protecting the checklist and audit prefixes caught a third by accident. Nothing but an operator asking collected it, and a collection that waits on someone remembering to ask is one a folder outgrows, so the skipped population grew per shipped branch and never shrank until it was most of the folder.
+The receipt half of that sweep was missing entirely. A review receipt was deleted per shipped branch while a memory receipt was skipped, because the exclusion protecting the checklist and audit prefixes caught a third by accident. Nothing but an operator asking collected it, and a collection that waits on someone remembering to ask is one a folder outgrows, so the skipped population grew per shipped branch and never shrank until it was most of the folder.
 
 The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the planning surface the request was about goes untouched.
 
@@ -35,9 +35,6 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Merge or retire an architecture entry before adding one at the record's stated cap, and name which in the report, so the cap never turns into compressed prose or two decisions packed under one heading
 - Anchor a decision entry this run writes or amends whose reasoning cites a measured number, re-reading the number against the tree before writing the marker
 - Report an anchored decision whose cited path the diff touched, since the number was read before the branch moved what it counted
-- Scan every memory-review receipt rather than the one matching this slug, since the skill that writes them runs after this one in the ship chain and a slug is unique per feature
-- Collect a memory-review receipt whose items are all decided, folding each skip into its memory entry first, since a declined item is recorded nowhere else and a promoted one is already in git
-- Leave a memory-review receipt holding a pending item, and report the count. A branch shipping is not an operator deciding what the receipt proposed.
 - Leave the current branch's review receipt alone, since the chain that wrote it cites it in its own closing line and this skill cannot read whether that citation is still live
 - Land each block of a promotion handoff at the destination its heading names, then delete the file so a later run does not fold it twice
 - Take a promotion destination as already decided, since the operator confirmed it where the page was produced

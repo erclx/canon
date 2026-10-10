@@ -21,10 +21,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'auto-ship',
   },
   {
-    prompt: "Pull together a design system from what's already in the app.",
-    expect: 'design-extract',
-  },
-  {
     prompt: 'Draw me a diagram of how the pieces of this system connect.',
     expect: 'draft-figure',
   },
@@ -62,18 +58,8 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'plan-intake-answer',
   },
   {
-    prompt:
-      "Draft a diff-based proposal for tightening this passage in the standard, don't just edit it.",
-    expect: 'markdown-propose',
-  },
-  {
     prompt: 'Pull the durable lessons out of this session before it ends.',
     expect: 'memory-capture',
-  },
-  {
-    prompt:
-      'Go through the memory folder and propose what to do with each entry.',
-    expect: 'memory-review',
   },
   {
     prompt:
@@ -172,11 +158,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt: 'Tell me the paint and layout cost of this page right now.',
     expect: 'ux-measure',
-  },
-  {
-    prompt:
-      'Sit with me while I go through my whole list of app findings one at a time, and write down each pick with what it beat.',
-    expect: 'ux-walkthrough',
   },
   {
     prompt:

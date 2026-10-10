@@ -1,8 +1,0 @@
-export interface Notification {
-  readonly to: string
-  readonly body: string
-}
-
-export function send(notification: Notification): void {
-  process.stdout.write(`${notification.to}: ${notification.body}\n`)
-}

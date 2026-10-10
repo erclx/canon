@@ -11,17 +11,8 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
     expect: 'ci-workflow',
   },
   {
-    prompt:
-      'Write me a headless automation script with no interactive prompts.',
-    expect: 'bash-cli-script',
-  },
-  {
     prompt: 'Scaffold a brand-new SKILL.md for this capability.',
     expect: 'create-skill',
-  },
-  {
-    prompt: 'Write a fresh authoring convention as a new standard file.',
-    expect: 'create-standard',
   },
   {
     prompt:

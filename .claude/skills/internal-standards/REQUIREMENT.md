@@ -29,5 +29,4 @@ The routing failure is the one with no local symptom. A misplaced document reads
 ## Out of scope
 
 - Word choice, punctuation, and formatting, which `claude/skills/markdown-craft/references/markdown.md` states directly, and voice and rhythm, which the `write-human` skill carries. Read those rather than loading this skill to reach them.
-- Creating a standard inside a target project, which the shipped `create-standard` skill does
 - The content of a Claude context entry that a plugin or skill change dates, which `internal-claude` updates. This skill owns the entry's shape through `standards/context.md`.

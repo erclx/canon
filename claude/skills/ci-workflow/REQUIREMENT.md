@@ -35,6 +35,5 @@ A cache keyed on a static string serves a stale browser or toolchain after a ver
 
 ## Out of scope
 
-- The shell scripts a job invokes: `bash-cli-script`
 - Secrets, environments, and deploy targets, which live in the repository settings rather than in the workflow this skill writes
 - CI systems other than GitHub Actions. The structure rules generalize and the file format does not, so a different system is a different skill rather than a flag on this one.

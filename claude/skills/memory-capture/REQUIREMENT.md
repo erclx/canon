@@ -46,5 +46,4 @@ The threshold is what the remaining folder lives or dies on. A first-occurrence 
 ## Out of scope
 
 - Editing the context entries themselves, which `context-fold` owns on its own pass
-- Curating what is already in the folder, which `memory-review` owns
 - Promoting an entry into an instruction file or a skill body, which mutates how the agent operates and ships as its own change

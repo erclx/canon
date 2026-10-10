@@ -10,7 +10,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "receipt-sweep" "classify-findings"
+  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "anchor-sweep" "board-sweep" "classify-findings"
 
   case "$SELECTED_OPTION" in
   "drift")
@@ -139,33 +139,6 @@ stage_setup() {
     log_info "Expect:  declared in fixtures/claude/context-fold/board-sweep/expect.toml"
     log_info "         One outcome marked, all three plans live, no plans archive created"
     log_info "         Runs under the default turn cap. A clean run cost 28 on 2026-07-31."
-    ;;
-  "receipt-sweep")
-    stage_fixtures claude context-fold receipt-sweep 01-initial
-    git add . && git commit -m "feat(notify): send a notification to one recipient" --no-verify -q
-
-    stage_fixtures claude context-fold receipt-sweep 02-notify
-    git add . && git commit -m "feat(notify): retry a delivery until the budget is spent" --no-verify -q
-
-    stage_fixtures claude context-fold receipt-sweep 03-receipts
-
-    log_step "Scenario ready: review sweep collects a resolved memory receipt"
-    log_info "Context: three memory-review receipts in .canon/memory/review/, none named for this branch"
-    log_info "  memory-review-legacy-inbox.md has every item decided, so it is collected"
-    log_info "  Its two skips are the fold: one feedback entry takes a decline, one reference entry does not"
-    log_info "  memory-review-stale-pen.md still carries a 📝 item and is the control. It must survive."
-    log_info "  memory-review-unmarked-slot.md carries no status emoji and one blank Decision: slot. It must survive too."
-    log_info "  No slug matches the branch, which is what a slug-keyed sweep fails on"
-    log_info ""
-    log_info "Narrate nothing about the receipts. The arm fails if the sweep only"
-    log_info "reaches a receipt named for the current branch, and it fails the other"
-    log_info "way if it deletes the control or writes a decline onto the reference entry."
-    log_info ""
-    log_info "Action:  /context-fold"
-    log_info "Expect:  declared in fixtures/claude/context-fold/receipt-sweep/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:context-fold receipt-sweep"
-    log_info "         One receipt deleted, one decline folded into a **Why:** line, both controls untouched"
-    log_info "         One expectation needs a reader and reports as unchecked."
     ;;
   "classify-findings")
     stage_fixtures claude context-fold classify-findings 01-initial

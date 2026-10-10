@@ -18,7 +18,7 @@ One identity rendered twice: the same mark sized down to an icon sequence and co
 
 Read these in parallel, skipping any that do not exist:
 
-- `canon/DESIGN.md`: the `## Personality`, `## Color`, and `## Typography` sections, the same three cells `design-extract` Step 2 sources from
+- `canon/DESIGN.md`: the `## Personality`, `## Color`, and `## Typography` sections
 - `canon/REQUIREMENTS.md`: the `## Personality` paragraph, when `canon/DESIGN.md` carries none
 - `CLAUDE.md`: the project's stated voice, when neither file above carries a personality signal
 
@@ -158,6 +158,6 @@ Card source: <the route, captured through the card server|a scratch page, since 
 Cite these rather than restating them.
 
 - `draft-and-pick` owns Steps 1 through 5 of the render-and-pick loop, cited above
-- `design-extract` owns building `canon/DESIGN.md`. This skill only reads it.
+- `canvas` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, its fixed 2x scale factor, and its reported dimensions. It already reads an `http(s)://` source, where `--out` names the destination PNG rather than a directory, so the route capture needs nothing added to it.
 - The `astro` tooling stack owns the card route's scaffold, its second config, and the exclusion check, read with `canon tooling reference astro`. This skill writes into the route and never reshapes it.

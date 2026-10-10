@@ -71,7 +71,7 @@ CANON_NON_INTERACTIVE=1 canon records stale canonical --json
 
 Each doc in the record carries `reviewed` and `releasesSince`. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the two docs.
 
-Nothing triggers this review but a request. A finished review routes to `markdown-propose` for the rewrite, and its last edit sets `reviewed:` in the doc's frontmatter to the day the operator's answers landed. This run writes neither.
+Nothing triggers this review but a request. A finished review hands the rewrite to the operator, and its last edit sets `reviewed:` in the doc's frontmatter to the day the operator's answers landed. This run writes neither.
 
 ## Step 4: report per document
 

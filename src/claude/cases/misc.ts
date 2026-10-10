@@ -24,17 +24,8 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      "I found two sites whose look I want us to draw from. Put them side by side and let's settle which one the design should follow before anyone writes a token.",
-    expect: 'sketch-design',
-  },
-  {
-    prompt:
       'Draw the signup screen as a frame on the canvas, then restyle the element I just selected there.',
     expect: 'canvas',
-  },
-  {
-    prompt: 'Fire up the dev server the way this project documents it.',
-    expect: 'project-commands',
   },
   {
     prompt:
@@ -103,10 +94,6 @@ export const MISC_CASES: readonly SkillCase[] = [
     prompt:
       'The old parseDate helper was replaced months ago. Can I just delete it, or could a few files still be calling it?',
     expect: 'deprecation-migration',
-  },
-  {
-    prompt: 'Does our github about text still match what the readme says?',
-    expect: 'repo-metadata',
   },
   {
     prompt: 'Connect this repo to Cloudflare Pages and set up the deploy.',

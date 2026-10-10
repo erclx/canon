@@ -1,6 +1,6 @@
 ---
 name: internal-scripts
-description: CLI entry point, bash scripts, sandbox scenarios, and lib functions. Use for `src/`, `manage-*.sh`, sandbox hooks, or shared `lib/` functions.
+description: CLI entry point, bash scripts, sandbox scenarios, and lib functions. Use for `src/`, `manage-*.sh`, or sandbox hooks.
 ---
 
 # Scripts
@@ -49,9 +49,8 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 - Run `bun run check:install` plus the affected stack's sandbox scenario before declaring done. Hand-tests do not count as e2e.
 
-## Assets and captures
+## Captures
 
-- Read `canon/context/development/regeneration.md`'s Hero section before touching `assets/captures/` or `assets/frames/`. Those renders gate on drift, so a hand edit to a generated frame is overwritten by the next `scripts/core/regen-hero.ts` run.
 - Read `canon/context/development/evidence.md` before editing `src/capture/` or `src/pr/`. It states which `evidence` folders are dev baselines and which are prod captures, and that `canon pr evidence` compares both.
 
 ## Hooks and husky
@@ -63,4 +62,4 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 - `canon/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
 - `canon/context/sandbox/index.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
-- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside. A new domain script is written in TypeScript on Bun, and an existing shell file over 100 lines is edited in place without growing it and flagged for a rewrite. Sandbox scenarios and existing domain scripts stay bash on `scripts/lib/ui.sh`, frame and picker included, until the harness itself moves, so the `bash-cli-script` guards against a framed timeline and prompts do not apply to them
+- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside. A new domain script is written in TypeScript on Bun, and an existing shell file over 100 lines is edited in place without growing it and flagged for a rewrite. Sandbox scenarios and existing domain scripts stay bash on `scripts/lib/ui.sh`, frame and picker included, until the harness itself moves

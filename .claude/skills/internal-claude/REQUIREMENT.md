@@ -33,4 +33,4 @@ The failures share one cause. The Claude surfaces reach a target through three c
 
 - The shape a context entry or any other prose document takes, which `internal-standards` owns through `standards/context.md`. This skill writes the content of the two Claude entries when a plugin or internal change dates them.
 - Reporting which changed skills lack a paired scenario edit at ship time: `internal-sandbox-check`
-- Creating a rule or a standard inside a target project, which the shipped `create-rule` and `create-standard` skills do
+- Creating a rule or a standard inside a target project, which the shipped `create-rule` skill does for a rule

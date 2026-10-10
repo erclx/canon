@@ -71,7 +71,6 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - Validation timing, error placement and save blocking, which `420-forms` owns
 - Rendered copy casing, button labels and error wording, which `400-ui` owns
 - The candidate loop, the arm set, the render and the pick, which `draft-and-pick` owns and which this skill is loaded alongside rather than inside
-- Tracing a reference's color, type and spacing values, which is `sketch-design`
 - The shape of the project's design document, its sections and its token tables, which `standards/design.md` governs
 - Spatial layout and interaction intent of one named surface, which `standards/wireframes.md` governs
 - Prose on the surface being designed, which `write-human` and `markdown.md` govern between them

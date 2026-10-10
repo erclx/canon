@@ -43,6 +43,6 @@ The third is silence on an unread axis. Both measured verbs resolve their folder
 
 - Whether a document exists or holds its required sections, which is the structural question `target-check` answers across six domains
 - Banned tokens and structural checkpoints in markdown, which `canon markdown audit` measures from package data. This skill reads rot a ban set cannot state.
-- Rewriting a stale claim once this run has named it, which is `markdown-propose`
+- Rewriting a stale claim once this run has named it, which the operator or the owning skill does
 - Running the toolkit's own checks as one gating set over its own corpus, which is `canon audits run`. That set gates a push and this reports to a reader.
 - Repairing anything an axis names. Each routes to the command or skill that owns it.

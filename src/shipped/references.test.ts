@@ -364,7 +364,7 @@ describe('referencesIn', () => {
     it('should pass a standards/ path illustrating a placeholder shape, which resolves nowhere', () => {
       expect(
         referencesIn(
-          'claude/skills/create-standard/SKILL.md',
+          'claude/skills/create-rule/SKILL.md',
           'Write the file to `standards/<slug>.md`, creating the folder when it is absent.',
           root,
         ),
@@ -460,7 +460,7 @@ describe('referencesIn', () => {
     it('should pass a rule path illustrating a placeholder shape', () => {
       expect(
         referencesIn(
-          'claude/skills/create-standard/SKILL.md',
+          'claude/skills/create-rule/SKILL.md',
           'Repoint the citation at `.claude/rules/canon/core/<n>-<slug>.md`.',
           root,
         ),

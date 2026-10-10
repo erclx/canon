@@ -1,9 +1,0 @@
----
-title: Propose the file list before editing anything
-description: Name every file a change will touch and wait for a yes, rather than editing and reporting after
-category: Feedback
----
-
-Name the files a change will touch and wait for confirmation before editing any of them.
-**Why:** A session rewrote four files under `src/` after a request that named one, and the extra three were reverted by hand.
-**How to apply:** Before the first edit of a request, list the paths and stop. Resume on a yes.

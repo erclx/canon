@@ -47,14 +47,6 @@ export const SETUP_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      "I don't know which specific toolkit skill I need, just handle it for me.",
-    expect: 'canon-operator',
-  },
-  // The performing skill wins a phrase naming its operation over the front
-  // door's own routing framing, even though canon-operator's description
-  // quotes a phrase near this one. See canon/context/cli/audits/routing.md.
-  {
-    prompt:
       "Whatever the right toolkit command is, get this project's rules installed.",
     expect: 'target-setup',
   },
@@ -63,17 +55,8 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'File the open feedback issues on the toolkit repo into an intake folder.',
     expect: 'canon-feedback-triage',
   },
-  // The outbound direction is what separates this from the front door above.
-  // canon-operator runs inside one project the session already stands in, and
-  // this reaches every project the toolkit installed into from the toolkit.
-  {
-    prompt:
-      'Take this change out to every project that installed the toolkit and get each one to a pull request.',
-    expect: 'canon-rollout',
-  },
-  // Reporting per domain is what separates this from canon-operator, which
-  // diagnoses on the way to running the operation an intent named. This answers
-  // one fixed question across a fixed domain list and repairs nothing.
+  // This answers one fixed question across a fixed domain list and repairs
+  // nothing, which is what separates it from the setup skill above.
   {
     prompt:
       'Report what this project has fallen behind the toolkit on, domain by domain, and fix nothing.',

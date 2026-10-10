@@ -18,7 +18,7 @@ For each `canon/context/<name>.md` token:
 
 Do not test a token against what a scaffolded project's seed happens to ship. That discriminator was measured and rejected: the seed's own contents drift, and a token reading as an instruction is fine regardless of what any seed carries.
 
-A token inside a branch only a toolkit-repo reader ever follows, such as an `In the toolkit:` clause beside an `In a project:` one, is Fine even when it names a domain entry, since the reader who reaches that branch is by construction sitting in this checkout. `create-standard/SKILL.md`'s `In the toolkit:` line is this case. An unbranched sentence naming the same path for every reader stays a Fails, since a target reader reaches it too.
+A token inside a branch only a toolkit-repo reader ever follows, such as an `In the toolkit:` clause beside an `In a project:` one, is Fine even when it names a domain entry, since the reader who reaches that branch is by construction sitting in this checkout. An unbranched sentence naming the same path for every reader stays a Fails, since a target reader reaches it too.
 
 For each layout, stack, or config-path claim:
 
@@ -29,7 +29,7 @@ For each layout, stack, or config-path claim:
 
 - State the fact the reference carries instead of the path. `claude/skills/canon-cli/SKILL.md`'s repaired form, naming the toolkit's own context entries as authoritative over a target-session summary without the three paths, is the shape.
 - Where the sentence labels the path toolkit-only inside text every reader sees, the label is not the fix. Drop the path and fold what it pointed at into the sentence, or drop the trailing clause when the path carried nothing past the label. `youtube-transcripts/SKILL.md`'s repaired form is this case.
-- Where the path sits inside a branch only a toolkit-repo reader ever follows, keep it and mark `<!-- canon-allow-reference: <why> -->`, naming the branch. That reader can open the path, so dropping it costs the only audience the sentence has. `create-standard/SKILL.md`'s `In the toolkit:` branch is this case, not the bullet above.
+- Where the path sits inside a branch only a toolkit-repo reader ever follows, keep it and mark `<!-- canon-allow-reference: <why> -->`, naming the branch. That reader can open the path, so dropping it costs the only audience the sentence has. That is a different case from the bullet above.
 - Where the token is a genuine illustration rather than a citation, mark it the same way, the marker `src/shipped/references.ts` already reads for its own four forms. Nothing in the gate scans a `canon/context/` token today, so the marker documents the read for the next reader rather than suppressing a check.
 - Scope a checkout-specific claim to "in the toolkit" or "in this repository" rather than deleting it, when the fact is worth keeping for a toolkit-only reader.
 
