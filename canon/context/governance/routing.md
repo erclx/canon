@@ -27,9 +27,9 @@ A standard governing a file path carries a rule routing to it, so an edit loads 
 
 - `595-tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
 - `governance/rules/standards/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
-- `governance/rules/standards/groundwork.md` and `governance/rules/standards/intake.md` route the two track folders and sit beside `governance/rules/standards/tasks.md` in `base`, so the three workflow surfaces share one roster. A skill-local reference would load only with its skill, never when a returning session opens the folder directly.
-- Each of those two carries the directives that ship silently when violated, the answer contract and the re-measure floor, and points at its standard for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
-- `governance/rules/standards/session.md` globs `.canon/tasks/session-*.md` alone inside the folder `governance/rules/standards/tasks.md` globs whole, because the board and the handoff are two shapes and one rule over both would carry two.
+- `governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` route the two record folders and ship in `base` with the `canon` band. Both are hand-written and unnumbered, as `writing/markdown.md` is, since their standards moved into `task-board` and `plan-feature` and the generator reads only `standards/`. The groundwork, intake, and session rules retired with their standards, since each only routed to a reference its owner skill already reads.
+- Each of those two carries the directives that ship silently when violated, such as the blank answer slot and the board's generated index, and loads its owner skill for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
+- `governance/rules/canon/tasks.md` globs `.canon/tasks/**` whole, so it also loads on a session handoff, and a carve-out bullet sends that file to `canon:session-map` because the board and the handoff are two shapes.
 
 ### Directives beside the pointer
 
@@ -57,7 +57,7 @@ Test the target for a guard before writing `Load` into a rule. `write-human` is 
 
 #### A missing file
 
-A rule with a file to match still cannot reach the moment that file is missing. `governance/rules/standards/session.md`'s glob excludes the no-map case by definition, so a bullet about what to do when no session map exists could never fire from it. The absent-file response belongs to the standard, which a session reaches without a glob.
+A rule with a file to match still cannot reach the moment that file is missing. The tasks rule's glob excludes the no-map case by definition, so a bullet about what to do when no session map exists could never fire from it. The absent-file response belongs to the `session-map` reference, which a session reaches through its skill without a glob.
 
 #### Citations from `CLAUDE.md`
 
@@ -79,16 +79,16 @@ The retirement is a stated exception to the cut test under "What an always-loade
 
 A call the operator's preference decides went through the structured question surface, stated in an always-loaded rule a target reached through `canon gov sync`. The operator cut that rule on 2026-10-10 on the ground that the guidance cost every session its words. What holds now is the skills that state the surface in their own bodies, so no shipped surface tells a target session to ask on a preference call. A skill body such as `decision-escalate` fires only when typed, which is the cost the operator accepted.
 
-The cut rule had forbidden reopening a question a written artifact already answered rather than forbidding the surface, since that was the real defect behind the rejections of it. The plan answer contract in `governance/rules/standards/plan.md` still carries the answer for a plan.
+The cut rule had forbidden reopening a question a written artifact already answered rather than forbidding the surface, since that was the real defect behind the rejections of it. The plan answer contract in `governance/rules/canon/plan.md` still carries the answer for a plan.
 
 ### What an always-loaded bullet has to carry alone
 
-An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `566-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both taken by the operator's choice rather than by the test: the relay retirement recorded under "Rules that always load" above, and the question-surface cut recorded under "The question surface has no shipped rule", which also dropped the "answer from the artifact rather than re-asking" bullet that `governance/rules/standards/plan.md` does not cover for intake and groundwork `- Suggested:` lines.
+An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `566-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both taken by the operator's choice rather than by the test: the relay retirement recorded under "Rules that always load" above, and the question-surface cut recorded under "The question surface has no shipped rule", which also dropped the "answer from the artifact rather than re-asking" bullet that `governance/rules/canon/plan.md` does not cover for intake and groundwork `- Suggested:` lines.
 
 Two always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
 
 - `606-git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
-- `602-tasks.md` keeps the act of writing the plan in the same session and linking it. `standards/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
+- `602-tasks.md` keeps the act of writing the plan in the same session and linking it. `claude/skills/task-board/references/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
 
 ## Gotchas
 

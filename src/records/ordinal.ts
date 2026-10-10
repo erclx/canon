@@ -4,7 +4,7 @@ import { recordDir } from '@/roots/record'
 
 /**
  * The two record folders that share one ordinal sequence, per
- * `standards/intake.md` and `standards/groundwork.md`. A folder opened as
+ * `claude/skills/plan-intake/references/intake.md` and `claude/skills/plan-groundwork/references/groundwork.md`. A folder opened as
  * either kind blocks the same number for the other, so the two read together
  * rather than each keeping a count of its own.
  */

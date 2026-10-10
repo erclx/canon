@@ -49,7 +49,7 @@ When a decision the plan will make rests on an outside practice or a third-party
 
 ## Step 3: build the plan
 
-The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/../../standards/plan-lifecycle.md`. Read it before writing the file and follow it rather than working the shape from memory.
+The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/references/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/references/plan-lifecycle.md`. Read it before writing the file and follow it rather than working the shape from memory.
 
 What this skill adds on top of the standard:
 
@@ -119,7 +119,7 @@ Derive a 2-to-4-word kebab-case slug from the feature description. Write the ful
 
 The plan is a main-root write, from a linked worktree and from a background session sitting at the main root with none entered alike, so it goes out as a heredoc, routed the way `session-worktree` states.
 
-The file follows the template in `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. Copy the shape from there rather than from this body, so one edit to the standard moves every plan.
+The file follows the template in `${CLAUDE_SKILL_DIR}/references/plan.md`. Copy the shape from there rather than from this body, so one edit to the standard moves every plan.
 
 Run `canon records validate plans` after writing the file when the CLI is on PATH. It reports a section, a filename, or an answer slot that does not hold, and it writes nothing.
 

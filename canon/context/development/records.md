@@ -49,7 +49,7 @@ An older binary meets the nested archives three ways:
 
 `RETIRED_FOLDERS` in `src/records/backup.ts` names both flat task-archive spellings as paths that moved, which an ignore entry over them would contradict.
 
-`standards/tasks.md` and `standards/plan.md` state the nested position as a convention a project receives rather than this repository's habit, so these failures are what an old binary produces against either layout, not a defect in either standard.
+`claude/skills/task-board/references/tasks.md` and `claude/skills/plan-feature/references/plan.md` state the nested position as a convention a project receives rather than this repository's habit, so these failures are what an old binary produces against either layout, not a defect in either standard.
 
 The move off the older layout is named rather than worked out per visit: `git mv` both archive folders onto the nested path, retarget every citing pointer onto the new spelling in the same commit, then run `canon tasks archive` in that checkout to confirm it resolves against the moved folder. That runs inside the project that owns the files, on its own branch, never from this checkout.
 
@@ -73,7 +73,7 @@ Nothing sits beside a track at the groundwork root, because mode detection lists
 
 `canon records validate groundwork` reports nothing on a track's `evidence/` subfolder, because `listMarkdown` in `src/records/validate.ts` filters `readdir` to files ending `.md` at the track's own level and `listFolders` runs once at the groundwork root without descending.
 
-Intake needs no equivalent. `plan-intake` routes any finding needing an experiment away to a track, so an intake pass never runs a spike. Its own gap is smaller: `standards/intake.md` enumerates items and an index and says nothing about a subfolder, while a live folder can carry one holding markdown.
+Intake needs no equivalent. `plan-intake` routes any finding needing an experiment away to a track, so an intake pass never runs a spike. Its own gap is smaller: `claude/skills/plan-intake/references/intake.md` enumerates items and an index and says nothing about a subfolder, while a live folder can carry one holding markdown.
 
 ## Backing the record folders off the disk
 
