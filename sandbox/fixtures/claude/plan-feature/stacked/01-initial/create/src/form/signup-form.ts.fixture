@@ -1,0 +1,3 @@
+export function renderSignupForm(): string {
+  return '<form id="signup"><input name="email" /><button>Sign up</button></form>'
+}

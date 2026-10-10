@@ -1,0 +1,6 @@
+import { expect, it } from 'vitest'
+import { renderSignupForm } from './signup-form'
+
+it('should render the form', () => {
+  expect(renderSignupForm()).toContain('<form')
+})

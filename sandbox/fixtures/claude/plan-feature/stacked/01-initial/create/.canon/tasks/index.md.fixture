@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Harden the signup form](v01.0-signup-form.md): Validate the email, show errors, and show a submit state

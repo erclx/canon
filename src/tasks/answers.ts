@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { isAbsolute, relative, resolve } from 'node:path'
+import { basename, isAbsolute, relative, resolve } from 'node:path'
 import { isUnder } from '@/tasks/paths'
+import { JUDGED_APART_REMEDY, readLivePlans, stackPairs } from '@/tasks/stack'
 import { recordDir, recordDirs } from '@/roots/record'
 import {
   hasStagedBatches,
@@ -228,6 +229,18 @@ export async function planAnswers(
     open.push({
       label: 'Batch staging',
       why: 'stages a batch inside one file and must split into one plan file per batch before it can dispatch.',
+    })
+  }
+
+  const stem = basename(resolved.path, '.md')
+  const pairs = stackPairs(await readLivePlans(root))
+
+  for (const { child, parent, shared } of pairs) {
+    if (child !== stem) continue
+
+    open.push({
+      label: 'Stacked sibling',
+      why: `stacks on \`${parent}\` and shares ${shared} declared files with it. ${JUDGED_APART_REMEDY}`,
     })
   }
 
