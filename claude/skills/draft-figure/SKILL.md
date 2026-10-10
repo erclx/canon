@@ -41,14 +41,14 @@ The standard states this as a render-first policy rather than a ban on any tool-
 
 Read the reference for the path Step 3 picked and follow it:
 
-- Architecture set: read `${CLAUDE_SKILL_DIR}/references/architecture-set.md` to shape the view, then `${CLAUDE_SKILL_DIR}/references/mermaid.md` to draw and render it. The architecture branch always renders and reads back. An unrendered fence is not a figure.
-- Mermaid path: read `${CLAUDE_SKILL_DIR}/references/mermaid.md`.
+- Architecture set: read `${CLAUDE_SKILL_DIR}/references/architecture-set.md` to shape the view, then `${CLAUDE_SKILL_DIR}/references/mermaid-path.md` to draw and render it. The architecture branch always renders and reads back. An unrendered fence is not a figure.
+- Mermaid path: read `${CLAUDE_SKILL_DIR}/references/mermaid-path.md`.
 - Hand-drawn path: read `${CLAUDE_SKILL_DIR}/references/hand-drawn.md`.
 
 ## Step 5: wrap, caption, and verify
 
 - Wrap the drawing in a `<figure>` element with a `<figcaption>` naming what to take from the figure, never what it shows. Let it run wider than the surrounding prose column.
-- On the Mermaid path, run the read-back `mermaid.md` states before confirming.
+- On the Mermaid path, run the read-back `mermaid-path.md` states before confirming.
 - On every path, confirm the figure still reads once every color and font it depends on is stripped to its fallback, per the standard's own working-figure bar.
 - When the destination is a rendered page, an HTML file a browser loads, the check that counts is the figure inside that page, which Step 6 captures once the figure is written, on either path. A markdown destination has no page to load, so the checks above are the whole check there.
 

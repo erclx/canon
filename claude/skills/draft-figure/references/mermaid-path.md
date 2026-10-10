@@ -9,7 +9,7 @@ description: The hand-drawn render config, the SVG and PNG pair, the hex rewrite
 
 ## Draft the fence
 
-- Draft the fence against `${CLAUDE_SKILL_DIR}/../../standards/mermaid.md` for direction, node and edge budgets, `accTitle` and `accDescr`, and quoted labels. Do not work the layout or the budgets from memory.
+- Draft the fence against `${CLAUDE_SKILL_DIR}/references/mermaid.md` for direction, node and edge budgets, `accTitle` and `accDescr`, and quoted labels. Do not work the layout or the budgets from memory.
 - Read every node and subgraph label against the banned characters `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` lists. The audit hook skips every line inside a fence, so a label carrying a banned character passes silently while the same character in the caption is caught. Reading the labels is the only gate they have. A colon works as a replacement inside a label.
 
 ## Render

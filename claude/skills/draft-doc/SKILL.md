@@ -18,7 +18,7 @@ Each kind has one standard and one reference. Load the reference for the resolve
 | docs       | a page under `docs/`                                     | `${CLAUDE_SKILL_DIR}/../../standards/docs.md`       | `${CLAUDE_SKILL_DIR}/references/docs.md`       |
 | context    | an entry under `canon/context/`                          | `${CLAUDE_SKILL_DIR}/../../standards/context.md`    | `${CLAUDE_SKILL_DIR}/references/context.md`    |
 | wireframes | a surface under `canon/wireframes/`                      | `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md` | `${CLAUDE_SKILL_DIR}/references/wireframes.md` |
-| wiki       | a reference page on a subject owned outside this project | `${CLAUDE_SKILL_DIR}/../../standards/wiki.md`       | `${CLAUDE_SKILL_DIR}/references/wiki.md`       |
+| wiki       | a reference page on a subject owned outside this project | `${CLAUDE_SKILL_DIR}/../../standards/wiki.md`       | `${CLAUDE_SKILL_DIR}/references/wiki-kind.md`  |
 | readme     | a `README.md`, at the root or in a folder                | `${CLAUDE_SKILL_DIR}/../../standards/readme.md`     | `${CLAUDE_SKILL_DIR}/references/readme.md`     |
 
 - Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wireframe".
