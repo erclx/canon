@@ -1,13 +1,13 @@
 ---
 title: Overview
-description: What the review paths cover, why no version-sequencing surface exists, how a routing decision is asserted, and the origin split autoship applies before severity
+description: What the review paths cover, why no version-sequencing surface exists, how a routing decision is asserted
 ---
 
 # Overview
 
 ## Overview
 
-How a change is reviewed once it exists: the pull request review `review-pr` posts and re-posts, the headings a poll routes on, the lenses a pass reads the description through, and the worker's half of the channel that answers a review. Review of a local branch before it opens a pull request is `review-branch`, whose diff selection sits in `canon/context/claude-plugin/skill-baseline.md`.
+How a change is reviewed once it exists: the pull request review `review-pr` posts and re-posts, the headings a poll routes on, the lenses a pass reads the description through, and the worker's half of the channel that answers a review.
 
 ## Layout
 
@@ -40,11 +40,3 @@ The `reply` expectation closes it. It reads `result` off the envelope `max_turns
 Pinning phrasing is the cost, and it is why every route pin is paired. A reply naming a skill in a sentence declining to route still passes a substring check, so each arm carries a `manual` entry stating the negative a substring cannot express, and the arms whose skills may execute nothing assert the tree as well: the root layout is still at the root and nothing appeared under `.claude/`.
 
 Where a handoff may legitimately continue into the skill it names, as a fresh target's does into `target-setup`, no tree assertion is declared at all, since none separates the router doing the work from the router routing to something that does it. The arms themselves are catalogued in `canon/context/sandbox/coverage/arms.md`.
-
-## The origin split in autoship
-
-`auto-ship` Step 7, through its `references/review-findings.md`, splits findings by origin before it reads severity. A critical or should-fix finding the branch inherited stops the chain, and one this run caused is repaired in place at any severity, bounded at a single pass the way Step 3 bounds verify. Severity alone is not enough to decide this, since a self-inflicted finding at any severity is worth fixing on the spot rather than reporting as a stop that hands the work back to the same session that created it.
-
-Origin is causation rather than authorship, which is the half that decides the hard cases. Staleness a run induces in a file it never opened is its own. The plan's file list is not the boundary either: it scopes what a run builds, and reading it as a review boundary is scope discipline applied to the wrong question.
-
-An offer to fix is a stop however it is worded. Naming a finding self-inflicted in the report and closing on a menu of resolutions leaves the operator holding the work, so the step forbids presenting the repair as a choice and the receipt records the fix as landed.

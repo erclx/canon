@@ -15,13 +15,12 @@ Governs the visual-intent document at `canon/DESIGN.md`: tokens described as int
 
 Does not govern:
 
-- Screen layout, on-screen copy, and interaction intent: `wireframes.md`
 - Per-domain implementation narrative: `context.md`
 
 ## What goes in
 
 - A token's exact value, anchored to the surface it was read from and tagged per `## The uncertainty tag` when unconfirmed. Fall back to intent language ("mid gray, muted text") only where no source exists yet to anchor from.
-- Layout constraints and sizing rules not obvious from wireframes
+- Layout constraints and sizing rules not obvious from the tokens and the code
 - Visual rules a developer could get wrong without guidance
 - Non-obvious omissions ("no motion", "no custom icons") that prevent scope creep
 
@@ -34,7 +33,7 @@ Does not govern:
 ## Format
 
 - Use tables for token systems, one row per token. Write every other rule as a short bullet, one decision per line, within `## Prose budget`.
-- Plain English over technical notation. If a section could be removed and the developer would still build correctly from wireframes and code alone, remove it.
+- Plain English over technical notation. If a section could be removed and the developer would still build correctly from the tokens and code alone, remove it.
 - Keep table headers and role names intact so the render tooling can parse the token tables.
 
 ## Prose budget

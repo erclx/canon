@@ -11,9 +11,7 @@ One check out of `canon context audit` gates `bun run check` and the rest report
 
 The requirements record's word count is the second measure to pass that test, and it gates the verb rather than the push, and only where the record states the rule it is held to. `--citations-only` is what the push stage runs and it never measures the record, and the audit-set stage only warns on a finding that is a fact, so the exit reaches a direct run, the seed stage passing `--gate`, and the `canon audits run` verdict. Widening either stage is a policy change about what fails a push, which `src/audits/catalog.ts` cautions against making as a side effect of adding a measure.
 
-`--gate` widens the failing set to required sections, index drift, and a wireframe's States table disagreeing with its evidence folders, and the seed stage is its only caller. What moves a finding across the line is the corpus rather than the measure. A context entry in a live project is edited under time pressure by the people who own it, so a threshold there reports. A seed is authored once and read by every scaffolded project, so the same finding ships outward and gates.
-
-A wireframe carrying a sketch beside evidence that already exists stays advisory under both modes rather than joining that set. It reads a whole entry against whether any state has evidence, not one sketched layout against its own, so a conforming file, a captured default layout beside a sketch of a breakpoint layout nobody has built, can still trip it.
+`--gate` widens the failing set to required sections and index drift, and the seed stage is its only caller. What moves a finding across the line is the corpus rather than the measure. A context entry in a live project is edited under time pressure by the people who own it, so a threshold there reports. A seed is authored once and read by every scaffolded project, so the same finding ships outward and gates.
 
 The thresholds that measure distance stay advisory under both corpora, since no corpus makes a judgment into a fact.
 
@@ -33,7 +31,7 @@ The named list is also what bounds the citation gate, since `citationPattern` bu
 
 A folder name resolves under `.claude/` first and at the project root second, which is what puts `docs/` in reach of the same engine. A sibling command measuring the same things against a different root would put one behavior in two places. `--folder` stays a name rather than a path, since a path invites `../../elsewhere` and the audit's scope is corpora inside the repository.
 
-The root base is opt-in through `canResolveAtRoot`, which only `--folder` sets. Applying it to the default list too was the first shape, and it audited any target holding a root `context/`, `diagrams/`, or `wireframes/` against a standard that target never adopted, on a bare run naming nothing.
+The root base is opt-in through `canResolveAtRoot`, which only `--folder` sets. Applying it to the default list too was the first shape, and it audited any target holding a root `context/` or `diagrams/` against a standard that target never adopted, on a bare run naming nothing.
 
 A root folder is measured and stays out of the citation scope, since the pattern spells the `.claude/` prefix. Widening it to a bare `docs/x.md` would match prose referencing nothing. A run with no `.claude/` folder says the check is out of scope, and refuses under `--citations-only`, because a gate exiting clean on a scope it could not build is the failure it exists to catch.
 
@@ -54,8 +52,6 @@ Required sections are the first measure that cannot decide from one entry, so th
 Four domains here split across a folder and describe one domain between them, so any sibling answers and the finding names the folder. Entries of the folder named under `.claude/` are one domain each and answer for themselves. Rolling every folder up was the first shape, and it let one entry stand in for thirteen domains beside it.
 
 A heading at any level satisfies a required section, since those split domains carry the overview as the `#` title and an `##` under it would repeat the filename. The check reports rather than gates by default, the closer call since a missing section reads as a fact. The standard sanctions omitting `## Layout` from a domain owning no paths, and no measure separates that from an entry that forgot it.
-
-Wireframes owe `## Regions`, `## States`, `## Copy`, and `## Not on this surface`, keyed on the folder name in `REQUIRED_SECTIONS_BY_FOLDER`, and each file answers for itself however deep it sits. The standard keeps one surface per file, so a subfolder such as `canon/wireframes/teach/` groups surfaces the way the named context folder groups domains, and rolling it up would let one conforming surface stand in for its siblings. `## Behavior` is left out because a static surface has nothing to state there. Provenance stays scoped through `governsContent`, since the wireframe standard states no provenance rule, which is why the section lists travel apart from that predicate.
 
 That sanctioned omission is what the `stub: true` frontmatter field answers under `--gate`. A file declaring it is dropped before the check and reported nowhere, and both seed install paths strip the field so no target receives it. The exemption is scoped to this one measure, since a skeleton is exempt from owing sections rather than from being well formed.
 

@@ -1,11 +1,11 @@
 ---
 title: Refresh context entries
-description: How context-fold Step 6 folds routed facts and diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
+description: How context-fold Step 5 folds routed facts and diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
 ---
 
 # Refresh context entries
 
-Step 6 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
+Step 5 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
 
 Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
 

@@ -20,7 +20,6 @@ Does not govern:
 
 - Product scope, goals, and non-goals: `requirements.md`
 - Path-scoped coding rules: `rule.md`
-- Wireframes, which answer layout questions an entry hands off: `wireframes.md`
 - Figures and architecture views, which answer structure questions an entry hands off: the `draft-figure` skill
 - The consumer-facing reference under `docs/`, whose reader is operating the project without the source open: `docs.md`
 

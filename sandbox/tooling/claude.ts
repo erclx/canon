@@ -34,7 +34,6 @@ export default scenario({
       ctx.log.info('')
       ctx.log.info('Verify after init:')
       ctx.log.info('  .canon/tasks/index.md, REQUIREMENTS.md exist')
-      ctx.log.info('  canon/wireframes/index.md exists')
       ctx.log.info('  canon/DESIGN.md exists only if UI was selected')
       ctx.log.info('  .gitignore contains .canon/tmp/')
     },

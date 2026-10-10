@@ -1,35 +1,20 @@
 ---
 name: auto-ship
-description: Chains implement → verify → review → ship after a feature plan is approved. Reads the plan the caller names, the plan a named task points at, or the plan for the current branch when none is named, runs the full pipeline in one session, and stops on any failure or non-minor review finding. Use when asked to "autoship", "ship this feature end to end", or "run the chain". Do NOT auto-trigger. Requires an approved plan file.
-disable-model-invocation: true
+description: Chains implement → verify → ship after a feature plan is approved. Reads the plan the caller names, the plan a named task points at, or the plan for the current branch when none is named, runs the full pipeline in one session, and stops on any failure. Use when asked to "autoship", "ship this feature end to end", or "run the chain". Do NOT auto-trigger. Requires an approved plan file.
 metadata:
   family: build
 ---
 
 # Auto ship
 
-Chain the post-plan pipeline in a single run. Every step but the UI checklist has a stop condition. State is always recoverable on stop: code lives on the branch, review output on disk, plan still linked.
+Chain the post-plan pipeline in a single run. Every step but the UI checklist has a stop condition. State is always recoverable on stop: code lives on the branch, plan still linked.
 
 ## Guards
 
-- All `.canon/plans/` and `.canon/review/` reads resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
-- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree, the review receipt, and the branch, regardless of which plan Step 1 reads.
+- All `.canon/plans/` reads resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
+- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree and the branch, regardless of which plan Step 1 reads.
 - Resolve `<plan>` in Step 1, ahead of any other read.
 - If the working tree has uncommitted changes unrelated to the plan, stop: `❌ Uncommitted changes outside the plan. Commit or stash before autoshipping.`
-
-## Diff baseline
-
-Step 6 classifies the changed-file list to decide whether review runs. Resolve the base ref once:
-
-```bash
-git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null
-```
-
-Prefer `origin/main` over local `main`, since a local `main` trailing the remote pulls other people's merged commits into the list.
-
-The baseline is unusable when no merge base resolves against either ref. Stop: `❌ No diff baseline against main. Fetch origin, then re-run autoship.`
-
-The base equalling HEAD stays usable, since nothing need be committed before Step 8. The classifier diffs the base against the working tree, so every slice Step 2 already committed stays in the changed set. Do not port the read-only siblings' `base == HEAD` stop into this skill.
 
 ## Step 0: take the role, then enter a worktree
 
@@ -97,35 +82,9 @@ Never read a missing subcommand as clean. Read `${CLAUDE_SKILL_DIR}/references/v
 
 ## Step 5: UI checklist (conditional)
 
-If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`, then continue to Step 6 whatever it returns, in every run. The Step 8 draft mark holds the merge, so a stop here protects nothing. When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.md` for the counts to hold before `git-pr` removes the file.
+If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`, then continue to Step 6 whatever it returns, in every run. The Step 6 draft mark holds the merge, so a stop here protects nothing. When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.md` for the counts to hold before `git-pr` removes the file.
 
-## Step 6: review
-
-Classify the diff first. Take the union of `git diff --name-only <base>` and `git ls-files --others --exclude-standard`, resolving `<base>` per Diff baseline, then hand that set to the verb rather than reading it against the list below yourself:
-
-```bash
-canon autoship classify --json <path>...
-```
-
-The verb reads names only and touches git not at all. Branch on the record's `decision` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
-
-- `skip`. Every path reads as prose and none states agent behavior. Skip review entirely and continue to Step 8.
-- `review`. Invoke `canon:review-branch`. The record names the `file` that decided it and the `test` it failed, `extension` for a path that is not prose and `behavior-path` for prose that states what an agent does.
-- `refused`, carrying reason `no-changes`. The changed set was empty, so take the stop below.
-
-Say in the run whether the verb or the written fallback decided.
-
-An empty list stops the chain rather than reading as prose-only, which it satisfies vacuously: `❌ No changed files to classify. Re-run when the plan has yet to produce its output. When the output is gitignored by design, autoship cannot ship it, so take the work out of the chain.` Never advise removing the output from `.gitignore`, which trades a stopped run for scratch committed into the repository.
-
-### When the verb is absent
-
-Never read an absent subcommand as a skip, since failing open would ship every branch unreviewed. Read `${CLAUDE_SKILL_DIR}/references/verb-absent.md` on meeting one, which carries the written test and the behavior paths it reads.
-
-## Step 7: evaluate findings
-
-Skip this step when Step 6 skipped review. Otherwise read `${CLAUDE_SKILL_DIR}/references/review-findings.md` before opening the review receipt. It carries how every finding splits by origin, which ones this run repairs and which stop the chain, and the one-pass bound on the repair.
-
-## Step 8: ship
+## Step 6: ship
 
 Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, memory capture, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. Read the order there and never here.
 
@@ -137,19 +96,18 @@ Emit the Output block on the wake after `git-ship`'s background CI watch exits o
 
 ## Output
 
-Respond with up to five lines:
+Respond with up to four lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
 🖼️ <N> visual boxes unchecked (<M> taste), owed on the evidence comment of <PR url> to the operator, or to the UI reviewer for the boxes a driver can run
-<N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
 ```
 
-`<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the mark asked for.
+`<state>` is whatever the Step 6 read returned, being `draft` or `ready, unsupervised`, rather than the state the mark asked for.
 
-Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if there were no minor findings, and the fourth if nothing routed. Omit the fifth if `memory-capture` wrote no memory file this session.
+Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if nothing routed. Omit the fourth if `memory-capture` wrote no memory file this session.
 
 This block replaces the one `git-ship` closes on rather than following it, since emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 

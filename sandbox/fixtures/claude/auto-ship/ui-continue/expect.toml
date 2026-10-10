@@ -4,18 +4,12 @@
 
 # The diff is one `.tsx` component under `src/`, so Step 5 invokes
 # `ui-checklist`, which writes a checklist for the padding and radius change.
-# Step 5 used to stop there with nothing committed, and resuming at
-# `/git-ship` skipped review. This arm pins the continue path: the chain runs
-# review, opens the pull request as a draft, and carries the unchecked boxes
-# into its closing block. The checker reads `reply` as substrings, so the
+# This arm pins the continue path: the chain opens the pull request as a
+# draft and carries the unchecked boxes into its closing block. The checker reads `reply` as substrings, so the
 # boxes line is pinned by its fixed words rather than by its counts.
 
 # No max_turns yet. No run has measured this arm, and the chain here runs
-# ui-checklist and review-branch both, so it is longer than happy-path's.
-
-# `review-branch` writes this file when it runs. A chain that stopped at
-# Step 5, or one that skipped review on the UI diff, never creates it.
-paths = [".canon/review/branch-roomier-button.md"]
+# ui-checklist and git-ship, so it is longer than happy-path's.
 
 # The completion line every autoship arm pins, plus the boxes line Step 5's
 # held counts feed. A chain halted on the checklist ends on neither.

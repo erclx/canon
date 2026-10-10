@@ -83,10 +83,6 @@ The `drift` check pairs the diff with `git ls-files --others --exclude-standard`
 
 `bun run check:install` packs and installs from the extracted tarball rather than cloning, so it reads the same working tree the other gates read. A change staged for one of the regenerated surfaces is visible to it with no separate commit required first.
 
-### The forced staging narrows the next review
-
-`review-branch` Step 2 uses `git diff --staged` as its scope whenever that is non-empty, so a review fired after a check reads only the regeneration. A branch can end up with a staged set of a few regenerated files while carrying many more, including every `src/` file the run existed to review, and both behaviors are documented and correct on their own, so nothing reports the gap. It compounds when the base equals HEAD, which is every autoship run before its first commit. Check whether the staged set matches the branch before invoking a review, and say which scope was read.
-
 ### A fence is exempt from the prose gate and not from the spell gate
 
 The prose-standards hook treats a fenced code block as exempt and `bun run check:spell` does not, so an invented short identifier inside a mermaid fence can pass every prose gate and still fail the check that blocks the commit. `claude/skills/draft-figure/references/mermaid.md` names the fence exemption for the prose hook while saying nothing about the spell stage, so the exemption reads wider than it is. Spell participant aliases and node ids as whole words, and check punctuation bans inside labels by hand. The `Markdown bans` and `Spelling` stages read different corpora, so no reordering closes the gap between them.

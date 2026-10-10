@@ -1,16 +1,15 @@
 ---
 name: review-pr
-description: Reviews an open pull request from an independent session and posts findings as a review comment on the PR. Posts a first pass against the whole change and every later pass against only the commits added since, under `## Review` while any finding is open and `## Review closed` once a pass carries none. Reads project docs and the task board for cross-feature context a self-review lacks. Use when asked to "review the PR", "review this feature's PR", "post a PR review", "re-review the PR", "close out the review", "confirm the findings are fixed", or acting as the orchestrator reviewing a worker's PR. Do NOT use to review local uncommitted changes. That is `review-branch`.
+description: Reviews an open pull request from an independent session and posts findings as a review comment on the PR. Posts a first pass against the whole change and every later pass against only the commits added since, under `## Review` while any finding is open and `## Review closed` once a pass carries none. Reads project docs and the task board for cross-feature context a self-review lacks. Use when asked to "review the PR", "review this feature's PR", "post a PR review", "re-review the PR", "close out the review", "confirm the findings are fixed", or acting as the orchestrator reviewing a worker's PR. Do NOT use to review local uncommitted changes.
 metadata:
   family: after-pr
 ---
 
 # Review PR
 
-This is the orchestrator's independent review, distinct from `review-branch`.
-`review-branch` reviews local changes for the session that wrote them and writes
-to disk. This one reviews an open PR the session did not write and posts the
-findings to the PR, so the vantage is independent and the output is durable.
+This is the orchestrator's independent review. It reviews an open PR the session
+did not write and posts the findings to the PR, so the vantage is independent
+and the output is durable.
 
 It posts at least twice over a pull request's life. A first pass opens the
 review against the whole change, and every later pass reads only the commits
@@ -32,7 +31,7 @@ reader scanning the thread finds the current verdict where the last one sat.
 
 ## Guards
 
-- If no open PR resolves for the target branch via `canon pr head --json`, stop: `❌ No open PR to review. Open one first, or use /review-branch for local changes.`
+- If no open PR resolves for the target branch via `canon pr head --json`, stop: `❌ No open PR to review. Open one first.`
 - Review and post. Do not merge. Merging is the human's gate.
 
 ## Step 1: resolve the PR and read context

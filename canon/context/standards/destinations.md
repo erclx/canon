@@ -49,9 +49,9 @@ Shipping a dependency beside its consumer connects them only when the consumer's
 
 ## Destinations
 
-Thirty-one standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
+Each standard that reaches a session through a rule, a skill, or the CLI carries a row below, with its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
 
-The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a session through the `draft-figure` skill, which the generated markdown rule names, since no glob can read whether a file holds a fence. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` reaches a session through the `draft-doc` skill's wiki kind, which names it at `references/wiki.md`. No rule globs the wiki folder any longer, since the standard moved into the skill with its one reader.
+A standard no rule globs carries no row. `mermaid.md` reaches a session through the `draft-figure` skill, which the generated markdown rule names, since no glob can read whether a file holds a fence. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` reaches a session through the `draft-doc` skill's wiki kind, which names it at `references/wiki.md`. No rule globs the wiki folder any longer, since the standard moved into the skill with its one reader.
 
 `figures.md` is a fragment standard with no document type of its own to glob, so no rule carries it. It reaches a session through the citation each caller's own body writes, the fallback form a flat standard takes when nothing globs it.
 
@@ -85,7 +85,6 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/canon/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/canon/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`.
-- `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root
 

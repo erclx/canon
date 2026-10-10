@@ -1,6 +1,6 @@
 ---
 name: draft-figure
-description: Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped, an architecture view, or needs freehand SVG, then draws it. Renders the Mermaid path through Mermaid's own hand-drawn look, reads the render back, and fixes what it exposes. Wraps every path in the figure standard's caption, color, and accessibility rules. Use when asked to "draw a figure", "add a hand-drawn diagram", "draft a figure for this doc", "draw this relationship as a figure", "draw the architecture", "diagram the system", or "show the components". Do NOT use for a UI wireframe, which is `draft-doc`.
+description: Drafts one hand-drawn figure for a document, deciding whether the subject is Mermaid-shaped, an architecture view, or needs freehand SVG, then draws it. Renders the Mermaid path through Mermaid's own hand-drawn look, reads the render back, and fixes what it exposes. Wraps every path in the figure standard's caption, color, and accessibility rules. Use when asked to "draw a figure", "add a hand-drawn diagram", "draft a figure for this doc", "draw this relationship as a figure", "draw the architecture", "diagram the system", or "show the components". Do NOT use for a UI screen mockup, which is `canvas`.
 metadata:
   family: generate
 ---

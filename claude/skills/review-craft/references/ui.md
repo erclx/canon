@@ -6,7 +6,7 @@ Stills are this pass's evidence. Driving the running app through the checklist b
 
 ## When it applies
 
-The diff touches a file that paints: markup, a stylesheet, a component or template, a design token file, a rendered document source, or a path a `canon/wireframes/` surface file names. Or the pull request carries an evidence comment, whatever the diff touches.
+The diff touches a file that paints: markup, a stylesheet, a component or template, a design token file, or a rendered document source. Or the pull request carries an evidence comment, whatever the diff touches.
 
 ## First, check that a screenshot exists
 
@@ -59,11 +59,11 @@ A second theme earns a read only when the diff touches a color token. Name the s
 
 ## Comparing
 
-Read `canon/wireframes/index.md` and open only the surface files the evidence states map to. Check each opened image for the layout, the order of regions, and the behavior at that width the surface file states. Check `canon/DESIGN.md` for the tokens the image makes visible: color, type scale, spacing, and component rules.
+Check each opened image against the layout its checklist box claims, and check `canon/DESIGN.md` for the tokens the image makes visible: color, type scale, spacing, and component rules.
 
-Read the width and theme from whatever the image path carries, and fix no width list, since which widths matter belongs to the project. Skip a comparison silently when the project has no wireframe or design file.
+Read the width and theme from whatever the image path carries, and fix no width list, since which widths matter belongs to the project. Skip the design file comparison silently when the project has none.
 
-A finding names the wireframe or design-file line the image breaks, never a taste.
+A finding names the checklist box or design-file line the image breaks, never a taste.
 
 ## The checklist
 

@@ -1,3 +1,0 @@
-export function MockDemoStrip() {
-  return <div>mock demo strip</div>;
-}

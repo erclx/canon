@@ -39,7 +39,7 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | Skill                         | When to use                                                                                                |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `canon:session-worktree`      | At the plan-to-execute boundary, to get an isolated tree and branch, or to route a refused main-root write |
-| `canon:auto-ship`             | After plan approval, to chain implement, verify, review, draft PR                                          |
+| `canon:auto-ship`             | After plan approval, to chain implement, verify, draft PR                                                  |
 | `canon:test-first`            | Before implementing a planned change, to run its test red, green, then refactor                            |
 | `canon:test-craft`            | When writing or changing any test, to pick its layer and filter what it asserts                            |
 | `canon:build-in-slices`       | While building a plan, to commit each tested slice and note out-of-scope defects rather than fix them      |
@@ -57,7 +57,6 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 
 | Skill                   | When to use                                                                       |
 | ----------------------- | --------------------------------------------------------------------------------- |
-| `canon:review-branch`   | On the local branch diff, before anything is pushed                               |
 | `canon:document-health` | When the documents themselves have to answer for length, placement, and staleness |
 | `canon:ux-audit`        | To read UI source for missing states, edge cases, and inconsistencies             |
 | `canon:ux-measure`      | To start the interface and measure paint, processor, and layout cost              |
@@ -105,6 +104,5 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | Skill                         | When to use                                                                            |
 | ----------------------------- | -------------------------------------------------------------------------------------- |
 | `canon:target-check`          | In a target project, to report per domain what it holds against what the toolkit ships |
-| `canon:seed-sync`             | After a toolkit update, to reconcile installed seeds without losing customizations     |
 | `canon:canon-feedback`        | When something in the toolkit is broken, missing, or off, to open an issue on it       |
 | `canon:canon-feedback-triage` | In the toolkit repo, to file the open feedback issues into an intake folder            |

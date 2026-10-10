@@ -92,11 +92,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Look over everything that changed on this branch for bugs and edge cases.',
-    expect: 'review-branch',
-  },
-  {
-    prompt:
       'What should a review of a change look for beyond bugs, and how much evidence does a finding need?',
     expect: 'review-craft',
   },
@@ -113,11 +108,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt: 'Draft me a script with beats for a screencast recording.',
     expect: 'draft-screencast',
-  },
-  {
-    prompt:
-      "Check whether my installed Claude seed docs have drifted from the toolkit's.",
-    expect: 'seed-sync',
   },
   {
     prompt: 'Turn this topic into a slide deck I can render.',

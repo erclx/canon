@@ -1,4 +1,0 @@
-export function ApiKeyGate() {
-  // Now supports Anthropic, OpenAI, and Gemini
-  return <div>Multi-provider gate</div>;
-}

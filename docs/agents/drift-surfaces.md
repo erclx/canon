@@ -33,8 +33,8 @@ finding the rendered half withheld.
 equivalent, since the domain walk lists what a target installed and cannot see a
 file that never arrived. There is no `customized` verdict here, because that one
 needs a stamp and seeds carry none, so a file history cannot attribute stays
-`drifted`. Reconcile the section with `seed-sync`, which merges one
-section at a time rather than replacing a file the project edits.
+`drifted`. Merge the section by hand against the toolkit copy rather than
+replacing a file the project edits.
 
 A markdown seed installs rewritten rather than copied, since the `stub: true`
 marker the toolkit's own seed gate reads is stripped on the way in. The

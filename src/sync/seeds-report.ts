@@ -34,7 +34,7 @@ export interface SeedsReport {
  * Classifies every seed the toolkit ships against the target's copy, and never
  * returns a change. Seeds are copy-once files a project is expected to edit, so
  * the engine's copy path would overwrite `CLAUDE.md` wholesale. Reporting alone
- * is what lets `seed-sync` merge one section at a time instead.
+ * is what lets an operator merge one section at a time by hand instead.
  *
  * Attribution reuses the history reader rather than the engine's own recovery
  * pass, which is private and takes a `SyncAdapter` seeds have no way to supply.

@@ -146,6 +146,5 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - Rendered copy casing, button labels, error message shape: the same rules
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
 - The shape of the project's design document and its token tables: `${CLAUDE_SKILL_DIR}/../../standards/design.md`
-- Spatial layout and interaction intent of one surface: `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
 - Prose on the surface being designed: the `write-human` skill

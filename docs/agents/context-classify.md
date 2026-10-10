@@ -5,14 +5,14 @@ description: Classifying canonical-doc content as keep, replace/rewrite, history
 
 # Doc classifier
 
-`canon context classify` reads content from the four canonical doc types (`context/<domain>.md`, `wireframes/<surface>.md`, `DESIGN.md`, `REQUIREMENTS.md`) and reports whether each piece states the project as it stands or should be rewritten, narrated elsewhere, or moved to another surface. It reports and never gates: a finding is a judgment for a writer to act on, not a fact a push fails over. The `context-fold` skill calls this verb in diff mode over its own diff baseline. Wiring it into the merge gate or `canon context audit` is separate work this verb does not do.
+`canon context classify` reads content from the three canonical doc types (`context/<domain>.md`, `DESIGN.md`, `REQUIREMENTS.md`) and reports whether each piece states the project as it stands or should be rewritten, narrated elsewhere, or moved to another surface. It reports and never gates: a finding is a judgment for a writer to act on, not a fact a push fails over. The `context-fold` skill calls this verb in diff mode over its own diff baseline. Wiring it into the merge gate or `canon context audit` is separate work this verb does not do.
 
-Two modes read different units. Diff mode reads the chunks a git range changed, each with the section it landed in, which is what a session checks right after an edit. Sweep mode reads every section of the five doc types, split at H3, which is what a cleanup pass or a periodic re-scan runs over a whole corpus.
+Two modes read different units. Diff mode reads the chunks a git range changed, each with the section it landed in, which is what a session checks right after an edit. Sweep mode reads every section of the four doc types, split at H3, which is what a cleanup pass or a periodic re-scan runs over a whole corpus.
 
 ```bash
 canon context classify diff
 canon context classify diff --base origin/main --json
-canon context classify diff --doc-types context,wireframes
+canon context classify diff --doc-types context,design
 canon context classify sweep
 canon context classify sweep --doc-types design,requirements --json
 ```
@@ -20,14 +20,14 @@ canon context classify sweep --doc-types design,requirements --json
 | Option               | Behavior                                                       |
 | -------------------- | -------------------------------------------------------------- |
 | `--base <ref>`       | Diff mode only. Far side of the range, defaulting to the trunk |
-| `--doc-types <list>` | Comma-separated canonical doc types (default: all five)        |
+| `--doc-types <list>` | Comma-separated canonical doc types (default: all four)        |
 | `--backend <name>`   | Override the resolved model backend for this run               |
 | `--model <name>`     | Override the resolved model name for this run                  |
 | `--json`             | Add a machine-readable record on stdout                        |
 
 ## Two layers
 
-The regex layer always runs. It is free, needs nothing installed, and catches narration (a branch name, "closed on", "did not survive") and a source file path named inside a wireframe. It never answers REPLACE in diff mode, since telling a restated figure from a genuinely new one needs the section a hunk landed in, which the model layer reads and the regex layer does not.
+The regex layer always runs. It is free, needs nothing installed, and catches narration (a branch name, "closed on", "did not survive"). It never answers REPLACE in diff mode, since telling a restated figure from a genuinely new one needs the section a hunk landed in, which the model layer reads and the regex layer does not.
 
 The local Ollama layer runs only when configured, through `canon context classifier`. When it runs, its call is one chunk or section per request, never batched: the groundwork measurement behind this verb found that batching 16 hunks into one call returned KEEP for every one of them. Thinking is always off, since it was measured to catch nothing thinking-off missed while running roughly five times slower and, in sweep mode, losing three real flags by reasoning past them.
 

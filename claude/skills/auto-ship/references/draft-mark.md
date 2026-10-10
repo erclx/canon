@@ -1,11 +1,11 @@
 ---
 title: Draft mark
-description: The one command auto-ship Step 8 runs as git-ship's pull request step returns, which proves the target is this branch's open pull request, marks it a draft, and reads the flag back
+description: The one command auto-ship Step 6 runs as git-ship's pull request step returns, which proves the target is this branch's open pull request, marks it a draft, and reads the flag back
 ---
 
 # Mark the pull request a draft
 
-Step 8 of `auto-ship`. The session reads this file as `git-ship`'s pull request step returns, ahead of its CI watch.
+Step 6 of `auto-ship`. The session reads this file as `git-ship`'s pull request step returns, ahead of its CI watch.
 
 Run the mark as one command, where the shell proves the target before the mark and reads the flag back after it:
 

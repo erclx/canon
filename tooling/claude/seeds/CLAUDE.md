@@ -4,11 +4,10 @@
 
 ## Context
 
-- Before non-trivial work in a domain read `canon/context/<domain>.md`, and before touching a UI surface read `canon/wireframes/<surface>.md`. Pick which from the index anchors below.
+- Before non-trivial work in a domain read `canon/context/<domain>.md`. Pick which from the index anchor below.
 
 @canon/REQUIREMENTS.md
 @canon/context/index.md
-@canon/wireframes/index.md
 
 ## Commands
 

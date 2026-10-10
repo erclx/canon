@@ -566,8 +566,7 @@ describe('classifying an audit run by its exit code', () => {
   })
 
   /**
-   * A project adopting none of `canon/context/`, `.claude/diagrams/`, or
-   * `canon/wireframes/` is the ordinary state of a target, the same test the
+   * A project adopting neither `canon/context/` nor `.claude/diagrams/` is the ordinary state of a target, the same test the
    * skill corpora take below.
    */
   it('should read a project with no audited context folder as absent', () => {

@@ -1,8 +1,0 @@
----
-title: Add task surface
-description: Modal dialog for creating a new task.
----
-
-# Add task surface
-
-Modal dialog with a single text input and a primary "Add" button plus a secondary "Cancel" button.

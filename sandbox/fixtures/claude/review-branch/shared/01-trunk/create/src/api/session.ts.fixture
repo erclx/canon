@@ -1,3 +1,0 @@
-export function readToken(headers: Record<string, string>) {
-  return headers.authorization ?? null;
-}

@@ -1,6 +1,6 @@
 ---
 title: Surfaces
-description: The teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, the wireframe transcription carve-out and copy rule, and when a standard moves into its one reader's skill
+description: The teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, and when a standard moves into its one reader's skill
 ---
 
 # Surfaces
@@ -30,22 +30,6 @@ The format comes from the external source the teaching surface was built against
 The taller-than-wide rule in `claude/skills/draft-figure/references/mermaid.md` is decided by the widest rank's label text and column count, so a wide render is fixed by trimming node labels to three or four words and stacking independent siblings with a `~~~` invisible link, not by removing nodes. A `~~~` link inside a subgraph or folding two nodes into one label can swing a diagram from wider-than-tall to taller-than-wide with every node and edge otherwise unchanged.
 
 Read the ratio mechanically out of bytes 16 to 24 of a PNG header after rendering through `bunx -y @mermaid-js/mermaid-cli`. A fan-in the standard bans is a separate problem, and a vertical timeline with the trigger on each edge label clears both at once.
-
-## Wireframe transcription
-
-The wireframe standard sends class or token names and pixel-exact spacing out of a wireframe, and its `## Regions` prefers a role label over a class name. A wireframe regenerated from an already-built surface needs the opposite: the `canon/wireframes/teach/` files carry `.mast`, `.track`, `--chrome`, and a 3.5rem bar height.
-
-`## Transcription wireframes` states the mode rather than repealing the rule. It permits a source citation, class or token names, and exact geometry only where the wireframe is regenerated from a built surface's own render code, and it requires the file to open by naming that source. A wireframe drafted ahead of any build keeps the original rule, since there is no source yet to check it against.
-
-Moving the class names and pixel values into a `canon/context/` entry lost. Nothing else documents the teach variables, so the move would have created a second source for facts the render code already carries.
-
-The carve-out asks for the source citation alone. A separate sentence stating that the block transcribes rather than approximates lost, since a class name and a line number traced to a real file already carry that signal.
-
-## Wireframe copy
-
-`## Copy` keeps short structural text verbatim, being labels, headings, empty-state strings, and nav or footer copy, and routes long-form or article-body content to a citation of its source file. `canon/wireframes/teach/lesson.md` showed the cost of the wider rule: its figure baked in the lede sentence and the `.assumes` panel text, duplicated from the live HTML source rather than the structural chrome the figure exists to show.
-
-Citing every kind of on-screen text lost. A label is authored in the wireframe itself rather than pulled from a live document, so it has no source file to cite. Short structural text stays verbatim because it has nowhere else to live, and long-form content moves to a citation because duplicating it is what lets a wireframe drift.
 
 ## One-reader standards
 

@@ -77,7 +77,7 @@ Read `seeds.entries` off the report. Each entry is `matching`, `stale`, `drifted
 - Behind: anything else. Report `stale` and `missing` separately from `drifted`, which means the content matches no version the toolkit ever published, so the project wrote it.
 - Unread: `historyUnavailable` set on `seeds`, which leaves every difference unattributed. Say so rather than reporting a file as untouched.
 
-Routes to `seed-sync`, which proposes per-section edits without overwriting a customization. It is a proposal rather than a write, which is why a `drifted` `CLAUDE.md` routes there rather than to a sync.
+Report a `stale` seed as safe to take whole and a `drifted` one as a hand merge against the toolkit copy, since a sync command would overwrite the project's edits.
 
 A seed entry matching says the file's bytes match the shipped seed. It says nothing about whether the harness those files configure is wired, which is the next domain.
 

@@ -16,7 +16,7 @@ Every verb below is `canon canvas`. Run `canon docs canvas` for the full verb re
 - If `canon` is not on PATH, stop: `❌ canon CLI not found.`
 - If `canon canvas --help` reports no such command, stop: `❌ The installed canon carries no canvas command. Update the CLI and re-run.`
 - Write no frame before the canvas is serving and the shell has loaded. A frame nobody can see is a draft reported as delivered.
-- Never present a frame as the project's design. The canvas is a drafting surface and the project's design document or wireframes hold what was decided.
+- Never present a frame as the project's design. The canvas is a drafting surface and the project's design document holds what was decided.
 - Never promise the canvas survives a lost checkout. Its folder is gitignored and nothing backs it up.
 
 ## Step 1: start the canvas and confirm the shell
@@ -102,7 +102,7 @@ The operator restyles elements from the inspector, and each edit lands as inline
 
 When the operator picks a frame, the decision leaves the canvas.
 
-- Carry visual values, being color, type, spacing, and radius, into the project's design document, editing its sections in place under the `design.md` standard. Carry structure and layout into the project's wireframes.
+- Carry visual values, being color, type, spacing, and radius, into the project's design document, editing its sections in place under the `design.md` standard. Leave structure and layout on the canvas, and name the frame in the plan that builds it.
 - Name the frame the decision came from in the reply, and leave the frame on the canvas until the operator clears it.
 - Never cite a frame path from a tracked file. The folder is gitignored, so the citation resolves on this machine alone.
 
@@ -113,7 +113,7 @@ When the operator picks a frame, the decision leaves the canvas.
 Page:     <page>, <n> frames
 Selected: <page>/<frame>, element <index>, or none, or stale
 Capture:  <path of each capture written>
-Carried:  <the design document or wireframe the pick went to, or not yet>
+Carried:  <the design document the pick went to, the plan that cites the frame, or not yet>
 ```
 
 Write the canvas line's URL as a markdown link. Omit the capture line when nothing was captured and the carried line when no direction was picked. Emit every path from the project root.

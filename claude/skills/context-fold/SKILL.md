@@ -1,6 +1,6 @@
 ---
 name: context-fold
-description: Folds a session into the project's context entries and wireframes, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
+description: Folds a session into the project's context entries, marks the outcomes the diff shipped `[x]` on the task board, and archives the plans those tasks cite. Use when asked to "fold the session into context", "update the context entries", "sync the planning records", when design or requirements changed mid-cycle, after a pivot, or before shipping. Do NOT use for `README.md` or `docs/`, which is `docs-sync`, or to create or archive a task file, which is `task-board`.
 metadata:
   family: ship
 ---
@@ -11,11 +11,11 @@ metadata:
 
 - If neither a `canon/` nor a `.claude/` directory exists, stop: `❌ No canon/ or .claude/ directory found. Run canon claude init to set up the workflow.`
 
-The skip for a session that changed nothing lives at the end of Step 2, because it needs the diff to decide. It drops the doc rewrite alone. The diff-driven sweep in Step 4 still runs.
+The skip for a session that changed nothing lives at the end of Step 2, because it needs the diff to decide. It drops the doc rewrite alone. The diff-driven refresh in Step 5 still runs.
 
 ## Diff baseline
 
-Steps 2, 4, and 6 share one diff on the usable path. An unusable baseline splits them, per the rule below. Resolve the base ref once and reuse it:
+Steps 2 and 5 share one diff on the usable path. An unusable baseline splits them, per the rule below. Resolve the base ref once and reuse it:
 
 ```bash
 git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/null
@@ -33,7 +33,6 @@ Read these in parallel from the current worktree root (`pwd`), not the main work
 
 - `canon/REQUIREMENTS.md`
 - `canon/DESIGN.md`
-- `canon/wireframes/index.md` and every surface file it links to, following a grouped surface's own `index.md` and the siblings it lists rather than stopping at the top-level folder
 
 Read the task board from the main worktree root instead, resolving that root the way `session-worktree` does. It is gitignored scratch and never commits with the branch:
 
@@ -47,7 +46,7 @@ Review the session for decisions that diverged from the original plan:
 
 - Requirements added, removed, or changed scope
 - Technical decisions made or revised
-- Design or UX decisions that differ from DESIGN.md or any wireframe surface file, flat or nested under its own subfolder
+- Design or UX decisions that differ from DESIGN.md
 - Tasks blocked or newly identified
 
 Then resolve the diff baseline and match it against the board. From `.canon/tasks/index.md` at the main worktree root, pick the task files whose title or description relates to the changed paths and read the ones Step 1 skipped.
@@ -66,7 +65,7 @@ Skip Step 3 when the session shows no divergence **and** the diff matches no que
 
 Then run Steps 4 through 8. Step 3 is the only one this skips, because it is the only one driven by the session rather than by the diff or the board. A project with an empty task board making a mechanical change satisfies both conditions above, and stopping here would put an uncovered surface out of reach in every such project.
 
-This changes which steps the skill reaches and never widens what any of them reads. Steps 4 and 6 still take the same scoped set the Diff baseline section defines.
+This changes which steps the skill reaches and never widens what any of them reads. Step 5 still takes the same scoped set the Diff baseline section defines.
 
 ## Step 3: update
 
@@ -83,7 +82,7 @@ The verb resolves the board at the main worktree root in-process, which is the r
 
 Read `ok` and `reason` out of that record rather than the exit. An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command and takes the second status, which flattens every non-zero exit to zero. A refusal arriving as success leaves the outcome unmarked while the chain moves on, so the board reports shipped work as open and the next session re-plans it.
 
-**DESIGN.md, a wireframe surface file (flat or nested)**
+**DESIGN.md**
 
 - Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
 - Update only the sections affected by session decisions.
@@ -94,15 +93,7 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
-## Step 4: wireframe coverage sweep
-
-Skip this step silently when `canon/wireframes/` does not exist or has no surface files. When the baseline is unusable, scope it to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the wireframe sweep.`
-
-Reuse the diff from the baseline above and filter for UI-affecting paths. UI-affecting paths are framework-dependent. Default heuristic: any file under a `components/`, `features/`, `pages/`, `app/`, `routes/`, or `screens/` folder, plus any `*.tsx`, `*.jsx`, `*.vue`, or `*.svelte` file anywhere in the diff.
-
-Skip silently when the filter leaves nothing, which is every branch touching no UI. Otherwise read `${CLAUDE_SKILL_DIR}/references/wireframe-sweep.md` for the slug derivation, the two findings it reports, the stub it writes, and the output lines.
-
-## Step 5: flag CLAUDE.md drift
+## Step 4: flag CLAUDE.md drift
 
 If this session established or changed a cross-cutting behavior rule that belongs in root `CLAUDE.md` (a new always-on convention, a revised workflow rule), surface a one-line warning:
 
@@ -110,21 +101,21 @@ If this session established or changed a cross-cutting behavior rule that belong
 
 Do not edit `CLAUDE.md` inline. Every `CLAUDE.md` change goes through the show-diff-and-approve gate, so this step only flags. Skip silently when the session made no cross-cutting behavior decision.
 
-## Step 6: refresh context entries
+## Step 5: refresh context entries
 
 Read `canon/context/index.md` at `pwd` to see which domain entries exist. Skip this step silently if the directory does not exist or has no entries.
 
 Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for its two sources, the routed facts and the diff, the widening a removed capability takes, when a new entry is created, and the output lines.
 
-## Step 7: fold promoted pages
+## Step 6: fold promoted pages
 
 Skip this step silently when no teach promotion handoff exists at `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root, deriving `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md` with the `latest` fallback. Otherwise read `${CLAUDE_SKILL_DIR}/references/promoted-pages.md` for how each block lands, the handoff delete, and the output lines.
 
-## Step 8: sweep consumed receipts
+## Step 7: sweep consumed receipts
 
 Read `${CLAUDE_SKILL_DIR}/references/receipt-sweep.md` for which review receipts this session sweeps, which it keeps, and the output lines. Skip this step silently when nothing qualifies.
 
-## Step 9: classify the fold's diff baseline
+## Step 8: classify the fold's diff baseline
 
 Skip this step silently only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
 
@@ -132,4 +123,4 @@ Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, 
 
 ## After completion
 
-Read `${CLAUDE_SKILL_DIR}/references/completion-report.md` before printing anything, for the line each outcome prints, the lines Step 3, Step 2, and Step 9 add, and when the closing line is suppressed.
+Read `${CLAUDE_SKILL_DIR}/references/completion-report.md` before printing anything, for the line each outcome prints, the lines Step 3, Step 2, and Step 8 add, and when the closing line is suppressed.

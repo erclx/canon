@@ -54,7 +54,9 @@ stage_setup() {
   log_info "     lockfile adds color-shim, which the manifest never names and"
   log_info "     which carries an install script"
   log_info ""
-  log_info "Action:  /canon:review-branch"
+  log_info "Action:  Load canon:review-craft, then review the changes on this branch, writing one graded finding per line as"
+  log_info "         '- **critical|should-fix|minor**: ...' under a heading per file to"
+  log_info "         .canon/review/branch-release-tag.md"
   log_info "Expect:  declared in fixtures/claude/review-craft/expect.toml"
   log_info "         Check it with: canon sandbox check claude:review-craft"
 }

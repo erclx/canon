@@ -10,7 +10,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "drift" "context-entries" "wireframe-coverage" "board-sweep" "classify-findings"
+  select_or_route_scenario "Which scenario?" "drift" "context-entries" "board-sweep" "classify-findings"
 
   case "$SELECTED_OPTION" in
   "drift")
@@ -58,29 +58,10 @@ stage_setup() {
     log_info "         canon/context/web.md already exists. Its Layer responsibilities section names src/features/chat/."
     log_info "Action:  /context-fold"
     log_info "Expect:  Step 3 updates planning docs (none diverged here)"
-    log_info "         Step 4 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
+    log_info "         Step 5 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
     log_info "         Rewrites the relevant section of canon/context/web.md from the diff content"
     log_info "         Does NOT create new entries (no auto-creation per design)"
     log_info "         Outputs a reminder line to run canon indexes regen"
-    ;;
-  "wireframe-coverage")
-    rm -f canon/wireframes/feature-name.md
-    stage_fixtures claude context-fold wireframe-coverage 01-initial
-    git add . && git commit -m "feat(web): initial BYOK gate" --no-verify -q
-
-    git checkout -b feat/widen-and-mock -q
-    stage_fixtures claude context-fold wireframe-coverage 02-widen
-    git add . && git commit -m "feat(web): widen BYOK to three providers and add mock demo strip" --no-verify -q
-
-    log_step "Scenario ready: docs wireframe coverage sweep"
-    log_info "Context: branch widens BYOK gate to three providers and adds a new mock demo surface"
-    log_info "  canon/wireframes/byok-gate.md still says Anthropic-only"
-    log_info "  src/features/mock/MockDemoStrip.tsx has no matching wireframe surface"
-    log_info ""
-    log_info "Action:  /context-fold"
-    log_info "Expect:  Step 4 reports drift in canon/wireframes/byok-gate.md (Anthropic-only contradicted)"
-    log_info "         Step 4 stubs canon/wireframes/mock-demo-strip.md with a TODO"
-    log_info "         Operator resolves drift manually; auto-rewrite of prose is out of scope"
     ;;
   "board-sweep")
     stage_fixtures claude context-fold board-sweep 01-initial
@@ -113,22 +94,18 @@ stage_setup() {
     stage_fixtures claude context-fold classify-findings 02-remeasure
 
     log_step "Scenario ready: context-fold classifies what it writes"
-    log_info "Context: two uncommitted edits stage two shapes Step 10 exists to catch"
+    log_info "Context: one uncommitted edit stages the shape Step 9 exists to catch"
     log_info "  canon/context/retrieval.md appended a branch-narrated re-measurement"
     log_info "  below the count it restates, instead of rewriting it in place"
-    log_info "  canon/wireframes/search-panel.md appended a bullet naming the source"
-    log_info "  file that implements it, which is a MOVE finding rather than a REPLACE"
-    log_info "  or a HISTORY one, and nothing but Step 10 touches a wireframe this way"
     log_info ""
-    log_info "Narrate nothing about either edit. The arm fails if the classify step only"
+    log_info "Narrate nothing about the edit. The arm fails if the classify step only"
     log_info "reaches a file the prompt named."
     log_info ""
     log_info "Action:  /context-fold"
     log_info "Expect:  declared in fixtures/claude/context-fold/classify-findings/expect.toml"
     log_info "         Check it with: canon sandbox check claude:context-fold classify-findings"
     log_info "         retrieval.md holds 58,500 once, the narration and 42,000 are gone"
-    log_info "         search-panel.md keeps its behavior bullets, the source-file mention gone"
-    log_info "         Three expectations need a reader and report as unchecked."
+    log_info "         Two expectations need a reader and report as unchecked."
     ;;
   *)
     log_error "Unknown scenario: $SELECTED_OPTION"

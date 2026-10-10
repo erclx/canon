@@ -20,16 +20,16 @@ The same procedure ran as five skills, one per kind, each restating the read, th
 - Confirm the resolved path, the kind's detections, and the full content with the user before writing, since placement and detection are judgment calls with no diff to preview them against
 - Regenerate the catalog of the folder the document landed in, where the kind keeps one, so the next run's collision check sees it
 - Draft a README from the template for every detected project type and combine them, never the closest one, since a project that is a CLI and a plugin owes its reader both
-- Carry each kind's own musts in its reference: the root check for context and wireframes, tier detection and the two modes for wireframes, both placement tests and a fetched source for the wiki, and project detection and rendered-value badges for the readme
+- Carry each kind's own musts in its reference: the root check for context, both placement tests and a fetched source for the wiki, and project detection and rendered-value badges for the readme
 
 ## Must not
 
 - Rewrite, refresh, or sync a document that already exists. A collision refuses toward the surface that owns the existing document.
 - Hand-edit an `index.md`. It regenerates from sibling frontmatter, and a hand edit is overwritten on the next regen.
 - Substitute recall for a failed fetch on the wiki kind, or invent an image or a placeholder path on the readme kind.
-- Build a companion render for a detected wireframe tier, or a hand-drawn diagram loop for a docs page.
+- Build a hand-drawn diagram loop for a docs page.
 - Widen the wiki's folder split to admit a subject its second placement test rejects. That is a change to the standard, argued there.
-- Assume this skill's routing needs no check. One description now covers five triggers, and a ranking over descriptions is a proxy for how Claude Code routes, so a review some months in should read real invocations back.
+- Assume this skill's routing needs no check. One description now covers four triggers, and a ranking over descriptions is a proxy for how Claude Code routes, so a review some months in should read real invocations back.
 
 ## Guards
 
@@ -40,7 +40,7 @@ The same procedure ran as five skills, one per kind, each restating the read, th
 ## Out of scope
 
 - Rewriting or syncing an existing `docs/` page or an authored README against a diff: `docs-sync`
-- Refreshing an existing context entry or wireframe, or stubbing a surface a diff touched: `context-fold`
+- Refreshing an existing context entry: `context-fold`
 - Drafting a governance rule: `create-rule`
 - Drawing a figure or a diagram for a document: `draft-figure`
 - Voice, rhythm, punctuation, and formatting in the drafted document: the `write-human` skill and the markdown standard

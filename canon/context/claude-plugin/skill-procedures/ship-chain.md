@@ -1,29 +1,9 @@
 ---
 title: Ship chain
-description: The hazards a ship chain meets, from a drift gate that mis-scopes the review and sweeps that cannot reach a later write to a pull request write landing on the wrong target and a failed commit leaking into the next group
+description: The hazards a ship chain meets, from a citation count that reads one surface to a pull request write landing on the wrong target and a failed commit leaking into the next group
 ---
 
 # Ship chain
-
-## Review scope and receipts
-
-### The drift gate stages a file that mis-scopes the review
-
-Two documented behaviors meet on any branch editing an authoring surface, and the result is a review of the wrong file set. The Consumed copies stage clears only on a staged regeneration, so a branch that edits `governance/rules/canon/X.md` has to stage `.claude/rules/canon/canon/X.md` before `bun run check` passes. <!-- audit-ignore-citations: .claude/rules/canon/canon/X.md --> A review reading a non-empty `git diff --staged` as its scope would then take the generated mirror alone and none of the files carrying the change.
-
-Nothing reports it, since the review runs, writes a receipt, and reads clean. `review-branch` Step 2 avoids it by reading one range against the working tree, covered in `canon/context/claude-plugin/skill-baseline.md`.
-
-### The body that writes a receipt owns its lifetime
-
-`auto-ship` owns the receipt's lifetime, because it writes the file, cites it in its own output, and is the one body that can read whether a later step still needs it, where `context-fold` sweeps for whatever called it and cannot.
-
-Pinning the slug once at chain entry is the alternative, and it makes the deletion reliable rather than stopping it. What reaps the receipt instead is a second sweep, over reports whose branch no longer exists, bounded by the branch count. The cost is one receipt per live branch, and the durable record stays the pull request's `## Technical Context`, folded before `context-fold` runs.
-
-### A slug-keyed sweep cannot reach what a later chain step writes
-
-A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. A review receipt can be written by a run that follows the ship chain and its `context-fold` sweep. A sweep keyed on the current slug looks for a name that does not exist yet, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
-
-Scanning the folder rather than keying on the slug is what survives this. The branch report sweep reads every `.canon/review/branch-*.md` and tests each against the branch list rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
 
 ## Board and doc refresh
 
@@ -55,7 +35,7 @@ Lifting a conditional from another skill copies the clause rather than what it t
 
 The verb's own extraction scopes to canonical doc types and reports nothing when the range carries none, and it reuses the Diff baseline section's own base rather than resolving a second one.
 
-A `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, is applied in place with a one-line reason to keep instead when it should not be. A model-decided `MOVE` finding is reported rather than cut, since the model's own prompt defines `MOVE` for correct content on the wrong surface, such as a decision written into a wireframe, which the regex layer's narrower wireframe-only reading of the same verdict never covers.
+A `REPLACE` or `HISTORY` finding is applied in place with a one-line reason to keep instead when it should not be. A `MOVE` finding is reported rather than cut, since the verdict means correct content on the wrong surface, such as a measured result written into a context entry that belongs in the requirements record, and only the model layer returns it.
 
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 

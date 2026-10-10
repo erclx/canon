@@ -5,7 +5,7 @@ description: Reading committed state rather than an arriving change, the shipped
 
 # State-scoped risk
 
-Every review surface a session can reach is scoped to a change. `review-branch` reads the branch diff, `review-pr` reads a pull request, and `code-review` takes a diff, a branch, or a path. A risk that arrived before the range under review is invisible to all three by construction, which is what these two commands answer.
+Every review surface a session can reach is scoped to a change. `review-pr` reads a pull request, and `code-review` takes a diff, a branch, or a path. A risk that arrived before the range under review is invisible to both by construction, which is what these two commands answer.
 
 | Question                                                 | Command              |
 | -------------------------------------------------------- | -------------------- |
