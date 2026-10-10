@@ -1,5 +1,3 @@
-const SLUG_FALLBACK = 'general'
-const SLUG_MAX_LENGTH = 40
 const TITLE_MAX_LENGTH = 72
 
 /**
@@ -77,16 +75,6 @@ export function missingFieldMessage(field: string): string {
 
 function surfaceField(body: string): string | undefined {
   return readField(body, 'Surface')?.split('\n')[0]?.trim()
-}
-
-export function deriveSlug(body: string): string {
-  const slug = (surfaceField(body) ?? '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, SLUG_MAX_LENGTH)
-    .replace(/-+$/g, '')
-  return slug || SLUG_FALLBACK
 }
 
 /**

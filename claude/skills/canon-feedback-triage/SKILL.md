@@ -1,67 +1,86 @@
 ---
 name: canon-feedback-triage
-description: Triage open GitHub issues labeled `feedback` in the toolkit repo. List them, pick one, classify it as a direct fix or plan-worthy work, route to the right skill, and link the issue for close-out. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback`), or for general GitHub issue triage unrelated to toolkit feedback.
+description: Files every open GitHub issue labeled `feedback` on the toolkit repo into an intake folder as one measured item each, skipping any issue the board already carries. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback`), to answer the filed items (that is `plan-intake-answer`), or for general GitHub issue triage unrelated to toolkit feedback.
 metadata:
   family: upkeep
 ---
 
 # Canon feedback triage
 
-Consume the feedback queue that `canon feedback --github` fills. Turn an open `feedback` issue into a scoped fix or a plan, then link the issue so merge closes it.
+Consume the feedback queue that `canon feedback` fills. Each open `feedback` issue is measured against the tree and filed as one item for the operator, who answers it before anything is built.
 
-Run from the toolkit repo root. This skill reads GitHub issues, not local `.canon/review/` files. Those are ephemeral session scratch. The durable, cross-project queue is GitHub.
+The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
+
+Run from the toolkit repo root. This skill reads GitHub issues and writes only inside its claimed folder. It posts no comment, close, or label to GitHub.
 
 ## Guards
 
+- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo.
 - If `gh` is not on PATH, stop: `❌ gh CLI not found. Install it to read feedback issues.`
 - If `gh auth status` fails, stop: `❌ gh is not authenticated. Run gh auth login.`
 - If no open `feedback` issues exist, stop: `✅ No open feedback issues.`
+- Never fill a `You:` slot, and never read an empty one as agreement. Answering runs through `plan-intake-answer` or the operator's own edit.
+- Branch on each `canon` record's `ok` and `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
 ## Step 1: list the queue
 
-Fetch open feedback issues:
-
 ```bash
-gh issue list --label feedback --state open --json number,title,url --jq '.[] | "#\(.number)\t\(.title)\t\(.url)"'
+gh issue list --label feedback --state open --limit 1000 --json number,title,body,labels
 ```
 
-Print each as a numbered line with its issue number, title, and URL. Do not open bodies yet. Ask which to triage, and accept "all" to work them in order.
+Take every issue. An issue without the `feedback` label does not surface here by design.
 
-## Step 2: read and classify
+## Step 2: drop what the board already carries
 
-For each picked issue, read the body:
+An issue is carried when its number appears in a live or archived task's `Issue:` line under `.canon/tasks/`, or in an item heading of an existing `.canon/intake/` folder, written `(#NNN)`. Search both at the main root.
 
-```bash
-gh issue view <n> --json title,body,labels --jq '"\(.title)\n\n\(.body)"'
+Set each carried issue aside with its carrier, a task path or a folder and item. Name every one in the overview, so a re-run while an earlier folder sits unanswered files nothing twice. When every issue is carried, stop: `✅ Every open feedback issue is already on the board.`
+
+## Step 3: claim the folder
+
+Run `canon records ordinal intake feedback-triage --claim --json` and take its `name`. The verb creates the folder in the same act, so two sessions opening at once never share one. Where the installed binary carries no such subcommand, report it and stop rather than picking an ordinal by hand.
+
+## Step 4: measure each issue
+
+For each remaining issue, measure its claim against the tree during this pass. Grep for the construct its defect names and count the sites, check whether the behavior it asks for exists, and search the log for a commit or pull request that shipped it under another task. Never carry a figure from the issue forward as current, since it states what was true when it was filed.
+
+Classify each against the toolkit's own surfaces:
+
+- **Direct fix.** One surface, one file, no architectural choice. A typo, a stale reference, a one-line correction.
+- **Plan-worthy.** Multiple files, a new skill or rule, a behavior change, or a cross-surface move.
+- **Needs clarification.** The observed and expected behavior conflict or the surface is unnamed. The item asks the operator for the missing detail.
+
+Strip the reporting project's specifics from the fix, being its filenames, frameworks, deploy targets, and label values. The issue describes one project, and the fix serves every project that installs the toolkit.
+
+Name the commit the pass measured against in the overview.
+
+## Step 5: write the items
+
+Write one item per issue in the intake item format, one cluster file per domain the fix touches, numbered in read order. Head each item `### N. <defect> (#NNN)` so an answer finds its issue.
+
+- `Problem:` states what this pass measured, with the count, path, or commit behind it
+- `Fix:` states the class from Step 4 and the change it names
+- `Open:` reads `fix, plan, ask, or decline?` on every item
+- `Suggested:` opens with exactly one of those tokens, then the reason
+- `You:` ships empty
+
+Write `00-overview.md` last, per the intake standard, with the counts by token, an open-questions list linking each item, the commit measured against, and every issue skipped in Step 2 with its carrier. Where the pass runs out of context before the index, write `99-next-session.md` naming the last issue filed.
+
+## Output
+
+```plaintext
+📂 Opened .canon/intake/<nn>-feedback-triage/
+
+**Filed:** <N> issues across <N> clusters, measured against <sha>
+**Skipped:** <n> already carried
+**Suggested:** <n> fix, <n> plan, <n> ask, <n> decline
+
+Next: /canon:plan-intake-answer to answer the `You:` slots
 ```
 
-Classify against the toolkit's own surfaces. Score in this order and stop at the first match:
-
-1. **Direct fix.** One surface, one file, no architectural choice. A typo, a stale reference, a one-line rule or doc correction, a single wording fix. Route straight to the edit.
-2. **Plan-worthy.** Multiple files, a new skill or rule, a behavior change, or a cross-surface move. Route to `plan-feature`.
-3. **Needs clarification.** The observed and expected behavior conflict or the surface is unnamed. Comment on the issue asking for the missing detail, then skip it.
-
-State the class and the one-line reason per issue before routing. Do not batch unrelated fixes into one branch.
-
-When the fix encodes into a skill, standard, or seed, keep the principle and strip the reporting project's specifics: its filenames, frameworks, deploy targets, and label values. The issue describes one project, and the fix serves every project that installs the toolkit.
-
-## Step 3: route
-
-- Direct fix: rename the branch to a conventional name (invoke `git-branch`), make the edit, then open the PR with `git-pr`.
-- Plan-worthy: invoke `plan-feature` with the issue body as the feature description. Let it write the plan and stop. Hand the plan slug back to the user. Do not implement.
-- Needs clarification: run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the question first, since it reaches the remote with nothing else checking it and this scan is the only gate. Then `gh issue comment <n> --body "<one question>"`, and move on.
-
-Match one issue to one branch and one PR. A single feedback issue is a single unit of work.
-
-## Step 4: close-out
-
-Link every fix back to its issue so the queue drains on merge.
-
-- For a PR-backed fix, add a `Closes #<n>` line to the PR body so GitHub closes the issue on merge. When `git-pr` regenerates the body, keep that line.
-- For a fix that ships without a PR, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the close message first, since it reaches the remote with nothing else checking it and this scan is the only gate. Then close it directly: `gh issue close <n> --comment "Fixed in <commit or PR url>."`
-- For a plan-worthy route, leave the issue open. It closes when the resulting PR merges with its `Closes #<n>` line.
+An answered fix or plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. Closing a declined issue on GitHub stays the operator's act.
 
 ## Notes
 
-- The `feedback` label is what `canon feedback --github` and the `toolkit-feedback.yml` issue form both apply. An issue without it does not surface here by design.
-- This skill routes, it does not reimplement. `plan-feature` owns planning, `git-pr` owns the PR body, `git-branch` owns the branch name. Do not duplicate their logic.
+- The `feedback` label is what `canon feedback` and the `toolkit-feedback.yml` issue form both apply.
+- This skill files and never reimplements. `plan-intake-answer` owns the answers and `task-board` owns the task a fix becomes.

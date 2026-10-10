@@ -30,7 +30,7 @@ Does not govern:
 ## Labels
 
 - Apply `bug` for a defect and `enhancement` for a task or improvement. Both are GitHub default labels.
-- Apply `feedback` to a report filed through `canon feedback --github`, which sets the label unconditionally rather than a session choosing it. It is not a GitHub default. Create it once per project with `gh label create feedback`.
+- Apply `feedback` to a report filed through `canon feedback`, which sets the label unconditionally rather than a session choosing it. It is not a GitHub default. Create it once per project with `gh label create feedback`.
 - A label that does not exist makes `gh` reject the issue. Create each one once with `gh label create`.
 - One label per issue unless a second genuinely applies.
 
@@ -83,11 +83,11 @@ Fix the feedback CLI so it applies the `feedback` label.
 
 ## Details
 
-`canon feedback --github` opens an issue with no label, so `canon-feedback-triage` never lists it.
+`canon feedback` opens an issue with no label, so `canon-feedback-triage` never lists it.
 
 ## Context
 
-Run a piped `canon feedback --github`, then check the issue carries no `feedback` label.
+Run a piped `canon feedback`, then check the issue carries no `feedback` label.
 
 ## Proposed
 

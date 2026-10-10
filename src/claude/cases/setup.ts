@@ -60,7 +60,7 @@ export const SETUP_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Work through the open feedback issues on the toolkit repo one by one.',
+      'File the open feedback issues on the toolkit repo into an intake folder.',
     expect: 'canon-feedback-triage',
   },
   // The outbound direction is what separates this from the front door above.

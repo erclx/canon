@@ -20,10 +20,9 @@ export default scenario({
   arms: {
     refusal: (ctx) => {
       // The one arm this command can assert. A report that passes validation
-      // writes into the toolkit's own `.canon/feedback/`, which sits outside the
-      // tree the snapshot covers, and `run.sh` reports that as an escape. A
-      // refusal writes nowhere at all, so the whole behavior lands inside the
-      // sandbox.
+      // files a real issue, which sits outside the tree the snapshot covers,
+      // and `run.sh` reports that as an escape. A refusal writes nowhere at
+      // all, so the whole behavior lands inside the sandbox.
       //
       // Both streams go to disk because `canon sandbox check` reads the tree and
       // nothing else. The status is held rather than left to stop the arm, since

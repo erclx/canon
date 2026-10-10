@@ -61,7 +61,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['autoship [cmd]', 'Decide whether a changed set needs review'],
       ['pr [cmd]', 'Read a pull request (key-changes, head, checks)'],
       ['upstream [cmd]', 'Read Claude Code releases (fetch, catalog, advance)'],
-      ['feedback', 'Write toolkit feedback from stdin'],
+      ['feedback', 'File toolkit feedback as a GitHub issue'],
     ],
   },
   {

@@ -19,7 +19,7 @@ The last failure is the session's own effort. Asked to report, a session starts 
 - Name the surface and its type, since the toolkit routes on that rather than on the symptom
 - Write the stated fallback for a field the session cannot fill, so an empty field reads as absent rather than as unreported
 - Open a GitHub issue on the toolkit repo through the CLI so the report lands where triage reads it, and print the returned URL on its own line
-- Say which file and which reason when the issue call fails and the report falls back to a local folder, since a silent fallback leaves it where nothing reads it
+- Surface the block and the reason when the issue call fails, since a failure that prints nothing leaves the report where nothing reads it
 - Hold a report the operator marks sensitive, since the issue is public
 - Fall back to printing the block when the CLI is absent, so the report still exists
 
