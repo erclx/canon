@@ -1,10 +1,6 @@
 ---
 title: Session map reference
 description: Filename and location, the sections a handoff carries, the write and read procedures, and how a role extends it
-paths:
-  - '.canon/tasks/session-*.md'
-rule:
-  - 'Follow this rule rather than the tasks rule for a `session-` file. A handoff is not a task and carries neither `## Outcomes` nor `## Findings`.'
 ---
 
 # Session map reference
@@ -12,6 +8,18 @@ rule:
 Applies to `.canon/tasks/session-<slug>.md`. A session writes one before a compaction, because a compaction keeps conclusions and drops the reasoning that produced them. It is rewritten whenever the session that owns it learns something the next session would otherwise re-derive, and it is optional: a project whose sessions never approach a compaction carries none.
 
 Any session writes one. The role a session holds decides which sections it adds on top of the core, never whether it may write at all.
+
+## Contents
+
+- [Scope](#scope)
+- [What a working session map looks like](#what-a-working-session-map-looks-like)
+- [Filename and location](#filename-and-location)
+- [Frontmatter](#frontmatter)
+- [Sections](#sections)
+- [Writing one](#writing-one)
+- [Reading one back](#reading-one-back)
+- [Extending it](#extending-it)
+- [Template](#template)
 
 ## Scope
 

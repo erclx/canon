@@ -41,7 +41,7 @@ stage_setup() {
   log_info "decline : one-file change already decided in .canon/tasks/"
   log_info ""
   log_info "Invoke the prefixed form. The dev-skill injection copies SKILL.md alone,"
-  log_info "so the unprefixed copy cannot resolve the bundled standards/groundwork.md."
+  log_info "so the unprefixed copy cannot resolve the bundled claude/skills/plan-groundwork/references/groundwork.md."
   log_info "Launch with: claude --plugin-dir <worktree-root>/claude --model sonnet"
 
   select_or_route_scenario "Which scenario?" "open" "resume" "decline"

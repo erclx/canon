@@ -9,7 +9,7 @@ metadata:
 
 Groundwork gathers and weighs. A plan commits. A groundwork folder costs nothing to throw away, which is what makes it the right container for a question nobody has answered yet.
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md` before writing any file in the folder. It holds the reserved numbers, the frontmatter and dating rules, what each required file carries, the conventions, and the anti-patterns. Do not work them from memory.
+Read `${CLAUDE_SKILL_DIR}/references/groundwork.md` before writing any file in the folder. It holds the reserved numbers, the frontmatter and dating rules, what each required file carries, the conventions, and the anti-patterns. Do not work them from memory.
 
 ## Guards
 
@@ -77,7 +77,7 @@ The standard sets the open question format and requires it inside a topic file a
 
 ## Open mode
 
-1. Claim the ordinal and create the folder in one act with `canon records ordinal groundwork <slug> --claim`, per `${CLAUDE_SKILL_DIR}/../../standards/groundwork.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/groundwork/` and `.canon/intake/` and creating `.canon/groundwork/<nn>-<slug>/` at the highest ordinal present across the two, incremented.
+1. Claim the ordinal and create the folder in one act with `canon records ordinal groundwork <slug> --claim`, per `${CLAUDE_SKILL_DIR}/references/groundwork.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/groundwork/` and `.canon/intake/` and creating `.canon/groundwork/<nn>-<slug>/` at the highest ordinal present across the two, incremented.
 2. Write `README.md` first. Writing it first forces the question of what the track is for.
 3. Write `01-current-state.md` by measuring now. Never carry a figure from a previous session or from recall without re-measuring it. Measure only what an open question in the folder needs. A number with no question attached is how groundwork turns into the work.
 4. Write `00-scope.md` when the track is large enough to run away. Skip it on a small track.
@@ -96,7 +96,7 @@ The standard sets the open question format and requires it inside a topic file a
 1. Write `06-decision.md`. It states the problem once, names the goal, lists what to do, and lists what was considered and dropped. Carry the "Overturned by" line of each lean that became the decision into a `## Revisit when` section, and carry none from a lean the decision did not take.
 2. Write `07-next-session.md` self-contained, so it survives a compaction that loses the conversation.
 3. Update the file map in `README.md`.
-4. Write one task file in `.canon/tasks/` recording what the track concluded, even when the conclusion is to do nothing. Follow `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` for the filename and frontmatter. Place the row through `task-board` Step 4, which checks the roster for a live orchestrator before writing `priority.md` or `backlog.md` directly. Aside from an experiment fixture, this and the routing in Step 5 are the only ways close mode reaches outside the folder.
+4. Write one task file in `.canon/tasks/` recording what the track concluded, even when the conclusion is to do nothing. Follow `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` for the filename and frontmatter. Place the row through `task-board` Step 4, which checks the roster for a live orchestrator before writing `priority.md` or `backlog.md` directly. Aside from an experiment fixture, this and the routing in Step 5 are the only ways close mode reaches outside the folder.
 5. When the task written in Step 4 does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report uncited external claims. Closing already reads every file in the folder, so list any statement about a source outside the project that carries neither a link nor a lead entry. Report and do not block, because judging whether a sentence makes an external claim is the call a checker gets wrong.
 

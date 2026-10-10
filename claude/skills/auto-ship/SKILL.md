@@ -49,7 +49,7 @@ When the invocation argument is a plan path or a bare slug, name the worktree fr
 
 Resolve `<plan>` in this order, stopping at the first match:
 
-1. **Caller-supplied task.** The invocation carried a path under `.canon/tasks/`. If it does not resolve to a file, stop: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.` Read that task's first `Plan:` line and take what it names as `<plan>`, per `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`, reading `${CLAUDE_SKILL_DIR}/references/tier-failures.md` first for how the pointer resolves and the four stops it can take.
+1. **Caller-supplied task.** The invocation carried a path under `.canon/tasks/`. If it does not resolve to a file, stop: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.` Read that task's first `Plan:` line and take what it names as `<plan>`, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, reading `${CLAUDE_SKILL_DIR}/references/tier-failures.md` first for how the pointer resolves and the four stops it can take.
 2. **Caller-supplied plan.** The invocation carried something else. Accept it as a plan path or a bare slug, in the same position `session-worktree` tier 0 accepts its name. A bare slug resolves to `.canon/plans/feature-<slug>.md`, and a path is taken as given from the main worktree root. If it does not resolve to a file, stop: `❌ No plan at <path>. Path was supplied, not derived, so check it and re-run.`
 3. **Derived.** `.canon/plans/feature-<slug>.md`, from the `<slug>` the Guards derived. If it does not exist, stop: `❌ No approved plan at .canon/plans/feature-<slug>.md, where <slug> was derived from the current branch, <branch>. The invocation carried no argument, so pass a plan or a task path, or run /plan-feature first.`
 
@@ -61,11 +61,11 @@ Tier 1 stops on a `Plan:` line linking several plans, on a task carrying none, a
 
 Test the shape of whatever `<plan>` resolved to before reading it as one, after all three tiers, since a file resolving under any tier can still be the wrong document.
 
-Check for a `**Files to touch:**` or `## Files to touch` marker per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, the one section every plan carries structurally and a task never does, where `## Outcomes` and `## Findings` are the task's own. If neither form is present, stop: `❌ <path> carries no plan sections. A plan lives at .canon/plans/feature-<slug>.md, and a task reaches one through its Plan: line only from .canon/tasks/. Point autoship at either and re-run.`
+Check for a `**Files to touch:**` or `## Files to touch` marker per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, the one section every plan carries structurally and a task never does, where `## Outcomes` and `## Findings` are the task's own. If neither form is present, stop: `❌ <path> carries no plan sections. A plan lives at .canon/plans/feature-<slug>.md, and a task reaches one through its Plan: line only from .canon/tasks/. Point autoship at either and re-run.`
 
 Read `<plan>` at the main worktree root. This file is the scope for this run.
 
-Its sections and its answer contract are fixed by `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. A blank `- Answer:` accepts the `- Suggested:` line above it, so an unanswered question is a decision this run executes rather than a reason to stop. When this run decides against that suggestion, rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
+Its sections and its answer contract are fixed by `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. A blank `- Answer:` accepts the `- Suggested:` line above it, so an unanswered question is a decision this run executes rather than a reason to stop. When this run decides against that suggestion, rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
 ## Step 2: implement
 

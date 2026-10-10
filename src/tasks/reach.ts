@@ -11,7 +11,7 @@ const PLANS = 'plans'
 const MARKDOWN = '.md'
 const NONE_IDENTIFIED = 'None identified.'
 
-/** The one group a dispatch reads, per `standards/board.md`. */
+/** The one group a dispatch reads, per `claude/skills/task-board/references/board.md`. */
 const DISPATCH_GROUP = 'Run now'
 
 export const REACH_REFUSALS = [
@@ -146,7 +146,7 @@ function namesFile(span: string): boolean {
  * An entry carrying no colon at all is taken whole. The standard requires a
  * reason rather than the punctuation introducing it, so the alternative is
  * reading such an entry as declaring nothing, which reports every path it
- * names as undeclared. `standards/plan.md` fixes the colon form, so the
+ * names as undeclared. `claude/skills/plan-feature/references/plan.md` fixes the colon form, so the
  * conforming entry never reaches this fallback.
  *
  * A rename declares both sides, since both are paths the branch writes and

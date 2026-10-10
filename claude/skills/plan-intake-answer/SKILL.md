@@ -12,7 +12,7 @@ Put an intake folder's unread items as batched questions, then land each selecti
 
 A folder is answered by opening each cluster file and typing under the item, which on a dump spanning six clusters means navigating to each in turn. This walks the same items in chat and writes the answers back, so the file rather than the conversation stays the record.
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing anything. It holds the item format and the answer contract this skill is bound by.
+Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing anything. It holds the item format and the answer contract this skill is bound by.
 
 ## Guards
 

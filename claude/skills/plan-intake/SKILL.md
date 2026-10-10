@@ -9,7 +9,7 @@ metadata:
 
 Intake dispositions many findings in breadth. A dump goes in, an inventory comes out, and every item carries a problem measured against the tree, one proposed fix, and a verdict. The item that turns out to be already settled is the highest-value output, and it is the one thing neither a plan nor a groundwork track has anywhere to put.
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing any file in the folder. It holds the numbering, the file map, the frontmatter and dating rules, the item format, and the answer contract. Do not work them from memory.
+Read `${CLAUDE_SKILL_DIR}/references/intake.md` before writing any file in the folder. It holds the numbering, the file map, the frontmatter and dating rules, the item format, and the answer contract. Do not work them from memory.
 
 ## Routing
 
@@ -44,7 +44,7 @@ List `.canon/intake/` from the project root and match the topic against the slug
 
 Never match against `.claude/` itself. That directory holds every other workflow surface, so a topic matched there lands on a folder that was never an intake.
 
-With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `toolkit-overview` over `august-triage`. Claim the ordinal and create the folder in one act with `canon records ordinal intake <slug> --claim`, per `${CLAUDE_SKILL_DIR}/../../standards/intake.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/intake/` and `.canon/groundwork/` and taking the highest ordinal present across the two, incremented. An absent folder opens, and a present one resumes by appending items and revising verdicts the tree has moved under.
+With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `toolkit-overview` over `august-triage`. Claim the ordinal and create the folder in one act with `canon records ordinal intake <slug> --claim`, per `${CLAUDE_SKILL_DIR}/references/intake.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/intake/` and `.canon/groundwork/` and taking the highest ordinal present across the two, incremented. An absent folder opens, and a present one resumes by appending items and revising verdicts the tree has moved under.
 
 ## Step 2: orient
 

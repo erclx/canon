@@ -9,7 +9,7 @@ metadata:
 
 Owns the two operations that bring a task file into existence and take it out of the folder. `context-fold` edits the contents of a task that already exists, marking outcomes `[x]`. Do not mark outcomes here, and do not move a plan by hand: the archive carries it.
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` before writing any file. It holds the filename convention, the frontmatter contract, and the file format. Do not work them from memory.
+Read `${CLAUDE_SKILL_DIR}/references/tasks.md` before writing any file. It holds the filename convention, the frontmatter contract, and the file format. Do not work them from memory.
 
 ## Guards
 
@@ -43,7 +43,7 @@ Do not derive the label from a version file. `${CLAUDE_SKILL_DIR}/../../standard
 
 ### Step 3: write the file
 
-Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file first if a session ever stubbed it, following the format in `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`. Include a link line only when the file or folder it names exists. A link to a plan nobody has written yet is the broken pointer the archive rules exist to prevent.
+Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file first if a session ever stubbed it, following the format in `${CLAUDE_SKILL_DIR}/references/tasks.md`. Include a link line only when the file or folder it names exists. A link to a plan nobody has written yet is the broken pointer the archive rules exist to prevent.
 
 Write `Plan:`, `Groundwork:`, and `Intake:` as markdown links relative to `.canon/tasks/`, as in `Plan: [feature-<slug>](../plans/feature-<slug>.md)`. Leave `Issue:` a bare `#NNN`. A task written in the older bare-path form still parses, so it costs the board a clickable line rather than an archive, but it leaves the board in two shapes for every reader after.
 
@@ -55,7 +55,7 @@ Write it immediately. Claude Code's tool permission dialog is the confirmation g
 
 A task file with no row is a dropped task, so name the surface it lands on in the same pass that creates it. A task that would plausibly be planned within the next few waves takes a row under `## Needs a plan` in `.canon/tasks/priority.md`, positioned by where it sits against the rows already there, with the reason for that position in its `Waiting on` cell. Anything else takes a line in `.canon/tasks/backlog.md`, which is unordered and where in the file it goes means nothing.
 
-The test and both file shapes are in `${CLAUDE_SKILL_DIR}/../../standards/board.md`.
+The test and both file shapes are in `${CLAUDE_SKILL_DIR}/references/board.md`.
 
 Check the roster for a live orchestrator before writing either file. Read `canon sessions list --self --json` for this session's own `sessionId` and `name`, then read `canon sessions list --json` and match a row whose `repository` matches this session's own, whose `sessionId` differs from it, and whose `name` starts with `orchestrator-`. That is the convention every hand-launched controller on this machine currently uses, and it excludes every `worker-` and `planner-` session cleanly. Treat a refusal from either call the same as a roster read that failed.
 
@@ -71,7 +71,7 @@ Scan for work that has been decided and would otherwise be forgotten. Three orig
 
 List `.canon/groundwork/` and run `gh issue list --state open` when a remote is configured, then grep the board for each track name and issue number. Report any with no task, one line each.
 
-Read the dumps through `canon intake list --json`, which reports items, open, unread, and malformed per folder and owns the parse of the answer contract `${CLAUDE_SKILL_DIR}/../../standards/intake.md` fixes. Then grep `.canon/tasks/`, `.canon/tasks/archive/`, and `.canon/tasks/declined/` for each folder slug. A dump with no live task is the ordinary shape of one already promoted and either shipped or declined, so a check reading the board by itself reports every settled folder as abandoned.
+Read the dumps through `canon intake list --json`, which reports items, open, unread, and malformed per folder and owns the parse of the answer contract `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` fixes. Then grep `.canon/tasks/`, `.canon/tasks/archive/`, and `.canon/tasks/declined/` for each folder slug. A dump with no live task is the ordinary shape of one already promoted and either shipped or declined, so a check reading the board by itself reports every settled folder as abandoned.
 
 A dump is the stronger case for this scan rather than the weaker one. A track holds one question and stays visible, while a dump holds dozens of items whose verdicts were reached and then left with nothing carrying them forward.
 

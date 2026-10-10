@@ -61,11 +61,11 @@ describe('resolveStandard', () => {
   })
 
   it('should fall back to the package copy when the project installed none', () => {
-    const resolved = resolveStandard(ROOT, 'plan.md')
+    const resolved = resolveStandard(ROOT, 'branch.md')
 
     expect(resolved).toEqual({
-      path: join(PROJECT_ROOT, 'standards', 'plan.md'),
-      source: join('<canon>', 'standards', 'plan.md'),
+      path: join(PROJECT_ROOT, 'standards', 'branch.md'),
+      source: join('<canon>', 'standards', 'branch.md'),
     })
   })
 
@@ -85,6 +85,12 @@ describe('resolveStandard', () => {
   it('should answer a second-slice standard from the skill that owns it', () => {
     expect(resolveStandard(ROOT, 'teach')?.source).toBe(
       join('<canon>', 'claude/skills/teach-workspace/references/teach.md'),
+    )
+  })
+
+  it('should answer a third-slice standard from the skill that owns it', () => {
+    expect(resolveStandard(ROOT, 'plan')?.source).toBe(
+      join('<canon>', 'claude/skills/plan-feature/references/plan.md'),
     )
   })
 
@@ -137,6 +143,12 @@ describe('listStandards', () => {
     const names = listStandards(ROOT)
 
     expect(names.filter((name) => name === 'teach')).toEqual(['teach'])
+  })
+
+  it('should name a third-slice standard once', () => {
+    const names = listStandards(ROOT)
+
+    expect(names.filter((name) => name === 'session')).toEqual(['session'])
   })
 
   it('should name a project standard the package does not carry', () => {

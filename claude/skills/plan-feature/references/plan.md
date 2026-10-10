@@ -1,16 +1,6 @@
 ---
 title: Plan reference
 description: Filename and slug, the required sections, and the suggested-and-answer contract for a feature plan
-paths:
-  - '.canon/plans/**'
-rule:
-  - 'Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.'
-  - 'Never ship a question without a `- Suggested:` line. Write `- Suggested: needs your call, <why>` where the answer turns on preference.'
-  - "Rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates from an unanswered question, leaving the slot blank. Put the same deviation in one line under the open task's `## Findings`."
-  - 'Fetch the source a decision rests on and quote the passage under `**Sources:**`, or mark the entry `unverified`. Never cite an outside source from recall.'
-  - 'Move a shipped plan to `.canon/plans/archive/`. Never delete one.'
-  - 'Amend a plan in place when a decision changes. Do not append a second passage narrating the change.'
-  - 'Follow the plan lifecycle standard for when a plan is written, how it is amended, and its move to the archive. Read it with `canon standards plan-lifecycle`.'
 ---
 
 # Plan reference
@@ -20,6 +10,15 @@ Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds on
 The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs a plan deleted before a push, which is why the archive step is a move rather than a cleanup.
 
 <!-- canon-length-exempt: the constraint forms and the answer contract share one reader, and a split into a second standard is queued as its own change -->
+
+## Contents
+
+- [Scope](#scope)
+- [What a working plan looks like](#what-a-working-plan-looks-like)
+- [Filename and slug](#filename-and-slug)
+- [Sections](#sections)
+- [The suggested-and-answer contract](#the-suggested-and-answer-contract)
+- [Template](#template)
 
 ## Scope
 

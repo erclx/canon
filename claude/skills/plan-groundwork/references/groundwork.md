@@ -1,10 +1,6 @@
 ---
 title: Groundwork reference
 description: Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
-paths:
-  - '.canon/groundwork/**'
-rule:
-  - 'Follow the groundwork spikes standard for `08-spikes.md` and the folders holding what a spike produced. Read it with `canon standards groundwork-spikes`.'
 ---
 
 # Groundwork reference
@@ -12,6 +8,23 @@ rule:
 Applies to a groundwork track at `.canon/groundwork/<nn>-<slug>/`. A track measures one question that has to be settled before anyone can plan against it. The numbering inside the folder is its table of contents.
 
 The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs it against a compaction dropping a session's reasoning before a push, so the handoff file has to be self-contained.
+
+## Contents
+
+- [Scope](#scope)
+- [Folder name](#folder-name)
+- [What a working track looks like](#what-a-working-track-looks-like)
+- [Frontmatter and dating](#frontmatter-and-dating)
+- [Reserved numbers](#reserved-numbers)
+- [README.md](#readmemd)
+- [01-current-state.md](#01-current-statemd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [00-scope.md](#00-scopemd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [06-decision.md](#06-decisionmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [07-next-session.md](#07-next-sessionmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [Open questions](#open-questions)
+- [Conventions](#conventions)
+- [Anti-patterns](#anti-patterns)
+- [Template](#template)
 
 ## Scope
 
