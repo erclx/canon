@@ -115,5 +115,5 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | `canon:target-check`          | In a target project, to report per domain what it holds against what the toolkit ships |
 | `canon:seed-sync`             | After a toolkit update, to reconcile installed seeds without losing customizations     |
 | `canon:canon-feedback`        | When something in the toolkit is broken, missing, or off, to open an issue on it       |
-| `canon:canon-feedback-triage` | In the toolkit repo, to work through the open feedback issues                          |
+| `canon:canon-feedback-triage` | In the toolkit repo, to file the open feedback issues into an intake folder            |
 | `canon:canon-rollout`         | In the toolkit repo, to take one change out to every consuming project at once         |
