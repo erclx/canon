@@ -1,0 +1,11 @@
+---
+title: 'v01.0: Make the charge endpoint safe to retry'
+description: A client retry after a timeout must not charge the card twice
+---
+
+# v01.0: Make the charge endpoint safe to retry
+
+`POST /charge` in `src/routes/payments.ts` calls the Stripe API through `chargeCard`. A client that times out and retries creates a second charge. Make the retry safe with an idempotency key, relying on how the payment API treats a repeated key.
+
+- [ ] Outcome: a retried `POST /charge` with the same key returns the first charge and creates no second one
+- [ ] Outcome: the key is passed through to the payment API call

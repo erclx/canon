@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "full" "small" "multi-concern" "constraint" "layout" "vague" "underspecified"
+  select_or_route_scenario "Which scenario?" "full" "sourced" "small" "multi-concern" "constraint" "layout" "vague" "underspecified"
 
   case "$SELECTED_OPTION" in
   "full")
@@ -26,6 +26,22 @@ stage_setup() {
     log_info "Context: task API with SQLite, Express routes, CLAUDE.md, ARCHITECTURE.md, and .canon/tasks/ present"
     log_info "Action:  /plan-feature (reference the task in .canon/tasks/)"
     log_info "Expect:  plan written to .canon/plans/feature-<slug>.md with files to touch, risks, and questions, each question carrying a Suggested line and an Answer slot, and v01.0-due-dates.md's Plan: line points at it"
+    ;;
+  "sourced")
+    stage_fixtures claude plan-feature sourced 01-initial
+
+    mkdir -p .claude
+
+    mkdir -p src src/routes
+
+    mkdir -p .canon/tasks
+
+    git add . && git commit -m "feat(api): initial charge endpoint" --no-verify -q
+
+    log_step "Scenario ready: feature planning (sourced)"
+    log_info "Context: charge endpoint calling a payment API, one task whose outcome rests on how that API treats a repeated idempotency key"
+    log_info "Action:  /canon:plan-feature plan the task in .canon/tasks/v01.0-retry-charge.md"
+    log_info "Expect:  plan carries a Sources section whose entry pairs an https link to the payment API's documentation with a double-quoted passage, or marks the source unverified. Needs outbound network"
     ;;
   "small")
     stage_fixtures claude plan-feature small 01-initial

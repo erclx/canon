@@ -1,0 +1,31 @@
+# What a correct `/canon:plan-feature plan the task` run leaves behind when the
+# task rests on a third-party behavior. Read by `canon sandbox check`. Patterns
+# use TOML literal strings so a regex needs no backslash escaping.
+#
+# The arm runs live web fetches, so it is neither deterministic nor free, and a
+# host without outbound access reports it red. The content patterns check shape
+# only: the plan exists, carries a `**Sources:**` section, and one entry pairs an
+# `https://` link with a double-quoted passage. Whether the source is an
+# authority the field trusts is semantic, so it sits under `manual`.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+
+paths = [".canon/plans/feature-*.md"]
+
+write_scope = [".canon/plans/**", ".canon/tasks/**", ".canon/tmp/**"]
+
+manual = [
+  "The cited source is an authority for the payment API, such as its own documentation, rather than a blog post or a forum answer. Semantic: which domains count as authoritative is a judgment a pattern cannot make.",
+  "The quoted passage appears on the cited page and supports the decision it is listed against. Semantic: the envelope carries no fetch result to compare against.",
+]
+
+# The plan carries a Sources section, in either spelling the validator reads.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Sources:\*\*|## Sources)[ \t]*$'
+
+# At least one entry pairs a link with a double-quoted passage.
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = 'https://[^\s)]+.*"[^"]{8,}"'
