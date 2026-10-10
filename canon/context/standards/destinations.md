@@ -63,7 +63,6 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 
 ### To an existing governance rule
 
-- `architecture.md` fixes what a cross-domain decision record holds. `governance/rules/standards/architecture.md`.
 - `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `governance/rules/standards/tasks.md`, which already globs the whole folder.
 - `context.md` fixes the per-domain narrative entry. `governance/rules/standards/context.md`.
 - `design.md` fixes visual intent and the token tables. `governance/rules/standards/design.md`.
@@ -85,7 +84,7 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/standards/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/standards/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
-- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
+- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`.
 - `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root

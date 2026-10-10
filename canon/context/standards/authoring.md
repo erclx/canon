@@ -11,7 +11,7 @@ The meta-standard `standards/standard.md` governs itself, so it is both the rule
 
 A standard governing a document type carries one fenced template of that document, and an attribute standard carries none. The rule lives in `standards/standard.md` under `## Template`, and `standard.md` governs itself, so it carries the template it demands. A paragraph describing a shape is advisory and a fenced block is something a check can compare against.
 
-The placement is not fixed to one heading. `architecture.md` and `requirements.md` carry `## Template`, and `tasks.md` carries the same block inside `## File format`. Both placements stay legal, since a template beside the rules it satisfies is one read and a fixed heading would move the `tasks.md` block away from them.
+The placement is not fixed to one heading. `context.md` carries its template under `### Template`, and `tasks.md` carries the same block inside `## File format`. Both placements stay legal, since a template beside the rules it satisfies is one read and a fixed heading would move the `tasks.md` block away from them.
 
 An attribute standard is exempt because it governs a scan, a string, or a label rather than a document type, so a template would have nothing to show. `publish.md`, `slug.md`, and `versioning.md` each name their own exemption in the sentence declaring them an attribute standard, which is the both-sides rule applied to a claim that would otherwise be a silence.
 

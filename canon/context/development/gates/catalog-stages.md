@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the architecture record, the document ceiling, skill provenance, skill practice shape, skill family, and standard success criteria
+description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, skill family, and standard success criteria
 ---
 
 # Catalog stages
@@ -35,9 +35,9 @@ The banned pattern is a bare `wiki/` with no exemption for a body that has a rea
 
 ## Canonical records
 
-The Canonical records stage calls `measureArchitecture` and `measureRequirements` in-process. It fails when `canon/ARCHITECTURE.md` holds more decisions than the entry cap it states, runs past the line ceiling its own allowances derive, lacks a sentence opening `Revisit when` in a decision while the record states that every decision closes with one, holds a decision past the words it allows a decision, or holds more risk bullets than it allows. It fails too when `canon/REQUIREMENTS.md` holds more words than the cap it states. Every one is the record's own clause, so a record stating none passes, and a project with no record passes and says so.
+The Canonical records stage calls `measureRequirements` in-process. It fails when `canon/REQUIREMENTS.md` holds more words than the cap it states. The cap is the record's own clause, so a record stating none passes, and a project with no record passes and says so. The stage kept its id and label after the architecture record left, since a rename costs every doc citing the label for no behavior change.
 
-It reads both records directly because the Context citations stage runs `--citations-only`, which never opens them. The decision count is by `###` heading outside a fence, so a heading carrying two decisions counts once, which is the undercount a writer at the cap is asked not to exploit. A decision's words are its prose below the heading with fenced lines dropped, and a risk bullet is every list item under `## Risks / open questions`, nested ones included. A record stating a risk cap and carrying no Risks section is reported as absent rather than passed as zero bullets.
+It reads the record directly because the Context citations stage runs `--citations-only`, which never opens it.
 
 ## Design prose
 

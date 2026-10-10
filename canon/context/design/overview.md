@@ -25,7 +25,7 @@ This repository's own record is generated rather than authored. `src/design/toke
 
 ### The record stays at the canon root
 
-`canon/DESIGN.md` sits at the `canon/` root beside `ARCHITECTURE.md` and `REQUIREMENTS.md`, and no `canon/design/` folder holds it. The operator decided this on 2026-10-02. Moving it would change a path every target shares, read by the surface root, the migrations, and the renderer, for a tidier root alone.
+`canon/DESIGN.md` sits at the `canon/` root beside `REQUIREMENTS.md`, and no `canon/design/` folder holds it. The operator decided this on 2026-10-02. Moving it would change a path every target shares, read by the surface root, the migrations, and the renderer, for a tidier root alone.
 
 ### Output is one-way
 

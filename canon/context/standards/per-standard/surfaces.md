@@ -1,23 +1,9 @@
 ---
 title: Surfaces
-description: The architecture record's verification anchor, the teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, the wireframe transcription carve-out and copy rule, and when a standard moves into its one reader's skill
+description: The teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, the wireframe transcription carve-out and copy rule, and when a standard moves into its one reader's skill
 ---
 
 # Surfaces
-
-## Architecture verification anchor
-
-`standards/architecture.md` takes the verification marker the diagram standard carries, in a different form and on a narrower scope. A diagram entry is one file per kind and keys its marker in frontmatter. The architecture record is one file holding many decisions and carries no frontmatter, so a file-level key would date the newest edit and say nothing about the rest. The anchor is a trailing sentence on the decision entry instead.
-
-The rule reaches only a decision citing a measured number. Counts go stale while the reasoning around them stays correct, and an entry whose reasoning stands on its own has nothing to check. A class covering a decision that cites no number while resting on a changeable state of the tree lost, since an unanchored entry in it reads as needing nothing while the writing rule asks for a marker. Keying on the number alone collapses the writing and reading rules onto one test.
-
-Scope is forward. A decision already in the record when the rule shipped stays unanchored, because dating it by blame is archaeology for a marker nothing reads back. The standard turns the reading on whether the entry cites a number rather than on when it was written.
-
-Nothing writes the anchor back. The diagram field has two writers, one setting `verified` and one appending `stale`, and the architecture record has neither. `canon/ARCHITECTURE.md` records that gap as an open risk.
-
-The sweep that reports a stale anchor reaches only what a diff can point at, so an anchor on a decision no branch touches is checked only by a person re-reading it. Two classes of claim stay unflagged: one counting over a tree the branch never opened, and one citing nothing narrower than a single path segment. The second is deliberate, since a prefix match on `src/` fires on nearly every branch.
-
-A pass that amends a decision's reasoning without re-reading its numbers dates the measurement rather than the edit: a decision importing an existing observation carries that observation's own anchor rather than a fresh one stamped at the import.
 
 ## Teach
 
@@ -69,6 +55,6 @@ The count is the test, and it decays: a count that predates a later citation mov
 
 A standard with zero readers is the other case. `claude/skills/draft-doc/references/wiki.md` was cited by nothing, so every page conformed from the author's memory rather than from a read. Giving it a reader, now the wiki kind of `draft-doc`, is what closes that, where moving the standard into a skill would bury a rule nothing enforces inside the only thing that reads it. Drafting that reader forced the first check against the tree, and all fourteen pages passed, including the sourcing rule a session working from recall breaks silently.
 
-Write frequency is why the wiki got a drafting skill and the architecture record and requirements did not. Across all 1725 commits at `f635d673`, the wiki folder appears in 90 against 8 for `canon/ARCHITECTURE.md` and 1 for `canon/REQUIREMENTS.md`. Over the last 200 commits the order inverts, wiki 5 and architecture 8, because the wiki was written heavily and early. The all-time figure decides, since a skill is built for the traffic a surface attracts across its life, and a later reader re-running the count on a short range should know the choice was made against the long one.
+Write frequency is why the wiki got a drafting skill and requirements did not. Across all 1725 commits at `f635d673`, the wiki folder appears in 90 against 1 for `canon/REQUIREMENTS.md`. Over the last 200 commits at `87dff2e5` the order inverts, wiki 3 and requirements 4, because the wiki was written heavily and early. The all-time figure decides, since a skill is built for the traffic a surface attracts across its life, and a later reader re-running the count on a short range should know the choice was made against the long one.
 
 A standard governing a surface nobody writes to does not need a drafting skill.

@@ -13,7 +13,7 @@ A `git init` project on `main` with no remote resolves no usable baseline, which
 
 The two sweeps and the context refresh run on the working tree and untracked files, and skip only when that set is empty. None substitutes the whole tree for a missing baseline. The wireframe sweep and the context refresh write, and a set that wide stubs a wireframe per uncovered surface and rewrites every context entry.
 
-The anchor sweep only reports, and the whole tree costs it a different way: every anchored decision cites a path the scaffold commit carries, so it flags the entire architecture record and names no number that moved. The asymmetry with the marking step is deliberate and worth keeping: on a scaffolded project the last commit is the scaffold commit, so the `git log -p -1` recovery is the whole tree by another route, which a step that only reads can tolerate and a step that writes cannot. Widening what a step reads is safe. Widening what a step writes is not, and widening what a step flags spends attention on entries nothing put in doubt.
+The asymmetry between the marking step and the steps that write is deliberate and worth keeping: on a scaffolded project the last commit is the scaffold commit, so the `git log -p -1` recovery is the whole tree by another route, which a step that only reads can tolerate and a step that writes cannot. Widening what a step reads is safe. Widening what a step writes is not.
 
 ## The shared-resource rule
 

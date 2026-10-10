@@ -111,3 +111,9 @@ The walk checks both `.claude/snippets` and a root `snippets/`, since a toolkit 
 - `project` is content the project wrote under the same name, which the retirement does not reach, so leave it alone
 
 The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` and a root `snippets/` by hand there, and treat what you find as `unattributed`.
+
+## Move decisions out of a held architecture record, once
+
+The toolkit stopped seeding a `canon/ARCHITECTURE.md`, stopped gating its caps, and retired the `architecture` standard and the rule generated from it. A project scaffolded earlier may hold the file and import it from `CLAUDE.md`. Both stay, since the record is project prose now and nothing syncs or deletes it. `canon gov sync` removes the generated rule, and `canon context audit` no longer reports the record or its caps.
+
+Decide what to do with the file yourself, since where a decision belongs takes judgment no sync has. A decision about how one domain is built goes to the `canon/context/` entry of the domain it constrains, under that entry's `## Decisions`. Once the file is empty, delete it and its `@canon/ARCHITECTURE.md` line in `CLAUDE.md`.

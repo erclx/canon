@@ -59,7 +59,7 @@ The exemption travels with the line rather than sitting in a path list away from
 
 Exit codes are `0` when the shipped tree carries no credential-shaped value, `1` for a refusal, and `2` for at least one value found.
 
-This is the one entry in `canon audits run` that gates without a `canon gate run` stage behind it. A credential in the published tree is a fact rather than a judgment, which is the test the catalog asks any gating addition to pass, and the architecture record already ranks content leaving the repository above content that stays.
+This is the one entry in `canon audits run` that gates without a `canon gate run` stage behind it. A credential in the published tree is a fact rather than a judgment, which is the test the catalog asks any gating addition to pass, and content leaving the repository ranks above content that stays.
 
 A refusal is never a clean tree. Five reasons produce one, and each exits `1`, because zero findings over zero files reads in the report exactly like zero findings over the whole shipped tree.
 
