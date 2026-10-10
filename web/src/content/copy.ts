@@ -254,12 +254,12 @@ export const workers = {
   foot: 'Four sessions, four worktrees. The file sets are disjoint, so none of them collided, and nothing caps the number of tracks.',
 } as const
 
-// README.md: canon-allow-readme-paraphrase: the quoted line is read from the rule itself at build time, and the rest narrates what it enforces.
+// README.md: canon-allow-readme-paraphrase: the quoted line is read from the skill itself at build time, and the rest narrates what it enforces.
 export const gate = {
   head: 'No behavior reaches history ahead of its test',
   cap: 'What a worker does inside its own branch, before anything is shown to anyone.',
-  cite: 'governance/rules/claude/567-planning.md',
-  citeNote: 'installed into every project that syncs governance',
+  cite: 'claude/skills/test-first/SKILL.md',
+  citeNote: 'the plugin loads it before a planned change',
   pair: [
     { what: 'the test', how: 'written first, and failing' },
     { what: 'the behavior', how: 'written until that test passes' },
