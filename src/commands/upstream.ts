@@ -1,18 +1,30 @@
 import { resolve } from 'node:path'
+import { $ } from 'bun'
 import type { Command } from 'commander'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import { currentWorktreeRoot, mainWorktreeRoot } from '@/git/worktree'
 import { buildCatalog, renderCatalog } from '@/upstream/catalog'
 import {
   advanceCursor,
+  compareVersions,
   llmsDifference,
   readCursor,
   readLastLlms,
 } from '@/upstream/cursor'
 import { buildDigest } from '@/upstream/digest'
 import {
+  decideDue,
+  passesVocabulary,
+  readDueCache,
+  writeDueCache,
+  type DueReason,
+  type Gap,
+} from '@/upstream/due'
+import {
   githubPageFetcher,
   grepHint,
+  keepLines,
+  walkReleases,
   type FetchFailure,
 } from '@/upstream/releases'
 
@@ -129,6 +141,33 @@ export function register(program: Command): void {
     })
 
   upstream
+    .command('due')
+    .description('Say whether a digest is due, from the cursor and the install')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the main root')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Due when the cursor is a week old and the installed version is ahead of',
+        'it, or sooner when an Added line in the gap names a canon surface. The',
+        'gap is read from GitHub at most once a day and cached under the scratch',
+        'folder, and a failed read is held for the day as well.',
+        '',
+        'Exit codes:',
+        '  0  answered, whether or not a digest is due',
+        '',
+        'Examples:',
+        '  canon upstream due --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RootOption) => {
+      process.exitCode = await runDue(opts)
+    })
+
+  upstream
     .command('advance')
     .description('Move the cursor to a version once its digest is filed')
     .helpOption('-h, --help', 'Show this help message')
@@ -233,6 +272,93 @@ async function runFetch(opts: FetchOptions): Promise<number> {
         releases: digest.releases,
         lines: digest.lines,
         llms: difference,
+      })}\n`,
+    )
+  }
+
+  return 0
+}
+
+const DUE_TEXT: Record<DueReason, string> = {
+  'no-cursor': 'No digest has been run, so there is no cursor.',
+  week: 'A week has passed since the last digest.',
+  vocabulary: 'A release since the last digest added something canon may use.',
+  current: 'The installed version is at or below the cursor.',
+  recent: 'The last digest is under a week old and nothing in the gap stands out.',
+  'unknown-version': 'The installed version could not be read.',
+}
+
+async function installedVersion(): Promise<string | null> {
+  try {
+    const result = await $`claude --version`.quiet().nothrow()
+    const match = /^\d+(\.\d+)*/.exec(result.stdout.toString().trim())
+
+    return match ? match[0] : null
+  } catch {
+    return null
+  }
+}
+
+// A failed read is stored as a null gap, so a rate limit hit by one session of
+// a wave is not retried by the nineteen after it.
+async function readGap(
+  root: string,
+  installed: string,
+  cursor: string,
+  now: Date,
+): Promise<Gap | null> {
+  const cached = readDueCache(root, installed, cursor, now)
+  if (cached) return cached.gap
+
+  const walk = await walkReleases(cursor, githubPageFetcher())
+  const gap: Gap | null =
+    walk.kind === 'reached'
+      ? {
+          releases: walk.releases.length,
+          lines: walk.releases
+            .flatMap(keepLines)
+            .map((line) => line.text)
+            .filter(passesVocabulary),
+        }
+      : null
+
+  try {
+    await writeDueCache(root, {
+      checkedAt: now.toISOString(),
+      installed,
+      cursor,
+      gap,
+    })
+  } catch {
+    // An unwritable cache costs a request next session, not a wrong answer.
+  }
+
+  return gap
+}
+
+async function runDue(opts: RootOption): Promise<number> {
+  const root = opts.root ? resolve(opts.root) : await mainWorktreeRoot()
+  const now = new Date()
+  const cursor = readCursor(root)
+  const installed = await installedVersion()
+  const isAhead =
+    cursor !== null &&
+    installed !== null &&
+    compareVersions(installed, cursor.version) > 0
+  const gap = isAhead ? await readGap(root, installed, cursor.version, now) : null
+  const result = decideDue({ installed, cursor, gap, now })
+
+  intro('canon upstream due')
+  logStep(result.due ? 'Due' : 'Not due')
+  logInfo(DUE_TEXT[result.reason])
+  outro()
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ...result,
+        installed,
+        cursor: cursor?.version ?? null,
       })}\n`,
     )
   }

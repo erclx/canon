@@ -120,4 +120,49 @@ describe('canon upstream', () => {
       expect(back.exitCode).toBe(1)
     })
   })
+
+  describe('due', () => {
+    it('should report due with no-cursor when nothing is stored', async () => {
+      const { record, exitCode } = await run([
+        'due',
+        '--json',
+        '--root',
+        root,
+      ])
+
+      expect(exitCode).toBe(0)
+      expect(record).toMatchObject({
+        due: true,
+        reason: 'no-cursor',
+        cursor: null,
+      })
+    })
+
+    it('should report not due when the cursor is ahead of the install', async () => {
+      await run([
+        'advance',
+        '99999.0.0',
+        '--intake',
+        'a-slug',
+        '--no-llms',
+        '--json',
+        '--root',
+        root,
+      ])
+
+      const { record, exitCode } = await run([
+        'due',
+        '--json',
+        '--root',
+        root,
+      ])
+
+      expect(exitCode).toBe(0)
+      expect(record).toMatchObject({
+        due: false,
+        reason: 'current',
+        cursor: '99999.0.0',
+      })
+    })
+  })
 })
