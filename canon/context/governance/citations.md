@@ -68,7 +68,6 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 
 - `governance/rules/standards/architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
 - `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
-- `governance/rules/standards/memory.md` → `canon standards memory`, without restating the routing or pen rules.
 - `governance/rules/standards/skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
 - `governance/rules/standards/readme.md` → `canon standards readme`, without restating the audience-and-voice rules.
 - `governance/rules/standards/rule.md` → `canon standards rule`, without restating the numbering or body rules.
@@ -81,7 +80,6 @@ Each rule below cites its standard through `canon standards <name>` alone, keepi
 
 Each rule and standard below cites its skill with the `canon:` prefix plus a report-if-missing line.
 
-- `governance/rules/canon/603-memory.md` cites `canon:memory-capture` and `canon:context-fold`, and leaves the pointer at its standard to `governance/rules/standards/memory.md`.
 - `claude/skills/teach-workspace/references/teach.md` cites `canon:teach-workspace`, the standard's fallback reading "say so and stop".
 - `governance/rules/standards/skill.md` cites `canon:create-skill` twice.
 - `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
@@ -90,7 +88,7 @@ Each rule and standard below cites its skill with the `canon:` prefix plus a rep
 
 A rule scoped to a folder only a plugin skill creates is inert rather than broken for a target holding governance alone. The folder never exists there, so the glob never matches and the citation never fires. No repair applies, and the row keeps a later pass from misreading inertness as a defect.
 
-- `governance/rules/standards/context.md`, scoped to `canon/context/**`. Only `context-fold` and `memory-capture` write an entry there.
+- `governance/rules/standards/context.md`, scoped to `canon/context/**`. Only `context-fold` writes an entry there.
 
 ### Clean pointer, no other note
 

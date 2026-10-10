@@ -19,11 +19,11 @@ case "$file" in
 esac
 
 case "$file" in
-# Four record folders, at either root. A skip list fixed at the old spelling
+# Three record folders, at either root. A skip list fixed at the old spelling
 # audits this repository's own session records the moment the move reaches it,
 # which reports findings against prose nobody publishes.
-*.claude/.tmp/* | *.claude/memory/* | *.claude/review/* | *.claude/plans/*) exit 0 ;;
-*.canon/tmp/* | *.canon/memory/* | *.canon/review/* | *.canon/plans/*) exit 0 ;;
+*.claude/.tmp/* | *.claude/review/* | *.claude/plans/*) exit 0 ;;
+*.canon/tmp/* | *.canon/review/* | *.canon/plans/*) exit 0 ;;
 esac
 
 [ -f "$file" ] || exit 0

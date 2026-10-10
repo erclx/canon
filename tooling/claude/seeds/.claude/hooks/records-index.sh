@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# Regenerates the index.md of a gitignored record folder, `tasks` or `memory`,
-# after a file in it changes.
+# Regenerates the index.md of the gitignored `tasks` record folder after a
+# file in it changes.
 #
-# These folders are gitignored, so the whole-repo walk in `bun run check` drops
-# them and never regenerates their index. Naming the file as a positional
+# That folder is gitignored, so the whole-repo walk in `bun run check` drops
+# it and never regenerates its index. Naming the file as a positional
 # argument to `canon indexes regen` below bypasses that filter, which makes this
-# hook the only trigger that reaches either folder.
+# hook the only trigger that reaches the folder.
 
 # Claude Code sends a payload and closes stdin. A bare read with nothing feeding
 # it blocks forever and holds the session open, so the read is bounded. `read`
@@ -31,11 +31,9 @@ file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 # said. The index then goes stale while every save reports success.
 #
 # A shell `case` `*` crosses `/`, so each arm also matches a file in a subfolder
-# the index does not render: an archived or declined task, a memory receipt, a
-# retired memory entry, or the index itself. Those exit here, before the regen
-# call. The exclusions are per folder, since a task under `review/` is indexed
-# and a memory `declined/` is not special. The arms are ordered tasks first,
-# and no path carries both segments today.
+# the index does not render: an archived or declined task, or the index itself.
+# Those exit here, before the regen call. A task under `review/` is
+# indexed, and no other folder is read.
 #
 # The walk-up boundary has to come from the path, not from the session. Shared
 # scratch resolves at the main worktree root, so a session inside a linked
@@ -45,22 +43,12 @@ file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 case "$file_path" in
 */.canon/tasks/index.md | */.canon/tasks/archive/* | */.canon/tasks/declined/*) exit 0 ;;
 */.claude/tasks/index.md | */.claude/tasks/archive/* | */.claude/tasks/declined/*) exit 0 ;;
-*/.canon/memory/index.md | */.canon/memory/review/* | */.canon/memory/archive/*) exit 0 ;;
-*/.claude/memory/index.md | */.claude/memory/review/* | */.claude/memory/archive/*) exit 0 ;;
 */.canon/tasks/*.md)
   folder=tasks
   base=.canon
   ;;
 */.claude/tasks/*.md)
   folder=tasks
-  base=.claude
-  ;;
-*/.canon/memory/*.md)
-  folder=memory
-  base=.canon
-  ;;
-*/.claude/memory/*.md)
-  folder=memory
   base=.claude
   ;;
 *) exit 0 ;;

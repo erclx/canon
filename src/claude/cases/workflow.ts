@@ -58,10 +58,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'plan-intake-answer',
   },
   {
-    prompt: 'Pull the durable lessons out of this session before it ends.',
-    expect: 'memory-capture',
-  },
-  {
     prompt:
       'Take on the orchestrator role and coordinate the parallel feature builds.',
     expect: 'role-orchestrator',

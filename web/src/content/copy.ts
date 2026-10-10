@@ -272,28 +272,6 @@ export const gate = {
   },
 }
 
-// README.md: canon-allow-readme-paraphrase: states the routing governance/rules/canon/603-memory.md carries, which the build checks the rule still says.
-export const memory = {
-  head: 'What the session learned outlives the session',
-  cap: 'The last thing a session does is decide what it learned and where that belongs.',
-  skill: 'canon:memory-capture',
-  when: 'runs at the close of a session, before anything is lost',
-  input: 'a fact the session learned',
-  routes: [
-    {
-      test: 'a domain owns it',
-      where: 'canon/context/<domain>.md',
-      what: 'Folded into the entry the three-tier model already loads on demand.',
-    },
-    {
-      test: 'nothing owns it',
-      where: '.canon/memory/',
-      what: 'The pen keeps only what no context entry owns, which is what the rule calls the residue.',
-    },
-  ],
-  foot: 'Routing is the point and the memory file is the fallback. A fact about a domain written to the pen instead lands in a folder nothing opens.',
-}
-
 /**
  * The capture pair is two fixed renders of one pull request, base against
  * head, by `canon design render` at one viewport and one crop. Both commits are
@@ -482,7 +460,6 @@ export const field = {
     'review-pr',
     'git-pr',
     'git-followup',
-    'memory-capture',
     'context-fold',
   ],
 }

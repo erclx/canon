@@ -29,7 +29,7 @@ The first step archives the task each merged pull request closed and stays silen
 
 ### Pushing the records
 
-The second step runs `canon records push`, which backs the gitignored record folders to a private remote. The call sits after the archive so an unreachable remote delays no archiving, and it fires on every merge rather than on one that closed a task, since a review report and a memory entry both land on runs that close nothing.
+The second step runs `canon records push`, which backs the gitignored record folders to a private remote. The call sits after the archive so an unreachable remote delays no archiving, and it fires on every merge rather than on one that closed a task, since a review report lands on runs that close nothing.
 
 A refusal prints its reason with a retry hint, except `unsafe-payload`, which points at running the push by hand to see the blocked paths, since waiting on the remote fixes nothing there. A checkout that never ran the one-time setup answers `no-repository` and reports nothing.
 

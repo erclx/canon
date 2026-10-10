@@ -27,7 +27,6 @@ canon/
 .canon/
 ├── tasks/           ← one file per task with a generated index.md, local scratch
 ├── plans/           ← one plan per feature, archived inside itself once it ships
-├── memory/          ← durable session facts no context entry owns
 └── tmp/             ← deletable scratch, safe to remove without loss
 ```
 
@@ -86,14 +85,6 @@ For features on a mature stack, chain the post-plan pipeline in one session. App
 - A produced UI checklist does not stop it. The checklist rides to the draft pull request's evidence comment, and the closing block names how many visual boxes are still unchecked and who owes them
 - Every stop leaves recoverable state. Fix and resume with `/git-ship`
 - Skip autoship for auth, migrations, security-sensitive changes, or work where the plan itself is uncertain
-
-#### Memory in the chain
-
-`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 6 rather than restating the order. A fact about a domain carrying an entry in `canon/context/index.md` is routed to that entry, and `context-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
-
-Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
-
-The chain ends at capture, and nothing curates the pen after it.
 
 ### UI polish
 

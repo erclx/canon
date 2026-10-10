@@ -1,21 +1,15 @@
 ---
 title: Refresh context entries
-description: How context-fold Step 6 folds routed facts and diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
+description: How context-fold Step 6 folds diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
 ---
 
 # Refresh context entries
 
 Step 6 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
 
-Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
+The diff carries what the repository changed, and this step rewrites against it.
 
-**Routed facts.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`, falling back to `latest` on an empty result, and read `.canon/tmp/handoff/memory-routing/<slug>.md` at the main worktree root. `memory-capture` writes it, one H2 per target entry naming the path, with the fact underneath. Fold each fact into the entry its heading names, which for a nested `canon/context/<domain>/index.md` heading is the sibling file the fact belongs under rather than the generated index itself. Then delete the handoff file so a later run does not fold it twice.
-
-This half is not diff-scoped and must not be. A gotcha a session hit while working is exactly the fact the diff never shows, and scoping it to changed files would drop the entries worth keeping. The handoff is a named input rather than a scan, so the reach stays bounded to what capture decided.
-
-Skip this half silently when the file is absent, which is every run where nothing routed.
-
-**The diff.** When the baseline is unusable, scope this half to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the context refresh.` The routed half still runs, since it reads a file rather than a diff.
+When the baseline is unusable, scope this step to the working tree and untracked files, and skip it only when that set is empty, reporting `⚠ No diff to scope against. Skipped the context refresh.`
 
 Reuse the diff from the baseline above, names and content both. For each domain listed in `canon/context/index.md`, read its own entry: a flat `canon/context/<domain>.md`, or, for a domain split into a folder, its `canon/context/<domain>/index.md` and every sibling file that index links. Follow the index rather than globbing the folder, since a folder can hold a file the index does not list yet.
 
@@ -40,9 +34,5 @@ Create a new entry only for a domain `canon/context/index.md` already lists but 
 Write each updated entry immediately. Output one line per file, naming the path this run actually wrote rather than always the flat template:
 
 `✅ Context: canon/context/<domain>.md` for a flat entry, or `✅ Context: canon/context/<domain>/<sub-area>.md` for the sibling file a nested edit landed in
-
-Add a line naming the handoff when one was consumed:
-
-`🧹 Folded: .canon/tmp/handoff/memory-routing/<slug>.md`
 
 The base lint-staged config runs `canon indexes regen` on every committed `*.md`, so `canon/context/index.md` refreshes automatically on commit. No manual step needed.

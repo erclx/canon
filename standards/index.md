@@ -14,7 +14,6 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Design reference](design.md): Shape and content rules for canon/DESIGN.md
 - [Docs reference](docs.md): Reader and jurisdiction, frontmatter, page structure, what a page links out to, the diagram permission, and when a category earns a subfolder
 - [Figure reference](figures.md): When a figure earns its place, the render-first policy for a graph-shaped subject, freehand SVG as the escape hatch, and its wrapping, color, and accessibility rules
-- [Memory reference](memory.md): Filename and type prefix, frontmatter, the body shape per type, links between entries, and the lifecycle from write to retire
 - [Pull request reference](pr.md): Pull request title and body conventions
 - [Publish reference](publish.md): Scan an author runs against finished text, the cross-reference form each destination takes, and the response to an unreadable source
 - [Readme reference](readme.md): Readme voice, structure, and content conventions

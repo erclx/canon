@@ -41,8 +41,6 @@ Both halves of that channel are written here and one of them is performed elsewh
 
 Cost never enters the decision to widen a wave. The rule weighing how many tracks to open measures conflict and review attention, and both describe what a worker writes rather than what the loop spends. Claude Code delivers a message from another session as a fresh turn carrying the whole accumulated context, and a recurring poll bills that same window on its own interval, so a wave's spend tracks this session's context rather than the work coming back. The one setting that bounds it reads as available to whoever finds it, and the two values that would bound it break the handback the loop runs on.
 
-The session also records nothing of what it learns. Both other callers of memory capture are ship-chain skills and this one never ships, so the session taking every operator correction is the session with no moment that writes one down. Hanging that moment on the merge sweep answers it and bills the operator a capture pass per batch of merges while nothing is being built, which is a cost paid on the days shipping is fastest.
-
 Dispatch parts from what it checked in three ways. The gate and the worker each derive the branch from their own reading of one plan and reach different strings, a launched worker inherits its launcher's model rather than the configured default, and a declared file set does not hold, since a track crosses the set its plan named.
 
 ## Must
@@ -65,7 +63,6 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Write the pre-compact handoff with what no other file carries, and name the runbook that reads it back
 - Carry the resume invocation and the owed poll restart in the handoff file itself, not in the runbook that writes it alone, since the file is what survives a compaction and the runbook is what a session has to already be holding to read
 - Distinguish this resume from the general-purpose `session-resume`, since the name an operator reaches for first reaches a skill that knows nothing about the board
-- Capture what the session learned at the handoff rather than in the merge sweep, and have the sweep report the debt dated from the last handoff, since a capture per batch of merges bills the operator a wait while nothing ships and an undated row reads the same however long the debt has run
 - Retire the sessions this wave delivered before the map is written and ahead of any reclaim run, reporting a hand-launched one rather than acting on it, since no verb decides a planner or an unmerged worker and a live session holding a worktree is what the reclaim reading refuses on
 - Carry every runbook the session cannot run from memory inside the skill, so each citation resolves for a project holding the plugin and nothing else
 - State which rule wins where the tracked-file ban collides with the root instruction on small edits, and where a correction no open task owns goes

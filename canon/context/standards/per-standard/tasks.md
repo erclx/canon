@@ -1,37 +1,9 @@
 ---
-title: Memory and tasks
-description: Where the memory standard's delete prohibition lives and why, the shape rules measured against the pen, why the review queue is its own verb reading cited paths, the tasks readiness test widened to admit a row waiting on an external condition, the board standard split from tasks, and the origin and archiving rationale
+title: Tasks
+description: The tasks readiness test widened to admit a row waiting on an external condition, the board standard split from tasks, and the origin and archiving rationale
 ---
 
-# Memory and tasks
-
-## Memory standard
-
-`standards/memory.md` fixes the filename and its type prefix, the frontmatter, the body shape each type carries, links between entries, and the lifecycle.
-
-`governance/rules/canon/603-memory.md` loads every session and carries three bullets rather than pointing at the standard for everything: the write location, because `.canon/memory/` rather than `~/.claude/projects/` is project policy, the routing rule, because it has to fire before an entry is written at all, and the delete prohibition.
-
-The delete prohibition sits in the always-loaded rule on purpose. A path-scoped rule fires when a session edits a file the glob matches, and a bulk retire runs through the shell as a `mv`, so `governance/rules/standards/memory.md`, which globs `.canon/memory/**` and routes to the standard's lifecycle, is never loaded at the moment the irreversible act happens. `603-memory.md` is what reaches the shell path. The tier test in `canon/context/context-model/overview.md` asks whether a rule fires on a path being edited, and this is the case where the answer is no because the violating action is not an edit.
-
-## Memory pen shape
-
-The shape rules are measured against the pen rather than drafted from the sources. Every body opens with a prose rule line, no marker is ever indented, and `**Why:**` and `**How to apply:**` co-occur in every rule-bearing entry, and the entries carrying neither are exactly the `reference` and `user` types.
-
-Blank lines between the three parts vary across the pen, so the standard states the three parts as the contract and stays silent on the separator. Requiring one spelling would report a large share of the corpus on the rule readers are least served by.
-
-`category` is compared against the sentence-case form of the filename prefix rather than checked field by field. One comparison catches a prefix outside the four types, a field disagreeing with the prefix, and a casing drift that would open a second group in the generated catalog, and it reports one finding where three rules would report the same defect three times.
-
-No dangling-link check ships. A `[[name]]` link that resolves to nothing usually names an entry not yet written, which the format treats as a marker worth keeping, and some apparent dangles are backticked TOML `[[table]]` syntax.
-
-The two classes the verb catches are an entry titled with its own filename stem, which renders a slug in the catalog where the rule belongs, and a filename prefix belonging to none of the four types.
-
-## Review queue
-
-Staleness is its own verb, `canon records stale memory`, rather than a class on `validate`. `memory-capture` runs `validate memory` on every ship and fixes every finding it names, so a class reporting every never-reviewed entry would turn each capture into a partial review of the whole pen. The two also answer different questions, one whether a file matches its standard and the other what a review should look at next, and a flag switching `validate` between them would make its exit code mean two things.
-
-Path resolution is the proxy for an entry the tree has moved under. A backticked path resolving to nothing is a cheap signal that the fact was written about a layout since renamed, and the first reading at `12b2d338` found 42 of 361 entries citing one, most of them the retired `.claude/context/` and `.claude/*.md` roots. It misses an entry whose rule the tree now contradicts in prose, which stays the review's judgment, and it flags a toolkit path cited from a target's pen, which is correct for that target and still a thing for the review to judge rather than retire on.
-
-The optional `reviewed` date is what makes review state durable. An entry without it reads as never reviewed, which is every entry at introduction, so the field adds no finding to `validate` and costs the pen nothing until a review writes it.
+# Tasks
 
 ## Tasks readiness test
 

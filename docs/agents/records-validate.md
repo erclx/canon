@@ -70,4 +70,4 @@ Skills branch on the findings rather than on the exit code:
 canon records validate plans --json | jq -r '.findings[] | "\(.kind): \(.subject)"'
 ```
 
-For the shapes each check enforces, see `claude/skills/plan-feature/references/plan.md`, `claude/skills/plan-groundwork/references/groundwork.md`, `claude/skills/plan-intake/references/intake.md`, `standards/memory.md`, and `standards/standard.md`.
+For the shapes each check enforces, see `claude/skills/plan-feature/references/plan.md`, `claude/skills/plan-groundwork/references/groundwork.md`, `claude/skills/plan-intake/references/intake.md`, and `standards/standard.md`.
