@@ -138,8 +138,7 @@ from its next comment.
 A reply that corrects the reviewing session rather than a finding stays off the
 thread. Which session holds which branch, or what gate a worker's edits pass
 through, changes no finding on a pull request that closes, so it goes to the task
-owning that surface. Nothing checks either rule, so both hold while a session
-applies them.
+owning that surface. Nothing checks either rule, so both rest on the session.
 
 A finding answered without a commit leaves the head where the first pass read it,
 which a gitignored record and a finding accepted as recorded both produce. The
@@ -182,9 +181,10 @@ The unit is fixed by the ceremony: one feature is one plan, one worktree, one
 PR, one review sitting. Split a feature down when a backend contract and its
 consumer both change, landing the contract first so no UI is built on a shaky
 contract. Merge a change up into an ordinary edit when it is a few lines with no
-new contract. The smell test: too big if the whole change does not fit in your
-head at review time, too small if the coordination costs more than the change.
-`canon records validate plans` flags a stacked batch that should have folded.
+new contract, skipping the plan and worktree entirely. The smell test: if the
+whole change does not fit in your head at review time it was too big, and if the
+coordination costs more than the change it was too small. `canon records
+validate plans` flags a stacked batch that should have folded.
 
 ## Where work comes from
 
