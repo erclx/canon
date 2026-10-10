@@ -20,8 +20,8 @@ that builds something runs an existing skill. The queue rules below decide which
 one runs and when.
 
 Run `canon docs operating-model` for the model this skill enacts: the two roles
-and what each owns, the loop end to end, why the worker's self-review and this
-session's review are different passes, and how a feature is sized.
+and what each owns, the loop end to end, why this session's review is the first
+one a change gets, and how a feature is sized.
 
 ## On invocation
 

@@ -39,7 +39,7 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | Skill                         | When to use                                                                                                |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `canon:session-worktree`      | At the plan-to-execute boundary, to get an isolated tree and branch, or to route a refused main-root write |
-| `canon:auto-ship`             | After plan approval, to chain implement, verify, review, draft PR                                          |
+| `canon:auto-ship`             | After plan approval, to chain implement, verify, draft PR                                                  |
 | `canon:test-first`            | Before implementing a planned change, to run its test red, green, then refactor                            |
 | `canon:test-craft`            | When writing or changing any test, to pick its layer and filter what it asserts                            |
 | `canon:build-in-slices`       | While building a plan, to commit each tested slice and note out-of-scope defects rather than fix them      |
