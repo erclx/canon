@@ -1,9 +1,0 @@
-
-# Notes app
-
-Small Vite + React notes app. Voice is calm and direct. Dense screens, sparing accent color, no animation.
-
-## Commands
-
-- `bun run dev`: start vite dev server
-- `bun run check`: lint and typecheck
