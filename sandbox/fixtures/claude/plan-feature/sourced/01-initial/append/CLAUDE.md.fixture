@@ -1,0 +1,15 @@
+
+# My App
+
+Task management API with SQLite storage.
+
+## Commands
+
+- `bun run check`: lint and typecheck
+- `bun run test`: run tests
+
+## Behavior
+
+- All database access goes through `src/db.ts`
+- Route handlers live in `src/routes/`
+- Use Zod for input validation

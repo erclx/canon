@@ -57,6 +57,14 @@ An unstamped constraint reads as unverified rather than as live. Restamping the 
 
 The rule sits in `standards/plan.md` with `role-orchestrator` naming the stamp alone, because a worker running the planning skill in its own branch writes constraints too. No check parses the block, so the rule holds by being read.
 
+## Sources
+
+Citations sit in an optional `**Sources:**` section rather than inline. A quote does not fit the one-line `- Suggested:` form, and an optional marker leaves a code-only plan untouched, since most plans rest on nothing outside the project.
+
+`source-unquoted` in `src/records/validate.ts` reads the shape of each entry, a link plus a double-quoted passage or the word `unverified`, and not coverage. No check can tell whether a decision resting on an outside claim got an entry, so the step in `plan-feature` carries that half and the `sourced` sandbox arm measures whether it fires. The word `unverified` passes without a quote on purpose, since inventing a quote for a page nobody opened is the failure the section exists to prevent.
+
+An entry owns its nested bullets and wrapped lines, so a passage broken across lines still counts as quoted. The section closes at the next marker, which `splitPlanSections` already does for every section.
+
 ## Branch description cap
 
 The branch standard's cap reads 2 words as the target with 4 as the ceiling, wide enough that a branch derived from a plan filename is not renamed at ship. A rename there is a third derivation on top of the two `canon tasks plan-branch` exists to collapse, and it parts the branch slug from the plan slug that `session-worktree` tier 1 and `git-pr`'s fallback plan lookup both read back to find the plan.

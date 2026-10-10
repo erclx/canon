@@ -18,13 +18,13 @@ Under `assets/evidence/` is dev, and anywhere else a tracked folder is named `ev
 | Kind               | Folder                                                  | Writer                                                     | Gate                                                  | Compared |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------- | -------- |
 | Dev, the site      | `assets/evidence/home/`                                 | the capture job, or the branch that changes the page       | none, the surface-capture rule asks for the commit    | yes      |
-| Dev, the canvas    | `assets/evidence/canvas-<slice>/`                       | the session changing the canvas shell                      | none, the `internal-canvas` skill asks for the commit | yes      |
+| Dev, the canvas    | `assets/evidence/canvas/<area>/`                        | the session changing the canvas shell                      | none, the `internal-canvas` skill asks for the commit | yes      |
 | Prod, the examples | `examples/teach/evidence/`, `examples/design/evidence/` | `canon capture`, which writes a `.stamp` beside each image | none, an example is disclaimed rather than gated      | yes      |
 | Prod, the site     | `web/public/evidence/`                                  | hand-placed, two fixed captures of one pull request        | none                                                  | yes      |
 
 The marketing images, being the hero, the social card, and the arrival and install frames, sit in `assets/frames/` and are not evidence of either kind. `canon pr evidence` never compares them, and the capture-stamp stage gates them. `canon/context/web/assets.md` owns the social card and the beat captures.
 
-The canvas baseline sits in sibling `canvas-<slice>/` folders today. The target is one `canvas` folder, which `feature-canvas-evidence-folder` brings, so treat the sibling layout as pending and never list the siblings by name.
+The canvas baseline sits in one `canvas/` folder with a subfolder per area, being `arrange`, `inspector`, `layers`, and `shell`, the way `home/` holds its sections. A slice commits its walk states into the area its walk exercises and adds a fifth area only for a region none of the four covers. A frame never repeats its folder in its name.
 
 ## Folders carrying the segment and neither kind
 

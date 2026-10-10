@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { chargeCard } from "../stripe";
+
+const router = Router();
+
+router.post("/charge", async (req, res) => {
+  const { amount, source } = req.body;
+  const charge = await chargeCard(amount, source);
+  res.status(201).json({ id: charge.id });
+});
+
+export default router;

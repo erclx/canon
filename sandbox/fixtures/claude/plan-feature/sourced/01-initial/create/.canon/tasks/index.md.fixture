@@ -1,0 +1,10 @@
+---
+title: Tasks
+subtitle: One file per task, ordered by phase label
+---
+
+# Tasks
+
+One file per task, ordered by phase label
+
+- [v01.0: Make the charge endpoint safe to retry](v01.0-retry-charge.md): A client retry after a timeout must not charge the card twice
