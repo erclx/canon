@@ -44,7 +44,7 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon hooks <verb>`        | Run the steps a git hook drives                                                            |
 | `canon autoship <verb>`     | Decide whether a changed set needs the review pass                                         |
 | `canon pr <verb>`           | Read a pull request's diff, head, checks, and review, and post its evidence                |
-| `canon feedback`            | Write toolkit feedback from stdin, or open an issue with `--github`                        |
+| `canon feedback`            | Open a GitHub issue from toolkit feedback on stdin, or print the block on failure          |
 | `canon audits <verb>`       | Run every audit as one set under one verdict against the recorded baseline                 |
 | `canon gate <verb>`         | Run every stage that guards a branch here                                                  |
 | `canon secrets <verb>`      | Report credential-shaped values in the tree the package ships                              |

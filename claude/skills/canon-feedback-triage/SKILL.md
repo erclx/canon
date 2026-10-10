@@ -7,7 +7,7 @@ metadata:
 
 # Canon feedback triage
 
-Consume the feedback queue that `canon feedback --github` fills. Turn an open `feedback` issue into a scoped fix or a plan, then link the issue so merge closes it.
+Consume the feedback queue that `canon feedback` fills. Turn an open `feedback` issue into a scoped fix or a plan, then link the issue so merge closes it.
 
 Run from the toolkit repo root. This skill reads GitHub issues, not local `.canon/review/` files. Those are ephemeral session scratch. The durable, cross-project queue is GitHub.
 
@@ -63,5 +63,5 @@ Link every fix back to its issue so the queue drains on merge.
 
 ## Notes
 
-- The `feedback` label is what `canon feedback --github` and the `toolkit-feedback.yml` issue form both apply. An issue without it does not surface here by design.
+- The `feedback` label is what `canon feedback` and the `toolkit-feedback.yml` issue form both apply. An issue without it does not surface here by design.
 - This skill routes, it does not reimplement. `plan-feature` owns planning, `git-pr` owns the PR body, `git-branch` owns the branch name. Do not duplicate their logic.

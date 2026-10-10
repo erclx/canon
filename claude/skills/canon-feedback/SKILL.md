@@ -1,6 +1,6 @@
 ---
 name: canon-feedback
-description: Format a report about something broken, missing, or off in canon and open it as a GitHub issue on the toolkit repo via `canon feedback --github`, where the toolkit's triage reads it. Use when asked to "send this to the toolkit", "report this to canon", "file toolkit feedback", or "give the toolkit feedback about X". Do NOT use for general complaints about other tooling, IDE issues, or in-project bugs that do not implicate canon surfaces.
+description: Format a report about something broken, missing, or off in canon and open it as a GitHub issue on the toolkit repo via `canon feedback`, where the toolkit's triage reads it. Use when asked to "send this to the toolkit", "report this to canon", "file toolkit feedback", or "give the toolkit feedback about X". Do NOT use for general complaints about other tooling, IDE issues, or in-project bugs that do not implicate canon surfaces.
 metadata:
   family: upkeep
 ---
@@ -76,7 +76,7 @@ The destination is a public GitHub issue on the toolkit repo, so the report leav
 Before the pipe below, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the composed block, phase-label half included. Nothing else checks what reaches the remote, so this scan is the only gate.
 
 ```bash
-cat <<'EOF' | canon feedback --github
+cat <<'EOF' | canon feedback
 ## Toolkit feedback
 
 ...
@@ -85,7 +85,7 @@ EOF
 
 The CLI opens a GitHub issue on the toolkit repo, labeled `feedback` and each domain label the surface type names, such as `skills` for a plugin skill, and prints the issue URL, which this skill reports back on its own line. It needs `gh` authenticated. `git-issue` is not the route, since it files on the current repository and this report belongs on the toolkit's.
 
-From a toolkit checkout, a call that produces no URL falls back to `.canon/feedback/feedback-<slug>-<ts>.md` and prints the reason on stderr. Say so in the same reply, naming the file and the reason, since a silent fallback leaves the report where nothing reads it. A target project has no such folder, so a failed call there prints the block in chat.
+A failed call exits 1, frames the reason on stderr, and prints the validated block on stdout. Tell the two outcomes apart by whether stdout opens with `https://`, never by the exit code, since a shell wrapper can flatten it. On a failure, show the block in chat with the reason and `📋 Paste this into an issue at https://github.com/erclx/canon/issues/new`.
 
 If `canon` is not on PATH, fall back: print the block in chat and tell the user `📋 Copy the block above into a toolkit-repo session.`
 
@@ -94,11 +94,8 @@ If `canon` is not on PATH, fall back: print the block in chat and tell the user 
 The command exits 1 and writes nothing on a report it refuses, so a non-zero run is a block to repair rather than a report that shipped. Two refusals reach this step:
 
 - A named missing field. Add that heading with a real value or its stated fallback, then re-run. Do not report the defect as filed.
-- `gh` absent or its call failed. The stderr names which, since installing `gh` and fixing an authenticated call are different repairs. Fall back to printing the block in chat.
-
-A `--github` run from a toolkit checkout whose GitHub call fails warns and writes local scratch instead, which is a report filed on the other route rather than a failure.
+- `gh` absent or its call failed. The stderr names which, since installing `gh` and fixing an authenticated call are different repairs. The block is on stdout, so show it in chat with the reason and the paste line from Step 2.
 
 ## Notes
 
 - `canon feedback` resolves the toolkit root from the running `canon` binary's source location. If multiple toolkit clones exist on the machine, the first `canon` on PATH wins.
-- The local folder is a fallback for a failed issue call, and nothing reads it on a schedule. The issue is the durable record.

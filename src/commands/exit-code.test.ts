@@ -28,8 +28,8 @@ const RUN_TIMEOUT_MS = 30_000
 
 /**
  * Carries every field `REQUIRED_FIELDS` names, so a case below fails on the
- * branch it is written for rather than on the shape validator that now runs
- * ahead of both write paths.
+ * branch it is written for rather than on the shape validator that runs ahead
+ * of the issue call.
  */
 const CONFORMING_REPORT = [
   '## Toolkit feedback',
