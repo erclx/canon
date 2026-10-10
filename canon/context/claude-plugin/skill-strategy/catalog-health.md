@@ -43,7 +43,7 @@ A few load-bearing patterns come out of running the three questions across the w
 - A skill reached almost entirely through a chain, such as `memory-capture` or most of the `git-ship` sequence, is not adopted by an operator typing its name. The chain is the denominator its call count measures, not demand, so read such a skill's reach against the typed count of whichever skill heads the chain.
 - The most-called skill in the catalog can carry no sandbox arm at all when its reach is already proven by how many chain steps route to it, and a skill with a real sandbox arm and a real citation can still score zero on every usage record. Neither instrument substitutes for the other.
 - A skill whose own body forbids merging into a neighbor, on a stated contradiction the merge would create, stays split even when its usage looks nominal next to that neighbor's.
-- `role-worker`, `role-planner`, and `repo-metadata` each answer question 1, whether a rule, a verb, or an existing skill already reaches this moment, with no: each asserts a role, a repository metadata proposal, or a channel obligation nothing else in the catalog covers.
+- `role-worker` and `role-planner` each answer question 1, whether a rule, a verb, or an existing skill already reaches this moment, with no: each asserts a role or a channel obligation nothing else in the catalog covers.
 
 ## The eval wrapper not built
 

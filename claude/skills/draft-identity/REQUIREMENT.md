@@ -24,7 +24,7 @@ A session building this without a shared loop restates `draft-and-pick`'s render
 
 - Restate `draft-and-pick`'s render, hand-off, pick, or loop mechanics
 - Add a `## Logo` section to `standards/design.md`'s fixed section set. `src/design/parse.ts` reads a fixed key set, and no outcome behind this skill asks for a schema change.
-- Modify `draft-and-pick`, `design-extract`, `canon capture`, or `canon design render`. This skill composes all four and extending any of them is a separate change.
+- Modify `draft-and-pick`, `canon capture`, or `canon design render`. This skill composes all three and extending any of them is a separate change.
 - Assume this skill's own invocation frequency needs no check. Whether anything reaches for it beyond an operator typing its name has no answer at creation time, so a review pass some months in should read that back rather than take it on faith.
 
 ## Guards

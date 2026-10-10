@@ -66,7 +66,7 @@ The resolve has exactly one caller, `src/commands/standards.ts`, and no shipped 
 ## Gotchas
 
 - A target holding `.claude/standards/` from an older toolkit resolves nothing through it. The folder is inert rather than authoritative, and deleting it is safe. This repository carries no such folder either.
-- A project that wants a standard of its own writes `standards/<slug>.md` at its root, which the resolver reads ahead of the package. `create-standard` writes there in the toolkit and in a target alike.
+- A project that wants a standard of its own writes `standards/<slug>.md` at its root, which the resolver reads ahead of the package. It is authored there by hand in the toolkit and in a target alike.
 - Do not hand-edit `standards/index.md` here. `canon indexes regen` rewrites it from the frontmatter of whatever is present, and a standard missing `title` or `description` fails that regen.
 - `bun run check` regenerates nothing for this corpus, and the Consumed copies stage names `.claude/rules` alone. Editing `standards/<name>.md` needs no second file staged behind it. No skill-reference fan-out exists either: a `references/` file is skill-local and edited in place.
 - A grep for `standards install` or `standards sync` in a skill body or a doc is a stale citation, not a verb. Neither exists.

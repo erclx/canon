@@ -1,6 +1,6 @@
 ---
 name: target-setup
-description: Gets a project onto the toolkit. Detects the stack, resolves per-domain arguments, previews the chain, runs `canon init`, then verifies at a stated depth and bootstraps the `index.md` system. Use when asked to "set up this project", "init this project", "bootstrap the toolkit", "install governance", "install gov rules", "set up indexes", "verify the scaffold", "run the smoke tests", or "one-shot install". Assumes the `canon` CLI is on PATH. Do NOT use on a project that already carries the toolkit, which is `canon-operator`, or to report per-domain drift without repairing it, which is `target-check`.
+description: Gets a project onto the toolkit. Detects the stack, resolves per-domain arguments, previews the chain, runs `canon init`, then verifies at a stated depth and bootstraps the `index.md` system. Use when asked to "set up this project", "init this project", "bootstrap the toolkit", "install governance", "install gov rules", "set up indexes", "verify the scaffold", "run the smoke tests", or "one-shot install". Assumes the `canon` CLI is on PATH. Do NOT use on a project that already carries the toolkit, or to report per-domain drift without repairing it, which is `target-check`.
 metadata:
   family: setup
 ---
@@ -50,14 +50,14 @@ else. Do not pause for a separate confirmation.
 ## Scope
 
 - This skill and `canon init` run once on a fresh scaffold, never on an existing project. They do not guard against clobbering existing configs. When tempted to add guards, mode switches, or an existing-project branch, stop. Extend the per-domain `canon <domain> install` or `canon sync` paths instead.
-- The chain stops at the project edge. `repo-metadata` and `git-commit` also ship, reaching a remote and the project's history respectively, and neither runs here.
+- The chain stops at the project edge. `git-commit` also ships, reaching the project's history, and does not run here.
 - Claude Code plugins are a machine concern rather than a project one, so no phase here installs them. Install them with `claude plugin install <name> --scope user`, which applies in every project on the machine and is copied into none.
 
 ## Declined states
 
 Three states reach this skill that the chain does not serve. Name the destination for each, so the refusal routes rather than ends. The first two stop the chain outright and the third runs it on a default the person may not want.
 
-- **An existing project.** Stop and hand off to `canon-operator`. It reads what the target already carries before it names a command, which this chain never does, so any per-domain install picked here is a guess against configs nobody read. The Scope bullet above names the same commands as the authoring alternative, and this is the destination a person takes.
+- **An existing project.** Stop and hand off to `target-check`, which reports what the target already carries before anything is repaired. This chain never reads that, so any per-domain install picked here is a guess against configs nobody read. The Scope bullet above names the same commands as the authoring alternative, and this is the destination a person takes.
 - **An install wanting the `.claude/` folder alone.** Stop. Run `canon claude init` for the seed docs, then run the `indexes` phase over the project's own documentation folders. Neither needs the tooling sync the `install` phase runs.
 - **A language the toolkit carries no stack for.** The chain still runs, on `base`, with the fallback marked in the preview. A project that wants none of what `base` carries declines there and takes the `gov` phase, which is language-neutral and installs rules without the `base` development dependencies the tooling layer would drop on it. Say so at the preview rather than resolving it here, since the fallback is a working default and only the person can say whether it fits.
 

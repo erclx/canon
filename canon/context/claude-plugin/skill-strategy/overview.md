@@ -23,7 +23,7 @@ Each file covers one question:
 
 - `canon/context/claude-plugin/skill-strategy/axes.md`: how a skill is named and sorted, from the prefix families to the direction axis
 - `canon/context/claude-plugin/skill-strategy/teaching-and-writing.md`: the teaching, writing, and restatement surfaces
-- `canon/context/claude-plugin/skill-strategy/drafting.md`: the proposal, candidate, draft, identity, and walkthrough surfaces
+- `canon/context/claude-plugin/skill-strategy/drafting.md`: the candidate, draft, identity, and canvas surfaces
 - `canon/context/claude-plugin/skill-strategy/catalog-health.md`: whether a skill earns its place, reading a usage census, the skill not built, and reading the catalog for overlap
 - `canon/context/claude-plugin/skill-strategy/redundancy-audit.md`: each skill compared against its community counterpart, and the borrows taken
 

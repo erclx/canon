@@ -21,7 +21,7 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 ## Standards citation arms
 
-`claude/review-branch`, `claude/ui-checklist`, and `claude/memory-review` each run against a target holding no standards folder, so the plugin root is the only route to the slug transform. Each stages a branch carrying a `/`, and the transform replacing it with `-` appears in no skill body, so the output filename is evidence the citation resolved. Each also asserts that `.claude/standards/skill.md` and `standards/skill.md` are both absent, so an arm staging a copy of its own goes red where it lands rather than quietly voiding the premise.
+`claude/review-branch` and `claude/ui-checklist` each run against a target holding no standards folder, so the plugin root is the only route to the slug transform. Each stages a branch carrying a `/`, and the transform replacing it with `-` appears in no skill body, so the output filename is evidence the citation resolved. Each also asserts that `.claude/standards/skill.md` and `standards/skill.md` are both absent, so an arm staging a copy of its own goes red where it lands rather than quietly voiding the premise.
 
 `claude/ui-checklist` asserts the exact checklist path, because the checklist is the skill's whole output and a run producing none has produced nothing. Its remaining entries stay `Semantic:`, since which changes land on the visual list and which layer each missing-test line names are the skill's calls, and a pattern cannot tell a correct classification from a lucky one. Two patterns bite on the format itself: a box line opening on a route, and a box whose action after the colon opens on neither "read" nor "look at". The `(taste)` marker stays `Semantic:` too, since whether a change reads as a judgment or an observable fact is the same classification call.
 
@@ -41,21 +41,3 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 - The `file` arm pins the slug through the invocation, since `paths` and `content` match exact paths. The numbering is still asserted, because the index links its cluster files and the pattern requires a two-digit number and a domain name in each link.
 - The `route` arm asserts a refusal. Its three `absent` entries name the folders a wrong turn would create, and the reply pin catches a stop that refuses without naming where the question goes. Why the run refused stays in `manual`.
-
-## Operator routing
-
-`claude/canon-operator.sh` drives a skill whose subject is a decision. Each arm pins the skill or command a route names in `reply`, pairs it with a `manual` entry for the negative a substring cannot carry, and asserts over the tree in the direction a correct run leaves it alone.
-
-- A proposal-only skill cannot be covered by tree assertions alone, since a session that did nothing passes every negative one.
-- `gitignore` pins what the write produced, the managed entries back in the file and the install stamp as the inject wrote it, which separates the narrow mode from a full inject.
-- `fresh` carries no tree pin, because a handoff to `target-setup` may continue into that skill and write the whole scaffold, and no path assertion separates routing from doing. It is reachable only from a real run.
-- `unclaimed` pins the reverse walk's attribution rather than a route, since the walk reports a folder the toolkit stopped shipping and offers nothing. Provisioning refuses a CLI whose report attributes no unclaimed folder, which is the two-speed release risk `canon/ARCHITECTURE.md` records arriving in the harness. The refusal names both causes, since reading attribution cannot separate a binary predating the walk from a walk that reached nothing. The declaration pins the dropped folder's name so the fragility sits where a reader sees it.
-- Every section of the operator report is gated on `isManagedTarget`, so the fixture stages a short `CLAUDE.md` as the one marker it needs rather than inheriting one from dev-skill injection.
-
-### The audits arm
-
-`audits` stages a target carrying two of the four audit surfaces. A passing run names the scaffold handoff first, offers the two staged audits, withholds the comment scan with a reason, and names `plans` as the only record kind.
-
-`## Route` in the skill carries a measurement row for the audit offers, and the preamble above the table ranks a lifecycle row ahead of them, because a session acting on the lifecycle row never opens the section below it. The arm pins `target-setup` beside the two audit commands to score that ranking. The order between the handoff and the offers stays in `manual`, because a substring set is unordered, and the withheld offer is a negative substring any rephrasing satisfies.
-
-The fixture stages one target shape with nothing installed, so a target shaped differently could rank the rows the other way with no assertion seeing it.

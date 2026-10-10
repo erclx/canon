@@ -39,7 +39,6 @@ import { register as deps } from '@/commands/deps'
 import { register as labels } from '@/commands/labels'
 import { register as autoship } from '@/commands/autoship'
 import { register as pr } from '@/commands/pr'
-import { register as repo } from '@/commands/repo'
 import { register as census } from '@/commands/census'
 import { register as upstream } from '@/commands/upstream'
 import { register as targets } from '@/commands/targets'
@@ -101,7 +100,6 @@ deps(program)
 labels(program)
 autoship(program)
 pr(program)
-repo(program)
 census(program)
 upstream(program)
 audits(program)

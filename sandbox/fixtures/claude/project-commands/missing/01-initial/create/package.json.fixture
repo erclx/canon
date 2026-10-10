@@ -1,9 +1,0 @@
-{
-  "name": "sandbox-project-commands-undocumented",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "touch fell-back.txt && echo listening on http://localhost:5173"
-  }
-}

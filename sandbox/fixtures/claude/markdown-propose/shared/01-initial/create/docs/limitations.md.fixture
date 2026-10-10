@@ -1,4 +1,0 @@
-# Limitations
-
-The toolkit supports TypeScript and Python projects. Every other stack needs
-a hand-written stack config before the toolkit can install anything into it.

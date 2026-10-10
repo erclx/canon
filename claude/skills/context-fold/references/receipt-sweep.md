@@ -1,13 +1,13 @@
 ---
 title: Sweep consumed receipts
-description: How context-fold Step 9 sweeps branch review reports whose branch is gone and fully decided memory receipts, and what it keeps and reports
+description: How context-fold Step 9 sweeps branch review reports whose branch is gone, and what it keeps and reports
 ---
 
 # Sweep consumed receipts
 
 Step 9 of `context-fold`, reached in order on every run.
 
-Sweep the review and memory receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
+Sweep the review receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 
 Every delete below is a plain `rm`, one per call, routed the way `session-worktree` states.
 
@@ -23,21 +23,10 @@ Sweep the branch reports this session never opened. List `.canon/review/branch-*
 
 What that removes is a local-only review on a branch deleted before it opened a pull request. `review-branch` says so where a reader meets the report, and the sweep runs anyway rather than keeping every report against the one case, since nothing else ever clears them.
 
-Memory receipts sweep board-wide rather than by slug. Scan every `.canon/memory/review/memory-review-*.md`, not only the one matching this slug. `memory-review` writes its receipt after this skill has run in every ship chain, so a sweep keyed on the current slug looks for a file that does not exist yet, and no later branch looks for it either because a slug is unique per feature. Scanning the folder is what makes the sweep fire at all.
-
-For each receipt, count the H2 items still pending. An item is pending when its H2 carries 📝, or when its H2 carries no status emoji and its `Decision:` slot holds nothing `memory-review` Apply would act on or skip, since a receipt written by hand or by an older binary may lack the marker, and Apply's parse leaves every other slot value undecided:
-
-- No pending item: fold it per the collection rule in `${CLAUDE_SKILL_DIR}/../../standards/memory.md`, then delete the receipt.
-- Any pending item: leave it and report the count. Pending items are decision state, and a branch shipping is not an operator deciding them.
-
-That standard owns what a fold writes and which entry types take one. `memory-review` collects a receipt on the same rule, so neither body restates it.
-
-Do not sweep `ux-audit-*.md` or `ux-measure-*.md` (standalone deliverables). Those sit at `.canon/review/` itself rather than under a producer folder, so the two globs above never reach them.
+Do not sweep `ux-audit-*.md` or `ux-measure-*.md` (standalone deliverables). Those sit at `.canon/review/` itself rather than under a producer folder, so the glob above never reaches them.
 
 Output one line per file swept:
 
 - `🧹 Deleted: <path>, branch gone` for a branch report whose branch no longer exists
-- `🧹 Deleted: <path>, folded <n> skips` for a swept memory receipt
-- `⏭ Kept: <path>, <n> items pending` for a memory receipt still holding decisions
 
 If nothing qualifies, skip this step silently.

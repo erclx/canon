@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which the `ui` governance rules carry, for the shape of the project's design document, which `design.md` governs, to run the candidate loop, which is `draft-and-pick`, or to trace a reference's values, which is `sketch-design`.
+description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which the `ui` governance rules carry, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `draft-and-pick`.
 metadata:
   family: build
 ---
@@ -145,7 +145,6 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - States, empty and loading coverage, destructive confirmation, truncation: the same rules
 - Rendered copy casing, button labels, error message shape: the same rules
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
-- Tracing a reference's color, type and spacing values: `sketch-design`
 - The shape of the project's design document and its token tables: `${CLAUDE_SKILL_DIR}/../../standards/design.md`
 - Spatial layout and interaction intent of one surface: `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`

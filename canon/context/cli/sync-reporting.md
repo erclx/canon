@@ -33,7 +33,7 @@ Seven report sections sit outside the domain scan in `src/sync/check.ts`, being 
 
 All seven are gated on `isManagedTarget`, which reads a `.claude/` directory, a `CLAUDE.md`, or a detected unmigrated domain. Seeds motivate the gate: they enumerate from the source rather than from what a target installed, so without it an unmanaged directory would report every seed as `missing` and route to a section-merge skill, while the three scanned domains would correctly stay quiet regardless, since `installedStampDomains` already gates them on an install marker.
 
-An unmigrated domain counts as a marker because `detectUnmigrated` fires only on root files whose basename the toolkit ships, so it firing proves the toolkit installed there before the layout moved. An unmanaged target returns every section empty rather than only suppressing the render, so no consumer, `canon-operator` reading the JSON directly included, can act on a finding the render withheld.
+An unmigrated domain counts as a marker because `detectUnmigrated` fires only on root files whose basename the toolkit ships, so it firing proves the toolkit installed there before the layout moved. An unmanaged target returns every section empty rather than only suppressing the render, so no consumer, one reading the JSON directly included, can act on a finding the render withheld.
 
 ### Seeds
 

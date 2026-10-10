@@ -64,6 +64,8 @@ Twenty-five plugin skills dropped their `claude-` prefix for two-word names, so 
 
 The same sweep carries the merge of the five per-kind document drafters into `draft-doc`, so a citation of any one of them lands on `canon:draft-doc`.
 
+Eleven skills and one rule were retired without a rename, so the sweep has nothing to map them to and leaves a citation of one as it stands. `design-extract` and `sketch-design` are replaced by `canon:canvas`, which carries a picked direction into `canon/DESIGN.md`. `bash-cli-script`, `canon-operator`, `canon-rollout`, `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor, and `canon repo metadata` went with `repo-metadata`. The `120-bash` rule left the `base` stack, so `canon gov sync` removes its installed copy. Replace each citation by hand, or delete the sentence naming a skill that has no successor. <!-- canon-keep-retired -->
+
 Two of those files run rather than sit there. `.husky/post-merge` runs the `canon hooks post-merge` verb, so a stale copy of the hook calls a binary that may lack it, and `.claude/hooks/pr-create-log.sh` hands a session a message naming a skill, so a stale copy tells someone to invoke something that no longer exists. A copy older than `git-pr`'s move to REST also matches only `gh pr create`, so it stays silent on every pull request `git-pr` opens. A rule under `.claude/rules/canon/core/` names skills too, though a rule is read rather than run.
 
 Resync what the toolkit owns, then sweep what the project wrote:

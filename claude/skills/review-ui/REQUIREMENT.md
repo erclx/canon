@@ -53,7 +53,6 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 ## Out of scope
 
 - Reviewing the code and the stills, which `review-pr` owns. The two run as separate sessions so each finishes on its own clock and neither hears the other.
-- Inspecting a running app across many findings with the operator present, which `ux-walkthrough` owns
 - Writing the checklist and its drivable format, which `ui-checklist` owns
 - Dispatching the pass, polling its verdict, and lifting the draft mark, which `role-orchestrator` owns
 - A subagent inside the code reviewer, dropped because its cost stays invisible until it returns

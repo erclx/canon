@@ -14,18 +14,18 @@ This repository's own record is generated rather than authored. `src/design/toke
 ## Layout
 
 - `src/design/` owns the token module, the component layer, the record and stylesheet renderers, the markdown parser and preview renderer, the sync adapter, and the contrast reading
-- `claude/skills/design-extract/` owns the skill that drafts the file, from an existing codebase or from a greenfield project
+- `claude/skills/canvas/` owns the step that carries a picked direction into the file
 - `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/460-design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it. Building an already-decided surface stays outside the glob, so a project styling entirely in utility classes is not reached
 - `.canon/tmp/render/design/` owns the rendered preview, gitignored
 - `.claude/design/` owns what an install lands in a target, `base.css` at its root and the target's own values under `project/`
 
-`canon/context/design/tokens.md` covers the token module and the surfaces reading it, `canon/context/design/extract.md` the extract skill and the seed shape, and `canon/context/design/render.md` the preview. The canvas a direction is drafted on before it reaches this record is `canon/context/features/canvas.md`.
+`canon/context/design/tokens.md` covers the token module and the surfaces reading it, and `canon/context/design/render.md` the preview. The canvas a direction is drafted on before it reaches this record is `canon/context/features/canvas.md`.
 
 ## Decisions
 
 ### The record stays at the canon root
 
-`canon/DESIGN.md` sits at the `canon/` root beside `ARCHITECTURE.md` and `REQUIREMENTS.md`, and no `canon/design/` folder holds it. The operator decided this on 2026-10-02. Moving it would change a path every target shares, read by the surface root, the migrations, `design-extract`, and the renderer, for a tidier root alone.
+`canon/DESIGN.md` sits at the `canon/` root beside `ARCHITECTURE.md` and `REQUIREMENTS.md`, and no `canon/design/` folder holds it. The operator decided this on 2026-10-02. Moving it would change a path every target shares, read by the surface root, the migrations, and the renderer, for a tidier root alone.
 
 ### Output is one-way
 
@@ -45,7 +45,7 @@ The toolkit's own record is rendered from `src/design/tokens.ts` rather than aut
 
 ## Workflow
 
-1. Run the extract skill to draft `canon/DESIGN.md`. It sources tokens from an existing codebase, or proposes them against a greenfield project with a personality paragraph.
+1. Draft `canon/DESIGN.md` from the seed template, or work the direction out on the canvas and carry the pick in.
 2. Review the `? verify` cells and edit the file directly. The preview marks each one and counts them, so the preview is where they are found rather than the source file.
 3. Run `canon design render` to regenerate the preview
 4. Open `.canon/tmp/render/design/index.html` in a browser

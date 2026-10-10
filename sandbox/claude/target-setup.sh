@@ -18,7 +18,7 @@ stage_setup() {
     log_step "Scenario ready: setup skill on an empty repo"
     log_info "Context: package.json only, no framework evidence"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names repo-metadata and git-commit as outside the chain"
+    log_info "Expect:  stack resolves to 'base' and the preview marks it a fallback, canon init lands .claude/rules/ and stamps canon/config/config.json, tooling sync is skipped (tooling stack also 'base' = already synced), the verify phase finds no stack scripts and reports base scripts only, the indexes phase then runs and finds no candidate folder on the empty tree, and the report names git-commit as outside the chain"
     ;;
   "no-stack")
     stage_fixtures claude target-setup no-stack 01-initial
@@ -28,7 +28,7 @@ stage_setup() {
     log_step "Scenario ready: setup skill on a language with no governance stack"
     log_info "Context: go.mod and main.go, no package.json and no JavaScript evidence"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  the governance stack resolves to 'base' and the preview marks it a fallback, with the Go language rule passed through --add. The tooling stack resolves to 'go' on a canon whose catalog carries it, and the preview names it with no fallback mark. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names repo-metadata and git-commit as outside the chain."
+    log_info "Expect:  the governance stack resolves to 'base' and the preview marks it a fallback, with the Go language rule passed through --add. The tooling stack resolves to 'go' on a canon whose catalog carries it, and the preview names it with no fallback mark. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names git-commit as outside the chain."
     ;;
   "monorepo")
     stage_fixtures claude target-setup monorepo 01-initial
@@ -55,7 +55,7 @@ stage_setup() {
     log_step "Scenario ready: setup skill on a Vite + React project"
     log_info "Context: real bunx create-vite output (index.html, public/, src/App.tsx, src/index.css)"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/ with 200-react.md and no 230-nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
+    log_info "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/ with 200-react.md and no 230-nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain"
     ;;
   "astro")
     log_step "Running bun create astro"
@@ -72,7 +72,7 @@ stage_setup() {
     log_step "Scenario ready: setup skill on an Astro project"
     log_info "Context: real bunx create-astro output (src/pages, astro.config.mjs, tsconfig.json)"
     log_info "Action:  /canon:target-setup"
-    log_info "Expect:  governance stack 'astro', tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names repo-metadata and git-commit as outside the chain"
+    log_info "Expect:  governance stack 'astro', tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain"
     ;;
   "verify-pass")
     stage_fixtures claude target-setup verify-pass 01-initial

@@ -15,9 +15,9 @@ The inverse failure is quieter. A session that assumes a sync will pick up a cha
 
 Being reachable is a separate problem from being right. This is a pure reference whose moment happens inside another skill's run, so nothing brings it up unless a body names it. Three sibling requirement files named it and routed nothing, because Claude Code loads `SKILL.md` as the entry and never opens the sibling. A route lives in a body or it does not exist, and a fourth requirement mention would repeat the same defect.
 
-The two bodies now carrying an inline pointer are `seed-sync` and `canon-operator`, each at the point it runs or prints an overwriting command.
+The body now carrying an inline pointer is `seed-sync`, at the point it runs or prints an overwriting command.
 
-A third gap sits beside the first two, aimed at a different question. `canon --help` lists every top-level verb and `canon docs` emits the toolkit's own reference corpus, but no reference skill pointed a session at either. The one skill that does, `canon-operator`, is user-invoked only and reaches them as a side effect of its own orientation step. A session guessing at a verb's name, or restating what a doc already answers, is the same missing-fact failure the overwrite gap names.
+A third gap sits beside the first two, aimed at a different question. `canon --help` lists every top-level verb and `canon docs` emits the toolkit's own reference corpus, but no reference skill pointed a session at either. No skill does now. A session guessing at a verb's name, or restating what a doc already answers, is the same missing-fact failure the overwrite gap names.
 
 ## Must
 
@@ -39,7 +39,7 @@ A third gap sits beside the first two, aimed at a different question. `canon --h
 
 ## Out of scope
 
-- Executing the sync, which the user runs or `canon-operator` routes
+- Executing the sync, which the user runs
 - Reconciling a customized seed section by section: `seed-sync`
 - Deciding which stack, rule, or standard a project should install, which the setup skills resolve from live catalogs
-- Diagnosing what a project is behind on, or executing the fix: `canon-operator`
+- Diagnosing what a project is behind on: `target-check`

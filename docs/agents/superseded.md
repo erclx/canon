@@ -40,7 +40,7 @@ Pass an empty replacement to retire a value outright, as in `canon gov supersede
 
 A citation naming a family as a pattern carries neither value. `canon-*` and `internal-<X>` are the two forms this corpus writes, and a literal comparison matches neither, so a rename running the verb once per name reports clean while the family citations stay stale. Two such citations have inverted this way, stating the old prefix as a guard, which left a rule instructing the next session to flag the correct naming as a mismatch.
 
-Beside the literal comparison the run matches a family stem, derived from the segment the two values actually differ on, with everything they share carried ahead of it. `toolkit-operator` to `canon-operator` derives `toolkit`, and `canon-cli` to `canon-shell` derives `canon-cli` rather than `canon`, which is what keeps a rename of one folder off every sibling in its family.
+Beside the literal comparison the run matches a family stem, derived from the segment the two values actually differ on, with everything they share carried ahead of it. `toolkit-sync` to `canon-sync` derives `toolkit`, and `canon-cli` to `canon-shell` derives `canon-cli` rather than `canon`, which is what keeps a rename of one folder off every sibling in its family.
 
 Three forms report, decided by the character after the stem and its separator:
 
@@ -72,7 +72,7 @@ A value sweep closes most of the first class and no part of either one. The help
 
 ## The false-positive rate
 
-Over-reporting is the design here as it is for the literal half, and the corpus bounds it. Sweeping `toolkit-operator` to `canon-operator` over this tree named one templated hit outside the change's own fixtures, a passage recording the retired `toolkit-` prefix as history, which reads correctly in place.
+Over-reporting is the design here as it is for the literal half, and the corpus bounds it. Sweeping the retired `toolkit-` prefix over this tree named one templated hit outside the change's own fixtures, a passage recording the retired `toolkit-` prefix as history, which reads correctly in place.
 
 A version reporting a page of hits teaches the next rename to skip the verb, which is worse than the blind spot being fixed. Read a report against that rate rather than against zero.
 

@@ -33,7 +33,7 @@ No version-sequencing surface exists. `role-orchestrator` and `review-pr` each r
 
 ## Asserting a routing decision
 
-A router is reviewable only through what it says. Almost every `canon-operator` route ends in a handoff or a report rather than a file, so a review reads a body claiming a route and cannot tell on its own whether the route fires.
+A router is reviewable only through what it says. A route ending in a handoff or a report rather than a file leaves a review reading a body that claims a route and unable to tell on its own whether the route fires.
 
 The `reply` expectation closes it. It reads `result` off the envelope `max_turns` already reads, so scoring a route costs nothing beyond the run, and the token worth pinning is the name of the skill or command the route hands to. `claude/target-setup/fresh` is one arm using it this way.
 

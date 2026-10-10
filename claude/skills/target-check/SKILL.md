@@ -15,7 +15,7 @@ Six domains carry the report. Five answer from a verb that already exists and th
 
 - `canon` absent from the path: stop. `❌ canon is not on PATH, so no domain can be read.`
 - No `.claude/` directory at the working root: stop. `❌ No .claude/ here, so nothing is installed to check. Run canon init first.`
-- A `claude/skills/` folder at the working root, with no leading dot: stop. `❌ This is the toolkit itself rather than a target. canon-rollout takes a change out to the targets.` A target receives skills at `.claude/skills/` and authors none, so the spelling without the dot separates the source from what it installs into.
+- A `claude/skills/` folder at the working root, with no leading dot: stop. `❌ This is the toolkit itself rather than a target. Ask the orchestrator for a worker per repository to take a change out to the targets.` A target receives skills at `.claude/skills/` and authors none, so the spelling without the dot separates the source from what it installs into.
 - Run every command under `CANON_NON_INTERACTIVE=1` and prompt at no point. Every caller in the near term is a worker a wave dispatched, with nobody present to answer, so the non-interactive path is the only path rather than a flag a caller remembers.
 - Branch on each record's own fields rather than on an exit status. An operator's shell profile may wrap `canon` in a function whose status comes from a trailing command, which reports every refusal as success.
 

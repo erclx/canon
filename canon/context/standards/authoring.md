@@ -73,4 +73,4 @@ Follow `standards/standard.md`. It is the meta-standard: the success criterion, 
 
 Create the `.md` file in `standards/` with `title` and `description` frontmatter, then run `bun run check` to regenerate `standards/index.md` and commit both. A standard carrying `paths:` also gains a generated rule under `governance/rules/standards/` and its consumed copy, which the same run writes and the commit carries.
 
-The `create-standard` skill has one write surface, `standards/` at the working root, in the toolkit and in a target alike. That is the root the resolver reads first, so an author never picks between two spellings.
+A standard has one write surface, `standards/` at the working root, in the toolkit and in a target alike. That is the root the resolver reads first, so an author never picks between two spellings.

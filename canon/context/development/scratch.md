@@ -56,7 +56,7 @@ A plan write is a no-op for every one of the four: `standards-audit.sh` exits on
 
 Most writers hold throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite, such as `git-pr`'s pull request body, `review-address`'s reply body, and `draft-figure`'s verification renders. None of those needs a root, since nothing outside the run that wrote it ever opens the file.
 
-Six write material a later run or a different worktree reads back, and each states the main root. `memory-capture` states it for `.canon/tmp/handoff/memory-routing/<slug>.md`, and `memory-review`'s append to that file relies on the location capture put it at rather than restating the root. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
+Five write material a later run or a different worktree reads back, and each states the main root. `memory-capture` states it for `.canon/tmp/handoff/memory-routing/<slug>.md`. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
 
 `draft-and-pick`'s `.canon/tmp/<slug>/candidates.html` reads like a seventh, since an operator drives the pick across more than one turn, but nothing outside the same skill run opens the scratch folder: `canon capture` and `canon serve` are its only readers there. The skill's close step batch-captures the final arms out to `.canon/picks/<slug>/` at the main root before it deletes the scratch folder, so the folder stays worktree-local.
 

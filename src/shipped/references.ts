@@ -168,8 +168,8 @@ const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
  * Reported unless `isStandardsPathReportable` reads the match as a
  * deliberate placeholder rather than a real citation. A body illustrating
  * the shape a project's own `standards/<name>.md` takes writes a bracketed
- * token this pattern also matches, such as `standards/<slug>.md` in
- * `create-standard/SKILL.md`, which names no real file. A bare,
+ * token this pattern also matches, such as `standards/<slug>.md`
+ * in a skill that drafts one, which names no real file. A bare,
  * non-bracketed match now reports whether or not the file exists, unlike
  * `DOCS_PATH`, which still gates on existence: a same-repository citation
  * under this corpus names no target project's own tree the way a `docs/`
@@ -206,7 +206,7 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
  *
  * Anchored on the trailing `\d{3}-[\w-]+\.md` rather than on the bare
  * `.claude/rules/` prefix, which is what keeps a folder mention carrying no
- * number, such as `create-rule`, `memory-review`, and `target-setup` already
+ * number, such as `create-rule`, `target-check`, and `target-setup` already
  * write correctly, from matching. The segment group between `rules/` and the
  * numbered file admits both a governance-namespace path
  * (`canon/canon/604-scratch.md`) and a project-namespace one

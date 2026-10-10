@@ -1,7 +1,0 @@
-# Feature: Invoice retry
-
-The invoice job drops a renewal when the payment provider times out.
-
-## Summary
-
-- Retry a timed-out renewal once before the job records it as failed.

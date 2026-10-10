@@ -1,7 +1,0 @@
----
-title: Delivery failures are charted on the transport dashboard
-description: The transport vendor's dashboard is where per-attempt delivery failures are read
-category: Reference
----
-
-Per-attempt delivery failures for this service are charted on the transport vendor's dashboard rather than in any log this repository writes.

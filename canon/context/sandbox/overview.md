@@ -47,7 +47,7 @@ A scenario is written in TypeScript from 2026-10-04, and the bash form takes no 
 
 ### Naming and staging a scenario
 
-- A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/memory-review.sh` drives `/canon:memory-review`, and a name that diverged would leave the `<category>/<rest>.sh` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
+- A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/context-fold.sh` drives `/canon:context-fold`, and a name that diverged would leave the `<category>/<rest>.sh` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
 - A scenario whose expectation reads a slug checks out its branch explicitly. `git init` inherits the machine's `init.defaultBranch`, so an arm resting on the initial branch name passes or fails by local git config.
 - Git history initializes fresh each run, and a `refs/sandbox/baseline` ref marks the post-setup state so `canon sandbox reset` restores without provisioning again.
 

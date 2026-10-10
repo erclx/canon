@@ -21,9 +21,9 @@ Pinning the slug once at chain entry is the alternative, and it makes the deleti
 
 ### A slug-keyed sweep cannot reach what a later chain step writes
 
-A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. A memory receipt is written by a standalone `memory-review` run, after the ship chain and its `context-fold` sweep have finished. A sweep keyed on the current slug looks for a name that does not exist yet, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
+A sweep placed in one ship-chain skill collects nothing when the file it looks for is written further down the same chain. A review receipt can be written by a run that follows the ship chain and its `context-fold` sweep. A sweep keyed on the current slug looks for a name that does not exist yet, and no later branch recovers it because a slug is unique per feature. The sweep runs, finds nothing, and reports a clean pass, which is the same silent shape as the drift gate above.
 
-Scanning the folder rather than keying on the slug is what survives this. The memory receipt sweep reads every `.canon/memory/review/memory-review-*.md` and tests each for pending items rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
+Scanning the folder rather than keying on the slug is what survives this. The branch report sweep reads every `.canon/review/branch-*.md` and tests each against the branch list rather than the session's own file. A sweep keyed on a slug is only safe when the file is written before it in the chain.
 
 ## Board and doc refresh
 
@@ -60,8 +60,6 @@ A `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, is applied
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
 ### The memory review nudge fires on a count
-
-`memory-capture` closes with a line naming `/canon:memory-review` only once `canon records stale memory` counts one batch of 25 entries due, and `git-ship` and `auto-ship` pass that line through their closing blocks. An unconditional line after every ship was removed earlier because a review per ship costs more than it drains, and a SessionStart hook would reach every session including workers that cannot act on it, so the count is what separates a pen worth reviewing from one that is not. A dispatched worker's line reaches the operator only when its controller relays it.
 
 ## Pull request writes
 
