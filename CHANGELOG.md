@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.31.0](https://github.com/erclx/canon/compare/v5.30.0...v5.31.0) (2026-10-10)
+
+
+### Features
+
+* **plan-feature:** cite fetched sources in a plan ([#2279](https://github.com/erclx/canon/issues/2279)) ([59fafa5](https://github.com/erclx/canon/commit/59fafa509412d1e2852a5e9980c8da6b4d572e9e))
+* **plans:** fold stacked batches that share most files ([#2286](https://github.com/erclx/canon/issues/2286)) ([83028c8](https://github.com/erclx/canon/commit/83028c805382ebc7387a0f16f7db8ea98a1d31b2))
+* **standards:** move the markdown standard into markdown-craft ([#2281](https://github.com/erclx/canon/issues/2281)) ([72506ce](https://github.com/erclx/canon/commit/72506ce269cb8bfe2e31867588d79eb620882903))
+* **upstream:** add the upstream digest verbs and skill ([#2284](https://github.com/erclx/canon/issues/2284)) ([70b78b0](https://github.com/erclx/canon/commit/70b78b034c1422bf87626d87a868bf1bd2a3fc2b))
+
 ## [5.30.0](https://github.com/erclx/canon/compare/v5.29.0...v5.30.0) (2026-10-05)
 
 
