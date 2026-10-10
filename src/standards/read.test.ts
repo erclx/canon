@@ -82,6 +82,12 @@ describe('resolveStandard', () => {
     })
   })
 
+  it('should answer a second-slice standard from the skill that owns it', () => {
+    expect(resolveStandard(ROOT, 'teach')?.source).toBe(
+      join('<canon>', 'claude/skills/teach-workspace/references/teach.md'),
+    )
+  })
+
   it('should keep an authored standard ahead of the moved map', () => {
     writeStandard('standards/markdown.md', '# Authored\n')
 
@@ -125,6 +131,12 @@ describe('listStandards', () => {
     const names = listStandards(ROOT)
 
     expect(names.filter((name) => name === 'markdown')).toEqual(['markdown'])
+  })
+
+  it('should name a second-slice standard once', () => {
+    const names = listStandards(ROOT)
+
+    expect(names.filter((name) => name === 'teach')).toEqual(['teach'])
   })
 
   it('should name a project standard the package does not carry', () => {

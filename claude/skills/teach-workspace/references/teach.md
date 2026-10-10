@@ -1,11 +1,6 @@
 ---
 title: Teach reference
 description: Workspace layout, ordinal naming, frontmatter, and the mission and learning-record formats for a learning workspace
-paths:
-  - '.canon/teach/**'
-rule:
-  - 'Follow the glossary standard for the glossary every workspace carries at its root. It is the single source for the entry shape, the ordering, and which terms the file carries. Read it with `canon standards glossary`.'
-  - 'Report it rather than proceeding silently when that file does not resolve. It ships with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have it.'
 ---
 
 # Teach reference
@@ -13,6 +8,23 @@ rule:
 Applies to a learning workspace at `.canon/teach/<nn>-<topic>/`. One workspace holds one subject studied across sessions, and it carries both halves of what studying produces: the durable reference material a reader consults later, and the disposable lessons a learner works through once.
 
 The folder is gitignored. Its markdown half is written in a format the authoring gates read, so a page promoted out of it later needs no conversion.
+
+## Contents
+
+- [Scope](#scope)
+- [What a working workspace looks like](#what-a-working-workspace-looks-like)
+- [Folder name](#folder-name)
+- [Layout](#layout)
+- [Frontmatter](#frontmatter)
+- [File naming](#file-naming)
+- [MISSION.md](#missionmd)
+- [Learning records](#learning-records)
+- [Revisit](#revisit)
+- [GLOSSARY.md](#glossarymd)
+- [RESOURCES.md](#resourcesmd)
+- [Conventions](#conventions)
+- [Anti-patterns](#anti-patterns)
+- [Template](#template)
 
 ## Scope
 

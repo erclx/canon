@@ -9,6 +9,17 @@ Applies to the canvas content under `.canon/canvas/`, where each page is a folde
 
 The folder is gitignored, so nothing in a repository checks its shape and nothing backs it up by default.
 
+## Contents
+
+- [Scope](#scope)
+- [What a working canvas looks like](#what-a-working-canvas-looks-like)
+- [Pages](#pages)
+- [Frames](#frames)
+- [Layout](#layout)
+- [Tokens](#tokens)
+- [What a frame must not assume](#what-a-frame-must-not-assume)
+- [Template](#template)
+
 ## Scope
 
 Governs the canvas content under `.canon/canvas/`: page folder names, frame files, the `layout.json` shape, how tokens reach a frame, and what a frame must not assume about where it renders.

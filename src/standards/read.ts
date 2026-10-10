@@ -60,6 +60,20 @@ export function standardRoots(root: string): StandardRoot[] {
  */
 const MOVED_STANDARDS: Readonly<Record<string, string>> = {
   markdown: 'claude/skills/markdown-craft/references/markdown.md',
+  canvas: 'claude/skills/canvas/references/canvas.md',
+  glossary: 'claude/skills/teach-workspace/references/glossary.md',
+  'groundwork-spikes':
+    'claude/skills/plan-groundwork/references/groundwork-spikes.md',
+  mermaid: 'claude/skills/draft-figure/references/mermaid.md',
+  ready: 'claude/skills/draft-ready/references/ready.md',
+  requirements: 'claude/skills/draft-doc/references/requirements.md',
+  'skill-paths': 'claude/skills/create-skill/references/skill-paths.md',
+  'skill-practice': 'claude/skills/create-skill/references/skill-practice.md',
+  'skill-requirement':
+    'claude/skills/create-skill/references/skill-requirement.md',
+  'tasks-decline': 'claude/skills/task-board/references/tasks-decline.md',
+  teach: 'claude/skills/teach-workspace/references/teach.md',
+  wiki: 'claude/skills/draft-doc/references/wiki.md',
 }
 
 function filename(name: string): string {

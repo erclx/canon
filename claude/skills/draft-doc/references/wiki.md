@@ -1,10 +1,6 @@
 ---
 title: Wiki reference
 description: Folder split, frontmatter, naming convention, and sourcing for a wiki reference page
-paths:
-  - 'wiki/**/*.md'
-rule:
-  - 'Read it before drafting a page. Do not work the placement criterion or the naming convention from memory.'
 ---
 
 # Wiki reference
