@@ -13,7 +13,7 @@ Target projects scale by splitting context across three loading tiers:
 
 - Always loaded: the root `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `canon/ARCHITECTURE.md`, eager at session start, holding cross-cutting behavior, product scope, and project-wide invariants
 - Path-scoped lazy: `.claude/rules/<scope>.md` with `paths:` frontmatter, loaded by glob match when files are read, holding do and don't rules and naming conventions for a file scope
-- On-demand lookup: `canon/context/<domain>.md`, `canon/wireframes/<surface>.md`, and `.claude/wiki/<page>.md`, read when the domain or surface is touched, holding per-domain narrative, per-surface layout intent, and tooling or workflow reference, indexed for discovery
+- On-demand lookup: `canon/context/<domain>.md` and `.claude/wiki/<page>.md`, read when the domain is touched, holding per-domain narrative and tooling or workflow reference, indexed for discovery
 
 `canon/context/` exists for discoverability rather than load cost. A nested `CLAUDE.md` below the cwd loads lazily when its subtree is read, so it is already cheap, and what it lacks is any signal that it exists. The `index.md` catalog lists every entry up front, so a session picks the one it needs before touching the domain.
 
@@ -55,7 +55,7 @@ Five surfaces under `.claude/` are Claude Code's own, and the toolkit invented n
 
 Two more sit under `.claude/` as the harness's rather than the toolkit's. `.claude/worktrees/` is where `EnterWorktree` creates a worktree and requires its target to sit, and nothing in this repository names `.claude/scheduled_tasks.lock`.
 
-The toolkit's committed surfaces sit under `canon/`: `canon/context/`, read on demand through its catalog, `canon/config/`, holding `baseline.json` for `canon audits` and `pr-labels.toml` for the pull request label map, the two eager documents, `canon/DESIGN.md`, read by `canon design render` and the design skills, and `canon/wireframes/`, audited by `canon context` in a project that carries one. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
+The toolkit's committed surfaces sit under `canon/`: `canon/context/`, read on demand through its catalog, `canon/config/`, holding `baseline.json` for `canon audits` and `pr-labels.toml` for the pull request label map, the two eager documents, and `canon/DESIGN.md`, read by `canon design render` and the design skills. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
 
 `.tmp/`, when it exists, is the old gitignored scratch spelling, which the scratch rule does not name, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
 

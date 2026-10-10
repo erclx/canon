@@ -86,7 +86,6 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/canon/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/canon/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
-- `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root
 

@@ -1,6 +1,6 @@
 ---
 title: Visual design workflow
-description: Tiered guide for design and wireframe authoring with Claude Code
+description: Tiered guide for design authoring with Claude Code
 category: Workflow
 ---
 
@@ -14,9 +14,9 @@ The tier framework sits alongside [Claude Design](../../wiki/claude/design.md), 
 
 ## Tier 0: prose only
 
-The default. `canon/DESIGN.md` holds visual intent as token tables for color, typography, spacing, and borders, with one Personality paragraph and at most three one-line rules a section, motion and iconography included. `.claude/WIREFRAMES.md` holds each surface's regions and states.
+The default. `canon/DESIGN.md` holds visual intent as token tables for color, typography, spacing, and borders, with one Personality paragraph and at most three one-line rules a section, motion and iconography included.
 
-Claude Code reads both and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
+Claude Code reads it and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
 
 ### Seed shape
 
@@ -52,16 +52,16 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 
 ## Tier 1: visual companion
 
-ASCII and prose stay as source of truth. Add a visual render as a feedback surface for the agent and for human review.
+Prose stays as source of truth. Add a visual render as a feedback surface for the agent and for human review.
 
-- Excalidraw handles agent-driven wireframes when the round-trip canvas loop matters
+- Excalidraw handles agent-drawn layouts when the round-trip canvas loop matters
 - Claude Design joins only when codebase extraction or the annotated handoff bundle is worth the ceiling cost
 
 Both produce derived artifacts, so human edits are review annotations rather than source changes.
 
 ### Seed shape
 
-Same as tier 0 with one addition. `WIREFRAMES.md` opts into Excalidraw rendering via a top-of-file marker like `<!-- excalidraw: WIREFRAMES.excalidraw -->`. `DESIGN.md` stays human-maintained.
+Same as tier 0. `DESIGN.md` stays human-maintained.
 
 Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in its own format. These are separate files from the toolkit's `canon/DESIGN.md` and are not synced with it. Treat impeccable's pair as its own source of truth for its commands, and the toolkit's `canon/DESIGN.md` as the source other toolkit skills read.
 
@@ -88,7 +88,7 @@ Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in its
 
 The two tools solve non-overlapping halves of the visual companion problem.
 
-Excalidraw gives the agent a canvas it can read back over MCP. Output is agent-facing and persists as a JSON file in the repo. Pick it when Claude Code needs to iterate on wireframes autonomously, not when a human needs polished review artifacts.
+Excalidraw gives the agent a canvas it can read back over MCP. Output is agent-facing and persists as a JSON file in the repo. Pick it when Claude Code needs to iterate on layouts autonomously, not when a human needs polished review artifacts.
 
 Claude Design reads the raw codebase without prose curation and produces a polished handoff bundle with chat history. Weekly quota makes it expensive, so reserve it for the extraction pass or the final handoff moment, not daily iteration.
 
@@ -144,4 +144,4 @@ Resist over-tiering early. Moving up is cheap because tiers stack. Moving down m
 - `canon/context/claude-plugin/skill-strategy/overview.md`: how to decide between workflow and domain-knowledge skills
 - [`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp): browser automation MCP used in tier 1 and tier 2
 - [`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp): live frontend debugging MCP used in tier 1 and tier 2
-- [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 wireframe companion
+- [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 visual companion
