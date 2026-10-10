@@ -31,11 +31,11 @@ Lifting a conditional from another skill copies the clause rather than what it t
 
 ### A deterministic check backstops the session judgment writing the doc
 
-`context-fold` Step 3 and Step 6 rewrite canonical docs on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 9 closes that gap by running `canon context classify diff` over the fold's whole diff baseline, after Step 3 and Step 6 have already run, and answering every non-`KEEP` finding rather than only the files those two steps wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
+`context-fold` Step 3 and Step 5 rewrite canonical docs on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 8 closes that gap by running `canon context classify diff` over the fold's whole diff baseline, after Step 3 and Step 5 have already run, and answering every non-`KEEP` finding rather than only the files those two steps wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
 
 The verb's own extraction scopes to canonical doc types and reports nothing when the range carries none, and it reuses the Diff baseline section's own base rather than resolving a second one.
 
-A `REPLACE` or `HISTORY` finding is applied in place with a one-line reason to keep instead when it should not be. A `MOVE` finding is reported rather than cut, since the verdict means correct content on the wrong surface, such as a measured result written into a context entry that belongs in the requirements record, and only the model layer returns it.
+A `REPLACE` or `HISTORY` finding is applied in place with a one-line reason to keep instead when it should not be. A `MOVE` finding is reported rather than cut, since the verdict means correct content on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it.
 
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
