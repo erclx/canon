@@ -137,7 +137,7 @@ Emit the Output block on the wake after `git-ship`'s background CI watch exits o
 
 ## Output
 
-Respond with up to six lines:
+Respond with up to five lines:
 
 ```plaintext
 ✅ Autoshipped (<state>): <PR url>
@@ -145,12 +145,11 @@ Respond with up to six lines:
 <N minor findings kept in .canon/review/branch-<slug>.md>
 <N facts routed to context entries>
 <N memories captured in .canon/memory/>
-<the review line memory-capture returned>
 ```
 
 `<state>` is whatever the Step 8 read returned, being `draft` or `ready, unsupervised`, rather than the state the mark asked for.
 
-Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if there were no minor findings, and the fourth if nothing routed. Omit the fifth if `memory-capture` wrote no memory file this session, and the sixth if it returned no review line. Pass that line through verbatim, since a dispatched worker's controller relays it to the operator.
+Fill the second line from the counts Step 5 held, and omit it when no checklist was produced. Omit the third line if there were no minor findings, and the fourth if nothing routed. Omit the fifth if `memory-capture` wrote no memory file this session.
 
 This block replaces the one `git-ship` closes on rather than following it, since emitting both reports one run twice and buries the state under a `✅ Shipped` that does not name it.
 
