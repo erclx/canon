@@ -46,7 +46,7 @@ const REFUSALS: Record<Refusal, string> = {
     'No cursor is stored, so there is no range to read. Pass --since <version> with the last version a digest covered.',
   'bad-since': 'The --since value is not a dotted version such as 2.1.256.',
   'cursor-missing':
-    'The cursor version is absent from the releases feed, so a range cannot be bounded. Pass --since with a version the feed carries.',
+    'The releases feed ran out before reaching a release at or below the cursor, so the range cannot be bounded. Pass --since with a more recent version.',
   'rate-limited':
     'GitHub refused the request. Set GH_TOKEN or GITHUB_TOKEN to lift the hourly limit.',
   network: 'The releases feed could not be reached.',

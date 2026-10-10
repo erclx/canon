@@ -23,7 +23,7 @@ The cursor lives in its own backed record folder rather than in the intake. Inta
 
 ## What the range bound does
 
-The walk stops at the first release not newer than the cursor, not at an exact tag match. The first live run exposed why: `2.1.256`, the version the groundwork measured from, was never published as a release, so an exact match never stopped. Comparing versions bounds the range either way and still refuses when every release returned is newer than the cursor.
+The walk stops at the first release not newer than the cursor, not at an exact tag match. The first live run exposed why: `2.1.256`, the version the groundwork measured from, was never published as a release, so an exact match never stopped. Comparing versions bounds the range either way and still refuses when every release returned is newer than the cursor. GitHub lists releases by creation date, so a backport published after a newer version would end the walk early and drop the releases behind it. The current feed has none.
 
 ## How complete a digest is
 

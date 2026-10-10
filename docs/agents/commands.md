@@ -116,7 +116,8 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `context`, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
 - `markdown`, in `markdown-audit.md`: `audit`
 - `repo`, described below: `metadata propose`, `metadata apply`
-  Common patterns:
+
+Common patterns:
 
 - `list --json` → machine-readable catalog on stdout.
 - `install <name> <path>` → install a specific entry into a target project.
@@ -150,7 +151,7 @@ the JSON record rather than on the exit, since an offline machine has to read as
 unmeasured rather than as a failing check.
 
 `canon upgrade --json` carries one further state, `pending`, that the skew report
-does not. It means the checkout at the working directory holds a release npm does
-not serve yet, so there is nothing to install. The record names that version in
-`checkout` beside `latest`, exits 0, and its `message` starts `CLI stays at`. A
-directory outside any canon checkout never reads `pending`.
+does not: the working directory's checkout holds a release npm does not serve
+yet, so there is nothing to install. The record names it in `checkout` beside
+`latest`, exits 0, and its `message` starts `CLI stays at`. Outside a canon
+checkout it never reads `pending`.
