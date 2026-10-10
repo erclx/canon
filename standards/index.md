@@ -17,7 +17,6 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Figure reference](figures.md): When a figure earns its place, the render-first policy for a graph-shaped subject, freehand SVG as the escape hatch, and its wrapping, color, and accessibility rules
 - [Groundwork reference](groundwork.md): Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
 - [Intake reference](intake.md): Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
-- [Memory reference](memory.md): Filename and type prefix, frontmatter, the body shape per type, links between entries, and the lifecycle from write to retire
 - [Plan lifecycle reference](plan-lifecycle.md): When a feature plan is written, where it lives, how it changes mid-flight, and its move to the archive
 - [Plan reference](plan.md): Filename and slug, the required sections, and the suggested-and-answer contract for a feature plan
 - [Pull request reference](pr.md): Pull request title and body conventions

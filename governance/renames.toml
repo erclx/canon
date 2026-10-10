@@ -20,7 +20,6 @@
 [renamed]
 "015-output" = "566-output"
 "035-tasks" = "602-tasks"
-"045-memory" = "603-memory"
 "055-scratch" = "604-scratch"
 "085-worktrees" = "605-worktrees"
 "087-git" = "606-git"
@@ -33,7 +32,6 @@
 "556-groundwork" = "656-groundwork"
 "557-intake" = "657-intake"
 "558-plan" = "658-plan"
-"559-memory" = "659-memory"
 "562-session" = "662-session"
 "501-markdown" = "801-markdown"
 "580-readme" = "880-readme"
@@ -50,7 +48,6 @@
 "655-tasks" = "tasks"
 "656-groundwork" = "groundwork"
 "657-intake" = "intake"
-"659-memory" = "memory"
 "662-session" = "session"
 "570-skill" = "skill"
 "590-rule-authoring" = "rule"
