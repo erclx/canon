@@ -1,6 +1,6 @@
 ---
 title: Canvas
-description: The canvas server, the page and frame content format, token resolution into frames, capture, and the skill and standard that drive it
+description: The canvas server, the shell's regions, states, and behavior, the page and frame content format, token resolution into frames, capture, and the skill and standard that drive it
 ---
 
 # Canvas
@@ -20,6 +20,82 @@ The canvas exists for Claude to draw frames the operator reviews. No further des
 - `src/canvas/client/inspector/` owns the inspector's field, section, size field, alignment grid, color field and picker, value formatting and color parsing, and its own stylesheet, composed by `inspector.tsx`
 - `claude/skills/canvas/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
+
+## Surface
+
+The shell shows one project's pages and the frames on each. Its chrome follows the system theme until the operator picks one, and the pick is remembered for the next visit. The frame's own markup is the frame's HTML file and is never restated here.
+
+### Regions
+
+- Pages panel: the left column, holding the brand line and theme toggle at its top, then the Pages and Theme tabs. The Pages tab holds the page list and below it the current page's frame list
+- Theme tab: in place of the page and frame lists, the project's tokens under one label per group, being color, spacing, radius, font family, font size, and other. A row reads a token's name and value, with a swatch beside a color. Read-only
+- Layers: under a frame's row, opened by the disclosure beside it, the frame's element tree from its body down, one row per element reading `tag.class` and a leaf's text
+- Surface: between the two panels, holding every frame of the current page at its box. Each frame's name, size, editing badge, and theme switch sit on one line above it, which is the frame's handle and holds one screen size at any zoom. A row too short for every part drops the theme switch first, then the badge, then the size, before it shortens the name
+- Tool strip: at the surface's top left, Move over Pan with the one in effect lit, then Undo over Redo, each disabled while there is nothing to step, then the panel toggle
+- Zoom toolbar: at the surface's bottom right, holding zoom out, the level, zoom in, and fit
+- History notice: at the surface's top center once an undo or redo drops an entry
+- Panel handles: on each panel's inner edge, drawn in the accent on hover, focus, or drag
+- Element outline: dashed around the element under the pointer, drawn over the frame
+- Selection: a thin outline with a square handle on each corner, all at one screen size. A selected frame's name takes the accent, and a selected element carries its rounded size in a chip under it
+- Details panel: a slim column on the right, holding the frame inspector, then the current page's name and frame count, then where the frames' tokens come from
+- Frame inspector: the selected frame's name and its x, y, width, and height as read-only fields, two to a row
+- Element inspector: below the frame inspector once an element is selected, its `tag.class` name over six titled sections in a two-column grid. Each field starts at the element's inline value, else its computed one
+
+The sections are Layout, Flex, Appearance, Typography, Fill, and Text. Layout holds x and y read-only, then width and height as a number, Fill, or Fit, then padding. Flex holds alignment, direction, wrap, and gap, else an add button. Appearance holds opacity and radius. Typography holds family, size, weight, spacing, and alignment. Fill holds color and background as swatch, hex, opacity, tokens, and eyedropper. Text holds the element's text, read-only over children. A field is a bordered box with a short glyph inside its left edge, such as `W`, and the value right of it. A section header keeps an empty lane at its right for later buttons.
+
+Below 900 wide the details panel is hidden and the pages panel narrows to a fixed width with no handle. Below 600 wide the pages panel stacks above the surface, capped at a share of the height and scrolling on its own.
+
+### States
+
+The `assets/evidence/canvas/arrange/`, `layers/`, and `shell/` folders hold the captures the capture and visual-check workflows read. A state with no capture says so.
+
+- filled: the current page holds at least one frame. Every frame sits at its box with the page selected in the list. Not captured
+- no-pages: the canvas folder holds no page. The page list gives way to the add-a-page line and the frame list is absent. Not captured
+- empty-page: the current page holds no frame. The frame list gives way to the add-a-frame line over an empty surface. Not captured
+- unplaced: a frame file has no box in the page's layout. That frame sits in a row after the placed ones with a count at right. Not captured
+- malformed: the page's layout file does not parse. Every frame sits in a default row with an alert at right naming the file. Not captured
+- no-tokens: no token stylesheet resolves. Frames stay unstyled and the details panel names where tokens would go. Not captured
+- unreachable: the page list cannot be read from the server. The panel gives way to one line saying to check the server is running. Not captured
+- light and dark: the system prefers one or the operator picks it, and the chrome takes that ground. Not captured
+- frame-switched: the operator switches one frame's theme from its label. That frame takes the other theme while the chrome and the rest stay put. Not captured
+- selected: the operator presses a frame's label or picks it in the list. The frame is outlined with handles, its name in the accent, its row marked, and its box shown. Captured in `arrange/`
+- element-hover: the pointer rests on an element in a frame or a layer row. A dashed outline surrounds it on the surface. Captured in `layers/`
+- element-selected: the operator clicks an element or picks its layer row. It gets an outline with handles and a size chip, its row is marked, and its values fill the inspector. Captured in `arrange/`
+- element-stale: the frame file changed since the element was picked. No outline or marked row shows, and the inspector says the pick may now name another element. Captured in `layers/`
+- element-mismatch: the browser and the file count the frame's elements differently. The pick is refused with an alert in the details panel. Captured in `layers/`
+- dragging: the operator moves a pressed frame. It follows the pointer and its x and y update in the inspector. Captured in `arrange/`
+- resizing: the operator drags a corner handle. A frame grows from its held far corner and an element from its top left, with its size shown. Not captured
+- editing: a session marks the frame, until it clears the mark or the mark expires. A badge naming the session follows the size and a dashed outline surrounds the frame. Captured in `arrange/`
+- write-failed: the server refuses a move or a selection. The frame returns to its stored place and an alert shows in the details panel. Not captured
+- edited: the operator commits a changed field or picks a token. The frame reloads with the change and `Saved` shows beside the element label for a moment. Not captured
+- edit-refused: the server refuses an edit, as when the file changed under it. The frame reloads, the typed value is dropped, and an alert says nothing was saved. Not captured
+- undo-dropped: an undo or redo finds its element or frame changed since the edit. Nothing is written, the entry is gone, and the history notice says so. Captured in `shell/`
+- panels-hidden: the operator presses the panel toggle or its key. Both panels go and the surface takes the full width with the frames held still. Captured in `shell/`
+- panels-resized: the operator drags a panel handle or moves it with the arrow keys. That panel takes the new width with the frames held still. Captured in `shell/`
+- theme and theme-empty: the Theme tab is picked. The token groups replace the page and frame lists, or one line says no tokens resolve, then the server's notice. Not captured
+
+### Behavior
+
+- Picking a page shows its frames and fits them into the surface. Picking a frame in the list selects it and centers it at the current zoom, and pressing one on the surface marks its row
+- Dragging the empty surface, or scrolling anywhere on it frames included, pans it, and scrolling with the control key held zooms about the pointer
+- A frame file Claude rewrites reloads that frame alone with pan and zoom unchanged, and a frame or page Claude adds appears with no refresh. A frame Claude moves or removes updates the surface and the inspector, and a removed frame leaves nothing selected
+- Pressing a frame's label selects it and drops any element picked inside it. One frame is selected at a time, and the selection is written to the project so Claude reads it as "this one"
+- Dragging a frame by its label moves it, and releasing writes the new position to the page's layout. A press that never moves writes no position or size
+- Clicking inside a frame selects the element under the pointer and its frame, and the click goes no further, so a link or a button in the frame does nothing. Picking a layer row selects the same way, and selecting on the surface opens the frame's layers and marks its row
+- With a frame focused, Enter or a Space released with no pan selects it, and the arrow keys nudge it, further with Shift. Control or Command with an arrow resizes from the keyboard
+- Dragging a selected element's corner handle previews its size in the frame, then writes width and height on release. Its inspector fields are the keyboard path
+- An element field commits on Enter or on leaving it, a value left as it started sends nothing, and Escape puts it back. Dragging a number field's glyph scrubs it, previewed in the frame and written once on release, and a cancelled drag puts both back
+- A committed field writes into the element's inline style or its text and leaves the rest of the file as it was. Fields hold while an edit is in flight and take the file's values once the frame reloads
+- The Theme tab lists what the token stylesheet defines and edits nothing
+- A frame's theme switch flips that frame alone, and the toggle in the pages panel flips the chrome
+- The panel toggle, or backslash with the canvas focused, hides both panels. A drag or an arrow key on a handle resizes its panel and never squeezes the surface out
+
+### Not on this surface
+
+- No shadows, constraints, effects, or components, since the inspector edits the basic set alone
+- No token editing, since the Theme tab only lists them
+- No project tabs, since one canvas serves one repository
+- No capture control on the surface
 
 ## Decisions
 
@@ -94,7 +170,7 @@ A browser computes a unitless line height to pixels, so the field shows a pixel 
 ### Skill
 
 - The skill starts the server before writing any frame, then fetches the printed address and checks the shell itself. Captures go through the frame route, so a shell that failed to build answers `/` with an empty `200` while every capture still passes, and only the shell check notices.
-- A picked direction leaves the canvas for the project's design document or wireframes. The canvas is a drafting surface, and its folder is gitignored, so nothing on it is citable from a tracked file.
+- A picked direction leaves the canvas for the project's design document. The canvas is a drafting surface, and its folder is gitignored, so nothing on it is citable from a tracked file.
 
 ### Editing mark
 
@@ -126,6 +202,5 @@ The component gallery existed only for the board's components panel and retired 
 - The writer reads a style attribute through `HTMLRewriter`, whose `getAttribute` returns the value with its entities still encoded and whose `setAttribute` escapes only `"`, as `&quot;`. A quoted font family comes back carrying `&quot;`, so the declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon.
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does, since a bare reuse restyles the Theme rows too.
 - In the browser walk, reading a write route's response body through Playwright hung once the write's change event made the shell reread the page list. A walk case asserts on the request's own JSON body and the response status instead.
-- `canon/wireframes/canvas.md` sits just under the 300 rendered line ceiling. Its States table renders each row at about 233 characters, three lines apiece, so one cell wider than the widest already there pushes every row back to four lines and the file past the ceiling. Its Behavior list states intent with no measurements, which live in this entry.
 - `HTMLRewriter` hands each text chunk over as source text with its entities still encoded, so the chunks inside an element holding text alone join into its raw inner content, and `setInnerContent(raw, { html: true })` writes it back byte for byte. The text undo depends on that, and takes the bytes from the server's record, never a request, since they are written as markup.
 - The signals integration skips a component whose props did not change, so a signal only a parent reads does not re-render its children. `ElementDetails` reads `savedEdit`, which clears on a timer, so `ElementFields` can re-render in the middle of a drag, and a value a drag must hold is read at press rather than at render.
