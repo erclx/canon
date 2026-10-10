@@ -7,7 +7,7 @@ description: The canvas server, its browser shell, and the verbs behind them. Us
 
 Read `canon/context/features/canvas.md` for the layout, the content format, token resolution, and the decisions behind the surface before editing. `docs/agents/canvas.md` is the verb reference.
 
-The canvas exists for Claude to draw frames the operator reviews, and the operator edits by hand only selection, color, and text. Do not add inspector or navigation features beyond those unless the operator asks.
+The canvas exists for Claude to draw frames the operator reviews. Do not add new design-tool features unless the operator asks.
 
 ## Working against the canvas
 

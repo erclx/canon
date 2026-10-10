@@ -11,7 +11,7 @@ description: The canvas server, the page and frame content format, token resolut
 
 `canon canvas` serves a local surface of pages and HTML frames that the operator drags, selects, and edits in the browser, and gives an agent a verb for each thing the mouse does. The `canvas` plugin skill tells a session how to drive it, and `standards/canvas.md` fixes the content format both sides write. The verb reference, with every record and refusal, is `docs/agents/canvas.md`.
 
-The canvas exists for Claude to draw frames the operator reviews, and the operator edits by hand only selection, color, and text. Further design-tool features are out of scope until the operator asks, so a later planner does not reopen inspector or navigation features unprompted.
+The canvas exists for Claude to draw frames the operator reviews. No further design-tool features are added unless the operator asks, so a later planner does not propose new inspector or navigation features unprompted.
 
 ## Layout
 
