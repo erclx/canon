@@ -10,7 +10,7 @@ The claude stack installs the `.claude/` workflow directory into a project. Stat
 CLAUDE.md              ← seeded. Project context and rules, auto-loaded by Claude Code each session
 
 canon/
-├── REQUIREMENTS.md    ← seeded. Project goals, non-goals, MVP scope
+├── REQUIREMENTS.md    ← seeded. Project problem, goals, non-goals
 ├── ARCHITECTURE.md    ← seeded. Technical design decisions and open questions
 ├── DESIGN.md          ← seeded. Visual intent and the decisions behind it
 ├── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
