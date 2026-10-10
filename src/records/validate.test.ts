@@ -736,6 +736,12 @@ describe('checkPlan', () => {
       expect(checkPlan('feature-a-b.md', body)).toEqual([])
     })
 
+    it('should keep a question out of Sources when Sources closes the plan', () => {
+      const body = `${conformingPlan()}\n**Sources:**\n\n- ${link}: "the exact words"\n`
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
     it('should read a nested bullet as part of the entry above it', () => {
       const body = withSources(`- ${link}, backing the pick`, '  - "the words"')
 
