@@ -51,7 +51,7 @@ Required-section, index, and wireframe-states findings sit between the two. All 
 
 The widened gate is correct here and wrong at the project root. A seed is authored once and read by every target, while a context entry in a live project is edited under time pressure by the people who own it. A missing section in the first is a defect shipping outward, and in the second it is a threshold worth reporting and not worth blocking a push over.
 
-Coverage follows the index-plus-entry contract, so it reaches seeded entries and the indexes beside them. `DESIGN.md` sitting directly under `.claude/` belongs to no audited folder and stays outside it, while `REQUIREMENTS.md` is measured on its own path. The seed record states no line allowance, so it is reported rather than gated, which is what a seed template showing the shape of a record should be.
+Coverage follows the index-plus-entry contract, so it reaches seeded entries and the indexes beside them. `DESIGN.md` sitting directly under `.claude/` belongs to no audited folder and stays outside it, while `REQUIREMENTS.md` is measured on its own path. The seed record states its own 600-word cap, which gates the same way a project's record does.
 
 The stage prints the entries it measured per root and warns on a root that measured none. A root can resolve an audited folder and hold no entry in it, which `tooling/claude/seeds` does today, so a single pass line over the set would report coverage of a tree nothing opened.
 
