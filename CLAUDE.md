@@ -6,14 +6,7 @@ A CLI and Claude Code plugin. What it is for, its goals, and its constraints are
 
 - When reading toolkit state, prefer a CLI verb over inspecting the files yourself, since the verb is the surface under test.
 - When directing the user to a skill, give the exact command with its arguments, or say it runs bare.
-- When a fix has a natural mirror in a template or seed, flag it as a follow-up rather than silently widening the change.
-- Before starting a new feature, confirm a concrete project or use case drives it, and lift patterns from that project where precedent exists.
 - Default to `bunx -y <pkg>` for one-shot package execution. Mention `npx` only as a fallback.
-- Prefer one layout that serves both a new and a grown project over dual-mode toggles or migration shims.
-- When a fix could live in a skill body or a seed, default to the skill. Lift it into shared infrastructure on the second concrete case.
-- When encoding a fix into a skill, standard, or seed, keep the principle and strip the reporting project's specifics: its filenames, frameworks, deploy targets, and label values.
-- When triaging a multi-topic request, list every concern and account for each one.
-- Update affected pages under `docs/` in the same change, through `canon:docs-sync`.
 
 ## Content ownership
 
@@ -38,7 +31,7 @@ Load the skill before editing anything in its domain.
 
 | Task type                                               | Skill                 |
 | ------------------------------------------------------- | --------------------- |
-| `src/`, `scripts/`, `sandbox/`, `lib/`, `assets/`       | `internal-scripts`    |
+| `src/`, `scripts/`, `sandbox/`                          | `internal-scripts`    |
 | `tooling/`, manifests, golden configs, seeds            | `internal-tooling`    |
 | `standards/`, `docs/`, `canon/context/`                 | `internal-standards`  |
 | `governance/rules/`, `governance/stacks/`               | `internal-governance` |

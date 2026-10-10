@@ -43,6 +43,8 @@ Classify against the toolkit's own surfaces. Score in this order and stop at the
 
 State the class and the one-line reason per issue before routing. Do not batch unrelated fixes into one branch.
 
+When the fix encodes into a skill, standard, or seed, keep the principle and strip the reporting project's specifics: its filenames, frameworks, deploy targets, and label values. The issue describes one project, and the fix serves every project that installs the toolkit.
+
 ## Step 3: route
 
 - Direct fix: rename the branch to a conventional name (invoke `git-branch`), make the edit, then open the PR with `git-pr`.
