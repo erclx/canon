@@ -254,8 +254,8 @@ figcaption {
    navigation shared by every teach page. Recovered from two gitignored
    course.css files that predate a regression that dropped this layer from the
    generator, and rewritten onto this module's tokens rather than the
-   incompatible palette they carried. See canon/wireframes/teach/chrome.md for
-   the shape. */
+   incompatible palette they carried. See canon/context/features/teach/chrome.md
+   for the shape. */
 
 :root {
   --teach-sans: var(--type-body-family);
@@ -282,6 +282,24 @@ figcaption {
   --ink-faint: var(--color-muted);
   --accent: var(--color-accent);
   --accent-bg: var(--color-teach-accent-bg);
+
+  --teach-syntax-keyword: #c76b5f;
+  --teach-syntax-string: #8dbb6c;
+  --teach-syntax-number: #d4a15a;
+  --teach-syntax-title: #b99ad8;
+  --teach-syntax-attr: #6fb3c4;
+  --teach-syntax-comment: #7f7f7c;
+  --teach-syntax-meta: #8c8b86;
+}
+
+[data-theme='light'] {
+  --teach-syntax-keyword: #ad4a4b;
+  --teach-syntax-string: #2d6b22;
+  --teach-syntax-number: #8a5300;
+  --teach-syntax-title: #72489a;
+  --teach-syntax-attr: #1e6478;
+  --teach-syntax-comment: #6e6d6c;
+  --teach-syntax-meta: #666561;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1339,6 +1357,58 @@ pre code {
   background: none;
   padding: 0;
   font-size: 1em;
+}
+
+/* Build-time highlight.js spans. Every class reads a --teach-syntax-* token,
+   so the dark and light values switch with the ground rather than per rule. */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-built_in,
+.hljs-doctag {
+  color: var(--teach-syntax-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-template-tag,
+.hljs-symbol {
+  color: var(--teach-syntax-string);
+}
+.hljs-number,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-id {
+  color: var(--teach-syntax-number);
+}
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-bullet {
+  color: var(--teach-syntax-title);
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-property {
+  color: var(--teach-syntax-attr);
+}
+.hljs-comment,
+.hljs-quote {
+  color: var(--teach-syntax-comment);
+  font-style: italic;
+}
+.hljs-meta,
+.hljs-deletion,
+.hljs-subst {
+  color: var(--teach-syntax-meta);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
 }
 
 /* ---- Callout ---- */
