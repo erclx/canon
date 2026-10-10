@@ -193,21 +193,29 @@ test('the skills field is one tab stop with a described usage line', async ({
   await expect(skills.nth(1)).toHaveAttribute('aria-describedby', /.+/)
 })
 
-// The first group holds seven names, so it lays out as two rows of four
+// The group under test holds ten names, so it lays out as three rows of four
 // columns above 900px, filling down each column, and as rows of two at 320.
+// The row count is read off the page so a catalog change moves the expected
+// index with it rather than breaking the spec.
+const arrowGroup = 'Decide what to build'
+
 test('arrow keys follow a column-first grid at desktop width', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('/')
-  const skills = page.locator('[data-field="skills"] li')
+  const group = page.locator('[data-field="skills"] .group', {
+    hasText: arrowGroup,
+  })
+  const skills = group.locator('li')
+  const rows = Math.ceil((await skills.count()) / 4)
 
   await skills.first().focus()
   await page.keyboard.press('ArrowRight')
-  await expect(skills.nth(2)).toBeFocused()
+  await expect(skills.nth(rows)).toBeFocused()
 
   await page.keyboard.press('ArrowDown')
-  await expect(skills.nth(3)).toBeFocused()
+  await expect(skills.nth(rows + 1)).toBeFocused()
 
   await page.keyboard.press('ArrowLeft')
   await expect(skills.nth(1)).toBeFocused()
@@ -221,7 +229,10 @@ test('arrow keys follow a row-first grid at the 320 floor', async ({
 }) => {
   await page.setViewportSize({ width: 320, height: 800 })
   await page.goto('/')
-  const skills = page.locator('[data-field="skills"] li')
+  const group = page.locator('[data-field="skills"] .group', {
+    hasText: arrowGroup,
+  })
+  const skills = group.locator('li')
 
   await skills.first().focus()
   await page.keyboard.press('ArrowRight')
