@@ -162,14 +162,14 @@ const SEEDED_FILES: readonly string[] = [
   'REQUIREMENTS.md',
   'DESIGN.md',
 ]
-const SEEDED_DIRS: readonly string[] = ['memory', 'tasks', 'wireframes']
+const SEEDED_DIRS: readonly string[] = ['tasks', 'wireframes']
 
 /**
  * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
  *
  * `wireframes` is a tracked surface entry, resolved under `canon/` ahead of
- * `.claude/`, while `memory` and `tasks` are session records resolved under
- * `.canon/` ahead of `.claude/`. Routing every name through `recordDir`
+ * `.claude/`, while `tasks` is a session record resolved under `.canon/`
+ * ahead of `.claude/`. Routing every name through `recordDir`
  * reported a migrated target's `canon/wireframes/` as missing, since that
  * resolver never checks `canon/`.
  */
