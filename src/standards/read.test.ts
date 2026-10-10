@@ -104,6 +104,10 @@ describe('resolveStandard', () => {
     )
   })
 
+  it('should return undefined for a name matching an inherited object key', () => {
+    expect(resolveStandard(ROOT, 'constructor')).toBeUndefined()
+  })
+
   it('should return undefined for a name under no root', () => {
     expect(resolveStandard(ROOT, 'bogus')).toBeUndefined()
   })
@@ -111,10 +115,10 @@ describe('resolveStandard', () => {
 
 describe('listStandards', () => {
   it('should name a project standard once when the package carries it too', () => {
-    writeStandard('standards/markdown.md', '# Authored\n')
+    writeStandard('standards/plan.md', '# Authored\n')
     const names = listStandards(ROOT)
 
-    expect(names.filter((name) => name === 'markdown')).toEqual(['markdown'])
+    expect(names.filter((name) => name === 'plan')).toEqual(['plan'])
   })
 
   it('should name a moved standard once', () => {

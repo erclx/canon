@@ -78,7 +78,10 @@ export function resolveStandard(
     if (existsSync(path)) return { path, source: join(label, file) }
   }
 
-  const moved = MOVED_STANDARDS[basename(file, '.md')]
+  const movedName = basename(file, '.md')
+  if (!Object.hasOwn(MOVED_STANDARDS, movedName)) return undefined
+
+  const moved = MOVED_STANDARDS[movedName]
   if (!moved) return undefined
 
   const path = join(PROJECT_ROOT, moved)
