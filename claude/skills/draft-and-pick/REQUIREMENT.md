@@ -49,7 +49,7 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Take the pick through the structured question surface, with the recommendation ranked first and marked, and every option carrying its cost. Read the canvas selection only to resolve an answer that points at it, and treat an empty or stale selection as no answer.
 - Keep every write inside the run's own canvas pages until the pick is final.
 - Apply the winning arm in one change.
-- Capture every arm from the final round as an image named for its frame before deleting the run's pages, rather than discarding the losing arms with them.
+- Capture every arm from the round the pick came from, whichever round that is, as an image named for its frame before deleting the run's pages, rather than discarding the losing arms with them.
 - Delete only the canvas pages the run itself added, recorded as it adds them, and stop only a canvas server the run itself started.
 - Resolve the archival capture's destination against the main worktree root, never against a linked worktree the run happens to be building in.
 - Put the candidates on the canvas on every run, whatever the decision's layer, and emit the canvas link ahead of the first pick question, so the operator can open the page the question is about and a still is never the only address.

@@ -50,7 +50,7 @@ paths = ["index.html", "canon/DESIGN.md"]
 # note exists to prevent.
 #
 # `.canon/picks/**` is the third write step 6 directs: the per-frame capture of
-# the final round's arms lands there as the durable revert record, before the
+# the picked round's arms lands there as the durable revert record, before the
 # round pages are deleted from `.canon/canvas/`. The composite render taken at
 # step 3 lands in session scratch, which `.canon/tmp/**` admits.
 write_scope = [".canon/canvas/**", ".canon/tmp/**", ".canon/picks/**", "index.html", "canon/DESIGN.md"]

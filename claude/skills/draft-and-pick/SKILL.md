@@ -59,7 +59,7 @@ Render the page and look at what came back before handing anything over:
 canon canvas capture <page> --composite --json
 ```
 
-- Point `--out` at `evidence/<slug>/renders/<page>.png` inside a live track, and leave it at its session-scratch default everywhere else. A pick taken from an image the track does not hold is a judgment nobody but this session can check, and the archive in Step 6 covers the final round alone.
+- Point `--out` at `evidence/<slug>/renders/<page>.png` inside a live track, and leave it at its session-scratch default everywhere else. A pick taken from an image the track does not hold is a judgment nobody but this session can check, and the archive in Step 6 covers the picked round alone.
 - Read the PNG's `path` off the record. The composite shows every frame in its default theme, so look at the other theme on the live canvas where the arms carry two.
 - `canon canvas capture` needs a browser binary the toolkit does not install. When it refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, stop the canvas server if this run started it, then stop rather than describing an arm nobody has seen.
 - A capture refusing on a font names the family it read off the frame's text. Take the repair `canon:canvas` Step 6 gives and capture again.
@@ -91,7 +91,7 @@ Put the choice to the operator through the structured question surface, since a 
 
 1. Apply the winning arm to the real surface, in one change.
 2. Close out whatever document stated the decision as open, in the same change, naming the arm that won and the ones that stayed defensible. A pick that changes a surface and records nothing about why leaves the next reader to re-derive it from a diff. Skip this where nothing stated the decision.
-3. Capture the final round's frames into the archive with `canon canvas capture <page> --out <archive-dir> --json`. Each frame lands as `arm-<id>.png`, which keeps every arm past the pick, the losing ones included, as a durable revert record.
+3. Capture the frames of the round the pick came from into the archive with `canon canvas capture <page> --out <archive-dir> --json`. That page is the final round's unless Step 4 resolved a revert to an earlier round, and archiving any other page would let item 5 delete the winning arm with nothing kept. Each frame lands as `arm-<id>.png`, which keeps every arm of that round past the pick, the losing ones included, as a durable revert record.
 4. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than against a linked worktree this run happens to be building in.
 5. Delete every page folder on the run's list from under the `content` folder `canon canvas list --json` reports, now that every arm sits at the durable path. Touch no page the run did not add, whatever its name. A variant left on the canvas is a second design nobody maintains.
 6. Stop the canvas server if this run started it, and leave one the operator started running.
