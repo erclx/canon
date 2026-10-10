@@ -9,7 +9,7 @@ metadata:
 
 Consume the feedback queue that `canon feedback` fills. Each open `feedback` issue is measured against the tree and filed as one item for the operator, who answers it before anything is built.
 
-The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `${CLAUDE_SKILL_DIR}/../../standards/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
+The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
 
 Run from the toolkit repo root. This skill reads GitHub issues and writes only inside its claimed folder. It posts no comment, close, or label to GitHub.
 

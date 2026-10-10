@@ -27,16 +27,12 @@ carried, and the sync says so. The sync lists each change by path before it
 applies, and the target's git diff is the record afterwards. `canon sync
 --check` lists the same file as `retired` or `renamed` before any sync runs.
 
-The `standards` band is the largest such move. Each rule that only routed a
-path to a standard ships under that standard's name at
-`.claude/rules/canon/standards/<standard>.md`. The rules for `.canon/tasks/**`
-and `.canon/plans/**` are hand-written at `canon/tasks.md` and `canon/plan.md`,
-so a target holding `655-tasks` or `658-plan` syncs onto them through the rename
-chain. A target holding `standards/tasks.md` or `standards/plan.md` has the file
-rewritten in place under `standards/`, since a source matches a held rule by
-basename, and the groundwork, intake, and session copies are deleted as retired.
-The markdown rule is hand-written at `writing/markdown.md`, and a target holding
-`standards/markdown.md` keeps it there as `800-prose` retires.
+A rule that only routed a path to a standard ships under that standard's name,
+but the tasks and plan rules are hand-written at `canon/tasks.md` and
+`canon/plan.md`. A held `standards/tasks.md` or `standards/plan.md` syncs in
+place by basename, and the groundwork, intake, and session copies are deleted
+as retired. The markdown rule is hand-written at `writing/markdown.md`, and a
+target holding `standards/markdown.md` keeps it there as `800-prose` retires.
 
 A project's own rules belong under `.claude/rules/project/`, where
 `canon standards rule` reserves `900-999` for them, and a rule placed under
