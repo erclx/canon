@@ -65,6 +65,14 @@ Two alternatives lost. Tightening `standards/plan.md` to three-word slugs moves 
 
 Nothing can tell a plan-derived name from a hand-picked one, so the wider ceiling holds for every branch in every target that installed the standard. The standard says that plainly rather than scoping the sentence to a case no tool can detect.
 
+## Fold rule beside a size floor
+
+A stacked batch that shares most of its files with its parent folds into it, because each pull request pays a fixed cost a same-file slice cannot earn back. On 2026-10-04 the canvas inspector had shipped as five merged pull requests over 26 distinct files, carrying 25 reviews, 13 comments, and 64 commits between them, with 29 to 528 minutes from open to merge. The standard states a fold rule with a written exemption, ``Judged apart from `feature-<parent>`: <reason>``, rather than a minimum slice size, since a size floor cannot see a contract split or a taste call the operator judges in its own sitting.
+
+The check reads declared file sets and the plan's own stack wording, so it measures coupling and not review size. It reports `stack-foldable` at 3 or more shared files, at 60% or more of the smaller set, with 20 files or fewer between the two. Over 1,043 live and archived plans, 87 stack pairs name a parent and 15 report at these values: the inspector, canvas, slides, and evidence chains, plus one sandbox contract split that would carry the exemption line. The 20-file ceiling drops one pair of 24 files, which keeps a long chain from folding into one oversized review. The values are calibrated against that corpus and not derived, since the per-PR overhead was never measured as a number. The exemption line is fixed text and an empty reason does not clear the finding, so the check reads one pattern and the reason sits where the dispatcher already reads constraints.
+
+The sources are DORA's small-batches capability, which names regrouping small batches as a pitfall and asks for independent batches, and Reinertsen's batch size economics, which frames the optimum as a U-curve with coupling raising the cost of a small batch.
+
 ## Shared path beside hold
 
 A constraint on work in flight takes one of two forms, a hold or a shared path, because the dispatch conflict check stopped treating a shared file as a hold. On 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. The standard still told a plan to name each track as forbidding an act, and `role-worker` still had a worker concede a file a constraint named as held, so a shared path read as a hold at both ends.

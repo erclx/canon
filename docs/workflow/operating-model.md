@@ -182,9 +182,9 @@ The unit is fixed by the ceremony: one feature is one plan, one worktree, one
 PR, one review sitting. Split a feature down when a backend contract and its
 consumer both change, landing the contract first so no UI is built on a shaky
 contract. Merge a change up into an ordinary edit when it is a few lines with no
-new contract, skipping the plan and worktree entirely. The smell test: if the
-whole change does not fit in your head at review time it was too big, and if the
-coordination costs more than the change it was too small.
+new contract. The smell test: too big if the whole change does not fit in your
+head at review time, too small if the coordination costs more than the change.
+`canon records validate plans` flags a stacked batch that should have folded.
 
 ## Where work comes from
 
