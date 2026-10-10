@@ -101,14 +101,14 @@ describe('rule layout', () => {
 
   it('should flag a glob under the toolkit seed tree', () => {
     seedRule(
-      'claude/576-settings.md',
+      'claude/576-fixture-settings.md',
       "---\npaths:\n  - '.claude/settings.json'\n  - 'tooling/claude/seeds/.claude/settings.json'\n---\n",
     )
 
     const findings = layoutFindings(root)
 
     expect(findings).toEqual([
-      'claude/576-settings: tooling/claude/seeds/.claude/settings.json names a path only the toolkit carries',
+      'claude/576-fixture-settings: tooling/claude/seeds/.claude/settings.json names a path only the toolkit carries',
     ])
   })
 

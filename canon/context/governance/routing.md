@@ -35,7 +35,7 @@ A standard governing a file path carries a rule routing to it, so an edit loads 
 
 A claude rule carries operative directives beside its pointer, since a rule arrives attached to the edit while a pointer reaches a session only if that session opens the file. Five directives is the cap, and past it a rule reproduces the standard's structure rather than stating what must not go wrong. The standard keeps the full specification either way, so a drift is a rule falling behind rather than two files disagreeing, and nothing checks it.
 
-`592-claude-md` carries directives and no pointer. No standard governs the root file, so there is no structure to reproduce, and the seed and `seed-sync` hold the role a standard would.
+No rule carries a directive for the root file and no standard governs it, so there is no structure to reproduce, and the seed and `seed-sync` hold the role a standard would.
 
 `governance/rules/writing/markdown.md` stays pointer-only on both halves it routes. Its format half points at the `markdown-craft` skill and its voice half at the `write-human` skill, and it carries the instruction to load each rather than a compressed sample, since the compressible half of that guidance does the least work. The one inline line names the two characters `src/markdown/bans.ts` owns, so a ban added there is a one-line edit to the rule rather than a silent gap.
 
@@ -63,7 +63,7 @@ A rule with a file to match still cannot reach the moment that file is missing. 
 
 A rule reached by its own glob needs no citation from `CLAUDE.md`, while a skill does. The harness delivers a path-scoped rule when a matching file opens, so a pointer from the always-loaded file re-announces what already arrives and spends budget every session pays. A skill loads on invocation alone, which is why the domain table and the `canon:docs-sync` line earn their place there.
 
-A filename is the wrong citation besides, since a project renumbers around a collision with a shared set. `592-claude-md` carries both directions as directives.
+A filename is the wrong citation besides, since a project renumbers around a collision with a shared set.
 
 A rule with no `paths:` key arrives unconditionally, so the argument runs harder. `canon/606-git.md` carries no `canon:git-*` skill pointer, since the precedence it states already loads into every session.
 
@@ -75,29 +75,20 @@ The retirement is a stated exception to the cut test under "What an always-loade
 
 `790-code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes `## Degradation vocabulary`. Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`. Discovery anchors on the heading rather than the filename, so a renumber cannot empty the list.
 
-### The question surface is a rule rather than a skill body
+### The question surface has no shipped rule
 
-A call the operator's preference decides goes through the structured question surface, stated in `governance/rules/claude/565-behavior.md`, an always-loaded rule a target reaches through `canon gov sync` rather than through a seed copy nothing updates. A skill body such as `decision-escalate` fires only when typed, which would have the operator starting the interaction that exists to interrupt them.
+A call the operator's preference decides went through the structured question surface, stated in an always-loaded rule a target reached through `canon gov sync`. The operator cut that rule on 2026-10-10 on the ground that the guidance cost every session its words. What holds now is the skills that state the surface in their own bodies, so no shipped surface tells a target session to ask on a preference call. A skill body such as `decision-escalate` fires only when typed, which is the cost the operator accepted.
 
-The rule forbids reopening a question a written artifact already answered rather than forbidding the surface, since that was the real defect behind the rejections of it. The escape hatch ships as a guarantee the surface supplies rather than an option to author, since `AskUserQuestion` appends its own and its contract forbids writing one.
-
-### Two always-loaded rules that read as one
-
-`000-code.md` ranks native platform capabilities over third-party libraries, and `567-planning.md` says to search the project, its dependencies, and the standard library before writing new code. Both load on every session of a code stack, and the pair scans as one instruction stated twice.
-
-They govern different moments. The code rule ranks options a session is already choosing between, and the planning bullet fires before there are options, when the open question is whether the code already exists. `standards/rule.md` bans reasoning in a rule body, so this entry carries the distinction instead.
+The cut rule had forbidden reopening a question a written artifact already answered rather than forbidding the surface, since that was the real defect behind the rejections of it. The plan answer contract in `governance/rules/standards/plan.md` still carries the answer for a plan.
 
 ### What an always-loaded bullet has to carry alone
 
-An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `566-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. The retirement recorded under "Rules that always load" above is the one cut this test would refuse, taken by the operator's choice rather than by the test.
+An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `566-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both taken by the operator's choice rather than by the test: the relay retirement recorded under "Rules that always load" above, and the question-surface cut recorded under "The question surface has no shipped rule", which also dropped the "answer from the artifact rather than re-asking" bullet that `governance/rules/standards/plan.md` does not cover for intake and groundwork `- Suggested:` lines.
 
-Three always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
+Two always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
 
-- `565-behavior.md` keeps "answer from the artifact rather than re-asking". `governance/rules/standards/plan.md` carries the plan answer contract, but it loads only for a plan, and the sentence also covers intake and groundwork `- Suggested:` lines. It is the fix the question-surface decision above records.
 - `606-git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
 - `602-tasks.md` keeps the act of writing the plan in the same session and linking it. `standards/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
-
-`567-planning.md` requires a confirmed plan only for a change whose diff cannot be described in one sentence, in a single bullet, so `602`'s "handle small edits immediately" holds against it.
 
 ## Gotchas
 

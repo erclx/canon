@@ -13,7 +13,6 @@ import {
   requireListed,
   type RuleMatchResult,
   type RuleMeta,
-  ruleBullet,
   type SkillFamily,
   type SkillGroup,
   skillGroups,
@@ -145,10 +144,7 @@ export function readSession(): SessionReads {
       planner: readRole(skills, 'role-planner'),
       worker: readRole(skills, 'role-worker'),
     },
-    testFirst: ruleBullet(
-      readRepoFile(root, 'governance/rules/claude/567-planning.md'),
-      'Write the test for a behavior',
-    ),
+    testFirst: readRole(skills, 'test-first'),
     mergeActions: hookActions(
       readRepoFile(root, merge.hook),
       readCanonText(['hooks', 'post-merge', '--help']),

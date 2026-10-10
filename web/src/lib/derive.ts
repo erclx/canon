@@ -280,14 +280,3 @@ export function skillGroups(
     }))
     .filter((entry) => entry.skills.length > 0)
 }
-
-/** A rule's bullet, read whole, so the page quotes what the rule still says. */
-export function ruleBullet(text: string, opening: string): string {
-  const line = text
-    .split('\n')
-    .find((candidate) => candidate.startsWith(`- ${opening}`))
-  if (!line) {
-    throw new Error(`The rule no longer carries a bullet opening "${opening}"`)
-  }
-  return line.slice(2).trim()
-}

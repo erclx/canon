@@ -33,7 +33,7 @@ stage_setup() {
   # stored `config/config.json` repeats its folder.
   stage_fixtures claude canon-rollout shared 02-seed
   mv targets/seed/consumer-config.json targets/seed/canon/config/config.json
-  echo "# Behavior standards" >targets/seed/.claude/rules/canon/claude/565-behavior.md
+  echo "# Output standards" >targets/seed/.claude/rules/canon/claude/566-output.md
   echo "# Kestrel" >targets/seed/README.md
 
   git -C targets/seed add .

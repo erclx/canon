@@ -73,7 +73,7 @@ An entry's `unresolved` list in the stale record names paths it cites that the t
 
 For each in-scope entry (see Scope), pick one action:
 
-- **Promote to an always-loaded rule**: the rule is cross-domain behavior or a design principle applied across the whole project, passing `592-claude-md.md`'s test (applies every session regardless of what is being edited). Do not author a toolkit rule file inline.
+- **Promote to an always-loaded rule**: the rule is cross-domain behavior or a design principle applied across the whole project, passing the tier test in `canon/context/context-model/overview.md` (applies every session regardless of what is being edited). Do not author a toolkit rule file inline.
   - In the toolkit repo, hand off to `internal-governance` and `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, which own `internal/rules/` (this repo only, never ships) and the audience group under `governance/rules/` the rule serves (ships to every target that group reaches).
   - In a target project, append the rule to an existing file under `.claude/rules/project/` with `Edit`, since a project rule is project-owned and sync never overwrites it, or hand off to the `create-rule` skill when no existing file fits.
 - **Promote to a skill body**: the rule fires only when editing a specific path-scoped domain. Name the target skill.

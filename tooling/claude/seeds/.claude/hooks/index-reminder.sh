@@ -53,5 +53,5 @@ marker="$marker_dir/$key"
 mkdir -p "$marker_dir"
 : >"$marker"
 
-msg=$(printf 'An index.md exists at %s. Read it before searching this folder, it catalogs the sibling files faster than a blind search. For a cross-folder answer, run canon indexes list --json or invoke the index-lookup skill.' "$index")
+msg=$(printf 'An index.md exists at %s. Read it before searching this folder, it catalogs the sibling files faster than a blind search. For a cross-folder answer, run canon indexes list --json.' "$index")
 jq -nc --arg msg "$msg" '{hookSpecificOutput:{hookEventName:"PreToolUse",additionalContext:$msg}}'

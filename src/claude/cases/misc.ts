@@ -109,10 +109,6 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'repo-metadata',
   },
   {
-    prompt: 'Is there a page anywhere in this repo that covers retries?',
-    expect: 'index-lookup',
-  },
-  {
     prompt: 'Connect this repo to Cloudflare Pages and set up the deploy.',
     expect: 'deploy-app',
   },

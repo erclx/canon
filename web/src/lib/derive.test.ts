@@ -6,7 +6,6 @@ import {
   hookActions,
   matchRules,
   requireListed,
-  ruleBullet,
   skillGroups,
 } from './derive'
 
@@ -179,21 +178,6 @@ describe('hookActions', () => {
 
   it('should refuse a verb that runs none of the named verbs', () => {
     expect(() => hookActions(hook, 'Steps:\n', notes)).toThrow(/runs none/)
-  })
-})
-
-describe('ruleBullet', () => {
-  const text =
-    '# Planning\n\n- Analyze requests.\n- Write the test first. Then code.\n'
-
-  it('should return the bullet opening with the given words', () => {
-    expect(ruleBullet(text, 'Write the test')).toBe(
-      'Write the test first. Then code.',
-    )
-  })
-
-  it('should refuse a rule that no longer carries the bullet', () => {
-    expect(() => ruleBullet(text, 'Delete the test')).toThrow(/Delete the test/)
   })
 })
 

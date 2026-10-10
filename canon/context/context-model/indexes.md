@@ -16,7 +16,6 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 - `src/indexes/` owns the engine: frontmatter parsing, the walker, the renderer, regen orchestration, and `list.ts`'s catalog flattening
 - `src/commands/indexes.ts` owns the command surface
 - `claude/skills/target-setup/references/indexes.md` owns the bootstrap procedure, reached as the `target-setup` skill's `indexes` phase
-- `claude/skills/index-lookup/` owns the topic-search skill wrapping `list`
 
 ## Decisions
 
@@ -29,7 +28,7 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 - Frontmatter is re-emitted verbatim rather than re-serialized from the parsed object. Key order, comments, and the `auto: false` marker all survive a regeneration that way.
 - Flat mode sorts sub-catalogs among the sibling files instead of appending them. A folder and a file are both one domain to a reader scanning the catalog, and a trailing entry reads as absent from the alphabetical run it belongs in.
 - Grouped mode keeps the append under a trailing `## Sub-catalogs` heading, since a category is the organizing key there and that heading is what makes the child catalogs visible in a catalog `CLAUDE.md` loads every session.
-- `list` ships with a dedicated lookup skill, `index-lookup`, which matches a topic against every entry's `title`, `description`, and `path` rather than searching file contents. The skill names, rather than searches, a folder sitting outside `list`'s walk, checking which ones a project carries before naming any, since widening `list` to reach them stays declined per the gotchas below.
+- `list` is the catalog a session reads for a cross-folder answer, matching a topic against every entry's `title`, `description`, and `path` rather than searching file contents. A folder sitting outside `list`'s walk stays one the caller checks by hand.
 
 ## Gotchas
 
@@ -50,7 +49,7 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 
 - A frontmatter failure takes the whole folder rather than the one file. `collectEntries` returns an error for the directory, so one unparseable entry leaves every sibling's index unwritten.
 - The same failure drops a folder out of `list`'s catalog without failing the whole command. `buildIndexCatalog` isolates the error into its `errors` array and keeps walking, so a caller reading `entries` still gets every conforming folder even though the run's exit code reports the miss.
-- `index-lookup` inherits both boundaries above rather than working around them. A gitignored indexed folder never reaches `entries`, and a README-based record catalog such as `.canon/groundwork/` carries no `index.md` frontmatter for `list` to read at all, so the skill names either kind as a folder to check by hand instead of matching a topic inside it.
+- A caller of `list` inherits both boundaries above. A gitignored indexed folder never reaches `entries`, and a README-based record catalog such as `.canon/groundwork/` carries no `index.md` frontmatter for `list` to read at all, so either kind is a folder to check by hand instead of matching a topic inside it.
 
 ### Frontmatter traps
 
@@ -90,7 +89,7 @@ A Claude Code `PostToolUse` hook on `Edit` and `Write` matching `**/*.md` covers
 
 ## Enforcement
 
-The system pays off only when sessions consult the catalogs instead of searching past them. The Claude seed ships a `PreToolUse` hook on `Grep` and `Glob` that walks up from the search path to the nearest `index.md` and reminds the agent to read it first, naming `canon indexes list --json` and the `index-lookup` skill alongside the local path as the cross-folder answer. It fires once per folder per session and only where an index exists, so it scales to a project's index density. `canon/context/claude-plugin/cli.md` carries the seed settings block.
+The system pays off only when sessions consult the catalogs instead of searching past them. The Claude seed ships a `PreToolUse` hook on `Grep` and `Glob` that walks up from the search path to the nearest `index.md` and reminds the agent to read it first, naming `canon indexes list --json` alongside the local path as the cross-folder answer. It fires once per folder per session and only where an index exists, so it scales to a project's index density. `canon/context/claude-plugin/cli.md` carries the seed settings block.
 
 ## Related
 

@@ -18,10 +18,7 @@
 # standard is a rename too: the generated rule keeps every glob and bullet, so
 # the pair is one-to-one identity under the standard's name.
 [renamed]
-"005-behavior" = "565-behavior"
 "015-output" = "566-output"
-"070-planning" = "567-planning"
-"025-indexes" = "601-indexes"
 "035-tasks" = "602-tasks"
 "045-memory" = "603-memory"
 "055-scratch" = "604-scratch"

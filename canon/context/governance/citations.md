@@ -99,7 +99,6 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 - `governance/rules/standards/groundwork.md`, scoped to `.canon/groundwork/**`. Only `plan-groundwork` creates a track folder.
 - `governance/rules/standards/intake.md`, scoped to `.canon/intake/**`. Only `plan-intake` creates a dump folder.
 - `governance/rules/standards/teach.md`, scoped to `.canon/teach/**`. Only `teach-workspace` creates a workspace.
-- `governance/rules/canon/601-indexes.md` names `canon/context/` and `canon/wireframes/`. Only the first is moot, since a governance-only target can hand-author a wireframe against `standards/wireframes.md`.
 
 ### Clean pointer, no other note
 

@@ -63,7 +63,7 @@ The body now holds the shared procedure, and each kind carries one reference und
 
 The merge was measured against `canon claude skills rank` before it shipped, since one description now covers five triggers. Against trunk, rank one held at 85 of 105 cases and top three rose from 95 to 96, with all five former drafter cases still at rank one.
 
-The gain was `index-lookup`, which the retired docs drafter had pushed to rank 5 and `draft-doc` pushes only to rank 3. A trial description ending "where no file covers it yet" pulled the `test-first` case, which says "nothing covers it yet", so the shipped description keeps that phrase out.
+The gain was a topic-search skill since retired, which the retired docs drafter had pushed to rank 5 and `draft-doc` pushes only to rank 3. A trial description ending "where no file covers it yet" pulled the `test-first` case, which says "nothing covers it yet", so the shipped description keeps that phrase out.
 
 The measure is TF-IDF over descriptions rather than Claude Code's own router, and one case per kind is a thin sample, so a real routing loss would show only as a session that never loads the skill.
 
