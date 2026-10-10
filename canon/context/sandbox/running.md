@@ -26,7 +26,7 @@ gh auth login   # required for any scenario declaring use_anchor
 
 Provisioning is offline, since the starting tree comes from a fixture, so the first network call is the probe `configure_sandbox_anchor_remote` runs before adding the remote. The probe turns a missing credential or an unreachable host into a named error at the top of the run, and `GIT_TERMINAL_PROMPT=0` keeps a credential failure immediate. `canon/context/sandbox/authoring.md` covers why an absent repository refuses by default.
 
-`claude:canon-operator unclaimed` also needs a checkout `canon` first on `PATH`. The reverse walk reads git history and the published install carries none, so provisioning stops naming the missing history. A shim that execs `bun <checkout>/src/cli.ts` serves, and the headless run calls the same `canon`, so a shim that satisfies only the provisioning guard would fail the run.
+A scenario that reads git history also needs a checkout `canon` first on `PATH`. The reverse walk reads git history and the published install carries none, so provisioning stops naming the missing history. A shim that execs `bun <checkout>/src/cli.ts` serves, and the headless run calls the same `canon`, so a shim that satisfies only the provisioning guard would fail the run.
 
 ## Commands
 

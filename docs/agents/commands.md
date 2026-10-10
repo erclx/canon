@@ -53,7 +53,6 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon comments <verb>`     | Measure comment density by language and kind, with a trend from git                        |
 | `canon context <verb>`      | Report context folder health, and classify changed or stale sections                       |
 | `canon markdown <verb>`     | Fail markdown on a banned character or a dead link, and report its structure               |
-| `canon repo <verb>`         | Propose and apply the remote's description, homepage, and topics                           |
 | `canon census [path]`       | Report tracked file count, extensions, and a line total skipping binaries                  |
 | `canon upstream <verb>`     | Read Claude Code releases from a cursor, and list the toolkit's own mechanisms             |
 
@@ -115,7 +114,6 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `comments`, in `comments.md`: `scan`
 - `context`, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
 - `markdown`, in `markdown-audit.md`: `audit`
-- `repo`, described below: `metadata propose`, `metadata apply`
 
 Common patterns:
 
@@ -134,7 +132,6 @@ Subcommands no other page describes:
 - A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
 - `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
 - `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a title word no dictionary holds, or a title breaking `standards/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
-- `repo metadata propose` compares a description, homepage, and topic set computed from the README and `package.json` against what the remote carries, writing nothing, and `repo metadata apply` writes an explicitly supplied set through `gh repo edit` (`--description`, `--homepage`, `--topics`).
 
 ## Version skew
 

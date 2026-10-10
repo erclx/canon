@@ -43,7 +43,7 @@ The runner watches `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.ca
 
 `escape_scope` in an arm's `expect.toml` turns that warning into a result, using the mechanism `write_scope` already models: globs matched against what `escapeRoots` and `ESCAPE_SCRATCH_DIRS` in `src/sandbox/headless/watch.ts` found, checked by the harness that finds them. Declaring the key, even as `escape_scope = []`, makes a write matching a declared glob pass and everything else fail the arm. Accepting the exposure and stating it in prose was the alternative, and it lost because the accidental bound it leaned on had already weakened once, when a machine-level target registry appeared as a side effect of an unrelated test.
 
-`claude:canon-rollout` is the one arm declaring it, at `escape_scope = []`, because its narration tells the run to dispatch no worker and a correct run touches none of the eight watched destinations. An arm that drives the dispatch widens the scope from what that run measures rather than from a guess at what a worker touches. `canon/context/sandbox/coverage/workflow-arms.md` states what a pass on that arm proves.
+No arm declares it at present. An arm that narrates a run dispatching no worker declares `escape_scope = []`, since a correct run touches none of the eight watched destinations, and an arm that drives the dispatch widens the scope from what that run measures rather than from a guess at what a worker touches.
 
 A scoped pass says nothing about a write past the watch's reach, being a home directory, a sibling worktree, or the machine-level target registry a live dispatch touches. It says nothing about whether a write it saw belongs to this run rather than a sibling's, since the harness cannot attribute one.
 
@@ -65,7 +65,7 @@ A `claude` shim sits first on the PATH of the session the runner spawns. It stay
 
 #### The session recording
 
-The runner snapshots `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions` either side of the run, comparing record names rather than content, since a live session rewrites its own record on every status change. The result reports on `sessions` in the merged JSON rather than through `escape_scope`, because folding a process fact into a key defined against a file-write watch would make the key mean two things and silently widen `claude:canon-rollout`'s empty declaration.
+The runner snapshots `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions` either side of the run, comparing record names rather than content, since a live session rewrites its own record on every status change. The result reports on `sessions` in the merged JSON rather than through `escape_scope`, because folding a process fact into a key defined against a file-write watch would make the key mean two things and silently widen an arm's empty declaration.
 
 A new record reads as a dispatch because the harness's own session leaves none. A headless `claude -p` writes no registry entry, so a sandbox path appearing there names either a scenario staging one by hand, such as `git-worktree`, or a nested dispatch. A client that started registering print-mode runs would have every sandbox run report itself.
 

@@ -14,11 +14,9 @@ These two groups hold the skills no single moment in a project's life calls for,
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `canon:create-rule`       | For a project-specific governance rule the toolkit does not ship                                                                               |
 | `canon:create-skill`      | For a new `SKILL.md`                                                                                                                           |
-| `canon:create-standard`   | For a new authoring convention                                                                                                                 |
 | `canon:draft-doc`         | For a brand-new `docs/` page, context entry, wireframe surface, wiki reference page, or `README.md`, drafted against the standard for its kind |
 | `canon:draft-ready`       | For finished files a worker should copy, written as a ready folder with its overview, thin plan, and task                                      |
 | `canon:draft-figure`      | For a hand-drawn figure or an architecture view inside an existing doc, drafted in Mermaid or freehand SVG                                     |
-| `canon:bash-cli-script`   | For a small non-interactive shell wrapper, stopping at 100 lines in favor of TypeScript on Bun                                                 |
 | `canon:ci-workflow`       | For a GitHub Actions workflow file                                                                                                             |
 | `canon:draft-slides`      | For a deck, drawn as HTML slides in its own folder and rendered to editable PowerPoint                                                         |
 | `canon:draft-screencast`  | For a recording script with beats and defaults already seeded                                                                                  |

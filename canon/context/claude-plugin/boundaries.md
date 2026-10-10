@@ -52,19 +52,6 @@ A track may run its own experiments. Reading and computing were always in scope,
 
 The fixture path splits by who reads it. A fixture this session provisions and reads itself is fine in-repo, and a fixture a headless run is pointed at has to sit outside the repository under `mktemp -d`. A session started anywhere beneath the project root inherits that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain, so an in-repo arm measures the repository rather than the thing under test. The retired eval runner extracted its fixture to `mktemp -d` for this reason, which is the isolation a track should copy along with the assertions.
 
-## Running the app
-
-| Aspect   | `run` (built-in)                                             | `project-commands` skill                                  |
-| -------- | ------------------------------------------------------------ | --------------------------------------------------------- |
-| What     | Launches the app and drives it to confirm a change works     | Runs a command the project documents, then stops          |
-| Sources  | Falls back through built-in patterns per project type        | Reads the development context entry and nothing else      |
-| Ends at  | A verified app: logs read, browser driven, screenshots taken | The launch: the port or exit status, and nothing after it |
-| Best for | Confirming a change behaves in the real app                  | Starting something to use, or running a check             |
-
-The built-in delegates to a project skill when it finds one, so the two compose rather than compete. The split is the stop condition. `run` continues past a passing health check by design, because its job is confirming a change. That is the wrong shape for "start the server so I can use it", which is the request `project-commands` answers.
-
-The no-fallback rule is what keeps the boundary sharp. A skill that guesses at a command source when the entry is missing becomes a second launcher, and the two would then disagree about what a project runs.
-
 ## Background session isolation
 
 Claude Code isolates a `claude --bg` session into its own `.claude/worktrees/` entry automatically, but only lazily: the move happens right before the session's first file edit rather than at dispatch. `auto-ship` Step 0 calls `EnterWorktree` through `session-worktree` ahead of any edit tool, so a worker dispatched through the ship chain never observes the built-in trigger firing at all. Its own explicit move always lands first.

@@ -12,7 +12,7 @@ Per-domain narrative loaded on demand
 - [Claude plugin](claude-plugin/index.md): Plugin skills shipped to target projects, the canon claude CLI, and overlap with built-in Claude Code features. Start with overview.
 - [CLI](cli/index.md): TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging. Start with overview.
 - [Context model](context-model/index.md): How project context is laid out, one entry each for the three-tier context model and the folder index.md system that catalogs it. Start with overview.
-- [Design](design/index.md): DESIGN.md and the token module it renders from, the extract skill and its two paths, and the render preview. Start with overview.
+- [Design](design/index.md): DESIGN.md and the token module it renders from, and the render preview. Start with overview.
 - [Development](development/index.md): Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
 - [Features](features/index.md): Small feature domains grouped by kind rather than split from one domain, one entry each for canvas, demo, inventory, slides, teach, and transcripts
 - [Governance](governance/index.md): Path-scoped Claude rules with their numbering and frontmatter contract, the stacks that group them, and the install and sync path with its CLI. Start with overview.

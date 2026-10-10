@@ -1,6 +1,6 @@
 ---
 title: Target check
-description: The six domains the target check reports, why the harness ships as a stated gap, and where the skill sits against canon-operator and the rollout worker
+description: The six domains the target check reports, why the harness ships as a stated gap, and where the skill sits against the other health reports
 ---
 
 # Target check
@@ -36,7 +36,6 @@ The same asymmetry is why an unread domain is a third state beside current and b
 
 ## Where it sits against the neighbors
 
-- `canon-operator` routes one plain-language intent to the command or skill that satisfies it, and diagnoses along the way. This skill answers one fixed question across a fixed domain list and routes nothing, which is what makes its output comparable between two targets and between two waves.
 - `target-setup` scaffolds a project that holds nothing. This one reads a project that already holds something.
 - `seed-sync` proposes per-section seed edits. This one counts seed states and names that skill.
 

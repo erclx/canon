@@ -22,9 +22,9 @@ Claude Code reads both and writes the implementation. Works for CLI tools, inter
 
 The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships a token-table template with a starting set of roles, and `standards/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
 
-The `canon:design-extract` skill drafts the file, sourcing tokens from a project's existing prose and CLI UI surfaces, or proposing them from `canon/REQUIREMENTS.md` and a `## Personality` paragraph when no UI code exists yet. `canon design render` writes an HTML plus CSS preview to `.canon/tmp/render/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design/index.md`.
+`canon design render` writes an HTML plus CSS preview to `.canon/tmp/render/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design/index.md`.
 
-A project wanting a neutral starting point to override runs `canon design install`, which copies one stylesheet to `.claude/design/base.css` carrying an achromatic token set as custom properties and two components built on them. Greys run from near-black to near-white and the accent is monochrome, so the only palette the project renders is one it writes itself. That file is toolkit-owned and `canon design sync` refreshes it, so a project overrides a value in `.claude/design/project/` instead, which sync never touches. Nothing arrives without that install, and the two channels are independent: a record drafted by the extract skill is the project's own, and the installed stylesheet is the toolkit's.
+A project wanting a neutral starting point to override runs `canon design install`, which copies one stylesheet to `.claude/design/base.css` carrying an achromatic token set as custom properties and two components built on them. Greys run from near-black to near-white and the accent is monochrome, so the only palette the project renders is one it writes itself. That file is toolkit-owned and `canon design sync` refreshes it, so a project overrides a value in `.claude/design/project/` instead, which sync never touches. Nothing arrives without that install, and the two channels are independent: a record the project wrote is its own, and the installed stylesheet is the toolkit's.
 
 A cell no source anchors ends in `? verify`, and the preview shows that marker beside the value rather than folding it in, so a swatch and a font sample stay built from the value alone. A confidence line above the sections names how many cells are anchored against how many are tagged, which is what tells a reader whether they are looking at a record of the code or a proposal about it. It reads the columns a source could anchor and leaves out the row names, so the ratio is not diluted by cells no tag could ever reach. The proposal path tags nearly all of them, so that count reads low on day one by design.
 
@@ -35,14 +35,11 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 
 ### Skills
 
-- `canon:sketch-design` to trace a design direction from reference images or URLs, before `design-extract`'s greenfield path proposes from a personality paragraph alone
-- `canon:design-extract` to draft `canon/DESIGN.md`, from existing project signals or from requirements alone on day one
 - `canon:ui-checklist` for what a reviewer has to look at after UI changes, and what ships without a test
 - `canon:ux-audit` for UX gap detection on existing surfaces
 - `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
 - `canon:draft-and-pick` for a call settled by looking, drafting several candidates onto one page and taking your pick
 - `canon:canvas` for a direction worked out over several turns, drawn as HTML frames you drag, select, and restyle in the browser while the session reads your changes back. Only the pick moves into `canon/DESIGN.md`, since the canvas folder is gitignored
-- `canon:ux-walkthrough` for a multi-finding inspection pass over a running app with the operator, drafting arms from the app's own markup and recording each pick for a builder
 - `canon:draft-identity` to draft a project's logo mark and compose it into an icon sequence and a social card, through `draft-and-pick`'s own render-and-pick loop. On an Astro project holding the card route scaffold, the card lands as a route the project keeps and is captured through a running server, so it reads the project's real stylesheet rather than typed copies of every color. Everywhere else it ships as a PNG and the run says so.
 - Anthropic's `frontend-design` plugin optional for light visual steering
 

@@ -9,14 +9,13 @@
 # straight to composing a close-out never reaches the point where it posts.
 
 # Two clean runs on 2026-08-26 came in at 8 and 7. The refusal resolves off
-# one read with nothing to execute behind it, the same fixed-cost shape as
-# `canon-operator/unmigrated`, so two samples are enough to set a ceiling.
+# one read with nothing to execute behind it, a fixed-cost shape, so two
+# samples are enough to set a ceiling.
 max_turns = 12
 
 # The whole assertion for the negative half. A second close-out would still
 # write a body file, so the folder staying empty is what proves no post
-# happened, matching the shape `project-commands/refused` already uses for a
-# refusal.
+# happened.
 absent = [".canon/tmp/pr/review/*.md"]
 
 # Fixed by the refusal Step 2 states, not chosen by the run.

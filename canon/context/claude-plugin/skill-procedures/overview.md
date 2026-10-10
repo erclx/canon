@@ -35,7 +35,7 @@ The general rule is that a skill mandating the variable owes every verb it calls
 
 ### Reading a report rather than rediscovering
 
-`canon-operator` reads `canon sync --check --json` rather than walking the tree itself, and treats an absent report key as unread rather than as an empty answer. An absent key and an empty array are separate states: reading an absent key as empty exits zero, takes the nothing-to-report branch, and reports a clean target the CLI never actually measured, while a current CLI reporting an empty array has looked and found nothing.
+A skill reading `canon sync --check --json` rather than walking the tree itself treats an absent report key as unread rather than as an empty answer. An absent key and an empty array are separate states: reading an absent key as empty exits zero, takes the nothing-to-report branch, and reports a clean target the CLI never actually measured, while a current CLI reporting an empty array has looked and found nothing.
 
 That skew is the general shape rather than one skill's problem. A skill reaches a target through whichever CLI the machine has, while the skill itself loads live from the plugin, so a body written against a field can run against a binary predating it. `canon/ARCHITECTURE.md` carries the two-speed release as a standing risk.
 
@@ -81,7 +81,7 @@ Several bodies write shared session scratch at the main worktree root, and Claud
 
 Each body names the route beside the destination rather than the destination alone. Creating a whole file goes out as a plain single `Bash` command carrying a heredoc, with `mkdir -p` sent separately because the isolation refuses a compound command whose target it cannot statically verify. Changing a line inside an existing file goes through a `canon` verb, since the shell route for that case is the stream editor `CLAUDE.md` bans. `session-worktree` states the split once, in its `references/main-root-writes.md`, and each guard names only its destination, its route, and a pointer to that skill.
 
-Two structured edits have verbs, `canon tasks pull-request` and `canon tasks outcome`, chosen over a body instruction because the board write has a measured cost and a verb is the only part of this a test can reach. A structured edit no verb covers, such as `context-fold` retargeting a `Plan:` line or `memory-review` flipping an item's emoji, reads the file and writes it back whole, staying a body instruction until a second caller wants the same edit.
+Two structured edits have verbs, `canon tasks pull-request` and `canon tasks outcome`, chosen over a body instruction because the board write has a measured cost and a verb is the only part of this a test can reach. A structured edit no verb covers, such as `context-fold` retargeting a `Plan:` line, reads the file and writes it back whole, staying a body instruction until a second caller wants the same edit.
 
 A read site needs no route, since `Read` resolves against the main root normally.
 

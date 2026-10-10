@@ -1,28 +1,11 @@
 ---
 title: Workflow arms
-description: What the rollout, orchestrator, groundwork, standards read, worktree, review, walkthrough, and test craft arms prove, and what each leaves unmeasured
+description: What the orchestrator, groundwork, standards read, worktree, review, and test craft arms prove, and what each leaves unmeasured
 ---
 
 # Workflow arms
 
 The arms below follow the shared decisions and gotchas in `canon/context/sandbox/coverage/arms.md`.
-
-## Rollout
-
-`claude/canon-rollout.sh` covers the only skill that enters a worktree in another project and pushes a branch there. The arm reaches a fixture rather than a real target, so it covers the decision taken before any dispatch rather than the dispatch.
-
-- The fixture is a bare origin and two clones built after the outer commit, on the pattern `infra:gov`'s `test-order` arm runs. `kestrel-b` moves the remote forward and `kestrel-a` is left one commit behind and sorts first, so a run picking by listing order reaches the wrong answer.
-- Both clones are taken before the divergence, so currency is the only thing separating them.
-- Nothing fetches in `kestrel-a` after the clone, so both checkouts read level until a run goes to the remote. `FETCH_HEAD` appears in both clones only if something fetched during the run, so a `paths` entry over it proves the fetch.
-- The narration fixes the two-line format the decision is written in, because both a correct and a wrong answer name both clones, and only an anchored pattern on the dispatch line reads which was chosen.
-- `write_scope` admits what a fetch touches, being `FETCH_HEAD`, the remote-tracking ref and its log, and the fetched objects, and keeps out working-tree paths, `targets/origin.git/`, and `refs/heads/**`. Remote-tracking refs move on a fetch and local heads do not, which is the right place to cut.
-- The population is given in the narration rather than read. `canon targets list` answers from the machine-level index, so a run enumerating for itself reaches the operator's real consuming projects, and no fixture can scope a machine-wide record.
-
-### What its escape scope proves
-
-The arm declares `escape_scope = []`, which `canon/context/sandbox/isolation.md` states the mechanism of. A pass says the run touched none of the eight watched destinations, which the narration asks for, now checked by the harness rather than trusted from the reply. A fail names an unbounded write the arm has no legitimate reason to make.
-
-Neither reaches the write a real dispatch would make. A pass proves the refusal path stayed clean and says nothing about a worker's worktree entry, commit, or session record, nor about the home directory, sibling worktrees, or machine-level registries a live `claude --bg` reaches. A run invoked with the bare `/canon:canon-rollout` prompt, without the narration, can dispatch a real worker and still report `no escape during this run`, correctly, because the dispatch touches none of the watched destinations. The dispatch bound in `canon/context/sandbox/isolation.md` covers that case instead.
 
 ## Orchestrator
 
@@ -70,10 +53,6 @@ A scenario staging a subdirectory read inside its own script is the other mechan
 `claude/review-pr.sh`'s `repeat-close-out` arm seeds a `## Review`, then a `## Review closed`, then one commit that raises nothing, which is the state a pass has to meet without posting a second close-out. The local file proves a body was written under `## Review closed` naming what the pass covered. Whether a second close-out was posted beside the standing one is the shape of a remote thread, which no assertion kind reads, so four entries sit in `manual` and are confirmed through the pull request's review API.
 
 A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the field `review-pr` Step 2 and `poll.ts` derive a prior commit from goes stale when the guard fires. `canon/context/claude-plugin/skill-review/two-pass.md` holds why that cost stands.
-
-## UX walkthrough
-
-`claude/ux-walkthrough.sh` stages a `package.json` declaring no build, dev, or preview script, and the seeded `CLAUDE.md` names no build command, so the skill's first guard fires. The arm asserts that refusal with `absent = [".canon/walkthroughs/**"]`, `write_scope = []`, and the reply pin `"Nothing to inspect"`. Every later step needs a live operator, a browser, and a served build, so the declaration claims the refusal path alone.
 
 ## Test craft
 

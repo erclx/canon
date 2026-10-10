@@ -1,25 +1,9 @@
 ---
 title: Drafting
-description: The proposal, candidate, and document draft surfaces, the identity surface, the walkthrough surface, and the canvas surface, with the boundary each holds against its neighbors
+description: The candidate and document draft surfaces, the identity surface, and the canvas surface, with the boundary each holds against its neighbors
 ---
 
 # Drafting
-
-## The proposal surface
-
-`markdown-propose` closes a gap two shipped surfaces sit beside without covering: nothing else drafts a markdown replacement, carries an answer slot, and waits. `canon markdown audit` measures bans and structural checkpoints from package data. `review-branch` reports findings on a diff someone already wrote. Both report, and neither drafts or waits for an answer.
-
-It is a recombination rather than a new design. Its phases are an external content-audit skill's five passes, generalized down to what describes a governing document rather than a person: inflation, staleness, contradiction, and duplication survive the generalization, and register drift does not, since this repository's docs carry no spoken-versus-written split for a word to drift across.
-
-Its answer contract is `plan-intake`'s `You:` slot rather than a new one, chosen because it already ships toolkit-wide with the same empty-means-unread rule this surface needs. The plan file's blank-means-accept contract would read the wrong way on a folder read over days rather than one sitting.
-
-The folder is `.canon/proposals/<nn>-<slug>/`, named for what it holds rather than leaning on a singular-versus-plural distinction against a sibling folder that reads the same at a glance. `src/records/backup.ts` carries it in `BACKED_FOLDERS`, since a proposal carries an unanswered decision and that list holds what a disk loss would take rather than regenerate.
-
-The skill takes the concern and the surface it audits as invocation inputs rather than constants, which is what lets a second concern reuse the skill rather than fork it.
-
-The format spec that would ordinarily be a standard, on the pattern `claude/skills/teach-workspace/references/teach.md` set for a workspace shape, stays inside the skill's own `references/format.md` instead, since this repository's own citation rule says a file only one skill reads ships inside it rather than into a corpus a second reader would have to find.
-
-The variant format states `### N.` for a change and `#### A/B/C` for a variant explicitly, which is the shape that holds across a run producing several labelled bets on an invented change against one replacement on a corrected claim.
 
 ## The candidate surface
 
@@ -69,7 +53,7 @@ The measure is TF-IDF over descriptions rather than Claude Code's own router, an
 
 ### The confirm step
 
-`draft-doc` borrows its confirm step from `create-standard` rather than from `docs-sync`. `docs-sync` writes at once after its preview, since the tool permission dialog is confirmation enough over a rewrite bounded by a diff. A new document carries no such bound, because its kind, its placement, and every detection a kind runs are judgment calls weighed against the catalog rather than a change the branch already made. The skill waits for the user to confirm the path and the full content, the way `create-standard` confirms a slug and a body against no diff of its own.
+`draft-doc` takes its confirm step from the standard-authoring skill's pattern rather than from `docs-sync`. `docs-sync` writes at once after its preview, since the tool permission dialog is confirmation enough over a rewrite bounded by a diff. A new document carries no such bound, because its kind, its placement, and every detection a kind runs are judgment calls weighed against the catalog rather than a change the branch already made. The skill waits for the user to confirm the path and the full content, the way that skill confirmed a slug and a body against no diff of its own.
 
 ### What each kind settles
 
@@ -94,22 +78,10 @@ The name passed over two candidates. `logo` names one of the two outputs and lea
 
 One skill covers both outputs rather than two. The mark and the card are one identity rendered twice, and two skills each reading the other's pick can settle on shapes that do not compose. Drafting every arm already inside the card frame is what makes that real rather than aspirational, since the pick settling the mark's shape settles its composition in the same choice.
 
-## The walkthrough surface
-
-`ux-walkthrough` turns what an operator sees in a running app into findings and picks a builder can act on without the conversation. It closes the operator-observed corner no other catalog entry answers.
-
-The boundary against `draft-and-pick` sits inside the render step rather than around the whole flow. `ux-walkthrough` takes `draft-and-pick`'s own live-app branch of Step 2, which lifts the rendered markup and links a copy of the built stylesheet rather than inlining, and departs only from Step 6's apply-and-delete, per its own `## What this delegates`, capturing arms into the walkthrough's own numbered evidence folder and leaving `candidates.html` in place rather than applying the winning arm.
-
-The boundary against `ux-audit` runs on where the judgment happens. `ux-audit` reads source for roughness the code alone reveals. `ux-walkthrough` measures a finding off the built page and hands the operator the link before every pick question, so a record carries what a person saw rather than what a reading of the source predicted.
-
-The boundary against `plan-feature` and a worker runs on who builds. `ux-walkthrough` records a pick with the arms it beat and the numbers behind it. Turning that record into a plan and code belongs to `plan-feature` and a worker, never to this skill.
-
-No redundancy audit entry names it, because it carries no plausible community counterpart. Pairing an operator's live look at a running build against a recorded batch of picks is a shape `canon/context/claude-plugin/skill-strategy/catalog-health.md` skips outright rather than one that was compared and cleared.
-
 ## The canvas surface
 
 `canvas` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
 
-What outlives the pick separates it from `draft-and-pick`, which writes its candidates to scratch, takes one pick through the question surface, and deletes the losers. Every canvas frame stays in its gitignored folder until somebody removes it, and the pick reaches the project through its design document or wireframes rather than through the canvas itself. `draft-and-pick`, `draft-identity`, and `sketch-design` keep their own render path for now, and moving them onto the canvas waits until this surface has shipped.
+What outlives the pick separates it from `draft-and-pick`, which writes its candidates to scratch, takes one pick through the question surface, and deletes the losers. Every canvas frame stays in its gitignored folder until somebody removes it, and the pick reaches the project through its design document or wireframes rather than through the canvas itself. `draft-and-pick` and `draft-identity` keep their own render path for now, and moving them onto the canvas waits until this surface has shipped.
 
-The boundary against `sketch-design` and `design-extract` runs on direction. Both read something that already exists, a reference image or the project's code, into design values. The canvas draws what does not exist yet.
+No skill reads a reference image or the project's code into design values now, so the canvas is the one surface that draws a direction, and what it draws is carried into the design document by hand.

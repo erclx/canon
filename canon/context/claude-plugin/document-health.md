@@ -47,12 +47,12 @@ A fold allowed to write `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md` on a
 
 The review point comes from `canon records stale canonical`, which reads an optional `reviewed: YYYY-MM-DD` frontmatter field on each record and counts the release tags merged into HEAD after it. The point is a date rather than a commit because this repository squash-merges, so a review commit written on a feature branch never reaches `main`. The verb sits under `canon records stale` rather than a new `canon context review`, since it extends a verb whose job is already what is due for review, at the cost of one tracked kind in a group otherwise about gitignored records. Both records are tracked, so it reads the current worktree rather than the main one.
 
-Nothing triggers the review but a request. Intake 137 item 7 proposed a `target-check` pointer, and the operator withdrew every trigger, hook, gate stage, and CI step with it. The skill prints one reminder line per record, routes a finished review to `markdown-propose`, and that review's last edit sets the stamp. This skill writes neither.
+Nothing triggers the review but a request. Intake 137 item 7 proposed a `target-check` pointer, and the operator withdrew every trigger, hook, gate stage, and CI step with it. The skill prints one reminder line per record, hands a finished review's rewrite to the operator, and that review's last edit sets the stamp. This skill writes neither.
 
 ## Where it sits against the neighbors
 
 - `target-check` asks the structural question across six domains and names document health as out of scope by design. This is the surface that scope was left for.
-- `markdown-propose` rewrites a claim once a finding has named it. This reports and stops.
+- The rewrite of a claim a finding has named belongs to the operator. This reports and stops.
 - `canon audits run` runs the toolkit's own checks as one gating set over its own corpus. It gates a push, and this reports to a reader in a project that may hold none of those gates. It carries the classifier sweep too, pinned to the regex layer so its retained tally reads the same on every clone, which leaves this skill as the one surface reading sections with the model layer when a project has it configured.
 
 ## Open

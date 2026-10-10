@@ -14,14 +14,10 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 
 ## Set up a project
 
-| Skill                  | When to use                                                                                                 |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `canon:target-setup`   | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone       |
-| `canon:canon-operator` | On a project that already exists, to read what it carries before an install is picked                       |
-| `canon:sketch-design`  | Before `design-extract`'s greenfield path, to trace a design direction from reference images or URLs        |
-| `canon:design-extract` | Before the first UI feature, to draft `canon/DESIGN.md`                                                     |
-| `canon:deploy-app`     | Once a project is ready to publish, to set up its Cloudflare or Vercel deploy and stop for token and domain |
-| `canon:repo-metadata`  | When the GitHub About text, homepage, or topics may have drifted, to reconcile them against the README      |
+| Skill                | When to use                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `canon:target-setup` | On a fresh scaffold, to detect the stack and run the install chain, or to reach one phase of it alone       |
+| `canon:deploy-app`   | Once a project is ready to publish, to set up its Cloudflare or Vercel deploy and stop for token and domain |
 
 ## Decide what to build
 
@@ -44,7 +40,6 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `canon:session-worktree`      | At the plan-to-execute boundary, to get an isolated tree and branch, or to route a refused main-root write |
 | `canon:auto-ship`             | After plan approval, to chain implement, verify, review, draft PR                                          |
-| `canon:project-commands`      | When the project's own command needs running                                                               |
 | `canon:test-first`            | Before implementing a planned change, to run its test red, green, then refactor                            |
 | `canon:test-craft`            | When writing or changing any test, to pick its layer and filter what it asserts                            |
 | `canon:build-in-slices`       | While building a plan, to commit each tested slice and note out-of-scope defects rather than fix them      |
@@ -60,14 +55,12 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 
 ## Check the work before it leaves the branch
 
-| Skill                    | When to use                                                                             |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `canon:review-branch`    | On the local branch diff, before anything is pushed                                     |
-| `canon:document-health`  | When the documents themselves have to answer for length, placement, and staleness       |
-| `canon:markdown-propose` | When a markdown claim needs rewriting and the change should wait for an answer per file |
-| `canon:ux-audit`         | To read UI source for missing states, edge cases, and inconsistencies                   |
-| `canon:ux-measure`       | To start the interface and measure paint, processor, and layout cost                    |
-| `canon:ux-walkthrough`   | To run a multi-finding inspection pass over a running app with the operator             |
+| Skill                   | When to use                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `canon:review-branch`   | On the local branch diff, before anything is pushed                               |
+| `canon:document-health` | When the documents themselves have to answer for length, placement, and staleness |
+| `canon:ux-audit`        | To read UI source for missing states, edge cases, and inconsistencies             |
+| `canon:ux-measure`      | To start the interface and measure paint, processor, and layout cost              |
 
 ## Ship it
 
@@ -81,7 +74,6 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | `canon:git-commit`     | When the staged set is one concern, or was staged hunk by hand                        |
 | `canon:git-branch`     | When a branch name needs generating or renaming to conventional form                  |
 | `canon:git-pr`         | When a pull request needs a title and body written from the diff                      |
-| `canon:memory-review`  | When the pen has grown, to propose where each entry belongs                           |
 
 ## After the pull request opens
 
@@ -116,4 +108,3 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | `canon:seed-sync`             | After a toolkit update, to reconcile installed seeds without losing customizations     |
 | `canon:canon-feedback`        | When something in the toolkit is broken, missing, or off, to open an issue on it       |
 | `canon:canon-feedback-triage` | In the toolkit repo, to file the open feedback issues into an intake folder            |
-| `canon:canon-rollout`         | In the toolkit repo, to take one change out to every consuming project at once         |

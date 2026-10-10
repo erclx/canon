@@ -53,7 +53,7 @@ It reports and never sets the failing exit. The Skill family gate stage fails th
 
 The measure keys on ownership rather than on existence. A cited path counts when it sits under an authoring root no install channel delivers, which `src/claude/skills-reach.ts` lists as eight prefixes covering standards, governance, the wiki, the internal tree, the tooling tree, the plugin tree, the CLI contract pages, and this narrative folder. Everything else a body might name is the reader's own tree, so `src/`, `scripts/`, and bare `docs/` are deliberately outside the list: including them would report every correct citation of the reader's own files as a defect alongside the real ones.
 
-A seeded path is disowned twice, under its own name and under the folder spelling it takes once a target splits the entry. A domain outgrowing one file becomes `<domain>/`, still the entry the seed delivered, and reporting the split form would fail a project for growing. That single rule is what cleared `project-commands`, whose body already tests both spellings before reading either.
+A seeded path is disowned twice, under its own name and under the folder spelling it takes once a target splits the entry. A domain outgrowing one file becomes `<domain>/`, still the entry the seed delivered, and reporting the split form would fail a project for growing. That single rule is what cleared a skill whose body already tested both spellings before reading either.
 
 ### Why the qualifier is a word rather than a notation
 

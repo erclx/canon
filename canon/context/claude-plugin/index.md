@@ -22,4 +22,4 @@ Plugin skills shipped to target projects, the canon claude CLI, and overlap with
 - [Skill review paths](skill-review/index.md): How a pull request review posts and re-posts, the headings a poll routes on, the lenses that read the body, and the worker's half of the channel. Start with overview.
 - [Skill strategy](skill-strategy/index.md): Where a plugin skill lives, how the catalog is named and sorted, the reasoning behind each surface, and whether each skill earns its place. Start with overview.
 - [Social card route](social-card-route.md): Why the card is a route the project keeps, the build-exclusion measurement that scopes it to Astro, and why the Next path waits
-- [Target check](target-check.md): The six domains the target check reports, why the harness ships as a stated gap, and where the skill sits against canon-operator and the rollout worker
+- [Target check](target-check.md): The six domains the target check reports, why the harness ships as a stated gap, and where the skill sits against the other health reports

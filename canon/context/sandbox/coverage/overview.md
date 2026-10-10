@@ -38,7 +38,6 @@ The count measures declarations present, never declarations that work. `canon/co
 Arm a skill when a wrong run is silent and the damage lands in a target project rather than in the sandbox. Blast radius decides rather than a coverage percentage. A percentage names no particular skill and counts an arm asserting one provisioning fact the same as one asserting eleven things about a run, so it rewards whichever arm is cheapest to write next.
 
 - The rule describes the arms already written as well as the next ones, since every skill armed before it was stated mutates a tree with no reader watching.
-- A skill whose subject is a decision rather than an artifact still earns an arm when the damage is real, as with `canon-operator` routing a target to the wrong installer. `reply` is what lets such an arm assert the decision.
 - A gov injection flag does not select an arm. `SANDBOX_INJECT_GOV` is a boolean naming no rule, so which scenario depends on which rule resolves by reading the skill bodies rather than by paying for an arm each.
 - The rule selects `git-stage` and `git-split` ahead of everything else, and the harness cannot assert either, which is the git-state standing limit in `canon/context/sandbox/overview.md`. A rule selecting what nothing can check is working correctly, since it names the gap instead of hiding it behind a skill nobody nominated.
 

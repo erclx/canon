@@ -21,7 +21,7 @@ Folding the measurement into the audit was the obvious alternative and its own g
 
 Contrast stays with the static reader against the pull of the runtime one. Two color values compute it and the audit already reads the token table holding them, so moving it buys a browser start for an answer arithmetic gives. What that costs is a contrast failure from a color computed at runtime, which is invisible to a token-table reader and is accepted rather than overlooked.
 
-The runner is detected rather than prescribed, since the harness differs per project. The surface owns the metrics and the thresholds, which are portable, and reads the project's choice of runner, which is not. Detecting nothing therefore reports what the measurement needs and stops, the same absent-key rule `canon-operator` already follows, since a stop there says the project has not chosen a runner rather than saying the skill is broken.
+The runner is detected rather than prescribed, since the harness differs per project. The surface owns the metrics and the thresholds, which are portable, and reads the project's choice of runner, which is not. Detecting nothing therefore reports what the measurement needs and stops, the same absent-key rule a `canon sync --check` reader follows, since a stop there says the project has not chosen a runner rather than saying the skill is broken.
 
 The front door reaches it through the audit offers. Four rows are `canon` verbs and this one is a skill handoff, so the execute contract governing a CLI run does not reach it. Its second condition is a browser harness, which the front door does not test, because the skill detects that already and a second reader of the same fact answers stale.
 
@@ -46,8 +46,6 @@ Where a skill writes does not decide the ownership answer. A thin wrapper over a
 The feedback pair is the one place the axis alone is not enough. `canon-feedback` and `canon-feedback-triage` share a subject and split on the act, which is the rule `## The interface pair splits on the act` above states, so the prefix places the family and the trailing word separates the consumer from the producer. Naming both for the subject alone would ship `canon-feedback` and `canon-triage`, which read as unrelated in a listing.
 
 ## The direction axis
-
-`canon-rollout` is a skill the prefixes above place correctly while saying nothing about what makes it different. Every other skill in the catalog acts on the checkout the session stands in. This one starts in the toolkit and writes into the projects the toolkit installed into, so `canon-` answers whose surface it owns and leaves its blast radius unstated.
 
 Direction is a second sorting axis beside the phase-of-use one the prefixes carry, and it earns no prefix of its own. A family naming it would hold one member and would contradict the ownership answer the prefix already gives, which is the further answer `## Prefix families` above exists to prevent. What recording it here costs is an axis with no naming convention behind it, so a second outbound skill can land under a prefix that hides the fact and nothing reports it.
 
