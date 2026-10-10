@@ -14,7 +14,7 @@ The folder is gitignored, and backed wherever a records remote is configured: `c
 - [Scope](#scope)
 - [What a working ready folder looks like](#what-a-working-ready-folder-looks-like)
 - [Folder name](#folder-name)
-- [00-overview.md](#00-overviewmd)
+- [00-overview.md](#00-overviewmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
 - [The mirrored tree](#the-mirrored-tree)
 - [The thin-plan contract](#the-thin-plan-contract)
 - [Lifecycle](#lifecycle)
@@ -76,7 +76,7 @@ Below the frontmatter, state in prose what the worker still owns beyond copying 
 
 ## The mirrored tree
 
-- Every other file in the folder sits at the same relative path its destination has in the project, so `standards/ready.md` inside the destination tree sits at `<nn>-<slug>/standards/ready.md` inside the ready folder.
+- Every other file in the folder sits at the same relative path its destination has in the project, so `standards/ready.md` inside the destination tree sits at `<nn>-<slug>/standards/ready.md` inside the ready folder. <!-- canon-allow-reference: the example shows a target tree, where the standard sits under standards/ -->
 - Carry no file the destination tree would not carry. A ready folder is a source for `git mv`-shaped copies, not a scratch pad for the warm session's own notes. Anything else belongs in the plan or in the pull request body.
 - Write each file exactly as it should land. The worker copies verbatim and edits only what the gate or the overview's own list requires, so a placeholder or a half-finished passage ships as written.
 
