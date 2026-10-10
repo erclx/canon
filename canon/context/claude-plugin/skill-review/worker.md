@@ -63,7 +63,7 @@ Refusing stays a first-class move rather than a failure mode: a worker arguing b
 
 `role-worker` and `role-planner` each state a channel, and each assumes a message-sending tool carries what they compose. A standalone skill for the session holding neither role never fires, because nothing routes a session to a skill matching no request and reaching for no artifact of its own.
 
-Moving the protocol inline into each role body was the other alternative, and it trades the firing problem for a duplication one: two bodies stating one protocol is the shared-surface case `canon/ARCHITECTURE.md` already decided against, since a later fix reaching one copy and not the other diverges silently.
+Moving the protocol inline into each role body was the other alternative, and it trades the firing problem for a duplication one: two bodies stating one protocol is the shared-surface case the content ownership table in `CLAUDE.md` already decides against, since a later fix reaching one copy and not the other diverges silently.
 
 `session-relay` is the shape that keeps both. The firing condition survives because the pointer sits inside `## The channel`, a section both role bodies already read at session start rather than one reached by request match alone, and what remains duplicated across the two bodies is two sentences naming one skill rather than the protocol itself. A pointer drifting from its target fails loudly, since the skill it names either resolves or does not, where two copies of one protocol drift from each other in silence.
 

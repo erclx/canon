@@ -66,7 +66,6 @@ ci = [".github/", "scripts/core/", ".husky/", ".claude/hooks/", ".claude/setting
 # iconography field names, not a mechanical derivative of anything.
 context = [
   "canon/context/",
-  "canon/ARCHITECTURE.md",
   "canon/REQUIREMENTS.md",
   "canon/DESIGN.md",
   "CLAUDE.md",

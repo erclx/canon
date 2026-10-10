@@ -19,7 +19,24 @@ The entry carries no version on purpose. `plugin.json` overrides the enclosing e
 
 The check pipeline does not follow the two symlinks. The index walker's glob, the spell checker, and the formatter were each tested against a symlinked directory in isolation, so `standards/` is not double-walked and the links produce no drift failures.
 
+## Decisions
+
+### Location enforces the plugin boundary
+
+Toolkit-internal content lives under `internal/`, which nothing inside `claude/` reaches, and the marketplace sources the plugin from `./claude` rather than the root. `src/gate/boundaries.ts` enforces the first half, and the symlink section below carries how it measures what an install copies.
+
+Sourcing from the root was the alternative, and the dependency install measured above is the cost that still rules it out.
+
+Revisit when the installer lets a plugin skip that install, or an `internal/` file surfaces in a target as something the plugin offers.
+
 ## Distribution gotchas
+
+### Skills and the CLI ship at two speeds
+
+- A skill merged to `main` reaches a `--plugin-dir` session at once, while the CLI reaches users only on release. A skill calling an unpublished verb fails in a target, and `canon sync --check` reports the version gap but not the missing verb.
+- A marketplace install is a cached copy, the same skew in the other direction, and nothing detects either.
+
+### What validation proves
 
 Validation proves the manifest parses and nothing about whether it works. `claude plugin validate --strict` passes a manifest whose `source` points at a directory that does not exist, so it would have accepted the zero-skill root-sourced shape. An install is the only check that proves a shape, which is why `bun run check` covering this file does not retire the manual install.
 

@@ -37,7 +37,7 @@ The general rule is that a skill mandating the variable owes every verb it calls
 
 A skill reading `canon sync --check --json` rather than walking the tree itself treats an absent report key as unread rather than as an empty answer. An absent key and an empty array are separate states: reading an absent key as empty exits zero, takes the nothing-to-report branch, and reports a clean target the CLI never actually measured, while a current CLI reporting an empty array has looked and found nothing.
 
-That skew is the general shape rather than one skill's problem. A skill reaches a target through whichever CLI the machine has, while the skill itself loads live from the plugin, so a body written against a field can run against a binary predating it. `canon/ARCHITECTURE.md` carries the two-speed release as a standing risk.
+That skew is the general shape rather than one skill's problem. A skill reaches a target through whichever CLI the machine has, while the skill itself loads live from the plugin, so a body written against a field can run against a binary predating it. `canon/context/claude-plugin/distribution.md` carries the two-speed release as a standing risk.
 
 The fallback does not key on `historyUnavailable`, since that field reports failed attribution on a domain or on `seeds`, while `unmigrated` is a filesystem read carrying no attribution at all. Keying on it would drop a correct detection whenever an unrelated half of the report could not be dated.
 

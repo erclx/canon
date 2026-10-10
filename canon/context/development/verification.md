@@ -29,7 +29,7 @@ The cases assert only that the verb the two package scripts name is registered. 
 
 ### Adding a case
 
-Write a fixture under a per-test `mkdtempSync` directory, being a golden config, a rule stack, or a task board, whatever the verb reads, and assert the resulting file tree, the exit code, and the parsed record together rather than any one alone. An exit code alone can misreport a wrapped shell function per `canon/ARCHITECTURE.md`, and a written file alone says nothing about whether the process reported the write correctly. Assert a written tree with named paths plus a count derived from the catalog the verb reads, such as the stack's own rule list off `gov list --json --stacks`, rather than a hardcoded figure, which fails on every unrelated addition.
+Write a fixture under a per-test `mkdtempSync` directory, being a golden config, a rule stack, or a task board, whatever the verb reads, and assert the resulting file tree, the exit code, and the parsed record together rather than any one alone. An exit code says nothing about a `canon` call here, since a shell profile may wrap the binary, which is why every task verb tells a caller to branch on the record's `reason`. An exit code alone can therefore misreport, and a written file alone says nothing about whether the process reported the write correctly. Assert a written tree with named paths plus a count derived from the catalog the verb reads, such as the stack's own rule list off `gov list --json --stacks`, rather than a hardcoded figure, which fails on every unrelated addition.
 
 ### Containment
 
