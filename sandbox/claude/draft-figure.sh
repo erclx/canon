@@ -64,7 +64,7 @@ stage_setup() {
     log_info "         custom properties, placed ahead of the quiz"
     ;;
   "architecture-set")
-    # A small two-folder project with both planning records and one context
+    # A small two-folder project with its requirements record and one context
     # entry to draw into. The request names an architecture view, so the run
     # shapes it through the architecture set and renders it through Mermaid,
     # landing it in the entry rather than in a per-kind diagrams folder.
@@ -73,7 +73,7 @@ stage_setup() {
     git add . && git commit -m "docs: add components entry with no figure" --no-verify -q
 
     log_step "Scenario ready: draft an architecture view into a named entry"
-    log_info "Context: canon/REQUIREMENTS.md and canon/ARCHITECTURE.md describe a"
+    log_info "Context: canon/REQUIREMENTS.md and the context index describe a"
     log_info "  four-layer web, agent, API, and SQLite app"
     log_info "  canon/context/components.md states the layers in prose and draws nothing"
     log_info ""
@@ -81,7 +81,7 @@ stage_setup() {
     log_info "         below the opening paragraph. Write it without waiting for a confirmation."
     log_info "Expect:  declared in fixtures/claude/draft-figure/architecture-set/expect.toml"
     log_info "         Check it with: canon sandbox check claude:draft-figure architecture-set"
-    log_info "         Render path decided as architecture, drawn from canon/ARCHITECTURE.md"
+    log_info "         Render path decided as architecture, drawn from canon/context/index.md and the folder layout"
     log_info "         A rendered SVG inside <figure> and <figcaption> in the entry"
     log_info "         Nothing written under .canon/diagrams/"
     ;;

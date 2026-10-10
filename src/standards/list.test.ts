@@ -68,7 +68,9 @@ describe('listStandardEntries', () => {
     const names = entries.map((each) => each.name)
 
     expect(new Set(names).size).toBe(names.length)
-    expect(entries[0]?.source).toBe(join('standards', `${names[0]}.md`))
+    expect(entries.find((each) => each.name === 'branch')?.source).toBe(
+      join('standards', 'branch.md'),
+    )
   })
 })
 

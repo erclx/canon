@@ -82,10 +82,10 @@ describe('staleCanonical on a tagged history', () => {
   })
 
   it('should report zero rather than null when the stamp postdates every tag', async () => {
-    writeDoc('canon/ARCHITECTURE.md', '2026-06-01')
+    writeDoc('canon/REQUIREMENTS.md', '2026-06-01')
     release('v1.0.0', '2026-02-01')
 
-    const doc = await readDoc('canon/ARCHITECTURE.md')
+    const doc = await readDoc('canon/REQUIREMENTS.md')
 
     expect(doc?.releasesSince).toBe(0)
   })
@@ -150,12 +150,12 @@ describe('staleCanonical on a tagged history', () => {
 
 describe('staleCanonical on the doc set', () => {
   it('should read a doc at the .claude root when canon does not hold it', async () => {
-    writeDoc('.claude/ARCHITECTURE.md', '2026-03-01')
+    writeDoc('.claude/REQUIREMENTS.md', '2026-03-01')
 
     const report = await read()
 
     expect(report.docs.map((doc) => doc.path)).toEqual([
-      '.claude/ARCHITECTURE.md',
+      '.claude/REQUIREMENTS.md',
     ])
   })
 

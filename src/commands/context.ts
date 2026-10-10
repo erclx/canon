@@ -18,18 +18,6 @@ import {
   requiredSections,
   type SectionFinding,
 } from '@/context/audit'
-import {
-  architectureRel,
-  type ArchitectureReport,
-  coveredCount,
-  isOverCount,
-  isOverLength,
-  isOverRisks,
-  measureArchitecture,
-  missingRevisit,
-  overWords,
-  testableCount,
-} from '@/context/architecture'
 import { auditCitations, type CitationReport } from '@/context/citations'
 import {
   CANONICAL_DOC_TYPES,
@@ -100,7 +88,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, the architecture record against its own ceiling, entry cap, word cap, and risk cap, and the requirements record against its own word cap',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, and the requirements record against its own word cap',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -123,20 +111,14 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr',
         '  2  a gating finding is present',
         '',
-        'An unresolved citation always gates. An architecture record that',
-        'states its own line allowances gates when it is past the ceiling',
-        'those derive, on any run except --citations-only, which never',
-        'measures it. A record stating an entry cap gates the same way when',
-        'it holds more decisions than the cap, and a record stating that',
-        'every decision closes with a revisit sentence gates when one lacks',
-        'it. A record stating a word cap a decision or a risk bullet cap',
-        'gates past either, and a requirements record stating a word cap',
-        'gates past it. A record stating none of these is reported and',
-        'never gated. --gate widens the gate to the other two',
-        'findings that are facts rather than judgments: a missing required',
-        'section and index drift. A context entry requires Overview and',
-        'Layout. Entry length, reference form, table, provenance, and the',
-        'record claim classification are judgments under both.',
+        'An unresolved citation always gates. A requirements record',
+        'stating a word cap gates past it, on any run except',
+        '--citations-only, which never measures it. A record stating no',
+        'cap is reported and never gated. --gate widens the gate to the',
+        'other two findings that are facts rather than judgments: a',
+        'missing required section and index drift. A context entry',
+        'requires Overview and Layout. Entry length, reference form,',
+        'table, and provenance are judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
         'than over a context entry, so `canon markdown audit` measures them.',
@@ -172,7 +154,7 @@ export function register(program: Command): void {
     .option('--base <ref>', 'Far side of the range, defaulting to the trunk')
     .option(
       '--doc-types <list>',
-      `Comma-separated canonical doc types (default: all four: ${CANONICAL_DOC_TYPES.join(', ')})`,
+      `Comma-separated canonical doc types (default: all three: ${CANONICAL_DOC_TYPES.join(', ')})`,
     )
     .option(
       '--backend <name>',
@@ -207,13 +189,13 @@ export function register(program: Command): void {
   classify
     .command('sweep')
     .description(
-      'Classify every section of the four canonical doc types, split at H3',
+      'Classify every section of the three canonical doc types, split at H3',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--doc-types <list>',
-      `Comma-separated canonical doc types (default: all four: ${CANONICAL_DOC_TYPES.join(', ')})`,
+      `Comma-separated canonical doc types (default: all three: ${CANONICAL_DOC_TYPES.join(', ')})`,
     )
     .option(
       '--backend <name>',
@@ -662,7 +644,6 @@ async function runAudit(
   // Absent under `--citations-only` and null when the project carries no
   // record. A run that never looked and a project with nothing to look at are
   // different answers, and one value for both reports the second as the first.
-  const record = gateOnly ? undefined : await measureArchitecture(root)
   const requirements = gateOnly ? undefined : await measureRequirements(root)
 
   if (gateOnly) {
@@ -677,7 +658,6 @@ async function runAudit(
     reportTables(entries)
     reportProvenance(entries, folders)
     reportDrift(drift)
-    reportRecord(record, root)
     reportRequirements(requirements, root)
     outro()
   }
@@ -715,8 +695,6 @@ async function runAudit(
         // Null says the run opened the project and found no record, which a
         // target that never wrote one is entitled to. Absent says the run
         // never looked, which is `--citations-only`.
-        architecture: gateOnly ? undefined : (record ?? null),
-        // The same three states for the requirements record.
         requirements: gateOnly ? undefined : (requirements ?? null),
         checkpoints: {
           lines: LENGTH_CHECKPOINT,
@@ -734,12 +712,6 @@ async function runAudit(
 
   const gating = isGating({
     unresolvedCitations: citations.unresolved.length,
-    recordOverLength: record !== undefined && isOverLength(record),
-    recordOverCount: record !== undefined && isOverCount(record),
-    recordMissingRevisit:
-      record !== undefined && missingRevisit(record).length > 0,
-    recordOverWords: record !== undefined && overWords(record).length > 0,
-    recordOverRisks: record !== undefined && isOverRisks(record),
     requirementsOverWords:
       requirements !== undefined && isOverWordCap(requirements),
     sections,
@@ -1110,178 +1082,6 @@ function reportProvenance(
             .map((found) => `  :${found.line}  ${found.kind}  ${found.text}`)
             .join('\n')}`,
       )
-      .join('\n'),
-  )
-}
-
-/** How each classification reads in the report. */
-const CLAIM_LABEL: Record<string, string> = {
-  countable: 'countable claim',
-  invariant: 'structural invariant',
-  neither: 'reasoning only',
-}
-
-/**
- * Reports the architecture record against the ceiling it states for itself and
- * against what a machine could test in it.
- *
- * The length reading is a fact and gates. Everything below it names candidates
- * a reader adjudicates, because deciding whether a sentence states a claim is a
- * judgment no parser settles, and a stored verdict would age the way the
- * anchors it sits beside already do. Nothing is stored: every run reclassifies,
- * so an entry rewritten tomorrow is read as it stands then.
- */
-function reportRecord(
-  report: ArchitectureReport | undefined,
-  root: string,
-): void {
-  logStep('Architecture record')
-
-  if (report === undefined) {
-    logInfo(
-      `Out of scope. The project carries no ${architectureRel(root)}, so there was no record to measure.`,
-    )
-    return
-  }
-
-  const decisions = report.decisions.length
-  const { allowances } = report
-
-  logInfo(
-    `${plural(report.words, 'word')} across ${plural(report.lines, 'line')}. The whole file's count never gates.`,
-  )
-  if (report.risksWords !== undefined) {
-    logInfo(
-      `\`## Risks / open questions\` holds ${plural(report.risksWords, 'word')}.`,
-    )
-  }
-
-  const longDecisions = overWords(report)
-  if (report.wordCap === undefined) {
-    logInfo(
-      'No word cap a decision stated, so each decision word count is reported and never gated.',
-    )
-  } else if (longDecisions.length > 0) {
-    for (const entry of longDecisions) {
-      logError(
-        `"${entry.heading}" holds ${entry.words} words against a cap of ${report.wordCap} a decision.`,
-      )
-    }
-  } else {
-    logInfo(
-      `Every decision fits the cap of ${report.wordCap} words a decision.`,
-    )
-  }
-
-  if (report.riskCap === undefined) {
-    logInfo('No risk bullet cap stated, so the Risks section is never gated.')
-  } else if (report.risksBullets === undefined) {
-    logWarn(
-      `The record states a cap of ${report.riskCap} risk bullets and carries no \`## Risks / open questions\` section to count.`,
-    )
-  } else if (isOverRisks(report)) {
-    logError(
-      `${plural(report.risksBullets, 'risk bullet')} against a cap of ${report.riskCap}, nested bullets counted.`,
-    )
-  } else {
-    logInfo(
-      `${plural(report.risksBullets, 'risk bullet')} against a cap of ${report.riskCap}, nested bullets counted.`,
-    )
-  }
-
-  if (allowances === undefined) {
-    logInfo(
-      `Covers ${report.rel} alone. No standard sets a length rule for it and this record states none, so its ${plural(report.lines, 'line')} across ${plural(decisions, 'decision')} are reported and nothing is gated.`,
-    )
-    logInfo(
-      'A record declaring an allowance for its frame and one a decision is measured against the ceiling those two derive. That rule belongs to whichever record writes it, never to the toolkit.',
-    )
-  } else {
-    logInfo(
-      `Covers ${report.rel} alone, which states its own allowance of ${plural(allowances.frame, 'line')} for the frame and ${allowances.perDecision} a decision.`,
-    )
-    if (isOverLength(report)) {
-      logError(
-        `${report.lines} lines against a ceiling of ${report.ceiling} from ${plural(decisions, 'decision')}`,
-      )
-    } else {
-      logInfo(
-        `${report.lines} lines against a ceiling of ${report.ceiling} from ${plural(decisions, 'decision')}.`,
-      )
-    }
-    logInfo(
-      `The ceiling rises with the decision count, so adding a decision buys ${allowances.perDecision} lines and the check passes exactly when the file grew.`,
-    )
-  }
-
-  if (report.entryCap === undefined) {
-    logInfo(
-      `${plural(decisions, 'decision')} and no entry cap stated, so the count is reported and never gated.`,
-    )
-  } else if (isOverCount(report)) {
-    logError(
-      `${plural(decisions, 'decision')} against a cap of ${report.entryCap}. Merge two or retire one, never compress.`,
-    )
-  } else {
-    logInfo(
-      `${plural(decisions, 'decision')} against a cap of ${report.entryCap}.`,
-    )
-  }
-
-  const revisited = report.decisions.filter((entry) => entry.revisit).length
-  const lackingRevisit = missingRevisit(report)
-  if (!report.revisitRequired) {
-    logInfo(
-      `${revisited} of ${plural(decisions, 'decision')} close with a revisit sentence, and the record states no revisit clause, so this is reported and never gated.`,
-    )
-  } else if (lackingRevisit.length > 0) {
-    for (const heading of lackingRevisit) {
-      logError(
-        `"${heading}" carries no sentence opening "Revisit when", which the record requires of every decision.`,
-      )
-    }
-  } else {
-    logInfo(
-      `Every one of ${plural(decisions, 'decision')} closes with the revisit sentence the record requires.`,
-    )
-  }
-
-  if (decisions === 0) {
-    logWarn('The record declares no decision, so nothing was classified.')
-    return
-  }
-
-  const testable = testableCount(report)
-  const covered = coveredCount(report)
-
-  logInfo(
-    'A countable claim carries a figure a run could recompute and an invariant quantifies over a named tree a walk could falsify. Both are candidates a reader settles, and neither gates.',
-  )
-  logInfo(
-    'A figure spelled in words reads as uncounted, since a cardinal in prose is pronominal more often than measured. Entries are counted by heading, so a heading carrying several decisions counts once and the total reads low by however many it holds.',
-  )
-  const line = `${testable} of ${decisions} carry a claim a machine could test, ${covered} of which name a check that exists`
-  // A record whose every testable claim names a check has nothing to act on,
-  // and so does one carrying no testable claim at all. Warning on both is how
-  // a section becomes one nobody reads after the second run.
-  if (testable > covered) logWarn(line)
-  else logInfo(`${line}.`)
-  logInfo(
-    'Coverage reads the entry rather than the tree, so a claim some check happens to cover without the entry naming it reads as unchecked.',
-  )
-
-  pipeOutput(
-    report.decisions
-      .map((entry) => {
-        const kind = CLAIM_LABEL[entry.claim] ?? entry.claim
-        const evidence =
-          entry.figures.length > 0 ? `  ${entry.figures.join(' ')}` : ''
-        const checks =
-          entry.checks.length > 0
-            ? `\n  checked by ${entry.checks.join(', ')}`
-            : ''
-        return `${report.rel}:${entry.line}  ${kind}${evidence}  ${plural(entry.words, 'word')}\n  ${entry.heading}${checks}`
-      })
       .join('\n'),
   )
 }

@@ -300,10 +300,10 @@ export function register(program: Command): void {
         'Entries are ordered due first, then those citing a missing path, then the',
         'longest unreviewed, then by name, so a review takes the first N as a batch.',
         '',
-        'canonical: reads REQUIREMENTS.md and ARCHITECTURE.md at whichever surface',
-        'root carries each, in the current worktree since both are tracked. Each',
-        'reports its reviewed date and the release tags merged into HEAD after that',
-        'day, or never when it carries no date. --days does not apply.',
+        'canonical: reads REQUIREMENTS.md at whichever surface root carries it,',
+        'in the current worktree since it is tracked. It reports its reviewed date',
+        'and the release tags merged into HEAD after that day, or never when it',
+        'carries no date. --days does not apply.',
         '',
         'Exit codes:',
         '  0  the reading completed, whatever it found',
@@ -645,7 +645,7 @@ async function runStaleCanonical(
   logStep('Canonical')
 
   if (outcome.docs.length === 0) {
-    logInfo('neither REQUIREMENTS.md nor ARCHITECTURE.md exists')
+    logInfo('REQUIREMENTS.md does not exist')
   } else {
     for (const doc of outcome.docs) logInfo(describeCanonical(doc, outcome))
   }

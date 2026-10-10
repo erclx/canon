@@ -117,17 +117,6 @@ describe('reading counts out of each record shape', () => {
     missingSections: [],
     indexDrift: [{ rel: 'c.md' }],
     entries: [{ bareReferences: [{ line: 4 }] }, { bareReferences: [] }],
-    architecture: {
-      rel: 'canon/ARCHITECTURE.md',
-      lines: 162,
-      ceiling: 178,
-      entryCap: 3,
-      decisions: [
-        { claim: 'countable', checks: [] },
-        { claim: 'invariant', checks: ['scripts/core/check.sh'] },
-        { claim: 'neither', checks: [] },
-      ],
-    },
   }
 
   it('should count the context audit findings by their own arrays', () => {
@@ -137,107 +126,7 @@ describe('reading counts out of each record shape', () => {
       missingSections: 0,
       indexDrift: 1,
       bareReferences: 1,
-      recordOverLength: 0,
-      recordOverCount: 0,
-      recordUnverifiable: 1,
-      recordUnchecked: 1,
     })
-  })
-
-  it('should count a record past its own ceiling as over length', () => {
-    const record = {
-      ...contextRecord,
-      architecture: { ...contextRecord.architecture, lines: 179 },
-    }
-
-    expect(countsFor(specFor('context'), record)?.recordOverLength).toBe(1)
-  })
-
-  it('should count a record holding more entries than its cap as over count', () => {
-    const record = {
-      ...contextRecord,
-      architecture: { ...contextRecord.architecture, entryCap: 2 },
-    }
-
-    expect(countsFor(specFor('context'), record)?.recordOverCount).toBe(1)
-  })
-
-  it('should omit the count key for a record stating no cap', () => {
-    const { entryCap, ...architecture } = contextRecord.architecture
-    const counts = countsFor(specFor('context'), {
-      ...contextRecord,
-      architecture,
-    })
-
-    expect(counts).not.toHaveProperty('recordOverCount')
-  })
-
-  it('should count a record missing a revisit sentence under its clause', () => {
-    const record = {
-      ...contextRecord,
-      architecture: {
-        ...contextRecord.architecture,
-        revisitRequired: true,
-        decisions: contextRecord.architecture.decisions.map((entry, index) => ({
-          ...entry,
-          revisit: index > 0,
-        })),
-      },
-    }
-
-    expect(countsFor(specFor('context'), record)?.recordMissingRevisit).toBe(1)
-  })
-
-  it('should omit the revisit key for a record stating no clause', () => {
-    const counts = countsFor(specFor('context'), contextRecord)
-
-    expect(counts).not.toHaveProperty('recordMissingRevisit')
-  })
-
-  it('should count decisions past the word cap the record states', () => {
-    const record = {
-      ...contextRecord,
-      architecture: {
-        ...contextRecord.architecture,
-        wordCap: 150,
-        decisions: contextRecord.architecture.decisions.map((entry, index) => ({
-          ...entry,
-          words: index === 0 ? 151 : 150,
-        })),
-      },
-    }
-
-    expect(countsFor(specFor('context'), record)?.recordOverWords).toBe(1)
-  })
-
-  it('should omit the word key for a record stating no word cap', () => {
-    const counts = countsFor(specFor('context'), contextRecord)
-
-    expect(counts).not.toHaveProperty('recordOverWords')
-  })
-
-  it('should count a Risks section past the bullet cap the record states', () => {
-    const record = {
-      ...contextRecord,
-      architecture: {
-        ...contextRecord.architecture,
-        riskCap: 6,
-        risksBullets: 7,
-      },
-    }
-
-    expect(countsFor(specFor('context'), record)?.recordOverRisks).toBe(1)
-  })
-
-  it('should omit the risk key for a record stating no bullet cap', () => {
-    const record = {
-      ...contextRecord,
-      architecture: { ...contextRecord.architecture, risksBullets: 9 },
-    }
-
-    expect(countsFor(specFor('context'), record)).not.toHaveProperty(
-      'recordOverRisks',
-    )
   })
 
   it('should count a requirements record past its own word cap', () => {
@@ -258,44 +147,6 @@ describe('reading counts out of each record shape', () => {
     expect(countsFor(specFor('context'), record)).not.toHaveProperty(
       'requirementsOverWords',
     )
-  })
-
-  /**
-   * Zero here would read as a record measured against a ceiling and found
-   * conforming, where the truth is that it declared none to measure against.
-   */
-  it('should omit the length key for a record stating no ceiling', () => {
-    const { ceiling, ...architecture } = contextRecord.architecture
-    const counts = countsFor(specFor('context'), {
-      ...contextRecord,
-      architecture,
-    })
-
-    expect(counts).not.toHaveProperty('recordOverLength')
-    expect(counts?.recordUnverifiable).toBe(1)
-  })
-
-  /**
-   * A project entitled to carry no architecture record still has context
-   * folders worth counting, and a zero under the record keys there would read
-   * as a conforming record rather than as an absent one.
-   */
-  it('should count the folders alone when the project carries no record', () => {
-    const record = { ...contextRecord, architecture: null }
-
-    expect(countsFor(specFor('context'), record)).toEqual({
-      unresolvedCitations: 1,
-      longEntries: 2,
-      missingSections: 0,
-      indexDrift: 1,
-      bareReferences: 1,
-    })
-  })
-
-  it('should return no counts for a context record carrying no architecture key', () => {
-    const { architecture, ...record } = contextRecord
-
-    expect(countsFor(specFor('context'), record)).toBeUndefined()
   })
 
   it('should sum the markdown weights across every measured entry', () => {

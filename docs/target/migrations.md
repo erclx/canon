@@ -127,3 +127,9 @@ A project scaffolded earlier keeps what it already holds, and nothing deletes it
 - `.claude/rules/canon/standards/wireframes.md` leaves on the next `canon gov sync`, which deletes a held copy of a rule the toolkit no longer ships.
 
 A `## States` table under `canon/wireframes/` is no longer checked against evidence folders, so `canon context audit --gate` passes without reading the folder.
+
+## Move decisions out of a held architecture record, once
+
+The toolkit stopped seeding a `canon/ARCHITECTURE.md`, stopped gating its caps, and retired the `architecture` standard and the rule generated from it. A project scaffolded earlier may hold the file and import it from `CLAUDE.md`. Both stay, since the record is project prose now and nothing syncs or deletes it. `canon gov sync` removes the generated rule, and `canon context audit` no longer reports the record or its caps.
+
+Decide what to do with the file yourself, since where a decision belongs takes judgment no sync has. A decision about how one domain is built goes to the `canon/context/` entry of the domain it constrains, under that entry's `## Decisions`. Once the file is empty, delete it and its `@canon/ARCHITECTURE.md` line in `CLAUDE.md`.

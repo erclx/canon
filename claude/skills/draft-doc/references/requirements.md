@@ -13,9 +13,8 @@ Governs the product-scope document at `canon/REQUIREMENTS.md`: goals and non-goa
 
 Does not govern:
 
-- Rationale for a technical choice: `architecture.md`
 - Execution order across the work the scope generates: `board.md`
-- Per-domain structure and narrative: `context.md`
+- Per-domain structure, narrative, and the rationale for a technical choice: `context.md`
 
 ## What goes in
 
@@ -29,7 +28,7 @@ Does not govern:
 - Implementation details, API names, or internal component references
 - Anything that describes how a feature is built rather than what it does
 - Measured results, such as scores, benchmark figures, or token counts. They move on every run and this file changes least. Name where the results live instead.
-- Content another canonical doc owns, such as the stack list, which the stack-and-runtime slot of `canon/ARCHITECTURE.md` holds, or the rules of this standard itself
+- Content another canonical doc owns, such as the stack list, which the context entry of the domain it constrains holds, or the rules of this standard itself
 
 ## Sections
 

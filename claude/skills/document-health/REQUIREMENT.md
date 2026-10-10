@@ -23,7 +23,7 @@ The third is silence on an unread axis. Both measured verbs resolve their folder
 - Say which layer answered the classifier sweep, since its model layer being off narrows the read without refusing it
 - Take every checkpoint from the record the verb returns rather than from a number written into the skill
 - Run standalone, and stay callable from the structural check rather than reachable only through it
-- Read the requirements and architecture records for identity drift when the scope reaches them, and print one reminder line per doc from `canon records stale canonical`, since the fold no longer writes the first and only writes the second for a planned slot decision, so nothing else reads either whole
+- Read the requirements record for identity drift when the scope reaches it, and print one reminder line from `canon records stale canonical`, since the fold never writes it, so nothing else reads it whole
 
 ## Must not
 

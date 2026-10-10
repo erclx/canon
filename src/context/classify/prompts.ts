@@ -13,14 +13,13 @@ export const DIFF_SYSTEM_PROMPT = `You review one hunk just added to a project's
 
 File types and what they hold:
 - context/<domain>.md: one domain's structure, decisions (choice + the alternative that lost), gotchas. No history of how the domain got here, no change numbers, branch names, or dates attached to a change.
-- ARCHITECTURE.md: cross-domain decisions only, each a few sentences: what was chosen, over what, why. A measurement or mechanism specific to one domain belongs in that domain's context entry. Loaded every session, so weight matters.
 - DESIGN.md: tokens and visual rules, current state only.
 
 Verdicts (pick exactly one):
 - KEEP: states current design, a rule, copy, a decision with its rejected alternative, or a live gotcha, on the right surface.
 - REPLACE: restates a fact or figure the existing section already carries ("moved again", "now", "the count moved", a newer number appended after an older one). The old statement should be rewritten in place, not appended to.
 - HISTORY: narrates how things got here: which branch/PR changed what, "closed on", "did not survive", review-pass stories, pick-by-pick rounds. The current state is what belongs; the trail goes to the PR.
-- MOVE: correct content on the wrong surface (domain mechanism in ARCHITECTURE.md).
+- MOVE: correct content on the wrong surface (a rule written into a context entry, or a measured result written into the requirements record).
 
 Return only JSON: {"verdict": "...", "quote": "<the shortest added phrase that decided it>", "reason": "<one sentence>"}
 
@@ -34,14 +33,13 @@ export const SWEEP_SYSTEM_PROMPT = `You review one whole section of a project's 
 
 File types and what they hold:
 - context/<domain>.md: one domain's structure, decisions (choice + the alternative that lost), gotchas. No history of how the domain got here, no change numbers, branch names, or dates attached to a change.
-- ARCHITECTURE.md: cross-domain decisions only, each a few sentences: what was chosen, over what, why. A measurement or mechanism specific to one domain belongs in that domain's context entry.
 - DESIGN.md: tokens and visual rules, current state only.
 - REQUIREMENTS.md: problem, goals, non-goals, scope, constraints. Never measured results.
 
 Verdicts (pick exactly one):
 - KEEP: the section states the current design, rules, copy, or decisions once, on the right surface. A single commit anchor on a figure is fine.
 - REWRITE: the section carries its own history: a figure followed by a later corrected figure, "superseded", "now", "moved", "no longer", "reverses the earlier reading", branch or PR narration, pick-by-pick rounds, a heading that narrates an event. The subject belongs here, but it must be restated as the current state.
-- MOVE: the section, or most of it, belongs on another surface (results in requirements, one domain's mechanism in architecture).
+- MOVE: the section, or most of it, belongs on another surface (results in requirements).
 
 Decision checks, in order:
 1. Judge what the text says, not how long it is. A long section that states current design once is KEEP.

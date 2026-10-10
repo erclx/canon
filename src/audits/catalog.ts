@@ -140,99 +140,11 @@ function allOf(
 }
 
 /**
- * Reads the architecture record's measures, or nothing when the project
- * carries no record.
- *
- * Three states rather than two, matching what the verb publishes. The key
- * absent is a run that never opened the record, which the aggregate never asks
- * for and so reads as a shape that moved. Null is a project entitled to carry
- * no record, whose other context counts still stand, so it contributes no key
- * rather than a zero that would read as a conforming record.
- */
-function architectureCounts(
-  root: Record<string, unknown>,
-): Record<string, number> | undefined | 'absent' {
-  if (!('architecture' in root)) return undefined
-  if (root.architecture === null) return 'absent'
-
-  const record = asObject(root.architecture)
-  const decisions = record?.decisions
-  if (
-    record === undefined ||
-    !Array.isArray(decisions) ||
-    typeof record.lines !== 'number'
-  ) {
-    return undefined
-  }
-
-  // A record stating no length rule has no ceiling to be past, and reporting
-  // zero there would read as one measured and found conforming.
-  const ceiling =
-    typeof record.ceiling === 'number' ? record.ceiling : undefined
-  const entryCap =
-    typeof record.entryCap === 'number' ? record.entryCap : undefined
-
-  const revisitRequired = record.revisitRequired === true
-  const wordCap =
-    typeof record.wordCap === 'number' ? record.wordCap : undefined
-  const riskCap =
-    typeof record.riskCap === 'number' ? record.riskCap : undefined
-  const risksBullets =
-    typeof record.risksBullets === 'number' ? record.risksBullets : undefined
-
-  let unverifiable = 0
-  let unchecked = 0
-  let lackingRevisit = 0
-  let overWords = 0
-  for (const raw of decisions) {
-    const entry = asObject(raw)
-    const claim = entry?.claim
-    const checks = lengthOf(entry?.checks)
-    if (typeof claim !== 'string' || checks === undefined) return undefined
-
-    if (claim === 'neither') unverifiable += 1
-    else if (checks === 0) unchecked += 1
-    if (revisitRequired && entry?.revisit !== true) lackingRevisit += 1
-    if (
-      wordCap !== undefined &&
-      typeof entry?.words === 'number' &&
-      entry.words > wordCap
-    ) {
-      overWords += 1
-    }
-  }
-
-  return {
-    // A boolean, counted so the aggregate reads it the way it reads every
-    // other measure. The verb gates on it separately, and the key is absent
-    // rather than zero on a record that declared no ceiling.
-    ...(ceiling !== undefined && {
-      recordOverLength: record.lines > ceiling ? 1 : 0,
-    }),
-    // Absent on a record stating no entry cap, for the same reason.
-    ...(entryCap !== undefined && {
-      recordOverCount: decisions.length > entryCap ? 1 : 0,
-    }),
-    // Absent on a record stating no revisit clause, for the same reason.
-    ...(revisitRequired && { recordMissingRevisit: lackingRevisit }),
-    // Absent on a record stating no word cap or no bullet cap, for the same
-    // reason, and the bullet key absent too on a record with no Risks section.
-    ...(wordCap !== undefined && { recordOverWords: overWords }),
-    ...(riskCap !== undefined &&
-      risksBullets !== undefined && {
-        recordOverRisks: risksBullets > riskCap ? 1 : 0,
-      }),
-    recordUnverifiable: unverifiable,
-    recordUnchecked: unchecked,
-  }
-}
-
-/**
  * Reads the requirements record's one cap, or nothing when the record is
  * absent, states no cap, or the run never opened it.
  *
- * The key is optional rather than required the way `architecture` is, so a
- * record from a binary predating it still counts its other findings.
+ * The key is optional, so a record from a binary predating it still counts
+ * its other findings.
  */
 function requirementsCounts(
   root: Record<string, unknown>,
@@ -301,8 +213,6 @@ function contextCounts(record: unknown): Record<string, number> | undefined {
     bareReferences += bare
   }
 
-  const architecture = architectureCounts(root)
-  if (architecture === undefined) return undefined
   const requirements = requirementsCounts(root)
 
   const counts = allOf({
@@ -314,9 +224,7 @@ function contextCounts(record: unknown): Record<string, number> | undefined {
   })
 
   if (counts === undefined) return undefined
-  return architecture === 'absent'
-    ? { ...counts, ...requirements }
-    : { ...counts, ...architecture, ...requirements }
+  return { ...counts, ...requirements }
 }
 
 function markdownCounts(record: unknown): Record<string, number> | undefined {

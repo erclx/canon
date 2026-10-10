@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { readEntryCap, readRiskCap, readWordCap } from '@/context/architecture'
 import { readRequirementsWordCap } from '@/context/requirements'
 import { bodyLines } from '@/markdown/scan'
 
@@ -31,27 +30,6 @@ function capLine(source: string): string | undefined {
 function template(source: string): string {
   return source.match(/```markdown\n([\s\S]*?)\n```/)?.[1] ?? ''
 }
-
-describe('architecture seed', () => {
-  const seed = read('tooling/claude/seeds/canon/ARCHITECTURE.md')
-
-  it('should state all three caps on one prose line', () => {
-    const line = capLine(seed) ?? ''
-
-    expect({
-      entry: readEntryCap(line),
-      words: readWordCap(line),
-      risks: readRiskCap(line),
-    }).toEqual({ entry: 12, words: 150, risks: 6 })
-  })
-
-  it('should state the caps the standard template states', () => {
-    const line = capLine(seed)
-
-    expect(line).toBeDefined()
-    expect(template(read('standards/architecture.md'))).toContain(line)
-  })
-})
 
 describe('requirements seed', () => {
   const seed = read('tooling/claude/seeds/canon/REQUIREMENTS.md')

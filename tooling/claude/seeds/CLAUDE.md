@@ -7,7 +7,6 @@
 - Before non-trivial work in a domain read `canon/context/<domain>.md`. Pick which from the index anchor below.
 
 @canon/REQUIREMENTS.md
-@canon/ARCHITECTURE.md
 @canon/context/index.md
 
 ## Commands

@@ -45,7 +45,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 
 - All shell scripts live in `scripts/`. Do not place a `.sh` file outside it.
 - Dictionaries live in `.cspell/`, hooks in `.husky/`, seeded context docs in `canon/context/`.
-- The `canon/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `canon/ARCHITECTURE.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `canon/context/`. Indexes stay opt-in.
+- The `canon/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md` and `canon/REQUIREMENTS.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `canon/context/`. Indexes stay opt-in.
 
 ## Hooks
 

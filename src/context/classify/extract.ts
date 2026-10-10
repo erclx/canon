@@ -7,14 +7,13 @@ import { listChangedFiles, resolveBaseRef } from '@/git/files'
 import { surfaceDir } from '@/roots/surface'
 
 /**
- * The four canonical doc types the classifier reaches, matching the file
+ * The three canonical doc types the classifier reaches, matching the file
  * pattern the groundwork spike scoped its fixture to
  * (`scripts/hunks.py`'s `DOC_PATH`) and the file-type catalog both system
  * prompts state.
  */
 export const CANONICAL_DOC_TYPES = [
   'context',
-  'architecture',
   'design',
   'requirements',
 ] as const
@@ -23,7 +22,6 @@ export type CanonicalDocType = (typeof CANONICAL_DOC_TYPES)[number]
 
 const DOC_PATTERNS: Record<CanonicalDocType, RegExp> = {
   context: /(^|\/)context\/.+\.md$/,
-  architecture: /(^|\/)ARCHITECTURE\.md$/,
   design: /(^|\/)DESIGN\.md$/,
   requirements: /(^|\/)REQUIREMENTS\.md$/,
 }
@@ -35,9 +33,8 @@ const MULTI_DOC_TYPES: readonly { type: CanonicalDocType; name: string }[] = [
   { type: 'context', name: 'context' },
 ]
 
-/** The three doc types that resolve to one file each, paired with `surfaceDir`'s entry name. */
+/** The two doc types that resolve to one file each, paired with `surfaceDir`'s entry name. */
 const SINGLE_DOC_TYPES: readonly { type: CanonicalDocType; entry: string }[] = [
-  { type: 'architecture', entry: 'ARCHITECTURE.md' },
   { type: 'design', entry: 'DESIGN.md' },
   { type: 'requirements', entry: 'REQUIREMENTS.md' },
 ]
@@ -387,9 +384,8 @@ function readSections(
  *
  * `context` resolves through `resolveFolders`, the same
  * folder discovery `canon context audit` uses, so a domain split into a
- * folder of its own is swept the same way it is audited. The three
- * single-file types resolve through `surfaceDir`, agreeing with
- * `architectureRel`'s own resolution.
+ * folder of its own is swept the same way it is audited. The two
+ * single-file types resolve through `surfaceDir`.
  */
 export async function extractSweepSections(
   root: string,

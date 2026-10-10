@@ -67,7 +67,7 @@ folder is a Go or PHP root rather than a JavaScript one.
 
 Read these once, from the repository root:
 
-- `canon/REQUIREMENTS.md` and `canon/ARCHITECTURE.md` if present
+- `canon/REQUIREMENTS.md` if present
 - Directory structure via `ls -1` of the project root and `src/` if present
 
 ## Resolve arguments

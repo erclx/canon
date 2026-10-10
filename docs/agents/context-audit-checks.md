@@ -1,6 +1,6 @@
 ---
 title: Context audit checks
-description: What each non-gating check reports, the unit each checkpoint is measured in, where the architecture record's findings are described, which folders each check reaches, and what moved to the attribute tier
+description: What each non-gating check reports, the unit each checkpoint is measured in, the requirements record's word cap, which folders each check reaches, and what moved to the attribute tier
 ---
 
 # Context audit checks
@@ -63,9 +63,9 @@ A release label reports with or without its leading `v` at three segments, since
 
 Fenced blocks are excluded, which keeps a pinned version in an install command from reading as a claim the entry makes. Frontmatter is excluded with them, since the content checks read the body alone, and that is what keeps a diagram entry's dated `verified` stamp a record of its last check rather than a marker to settle. Length is the exception, counting the whole file, so a reader applying the 150-rendered-line checkpoint against the body alone lands a few lines under what the tool reports.
 
-## The architecture record
+## The requirements record
 
-Seven findings read `canon/ARCHITECTURE.md` rather than a folder: an entry cap, a revisit sentence closing each decision, a length ceiling, a word cap a decision, and a risk bullet cap, each gating only where the record states it for itself, a claim coverage report, and a word count. One more reads `canon/REQUIREMENTS.md` against the word cap it states. What each reads and why the last two architecture findings gate nothing are in `architecture-record.md`.
+The audit reads `canon/REQUIREMENTS.md` under its own step rather than as a folder, and counts every word below the frontmatter against the cap the record states in a clause of the form `This record holds at most 600 words.` The cap is the record's own, so a record stating none is measured and never gated, and a project with no record is reported as out of scope. The seeded record states the 600-word cap. The JSON record carries the reading as `requirements`, null where the project carries no record and absent under `--citations-only`, and the audit catalog counts a record past its cap as `requirementsOverWords`.
 
 ## Which folders each check reaches
 

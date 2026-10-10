@@ -14,7 +14,7 @@ Draw the view the request names. Each answers one question and is drawn from one
 | View           | Question it answers                                     | Source signal                                     | Diagram type                         |
 | -------------- | ------------------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
 | System context | Who uses the system, what it talks to, where it ends    | `canon/REQUIREMENTS.md`                           | `flowchart TB`                       |
-| Components     | The layered structure inside the boundary               | `canon/ARCHITECTURE.md`                           | `flowchart TB` with `subgraph` lanes |
+| Components     | The layered structure inside the boundary               | `canon/context/index.md` and the folder layout    | `flowchart TB` with `subgraph` lanes |
 | Request flow   | A request lifecycle, an agent loop, or an actor handoff | the entry point and its handlers                  | `sequenceDiagram`                    |
 | Data pipeline  | Retrieval, ranking, queues, or ETL                      | the pipeline's modules                            | `flowchart TB`                       |
 | Deployment     | Hosts, services, and infrastructure config              | deploy config, compose files, infrastructure code | `flowchart TB`                       |
@@ -25,8 +25,8 @@ Stay inside `flowchart` and `sequenceDiagram`. C4, state, ER, and class diagrams
 
 ## Sources
 
-- Read `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`, `CLAUDE.md`, and the language manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) when present, plus the top-level folder layout through `ls`. Do not recurse speculatively.
-- When neither planning file exists and no folder structure names a boundary, stop: `❌ No source signal for <view>. Add canon/ARCHITECTURE.md or run inside a project folder.`
+- Read `canon/REQUIREMENTS.md`, `canon/context/index.md`, `CLAUDE.md`, and the language manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) when present, plus the top-level folder layout through `ls`. Do not recurse speculatively.
+- When neither planning file exists and no folder structure names a boundary, stop: `❌ No source signal for <view>. Add canon/REQUIREMENTS.md or run inside a project folder.`
 - When the view came from a code scan rather than planning prose, open the caption with `Source: code.` and add `Fidelity is lower than prose-driven figures. Verify against the project's intent.`
 
 ## Caption and prose

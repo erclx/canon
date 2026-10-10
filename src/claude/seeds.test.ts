@@ -37,7 +37,7 @@ async function makeRoot(): Promise<string> {
   await writeFile(join(claude, 'settings.json'), '{}\n')
   await writeFile(join(claude, 'hooks', 'guard.sh'), '#!/bin/sh\n')
   await writeFile(join(claude, 'tasks', 'index.md'), '# Tasks\n')
-  await writeFile(join(surface, 'ARCHITECTURE.md'), '# Architecture\n')
+  await writeFile(join(surface, 'REQUIREMENTS.md'), '# Requirements\n')
   await writeFile(join(surface, 'context', 'index.md'), '# Context\n')
   await writeFile(join(surface, 'decisions', 'index.md'), '# Decisions\n')
 
@@ -59,7 +59,7 @@ describe('planSeeds', () => {
 
     expect(labels).toEqual([
       'settings.json',
-      'ARCHITECTURE.md',
+      'REQUIREMENTS.md',
       'hooks/guard.sh',
       'context/index.md',
       'tasks/index.md',
@@ -80,12 +80,12 @@ describe('planSeeds', () => {
     const root = await makeRoot()
     const target = await makeDir()
     await mkdir(join(target, '.claude'), { recursive: true })
-    await writeFile(join(target, '.claude', 'ARCHITECTURE.md'), '# Mine\n')
+    await writeFile(join(target, '.claude', 'REQUIREMENTS.md'), '# Mine\n')
 
     const entries = planSeeds(root, target)
 
     expect(
-      entries.find((e) => e.seed.scanLabel === 'ARCHITECTURE.md')?.present,
+      entries.find((e) => e.seed.scanLabel === 'REQUIREMENTS.md')?.present,
     ).toBe(true)
   })
 
@@ -141,7 +141,7 @@ describe('applySeeds', () => {
 
     expect(applied).toEqual([
       '.claude/settings.json',
-      'canon/ARCHITECTURE.md',
+      'canon/REQUIREMENTS.md',
       '.claude/hooks/guard.sh',
       'canon/context/index.md',
       '.canon/tasks/index.md',
@@ -184,10 +184,10 @@ describe('applySeeds', () => {
     const root = await makeRoot()
     const target = await makeDir()
     await mkdir(join(target, '.claude'), { recursive: true })
-    await writeFile(join(target, '.claude', 'ARCHITECTURE.md'), '# Mine\n')
+    await writeFile(join(target, '.claude', 'REQUIREMENTS.md'), '# Mine\n')
 
     const applied = await applySeeds(pendingSeeds(planSeeds(root, target)))
 
-    expect(applied).not.toContain('canon/ARCHITECTURE.md')
+    expect(applied).not.toContain('canon/REQUIREMENTS.md')
   })
 })

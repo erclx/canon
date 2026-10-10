@@ -5,7 +5,7 @@ description: The classify diff invocation, the record fields to read, applying a
 
 # Classify the fold's diff baseline
 
-Mechanics for Step 9 of `context-fold`. The body owns the skip condition and the shared baseline, and this file owns the invocation, what the record carries, and what applying a finding does.
+Mechanics for Step 8 of `context-fold`. The body owns the skip condition and the shared baseline, and this file owns the invocation, what the record carries, and what applying a finding does.
 
 ## Invocation
 
@@ -17,7 +17,7 @@ canon context classify diff --base <base> --json
 
 Never substitute a different verb for it, such as `canon docs <name>` (a documentation lookup, not a classification).
 
-Reuse the base the Diff baseline section already resolved for Steps 2, 4, and 6 rather than resolving a second time. Never pick or configure a backend here. The project setting decides it, and this step reports `modelLayer` as the record returns it.
+Reuse the base the Diff baseline section already resolved for Steps 2 and 5 rather than resolving a second time. Never pick or configure a backend here. The project setting decides it, and this step reports `modelLayer` as the record returns it.
 
 ## Reading the record
 
@@ -30,16 +30,16 @@ Each finding carries `file`, a `verdict` of `KEEP`, `REPLACE`, `HISTORY`, or `MO
 
 ## Scope
 
-Answer every non-`KEEP` finding the verb returns, not only the files Step 3 or Step 6 wrote this run. A branch carrying earlier commits from a prior session has doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none, so there is no narrower check to add here.
+Answer every non-`KEEP` finding the verb returns, not only the files Step 3 or Step 5 wrote this run. A branch carrying earlier commits from a prior session has doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none, so there is no narrower check to add here.
 
 ## Applying a finding
 
 Locate the finding by its `quote` in the file's current content. The quote is often a narrow fragment rather than the whole clause it sits in, since the regex layer's own match is a short pattern hit, so the edit below targets the sentence or bullet the quote sits in rather than the literal substring alone.
 
 - **Found exactly once.** Apply the verdict:
-  - `REPLACE`: rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3 and Step 6's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
+  - `REPLACE`: rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3 and Step 5's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
   - `HISTORY`: rewrite the sentence or bullet carrying the quote to drop the narration and keep any current fact the same clause states. The quote narrates how the fact arrived rather than stating the fact, which a canonical doc excludes regardless of what wrote it, and a literal cut of the fragment alone would leave the rest of the clause grammatically stranded.
-  - `MOVE`: do not cut. The verdict means correct content sitting on the wrong surface, such as domain mechanism written into `canon/ARCHITECTURE.md` that belongs in a context entry, and only the model layer returns it. Cutting would delete content a fold with no model configured would never have flagged at all. Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited.
+  - `MOVE`: do not cut. The verdict means correct content sitting on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it. Cutting would delete content a fold with no model configured would never have flagged at all. Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited.
 - **Found more than once, or not found at all.** Report that the finding could not be located rather than guessing which occurrence or rewriting nothing silently. A model verdict paraphrasing the quote it read is the ordinary way this happens.
 
 Run the classifier once per fold. Do not re-run it after applying a finding to check the edit, since a second pass over what this step wrote is the loop the verb's own reference already warns against.

@@ -1,8 +1,0 @@
-# Gov Toolkit
-
-Installs governance rules into target projects.
-
-## Rules
-
-- Install a rule as a real file the project owns, never as a pointer into the catalog.
-- Report drift rather than overwriting a rule a project edited.

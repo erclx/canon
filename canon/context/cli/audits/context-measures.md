@@ -1,6 +1,6 @@
 ---
 title: Context audit measures
-description: How the length, depth, provenance, and reference-form measures count, and the architecture record measured beside the folders
+description: How the length, depth, provenance, and reference-form measures count, and the requirements record measured beside the folders
 ---
 
 # Context audit measures
@@ -47,14 +47,10 @@ The reference-form match is a second pass rather than a widened `citationPattern
 
 The provenance marker matches a version-like or date-like token anywhere outside a fence, so two shapes that narrate no change still report. One is a fixture literal an entry quotes because the fixture stages that exact label, and the other is a version string illustrating a pattern some other matcher must not misread. Naming the property rather than the literal clears both while keeping what the sentence taught, which is the remedy the reported-rather-than-gated framing leaves open. A date stamping a measurement clears the same way when the measured artifact's own version pins already sit in the surrounding prose, since those date the measurement more precisely than a calendar does.
 
-## The architecture record
+## The requirements record
 
-`canon/ARCHITECTURE.md` is measured beside the folders rather than by a command of its own. The record is a context surface and this verb already sits in the audit catalog, while a new top-level registration would touch `src/cli.ts` for no reason specific to this check. The accepted cost is an architecture check under a verb named for context folders, and moving it later renames a command surface.
+`canon/REQUIREMENTS.md` is measured beside the folders rather than by a command of its own. The record is a context surface and this verb already sits in the audit catalog, while a new top-level registration would touch `src/cli.ts` for no reason specific to this check. The accepted cost is a requirements check under a verb named for context folders, and moving it later renames a command surface.
 
-The ceiling comes from the record being measured rather than from a standard or from code. `standards/architecture.md` sets no length rule, so the allowances belong to whichever record declares them, and `readAllowances` reads a frame clause and a per-decision clause out of that record's own prose. The ceiling is then the frame plus the allowance times the decision count. A record declaring neither is measured and never gated, which is the ordinary shape of a target: holding a pair in code and gating every project against it audits a target against a rule it never adopted, the same failure `canResolveAtRoot` answers on the folder side. What the derivation costs is that the gate rises when a decision is added and falls for nothing, so it passes exactly when the file grew, and a rewrite of the declaring sentence past those clauses falls back to reporting rather than to a stale ceiling nobody can point at.
+The word cap comes from the record being measured rather than from code. `readRequirementsWordCap` reads an `at most <n> words` clause out of the record's own prose, so a record stating none is measured and never gated. Holding a cap in code and gating every project against it audits a target against a rule it never adopted, the same failure `canResolveAtRoot` answers on the folder side.
 
-Each decision is then classified as carrying a countable claim, a structural invariant, or neither, and every testable entry is reported against whether it names a check that exists. A countable claim carries a figure a run could recompute and an invariant quantifies over a named tree within six words of it, both orders matched. The countable signal reads digits alone: admitting a cardinal spelled in words classified 22 of 24 entries as countable, because `one` in this prose is pronominal far more often than measured, and the cost of the narrower rule is that a measured claim written in words reads as uncounted.
-
-Coverage reads the entry rather than the tree. A check is a `scripts/**.sh` path the entry spells that exists on disk, or a `canon` invocation matching an argv registered in `src/audits/catalog.ts`, so a claim some check happens to cover without the entry naming it reads as unchecked. Nothing is stored: every run reclassifies, so an entry rewritten tomorrow is read as it stands then and no verdict ages the way an anchor does. The classification gates nothing, since deciding whether a sentence states a claim is a judgment no parser settles, and counting entries by heading undercounts by at least two, which the report states rather than parses for.
-
-The three measures reach `canon audits run` through the existing `context` row rather than a row of their own, because a second row spelling the same argv walks the whole tree twice for numbers the first record already carries. A project entitled to carry no record contributes no key rather than a zero, which would read as a conforming record, and the record key absent entirely reads as a shape that moved.
+The measure reaches `canon audits run` through the existing `context` row rather than a row of its own, because a second row spelling the same argv walks the whole tree twice for numbers the first record already carries. A project entitled to carry no record contributes no key rather than a zero, which would read as a conforming record.

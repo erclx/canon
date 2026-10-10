@@ -118,7 +118,7 @@ Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refu
 
 ## Stale
 
-`canon records stale memory` reports which memory entries are due for review and which cite a path the tree no longer holds, ordered so a review takes the first N as a batch. `canon records stale canonical` reports when the requirements and architecture records were last reviewed and how many releases have shipped since. What makes an entry due, how a cited path resolves, how the release count is taken, and the refusals are in `records-stale.md`.
+`canon records stale memory` reports which memory entries are due for review and which cite a path the tree no longer holds, ordered so a review takes the first N as a batch. `canon records stale canonical` reports when the requirements record was last reviewed and how many releases have shipped since. What makes an entry due, how a cited path resolves, how the release count is taken, and the refusals are in `records-stale.md`.
 
 ## Push and pull
 

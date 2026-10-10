@@ -157,11 +157,7 @@ interface RoutingOptions {
   readonly json?: boolean
 }
 
-const SEEDED_FILES: readonly string[] = [
-  'ARCHITECTURE.md',
-  'REQUIREMENTS.md',
-  'DESIGN.md',
-]
+const SEEDED_FILES: readonly string[] = ['REQUIREMENTS.md', 'DESIGN.md']
 const SEEDED_DIRS: readonly string[] = ['tasks']
 
 /**

@@ -40,5 +40,5 @@ The opposite failure is the one that ships silently. A session that takes a pref
 ## Out of scope
 
 - Making the ordinary judgment call, which is a pick plus a one-sentence tradeoff and needs no surface
-- Writing the decision into a plan, task, or architecture record, which each owning standard governs and this skill only routes to
+- Writing the decision into a plan, task, or context entry, which each owning standard governs and this skill only routes to
 - Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so escalating is the operator's call rather than a description match.

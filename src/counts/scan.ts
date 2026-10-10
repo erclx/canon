@@ -35,8 +35,8 @@ export type CountsReport =
 
 /**
  * A calendar date, which reads a sentence as a historical record rather than
- * a live claim about the tree. `canon/ARCHITECTURE.md` and the context
- * entries carry a figure this way deliberately, and every one of them stays
+ * a live claim about the tree. The context entries
+ * carry a figure this way deliberately, and every one of them stays
  * correct forever, so a sentence carrying one is read past rather than
  * matched.
  */
@@ -142,7 +142,7 @@ const QUANTIFIERS = ['all']
  * match at all. No syntactic rule tells a qualifier that narrows a catalog
  * from one that only restates it, and the sentence was true when written, so
  * the fix was not a narrower matcher: the clause was dated as a past state,
- * the way `canon/ARCHITECTURE.md` dates its own figures, which is the class
+ * the way a context entry dates its own figures, which is the class
  * the date exclusion below already reads past.
  */
 const ARTICLES = ['the', 'a', 'an']

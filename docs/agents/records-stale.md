@@ -1,11 +1,11 @@
 ---
 title: Records stale
-description: Reading the memory pen as a review queue, what makes an entry due, how a cited path is read and resolved, the order entries come back in, counting the releases since the requirements and architecture records were last reviewed, and the exit codes and refusals
+description: Reading the memory pen as a review queue, what makes an entry due, how a cited path is read and resolved, the order entries come back in, counting the releases since the requirements record was last reviewed, and the exit codes and refusals
 ---
 
 # Records stale
 
-`canon records stale memory` reports each memory entry's review state and every backticked path it cites that the project no longer holds. It answers what a review of the pen should read next, so a skill takes the queue from the verb rather than re-deriving it by grep. `canon records stale canonical` reports when the requirements and architecture records were last reviewed and how many releases have shipped since.
+`canon records stale memory` reports each memory entry's review state and every backticked path it cites that the project no longer holds. It answers what a review of the pen should read next, so a skill takes the queue from the verb rather than re-deriving it by grep. `canon records stale canonical` reports when the requirements record was last reviewed and how many releases have shipped since.
 
 ```bash
 canon records stale memory
@@ -56,9 +56,9 @@ The record carries `total`, `due`, `days`, the `folder` read relative to the roo
 
 ## Canonical records
 
-`canonical` reads `REQUIREMENTS.md` and `ARCHITECTURE.md` at whichever surface root carries each, `canon/` ahead of `.claude/`, and omits one the project does not hold. Both are tracked, so `--root` defaults to the worktree the caller stands in rather than the main one, and a stamp a branch just wrote reads back from that branch.
+`canonical` reads `REQUIREMENTS.md` at whichever surface root carries it, `canon/` ahead of `.claude/`, and omits it when the project does not hold one. It is tracked, so `--root` defaults to the worktree the caller stands in rather than the main one, and a stamp a branch just wrote reads back from that branch.
 
-Each doc's review point is an optional `reviewed: YYYY-MM-DD` frontmatter field, set by whoever finishes a review, per `canon standards requirements` and `canon standards architecture`. It is a date rather than a commit, since a commit written on a feature branch never reaches a trunk that squash-merges. The field is read the way the memory field is, so a value that is not a calendar date comes back as `invalidReviewed`.
+The review point is an optional `reviewed: YYYY-MM-DD` frontmatter field, set by whoever finishes a review, per `canon standards requirements`. It is a date rather than a commit, since a commit written on a feature branch never reaches a trunk that squash-merges. The field is read the way the memory field is, so a value that is not a calendar date comes back as `invalidReviewed`.
 
 The count is every release tag merged into `HEAD` whose creator date falls after the reviewed day. A release tag ends in a dotted version, bare as `v5.25.0` or behind a component prefix as `canon-v2.1.0`, so an eval, deploy, or snapshot tag on the trunk never inflates it. A lightweight tag's creator date is its commit's date and an annotated tag's is the tagging date, so a project mixing both counts by two clocks.
 

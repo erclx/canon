@@ -18,11 +18,6 @@ function makeSection(overrides: Partial<SectionFinding> = {}): SectionFinding {
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
-    recordOverLength: false,
-    recordOverCount: false,
-    recordMissingRevisit: false,
-    recordOverWords: false,
-    recordOverRisks: false,
     requirementsOverWords: false,
     sections: [],
     drift: [],
@@ -68,38 +63,6 @@ describe('isGating', () => {
     const input = makeInput({ unresolvedCitations: 1, widened: true })
 
     expect(isGating(input)).toBe(true)
-  })
-
-  it('should fail a record past its own ceiling under the narrow gate', () => {
-    expect(isGating(makeInput({ recordOverLength: true }))).toBe(true)
-  })
-
-  it('should fail a record past its own ceiling under the widened gate', () => {
-    const input = makeInput({ recordOverLength: true, widened: true })
-
-    expect(isGating(input)).toBe(true)
-  })
-
-  it('should fail a record past its own entry cap under the narrow gate', () => {
-    expect(isGating(makeInput({ recordOverCount: true }))).toBe(true)
-  })
-
-  it('should fail a record past its own entry cap under the widened gate', () => {
-    const input = makeInput({ recordOverCount: true, widened: true })
-
-    expect(isGating(input)).toBe(true)
-  })
-
-  it('should fail a record missing a revisit sentence it requires under the narrow gate', () => {
-    expect(isGating(makeInput({ recordMissingRevisit: true }))).toBe(true)
-  })
-
-  it('should fail a decision past the word cap the record states under the narrow gate', () => {
-    expect(isGating(makeInput({ recordOverWords: true }))).toBe(true)
-  })
-
-  it('should fail a Risks section past the bullet cap the record states under the narrow gate', () => {
-    expect(isGating(makeInput({ recordOverRisks: true }))).toBe(true)
   })
 
   it('should fail a requirements record past its own word cap under the narrow gate', () => {

@@ -10,7 +10,7 @@ use_config() {
 }
 
 stage_setup() {
-  select_or_route_scenario "Which scenario?" "drift" "context-entries" "anchor-sweep" "board-sweep" "classify-findings"
+  select_or_route_scenario "Which scenario?" "drift" "context-entries" "board-sweep" "classify-findings"
 
   case "$SELECTED_OPTION" in
   "drift")
@@ -24,7 +24,7 @@ stage_setup() {
 
     log_step "Scenario ready: docs drift after a session pivot"
     log_info "Context: planning docs are stale relative to HEAD"
-    log_info "  ARCHITECTURE.md still says SQLite, but src/db.ts now uses Postgres"
+    log_info "  canon/context/storage.md still says SQLite, but src/db.ts now uses Postgres"
     log_info "  REQUIREMENTS.md lists 'no multi-user support' as a non-goal, but createTask now takes userId"
     log_info "  .canon/tasks/ has 'Migrate storage to Postgres' open, but it shipped in HEAD"
     log_info "  .canon/plans/feature-postgres-migration.md is linked from that task and must stay live"
@@ -34,7 +34,7 @@ stage_setup() {
     log_info "  'We pivoted this session: switched storage from SQLite to Postgres,'"
     log_info "  'and promoted multi-user support from non-goal to in-scope.'"
     log_info ""
-    log_info "The folded plan names the storage move as a slot decision, so ARCHITECTURE.md is rewritten."
+    log_info "The folded plan names the storage move as a decision of the storage domain, so canon/context/storage.md is rewritten."
     log_info "REQUIREMENTS.md stays unwritten. The fold reports the direction change and names document-health."
     log_info "Task marking reads the diff, so it must land whether or not you narrate."
     log_info ""
@@ -58,44 +58,10 @@ stage_setup() {
     log_info "         canon/context/web.md already exists. Its Layer responsibilities section names src/features/chat/."
     log_info "Action:  /context-fold"
     log_info "Expect:  Step 3 updates planning docs (none diverged here)"
-    log_info "         Step 4 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
+    log_info "         Step 5 reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)"
     log_info "         Rewrites the relevant section of canon/context/web.md from the diff content"
     log_info "         Does NOT create new entries (no auto-creation per design)"
     log_info "         Outputs a reminder line to run canon indexes regen"
-    ;;
-  "anchor-sweep")
-    # The fixture record overwrites the seeded canon/ARCHITECTURE.md in place.
-    # No delete first, unlike an arm keying on a path entering the tree: nothing here keys on the file
-    # being added, so the branch diff is the same either way.
-    stage_fixtures claude context-fold anchor-sweep 01-initial
-    # `git init` runs without `-b`, so the baseline branch follows the machine's
-    # init.defaultBranch. The sweep resolves its diff against `main` by name, and
-    # on a machine naming it otherwise the baseline comes out unusable, the
-    # fallback set is empty because everything is committed, and Step 6 skips.
-    git branch -M main
-    git add -A && git commit -m "feat(gov): install rules into a target project" --no-verify -q
-
-    git checkout -b feat/widen-the-catalog -q
-    stage_fixtures claude context-fold anchor-sweep 02-widen
-    git add . && git commit -m "feat(gov): widen the bundled catalog and scope sync to a stack" --no-verify -q
-
-    log_step "Scenario ready: docs architecture anchor sweep"
-    log_info "Context: the branch moves a number three decisions cite, two anchored and one not"
-    log_info "  The install decision is anchored and cites src/gov/install.ts, which goes from 4 rules to 6"
-    log_info "  The drift decision cites src/gov/sync.ts, which this branch also edits, and carries no anchor"
-    log_info "  The planner decision is anchored and cites src/gov/plan.ts, which this branch never touches"
-    log_info "  The one-file decision is anchored and cites CLAUDE.md, a root file going from 2 rules to 4"
-    log_info ""
-    log_info "Narrate nothing about the catalog. The arm fails if the sweep only"
-    log_info "reaches an entry the prompt named, and it fails the other way if it"
-    log_info "flags the unanchored entry or the entry no signal points at."
-    log_info ""
-    log_info "Action:  /context-fold"
-    log_info "Expect:  declared in fixtures/claude/context-fold/anchor-sweep/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:context-fold anchor-sweep"
-    log_info "         Two reported entries, and canon/ARCHITECTURE.md unwritten:"
-    log_info "         no anchor refreshed, none added, no claim edited beside one"
-    log_info "         Two expectations need a reader and report as unchecked."
     ;;
   "board-sweep")
     stage_fixtures claude context-fold board-sweep 01-initial
@@ -128,7 +94,7 @@ stage_setup() {
     stage_fixtures claude context-fold classify-findings 02-remeasure
 
     log_step "Scenario ready: context-fold classifies what it writes"
-    log_info "Context: one uncommitted edit stages the shape Step 9 exists to catch"
+    log_info "Context: one uncommitted edit stages the shape Step 8 exists to catch"
     log_info "  canon/context/retrieval.md appended a branch-narrated re-measurement"
     log_info "  below the count it restates, instead of rewriting it in place"
     log_info ""

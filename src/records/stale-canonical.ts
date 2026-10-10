@@ -6,8 +6,8 @@ import { gitEnv } from '@/git/env'
 import { readReviewed } from '@/records/stale'
 import { surfaceDir } from '@/roots/surface'
 
-/** The two records whose drift is identity rather than a stale path. */
-const CANONICAL_DOCS = ['REQUIREMENTS.md', 'ARCHITECTURE.md'] as const
+/** The record whose drift is identity rather than a stale path. */
+const CANONICAL_DOCS = ['REQUIREMENTS.md'] as const
 
 export interface CanonicalDoc {
   /** Relative to the root, at whichever surface root carries the doc. */

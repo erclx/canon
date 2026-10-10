@@ -11,7 +11,6 @@ CLAUDE.md              ← seeded. Project context and rules, auto-loaded by Cla
 
 canon/
 ├── REQUIREMENTS.md    ← seeded. Project problem, goals, non-goals
-├── ARCHITECTURE.md    ← seeded. Technical design decisions and open questions
 ├── DESIGN.md          ← seeded. Visual intent and the decisions behind it
 └── context/           ← seeded. Per-domain narrative. `index.md` is the discovery anchor.
 

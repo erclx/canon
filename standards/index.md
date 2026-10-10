@@ -7,7 +7,6 @@ subtitle: Reference docs for consistent authoring across the toolkit and target 
 
 Reference docs for consistent authoring across the toolkit and target projects.
 
-- [Architecture reference](architecture.md): Shape and content rules for canon/ARCHITECTURE.md
 - [Branch reference](branch.md): Branch naming format and type conventions
 - [Commit reference](commit.md): Commit message format and type conventions
 - [Context entry reference](context.md): Shape and content rules for canon/context/<domain>.md entries

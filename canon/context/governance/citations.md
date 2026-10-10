@@ -66,7 +66,6 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 
 Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `standards/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
 
-- `governance/rules/standards/architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
 - `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
 - `governance/rules/standards/skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
 - `governance/rules/standards/readme.md` → `canon standards readme`, without restating the audience-and-voice rules.

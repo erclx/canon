@@ -19,9 +19,8 @@ const LONG_PARAGRAPH = Array.from(
 ).join(' ')
 
 describe('docTypeOf', () => {
-  it('should classify each of the four canonical doc paths', () => {
+  it('should classify each of the three canonical doc paths', () => {
     expect(docTypeOf('canon/context/cli/audits.md')).toBe('context')
-    expect(docTypeOf('canon/ARCHITECTURE.md')).toBe('architecture')
     expect(docTypeOf('canon/DESIGN.md')).toBe('design')
     expect(docTypeOf('canon/REQUIREMENTS.md')).toBe('requirements')
   })
@@ -30,7 +29,7 @@ describe('docTypeOf', () => {
     expect(docTypeOf('canon/context/index.md')).toBeUndefined()
   })
 
-  it('should classify no doc type for a path outside the four surfaces', () => {
+  it('should classify no doc type for a path outside the three surfaces', () => {
     expect(docTypeOf('src/context/classify/extract.ts')).toBeUndefined()
     expect(docTypeOf('README.md')).toBeUndefined()
   })
@@ -188,7 +187,7 @@ describe('extractDiffChunks', () => {
     if (result.kind === 'ok') expect(result.chunks).toHaveLength(0)
   })
 
-  it('should ignore a change outside the four canonical doc types', async () => {
+  it('should ignore a change outside the three canonical doc types', async () => {
     commit('chore: init', { 'src/index.ts': 'export const x = 1\n' })
     write('src/index.ts', `export const x = 1\n// ${LONG_PARAGRAPH}\n`)
 
@@ -224,10 +223,6 @@ describe('extractSweepSections', () => {
       join(ROOT, 'canon', 'context', 'example.md'),
       '# Example\n\n## Overview\nCurrent state.\n\n## Layout\nMore.\n',
     )
-    writeFileSync(
-      join(ROOT, 'canon', 'ARCHITECTURE.md'),
-      '## Decision\nText.\n',
-    )
     writeFileSync(join(ROOT, 'canon', 'DESIGN.md'), '## Spacing\nTokens.\n')
     writeFileSync(join(ROOT, 'canon', 'REQUIREMENTS.md'), '## Goals\nText.\n')
 
@@ -238,7 +233,6 @@ describe('extractSweepSections', () => {
     const headings = result.sections.map((s) => `${s.docType}:${s.heading}`)
     expect(headings).toContain('context:Overview')
     expect(headings).toContain('context:Layout')
-    expect(headings).toContain('architecture:Decision')
     expect(headings).toContain('design:Spacing')
     expect(headings).toContain('requirements:Goals')
   })

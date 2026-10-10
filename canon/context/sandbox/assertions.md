@@ -32,7 +32,7 @@ An entry leaves `manual` only once it is verified against a real run's output ra
 ### Negatives
 
 - Never invert a demoted assertion into `absent`. Where a claim cannot be read, the filenames a wrong run would have chosen stay undeclared, because an `absent` entry passes for the file being elsewhere rather than for the run being correct. That is the vacuous pass `manual` is excluded from the count to prevent.
-- An arm over a step that reports rather than writes needs `reply`, because every tree assertion it can make is a negative, and a declaration of only negatives passes hardest on the skip it exists to detect. `claude:context-fold/anchor-sweep` pins a record that has to survive the run byte-identical, which a run where the step never fired satisfies, and two `reply` substrings separate the two.
+- An arm over a step that reports rather than writes needs `reply`, because every tree assertion it can make is a negative, and a declaration of only negatives passes hardest on the skip it exists to detect. A record pinned byte-identical is satisfied by a run where the step never fired, and `reply` substrings separate the two.
 
 ## Gotchas
 

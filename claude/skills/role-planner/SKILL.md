@@ -41,7 +41,7 @@ Each item below is something a record needed and a launch string did not carry.
 
 - The task file, and its `## Findings` before deciding anything. A row can carry its own disproof under a title that still states the original claim, which is how one trial nearly planned against a premise the file had already recorded as dead.
 - The source files themselves, opened rather than summarized. Never a count quoted from the task file, which was wrong or stale in ten places across four plans.
-- `CLAUDE.md` and `canon/ARCHITECTURE.md`, for the decision and the alternative it was taken against rather than for the decision alone.
+- `CLAUDE.md` and the context entries the row touches, for the decision and the alternative it was taken against rather than for the decision alone.
 - `.canon/tasks/priority.md` for the row's Touches column and its stated blocker. That column is the file set the dispatch conflict check already reads. Read it for the shared-path lines and the holds of the constraint block, never as a gate a plan must clear.
 
 Two reads belong to the `plan-feature` path alone, since neither a groundwork
