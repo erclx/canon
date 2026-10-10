@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   REQUIRED_FIELDS,
   deriveDomainLabels,
-  deriveSlug,
   deriveTitle,
   missingField,
   missingFieldMessage,
@@ -118,22 +117,6 @@ describe('deriveTitle', () => {
     const body = report({ Surface: 'x'.repeat(200) })
 
     expect(deriveTitle(body).length).toBeLessThanOrEqual(72)
-  })
-})
-
-describe('deriveSlug', () => {
-  it('should build a slug from the Surface field', () => {
-    expect(deriveSlug(report())).toBe('plugin-skill-git-commit')
-  })
-
-  it('should take the first line of a multi-line Surface field', () => {
-    const body = report({ Surface: 'plugin skill, git-commit\nand a note' })
-
-    expect(deriveSlug(body)).toBe('plugin-skill-git-commit')
-  })
-
-  it('should fall back to general when no Surface field is present', () => {
-    expect(deriveSlug('no surface here')).toBe('general')
   })
 })
 

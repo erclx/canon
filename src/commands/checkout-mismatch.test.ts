@@ -146,46 +146,6 @@ describe('checkout-mismatch warning at each directly wired verb', () => {
   })
 })
 
-/**
- * `feedback.ts` reads `.claude/`'s presence off `PROJECT_ROOT`, which resolves
- * to the checkout this test spawns `bun` out of rather than to `cwd`, so the
- * decoy cannot make this verb refuse the way the other cases' `plain` root
- * does elsewhere in this file. The write lands in this checkout's own
- * `.canon/feedback/`, which the test deletes.
- */
-describe('checkout-mismatch warning on canon feedback', () => {
-  it('should warn on the local-scratch write path', () => {
-    const body = [
-      '## Toolkit feedback',
-      '',
-      '### Surface',
-      '',
-      'checkout-mismatch regression test',
-      '',
-      '### Observed',
-      '',
-      'placeholder',
-      '',
-      '### Proposed fix',
-      '',
-      'placeholder',
-      '',
-    ].join('\n')
-
-    const result = spawnSync('bun', [CLI, 'feedback'], {
-      cwd: decoy,
-      encoding: 'utf8',
-      env: buildEnv(),
-      input: body,
-    })
-
-    expect(result.stderr).toContain(decoy)
-
-    const filePath = result.stdout.trim()
-    rmSync(filePath, { force: true })
-  })
-})
-
 describe('checkout-mismatch warning from an ordinary cwd', () => {
   it('should warn nothing when no ancestor carries a matching package.json', () => {
     expect(stderrFrom(plain, ['tooling', 'list'])).not.toContain('checkout at')

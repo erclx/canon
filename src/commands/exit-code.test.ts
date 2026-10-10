@@ -85,14 +85,11 @@ async function runCli(args: string[], opts: RunOptions): Promise<CliResult> {
 describe('command action exit codes', () => {
   let workDir: string
   let emptyPath: string
-  let relocatedCli: string
   let namelessCli: string
 
   /**
-   * `isToolkitSource` reads `.claude/` under `PROJECT_ROOT`, which resolves
-   * from the CLI's own location rather than the working directory. Reaching
-   * the two branches that guard against writing scratch into an installed
-   * package therefore needs the CLI itself to sit outside the toolkit tree.
+   * A copy of the CLI outside the toolkit tree, which the nameless-manifest
+   * root below is built from.
    */
   beforeAll(async () => {
     workDir = await mkdtemp(join(tmpdir(), 'canon-exit-code-'))
@@ -108,7 +105,6 @@ describe('command action exit codes', () => {
       join(relocatedRoot, 'tsconfig.json'),
     )
     await symlink(findInstalledModules(), join(relocatedRoot, 'node_modules'))
-    relocatedCli = join(relocatedRoot, 'src', 'cli.ts')
 
     /**
      * A root a package manager owns, holding a manifest with no `name`. The
@@ -237,21 +233,10 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain('Empty feedback body')
   })
 
-  it('should exit 1 when feedback has no toolkit source to write into', async () => {
-    const result = await runCli(['feedback'], {
-      cwd: workDir,
-      cli: relocatedCli,
-      input: CONFORMING_REPORT,
-    })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('Local scratch needs the toolkit source')
-  })
-
   /**
-   * The validator gates both write paths, so this reaches the local one and
-   * covers the flag path with it. Running `--github` here would file a real
-   * issue on any machine holding an authenticated `gh`.
+   * The validator runs before any `gh` call, so this never reaches the issue
+   * path. A report that passed it would file a real issue on any machine
+   * holding an authenticated `gh`.
    */
   it('should exit 1 when feedback is missing a required field', async () => {
     const result = await runCli(['feedback'], {
@@ -263,16 +248,16 @@ describe('command action exit codes', () => {
     expect(result.stderr).toContain('### Surface')
   })
 
-  it('should exit 1 when feedback --github finds neither gh nor a toolkit source', async () => {
-    const result = await runCli(['feedback', '--github'], {
+  it('should exit 1 and print the block when feedback finds no gh', async () => {
+    const result = await runCli(['feedback'], {
       cwd: workDir,
-      cli: relocatedCli,
       input: CONFORMING_REPORT,
       emptyPath,
     })
 
     expect(result.exitCode).toBe(1)
     expect(result.stderr).toContain('gh is not installed')
+    expect(result.stdout).toContain('## Toolkit feedback')
   })
 
   /**
