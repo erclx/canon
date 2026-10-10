@@ -61,10 +61,16 @@ export default scenario({
         `${Buffer.byteLength(result.stdout)}\n`,
       )
       ctx.print(result.stderr, 'stderr')
-      ctx.log.info('install/refusal.log        carries the refusal and the field it named')
+      ctx.log.info(
+        'install/refusal.log        carries the refusal and the field it named',
+      )
       ctx.log.info('install/refusal-status.txt carries the exit status')
-      ctx.log.info('Expect: declared in fixtures/infra/feedback/refusal/expect.toml')
-      ctx.log.info('        Check it with: canon sandbox check infra:feedback refusal')
+      ctx.log.info(
+        'Expect: declared in fixtures/infra/feedback/refusal/expect.toml',
+      )
+      ctx.log.info(
+        '        Check it with: canon sandbox check infra:feedback refusal',
+      )
     },
   },
 })

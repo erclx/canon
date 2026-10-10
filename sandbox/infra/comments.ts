@@ -44,7 +44,9 @@ export default scenario({
     ctx.log.info('snapshot   : density by language and by comment kind')
     ctx.log.info('heredoc    : heredoc bodies are data, not bash comments')
     ctx.log.info('vocabulary : sweep reads its terms from an installed rule')
-    ctx.log.info('skipped    : no rule means the sweep reports skipped, not clean')
+    ctx.log.info(
+      'skipped    : no rule means the sweep reports skipped, not clean',
+    )
     ctx.log.info('trend      : recomputes the series from git with no ledger')
     ctx.log.info('json       : machine record on stdout, frame still on stderr')
   },
@@ -70,7 +72,9 @@ export default scenario({
       seedDegradedSource(ctx)
       ctx.log.step('Running: canon comments scan')
       scan(ctx)
-      ctx.log.info('Expect: hits for TODO and previously, sourced from the rule')
+      ctx.log.info(
+        'Expect: hits for TODO and previously, sourced from the rule',
+      )
       ctx.log.info('Expect: the TODO inside the string literal is not a hit')
     },
     skipped: (ctx) => {

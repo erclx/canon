@@ -15,7 +15,9 @@ export default scenario({
     ctx.log.step('Claude sandbox')
     ctx.log.info('init        : seeds .claude/ project docs')
     ctx.log.info('seeds-list  : lists seed doc sources as JSON')
-    ctx.log.info('sync        : reconciles .gitignore against the claude manifest')
+    ctx.log.info(
+      'sync        : reconciles .gitignore against the claude manifest',
+    )
     ctx.log.info('setup       : installs user-level config to ./home/.claude/')
   },
   arms: {

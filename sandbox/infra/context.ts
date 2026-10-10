@@ -136,16 +136,26 @@ function runAudit(ctx: StageContext, ...args: string[]): void {
 export default scenario({
   prepare: (ctx) => {
     ctx.log.step('Context sandbox')
-    ctx.log.info('clean         : a conforming folder reports no findings and exits 0')
-    ctx.log.info('stale         : an unresolved citation fails the gate with exit 2')
+    ctx.log.info(
+      'clean         : a conforming folder reports no findings and exits 0',
+    )
+    ctx.log.info(
+      'stale         : an unresolved citation fails the gate with exit 2',
+    )
     ctx.log.info('illustration  : fence, fixture, and marker exclusions hold')
     ctx.log.info(
       'sections      : a short entry reports, a sibling does not answer for it',
     )
     ctx.log.info('depth         : a long run reports and a peer list is exempt')
-    ctx.log.info('tables        : a growing catalog reports, a fixed table does not')
-    ctx.log.info('drift         : index and siblings disagree in both directions')
-    ctx.log.info('json          : machine record on stdout, frame still on stderr')
+    ctx.log.info(
+      'tables        : a growing catalog reports, a fixed table does not',
+    )
+    ctx.log.info(
+      'drift         : index and siblings disagree in both directions',
+    )
+    ctx.log.info(
+      'json          : machine record on stdout, frame still on stderr',
+    )
   },
   arms: {
     clean: (ctx) => {
@@ -163,8 +173,12 @@ export default scenario({
       seedStaleCitation(ctx)
       ctx.log.step('Running: canon context audit --citations-only')
       runAudit(ctx, '--citations-only')
-      ctx.log.info('Expect: docs/onboarding.md flagged for retrieval.md, exit 2')
-      ctx.log.info('Expect: the gate prints only the finding, with no frame above it')
+      ctx.log.info(
+        'Expect: docs/onboarding.md flagged for retrieval.md, exit 2',
+      )
+      ctx.log.info(
+        'Expect: the gate prints only the finding, with no frame above it',
+      )
     },
     illustration: (ctx) => {
       seedRepo(ctx)
@@ -172,7 +186,9 @@ export default scenario({
       seedIllustrations(ctx)
       ctx.log.step('Running: canon context audit --citations-only')
       runAudit(ctx, '--citations-only')
-      ctx.log.info('Expect: silence and exit 0, since all three are illustrations')
+      ctx.log.info(
+        'Expect: silence and exit 0, since all three are illustrations',
+      )
       ctx.log.info(
         'Expect: the fenced pair, the marked line, and the fixture excluded',
       )
@@ -182,7 +198,9 @@ export default scenario({
       seedShortSections(ctx)
       ctx.log.step('Running: canon context audit')
       runAudit(ctx)
-      ctx.log.info('Expect: short.md alone reported, missing Overview and Layout')
+      ctx.log.info(
+        'Expect: short.md alone reported, missing Overview and Layout',
+      )
       ctx.log.info(
         'Expect: ci.md beside it answers for itself and does not cover short.md',
       )
@@ -199,7 +217,9 @@ export default scenario({
       seedDeepEntry(ctx)
       ctx.log.step('Running: canon context audit')
       runAudit(ctx)
-      ctx.log.info('Expect: deep.md reports one run past the 40-line checkpoint')
+      ctx.log.info(
+        'Expect: deep.md reports one run past the 40-line checkpoint',
+      )
       ctx.log.info('Expect: the 60-item peer list below it reports nothing')
     },
     tables: (ctx) => {
@@ -217,7 +237,9 @@ export default scenario({
       ctx.log.step('Running: canon context audit')
       runAudit(ctx)
       ctx.log.info('Expect: sandbox.md unlisted and web.md missing')
-      ctx.log.info('Expect: exit 0, since index drift is advisory rather than gating')
+      ctx.log.info(
+        'Expect: exit 0, since index drift is advisory rather than gating',
+      )
     },
     json: (ctx) => {
       seedRepo(ctx)

@@ -1,10 +1,6 @@
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import {
-  ScenarioStop,
-  type StageContext,
-  scenario,
-} from '@/sandbox/scenario'
+import { ScenarioStop, type StageContext, scenario } from '@/sandbox/scenario'
 
 const REPORT = 'drift-report.json'
 const STALE_LIMIT = 2
@@ -14,7 +10,11 @@ function lines(text: string): string[] {
   return text.split('\n').filter((line) => line !== '')
 }
 
-function sortedLines(ctx: StageContext, text: string, args: string[]): string[] {
+function sortedLines(
+  ctx: StageContext,
+  text: string,
+  args: string[],
+): string[] {
   return lines(ctx.capture('sort', args, { input: text }).stdout)
 }
 
@@ -62,7 +62,10 @@ function pickDroppedRoot(ctx: StageContext): string {
  * deleted. Content is what the attribution matches on, so a file written by
  * hand would report unattributed and an arm would assert the wrong verdict.
  */
-function restoreDroppedFile(ctx: StageContext, root: string): string | undefined {
+function restoreDroppedFile(
+  ctx: StageContext,
+  root: string,
+): string | undefined {
   const listing = ctx.capture('git', [
     '-C',
     ctx.root,
@@ -91,7 +94,12 @@ function restoreDroppedFile(ctx: StageContext, root: string): string | undefined
   if (commit === undefined) return undefined
 
   ctx.mkdir(dirname(rel))
-  const shown = ctx.capture('git', ['-C', ctx.root, 'show', `${commit}^:${rel}`])
+  const shown = ctx.capture('git', [
+    '-C',
+    ctx.root,
+    'show',
+    `${commit}^:${rel}`,
+  ])
   ctx.write(rel, shown.stdout)
 
   return shown.status === 0 ? rel : undefined
@@ -137,8 +145,12 @@ export default scenario({
       ctx.log.info(`  Stale rules: ${stale.join(' ')}`)
       ctx.log.info('  CLAUDE.md carries a section the seed does not')
       ctx.log.info('')
-      ctx.log.info('Expect:  declared in fixtures/infra/drift/stale/expect.toml')
-      ctx.log.info('         Check it with: canon sandbox check infra:drift stale')
+      ctx.log.info(
+        'Expect:  declared in fixtures/infra/drift/stale/expect.toml',
+      )
+      ctx.log.info(
+        '         Check it with: canon sandbox check infra:drift stale',
+      )
     },
     retired: (ctx) => {
       ctx.write('.claude/TASKS.md', '# Tasks\n\nOld single-file board.\n')
@@ -154,32 +166,54 @@ export default scenario({
       writeReport(ctx)
 
       ctx.log.step('Scenario ready: retired artifacts present')
-      ctx.log.info('Context: the seed tree moved to folders and the target kept the files')
-      ctx.log.info('  .claude/TASKS.md and .claude/WIREFRAMES.md are superseded')
+      ctx.log.info(
+        'Context: the seed tree moved to folders and the target kept the files',
+      )
+      ctx.log.info(
+        '  .claude/TASKS.md and .claude/WIREFRAMES.md are superseded',
+      )
       ctx.log.info(
         '  .claude/TASKS-ARCHIVE.md is the suffixed variant, deliberately unmatched',
       )
       ctx.log.info('')
-      ctx.log.info('The report names these and proposes nothing. No command moves them,')
+      ctx.log.info(
+        'The report names these and proposes nothing. No command moves them,',
+      )
       ctx.log.info('because the content belongs to the project.')
       ctx.log.info('')
-      ctx.log.info('Expect:  declared in fixtures/infra/drift/retired/expect.toml')
-      ctx.log.info('         Check it with: canon sandbox check infra:drift retired')
+      ctx.log.info(
+        'Expect:  declared in fixtures/infra/drift/retired/expect.toml',
+      )
+      ctx.log.info(
+        '         Check it with: canon sandbox check infra:drift retired',
+      )
     },
     tooling: (ctx) => {
       writeReport(ctx)
 
       ctx.log.step('Scenario ready: rules installed, tooling never recorded')
-      ctx.log.info('Context: every target installed before the tooling record shipped')
+      ctx.log.info(
+        'Context: every target installed before the tooling record shipped',
+      )
       ctx.log.info('  canon/config/config.json carries no tooling chain')
       ctx.log.info('')
-      ctx.log.info('The report names tooling unmeasured rather than counting zero')
-      ctx.log.info('changes against it. A target that never installed tooling and one')
-      ctx.log.info('whose tooling is current produce the same zero, so the count alone')
+      ctx.log.info(
+        'The report names tooling unmeasured rather than counting zero',
+      )
+      ctx.log.info(
+        'changes against it. A target that never installed tooling and one',
+      )
+      ctx.log.info(
+        'whose tooling is current produce the same zero, so the count alone',
+      )
       ctx.log.info('is a claim rather than the absence of one.')
       ctx.log.info('')
-      ctx.log.info('Expect:  declared in fixtures/infra/drift/tooling/expect.toml')
-      ctx.log.info('         Check it with: canon sandbox check infra:drift tooling')
+      ctx.log.info(
+        'Expect:  declared in fixtures/infra/drift/tooling/expect.toml',
+      )
+      ctx.log.info(
+        '         Check it with: canon sandbox check infra:drift tooling',
+      )
     },
     unclaimed: (ctx) => {
       const root = pickDroppedRoot(ctx)
@@ -202,18 +236,34 @@ export default scenario({
       writeReport(ctx)
 
       ctx.log.step('Scenario ready: a folder the toolkit stopped shipping')
-      ctx.log.info('Context: the reverse of every other section, which asks only')
-      ctx.log.info('whether the target matches what the toolkit currently ships')
+      ctx.log.info(
+        'Context: the reverse of every other section, which asks only',
+      )
+      ctx.log.info(
+        'whether the target matches what the toolkit currently ships',
+      )
       ctx.log.info(`  ${root}/ holds ${staged} at its published bytes`)
-      ctx.log.info(`  ${root}/project-authored.md is a sibling the toolkit never had`)
+      ctx.log.info(
+        `  ${root}/project-authored.md is a sibling the toolkit never had`,
+      )
       ctx.log.info('')
-      ctx.log.info('The folder is reported as dropped upstream and named with the')
-      ctx.log.info('commit it was last published at. It counts toward no gate, because')
-      ctx.log.info('a dropped folder and one the project wrote are the same bytes at')
+      ctx.log.info(
+        'The folder is reported as dropped upstream and named with the',
+      )
+      ctx.log.info(
+        'commit it was last published at. It counts toward no gate, because',
+      )
+      ctx.log.info(
+        'a dropped folder and one the project wrote are the same bytes at',
+      )
       ctx.log.info('the same path and only the user can tell them apart.')
       ctx.log.info('')
-      ctx.log.info('Expect:  declared in fixtures/infra/drift/unclaimed/expect.toml')
-      ctx.log.info('         Check it with: canon sandbox check infra:drift unclaimed')
+      ctx.log.info(
+        'Expect:  declared in fixtures/infra/drift/unclaimed/expect.toml',
+      )
+      ctx.log.info(
+        '         Check it with: canon sandbox check infra:drift unclaimed',
+      )
     },
   },
 })

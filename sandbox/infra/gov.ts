@@ -11,10 +11,7 @@ function sortLines(ctx: StageContext, text: string): string[] {
 }
 
 function findMarkdown(ctx: StageContext, dir: string): string[] {
-  return sortLines(
-    ctx,
-    ctx.read('find', [dir, '-type', 'f', '-name', '*.md']),
-  )
+  return sortLines(ctx, ctx.read('find', [dir, '-type', 'f', '-name', '*.md']))
 }
 
 /** Where a rule lands under a consumed root, keeping the folder it sits in at the source. */
@@ -135,7 +132,9 @@ export default scenario({
       'build/   : full .claude/rules/ present, generates .canon/tmp/gov/rules.md',
     )
     ctx.log.info('list     : read-only catalog dump, no target needed')
-    ctx.log.info('regen/   : toolkit-shaped root, orphan and drifted rule present')
+    ctx.log.info(
+      'regen/   : toolkit-shaped root, orphan and drifted rule present',
+    )
     ctx.log.info(
       'test-order/ : own history, one pair per verdict on feat/parser',
     )
@@ -209,8 +208,12 @@ export default scenario({
       ctx.print(result.stderr, 'stderr')
       ctx.log.info('test-order-record.json carries a verdict per module')
       ctx.log.info('test-order-status.txt  carries the exit the run produced')
-      ctx.log.info('Expect: declared in fixtures/infra/gov/test-order/expect.toml')
-      ctx.log.info('        Check it with: canon sandbox check infra:gov test-order')
+      ctx.log.info(
+        'Expect: declared in fixtures/infra/gov/test-order/expect.toml',
+      )
+      ctx.log.info(
+        '        Check it with: canon sandbox check infra:gov test-order',
+      )
     },
   },
 })

@@ -59,17 +59,27 @@ export default scenario({
       ctx.log.info(
         'Expect no workflow topic: the folder index declares no target-facing category',
       )
-      ctx.log.info('Expect agents by folder name, described by its index subtitle')
-      ctx.log.info('Expect domain context topics: tooling, governance, standards')
-      ctx.log.info('Expect no toolkit-internal topics: ci, development, sandbox')
+      ctx.log.info(
+        'Expect agents by folder name, described by its index subtitle',
+      )
+      ctx.log.info(
+        'Expect domain context topics: tooling, governance, standards',
+      )
+      ctx.log.info(
+        'Expect no toolkit-internal topics: ci, development, sandbox',
+      )
     },
     get: (ctx) => {
       ctx.log.step('Running: canon docs agents')
       ctx.print(head(cli(ctx, 'docs', 'agents'), 5))
-      ctx.log.info('Expect the agents folder index on stdout, frontmatter stripped')
+      ctx.log.info(
+        'Expect the agents folder index on stdout, frontmatter stripped',
+      )
       ctx.log.step('Running: canon docs tooling')
       ctx.print(head(cli(ctx, 'docs', 'tooling'), 5))
-      ctx.log.info('Expect the tooling doc resolved from canon/context/, not docs/')
+      ctx.log.info(
+        'Expect the tooling doc resolved from canon/context/, not docs/',
+      )
     },
   },
 })
