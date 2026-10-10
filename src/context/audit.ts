@@ -166,7 +166,7 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * entry types while a rule about what an entry may say does not.
  *
  * What gates here is a rule only this standard states. Bullet weight does not,
- * since `standards/markdown.md` owns that checkpoint across document types and
+ * since `claude/skills/markdown-craft/references/markdown.md` owns that checkpoint across document types and
  * its remedy sends the overflow to prose, which any entry type can act on.
  * `standards/context.md` specializes that remedy for an entry carrying
  * decisions, and specializing a rule narrows the advice rather than the measure.

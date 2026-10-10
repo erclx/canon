@@ -92,7 +92,7 @@ const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“(\[]*[A-Z]|`)|\s*$)/g
  * Checkpoints the structural measures run against.
  *
  * These are the definition rather than a fallback. Reading each number out of
- * the sentence `standards/markdown.md` states it in was the alternative, and it
+ * the sentence `claude/skills/markdown-craft/references/markdown.md` states it in was the alternative, and it
  * put a parser contract on a document authored for people, where a rewording
  * degraded a number and the report had to carry a legend saying which one. The
  * standard still states every number for a reader, and moving one is an edit to

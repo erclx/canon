@@ -11,7 +11,7 @@ Write prose that reads as though a person wrote it. A ban list subtracts words a
 
 Load this before drafting a passage rather than after. A revision pass recovers the words and never recovers the structure the draft already settled.
 
-The banned characters sit in `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`. They stay in force here. This skill adds to them and never restates them, since `canon markdown audit` reads them from the package and a second copy would drift. The word guidance under `## Voice` is the one copy of that list, and no command reads it.
+The banned characters sit in `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`. They stay in force here. This skill adds to them and never restates them, since `canon markdown audit` reads them from the package and a second copy would drift. The word guidance under `## Voice` is the one copy of that list, and no command reads it.
 
 ## What yields and what does not
 

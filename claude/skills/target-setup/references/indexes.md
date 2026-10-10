@@ -75,7 +75,7 @@ candidate list and stop rather than choosing on the operator's behalf.
 For each chosen folder, read every `*.md` sibling and draft frontmatter:
 
 - `title`: derived from the first H1. If absent, derive from the filename in sentence case.
-- `description`: one line summarizing the file's purpose, drawn from the first paragraph after the H1. Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` § Frontmatter descriptions for length and style.
+- `description`: one line summarizing the file's purpose, drawn from the first paragraph after the H1. Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` § Frontmatter descriptions for length and style.
 
 Surface every drafted entry to the user grouped by file:
 

@@ -112,7 +112,7 @@ fixes.
 
 The reply is a rendered-for-human GitHub surface, so load the `write-human`
 skill for voice and word choice, follow
-`${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation, and keep each
+`${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` for punctuation, and keep each
 mapping to a line or two.
 
 Open the body with the `## Review response` heading so it anchors as a section

@@ -18,7 +18,7 @@ A needs-eyes box leaves the review closed, and so does a box not driven for a ca
 
 ## The body
 
-Write it to `.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` at the main worktree root, sent as a heredoc the way `session-worktree` states for a main-root write. Load the `write-human` skill for the prose and follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` for punctuation.
+Write it to `.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` at the main worktree root, sent as a heredoc the way `session-worktree` states for a main-root write. Load the `write-human` skill for the prose and follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` for punctuation.
 
 ```markdown
 <## UI review, or ## UI review closed, by the rule above>

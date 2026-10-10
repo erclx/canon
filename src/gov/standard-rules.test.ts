@@ -130,7 +130,7 @@ describe('regenStandardRules', () => {
   })
 
   it('should refuse a standard named like a band folder', async () => {
-    write('governance/rules/writing/800-prose.md', 'prose\n')
+    write('governance/rules/writing/markdown.md', 'prose\n')
     write(
       'standards/writing.md',
       "---\ntitle: Writing reference\ndescription: Prose\npaths:\n  - '**/*.md'\n---\n",

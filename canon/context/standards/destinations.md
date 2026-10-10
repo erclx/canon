@@ -57,7 +57,7 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 
 ### To the CLI
 
-- `markdown.md` fixes what a check can decide about any markdown file. `canon markdown audit`, arrived, with `governance/rules/standards/markdown.md` left pointing at it.
+- `markdown.md` fixes what a check can decide about any markdown file. `canon markdown audit`, arrived, and the standard has since moved into the `markdown-craft` skill's reference.
 
 `slug.md` and `publish.md` are withdrawn below rather than routed here.
 

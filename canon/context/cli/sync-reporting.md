@@ -57,7 +57,7 @@ It stays out of `--exit-code`, the same as `superseded`. The verb closes it, but
 
 ### Rules the target never received
 
-`readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `800-prose` citing `governance/rules/standards/markdown.md`, which needs a hand repair once discovered.
+`readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `governance/rules/writing/markdown.md` citing a sibling rule, which needs a hand repair once discovered.
 
 Reporting was chosen over installing. A sync that adds rules silently changes what a project is governed by, and nobody chose that, so the install stays a separate command an operator runs. The cost is that a target can read the section and act on none of it, which is the same contract `newSkills` already sets.
 

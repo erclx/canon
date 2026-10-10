@@ -1,18 +1,25 @@
 ---
 title: Markdown reference
 description: Headings, paragraph and list structure, code spans, the date form, punctuation, emphasis, file references, American spelling, and frontmatter wording
-paths:
-  - '**/*.md'
-rule:
-  - 'Read it before a substantial markdown edit. Do not work the banned characters from memory.'
-  - 'Run `canon markdown audit <path>` after the edit, and rewrite the sentence carrying a hit rather than swapping the token for a near-synonym.'
-  - 'Voice, rhythm, and sentence construction are a separate topic. `800-prose` routes them.'
-  - 'Load the `canon:draft-figure` skill before drafting or revising a Mermaid fence or a figure, and report it rather than proceeding silently when it does not resolve.'
 ---
 
 # Markdown reference
 
 Applies to markdown reference docs, READMEs, and inline documentation in repos. Every rule here is a fact a scan can settle rather than a judgment, so no surface yields any of them. A surface stating its own voice claims that yield from the voice guidance and formats and spells by this file regardless.
+
+## Contents
+
+- [Scope](#scope)
+- [Headings](#headings)
+- [Paragraphs and lists](#paragraphs-and-lists)
+- [Code and identifiers](#code-and-identifiers)
+- [Dates](#dates)
+- [Punctuation](#punctuation)
+- [Language](#language)
+- [Frontmatter descriptions](#frontmatter-descriptions)
+- [Emphasis and dividers](#emphasis-and-dividers)
+- [Links and file references](#links-and-file-references)
+- [Examples](#examples)
 
 ## Scope
 

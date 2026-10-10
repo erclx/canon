@@ -37,7 +37,7 @@ The root base is opt-in through `canResolveAtRoot`, which only `--folder` sets. 
 
 A root folder is measured and stays out of the citation scope, since the pattern spells the `.claude/` prefix. Widening it to a bare `docs/x.md` would match prose referencing nothing. A run with no `.claude/` folder says the check is out of scope, and refuses under `--citations-only`, because a gate exiting clean on a scope it could not build is the failure it exists to catch.
 
-Which measures reach a folder is decided by the tier stating the rule behind them, not by whether a standard claims the folder. Length and the catalog-table scan are judgments about how far a reader travels, depth and bullet weight are stated in `standards/markdown.md` over every markdown file, and all four report wherever the audit is pointed, `docs/` included.
+Which measures reach a folder is decided by the tier stating the rule behind them, not by whether a standard claims the folder. Length and the catalog-table scan are judgments about how far a reader travels, depth and bullet weight are stated in `claude/skills/markdown-craft/references/markdown.md` over every markdown file, and all four report wherever the audit is pointed, `docs/` included.
 
 Required sections and provenance narrow to the folder `standards/context.md` claims through `governsContent`, and citation resolution keys on the `.claude/` prefix. No standard claims `docs/` and none needs to, since a folder opting into measurement reads the output without a rule to cite.
 
@@ -59,7 +59,7 @@ Wireframes owe `## Regions`, `## States`, `## Copy`, and `## Not on this surface
 
 That sanctioned omission is what the `stub: true` frontmatter field answers under `--gate`. A file declaring it is dropped before the check and reported nowhere, and both seed install paths strip the field so no target receives it. The exemption is scoped to this one measure, since a skeleton is exempt from owing sections rather than from being well formed.
 
-Bullet weight and depth left this command for `canon markdown audit`. Both are stated in `standards/markdown.md` over every markdown file, and a check reaching every markdown file has no reason to require a folder that resolves. `standards/context.md` keeps the incident half of the bullet remedy, which needs a decision to keep, so the specialized advice stays here while the measure moved.
+Bullet weight and depth left this command for `canon markdown audit`. Both are stated in `claude/skills/markdown-craft/references/markdown.md` over every markdown file, and a check reaching every markdown file has no reason to require a folder that resolves. `standards/context.md` keeps the incident half of the bullet remedy, which needs a decision to keep, so the specialized advice stays here while the measure moved.
 
 ## Gotchas
 

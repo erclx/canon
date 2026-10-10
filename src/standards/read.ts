@@ -53,6 +53,15 @@ export function standardRoots(root: string): StandardRoot[] {
   ]
 }
 
+/**
+ * Standards retired into the skill reference that took them, keyed by name with
+ * a path relative to the package root. Each retirement adds one line, and the
+ * map goes with the verb in the last slice of the retirement.
+ */
+const MOVED_STANDARDS: Readonly<Record<string, string>> = {
+  markdown: 'claude/skills/markdown-craft/references/markdown.md',
+}
+
 function filename(name: string): string {
   return name.endsWith('.md') ? name : `${name}.md`
 }
@@ -69,7 +78,16 @@ export function resolveStandard(
     if (existsSync(path)) return { path, source: join(label, file) }
   }
 
-  return undefined
+  const movedName = basename(file, '.md')
+  if (!Object.hasOwn(MOVED_STANDARDS, movedName)) return undefined
+
+  const moved = MOVED_STANDARDS[movedName]
+  if (!moved) return undefined
+
+  const path = join(PROJECT_ROOT, moved)
+  if (!existsSync(path)) return undefined
+
+  return { path, source: join(PACKAGE_LABEL, moved) }
 }
 
 /**
@@ -91,6 +109,8 @@ export function listStandards(root: string): string[] {
       names.add(basename(entry.name, '.md'))
     }
   }
+
+  for (const name of Object.keys(MOVED_STANDARDS)) names.add(name)
 
   return [...names].sort()
 }

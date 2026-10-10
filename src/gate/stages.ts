@@ -110,7 +110,6 @@ export const TEST_CORPORA_PATTERNS = [
   '^governance/rules/',
   '^\\.claude/hooks/',
   '^tooling/claude/seeds/\\.claude/hooks/',
-  '^standards/markdown\\.md$',
   '^tooling/base/reference\\.md$',
   '^tooling/web/configs/scripts/worktree-port\\.sh$',
 ]
