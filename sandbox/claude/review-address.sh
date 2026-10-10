@@ -15,7 +15,7 @@ use_config() {
 seed_base_tree() {
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/tmp/\n' >.gitignore
 
   stage_fixtures claude review-address shared 01-base-tree
 

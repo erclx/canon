@@ -21,7 +21,7 @@ paths = [
 # writes. A path negative fails on the file existing rather than on wording.
 absent = [".canon/tasks/session-*.md"]
 
-write_scope = [".canon/compact/**", ".canon/memory/**"]
+write_scope = [".canon/compact/**"]
 
 manual = [
   "The note is a single file. Semantic: the glob above finds one match and reports it, so a second note for the same work passes unseen.",

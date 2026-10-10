@@ -35,7 +35,6 @@ Review is the step that varies most. It gets skipped on a diff that needed one, 
 - Read the plan's file list as the boundary on a repair. It scopes what the run builds, and a finding this run caused is in reach wherever it landed.
 - Restate the ship sequence. Two copies of one order drift with nothing comparing them, which is what the merge into `git-ship` closed.
 - Skip that skill's own verify for repeating this chain's. The gate exists for the resumed run, and a chain that suppresses it leaves the resumed run reaching nothing.
-- Run the memory Apply phase. Promoting an entry changes how the agent operates and ships as its own change.
 - Read an empty changed-file list as prose-only. It satisfies that test vacuously and would route the branch past review instead of through it.
 - Read a markdown extension as evidence the change only informs. A skill body, a governance rule, and a standard are behavior written in prose.
 - Stop the chain or rewrite a commit over a test-order finding. The verb reports and never gates, and a commit already in history is a different act from the work this run is building.

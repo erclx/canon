@@ -24,7 +24,6 @@ It counts unclaimed plans against workers rather than reading the reserve in ste
 7. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then report:
 
 ```plaintext
-Capture: owed since <the last handoff, or session start when none has run>
 Findings placed: <finding> → <destination>
 Archived: <task>
 Promoted: <task>, touches <surfaces>, parallel with <task>, sharing <paths or none>
@@ -32,8 +31,6 @@ Serialized: <task> behind <task>, held on <dependency, contract, relocation, swe
 Backlogged: <task>, because <what stopped being near-term>
 Ready now: <tasks with plans, and what each waits on>
 ```
-
-The capture row states a standing debt rather than a per-run result. Running capture from here costs the operator a pass between merges while nothing ships, so the row leaves the timing to them and dates the debt, since a capture owed for twenty minutes and one owed all day want different answers and undated text reads the same either way. `orchestrator-handoff.md` holds the step that pays it.
 
 That block is the detail. Lead the reply with the three slots under `## Every later turn` in `orchestrator-output.md`, so the human reads what they own before the evidence for it.
 

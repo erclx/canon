@@ -16,7 +16,6 @@ Sessions also write the wrong thing into a handoff. They restate the tree, which
 ## Must
 
 - Write to `.canon/compact/`, outside the task board and outside scratch.
-- Invoke `canon:memory-capture` before writing, so the note cites entries rather than repeating them.
 - Carry a stated shape for the note, so what belongs in it is not re-derived per session.
 - Require a citation for every claim, and a rejected alternative beside every decision.
 - Decline in one line where the session holds nothing a compaction would destroy.
@@ -27,7 +26,6 @@ Sessions also write the wrong thing into a handoff. They restate the tree, which
 - Write a task row, a plan, or anything under `.canon/tasks/`.
 - Write a `## State` section, or any section a reader could fill from `git status`.
 - Run a drift check or recover a start commit. Both belong to the role that ships code.
-- Restate a memory entry the capture pass wrote.
 - Lose its caller. The `PreCompact` hook names this skill on a manual compaction, and that hook plus an operator typing it are the two callers the third creation question asks for. A hook edit that names another skill leaves one caller, which is a reason to revisit this skill rather than to keep it.
 
 ## Guards
@@ -41,5 +39,4 @@ Sessions also write the wrong thing into a handoff. They restate the tree, which
 
 - The orchestrator's handoff, which carries a drift check and a board row: `canon:session-map`. The two skills are held apart by role, so a plain session belongs here and a session holding `canon:role-orchestrator` belongs there.
 - Reading a handoff back: `canon:session-resume`, which reads `.canon/compact/` ahead of the older task-board form.
-- The memory pen, its routing and its shape: `canon:memory-capture` and `standards/memory.md`.
 - A decision a groundwork track owns, which belongs in that track's `06-decision.md`: `canon:plan-groundwork`.

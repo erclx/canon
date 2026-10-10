@@ -3,7 +3,7 @@ title: Main-root write routing
 description: Which tools the isolation refusal covers, the route each kind of main-root write takes, the fallback when a heredoc is refused, and the index cost a shell write carries
 ---
 
-Shared session scratch, being `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/`, lives at the main worktree root. Resolve that root with the first `worktree` entry of `git worktree list --porcelain`, falling back to `pwd` outside a git repository.
+Shared session scratch, being `.canon/plans/`, `.canon/review/`, and `.canon/tasks/`, lives at the main worktree root. Resolve that root with the first `worktree` entry of `git worktree list --porcelain`, falling back to `pwd` outside a git repository.
 
 ## The refusal
 
@@ -21,4 +21,4 @@ Shared session scratch, being `.canon/plans/`, `.canon/review/`, `.canon/memory/
 
 ## The index cost
 
-A shell write skips every `PostToolUse` hook, since those match `Write|Edit|MultiEdit` and never fire on `Bash`. That costs nothing on `.canon/plans/` and `.canon/review/`, which no hook indexes, and costs the generated `index.md` on `.canon/tasks/` and `.canon/memory/`. Regenerate positionally after a shell write there, by an explicit `canon indexes regen` call, unless the verb that made the write already calls it, as `canon tasks archive` does.
+A shell write skips every `PostToolUse` hook, since those match `Write|Edit|MultiEdit` and never fire on `Bash`. That costs nothing on `.canon/plans/` and `.canon/review/`, which no hook indexes, and costs the generated `index.md` on `.canon/tasks/`. Regenerate positionally after a shell write there, by an explicit `canon indexes regen` call, unless the verb that made the write already calls it, as `canon tasks archive` does.

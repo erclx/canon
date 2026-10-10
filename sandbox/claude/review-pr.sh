@@ -19,7 +19,7 @@ seed_reviewable_pr() {
 
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/tmp/\n' >.gitignore
 
   stage_fixtures claude review-pr shared 01-reviewable-tree
 
@@ -47,7 +47,7 @@ seed_reviewer_request_pr() {
 
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/tmp/\n' >.gitignore
 
   stage_fixtures claude review-pr reviewer-request 01-tree
 
@@ -80,7 +80,7 @@ seed_review_focus_pr() {
 
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/tmp/\n' >.gitignore
 
   stage_fixtures claude review-pr review-focus 01-tree
 
@@ -117,7 +117,7 @@ seed_header_trunk() {
 
   find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
 
-  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/memory/\n.canon/tmp/\n' >.gitignore
+  printf 'node_modules\n.canon/plans/\n.canon/review/\n.canon/tmp/\n' >.gitignore
 
   stage_fixtures claude review-pr shared 03-header-tree
 

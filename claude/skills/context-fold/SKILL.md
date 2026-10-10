@@ -129,7 +129,7 @@ Do not edit `CLAUDE.md` inline. Every `CLAUDE.md` change goes through the show-d
 
 Read `canon/context/index.md` at `pwd` to see which domain entries exist. Skip this step silently if the directory does not exist or has no entries.
 
-Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for its two sources, the routed facts and the diff, the widening a removed capability takes, when a new entry is created, and the output lines.
+Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for the diff it reads, the widening a removed capability takes, when a new entry is created, and the output lines.
 
 ## Step 8: fold promoted pages
 

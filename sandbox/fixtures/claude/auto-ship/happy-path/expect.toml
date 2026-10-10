@@ -12,10 +12,10 @@
 
 # No max_turns yet. A real pass on 2026-08-30 came in at 74 turns, well past
 # the 30 this row dropped for want of a number, which is what the drop was
-# for. One sample of a chain whose cost follows however much capture, both
-# doc syncs, and review find to do is not enough to set a ceiling from.
+# for. One sample of a chain whose cost follows however much both
+# doc syncs and review find to do is not enough to set a ceiling from.
 
-# `git-ship`'s sequence reaches this exact line only after memory capture, both
+# `git-ship`'s sequence reaches this exact line only after the verify gate, both
 # doc syncs, staging, the commit, the branch rename, and the pull request have
 # all run, with the draft marking landing before the CI watch. A chain halted
 # at or before Step 7, silently or on a refused invocation, ends its reply
@@ -25,6 +25,5 @@ reply = ["Autoshipped (draft)"]
 
 manual = [
   "The pull request itself opened, and opened as a draft. Unwired: the sandbox tree and the reply text are what expect.toml can read, and confirming the PR object needs a gh call this declaration has no channel for.",
-  "Capture may or may not write a memory file, and no memory proposal line is reported either way. Judgment: the fixture's plan carries no Risks or Questions and the run is a single headless pass with no user exchange, so a correct run may just as well report 'Nothing worth capturing', and either shape is consistent with a working chain.",
   "docs-sync and context-fold left the tree exactly where a run with no public docs and no owning task would leave it. Semantic: both skills sync against what a session finds, and a project this small may give either nothing to change, so an assertion pinned to a specific edit would fail a correct run that found none to make.",
 ]
