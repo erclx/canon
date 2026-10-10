@@ -80,6 +80,7 @@ export const RECORD_ENTRIES: readonly string[] = [
   'tasks',
   'teach',
   'transcripts',
+  'upstream',
   'walkthroughs',
 ]
 

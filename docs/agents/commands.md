@@ -55,6 +55,7 @@ One row per top-level command, in the order `canon --help` prints them. A domain
 | `canon markdown <verb>`     | Fail markdown on a banned character or a dead link, and report its structure               |
 | `canon repo <verb>`         | Propose and apply the remote's description, homepage, and topics                           |
 | `canon census [path]`       | Report tracked file count, extensions, and a line total skipping binaries                  |
+| `canon upstream <verb>`     | Read Claude Code releases from a cursor, and list the toolkit's own mechanisms             |
 
 `canon serve` drives no browser, which is what separates it from the four that do. All four ship now that `capture` does, so the line between them is the engine rather than the package. A generated page loses its script to an editor preview and to a `file://` open, so the link is the delivery rather than a convenience, and every generated surface here reaches a reader through one. A teach lesson's stylesheet is embedded rather than linked, so only its script still needs a server. It binds `127.0.0.1` and never a wildcard, because what it is pointed at is routinely a gitignored record tree. It sends `cache-control: no-store`, since a preview exists to be edited and reloaded and a cached stylesheet reads as a fix that did not work.
 
@@ -150,7 +151,7 @@ the JSON record rather than on the exit, since an offline machine has to read as
 unmeasured rather than as a failing check.
 
 `canon upgrade --json` carries one further state, `pending`, that the skew report
-does not. It means the checkout at the working directory holds a release npm does
-not serve yet, so there is nothing to install. The record names that version in
-`checkout` beside `latest`, exits 0, and its `message` starts `CLI stays at`. A
-directory outside any canon checkout never reads `pending`.
+does not: the working directory's checkout holds a release npm does not serve
+yet, so there is nothing to install. The record names it in `checkout` beside
+`latest`, exits 0, and its `message` starts `CLI stays at`. Outside a canon
+checkout it never reads `pending`.

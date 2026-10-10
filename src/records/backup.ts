@@ -47,6 +47,7 @@ export const BACKED_FOLDERS = [
   'tasks',
   'teach',
   'transcripts',
+  'upstream',
   'walkthroughs',
 ] as const
 

@@ -60,6 +60,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['hooks [cmd]', 'Run the steps a git hook drives (post-merge)'],
       ['autoship [cmd]', 'Decide whether a changed set needs review'],
       ['pr [cmd]', 'Read a pull request (key-changes, head, checks)'],
+      ['upstream [cmd]', 'Read Claude Code releases (fetch, catalog, advance)'],
       ['feedback', 'Write toolkit feedback from stdin'],
     ],
   },
@@ -132,6 +133,7 @@ const EXAMPLES = [
   'canon audits run --json',
   'canon gate run --all --no-write',
   'canon upgrade --json',
+  'canon upstream fetch --since 2.1.256 --json',
 ]
 
 // The frame follows stdout's TTY state rather than `palette`, whose blank

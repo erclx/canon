@@ -11,3 +11,4 @@ Toolkit-only internal skills, the task and plan artifacts that coordinate sessio
 - [Orchestration](orchestration/index.md): The task, plan, and ready artifacts coordinating multi-session work, the board they sit on, and the planning, build, review, and reclaim steps that move a row to merged. Start with overview.
 - [Overview](overview.md): What the internal Claude domain owns and the folder holding it
 - [Internal skills](skills.md): The internal canon skills loaded before editing a toolkit domain, their requirement coverage, and the sandbox verification route
+- [Upstream digest](upstream-digest.md): Why the Claude Code release triage runs by hand in the operator's session, why the cursor advances only after the findings are filed, and how complete a digest is

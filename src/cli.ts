@@ -41,6 +41,7 @@ import { register as autoship } from '@/commands/autoship'
 import { register as pr } from '@/commands/pr'
 import { register as repo } from '@/commands/repo'
 import { register as census } from '@/commands/census'
+import { register as upstream } from '@/commands/upstream'
 import { register as targets } from '@/commands/targets'
 import { register as upgrade } from '@/commands/upgrade'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
@@ -102,6 +103,7 @@ autoship(program)
 pr(program)
 repo(program)
 census(program)
+upstream(program)
 audits(program)
 gate(program)
 upgrade(program)
