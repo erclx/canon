@@ -67,8 +67,8 @@ export function compareVersions(a: string, b: string): number {
   return 0
 }
 
-// The hook in the second batch reads this file beside `fetch`, so a write that
-// half-lands would leave them disagreeing. A rename within one folder is atomic.
+// `fetch` reads this file, so a write that half-lands would leave a reader on a
+// truncated cursor. A rename within one folder is atomic.
 async function writeAtomic(path: string, body: string): Promise<void> {
   mkdirSync(dirname(path), { recursive: true })
   const temp = `${path}.${process.pid}.tmp`
