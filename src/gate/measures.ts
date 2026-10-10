@@ -7,14 +7,6 @@ import {
   type ClientCommand,
   clientCommandCitationsIn,
 } from '@/gate/client-commands'
-import {
-  isOverCount,
-  isOverLength,
-  isOverRisks,
-  measureArchitecture,
-  missingRevisit,
-  overWords,
-} from '@/context/architecture'
 import { isOverWordCap, measureRequirements } from '@/context/requirements'
 import {
   auditSkills,
@@ -253,61 +245,18 @@ function citedPaths(record: { paths?: unknown } | undefined): string[] {
 }
 
 /**
- * The canonical records against the caps each states for itself. The
- * architecture record carries five: the line ceiling its allowances derive,
- * the entry cap, the revisit sentence closing each decision, the words a
- * decision may hold, and the bullets its Risks section may hold. The
- * requirements record carries one, its own word count.
+ * The requirements record against the word cap it states for itself.
  *
  * Read in-process rather than through `context audit`, whose one gating stage
- * here runs `--citations-only` and never opens either record, which is why
- * the line ceiling went unenforced by `bun run check` until this stage. A
- * project carrying neither record, or records stating none of the caps,
- * passes, since each rule belongs to the record rather than to the toolkit.
+ * here runs `--citations-only` and never opens the record. A project carrying
+ * no record, or a record stating no cap, passes, since the rule belongs to the
+ * record rather than to the toolkit.
  */
 export const canonicalRecords: Measure = async (ctx) => {
-  const [report, requirements] = await Promise.all([
-    measureArchitecture(ctx.root),
-    measureRequirements(ctx.root),
-  ])
+  const requirements = await measureRequirements(ctx.root)
 
   const failures: string[] = []
   const emissions: Emission[] = []
-
-  if (report === undefined) {
-    emissions.push(info('No architecture record to measure'))
-  } else {
-    const decisions = report.decisions.length
-    const lackingRevisit = missingRevisit(report)
-    const longDecisions = overWords(report)
-    failures.push(
-      ...[
-        isOverCount(report) &&
-          `${decisions} decisions against a cap of ${report.entryCap}. Merge two or retire one in ${report.rel}, never compress.`,
-        isOverLength(report) &&
-          `${report.lines} lines against a ceiling of ${report.ceiling} in ${report.rel}.`,
-        lackingRevisit.length > 0 &&
-          `No revisit sentence in ${lackingRevisit.map((heading) => `"${heading}"`).join(', ')}. Close each with one opening "Revisit when" in ${report.rel}.`,
-        longDecisions.length > 0 &&
-          `${longDecisions.map((entry) => `"${entry.heading}" (${entry.words})`).join(', ')} past ${report.wordCap} words a decision in ${report.rel}. Cut the reasoning to the trade, never split one decision across two headings.`,
-        isOverRisks(report) &&
-          `${report.risksBullets} risk bullets against a cap of ${report.riskCap} in ${report.rel}. Drop what is no longer open.`,
-      ].filter((failure): failure is string => typeof failure === 'string'),
-    )
-
-    const cap =
-      report.entryCap === undefined
-        ? 'no entry cap stated'
-        : `a cap of ${report.entryCap}`
-    emissions.push(info(`${decisions} decisions against ${cap}`))
-    if (report.riskCap !== undefined && report.risksBullets === undefined) {
-      emissions.push(
-        info(
-          `No Risks section to count against a cap of ${report.riskCap} in ${report.rel}`,
-        ),
-      )
-    }
-  }
 
   if (requirements === undefined) {
     emissions.push(info('No requirements record to measure'))

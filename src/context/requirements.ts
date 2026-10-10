@@ -1,15 +1,24 @@
 import { readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { wordCount } from '@/context/architecture'
 import { bodyLines } from '@/markdown/scan'
 import { surfaceDir } from '@/roots/surface'
 
 /**
  * The record this measures, relative to `root`, resolved at either surface
- * root for the reason `architectureRel` gives.
+ * root, since a project that has moved holds it under either.
  */
 export function requirementsRel(root: string): string {
   return relative(root, surfaceDir(root, 'REQUIREMENTS.md'))
+}
+
+/**
+ * Counts whitespace-delimited tokens, the unit the record's word cap is stated
+ * in. A code span counts as the tokens it holds, so a line citing a long path
+ * pays for it the way a reader does. A caller gating on the count hands in
+ * prose with fenced lines already dropped.
+ */
+export function wordCount(text: string): number {
+  return text.match(/\S+/g)?.length ?? 0
 }
 
 export interface RequirementsReport {
@@ -43,8 +52,8 @@ function isMissing(error: unknown): boolean {
 /**
  * Measures the record, or reports nothing when the project carries none.
  *
- * Absent rather than zeroed, for the reason `measureArchitecture` gives, and a
- * record present and unreadable propagates the same way.
+ * Absent rather than zeroed, so a project with no record is never told it holds an
+ * empty one, and a record present and unreadable propagates.
  */
 export async function measureRequirements(
   root: string,

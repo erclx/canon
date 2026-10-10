@@ -659,7 +659,7 @@ function measureParagraph(block: readonly BodyLine[]): CadenceFinding {
  *
  * `compromise` reported 2 percent. It tags a fronted past participle as a
  * finite past-tense verb, so all twelve of those sentences in
- * `.claude/ARCHITECTURE.md` read as carrying one, eleven opening `Measured at`
+ * the repository's architecture record at that commit read as carrying one, eleven opening `Measured at`
  * and one `Overturned by`, which is the exact shape the measure exists to
  * catch. It is not even consistent with itself there: `Measured at` tags a verb
  * and `Measured against` tags an adjective.

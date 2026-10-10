@@ -22,20 +22,20 @@ afterEach(() => {
 
 describe('listSeeds', () => {
   it('should map each seed to its name, source, and install target', () => {
-    seedFile(join('canon', 'ARCHITECTURE.md'), 'Architecture')
+    seedFile(join('canon', 'REQUIREMENTS.md'), 'Requirements')
 
     expect(listSeeds(root)).toEqual([
       {
-        name: 'ARCHITECTURE.md',
-        source: join('tooling', 'claude', 'seeds', 'canon', 'ARCHITECTURE.md'),
-        target: join('canon', 'ARCHITECTURE.md'),
+        name: 'REQUIREMENTS.md',
+        source: join('tooling', 'claude', 'seeds', 'canon', 'REQUIREMENTS.md'),
+        target: join('canon', 'REQUIREMENTS.md'),
         src: join(
           root,
           'tooling',
           'claude',
           'seeds',
           'canon',
-          'ARCHITECTURE.md',
+          'REQUIREMENTS.md',
         ),
       },
     ])
@@ -66,11 +66,11 @@ describe('listSeeds', () => {
   })
 
   it('should place the project-level CLAUDE.md last', () => {
-    seedFile(join('canon', 'ARCHITECTURE.md'), 'Architecture')
+    seedFile(join('canon', 'REQUIREMENTS.md'), 'Requirements')
     seedFile('CLAUDE.md', 'Project')
 
     expect(listSeeds(root).map((entry) => entry.target)).toEqual([
-      join('canon', 'ARCHITECTURE.md'),
+      join('canon', 'REQUIREMENTS.md'),
       'CLAUDE.md',
     ])
   })

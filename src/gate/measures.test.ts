@@ -934,139 +934,34 @@ describe('canonicalRecords', () => {
     cli: refuse,
   })
 
-  const writeRecord = (source: string): void => {
-    mkdirSync(join(root, 'canon'), { recursive: true })
-    writeFileSync(join(root, 'canon', 'ARCHITECTURE.md'), source)
-  }
-
-  const decisions = (count: number): string =>
-    Array.from(
-      { length: count },
-      (_, index) => `### Decision ${index}\n\nReasoning.\n`,
-    ).join('\n')
-
   beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), 'canon-architecture-record-'))
+    root = mkdtempSync(join(tmpdir(), 'canon-requirements-record-'))
   })
 
   afterEach(() => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  it('passes a record holding no more entries than its cap', async () => {
-    writeRecord(`# Architecture\n\nAt most 2 decisions.\n\n${decisions(2)}`)
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
-  it('fails a record holding more entries than its cap', async () => {
-    writeRecord(`# Architecture\n\nAt most 2 decisions.\n\n${decisions(3)}`)
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toContain('3 decisions against a cap of 2')
-  })
-
-  it('fails a record longer than the ceiling it derives', async () => {
-    writeRecord(
-      `# Architecture\n\nA 2-line frame plus 1 line a decision.\n\n${decisions(1)}`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toContain('against a ceiling of 3')
-  })
-
-  const revisitClause = 'Every decision closes with a revisit sentence.'
-
-  it('fails a decision with no revisit sentence under the clause', async () => {
-    writeRecord(
-      `# Architecture\n\n${revisitClause}\n\n### Bare\n\nReasoning.\n`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toContain('Bare')
-  })
-
-  it('passes the same decision carrying a revisit sentence', async () => {
-    writeRecord(
-      `# Architecture\n\n${revisitClause}\n\n### Bare\n\nReasoning. Revisit when the reason goes.\n`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
-  it('passes a decision with no revisit sentence when the record states no clause', async () => {
-    writeRecord(`# Architecture\n\n### Bare\n\nReasoning.\n`)
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
-  it('passes a project carrying no record', async () => {
+  it('passes a project carrying no record, with an info line', async () => {
     const report = await canonicalRecords(context())
 
     expect(report.failure).toBeUndefined()
     expect(report.unmeasured).toBeUndefined()
+    expect(report.emissions.map((e) => e.text)).toEqual([
+      'No requirements record to measure',
+    ])
+  })
+
+  it('passes a requirements record stating no word cap', async () => {
+    writeRequirements(`${words(900)}\n`)
+
+    const report = await canonicalRecords(context())
+
+    expect(report.failure).toBeUndefined()
   })
 
   const words = (count: number): string =>
     Array.from({ length: count }, () => 'word').join(' ')
-
-  it('fails a decision past the word cap the record states', async () => {
-    writeRecord(
-      `# Architecture\n\nAt most 3 words a decision.\n\n### Long\n\n${words(4)}\n`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toContain('"Long" (4)')
-  })
-
-  it('passes a decision at the word cap the record states', async () => {
-    writeRecord(
-      `# Architecture\n\nAt most 3 words a decision.\n\n### Short\n\n${words(3)}\n`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
-  it('passes a long decision when the record states no word cap', async () => {
-    writeRecord(`# Architecture\n\n### Long\n\n${words(400)}\n`)
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-  })
-
-  it('fails a Risks section past the bullet cap the record states', async () => {
-    writeRecord(
-      `# Architecture\n\nAt most 1 risk bullet.\n\n## Risks / open questions\n\n- One.\n  - Two.\n`,
-    )
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toContain('2 risk bullets against a cap of 1')
-  })
-
-  it('reports an absent Risks section rather than passing a zero count', async () => {
-    writeRecord(`# Architecture\n\nAt most 1 risk bullet.\n`)
-
-    const report = await canonicalRecords(context())
-
-    expect(report.failure).toBeUndefined()
-    expect(report.emissions.map((e) => e.text).join('\n')).toContain(
-      'No Risks section',
-    )
-  })
 
   const writeRequirements = (source: string): void => {
     mkdirSync(join(root, 'canon'), { recursive: true })
