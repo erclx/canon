@@ -1,6 +1,6 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { delimiter, join } from 'node:path'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -12,11 +12,15 @@ const RUN_TIMEOUT_MS = 30_000
  * Spawns the CLI because every refusal reports through `process.exitCode`, and
  * an in-process call would set it on the test runner.
  */
-async function run(args: string[]): Promise<{
+async function run(
+  args: string[],
+  env: Record<string, string> = {},
+): Promise<{
   readonly record: Record<string, unknown>
   readonly exitCode: number | undefined
 }> {
   const result = await execa(process.execPath, [CLI, 'upstream', ...args], {
+    env,
     reject: false,
     timeout: RUN_TIMEOUT_MS,
   })
@@ -134,6 +138,15 @@ describe('canon upstream', () => {
     })
 
     it('should report not due when the cursor is ahead of the install', async () => {
+      // A stub `claude`, so the case pins the version compare rather than
+      // whichever binary the machine carries, or none.
+      const bin = join(root, 'bin')
+      await mkdir(bin)
+      const stub = join(bin, 'claude')
+      await writeFile(stub, "#!/bin/sh\necho '2.1.296 (Claude Code)'\n")
+      await chmod(stub, 0o755)
+      const path = `${bin}${delimiter}${process.env.PATH ?? ''}`
+
       await run([
         'advance',
         '99999.0.0',
@@ -145,12 +158,16 @@ describe('canon upstream', () => {
         root,
       ])
 
-      const { record, exitCode } = await run(['due', '--json', '--root', root])
+      const { record, exitCode } = await run(
+        ['due', '--json', '--root', root],
+        { PATH: path },
+      )
 
       expect(exitCode).toBe(0)
       expect(record).toMatchObject({
         due: false,
         reason: 'current',
+        installed: '2.1.296',
         cursor: '99999.0.0',
       })
     })
