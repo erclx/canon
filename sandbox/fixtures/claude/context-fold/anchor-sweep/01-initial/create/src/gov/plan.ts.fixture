@@ -1,5 +1,0 @@
-const STACKS = ['base', 'node', 'react']
-
-export function planRules(stack: string): string[] {
-  return STACKS.includes(stack) ? [`resolved ${stack}`] : []
-}

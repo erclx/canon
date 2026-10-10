@@ -4,5 +4,5 @@ Plan linked from the "Migrate storage to Postgres" task block. The context-fold 
 
 ## Summary
 
-- Storage moves from SQLite to Postgres. This is a stack-and-runtime decision for the architecture record: Postgres replaces better-sqlite3, chosen over staying on SQLite because the next task scopes tasks to users and needs concurrent writers.
+- Storage moves from SQLite to Postgres. This is a decision the storage domain carries: Postgres replaces better-sqlite3, chosen over staying on SQLite because the next task scopes tasks to users and needs concurrent writers.
 - `src/db.ts` keeps owning the connection and reads its config from the environment.

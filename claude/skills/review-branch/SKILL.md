@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: Reviews all changes since main for bugs, edge cases, and logic flaws. Reads CLAUDE.md, REQUIREMENTS.md, and ARCHITECTURE.md for context, then applies a structured review to the full diff and outputs a findings report. Coding standards from `.claude/rules/` are auto-loaded by Claude Code. Use when asked to review changes, run a code review, or check the current branch. Do NOT auto-trigger on vague signals like "looks good" or "can you check this". Require an explicit review request or an autoship invocation.
+description: Reviews all changes since main for bugs, edge cases, and logic flaws. Reads CLAUDE.md and REQUIREMENTS.md for context, then applies a structured review to the full diff and outputs a findings report. Coding standards from `.claude/rules/` are auto-loaded by Claude Code. Use when asked to review changes, run a code review, or check the current branch. Do NOT auto-trigger on vague signals like "looks good" or "can you check this". Require an explicit review request or an autoship invocation.
 metadata:
   family: check
 ---
@@ -31,7 +31,6 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: project type, conventions, and commands
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
-- `canon/ARCHITECTURE.md`: technical design decisions
 
 Coding standards from `.claude/rules/` are auto-loaded by Claude Code. Always-on rules apply every session. Path-scoped rules apply to files matching their `paths:` glob.
 
@@ -69,7 +68,7 @@ Review the full diff and changed file contents for:
 2. Violations of rules from `.claude/rules/` that apply to the changed files
 3. When the diff touches a file this project ships to a target holding none of its own history: a repository-relative path, a phase label naming a gitignored board, a same-repository pull request or commit reference, or a layout, stack, or config-path claim true of this checkout but stated as if it were general
 
-Use `CLAUDE.md`, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`, and the auto-loaded `.claude/rules/` as project context to inform what is intentional vs problematic. Do not fix, rewrite, or suggest refactors outside the scope of a finding.
+Use `CLAUDE.md`, `canon/REQUIREMENTS.md`, and the auto-loaded `.claude/rules/` as project context to inform what is intentional vs problematic. Do not fix, rewrite, or suggest refactors outside the scope of a finding.
 
 ### High-signal filter
 

@@ -1,5 +1,0 @@
-const BUNDLED_RULES = ['base', 'testing', 'naming', 'logging']
-
-export function installRules(target: string): string[] {
-  return BUNDLED_RULES.map((rule) => `installed ${rule} into ${target}`)
-}

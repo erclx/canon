@@ -1,0 +1,15 @@
+---
+title: Storage
+description: The database behind the task API
+---
+
+# Storage
+
+## Overview
+
+SQLite via better-sqlite3. Single `src/db.ts` module owns the connection and exports typed query functions.
+
+## Layout
+
+- `src/db.ts`: the connection and the typed queries
+- `src/routes/`: Express routes, each file exporting a router that `src/app.ts` mounts

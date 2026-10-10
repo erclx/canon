@@ -4,7 +4,7 @@ Mixed web and api project.
 
 ## Context
 
-- Always loaded: this file, `canon/REQUIREMENTS.md`, `canon/ARCHITECTURE.md`
+- Always loaded: this file, `canon/REQUIREMENTS.md`
 - On-demand lookup: `canon/context/<domain>.md`. Check `canon/context/index.md` first.
 
 ## Commands

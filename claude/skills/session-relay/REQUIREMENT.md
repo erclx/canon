@@ -24,7 +24,7 @@ makes the firing survive.
 The first draft of this plan closed the gap with a paragraph drafted inline,
 once inside `role-worker` and once inside `role-planner`. The operator overrode
 that call: two bodies carrying identical protocol text is the shared-surface
-case `canon/ARCHITECTURE.md` already decided against duplicating, since a later
+case, since a later
 fix reaching one copy and not the other diverges silently.
 
 Neither attempt named who the relay is from. A message an operator relays by

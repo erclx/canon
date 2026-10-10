@@ -20,7 +20,6 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: behavior rules, conventions, commands
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
-- `canon/ARCHITECTURE.md`: decisions already made
 - `.canon/tasks/index.md`: current scope and status, then any task file the feature relates to
 
 Also read these when the feature touches code or UI. Skip them for prose, docs, catalog, or config-only changes:

@@ -23,7 +23,7 @@ stage_setup() {
     git add . && git commit -m "feat(api): initial task endpoints" --no-verify -q
 
     log_step "Scenario ready: feature planning (full mode)"
-    log_info "Context: task API with SQLite, Express routes, CLAUDE.md, ARCHITECTURE.md, and .canon/tasks/ present"
+    log_info "Context: task API with SQLite, Express routes, CLAUDE.md, and .canon/tasks/ present"
     log_info "Action:  /plan-feature (reference the task in .canon/tasks/)"
     log_info "Expect:  plan written to .canon/plans/feature-<slug>.md with files to touch, risks, and questions, each question carrying a Suggested line and an Answer slot, and v01.0-due-dates.md's Plan: line points at it"
     ;;

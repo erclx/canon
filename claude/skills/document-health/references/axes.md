@@ -67,17 +67,15 @@ Read each document against the surfaces it names. Four claim shapes are testable
 
 A claim resting on none of the four is unverifiable from here. Report it as unread rather than as passing, which is the same rule the measured axes take when a verb refuses.
 
-### Identity drift in the requirements and architecture records
+### Identity drift in the requirements record
 
-These two records state what the project is and why it is built the way it is, so they go stale by the project changing direction as well as by the tree moving. Test these claim shapes beside the four above:
+This record states what the project is and why it is built, so it goes stale by the project changing direction as well as by the tree moving. Test these claim shapes beside the four above:
 
 - A goal nobody pursues, read against the task board and the recent history
 - A non-goal the project has since shipped
 - A constraint the tree contradicts
-- A decision whose revisit sentence has fired
-- A risk or open question already fixed
 
-Each is a `read`. The review point beside them is `measured`: `canon records stale canonical --json` returns per doc the `reviewed` date from its frontmatter and `releasesSince`, the release tags merged into HEAD after that day. A null `releasesSince` means the doc was never reviewed, and `tagged: false` means no release tag exists to count, so a zero there measured nothing. The count is a reminder of how far the project has moved since someone last read the record whole, never a threshold.
+Each is a `read`. The review point beside them is `measured`: `canon records stale canonical --json` returns the `reviewed` date from its frontmatter and `releasesSince`, the release tags merged into HEAD after that day. A null `releasesSince` means the doc was never reviewed, and `tagged: false` means no release tag exists to count, so a zero there measured nothing. The count is a reminder of how far the project has moved since someone last read the record whole, never a threshold.
 
 **Routes to:** the skill that rewrites a stale claim against an answer, rather than a direct edit from here. A document health run reports and never repairs.
 

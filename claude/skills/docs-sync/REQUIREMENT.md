@@ -35,7 +35,7 @@ The quiet one is the baseline. A diff resolved against a bare local ref equals H
 
 ## Out of scope
 
-- The context entries, architecture, wireframes, and task board: `context-fold`, which runs immediately before this skill in the ship chain and resolves the same baseline. The split is by audience, so a file's location decides which skill owns it rather than its subject.
+- The context entries, wireframes, and task board: `context-fold`, which runs immediately before this skill in the ship chain and resolves the same baseline. The split is by audience, so a file's location decides which skill owns it rather than its subject.
 - The requirements record: `document-health` reads it when asked
 - `CLAUDE.md` and the installed seed docs: `seed-sync`, which reconciles them per section against the toolkit source
 - Changelog entries, which release tooling generates from commit messages

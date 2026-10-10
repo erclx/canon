@@ -30,7 +30,7 @@ reply = ["canon/context/components.md", "architecture"]
 
 manual = [
   "The rendered PNG was read back before confirming. Unwired: the skill deletes the PNG once the checks confirm, so a conforming run leaves no file to assert.",
-  "The drawing reads as the four layers the architecture names, inside the boundary. Semantic: whether the boxes say what the record says is a judgment over the picture.",
+  "The drawing reads as the four layers the components entry names, inside the boundary. Semantic: whether the boxes say what the entry says is a judgment over the picture.",
 ]
 
 # The figure landed in the named entry, wrapped and captioned.

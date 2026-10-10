@@ -35,7 +35,7 @@ write_scope = [".claude/**", ".canon/**"]
 # the mechanical assertions rather than left in the scenario's log lines, which is
 # the only thing that stops them rotting once the rest are machine-checked.
 manual = [
-  "ARCHITECTURE.md storage section rewritten from SQLite to Postgres, since the folded plan names it a stack-and-runtime decision. Semantic: a pattern matching Postgres passes on a sentence saying the run did not migrate to it",
+  "canon/context/storage.md rewritten from SQLite to Postgres, since the folded plan names the storage decision and that entry is the domain it constrains. Semantic: a pattern matching Postgres passes on a sentence saying the run did not migrate to it",
   "REQUIREMENTS.md unwritten, backed by the content assertion below. Semantic: the assertion proves the non-goal survived, and a reader confirms no other line of the record moved",
   "The report carries one line naming document-health for the multi-user direction change. Semantic: the line is in the session transcript rather than in a file the checker reads",
 ]

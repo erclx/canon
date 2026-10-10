@@ -1,11 +1,11 @@
 ---
 title: Refresh context entries
-description: How context-fold Step 7 folds routed facts and diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
+description: How context-fold Step 6 folds routed facts and diff-scoped rewrites into canon/context entries, when it creates an entry, and the lines it reports
 ---
 
 # Refresh context entries
 
-Step 7 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
+Step 6 of `context-fold`, reached in order once `canon/context/index.md` lists at least one entry.
 
 Two sources feed this step, the same split Step 2 runs on. The diff carries what the repository changed. The routed facts carry what the session learned, which a diff cannot show.
 
@@ -21,7 +21,7 @@ Reuse the diff from the baseline above, names and content both. For each domain 
 
 - Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
 - For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
-- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule Step 3 applies to the other four canonical doc types.
+- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule Step 3 applies to the other canonical doc types.
 - Write a reference to another entry as the path that entry sits at, rather than as its bare filename. `${CLAUDE_SKILL_DIR}/../../standards/context.md` states the form, and a bare name strands the reference once a domain splits into subfolders.
 
 ## When the diff removes a capability

@@ -1,11 +1,11 @@
 ---
 title: Sweep consumed receipts
-description: How context-fold Step 9 sweeps branch review reports whose branch is gone, and what it keeps and reports
+description: How context-fold Step 8 sweeps branch review reports whose branch is gone, and what it keeps and reports
 ---
 
 # Sweep consumed receipts
 
-Step 9 of `context-fold`, reached in order on every run.
+Step 8 of `context-fold`, reached in order on every run.
 
 Sweep the review receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 
