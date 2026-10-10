@@ -40,6 +40,13 @@ Measure against the tree rather than recall. Grep for each construct the plan wi
 
 Open each file before describing what is in it. A count or a claim carried from an earlier session, a summary, or another document is the most common way a plan ships the wrong scope.
 
+When a decision the plan will make rests on an outside practice or a third-party behavior, invoke `canon:search-craft` before searching, fetch each source, and record the passage relied on. Skip this for a plan that rests on nothing outside the project.
+
+- Ask the fetch for the verbatim passage, and confirm the wording through `curl` where a decision turns on exact wording, since `WebFetch` returns a model's answer rather than the page.
+- Route a Claude Code subject to the `claude-code-guide` agent.
+- Mark a source that could not be fetched as unverified rather than citing recall.
+- Report it rather than proceeding silently when `canon:search-craft` does not resolve.
+
 ## Step 3: build the plan
 
 The section list, what each section holds, and the suggested-and-answer contract are fixed by `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, and the lifecycle by `${CLAUDE_SKILL_DIR}/../../standards/plan-lifecycle.md`. Read it before writing the file and follow it rather than working the shape from memory.
@@ -51,6 +58,7 @@ What this skill adds on top of the standard:
 - Suggest a real default when best practice, the codebase, or prior context points to one.
 - Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
 - Write `**Verification:**` as one bullet per outcome naming the test or command that proves it, and `**Review focus:**` as the inputs or states that would break the change. You understood the risk before any diff existed, and these two sections carry it to the executing session and to the reviewer.
+- Cite the `**Sources:**` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`.
 - Prefer `None identified.` over low-signal fillers. A small feature should produce a short plan, not a padded one.
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
 

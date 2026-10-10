@@ -7,6 +7,7 @@ rule:
   - 'Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.'
   - 'Never ship a question without a `- Suggested:` line. Write `- Suggested: needs your call, <why>` where the answer turns on preference.'
   - "Rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates from an unanswered question, leaving the slot blank. Put the same deviation in one line under the open task's `## Findings`."
+  - 'Fetch the source a decision rests on and quote the passage under `**Sources:**`, or mark the entry `unverified`. Never cite an outside source from recall.'
   - 'Move a shipped plan to `.canon/plans/archive/`. Never delete one.'
   - 'Amend a plan in place when a decision changes. Do not append a second passage narrating the change.'
   - 'Follow the plan lifecycle standard for when a plan is written, how it is amended, and its move to the archive. Read it with `canon standards plan-lifecycle`.'
@@ -61,17 +62,18 @@ A plan carries no frontmatter. Its filename is the whole of its identity, so a f
 
 The document opens with `# Feature: <short title>` and one paragraph stating what is being built and why now. The sections below follow in this order.
 
-| Section               | Holds                                                                     | Required      |
-| --------------------- | ------------------------------------------------------------------------- | ------------- |
-| `## Summary`          | three to five one-line bullets: the goal, the deliverables, the trade-off | Always        |
-| `**Constraints:**`    | durable rules the work must respect                                       | When supplied |
-| `**Files to touch:**` | each file with a one-line reason                                          | Always        |
-| `**Verification:**`   | the test or command that proves each outcome                              | Always        |
-| `**Risks:**`          | conflicts, coupling, and the tricky spots                                 | Always        |
-| `**Review focus:**`   | the inputs or states that would break the change, for the reviewer        | Always        |
-| `**Questions:**`      | numbered open decisions, each with a suggestion and an answer slot        | Always        |
+| Section               | Holds                                                                     | Required                                   |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
+| `## Summary`          | three to five one-line bullets: the goal, the deliverables, the trade-off | Always                                     |
+| `**Constraints:**`    | durable rules the work must respect                                       | When supplied                              |
+| `**Files to touch:**` | each file with a one-line reason                                          | Always                                     |
+| `**Verification:**`   | the test or command that proves each outcome                              | Always                                     |
+| `**Risks:**`          | conflicts, coupling, and the tricky spots                                 | Always                                     |
+| `**Review focus:**`   | the inputs or states that would break the change, for the reviewer        | Always                                     |
+| `**Questions:**`      | numbered open decisions, each with a suggestion and an answer slot        | Always                                     |
+| `**Sources:**`        | the outside sources a decision rests on, each with its quoted passage     | When a decision rests on an outside source |
 
-- Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the six that follow are labels over lists rather than sections of prose.
+- Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the others are labels over lists rather than sections of prose.
 - A section written in the other spelling is still that section, since `## Risks` and `**Risks:**` name one thing. Write the table's form in a new plan and leave an existing plan's spelling alone. Either spelling breaks a depth run.
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
 - Aim `## Summary` at a person scanning the plan, not at the session executing it. The other sections carry what execution needs.
@@ -117,6 +119,13 @@ A constraint naming a `.canon/ready/` folder is a third shape beside the hold an
 - Name each input or state that would break the change if the implementation got it wrong, one bullet each, with what the change must do there.
 - Write it for the reviewer rather than the builder, since this section is where the planner's understanding of the risk reaches the review pass.
 - Keep it apart from `**Risks:**`. A risk is something the work might collide with, and a focus item is something the finished diff must be shown to handle.
+
+### Sources
+
+- Give each entry a link, the decision it backs, and the passage relied on in double quotes.
+- Mark a source that could not be fetched `unverified` and never quote it. A quote for a page nobody opened is the failure this section exists to prevent.
+- Cite no source that was found and not opened, following the lead rule in `groundwork.md`.
+- Leave the section out when no decision rests on an outside practice or behavior. `canon records validate plans` checks that an entry is well formed, not that every outside claim got one.
 
 ## The suggested-and-answer contract
 
@@ -191,4 +200,8 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
    - Answer:
+
+**Sources:**
+
+- [<title>](url), backing <decision>: "<passage relied on>"
 ```

@@ -1,0 +1,19 @@
+import Database from "better-sqlite3";
+
+const db = new Database("tasks.db");
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    done INTEGER DEFAULT 0
+  )
+`);
+
+export function getTasks() {
+  return db.prepare("SELECT * FROM tasks").all();
+}
+
+export function createTask(title: string) {
+  return db.prepare("INSERT INTO tasks (title) VALUES (?)").run(title);
+}

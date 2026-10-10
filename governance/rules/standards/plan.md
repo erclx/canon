@@ -13,6 +13,7 @@ paths:
 - Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.
 - Never ship a question without a `- Suggested:` line. Write `- Suggested: needs your call, <why>` where the answer turns on preference.
 - Rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates from an unanswered question, leaving the slot blank. Put the same deviation in one line under the open task's `## Findings`.
+- Fetch the source a decision rests on and quote the passage under `**Sources:**`, or mark the entry `unverified`. Never cite an outside source from recall.
 - Move a shipped plan to `.canon/plans/archive/`. Never delete one.
 - Amend a plan in place when a decision changes. Do not append a second passage narrating the change.
 - Follow the plan lifecycle standard for when a plan is written, how it is amended, and its move to the archive. Read it with `canon standards plan-lifecycle`.
