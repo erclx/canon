@@ -14,6 +14,7 @@ A skill born without its requirement is the second failure, and it surfaces much
 A third failure is a folder created for a moment a rule, a verb, or an existing skill already reaches, or for a procedure no session would get wrong from first principles. Nothing caught that before the folder existed, so the corpus grew by a skill an inward audit later had to argue for removing, with only a commit body recording the argument.
 
 A fourth failure is dated provenance in the body. A target asked for an edit citing a measurement taken that day, and the draft carried "measured on" and the date inline, with the authoring standard, the markdown audit, and this skill all passing it. A body collecting those notes reads as history rather than as the rule a session follows.
+
 A fifth failure is the confirmation itself. A worker running a plan that adds a skill reached Step 4, asked a person nobody had dispatched, and the chain parked on a question nobody read. The same description named only the installed `.claude/skills/` root, which the toolkit's checkout forbids authoring into.
 
 ## Must
