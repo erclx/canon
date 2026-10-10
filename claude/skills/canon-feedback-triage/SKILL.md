@@ -25,7 +25,7 @@ Run from the toolkit repo root. This skill reads GitHub issues and writes only i
 ## Step 1: list the queue
 
 ```bash
-gh issue list --label feedback --state open --json number,title,body,labels
+gh issue list --label feedback --state open --limit 1000 --json number,title,body,labels
 ```
 
 Take every issue. An issue without the `feedback` label does not surface here by design.
