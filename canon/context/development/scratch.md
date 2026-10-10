@@ -58,7 +58,7 @@ Most writers hold throwaway working state a single run creates, consumes through
 
 Four write material a later run or a different worktree reads back, and each states the main root. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
 
-`draft-and-pick`'s `.canon/tmp/<slug>/candidates.html` reads like a seventh, since an operator drives the pick across more than one turn, but nothing outside the same skill run opens the scratch folder: `canon capture` and `canon serve` are its only readers there. The skill's close step batch-captures the final arms out to `.canon/picks/<slug>/` at the main root before it deletes the scratch folder, so the folder stays worktree-local.
+`draft-and-pick` writes no scratch file, since the canvas folder at the main root is its working surface and its close captures the final arms out to `.canon/picks/<slug>/` before deleting the pages it added.
 
 `review-pr`'s `.canon/tmp/pr/review/body-<number>-<short-sha>.md` is the exception on the other side: material a later pass reads back through the Step 2 oid comparison, with no root stated anywhere in the body. A dispatched re-review runs in its own worktree, so the second pass writes a folder the first pass never touched, which the filename scheme cannot stop without the root fixed. Its Step 4 takes the same main-root heredoc route the six use.
 
