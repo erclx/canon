@@ -11,9 +11,10 @@
 # else, and a headless session has no operator to hear that from, so waiting
 # would spend turns to the cap and closing is the only terminal behavior
 # available. A pre-supplied pick therefore carries the run through step 6 rather
-# than parking it at the hand-off. Measured 2026-09-02 at 99 seconds: the run
-# drafted four arms with the shipping wash as arm 0, applied the ground shift,
-# recorded the decision in the design note, and removed the scratch folder.
+# than parking it at the hand-off. Measured 2026-09-02 at 99 seconds, before the
+# arms moved onto the canvas: the run drafted four arms with the shipping wash as
+# arm 0, applied the ground shift, recorded the decision in the design note, and
+# removed its working files.
 #
 # So what is asserted is the blast radius and the scope of the edit, not the
 # loop. `write_scope` is the load-bearing entry: it admits the two surfaces a
@@ -33,12 +34,12 @@
 # sandbox, which fails because it resolves `@playwright/test` out of a
 # `node_modules` nobody installed, where `canon capture` resolves
 # `playwright-core` through the installed `canon` and renders. It then asserted
-# the scratch folder still standing, on the reading that a pick is not permission
+# its working files still standing, on the reading that a pick is not permission
 # to close, which is true of the body and untestable without an operator.
 
 paths = ["index.html", "canon/DESIGN.md"]
 
-# The two surfaces a close reaches, and the scratch it works in. `index.html`
+# The two surfaces a close reaches, and the canvas it works on. `index.html`
 # carries the applied arm and the design note carries the decision, and step 6
 # directs both writes, so this entry admits exactly what the body sends a run to
 # touch. That correspondence is the point rather than a convenience: an entry
@@ -48,10 +49,11 @@ paths = ["index.html", "canon/DESIGN.md"]
 # the path dropped, since a pick that records nothing about why is the loss the
 # note exists to prevent.
 #
-# `.canon/picks/**` is the third write step 6 directs: the batch capture of the
-# final round's arms lands there as the durable revert record, before the
-# scratch folder is removed.
-write_scope = [".canon/tmp/**", ".canon/picks/**", "index.html", "canon/DESIGN.md"]
+# `.canon/picks/**` is the third write step 6 directs: the per-frame capture of
+# the final round's arms lands there as the durable revert record, before the
+# round pages are deleted from `.canon/canvas/`. The composite render taken at
+# step 3 lands in session scratch, which `.canon/tmp/**` admits.
+write_scope = [".canon/canvas/**", ".canon/tmp/**", ".canon/picks/**", "index.html", "canon/DESIGN.md"]
 
 # Declared at the runner default rather than at the observation. One run bounds
 # nothing here, since the cost follows how many arms the run drafts and how much
@@ -65,13 +67,14 @@ max_turns = 30
 
 manual = [
   "The arms differ in a way worth choosing between. Semantic: this is the whole judgment the skill exists to serve, and a fixture with the answer pre-supplied proves the run reached a pick rather than that the candidates were worth choosing between.",
-  "Three to five arms were drafted onto one page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 removes the scratch folder, so the page the claim is about is gone by the time anything reads the tree. The measured run named its four arms in the design note it wrote, which is evidence rather than an assertion.",
+  "Three to five arms were drafted as frames on one canvas page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 deletes the round pages, so the page the claim is about is gone by the time anything reads the tree. The archive under .canon/picks/ holds one arm-<id> image per arm, which is evidence rather than an assertion.",
   "The arms varied one property. Semantic: the seeded decision names a border, a ground shift, and a rule down one edge, and whether a run held everything else fixed is read off markup that no longer exists once the run closes.",
-  "The page declared a font stack the machine resolves. Unwired: the page is deleted by the close, and the render it gates is a property of the machine rather than of the run.",
+  "Every frame declared a font stack the machine resolves. Unwired: the frames are deleted by the close, and the render it gates is a property of the machine rather than of the run.",
   "The applied treatment is the arm the prompt picked rather than another. Semantic: which arm is second is a property of the order the run authored, so no pattern can tie the pick to the treatment without fixing the arms the run is meant to invent.",
   "The pick was put through the structured question surface with the recommendation ranked first and marked. Unwired: the harness captures no tool calls, and a headless session has no operator to put a question to, so this arm cannot reach it at all.",
   "The loop narrowed to the picked arm and handed off before closing. Unwired: the loop stops on a person saying the pick is right and no fixture supplies one, so a headless run closes on the pick and a green verdict here is not coverage of the loop.",
-  "The candidates page was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 stops the server and deletes the page before anything reads the tree.",
+  "The canvas was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 stops the server it started and deletes the round pages before anything reads the tree.",
+  "The close deleted only the round pages the run added and left no other canvas page touched. Unwired: the fixture seeds no operator page beside the run's, so nothing here separates a delete by recorded name from a delete by prefix.",
   "The design note names the arm that won and the ones that stayed defensible, rather than merely being touched. Judgment: step 6 now directs the write and write_scope admits it, so what nothing asserts is whether the record says anything useful, and any pattern over it would match wording the run chooses.",
 ]
 
