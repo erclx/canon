@@ -33,7 +33,7 @@ Four page kinds share one chrome, which `chrome.md` carries. The captures sit fl
 
 ## Lesson
 
-`rewriteLesson` splices the chrome into the four markers on every run and leaves the heading, lede, body, and quiz authored between them. A lesson is the only page whose sidebar opens on arrival above 1100px, with the one being read marked and its `h2` outline folded under it.
+`rewriteLesson` splices the chrome into the four markers on every run and leaves the heading, lede, body, and quiz authored between them. A lesson's sidebar opens on arrival above 1100px, as a reference page's does, with the one being read marked and its `h2` outline folded under it. The root and contents pages are the two that arrive shut.
 
 - The article's authored blocks are an assumes panel under the lede, steps, a callout, a table that scrolls sideways with every column but the first right-aligned, a figure, a road of numbered rows with a duration each, a quiz, a teach-back prompt over a disclosure, and numbered references
 - A figure always breaks out of the measure to the wider column and has no narrower variant
