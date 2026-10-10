@@ -1,6 +1,6 @@
 ---
 title: Upstream
-description: The fetch, catalog, and advance verbs that read Claude Code releases against the toolkit, the cursor record, and each refusal reason
+description: The fetch, catalog, due, and advance verbs that read Claude Code releases against the toolkit, the cursor record, and each refusal reason
 ---
 
 # Upstream
