@@ -87,6 +87,16 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/cloud-setup.sh"
           }
         ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/upstream-due.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreCompact": [

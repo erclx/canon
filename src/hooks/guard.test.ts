@@ -155,6 +155,7 @@ beforeAll(() => {
     join(fixture, 'bin-no-runner'),
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-no-record'),
+    join(fixture, 'bin-due'),
     join(fixture, 'no-source'),
     join(fixture, 'read-only'),
     join(fixture, 'elsewhere/tmp'),
@@ -220,6 +221,16 @@ beforeAll(() => {
   const silent = join(fixture, 'bin-no-record/canon')
   writeFileSync(silent, '#!/usr/bin/env bash\nexit 1\n')
   chmodSync(silent, 0o755)
+
+  // The reminder reads a due record off `bun src/cli.ts upstream due`, so the
+  // stub answers one and the output is the fixture's rather than whichever
+  // cursor and network the machine carries.
+  const due = join(fixture, 'bin-due/bun')
+  writeFileSync(
+    due,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"due":true,"reason":"week","releases":4}'\n`,
+  )
+  chmodSync(due, 0o755)
 
   // An empty file is enough, since the hook tests for the path and the stub
   // runner never reads it. Without it the project root takes the fallback and
@@ -364,6 +375,14 @@ beforeAll(() => {
           tool_input: { file_path: join(project, 'doc.md') },
           tool_name: 'Write',
         }),
+    },
+    'upstream-due.sh': {
+      // The runner may itself be a background session reading `0`, which the
+      // hook is built to stay silent for.
+      env: { CLAUDE_CODE_SESSION_ATTENDED: undefined },
+      expect: '4 Claude Code releases since the last upstream digest',
+      path: [join(fixture, 'bin-due'), hookPath].join(delimiter),
+      payload: () => payloadFor({ source: 'startup' }),
     },
     'unattended-agent-guard.sh': {
       code: 2,
@@ -940,6 +959,44 @@ describe('seeds standards-audit.sh runner', () => {
 // itself, so it exists in .claude/hooks/ alone and the directory walk above
 // never reaches a seed copy to test.
 //
+// The acting case above proves the reminder fires on an attended startup. These
+// pin the two silences it promises, since a stub answering due on every call
+// would otherwise pass a hook that never filtered.
+describe('upstream-due.sh silences', () => {
+  const hook = join(ROOT, '.claude/hooks/upstream-due.sh')
+  const dueBin = (): string =>
+    [join(fixture, 'bin-due'), hookPath].join(delimiter)
+
+  it.concurrent(
+    'should stay silent in a background session',
+    async ({ expect }) => {
+      const result = await run(
+        hook,
+        payloadFor({ source: 'startup' }),
+        dueBin(),
+        undefined,
+        { CLAUDE_CODE_SESSION_ATTENDED: '0' },
+      )
+
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent('should stay silent on a resume', async ({ expect }) => {
+    const result = await run(
+      hook,
+      payloadFor({ source: 'resume' }),
+      dueBin(),
+      undefined,
+      { CLAUDE_CODE_SESSION_ATTENDED: undefined },
+    )
+
+    expect(result.stdout).toBe('')
+    expect(result.code).toBe(0)
+  })
+})
+
 // The acting case proves the denial fires on the one value the hook can back.
 // Everything else, unset included, is a session this reading cannot classify,
 // and classifying it wrong in either direction is worse than saying nothing:
