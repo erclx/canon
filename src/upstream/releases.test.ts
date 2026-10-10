@@ -56,9 +56,11 @@ describe('keepLines', () => {
   )
 
   it('should keep a bullet nested under another and one written with a star', () => {
-    const body = ['- Added top', '  - Changed nested', '* Removed starred'].join(
-      '\n',
-    )
+    const body = [
+      '- Added top',
+      '  - Changed nested',
+      '* Removed starred',
+    ].join('\n')
 
     const lines = keepLines({ ...release('2.1.2', []), body })
 
@@ -90,7 +92,9 @@ describe('extractIdentifiers', () => {
   })
 
   it('should skip a name under three characters or over sixty', () => {
-    const found = extractIdentifiers(`Changed \`a-\` and \`${'a-'.repeat(31)}\``)
+    const found = extractIdentifiers(
+      `Changed \`a-\` and \`${'a-'.repeat(31)}\``,
+    )
 
     expect(found).toEqual([])
   })
@@ -111,9 +115,9 @@ describe('walkReleases', () => {
 
     const walk = await walkReleases('2.1.3', pagesOf(pages), 2)
 
-    expect(walk.kind === 'reached' && walk.releases.map((r) => r.tag_name)).toEqual(
-      ['v2.1.5', 'v2.1.4'],
-    )
+    expect(
+      walk.kind === 'reached' && walk.releases.map((r) => r.tag_name),
+    ).toEqual(['v2.1.5', 'v2.1.4'])
   })
 
   it('should not stop at the end of the first page when the cursor is on the second', async () => {
