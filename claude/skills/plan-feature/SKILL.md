@@ -54,6 +54,8 @@ The section list, what each section holds, and the suggested-and-answer contract
 What this skill adds on top of the standard:
 
 - Reframe a vague ask as success criteria before writing `**Files to touch:**`. Each criterion names something observable and a check that decides it, such as a measure and the threshold it must stay under, drawn from the ask or the project context. "Make it faster" names no criterion, while a stated budget for one path does. Each criterion becomes one `**Verification:**` bullet.
+- Confirm a concrete project or use case drives the feature before shaping it, and lift patterns from that project where precedent exists. A feature with no named user is a guess about what one will want.
+- Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
 - Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
 - Suggest a real default when best practice, the codebase, or prior context points to one.
 - Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
