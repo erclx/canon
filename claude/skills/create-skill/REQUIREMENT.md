@@ -15,7 +15,7 @@ A third failure is a folder created for a moment a rule, a verb, or an existing 
 
 A fourth failure is dated provenance in the body. A target asked for an edit citing a measurement taken that day, and the draft carried "measured on" and the date inline, with the authoring standard, the markdown audit, and this skill all passing it. A body collecting those notes reads as history rather than as the rule a session follows.
 
-A fifth failure is the confirmation itself. A worker running a plan that adds a skill reached Step 4, asked a person nobody had dispatched, and the chain parked on a question nobody read. The same description named only the installed `.claude/skills/` root, which the toolkit's checkout forbids authoring into.
+A fifth failure is the confirmation itself. A worker running a plan that adds a skill reached Step 4, asked a person nobody had dispatched, and the chain parked on a question nobody read. The same description named only the `.claude/skills/` root, which is where a target authors and where a toolkit checkout keeps its `internal-*` skills, but not where its plugin skills live.
 
 ## Must
 
@@ -23,7 +23,7 @@ A fifth failure is the confirmation itself. A worker running a plan that adds a 
 - Answer, in writing, whether a rule, a verb, or an existing skill already reaches this moment, and whether the body carries a procedure a session would get wrong from first principles. A folder that fails either belongs to the surface that already covers it, not to a new skill.
 - Draft the sibling `REQUIREMENT.md` beside the body, from what the skill is for rather than from the drafted body
 - Confirm the name and both files with the user before writing, where a person is present to answer. The name is the routing key and a folder that disagrees with its frontmatter fails silently. Where nobody is present, record the three answers and both paths in the output and write.
-- Write to the conventional skills path, so discovery finds it without configuration. That is `claude/skills/` in the toolkit's own checkout and `.claude/skills/` in a target project, chosen by whether the project root holds `claude/.claude-plugin/plugin.json`
+- Write to the conventional skills path, so discovery finds it without configuration. That is `.claude/skills/` in a target project. In the toolkit's own checkout, which the project root's `claude/.claude-plugin/plugin.json` marks, an `internal-*` skill goes under `.claude/skills/` and a plugin skill under `claude/skills/`
 - Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident moved to the requirement's `Gap`
 
 ## Must not
