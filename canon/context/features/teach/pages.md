@@ -59,4 +59,3 @@ Four page kinds share one chrome, which `chrome.md` carries. The captures sit fl
 ## Capture drift
 
 The root capture trails the fixture, whose Fixture row reads one reference page where the image reads none, and only Live and Stub rows appear since no committed fixture reaches Open. The contents capture shows no Reference pages section, which `examples/teach/00-fixture/index.html` renders. A regenerated capture clears both.
-
