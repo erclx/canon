@@ -35,7 +35,7 @@ This skill writes canonical docs at the end of a long build and never reviews wh
 - Merge or retire an architecture entry before adding one at the record's stated cap, and name which in the report, so the cap never turns into compressed prose or two decisions packed under one heading
 - Anchor a decision entry this run writes or amends whose reasoning cites a measured number, re-reading the number against the tree before writing the marker
 - Report an anchored decision whose cited path the diff touched, since the number was read before the branch moved what it counted
-- Leave the current branch's review receipt alone, since the chain that wrote it cites it in its own closing line and this skill cannot read whether that citation is still live
+- Leave the current branch's review receipt alone, since its branch is still live
 - Land each block of a promotion handoff at the destination its heading names, then delete the file so a later run does not fold it twice
 - Take a promotion destination as already decided, since the operator confirmed it where the page was produced
 - Classify the fold's whole diff baseline through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body, since an earlier commit on the branch carries a doc edit the fold is equally responsible for

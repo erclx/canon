@@ -112,4 +112,4 @@ Cite these rather than restating them. A step reimplemented here rots against th
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 - `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
-- `review-branch` and `review-address` run the review pass
+- `review-pr` and `review-address` run the review pass

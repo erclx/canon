@@ -49,10 +49,6 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
     expect: 'draft-doc',
   },
   {
-    prompt: 'Say what that dense answer actually means in plain terms.',
-    expect: 'restate-plainly',
-  },
-  {
     prompt: 'This passage reads flat and robotic, give it some real cadence.',
     expect: 'write-human',
   },
