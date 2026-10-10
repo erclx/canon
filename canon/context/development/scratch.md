@@ -7,7 +7,7 @@ description: Why shared scratch lives at the main worktree root, what worktree i
 
 ## Where shared scratch lives
 
-`.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/` are gitignored and live at the main worktree root. A linked worktree resolves them there rather than writing its own copy. How each folder archives, and how the set is backed off the disk, sits in `canon/context/development/records.md`.
+`.canon/plans/`, `.canon/review/`, and `.canon/tasks/` are gitignored and live at the main worktree root. A linked worktree resolves them there rather than writing its own copy. How each folder archives, and how the set is backed off the disk, sits in `canon/context/development/records.md`.
 
 `.claude/.tmp/` carries its own `.gitignore` entry and manifest array member, so a project still on the old root keeps its scratch out of git wherever it is written, worktree or main root alike. The scratch rule states only `.canon/tmp/`, since a rule names the current layout alone. It stays an ignore entry rather than a second scratch root, since only whether git sees the folder changed. `canon/context/context-model/overview.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
 
@@ -32,7 +32,7 @@ The same token reaches a script handed to an interpreter inline, so a Python her
 
 `session-worktree` states these routes to a session, in its `references/main-root-writes.md`, and `605-worktrees` points there. This section keeps the reasons behind them.
 
-Two write kinds take two routes. Creating a whole file is a heredoc through `Bash`, which is why a plan, a review report, and a memory entry need no code behind them. A body the verification refuses falls back to `Write` into the worktree followed by a two-argument `cp` out to the main root, which carries no syntax to inspect and needs no verb.
+Two write kinds take two routes. Creating a whole file is a heredoc through `Bash`, which is why a plan and a review report need no code behind them. A body the verification refuses falls back to `Write` into the worktree followed by a two-argument `cp` out to the main root, which carries no syntax to inspect and needs no verb.
 
 Changing a line inside a file that already exists has no shell route, because the stream editors that would do it are banned for rewriting the line they anchored to and for exiting zero on a non-match, so it runs through a `canon` verb resolving the main root in-process. Relocating the four scratch folders was the other candidate, and it addresses nothing, since the refusal is tool-scoped rather than filesystem-scoped, while costing a breaking rename for every installed target.
 
@@ -44,11 +44,11 @@ Resolution runs `CLAUDE_BG_ISOLATION` first, then a value stamped into the job r
 
 ### What a shell write bypasses
 
-A shell write costs the index hook, which matters wherever a folder's `index.md` is generated. The `PostToolUse` triggers match `Write|Edit|MultiEdit`, so nothing fires on `Bash`, and `task-board` and `memory-capture` each regenerate positionally after a shell write rather than leaving the index a row short.
+A shell write costs the index hook, which matters wherever a folder's `index.md` is generated. The `PostToolUse` triggers match `Write|Edit|MultiEdit`, so nothing fires on `Bash`, and `task-board` regenerates positionally after a shell write rather than leaving the index a row short.
 
 The bypass reaches four hooks: `PostToolUse` on `Edit|Write|MultiEdit` runs `standards-audit.sh`, `records-index.sh`, and `path-form.sh`, and `PreToolUse` on `Write|Edit` runs `scratch-guard.sh`.
 
-A plan write is a no-op for every one of the four: `standards-audit.sh` exits on `*.canon/plans/*` by an explicit skip, `records-index.sh` matches the tasks and memory folders alone, `path-form.sh` answers only a path carrying a worktree segment, and `scratch-guard.sh` fires only on a `tmp`, `Temp`, or `var/folders` segment. `.canon/review/` clears the same four for the same reasons, so the cost lands on `.canon/tasks/` and `.canon/memory/` alone, where the index hook is a real writer.
+A plan write is a no-op for every one of the four: `standards-audit.sh` exits on `*.canon/plans/*` by an explicit skip, `records-index.sh` matches the tasks folder alone, `path-form.sh` answers only a path carrying a worktree segment, and `scratch-guard.sh` fires only on a `tmp`, `Temp`, or `var/folders` segment. `.canon/review/` clears the same four for the same reasons, so the cost lands on `.canon/tasks/` alone, where the index hook is a real writer.
 
 ## Which `.canon/tmp/` writers state a root
 
@@ -56,7 +56,7 @@ A plan write is a no-op for every one of the four: `standards-audit.sh` exits on
 
 Most writers hold throwaway working state a single run creates, consumes through a local verb or a `gh` call, and removes or leaves for the next run to overwrite, such as `git-pr`'s pull request body, `review-address`'s reply body, and `draft-figure`'s verification renders. None of those needs a root, since nothing outside the run that wrote it ever opens the file.
 
-Five write material a later run or a different worktree reads back, and each states the main root. `memory-capture` states it for `.canon/tmp/handoff/memory-routing/<slug>.md`. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
+Four write material a later run or a different worktree reads back, and each states the main root. `ui-checklist`'s checklist, `teach-workspace`'s promotion handoff, `draft-screencast`'s draft, and `role-orchestrator`'s poll baseline under `.canon/tmp/pr/poll` each state their own root directly.
 
 `draft-and-pick`'s `.canon/tmp/<slug>/candidates.html` reads like a seventh, since an operator drives the pick across more than one turn, but nothing outside the same skill run opens the scratch folder: `canon capture` and `canon serve` are its only readers there. The skill's close step batch-captures the final arms out to `.canon/picks/<slug>/` at the main root before it deletes the scratch folder, so the folder stays worktree-local.
 
@@ -64,4 +64,4 @@ Five write material a later run or a different worktree reads back, and each sta
 
 ### A handoff shared across worktrees
 
-A `.canon/tmp/<topic>/<slug>.md` handoff shared across worktrees, the pattern `memory-capture` and `teach-workspace` use, carries no producer subfolder of its own. Its consumer removes the consumed `<slug>.md` alone, then `rmdir`s the topic folder guarded with `2>/dev/null || true`, which is a no-op wherever a sibling branch's own pending file still sits in it. A plain `rm -rf` on the topic folder would delete that sibling's in-flight handoff, since the folder is shared across every worktree writing to the same main root.
+A `.canon/tmp/<topic>/<slug>.md` handoff shared across worktrees, the pattern `teach-workspace` uses, carries no producer subfolder of its own. Its consumer removes the consumed `<slug>.md` alone, then `rmdir`s the topic folder guarded with `2>/dev/null || true`, which is a no-op wherever a sibling branch's own pending file still sits in it. A plain `rm -rf` on the topic folder would delete that sibling's in-flight handoff, since the folder is shared across every worktree writing to the same main root.

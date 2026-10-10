@@ -59,8 +59,6 @@ A `REPLACE` or `HISTORY` finding, and a regex-decided `MOVE` finding, is applied
 
 The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
-### The memory review nudge fires on a count
-
 ## Pull request writes
 
 ### Pull request detection hits a merged namesake

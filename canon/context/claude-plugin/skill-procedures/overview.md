@@ -73,7 +73,7 @@ Nothing detects a body that restates a procedure instead of citing it. `assert_n
 
 ### The routing handoff drains per session
 
-The memory-routing handoff queue drains per session rather than accumulating unread, so a file sitting in it is evidence about one session rather than about the mechanism. A handoff outlives its producer only when that producer never reached its own ship chain, so an aged file reads as a session that stopped early rather than as a queue with no consumer. Check the modification time against the live worktree list before concluding the mechanism itself is unread.
+A handoff queue under `.canon/tmp/handoff/` drains per session rather than accumulating unread, so a file sitting in it is evidence about one session rather than about the mechanism. A handoff outlives its producer only when that producer never reached its own ship chain, so an aged file reads as a session that stopped early rather than as a queue with no consumer. Check the modification time against the live worktree list before concluding the mechanism itself is unread.
 
 ### A main-root write names its route or the guard silently takes it
 

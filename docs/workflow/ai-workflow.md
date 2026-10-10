@@ -28,7 +28,6 @@ canon/
 .canon/
 ├── tasks/           ← one file per task with a generated index.md, local scratch
 ├── plans/           ← one plan per feature, archived inside itself once it ships
-├── memory/          ← durable session facts no context entry owns
 └── tmp/             ← deletable scratch, safe to remove without loss
 ```
 
@@ -103,14 +102,6 @@ An empty changed-file list stops the chain rather than counting as prose-only. T
 `canon autoship classify` answers that decision now, and the chain branches on the record it returns rather than on a session applying the list above. Three runs read past the list while it was prose, the last of them a driven arm that staged a file the list names and shipped a draft pull request with no review. The verb takes the names the chain already computed, so no second diff baseline resolves, and it names the file and the test that decided. [Review classification](../agents/review-classification.md) carries the record shape and the exit codes.
 
 The list stays written in the skill body as the fallback for a target whose installed CLI predates the verb, since the two ship at different speeds. That fallback is never a skip: failing open is the defect the verb closes, so an absent subcommand routes to review rather than past it.
-
-#### Memory in the chain
-
-`git-ship` runs its verify gate and then opens on `memory-capture`, which sends what the session learned to the surface that owns it. `autoship` reaches the same step by invoking that skill at its Step 8 rather than restating the order. A fact about a domain carrying an entry in `canon/context/index.md` is routed to that entry, and `context-fold` folds it in on the next step, so it ships in the same pull request. Anything no entry owns stays a file in `.canon/memory/`.
-
-Capture leads rather than trails because a routed fact edits a tracked file, which has to reach the branch before the commit steps run.
-
-The chain ends at capture, and nothing curates the pen after it.
 
 ### UI polish
 

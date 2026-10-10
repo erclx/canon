@@ -70,7 +70,6 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `groundwork.md` fixes the measurement track a topic gets before anyone plans it. `governance/rules/standards/groundwork.md`.
 - `groundwork-spikes.md` fixes a track's `08-spikes.md`, the sample rule, and the folders holding what a spike produced. `governance/rules/standards/groundwork.md`, through a pointer bullet. It was split from `groundwork.md` when the generated rule's frontmatter pushed that standard past the 300 rendered line ceiling.
 - `intake.md` fixes the folder a raw dump is filed into. `governance/rules/standards/intake.md`.
-- `memory.md` fixes the pen entry and its lifecycle from write to retire. `governance/rules/standards/memory.md`.
 - `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `governance/rules/standards/plan.md`.
 - `plan-lifecycle.md` fixes when a plan is written, how it is amended, and its move to the archive. `governance/rules/standards/plan.md`, through a pointer bullet. Split from `plan.md` for the same ceiling, which `plan.md` still sits one line under.
 - `readme.md` fixes the voice and structure of the page a project leads with. `governance/rules/standards/readme.md`.

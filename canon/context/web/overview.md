@@ -65,7 +65,7 @@ Every committed frame is also a still, since the capture creates its context wit
 
 ### Composition
 
-The page is one agent session read top to bottom: the ask, the rules whose globs match the path it touches, the skill loaded, the plan, the dispatch, the workers, the test gate, the memory routing, the review from a session that did not write the change, and the merge. The provenance ledger, the install steps, a field of every command and skill name with the used ones lit, and the close follow. Cause precedes effect throughout, which is why the skill beat sits ahead of the plan. The composition is the reference build `.canon/groundwork/95-visual-direction/evidence/system-15/`, and no earlier build in that folder is a source to build from.
+The page is one agent session read top to bottom: the ask, the rules whose globs match the path it touches, the skill loaded, the plan, the dispatch, the workers, the test gate, the review from a session that did not write the change, and the merge. The provenance ledger, the install steps, a field of every command and skill name with the used ones lit, and the close follow. Cause precedes effect throughout, which is why the skill beat sits ahead of the plan. The composition is the reference build `.canon/groundwork/95-visual-direction/evidence/system-15/`, and no earlier build in that folder is a source to build from.
 
 Every claim on the page names something the tool did in that session, and every figure that can derive does, from a real file or a CLI read at build time. Drawing figures from real data is what falsified three claims prose review had read past: a numerator nobody counted, a denominator read from the wrong root, and a hook action the hook does not perform.
 
