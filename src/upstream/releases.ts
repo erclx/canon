@@ -1,5 +1,6 @@
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
+import { compareVersions } from '@/upstream/cursor'
 
 const RELEASES_URL =
   'https://api.github.com/repos/anthropics/claude-code/releases'
@@ -77,10 +78,11 @@ export function extractIdentifiers(text: string): string[] {
 /**
  * Collects the releases newer than the cursor, newest first.
  *
- * The walk stops at the cursor tag wherever it sits, so a range crossing a page
- * boundary is read whole. A feed that ends without the tag reports
- * `cursor-missing` instead of returning everything, since a yanked release would
- * otherwise read back to the oldest one.
+ * The walk stops at the first release whose version is not newer than the
+ * cursor, wherever it sits, so a range crossing a page boundary is read whole
+ * and a cursor naming a version the feed never carried, as 2.1.256 is not,
+ * still bounds the range. A feed that ends with every release newer than the
+ * cursor reports `cursor-missing` instead of returning all of it.
  */
 export async function walkReleases(
   cursor: string,
@@ -97,7 +99,7 @@ export async function walkReleases(
 
     for (const release of result.releases) {
       if (release.draft) continue
-      if (versionOf(release.tag_name) === cursor) {
+      if (compareVersions(versionOf(release.tag_name), cursor) <= 0) {
         return { kind: 'reached', releases: collected }
       }
       collected.push(release)

@@ -136,6 +136,19 @@ describe('walkReleases', () => {
     expect(walk).toEqual({ kind: 'cursor-missing', cursor: '2.0.0' })
   })
 
+  it('should stop at the first release not newer than a cursor tag the feed lacks', async () => {
+    const pages = [
+      [release('2.1.5', []), release('2.1.4', [])],
+      [release('2.1.2', []), release('2.1.1', [])],
+    ]
+
+    const walk = await walkReleases('2.1.3', pagesOf(pages), 2)
+
+    expect(
+      walk.kind === 'reached' && walk.releases.map((r) => r.tag_name),
+    ).toEqual(['v2.1.5', 'v2.1.4'])
+  })
+
   it('should surface a failed page as a refusal', async () => {
     const fetcher: PageFetcher = async () => ({
       ok: false,

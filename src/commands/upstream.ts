@@ -221,11 +221,11 @@ async function runFetch(opts: FetchOptions): Promise<number> {
   if (difference === null) logWarn('llms.txt could not be fetched')
   outro()
 
-  for (const line of digest.lines) {
-    process.stdout.write(`${line.version}\t${line.text}\n`)
-  }
-
-  if (emitJson) {
+  if (!emitJson) {
+    for (const line of digest.lines) {
+      process.stdout.write(`${line.version}\t${line.text}\n`)
+    }
+  } else {
     process.stdout.write(
       `${JSON.stringify({
         from: digest.from,

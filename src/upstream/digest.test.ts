@@ -82,11 +82,11 @@ describe('buildDigest', () => {
 
   it('should pass a cursor missing from the feed through', async () => {
     const digest = await buildDigest(
-      '9.9.9',
+      '2.0.0',
       feed([release('2.1.2', [])]),
       noFiles,
     )
 
-    expect(digest).toEqual({ kind: 'cursor-missing', cursor: '9.9.9' })
+    expect(digest).toEqual({ kind: 'cursor-missing', cursor: '2.0.0' })
   })
 })
