@@ -1,13 +1,13 @@
 ---
 title: Overview
-description: What the landing page domain owns, its composition as one agent session, the layer order a redesign works in, motion and type, the nav, and the costs the page accepts
+description: What the landing page domain owns, its regions, states, and exclusions, its composition as one agent session, the layer order a redesign works in, motion and type, the nav, and the costs the page accepts
 ---
 
 # Overview
 
 ## Overview
 
-Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route, read as one agent session from the ask to the merge across eleven sections. This is the toolkit's own public site rather than code shipped to a target project, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it. See `canon/wireframes/landing-page.md` for the regions and states and `canon/context/tooling/index.md` for the astro-stack mechanics this domain inherits.
+Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route, read as one agent session from the ask to the merge across eleven sections. This is the toolkit's own public site rather than code shipped to a target project, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it. `## Surface` below carries the regions, states, and exclusions, and `canon/context/tooling/index.md` carries the astro-stack mechanics this domain inherits.
 
 ## Layout
 
@@ -24,6 +24,42 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/card-src/` owns the social card route, a third Astro config
 
 `canon/context/web/build.md` covers the build-time reads, the build, and deploy, `canon/context/web/assets.md` the social card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks and the capture of this page.
+
+## Surface
+
+The page is the toolkit's one outward-facing route, and a reader arrives cold, scrolls once, and reads one real session from the ask to the merge. Every count in a section head is read from the repository at build time. The long-form copy lives in `web/src/content/copy.ts`, each string tied to a `README.md` citation, so it is not restated here.
+
+### Regions
+
+- Skip link: first in the tab order, jumping to the start of the session
+- Nav bar: sticky at the top, carrying the mark, the version with a dot lit when it matches the published one, one link per named beat, the theme toggle, and the install action
+- Fold: the headline, a one-line lede, two actions, and a before-and-after pair on one command, ending in a strip naming the two surfaces the command never copies
+- Proof band: one claim on its own line at full width, below the fold
+- Beats: the eleven sections in reading order. Their sequence and what each figure derives from are under Composition below
+- Field: every command name and skill name in two fields, the ones the session used lit. Skills sit under the skill map's groups, and each name reveals its when-to-use text on hover, focus, and tap
+- Footer: the brand line, three link columns, and a note on what is read and what is authored
+
+### States
+
+- light: the reader's system prefers light, or they pick it, and the page sits on the warm light ground. Captured at `assets/evidence/home/1280--light.png`
+- dark: the system prefers dark or the reader picks it, and the page sits on its own derived dark ground, not an inversion. Captured at `assets/evidence/home/1280--dark.png`
+- still: the reader asks for reduced motion or opens `?still`, and every figure shows its end state with no build and no control motion
+
+Every committed frame is also a still, since the capture creates its context with reduced motion and scrolls each section into view before it shoots. The whole-page frames sit beside a folder per section, so a change to one part reaches review as a diff on that part. `capture.md` carries the section list.
+
+### Behavior
+
+- The nav bar lights the beat the reader is on and jumps to any beat on selection. Below 900 pixels the beat links drop and the mark, the toggle, and the action stay
+- The theme follows the system preference before first paint, and the toggle overrides it and keeps the choice across a reload
+- The evidence pair and the token preview load lazily as their beat nears the viewport
+- The page reads without horizontal overflow from a 320 pixel viewport up, in both themes
+
+### Not on this surface
+
+- No placeholder figure. Every figure derives from a real file or is a real capture, except the branch graph, the review exchange, and the provenance roster, which the footer names as drawn from the session
+- No full-bleed expansion cap, since a figure's height is a result of its content
+- No window mockup assembled from boxes, since a real capture answers the question with more force
+- No catalog tables, board snapshot, targets list, or teach workspace, since the page carries the session and nothing else
 
 ## Decisions
 
