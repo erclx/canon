@@ -35,7 +35,8 @@ const LEGACY_MOVES: ReadonlyMap<string, string> = new Map([
  * Scratch-root names a different migration moves out of scratch for good,
  * derived from that migration's own table rather than duplicated in a second
  * hand-kept list. `RECORD_LAYOUT_MOVES` names `memory-archive`, the
- * retired-entry archive `603-memory` says never to delete, and `PROMOTED_FOLDERS`
+ * retired-entry archive of the memory kind, which is never offered for deletion,
+ * and `PROMOTED_FOLDERS`
  * names an evidence folder a durable record cites by name. A project that has
  * not run either migration still carries these at the scratch root, where an
  * ordinary slug's own age test would eventually offer them.
