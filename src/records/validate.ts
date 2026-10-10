@@ -75,6 +75,7 @@ export const FINDING_KINDS = [
   'category-mismatch',
   'operator-call-phrasing',
   'batch-unsplit',
+  'source-unquoted',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -276,6 +277,7 @@ const PLAN_SECTIONS = [
   'Risks',
   'Review focus',
   'Questions',
+  'Sources',
 ] as const
 
 type PlanSection = (typeof PLAN_SECTIONS)[number]
@@ -425,6 +427,57 @@ function checkQuestionContract(name: string, lines: string[]): Finding[] {
   return findings
 }
 
+const SOURCE_LINK = /\[[^\]]+\]\(https?:\/\/[^)\s]+\)|https?:\/\/\S+/
+const SOURCE_QUOTE = /["“][^"“”]+["”]/
+const SOURCE_UNVERIFIED = /\bunverified\b/i
+
+/**
+ * A bullet opens an entry only at the section's shallowest indent, so a nested
+ * bullet and a wrapped line both belong to the entry above. Joining them first
+ * lets a passage wrap across lines and still count as quoted.
+ */
+function readSourceEntries(lines: readonly string[]): string[] {
+  const entries: string[] = []
+  let depth: number | undefined
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (trimmed === '') continue
+
+    const indent = line.length - line.trimStart().length
+    const opensEntry =
+      trimmed.startsWith('- ') && (depth === undefined || indent <= depth)
+
+    if (opensEntry) {
+      depth = indent
+      entries.push(trimmed)
+      continue
+    }
+
+    if (entries.length > 0) entries[entries.length - 1] += ` ${trimmed}`
+  }
+
+  return entries
+}
+
+function checkSources(name: string, lines: readonly string[]): Finding[] {
+  return readSourceEntries(lines)
+    .filter((entry) => entry !== `- ${NONE_IDENTIFIED}`)
+    .filter(
+      (entry) =>
+        !SOURCE_LINK.test(entry) ||
+        !(SOURCE_QUOTE.test(entry) || SOURCE_UNVERIFIED.test(entry)),
+    )
+    .map((entry) =>
+      finding(
+        'source-unquoted',
+        name,
+        shorten(entry),
+        'carries no link, or a link with neither a double-quoted passage nor the word unverified.',
+      ),
+    )
+}
+
 export function checkPlan(name: string, text: string): Finding[] {
   const findings: Finding[] = []
 
@@ -480,6 +533,7 @@ export function checkPlan(name: string, text: string): Finding[] {
   }
 
   findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
+  findings.push(...checkSources(name, sections.get('Sources') ?? []))
 
   if (hasStagedBatches(text)) {
     const staged = linesOutsideFences(text).find((line) =>

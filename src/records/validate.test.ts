@@ -688,6 +688,67 @@ describe('checkPlan', () => {
     expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
   })
 
+  describe('Sources', () => {
+    const link = '[Docs](https://example.com/docs)'
+
+    function withSources(...entries: string[]): string {
+      return conformingPlan().replace(
+        '**Questions:**',
+        ['**Sources:**', '', ...entries, '', '**Questions:**'].join('\n'),
+      )
+    }
+
+    it('should accept an entry with a link and a quoted passage', () => {
+      const body = withSources(`- ${link}, backing the pick: "the exact words"`)
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should accept an unverified entry carrying no quote', () => {
+      const body = withSources(`- ${link}, backing the pick. unverified`)
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should report an entry with a link and no quote', () => {
+      const body = withSources(`- ${link}, backing the pick`)
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'source-unquoted',
+      ])
+    })
+
+    it('should report an entry carrying no link', () => {
+      const body = withSources('- Recalled from memory: "a passage"')
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'source-unquoted',
+      ])
+    })
+
+    it('should pass a plan with no Sources section', () => {
+      expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
+    })
+
+    it('should close Sources at the next marker so a question is not read as a source', () => {
+      const body = withSources(`- ${link}: "the exact words"`)
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should read a nested bullet as part of the entry above it', () => {
+      const body = withSources(`- ${link}, backing the pick`, '  - "the words"')
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should count a quoted passage wrapped across lines', () => {
+      const body = withSources(`- ${link}: "the exact`, '  words wrapped"')
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+  })
+
   it('should not report a paraphrase once the Answer is filled', () => {
     const body = conformingPlan()
       .replace(
