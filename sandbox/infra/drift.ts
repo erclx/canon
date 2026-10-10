@@ -154,10 +154,7 @@ export default scenario({
     },
     retired: (ctx) => {
       ctx.write('.claude/TASKS.md', '# Tasks\n\nOld single-file board.\n')
-      ctx.write(
-        '.claude/WIREFRAMES.md',
-        '# Wireframes\n\nOld single-file wireframes.\n',
-      )
+      ctx.write('.claude/MEMORY.md', '# Memory\n\nOld single-file memory.\n')
       ctx.write(
         '.claude/TASKS-ARCHIVE.md',
         '# Archive\n\nSuffixed variant the stem rule does not match.\n',
@@ -169,9 +166,7 @@ export default scenario({
       ctx.log.info(
         'Context: the seed tree moved to folders and the target kept the files',
       )
-      ctx.log.info(
-        '  .claude/TASKS.md and .claude/WIREFRAMES.md are superseded',
-      )
+      ctx.log.info('  .claude/TASKS.md and .claude/MEMORY.md are superseded')
       ctx.log.info(
         '  .claude/TASKS-ARCHIVE.md is the suffixed variant, deliberately unmatched',
       )

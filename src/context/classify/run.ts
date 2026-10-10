@@ -245,7 +245,7 @@ async function modelVerdictFor<V extends string>(opts: {
  * A finding's `verdict` takes the model's reading when the model ran and
  * parsed, and the regex reading otherwise, since the groundwork measurements
  * show the model catching what the regex layer structurally cannot
- * (REPLACE, and MOVE outside a wireframe). Both readings stay on the finding
+ * (REPLACE and MOVE). Both readings stay on the finding
  * regardless of which one decided, so a caller can see where they disagreed.
  */
 export async function classifyDiff(
@@ -263,7 +263,7 @@ export async function classifyDiff(
 
   const findings: DiffFinding[] = []
   for (const chunk of extraction.chunks) {
-    const regex = withQuote(diffPatternVerdict(chunk.file, chunk.added))
+    const regex = withQuote(diffPatternVerdict(chunk.added))
     const model = await modelVerdictFor({
       plan,
       client,
@@ -312,7 +312,7 @@ export async function classifySweep(
 
   const findings: SweepFinding[] = []
   for (const section of extraction.sections) {
-    const regex = withQuote(sweepPatternVerdict(section.file, section.body))
+    const regex = withQuote(sweepPatternVerdict(section.body))
     const model = await modelVerdictFor({
       plan,
       client,

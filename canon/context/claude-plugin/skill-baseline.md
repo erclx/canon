@@ -11,13 +11,13 @@ The diff baseline is a block six skills share, `context-fold` and five ported co
 
 A `git init` project on `main` with no remote resolves no usable baseline, which is the ordinary shape of a scaffolded target project rather than an edge case. That costs only the committed half of the diff, since the working tree and untracked files still scope correctly. The marking step recovers the committed half by reading `git log -p -1`, which supplies content where a bare file list would not.
 
-The two sweeps and the context refresh run on the working tree and untracked files, and skip only when that set is empty. None substitutes the whole tree for a missing baseline. The wireframe sweep and the context refresh write, and a set that wide stubs a wireframe per uncovered surface and rewrites every context entry.
+The anchor sweep and the context refresh run on the working tree and untracked files, and skip only when that set is empty. Neither substitutes the whole tree for a missing baseline. The context refresh writes, and a set that wide rewrites every context entry.
 
 The anchor sweep only reports, and the whole tree costs it a different way: every anchored decision cites a path the scaffold commit carries, so it flags the entire architecture record and names no number that moved. The asymmetry with the marking step is deliberate and worth keeping: on a scaffolded project the last commit is the scaffold commit, so the `git log -p -1` recovery is the whole tree by another route, which a step that only reads can tolerate and a step that writes cannot. Widening what a step reads is safe. Widening what a step writes is not, and widening what a step flags spends attention on entries nothing put in doubt.
 
 ## The shared-resource rule
 
-That baseline is the worked case behind a rule split across two skills. One step in `context-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the steps that write stub a wireframe for every uncovered surface and rewrite every context entry.
+That baseline is the worked case behind a rule split across two skills. One step in `context-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the step that writes rewrite every context entry.
 
 So `plan-feature` obliges a plan that establishes a resource with more than one consumer to list them and mark each read or write, and `review-pr` carries the matching lens beside Integration and Contract. Both skills ship to target projects, where a consumer is a call site, a module, or a component rather than a skill step, so the clause names the unit generically. The review half is what catches the miss, since an author who never noticed the resource was shared will not notice the authoring clause either. `review-branch` stays out of it, because an author reviewing their own change cannot catch a consumer they never enumerated.
 

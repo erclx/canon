@@ -18,7 +18,7 @@ import { isStubSeed } from '@/tooling/seed-marker'
  * Every reason `canon context audit` refuses for.
  *
  * `no-folders` is the one ordinary absence: a project that never adopted
- * `canon/context/` or `canon/wireframes/`, and holds no `.canon/diagrams/`
+ * `canon/context/`, and holds no `.canon/diagrams/`
  * folder an older install left, names no corpus this audit can measure, the
  * same state `no-skills` reads for the skill corpora. The other four are a malformed invocation or a checkout git
  * cannot read, which stay a break rather than an absence.
@@ -54,16 +54,13 @@ const CATALOG_NAMED_RATIO = 0.6
  *
  * These names do not generalize the way a length threshold does, which is why
  * each list is keyed on the folder whose standard states it. `context.md`
- * requires an overview and a layout. `wireframes.md` asks four questions of a
- * surface and answers each in a section, so those four are required and
- * `## Behavior` is not, since a static surface has no interaction to state. A
+ * requires an overview and a layout. A
  * diagram entry declares a heading per kind and its standard requires none.
  */
 export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
 > = {
   context: ['Overview', 'Layout'],
-  wireframes: ['Regions', 'States', 'Copy', 'Not on this surface'],
 }
 
 /**
@@ -158,9 +155,8 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * reading that field for a gain of one word.
  *
  * `standards/context.md` opens its scope by handing figures to the
- * `draft-figure` skill and wireframes to `wireframes.md`, so a marker reported
- * in a diagrams or wireframes entry would cite a rule that entry's own
- * standard routes elsewhere. The length and table
+ * `draft-figure` skill, so a marker reported in a diagrams entry would cite a
+ * rule that entry's own standard routes elsewhere. The length and table
  * checkpoints are quoted from the same standard and keep reaching every audited
  * folder, because a threshold on how far a reader travels generalizes across
  * entry types while a rule about what an entry may say does not.
@@ -495,7 +491,7 @@ function bareReferences(
  * path prefix hardcodes what `--folder` exists to override and misses a domain
  * split into `context/<sub-area>/`. Sibling names arrive the same way and for
  * the same reason, since the folder an entry sits in is what holds them. The
- * required sections arrive apart from jurisdiction, since a wireframe owes
+ * required sections arrive apart from jurisdiction, since a folder can owe
  * sections under a standard that states no provenance rule.
  */
 export function measureEntry(
@@ -652,11 +648,6 @@ export function matchesSiblings(folder: AuditedFolder): boolean {
  * The standard sanctions omitting `## Layout` from a domain owning no paths,
  * which no measure can tell from an entry that forgot it. An entry of that
  * shape therefore reports, which is a reason this is printed and never gated on.
- *
- * A wireframe folder answers per file whether nested or not, since its
- * standard keeps one surface per file. A subfolder of wireframes groups
- * surfaces the way the named context folder groups domains, so a conforming
- * sibling there says nothing about the surface beside it.
  */
 export function missingSections(
   root: string,

@@ -118,7 +118,7 @@ describe('resolveFolders', () => {
   })
 
   it('should skip a root folder carrying a default name on a default run', async () => {
-    seed('wireframes', ['login.md'])
+    seed('diagrams', ['login.md'])
 
     expect((await resolveFolders(ROOT)).folders).toEqual([])
   })
@@ -210,7 +210,7 @@ describe('presentNames', () => {
     seed('canon/context', ['ci.md'])
 
     expect(presentNames((await resolveFolders(ROOT)).folders)).not.toContain(
-      'wireframes',
+      'diagrams',
     )
   })
 

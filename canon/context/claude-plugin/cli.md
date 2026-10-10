@@ -16,11 +16,9 @@ description: The canon claude command surface and what each verb writes into a t
 
 `canon claude seeds list` names every file `init` writes and where it comes from, so this entry does not restate the set. `init` also merges `.gitignore` entries, skips a file already present, and runs once per project.
 
-Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `governance/rules/writing/markdown.md`, `governance/rules/standards/context.md`, and `governance/rules/standards/wireframes.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
+Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `governance/rules/writing/markdown.md` and `governance/rules/standards/context.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
 
 ### Seeded folders
-
-The `canon/wireframes/` folder ships with an `index.md` discovery anchor. Add a file per surface as the UI grows, following `standards/wireframes.md`. Read `index.md` first, then load only the surface files the current task touches. Per-surface files keep the lazy-load model honest as the project grows.
 
 The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` installs the folder's `index.md`, `development.md`, and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude seed pass skips what is already present. Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path, since two seed sources writing one destination resolve by whichever domain runs first.
 

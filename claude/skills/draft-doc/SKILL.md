@@ -1,6 +1,6 @@
 ---
 name: draft-doc
-description: Drafts one brand-new project document from scratch against the standard for its kind, picking the kind from where it lands, a `docs/` page, a `canon/context/` entry, a `canon/wireframes/` surface, a wiki reference page, or a README.md. Checks the catalog for a name or topic collision, places it, confirms with the user, then writes. Use when asked to "write a new docs page for X", "write a context entry for X", "draft a wireframe for X", "write a wiki page for X", or "write a README" where none exists yet. Do NOT use to rewrite or sync an existing page or README against a diff, which is `docs-sync`, or to refresh a context entry or wireframe, which is `context-fold`.
+description: Drafts one brand-new project document from scratch against the standard for its kind, picking the kind from where it lands, a `docs/` page, a `canon/context/` entry, a wiki reference page, or a README.md. Checks the catalog for a name or topic collision, places it, confirms with the user, then writes. Use when asked to "write a new docs page for X", "write a context entry for X", "write a wiki page for X", or "write a README" where none exists yet. Do NOT use to rewrite or sync an existing page or README against a diff, which is `docs-sync`, or to refresh a context entry, which is `context-fold`.
 metadata:
   family: generate
 ---
@@ -13,15 +13,14 @@ Drafts one brand-new project document end to end: resolve its kind, read the sta
 
 Each kind has one standard and one reference. Load the reference for the resolved kind and no other, since every step below that differs by kind lives there.
 
-| Kind       | Lands at                                                 | Standard                                            | Reference                                      |
-| ---------- | -------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------- |
-| docs       | a page under `docs/`                                     | `${CLAUDE_SKILL_DIR}/../../standards/docs.md`       | `${CLAUDE_SKILL_DIR}/references/docs.md`       |
-| context    | an entry under `canon/context/`                          | `${CLAUDE_SKILL_DIR}/../../standards/context.md`    | `${CLAUDE_SKILL_DIR}/references/context.md`    |
-| wireframes | a surface under `canon/wireframes/`                      | `${CLAUDE_SKILL_DIR}/../../standards/wireframes.md` | `${CLAUDE_SKILL_DIR}/references/wireframes.md` |
-| wiki       | a reference page on a subject owned outside this project | `${CLAUDE_SKILL_DIR}/references/wiki.md`            | `${CLAUDE_SKILL_DIR}/references/wiki-kind.md`  |
-| readme     | a `README.md`, at the root or in a folder                | `${CLAUDE_SKILL_DIR}/../../standards/readme.md`     | `${CLAUDE_SKILL_DIR}/references/readme.md`     |
+| Kind    | Lands at                                                 | Standard                                         | Reference                                     |
+| ------- | -------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| docs    | a page under `docs/`                                     | `${CLAUDE_SKILL_DIR}/../../standards/docs.md`    | `${CLAUDE_SKILL_DIR}/references/docs.md`      |
+| context | an entry under `canon/context/`                          | `${CLAUDE_SKILL_DIR}/../../standards/context.md` | `${CLAUDE_SKILL_DIR}/references/context.md`   |
+| wiki    | a reference page on a subject owned outside this project | `${CLAUDE_SKILL_DIR}/references/wiki.md`         | `${CLAUDE_SKILL_DIR}/references/wiki-kind.md` |
+| readme  | a `README.md`, at the root or in a folder                | `${CLAUDE_SKILL_DIR}/../../standards/readme.md`  | `${CLAUDE_SKILL_DIR}/references/readme.md`    |
 
-- Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wireframe".
+- Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wiki page".
 - Ask which kind when the request names no destination, offering the candidates the subject fits with the likeliest first. Never default to `docs/` without saying so, since a subject documented in the wrong surface is invisible to the session that looks for it in the right one.
 - If no subject is given for any kind but readme, stop: `❌ No subject given. Name what this document should cover.` A README covers the project or the folder it sits in, so its subject is the target path.
 
@@ -63,7 +62,7 @@ Settle the path and check the catalog for a collision the way the reference stat
 
 ### Preview
 
-**Kind:** `<docs | context | wireframes | wiki | readme>`
+**Kind:** `<docs | context | wiki | readme>`
 **Subject:** `<subject, or the target path for a README>`
 **Placement:** `<path>`
 <one line per preview field the reference names>

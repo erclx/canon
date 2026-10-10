@@ -35,9 +35,9 @@ A close records the decision wherever it was stated as open, in the same step th
 
 ## The document draft surface
 
-`draft-doc` covers a document that does not exist yet, in any of five kinds: a `docs/` page, a `canon/context/` entry, a `canon/wireframes/` surface, a wiki reference page, and a `README.md`. Each kind sits beside a surface that rewrites or refreshes an existing document and was never built to originate one.
+`draft-doc` covers a document that does not exist yet, in any of four kinds: a `docs/` page, a `canon/context/` entry, a wiki reference page, and a `README.md`. Each kind sits beside a surface that rewrites or refreshes an existing document and was never built to originate one.
 
-`docs-sync` classifies and rewrites existing sections against a diff since main, and `context-fold` refreshes context entries and only stubs a wireframe a diff touched. A document with no prior version has no diff to classify, so reaching for either on a brand-new subject reports it as unrelated to any change, which reads as a clean pass over a request nobody served.
+`docs-sync` classifies and rewrites existing sections against a diff since main, and `context-fold` refreshes context entries. A document with no prior version has no diff to classify, so reaching for either on a brand-new subject reports it as unrelated to any change, which reads as a clean pass over a request nobody served.
 
 ### One skill rather than five
 
@@ -60,8 +60,6 @@ The measure is TF-IDF over descriptions rather than Claude Code's own router, an
 - Docs placement reads the catalog rather than assuming a folder. A `category` a sibling page carries is reused verbatim, and a topic matching no shelf lands at the `docs/` root.
 - The docs `canon docs <slug>` guard is a heuristic, since the slug is guessed from the topic phrase, so the title and description check behind it catches the wider case.
 - A context entry defaults to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder.
-- A wireframe check walks the whole tree rather than its top level, since a collision can sit nested inside a grouped surface's own subfolder.
-- `standards/wireframes.md` documents only the per-surface ASCII shape. The three-tier call between ASCII only, ASCII plus a render, and visual as the source of truth is made once per project in the visual design workflow guide. The wireframes kind reads `canon/DESIGN.md` and the tree for a tier signal and reports it, since no shipped mechanism turns a detected tier into a companion render.
 - The wiki kind's ownership refusal offers the docs or context kind of the same skill, so a subject this project owns is redirected without leaving the skill.
 
 ### Why the readme templates sit in the skill
@@ -82,6 +80,6 @@ One skill covers both outputs rather than two. The mark and the card are one ide
 
 `canvas` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
 
-What outlives the pick separates it from `draft-and-pick`, which writes its candidates to scratch, takes one pick through the question surface, and deletes the losers. Every canvas frame stays in its gitignored folder until somebody removes it, and the pick reaches the project through its design document or wireframes rather than through the canvas itself. `draft-and-pick` and `draft-identity` keep their own render path for now, and moving them onto the canvas waits until this surface has shipped.
+What outlives the pick separates it from `draft-and-pick`, which writes its candidates to scratch, takes one pick through the question surface, and deletes the losers. Every canvas frame stays in its gitignored folder until somebody removes it, and the pick reaches the project through its design document or a plan rather than through the canvas itself. `draft-and-pick` and `draft-identity` keep their own render path for now, and moving them onto the canvas waits until this surface has shipped.
 
 No skill reads a reference image or the project's code into design values now, so the canvas is the one surface that draws a direction, and what it draws is carried into the design document by hand.

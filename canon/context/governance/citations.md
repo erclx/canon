@@ -66,7 +66,6 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 
 Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `standards/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
 
-- `governance/rules/standards/wireframes.md` → `canon standards wireframes`, without restating the ASCII-fence, region-label, copy-verbatim, interaction-intent, or same-PR-update rules.
 - `governance/rules/standards/architecture.md` → `canon standards architecture`, without restating the decision-H3 or verification-anchor rules.
 - `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
 - `governance/rules/standards/memory.md` → `canon standards memory`, without restating the routing or pen rules.
@@ -101,4 +100,4 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 
 ### Standards corpus, examined and excluded
 
-Every other standard names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts. `wireframes.md` carries one further mention, a sentence naming the voice yield a sibling standard grants the surface. That sentence describes a cross-standard relationship rather than instructing the reader to load anything, which is why it takes no verdict while `markdown.md`'s routing sentence does.
+Every other standard names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts.

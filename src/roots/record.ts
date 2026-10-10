@@ -56,7 +56,7 @@ const CANON_SCRATCH = 'tmp'
  * Everything absent from this list is committed and never lands under the
  * record root, which is the rule the move ran on. `rules`, `skills`, and
  * `hooks` stay under `.claude/` because the vendor reads them there, while
- * `context`, `wireframes`, and the loose documents are tracked surfaces that
+ * `context` and the loose documents are tracked surfaces that
  * `surface.ts` resolves under `canon/` instead. A seed and a
  * superseded-layout report each ask this rather than assuming a root.
  */

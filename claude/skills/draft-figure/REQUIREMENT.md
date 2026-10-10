@@ -53,7 +53,7 @@ The color failure is the quiet one. Mermaid's own theme writes literal hex value
 ## Out of scope
 
 - Mermaid's own layout, budgets, and label rules for the fence itself: the mermaid standard, cited rather than restated here
-- A UI wireframe or screen mockup: `draft-doc`
+- A UI screen mockup: `canvas`
 - Design tokens and the visual system: `canvas`, which carries a picked direction into the design document
 - Implementation detail behind an architecture view, which belongs in a context entry the caption points at
 - Which lesson needs a figure and where it sits among the lesson's blocks: `teach-workspace`, which calls this skill to draw one

@@ -19,10 +19,9 @@ const LONG_PARAGRAPH = Array.from(
 ).join(' ')
 
 describe('docTypeOf', () => {
-  it('should classify each of the five canonical doc paths', () => {
+  it('should classify each of the four canonical doc paths', () => {
     expect(docTypeOf('canon/context/cli/audits.md')).toBe('context')
     expect(docTypeOf('canon/ARCHITECTURE.md')).toBe('architecture')
-    expect(docTypeOf('.claude/wireframes/answer.md')).toBe('wireframes')
     expect(docTypeOf('canon/DESIGN.md')).toBe('design')
     expect(docTypeOf('canon/REQUIREMENTS.md')).toBe('requirements')
   })
@@ -31,7 +30,7 @@ describe('docTypeOf', () => {
     expect(docTypeOf('canon/context/index.md')).toBeUndefined()
   })
 
-  it('should classify no doc type for a path outside the five surfaces', () => {
+  it('should classify no doc type for a path outside the four surfaces', () => {
     expect(docTypeOf('src/context/classify/extract.ts')).toBeUndefined()
     expect(docTypeOf('README.md')).toBeUndefined()
   })
@@ -189,7 +188,7 @@ describe('extractDiffChunks', () => {
     if (result.kind === 'ok') expect(result.chunks).toHaveLength(0)
   })
 
-  it('should ignore a change outside the five canonical doc types', async () => {
+  it('should ignore a change outside the four canonical doc types', async () => {
     commit('chore: init', { 'src/index.ts': 'export const x = 1\n' })
     write('src/index.ts', `export const x = 1\n// ${LONG_PARAGRAPH}\n`)
 

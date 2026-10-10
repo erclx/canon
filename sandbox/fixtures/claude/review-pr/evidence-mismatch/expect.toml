@@ -21,7 +21,6 @@ paths = [
 write_scope = [".canon/tmp/pr/review/**"]
 
 manual = [
-  "The pass checked the header against `canon/wireframes/header.md` as well as the checklist. Semantic: whether the finding cites the wireframe line or the box alone is a reading.",
   "The pass opened the image it wrote out rather than only writing it. Unwired: the checker reads the tree, not the session's tool calls.",
 ]
 

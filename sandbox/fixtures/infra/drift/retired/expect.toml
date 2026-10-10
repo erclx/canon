@@ -9,7 +9,7 @@
 paths = [
   "drift-report.json",
   ".claude/TASKS.md",
-  ".claude/WIREFRAMES.md",
+  ".claude/MEMORY.md",
   ".claude/TASKS-ARCHIVE.md",
 ]
 
@@ -37,4 +37,4 @@ pattern = '"replacedBy": "\.canon/tasks"'
 
 [[content]]
 path = "drift-report.json"
-pattern = '"rel": "\.claude/WIREFRAMES\.md"'
+pattern = '"rel": "\.claude/MEMORY\.md"'
