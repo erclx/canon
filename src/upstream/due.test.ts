@@ -1,5 +1,15 @@
-import { describe, expect, it } from 'vitest'
-import { decideDue, passesVocabulary, type DueInput } from '@/upstream/due'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  decideDue,
+  passesVocabulary,
+  readDueCache,
+  writeDueCache,
+  type DueCache,
+  type DueInput,
+} from '@/upstream/due'
 
 const NOW = new Date('2026-10-10T12:00:00Z')
 
@@ -137,5 +147,63 @@ describe('decideDue', () => {
     )
 
     expect(result).toMatchObject({ due: false, reason: 'recent' })
+  })
+})
+
+describe('the due cache', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-due-cache-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  const makeCache = (overrides: Partial<DueCache> = {}): DueCache => ({
+    checkedAt: '2026-10-10T08:00:00Z',
+    installed: '2.1.296',
+    cursor: '2.1.289',
+    gap: { releases: 3, lines: [] },
+    ...overrides,
+  })
+
+  it('should read nothing when no check was stored', () => {
+    expect(readDueCache(root, '2.1.296', '2.1.289', NOW)).toBeNull()
+  })
+
+  it('should return a stored check under a day old for the same versions', async () => {
+    await writeDueCache(root, makeCache())
+
+    expect(readDueCache(root, '2.1.296', '2.1.289', NOW)).toMatchObject({
+      gap: { releases: 3 },
+    })
+  })
+
+  it('should read nothing once the check is a day old', async () => {
+    await writeDueCache(root, makeCache({ checkedAt: '2026-10-09T12:00:00Z' }))
+
+    expect(readDueCache(root, '2.1.296', '2.1.289', NOW)).toBeNull()
+  })
+
+  it('should read nothing when the installed version changed', async () => {
+    await writeDueCache(root, makeCache())
+
+    expect(readDueCache(root, '2.1.297', '2.1.289', NOW)).toBeNull()
+  })
+
+  it('should read nothing when the cursor moved', async () => {
+    await writeDueCache(root, makeCache())
+
+    expect(readDueCache(root, '2.1.296', '2.1.290', NOW)).toBeNull()
+  })
+
+  it('should keep a failed read for the day so a rate limit is not retried', async () => {
+    await writeDueCache(root, makeCache({ gap: null }))
+
+    expect(readDueCache(root, '2.1.296', '2.1.289', NOW)).toMatchObject({
+      gap: null,
+    })
   })
 })

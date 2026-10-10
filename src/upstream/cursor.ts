@@ -73,7 +73,7 @@ export function compareVersions(a: string, b: string): number {
 
 // `fetch` reads this file, so a write that half-lands would leave a reader on a
 // truncated cursor. A rename within one folder is atomic.
-async function writeAtomic(path: string, body: string): Promise<void> {
+export async function writeAtomic(path: string, body: string): Promise<void> {
   mkdirSync(dirname(path), { recursive: true })
   const temp = `${path}.${process.pid}.tmp`
   writeFileSync(temp, body)

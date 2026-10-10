@@ -1,4 +1,6 @@
-import { compareVersions, type Cursor } from '@/upstream/cursor'
+import { existsSync, readFileSync } from 'node:fs'
+import { recordDir, SCRATCH } from '@/roots/record'
+import { compareVersions, writeAtomic, type Cursor } from '@/upstream/cursor'
 
 const DAY_MS = 86_400_000
 const DUE_AFTER_DAYS = 7
@@ -8,6 +10,7 @@ const DUE_AFTER_DAYS = 7
 const VOCABULARY =
   /plugin|skill|hook|SendMessage|ListAgents|agent view|agents view|worktree|subagent|background|routine|schedule|Monitor|mod\b|mods\b|CLAUDE\.md|rules|memory|permission|auto mode|stream-json|--bg|headless|-p\b|marketplace|session/i
 const ADDED = /^Added/
+const CACHE_MAX_AGE_MS = DAY_MS
 
 /** What the gap between the cursor and the installed version holds. */
 export interface Gap {
@@ -76,4 +79,50 @@ export function decideDue(input: DueInput): DueResult {
   }
 
   return { due: false, reason: 'recent', releases }
+}
+
+/**
+ * One reading of the feed, kept so a wave of sessions starting together spends
+ * one request rather than one each.
+ */
+export interface DueCache {
+  readonly checkedAt: string
+  readonly installed: string
+  readonly cursor: string
+  /** Null when the read failed, so a failure is held for the day too. */
+  readonly gap: Gap | null
+}
+
+// Scratch rather than the upstream record folder, which a records push backs
+// whole. A file rewritten daily would add a commit to the history each time.
+const cachePath = (root: string): string =>
+  recordDir(root, SCRATCH, 'upstream-due', 'check.json')
+
+/** The stored reading when it is fresh and answers for this pair of versions. */
+export function readDueCache(
+  root: string,
+  installed: string,
+  cursor: string,
+  now: Date,
+): DueCache | null {
+  const path = cachePath(root)
+  if (!existsSync(path)) return null
+
+  try {
+    const cache = JSON.parse(readFileSync(path, 'utf8')) as DueCache
+    const age = now.getTime() - Date.parse(cache.checkedAt)
+    const isFresh = age >= 0 && age < CACHE_MAX_AGE_MS
+    const isSamePair = cache.installed === installed && cache.cursor === cursor
+
+    return isFresh && isSamePair ? cache : null
+  } catch {
+    return null
+  }
+}
+
+export async function writeDueCache(
+  root: string,
+  cache: DueCache,
+): Promise<void> {
+  await writeAtomic(cachePath(root), `${JSON.stringify(cache)}\n`)
 }
