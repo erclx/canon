@@ -123,12 +123,7 @@ describe('canon upstream', () => {
 
   describe('due', () => {
     it('should report due with no-cursor when nothing is stored', async () => {
-      const { record, exitCode } = await run([
-        'due',
-        '--json',
-        '--root',
-        root,
-      ])
+      const { record, exitCode } = await run(['due', '--json', '--root', root])
 
       expect(exitCode).toBe(0)
       expect(record).toMatchObject({
@@ -150,12 +145,7 @@ describe('canon upstream', () => {
         root,
       ])
 
-      const { record, exitCode } = await run([
-        'due',
-        '--json',
-        '--root',
-        root,
-      ])
+      const { record, exitCode } = await run(['due', '--json', '--root', root])
 
       expect(exitCode).toBe(0)
       expect(record).toMatchObject({

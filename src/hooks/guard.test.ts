@@ -964,7 +964,8 @@ describe('seeds standards-audit.sh runner', () => {
 // would otherwise pass a hook that never filtered.
 describe('upstream-due.sh silences', () => {
   const hook = join(ROOT, '.claude/hooks/upstream-due.sh')
-  const dueBin = (): string => [join(fixture, 'bin-due'), hookPath].join(delimiter)
+  const dueBin = (): string =>
+    [join(fixture, 'bin-due'), hookPath].join(delimiter)
 
   it.concurrent(
     'should stay silent in a background session',
@@ -982,21 +983,18 @@ describe('upstream-due.sh silences', () => {
     },
   )
 
-  it.concurrent(
-    'should stay silent on a resume',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        payloadFor({ source: 'resume' }),
-        dueBin(),
-        undefined,
-        { CLAUDE_CODE_SESSION_ATTENDED: undefined },
-      )
+  it.concurrent('should stay silent on a resume', async ({ expect }) => {
+    const result = await run(
+      hook,
+      payloadFor({ source: 'resume' }),
+      dueBin(),
+      undefined,
+      { CLAUDE_CODE_SESSION_ATTENDED: undefined },
+    )
 
-      expect(result.stdout).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.code).toBe(0)
+  })
 })
 
 // The acting case proves the denial fires on the one value the hook can back.

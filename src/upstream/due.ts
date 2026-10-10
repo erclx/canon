@@ -5,7 +5,7 @@ import { compareVersions, writeAtomic, type Cursor } from '@/upstream/cursor'
 const DAY_MS = 86_400_000
 const DUE_AFTER_DAYS = 7
 
-// Ported from the groundwork's prefilter script. It names canon's own surfaces,
+// Ported from the groundwork's pre-filter script. It names canon's own surfaces,
 // so an Added line matching it is one a digest would act on.
 const VOCABULARY =
   /plugin|skill|hook|SendMessage|ListAgents|agent view|agents view|worktree|subagent|background|routine|schedule|Monitor|mod\b|mods\b|CLAUDE\.md|rules|memory|permission|auto mode|stream-json|--bg|headless|-p\b|marketplace|session/i

@@ -284,7 +284,8 @@ const DUE_TEXT: Record<DueReason, string> = {
   week: 'A week has passed since the last digest.',
   vocabulary: 'A release since the last digest added something canon may use.',
   current: 'The installed version is at or below the cursor.',
-  recent: 'The last digest is under a week old and nothing in the gap stands out.',
+  recent:
+    'The last digest is under a week old and nothing in the gap stands out.',
   'unknown-version': 'The installed version could not be read.',
 }
 
@@ -330,7 +331,7 @@ async function readGap(
       gap,
     })
   } catch {
-    // An unwritable cache costs a request next session, not a wrong answer.
+    // A cache that cannot be written costs a request next session, not a wrong answer.
   }
 
   return gap
@@ -345,7 +346,9 @@ async function runDue(opts: RootOption): Promise<number> {
     cursor !== null &&
     installed !== null &&
     compareVersions(installed, cursor.version) > 0
-  const gap = isAhead ? await readGap(root, installed, cursor.version, now) : null
+  const gap = isAhead
+    ? await readGap(root, installed, cursor.version, now)
+    : null
   const result = decideDue({ installed, cursor, gap, now })
 
   intro('canon upstream due')
